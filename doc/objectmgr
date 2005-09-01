@@ -1,0 +1,69 @@
+stage1 (complete)
+-----------------
+
+how object can be created:
+    1) via db
+    2) dynamically
+
+
+dynamic way:
+
+    unit = new Unit();
+    unit->Create();
+    set fields
+
+    world.BringObjectToWorld(unit);
+
+
+
+BringObjectToWorld(obj)
+{
+    CheckForInRangeObjects(obj);
+    foreach(obj->inrangelist)
+    {
+        if(correcttype)
+            obj->addtoinrangelist(obj2);
+    }
+}
+
+
+stage2
+------
+
+questions:
+1. Updates. ObjectMgr shouldn't care about updates. That's WorldServer's responsibility. Am I wrong?
+2. Creation/Loading. Both creation and loading from db should be done cleanly.
+3. Per-type hash maps. Are they really necessary?
+4. GUIDs. Should number part of guid be globally unique or only per-type unique.
+    (full GUIDs are of course unique anyway). Need to confirm blizzard's way here.
+5. Distinction between ObjectMgr and WorldServer:
+    Let me explain. Objects can be divided into following categories:
+        Players/Creatures/Corpses/GameObjects - they are basically map-local. Most of the message handlers
+            need to look only in current map for them, for example attacking and talking (except whispers).
+        Items/Containers - they are referenced only via objects that hold them.
+    But keep in mind that:
+        Lots of handlers need to look for Players globally. And sometimes we may need to lookup globally for other
+        object types too. Questing comes in my mind.
+    So imho:
+        * There must be a way to lookup for map objects via WorldServer. Name isn't really correct, it's better called
+        MapManager. There should be many 'WorldServers' each taking care of it's own map. Also some 'WorldServers'
+        will be in another thread or even running on another computer.
+        * There must be a way to lookup for objects globally. Very careful designing should be done here because
+        object we look for may be on another continent (i.e. another computer).
+        * We need to confirm when blizzard server does lookups from another server's data.
+
+
+interface:
+
+ObjectMgr
+{
+    // Allocate object. From now on object can be returned by GetObject()
+    DynamicObject* CreateDynamicObject(object specific parameters?);
+    --or--
+    // Allocate object. Object is not accounted yet.
+    DynamicObject* AllocateDynamicObject();
+    // From now on object can be returned by GetObject()
+    void AddDynamicObject(DynamicObject* obj);
+
+    void FreeDynamicObject(DynamicObject* obj);
+}

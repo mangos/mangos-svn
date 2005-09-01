@@ -1,0 +1,66 @@
+0     Success
+1     Failure
+2     Cancelled
+3     Disconnected from server
+4     Failed to connect
+5     Connected
+6     Wrong client version
+7     Connecting to server...
+8     Negotiating Security
+9     Security negotiation complete
+10     Security negotiation failed
+11     Authenticating
+12     Authentication successful
+13     Authentication failed
+14     Rejected - please contact customer support
+15     Server is not valid
+16     System unavailable - please try again later
+17     System error
+18     Billing system error
+19     Account billing has expired
+20     Wrong client version
+21     Unknown account
+22     Incorrect password
+23     Session expired
+24     Server shutting down
+25     Already logging in
+26     Invalid login server
+27     Position in queue -  (number)
+28     Retrieving realm list
+29     Realm list retrieved
+30     Unable to contact realm list server
+31     Invalid realm list
+32     Realm is down
+33     Creating account
+34     Account created
+35     Account creation failed
+36     Retrieving character list
+37     Character list retrieved
+38     Error retrieving character list
+39     Creating character
+40     Create success
+41     Error creating character
+42     Character creation failed
+43     Name already in use
+44     Creation of that race and/or class is currently disabled
+45     Deleting character
+46     Character deleted
+47     Character deletion failed
+48     Entering the World of Warcraft
+49     Login successful
+50     World server is down
+51     A character with that name already exists
+52     No instance servers are available
+53     Login failed
+54     Login for that race and/or class is currently disabled
+55     Enter a name for your character
+56     Name must be at least 3 characters
+57     Names must be no more than 12 characters
+58     Name must start with a letter
+59     Names can only have one grave (`)
+60     Names can only contain letters and one grave (`)
+61     Names must contain only one language
+62     That name contains profanity
+63     That name is reserved
+64     Invalid character name
+65     (Blank)
