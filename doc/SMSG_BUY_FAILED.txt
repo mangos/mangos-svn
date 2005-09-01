@@ -1,0 +1,26 @@
+SMSG_BUY_FAILED
+uint64(Playerguid)
+uint32(itemid)
+uint8(result)
+
+Results:
+0 = The item was not found
+1 = That item is Currently Sold Out
+2 = Not Enough Money
+3 = The Item was Not Found
+4 = That vendor Doesn't like you
+5 = you are too far away
+6 = (Theres no text :( ) 
+7 = That item is currently sold out
+8 = You can't carry any more of those items.
+9 = the item was not found
+all the rest are ^ up to 21 tested
+
+
+SMSG_INVENTORY_CHANGE_FAILURE 
+uint8(error)
+uint64(dstitem)
+uint64(srcitem)
+uint8(0)
+
+48 = Inventory Full

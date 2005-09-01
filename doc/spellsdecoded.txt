@@ -1,0 +1,194 @@
+SMSG_HEALSPELL_ON_PLAYER = 0x014E
+
+SMSG_SPELL_FAILURE = 0x0131
+uint64 casterGUID
+spellID int32
+uint8 reason
+
+SMSG_CLEAR_COOLDOWN = 0x01DC
+int32 spellID
+uint64 guid
+
+SMSG_COOLDOWN_EVENT = 0x0133
+int32 spellID
+uint64 guid
+
+SMSG_COOLDOWN_CHEAT = 0x01DF
+// clears cooldowns
+int32 spellID
+uint64 guid
+
+SMSG_SPELL_GO = 0x0130
+uint64 casterGUID
+uint64 casterUnit
+uint32 spellID
+uint16 spellCastFlags
+uint8 hitCount
+foreach( hitCount ) {
+  uint64 target
+}
+uint8 missCount
+foreach( missCount ) {
+  uint8 missReason
+  uint64 missTarget
+}
+uint16 targetmask
+if( targetmask & 0x8000 || targetmask & 0x0800 || targetmask & 0x0002 ) {
+  uint64 unitTarget
+}
+if( targetmask & 0x1000 || targetmask & 0x0010 ) {
+  uint64 itemTarget
+}
+if( targetmask & 0x0020 ) {
+  float sourceLocation.x
+  float sourceLocation.y
+  float sourceLocation.z
+}
+if( targetmask & 0x0040 ) {
+  float destLocation.x
+  float destLocation.y
+  float destLocation.z
+}
+if( targetmask & 0x2000 ) {
+  char targetString[0x80]
+}
+if( spellCastFlags & 0x20 ) {
+  uint32 ammoDisplayID
+  uint32 ammoInventoryType
+}
+
+SMSG_SPELL_START = 0x012F
+uint64 casterGUID
+uint64 casterUnit
+uint32 spellID
+uint16 spellCastFlags
+uint32 castDelay
+uint16 targetmask
+if( targetmask & 0x8000 || targetmask & 0x0800 || targetmask & 0x0002 ) {
+  uint64 unitTarget
+}
+if( targetmask & 0x1000 || targetmask & 0x0010 ) {
+  uint64 itemTarget
+}
+if( targetmask & 0x0020 ) {
+  float sourceLocation.x
+  float sourceLocation.y
+  float sourceLocation.z
+}
+if( targetmask & 0x0040 ) {
+  float destLocation.x
+  float destLocation.y
+  float destLocation.z
+}
+if( targetmask & 0x2000 ) {
+  char targetString[0x80]
+}
+if( spellCastFlags & 0x20 ) {
+  int32 ammoDisplayID
+  int32 ammoInventoryType
+}
+
+SMSG_CAST_RESULT = 0x012E
+uint32 spellID
+uint8 status
+if( status == 2 ) { // spell failed
+  uint8 reason
+  uint32 arg1 // optional
+  uint32 arg2 // optional
+}
+
+SMSG_SPELL_COOLDOWN = 0x0132
+uint32 spellID
+uint64 guid
+uint16 forceSpellRecoveryTime
+
+
+SpellStartHandler:
+uint64 casterGUID
+uint64 casterUnit
+uint32 spellID
+if( msgId == 0x012F ) {
+  // 6E1BD6
+  __fastcall SpellStart( spellID, msg, casterGUID, casterUnit ):
+  uint16 spellCastFlags
+  uint32 castDelay
+  if( some static condition involving ebx+8 and dword_FD9B60 ) {
+    __fastcall sub_62A0D0( spellID );
+  }
+  __fastcall SpellGetCastTargets( cast, msg ):
+    uint16 targetmask
+    if( targetmask & 0x8000 || targetmask & 0x0800 || targetmask & 0x0002 ) {
+      uint64 unitTarget
+    }
+    if( targetmask & 0x1000 || targetmask & 0x0010 ) {
+      uint64 itemTarget
+    }
+    if( targetmask & 0x0020 ) {
+      float sourceLocation.x
+      float sourceLocation.y
+      float sourceLocation.z
+    }
+    if( targetmask & 0x0040 ) {
+      float destLocation.x
+      float destLocation.y
+      float destLocation.z
+    }
+    if( targetmask & 0x2000 ) {
+      char targetString[0x80]
+    }
+  if( spellCastFlags & 0x20 ) {
+    int32 ammoDisplayID
+    int32 ammoInventoryType
+  }
+} else {
+  // 6E1BFD
+  __fastcall SpellGo( &casterGUID, &casterUnit, spellID, msg );
+  uint16 spellCastFlags
+  uint8 hitCount
+  foreach( hitCount ) {
+    uint64 target
+  }
+  uint8 missCount
+  foreach( missCount ) {
+    uint8 missReason
+    uint64 missTarget
+  }
+  __fastcall SpellGetCastTargets( cast, msg ):
+    uint16 targetmask
+    if( targetmask & 0x8000 || targetmask & 0x0800 || targetmask & 0x0002 ) {
+      uint64 unitTarget
+    }
+    if( targetmask & 0x1000 || targetmask & 0x0010 ) {
+      uint64 itemTarget
+    }
+    if( targetmask & 0x0020 ) {
+      float sourceLocation.x
+      float sourceLocation.y
+      float sourceLocation.z
+    }
+    if( targetmask & 0x0040 ) {
+      float destLocation.x
+      float destLocation.y
+      float destLocation.z
+    }
+    if( targetmask & 0x2000 ) {
+      char targetString[0x80]
+    }
+  if( spellCastFlags & 0x20 ) {
+    uint32 ammoDisplayID
+    uint32 ammoInventoryType
+  }
+}
+
+CooldownEvent:
+int32 spellID
+uint64 guid
+if( msgId == 0x01DF ) {
+  // 6E3167
+  __fastcall Spell_C_ClearCooldowns( bool isPet );
+} else {
+  // 6E3179
+  __fastcall Spell_C_CooldownEventTriggered( spellID, timeReceived, bool isPet, clear = (msgId == 0x1DC) );
+  SpellHistory::RemoveHold( spellID, timeReceived, clear, msg )
+}
+

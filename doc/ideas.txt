@@ -1,0 +1,34 @@
+--------------------------------------------------------------------------------------
+To prevent characters from been corupted how about we do this
+instead of deleteing all there info
+select it in to temp tables or another db then delete it
+then insert there data in to the actual table
+once it gets to the end of the save script
+delete there data from the temp table
+on startup if theres a characters data in the temp table
+delete there data from the actual table
+and add the stuff in the temp one
+then delete the temp data
+you can do a select * from table into temptable;
+so mysql does the work
+only prob with that is if theserver crashes while adding there data to the temp table
+maybe add another field
+and once every things added (end of script) set it to 1
+--------------------------------------------------------------------------------------
+
+////////////////
+///////AI///////
+////////////////
+
+After line 591->creatures.cpp
+
+//Attack highest damage dealer
+
+if( closestTarget->getDamageTaken() < itr->getDamageTaken() ) //getDamage() damage taken by creature
+{
+	closestTarget = *itr;
+	targetDistanceSq = lengthSq;
+}
+
+--------------------------------------------------------------------------------------
+	
