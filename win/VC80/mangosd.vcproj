@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="mangosd"
 	ProjectGUID="{A3A04E47-43A2-4C08-90B3-029CEF558594}"
 	>
@@ -18,8 +18,9 @@
 			OutputDirectory=".\..\..\bin\Release"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -43,18 +44,17 @@
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="WIN32,NDEBUG,_CONSOLE"
-				StringPooling="TRUE"
+				StringPooling="true"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
+				EnableFunctionLevelLinking="true"
 				PrecompiledHeaderFile=".\Release/mangosd.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
 				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="FALSE"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				CompileAs="0"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -73,7 +73,7 @@
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\Release/mangosd.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
 				SubSystem="1"
@@ -91,6 +91,9 @@
 				Name="VCBscMakeTool"
 			/>
 			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
 				Name="VCAppVerifierTool"
 			/>
 			<Tool
@@ -106,8 +109,9 @@
 			OutputDirectory=".\..\..\bin\Debug"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -131,20 +135,18 @@
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="WIN32,_DEBUG,_CONSOLE"
-				IgnoreStandardIncludePath="FALSE"
+				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\Debug/mangosd.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
 				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="FALSE"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 				CompileAs="0"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -163,9 +165,9 @@
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\Debug/mangosd.exe"
 				LinkIncremental="2"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
-				GenerateDebugInformation="TRUE"
+				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
 				SubSystem="1"
 			/>
@@ -180,6 +182,9 @@
 			/>
 			<Tool
 				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCAppVerifierTool"
