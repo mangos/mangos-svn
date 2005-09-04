@@ -1,7 +1,7 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="shared"
 	ProjectGUID="{90297C34-F231-4DF4-848E-A74BCC0E40ED}"
 	>
@@ -18,8 +18,9 @@
 			OutputDirectory=".\shared___Win32_Release"
 			IntermediateDirectory=".\shared___Win32_Release"
 			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -42,19 +43,18 @@
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\realmlist"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
+				StringPooling="true"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\shared___Win32_Release/shared.pch"
 				AssemblerListingLocation=".\shared___Win32_Release/"
 				ObjectFile=".\shared___Win32_Release/"
 				ProgramDataBaseFileName=".\shared___Win32_Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="FALSE"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				CompileAs="0"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -70,7 +70,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\Release\shared.lib"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -82,7 +82,7 @@
 				Name="VCBscMakeTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
+				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -93,8 +93,9 @@
 			OutputDirectory=".\shared___Win32_Debug"
 			IntermediateDirectory=".\shared___Win32_Debug"
 			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
 			>
 			<Tool
@@ -125,11 +126,10 @@
 				ObjectFile=".\shared___Win32_Debug/"
 				ProgramDataBaseFileName=".\shared___Win32_Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="FALSE"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
 				CompileAs="0"
-				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -145,7 +145,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\shared___Win32_Debug\shared.lib"
-				SuppressStartupBanner="TRUE"
+				SuppressStartupBanner="true"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -157,7 +157,7 @@
 				Name="VCBscMakeTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
+				Name="VCFxCopTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -395,7 +395,27 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\RealmPacket.h"
+				RelativePath="..\..\src\shared\Network\PoolSocket.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\PoolSocket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\ResolvServer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\ResolvServer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\ResolvSocket.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\ResolvSocket.h"
 				>
 			</File>
 			<File
@@ -404,6 +424,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Network\Socket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\socket_include.cpp"
 				>
 			</File>
 			<File
@@ -419,7 +443,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Network\SocketThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\SocketThread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Network\StdLog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\StdoutLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\StdoutLog.h"
 				>
 			</File>
 			<File
@@ -431,11 +471,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Network\Thread.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Thread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Network\UdpSocket.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Network\UdpSocket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Utility.cpp"
 				>
 			</File>
 			<File
