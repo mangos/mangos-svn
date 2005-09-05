@@ -1,5 +1,7 @@
 //// Things that are added / fixed:
 
++ Set daemon version via configure.
++ Set path to mangosd.conf via configure.
 + Update client release number to 4544.
 + Area triggers now are read from database, see areatriggers.sql for table
   structure and trigger data. port.bin is obsolete now.

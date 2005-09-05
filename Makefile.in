@@ -201,7 +201,7 @@ subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = src/mangosd/Master.h
 DIST_SOURCES =
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
