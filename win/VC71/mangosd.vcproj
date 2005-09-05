@@ -22,7 +22,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
-				PreprocessorDefinitions="WIN32,NDEBUG,_CONSOLE"
+				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,NDEBUG,_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -83,7 +83,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
-				PreprocessorDefinitions="WIN32,_DEBUG,_CONSOLE"
+				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,_DEBUG,_CONSOLE"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -168,6 +168,20 @@
 		</File>
 		<File
 			RelativePath="..\..\src\mangosd\Master.h">
+			<FileConfiguration
+				Name="Release|Win32">
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
+					Outputs="..\..\src\mangosd\Master.h"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug|Win32">
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
+					Outputs="..\..\src\mangosd\Master.h"/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\src\mangosd\WorldRunnable.cpp">
