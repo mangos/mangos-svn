@@ -34,3 +34,6 @@ mangosd_LDFLAGS = -L$(srcdir)/../shared \
                -L$(srcdir)/../game \
                -L$(srcdir)/../../dep/src/zthread \
                -L$(srcdir)/../../dep/src/zlib
+
+CLEANFILES = \
+    Master.h

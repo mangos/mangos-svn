@@ -101,7 +101,6 @@ mangosd_SOURCES = \
     Master.h \
     WorldRunnable.h
 
-
 mangosd_LDADD = -lgame -ldatabase -lrealmlist -lconfig -lauth -lshared -lZThread -lzlib  -lnetwork
 
 mangosd_LDFLAGS = -L$(srcdir)/../shared \
