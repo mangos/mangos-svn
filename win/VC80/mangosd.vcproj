@@ -4,7 +4,6 @@
 	Version="8,00"
 	Name="mangosd"
 	ProjectGUID="{A3A04E47-43A2-4C08-90B3-029CEF558594}"
-	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -247,7 +246,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
-					Outputs="..\..\src\mangosd\Master.h"
+					Outputs="Master.h"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -256,7 +255,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
-					Outputs="..\..\src\mangosd\Master.h"
+					Outputs="Master.h"
 				/>
 			</FileConfiguration>
 		</File>

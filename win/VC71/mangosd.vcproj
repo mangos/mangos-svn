@@ -173,14 +173,14 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
-					Outputs="..\..\src\mangosd\Master.h"/>
+					Outputs="Master.h"/>
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Debug|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
-					Outputs="..\..\src\mangosd\Master.h"/>
+					Outputs="Master.h"/>
 			</FileConfiguration>
 		</File>
 		<File
