@@ -86,10 +86,17 @@ AC_CHECK_FUNCS(                                               \
    sqrt stpcpy strchr strpbrk strrchr strstr strtol strtoul   \
 )
 
+MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
+eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
+
+AC_SUBST(MANGOSD_CONFIG)
+AC_SUBST(VERSION)
+
 AC_CONFIG_FILES([
    ./Makefile
    doc/Makefile
    src/Makefile
+   src/mangosd/Master.h
    src/mangosd/Makefile
    src/shared/Makefile
    src/realmlist/Makefile
