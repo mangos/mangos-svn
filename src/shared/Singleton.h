@@ -36,28 +36,28 @@ type the##type
 template < class type > class Singleton
 {
     public:
-/// Constructor
+        /// Constructor
         Singleton( )
         {
-/// If you hit this assert, this singleton already exists -- you can't create another one!
+            /// If you hit this assert, this singleton already exists -- you can't create another one!
             WPAssert( mSingleton == 0 );
             mSingleton = static_cast<type *>(this);
         }
-/// Destructor
+        /// Destructor
         ~Singleton( )
         {
             mSingleton = 0;
         }
 
-/// Retrieve the singleton object, if you hit this assert this singleton object doesn't exist yet
+        /// Retrieve the singleton object, if you hit this assert this singleton object doesn't exist yet
         static type & getSingleton( ) { WPAssert( mSingleton ); return *mSingleton; }
 
-/// Retrieve a pointer to the singleton object
+        /// Retrieve a pointer to the singleton object
         static type * getSingletonPtr( ) { return mSingleton; }
 
     protected:
 
-/// Singleton pointer, must be set to 0 prior to creating the object
+        /// Singleton pointer, must be set to 0 prior to creating the object
         static type * mSingleton;
 };
 #endif

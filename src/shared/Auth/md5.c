@@ -135,10 +135,10 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
         c = pms->abcd[2], d = pms->abcd[3];
     md5_word_t t;
 #if BYTE_ORDER > 0
-/* Define storage only for big-endian CPUs. */
+    /* Define storage only for big-endian CPUs. */
     md5_word_t X[16];
 #else
-/* Define storage for little-endian or both types of CPUs. */
+    /* Define storage for little-endian or both types of CPUs. */
     md5_word_t xbuf[16];
     const md5_word_t *X;
 #endif
@@ -156,18 +156,18 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 #endif
 #if BYTE_ORDER <= 0                       /* little-endian */
         {
-/*
- * On little-endian machines, we can process properly aligned
- * data without copying it.
- */
+            /*
+             * On little-endian machines, we can process properly aligned
+             * data without copying it.
+             */
             if (!((data - (const md5_byte_t *)0) & 3))
             {
-/* data are properly aligned */
+                /* data are properly aligned */
                 X = (const md5_word_t *)data;
             }
             else
             {
-/* not aligned */
+                /* not aligned */
                 memcpy(xbuf, data, 64);
                 X = xbuf;
             }
@@ -178,10 +178,10 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 #endif
 #if BYTE_ORDER >= 0                       /* big-endian */
         {
-/*
- * On big-endian machines, we must arrange the bytes in the
- * right order.
- */
+            /*
+             * On big-endian machines, we must arrange the bytes in the
+             * right order.
+             */
             const md5_byte_t *xp = data;
             int i;
 
@@ -198,14 +198,14 @@ md5_process(md5_state_t *pms, const md5_byte_t *data /*[64]*/)
 
 #define ROTATE_LEFT(x, n) (((x) << (n)) | ((x) >> (32 - (n))))
 
-/* Round 1. */
-/* Let [abcd k s i] denote the operation
-   a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
+    /* Round 1. */
+    /* Let [abcd k s i] denote the operation
+       a = b + ((a + F(b,c,d) + X[k] + T[i]) <<< s). */
 #define F(x, y, z) (((x) & (y)) | (~(x) & (z)))
 #define SET(a, b, c, d, k, s, Ti)\
 t = a + F(b,c,d) + X[k] + Ti;\
 a = ROTATE_LEFT(t, s) + b
-/* Do the following 16 operations. */
+    /* Do the following 16 operations. */
     SET(a, b, c, d,  0,  7,  T1);
     SET(d, a, b, c,  1, 12,  T2);
     SET(c, d, a, b,  2, 17,  T3);
@@ -224,14 +224,14 @@ a = ROTATE_LEFT(t, s) + b
     SET(b, c, d, a, 15, 22, T16);
 #undef SET
 
-/* Round 2. */
-/* Let [abcd k s i] denote the operation
-     a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
+    /* Round 2. */
+    /* Let [abcd k s i] denote the operation
+         a = b + ((a + G(b,c,d) + X[k] + T[i]) <<< s). */
 #define G(x, y, z) (((x) & (z)) | ((y) & ~(z)))
 #define SET(a, b, c, d, k, s, Ti)\
 t = a + G(b,c,d) + X[k] + Ti;\
 a = ROTATE_LEFT(t, s) + b
-/* Do the following 16 operations. */
+    /* Do the following 16 operations. */
     SET(a, b, c, d,  1,  5, T17);
     SET(d, a, b, c,  6,  9, T18);
     SET(c, d, a, b, 11, 14, T19);
@@ -250,14 +250,14 @@ a = ROTATE_LEFT(t, s) + b
     SET(b, c, d, a, 12, 20, T32);
 #undef SET
 
-/* Round 3. */
-/* Let [abcd k s t] denote the operation
-     a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
+    /* Round 3. */
+    /* Let [abcd k s t] denote the operation
+         a = b + ((a + H(b,c,d) + X[k] + T[i]) <<< s). */
 #define H(x, y, z) ((x) ^ (y) ^ (z))
 #define SET(a, b, c, d, k, s, Ti)\
 t = a + H(b,c,d) + X[k] + Ti;\
 a = ROTATE_LEFT(t, s) + b
-/* Do the following 16 operations. */
+    /* Do the following 16 operations. */
     SET(a, b, c, d,  5,  4, T33);
     SET(d, a, b, c,  8, 11, T34);
     SET(c, d, a, b, 11, 16, T35);
@@ -276,14 +276,14 @@ a = ROTATE_LEFT(t, s) + b
     SET(b, c, d, a,  2, 23, T48);
 #undef SET
 
-/* Round 4. */
-/* Let [abcd k s t] denote the operation
-     a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
+    /* Round 4. */
+    /* Let [abcd k s t] denote the operation
+         a = b + ((a + I(b,c,d) + X[k] + T[i]) <<< s). */
 #define I(x, y, z) ((y) ^ ((x) | ~(z)))
 #define SET(a, b, c, d, k, s, Ti)\
 t = a + I(b,c,d) + X[k] + Ti;\
 a = ROTATE_LEFT(t, s) + b
-/* Do the following 16 operations. */
+    /* Do the following 16 operations. */
     SET(a, b, c, d,  0,  6, T49);
     SET(d, a, b, c,  7, 10, T50);
     SET(c, d, a, b, 14, 15, T51);
@@ -302,9 +302,9 @@ a = ROTATE_LEFT(t, s) + b
     SET(b, c, d, a,  9, 21, T64);
 #undef SET
 
-/* Then perform the following additions. (That is increment each
-   of the four registers by the value it had before this block
-   was started.) */
+    /* Then perform the following additions. (That is increment each
+       of the four registers by the value it had before this block
+       was started.) */
     pms->abcd[0] += a;
     pms->abcd[1] += b;
     pms->abcd[2] += c;
@@ -334,13 +334,13 @@ md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
     if (nbytes <= 0)
         return;
 
-/* Update the message length. */
+    /* Update the message length. */
     pms->count[1] += nbytes >> 29;
     pms->count[0] += nbits;
     if (pms->count[0] < nbits)
         pms->count[1]++;
 
-/* Process an initial partial block. */
+    /* Process an initial partial block. */
     if (offset)
     {
         int copy = (offset + nbytes > 64 ? 64 - offset : nbytes);
@@ -353,11 +353,11 @@ md5_append(md5_state_t *pms, const md5_byte_t *data, int nbytes)
         md5_process(pms, pms->buf);
     }
 
-/* Process full blocks. */
+    /* Process full blocks. */
     for (; left >= 64; p += 64, left -= 64)
         md5_process(pms, p);
 
-/* Process a final partial block. */
+    /* Process a final partial block. */
     if (left)
         memcpy(pms->buf, p, left);
 }
@@ -376,12 +376,12 @@ md5_finish(md5_state_t *pms, md5_byte_t digest[16])
     md5_byte_t data[8];
     int i;
 
-/* Save the length before padding. */
+    /* Save the length before padding. */
     for (i = 0; i < 8; ++i)
         data[i] = (md5_byte_t)(pms->count[i >> 2] >> ((i & 3) << 3));
-/* Pad to 56 bytes mod 64. */
+    /* Pad to 56 bytes mod 64. */
     md5_append(pms, pad, ((55 - (pms->count[0] >> 3)) & 63) + 1);
-/* Append the length. */
+    /* Append the length. */
     md5_append(pms, data, 8);
     for (i = 0; i < 16; ++i)
         digest[i] = (md5_byte_t)(pms->abcd[i >> 2] >> ((i & 3) << 3));

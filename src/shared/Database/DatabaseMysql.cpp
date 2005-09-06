@@ -41,7 +41,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
-//        sLog.Log(L_CRITICAL, "Could not initialize Mysql\n");
+        // sLog.Log(L_CRITICAL, "Could not initialize Mysql\n");
         Log::getSingleton().outError( "Could not initialize Mysql" );
         return false;
     }
@@ -67,13 +67,13 @@ bool DatabaseMysql::Initialize(const char *infoString)
         password.c_str(), database.c_str(), 0, 0, 0);
 
     if (mMysql)
-//        sLog.Log(L_INFO, "Connected to MySQL database at %s\n",
-//                                        parsedInfoString[0]);
+        // sLog.Log(L_INFO, "Connected to MySQL database at %s\n",
+        //     parsedInfoString[0]);
         Log::getSingleton().outDetail( "Connected to MySQL database at %s\n",
             host.c_str());
     else
-//        sLog.Log(L_ERROR, "Could not connect to MySQL database at %s\n",
-//                                        parsedInfoString[0]);
+        // sLog.Log(L_ERROR, "Could not connect to MySQL database at %s\n",
+        //     parsedInfoString[0]);
         Log::getSingleton().outError( "Could not connect to MySQL database at %s: %s\n",
             host.c_str(),mysql_error(mysqlInit));
 
@@ -89,7 +89,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     if (!mMysql)
         return 0;
 
-//Log::getSingleton().outDetail( (std::string("SQL: ") + sql).c_str() );
+    // Log::getSingleton().outDetail( (std::string("SQL: ") + sql).c_str() );
 
     if (mysql_query(mMysql, sql))
         return 0;
@@ -99,17 +99,17 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     uint64 rowCount = mysql_affected_rows(mMysql);
     uint32 fieldCount = mysql_field_count(mMysql);
 
-//    uint64 rowCount = mysql_num_rows(result);
-//    uint32 fieldCount = mysql_num_fields(result);
+    // uint64 rowCount = mysql_num_rows(result);
+    // uint32 fieldCount = mysql_num_fields(result);
 
-// Did the query succeed? And did it return any result set?
+    // Did the query succeed? And did it return any result set?
     if (result == 0)
     {
         if (fieldCount == 0)
             return 0;                             // no results
         else
         {
-//            sLog.Log(L_ERROR, "Query result storage failed in query \"%s\"\n", sql);
+            // sLog.Log(L_ERROR, "Query result storage failed in query \"%s\"\n", sql);
             return 0;
         }
     }
@@ -122,7 +122,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
     if(!queryResult)
     {
-//        sLog.Log(L_ERROR, "Out of memory on query result allocation in query \"%s\"\n", sql);
+        // sLog.Log(L_ERROR, "Out of memory on query result allocation in query \"%s\"\n", sql);
         return 0;
     }
 

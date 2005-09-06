@@ -23,7 +23,7 @@
 QueryResultMysql::QueryResultMysql(MYSQL_RES *result, uint64 rowCount, uint32 fieldCount) :
 QueryResult(rowCount, fieldCount), mResult(result)
 {
-// There were rows returned from the query, so fetch them.
+    // There were rows returned from the query, so fetch them.
     mCurrentRow = new Field[mFieldCount];
     ASSERT(mCurrentRow);
 
@@ -96,7 +96,7 @@ enum Field::DataTypes QueryResultMysql::ConvertNativeType(enum_field_types mysql
         case FIELD_TYPE_NULL:
             return Field::DB_TYPE_STRING;
         case FIELD_TYPE_TINY:
-//  case FIELD_TYPE_CHAR:           // replaced by FIELD_TYPE_TINY
+        // case FIELD_TYPE_CHAR:                  // replaced by FIELD_TYPE_TINY
         case FIELD_TYPE_SHORT:
         case FIELD_TYPE_LONG:
         case FIELD_TYPE_INT24:

@@ -49,9 +49,10 @@ class ByteBuffer
             _rpos = _wpos = 0;
         }
 
-//template <typename T> void insert(size_t pos, T value) {
-//  insert(pos, (uint8 *)&value, sizeof(value));
-//}
+        // template <typename T> void insert(size_t pos, T value) {
+        //     insert(pos, (uint8 *)&value, sizeof(value));
+        // }
+
         template <typename T> void append(T value)
         {
             append((uint8 *)&value, sizeof(value));
@@ -61,7 +62,7 @@ class ByteBuffer
             put(pos,(uint8 *)&value,sizeof(value));
         }
 
-// stream like operators for storing data
+        // stream like operators for storing data
         ByteBuffer &operator<<(bool value)
         {
             append<char>((char)value);
@@ -110,7 +111,7 @@ class ByteBuffer
             return *this;
         }
 
-// stream like operators for reading data
+        // stream like operators for reading data
         ByteBuffer &operator>>(bool &value)
         {
             value = read<char>() > 0 ? true : false;
@@ -214,7 +215,7 @@ class ByteBuffer
         const uint8 *contents() const { return &_storage[0]; };
 
         inline size_t size() const { return _storage.size(); };
-// one should never use resize probably
+        // one should never use resize probably
         void resize(size_t newsize)
         {
             _storage.resize(newsize);
@@ -226,7 +227,7 @@ class ByteBuffer
             if (ressize > size()) _storage.reserve(ressize);
         };
 
-// appending to the end of buffer
+        // appending to the end of buffer
         void append(const std::string& str)
         {
             append((uint8 *)str.c_str(),str.size() + 1);
@@ -239,11 +240,11 @@ class ByteBuffer
         {
             if (!cnt) return;
 
-// noone should even need uint8buffer longer than 10mb
-// if you DO need, think about it
-// then think some more
-// then use something else
-// -- qz
+            // noone should even need uint8buffer longer than 10mb
+            // if you DO need, think about it
+            // then think some more
+            // then use something else
+            // -- qz
             ASSERT(size() < 10000000);
 
             if (_storage.size() < _wpos + cnt)
@@ -261,12 +262,13 @@ class ByteBuffer
             ASSERT(pos + cnt <= size());
             memcpy(&_storage[pos], src, cnt);
         }
-//void insert(size_t pos, const uint8 *src, size_t cnt) {
-//  std::copy(src, src + cnt, inserter(_storage, _storage.begin() + pos));
-//}
+
+        // void insert(size_t pos, const uint8 *src, size_t cnt) {
+        //     std::copy(src, src + cnt, inserter(_storage, _storage.begin() + pos));
+        // }
 
     protected:
-// read and write positions
+        // read and write positions
         size_t _rpos, _wpos;
         std::vector<uint8> _storage;
 };

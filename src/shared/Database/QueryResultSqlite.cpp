@@ -29,7 +29,7 @@ QueryResult(rowCount, fieldCount), mTableData(tableData), mTableIndex(0)
     for (uint32 i = 0; i < mFieldCount; i++)
     {
         mCurrentRow[i].SetName(mTableData[i]);
-// will change this to support datatypes eventually if needed
+        // will change this to support datatypes eventually if needed
         mCurrentRow[i].SetType(Field::DB_TYPE_UNKNOWN);
     }
 }

@@ -30,8 +30,8 @@ class DatabaseSqlite : public Database
         DatabaseSqlite();
         ~DatabaseSqlite();
 
-//! Initializes Sqlite and opens a database file.
-/*! infoString should be formated like database.db. */
+        //! Initializes Sqlite and opens a database file.
+        /*! infoString should be formated like database.db. */
         bool Initialize(const char *infoString);
 
         QueryResult* Query(const char *sql);

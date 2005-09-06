@@ -31,7 +31,7 @@ class WorldPacket : public ByteBuffer
         WorldPacket(size_t res) : ByteBuffer(res), m_opcode(0) { }
         WorldPacket(const WorldPacket &packet) : ByteBuffer(packet), m_opcode(packet.m_opcode) {}
 
-//! Clear packet and set opcode all in one mighty blow
+        //! Clear packet and set opcode all in one mighty blow
         void Initialize(uint16 opcode )
         {
             clear();
