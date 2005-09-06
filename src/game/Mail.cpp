@@ -89,7 +89,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
 
     std::stringstream delinvq;
-// TODO: use full guids
+    // TODO: use full guids
     delinvq << "DELETE FROM mail WHERE mailID = " << mID;
     sDatabase.Execute( delinvq.str().c_str( ) );
     std::stringstream ss;
@@ -171,7 +171,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     }
 
     std::stringstream delinvq;
-// TODO: use full guids
+    // TODO: use full guids
     delinvq << "DELETE FROM mail WHERE mailID = " << m->messageID;
     sDatabase.Execute( delinvq.str().c_str( ) );
     std::stringstream ss;
@@ -281,7 +281,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32((*itr)->money);            //money
         data << uint32((*itr)->COD);              //COD check
         data << uint32((*itr)->checked);          //read check
-//time
+        //time
         data << float(((*itr)->time - time(NULL)) / 3600);
     }
     SendPacket(&data);
@@ -298,9 +298,9 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     Log::getSingleton().outDebug("We got mailguid: %d with unk: %d",mailguid,unk1);
 
     Player* pl = GetPlayer();
-//std::list<Mail*>::iterator itr;
+    // std::list<Mail*>::iterator itr;
     Mail *itr;
-//for (itr = pl->GetmailBegin(); (*itr)->messageID != mailguid && itr != pl->GetmailEnd() ;itr++) ;
+    // for (itr = pl->GetmailBegin(); (*itr)->messageID != mailguid && itr != pl->GetmailEnd() ;itr++) ;
     itr = pl->GetMail(mailguid);
     if(!itr)
     {

@@ -157,13 +157,13 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
         GetPlayer()->SetInGroup();
         GetPlayer()->SetLeader( player->GetGUID() );
 
-// creating group
+        // creating group
         Group * group = new Group;
         ASSERT(group);
 
         group->Create(player->GetGUID(), player->GetName());
 
-// adding our client
+        // adding our client
         group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName());
         objmgr.AddGroup(group);
 
@@ -305,12 +305,12 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
         return;
     }
 
-// error player is not leader
+    // error player is not leader
     if (!GetPlayer()->IsInGroup() ||
         (GetPlayer()->GetGroupLeader() != GetPlayer()->GetGUID()))
         return;
 
-// error player not in group
+    // error player not in group
     if (!player->IsInGroup() || (player->GetGroupLeader() != GetPlayer()->GetGUID()))
         return;
 
@@ -328,7 +328,7 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-// error he's not in a group
+    // error he's not in a group
     if (!GetPlayer()->IsInGroup())
         return;
 

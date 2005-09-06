@@ -53,10 +53,10 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
         obj = (Object*)m_session->GetPlayer();
 
     char buf[256];
-//sprintf((char*)buf, "%d", m_session->GetPlayer()->inarc( 3.000f,obj->GetPositionX() ,obj->GetPositionY(), 90, m_session->GetPlayer()->GetOrientation(), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY()));
+    // sprintf((char*)buf, "%d", m_session->GetPlayer()->inarc( 3.000f,obj->GetPositionX() ,obj->GetPositionY(), 90, m_session->GetPlayer()->GetOrientation(), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY()));
 
     FillSystemMessageData(&data, m_session, buf);
-//m_session->SendPacket( &data );
+    // m_session->SendPacket( &data );
 
     return true;
 }

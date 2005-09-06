@@ -233,7 +233,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             sDatabase.Execute( ss.str().c_str() );
 
             std::stringstream md;
-// TODO: use full guids
+            // TODO: use full guids
             md << "DELETE FROM mail WHERE mailID = " << m->messageID;
             sDatabase.Execute( md.str().c_str( ) );
 
@@ -258,15 +258,15 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             std::stringstream id;
             std::stringstream bd;
 
-// TODO: use full guids
+            // TODO: use full guids
             delinvq << "DELETE FROM auctionhouse WHERE itemowner = " << ah->owner;
             sDatabase.Execute( delinvq.str().c_str( ) );
 
-// TODO: use full guids
+            // TODO: use full guids
             id << "DELETE FROM auctioned_items WHERE guid = " << ah->item;
             sDatabase.Execute( id.str().c_str( ) );
 
-// TODO: use full guids
+            // TODO: use full guids
             bd << "DELETE FROM bids WHERE Id = " << ah->Id;
             sDatabase.Execute( bd.str().c_str( ) );
             data.Initialize( SMSG_AUCTION_LIST_RESULT );
@@ -286,7 +286,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->item = 0;
             mn->time = time(NULL) + (29 * 3600);
             std::stringstream mdn;
-// TODO: use full guids
+            // TODO: use full guids
             mdn << "DELETE FROM mail WHERE mailID = " << mn->messageID;
             sDatabase.Execute( mdn.str().c_str( ) );
 
@@ -329,7 +329,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->buyout = buyout;
     time_t base = time(NULL);
     AH->time = ((time_t)(etime * 60)) + base;
-//AH->time = base + 300;
+    //AH->time = base + 300;
     AH->Id = objmgr.GenerateAuctionID();
     Log::getSingleton().outString("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes)",GUID_LOPART(item),GUID_LOPART(auctioneer),bid,buyout,time);
     objmgr.AddAuction(AH);

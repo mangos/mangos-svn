@@ -62,26 +62,28 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 /* CMSG_TRAINER_LIST: //needs to be changed to the vendor-list
 void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 {
-WorldPacket data;
-uint32 player_level, player_gold;
-player_level = GetPlayer( )->GetUInt32Value( UNIT_FIELD_LEVEL );
-player_gold = GetPlayer( )->GetUInt32Value( PLAYER_FIELD_COINAGE );
-uint32 guid1, guid2;
-uint32 count;
-//count = 2; //we can have more then 2 spells now ;)
-recv_data >> guid1 >> guid2;
+    WorldPacket data;
+    uint32 player_level, player_gold;
+    player_level = GetPlayer( )->GetUInt32Value( UNIT_FIELD_LEVEL );
+    player_gold = GetPlayer( )->GetUInt32Value( PLAYER_FIELD_COINAGE );
+    uint32 guid1, guid2;
+    uint32 count;
+    //count = 2; //we can have more then 2 spells now ;)
+    recv_data >> guid1 >> guid2;
 
-DatabaseInterface *dbi = Database::getSingleton().createDatabaseInterface(); //
-count = (uint32)dbi->getTrainerSpellsCount ( session );
-data.Initialize( (38*count)+48, SMSG_TRAINER_LIST ); //set packet size - count = number of spells
-data << guid1 << guid2;
-data << uint32(0) << count;
+    DatabaseInterface *dbi = Database::getSingleton().createDatabaseInterface(); //
+    count = (uint32)dbi->getTrainerSpellsCount ( session );
+    data.Initialize( (38*count)+48, SMSG_TRAINER_LIST ); //set packet size - count = number of spells
+    data << guid1 << guid2;
+    data << uint32(0) << count;
 
-dbi->getTrainerSpells( session, data);
-Database::getSingleton().removeDatabaseInterface( dbi );
+    dbi->getTrainerSpells( session, data);
+    Database::getSingleton().removeDatabaseInterface( dbi );
 
-SendPacket( &data );
-}    */
+    SendPacket( &data );
+}
+*/
+
 
 //////////////////////////////////////////////////////////////
 /// This function handles CMSG_TRAINER_LIST
@@ -98,13 +100,13 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
     cnt = 0;
     if(strainer)
     {
-//Log::getSingleton().outString("loading trainer %u with skillines %u, %u, and %u",GUID_LOPART(guid),strainer->skilline1,strainer->skilline2,strainer->skilline3);
+        // Log::getSingleton().outString("loading trainer %u with skillines %u, %u, and %u",GUID_LOPART(guid),strainer->skilline1,strainer->skilline2,strainer->skilline3);
         for (unsigned int t = 0;t < sSkillStore.GetNumRows();t++)
         {
             skilllinespell *skill = sSkillStore.LookupEntry(t);
             if ((skill->skilline == strainer->skilline1) || (skill->skilline == strainer->skilline2) || (skill->skilline == strainer->skilline3))
             {
-//Log::getSingleton().outString("skill %u with skillline %u matches",skill->spell,skill->skilline);
+                // Log::getSingleton().outString("skill %u with skillline %u matches",skill->spell,skill->skilline);
                 SpellEntry *proto = sSpellStore.LookupEntry(skill->spell);
                 if ((proto) && (proto->spellLevel != 0))
                 {
@@ -115,7 +117,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
         data.Initialize( SMSG_TRAINER_LIST );     //set packet size - count = number of spells
         data << guid;
         data << uint32(0) << uint32(cnt);
-//Log::getSingleton().outString("count = %u",cnt);
+        // Log::getSingleton().outString("count = %u",cnt);
         for (unsigned int t = 0;t < sSkillStore.GetNumRows();t++)
         {
             skilllinespell *skill = sSkillStore.LookupEntry(t);
@@ -124,9 +126,9 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
                 SpellEntry *proto = sSpellStore.LookupEntry(skill->spell);
                 if ((proto) && (proto->spellLevel != 0))
                 {
-//Log::getSingleton( ).outString( "WORLD: Grabbing trainer spell %u with skilline %u", skill->spell, skill->skilline);
+                    // Log::getSingleton( ).outString( "WORLD: Grabbing trainer spell %u with skilline %u", skill->spell, skill->skilline);
                     data << uint32(skill->spell);
-//data << uint32(10);
+                    // data << uint32(10);
                     if (GetPlayer()->HasSpell(skill->spell))
                     {
                         data << uint8(2);
@@ -148,7 +150,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
                     data << uint32(0);            // set required level of a skill line
                     data << uint32(0);
                     data << uint32(0) << uint32(0);
-//Log::getSingleton( ).outString( "WORLD: Grabbing trainer spell %u", itr->second->spell);
+                    // Log::getSingleton( ).outString( "WORLD: Grabbing trainer spell %u", itr->second->spell);
                 }
             }
         }
@@ -181,7 +183,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     {
         GetPlayer( )->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - price );
 
-// Ignatich: do we really need that spell casting sequence? need to check against logs
+        // Ignatich: do we really need that spell casting sequence? need to check against logs
 
         data.Initialize( SMSG_SPELL_START );
         data << guid;
@@ -289,7 +291,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
             data << pGossip->pOptions[i].OptionText;
         }
 
-//QUEST HANDLER
+        // QUEST HANDLER
         data << uint32(0);                        //quest count
         SendPacket(&data);
     }
@@ -408,6 +410,6 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
     GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURAFLAGS +4, 0 );
     GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURASTATE, 0 );
     GetPlayer( )->SetUInt32Value( PLAYER_BYTES_2, (0xffffffff - 0x10) & GetPlayer( )->GetUInt32Value( PLAYER_BYTES_2 ) );
-//GetPlayer( )->UpdateObject( );
+    //GetPlayer( )->UpdateObject( );
     GetPlayer()->setDeathState(ALIVE);
 }

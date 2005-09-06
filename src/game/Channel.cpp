@@ -387,14 +387,14 @@ void Channel::Say(Player *p, const char *what)
     }
     else
     {
-//Packet structure
-//uint8      type;
-//uint32     language;
-//uint32     PVP rank
-//uint64     guid;
-//uint32      len_of_text;
-//char       text[];
-//uint8      afk_state;
+        //Packet structure
+        //uint8      type;
+        //uint32     language;
+        //uint32     PVP rank
+        //uint64     guid;
+        //uint32      len_of_text;
+        //char       text[];
+        //uint8      afk_state;
 
         uint32 messageLength = strlen((char*)what) + 1;
         uint8 afk = 0;
@@ -410,7 +410,7 @@ void Channel::Say(Player *p, const char *what)
         data << (uint8)0;
 
         SendToAll(&data);
-// Send the actual talking stuff.
+        // Send the actual talking stuff.
     }
 }
 

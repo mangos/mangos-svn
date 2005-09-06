@@ -36,12 +36,12 @@ class Item : public Object
         Player* GetOwner() const { return m_owner; }
         void SetOwner(Player *owner) { m_owner = owner; }
 
-//! DB Serialization
+        //! DB Serialization
         void SaveToDB();
         void LoadFromDB(uint32 guid, uint32 auctioncheck);
         void DeleteFromDB();
 
-//! Item Properties
+        //! Item Properties
         void SetDurability(uint32 Value);
         void SetDurabilityToMax();
 

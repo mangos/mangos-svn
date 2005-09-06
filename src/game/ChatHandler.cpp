@@ -79,7 +79,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
             }
             player->GetSession()->SendPacket(&data);
-//Sent the to Users id as the channel, this should be fine as it's not used for wisper
+            // Sent the to Users id as the channel, this should be fine as it's not used for wisper
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_WHISPER_INFORM, LANG_UNIVERSAL, ((char *)(player->GetGUID())), msg.c_str() );
             SendPacket(&data);
         } break;
@@ -178,20 +178,21 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAreatriggerOpcode( WorldPacket & recv_data )
 {
-//WorldPacket data;
-//Log::getSingleton( ).outString( "Areatrigger with some infos -> %x", recv_data.data );
-/*data.Initialize(SMSG_TRANSFER_PENDING);
-data << uint32(1);
-data << uint32(0x00005148); //48 51 00 00 00 00 00 00
-data << uint32(0);
-SendPacket(&data);
+    // WorldPacket data;
+    // Log::getSingleton( ).outString( "Areatrigger with some infos -> %x", recv_data.data );
+    /*
+    data.Initialize(SMSG_TRANSFER_PENDING);
+    data << uint32(1);
+    data << uint32(0x00005148); //48 51 00 00 00 00 00 00
+    data << uint32(0);
+    SendPacket(&data);
 
-float x,y,z;
-x = GetPlayer()->GetPositionX();
-y = GetPlayer()->GetPositionY();
-z = GetPlayer()->GetPositionZ();*/
+    float x,y,z;
+    x = GetPlayer()->GetPositionX();
+    y = GetPlayer()->GetPositionY();
+    z = GetPlayer()->GetPositionZ();*/
 
-//smsg_NewWorld(this, 0, float(-8949.95), float(-132.493), float(83.5312));
-//smsg_NewWorld(this, 0, x, y, z);
-//SendPacket(&data);
+    // smsg_NewWorld(this, 0, float(-8949.95), float(-132.493), float(83.5312));
+    // smsg_NewWorld(this, 0, x, y, z);
+    // SendPacket(&data);
 }

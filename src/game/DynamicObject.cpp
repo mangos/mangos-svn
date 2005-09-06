@@ -62,7 +62,7 @@ void DynamicObject::Update(uint32 p_time)
 {
     bool deleteThis = false;
     WorldPacket data;
-// Delete Timer
+    // Delete Timer
     if(m_aliveDuration > 0)
     {
         if(m_aliveDuration > p_time)
@@ -96,7 +96,7 @@ void DynamicObject::Update(uint32 p_time)
     {
         m_PeriodicDamage = 0;
         m_PeriodicDamageTick = 0;
-//RemoveFromMap();
+        // RemoveFromMap();
         RemoveFromWorld();
         objmgr.RemoveObject(this);
         delete this;

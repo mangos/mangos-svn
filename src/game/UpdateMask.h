@@ -39,14 +39,14 @@ class UpdateMask
         {
             ASSERT(index < mCount);
             ( (uint8 *)mUpdateMask )[ index >> 3 ] |= 1 << ( index & 0x7 );
-// ( (uint8 *)mUpdateMask )[ index / 8 ] |= 1 * pow( 2, index % 8 );
+            // ( (uint8 *)mUpdateMask )[ index / 8 ] |= 1 * pow( 2, index % 8 );
         }
 
         void UnsetBit( const uint16 index )
         {
             ASSERT(index < mCount);
             ( (uint8 *)mUpdateMask )[ index >> 3 ] &= (0xff ^ (1 <<  ( index & 0x7 ) ) );
-// ( (uint8 *)mUpdateMask )[ index / 8 ] &= 255 - ( 1 * pow( 2, index % 8 ) ) );
+            // ( (uint8 *)mUpdateMask )[ index / 8 ] &= 255 - ( 1 * pow( 2, index % 8 ) ) );
         }
 
         bool GetBit( const uint16 index ) const
@@ -66,7 +66,7 @@ class UpdateMask
                 delete mUpdateMask;
 
             mCount = valuesCount;
-//mBlocks = (valuesCount >> 5) + 1;
+            // mBlocks = (valuesCount >> 5) + 1;
             mBlocks = (valuesCount + 31) / 32;
 
             mUpdateMask = new uint32[mBlocks];

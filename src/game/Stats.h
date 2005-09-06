@@ -46,30 +46,31 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
 
 /*
 
-uint32 xp = 1;
-uint32 total =  pVictim->GetUInt32Value(UNIT_FIELD_MAXHEALTH) +
-                pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER1) +
-                pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER2) +
-                pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER3) +
-                pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER4);
+        uint32 xp = 1;
+        uint32 total =  pVictim->GetUInt32Value(UNIT_FIELD_MAXHEALTH) +
+                        pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER1) +
+                        pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER2) +
+                        pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER3) +
+                        pVictim->GetUInt32Value(UNIT_FIELD_MAXPOWER4);
 
-xp = total / 5;
-xp *= pVictim->GetUInt32Value(UNIT_FIELD_LEVEL)*2*sWorld.getRate(RATE_XP);
+        xp = total / 5;
+        xp *= pVictim->GetUInt32Value(UNIT_FIELD_LEVEL)*2*sWorld.getRate(RATE_XP);
 */
 /*
-    // Maybe implement some modifier depending on difference of levels, but that might not be necessary
-    // in theory a higher lvl mob will give higher xp thanks to having higher stats
-
-    int lvl_diff_mod = (pVictim->GetUInt32Value(UNIT_FIELD_LEVEL) - pAttacker->GetUInt32Value(UNIT_FIELD_LEVEL)) / 3;
-    // level difference multiplier
-    if (lvl_diff_mod < 0){
-        // This monster is lower than the killer, reduce XP
-        xp /= lvl_diff_mod;
-    }
-    else {
-// victim is higher level, increase XP
-xp *= lvl_diff_mod;
-}
+        // Maybe implement some modifier depending on difference of levels, but that might not be necessary
+        // in theory a higher lvl mob will give higher xp thanks to having higher stats
+        int lvl_diff_mod = (pVictim->GetUInt32Value(UNIT_FIELD_LEVEL) - pAttacker->GetUInt32Value(UNIT_FIELD_LEVEL)) / 3;
+        // level difference multiplier
+        if (lvl_diff_mod < 0)
+        {
+            // This monster is lower than the killer, reduce XP
+            xp /= lvl_diff_mod;
+        }
+        else
+        {
+            // victim is higher level, increase XP
+            xp *= lvl_diff_mod;
+        }
 */
     return xp;
 }
@@ -80,17 +81,18 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
 {
     uint32 attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACKPOWER);
 
-/*if(pAttacker->GetTypeId() == TYPEID_PLAYER)
-{
-   attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACKPOWER);
-   // attack_power += pAttacker->GetUInt32Value(PLAYER_FIELD_ATTACKPOWERMODPOS);
-   // attack_power -= pAttacker->GetUInt32Value(PLAYER_FIELD_ATTACKPOWERMODNEG);
-
-}*/
+    /*
+    if(pAttacker->GetTypeId() == TYPEID_PLAYER)
+    {
+       attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACKPOWER);
+       // attack_power += pAttacker->GetUInt32Value(PLAYER_FIELD_ATTACKPOWERMODPOS);
+       // attack_power -= pAttacker->GetUInt32Value(PLAYER_FIELD_ATTACKPOWERMODNEG);
+    }
+*/
 
     uint32 min_damage = pAttacker->GetFloatValue(UNIT_FIELD_MINDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
     uint32 max_damage = pAttacker->GetFloatValue(UNIT_FIELD_MAXDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
-// Ehh, sometimes min is bigger than max!?!?
+    // Ehh, sometimes min is bigger than max!?!?
     if (min_damage > max_damage)
     {
         uint32 temp = max_damage;
@@ -98,7 +100,7 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
         min_damage = temp;
     }
 
-// Fix creatures that have no base attack damage.
+    // Fix creatures that have no base attack damage.
     if(max_damage==0)
         max_damage=5;
 

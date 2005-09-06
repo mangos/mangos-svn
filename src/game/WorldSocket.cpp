@@ -73,7 +73,7 @@ void WorldSocket::SendPacket(WorldPacket* packet)
     WorldPacket *pck = new WorldPacket(*packet);
     ASSERT(pck);
 
-// guard
+    // guard
     _sendQueue.add(pck);
 }
 
@@ -111,7 +111,7 @@ void WorldSocket::OnRead()
             _cmd = hdr.cmd;
         }
 
-// wait until there's full packet
+        // wait until there's full packet
         if (ibuf.GetLength() < _remaining)
             break;
 
@@ -121,7 +121,7 @@ void WorldSocket::OnRead()
         packet.SetOpcode((uint16)_cmd);
         ibuf.Read((char*)packet.contents(), _remaining);
 
-// World Logger
+        // World Logger
         if (sConfig.GetBoolDefault("LogWorld", false))
         {
             FILE *pFile = fopen("world.log", "a");
@@ -146,7 +146,7 @@ void WorldSocket::OnRead()
 
         _remaining = 0;
 
-// packets that we handle ourself
+        // packets that we handle ourself
         switch (_cmd)
         {
             case CMSG_PING:
@@ -212,10 +212,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     QueryResult *result = sDatabase.Query(ss.str().c_str());
 
-// Checking if account exists
+    // Checking if account exists
     if ( !result )
     {
-// Send Bad Account
+        // Send Bad Account
         packet.Initialize( SMSG_AUTH_RESPONSE );
         packet << uint8( 21 );                    // TODO: use enums
         SendPacket( &packet );
@@ -230,11 +230,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     delete result;
 
-// TODO: check if server is full
+    // TODO: check if server is full
     uint32 num = sWorld.GetSessionCount();
     if (sWorld.GetPlayerLimit() > 0 && num > sWorld.GetPlayerLimit() && security == 0)
     {
-// Should Send Server Full Error Code
+        // Should Send Server Full Error Code
         packet.Initialize( SMSG_AUTH_RESPONSE );
         packet << uint8( 21 );                    // TODO: use enums
         SendPacket( &packet );
@@ -243,7 +243,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-//checking if player is already connected
+    // checking if player is already connected
     WorldSession *session = sWorld.FindSession( id );
     if( session )
     {
@@ -254,10 +254,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         Log::getSingleton( ).outDetail( "SOCKET: Sent Auth Response (already connected)." );
 
         session->LogoutPlayer(false);
-//session->SetSocket(0);
-//session = 0;
-//sWorldSocketMgr.RemoveSocket(this);
-//sWorld.RemoveSession(id);
+        // session->SetSocket(0);
+        // session = 0;
+        // sWorldSocketMgr.RemoveSocket(this);
+        // sWorld.RemoveSession(id);
         return;
     }
 
@@ -275,7 +275,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     if (memcmp(sha.GetDigest(), digest, 20))
     {
-// Sending Authentification Failed
+        // Sending Authentification Failed
         packet.Initialize( SMSG_AUTH_RESPONSE );
         packet << uint8( 21 );                    // TODO: use enums
         SendPacket( &packet );
@@ -297,7 +297,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     SendPacket(&packet);
 
-// FIXME: allocating memory in one thread and transferring ownership  to another.
+    // FIXME: allocating memory in one thread and transferring ownership  to another.
     _session = new WorldSession(id, this);
     ASSERT(_session);
     _session->SetSecurity(security);
@@ -344,7 +344,7 @@ void WorldSocket::Update(time_t diff)
         hdr.size = ntohs((uint16)packet->size() + 2);
         hdr.cmd = packet->GetOpcode();
 
-// World Logger
+        // World Logger
         if (sConfig.GetBoolDefault("LogWorld", false))
         {
             FILE *pFile = fopen("world.log", "a");

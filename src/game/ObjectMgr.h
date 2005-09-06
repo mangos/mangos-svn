@@ -60,14 +60,14 @@ class ObjectMgr : public Singleton < ObjectMgr >
         ObjectMgr();
         ~ObjectMgr();
 
-// objects
+        // objects
         typedef HM_NAMESPACE::hash_map<uint32, Player*> PlayerMap;
         typedef HM_NAMESPACE::hash_map<uint32, Creature*> CreatureMap;
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
         typedef HM_NAMESPACE::hash_map<uint32, DynamicObject*> DynamicObjectMap;
         typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectMap;
         typedef HM_NAMESPACE::hash_map<uint32, Corpse*> CorpseMap;
-// other objects
+        // other objects
         typedef std::set< Group * > GroupSet;
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, GossipNpc*> GossipNpcMap;
@@ -82,7 +82,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef std::vector<TaxiPathNodes*> TaxiPathNodesVec;
         typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
 
-// objects
+        // objects
         template <class T>
             typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
             Begin() { return _GetContainer<T>().begin(); }
@@ -146,12 +146,12 @@ class ObjectMgr : public Singleton < ObjectMgr >
             return NULL;
         }
 
-// Groups
+        // Groups
         Group * GetGroupByLeader(const uint64 &guid) const;
         void AddGroup(Group* group) { mGroupSet.insert( group ); }
         void RemoveGroup(Group* group) { mGroupSet.erase( group ); }
 
-// quests
+        // Quests
         void AddQuest(Quest* quest)
         {
             ASSERT( quest );
@@ -189,7 +189,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
             mAuctions.erase(i);
             return true;
         }
-// creature names
+        // Creature names
         uint32 AddCreatureName(const char* name);
         uint32 AddCreatureName(const char* name, uint32 displayid);
         void AddCreatureName(uint32 id, const char* name);
@@ -197,10 +197,10 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void AddCreatureName(CreatureInfo *cinfo);
         CreatureInfo *GetCreatureName( uint32 id );
 
-//Sub names
+        // Sub names
         uint32 AddCreatureSubName(const char* name, const char* subname, uint32 displayid);
 
-// item prototypes
+        // Item prototypes
         ItemPrototype* GetItemPrototype(uint32 id) const
         {
             ItemPrototypeMap::const_iterator itr = mItemPrototypes.find( id );
@@ -266,7 +266,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         }
         AuctionEntryMap::iterator GetAuctionsBegin() {return mAuctions.begin();}
         AuctionEntryMap::iterator GetAuctionsEnd() {return mAuctions.end();}
-// trainer spells
+        // Trainer spells
         Trainerspell* GetTrainerspell(uint32 id) const
         {
             TrainerspellMap::const_iterator itr = mTrainerspells.find( id );
@@ -280,7 +280,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
             ASSERT( mTrainerspells.find(trainspell->Id) == mTrainerspells.end() );
             mTrainerspells[trainspell->Id] = trainspell;
         }
-// Create Player Info
+        // Create Player Info
         void AddPlayerCreateInfo(PlayerCreateInfo *playerCreate)
         {
             ASSERT( playerCreate );
@@ -289,7 +289,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         PlayerCreateInfo* GetPlayerCreateInfo(uint8 race, uint8 class_) const
         {
             PlayerCreateInfoMap::const_iterator itr;
-//		Log::getSingleton().outError("race: %d, class: %d",race,class_);
+            // Log::getSingleton().outError("race: %d, class: %d",race,class_);
             for (itr = mPlayerCreateInfo.begin(); itr != mPlayerCreateInfo.end(); itr++)
             {
                 if( (itr->second->race == race) && (itr->second->class_ == class_) )
@@ -298,11 +298,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
             return NULL;
         }
 
-// it's kind of db related, not sure where to put it
+        // it's kind of db related, not sure where to put it
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
 
-// taxi code
+        // taxi code
         void AddTaxiNodes(TaxiNodes *taxiNodes)
         {
             ASSERT( taxiNodes );
@@ -324,11 +324,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
         uint16 GetTaxiMount( uint32 id );
         void GetTaxiPathNodes( uint32 path, Path *pathnodes );
 
-//Corpse Stuff
+        // Corpse Stuff
         Corpse *GetCorpseByOwner(Player *pOwner);
         void SaveCorpses();
 
-//Gossip Stuff
+        // Gossip Stuff
         void AddGossipText(GossipText *pGText);
         void AddGossip(GossipNpc *pGossip);
         GossipText *GetGossipText(uint32 ID);
@@ -336,12 +336,12 @@ class ObjectMgr : public Singleton < ObjectMgr >
         GossipNpcMap::iterator GetGossipListBegin(uint32 mapid) { return mGossipNpc[mapid].begin(); }
         GossipNpcMap::iterator GetGossipListEnd(uint32 mapid) { return mGossipNpc[mapid].end(); }
 
-//Death stuff
+        // Death stuff
         void AddGraveyard(GraveyardTeleport *pgrave);
         GraveyardMap::iterator GetGraveyardListBegin() { return mGraveyards.begin(); }
         GraveyardMap::iterator GetGraveyardListEnd() { return mGraveyards.end(); }
 
-//Teleport Stuff
+        // Teleport Stuff
         void AddTeleportCoords(TeleportCoords* TC)
         {
             ASSERT( TC );
@@ -355,7 +355,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
             return NULL;
         }
 
-// Serialization
+        // Serialization
         void LoadCreatures();
         void LoadGameObjects();
         void LoadQuests();
@@ -384,7 +384,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
-// highest GUIDs, used for creating new objects
+        // highest GUIDs, used for creating new objects
         uint32 m_hiCharGuid;
         uint32 m_hiCreatureGuid;
         uint32 m_hiItemGuid;
@@ -395,69 +395,69 @@ class ObjectMgr : public Singleton < ObjectMgr >
         template<class T> HM_NAMESPACE::hash_map<uint32,T*>& _GetContainer();
         template<class T> TYPEID _GetTypeId() const;
 
-///// Object Tables ////
-// These tables are modified as creatures are created and destroyed in the world
+        ///// Object Tables ////
+        // These tables are modified as creatures are created and destroyed in the world
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
 
-// Map of active characters in the game
+        // Map of active characters in the game
         PlayerMap           mPlayers;
 
-// Map of active creatures in the game
+        // Map of active creatures in the game
         CreatureMap         mCreatures;
 
-// Map of dynamic objects
+        // Map of dynamic objects
         GameObjectMap       mGameObjects;
 
-// Map of dynamic objects
+        // Map of dynamic objects
         DynamicObjectMap    mDynamicObjects;
 
-// Map of corpse objects
+        // Map of corpse objects
         CorpseMap           mCorpses;
 
-// Group List
+        // Group List
         GroupSet            mGroupSet;
 
-// Map of all item types in the game
+        // Map of all item types in the game
         ItemMap             mItems;
 
-// Map of auction item intances
+        // Map of auction item intances
         ItemMap             mAitems;
 
-// Map of mailed itesm
+        // Map of mailed itesm
         ItemMap             mMitems;
 
-// Map of all item types in the game
+        // Map of all item types in the game
         ItemPrototypeMap    mItemPrototypes;
 
-// Map of the trainer spells
+        // Map of the trainer spells
         TrainerspellMap     mTrainerspells;
 
-// Map of auctioned items
+        // Map of auctioned items
         AuctionEntryMap     mAuctions;
 
-// map entry to a creature name
+        // Map entry to a creature name
         CreatureNameMap     mCreatureNames;
 
-// Quest data
+        // Quest data
         QuestMap            mQuests;
 
-// Map of all starting infos needed for player creation
+        // Map of all starting infos needed for player creation
         PlayerCreateInfoMap mPlayerCreateInfo;
 
-// Maps containing the infos for taxi paths
+        // Maps containing the infos for taxi paths
         TaxiNodesMap        mTaxiNodes;
         TaxiPathMap         mTaxiPath;
         TaxiPathNodesVec    vTaxiPathNodes;
 
-// Maps for Gossip stuff
+        // Maps for Gossip stuff
         GossipTextMap       mGossipText;
         GossipNpcMap        mGossipNpc[MAX_CONTINENTS];
 
-// Death Stuff
+        // Death Stuff
         GraveyardMap        mGraveyards;
 
-// Teleport Stuff
+        // Teleport Stuff
         TeleportMap         mTeleports;
 
 };

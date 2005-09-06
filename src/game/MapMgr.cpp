@@ -70,7 +70,7 @@ MapMgr::~MapMgr()
 void MapMgr::AddObject(Object *obj)
 {
     ASSERT(obj);
-// make sure object is a virgin
+    // make sure object is a virgin
     ASSERT(obj->GetInRangeSetBegin() == obj->GetInRangeSetEnd());
     ASSERT(obj->GetMapId() == _mapId);
     ASSERT(obj->GetPositionX() < _maxX && obj->GetPositionX() > _minX);
@@ -80,10 +80,10 @@ void MapMgr::AddObject(Object *obj)
     sLog.outDetail("Adding object "I64FMT" with type %i to the map %u.",
         obj->GetGUID(), obj->GetTypeId(), _mapId);
 
-// That object types are not map objects. TODO: add AI groups here?
+    // That object types are not map objects. TODO: add AI groups here?
     if(obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER)
     {
-// mark object as updatable and exit
+    // mark object as updatable and exit
         obj->AddToWorld();
         return;
     }
@@ -96,7 +96,7 @@ void MapMgr::AddObject(Object *obj)
     y /= _sizeY;
 
 /*
-sLog.outDetail("Obj position: %f %f Cell position: %u %u",
+    sLog.outDetail("Obj position: %f %f Cell position: %u %u",
     obj->GetPositionX(), obj->GetPositionY(), x, y);
 */
 
@@ -125,7 +125,7 @@ sLog.outDetail("Obj position: %f %f Cell position: %u %u",
             {
                 if ((*iter)->GetDistance2dSq(obj) <= UPDATE_DISTANCE*UPDATE_DISTANCE)
                 {
-// Object in range, add to set
+                    // Object in range, add to set
                     if((*iter)->GetTypeId() == TYPEID_PLAYER)
                     {
                         sLog.outDetail("Creating object "I64FMT" for player "I64FMT".",
@@ -183,10 +183,10 @@ void MapMgr::RemoveObject(Object *obj)
     sLog.outDetail("Removing object "I64FMT" with type %i from the world.",
         obj->GetGUID(), obj->GetTypeId());
 
-// That object types are not map objects. TODO: add AI groups here?
+    // That object types are not map objects. TODO: add AI groups here?
     if(obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER)
     {
-// remove updatable flag and exit
+    // remove updatable flag and exit
         obj->RemoveFromWorld();
         return;
     }
@@ -196,7 +196,7 @@ void MapMgr::RemoveObject(Object *obj)
     ObjectMap::iterator itr = _objects.find(obj->GetGUID());
     _objects.erase(itr);
 
-// remove us from updated objects list
+    // remove us from updated objects list
     ObjectSet::iterator updi = _updatedObjects.find(obj);
     if(updi != _updatedObjects.end())
         _updatedObjects.erase(updi);
@@ -270,7 +270,7 @@ void MapMgr::ChangeObjectLocation(Object *obj)
     cellY /= _sizeY;
 
 /*
-sLog.outDetail("Obj position: %f %f Cell position: %u %u",
+    sLog.outDetail("Obj position: %f %f Cell position: %u %u",
     obj->GetPositionX(), obj->GetPositionY(), cellX, cellY);
 */
 
@@ -305,7 +305,7 @@ sLog.outDetail("Obj position: %f %f Cell position: %u %u",
                     (curObj)->GetDistance2dSq(obj) <= UPDATE_DISTANCE*UPDATE_DISTANCE &&
                     !obj->IsInRangeSet(curObj))
                 {
-// Object in range, add to set
+                    // Object in range, add to set
                     if((curObj)->GetTypeId() == TYPEID_PLAYER)
                     {
                         sLog.outDetail("Creating object "I64FMT" for player "I64FMT".",
@@ -394,7 +394,7 @@ void MapMgr::_UpdateObjects()
                 Log::getSingleton( ).outDetail("Sending updater to player %u",
                     (*iplr)->GetGUIDLow());
 
-// TODO: take ranges into accounts as suggested by quetzal
+                // TODO: take ranges into accounts as suggested by quetzal
 
                 i = updates.find( (Player*)*iplr );
                 if(i == updates.end())
@@ -443,9 +443,9 @@ void MapMgr::Update(time_t diff)
         for( chriter = objmgr.Begin<Player>(); chriter != objmgr.End<Player>( ); ++ chriter )
             chriter->second->Update( fTime );
 
-for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
-iter->second->Update( fTime );
-}
+        for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
+            iter->second->Update( fTime );
+    }
 */
 
     if (_timers[MMUPDATE_FIELDS].Passed())

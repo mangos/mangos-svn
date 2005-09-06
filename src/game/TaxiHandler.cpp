@@ -55,7 +55,7 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_TAXINODE_STATUS );
     data << guid;
 
-// Check for known nodes
+    // Check for known nodes
     if ( (GetPlayer( )->GetTaximask(field) & submask) != submask )
     {
         data << uint8( 0 );
@@ -93,7 +93,7 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     field = (uint8)((curloc - 1) / 32);
     submask = 1<<((curloc-1)%32);
 
-// Check for known nodes
+    // Check for known nodes
     if ( (GetPlayer( )->GetTaximask(field) & submask)
         != submask )
     {
@@ -112,8 +112,7 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
         SendPacket( &update );
     }
 
-// New in 0.12.0
-// A 256bit bitmask representing taxi nodes ... position of the bit = taxinodeID
+    // A 256bit bitmask representing taxi nodes ... position of the bit = taxinodeID
     memset(TaxiMask, 0, sizeof(TaxiMask));
     if ( !objmgr.GetGlobalTaxiNodeMask( curloc, TaxiMask ) )
         return;
@@ -155,15 +154,15 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
     objmgr.GetTaxiPathNodes( path, &pathnodes );
     MountId = objmgr.GetTaxiMount(sourcenode);
-// MOUNTDISPLAYID
-// bat: 1566
-// gryph: 1147
-// wyvern: 295
-// hippogryph: 479
+    // MOUNTDISPLAYID
+    // bat: 1566
+    // gryph: 1147
+    // wyvern: 295
+    // hippogryph: 479
 
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
 
-// Check for valid node
+    // Check for valid node
     if ( MountId == 0 )
     {
         data << uint32( 1 );
@@ -171,7 +170,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
     }
 
-// Check for gold
+    // Check for gold
     newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - cost);
     if(newmoney < 0 )
     {
@@ -182,10 +181,10 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     GetPlayer( )->setDismountCost( newmoney );
 
     data << uint32( 0 );
-// 0 Ok
-// 1 Unspecified Server Taxi Error
-// 2.There is no direct path to that direction
-// 3 Not enough Money
+    // 0 Ok
+    // 1 Unspecified Server Taxi Error
+    // 2.There is no direct path to that direction
+    // 3 Not enough Money
     SendPacket( &data );
     Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
 
@@ -193,12 +192,12 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
     GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
 
-// 0x001000 seems to make a mount visible
-// 0x002000 seems to make you sit on the mount, and the mount move with you
-// 0x000004 locks you so you can't move, no msg_move updates are sent to the server
-// 0x000008 seems to enable detailed collision checking
+    // 0x001000 seems to make a mount visible
+    // 0x002000 seems to make you sit on the mount, and the mount move with you
+    // 0x000004 locks you so you can't move, no msg_move updates are sent to the server
+    // 0x000008 seems to enable detailed collision checking
 
-// 36.7407
+    // 36.7407
     uint32 traveltime = uint32(pathnodes.getTotalLength( ) * 32);
 
     GetPlayer()->setMountPos( pathnodes.getNodes( )[ pathnodes.getLength( ) - 1 ].x,

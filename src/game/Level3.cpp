@@ -59,12 +59,12 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     Player *chr = objmgr.GetPlayer(args);
     if (chr)
     {
-// send message to user
+        // send message to user
         sprintf((char*)buf,"You change security level of %s to %i.", chr->GetName(), gm);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
-// send message to player
+        // send message to player
         sprintf((char*)buf,"%s changed your security level to %i.", m_session->GetPlayer()->GetName(), gm);
         FillSystemMessageData(&data, m_session, buf);
 
@@ -99,7 +99,7 @@ bool ChatHandler::HandleWorldPortCommand(const char* args)
     if (!px || !py || !pz)
         return false;
 
-//LINA
+    // LINA
     smsg_NewWorld(m_session, atoi(pContinent), (float)atof(px), (float)atof(py), (float)atof(pz));
 
     return true;
@@ -240,7 +240,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
         return false;
 
     uint32 display_id = atoi((char*)args);
-//char* name = strtok((char*)args, " ");
+    //char* name = strtok((char*)args, " ");
     char* safe = strtok((char*)args, " ");
 
     Player *chr = m_session->GetPlayer();
@@ -251,7 +251,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
 
     GameObject* pGameObj = new GameObject();
 
-// uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
+    // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, 1, 142093, 1, 19, 1, chr->GetMapId(), x, y, z, o );
 
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
@@ -359,8 +359,8 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     uint32 fieldentry = atoi((char*)args);
     if(!fieldentry) return false;
 
-//char* name = strtok((char*)args, " ");
-//char* safe = strtok((char*)args, " ");
+    // char* name = strtok((char*)args, " ");
+    // char* safe = strtok((char*)args, " ");
 
     Player *chr = m_session->GetPlayer();
     float x = chr->GetPositionX();
@@ -374,14 +374,14 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
     GameObject* pGameObj = new GameObject();
 
-// uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
+    // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
     pGameObj->Create(guidlow, display_id, state, fieldentry, scale, typesid, factionid, chr->GetMapId(), x, y, z, o );
     pGameObj->SetZoneId(chr->GetZoneId());
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
     objmgr.AddObject(pGameObj);
     pGameObj->PlaceOnMap();
 
-//if(strcmp(safe,"true") == 0)
+    //if(strcmp(safe,"true") == 0)
     pGameObj->SaveToDB();
 
     return true;
@@ -487,8 +487,8 @@ bool ChatHandler::HandleMorphCommand(const char* args)
     uint16 display_id = (uint16)atoi((char*)args);
 
     m_session->GetPlayer()->SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
-//m_session->GetPlayer()->UpdateObject( );
-//m_session->GetPlayer()->SendMessageToSet(&data, true);
+    // m_session->GetPlayer()->UpdateObject( );
+    // m_session->GetPlayer()->SendMessageToSet(&data, true);
 
     return true;
 }
@@ -508,7 +508,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
     m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeee00 );
     m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURAFLAGS+4, 0x0000000d );
     m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURASTATE, 0x00000002 );
-//m_session->GetPlayer()->UpdateObject( );
+    // m_session->GetPlayer()->UpdateObject( );
 
     return true;
 }
@@ -557,7 +557,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
 {
     WorldPacket data;
 
-// Create the requested monster
+    // Create the requested monster
     Player *chr = m_session->GetPlayer();
     float x = chr->GetPositionX();
     float y = chr->GetPositionY();
@@ -644,8 +644,8 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
 bool ChatHandler::HandleSpawnTransportCommand(const char* args)
 {
     GameObject* pGameObj = new GameObject();
-// uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction, uint32 mapid, float x, float y, float z, float ang
-// Freewind Post Elevators
+    // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction, uint32 mapid, float x, float y, float z, float ang
+    // Freewind Post Elevators
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 11898, 1, 11, 1, 1, float(-5399.188477), float(-2504.615967), float(89.021133), float(2.609266) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
     objmgr.AddObject(pGameObj);
@@ -659,7 +659,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     pGameObj->PlaceOnMap();
     pGameObj->SaveToDB();
 
-// Undercity Elevators and Doors
+    // Undercity Elevators and Doors
     pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20657, 1, 11, 1, 0, float(1533.879395), float(240.823593), float(-32.347244), float(3.132866) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
@@ -723,7 +723,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     pGameObj->PlaceOnMap();
     pGameObj->SaveToDB();
 
-// The Great Lift Elevators
+    // The Great Lift Elevators
     pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 11899, 1, 11, 1, 1, float(-4670.772461), float(-1849.608398), float(-44.144260), float(-0.183260) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
@@ -738,7 +738,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     pGameObj->PlaceOnMap();
     pGameObj->SaveToDB();
 
-// Thunderbluff Elevators
+    // Thunderbluff Elevators
     pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 47297, 1, 11, 1, 1, float(-1037.266113), float(-49.235500), float(140.494644), float(3.071780) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
@@ -767,7 +767,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     pGameObj->PlaceOnMap();
     pGameObj->SaveToDB();
 
-// Tram
+    // Tram
     pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176080, 1, 11, 1, 369, float(4.580645), float(28.209660), float(6.905265), float(1.570796) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
@@ -804,7 +804,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     objmgr.AddObject(pGameObj);
     pGameObj->PlaceOnMap();
 
-// Zeppelin Undercity -> Ogrimmar
+    // Zeppelin Undercity -> Ogrimmar
     pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3031, 1, 176495, 1, 15, 1, 0, float(2068), float(289), float(97), float(-1.155328) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
@@ -812,7 +812,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     objmgr.AddObject(pGameObj);
     pGameObj->PlaceOnMap();
 
-// Zeppelin Undercity -> Grom'Gol
+    // Zeppelin Undercity -> Grom'Gol
     pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3031, 1, 164871, 1, 15, 1, 0, float(2068), float(289), float(97), float(-1.155328) );
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
@@ -891,7 +891,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     if (flag != 0)
     {
         sprintf((char*)buf,"%s has explored all zones now.", chr->GetName());
@@ -903,7 +903,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     if (flag != 0)
     {
         sprintf((char*)buf,"%s has explored all zones for you.",

@@ -83,15 +83,15 @@ class Creature : public Unit
         Creature();
         virtual ~Creature();
 
-/// Creation
+        /// Creation
         void Create (uint32 guidlow, const char* creature_name, uint32 mapid,
             float x, float y, float z, float ang);
 
-/// Updates
+        /// Updates
         void UpdateMobMovement( uint32 p_time );
         virtual void Update( uint32 time );
 
-/// AI
+        /// AI
         void AI_ToggleAI(bool useAI) { m_useAI = useAI; }
         void AI_Update();
         void AI_AttackReaction(Unit *pAttacker, uint32 damage_dealt);
@@ -99,7 +99,7 @@ class Creature : public Unit
         void AI_ChangeState(CreatureState state) { m_creatureState = state; }
         void AI_MoveTo(float x, float y, float z, bool run);
 
-/// Movement
+        /// Movement
         bool addWaypoint(float x, float y, float z);
         inline bool hasWaypoints() { return m_nWaypoints > 0; }
         inline void setMoveRandomFlag(bool f) { m_moveRandom = f; }
@@ -107,7 +107,7 @@ class Creature : public Unit
         inline bool getMoveRandomFlag() { return m_moveRandom; }
         inline bool getMoveRunFlag() { return m_moveRun; }
 
-/// Creature inventory
+        /// Creature inventory
         void setItemId(int slot, uint32 tempitemid) { item_list[slot].itemid = tempitemid; }
         void setItemAmount(int slot, int tempamount) { item_list[slot].amount = tempamount; }
         void setItemAmountById(uint32 tempitemid, int tempamount)
@@ -140,7 +140,7 @@ class Creature : public Unit
         int getItemAmount(int slot) { return item_list[slot].amount; }
         uint32 getItemId(int slot) { return item_list[slot].itemid; }
 
-/// Quests
+        /// Quests
         uint32 getQuestStatus(Player *pPlayer);
         uint32 getCurrentQuest(Player *pPlayer);
 
@@ -154,16 +154,16 @@ class Creature : public Unit
         void addQuest(uint32 quest_id) { mQuestIds.push_back(quest_id); };
         void removeQuest(uint32 quest_id);
 
-/// Looting
+        /// Looting
         void generateLoot();
         uint32 getLootMoney() { return m_lootMoney; }
         void setLootMoney(uint32 amount) { m_lootMoney = amount; }
 
-/// Name
+        /// Name
         const char* GetName() const { return m_name.c_str(); };
         void SetName(const char* name) { m_name = name; }
 
-/// Misc
+        /// Misc
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
         uint8 getMovementState() { return m_movementState; };
         uint8 setMovementState(uint8 movement) { m_movementState = movement; };
@@ -177,7 +177,7 @@ class Creature : public Unit
             }
         };
 
-// Serialization
+        // Serialization
         void SaveToDB();
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
@@ -187,43 +187,43 @@ class Creature : public Unit
         void _LoadQuests();
         void _LoadMovement();
 
-/// Looting
+        /// Looting
         uint32 m_lootMoney;
 
-/// Spells/Skills
+        /// Spells/Skills
         uint8 m_movementState;
 
-/// Timers
+        /// Timers
         uint32 m_deathTimer;                      // timer for death or corpse disappearance
         uint32 m_respawnTimer;                    // timer for respawn to happen
         uint32 m_moveTimer;                       // timer creature moves
         uint32 m_respawnDelay;                    // delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                     // delay between death and corpse disappearance
 
-/// Vendor data
+        /// Vendor data
         CreatureItem item_list[MAX_CREATURE_ITEMS];
         int itemcount;
 
-/// Taxi data
+        /// Taxi data
         uint32 mTaxiNode;
 
-/// Quest data
+        /// Quest data
         std::list<uint32> mQuestIds;
 
-/// Respawn Coordenates
+        /// Respawn Coordenates
         float respawn_cord[3];
 
-/// AI data
+        /// AI data
         bool m_useAI;
 
-/// Movement
+        /// Movement
         uint32 m_currentWaypoint;
         bool m_moveBackward;
         bool m_moveRandom;
         bool m_moveRun;
         CreatureState m_creatureState;
         uint32 m_nWaypoints;
-// will be changed to list
+        // will be changed to list
         float m_waypoints[MAX_CREATURE_WAYPOINTS][3];
         float m_moveSpeed;
 
@@ -234,7 +234,7 @@ class Creature : public Unit
         uint32 m_timeToMove;
         uint32 m_timeMoved;
 
-/// Misc
+        /// Misc
         uint8 m_emoteState;
         std::string m_name;
 };

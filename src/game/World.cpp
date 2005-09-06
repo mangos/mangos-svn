@@ -83,7 +83,7 @@ void World::AddSession(WorldSession* s)
 
 void World::SetInitialWorldSettings()
 {
-// clear logfile
+    // clear logfile
     if (sConfig.GetBoolDefault("LogWorld", false))
     {
         FILE *pFile = fopen("world.log", "w+");
@@ -94,7 +94,7 @@ void World::SetInitialWorldSettings()
 
     m_lastTick = time(NULL);
 
-// TODO: clean this
+    // TODO: clean this
     time_t tiempo;
     char hour[3];
     char minute[3];
@@ -105,12 +105,12 @@ void World::SetInitialWorldSettings()
     strftime( hour, 3, "%H", tmPtr );
     strftime( minute, 3, "%M", tmPtr );
     strftime( second, 3, "%S", tmPtr );
-// server starts at noon
+    // server starts at noon
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
-// TODO: clean this
-// fill in emotes table
-// it appears not every emote has an animation
+    // TODO: clean this
+    // fill in emotes table
+    // it appears not every emote has an animation
     mPrices[1] = 10;
     mPrices[4] = 80;
     mPrices[6] = 150;
@@ -144,47 +144,47 @@ void World::SetInitialWorldSettings()
 
     new ChannelMgr;
 
-// Load quests
+    // Load quests
     Log::getSingleton( ).outString( "Loading Quests..." );
     objmgr.LoadQuests();
-// Load items
+    // Load items
     Log::getSingleton( ).outString( "Loading Items..." );
     objmgr.LoadItemPrototypes();
     objmgr.LoadAuctions();
     objmgr.LoadAuctionItems();
     objmgr.LoadMailedItems();
-// Load initial creatures
+    // Load initial creatures
     Log::getSingleton( ).outString( "Loading Creatures..." );
     objmgr.LoadCreatureNames();
     objmgr.LoadCreatures();
-// Load initial GameObjects
+    // Load initial GameObjects
     Log::getSingleton( ).outString( "Loading Gameobjects..." );
     objmgr.LoadGameObjects();
-// Load player create info
+    // Load player create info
     Log::getSingleton( ).outString( "Loading Environment..." );
     objmgr.LoadPlayerCreateInfo();
-// Load taxi info
+    // Load taxi info
     Log::getSingleton( ).outString( "Loading TaxiPaths..." );
     objmgr.LoadTaxiNodes();
     objmgr.LoadTaxiPath();
     objmgr.LoadTaxiPathNodes();
-// Load Corpses
+    // Load Corpses
     Log::getSingleton( ).outString( "Loading Corpses..." );
     objmgr.LoadCorpses();
-// Load Gossip
+    // Load Gossip
     Log::getSingleton( ).outString( "Loading Gossip Text..." );
     objmgr.LoadGossipText();
 
     Log::getSingleton( ).outString( "Loading Gossip Npc..." );
     objmgr.LoadGossips();
-//Load graveyards
+    //Load graveyards
     Log::getSingleton( ).outString( "Loading Graveyards..." );
     objmgr.LoadGraveyards();
     Log::getSingleton( ).outString( "Loading Trainers..." );
     objmgr.LoadTrainerSpells();
     Log::getSingleton( ).outString( "" );
     objmgr.SetHighestGuids();
-//Load Teleport Coords
+    //Load Teleport Coords
     Log::getSingleton( ).outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
     new SkillStore("DBC/SkillLineAbility.dbc");
@@ -195,9 +195,9 @@ void World::SetInitialWorldSettings()
     new DurationStore("DBC/SpellDuration.dbc");
     new RadiusStore("DBC/SpellRadius.dbc");
     new TalentStore("DBC/Talent.dbc");
-//    new AreaTriggerStore("DBC/AreaTrigger.dbc");
+    // new AreaTriggerStore("DBC/AreaTrigger.dbc");
 
-// set timers
+    // set timers
     m_timers[WUPDATE_OBJECTS].SetInterval(100);
     m_timers[WUPDATE_SESSIONS].SetInterval(100);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
@@ -270,7 +270,7 @@ void World::Update(time_t diff)
                     sDatabase.Execute( ss.str().c_str() );
 
                     std::stringstream md;
-// TODO: use full guids
+                    // TODO: use full guids
                     md << "DELETE FROM mail WHERE mailID = " << m->messageID;
                     sDatabase.Execute( md.str().c_str( ) );
 
@@ -293,15 +293,15 @@ void World::Update(time_t diff)
                     std::stringstream delinvq;
                     std::stringstream id;
                     std::stringstream bd;
-// TODO: use full guids
+                    // TODO: use full guids
                     delinvq << "DELETE FROM auctionhouse WHERE itemowner = " << m->reciever;
                     sDatabase.Execute( delinvq.str().c_str( ) );
 
-// TODO: use full guids
+                    // TODO: use full guids
                     id << "DELETE FROM auctioned_items WHERE guid = " << m->item;
                     sDatabase.Execute( id.str().c_str( ) );
 
-// TODO: use full guids
+                    // TODO: use full guids
                     bd << "DELETE FROM bids WHERE Id = " << itr->second->Id;
                     sDatabase.Execute( bd.str().c_str( ) );
 
@@ -321,7 +321,7 @@ void World::Update(time_t diff)
                     m->subject = "Your item sold!";
                     m->item = 0;
                     std::stringstream md;
-// TODO: use full guids
+                    // TODO: use full guids
                     md << "DELETE FROM mail WHERE mailID = " << m->messageID;
                     sDatabase.Execute( md.str().c_str( ) );
                     std::stringstream mi;
@@ -365,7 +365,7 @@ void World::Update(time_t diff)
                     sDatabase.Execute( ss.str().c_str() );
 
                     std::stringstream mdn;
-// TODO: use full guids
+                    // TODO: use full guids
                     mdn << "DELETE FROM mail WHERE mailID = " << mn->messageID;
                     sDatabase.Execute( mdn.str().c_str( ) );
                     std::stringstream min;
@@ -406,7 +406,7 @@ void World::Update(time_t diff)
             }
         }
     }
-// TODO: make sure that all objects get their updates, not just characters and creatures
+    // TODO: make sure that all objects get their updates, not just characters and creatures
     if (m_timers[WUPDATE_OBJECTS].Passed())
     {
         m_timers[WUPDATE_OBJECTS].Reset();

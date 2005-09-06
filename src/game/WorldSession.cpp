@@ -128,12 +128,12 @@ void WorldSession::LogoutPlayer(bool Save)
 {
     if (_player)
     {
-// Issue a message saying we left the world
+        // Issue a message saying we left the world
         std::string outstring = _player->GetName( );
         outstring.append( " has left the world." );
         sWorld.SendWorldText( outstring.c_str( ) );
 
-// Remove ourself from a group
+        // Remove ourself from a group
         if (_player->IsInGroup())
         {
             _player->UnSetInGroup();
@@ -153,7 +153,7 @@ void WorldSession::LogoutPlayer(bool Save)
             }
         }
 
-// Remove us from world
+        // Remove us from world
         if (_player->IsInWorld())
         {
             sLog.outDebug( "SESSION: removing player from world" );
@@ -164,9 +164,9 @@ void WorldSession::LogoutPlayer(bool Save)
 
         if(Save)
         {
-// Save the player
-/*	Removed this to help prevent Character coruption while the server
-    still dies alot. ReEnable when fixed */
+            // Save the player
+            /*	Removed this to help prevent Character coruption while the server
+            still dies alot. ReEnable when fixed */
             _player->SaveToDB();
         }
         delete _player;
@@ -188,16 +188,16 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 {
     static OpcodeHandler table[] =
     {
-/// Character screen
+        /// Character screen
         { CMSG_CHAR_ENUM,                STATUS_AUTHED,   &WorldSession::HandleCharEnumOpcode                },
         { CMSG_CHAR_CREATE,              STATUS_AUTHED,   &WorldSession::HandleCharCreateOpcode              },
         { CMSG_CHAR_DELETE,              STATUS_AUTHED,   &WorldSession::HandleCharDeleteOpcode              },
         { CMSG_PLAYER_LOGIN,             STATUS_AUTHED,   &WorldSession::HandlePlayerLoginOpcode             },
 
-/// Action Bar Opcodes
+        /// Action Bar Opcodes
         { CMSG_SET_ACTION_BUTTON,        STATUS_LOGGEDIN, &WorldSession::HandleSetActionButtonOpcode         },
 
-/// Misc opcodes
+        /// Misc opcodes
         { CMSG_REPOP_REQUEST,            STATUS_LOGGEDIN, &WorldSession::HandleRepopRequestOpcode            },
         { CMSG_AUTOSTORE_LOOT_ITEM,      STATUS_LOGGEDIN, &WorldSession::HandleAutostoreLootItemOpcode       },
         { CMSG_LOOT_MONEY,               STATUS_LOGGEDIN, &WorldSession::HandleLootMoneyOpcode               },
@@ -222,15 +222,15 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_AREATRIGGER,              STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             },
         { CMSG_UPDATE_ACCOUNT_DATA,      STATUS_LOGGEDIN, &WorldSession::HandleUpdateAccountData             },
         { CMSG_REQUEST_ACCOUNT_DATA,     STATUS_LOGGEDIN, &WorldSession::HandleRequestAccountData             },
-// { CMSG_JOIN_CHANNEL,             STATUS_LOGGEDIN, &WorldSession::HandleJoinChannelOpcode             },
-//{ CMSG_LEAVE_CHANNEL,            STATUS_LOGGEDIN, &WorldSession::HandleLeaveChannelOpcode            },
-/// Queries
+        // { CMSG_JOIN_CHANNEL,             STATUS_LOGGEDIN, &WorldSession::HandleJoinChannelOpcode             },
+        // { CMSG_LEAVE_CHANNEL,            STATUS_LOGGEDIN, &WorldSession::HandleLeaveChannelOpcode            },
+        /// Queries
         { MSG_CORPSE_QUERY,              STATUS_LOGGEDIN, &WorldSession::HandleCorpseQueryOpcode             },
         { CMSG_NAME_QUERY,               STATUS_LOGGEDIN, &WorldSession::HandleNameQueryOpcode               },
         { CMSG_QUERY_TIME,               STATUS_LOGGEDIN, &WorldSession::HandleQueryTimeOpcode               },
         { CMSG_CREATURE_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandleCreatureQueryOpcode           },
         { CMSG_GAMEOBJECT_QUERY,         STATUS_LOGGEDIN, &WorldSession::HandleGameObjectQueryOpcode         },
-/// Movement opcodes
+        /// Movement opcodes
         { MSG_MOVE_HEARTBEAT,            STATUS_LOGGEDIN, &WorldSession::HandleMoveHeartbeatOpcode           },
         { MSG_MOVE_WORLDPORT_ACK,        STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
         { MSG_MOVE_JUMP,                 STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
@@ -253,7 +253,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { MSG_MOVE_START_SWIM,           STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_STOP_SWIM,            STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_FALL_LAND,            STATUS_LOGGEDIN, &WorldSession::HandleFallOpcode                    },
-/// Group Handler
+        /// Group Handler
         { CMSG_GROUP_INVITE,             STATUS_LOGGEDIN, &WorldSession::HandleGroupInviteOpcode             },
         { CMSG_GROUP_CANCEL,             STATUS_LOGGEDIN, &WorldSession::HandleGroupCancelOpcode             },
         { CMSG_GROUP_ACCEPT,             STATUS_LOGGEDIN, &WorldSession::HandleGroupAcceptOpcode             },
@@ -263,11 +263,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GROUP_SET_LEADER,         STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          },
         { CMSG_GROUP_DISBAND,            STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            },
         { CMSG_LOOT_METHOD,              STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
-/// Taxi opcodes
+        /// Taxi opcodes
         { CMSG_TAXINODE_STATUS_QUERY,    STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     },
         { CMSG_TAXIQUERYAVAILABLENODES,  STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAviableNodesOpcode   },
         { CMSG_ACTIVATETAXI,             STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiOpcode            },
-/// NPC related opcodes
+        /// NPC related opcodes
         { MSG_TABARDVENDOR_ACTIVATE,     STATUS_LOGGEDIN, &WorldSession::HandleTabardVendorActivateOpcode    },
         { CMSG_BANKER_ACTIVATE,          STATUS_LOGGEDIN, &WorldSession::HandleBankerActivateOpcode          },
         { CMSG_TRAINER_LIST,             STATUS_LOGGEDIN, &WorldSession::HandleTrainerListOpcode             },
@@ -279,7 +279,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SPIRIT_HEALER_ACTIVATE,   STATUS_LOGGEDIN, &WorldSession::HandleSpiritHealerActivateOpcode    },
         { CMSG_NPC_TEXT_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandleNpcTextQueryOpcode            },
         { CMSG_BINDER_ACTIVATE,          STATUS_LOGGEDIN, &WorldSession::HandleBinderActivateOpcode          },
-/// Item opcodes
+        /// Item opcodes
         { CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
         { CMSG_DESTROYITEM,              STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode             },
         { CMSG_AUTOEQUIP_ITEM,           STATUS_LOGGEDIN, &WorldSession::HandleAutoEquipItemOpcode           },
@@ -288,30 +288,30 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_BUY_ITEM_IN_SLOT,         STATUS_LOGGEDIN, &WorldSession::HandleBuyItemInSlotOpcode           },
         { CMSG_BUY_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleBuyItemOpcode                 },
         { CMSG_LIST_INVENTORY,           STATUS_LOGGEDIN, &WorldSession::HandleListInventoryOpcode           },
-//{ CMSG_AUTOSTORE_BAG_ITEM,       STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBagItemOpcode        },
-/// Combat opcodes
+        // { CMSG_AUTOSTORE_BAG_ITEM,       STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBagItemOpcode        },
+        /// Combat opcodes
         { CMSG_ATTACKSWING,              STATUS_LOGGEDIN, &WorldSession::HandleAttackSwingOpcode             },
         { CMSG_ATTACKSTOP,               STATUS_LOGGEDIN, &WorldSession::HandleAttackStopOpcode              },
-/// Spell opcodes
+        /// Spell opcodes
         { CMSG_USE_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleUseItemOpcode                 },
         { CMSG_CAST_SPELL,               STATUS_LOGGEDIN, &WorldSession::HandleCastSpellOpcode               },
         { CMSG_CANCEL_CAST,              STATUS_LOGGEDIN, &WorldSession::HandleCancelCastOpcode              },
         { CMSG_CANCEL_AURA,              STATUS_LOGGEDIN, &WorldSession::HandleCancelAuraOpcode              },
-/// Skill opcodes
-//{ CMSG_SKILL_LEVELUP,          STATUS_LOGGEDIN, &WorldSession::HandleSkillLevelUpOpcode            },
+        /// Skill opcodes
+        // { CMSG_SKILL_LEVELUP,          STATUS_LOGGEDIN, &WorldSession::HandleSkillLevelUpOpcode            },
         { CMSG_LEARN_TALENT,             STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
-/// Quest opcodes
+        /// Quest opcodes
         { CMSG_QUESTGIVER_STATUS_QUERY,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   },
         { CMSG_QUESTGIVER_HELLO,         STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverHelloOpcode         },
         { CMSG_QUESTGIVER_ACCEPT_QUEST,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverAcceptQuestOpcode   },
         { CMSG_QUESTGIVER_CHOOSE_REWARD, STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverChooseRewardOpcode  },
         { CMSG_QUESTGIVER_REQUEST_REWARD,STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverRequestRewardOpcode },
         { CMSG_QUEST_QUERY,              STATUS_LOGGEDIN, &WorldSession::HandleQuestQueryOpcode              },
-/// Chat opcodes
+        /// Chat opcodes
         { CMSG_MESSAGECHAT,              STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             },
         { CMSG_TEXT_EMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               },
         { CMSG_AREATRIGGER,              STATUS_LOGGEDIN, &WorldSession::HandleAreatriggerOpcode             },
-/// Corpse Opcodes
+        /// Corpse Opcodes
         { CMSG_RECLAIM_CORPSE,           STATUS_LOGGEDIN, &WorldSession::HandleCorpseReclaimOpcode           },
         { CMSG_RESURRECT_RESPONSE,       STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode       },
         { CMSG_AUCTION_LIST_ITEMS,       STATUS_LOGGEDIN, &WorldSession::HandleAuctionListItems              },
@@ -319,7 +319,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_AUCTION_SELL_ITEM,        STATUS_LOGGEDIN, &WorldSession::HandleAuctionSellItem               },
         { CMSG_AUCTION_LIST_OWNER_ITEMS, STATUS_LOGGEDIN, &WorldSession::HandleAuctionListOwnerItems         },
         { CMSG_AUCTION_PLACE_BID,        STATUS_LOGGEDIN, &WorldSession::HandleAuctionPlaceBid               },
-/// Channel Opcodes
+        /// Channel Opcodes
         { CMSG_JOIN_CHANNEL,             STATUS_LOGGEDIN, &WorldSession::HandleChannelJoin                   },
         { CMSG_LEAVE_CHANNEL,            STATUS_LOGGEDIN, &WorldSession::HandleChannelLeave                  },
         { CMSG_CHANNEL_LIST,             STATUS_LOGGEDIN, &WorldSession::HandleChannelList                   },
@@ -336,7 +336,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_CHANNEL_UNBAN,            STATUS_LOGGEDIN, &WorldSession::HandleChannelUnban                  },
         { CMSG_CHANNEL_ANNOUNCEMENTS,    STATUS_LOGGEDIN, &WorldSession::HandleChannelAnnounce               },
         { CMSG_CHANNEL_MODERATE,         STATUS_LOGGEDIN, &WorldSession::HandleChannelModerate               },
-//Mail Packets
+        /// Mail Packets
         { CMSG_GET_MAIL_LIST,            STATUS_LOGGEDIN, &WorldSession::HandleGetMail                       },
         { CMSG_ITEM_TEXT_QUERY,          STATUS_LOGGEDIN, &WorldSession::HandleItemTextQuery                 },
         { CMSG_SEND_MAIL,                STATUS_LOGGEDIN, &WorldSession::HandleSendMail                      },
@@ -346,7 +346,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_MAIL_RETURN_TO_SENDER,    STATUS_LOGGEDIN, &WorldSession::HandleReturnToSender                },
         { CMSG_MAIL_DELETE,              STATUS_LOGGEDIN, &WorldSession::HandleMailDelete                    },
 
-/// End of table
+        /// End of table
         { 0,                             0,               NULL                                               }
     };
 

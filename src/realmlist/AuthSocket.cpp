@@ -126,7 +126,7 @@ void AuthSocket::OnRead()
             return;
         }
 
-// are we waiting for a new packet?
+        // are we waiting for a new packet?
         if (_cmd == AUTH_NO_CMD)
             ibuf.SoftRead((char *)&_cmd, 1);
         else
@@ -162,13 +162,13 @@ void AuthSocket::OnRead()
 
 bool AuthSocket::_HandleLogonChallenge()
 {
-// not even header..
+    // not even header..
     if (ibuf.GetLength() < 4)
         return false;
 
     std::vector<uint8> buf;
     buf.resize(4);
-// got only packet header
+    // got only packet header
     ibuf.Read((char *)&buf[0], 4);
     uint16 remaining = ((sAuthLogonChallenge_C *)&buf[0])->size;
     sLog.outDetail("[AuthChallenge] got header, body is %#04x bytes", remaining);
@@ -176,16 +176,16 @@ bool AuthSocket::_HandleLogonChallenge()
     if (ibuf.GetLength() < remaining)
         return false;
 
-// got full packet
+    // got full packet
     buf.resize(remaining + buf.size() + 1);
-// we want I zero-terminated
+    // we want I zero-terminated
     buf[buf.size() - 1] = 0;
     sAuthLogonChallenge_C *ch = (sAuthLogonChallenge_C*)&buf[0];
     ibuf.Read((char *)&buf[4], remaining);
     sLog.outDebug("[AuthChallenge] got full packet, %#04x bytes", ch->size);
     sLog.outDebug("    I(%d): '%s'", ch->I_len, ch->I);
 
-// AuthChallenge
+    // AuthChallenge
     ByteBuffer pkt;
 
     _login = (const char*)ch->I;
@@ -206,7 +206,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
     std::string password;
 
-// check for an accepted client version
+    // check for an accepted client version
     bool valid_version=false;
     int accepted_versions[]=EXPECTED_WOW_CLIENT_BUILD;
     for(int i=0;accepted_versions[i]&&(!valid_version);i++)
@@ -222,8 +222,7 @@ bool AuthSocket::_HandleLogonChallenge()
     }
     else
     {
-// TODO: in the far future should check if the account is expired too//fixed
-//Deadknight ip ban check //Needs improvement 	query << "SELECT COUNT(*) FROM `ipbantable` where ip='" << ip << "'";
+        // TODO: in the far future should check if the account is expired too
         std::stringstream sb;
         std::string ipb;
         ipb=GetRemoteAddress().c_str();
@@ -232,15 +231,15 @@ bool AuthSocket::_HandleLogonChallenge()
         if(result)
         {
             res = CE_IPBAN;
-//Add ip here
+            //Add ip here
             sLog.outBasic("Banned ip try to login!");
         }
         else
         {
             std::stringstream ss;
-//Deadknight Fix Start
-//ss << "SELECT password, gm FROM accounts WHERE login='" << _login << "'"; // password
-// password,banned
+            // Deadknight Fix Start
+            // ss << "SELECT password, gm FROM accounts WHERE login='" << _login << "'"; // password
+            // password,banned
             ss << "SELECT password, gm, banned FROM accounts WHERE login='" << _login << "'";
             QueryResult *result = sDatabase.Query(ss.str().c_str());
 
@@ -279,7 +278,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 res = CE_NO_ACCOUNT;
             }
         }
-//Finish fix
+        // Finish fix
 
         pkt << (uint8) AUTH_LOGON_CHALLENGE;
 
@@ -352,7 +351,7 @@ bool AuthSocket::_HandleLogonChallenge()
             pkt                                   // g_len, g
                 << (uint8)1;
             pkt.append(g.AsByteArray(), 1);
-// N_len, N
+            // N_len, N
             pkt << (uint8)32;
             pkt.append(N.AsByteArray(), 32);
 
@@ -453,7 +452,7 @@ bool AuthSocket::_HandleLogonProof()
     {
         sLog.outBasic("User '%s' successfully authed", _login.c_str());
 
-//saving session key to database
+        //saving session key to database
         std::stringstream ss;
         ss << "UPDATE accounts SET sessionkey = '";
         ss << K.AsHexStr();
@@ -506,7 +505,7 @@ bool AuthSocket::_HandleRealmList()
     ByteBuffer pkt;
 
     std::stringstream ss;
-// password
+    // password
     ss << "SELECT acct FROM accounts WHERE login='" << _login << "'";
     QueryResult *result = sDatabase.Query(ss.str().c_str());
     if(!result)                                   // we got an error.

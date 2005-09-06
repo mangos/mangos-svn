@@ -81,9 +81,9 @@ class AuthSocket: public TcpSocket
         BigNumber b, B;
         BigNumber rs;
 
-// mighty session key.
-// one should keep this in some other place,
-// we will use it from other AuthSocket object (upon reconnect)
+        // mighty session key.
+        // one should keep this in some other place,
+        // we will use it from other AuthSocket object (upon reconnect)
         BigNumber K;
 
         eAuthCmd _cmd;

@@ -116,11 +116,11 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
 
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
 {
-//they can see ANYONE or ANYTHING in a 30f radius from their corpse//FIX ME
+    //they can see ANYONE or ANYTHING in a 30f radius from their corpse//FIX ME
     Creature *creat = objmgr.GetObject<Creature>(GetGUID());
     if(target->isAlive())
     {
-//if creature exists and its spirit healer return
+        //if creature exists and its spirit healer return
         if (creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
         {
             return;
@@ -129,15 +129,15 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         {
             ByteBuffer buf(500);
 
-// update type == creation
+            // update type == creation
             buf << uint8( UPDATETYPE_CREATE_OBJECT );
             buf << GetGUID() ;                    // object GUID
             buf << GetTypeId();                   // object type
 
-// build and add the movement update portion of the packet
+            // build and add the movement update portion of the packet
             _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+            // 4 byte flags, 1 == active player
             buf << uint32( target == this ? 1 : 0 );
             buf << uint32( 0 );                   // uint32 attack cycle
             buf << uint32( 0 );                   // uint32 timer id
@@ -153,22 +153,22 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         else if(!creat)                           //if there isnt any creature
         {
             Player *plyr = objmgr.GetObject<Player>(GetGUID());
-//if player exists and player and target is in group and player is dead
+            // if player exists and player and target is in group and player is dead
             if(plyr && plyr!=target && plyr->IsInGroup() && target->IsInGroup() && plyr->isDead())
             {
                 if(plyr->IsGroupMember(target))   //if its group member of target update
                 {
                     ByteBuffer buf(500);
 
-// update type == creation
+                    // update type == creation
                     buf << uint8( UPDATETYPE_CREATE_OBJECT );
                     buf << GetGUID() ;            // object GUID
                     buf << GetTypeId();           // object type
 
-// build and add the movement update portion of the packet
+                    // build and add the movement update portion of the packet
                     _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+                    // 4 byte flags, 1 == active player
                     buf << uint32( target == this ? 1 : 0 );
                     buf << uint32( 0 );           // uint32 attack cycle
                     buf << uint32( 0 );           // uint32 timer id
@@ -190,20 +190,20 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
             {
                 return;
             }
-//player end
+            // player end
             else                                  //self update
             {
                 ByteBuffer buf(500);
 
-// update type == creation
+                // update type == creation
                 buf << uint8( UPDATETYPE_CREATE_OBJECT );
                 buf << GetGUID() ;                // object GUID
                 buf << GetTypeId();               // object type
 
-// build and add the movement update portion of the packet
+                // build and add the movement update portion of the packet
                 _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+                // 4 byte flags, 1 == active player
                 buf << uint32( target == this ? 1 : 0 );
                 buf << uint32( 0 );               // uint32 attack cycle
                 buf << uint32( 0 );               // uint32 timer id
@@ -217,49 +217,51 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
                 data->AddUpdateBlock(buf);
             }
         }
-/*else//is it needed
-{
-    ByteBuffer buf(500);
+/*
+        else                                      //is it needed
+        {
+            ByteBuffer buf(500);
 
-    buf << uint8( UPDATETYPE_CREATE_OBJECT );// update type == creation
-    buf << GetGUID() ;                       // object GUID
-    buf << GetTypeId();                      // object type
+            buf << uint8( UPDATETYPE_CREATE_OBJECT );// update type == creation
+            buf << GetGUID() ;                       // object GUID
+            buf << GetTypeId();                      // object type
 
-    // build and add the movement update portion of the packet
-    _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
+            // build and add the movement update portion of the packet
+            _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-buf << uint32( target == this ? 1 : 0 ); // 4 byte flags, 1 == active player
-buf << uint32( 0 );                      // uint32 attack cycle
-buf << uint32( 0 );                      // uint32 timer id
-buf << uint64( 0 );                      // GUID victim
+            buf << uint32( target == this ? 1 : 0 ); // 4 byte flags, 1 == active player
+            buf << uint32( 0 );                      // uint32 attack cycle
+            buf << uint32( 0 );                      // uint32 timer id
+            buf << uint64( 0 );                      // GUID victim
 
-UpdateMask updateMask;
-updateMask.SetCount( m_valuesCount );
-_SetCreateBits( &updateMask, target );
-_BuildValuesUpdate( &buf, &updateMask );
+            UpdateMask updateMask;
+            updateMask.SetCount( m_valuesCount );
+            _SetCreateBits( &updateMask, target );
+            _BuildValuesUpdate( &buf, &updateMask );
 
-data->AddUpdateBlock(buf);
-}*/
+            data->AddUpdateBlock(buf);
+        }
+*/
     }
     if(target->isDead())
     {
         if(!creat)
         {
             Player *plyr = objmgr.GetObject<Player>(GetGUID());
-//if player and player is in group of target update
+            // if player and player is in group of target update
             if(plyr && plyr->IsGroupMember(target))
             {
                 ByteBuffer buf(500);
 
-// update type == creation
+                // update type == creation
                 buf << uint8( UPDATETYPE_CREATE_OBJECT );
                 buf << GetGUID() ;                // object GUID
                 buf << GetTypeId();               // object type
 
-// build and add the movement update portion of the packet
+                // build and add the movement update portion of the packet
                 _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+                // 4 byte flags, 1 == active player
                 buf << uint32( target == this ? 1 : 0 );
                 buf << uint32( 0 );               // uint32 attack cycle
                 buf << uint32( 0 );               // uint32 timer id
@@ -280,15 +282,15 @@ data->AddUpdateBlock(buf);
             {
                 ByteBuffer buf(500);
 
-// update type == creation
+                // update type == creation
                 buf << uint8( UPDATETYPE_CREATE_OBJECT );
                 buf << GetGUID() ;                // object GUID
                 buf << GetTypeId();               // object type
 
-// build and add the movement update portion of the packet
+                // build and add the movement update portion of the packet
                 _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+                // 4 byte flags, 1 == active player
                 buf << uint32( target == this ? 1 : 0 );
                 buf << uint32( 0 );               // uint32 attack cycle
                 buf << uint32( 0 );               // uint32 timer id
@@ -302,20 +304,20 @@ data->AddUpdateBlock(buf);
                 data->AddUpdateBlock(buf);
             }
         }
-//if creature exists and its spirit healer update
+        // if creature exists and its spirit healer update
         else if(creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
         {
             ByteBuffer buf(500);
 
-// update type == creation
+            // update type == creation
             buf << uint8( UPDATETYPE_CREATE_OBJECT );
             buf << GetGUID() ;                    // object GUID
             buf << GetTypeId();                   // object type
 
-// build and add the movement update portion of the packet
+            // build and add the movement update portion of the packet
             _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+            // 4 byte flags, 1 == active player
             buf << uint32( target == this ? 1 : 0 );
             buf << uint32( 0 );                   // uint32 attack cycle
             buf << uint32( 0 );                   // uint32 timer id
@@ -336,15 +338,15 @@ data->AddUpdateBlock(buf);
         {
             ByteBuffer buf(500);
 
-// update type == creation
+            // update type == creation
             buf << uint8( UPDATETYPE_CREATE_OBJECT );
             buf << GetGUID() ;                    // object GUID
             buf << GetTypeId();                   // object type
 
-// build and add the movement update portion of the packet
+            // build and add the movement update portion of the packet
             _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
 
-// 4 byte flags, 1 == active player
+            // 4 byte flags, 1 == active player
             buf << uint32( target == this ? 1 : 0 );
             buf << uint32( 0 );                   // uint32 attack cycle
             buf << uint32( 0 );                   // uint32 timer id
@@ -472,7 +474,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint32 flags, uint32 flags2
         {
             for (int i = 0; i < spline_count; i++)
             {
-// 6 (wtf it's 8 :\) bytes per spline point
+                // 6 (wtf it's 8 :\) bytes per spline point
                 *data << uint32(0);               // uint64
                 *data << uint32(0);
             }
@@ -519,13 +521,13 @@ void Object::BuildHeartBeatMsg(WorldPacket *data) const
 
 void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
-///////////////////////////////////////
-//Update player on the client with TELEPORT_ACK
+    ///////////////////////////////////////
+    //Update player on the client with TELEPORT_ACK
     data->Initialize(MSG_MOVE_TELEPORT_ACK);
 
     *data << GetGUID();
 
-//First 4 bytes = no idea what it is
+    //First 4 bytes = no idea what it is
     *data << uint32(0);                           // flags
     *data << uint32(0);                           // mysterious value #1
 
@@ -567,7 +569,7 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
 {
     if (bToSelf && GetTypeId() == TYPEID_PLAYER)
     {
-//has to be a player to send to self
+        // has to be a player to send to self
         ((Player*)this)->GetSession()->SendPacket(data);
     }
 
@@ -597,16 +599,16 @@ void Object::SendPacketListToSet(WorldSession::MessageList & msglist, bool bToSe
     {
         WPWarning((*itr), "Warning:  NULL Iterator in Set, skipping.");
         if (!(*itr))
-continue;
+            continue;
 
-if ((*itr)->GetTypeId() == TYPEID_PLAYER)
-{
-WorldSession *session = ((Player*)(*itr))->GetSession();
-WPWarning( session, "Null client in message set!" );
-if (session && session->IsInWorld() && session->GetPlayer())
-session->SendPacketList( msglist );
-}
-}
+        if ((*itr)->GetTypeId() == TYPEID_PLAYER)
+        {
+            WorldSession *session = ((Player*)(*itr))->GetSession();
+            WPWarning( session, "Null client in message set!" );
+            if (session && session->IsInWorld() && session->GetPlayer())
+                session->SendPacketList( msglist );
+        }
+    }
 }
 */
 

@@ -24,10 +24,10 @@
 struct TaxiNodes
 {
     uint8 id;
-//std::string name;
+    // std::string name;
     float x,y,z;
     uint8 continent;
-//uint8 flags;
+    // uint8 flags;
     uint16 mount;
 };
 struct TaxiPath
@@ -44,8 +44,8 @@ struct TaxiPathNodes
     uint8 index;
     uint8 continent;
     float x,y,z;
-//uint32 unkown1;
-//uint32 unkown2;
+    // uint32 unkown1;
+    // uint32 unkown2;
 };
 
 class Path

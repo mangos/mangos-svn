@@ -20,9 +20,7 @@
 
 #include "Common.h"
 #include "RealmList.h"
-//Deadknight Addon
 #include "Database/DatabaseEnv.h"
-//Finish
 
 createFileSingleton( RealmList );
 
@@ -44,38 +42,41 @@ RealmList::~RealmList( )
 }
 
 
-//Deadknight Addon
 int RealmList::GetAndAddRealms()
 {
     std::stringstream query;
 
-// Format: Realm_Name, Realm_IP, Icon (0 = Normal, 1 = PVP), Color (0 = Yellow, 1 = Red), TimeZone (1 - 4)
-    AddRealm( "** MaNGOS Local Dev **", "127.0.0.1", 0, 0, 1 );
+    // Format: Realm_Name, Realm_IP, Icon (0 = Normal, 1 = PVP), Color (0 = Yellow, 1 = Red), TimeZone (1 - 4)
+    // AddRealm( "** MaNGOS Local Dev **", "127.0.0.1", 0, 0, 1 );
 
-//query << "SELECT name,address,population,type,color,language,online FROM realms";
+    // query << "SELECT name,address,population,type,color,language,online FROM realms";
     query << "SELECT name,address,icon,color,timezone FROM realms";
     QueryResult *result = sDatabase.Query( query.str().c_str() );
     if(result)
     {
         Field *fields = result->Fetch();
-//Openw0w style realm
-//FIXME:Online-Offline
-/*if(!(NumChars = fields[6].GetUInt8()))
-  {
-  r->Color = 2;
-  }*/
+        // Openw0w style realm
+        // FIXME:Online-Offline
+        /*
+        if(!(NumChars = fields[6].GetUInt8()))
+        {
+            r->Color = 2;
+        }
+        */
 
         AddRealm(fields[0].GetString(),fields[1].GetString(),fields[2].GetUInt8(), fields[3].GetUInt8(), fields[4].GetUInt8());
 
         while( result->NextRow() )
         {
             Field *fields = result->Fetch();
-//Openw0w style realm
-//FIXME:Online-Offline
-/*if(!(NumChars = fields[6].GetUInt8()))
-  {
-  r->Color = 2;
-  }*/
+            // Openw0w style realm
+            // FIXME:Online-Offline
+            /*
+            if(!(NumChars = fields[6].GetUInt8()))
+            {
+                r->Color = 2;
+            }
+            */
             AddRealm(fields[0].GetString(),fields[1].GetString(),fields[2].GetUInt8(), fields[3].GetUInt8(), fields[4].GetUInt8());
         }
         delete result;
@@ -89,13 +90,10 @@ int RealmList::GetAndAddRealms()
 }
 
 
-//Finish
-
 void RealmList::AddRealm( const char * name, const char * address, uint8 icon, uint8 color, uint8 timezone )
 {
     RemoveRealm( name );
 
-//_realms[ name ] = new Realm( );
     _realms[ name ] = new Realm( name, address, icon, color , timezone);
 
     std::string addr(address);

@@ -33,32 +33,30 @@
 
 struct Realm
 {
-/// Realm name
+    /// Realm name
     const char *name;
-/// Server address (x.x.x.x:port)
+    /// Server address (x.x.x.x:port)
     std::string address;
-/// Low/Medium/High, absolute values do not matter, everything is relative
-//float population;
-/// 0 - Normal, 1 - PvP, 2 - Offline
+    /// Low/Medium/High, absolute values do not matter, everything is relative
+    // float population;
+    /// 0 - Normal, 1 - PvP, 2 - Offline
     uint32 icon;
-/// 0 - Orange, 1 - Red, 2 - Disabled
+    /// 0 - Orange, 1 - Red, 2 - Disabled
     uint8 color;
-/// 0,1 - English, 2 - German, 3 - French, 4 - Other
+    /// 0,1 - English, 2 - German, 3 - French, 4 - Other
     uint8 timezone;
-/// Number of characters owned by the client on this server
-//uint8 numChars;
+    /// Number of characters owned by the client on this server
+    // uint8 numChars;
 
-/*Realm (const char *Name, const char *Address, float population, uint32 icon,
-       uint8 color, uint8 language)*/
     Realm (const char *Name, std::string Address, uint32 Icon, uint8 Color, uint8 Timezone)
     {
         name = Name;
         address = Address;
-//population = Population;
+        // population = Population;
         icon = Icon;
         color = Color;
         timezone = Timezone;
-//numChars = 0;
+        // numChars = 0;
     }
 
     ~Realm ()
@@ -75,9 +73,7 @@ class RealmList : public Singleton<RealmList>
         ~RealmList();
 
         void AddRealm( const char * name, const char * address, uint8 icon, uint8 color, uint8 timezone );
-//Deadknight Addon
         int GetAndAddRealms();
-//Finish
         void SetRealm( const char * name, uint8 icon, uint8 color, uint8 timezone );
         void RemoveRealm (const char * name );
         inline void setServerPort(port_t p) { i_serverPort = p; }

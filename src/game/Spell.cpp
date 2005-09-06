@@ -275,7 +275,7 @@ void Spell::FillTargetMap()
                 {
                 }break;
             }
-// Add Chain Targets
+            // Add Chain Targets
             if(m_spellInfo->EffectChainTarget[i] != 0)
             {
                 if(m_targets.m_unitTarget)
@@ -355,10 +355,11 @@ void Spell::cast()
     WorldPacket data;
 
     bool Instant = true;
-//for(uint32 i=0;i<=2;i++){
-//    if(m_spellInfo->Effect[i] == 17 || m_spellInfo->Effect[i] == 58)
-//        Instant = false;
-//}
+    // for(uint32 i=0;i<=2;i++)
+    // {
+    //     if(m_spellInfo->Effect[i] == 17 || m_spellInfo->Effect[i] == 58)
+    //         Instant = false;
+    // }
 
     if(Instant)
     {
@@ -474,7 +475,7 @@ void Spell::finish()
     m_caster->m_meleeSpell = false;
     m_caster->m_canMove = true;
 
-/* Mana Regenerates while in combat but not for 5 seconds after each spell */
+    /* Mana Regenerates while in combat but not for 5 seconds after each spell */
     m_caster->setRegenTimer(5000);                /* 5 Seconds */
 }
 
@@ -497,7 +498,7 @@ void Spell::SendCastResult(uint8 result)
 
 void Spell::SendSpellStart()
 {
-// Send Spell Start
+    // Send Spell Start
     WorldPacket data;
     uint16 cast_flags;
 
@@ -517,7 +518,7 @@ void Spell::SendSpellStart()
 
 void Spell::SendSpellGo()
 {
-// Start Spell
+    // Start Spell
     WorldPacket data;
     uint16 flags;
 
@@ -529,7 +530,7 @@ void Spell::SendSpellGo()
 
     data << m_caster->GetGUID() << m_caster->GetGUID();
     data << m_spellInfo->Id;
-//data << flags;
+    // data << flags;
     data << uint16(0x0500);
     writeSpellGoTargets(&data);
 
@@ -640,7 +641,7 @@ void Spell::SendChannelStart(uint32 duration)
         return;
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-// Send Channel Start
+        // Send Channel Start
         WorldPacket data;
         data.Initialize( MSG_CHANNEL_START );
         data << m_spellInfo->Id;
@@ -693,7 +694,7 @@ void Spell::TakePower()
 void Spell::HandleEffects(uint64 guid,uint32 i)
 {
     Unit* unitTarget;
-//    Item* itemTarget;
+    // Item* itemTarget;
     GameObject* gameObjTarget;
     Player* playerTarget;
     WorldPacket data;
@@ -701,7 +702,7 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
     unitTarget = objmgr.GetObject<Creature>(guid);
     if(!unitTarget)
         unitTarget = objmgr.GetObject<Player>(guid);
-//itemTarget = objmgr.GetObject<Item>(guid);
+    // itemTarget = objmgr.GetObject<Item>(guid);
     gameObjTarget = objmgr.GetObject<GameObject>(guid);
     playerTarget = objmgr.GetObject<Player>(guid);
 
@@ -747,15 +748,16 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
             if(m_spellInfo->EffectBasePoints[i] < 0)
                 type = 1;
 
-// Periodic Trigger Damage
+            // Periodic Trigger Damage
             if(m_spellInfo->EffectApplyAuraName[i] == 3)
             {
                 unitTarget->tmpAffect->SetDamagePerTick(damage,m_spellInfo->EffectAmplitude[i]);
                 unitTarget->tmpAffect->SetNegative();
-// Periodic Trigger Spell
-            }else if(m_spellInfo->EffectApplyAuraName[i] == 23)
-            unitTarget->tmpAffect->SetPeriodicTriggerSpell(m_spellInfo->EffectTriggerSpell[i],m_spellInfo->EffectAmplitude[i]);
-// Periodic Heal
+            // Periodic Trigger Spell
+            }
+            else if(m_spellInfo->EffectApplyAuraName[i] == 23)
+                unitTarget->tmpAffect->SetPeriodicTriggerSpell(m_spellInfo->EffectTriggerSpell[i],m_spellInfo->EffectAmplitude[i]);
+            // Periodic Heal
             else if(m_spellInfo->EffectApplyAuraName[i] == 8)
                 unitTarget->tmpAffect->SetHealPerTick(damage,m_spellInfo->EffectAmplitude[i]);
             else
@@ -830,25 +832,30 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
                     return;
                 }
 
-Item* newItem;
-for(i=0;i<2;i++){// now create the Items
-if(m_spellInfo->EffectItemType[i] == 0)
-continue;
+                Item* newItem;
+                for(i=0;i<2;i++)
+                {
+                    // now create the Items
+                    if(m_spellInfo->EffectItemType[i] == 0)
+                        continue;
 
-slot = 0;
-for(uint32 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++){// check if there is a free slot for the item to conjure
-if(pUnit->GetItemBySlot(i) == 0)
-slot = i;
-}
-if(slot == 0){
-SendCastResult(0x18);
-return;
-}
-newItem = new Item;
-newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
-pUnit->AddItemToSlot(slot,newItem);
-newItem = NULL;
-}
+                    slot = 0;
+                    for(uint32 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+                    {
+                        // check if there is a free slot for the item to conjure
+                        if(pUnit->GetItemBySlot(i) == 0)
+                            slot = i;
+                    }
+                    if(slot == 0)
+                    {
+                        SendCastResult(0x18);
+                        return;
+                    }
+                    newItem = new Item;
+                    newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
+                    pUnit->AddItemToSlot(slot,newItem);
+                    newItem = NULL;
+                }
 */
         }break;
         case 27:                                  // Persistent Area Aura
@@ -857,7 +864,7 @@ newItem = NULL;
                 break;
 
             m_AreaAura = true;
-// Spawn dyn GameObject
+            // Spawn dyn GameObject
             DynamicObject* dynObj = new DynamicObject();
             dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex)));
             dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
@@ -865,8 +872,8 @@ newItem = NULL;
             dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
             dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
 
-//objmgr.AddObject(dynObj);
-//dynObj->AddToWorld();
+            // objmgr.AddObject(dynObj);
+            // dynObj->AddToWorld();
         }break;
         case 30:                                  // Energize
         {
@@ -979,14 +986,16 @@ newItem = NULL;
                     field = 1;
                 else
                     field = 3;
-                if(!m_CastItem){
-                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++){
+                if(!m_CastItem)
+                {
+                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
+                    {
                         if(p_caster->GetItemBySlot(i) != 0)
                             if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
-m_CastItem = p_caster->GetItemBySlot(i);
-}
-}
-//m_CastItem->Enchant(m_spellInfo->EffectMiscValue[i],0);
+                        m_CastItem = p_caster->GetItemBySlot(i);
+                    }
+                }
+                // m_CastItem->Enchant(m_spellInfo->EffectMiscValue[i],0);
 */
         }break;
         case 54:                                  // Enchant Item Temporary
@@ -999,15 +1008,17 @@ m_CastItem = p_caster->GetItemBySlot(i);
                     field = 1;
                 else
                     field = 3;
-                if(!m_CastItem){
-                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++){
+                if(!m_CastItem)
+                {
+                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
+                    {
                         if(p_caster->GetItemBySlot(i) != 0)
-if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
-m_CastItem = p_caster->GetItemBySlot(i);
-}
-}
+                            if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
+                                m_CastItem = p_caster->GetItemBySlot(i);
+                    }
+                }
 
-//m_CastItem->Enchant(m_spellInfo->EffectMiscValue[i],duration,field);
+                // m_CastItem->Enchant(m_spellInfo->EffectMiscValue[i],duration,field);
 */
         }break;
         case 58:                                  // Weapon damage +
@@ -1038,7 +1049,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
         }break;
         case 63:                                  // Threat
         {
-// reduce Thread
+            // reduce Threat
         }break;
         case 64:                                  // Trigger Spell
         {
@@ -1095,7 +1106,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
         case 90:                                  // Summon Totem (slot 4)
         {
             uint64 guid = 0;
-// delete old summoned object
+            // delete old summoned object
             if(m_spellInfo->Effect[i] == 87)
             {
                 guid = m_caster->m_TotemSlot1;
@@ -1127,7 +1138,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
                 }
             }
 
-// spawn a new one
+            // spawn a new one
             Creature* pTotem = new Creature();
             CreatureInfo* ci = objmgr.GetCreatureName(m_spellInfo->EffectMiscValue[i]);
             if(!ci)
@@ -1137,7 +1148,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
             }
             char* name = (char*)ci->Name.c_str();
 
-// uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
+            // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
             pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() );
             pTotem->SetUInt32Value(OBJECT_FIELD_TYPE,33);
             pTotem->SetUInt32Value(UNIT_FIELD_DISPLAYID,ci->DisplayID);
@@ -1174,7 +1185,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
         {
 
             uint64 guid = 0;
-// delete old summoned object
+            // delete old summoned object
             if(m_spellInfo->Effect[i] == 104)
             {
                 guid = m_caster->m_TotemSlot1;
@@ -1206,11 +1217,11 @@ m_CastItem = p_caster->GetItemBySlot(i);
                 }
             }
 
-// spawn a new one
+            // spawn a new one
             GameObject* pGameObj = new GameObject();
             uint16 display_id = m_spellInfo->EffectMiscValue[i];
 
-// uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
+            // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
             pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, 1, m_spellInfo->EffectMiscValue[i], 1, 6, 6, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() );
             pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
             pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
@@ -1247,8 +1258,8 @@ m_CastItem = p_caster->GetItemBySlot(i);
         }break;
         default:
         {
-//PLAYER_TRACK_CREATURES 2^X
-//printf("unknown effect\n");
+            // PLAYER_TRACK_CREATURES 2^X
+            // printf("unknown effect\n");
         }break;
     }
 }
@@ -1276,7 +1287,7 @@ void Spell::TriggerSpell()
 {
     if(TriggerSpellId != 0)
     {
-// check for spell id
+        // check for spell id
         SpellEntry *spellInfo = sSpellStore.LookupEntry(TriggerSpellId );
 
         if(!spellInfo)
@@ -1320,7 +1331,8 @@ uint8 Spell::CanCast()
         castResult = 0x59;
 
     castResult = CheckItems();
-/*    Cheat Detection, crashes somehow need to fix it
+/*
+    // Cheat Detection, crashes somehow need to fix it
     if(m_caster->GetTypeId() == TYPEID_PLAYER && m_triggeredByAffect == 0)
     {
         std::list<struct spells>::iterator i;
@@ -1331,12 +1343,12 @@ uint8 Spell::CanCast()
         }
         if(i != ((Player*)m_caster)->getSpellList().end())
         {
-castResult = 0x1F;
-FILE *pFile = fopen("spells.log", "a+");
-fprintf(pFile,"Player: %u tried to use a not known spell: %u\n", m_caster->GetGUID(),m_spellInfo->Id);
-fclose(pFile);
-}
-}
+            castResult = 0x1F;
+            FILE *pFile = fopen("spells.log", "a+");
+            fprintf(pFile,"Player: %u tried to use a not known spell: %u\n", m_caster->GetGUID(),m_spellInfo->Id);
+            fclose(pFile);
+        }
+    }
 */
 
     if(castResult != 0)
@@ -1355,7 +1367,7 @@ uint8 Spell::CheckItems()
     Item* itm;
     uint32 tmpReagentCount[8];
 
-// Check Reagents
+    // Check Reagents
     for(uint32 i=0;i<8;i++)
         tmpReagentCount[i] = m_spellInfo->ReagentCount[i];
 
@@ -1379,7 +1391,7 @@ uint8 Spell::CheckItems()
             return uint8(0x54);
     }
 
-// Check Totems
+    // Check Totems
     uint32 totems = 2;
     for(uint32 i=0;i<2;i++)
     {
@@ -1451,7 +1463,7 @@ uint32 Spell::CalculateDamage(uint8 i)
         m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 
-// increase/decrease Damage by Talents etc.
+    // increase/decrease Damage by Talents etc.
 
     return value;
 }
@@ -1475,13 +1487,13 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
 
     Target->RemoveFromMap();
 
-// Build a NEW WORLD packet
+    // Build a NEW WORLD packet
     data.Initialize(SMSG_NEW_WORLD);
     data << TC->mapId << TC->x << TC->y << TC->z << (float)0.0f;
     if(pTarget)
         pTarget->GetSession()->SendPacket(&data);
 
-// TODO: clear attack list
+    // TODO: clear attack list
 
     Target->SetMapId(TC->mapId);
     Target->SetPosition(TC->x, TC->y, TC->z, 0);

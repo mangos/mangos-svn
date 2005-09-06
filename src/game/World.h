@@ -84,10 +84,10 @@ class World : public Singleton<World>
         void SendWorldText(const char *text, WorldSession *self = 0);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
 
-// update the world server every frame
+        // update the world server every frame
         void Update(time_t diff);
 
-// get map manager
+        // get map manager
         MapMgr* GetMap(uint32 id);
 
         void setRate(int index,float value)
@@ -102,15 +102,15 @@ class World : public Singleton<World>
                 return regen_values[index];
         }
 
-// map text emote to spell prices
+        // map text emote to spell prices
         typedef std::map< uint32, uint32> SpellPricesMap;
         SpellPricesMap mPrices;
 
     protected:
-// update Stuff, FIXME: use diff
+        // update Stuff, FIXME: use diff
         time_t _UpdateGameTime()
         {
-// Update Server time
+            // Update Server time
             time_t thisTime = time(NULL);
             m_gameTime += thisTime - m_lastTick;
             m_lastTick = thisTime;
@@ -119,7 +119,7 @@ class World : public Singleton<World>
         }
 
     private:
-//! Timers
+        //! Timers
         IntervalTimer m_timers[WUPDATE_COUNT];
 
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;

@@ -46,13 +46,13 @@ uint16 faction, uint32 mapid, float x, float y, float z, float ang )
     printf("create game object\n");
     Object::_Create(guidlow, 0xF0007000, mapid, x, y, z, ang);
 
-// no idea yet
+    // no idea yet
     SetUInt32Value( OBJECT_FIELD_ENTRY, obj_field_entry );
     SetFloatValue( OBJECT_FIELD_SCALE_X, scale );
     SetUInt32Value( GAMEOBJECT_DISPLAYID, display_id );
     SetUInt32Value( GAMEOBJECT_STATE, state  );
     SetUInt32Value( GAMEOBJECT_TYPE_ID, type  );
-// ??
+    // ??
     SetUInt32Value( GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue( GAMEOBJECT_POS_X, x);
     SetFloatValue( GAMEOBJECT_POS_Y, y );
@@ -65,7 +65,7 @@ uint16 faction, uint32 mapid, float x, float y, float z, float ang )
 void GameObject::Update(uint32 p_time)
 {
     WorldPacket data;
-// Respawn Timer
+    // Respawn Timer
     if(m_RespawnTimer > 0)
     {
         if(m_RespawnTimer > p_time)
@@ -139,7 +139,7 @@ void GameObject::FillItemList()
     }
     i = 0;
 
-// Silverleaf
+    // Silverleaf
     if(GetUInt32Value(OBJECT_FIELD_ENTRY) == 1617 || GetUInt32Value(UNIT_FIELD_DISPLAYID) == 270)
     {
         m_ItemCount = 1;
@@ -184,7 +184,7 @@ void GameObject::LoadFromDB(uint32 guid)
 
     Field *fields = result->Fetch();
 
-//Create(fields[0].GetUInt32(),1,1,0,1,1,0,fields[5].GetUInt32(),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
+    // Create(fields[0].GetUInt32(),1,1,0,1,1,0,fields[5].GetUInt32(),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
     Create(fields[0].GetUInt32(),1,1,0,1,1,0,fields[6].GetUInt32(),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
 
     m_zoneId = fields[5].GetUInt32();

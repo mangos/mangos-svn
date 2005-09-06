@@ -35,11 +35,11 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-// parse m_characters and build a mighty packet of
-// characters to send to the client.
+    // parse m_characters and build a mighty packet of
+    // characters to send to the client.
     data.Initialize(SMSG_CHAR_ENUM);
 
-// loading characters
+    // loading characters
     std::stringstream ss;
     ss << "SELECT guid FROM characters WHERE acct=" << GetAccountId();
 
@@ -55,7 +55,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
         {
             plr = new Player;
             ASSERT(plr);
-// added to catch an assertion failure at Player::LoadFromDB function.
+            // added to catch an assertion failure at Player::LoadFromDB function.
             Log::getSingleton().outError("Loading char guid %d from account %d.",(*result)[0].GetUInt32(),GetAccountId());
 
             plr->LoadFromDB( (*result)[0].GetUInt32() );
@@ -99,7 +99,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-// loading characters
+    // loading characters
     ss.rdbuf()->str("");
     ss << "SELECT guid FROM characters WHERE acct=" << GetAccountId();
     result = sDatabase.Query( ss.str( ).c_str( ) );
@@ -244,79 +244,81 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     plr->SetSession(this);
     SetPlayer(plr);
 
-// account data == UI config
+    // account data == UI config
     data.Initialize( SMSG_ACCOUNT_DATA_MD5 );
-/*for (int i = 0; i < 5; i++)
-{
-    std::stringstream ss;
-    ss << "SELECT uiconfig" << i << " FROM accounts WHERE acct=" << GetAccountId();
-    QueryResult* result = sDatabase.Query(ss.str().c_str());
-    int j;
-    if (!result)
+    /*
+    for (int i = 0; i < 5; i++)
     {
-        for (int j = 0; j < 16; j++)
-            data << uint8(0);
-    }
-else
-{
-std::string dat;
-dat = result->Fetch()->GetString();
-if (strcmp(dat.c_str(), "") == 0)
-{
-for (int j = 0; j < 16; j++)
-data << uint8(0);
-continue;
-}
-md5_byte_t md5hash[16];
-md5_state_t state;
-md5_init(&state);
-md5_append(&state, (const md5_byte_t *)dat.c_str(), dat.length());
-md5_finish(&state, md5hash);
-data << md5hash;
-}
-}*/
+        std::stringstream ss;
+        ss << "SELECT uiconfig" << i << " FROM accounts WHERE acct=" << GetAccountId();
+        QueryResult* result = sDatabase.Query(ss.str().c_str());
+        int j;
+        if (!result)
+        {
+            for (int j = 0; j < 16; j++)
+                data << uint8(0);
+        }
+    else
+    {
+        std::string dat;
+        dat = result->Fetch()->GetString();
+        if (strcmp(dat.c_str(), "") == 0)
+        {
+            for (int j = 0; j < 16; j++)
+                data << uint8(0);
+            continue;
+        }
+        md5_byte_t md5hash[16];
+        md5_state_t state;
+        md5_init(&state);
+        md5_append(&state, (const md5_byte_t *)dat.c_str(), dat.length());
+        md5_finish(&state, md5hash);
+        data << md5hash;
+        }
+    }*/
     for(int i = 0; i < 80; i++)
         data << uint8(0);
 
     SendPacket(&data);
 
-// MOTD
+    // MOTD
     sChatHandler.FillSystemMessageData(&data, this, sWorld.GetMotd());
     SendPacket( &data );
 
     Log::getSingleton( ).outDebug( "WORLD: Sent motd (SMSG_MESSAGECHAT)" );
 
-//data.Initialize(4, SMSG_SET_REST_START);
-//data << unsure;
-//SendPacket(&data);
+    //data.Initialize(4, SMSG_SET_REST_START);
+    //data << unsure;
+    //SendPacket(&data);
 
-//Tutorial Flags
+    //Tutorial Flags
     data.Initialize( SMSG_TUTORIAL_FLAGS );
     for(int i = 0; i < 32; i++)
         data << uint8(0xFF);
     SendPacket(&data);
     Log::getSingleton( ).outDebug( "WORLD: Sent tutorial flags." );
 
-//Initial Spells
+    //Initial Spells
     GetPlayer()->smsg_InitialSpells();
 
-//Initial Actions
+    //Initial Actions
     GetPlayer()->smsg_InitialActions();
 
-// SMSG_ACTION_BUTTONS
-/*data.Initialize(SMSG_ACTION_BUTTONS);
-data << uint32(0x19CB);
-data << uint32(0x0074);
-data << uint32(0x0085);
-data << uint32(0x0848);
-for(int i = 0; i < 116; i++)
-    data << uint32(0);
-SendPacket( &data );
-*/
+    // SMSG_ACTION_BUTTONS
+    /*
+    data.Initialize(SMSG_ACTION_BUTTONS);
+    data << uint32(0x19CB);
+    data << uint32(0x0074);
+    data << uint32(0x0085);
+    data << uint32(0x0848);
+    for(int i = 0; i < 116; i++)
+        data << uint32(0);
+    SendPacket( &data );
+    */
 
-// SMSG_INITIALIZE_FACTIONS
+    // SMSG_INITIALIZE_FACTIONS
 
-// Unknown (0x02C2)
+    // Unknown (0x02C2)
     data.Initialize(0x02C2);
     data << uint64(0x0517000005180046LL);
     data << uint64(0x0570000005710000LL);
@@ -356,9 +358,9 @@ SendPacket( &data );
     data << uint16(0x0000);
     SendPacket( &data );
 
-// SMSG_EXPLORATION_EXPERIENCE
+    // SMSG_EXPLORATION_EXPERIENCE
 
-// SMSG_CAST_RESULT -- Spell_id = 836 (LOGINEFFECT (24347)) From spells.dbc.csv
+    // SMSG_CAST_RESULT -- Spell_id = 836 (LOGINEFFECT (24347)) From spells.dbc.csv
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED);
     time_t minutes = sWorld.GetGameTime( ) / 60;
@@ -368,12 +370,12 @@ SendPacket( &data );
     data << (float)0.017f;                        // Normal Game Speed
     SendPacket( &data );
 
-// SMSG_UPDATE_AURA_DURATION -- if the player had an aura on when he logged out
+    // SMSG_UPDATE_AURA_DURATION -- if the player had an aura on when he logged out
 
-// Bojangles has Been up in here :0 Cinematics working Just need
-// the sound flags to kick off sound.
-// doesnt check yet if its the first login to run. *YET*
-// WantedMan fixed so it will only start if you are at starting loc
+    // Bojangles has Been up in here :0 Cinematics working Just need
+    // the sound flags to kick off sound.
+    // doesnt check yet if its the first login to run. *YET*
+    // WantedMan fixed so it will only start if you are at starting loc
 
     data.Initialize( SMSG_TRIGGER_CINEMATIC );
     uint8 theRace = GetPlayer()->getRace();       // get race
@@ -423,7 +425,7 @@ SendPacket( &data );
                     SendPacket( &data );
                 }
     }
-    if (theRace == 5)                             // undead <-- WORKING thats Correct
+    if (theRace == 5)                             // Undead
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -466,16 +468,16 @@ SendPacket( &data );
 
     Player *pCurrChar = GetPlayer();
 
-// Now send all A9's
-// Add character to the ingame list
-// Build the in-range set
-// Send a message to other clients that a new player has entered the world
-// And let this client know we're in game
+    // Now send all A9's
+    // Add character to the ingame list
+    // Build the in-range set
+    // Send a message to other clients that a new player has entered the world
+    // And let this client know we're in game
     Log::getSingleton( ).outError("AddObject at CharacterHandler.cpp");
     objmgr.AddObject( pCurrChar );
     pCurrChar->PlaceOnMap();
 
-// add skilllines from db
+    // add skilllines from db
     for (uint16 sl = PLAYER_SKILL_INFO_1_1; sl < PLAYER_SKILL_INFO_1_1_381; sl += 3)
     {
         uint16 curr = 0, max = 0;
@@ -485,7 +487,7 @@ SendPacket( &data );
         max = (uint16)(pCurrChar->GetUInt32Value(sl + 1) >> 16);
         pCurrChar->AddSkillLine(id, curr, max, false);
     }
-// end
+    // end
 
     Log::getSingleton( ).outDetail( "WORLD: Created new player for existing players (%s)", pCurrChar->GetName() );
 

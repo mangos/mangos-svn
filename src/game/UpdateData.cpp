@@ -70,10 +70,10 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 
     packet->clear();
 
-// do not compress small packets
+    // do not compress small packets
     if (m_data.size() > 50)
     {
-// not sure about that, saw in qz code
+        // not sure about that, saw in qz code
         unsigned long destsize = buf.size() + buf.size()/10 + 16;
         packet->resize( destsize );
 
@@ -81,7 +81,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 
         int err;
 
-// i know, it's evil
+        // i know, it's evil
         if ((err = compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
             &destsize, buf.contents(), buf.size())) != Z_OK)
         {

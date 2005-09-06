@@ -51,7 +51,7 @@ class GameObject : public Object
 
         }
 
-// Serialization
+        // Serialization
         void SaveToDB();
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
