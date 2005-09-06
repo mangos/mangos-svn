@@ -40,8 +40,8 @@ bool DatabaseSqlite::Initialize(const char *infoString)
 
     if (!mSqlite)
     {
-//        sLog.Log(L_CRITICAL, "Sqlite initialization failed: %s\n",
-//            errmsg ? errmsg : "<no error message>");
+        // sLog.Log(L_CRITICAL, "Sqlite initialization failed: %s\n",
+        //     errmsg ? errmsg : "<no error message>");
         if (errmsg)
             sqlite_freemem(errmsg);
         return false;
@@ -69,8 +69,8 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
 
     if (!tableData)
     {
-//        sLog.Log(L_ERROR, "Query \"%s\" failed: %s\n",
-//            sql, errmsg ? errmsg : "<no error message>");
+        // sLog.Log(L_ERROR, "Query \"%s\" failed: %s\n",
+        //     sql, errmsg ? errmsg : "<no error message>");
         if (errmsg)
             sqlite_freemem(errmsg);
         return 0;
@@ -79,7 +79,7 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
     QueryResultSqlite *queryResult = new QueryResultSqlite(tableData, rowCount, fieldCount);
     if(!queryResult)
     {
-//        sLog.Log(L_ERROR, "Out of memory on query result allocation in query \"%s\"\n", sql);
+        // sLog.Log(L_ERROR, "Out of memory on query result allocation in query \"%s\"\n", sql);
         return 0;
     }
 

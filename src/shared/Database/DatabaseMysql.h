@@ -34,8 +34,8 @@ class DatabaseMysql : public Database
         DatabaseMysql();
         ~DatabaseMysql();
 
-//! Initializes Mysql and connects to a server.
-/*! infoString should be formated like hostname;username;password;database. */
+        //! Initializes Mysql and connects to a server.
+        /*! infoString should be formated like hostname;username;password;database. */
         bool Initialize(const char *infoString);
 
         QueryResult* Query(const char *sql);

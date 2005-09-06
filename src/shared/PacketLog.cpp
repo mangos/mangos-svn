@@ -28,13 +28,13 @@ createFileSingleton( PacketLog );
 
 PacketLog::PacketLog()
 {
-// clear realm logfile
+    // clear realm logfile
     if (sConfig.GetBoolDefault("LogRealm", false))
     {
         FILE *pFile = fopen("realm.log", "w+");
         fclose(pFile);
     }
-// clear world logfile
+    // clear world logfile
     if (sConfig.GetBoolDefault("LogWorld", false))
     {
         FILE *pFile = fopen("world.log", "w+");

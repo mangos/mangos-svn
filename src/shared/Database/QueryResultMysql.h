@@ -33,14 +33,14 @@ class QueryResultMysql : public QueryResult
     public:
         QueryResultMysql(MYSQL_RES *result, uint64 rowCount, uint32 fieldCount);
 
-//! Frees resources used by QueryResult.
+        //! Frees resources used by QueryResult.
         ~QueryResultMysql();
 
-//! Selects the next row in the result of the current query.
-/*
-This will update any references to fields of the previous row, so use Field's copy constructor to keep a persistant field.
-@return 1 if the next row was successfully selected, else 0.
-*/
+        //! Selects the next row in the result of the current query.
+        /*
+        This will update any references to fields of the previous row, so use Field's copy constructor to keep a persistant field.
+        @return 1 if the next row was successfully selected, else 0.
+        */
         bool NextRow();
 
     private:
