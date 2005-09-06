@@ -1,5 +1,6 @@
 //// Things that are added / fixed:
 
++ Daemon will now use the path to mangosd.conf set via configure.
 + Set daemon version via configure.
 + Set path to mangosd.conf via configure.
 + Update client release number to 4544.
