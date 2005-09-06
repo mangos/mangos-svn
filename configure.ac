@@ -88,8 +88,11 @@ AC_CHECK_FUNCS(                                               \
 
 MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
+MANGOSD_DATA_TEMP="$datadir/mangos"
+eval "MANGOSD_DATA=$MANGOSD_DATA_TEMP"
 
 AC_SUBST(MANGOSD_CONFIG)
+AC_SUBST(MANGOSD_DATA)
 AC_SUBST(VERSION)
 
 AC_CONFIG_FILES([
