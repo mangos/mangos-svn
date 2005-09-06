@@ -151,7 +151,7 @@ CreatureInfo *ObjectMgr::GetCreatureName(uint32 id)
     if( itr != mCreatureNames.end( ) )
         return itr->second;
 
-//returning unknown creature if no data found
+    // returning unknown creature if no data found
 
     CreatureInfo *ci=new CreatureInfo;
     ci->Name = "Unknown Being";
@@ -245,9 +245,9 @@ uint32 ObjectMgr::AddCreatureSubName(const char* name, const char* subname, uint
 void ObjectMgr::AddCreatureName(CreatureInfo *cinfo)
 {
     ASSERT( mCreatureNames.find(cinfo->Id) == mCreatureNames.end() );
-//verifying if info for that creature already exists(need some cleaning here some time)
+    // verifying if info for that creature already exists(need some cleaning here some time)
     CreatureNameMap::iterator itr = mCreatureNames.find( cinfo->Id );
-//if found we delete the old creature info
+    // if found we delete the old creature info
     if( itr != mCreatureNames.end( ) )
         mCreatureNames.erase(itr);
     mCreatureNames[cinfo->Id] = cinfo;
@@ -456,16 +456,14 @@ void ObjectMgr::LoadItemPrototypes()
         }
         for(i = 0; i < 15; i+=3)
         {
-// Stupid items.sql
+            // Stupid items.sql
             int *a=(int *)malloc(sizeof(int)); *a=fields[46 + i].GetUInt32();
             int *b=(int *)malloc(sizeof(int)); *b=fields[47 + i].GetUInt32();
 
             pItemPrototype->DamageMin[i/3] = *(float *)a;
             pItemPrototype->DamageMax[i/3] = *(float *)b;
-/*
- */
-//pItemPrototype->DamageMin[i/3] = fields[46 + +i].GetFloat();
-//pItemPrototype->DamageMax[i/3] = fields[47 +i].GetFloat();
+            // pItemPrototype->DamageMin[i/3] = fields[46 + +i].GetFloat();
+            // pItemPrototype->DamageMax[i/3] = fields[47 +i].GetFloat();
             pItemPrototype->DamageType[i/3] = fields[48 + i].GetUInt32();
 
             free(a);free(b);
@@ -600,7 +598,7 @@ void ObjectMgr::LoadQuests()
         pQuest->m_completedText = fields[5].GetString();
         pQuest->m_incompleteText = fields[6].GetString();
         GUID_LOPART(pQuest->m_targetGuid) = fields[7].GetUInt32();
-// HACK!
+        // HACK!
         GUID_HIPART(pQuest->m_targetGuid) = 0xF0001000;
         pQuest->m_questItemId[0] = fields[8].GetUInt32();
         pQuest->m_questItemId[1] = fields[9].GetUInt32();
@@ -644,7 +642,7 @@ void ObjectMgr::LoadQuests()
         pQuest->m_questXp = fields[47].GetUInt32();
         pQuest->m_originalGuid = fields[48].GetUInt32();
         GUID_LOPART(pQuest->m_originalGuid) = fields[48].GetUInt32();
-// HACK!
+        // HACK!
         GUID_HIPART(pQuest->m_originalGuid) = 0xF0001000;
         pQuest->m_requiredLevel = fields[49].GetUInt32();
         pQuest->m_previousQuest = fields[50].GetUInt32();
@@ -664,7 +662,7 @@ void ObjectMgr::LoadCreatures()
 
     if( !result )
     {
-// log no creatures error
+        // log no creatures error
         return;
     }
 
@@ -694,7 +692,7 @@ void ObjectMgr::LoadGameObjects()
 
     if( !result )
     {
-// log no creatures error
+        // log no creatures error
         return;
     }
 
@@ -793,8 +791,8 @@ void ObjectMgr::LoadTaxiNodes()
         pTaxiNodes->x = fields[2].GetFloat();
         pTaxiNodes->y = fields[3].GetFloat();
         pTaxiNodes->z = fields[4].GetFloat();
-//pTaxiNodes->name = fields[5].GetString();
-//pTaxiNodes->flags = fields[6].GetUInt32();
+        // pTaxiNodes->name = fields[5].GetString();
+        // pTaxiNodes->flags = fields[6].GetUInt32();
         pTaxiNodes->mount = fields[7].GetUInt16();
 
         AddTaxiNodes(pTaxiNodes);
@@ -853,8 +851,8 @@ void ObjectMgr::LoadTaxiPathNodes()
         pTaxiPathNodes->x = fields[4].GetFloat();
         pTaxiPathNodes->y = fields[5].GetFloat();
         pTaxiPathNodes->z = fields[6].GetFloat();
-//pTaxiPathNodes->unkown1 = fields[7].GetUInt32();
-//pTaxiPathNodes->unkown2 = fields[8].GetUInt32();
+        // pTaxiPathNodes->unkown1 = fields[7].GetUInt32();
+        // pTaxiPathNodes->unkown2 = fields[8].GetUInt32();
 
         AddTaxiPathNodes(pTaxiPathNodes);
 
@@ -1283,7 +1281,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_mailid = 0;
     }
-//FIXME: Corpses are Gameobjects. IF we add other gameobjects we need a unified table
+    // FIXME: Corpses are Gameobjects. IF we add other gameobjects we need a unified table
     result = sDatabase.Query( "SELECT MAX(guid) FROM corpses" );
     if( result )
     {
@@ -1323,11 +1321,11 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
     switch(guidhigh)
     {
         case HIGHGUID_ITEM          : guidlow = objmgr.m_hiItemGuid++;     break;
-//case HIGHGUID_CONTAINER   : guidlow = objmgr.m_hiItemGuid++;     break;
+        // case HIGHGUID_CONTAINER   : guidlow = objmgr.m_hiItemGuid++;     break;
         case HIGHGUID_UNIT          : guidlow = objmgr.m_hiCreatureGuid++; break;
         case HIGHGUID_PLAYER        : guidlow = objmgr.m_hiCharGuid++;     break;
         case HIGHGUID_GAMEOBJECT    : guidlow = objmgr.m_hiGoGuid++;       break;
-//case HIGHGUID_CORPSE      : guidlow = objmgr.m_hiGoGuid++;       break;
+        // case HIGHGUID_CORPSE      : guidlow = objmgr.m_hiGoGuid++;       break;
         case HIGHGUID_DYNAMICOBJECT : guidlow = objmgr.m_hiDoGuid++;       break;
         default                     : ASSERT(guidlow);
     }

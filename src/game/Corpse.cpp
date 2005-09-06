@@ -58,7 +58,7 @@ void Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
 
 void Corpse::SaveToDB()
 {
-//save corpse to DB
+    //save corpse to DB
     std::stringstream ss;
     ss << "DELETE FROM corpses WHERE guid = " << GetGUIDLow();
     sDatabase.Execute( ss.str( ).c_str( ) );
@@ -78,7 +78,7 @@ void Corpse::SaveToDB()
 
 void Corpse::DeleteFromDB()
 {
-//delete corpse from db when its not needed anymore
+    //delete corpse from db when its not needed anymore
     char sql[256];
 
     sprintf(sql, "DELETE FROM corpses WHERE guid=%u", GetGUIDLow());

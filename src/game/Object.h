@@ -78,19 +78,19 @@ class Object
         virtual void AddToWorld() { m_inWorld = true; }
         virtual void RemoveFromWorld() { m_inWorld = false; }
 
-// guid always comes first
+        // guid always comes first
         const uint64& GetGUID() const { return *((uint64*)m_uint32Values); }
 
-// should be removed later
+        // should be removed later
         const uint32& GetGUIDLow() const { return m_uint32Values[0]; }
         const uint32& GetGUIDHigh() const { return m_uint32Values[1]; }
 
-// type
+        // type
         const uint8& GetTypeId() const { return m_objectTypeId; }
 
-//    void BuildUpdateMsgHeader( WorldPacket *data ) const;
+        // void BuildUpdateMsgHeader( WorldPacket *data ) const;
 
-//! This includes any nested objects we have, inventory for example.
+        //! This includes any nested objects we have, inventory for example.
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
@@ -110,9 +110,9 @@ class Object
         const float& GetPositionZ( ) const { return m_positionZ; }
         const float& GetOrientation( ) const { return m_orientation; }
 
-//! Only for MapMgr use
+        //! Only for MapMgr use
         MapCell* GetMapCell() const { return m_mapCell; }
-//! Only for MapMgr use
+        //! Only for MapMgr use
         void SetMapCell(MapCell* cell) { m_mapCell = cell; }
 
         const uint32& GetTaximask( uint8 index ) const { return m_taximask[index]; }
@@ -124,34 +124,34 @@ class Object
         const uint32& GetMapId( ) const { return m_mapId; }
         const uint32& GetZoneId( ) const { return m_zoneId; }
 
-//! Get uint32 property
+        //! Get uint32 property
         const uint32& GetUInt32Value( const uint16 &index ) const
         {
             ASSERT( index < m_valuesCount );
             return m_uint32Values[ index ];
         }
 
-//! Get uint64 property
+        //! Get uint64 property
         const uint64& GetUInt64Value( const uint16 &index ) const
         {
             ASSERT( index + 1 < m_valuesCount );
             return *((uint64*)&(m_uint32Values[ index ]));
         }
 
-//! Get float property
+        //! Get float property
         const float& GetFloatValue( const uint16 &index ) const
         {
             ASSERT( index < m_valuesCount );
             return m_floatValues[ index ];
         }
 
-//! Set uint32 property
+        //! Set uint32 property
         void SetUInt32Value( const uint16 &index, const uint32 &value );
 
-//! Set uint64 property
+        //! Set uint64 property
         void SetUInt64Value( const uint16 &index, const uint64 &value );
 
-//! Set float property
+        //! Set float property
         void SetFloatValue( const uint16 &index, const float &value );
 
         void SetFlag( const uint16 &index, uint32 newFlag );
@@ -191,7 +191,7 @@ class Object
             return (dx*dx) + (dy*dy);
         }
 
-// In-range object management, not sure if we need it
+        // In-range object management, not sure if we need it
         bool IsInRangeSet(Object* pObj) { return !(m_objectsInRange.find(pObj) == m_objectsInRange.end()); }
         virtual void AddInRangeObject(Object* pObj) { m_objectsInRange.insert(pObj); }
         virtual void RemoveInRangeObject(Object* pObj) { m_objectsInRange.erase(pObj); }
@@ -202,15 +202,15 @@ class Object
 
         void SendMessageToSet(WorldPacket *data, bool self);
 
-//! Fill values with data from a space seperated string of uint32s.
+        //! Fill values with data from a space seperated string of uint32s.
         void LoadValues(const char* data);
         void LoadTaxiMask(const char* data);
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
-//! Add object to map
+        //! Add object to map
         void PlaceOnMap();
-//! Remove object from map
+        //! Remove object from map
         void RemoveFromMap();
 
     protected:
@@ -230,36 +230,36 @@ class Object
         void _Create (uint32 guidlow, uint32 guidhigh);
         void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang);
 
-//! Mark values that need updating for specified player.
+        //! Mark values that need updating for specified player.
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
-//! Mark values that player should get when he/she/it sees object for first time.
+        //! Mark values that player should get when he/she/it sees object for first time.
         virtual void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
 
         void _BuildMovementUpdate( ByteBuffer *data, uint32 flags, uint32 flags2 ) const;
         void _BuildValuesUpdate( ByteBuffer *data, UpdateMask *updateMask  ) const;
 
-//! Types. Bitmasked together by subclasses.
+        //! Types. Bitmasked together by subclasses.
         uint16 m_objectType;
-//! Type id.
+        //! Type id.
         uint8 m_objectTypeId;
 
-//! Zone id.
+        //! Zone id.
         uint32 m_zoneId;
-//! Continent/map id.
+        //! Continent/map id.
         uint32 m_mapId;
-//! Map manager
+        //! Map manager
         MapMgr *m_mapMgr;
-//! Current map cell
+        //! Current map cell
         MapCell *m_mapCell;
 
-// TODO: use vectors here
+        // TODO: use vectors here
         float m_positionX;
         float m_positionY;
         float m_positionZ;
         float m_orientation;
         uint32 m_taximask[8];
 
-//! Blizzard seem to send those for all object types. weird.
+    //! It seem like these should be sent all object types.
         float m_walkSpeed;
         float m_runSpeed;
         float m_backWalkSpeed;
@@ -267,33 +267,33 @@ class Object
         float m_backSwimSpeed;
         float m_turnRate;
 
-// Semaphores - needed to forbid two operations on the same object at the same very time (may cause crashing\lack of data)
+        // Semaphores - needed to forbid two operations on the same object at the same very time (may cause crashing\lack of data)
         bool mSemaphoreTeleport;
 
-//! TODO: Should be removed later.
+        //! TODO: Should be removed later.
         float m_minZ;
 
-//! Object properties.
+        //! Object properties.
         union
         {
             uint32 *m_uint32Values;
             float *m_floatValues;
         };
 
-//! Number of properties
+        //! Number of properties
         uint16 m_valuesCount;
 
-//! List of object properties that need updating.
+        //! List of object properties that need updating.
         UpdateMask m_updateMask;
 
-//! True if object exists in world
+        //! True if object exists in world
         bool m_inWorld;
 
-//! True if object was updated
+        //! True if object was updated
         bool m_objectUpdated;
 
-//! Set of Objects in range.
-//! TODO: that functionality should be moved into WorldServer.
+        //! Set of Objects in range.
+        //! TODO: that functionality should be moved into WorldServer.
         std::set<Object*> m_objectsInRange;
 };
 #endif

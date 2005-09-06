@@ -31,7 +31,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-// AttackSwing
+    // AttackSwing
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message" );
 
     Creature *pEnemy = objmgr.GetObject<Creature>(guid);
@@ -55,5 +55,5 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
     GetPlayer()->smsg_AttackStop(guid);
 
     GetPlayer()->clearStateFlag(UF_ATTACKING);
-// GetPlayer()->removeCreatureFlag(0x00080000);
+    // GetPlayer()->removeCreatureFlag(0x00080000);
 }

@@ -91,7 +91,7 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if(result==NULL)
         return;
-//	ASSERT(result);
+    //	ASSERT(result);
 
     Field *fields = result->Fetch();
 

@@ -31,7 +31,7 @@ void WorldRunnable::run()
 
     while (!Master::m_stopEvent)
     {
-// uint32 exceeded
+        // uint32 exceeded
         if (realPrevTime > realCurrTime)
             realPrevTime = 0;
 

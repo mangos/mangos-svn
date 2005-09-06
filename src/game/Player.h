@@ -245,7 +245,7 @@ class Player : public Unit
         void KilledMonster(uint32 entry, const uint64 &guid);
         void GiveXP(uint32 xp, const uint64 &guid);
 
-// Taxi
+        // Taxi
         void setDismountTimer(uint32 time) { m_dismountTimer = time; };
         void setDismountCost(uint32 money) { m_dismountCost = money; };
         void setMountPos(float x, float y, float z)
@@ -255,7 +255,7 @@ class Player : public Unit
             m_mount_pos_z = z;
         }
 
-// Quests
+        // Quests
         uint32 getQuestStatus(uint32 quest_id);
         uint32 addNewQuest(uint32 quest_id, uint32 status=4);
         void loadExistingQuest(struct quest_status qs);
@@ -266,8 +266,8 @@ class Player : public Unit
 
         void AddMail(Mail *m);
 
-// sets the needed bits for any quests in the player's log
-//void setQuestLogBits(UpdateMask *updateMask);
+        // sets the needed bits for any quests in the player's log
+        // void setQuestLogBits(UpdateMask *updateMask);
         std::map<uint32, struct quest_status> getQuestStatusMap() { return mQuestStatus; };
 
         const uint64& GetSelection( ) const { return m_curSelection; }
@@ -285,7 +285,7 @@ class Player : public Unit
         bidentry* GetBid(uint32 id);
         std::list<bidentry*>::iterator GetBidBegin() { return m_bids.begin();};
         std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
-// spells
+        // spells
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
@@ -300,13 +300,13 @@ class Player : public Unit
             m_resurrectMana = mana;
         };
 
-//action bar
+        //action bar
         inline std::list<struct actions> getActionList() { return m_actions; };
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
         void removeAction(uint8 button);
         void smsg_InitialActions();
 
-// groups
+        // groups
         void SetInvited() { m_isInvited = true; }
         void SetInGroup() { m_isInGroup = true; }
         void SetLeader(const uint64 &guid) { m_groupLeader = guid; }
@@ -318,14 +318,14 @@ class Player : public Unit
         void UnSetInvited() { m_isInvited = false; }
         void UnSetInGroup() { m_isInGroup = false; }
 
-// Deadknight isGroupMember(plyr)
+        // Deadknight isGroupMember(plyr)
         bool IsGroupMember(Player *plyr);
 
-// Items
+        // Items
         void SwapItemSlots(uint8 srcslot, uint8 dstslot);
         Item* GetItemBySlot(uint8 slot) const
         {
-/* ASSERT(slot < INVENTORY_SLOT_ITEM_END); */
+            /* ASSERT(slot < INVENTORY_SLOT_ITEM_END); */
             ASSERT(slot < BANK_SLOT_BAG_END);     /* Bank Support */
             return m_items[slot];
         }
@@ -336,7 +336,7 @@ class Player : public Unit
         uint8 FindFreeItemSlot(uint32 type);
         uint8 CanEquipItemInSlot(uint8 slot, ItemPrototype* item);
 
-// looting
+        // looting
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
 
@@ -346,16 +346,16 @@ class Player : public Unit
         void CreateYourself( );
         void DestroyYourself( );
 
-// These functions build a specific type of A9 packet
+        // These functions build a specific type of A9 packet
         void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void DestroyForPlayer( Player *target ) const;
 
-// Serialize character to db
+        // Serialize character to db
         void SaveToDB();
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
-//Death Stuff
+        // Death Stuff
         void SpawnCorpseBody();
         void SpawnCorpseBones();
         void CreateCorpse();
@@ -365,16 +365,16 @@ class Player : public Unit
         void DeathDurabilityLoss(double percent);
         void RepopAtGraveyard();
 
-//Movement stuff
+        // Movement stuff
         void SetMovement(uint8 pType);
         void SetPlayerSpeed(uint8 SpeedType, float value, bool forced=false);
 
-//Channel stuff
+        // Channel stuff
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);
         void CleanupChannels();
 
-// skilllines
+        // skilllines
         bool HasSkillLine(uint32 id);
         void AddSkillLine(uint32 id, uint16 currVal, uint16 maxVal);
         void AddSkillLine(uint32 id, uint16 currVal, uint16 maxVal, bool sendUpdate);
@@ -427,51 +427,51 @@ class Player : public Unit
 
         uint32 m_nextSave;
 
-// Inventory and equipment
+        // Inventory and equipment
         Item* m_items[BANK_SLOT_BAG_END];
 
-// AFK status
+        // AFK status
         uint8 m_afk;
 
-// guid of current target
+        // guid of current target
         uint64 m_curTarget;
 
-// guid of current selection
+        // guid of current selection
         uint64 m_curSelection;
 
-// current quest statuses
+        // current quest statuses
         typedef std::map<uint32, struct quest_status> StatusMap;
         StatusMap mQuestStatus;
 
-// Group
+        // Group
         uint64 m_groupLeader;
         bool m_isInGroup;
         bool m_isInvited;
 
-// items the player has bid on
+        // items the player has bid on
         std::list<bidentry*> m_bids;
 
-// pieces of mail the player has
+        // pieces of mail the player has
         std::list<Mail*> m_mail;
 
-// Player Spells
+        // Player Spells
         std::list<struct spells> m_spells;
 
-//Player Action Bar
+        // Player Action Bar
         std::list<struct actions> m_actions;
 
-// Player Skilllines
+        // Player Skilllines
         std::list<struct skilllines> m_skilllines;
 
-// vars for ressurection
+        // vars for ressurection
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
         uint32 m_resurrectHealth, m_resurrectMana;
 
-// Pointer to this char's game client
+        // Pointer to this char's game client
         WorldSession *m_session;
 
-// Channels
+        // Channels
         std::list<Channel*> m_channels;
 
         bool m_dontMove;

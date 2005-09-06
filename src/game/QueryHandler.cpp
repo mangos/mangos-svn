@@ -48,7 +48,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
         if (!objmgr.GetPlayerNameByGUID(guid, name))
             Log::getSingleton( ).outError( "No player name found for this guid" );
 
-// TODO: load race, class, sex, etc from db
+        // TODO: load race, class, sex, etc from db
     }
     else
     {

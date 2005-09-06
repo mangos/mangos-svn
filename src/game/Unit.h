@@ -61,28 +61,28 @@ class Unit : public Object
                 m_attackers.erase(itr);
         }
 
-/// State flags are server-only flags to help me know when to do stuff, like die, or attack
+        /// State flags are server-only flags to help me know when to do stuff, like die, or attack
         inline void addStateFlag(uint32 f) { m_state |= f; };
         inline void clearStateFlag(uint32 f) { m_state &= ~f; };
 
-/// Stats
+        /// Stats
         inline uint8 getLevel() { return (uint8)m_uint32Values[ UNIT_FIELD_LEVEL ]; };
         inline uint8 getRace() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
         inline uint8 getClass() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
         inline uint8 getGender() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
         inline uint8 getStandState() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
-//// Combat
+        //// Combat
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag);
         void AttackerStateUpdate(Unit *pVictim, uint32 damage);
         void PeriodicAuraLog(Unit *pVictim, uint32 spellID, uint32 damage, uint32 damageType);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
-//void HandleProc(ProcTriggerSpell *pts, uint32 flag) {};
+        // void HandleProc(ProcTriggerSpell *pts, uint32 flag) {};
         void CastSpell(Unit* caster,Unit* Victim, uint32 spellId, bool triggered);
         void CalcRage( uint32 damage );
         void RegenerateAll();
         void Regenerate(uint16 field_cur, uint16 field_max, bool switch_);  void setRegenTimer(uint32 time) {m_regenTimer = time;};
-//Morph stuff  - morph into something, and out of something
+        // Morph stuff  - morph into something, and out of something
         void DeMorph();
 
         void smsg_AttackStart(Unit* pVictim);
@@ -99,7 +99,7 @@ class Unit : public Object
             Object::RemoveInRangeObject(pObj);
         }
 
-/// Combat / Death Status
+        /// Combat / Death Status
         bool isAlive() { return m_deathState == ALIVE; };
         bool isDead() { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         virtual void setDeathState(DeathState s)
@@ -108,28 +108,28 @@ class Unit : public Object
         };
         DeathState getDeathState() { return m_deathState; }
 
-//! Add affect to unit
+        //! Add affect to unit
         bool AddAffect(Affect *aff, bool uniq = false);
-//! Remove affect from unit
+        //! Remove affect from unit
         void RemoveAffect(Affect *aff);
-//! Remove all affects with specified type
+        //! Remove all affects with specified type
         bool RemoveAffect(uint32 type);
         void RemoveAffectById(uint32 spellId);
-//! Remove all affects
+        //! Remove all affects
         void RemoveAllAffects();
         void SetAura(Affect* aff){ m_aura = aff; }
         bool SetAffDuration(uint32 spellId,Unit* caster,uint32 duration);
         uint32 GetAffDuration(uint32 spellId,Unit* caster);
         Affect* tmpAffect;
 
-//! Player should override it to use POS/NEG fields
+        //! Player should override it to use POS/NEG fields
         virtual void ApplyModifier(const Modifier *mod, bool apply, Affect* parent);
 
 /*
-//Distance Calculation
-float CalcDistance(Unit *Ua, Unit *Ub);
-float CalcDistance(Unit *Ua, float PaX, float PaY, float PaZ);
-float CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, float PbZ);
+        // Distance Calculation
+        float CalcDistance(Unit *Ua, Unit *Ub);
+        float CalcDistance(Unit *Ua, float PaX, float PaY, float PaZ);
+        float CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, float PbZ);
 */
 
         void castSpell(Spell * pSpell);
@@ -144,11 +144,11 @@ float CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, float 
         uint32 m_triggerDamage;
         uint32 m_canMove;
 
-// Use it to Check if a Unit is in front of another one
+        // Use it to Check if a Unit is in front of another one
         bool isInFront(Unit* target,float distance);
         bool setInFront(Unit* target, float distance);
 
-// Spell Effect Variables
+        // Spell Effect Variables
         bool m_silenced;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct ProcTriggerSpell> m_procSpells;
@@ -157,9 +157,9 @@ float CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, float 
         Unit ( );
 
         float m_speed;
-//! Temporary remove all affects
+        //! Temporary remove all affects
         void _RemoveAllAffectMods();
-//! Place all mods back
+        //! Place all mods back
         void _ApplyAllAffectMods();
 
         void _AddAura(Affect *aff);
@@ -172,30 +172,30 @@ float CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, float 
         Affect* m_aura;
         uint32 m_auraCheck, m_removeAuraTimer;
 
-// FIXME: implement it
+        // FIXME: implement it
         bool _IsAffectPositive(Affect *aff) { return true; }
 
         uint32 m_regenTimer;
         uint32 m_state;                           // flags for keeping track of some states
         uint32 m_attackTimer;                     // timer for attack
 
-/// Combat
+        /// Combat
         AttackerSet m_attackers;
         DeathState m_deathState;
 
         typedef std::list<Affect*> AffectList;
         AffectList m_affects;
 
-// Spell currently casting
+        // Spell currently casting
         Spell * m_currentSpell;
 
-/* Some Functions for isInFront Calculation ( thanks to emperor and undefined for the formula ) */
+        /* Some Functions for isInFront Calculation ( thanks to emperor and undefined for the formula ) */
 
         float geteasyangle( float angle );        /* converts to 360 > x > 0 */
 
-/* float calcAngle( float Position1X, float Position1Y, float Position2X, float Position2Y ); */
+        /* float calcAngle( float Position1X, float Position1Y, float Position2X, float Position2Y ); */
 
-/* Main Function called by isInFront(); */
+        /* Main Function called by isInFront(); */
         bool inarc( float radius,  float xM, float yM, float fov, float orientation, float xP, float yP );
         float getangle( float xe, float ye, float xz, float yz );
         float getdistance( float xe, float ye, float xz, float yz );

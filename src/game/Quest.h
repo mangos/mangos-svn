@@ -59,18 +59,18 @@ class Quest
         uint32 m_questId;
         uint32 m_zone;
 
-// String descriptions sent to Client
+        // String descriptions sent to Client
         std::string m_title;
         std::string m_details;
         std::string m_objectives;
         std::string m_completedText;
         std::string m_incompleteText;
 
-// Quest pre-requisites
+        // Quest pre-requisites
         uint32 m_requiredLevel;                   // level you are required to be to do this quest
         uint32 m_previousQuest;                   // id of a previous quest that much be completed first
 
-// Quest Requirements
+        // Quest Requirements
         uint64 m_originalGuid;                    // GUID of the original questgiving creature, only needed when m_targetGuid is filled out
         uint64 m_targetGuid;                      // GUID of a creature to speak with to complete the quest
 
@@ -80,7 +80,7 @@ class Quest
         uint32 m_questMobId[4];                   // entry ID of the mob to be slain for this quest
         uint32 m_questMobCount[4];                // number of mobs to slay
 
-// Rewards
+        // Rewards
         uint16 m_choiceRewards;                   // number of items to choose from, max 5?
         uint32 m_choiceItemId[5];                 // entry ID of the items to choose for a reward
         uint32 m_choiceItemCount[5];              // number of each item to be awarded

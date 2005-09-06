@@ -65,7 +65,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
 
     if(strlen((char*)args)>75)
     {
-// send message to user
+        // send message to user
         char buf[256];
         sprintf((char*)buf,"The name was too long by %i", strlen((char*)args)-75);
         FillSystemMessageData(&data, m_session, buf);
@@ -119,7 +119,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
 
     if(strlen((char*)args)>75)
     {
-// send message to user
+        // send message to user
         char buf[256];
         sprintf((char*)buf,"The subname was too long by %i", strlen((char*)args)-75);
         FillSystemMessageData(&data, m_session, buf);

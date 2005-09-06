@@ -41,7 +41,7 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
         return false;
 
     char pAnnounce[256];
-// Adds BROADCAST:
+    // Adds BROADCAST:
     sprintf((char*)pAnnounce, "BROADCAST: %s", args);
     sWorld.SendWorldText(pAnnounce);              // send message
 
@@ -108,45 +108,45 @@ bool ChatHandler::HandleKickCommand(const char* args)
     Player *chr = objmgr.getPlayer((char*)args);
     if (chr)
     {
-if(m_session->getAccountLvl() < chr->GetSession()->getAccountLvl())
-{
-// send message to user
-char buf[256];
-sprintf((char*)buf,"You try to kick %s.", chr->getName());
-FillSystemMessageData(&data, m_session, buf);
-m_session->SendPacket( &data );
+        if(m_session->getAccountLvl() < chr->GetSession()->getAccountLvl())
+        {
+            // send message to user
+            char buf[256];
+            sprintf((char*)buf,"You try to kick %s.", chr->getName());
+            FillSystemMessageData(&data, m_session, buf);
+            m_session->SendPacket( &data );
 
-// send message to player
-char buf0[256];
-sprintf((char*)buf0,"%s try kick you.", m_session->GetPlayer()->getName());
-FillSystemMessageData(&data, m_session, buf0);
-sWorld.SendMessageToPlayer(&data, chr->GetGUIDLow());
+            // send message to player
+            char buf0[256];
+            sprintf((char*)buf0,"%s try kick you.", m_session->GetPlayer()->getName());
+            FillSystemMessageData(&data, m_session, buf0);
+            sWorld.SendMessageToPlayer(&data, chr->GetGUIDLow());
 
-return true;
-}
-// send message to user
-char buf[256];
-sprintf((char*)buf,"You kick %s.", chr->getName());
-FillSystemMessageData(&data, m_session, buf);
-m_session->SendPacket( &data );
+            return true;
+        }
+        // send message to user
+        char buf[256];
+        sprintf((char*)buf,"You kick %s.", chr->getName());
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket( &data );
 
-// send message to player
-char buf0[256];
-sprintf((char*)buf0,"%s kick you.", m_session->GetPlayer()->getName());
-FillSystemMessageData(&data, m_session, buf0);
-sWorld.SendMessageToPlayer(&data, chr->GetGUIDLow());
+        // send message to player
+        char buf0[256];
+        sprintf((char*)buf0,"%s kick you.", m_session->GetPlayer()->getName());
+        FillSystemMessageData(&data, m_session, buf0);
+        sWorld.SendMessageToPlayer(&data, chr->GetGUIDLow());
 
-sWorld.disconnect_client(reinterpret_cast < Server::nlink_client *> (chr->GetSession()->GetNLink()));
-}
-else
-{
-char buf[256];
-sprintf((char*)buf,"Player (%s) does not exist or is not logged in.", args);
-FillSystemMessageData(&data, m_session, buf);
-m_session->SendPacket( &data );
-}
+        sWorld.disconnect_client(reinterpret_cast < Server::nlink_client *> (chr->GetSession()->GetNLink()));
+    }
+    else
+    {
+        char buf[256];
+        sprintf((char*)buf,"Player (%s) does not exist or is not logged in.", args);
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket( &data );
+    }
 
-return true;
+    return true;
 }
 */
 
@@ -160,7 +160,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
     Player *chr = objmgr.GetPlayer(args);
     if (chr)
     {
-// send message to user
+        // send message to user
         char buf[256];
         char buf0[256];
         if(chr->IsBeingTeleported()==true)
@@ -174,7 +174,7 @@ bool ChatHandler::HandleSummonCommand(const char* args)
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
-// send message to player
+        // send message to player
         sprintf((char*)buf0,"You are being summoned by %s.", m_session->GetPlayer()->GetName());
         FillSystemMessageData(&data, m_session, buf0);
         chr->GetSession()->SendPacket( &data );
@@ -214,7 +214,7 @@ bool ChatHandler::HandleAppearCommand(const char* args)
             m_session->SendPacket( &data );
             return true;
         }
-// -- europa
+        // -- europa
         sprintf((char*)buf,"Appearing at %s's location.", chr->GetName());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
@@ -275,7 +275,7 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
 {
     WorldPacket data;
 
-// change level of char
+    // change level of char
     char* pHp = strtok((char*)args, " ");
     if (!pHp)
         return false;
@@ -304,12 +304,12 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You change the HP to %i/%i of %s.", hp, hpm, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s changed your HP to %i/%i.", m_session->GetPlayer()->GetName(), hp, hpm);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -354,12 +354,12 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You change the MANA to %i/%i of %s.", mana, manam, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s changed your MANA to %i/%i.", m_session->GetPlayer()->GetName(), mana, manam);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -404,12 +404,12 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You change the ENERGY to %i/%i of %s.", mana, manam, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s changed your ENERGY to %i/%i.", m_session->GetPlayer()->GetName(), mana, manam);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -456,12 +456,12 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You change the RAGE to %i/%i of %s.", mana, manam, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s changed your RAGE to %i/%i.", m_session->GetPlayer()->GetName(), mana, manam);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -500,12 +500,12 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You change the LVL to %i of %s.", lvl, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s changed your LVL to %i.", m_session->GetPlayer()->GetName(), lvl);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -536,7 +536,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     if (flag != 0)
     {
         sprintf((char*)buf,"%s has all taxi nodes now.", chr->GetName());
@@ -548,7 +548,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     if (flag != 0)
     {
         sprintf((char*)buf,"%s has given you all taxi nodes.",
@@ -604,12 +604,12 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You set all speeds to %2.2f of %s.", ASpeed, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s set all your speeds to %2.2f.", m_session->GetPlayer()->GetName(), ASpeed);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -663,12 +663,12 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You set the speed to %2.2f of %s.", Speed, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s set your speed to %2.2f.", m_session->GetPlayer()->GetName(), Speed);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -710,12 +710,12 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You set the swim speed to %2.2f of %s.", Swim, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s set your swim speed to %2.2f.", m_session->GetPlayer()->GetName(), Swim);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -757,12 +757,12 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You set the backwards run speed to %2.2f of %s.", BSpeed, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s set your backwards run speed to %2.2f.", m_session->GetPlayer()->GetName(), BSpeed);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -803,12 +803,12 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You set the size %2.2f of %s.", Scale, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s set your size to %2.2f.", m_session->GetPlayer()->GetName(), Scale);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -1059,12 +1059,12 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
 
     char buf[256];
 
-// send message to user
+    // send message to user
     sprintf((char*)buf,"You give a mount to %s.", chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-// send message to player
+    // send message to player
     sprintf((char*)buf,"%s gave you a mount.", m_session->GetPlayer()->GetName());
     FillSystemMessageData(&data, m_session, buf);
 
@@ -1116,31 +1116,31 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     if(gold < 0)
     {
         int32 newmoney = moneyuser + gold;
-//INFO
+        // INFO
         Log::getSingleton( ).outDetail("USER1: %i, ADD: %i, DIF: %i\n", moneyuser, gold, newmoney);
         if(newmoney < 0 )
         {
-// send message to user
+            // send message to user
             sprintf((char*)buf,"You take all copper of %s.", chr->GetName());
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
 
-// send message to player
+            // send message to player
             sprintf((char*)buf,"%s took you all of your copper.", m_session->GetPlayer()->GetName());
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
 
-// update value
+            // update value
             chr->SetUInt32Value( PLAYER_FIELD_COINAGE, 0);
         }
         else
         {
-// send message to user
+            // send message to user
             sprintf((char*)buf,"You take %i copper to %s.", abs(gold), chr->GetName());
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
 
-// send message to player
+            // send message to player
             sprintf((char*)buf,"%s took %i copper from you.", m_session->GetPlayer()->GetName(), abs(gold));
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
@@ -1148,18 +1148,18 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     }
     else
     {
-// send message to user
+        // send message to user
         sprintf((char*)buf,"You give %i copper to %s.", gold, chr->GetName());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
-// send message to player
+        // send message to player
         sprintf((char*)buf,"%s gave you %i copper.", m_session->GetPlayer()->GetName(), gold);
         FillSystemMessageData(&data, m_session, buf);
         chr->GetSession()->SendPacket(&data);
     }
 
-// update value
+    // update value
     Log::getSingleton( ).outDetail("USER2: %i, ADD: %i, RESULT: %i\n", moneyuser, gold, moneyuser+gold);
     chr->SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser+gold );
 

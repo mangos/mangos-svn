@@ -142,7 +142,7 @@ class Spell
 
         inline uint32 getState() { return m_spellState; }
 
-// Send Packet functions
+        // Send Packet functions
         void SendCastResult(uint8 result);
         void SendSpellStart();
         void SendSpellGo();

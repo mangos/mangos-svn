@@ -46,8 +46,7 @@ ChatHandler::~ChatHandler()
 
 ChatCommand * ChatHandler::getCommandTable()
 {
-// Ignatich
-// TODO: change default security levels?
+    // TODO: change default security levels?
 
     static bool first_call = true;
 
@@ -75,7 +74,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,          0, NULL,                                     "",   NULL }
     };
 
-// in alphabetical order
+    // in alphabetical order
     static ChatCommand commandTable[] =
     {
         { "acct",        0, &ChatHandler::HandleAcctCommand,          "",   NULL },
@@ -226,7 +225,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
 {
     std::string cmd = "";
 
-// skip command
+    // skip command
     while (*text != ' ' && *text != '\0')
     {
         cmd += *text;
@@ -309,14 +308,14 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
 
 void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint32 type, uint32 language, const char *channelName, const char *message ) const
 {
-//Packet structure
-//uint8      type;
-//uint32     language;
-//uint64     guid;
-//uint64	 guid;
-//uint32      len_of_text;
-//char       text[];         // not sure ? i think is null terminated .. not null terminated
-//uint8      afk_state;
+    //Packet structure
+    //uint8      type;
+    //uint32     language;
+    //uint64     guid;
+    //uint64	 guid;
+    //uint32      len_of_text;
+    //char       text[];         // not sure ? i think is null terminated .. not null terminated
+    //uint8      afk_state;
 
     uint32 messageLength = strlen((char*)message) + 1;
     uint8 afk = 0;
@@ -338,13 +337,13 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     }
     else if (type == CHAT_MSG_WHISPER_INFORM)
     {
-//Convert ChannelName back to the to Players GUID
+        //Convert ChannelName back to the to Players GUID
         guid = uint64(channelName);               //session ? session->GetPlayer()->GetGUID() : 0; // FIXME: may be receiver?
     }
 
     *data << guid;
 
-// crashfix
+    // crashfix
     if (type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
         *data << guid;
 
@@ -362,7 +361,7 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
 {
     WorldPacket data;
 
-// Create the requested monster
+    // Create the requested monster
     Player *chr = session->GetPlayer();
     float x = chr->GetPositionX();
     float y = chr->GetPositionY();
@@ -406,12 +405,12 @@ void ChatHandler::smsg_NewWorld(WorldSession *session, uint32 mapid, float x, fl
 
     session->GetPlayer()->RemoveFromMap();
 
-// Build a NEW WORLD packet
+    // Build a NEW WORLD packet
     data.Initialize(SMSG_NEW_WORLD);
     data << (uint32)mapid << (float)x << (float)y << (float)z << (float)0.0f;
     session->SendPacket( &data );
 
-// TODO: clear attack list
+    // TODO: clear attack list
 
     session->GetPlayer()->SetMapId(mapid);
     session->GetPlayer()->SetPosition(x, y, z, 0);
@@ -422,22 +421,22 @@ void ChatHandler::MovePlayer(WorldSession *session, float x, float y, float z)
 {
     WorldPacket data;
 
-// Output new position to the console
+    // Output new position to the console
     Log::getSingleton( ).outDetail( "WORLD: Moved player to (%f, %f, %f)", x, y, z );
 
-////////////////////////////////////////
-// Set the new position of the character
+    ////////////////////////////////////////
+    // Set the new position of the character
     Player *chr = session->GetPlayer();
 
-// Send new position to client via MSG_MOVE_TELEPORT_ACK
+    // Send new position to client via MSG_MOVE_TELEPORT_ACK
     chr->BuildTeleportAckMsg(&data, x, y, z, 0);
     session->SendPacket(&data);
 
-// Set actual position and update in-range lists
+    // Set actual position and update in-range lists
     chr->SetPosition(x, y, z, 0);
 
-//////////////////////////////////
-// Now send new position of this player to clients using MSG_MOVE_HEARTBEAT
+    //////////////////////////////////
+    // Now send new position of this player to clients using MSG_MOVE_HEARTBEAT
     chr->BuildHeartBeatMsg(&data);
     chr->SendMessageToSet(&data, true);
 
@@ -458,7 +457,7 @@ Player * ChatHandler::getSelectedChar(WorldSession *client)
         chr = client->GetPlayer();                // autoselect
     else
         chr = objmgr.GetPlayer(guid);
-//chr = objmgr.GetObject<Player>(guid);
+        //chr = objmgr.GetObject<Player>(guid);
 
     return chr;
 }

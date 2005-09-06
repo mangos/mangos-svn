@@ -45,7 +45,7 @@ Creature::Creature() : Unit()
 
     m_valuesCount = UNIT_END;
 
-// FIXME: use constant
+    // FIXME: use constant
     itemcount = 0;
     memset(item_list, 0, 8*128);
 
@@ -98,7 +98,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
             if(m_timeMoved == m_timeToMove)
             {
                 m_creatureState = STOPPED;
-// wait before next move
+                // wait before next move
                 m_moveTimer = rand() % (m_moveRun ? 5000 : 10000);
 
                 m_positionX = m_destinationX;
@@ -130,18 +130,18 @@ void Creature::UpdateMobMovement( uint32 p_time)
             }
         }                                         // still moving
     }
-//creature is stoped
+    // creature is stoped
     else if(m_creatureState == STOPPED && !m_moveTimer && !m_timeMoved)
     {
         if(sWorld.getAllowMovement() == false)    //is creature movement enabled?
             return;
 
-//if Spirit Healer don't move
+    // if Spirit Healer don't move
         if(GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
             return;
 
         int destpoint;
-// If creature has no waypoints just wander aimlessly around spawnpoint
+        // If creature has no waypoints just wander aimlessly around spawnpoint
         if(m_nWaypoints==0)                       //no waypoints
         {
             if(m_moveRandom)
@@ -155,7 +155,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
 
                     if(getdistance(m_positionX,m_positionY,respawn_cord[0],respawn_cord[1])>10)
                     {
-//return home
+                        //return home
                         AI_MoveTo(respawn_cord[0],respawn_cord[1],respawn_cord[2],false);
                     }
                     else
@@ -170,12 +170,12 @@ void Creature::UpdateMobMovement( uint32 p_time)
         {
             if(m_moveRandom)                      //is random move on if so move to a random waypoint
             {
-//if(m_nWaypoints > 1)
+                // if(m_nWaypoints > 1)
                 destpoint = rand() % m_nWaypoints;
             }
             else                                  //random move is not on lets follow the path
             {
-// Are we on the last waypoint? if so walk back
+                // Are we on the last waypoint? if so walk back
                 if (m_currentWaypoint == (m_nWaypoints-1))
                     m_moveBackward = true;
                 if (m_currentWaypoint == 0)       // Are we on the first waypoint? if so lets goto the second waypoint
@@ -198,10 +198,10 @@ void Creature::Update( uint32 p_time )
 
     if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
     {
-//Still Moving well then lets stop
+        // Still Moving well then lets stop
         if(m_creatureState == MOVING)
         {
-//Stop Moving
+            // Stop Moving
             m_moveSpeed = 7.0f*0.001f;
             AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
             m_moveTimer = 0;
@@ -216,9 +216,9 @@ void Creature::Update( uint32 p_time )
     if (m_deathState == JUST_DIED)
     {
         this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
-//		UpdateObject();
+        // UpdateObject();
 
-// remove me as an attacker from the AttackMap
+        // remove me as an attacker from the AttackMap
         m_attackers.clear();
         m_deathState = CORPSE;
     }
@@ -232,7 +232,7 @@ void Creature::Update( uint32 p_time )
 
         if (m_deathTimer <= 0)
         {
-// time to respawn!
+            // time to respawn!
             Log::getSingleton( ).outDetail("Removing corpse...");
 
             RemoveFromMap();
@@ -256,7 +256,7 @@ void Creature::Update( uint32 p_time )
 
         if(m_respawnTimer <= 0)
         {
-//WorldPacket data;
+            // WorldPacket data;
             Log::getSingleton( ).outDetail("Respawning...");
             SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
             PlaceOnMap();
@@ -265,7 +265,7 @@ void Creature::Update( uint32 p_time )
         }
     }
 
-// FIXME
+    // FIXME
     if (isAlive())
     {
         if(m_attackers.empty())
@@ -275,10 +275,9 @@ void Creature::Update( uint32 p_time )
         UpdateMobMovement( p_time );
         AI_Update();
 
-// Clear the NPC flags bit so it doesn't get auto- updated each frame. NPC flags are set per player and this would ruin is
-// Ignatich: do not understand this yet
-//unsetUpdateMaskBit(UNIT_NPC_FLAGS);
-//		UpdateObject();
+        // Clear the NPC flags bit so it doesn't get auto- updated each frame. NPC flags are set per player and this would ruin is
+        // unsetUpdateMaskBit(UNIT_NPC_FLAGS);
+        // UpdateObject();
     }
 }
 
@@ -306,8 +305,8 @@ uint32 Creature::getQuestStatus(Player *pPlayer)
         if (status == 0 || status == QUEST_STATUS_UNAVAILABLE)
         {
             Quest *pQuest = objmgr.GetQuest(quest_id);
-// if 0, then the player has never been offered this before
-// Add it to the player with a new quest value of 4
+            // if 0, then the player has never been offered this before
+            // Add it to the player with a new quest value of 4
             if (pQuest->m_requiredLevel >= pPlayer->GetUInt32Value(UNIT_FIELD_LEVEL))
                 status = pPlayer->addNewQuest(quest_id,2);
             else
@@ -330,8 +329,8 @@ uint32 Creature::getCurrentQuest(Player *pPlayer)
         uint32 status = pPlayer->getQuestStatus(quest_id);
 
         if (status == 0)
-// if 0, then the player has never been offered this before
-// Add it to the player with a new quest value of 4
+        // if 0, then the player has never been offered this before
+        // Add it to the player with a new quest value of 4
             status = pPlayer->addNewQuest(quest_id);
 
         if (status != QUEST_STATUS_COMPLETE)      // if quest is not completed yet, then this is the active quest to return
@@ -392,43 +391,43 @@ bool Creature::hasQuest(uint32 quest_id)
 /*
 int Creature::CheckQuestGiverFlag(Player *pPlayer, UpdateMask *unitMask, WorldPacket * data)
 {
-for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
-{
-uint32 quest_id = *i;
-uint32 status = pPlayer->getQuestStatus(quest_id);
-Quest *pQuest = objmgr.getQuest(quest_id);
-//        if (status != 0)
-//        {
-if (pQuest->m_targetGuid != 0 && pQuest->m_targetGuid != m_guid[0] && status == QUEST_STATUS_INCOMPLETE)
-{
-// If this is a talk to quest, and the target NPC is not THIS npc, and the status is Incomplete,...
-// Set NPC_FLAGS to 0 so it doesn't offer a quest to this player
-SetUInt32Value(UNIT_NPC_FLAGS, 0);
-CreateObject(unitMask, data, 0);
-SetUInt32Value(UNIT_NPC_FLAGS, 2);
-return 1;
-}
-else if (pQuest->m_targetGuid == m_guid[0] && (status == QUEST_STATUS_COMPLETE || status == QUEST_STATUS_INCOMPLETE))
-{
-// If this creature has a Talk To quest, and it is the target of the quest, and the quest is either complete or currently
-// underway, then allow this creature to have quest flags
-SetUInt32Value(UNIT_NPC_FLAGS, 2);
-CreateObject(unitMask, data, 0);
-SetUInt32Value(UNIT_NPC_FLAGS, 0);
-return 1;
-}
-else if (pQuest->m_targetGuid == m_guid[0] && (status == QUEST_STATUS_AVAILABLE || status == 0))
-{
-// If this Creature has a Talk to quest, and is the target of the quest, and the quest is currently available,
-// Remove Questgiver flags
-SetUInt32Value(UNIT_NPC_FLAGS, 0);
-CreateObject(unitMask, data, 0);
-SetUInt32Value(UNIT_NPC_FLAGS, 2);
-return 1;
-}
-//        }
-}
-return 0;
+    for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
+    {
+        uint32 quest_id = *i;
+        uint32 status = pPlayer->getQuestStatus(quest_id);
+        Quest *pQuest = objmgr.getQuest(quest_id);
+        // if (status != 0)
+        // {
+        if (pQuest->m_targetGuid != 0 && pQuest->m_targetGuid != m_guid[0] && status == QUEST_STATUS_INCOMPLETE)
+        {
+            // If this is a talk to quest, and the target NPC is not THIS npc, and the status is Incomplete,...
+            // Set NPC_FLAGS to 0 so it doesn't offer a quest to this player
+            SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            CreateObject(unitMask, data, 0);
+            SetUInt32Value(UNIT_NPC_FLAGS, 2);
+            return 1;
+        }
+        else if (pQuest->m_targetGuid == m_guid[0] && (status == QUEST_STATUS_COMPLETE || status == QUEST_STATUS_INCOMPLETE))
+        {
+            // If this creature has a Talk To quest, and it is the target of the quest, and the quest is either complete or currently
+            // underway, then allow this creature to have quest flags
+            SetUInt32Value(UNIT_NPC_FLAGS, 2);
+            CreateObject(unitMask, data, 0);
+            SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            return 1;
+        }
+        else if (pQuest->m_targetGuid == m_guid[0] && (status == QUEST_STATUS_AVAILABLE || status == 0))
+        {
+            // If this Creature has a Talk to quest, and is the target of the quest, and the quest is currently available,
+            // Remove Questgiver flags
+            SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            CreateObject(unitMask, data, 0);
+            SetUInt32Value(UNIT_NPC_FLAGS, 2);
+            return 1;
+        }
+        // }
+    }
+    return 0;
 }
 */
 
@@ -448,7 +447,7 @@ void Creature::generateLoot()
     int i;
     int itemsToGet;
 
-//max items to give for this creature
+    //max items to give for this creature
     if(this->getLevel() < 10)
     {
         itemsToGet = rand()%1;
@@ -474,15 +473,15 @@ void Creature::generateLoot()
         itemsToGet = rand()%6;                    //calculate items to get
     }
 
-//lets make it harder to get items
-//if the random result is > 25 out of 100 they get no items
-//if (rand()%100 < 25)
-//	itemsToGet = 0;
+    // lets make it harder to get items
+    // if the random result is > 25 out of 100 they get no items
+    // if (rand()%100 < 25)
+    //	itemsToGet = 0;
 
-//Max Value of all items when sold
+    //Max Value of all items when sold
     MaxLootValue = ((getLevel() * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5;
 
-// FIX ME Add real formulas
+    // FIX ME Add real formulas
     for(i = 0; i < itemsToGet; i++)
     {
         retryCount = 0;                           //set our retrys to 0
@@ -490,7 +489,7 @@ void Creature::generateLoot()
         {
             retryCount++;
             randItem = rand()%8000;               //get a random item id
-//get the item
+            //get the item
             ItemPrototype *pCurItem = objmgr.GetItemPrototype(randItem);
             if (pCurItem != NULL)                 //if the item exist's
             {
@@ -516,7 +515,7 @@ void Creature::generateLoot()
         }
 
     }
-//generate copper
+    // generate copper
     m_lootMoney = getLevel() * (rand()%5 + 1)*sWorld.getRate(RATE_DROP);
 }
 
@@ -525,7 +524,7 @@ void Creature::generateLoot()
 /// Creature AI
 
 // This Creature has just been attacked by someone
-// Reaction:  Add this Creature to the list of current attackers
+// Reaction: Add this Creature to the list of current attackers
 void Creature::AI_AttackReaction(Unit *pAttacker, uint32 damage_dealt)
 {
     if(!m_useAI)
@@ -542,17 +541,17 @@ void Creature::AI_AttackReaction(Unit *pAttacker, uint32 damage_dealt)
 
     if(m_canMove)
     {
-//move to attacker when attacked
+        //move to attacker when attacked
         m_moveSpeed = 7.0f*0.001f;
         AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 100, 1);
         m_moveTimer = 0;
         m_destinationX = m_destinationY = m_destinationZ = 0;
         m_timeMoved = 0;
         m_timeToMove = 0;
-//m_creatureState = MOVING; //makes them fall through the ground
+        // m_creatureState = MOVING; //makes them fall through the ground
 
-//m_creatureState = STOPPED;
-//AI_MoveTo(m_positionX, m_positionY, m_positionZ, true);
+        // m_creatureState = STOPPED;
+        // AI_MoveTo(m_positionX, m_positionY, m_positionZ, true);
     }
 
     m_attackers.insert(pAttacker);
@@ -567,8 +566,8 @@ void Creature::AI_Update()
     Unit *closestTarget = NULL;
     float targetDistanceSq = 10000.0f;
 
-// Cycle through attackers
-// If one is out of range, remove from the map
+    // Cycle through attackers
+    // If one is out of range, remove from the map
     AttackerSet::iterator itr;
     if(m_attackers.empty() && m_creatureState == ATTACKING)
     {
@@ -590,7 +589,7 @@ void Creature::AI_Update()
 
         if (lengthSq > 30.0f*30.0f)               // must be greater than the max range of spells
         {
-// stop attacking because the target is too far
+            // stop attacking because the target is too far
             m_attackers.erase(itr++);
             continue;
         }
@@ -639,22 +638,22 @@ void Creature::AI_Update()
             if (isAttackReady())
             {
 /*
-if(!isInFront(closestTarget,10.00000f))
-{
-    if(setInFront(closestTarget, 10.00000f))
-    {
-        setAttackTimer(0);
-        AttackerStateUpdate(closestTarget, 0);
-    }
-    else
-        setAttackTimer(uint32(500));
-
-}else
-{
+                if(!isInFront(closestTarget,10.00000f))
+                {
+                    if(setInFront(closestTarget, 10.00000f))
+                    {
+                        setAttackTimer(0);
+                        AttackerStateUpdate(closestTarget, 0);
+                    }
+                    else
+                        setAttackTimer(uint32(500));
+                }
+                else
+                {
 */
                 setAttackTimer(0);
                 AttackerStateUpdate(closestTarget, 0);
-//}
+                // }
 
             }
         }
@@ -702,7 +701,7 @@ void Creature::AI_MoveTo(float x, float y, float z, bool run)
     AI_SendMoveToPacket(x, y, z, moveTime, run);
 
     m_timeToMove = moveTime;
-// update every 300 msecs
+    // update every 300 msecs
     m_moveTimer =  UNIT_MOVEMENT_INTERPOLATE_INTERVAL;
 
     if(m_creatureState != MOVING)
@@ -749,7 +748,7 @@ void Creature::SaveToDB()
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 
-// TODO: save vendor items etc?
+    // TODO: save vendor items etc?
 }
 
 
@@ -765,7 +764,7 @@ void Creature::LoadFromDB(uint32 guid)
 
     Field *fields = result->Fetch();
 
-//    _Create( guid, 0 );
+    // _Create( guid, 0 );
 
     Create(fields[8].GetUInt32(), objmgr.GetCreatureName(fields[8].GetUInt32())->Name.c_str(), fields[6].GetUInt32(),
         fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
@@ -791,10 +790,10 @@ void Creature::LoadFromDB(uint32 guid)
 
 void Creature::_LoadGoods()
 {
-// remove items from vendor
+    // remove items from vendor
     itemcount = 0;
 
-// load his goods
+    // load his goods
     std::stringstream query;
     query << "SELECT * FROM vendors WHERE vendorGuid=" << GetGUIDLow();
 
@@ -807,8 +806,8 @@ void Creature::_LoadGoods()
 
             if (getItemCount() >= MAX_CREATURE_ITEMS)
             {
-// this should never happen unless someone has been fucking with the dbs
-// complain and break :P
+                // this should never happen unless someone has been fucking with the dbs
+                // complain and break :P
                 Log::getSingleton( ).outError( "Vendor %u has too many items. Check the DB!", GetGUIDLow() );
                 break;
             }
@@ -827,7 +826,7 @@ void Creature::_LoadGoods()
 
 void Creature::_LoadQuests()
 {
-// clean quests
+    // clean quests
     mQuestIds.clear();
 
     std::stringstream query;
@@ -851,7 +850,7 @@ void Creature::_LoadQuests()
 
 void Creature::_LoadMovement()
 {
-// clean waypoint list
+    // clean waypoint list
     m_nWaypoints = 0;
     m_currentWaypoint = 0;
 

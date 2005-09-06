@@ -35,7 +35,7 @@ enum ChatMsg
 {
     CHAT_MSG_SAY                                  = 0x00,
     CHAT_MSG_PARTY                                = 0x01,
-// unknown
+    // 0x02 unknown
     CHAT_MSG_GUILD                                = 0x03,
     CHAT_MSG_OFFICER                              = 0x04,
     CHAT_MSG_YELL                                 = 0x05,
@@ -116,7 +116,7 @@ class ChatHandler : public Singleton<ChatHandler>
 
         ChatCommand* getCommandTable();
 
-// Level 0 commands
+        // Level 0 commands
         bool HandleHelpCommand(const char* args);
         bool HandleCommandsCommand(const char* args);
         bool HandleNYICommand(const char* args);
@@ -128,7 +128,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleSaveCommand(const char* args);
         bool HandleGMListCommand(const char* args);
 
-// Level 1 commands
+        // Level 1 commands
         bool HandleSummonCommand(const char* args);
         bool HandleAppearCommand(const char* args);
         bool HandleRecallCommand(const char* args);
@@ -152,10 +152,10 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleModifyMountCommand(const char* args);
         bool HandleModifyBitCommand(const char* args);
 
-// Debug Commands
+        // Debug Commands
         bool HandleDebugInArcCommand(const char* args);
 
-// Level 2 commands
+        // Level 2 commands
         bool HandleGUIDCommand(const char* args);
         bool HandleNameCommand(const char* args);
         bool HandleSubNameCommand(const char* args);
@@ -174,7 +174,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleDisplayIdCommand(const char* args);
         bool HandleFactionIdCommand(const char* args);
 
-// Level 3 commands
+        // Level 3 commands
         bool HandleSecurityCommand(const char* args);
         bool HandleWorldPortCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);

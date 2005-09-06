@@ -50,7 +50,7 @@ class MapMgr
         ObjectMap::iterator GetObjectsBegin() { return _objects.begin(); }
         ObjectMap::iterator GetObjectsEnd() { return _objects.end(); }
 
-//! Mark object as updated
+        //! Mark object as updated
         void ObjectUpdated(Object *obj)
         {
             ASSERT(_updatedObjects.find(obj) == _updatedObjects.end());
@@ -61,11 +61,11 @@ class MapMgr
 
     protected:
 
-//! Collect and send updates to clients
+        //! Collect and send updates to clients
         void _UpdateObjects();
 
     private:
-//! Objects that exist on map
+        //! Objects that exist on map
         ObjectMap _objects;
         int32 _minX, _minY, _minZ, _maxX, _maxY, _maxZ;
         uint32 _cellSize, _sizeX, _sizeY;

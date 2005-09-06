@@ -49,7 +49,7 @@ class Group
 
         void AddMember(uint64 guid, const char* name)
         {
-//        ASSERT(m_count < MAXGROUPSIZE-1);
+            // ASSERT(m_count < MAXGROUPSIZE-1);
 
             if (m_count < MAXGROUPSIZE-1)
             {
@@ -60,7 +60,7 @@ class Group
             else
             {
                 ;
-// need to broadcast an error message.
+                // need to broadcast an error message.
             }
         }
 
@@ -73,7 +73,7 @@ class Group
         void Disband();
 
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
-//    const char* GetLeaderName() const { return m_leaderName.c_str(); }
+        // const char* GetLeaderName() const { return m_leaderName.c_str(); }
 
         void SetLootMethod(uint32 method) { m_lootMethod = method; }
         void SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
@@ -84,7 +84,7 @@ class Group
         uint32 GetMembersCount() const { return m_count; }
         const uint64& GetMemberGUID(uint32 i) const { ASSERT(i < m_count); return m_members[i].guid; }
 
-// GroupCheck for DeadUpdate
+        // GroupCheck for DeadUpdate
         bool GroupCheck(uint64 guid)
         {
             for(uint32 i = 0; i < m_count; i++ )
@@ -97,7 +97,7 @@ class Group
             return false;
         }
 
-// party chat implementation
+        // party chat implementation
         void BroadcastToGroup(WorldSession *session, std::string msg);
 
     protected:

@@ -44,8 +44,10 @@
     GetPlayer( )->SetUInt32Value( PLAYER_SKILL_INFO_1_1+slot , ( 0x000001a1 ));
     GetPlayer( )->SetUInt32Value( PLAYER_SKILL_INFO_1_1+slot+1 , ( (current_points & 0xffff) + (amount << 16) ) );
     GetPlayer( )->SetUInt32Value( PLAYER_CHARACTER_POINTS2, points-amount );
-GetPlayer( )->UpdateObject( );
-}*/
+    GetPlayer( )->UpdateObject( );
+}
+*/
+
 
 void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 {
@@ -58,7 +60,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     uint32 CurTalentPoints =  GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS1);
     if(CurTalentPoints == 0)
     {
-//NO TALENT POINTS
+        // NO TALENT POINTS
     }
     else
     {
@@ -71,7 +73,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
         {
             if(!(GetPlayer( )->HasSpell(spellid)))
             {
-//Send data if all OK
+                // Send data if all OK
                 data.Initialize(SMSG_LEARNED_SPELL);
                 Log::getSingleton( ).outDetail("TalentID: %d Rank: %d Spell: %d\n", talent_id, requested_rank, spellid);
                 data << spellid;
@@ -79,7 +81,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                 GetPlayer( )->addSpell((uint16)spellid);
             }
 
-//Update Talent Points
+            // Update Talent Points
             GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
         }
     }

@@ -44,7 +44,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
         return;
     }
 
-//uint32 quest_status = sWorld.mCreatures[guid1]->getQuestStatus(GetPlayer());
+    // uint32 quest_status = sWorld.mCreatures[guid1]->getQuestStatus(GetPlayer());
 
     uint32 questStatus = pCreature->getQuestStatus(GetPlayer());
 
@@ -121,7 +121,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
         }
         else
         {
-// Incomplete Quest
+            // Incomplete Quest
             const char *title = pCreature->getQuestTitle(quest_id);
             const char *incompleteText = pCreature->getQuestIncompleteText(quest_id);
 
@@ -135,21 +135,21 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
             data << uint8(0x06) << uint8(0x00) << uint8(0x00) << uint8(0x00);
             data << uint8(0x01) << uint8(0x00) << uint8(0x00) << uint8(0x00);
             data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
-// setting this to anything...
+            // setting this to anything...
             data << uint8(0x01) << uint8(0x00) << uint8(0x00) << uint8(0x00);
-// with this set to anything, enables "continue" to comlete quest
+            // with this set to anything, enables "continue" to comlete quest
             data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
             data << uint8(0x01) << uint8(0x00) << uint8(0x00) << uint8(0x00);
 
             WPAssert(data.size() == 8 + 4 + strlen(title)+1 + strlen(incompleteText)+1 + 28);
             SendPacket( &data );
-//GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_CHOOSE_REWARD);
+            // GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_CHOOSE_REWARD);
             Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS" );
         }
     }
     else if(qg_status == QUEST_STATUS_AVAILABLE)
     {
-// Send quest details
+        // Send quest details
         const char *title = pCreature->getQuestTitle(quest_id);
         const char *details = pCreature->getQuestDetails(quest_id);
         const char *objectives = pCreature->getQuestObjectives(quest_id);
@@ -215,14 +215,14 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     uint16 log_slot = GetPlayer()->getOpenQuestSlot();
     if (log_slot == 0)
     {
-// TODO:  Send log full message
+        // TODO:  Send log full message
         return;
     }
 
     GetPlayer()->SetUInt32Value(log_slot, quest_id);
     GetPlayer()->SetUInt32Value(log_slot+1, uint32(0x337));
 
-// SendPacket( &data );
+    // SendPacket( &data );
     Log::getSingleton( ).outDebug( "WORLD: Sent Quest Acceptance 0xA9" );
 
     if (pQuest->m_targetGuid != 0)
@@ -270,13 +270,13 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_QUEST_QUERY_RESPONSE );
     data << quest_id;
 
-// tdata
+    // tdata
     data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
     data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
     data << uint32(pQuest->m_zone);
 
     data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
-// reputation faction?
+    // reputation faction?
     data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
     data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
 
@@ -312,7 +312,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     data << objectives;
     data << details;
 
-// quest requirements
+    // quest requirements
     data << uint8(0);
     data << uint32(pQuest->m_questMobId[0])  << uint32(pQuest->m_questMobCount[0]);
     data << uint32(pQuest->m_questItemId[0]) << uint32(pQuest->m_questItemCount[0]);
@@ -324,7 +324,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     data << uint32(pQuest->m_questItemId[3]) << uint32(pQuest->m_questItemCount[3]);
     data << uint32(0);
 
-// not sure
+    // not sure
     WPAssert(data.size() == 140 + strlen(title)+1 + strlen(details)+1 + strlen(objectives)+1 + 69 + 4);
     SendPacket( &data );
     Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE" );
@@ -334,106 +334,107 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
 void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 {
 /*
-Log::getSingleton( ).outString( "WORLD: Recieved CMSG_QUESTGIVER_CHOOSE_REWARD" );
+    Log::getSingleton( ).outString( "WORLD: Recieved CMSG_QUESTGIVER_CHOOSE_REWARD" );
 
-uint32 guid1,guid2,quest_id,rewardid;
-WorldPacket data;
+    uint32 guid1,guid2,quest_id,rewardid;
+    WorldPacket data;
 
-recv_data >> guid1 >> guid2 >> quest_id >> rewardid;
+    recv_data >> guid1 >> guid2 >> quest_id >> rewardid;
 
-Quest *pQuest = objmgr.getQuest(quest_id);
+    Quest *pQuest = objmgr.getQuest(quest_id);
 
-data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
-data << quest_id;
-data.append(uint32(0x03));  // unsure
-data.append(uint32(pQuest->m_questXp));
-data.append(uint32(pQuest->m_rewardGold));
-data << uint32(0x00);
-WPAssert(data.size() == 20);
-SendPacket( &data );
+    data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
+    data << quest_id;
+    data.append(uint32(0x03));  // unsure
+    data.append(uint32(pQuest->m_questXp));
+    data.append(uint32(pQuest->m_rewardGold));
+    data << uint32(0x00);
+    WPAssert(data.size() == 20);
+    SendPacket( &data );
 
-GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
+    GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
 
-if (pQuest->m_targetGuid != 0 && pQuest->m_originalGuid != 0)
-{
-// Do some special actions for "Talk to..." quests
-UpdateMask npcMask;
-npcMask.setCount(UNIT_END);
-npcMask.setBit(OBJECT_FIELD_GUID );
-npcMask.setBit(OBJECT_FIELD_GUID+1 );
-npcMask.setBit(UNIT_NPC_FLAGS );
-// added code to buffer flags and set back so other players don't see the change -RG
-// note that this buffering is *not* thread safe and should be only temporary
+    if (pQuest->m_targetGuid != 0 && pQuest->m_originalGuid != 0)
+    {
+        // Do some special actions for "Talk to..." quests
+        UpdateMask npcMask;
+        npcMask.setCount(UNIT_END);
+        npcMask.setBit(OBJECT_FIELD_GUID );
+        npcMask.setBit(OBJECT_FIELD_GUID+1 );
+        npcMask.setBit(UNIT_NPC_FLAGS );
+        // added code to buffer flags and set back so other players don't see the change -RG
+        // note that this buffering is *not* thread safe and should be only temporary
 
-Creature *unit = objmgr.GetObject<Creature>(pQuest->m_originalGuid);
-WPAssert(unit);
+        Creature *unit = objmgr.GetObject<Creature>(pQuest->m_originalGuid);
+        WPAssert(unit);
 
-uint32 valuebuffer = unit->GetUInt32Value( UNIT_NPC_FLAGS  );
-unit->SetUInt32Value(UNIT_NPC_FLAGS , uint32(2));
-unit->UpdateObject(&npcMask, &data);
-SendPacket(&data);
-unit->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
+        uint32 valuebuffer = unit->GetUInt32Value( UNIT_NPC_FLAGS  );
+        unit->SetUInt32Value(UNIT_NPC_FLAGS , uint32(2));
+        unit->UpdateObject(&npcMask, &data);
+        SendPacket(&data);
+        unit->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
 
-unit = objmgr.GetObject<Creature>( pQuest->m_targetGuid );
-WPAssert(unit);
+        unit = objmgr.GetObject<Creature>( pQuest->m_targetGuid );
+        WPAssert(unit);
 
-valuebuffer = unit->GetUInt32Value(UNIT_NPC_FLAGS );
-unit->SetUInt32Value(UNIT_NPC_FLAGS , uint32(2));
-unit->UpdateObject(&npcMask, &data);
-SendPacket(&data);
-unit->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
-}
+        valuebuffer = unit->GetUInt32Value(UNIT_NPC_FLAGS );
+        unit->SetUInt32Value(UNIT_NPC_FLAGS , uint32(2));
+        unit->UpdateObject(&npcMask, &data);
+        SendPacket(&data);
+        unit->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
+    }
 
-Log::getSingleton( ).outString( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE" );
+    Log::getSingleton( ).outString( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE" );
 
-uint16 log_slot = GetPlayer()->getQuestSlot(quest_id);
+    uint16 log_slot = GetPlayer()->getQuestSlot(quest_id);
 
-// Set player object with rewards!
-Player *chr = GetPlayer();
+    // Set player object with rewards!
+    Player *chr = GetPlayer();
 
-uint32 guid = chr->GetGUIDLow();
+    uint32 guid = chr->GetGUIDLow();
 
-chr->giveXP(pQuest->m_questXp);
-if (pQuest->m_rewardGold > 0)
-{
-uint32 newCoinage = chr->GetUInt32Value(PLAYER_FIELD_COINAGE ) + pQuest->m_rewardGold;
-chr->SetUInt32Value(PLAYER_FIELD_COINAGE , newCoinage);
-}
+    chr->giveXP(pQuest->m_questXp);
+    if (pQuest->m_rewardGold > 0)
+    {
+        uint32 newCoinage = chr->GetUInt32Value(PLAYER_FIELD_COINAGE ) + pQuest->m_rewardGold;
+        chr->SetUInt32Value(PLAYER_FIELD_COINAGE , newCoinage);
+    }
 
-chr->SetUInt32Value(log_slot, 0);
-chr->SetUInt32Value(log_slot+1, 0);
-chr->SetUInt32Value(log_slot+2, 0);
-chr->SetUInt32Value(log_slot+3, 0);
+    chr->SetUInt32Value(log_slot, 0);
+    chr->SetUInt32Value(log_slot+1, 0);
+    chr->SetUInt32Value(log_slot+2, 0);
+    chr->SetUInt32Value(log_slot+3, 0);
 */
 }
 
 
 void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data )
 {
-/*  Not really sure what this is all about.  Sent from a SMSG_QUESTGIVER_REQUEST_ITEMS
+/*
+    // Not really sure what this is all about.  Sent from a SMSG_QUESTGIVER_REQUEST_ITEMS
 
-uint32 guid1, guid2, quest_id;
-recv_data >> guid1 >> guid2 >> quest_id;
+    uint32 guid1, guid2, quest_id;
+    recv_data >> guid1 >> guid2 >> quest_id;
 
-char *title = sWorld.mCreatures[guid1]->getQuestTitle(quest_id);
-char *details = sWorld.mCreatures[guid1]->getQuestCompleteText(quest_id);
+    char *title = sWorld.mCreatures[guid1]->getQuestTitle(quest_id);
+    char *details = sWorld.mCreatures[guid1]->getQuestCompleteText(quest_id);
 
-unsigned char tdata[] =
-{
-0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
-};
+    unsigned char tdata[] =
+    {
+        0x01, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+        0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
+    };
 
-data.Initialize( 8+4+strlen(title)+1 + strlen(details)+1 +sizeof(tdata), SMSG_QUESTGIVER_OFFER_REWARD );
-data << guid1 << guid2 << uint32( 0x1 );
-data.append( title, strlen(title)+1 );
-data.append( details, strlen(details)+1 );
-data.append( tdata, sizeof(tdata) );
-SendPacket( &data );
-Log::getSingleton( ).outString( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD" );
-GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_CHOOSE_REWARD);
+    data.Initialize( 8+4+strlen(title)+1 + strlen(details)+1 +sizeof(tdata), SMSG_QUESTGIVER_OFFER_REWARD );
+    data << guid1 << guid2 << uint32( 0x1 );
+    data.append( title, strlen(title)+1 );
+    data.append( details, strlen(details)+1 );
+    data.append( tdata, sizeof(tdata) );
+    SendPacket( &data );
+    Log::getSingleton( ).outString( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD" );
+    GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_CHOOSE_REWARD);
 */
 }
 
@@ -441,27 +442,27 @@ GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_CHOOSE_REWARD);
 void WorldSession::SetNpcFlagsForTalkToQuest(const uint64 &guid, const uint64 &targetGuid)
 {
 /*
-// Do some special actions for "Talk to..." quests
-WorldPacket data;
-UpdateMask npcMask;
+    // Do some special actions for "Talk to..." quests
+    WorldPacket data;
+    UpdateMask npcMask;
 
-npcMask.setCount(UNIT_END);
-npcMask.setBit(UNIT_NPC_FLAGS );
+    npcMask.setCount(UNIT_END);
+    npcMask.setBit(UNIT_NPC_FLAGS );
 
-Creature* pGiver = objmgr.GetObject<Creature>(guid1);
-uint32 valuebuffer = pGiver->GetUInt32Value( UNIT_NPC_FLAGS  );
-pGiver->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
-pGiver->UpdateObject(&npcMask, &data);
-SendPacket(&data);
-pGiver->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
+    Creature* pGiver = objmgr.GetObject<Creature>(guid1);
+    uint32 valuebuffer = pGiver->GetUInt32Value( UNIT_NPC_FLAGS  );
+    pGiver->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
+    pGiver->UpdateObject(&npcMask, &data);
+    SendPacket(&data);
+    pGiver->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
 
-Creature* pTarget = objmgr.GetObject<Creature>(targetGuid);
+    Creature* pTarget = objmgr.GetObject<Creature>(targetGuid);
 
-valuebuffer = pTarget->GetUInt32Value(UNIT_NPC_FLAGS );
-pTarget->SetUInt32Value(UNIT_NPC_FLAGS , uint32(2));
-pTarget->UpdateObject(&npcMask, &data);
-SendPacket(&data);
-pTarget->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
+    valuebuffer = pTarget->GetUInt32Value(UNIT_NPC_FLAGS );
+    pTarget->SetUInt32Value(UNIT_NPC_FLAGS , uint32(2));
+    pTarget->UpdateObject(&npcMask, &data);
+    SendPacket(&data);
+    pTarget->SetUInt32Value(UNIT_NPC_FLAGS , valuebuffer);
 */
 }
 

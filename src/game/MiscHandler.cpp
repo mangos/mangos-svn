@@ -66,7 +66,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     if (slot == 0)
     {
-//Our User doesn't have a free Slot in there bag
+        // Our User doesn't have a free Slot in there bag
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
         data << uint8(48);                        // Inventory Full
         data << uint64(0);
@@ -139,22 +139,22 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_LOOT_RESPONSE );
 
     data << guid;
-// 0 =  Premission Deined | 1 = 4 = 5 = 2 = Death | 3 = Fishing
+    // 0 =  Premission Denied | 1 = 4 = 5 = 2 = Death | 3 = Fishing
     data << uint8(1);                             //loot Type
     data << uint32(pCreature->getLootMoney());
     data << uint8(tmpItemsCount);
-//for(i = 0; i < tmpItemsCount ; i++)
+    // for(i = 0; i < tmpItemsCount ; i++)
     for(i = 0; i<pCreature->getItemCount() ; i++)
     {
         if (pCreature->getItemAmount((int)i) > 0)
         {
             data << uint8(i+1);                   //Item Slot, must be > 0
             tmpLootItem = objmgr.GetItemPrototype(pCreature->getItemId((int)i));
-//item ID
+            //item ID
             data << uint32(pCreature->getItemId((int)i));
-//quantity
+            //quantity
             data << uint32(pCreature->getItemAmount((int)i));
-//Display IconID
+            //Display IconID
             data << uint32(tmpLootItem->DisplayInfoID);
             data << uint8(0) << uint32(0) << uint32(0);
         }
@@ -289,7 +289,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-//TODO: Receive message sent and relay it to an online GM
+    // TODO: Receive message sent and relay it to an online GM
     data.Initialize( SMSG_GMTICKET_CREATE );
     data << uint32(2);
 
@@ -301,7 +301,7 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-//TODO: Receive message sent and relay it to an online GM
+    // TODO: Receive message sent and relay it to an online GM
     data.Initialize( SMSG_GMTICKET_SYSTEMSTATUS );
     data << uint32(1);
 
@@ -322,7 +322,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     oldZone = GetPlayer( )->GetZoneId();
 
-//Setting new zone
+    // Setting new zone
     GetPlayer()->SetZoneId((uint16)newZone);
 }
 
@@ -349,7 +349,7 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     else
         return;
 
-// if its a new Target set Combo Points Target to 0
+    // if its a new Target set Combo Points Target to 0
     if(GetPlayer( )->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
     {
         GetPlayer( )->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
@@ -362,23 +362,23 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 {
     if( GetPlayer( ) != 0 )
     {
-// retrieve current BYTES
+        // retrieve current BYTES
         uint32 bytes1 = GetPlayer( )->GetUInt32Value( UNIT_FIELD_BYTES_1 );
         uint8 bytes[4];
 
-//        uint64 guid; no need for it in 0.12
-//        recv_data >> guid;
+        // uint64 guid; no need for it in 0.12
+        // recv_data >> guid;
 
         bytes[0] = uint8(bytes1 & 0xff);
         bytes[1] = uint8((bytes1>>8) & 0xff);
         bytes[2] = uint8((bytes1>>16) & 0xff);
         bytes[3] = uint8((bytes1>>24) & 0xff);
 
-// retrieve new stand state
+        // retrieve new stand state
         uint8 animstate;
         recv_data >> animstate;
 
-// if (bytes[0] == animstate) break;
+        // if (bytes[0] == animstate) break;
         bytes[0] = animstate;
 
         uint32 newbytes = (bytes[0]) + (bytes[1]<<8) + (bytes[2]<<16) + (bytes[3]<<24);
@@ -392,16 +392,16 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_FRIEND_LIST"  );
-// TODO: send SMSG_FRIEND_LIST with a list of friend->fixed
-//<nothin>void Player::LoadFromDB( uint32 guid )
-//<nothin>add a new function in Player
-//<nothin>_LoadFriendList();
-//<nothin>and _SaveFriendList();
-//<Deadknight>ok
-//<Deadknight> after that one goes to logout other one?
-//<nothin>call _SaveFriendList(); in void Player::SaveToDB()
-//<Deadknight>ha
-//Deadknight
+    // TODO: send SMSG_FRIEND_LIST with a list of friend->fixed
+    // <nothin>void Player::LoadFromDB( uint32 guid )
+    // <nothin>add a new function in Player
+    // <nothin>_LoadFriendList();
+    // <nothin>and _SaveFriendList();
+    // <Deadknight>ok
+    // <Deadknight> after that one goes to logout other one?
+    // <nothin>call _SaveFriendList(); in void Player::SaveToDB()
+    // <Deadknight>ha
+    // Deadknight
     unsigned char Counter=0;
     uint64 guid;
     std::stringstream query;
@@ -471,14 +471,14 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     {
         sLog.outError("There is no social table");
     }
-//Finish
+    //Finish
 
     data.Initialize( SMSG_FRIEND_LIST );
     data << Counter;
 
     for (int j=0; j<Counter; j++)
     {
-// adding friend
+        // adding friend
         Log::getSingleton( ).outDetail( "WORLD: Adding Friend - Guid:%ld, Status:%d, Area:%d, Level:%d Class:%d",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
 
         data << friendstr[j].PlayerGUID << friendstr[j].Status ;
@@ -509,7 +509,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     uint32 friendClass = 0;
     WorldPacket data;
 
-// TODO: Add Friend To list, and fill in FriendResult.//fixed
+    // TODO: Add Friend To list, and fill in FriendResult.//fixed
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
     if (friendGuid > 0)
     {
@@ -527,7 +527,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         Log::getSingleton( ).outDetail( "WORLD: %s Guid not found ", friendName.c_str() );
     }
 
-// Send reposnse.
+    // Send response.
     data.Initialize( SMSG_FRIEND_STATUS );
 
     if (!strcmp(GetPlayer()->GetName(),friendName.c_str()))
@@ -539,7 +539,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     {
         if (friendResult ==  FRIEND_ADDED_ONLINE || friendResult == FRIEND_ONLINE ||
             friendResult ==  FRIEND_OFFLINE
-//|| FriendResult ==  FRIEND_ADDED_OFFLINE
+            //|| FriendResult ==  FRIEND_ADDED_OFFLINE
             )
         {
             data << (uint8)friendResult << (uint64)friendGuid;
@@ -551,14 +551,14 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             data << (uint8)friendResult << (uint64)friendGuid;
         }
 
-//Deadknight addon start add buffer to social table
+        // Deadknight addon start add buffer to social table
         std::stringstream query;
         uint64 guid;
         guid=GetPlayer()->GetGUID();
 
         query << "INSERT INTO `social` VALUES ('" << friendName << "', " << guid << ", " << friendGuid << ", 'FRIEND')" ;
         sDatabase.Query( query.str().c_str() );
-//Finish
+        // Finish
     }
 
     SendPacket( &data );
@@ -581,21 +581,21 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
     int FriendLevel = 0;
     int FriendClass = 0;
 
-// TODO: Delete Friend from list, and fill in FriendResult.//finished
+    // TODO: Delete Friend from list, and fill in FriendResult.//finished
 
-// Send reposnse.
+    // Send response.
     data.Initialize( SMSG_FRIEND_STATUS );
 
     data << (uint8)FriendResult << (uint64)FriendGUID;
 
-//Deadknight Addon remove from social table
+    // Deadknight Addon remove from social table
     std::stringstream query;
     uint64 guid;
     guid=GetPlayer()->GetGUID();
 
     query << "DELETE FROM `social` WHERE `guid`=" << guid << " AND `friendid`=" << FriendGUID;
     sDatabase.Query( query.str().c_str() );
-//Finish
+    // Finish
 
     SendPacket( &data );
 
@@ -634,16 +634,19 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
+
 void WorldSession::HandleLeaveChannelOpcode( WorldPacket & recv_data )
 {
-WorldPacket data;
-std::string channelName;
-recv_data >> channelName;
-data.Initialize(SMSG_CHANNEL_NOTIFY);
-data << uint8(3);
-data << channelName;
-SendPacket( &data );
-}*/
+    WorldPacket data;
+    std::string channelName;
+    recv_data >> channelName;
+    data.Initialize(SMSG_CHANNEL_NOTIFY);
+    data << uint8(3);
+    data << channelName;
+    SendPacket( &data );
+}
+*/
+
 
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 {
@@ -757,57 +760,59 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 {
 /*
-Log::getSingleton().outDetail("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
+    Log::getSingleton().outDetail("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
 
-uint32 uiID, uiDecompressedSize;
-recv_data >> uiID;
-recv_data >> uiDecompressedSize;
+    uint32 uiID, uiDecompressedSize;
+    recv_data >> uiID;
+    recv_data >> uiDecompressedSize;
 
-ByteBuffer buff(uiDecompressedSize);
+    ByteBuffer buff(uiDecompressedSize);
 
-int err;
-if ( (err = uncompress(const_cast<uint8*>(buff.contents()), &uiDecompressedSize, const_cast<uint8*>(recv_data.contents()) + 8, (recv_data.size() - 8))) == Z_OK)
-{
-std::stringstream ss;
-ss << "UPDATE accounts SET uiconfig" << uiID << "=\"" << buff.contents() << "\" WHERE acct=" << GetAccountId() << " LIMIT 1";
-sDatabase.Execute(ss.str().c_str());
-}
+    int err;
+    if ( (err = uncompress(const_cast<uint8*>(buff.contents()), &uiDecompressedSize, const_cast<uint8*>(recv_data.contents()) + 8, (recv_data.size() - 8))) == Z_OK)
+    {
+        std::stringstream ss;
+        ss << "UPDATE accounts SET uiconfig" << uiID << "=\"" << buff.contents() << "\" WHERE acct=" << GetAccountId() << " LIMIT 1";
+        sDatabase.Execute(ss.str().c_str());
+    }
 */
 }
 
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 {
-// this function should get uiconfigX from mysql table
-// and send it to the client.
-// it works, but it crashes server, dunno why,
-// here seems all to be fine .. but on exit from funct
-// exception is thrown
+    // this function should get uiconfigX from mysql table
+    // and send it to the client.
+    // it works, but it crashes server, dunno why,
+    // here seems all to be fine .. but on exit from funct
+    // exception is thrown
     Log::getSingleton().outDetail("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 
-/*WorldPacket data;
+/*
+    WorldPacket data;
 
-uint32 id;
-recv_data >> id;
-std::stringstream ss;
+    uint32 id;
+    recv_data >> id;
+    std::stringstream ss;
 
-ss << "SELECT uiconfig" << id << " FROM accounts WHERE acct=" << GetAccountId();
-QueryResult *result = sDatabase.Query(ss.str().c_str());
-if (result)
-{
-    data.Initialize(SMSG_UPDATE_ACCOUNT_DATA);
-std::string res = result->Fetch()->GetString();
-ByteBuffer buf(res.length());
-buf.append(res.c_str(), res.length());
-uint32 destsize = (uint32)res.length();
-data << destsize;
-int err;
-if ( (err = compress(const_cast<uint8*>(data.contents()) + sizeof(uint32), &destsize, buf.contents(), buf.size())) != Z_OK)
-{
-Log::getSingleton().outDetail("Error while compressing ACCOUNT_DATA");
-}
-else SendPacket(&data);
-}*/
+    ss << "SELECT uiconfig" << id << " FROM accounts WHERE acct=" << GetAccountId();
+    QueryResult *result = sDatabase.Query(ss.str().c_str());
+    if (result)
+    {
+        data.Initialize(SMSG_UPDATE_ACCOUNT_DATA);
+        std::string res = result->Fetch()->GetString();
+        ByteBuffer buf(res.length());
+        buf.append(res.c_str(), res.length());
+        uint32 destsize = (uint32)res.length();
+        data << destsize;
+        int err;
+        if ( (err = compress(const_cast<uint8*>(data.contents()) + sizeof(uint32), &destsize, buf.contents(), buf.size())) != Z_OK)
+        {
+            Log::getSingleton().outDetail("Error while compressing ACCOUNT_DATA");
+        }
+        else SendPacket(&data);
+    }
+*/
 }
 
 
@@ -821,7 +826,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     if(action==0)
     {
         Log::getSingleton( ).outString( "MISC: Remove action from button %u", button );
-//remove the action button from the db
+        //remove the action button from the db
         GetPlayer()->removeAction(button);
     }
     else

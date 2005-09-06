@@ -786,7 +786,7 @@ enum NPCFlags
     UNIT_NPC_FLAG_VENDOR            = 4,          // Vendor (CMSG_LIST_INVENTORY, SMSG_LIST_INVENTORY)
     UNIT_NPC_FLAG_TAXIVENDOR        = 8,          // Taxi Vendor (CMSG_TAXIQUERYAVAILABLENODES, SMSG_SHOWTAXINODES)
     UNIT_NPC_FLAG_TRAINER           = 16,         // Trainer (CMSG_TRAINER_LIST, SMSG_TRAINER_LIST)
-//unknown                       = 32,
+    // unknown                         = 32,
     UNIT_NPC_FLAG_SPIRITHEALER      = 64,         // Spirithealer (CMSG_BINDER_ACTIVATE, ?)
     UNIT_NPC_FLAG_BANKER            = 128,        // Banker (CMSG_BANKER_ACTIVATE, SMSG_SHOW_BANK)
     UNIT_NPC_FLAG_PETITIONER        = 256,        // Petitioner/?Guild Charter? (CMSG_PETITION_SHOWLIST, SMSG_PETITION_SHOWLIST)

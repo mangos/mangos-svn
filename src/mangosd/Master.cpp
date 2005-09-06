@@ -75,7 +75,7 @@ bool Master::Run()
     sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
-//setting up configuration
+    //setting up configuration
     if (!Config::getSingleton().SetSource(_MANGOSD_CONFIG))
     {
         sLog.outError("\nCould not find configuration file %s.", _MANGOSD_CONFIG);
@@ -99,7 +99,7 @@ bool Master::Run()
     rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
     wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
 
-// load regeneration rates.
+    // load regeneration rates.
     sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
     sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
     sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
@@ -132,7 +132,7 @@ bool Master::Run()
     realCurrTime = realPrevTime = getMSTime();
     while (!Master::m_stopEvent)
     {
-// uint32 exceeded
+        // uint32 exceeded
         if (realPrevTime > realCurrTime)
             realPrevTime = 0;
 

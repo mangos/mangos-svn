@@ -40,18 +40,18 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 
     Log::getSingleton().outDetail("ITEM: swap, src slot: %u dst slot: %u", (uint32)srcslot, (uint32)dstslot);
 
-// these are the bags slots...ignore it for now
-//if (dstslot >= INVENTORY_SLOT_BAG_1 && dstslot <= INVENTORY_SLOT_BAG_4)
-//    dstslot = srcslot;
+    // these are the bags slots...ignore it for now
+    // if (dstslot >= INVENTORY_SLOT_BAG_1 && dstslot <= INVENTORY_SLOT_BAG_4)
+    //     dstslot = srcslot;
 
-// these are then bankbag slots...ignore them for now
-//if (dstslot >= 63 && dstslot <= 69)
-//    dstslot = srcslot;
+    // these are then bankbag slots...ignore them for now
+    // if (dstslot >= 63 && dstslot <= 69)
+    //     dstslot = srcslot;
 
     Item * dstitem = GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = GetPlayer()->GetItemBySlot(srcslot);
 
-// check to make sure items are not being put in wrong spots
+    // check to make sure items are not being put in wrong spots
     if ((srcslot >= INVENTORY_SLOT_ITEM_START && dstslot < INVENTORY_SLOT_ITEM_END) ||
         (dstslot >= INVENTORY_SLOT_BAG_START && dstslot < INVENTORY_SLOT_BAG_END))
     {
@@ -69,7 +69,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
         }
     }
 
-// error
+    // error
     if (srcslot == dstslot)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
@@ -82,11 +82,11 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-// swap items
+    // swap items
     GetPlayer()->SwapItemSlots(srcslot, dstslot);
 
-//    GetPlayer( )->BuildUpdateObjectMsg( &data, &updateMask );
-//    GetPlayer( )->SendMessageToSet( &data, false );
+    // GetPlayer( )->BuildUpdateObjectMsg( &data, &updateMask );
+    // GetPlayer( )->SendMessageToSet( &data, false );
 }
 
 
@@ -284,7 +284,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
     recv_data >> itemguid;
     recv_data >> amount;
 
-// Check if item exists
+    // Check if item exists
     if (itemguid == 0)
     {
         data.Initialize( SMSG_SELL_ITEM );
@@ -295,7 +295,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
     }
 
     Creature *unit = objmgr.GetObject<Creature>(vendorguid);
-// Check if Vendor exists
+    // Check if Vendor exists
     if (unit == NULL)
     {
         data.Initialize( SMSG_SELL_ITEM );
@@ -306,7 +306,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
     }
 
     Item *item;
-// Search the slot...
+    // Search the slot...
     for(uint8 i=0; i<39; i++)
     {
         item = GetPlayer()->GetItemBySlot(i);
@@ -329,35 +329,37 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         return;                                   //our player doesn't have this item
     }
 
-/*//adding this item to the vendor's item list... not nessesary for unlimited items
-for(i=0; i<tempunit->getItemCount();i++)
-{
-    if (tempunit->getItemId(i) == GetPlayer()->getItemIdBySlot(itemindex))
+    /*
+    // adding this item to the vendor's item list... not nessesary for unlimited items
+    for(i=0; i<tempunit->getItemCount();i++)
     {
-        tempunit->setItemAmount(i, tempunit->getItemAmount(i) + amount);
-        check = 1;
+        if (tempunit->getItemId(i) == GetPlayer()->getItemIdBySlot(itemindex))
+        {
+            tempunit->setItemAmount(i, tempunit->getItemAmount(i) + amount);
+            check = 1;
+        }
     }
-}
 
-if (check == 0)
-{
-if (tempunit->getItemCount() > 100)
-{
-data.Initialize( SMSG_SELL_ITEM );
-data << srcguid1 << srcguid2 << itemguid1 << itemguid2 << uint8(0x02);
-WPAssert(data.size() == 17);
-SendPacket( &data );
-return;
-}
-else
-tempunit->addItem(GetPlayer()->getItemIdBySlot(itemindex), amount);
-}*/
+    if (check == 0)
+    {
+        if (tempunit->getItemCount() > 100)
+        {
+            data.Initialize( SMSG_SELL_ITEM );
+            data << srcguid1 << srcguid2 << itemguid1 << itemguid2 << uint8(0x02);
+            WPAssert(data.size() == 17);
+            SendPacket( &data );
+            return;
+        }
+        else
+            tempunit->addItem(GetPlayer()->getItemIdBySlot(itemindex), amount);
+    }
+    */
 
     if (amount == 0) amount = 1;                  // ?!?
     newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) + (item->GetProto()->SellPrice) * amount);
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
 
-//removing the item from the char's inventory
+    //removing the item from the char's inventory
     GetPlayer()->RemoveItemFromSlot(slot);
 
     item->DeleteFromDB();
@@ -367,11 +369,11 @@ tempunit->addItem(GetPlayer()->getItemIdBySlot(itemindex), amount);
     data.Initialize( SMSG_SELL_ITEM );
     data << vendorguid << itemguid
         << uint8(0x05);                           // Error Codes: 0x01 = Item not Found
-//              0x02 = Vendor doesnt want that item
-//              0x03 = Vendor doesnt like you ;P
-//              0x04 = You dont own that item
-//              0x05 = Ok
-//              0x06 = Only with empty Bags !?
+                                                  //              0x02 = Vendor doesnt want that item
+                                                  //              0x03 = Vendor doesnt like you ;P
+                                                  //              0x04 = You dont own that item
+                                                  //              0x05 = Ok
+                                                  //              0x06 = Only with empty Bags !?
 
     WPAssert(data.size() == 17);
     SendPacket( &data );
@@ -410,7 +412,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     if (GetPlayer()->GetItemBySlot(slot) != 0)
         return;                                   //slot is not empty...
 
-// Find item slot
+    // Find item slot
     for(uint8 i = 0; i < unit->getItemCount(); i++)
     {
         if (unit->getItemId(i) == itemid)
@@ -423,11 +425,11 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     if( vendorslot == -1 )
         return;
 
-// Check for vendor have the required amount of that item ....
+    // Check for vendor have the required amount of that item ....
     if (amount > unit->getItemAmount(vendorslot) && unit->getItemAmount(vendorslot)>=0)
         return;
 
-// Check for gold
+    // Check for gold
     newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (objmgr.GetItemPrototype(itemid)->BuyPrice));
     if(newmoney < 0 )
     {
@@ -475,7 +477,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     if (unit == NULL)
         return;
 
-// Find free slot and break if inv full
+    // Find free slot and break if inv full
     for(uint8 i = 23; i <= 38; i++)
     {
         if (GetPlayer()->GetItemBySlot(i) == 0)
@@ -495,7 +497,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-// Find item slot
+    // Find item slot
     for(uint8 i = 0; i < unit->getItemCount(); i++)
     {
         if (unit->getItemId(i) == itemid)
@@ -508,11 +510,11 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     if( vendorslot == -1 )
         return;
 
-// Check for vendor have the required amount of that item ....
+    // Check for vendor have the required amount of that item ....
     if (amount > unit->getItemAmount(vendorslot) && unit->getItemAmount(vendorslot)>=0)
         return;
 
-// Check for gold
+    // Check for gold
     newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (objmgr.GetItemPrototype(itemid)->BuyPrice));
     if(newmoney < 0 )
     {
@@ -525,7 +527,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     }
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
 
-// unit->setItemAmount( vendorslot, unit->getItemAmount(vendorslot)-amount ); // Unlimited Items
+    // unit->setItemAmount( vendorslot, unit->getItemAmount(vendorslot)-amount ); // Unlimited Items
 
     Item *item = new Item();
     item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
@@ -558,7 +560,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     uint8 actualnumitems = 0;
     uint8 i = 0;
 
-//get actual Item Count better then alot of spaces :D
+    // get actual Item Count better then alot of spaces :D
     for(i = 0; i < numitems; i ++ )
     {
         if(unit->getItemId(i) != 0) actualnumitems += 1;
@@ -569,7 +571,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     data << guid;
     data << uint8( actualnumitems );              // num items
 
-// each item has seven uint32's
+    // each item has seven uint32's
 
     ItemPrototype * curItem;
     for(i = 0; i < numitems; i ++ )
@@ -593,13 +595,13 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
             else
             {
                 data << uint32( i + 1 );          // index ? doesn't seem to affect anything
-// item id
+                // item id
                 data << uint32( unit->getItemId(i) );
-// item icon
+                // item icon
                 data << uint32( curItem->DisplayInfoID );
-// number of items available, -1 works for infinity, although maybe just 'cause it's really big
+                // number of items available, -1 works for infinity, although maybe just 'cause it's really big
                 data << uint32( unit->getItemAmount(i) );
-// price
+                // price
                 data << uint32( curItem->BuyPrice );
                 data << uint32( 0 );              // ?
                 data << uint32( 0 );              // ?

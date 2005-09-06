@@ -149,7 +149,7 @@ bool ChatHandler::HandleInfoCommand(const char* args)
     uint32 clientsNum = sWorld.GetSessionCount();
     char buf[256];
 
-//more info come.. right now only display users connected
+    // more info come.. right now only display users connected
     sprintf((char*)buf,"Number of users connected: %i", (int) clientsNum);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
@@ -175,7 +175,7 @@ bool ChatHandler::HandleMountCommand(const char* args)
 {
     WorldPacket data;
 
-// get level
+    // get level
     uint32 theLevel = m_session->GetPlayer( )->GetUInt32Value( UNIT_FIELD_LEVEL );
     uint16 mId=1147;
     float speed = (float)8;
@@ -184,7 +184,7 @@ bool ChatHandler::HandleMountCommand(const char* args)
 
     if (theLevel < 10 )
     {
-// If not level 10, then this text will be displayed
+    // If not level 10, then this text will be displayed
         FillSystemMessageData(&data, m_session, "You have to be atleast level 10 to use this command.");
         m_session->SendPacket( &data );
         return true;
@@ -348,7 +348,7 @@ bool ChatHandler::HandleDismountCommand(const char* args)
     m_session->GetPlayer( )->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
 
-// Remove the "player locked" flag, to allow movement
+    // Remove the "player locked" flag, to allow movement
     if (m_session->GetPlayer( )->GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
         m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
 

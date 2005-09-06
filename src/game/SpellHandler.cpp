@@ -41,7 +41,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     ItemPrototype *itemProto = tmpItem->GetProto();
     spellId = itemProto->SpellId[0];
 
-// check for spell id
+    // check for spell id
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
 
     if(!spellInfo)
@@ -69,7 +69,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     Log::getSingleton( ).outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i\n",
         spellId, recvPacket.size());
 
-// check for spell id
+    // check for spell id
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)

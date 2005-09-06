@@ -61,13 +61,13 @@ enum MOD_TYPES
     SPELL_AURA_MOD_RANGED_ATTACK_POWER = 124,     // Mod Ranged Attack Power
     SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN = 125,      // Mod Melee Dmg Taken
     SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT = 126,  // Mod Melee % Dmg Taken
-// Rngd Atk Pwr Attckr Bonus
+    // Ranged Attack Power Attack Bonus
     SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS = 127,
     SPELL_AURA_MOD_POSSESS_PET = 128,             // Mod Possess Pet
     SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS = 129,   // Mod Speed Always
     SPELL_AURA_MOD_DAMAGE_DONE = 13,              // Mod Damage Done
     SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS = 130,    // Mod Mounted Speed Always
-// Mod Creature Ranged Attack Power
+    // Mod Creature Ranged Attack Power
     SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER = 131,
     SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT = 132, // Mod Increase Energy %
     SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT = 133, // Mod Max Health %

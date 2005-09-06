@@ -131,7 +131,7 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
 
     uint32 flags, time;
     float x, y, z, orientation;
-//float unk1, unk2, unk3, unk4;
+    // float unk1, unk2, unk3, unk4;
     uint32 FallTime;
 
     uint64 guid;
@@ -146,11 +146,11 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     recv_data >> FallTime;
     if ( FallTime > 1100 && !GetPlayer()->isDead() )
     {
-// need a better formula
+        // need a better formula
         guid = GetPlayer()->GetGUID();
         type = DAMAGE_FALL;
         damage = (uint32)((FallTime - 1100)/100)+1;
-//		Log::getSingleton().outError("Falling for %d time and %d damage taken.",FallTime,damage);
+        // Log::getSingleton().outError("Falling for %d time and %d damage taken.",FallTime,damage);
         WorldPacket data;
         data.Initialize(SMSG_ENVIRONMENTALDAMAGELOG);
         data << guid;
@@ -166,7 +166,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 flags, time;
     float x, y, z, orientation;
-//float unk1, unk2, unk3, unk4, unk5;
+    // float unk1, unk2, unk3, unk4, unk5;
 
     if(GetPlayer()->GetDontMove())
         return;

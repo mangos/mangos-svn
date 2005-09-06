@@ -123,21 +123,21 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             ((Creature*)pVictim)->generateLoot();
 
 /*
-    //FIXME: should we remove all equipment affects too
-    if(pVictim->GetTypeId() == TYPEID_PLAYER)
-        _RemoveAllItemMods();
+    // FIXME: should we remove all equipment affects too
+        if(pVictim->GetTypeId() == TYPEID_PLAYER)
+            _RemoveAllItemMods();
 */
         Log::getSingleton( ).outError("DealDamageAffects");
         pVictim->RemoveAllAffects();
 
-/* victim died! */
+        /* victim died! */
         pVictim->setDeathState(JUST_DIED);
 
 /*
     Send SMSG_PARTYKILLLOG 0x1e6
     To everyone in the party?
 */
-/* SMSG_ATTACKSTOP */
+        /* SMSG_ATTACKSTOP */
         uint64 attackerGuid, victimGuid;
         attackerGuid = GetGUID();
         victimGuid = pVictim->GetGUID();
@@ -145,7 +145,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         Log::getSingleton( ).outError("DealDamageAttackStop");
         pVictim->smsg_AttackStop(attackerGuid);
 
-/* Send MSG_MOVE_ROOT   0xe7 */
+        /* Send MSG_MOVE_ROOT   0xe7 */
 
 /*
     Set update values... try flags 917504
@@ -154,7 +154,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         Log::getSingleton( ).outError("DealDamageHealth1");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 
-/* then another update message, sets health to 0, maxhealth to 100, and dynamic flags */
+        /* then another update message, sets health to 0, maxhealth to 100, and dynamic flags */
         Log::getSingleton( ).outError("DealDamageHealth2");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
         pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
@@ -170,12 +170,12 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             Log::getSingleton( ).outError("DealDamageIsPlayer");
             uint32 xp = CalculateXpToGive(pVictim, this);
 
-// check running quests in case this monster belongs to it
+            // check running quests in case this monster belongs to it
             uint32 entry = 0;
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
 
-// Is this player part of a group?
+            // Is this player part of a group?
             Group *pGroup = objmgr.GetGroupByLeader(((Player*)this)->GetGroupLeader());
             if (pGroup)
             {
@@ -193,7 +193,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             else
             {
                 Log::getSingleton( ).outError("DealDamageNotInGroup");
-// update experience
+                // update experience
                 ((Player*)this)->GiveXP(xp, victimGuid);
 
                 if (pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -213,23 +213,24 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         Log::getSingleton( ).outError("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
 
-// this need alot of work.
+        // this need alot of work.
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
 
             Log::getSingleton( ).outDetail("Attacking back");
-// when attacked mobs stop moving around
+            // when attacked mobs stop moving around
             ((Creature*)pVictim)->AI_ChangeState(ATTACKING);
             ((Creature*)pVictim)->AI_AttackReaction(this, damage);
 /*
-//uint32 max_health = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-//uint32 health_porcent = (max_health*10)/100; // this if for know 10% of total healt,need changes about mobs lvls
-pVictim->AI_ChangeState(3); //if mob are attack then they stop moving around
-pVictim->AI_AttackReaction(pAttacker, damage);
+            // uint32 max_health = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+            // uint32 health_porcent = (max_health*10)/100; // this if for know 10% of total healt,need changes about mobs lvls
+            pVictim->AI_ChangeState(3); //if mob are attack then they stop moving around
+            pVictim->AI_AttackReaction(pAttacker, damage);
 
-//well mobs scape if have a movement assignet atm
-//if(health<=health_porcent)
-{}
+            //well mobs scape if have a movement assignet atm
+            // if(health<=health_porcent)
+            {
+            }
 */
             if( getClass() == 1 )
             {
@@ -239,7 +240,7 @@ pVictim->AI_AttackReaction(pAttacker, damage);
         }
         else
         {
-/* player is been attacked so they can't regen */
+            /* player is been attacked so they can't regen */
             ((Player*)pVictim)->addStateFlag(UF_ATTACKING);
 
             if( (((Player*)pVictim)->getClass()) == 1 )
@@ -248,27 +249,27 @@ pVictim->AI_AttackReaction(pAttacker, damage);
             }
         }
 
-// Deal Damage to Attacker
+        // Deal Damage to Attacker
         for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
         {
             pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
         }
-/* Commented out as it is not doing any thing ? a few printf's maybe besides that nothing
-for(std::list<struct ProcTriggerSpell>::iterator itr = pVictim->m_procSpells.begin();itr != pVictim->m_procSpells.end();itr++)  // Proc Trigger Spells for Victim
-{
-    printf("Proc Trigger spell: %u\n", itr->spellId);
-    printf("proc: %u, %u, %u\n", itr->procChance,itr->procFlags,itr->procCharges);
-//            if(rand()%100 < itr->procChance);
-        //pVictim->HandleProc(itr, procFlag);
-}
+        /* Commented out as it is not doing any thing ? a few printf's maybe besides that nothing
+        for(std::list<struct ProcTriggerSpell>::iterator itr = pVictim->m_procSpells.begin();itr != pVictim->m_procSpells.end();itr++)  // Proc Trigger Spells for Victim
+        {
+            printf("Proc Trigger spell: %u\n", itr->spellId);
+            printf("proc: %u, %u, %u\n", itr->procChance,itr->procFlags,itr->procCharges);
+            // if(rand()%100 < itr->procChance);
+            //     pVictim->HandleProc(itr, procFlag);
+        }
 
-for(std::list<struct ProcTriggerSpell>::iterator itr = m_procSpells.begin();itr != m_procSpells.end();itr++)  // Proc Trigger Spells for Attacker
-{
-printf("Proc Trigger spell: %u\n", itr->spellId);
-printf("proc: %u, %u, %u\n", itr->procChance,itr->procFlags,itr->procCharges);
-//            if(rand()%100 < itr->procChance);
-//HandleProc(itr, procFlag);
-}
+        for(std::list<struct ProcTriggerSpell>::iterator itr = m_procSpells.begin();itr != m_procSpells.end();itr++)  // Proc Trigger Spells for Attacker
+        {
+            printf("Proc Trigger spell: %u\n", itr->spellId);
+            printf("proc: %u, %u, %u\n", itr->procChance,itr->procFlags,itr->procCharges);
+            // if(rand()%100 < itr->procChance);
+            //     HandleProc(itr, procFlag);
+        }
 */
 
     }
@@ -287,61 +288,61 @@ void Unit::HandleProc(ProcTriggerSpell* pts, uint32 flag)
     case 2:{        // on struck melee
            }break;
     case 4:{        // on kill xp giver
-}break;
-case 8:{        // unknown
-}break;
-case 16:{       // on dodge
-}break;
-case 32:{       // unknown
-}break;
-case 64:
-case 66:{       // on block
-}break;
-case 112:{      // unknown
-}break;
-case 128:
-case 129:{      // on next melee attack
-}break;
-case 256:{      // on cast spell
-}break;
-case 1026:{     // on struck
-}break;
-case 1138:
-case 1139:{     // unknown
-}break;
-case 2048:{     // on hit ranged
-}break;
-case 4096:{     // on hit critical
-}break;
-case 8192:{     // on struck critical melee
-}break;
-case 16384:{    // on cast spell
-}break;
-case 32768:{    // on take damage
-}break;
-case 65536:{    // on hit critical spell
-}break;
-case 69632:{    // on critical melee
-}break;
-case 131072:{   // on hit spell
-}break;
-case 270336:{   // on struck critical
-}break;
-case 1048578:{  // on struck in combat
-}break;
-case 1049602:{  // on struck melee/ranged
-}break;
-default:{
-}break;
-}
-if(cast)
-CastSpell(this, pVictim, itr->spellId, true);
+        }break;
+    case 8:{        // unknown
+        }break;
+    case 16:{       // on dodge
+        }break;
+    case 32:{       // unknown
+        }break;
+    case 64:
+    case 66:{       // on block
+        }break;
+    case 112:{      // unknown
+        }break;
+    case 128:
+    case 129:{      // on next melee attack
+        }break;
+    case 256:{      // on cast spell
+        }break;
+    case 1026:{     // on struck
+        }break;
+    case 1138:
+    case 1139:{     // unknown
+        }break;
+    case 2048:{     // on hit ranged
+        }break;
+    case 4096:{     // on hit critical
+        }break;
+    case 8192:{     // on struck critical melee
+        }break;
+    case 16384:{    // on cast spell
+        }break;
+    case 32768:{    // on take damage
+        }break;
+    case 65536:{    // on hit critical spell
+        }break;
+    case 69632:{    // on critical melee
+        }break;
+    case 131072:{   // on hit spell
+        }break;
+    case 270336:{   // on struck critical
+        }break;
+    case 1048578:{  // on struck in combat
+        }break;
+    case 1049602:{  // on struck melee/ranged
+        }break;
+    default:{
+        }break;
+    }
+    if(cast)
+        CastSpell(this, pVictim, itr->spellId, true);
 }
 */
 
 void Unit::CastSpell(Unit* caster,Unit* Victim, uint32 spellId, bool triggered)
 {
-// check for spell id
+    // check for spell id
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)
@@ -362,27 +363,30 @@ void Unit::CastSpell(Unit* caster,Unit* Victim, uint32 spellId, bool triggered)
 
 void Unit::CalcRage( uint32 damage )
 {
-/* Calculate Rage */
+    /* Calculate Rage */
     uint32 oldRage = GetUInt32Value(UNIT_FIELD_POWER2); uint32 maxRage = GetUInt32Value(UNIT_FIELD_MAXPOWER2);
-    uint32 Rage = oldRage + damage*2; /* 2x damage */   if(Rage == oldRage) Rage = oldRage + 1; /* min rate of 1 */ if (Rage > maxRage) Rage = maxRage;     /* set the new rage */  SetUInt32Value(UNIT_FIELD_POWER2, Rage);
+    uint32 Rage = oldRage + damage*2;               /* 2x damage */
+    if(Rage == oldRage) Rage = oldRage + 1;         /* min rate of 1 */
+    if (Rage > maxRage) Rage = maxRage;             /* set the new rage */
+    SetUInt32Value(UNIT_FIELD_POWER2, Rage);
 }
 
 
 void Unit::RegenerateAll()
 {
-
-/*
-Added so that every thing regenerates at the same time
-         instead of one regenerating till full then other starting	*/
-    /* check if it's time to regen health */    if (m_regenTimer != 0)      return;
+    /* Added so that every thing regenerates at the same time
+   instead of one regenerating till full then other starting	*/
+    /* check if it's time to regen health */
+    if (m_regenTimer != 0)
+        return;
     uint32 regenDelay = 2000;
-/* Regenerate health, mana and energy if necessary. */
+    /* Regenerate health, mana and energy if necessary. */
     if (!(m_state & UF_ATTACKING))                /* NOT in Combat */
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH, true );
         Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2, false );
     }
-/* Mana Regenerates while in combat but not for 5 seconds after each spell */
+    /* Mana Regenerates while in combat but not for 5 seconds after each spell */
     Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4, true );
     Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1, true );
 
@@ -412,40 +416,121 @@ void Unit::Regenerate(uint16 field_cur, uint16 field_max, bool switch_)
     if( EnergyIncreaseRate <= 0 ) EnergyIncreaseRate = 1;
 
 /*
-//Log::getSingleton( ).outError("Regen Health Rate: %f\n", HealthIncreaseRate);
-//Log::getSingleton( ).outError("Regen Mana Rate: %f\n", ManaIncreaseRate);
-//Log::getSingleton( ).outError("Regen Rage Rate: %f\n", RageIncreaseRate);
-//Log::getSingleton( ).outError("Regen Energy Rate: %f\n", EnergyIncreaseRate);
-//Log::getSingleton( ).outError("Spirit: %i\n", Spirit);
-//Log::getSingleton( ).outError("CurrentValue: %i\n", curValue);
-//Log::getSingleton( ).outError("Class: %i\n", Class);
+    // Log::getSingleton( ).outError("Regen Health Rate: %f\n", HealthIncreaseRate);
+    // Log::getSingleton( ).outError("Regen Mana Rate: %f\n", ManaIncreaseRate);
+    // Log::getSingleton( ).outError("Regen Rage Rate: %f\n", RageIncreaseRate);
+    // Log::getSingleton( ).outError("Regen Energy Rate: %f\n", EnergyIncreaseRate);
+    // Log::getSingleton( ).outError("Spirit: %i\n", Spirit);
+    // Log::getSingleton( ).outError("CurrentValue: %i\n", curValue);
+    // Log::getSingleton( ).outError("Class: %i\n", Class);
 */
 
     uint32 oldCurValue = curValue;
 
     uint32 addvalue = 0;
 
-    switch (field_cur)  {   /* mod by hann */   case UNIT_FIELD_HEALTH:     {               switch (Class)          {           case 1: /* Warrior = 1 */               {                   addvalue = uint32(((Spirit*0.80) * HealthIncreaseRate));                    break;              }           case 2: /* Paladin = 2 */               {                   addvalue = uint32(((Spirit*0.25) * HealthIncreaseRate));                    break;              }           case 3: /* Hunter = 3 */                {                   addvalue = uint32(((Spirit*0.25) * HealthIncreaseRate));                    break;              }           case 4: /* Rogue = 4 */             {                   addvalue = uint32(((Spirit*0.50) * HealthIncreaseRate));                    break;              }           case 5: /* Priest = 5 */                {                   addvalue = uint32(((Spirit*0.10) * HealthIncreaseRate));                    break;              }           case 7: /* Shaman = 7 */                {                   addvalue = uint32((((Spirit*0.11)+9) * HealthIncreaseRate));                    break;              }           case 8: /* Mage = 8 */              {                   curValue+=uint32(((Spirit*0.10) * HealthIncreaseRate));                 break;              }           case 9: /* Warlock = 9 */               {                   addvalue = uint32(((Spirit*0.11) * HealthIncreaseRate));                    break;              }           case 11: /* Druid = 11 */               {                   /* TODO: change this one, cause on wowwow's forums hp regen					   formula for druid was UNKNOWN */                 addvalue = uint32(((Spirit+10) * HealthIncreaseRate));                  break;              }           default: /* Poor Creatures got left out */              {                   addvalue = uint32(((Spirit+10) * HealthIncreaseRate));                  break;              }           }
-    break;
-    }   /* mod by hann */   case UNIT_FIELD_POWER1: /* mana */      {                       switch (Class)          {                   case 2: /* Paladin = 2 */               {                   addvalue = uint32((((Spirit/4)+8) * ManaIncreaseRate));                 break;              }           case 3: /* Hunter = 3 */                {                   addvalue = uint32((((Spirit/4)+11) * ManaIncreaseRate));                    break;              }           case 5: /* Priest = 5 */                {                   addvalue = uint32((((Spirit/4)+13) * ManaIncreaseRate));                    break;              }           case 7: /* Shaman = 7 */                {                   addvalue = uint32((((Spirit/5)+17) * ManaIncreaseRate));                    break;              }           case 8: /* Mage = 8 */              {                   addvalue = uint32((((Spirit/4)+11) * ManaIncreaseRate));                    break;              }           case 9: /* Warlock = 9 */               {                   addvalue = uint32((((Spirit/4)+8) * ManaIncreaseRate));                 break;              }           case 11: /* Druid = 11 */               {                   addvalue = uint32((((Spirit/5)+15) * ManaIncreaseRate));                    break;              }           default: /* Poor Creatures got left out */              {                   addvalue = uint32((Spirit * ManaIncreaseRate));                 break;                  }           }           break;                  }
-    case UNIT_FIELD_POWER2: /* rage */      {           /* formula for rage required */         addvalue = uint32((1 * RageIncreaseRate));
-    break;
+    switch (field_cur)
+    {
+        /* mod by hann */
+        case UNIT_FIELD_HEALTH:{
+            switch (Class)
+            {
+                case 1: /* Warrior = 1 */{
+                    addvalue = uint32(((Spirit*0.80) * HealthIncreaseRate));
+                    break;              }
+               case 2: /* Paladin = 2 */{
+                    addvalue = uint32(((Spirit*0.25) * HealthIncreaseRate));
+                    break;              }
+                case 3: /* Hunter = 3 */{
+                    addvalue = uint32(((Spirit*0.25) * HealthIncreaseRate));
+                    break;              }
+               case 4: /* Rogue = 4 */  {
+                    addvalue = uint32(((Spirit*0.50) * HealthIncreaseRate));
+                    break;              }
+               case 5: /* Priest = 5 */ {
+                    addvalue = uint32(((Spirit*0.10) * HealthIncreaseRate));
+                    break;              }
+               case 7: /* Shaman = 7 */ {
+                    addvalue = uint32((((Spirit*0.11)+9) * HealthIncreaseRate));
+                    break;              }
+               case 8: /* Mage = 8 */   {
+                   curValue+=uint32(((Spirit*0.10) * HealthIncreaseRate));
+                    break;              }
+               case 9: /* Warlock = 9 */{
+                   addvalue = uint32(((Spirit*0.11) * HealthIncreaseRate));
+                   break;               }
+               case 11: /* Druid = 11 */{
+                    /* TODO: change this one, cause on wowwow's forums hp regen
+					   formula for druid was UNKNOWN */
+                    addvalue = uint32(((Spirit+10) * HealthIncreaseRate));
+                    break;              }
+               default: /* Poor Creatures got left out */{
+                   addvalue = uint32(((Spirit+10) * HealthIncreaseRate));
+                      break;            }
+            }
+            break; }
+        /* mod by hann */
+        case UNIT_FIELD_POWER1: /* mana */{
+            switch (Class)
+            {
+                case 2: /* Paladin = 2 */               {
+                    addvalue = uint32((((Spirit/4)+8) * ManaIncreaseRate));
+                    break;              }
+                case 3: /* Hunter = 3 */                {
+                    addvalue = uint32((((Spirit/4)+11) * ManaIncreaseRate));
+                    break;              }
+                case 5: /* Priest = 5 */                {
+                    addvalue = uint32((((Spirit/4)+13) * ManaIncreaseRate));
+                    break;              }
+                case 7: /* Shaman = 7 */                {
+                    addvalue = uint32((((Spirit/5)+17) * ManaIncreaseRate));
+                    break;              }
+                case 8: /* Mage = 8 */              {
+                    addvalue = uint32((((Spirit/4)+11) * ManaIncreaseRate));
+                    break;              }
+                case 9: /* Warlock = 9 */               {
+                    addvalue = uint32((((Spirit/4)+8) * ManaIncreaseRate));
+                    break;              }
+                case 11: /* Druid = 11 */               {
+                    addvalue = uint32((((Spirit/5)+15) * ManaIncreaseRate));
+                    break;              }
+                default: /* Poor Creatures got left out */              {
+                    addvalue = uint32((Spirit * ManaIncreaseRate));
+                    break;                  }
+           }
+           break;}
+        case UNIT_FIELD_POWER2: /* rage */{
+            /* formula for rage required */
+            addvalue = uint32((1 * RageIncreaseRate));
+            break;}
+
+        case UNIT_FIELD_POWER4: /* energy */{
+            addvalue = uint32(20);
+            break;}
+
+        default:{
+            break;}
+    }
+    if(addvalue == 0) addvalue = 1; /* min rate of 1 */
+    if (switch_)
+    {
+        /* Log::getSingleton( ).outError("StandState: %i\n", getStandState()); */
+        if((getStandState() == 1) || (getStandState() == 3))
+        {
+            /* we are sitting */
+            addvalue *= 2;
+        }
+        curValue += addvalue;
+        if (curValue > maxValue) curValue = maxValue;
+        SetUInt32Value(field_cur, curValue);
+    }
+    else
+    {
+        curValue -= addvalue;
+        if (curValue > maxValue) curValue = 0;
+        SetUInt32Value(field_cur, curValue);
+    }
 }
-
-
-case UNIT_FIELD_POWER4: /* energy */        {                       addvalue = uint32(20);
-break;
-}
-
-
-default:
-{
-    break;
-}
-
-
-}
-if(addvalue == 0) addvalue = 1; /* min rate of 1 */ if (switch_)    {       /* Log::getSingleton( ).outError("StandState: %i\n", getStandState()); */       if((getStandState() == 1) || (getStandState() == 3))        {           /* we are sitting */            addvalue *= 2;      }       curValue += addvalue;       if (curValue > maxValue) curValue = maxValue;       SetUInt32Value(field_cur, curValue);    }   else    {       curValue -= addvalue;       if (curValue > maxValue) curValue = 0;      SetUInt32Value(field_cur, curValue);    }}
 
 //================================================================================================
 //  AttackerStateUpdate
@@ -529,7 +614,7 @@ void Unit::AttackerStateUpdate(Unit *pVictim,uint32 damage)
     data << (uint32)damage;
     data << (uint8)1;                             // Damage type counter
 
-// for each...
+    // for each...
     data << damageType;                           // Damage type, // 0 - white font, 1 - yellow
     data << (uint32)0;                            // damage float
     data << (uint32)damage;                       // Damage amount
@@ -568,7 +653,7 @@ void Unit::smsg_AttackStart(Unit* pVictim)
 {
     WorldPacket data;
     Player* pThis = objmgr.GetObject<Player>(GetGUID());
-// Prevent user from ignoring attack speed and stopping and start combat really really fast
+    // Prevent user from ignoring attack speed and stopping and start combat really really fast
     if(!isAttackReady())
         setAttackTimer(uint32(0));
     else if(!canReachWithAttack(pVictim))
@@ -592,16 +677,16 @@ void Unit::smsg_AttackStart(Unit* pVictim)
             pThis->GetSession()->SendPacket(&data);
     }
 
-// Send out ATTACKSTART
+    // Send out ATTACKSTART
     data.Initialize( SMSG_ATTACKSTART );
     data << GetGUID();
     data << pVictim->GetGUID();
     SendMessageToSet(&data, true);
     Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_ATTACKSTART" );
 
-// FLAGS changed so other players see attack animation
-//    addUnitFlag(0x00080000);
-//    setUpdateMaskBit(UNIT_FIELD_FLAGS );
+    // FLAGS changed so other players see attack animation
+    // addUnitFlag(0x00080000);
+    // setUpdateMaskBit(UNIT_FIELD_FLAGS );
 }
 
 
@@ -747,16 +832,16 @@ bool Unit::RemoveAffect(uint32 spellId)
 
 void Unit::RemoveAllAffects()
 {
-/* Changed Just testing: Please Feel Free to change back to teh other way but comment it this time :D */
+    /* Changed Just testing: Please Feel Free to change back to the other way but comment it this time :D */
     Log::getSingleton( ).outError("RemoveAllAffects");
     AffectList::iterator i;
     Affect::ModList::const_iterator j;
-//    Affect *aff;
+    // Affect *aff;
 
     for (i = m_affects.begin(); i != m_affects.end(); i++)
     {
         Log::getSingleton( ).outError("First Loop");
-//Affect *aff = *i;
+        // Affect *aff = *i;
         Log::getSingleton( ).outError("Affect set");
         for (j = (*i)->GetModList().begin(); j != (*i)->GetModList().end(); j++)
         {
@@ -767,12 +852,12 @@ void Unit::RemoveAllAffects()
         _RemoveAura((*i));
     }
     Log::getSingleton( ).outError("Erase");
-//for (i = m_affects.begin(); i != m_affects.end(); i++)
-//{
-//	m_affects.erase(i);
-//}
+    // for (i = m_affects.begin(); i != m_affects.end(); i++)
+    // {
+    //     m_affects.erase(i);
+    // }
     m_affects.clear();
-//delete aff;
+    // delete aff;
     return;
 }
 
@@ -788,40 +873,40 @@ void Unit::RemoveAllAffects()
     uint8 t = 0;
     uint8 s = 0;
     for (i = m_affects.begin(); i != m_affects.end(); i = next)
-{
-t+=1;
-Log::getSingleton( ).outError("RemoveAllAffects: MainLoop");
-next = i;
-next++;
+    {
+        t+=1;
+        Log::getSingleton( ).outError("RemoveAllAffects: MainLoop");
+        next = i;
+        next++;
 
-aff = *i;
-s = 0;
-for (Affect::ModList::const_iterator j = aff->GetModList().begin();
-j != aff->GetModList().end(); i++)
-{
-s +=1;
-Log::getSingleton( ).outError("RemoveAllAffects: Secondaryloop");
-ApplyModifier(&(*j), false, aff);
-if(s == 20)
-{
-Log::getSingleton( ).outError("RemoveAllAffects: Second Loop Reached Limit");
-break;
-}
-}
-Log::getSingleton( ).outError("RemoveAllAffects: RemoveAura");
-_RemoveAura(aff);
-Log::getSingleton( ).outError("RemoveAllAffects: Erase Affect");
-m_affects.erase(i);
+        aff = *i;
+        s = 0;
+        for (Affect::ModList::const_iterator j = aff->GetModList().begin();
+        j != aff->GetModList().end(); i++)
+        {
+            s +=1;
+            Log::getSingleton( ).outError("RemoveAllAffects: Secondaryloop");
+            ApplyModifier(&(*j), false, aff);
+            if(s == 20)
+            {
+                Log::getSingleton( ).outError("RemoveAllAffects: Second Loop Reached Limit");
+                break;
+            }
+        }
+        Log::getSingleton( ).outError("RemoveAllAffects: RemoveAura");
+        _RemoveAura(aff);
+        Log::getSingleton( ).outError("RemoveAllAffects: Erase Affect");
+        m_affects.erase(i);
 
-delete aff;
-if(t == 80)
-{
-Log::getSingleton( ).outError("RemoveAllAffects: First Loop Reached Limit");
-break;
-}
-}
+        delete aff;
+        if(t == 80)
+        {
+            Log::getSingleton( ).outError("RemoveAllAffects: First Loop Reached Limit");
+            break;
+        }
+    }
 
-return;
+    return;
 }
 */
 
@@ -1463,7 +1548,7 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
                     printf("Unknown Shapeshift Type\n");
                 } break;
             }
-// check for spell id
+            // check for spell id
             SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
 
             if(!spellInfo)
@@ -1485,16 +1570,17 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
                         type = 1;
                     }
                     uint32 sBasePoints = (uint32)sqrt((float)(spellInfo->EffectBasePoints[i]*spellInfo->EffectBasePoints[i]));
-// Periodic Trigger Damage
+                    // Periodic Trigger Damage
                     if(spellInfo->EffectApplyAuraName[i] == 3)
                     {
                         damage = spellInfo->EffectBasePoints[i]+rand()%spellInfo->EffectDieSides[i]+1;
                         tmpAff->SetDamagePerTick((uint16)damage, spellInfo->EffectAmplitude[i]);
                         tmpAff->SetNegative();
-// Periodic Trigger Spell
-                    }else if(spellInfo->EffectApplyAuraName[i] == 23)
-                    tmpAff->SetPeriodicTriggerSpell(spellInfo->EffectTriggerSpell[i],spellInfo->EffectAmplitude[i]);
-// Periodic Heal
+                    // Periodic Trigger Spell
+                    }
+                    else if(spellInfo->EffectApplyAuraName[i] == 23)
+                        tmpAff->SetPeriodicTriggerSpell(spellInfo->EffectTriggerSpell[i],spellInfo->EffectAmplitude[i]);
+                    // Periodic Heal
                     else if(spellInfo->EffectApplyAuraName[i] == 8)
                         tmpAff->SetHealPerTick(damage,spellInfo->EffectAmplitude[i]);
                     else
@@ -1791,7 +1877,7 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
         }break;
         case SPELL_AURA_MOD_ATTACK_POWER:
         {
-//apply ? SetUInt32Value(UNIT_FIELD_ATTACKPOWER,GetUInt32Value(UNIT_FIELD_ATTACKPOWER) + mod->GetAmount()) : SetUInt32Value(UNIT_FIELD_ATTACKPOWER,GetUInt32Value(UNIT_FIELD_ATTACKPOWER) - mod->GetAmount());
+            // apply ? SetUInt32Value(UNIT_FIELD_ATTACKPOWER,GetUInt32Value(UNIT_FIELD_ATTACKPOWER) + mod->GetAmount()) : SetUInt32Value(UNIT_FIELD_ATTACKPOWER,GetUInt32Value(UNIT_FIELD_ATTACKPOWER) - mod->GetAmount());
             apply ? SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS) + mod->GetAmount()) : SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS) - mod->GetAmount());
         }break;
         default:
@@ -1844,7 +1930,7 @@ void Unit::_UpdateAura()
                 {
                     printf("remove aura from %u\n", pGroupGuy->GetGUID());
                     pGroupGuy->RemoveAffectById(m_aura->GetId());
-//pGroupGuy->SetAffDuration(m_aura->GetId(),this,0);
+                    // pGroupGuy->SetAffDuration(m_aura->GetId(),this,0);
                 }
             }
         }
@@ -1884,7 +1970,7 @@ void Unit::_UpdateSpells( uint32 time )
             if(!attacker)
                 attacker = (Unit*) objmgr.GetObject<Creature>(aff->GetCasterGUID());
 
-// FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
+            // FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
             if(attacker)
             {
                 if(this->isAlive())
@@ -1893,8 +1979,8 @@ void Unit::_UpdateSpells( uint32 time )
         }
         if( AffResult == 4 || AffResult == 6 || AffResult == 12 || AffResult == 14)
         {
-// Trigger Spell
-// check for spell id
+            // Trigger Spell
+            // check for spell id
             SpellEntry *spellInfo = sSpellStore.LookupEntry( aff->GetSpellPerTick() );
 
             if(!spellInfo)
@@ -1918,7 +2004,7 @@ void Unit::_UpdateSpells( uint32 time )
             if(!attacker)
                 attacker = (Unit*) objmgr.GetObject<Creature>(aff->GetCasterGUID());
 
-// FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
+            // FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
             if(attacker)
             {
                 if(this->isAlive())
@@ -1942,7 +2028,7 @@ void Unit::_UpdateSpells( uint32 time )
 
 void Unit::castSpell( Spell * pSpell )
 {
-// check if we have a spell already casting etc
+    // check if we have a spell already casting etc
     if(m_currentSpell)
     {
         m_currentSpell->cancel();
@@ -1973,7 +2059,7 @@ void Unit::_AddAura(Affect *aff)
         return;
     }
 
-//UNIT_FIELD_AURAFLAGS 0-7;UNIT_FIELD_AURAFLAGS+1 8-15;UNIT_FIELD_AURAFLAGS+2 16-23 ... For each Aura 1 Byte
+    //UNIT_FIELD_AURAFLAGS 0-7;UNIT_FIELD_AURAFLAGS+1 8-15;UNIT_FIELD_AURAFLAGS+2 16-23 ... For each Aura 1 Byte
 
     WorldPacket data;
 
@@ -2046,7 +2132,7 @@ void Unit::_RemoveAura(Affect *aff)
 {
     ASSERT(aff);
 
-//UNIT_FIELD_AURAFLAGS 0-7;UNIT_FIELD_AURAFLAGS+1 8-15;UNIT_FIELD_AURAFLAGS+2 16-23 ... For each Aura 1 Byte
+    // UNIT_FIELD_AURAFLAGS 0-7;UNIT_FIELD_AURAFLAGS+1 8-15;UNIT_FIELD_AURAFLAGS+2 16-23 ... For each Aura 1 Byte
 
     uint8 slot = aff->GetAuraSlot();
 
@@ -2089,7 +2175,6 @@ float Unit::getdistance( float xe, float ye, float xz, float yz )
 
 
 /*
-
 float Unit::calcAngle( float Position1X, float Position1Y, float Position2X, float Position2Y )
 {
     float radians = atan2(Position2Y - Position1Y, Position2X - Position1X);
@@ -2099,13 +2184,13 @@ float Unit::calcAngle( float Position1X, float Position1Y, float Position2X, flo
     float angle1 = geteasyangle(angle);
     float angle2 = 360 - angle;
     float angle3 = 360 + angle;
-Log::getSingleton().outError("Angle1: %f",angle1);
-Log::getSingleton().outError("Angle2: %f",angle2);
-Log::getSingleton().outError("Angle3: %f",angle3);
-return angle1;
+    Log::getSingleton().outError("Angle1: %f",angle1);
+    Log::getSingleton().outError("Angle2: %f",angle2);
+    Log::getSingleton().outError("Angle3: %f",angle3);
+    return angle1;
 }
-
 */
+
 
 float Unit::getangle( float xe, float ye, float xz, float yz )
 {
@@ -2161,9 +2246,9 @@ bool Unit::isInFront(Unit* target,float distance)
 {
     float orientation = GetOrientation()/float(2*M_PI)*360;
     orientation += 90.0f;
-/* float FOV = 90; */
-/* float orientation = GetOrientation()/float(2*M_PI)*360; */
-/* float orientation = geteasyangle((GetOrientation() - (FOV))); */
+    /* float FOV = 90; */
+    /* float orientation = GetOrientation()/float(2*M_PI)*360; */
+    /* float orientation = geteasyangle((GetOrientation() - (FOV))); */
     return inarc(distance,GetPositionX(),GetPositionY(),float(180),GetOrientation(),target->GetPositionX(),target->GetPositionY());
 }
 
@@ -2171,7 +2256,7 @@ bool Unit::isInFront(Unit* target,float distance)
 // not the best way to do it, though
 bool Unit::setInFront(Unit* target, float distance)
 {
-//verry verry high cpu usage here actually infinite loop some times
+    // very verry high cpu usage here actually infinite loop some times
     Log::getSingleton().outError("Orentation Start: %f",GetOrientation());
     float orientation = GetOrientation()/float(2*M_PI)*360;
     orientation += 45.0f;
@@ -2194,7 +2279,7 @@ bool Unit::setInFront(Unit* target, float distance)
 
 void Unit::DeMorph()
 {
-// hope it solves it :)
+    // hope it solves it :)
     uint32 displayid = this->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
     this->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayid);
 }
@@ -2206,16 +2291,18 @@ float Unit::CalcDistance(Unit *Ua, Unit *Ub)
     return CalcDistance(Ua->getPositionX(), Ua->getPositionY(), Ua->getPositionZ(), Ub->getPositionX(), Ub->getPositionY(), Ub->getPositionZ());
 }
 
+
 float Unit::CalcDistance(Unit *Ua, float PaX, float PaY, float PaZ)
 {
     return CalcDistance(Ua->getPositionX(), Ua->getPositionY(), Ua->getPositionZ(), PaX, PaY, PaZ);
 }
 
+
 float Unit::CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, float PbZ)
 {
-float xdest = PaX - PbX;
-float ydest = PaY - PbY;
-float zdest = PaZ - PbZ;
-return sqrt(zdest*zdest + ydest*ydest + xdest*xdest);
+    float xdest = PaX - PbX;
+    float ydest = PaY - PbY;
+    float zdest = PaZ - PbZ;
+    return sqrt(zdest*zdest + ydest*ydest + xdest*xdest);
 }
 */
