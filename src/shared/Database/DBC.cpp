@@ -23,12 +23,8 @@
 
 class DBC;
 
-DBC::DBC()
+DBC::DBC() : rows(0), cols(0), dblength(0), weird2(0), tbl(NULL), db(NULL), loaded(false), format(NULL)
 {
-    tbl = NULL;
-    db = NULL;
-    loaded = false;
-    format = NULL;
 }
 
 
