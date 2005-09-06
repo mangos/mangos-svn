@@ -76,9 +76,9 @@ bool Master::Run()
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
 //setting up configuration
-    if (!Config::getSingleton().SetSource("mangos.conf"))
+    if (!Config::getSingleton().SetSource(_MANGOSD_CONFIG))
     {
-        sLog.outError("\nCould not find mangos.conf configuration.");
+        sLog.outError("\nCould not find configuration file %s.", _MANGOSD_CONFIG);
     }
 
     _StartDB();
