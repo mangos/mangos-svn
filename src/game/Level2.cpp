@@ -253,6 +253,36 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleAddSpwCommand(const char* args)
+{
+	// Added: Chance TODO: Posibility to add npc after name as well.
+	WorldPacket data;
+	char* charID = strtok((char*)args, " ");
+	if (!charID)
+		return false;
+
+	uint32 id  = atoi(charID);
+
+	/*if (!isdigit(id)) {
+		FillSystemMessageData(&data, m_session, "ID has to be a numeric value.");
+		m_session->SendPacket( &data );
+		return false;
+	}*/
+	
+	std::stringstream ss;
+	ss << "select modelid, flag, faction, level, name from creaturetemplate where entryid = " << id << '\0';
+	QueryResult *result;
+	result = sDatabase.Query( ss.str().c_str() );
+	if(result)
+	{
+		Field *fields = result->Fetch();
+		// pName, display_id, npcFlags, faction_id, level
+		SpawnCreature(m_session, fields[4].GetString(), fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32(), fields[3].GetUInt32());
+		return true;
+	}
+	else
+		return false;
+}
 
 bool ChatHandler::HandleDeleteCommand(const char* args)
 {
@@ -293,12 +323,14 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
 }
 
 
-/*bool ChatHandler::HandleSpawnTaxiCommand(const char* args)
+/*
+bool ChatHandler::HandleSpawnTaxiCommand(const char* args)
 {
     SpawnCreature(m_session, "Taxi", 20, 8, 1 , 1);
 
     return true;
-}*/
+}
+*/
 
 bool ChatHandler::HandleItemCommand(const char* args)
 {
