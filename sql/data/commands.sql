@@ -7,7 +7,7 @@
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
--- Database: `wowd`
+-- Database: `mangos`
 -- 
 
 -- 
