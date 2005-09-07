@@ -1,5 +1,10 @@
 //// Things that are added / fixed:
 
++ Fixed mangos.conf. Packet logging for world and realm is set via bool
+  value.
++ Added new GM command: ".addspw <entry id>" will add a creature via
+  template from the creaturetemplates table.
++ Add sql/data/ with default data for player creation and command help.
 + Set path to data directory via configure.
 + Daemon will now use the path to mangosd.conf set via configure.
 + Set daemon version via configure.
