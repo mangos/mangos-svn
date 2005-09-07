@@ -139,6 +139,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "emote",       3, &ChatHandler::HandleEmoteCommand,         "",   NULL },
         { "showarea",    3, &ChatHandler::HandleShowAreaCommand,      "",   NULL },
         { "hidearea",    3, &ChatHandler::HandleHideAreaCommand,      "",   NULL },
+		{ "addspw",		 2, &ChatHandler::HandleAddSpwCommand,        "",   NULL },
         { NULL,          0, NULL,                                     "",   NULL }
     };
 
@@ -337,7 +338,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     }
     else if (type == CHAT_MSG_WHISPER_INFORM)
     {
-        //Convert ChannelName back to the to Players GUID
+        // Convert ChannelName back to the to Players GUID
         guid = uint64(channelName);               //session ? session->GetPlayer()->GetGUID() : 0; // FIXME: may be receiver?
     }
 
@@ -457,7 +458,7 @@ Player * ChatHandler::getSelectedChar(WorldSession *client)
         chr = client->GetPlayer();                // autoselect
     else
         chr = objmgr.GetPlayer(guid);
-        //chr = objmgr.GetObject<Player>(guid);
+        // chr = objmgr.GetObject<Player>(guid);
 
     return chr;
 }

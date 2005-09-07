@@ -181,7 +181,7 @@ uint32 ObjectMgr::AddCreatureName(const char* name)
     AddCreatureName(id, name);
 
     std::stringstream ss;
-    ss << "INSERT INTO creature_names (name_id,creature_name) VALUES (" << id << ", '" << name << "')";
+    ss << "INSERT INTO creaturetemplate (entryid,name) VALUES (" << id << ", '" << name << "')";
     sDatabase.Execute( ss.str( ).c_str( ) );
 
     return id;
@@ -201,7 +201,7 @@ uint32 ObjectMgr::AddCreatureName(const char* name, uint32 displayid)
     AddCreatureName(id, name, displayid);
 
     std::stringstream ss;
-    ss << "INSERT INTO creature_names (name_id,creature_name,displayid) VALUES (" << id << ", '" << name << "', '" << displayid << "')";
+	ss << "INSERT INTO creaturetemplate (entryid,name,modelid) VALUES (" << id << ", '" << name << "', '" << displayid << "')";
     sDatabase.Execute( ss.str( ).c_str( ) );
 
     return id;
@@ -234,7 +234,7 @@ uint32 ObjectMgr::AddCreatureSubName(const char* name, const char* subname, uint
     AddCreatureName(cInfo);
 
     std::stringstream ss;
-    ss << "INSERT INTO creature_names (name_id,creature_name,Subname,displayid) VALUES (" << id << ", '" << name;
+    ss << "INSERT INTO creaturetemplate (entryid,_name,subname,modelid) VALUES (" << id << ", '" << name;
     ss << "', '" << subname << "', '" << displayid << "')";
     sDatabase.Execute( ss.str( ).c_str( ) );
 
@@ -297,7 +297,7 @@ void ObjectMgr::AddCreatureName(uint32 id, const char* name, uint32 displayid)
 void ObjectMgr::LoadCreatureNames()
 {
     CreatureInfo *cn;
-    QueryResult *result = sDatabase.Query( "SELECT * FROM creature_names" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM creaturetemplate" );
     if(result)
     {
         do
@@ -308,11 +308,11 @@ void ObjectMgr::LoadCreatureNames()
             cn->Id = fields[0].GetUInt32();
             cn->Name = fields[1].GetString();
             cn->SubName = fields[2].GetString();
-            cn->unknown1 = fields[3].GetUInt32();
+            // cn->unknown1 = fields[3].GetUInt32();
             cn->Type = fields[4].GetUInt32();
-            cn->unknown2 = fields[5].GetUInt32();
-            cn->unknown3 = fields[6].GetUInt32();
-            cn->unknown4 = fields[7].GetUInt32();
+            // cn->unknown2 = fields[5].GetUInt32();
+            // cn->unknown3 = fields[6].GetUInt32();
+            // cn->unknown4 = fields[7].GetUInt32();
             cn->DisplayID = fields[8].GetUInt32();
 
             AddCreatureName( cn );
@@ -321,7 +321,7 @@ void ObjectMgr::LoadCreatureNames()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(name_id) FROM creature_names" );
+    result = sDatabase.Query( "SELECT MAX(entryid) FROM creaturetemplate" );
     if(result)
     {
         m_hiNameGuid = (*result)[0].GetUInt32();
@@ -1243,7 +1243,8 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(name_id) FROM creature_names" );
+    // result = sDatabase.Query( "SELECT MAX(name_id) FROM creature_names" );
+    result = sDatabase.Query( "SELECT MAX(entryid) FROM creaturetemplate" );
     if( result )
     {
         m_hiNameGuid = (*result)[0].GetUInt32()+1;
@@ -1321,11 +1322,11 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
     switch(guidhigh)
     {
         case HIGHGUID_ITEM          : guidlow = objmgr.m_hiItemGuid++;     break;
-        // case HIGHGUID_CONTAINER   : guidlow = objmgr.m_hiItemGuid++;     break;
+        // case HIGHGUID_CONTAINER     : guidlow = objmgr.m_hiItemGuid++;     break;
         case HIGHGUID_UNIT          : guidlow = objmgr.m_hiCreatureGuid++; break;
         case HIGHGUID_PLAYER        : guidlow = objmgr.m_hiCharGuid++;     break;
         case HIGHGUID_GAMEOBJECT    : guidlow = objmgr.m_hiGoGuid++;       break;
-        // case HIGHGUID_CORPSE      : guidlow = objmgr.m_hiGoGuid++;       break;
+        // case HIGHGUID_CORPSE        : guidlow = objmgr.m_hiGoGuid++;       break;
         case HIGHGUID_DYNAMICOBJECT : guidlow = objmgr.m_hiDoGuid++;       break;
         default                     : ASSERT(guidlow);
     }

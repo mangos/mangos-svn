@@ -35,7 +35,7 @@ enum ChatMsg
 {
     CHAT_MSG_SAY                                  = 0x00,
     CHAT_MSG_PARTY                                = 0x01,
-    // 0x02 unknown
+    // unknown                                       = 0x02,
     CHAT_MSG_GUILD                                = 0x03,
     CHAT_MSG_OFFICER                              = 0x04,
     CHAT_MSG_YELL                                 = 0x05,
@@ -173,6 +173,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleNPCFlagCommand(const char* args);
         bool HandleDisplayIdCommand(const char* args);
         bool HandleFactionIdCommand(const char* args);
+		bool HandleAddSpwCommand(const char* args);
 
         // Level 3 commands
         bool HandleSecurityCommand(const char* args);
