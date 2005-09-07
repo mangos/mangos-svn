@@ -201,7 +201,7 @@ uint32 ObjectMgr::AddCreatureName(const char* name, uint32 displayid)
     AddCreatureName(id, name, displayid);
 
     std::stringstream ss;
-	ss << "INSERT INTO creaturetemplate (entryid,name,modelid) VALUES (" << id << ", '" << name << "', '" << displayid << "')";
+    ss << "INSERT INTO creaturetemplate (entryid,name,modelid) VALUES (" << id << ", '" << name << "', '" << displayid << "')";
     sDatabase.Execute( ss.str( ).c_str( ) );
 
     return id;

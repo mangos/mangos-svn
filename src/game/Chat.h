@@ -173,7 +173,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleNPCFlagCommand(const char* args);
         bool HandleDisplayIdCommand(const char* args);
         bool HandleFactionIdCommand(const char* args);
-		bool HandleAddSpwCommand(const char* args);
+        bool HandleAddSpwCommand(const char* args);
 
         // Level 3 commands
         bool HandleSecurityCommand(const char* args);
