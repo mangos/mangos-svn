@@ -1,4 +1,4 @@
-/* WoWCrypt.cpp
+/* AuthCrypt.cpp
  *
  * Copyright (C) 2004 Wow Daemon
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
@@ -18,24 +18,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "WowCrypt.h"
+#include "AuthCrypt.h"
 
 #include <algorithm>
 
-WowCrypt::WowCrypt()
+AuthCrypt::AuthCrypt()
 {
     _initialized = false;
 }
 
 
-void WowCrypt::Init()
+void AuthCrypt::Init()
 {
     _send_i = _send_j = _recv_i = _recv_j = 0;
     _initialized = true;
 }
 
 
-void WowCrypt::DecryptRecv(uint8 *data, size_t len)
+void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
 {
     if (!_initialized) return;
     if (len < CRYPTED_RECV_LEN) return;
@@ -51,7 +51,7 @@ void WowCrypt::DecryptRecv(uint8 *data, size_t len)
 }
 
 
-void WowCrypt::EncryptSend(uint8 *data, size_t len)
+void AuthCrypt::EncryptSend(uint8 *data, size_t len)
 {
     if (!_initialized) return;
     if (len < CRYPTED_SEND_LEN) return;
@@ -66,13 +66,13 @@ void WowCrypt::EncryptSend(uint8 *data, size_t len)
 }
 
 
-void WowCrypt::SetKey(uint8 *key, size_t len)
+void AuthCrypt::SetKey(uint8 *key, size_t len)
 {
     _key.resize(len);
     std::copy(key, key + len, _key.begin());
 }
 
 
-WowCrypt::~WowCrypt()
+AuthCrypt::~AuthCrypt()
 {
 }

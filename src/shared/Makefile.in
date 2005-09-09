@@ -114,8 +114,8 @@ libauth_a_SOURCES = \
     Auth/BigNumber.h \
     Auth/Sha1.cpp \
     Auth/Sha1.h \
-    Auth/WowCrypt.cpp \
-    Auth/WowCrypt.h
+    Auth/AuthCrypt.cpp \
+    Auth/AuthCrypt.h
 
 
 libconfig_a_SOURCES = \
@@ -194,7 +194,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 libauth_a_AR = $(AR) cru
 libauth_a_LIBADD =
 am_libauth_a_OBJECTS = BigNumber.$(OBJEXT) Sha1.$(OBJEXT) \
-	WowCrypt.$(OBJEXT)
+	AuthCrypt.$(OBJEXT)
 libauth_a_OBJECTS = $(am_libauth_a_OBJECTS)
 libconfig_a_AR = $(AR) cru
 libconfig_a_LIBADD =
@@ -246,7 +246,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/StdoutLog.Po ./$(DEPDIR)/TcpSocket.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Thread.Po ./$(DEPDIR)/UdpSocket.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Util.Po ./$(DEPDIR)/Utility.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/WowCrypt.Po ./$(DEPDIR)/dotconfpp.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/AuthCrypt.Po ./$(DEPDIR)/dotconfpp.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/mempool.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/socket_include.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -282,7 +282,7 @@ clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
 BigNumber.$(OBJEXT): Auth/BigNumber.cpp
 Sha1.$(OBJEXT): Auth/Sha1.cpp
-WowCrypt.$(OBJEXT): Auth/WowCrypt.cpp
+AuthCrypt.$(OBJEXT): Auth/AuthCrypt.cpp
 libauth.a: $(libauth_a_OBJECTS) $(libauth_a_DEPENDENCIES) 
 	-rm -f libauth.a
 	$(libauth_a_AR) libauth.a $(libauth_a_OBJECTS) $(libauth_a_LIBADD)
@@ -364,7 +364,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UdpSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utility.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WowCrypt.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AuthCrypt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dotconfpp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket_include.Po@am__quote@
@@ -408,17 +408,17 @@ Sha1.obj: Auth/Sha1.cpp
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Sha1.obj `cygpath -w Auth/Sha1.cpp`
 
-WowCrypt.o: Auth/WowCrypt.cpp
-@AMDEP_TRUE@	source='Auth/WowCrypt.cpp' object='WowCrypt.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/WowCrypt.Po' tmpdepfile='$(DEPDIR)/WowCrypt.TPo' @AMDEPBACKSLASH@
+AuthCrypt.o: Auth/AuthCrypt.cpp
+@AMDEP_TRUE@	source='Auth/AuthCrypt.cpp' object='AuthCrypt.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/AuthCrypt.Po' tmpdepfile='$(DEPDIR)/AuthCrypt.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WowCrypt.o `test -f 'Auth/WowCrypt.cpp' || echo '$(srcdir)/'`Auth/WowCrypt.cpp
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AuthCrypt.o `test -f 'Auth/AuthCrypt.cpp' || echo '$(srcdir)/'`Auth/AuthCrypt.cpp
 
-WowCrypt.obj: Auth/WowCrypt.cpp
-@AMDEP_TRUE@	source='Auth/WowCrypt.cpp' object='WowCrypt.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@	depfile='$(DEPDIR)/WowCrypt.Po' tmpdepfile='$(DEPDIR)/WowCrypt.TPo' @AMDEPBACKSLASH@
+AuthCrypt.obj: Auth/AuthCrypt.cpp
+@AMDEP_TRUE@	source='Auth/AuthCrypt.cpp' object='AuthCrypt.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/AuthCrypt.Po' tmpdepfile='$(DEPDIR)/AuthCrypt.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o WowCrypt.obj `cygpath -w Auth/WowCrypt.cpp`
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o AuthCrypt.obj `cygpath -w Auth/AuthCrypt.cpp`
 
 Config.o: Config/Config.cpp
 @AMDEP_TRUE@	source='Config/Config.cpp' object='Config.o' libtool=no @AMDEPBACKSLASH@

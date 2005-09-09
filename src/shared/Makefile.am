@@ -42,8 +42,8 @@ libauth_a_SOURCES = \
     Auth/BigNumber.h \
     Auth/Sha1.cpp \
     Auth/Sha1.h \
-    Auth/WowCrypt.cpp \
-    Auth/WowCrypt.h
+    Auth/AuthCrypt.cpp \
+    Auth/AuthCrypt.h
 
 
 libconfig_a_SOURCES = \
