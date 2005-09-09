@@ -170,7 +170,8 @@ libgame_a_SOURCES = \
     ChannelHandler.cpp \
     Channel.cpp \
     Channel.h \
-    AuctionHouse.cpp
+    AuctionHouse.cpp \
+    LootMgr.cpp
 
 subdir = src/game
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -195,7 +196,7 @@ am_libgame_a_OBJECTS = CharacterHandler.$(OBJEXT) Chat.$(OBJEXT) \
 	WorldSocketMgr.$(OBJEXT) debugcmds.$(OBJEXT) \
 	ZoneMapper.$(OBJEXT) MapMgr.$(OBJEXT) Mail.$(OBJEXT) \
 	ChannelHandler.$(OBJEXT) Channel.$(OBJEXT) \
-	AuctionHouse.$(OBJEXT)
+	AuctionHouse.$(OBJEXT) LootMgr.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 
 DEFS = @DEFS@
