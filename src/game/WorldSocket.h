@@ -23,7 +23,7 @@
 
 #include "Network/TcpSocket.h"
 #include "Auth/BigNumber.h"
-#include "Auth/WowCrypt.h"
+#include "Auth/AuthCrypt.h"
 
 class WorldPacket;
 class SocketHandler;
@@ -50,7 +50,7 @@ class WorldSocket : public TcpSocket
         static uint32 _GetSeed();
 
     private:
-        WowCrypt _crypt;
+        AuthCrypt _crypt;
         uint32 _seed;
         uint32 _cmd;
         uint16 _remaining;

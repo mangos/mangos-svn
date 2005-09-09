@@ -355,11 +355,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\Auth\WowCrypt.cpp"
+				RelativePath="..\..\src\shared\Auth\AuthCrypt.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\Auth\WowCrypt.h"
+				RelativePath="..\..\src\shared\Auth\AuthCrypt.h"
 				>
 			</File>
 		</Filter>

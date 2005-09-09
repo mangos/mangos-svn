@@ -1,4 +1,4 @@
-/* WowCrypt.h
+/* AuthCrypt.h
  *
  * Copyright (C) 2004 Wow Daemon
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
@@ -18,17 +18,17 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _WOWCRYPT_H
-#define _WOWCRYPT_H
+#ifndef _AUTHCRYPT_H
+#define _AUTHCRYPT_H
 
 #include <Common.h>
 #include <vector>
 
-class WowCrypt
+class AuthCrypt
 {
     public:
-        WowCrypt();
-        ~WowCrypt();
+        AuthCrypt();
+        ~AuthCrypt();
 
         const static int CRYPTED_SEND_LEN = 4;
         const static int CRYPTED_RECV_LEN = 6;
