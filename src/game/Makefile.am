@@ -94,4 +94,5 @@ libgame_a_SOURCES = \
     ChannelHandler.cpp \
     Channel.cpp \
     Channel.h \
-    AuctionHouse.cpp
+    AuctionHouse.cpp \
+    LootMgr.cpp
