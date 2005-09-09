@@ -297,7 +297,7 @@ void ObjectMgr::AddCreatureName(uint32 id, const char* name, uint32 displayid)
 void ObjectMgr::LoadCreatureNames()
 {
     CreatureInfo *cn;
-    QueryResult *result = sDatabase.Query( "SELECT * FROM creaturetemplate" );
+    QueryResult *result = sDatabase.Query( "SELECT entryid,name,subname,type,modelid FROM creaturetemplate" );
     if(result)
     {
         do
@@ -308,12 +308,14 @@ void ObjectMgr::LoadCreatureNames()
             cn->Id = fields[0].GetUInt32();
             cn->Name = fields[1].GetString();
             cn->SubName = fields[2].GetString();
-            // cn->unknown1 = fields[3].GetUInt32();
-            cn->Type = fields[4].GetUInt32();
-            // cn->unknown2 = fields[5].GetUInt32();
-            // cn->unknown3 = fields[6].GetUInt32();
-            // cn->unknown4 = fields[7].GetUInt32();
-            cn->DisplayID = fields[8].GetUInt32();
+            cn->Type = fields[3].GetUInt32();
+            cn->DisplayID = fields[4].GetUInt32();
+
+	    // Adding unknowns here later
+            cn->unknown1 = 0; 
+            cn->unknown2 = 0; 
+            cn->unknown3 = 0; 
+            cn->unknown4 = 0; 
 
             AddCreatureName( cn );
         } while( result->NextRow() );
@@ -677,7 +679,6 @@ void ObjectMgr::LoadCreatures()
         ASSERT(unit);
 
         unit->LoadFromDB(fields[0].GetUInt32());
-        Log::getSingleton( ).outError("AddObject at ObjectMgr.cpp line 600");
         AddObject(unit);
     }
     while( result->NextRow() );

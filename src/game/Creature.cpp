@@ -447,33 +447,33 @@ void Creature::generateLoot()
     int creature_level = getLevel();
     if(creature_level < 10)
     {
-		itemsToGet = rand()%2; // 0 or 1 items
+	itemsToGet = rand()%2; // 0 or 1 items
     }
     else if(creature_level < 25)
     {
-		itemsToGet = rand()%3; // 0 to 2 items
+	itemsToGet = rand()%3; // 0 to 2 items
     }
     else if(creature_level < 40)
     {
-		itemsToGet = rand()%4; // 0 to 3 items
+	itemsToGet = rand()%4; // 0 to 3 items
     }
     else if(creature_level < 60)
     {
-		itemsToGet = rand()%5; // 0 to 4 items
+	itemsToGet = rand()%5; // 0 to 4 items
     }
     else if(creature_level < 80)
     {
-		itemsToGet = rand()%6; // 0 to 5 items
+	itemsToGet = rand()%6; // 0 to 5 items
     }
     else 
     {
-		itemsToGet = rand()%7; // 0 to 6 items
+	itemsToGet = rand()%7; // 0 to 6 items
     }
-
+    
     m_lootMoney = creature_level * (rand()%5 + 1)*sWorld.getRate(RATE_DROP); //generate copper    
-
+    
     if( itemsToGet == 0 )
-		return; // sorry dude.. nothing for you
+	return; // sorry dude.. nothing for you
 
     // Generate max value
     MaxLootValue = ((creature_level * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5;
@@ -498,25 +498,25 @@ void Creature::generateLoot()
     
     while (not_done)
     {
-		// generate the item you need to pick
-		int idx = rand()%indexes.size();
-		const LootItem &item(loot_list[indexes[idx]]);
-		indexes.erase(indexes.begin()+idx);
-		ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
+	// generate the item you need to pick
+	int idx = rand()%indexes.size();
+	const LootItem &item(loot_list[indexes[idx]]);
+	indexes.erase(indexes.begin()+idx);
+	ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
 	
-		if( pCurItem != NULL && item.chance >= (rand()%100) )
-		{
-			int item_level = pCurItem->ItemLevel;
-			if( !(LootValue > MaxLootValue) )
-			{
-				LootValue += pCurItem->BuyPrice;
-				addItem(item.itemid, 1);		
-				--itemsToGet;
-			}
-		}
-	
-		not_done = (itemsToGet && indexes.size() && !(LootValue > MaxLootValue));
+	if( pCurItem != NULL && item.chance >= (rand()%100) )
+	{
+	    int item_level = pCurItem->ItemLevel;
+	    if( !(LootValue > MaxLootValue) )
+	    {
+		LootValue += pCurItem->BuyPrice;
+		addItem(item.itemid, 1);		
+		--itemsToGet;
+	    }
 	}
+	
+	not_done = (itemsToGet && indexes.size() && !(LootValue > MaxLootValue));
+    }
 }
 
 
