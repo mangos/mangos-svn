@@ -77,9 +77,6 @@ void MapMgr::AddObject(Object *obj)
     ASSERT(obj->GetPositionY() < _maxY && obj->GetPositionY() > _minY);
     ASSERT(_cells);
 
-    sLog.outDetail("Adding object "I64FMT" with type %i to the map %u.",
-        obj->GetGUID(), obj->GetTypeId(), _mapId);
-
     // That object types are not map objects. TODO: add AI groups here?
     if(obj->GetTypeId() == TYPEID_ITEM || obj->GetTypeId() == TYPEID_CONTAINER)
     {

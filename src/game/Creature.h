@@ -48,15 +48,17 @@ struct CreatureItem
 
 struct CreatureInfo
 {
+    // ctor in case users forget to intialized
+    CreatureInfo() : Id(0), Type(0), DisplayID(0), unknown1(0), unknown2(0), unknown3(0), unknown4(0) {}
     uint32 Id;
-    std::string Name;
-    std::string SubName;
-    uint32 unknown1;
     uint32 Type;
+    uint32 DisplayID;
+    uint32 unknown1;
     uint32 unknown2;
     uint32 unknown3;
     uint32 unknown4;
-    uint32 DisplayID;
+    std::string Name;
+    std::string SubName;
 };
 
 enum UNIT_TYPE
