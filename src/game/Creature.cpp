@@ -31,6 +31,7 @@
 #include "Stats.h"
 #include "Log.h"
 #include "ZoneMapper.h"
+#include "LootMgr.h"
 
 Creature::Creature() : Unit()
 {
@@ -437,87 +438,88 @@ int Creature::CheckQuestGiverFlag(Player *pPlayer, UpdateMask *unitMask, WorldPa
 void Creature::generateLoot()
 {
     memset(item_list, 0, 8*128);
-    itemcount = 0;                                //set Total Unit Item count to 0
-    int maxRetryCount = 20;                       // max times we will try to get an item
-    int retryCount = 0;
-    int found = 0;
+    itemcount = 0; //set Total Unit Item count to 0
     int LootValue = 0, MaxLootValue = 0;
-    int randItem;
-    int tempLevel;
     int i;
-    int itemsToGet;
+    
+    // max items to give for this creature
+    int itemsToGet = 0;
+    int creature_level = getLevel();
+    if(creature_level < 10)
+    {
+		itemsToGet = rand()%2; // 0 or 1 items
+    }
+    else if(creature_level < 25)
+    {
+		itemsToGet = rand()%3; // 0 to 2 items
+    }
+    else if(creature_level < 40)
+    {
+		itemsToGet = rand()%4; // 0 to 3 items
+    }
+    else if(creature_level < 60)
+    {
+		itemsToGet = rand()%5; // 0 to 4 items
+    }
+    else if(creature_level < 80)
+    {
+		itemsToGet = rand()%6; // 0 to 5 items
+    }
+    else 
+    {
+		itemsToGet = rand()%7; // 0 to 6 items
+    }
 
-    //max items to give for this creature
-    if(this->getLevel() < 10)
-    {
-        itemsToGet = rand()%1;
-    }
-    else if(this->getLevel() < 25)
-    {
-        itemsToGet = rand()%2;
-    }
-    else if(this->getLevel() < 40)
-    {
-        itemsToGet = rand()%3;
-    }
-    else if(this->getLevel() < 60)
-    {
-        itemsToGet = rand()%4;
-    }
-    else if(this->getLevel() < 80)
-    {
-        itemsToGet = rand()%5;
-    }
-    else
-    {
-        itemsToGet = rand()%6;                    //calculate items to get
-    }
+    m_lootMoney = creature_level * (rand()%5 + 1)*sWorld.getRate(RATE_DROP); //generate copper    
 
-    // lets make it harder to get items
-    // if the random result is > 25 out of 100 they get no items
-    // if (rand()%100 < 25)
-    //	itemsToGet = 0;
+    if( itemsToGet == 0 )
+		return; // sorry dude.. nothing for you
 
-    //Max Value of all items when sold
-    MaxLootValue = ((getLevel() * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5;
+    // Generate max value
+    MaxLootValue = ((creature_level * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5;
 
-    // FIX ME Add real formulas
-    for(i = 0; i < itemsToGet; i++)
+    /*
+      We need an algorithm that mimic the randomless given the probabilities of each items.
+      The algorithm must not affected by the order the items in the list and only
+      by the probability they assigned to.  Note, this is important due to the fact
+      that there's a max loot item.
+      Algorithm:
+         Given N items, randomly draw an item form the list (and remove it)
+	 Generate the probability and compare against the item's assigned probability
+	 If max items has not been achieved, repeat the whole process with N-1
+	 recursively repeat until either all items has been drawn or itemsToGet fulfilled.
+     */
+
+    const LootMgr::LootList &loot_list(LootMgr::getSingleton().getCreaturesLootList(GetUInt32Value(OBJECT_FIELD_ENTRY)));
+    bool not_done = (loot_list.size()  && itemsToGet);
+    std::vector<short> indexes(loot_list.size());
+    std::generate(indexes.begin(), indexes.end(), SequenceGen());
+    sLog.outDebug("Number of items to get %d", itemsToGet);
+    
+    while (not_done)
     {
-        retryCount = 0;                           //set our retrys to 0
-        while((found == 0) && (retryCount <= maxRetryCount))
-        {
-            retryCount++;
-            randItem = rand()%8000;               //get a random item id
-            //get the item
-            ItemPrototype *pCurItem = objmgr.GetItemPrototype(randItem);
-            if (pCurItem != NULL)                 //if the item exist's
-            {
-                tempLevel = pCurItem->ItemLevel;  //get the items level
-                if ((tempLevel < getLevel() +2) && (tempLevel > getLevel() -2)&&
-                    ((pCurItem->Class==2)||(pCurItem->Class==4)||(pCurItem->Class==15)))
-                {
-                    if (pCurItem->SellPrice)      //if the item has a sell price
-                    {
-                        if(!(LootValue > MaxLootValue))
-                        {
-                            LootValue += pCurItem->BuyPrice;
-                            found = 1;
-                        }
-                    }
-                }
-            }
-        }
-        if (found == 1)                           //if we have an item
-        {
-            addItem(randItem,1);                  //add our item to the list
-            found = 0;
-        }
-
-    }
-    // generate copper
-    m_lootMoney = getLevel() * (rand()%5 + 1)*sWorld.getRate(RATE_DROP);
+		// generate the item you need to pick
+		int idx = rand()%indexes.size();
+		const LootItem &item(loot_list[indexes[idx]]);
+		indexes.erase(indexes.begin()+idx);
+		ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
+	
+		if( pCurItem != NULL && item.chance >= (rand()%100) )
+		{
+			int item_level = pCurItem->ItemLevel;
+			if( !(LootValue > MaxLootValue) )
+			{
+				LootValue += pCurItem->BuyPrice;
+				addItem(item.itemid, 1);		
+				--itemsToGet;
+			}
+		}
+	
+		not_done = (itemsToGet && indexes.size() && !(LootValue > MaxLootValue));
+	}
 }
+
+
 
 
 ///////////////

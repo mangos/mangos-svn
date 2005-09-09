@@ -35,6 +35,7 @@
 #include "Chat.h"
 #include "Database/DBCStores.h"
 #include "ChannelMgr.h"
+#include "LootMgr.h"
 
 initialiseSingleton( World );
 
@@ -184,6 +185,11 @@ void World::SetInitialWorldSettings()
     objmgr.LoadTrainerSpells();
     Log::getSingleton( ).outString( "" );
     objmgr.SetHighestGuids();
+
+	// Loading loot templates
+	Log::getSingleton().outString("Initialize loot tables...");
+    LootMgr::getSingleton().LoadLootTables();
+
     //Load Teleport Coords
     Log::getSingleton( ).outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
