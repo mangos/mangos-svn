@@ -371,6 +371,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\LootMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\LootMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Object.cpp"
 				>
 			</File>
