@@ -1,4 +1,5 @@
 TypeTable{guild=string,name=string}
+InfoTable{table=creature_names,outfile=creature_names.sql,fileName=creatures.scp}
 creature->name_id
 name->creature_name
 guild->Subname
