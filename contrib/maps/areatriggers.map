@@ -1,8 +1,0 @@
-TypeTable{name=string,note=string,script=string}
-InfoTable{fileName=areatriggers.scp,table=areatriggers,outfile=areatriggers.sql}
-areatrigger->id
-name->name
-pos->coord_x,coord_y,coord_z
-totrigger->totrigger
-note->note
-script->script
