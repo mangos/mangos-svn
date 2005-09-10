@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:20 PM
+-- Generation Time: Sep 10, 2005 at 12:29 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,12 +15,12 @@
 -- 
 -- Table structure for table `teleport_cords`
 -- 
--- Creation: Aug 26, 2005 at 12:31 AM
--- Last update: Aug 26, 2005 at 12:31 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `teleport_cords`;
-CREATE TABLE `teleport_cords` (
+CREATE TABLE IF NOT EXISTS `teleport_cords` (
   `id` int(16) NOT NULL default '0',
   `name` char(255) NOT NULL default '',
   `mapId` int(16) NOT NULL default '0',
@@ -29,4 +29,4 @@ CREATE TABLE `teleport_cords` (
   `z` float NOT NULL default '0',
   `totrigger` int(16) NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) TYPE=MyISAM;

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:13 PM
+-- Generation Time: Sep 10, 2005 at 12:08 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,22 +15,22 @@
 -- 
 -- Table structure for table `accounts`
 -- 
--- Creation: Aug 21, 2005 at 10:30 AM
--- Last update: Aug 21, 2005 at 10:30 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `accounts`;
-CREATE TABLE `accounts` (
+CREATE TABLE IF NOT EXISTS `accounts` (
   `acct` bigint(20) NOT NULL auto_increment,
-  `login` varchar(255) collate latin1_general_ci NOT NULL default '',
-  `password` varchar(28) collate latin1_general_ci NOT NULL default '',
-  `s` longtext collate latin1_general_ci NOT NULL,
-  `v` longtext collate latin1_general_ci NOT NULL,
+  `login` varchar(255) NOT NULL default '',
+  `password` varchar(28) NOT NULL default '',
+  `s` longtext NOT NULL,
+  `v` longtext NOT NULL,
   `gm` tinyint(1) NOT NULL default '0',
-  `sessionkey` longtext collate latin1_general_ci NOT NULL,
-  `email` varchar(50) collate latin1_general_ci NOT NULL default '',
-  `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `sessionkey` longtext NOT NULL,
+  `email` varchar(50) NOT NULL default '',
+  `joindate` timestamp NOT NULL,
   `banned` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`acct`),
   UNIQUE KEY `acct` (`acct`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB' AUTO_INCREMENT=2 ;
+) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB' AUTO_INCREMENT=1 ;

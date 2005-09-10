@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:15 PM
+-- Generation Time: Sep 10, 2005 at 12:22 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,15 +15,15 @@
 -- 
 -- Table structure for table `creature_names`
 -- 
--- Creation: Aug 21, 2005 at 10:34 AM
--- Last update: Aug 21, 2005 at 10:38 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `creature_names`;
-CREATE TABLE `creature_names` (
+CREATE TABLE IF NOT EXISTS `creature_names` (
   `name_id` bigint(20) NOT NULL default '0',
-  `creature_name` varchar(100) collate latin1_general_ci NOT NULL default '',
-  `Subname` varchar(100) collate latin1_general_ci NOT NULL default '',
+  `creature_name` varchar(100) NOT NULL default '',
+  `Subname` varchar(100) NOT NULL default '',
   `unk1` int(30) default '0',
   `type` int(30) default '0',
   `unk2` int(30) default '0',
@@ -31,4 +31,4 @@ CREATE TABLE `creature_names` (
   `unk4` int(30) default '0',
   `displayid` int(30) default '0',
   PRIMARY KEY  (`name_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) TYPE=MyISAM;

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:20 PM
+-- Generation Time: Sep 10, 2005 at 12:30 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,16 +15,16 @@
 -- 
 -- Table structure for table `trainer`
 -- 
--- Creation: Aug 26, 2005 at 12:29 AM
--- Last update: Aug 26, 2005 at 12:29 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `trainer`;
-CREATE TABLE `trainer` (
+CREATE TABLE IF NOT EXISTS `trainer` (
   `GUID` int(32) unsigned NOT NULL default '0',
   `skillline1` int(32) unsigned NOT NULL default '0',
   `skillline2` int(32) unsigned NOT NULL default '0',
   `skillline3` int(32) unsigned NOT NULL default '0',
   `maxlvl` int(32) unsigned NOT NULL default '0',
   `class` int(32) unsigned NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) TYPE=MyISAM;

@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:19 PM
+-- Generation Time: Sep 10, 2005 at 12:28 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,12 +15,12 @@
 -- 
 -- Table structure for table `spirithealers`
 -- 
--- Creation: Aug 26, 2005 at 12:25 AM
--- Last update: Aug 26, 2005 at 12:26 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `spirithealers`;
-CREATE TABLE `spirithealers` (
+CREATE TABLE IF NOT EXISTS `spirithealers` (
   `X` float default NULL,
   `Y` float default NULL,
   `Z` float default NULL,
@@ -29,4 +29,4 @@ CREATE TABLE `spirithealers` (
   `zoneId` int(16) default NULL,
   `mapId` int(16) default NULL,
   `faction_id` int(32) unsigned default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) TYPE=MyISAM;

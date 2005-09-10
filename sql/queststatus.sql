@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:19 PM
+-- Generation Time: Sep 10, 2005 at 12:27 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,12 +15,12 @@
 -- 
 -- Table structure for table `queststatus`
 -- 
--- Creation: Aug 26, 2005 at 12:25 AM
--- Last update: Aug 26, 2005 at 12:25 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `queststatus`;
-CREATE TABLE `queststatus` (
+CREATE TABLE IF NOT EXISTS `queststatus` (
   `playerId` bigint(20) unsigned NOT NULL default '0',
   `questId` bigint(22) unsigned NOT NULL default '0',
   `status` bigint(20) unsigned NOT NULL default '0',
@@ -34,4 +34,4 @@ CREATE TABLE `queststatus` (
   `questItemCount4` bigint(20) unsigned NOT NULL default '0',
   `id` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci AUTO_INCREMENT=1 ;
+) TYPE=MyISAM AUTO_INCREMENT=1 ;

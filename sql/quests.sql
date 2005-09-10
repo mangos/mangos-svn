@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:19 PM
+-- Generation Time: Sep 10, 2005 at 12:26 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,19 +15,19 @@
 -- 
 -- Table structure for table `quests`
 -- 
--- Creation: Aug 26, 2005 at 12:24 AM
--- Last update: Aug 26, 2005 at 12:24 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `quests`;
-CREATE TABLE `quests` (
+CREATE TABLE IF NOT EXISTS `quests` (
   `questId` bigint(20) unsigned NOT NULL auto_increment,
   `zoneId` bigint(20) unsigned NOT NULL default '0',
-  `title` longtext collate latin1_general_ci,
-  `details` longtext collate latin1_general_ci,
-  `objectives` longtext collate latin1_general_ci,
-  `completedText` longtext collate latin1_general_ci,
-  `incompleteText` longtext collate latin1_general_ci,
+  `title` longtext,
+  `details` longtext,
+  `objectives` longtext,
+  `completedText` longtext,
+  `incompleteText` longtext,
   `targetGuid` bigint(20) unsigned NOT NULL default '0',
   `questItemId1` bigint(20) unsigned NOT NULL default '0',
   `questItemId2` bigint(20) unsigned NOT NULL default '0',
@@ -73,4 +73,4 @@ CREATE TABLE `quests` (
   `requiredLevel` bigint(20) unsigned NOT NULL default '0',
   `previousQuest` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`questId`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='InnoDB free: 18432 kB' AUTO_INCREMENT=1 ;
+) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB' AUTO_INCREMENT=1 ;

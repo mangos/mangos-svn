@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:20 PM
+-- Generation Time: Sep 10, 2005 at 12:29 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,12 +15,12 @@
 -- 
 -- Table structure for table `taxipathnodes`
 -- 
--- Creation: Aug 26, 2005 at 12:26 AM
--- Last update: Aug 26, 2005 at 12:28 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `taxipathnodes`;
-CREATE TABLE `taxipathnodes` (
+CREATE TABLE IF NOT EXISTS `taxipathnodes` (
   `id` smallint(5) unsigned NOT NULL default '0',
   `path` smallint(5) unsigned default NULL,
   `index` tinyint(3) unsigned default NULL,
@@ -31,4 +31,4 @@ CREATE TABLE `taxipathnodes` (
   `unknown1` mediumint(8) unsigned default NULL,
   `unknown2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) TYPE=MyISAM;
