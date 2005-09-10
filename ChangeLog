@@ -1,5 +1,6 @@
 //// Things that are added / fixed:
 
++ Added siuollys' scp-to-sql converter to contrib/scp-to-sql/.
 + Fixed mangos.conf. Packet logging for world and realm is set via bool
   value.
 + Added new GM command: ".addspw <entry id>" will add a creature via
