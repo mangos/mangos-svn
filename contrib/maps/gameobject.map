@@ -1,0 +1,15 @@
+# This table only filter out gameobjects in the world.save
+TypeTable{GUID=hex}
+InfoTable{table=creatures,outfile=gameobject.sql,fileName=world.save}
+GUID->id(*)
+XYZ->positionX,positionY,positionZ,orientation
+X->zoneId(0)
+MAP->mapId
+ENTRY->name_id(*)
+# TYPE->X2 ENTRY->X3 
+# X8 = DISPLAYID(MODEL)  X9=FLAGS 
+# ROTATION-> X10 X11 X12 X13
+# POS_X, POS_Y, POS_Z = X16 X17 X18
+# GTYPE-> X22
+ConCat(GUID,X1,TYPE,ENTRY,X4,X5,X6,X7,MODEL,X9,ROTATION,X14,X15,XYZ,X20,X21,GTYPE,X23)->data(0,0,0,0,0,0,0,0,0,0,*,0,0,0,0,0,0,0)
+

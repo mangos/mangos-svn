@@ -669,7 +669,6 @@ void Object::PlaceOnMap()
     MapMgr* mapMgr = sWorld.GetMap(m_mapId);
     ASSERT(mapMgr);
 
-    Log::getSingleton( ).outError("AddObject at Object.cpp");
     mapMgr->AddObject(this);
     m_mapMgr = mapMgr;
     mSemaphoreTeleport = false;
