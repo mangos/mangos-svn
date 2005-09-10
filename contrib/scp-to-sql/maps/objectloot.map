@@ -1,0 +1,4 @@
+TypeTable{entryid=int}
+gameobj->entryid
+loot[UNIQUE(gameobj)]->itemid,percentchance
+
