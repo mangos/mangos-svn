@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:15 PM
+-- Generation Time: Sep 10, 2005 at 12:10 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,13 +15,13 @@
 -- 
 -- Table structure for table `commands`
 -- 
--- Creation: Aug 21, 2005 at 10:32 AM
--- Last update: Aug 21, 2005 at 10:33 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `commands`;
-CREATE TABLE `commands` (
-  `name` varchar(100) collate latin1_general_ci NOT NULL default '',
+CREATE TABLE IF NOT EXISTS `commands` (
+  `name` varchar(100) NOT NULL default '',
   `security` int(11) NOT NULL default '0',
-  `help` longtext collate latin1_general_ci NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+  `help` longtext NOT NULL
+) TYPE=MyISAM;

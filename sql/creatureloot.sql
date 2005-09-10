@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:15 PM
+-- Generation Time: Sep 10, 2005 at 12:20 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,14 +15,14 @@
 -- 
 -- Table structure for table `creatureloot`
 -- 
--- Creation: Aug 21, 2005 at 10:38 AM
--- Last update: Aug 25, 2005 at 11:43 PM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `creatureloot`;
-CREATE TABLE `creatureloot` (
+CREATE TABLE IF NOT EXISTS `creatureloot` (
   `entryid` int(11) NOT NULL default '0',
   `itemid` int(11) NOT NULL default '0',
   `percentchance` float default NULL,
   PRIMARY KEY  (`entryid`,`itemid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci;
+) TYPE=MyISAM;

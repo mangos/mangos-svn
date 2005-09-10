@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Aug 30, 2005 at 08:18 PM
+-- Generation Time: Sep 10, 2005 at 12:24 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,20 +15,20 @@
 -- 
 -- Table structure for table `items`
 -- 
--- Creation: Aug 26, 2005 at 12:04 AM
--- Last update: Aug 26, 2005 at 12:23 AM
+-- Creation: Sep 10, 2005 at 12:02 PM
+-- Last update: Sep 10, 2005 at 12:02 PM
 -- 
 
 DROP TABLE IF EXISTS `items`;
-CREATE TABLE `items` (
+CREATE TABLE IF NOT EXISTS `items` (
   `entry` int(255) NOT NULL default '0',
   `itemlen` int(30) NOT NULL default '0',
   `class` int(30) NOT NULL default '0',
   `subclass` int(30) NOT NULL default '0',
-  `name` varchar(255) collate latin1_general_ci NOT NULL default '',
-  `name2` varchar(255) collate latin1_general_ci NOT NULL default '',
-  `name3` varchar(255) collate latin1_general_ci NOT NULL default '',
-  `name4` varchar(255) collate latin1_general_ci NOT NULL default '',
+  `name` varchar(255) NOT NULL default '',
+  `name2` varchar(255) NOT NULL default '',
+  `name3` varchar(255) NOT NULL default '',
+  `name4` varchar(255) NOT NULL default '',
   `displayid` int(70) NOT NULL default '0',
   `quality` int(30) NOT NULL default '0',
   `flags` int(30) NOT NULL default '0',
@@ -122,7 +122,7 @@ CREATE TABLE `items` (
   `spellcategory_5` int(30) NOT NULL default '0',
   `spellcategorycooldown_5` int(30) NOT NULL default '0',
   `bonding` int(30) NOT NULL default '0',
-  `description` varchar(255) collate latin1_general_ci NOT NULL default '',
+  `description` varchar(255) NOT NULL default '',
   `field102` int(30) NOT NULL default '0',
   `field103` int(30) NOT NULL default '0',
   `field104` int(30) NOT NULL default '0',
@@ -135,4 +135,4 @@ CREATE TABLE `items` (
   `field111` int(30) NOT NULL default '0',
   `MaxDurability` int(30) NOT NULL default '0',
   PRIMARY KEY  (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_general_ci COMMENT='new item 011';
+) TYPE=MyISAM COMMENT='new item 011';
