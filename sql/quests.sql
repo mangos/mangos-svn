@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Sep 10, 2005 at 12:26 PM
+-- Generation Time: Sep 11, 2005 at 08:26 PM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,19 +15,19 @@
 -- 
 -- Table structure for table `quests`
 -- 
--- Creation: Sep 10, 2005 at 12:02 PM
--- Last update: Sep 10, 2005 at 12:02 PM
+-- Creation: Sep 11, 2005 at 08:21 PM
+-- Last update: Sep 11, 2005 at 08:23 PM
 -- 
 
 DROP TABLE IF EXISTS `quests`;
 CREATE TABLE IF NOT EXISTS `quests` (
   `questId` bigint(20) unsigned NOT NULL auto_increment,
   `zoneId` bigint(20) unsigned NOT NULL default '0',
-  `title` longtext,
-  `details` longtext,
-  `objectives` longtext,
-  `completedText` longtext,
-  `incompleteText` longtext,
+  `title` longtext NOT NULL,
+  `details` longtext NOT NULL,
+  `objectives` longtext NOT NULL,
+  `completedText` longtext NOT NULL,
+  `incompleteText` longtext NOT NULL,
   `targetGuid` bigint(20) unsigned NOT NULL default '0',
   `questItemId1` bigint(20) unsigned NOT NULL default '0',
   `questItemId2` bigint(20) unsigned NOT NULL default '0',
@@ -73,4 +73,4 @@ CREATE TABLE IF NOT EXISTS `quests` (
   `requiredLevel` bigint(20) unsigned NOT NULL default '0',
   `previousQuest` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`questId`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB' AUTO_INCREMENT=1 ;
+) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB' AUTO_INCREMENT=21003 ;
