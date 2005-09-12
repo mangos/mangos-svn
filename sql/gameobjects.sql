@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 -- 
 -- Host: localhost
--- Generation Time: Sep 10, 2005 at 12:22 PM
+-- Generation Time: Sep 12, 2005 at 10:37 AM
 -- Server version: 4.1.12
 -- PHP Version: 5.0.4
 -- 
@@ -15,8 +15,9 @@
 -- 
 -- Table structure for table `gameobjects`
 -- 
--- Creation: Sep 10, 2005 at 12:02 PM
--- Last update: Sep 10, 2005 at 12:02 PM
+-- Creation: Sep 12, 2005 at 10:14 AM
+-- Last update: Sep 12, 2005 at 10:15 AM
+-- Last check: Sep 12, 2005 at 10:19 AM
 -- 
 
 DROP TABLE IF EXISTS `gameobjects`;
@@ -32,5 +33,6 @@ CREATE TABLE IF NOT EXISTS `gameobjects` (
   `name_id` bigint(20) NOT NULL default '0',
   `moverandom` int(11) NOT NULL default '1',
   `running` int(11) NOT NULL default '0',
+  `name` varchar(100) NOT NULL default '',
   PRIMARY KEY  (`id`)
 ) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
