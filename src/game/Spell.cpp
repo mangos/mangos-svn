@@ -1222,7 +1222,9 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
             uint16 display_id = m_spellInfo->EffectMiscValue[i];
 
             // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-            pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, 1, m_spellInfo->EffectMiscValue[i], 1, 6, 6, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() );
+	    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation());
+	    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i]);
+	    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
             pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
             pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
             Log::getSingleton( ).outError("AddObject at Spell.cpp 1100");

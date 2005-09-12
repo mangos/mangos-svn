@@ -122,68 +122,37 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 {
 
     WorldPacket data;
-    data.Initialize( SMSG_GAMEOBJECT_QUERY_RESPONSE );
     uint32 entryID;
     uint64 guid;
 
     recv_data >> entryID;
-    recv_data >> guid;
+    recv_data >> guid;    
 
     Log::getSingleton( ).outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%u'", guid);
+    const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
+    if( info == NULL )
+    {
+	Log::getSingleton( ).outDebug( "Missing game object info for entry %d", entryID);	
+	return; // no luck..
+    }
 
-    GameObject* gameObj = objmgr.GetObject<GameObject>(guid);
-    if(!gameObj)
-        return;
-
-    std::string name = "";
-
-    data << gameObj->GetUInt32Value(OBJECT_FIELD_ENTRY);
-    data << gameObj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-    data << gameObj->GetUInt32Value(GAMEOBJECT_DISPLAYID);
-    data << name.c_str();
-    data << uint8(0) << uint8(0) << uint8(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint16(0);
-    data << uint8(0);
-
-/*
-00 00 07 87 00 00 00 08 00 00 00 C0 54 F9 EC 01
-04 00 00 00 0A 00 00 00 12 00 00 00 00 00 00 08
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-00 00 00 00 00 00 00 00 00 00 00 4F 52 44 45 52
-*/
-
-/* Mailbox
-22 33 02 00 // ENTRY
-13 00 00 00 // Unknown
-8e 08 00 00 // Display_id
-4d 61 69 6c | 62 6f 78 00 // Mailbox (Null terminated)
-00          // name2
-00          // name3
-00          // name4
-00 00 00 00 // 1
-00 00 00 00 // 2
-00 00 00 00 // 3
-00 00 00 00 // 4
-00 00 00 00 // 5
-00 00 00 00 // 6
-00 00 00 00 // 7
-00 00 00 00 // 8
-00 00 00 00 // 9
-00 00 00 00 // 10
-00 00 00    // 11
-*/
-
-//WPAssert( data.size() == 64 );
+    // temparary disable due to client will crash
+    return;
+    data.Initialize( SMSG_GAMEOBJECT_QUERY_RESPONSE );
+    data << (uint32)entryID;
+    data << (uint32)info->type;
+    data << (uint32)info->displayId;
+    data << info->name.c_str();
+    data << (uint32)info->sound0;
+    data << (uint32)info->sound1;
+    data << (uint32)info->sound2;
+    data << (uint32)info->sound3;
+    data << (uint32)info->sound4;
+    data << (uint32)info->sound5;
+    data << (uint32)info->sound6;
+    data << (uint32)info->sound7;
+    data << (uint32)info->sound8;
+    data << (uint32)info->sound9;
     SendPacket( &data );
 }
 

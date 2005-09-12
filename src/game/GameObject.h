@@ -23,44 +23,66 @@
 
 #include "Object.h"
 
+struct GameObjectInfo
+{
+    GameObjectInfo(uint32 i=0, uint32 t=0, uint32 dis_id=0, uint32 s0=0, uint32 s1=0, uint32 s2=0, uint32 s3 =0, uint32 s4=0,
+		   uint32 s5 = 0, uint32 s6 = 0, uint32 s7 = 0, 
+		   uint32 s8 = 0, uint32 s9 = 0, const char *n = NULL) : id(i), type(t),displayId(dis_id), sound0(s0), sound1(s1), sound2(s2), sound3(s3), sound4(s4), sound5(s5), sound6(s6), sound7(s7), sound8(s8), sound9(s9), name(n == NULL ? "" : n) {}
+    uint32 id;
+    uint32 type;
+    uint32 displayId;
+    uint32 sound0;
+    uint32 sound1;
+    uint32 sound2;
+    uint32 sound3;
+    uint32 sound4;
+    uint32 sound5;
+    uint32 sound6;
+    uint32 sound7;
+    uint32 sound8;
+    uint32 sound9;
+    std::string name;
+};
+
 class GameObject : public Object
 {
-    public:
-        GameObject( );
+public:
+    GameObject( );
+    
+    void Create (uint32 guidlow, const char *name, uint32 mapid, float x, float y, float z, float ang);
+    void Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang);
 
-        void Create ( uint32 guidlow, uint32 display_id, uint8 state, uint32 obj_field_entry,
-            float scale, uint16 type, uint16 faction, uint32 mapid,
-            float x, float y, float z, float ang );
-
-        void Update(uint32 p_time);
-
-        void Despawn(uint32 time);
-        bool FillLoot(WorldPacket *data);
-        void FillItemList();
-
-        int getItemAmount(int slot) { return m_ItemAmount[slot]; }
-        void setItemAmount(int slot, uint32 value) { m_ItemAmount[slot] = value; }
-        uint32 getItemId(int slot) { return m_ItemList[slot]; }
-        bool hasLoot()
-        {
-            bool hasLoot = false;
-            for(int i=0;i<10;i++)
-                if(m_ItemAmount[i] && m_ItemAmount[i] != 0)
-                    hasLoot = true;
-            return hasLoot;
-
-        }
-
-        // Serialization
+    void Update(uint32 p_time);
+    const char* GetName() const { return m_name.c_str(); };
+    
+    void Despawn(uint32 time);
+    bool FillLoot(WorldPacket *data);
+    void FillItemList();
+    
+    int getItemAmount(int slot) { return m_ItemAmount[slot]; }
+    void setItemAmount(int slot, uint32 value) { m_ItemAmount[slot] = value; }
+    uint32 getItemId(int slot) { return m_ItemList[slot]; }
+    bool hasLoot()
+    {
+	bool hasLoot = false;
+	for(int i=0;i<10;i++)
+	    if(m_ItemAmount[i] && m_ItemAmount[i] != 0)
+		hasLoot = true;
+	return hasLoot;
+	
+    }
+    
+    // Serialization
         void SaveToDB();
-        void LoadFromDB(uint32 guid);
-        void DeleteFromDB();
-
+    void LoadFromDB(uint32 guid);
+    void DeleteFromDB();
+    
     protected:
 
         uint32 m_RespawnTimer;
         uint32 m_gold;
         uint32 m_ItemList[10],m_ItemAmount[10];
         uint8 m_ItemCount;
+    std::string m_name;
 };
 #endif

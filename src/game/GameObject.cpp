@@ -20,12 +20,12 @@
 
 #include "Common.h"
 #include "GameObject.h"
+#include "ObjectMgr.h"
 #include "UpdateMask.h"
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 
 GameObject::GameObject() : Object()
@@ -39,26 +39,22 @@ GameObject::GameObject() : Object()
     m_ItemCount = 0;
 }
 
-
-void GameObject::Create( uint32 guidlow, uint32 display_id, uint8 state, uint32 obj_field_entry, float scale, uint16 type,
-uint16 faction, uint32 mapid, float x, float y, float z, float ang )
+void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang)
 {
-    printf("create game object\n");
-    Object::_Create(guidlow, 0xF0007000, mapid, x, y, z, ang);
+    Create(guidlow, objmgr.GetGameObjectName(name_id), mapid, x, y, z, ang);
+}
 
-    // no idea yet
-    SetUInt32Value( OBJECT_FIELD_ENTRY, obj_field_entry );
-    SetFloatValue( OBJECT_FIELD_SCALE_X, scale );
-    SetUInt32Value( GAMEOBJECT_DISPLAYID, display_id );
-    SetUInt32Value( GAMEOBJECT_STATE, state  );
-    SetUInt32Value( GAMEOBJECT_TYPE_ID, type  );
-    // ??
-    SetUInt32Value( GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
-    SetFloatValue( GAMEOBJECT_POS_X, x);
-    SetFloatValue( GAMEOBJECT_POS_Y, y );
-    SetFloatValue( GAMEOBJECT_POS_Z, z );
-    SetFloatValue( GAMEOBJECT_FACING, ang );
-    SetFloatValue( GAMEOBJECT_FLAGS, 0 );
+void GameObject::Create(uint32 guidlow, const char *name, uint32 mapid, float x, float y, float z, float ang)
+{
+    Object::_Create(guidlow, HIGHGUID_GAMEOBJECT, mapid, x, y, z, ang);
+    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
+    SetFloatValue(GAMEOBJECT_POS_X, x);
+    SetFloatValue(GAMEOBJECT_POS_Y, y);
+    SetFloatValue(GAMEOBJECT_POS_Z, z);
+    SetFloatValue(GAMEOBJECT_FACING, ang);
+    SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0);
+    SetUInt32Value(GAMEOBJECT_STATE, 1);
+    m_name = name;
 }
 
 
@@ -177,19 +173,25 @@ void GameObject::SaveToDB()
 void GameObject::LoadFromDB(uint32 guid)
 {
     std::stringstream ss;
-    ss << "SELECT * FROM gameobjects WHERE id=" << guid;
+    ss << "SELECT id,positionX,positionY,positionZ,orientation,zoneId,mapId,data,name_id FROM gameobjects WHERE id=" << guid;
 
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     ASSERT(result);
 
     Field *fields = result->Fetch();
 
-    // Create(fields[0].GetUInt32(),1,1,0,1,1,0,fields[5].GetUInt32(),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
-    Create(fields[0].GetUInt32(),1,1,0,1,1,0,fields[6].GetUInt32(),fields[1].GetFloat(),fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
+    // guildlow[0], x[1], y[2], z[3], ang[4], zone[5], map[6], data[7], name_id[8], name[9]
+    Create(fields[0].GetUInt32(),fields[8].GetUInt32(),fields[6].GetUInt32(),fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
 
     m_zoneId = fields[5].GetUInt32();
-
     LoadValues(fields[7].GetString());
+    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
+    SetFloatValue(GAMEOBJECT_POS_X, m_positionX);
+    SetFloatValue(GAMEOBJECT_POS_Y, m_positionY);
+    SetFloatValue(GAMEOBJECT_POS_Z, m_positionZ);
+    SetFloatValue(GAMEOBJECT_FACING, m_orientation);
+    SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0);
+    SetUInt32Value(GAMEOBJECT_STATE, 1);
 
     delete result;
 }

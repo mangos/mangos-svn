@@ -73,6 +73,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef HM_NAMESPACE::hash_map<uint32, GossipNpc*> GossipNpcMap;
         typedef HM_NAMESPACE::hash_map<uint32, GraveyardTeleport*> GraveyardMap;
         typedef HM_NAMESPACE::hash_map<uint32, CreatureInfo*> CreatureNameMap;
+        typedef HM_NAMESPACE::hash_map<uint32, GameObjectInfo *> GameObjectInfoMap;
         typedef HM_NAMESPACE::hash_map<uint32, ItemPrototype*> ItemPrototypeMap;
         typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
         typedef HM_NAMESPACE::hash_map<uint32, Trainerspell*> TrainerspellMap;
@@ -140,11 +141,16 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         Creature* GetCreature(uint64 guid)
         {
-            CreatureMap::const_iterator itr = mCreatures.find(GUID_LOPART(guid));
-            if (itr != mCreatures.end())
-                return itr->second;
-            return NULL;
+	    return _getCreature(GUID_LOPART(guid));
         }
+
+    // GameObjects
+    const char* GetGameObjectName(uint32 id);
+    const GameObjectInfo *GetGameObjectInfo(uint32 id) const
+    {
+	GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
+	return (iter == mGameObjectInfo.end() ? NULL : iter->second);
+    }
 
         // Groups
         Group * GetGroupByLeader(const uint64 &guid) const;
@@ -439,6 +445,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
         // Map entry to a creature name
         CreatureNameMap     mCreatureNames;
 
+        // Map entry for object
+        GameObjectInfoMap   mGameObjectInfo;
+
         // Quest data
         QuestMap            mQuests;
 
@@ -459,6 +468,15 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // Teleport Stuff
         TeleportMap         mTeleports;
+
+private:
+    Creature* _getCreature(uint32 guid)
+    {
+	CreatureMap::const_iterator itr = mCreatures.find(guid);
+	if (itr != mCreatures.end())
+	    return itr->second;
+	return NULL;
+    }
 
 };
 
