@@ -1123,23 +1123,17 @@ void ObjectMgr::AddGossip(GossipNpc *pGossip)
     if( cr != NULL )
     {
 	const uint32 mapid = cr->GetMapId();;
-	ASSERT( pGossip->ID );
-	ASSERT( mGossipNpc[mapid].find(pGossip->ID) == mGossipNpc[mapid].end() );
-	mGossipNpc[mapid][pGossip->ID] = pGossip;
+	ASSERT( pGossip->Guid );
+	ASSERT( mGossipNpc[mapid].find(pGossip->Guid) == mGossipNpc[mapid].end() );
+	mGossipNpc[mapid][pGossip->Guid] = pGossip;
     }
 }
 
 
 GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid, uint32 mapid)
 {
-    GossipNpcMap::iterator iter, end;
-    for( iter = GetGossipListBegin(mapid), end = GetGossipListEnd(mapid); iter != end; iter++ )
-    {
-        GossipNpc *pObj = iter->second;
-        if(pObj->Guid == guid)
-            return pObj;
-    }
-    return NULL;
+    GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
+    return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
 }
 
 
