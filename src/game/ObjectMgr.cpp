@@ -103,6 +103,12 @@ ObjectMgr::~ObjectMgr()
     }
     mGossipText.clear( );
 
+    for( GameObjectInfoMap::iterator iter = mGameObjectInfo.begin(); iter != mGameObjectInfo.end(); ++iter)
+    {
+	delete iter->second;
+    }
+    mGameObjectInfo.clear();
+
     GossipNpcMap::iterator iter, end;
     for(int a=0; a < MAX_CONTINENTS; a++)
     {
@@ -140,6 +146,18 @@ Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
     return NULL;
 }
 
+// Game Object names
+const char* ObjectMgr::GetGameObjectName(uint32 id)
+{
+    static const char *si_unknownObjectName = "Unknown Object";
+    GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
+    if( iter == mGameObjectInfo.end() )
+	return si_unknownObjectName;
+    
+    // don't create new object info here.. race condition and
+    // needed to lock it.  However, it is slow to do so
+    return iter->second->name.c_str();
+}
 
 //
 // Creature names
@@ -689,7 +707,9 @@ void ObjectMgr::LoadCreatures()
 
 void ObjectMgr::LoadGameObjects()
 {
-    QueryResult *result = sDatabase.Query( "SELECT id FROM gameobjects" );
+
+    // load game object info...
+    QueryResult *result = sDatabase.Query( "SELECT id,type,displayId,sound0,sound1,sound2,sound3,sound4,sound5,sound6,sound7,sound8,sound9,name FROM gameobjecttemplate" );
 
     if( !result )
     {
@@ -697,23 +717,38 @@ void ObjectMgr::LoadGameObjects()
         return;
     }
 
-    GameObject* go;
     Field *fields;
 
     do
     {
         fields = result->Fetch();
-
-        go = new GameObject;
-        ASSERT(go);
-
-        go->LoadFromDB(fields[0].GetUInt32());
-        Log::getSingleton( ).outError("AddObject at ObjectMgr.cpp line 629");
-        AddObject(go);
+	uint32 id = fields[0].GetUInt32();
+	GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(),
+						  fields[4].GetUInt32(),fields[5].GetUInt32(),fields[6].GetUInt32(),fields[7].GetUInt32(),
+						  fields[8].GetUInt32(),fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
+						  fields[12].GetUInt32(),fields[13].GetString());
+	mGameObjectInfo[id] = info;
     }
     while( result->NextRow() );
 
     delete result;
+
+    // Load game objects
+    result = sDatabase.Query("SELECT id FROM gameobjects");
+    if( result )
+    {
+	do
+	{
+	    fields = result->Fetch();
+	    GameObject *go = new GameObject();
+	    ASSERT(go);
+	    
+	    go->LoadFromDB(fields[0].GetUInt32());
+	    AddObject(go);
+	}while( result->NextRow() );
+
+	delete result;
+    }
 }
 
 
@@ -1081,19 +1116,14 @@ void ObjectMgr::LoadGossipText()
 
 void ObjectMgr::AddGossip(GossipNpc *pGossip)
 {
-    uint32 mapid = -1;
-    ObjectMgr::CreatureMap::iterator iter;
-    for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
+    Creature *cr =  _getCreature(pGossip->Guid);
+    if( cr != NULL )
     {
-        uint32 guid = GUID_LOPART(iter->second->GetGUID());
-        if( guid == pGossip->Guid)
-            mapid = iter->second->GetMapId();
+	const uint32 mapid = cr->GetMapId();;
+	ASSERT( pGossip->ID );
+	ASSERT( mGossipNpc[mapid].find(pGossip->ID) == mGossipNpc[mapid].end() );
+	mGossipNpc[mapid][pGossip->ID] = pGossip;
     }
-    if(mapid == -1) { return; }
-
-    ASSERT( pGossip->ID );
-    ASSERT( mGossipNpc[mapid].find(pGossip->ID) == mGossipNpc[mapid].end() );
-    mGossipNpc[mapid][pGossip->ID] = pGossip;
 }
 
 

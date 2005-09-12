@@ -82,26 +82,26 @@ sub get_spawn_points
     }
 }
 
-sub set_creature_template
+sub set_merge_template
 {
-    my ($obj_map_item, $creature_template) = @_;
+    my ($obj_map_item, $merge_template, $merge_id) = @_;
     my $display_id = $obj_map_item->{"ENTRY"};
     if(  $display_id ne "" )
     {
-	for my $key( keys %{$creature_template->{$display_id}}  )
+	for my $key( keys %{$merge_template->{$display_id}}  )
 	{
-	    if( $key eq "attack" || $key  eq "damage" )
+	    if( $key eq "attack" || $key  eq "damage" ) #HACK
 	    {
-		my @val_arr = split " ", $creature_template->{$display_id}{$key};
+		my @val_arr = split " ", $merge_template->{$display_id}{$key};
 		my $size = scalar(@val_arr);
 		for(my $i=0; $i < $size; ++$i)
 		{
-		    $obj_map_item->{"Creature_" . $key . "_" . $i} = $val_arr[$i];		    
+		    $obj_map_item->{$merge_id . $key . "_" . $i} = $val_arr[$i];		    
 		}
 	    }
 	    else
 	    {
-		$obj_map_item->{"Creature_" . $key} = $creature_template->{$display_id}{$key};
+		$obj_map_item->{$merge_id . "_" . $key} = $merge_template->{$display_id}{$key};
 	    }
 	}
     }
@@ -150,9 +150,15 @@ sub apply
     {
 	$init_str = "creatures.scp";
     }
+    my $merge_id = "creature";
 
-    my %creature_object;
-    Parsescp::parse($init_str, \%creature_object, $lookup_map, "");
+    if( $init_str =~ /^(.*).scp$/ )
+    {
+	$merge_id = $1;
+    }
+
+    my %merge_object;
+    Parsescp::parse($init_str, \%merge_object, $lookup_map, "");
 
     for my $key ( keys %spawn_points )
     {
@@ -162,9 +168,7 @@ sub apply
 	    $obj_map->{$key}{"Link_" . $ref_key} = $spawn_reference->{$ref_key};
 	}
 	set_zone_id($obj_map->{$key});
-	set_creature_template($obj_map->{$key}, \%creature_object);
-	$obj_map->{$spawn_points{$key}} = {}; # for performance purposes.
+	set_merge_template($obj_map->{$key}, \%merge_object, $merge_id);
+	$obj_map->{$spawn_points{$key}} = {}; # for performance purposes.	
     }
-
-   
 }

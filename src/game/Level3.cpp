@@ -250,17 +250,16 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float o = chr->GetOrientation();
 
     GameObject* pGameObj = new GameObject();
-
-    // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, 1, 142093, 1, 19, 1, chr->GetMapId(), x, y, z, o );
-
+    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), objmgr.GetGameObjectName(display_id), chr->GetMapId(), x, y, z, o);	
+    pGameObj->SetZoneId(chr->GetZoneId());
+    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
     objmgr.AddObject(pGameObj);
     pGameObj->PlaceOnMap();
-
+    
     if(strcmp(safe,"true") == 0)
-        pGameObj->SaveToDB();
-
+	pGameObj->SaveToDB();
+    
     return true;
 }
 
@@ -369,13 +368,13 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     float o = chr->GetOrientation();
     uint32 guidlow = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
     Log::getSingleton( ).outError("GameObjectGUIDlow %u",guidlow);
-    uint8 state = 1;
-    uint8 scale = 1;
 
     GameObject* pGameObj = new GameObject();
 
     // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-    pGameObj->Create(guidlow, display_id, state, fieldentry, scale, typesid, factionid, chr->GetMapId(), x, y, z, o );
+    pGameObj->Create(guidlow, display_id, chr->GetMapId(), x, y, z, o);
+    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, fieldentry);
+    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, typesid);
     pGameObj->SetZoneId(chr->GetZoneId());
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
     objmgr.AddObject(pGameObj);
@@ -643,183 +642,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
 
 bool ChatHandler::HandleSpawnTransportCommand(const char* args)
 {
-    GameObject* pGameObj = new GameObject();
-    // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction, uint32 mapid, float x, float y, float z, float ang
-    // Freewind Post Elevators
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 11898, 1, 11, 1, 1, float(-5399.188477), float(-2504.615967), float(89.021133), float(2.609266) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 11899, 1, 11, 1, 1, float(-5382.495605), float(-2489.417480), float(-40.528416), float(2.364921) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    // Undercity Elevators and Doors
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20657, 1, 11, 1, 0, float(1533.879395), float(240.823593), float(-32.347244), float(3.132866) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20656, 1, 11, 1, 0, float(1553.299194), float(240.654114), float(55.395279), float(-0.008727) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 455, 1, 20655, 1, 11, 1, 0, float(1544.237183), float(240.770660), float(-40.783455), float(-0.008727) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20654, 1, 11, 1, 0, float(1595.213013), float(178.691315), float(-40.522171), float(-1.579524) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20653, 1, 11, 1, 0, float(1595.379028), float(197.704514), float(55.395279), float(1.562070) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 455, 1, 20652, 1, 11, 1, 0, float(1595.262451), float(188.642441), float(-40.783455), float(1.562070) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20651, 1, 11, 1, 0, float(1596.209961), float(302.398712), float(-40.664421), float(1.562070) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 462, 1, 20650, 1, 11, 1, 0, float(1596.038452), float(282.735748), float(55.395290), float(-1.579524) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 455, 1, 20649, 1, 11, 1, 0, float(1596.209961), float(291.797821), float(14.682331), float(-1.579524) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    // The Great Lift Elevators
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 11899, 1, 11, 1, 1, float(-4670.772461), float(-1849.608398), float(-44.144260), float(-0.183260) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 11898, 1, 11, 1, 1, float(-4665.432617), float(-1827.673706), float(85.405289), float(0.061086) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    // Thunderbluff Elevators
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 47297, 1, 11, 1, 1, float(-1037.266113), float(-49.235500), float(140.494644), float(3.071780) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 47296, 1, 11, 1, 1, float(-1028.043335), float(-28.356815), float(69.022560), float(2.914700) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 4171, 1, 11, 1, 1, float(-1308.377075), float(185.288116), float(68.585815), float(-0.270525) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 360, 1, 4170, 1, 11, 1, 1, float(-1286.240723), float(189.718201), float(130.079819), float(-1.073379) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-    pGameObj->SaveToDB();
-
-    // Tram
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176080, 1, 11, 1, 369, float(4.580645), float(28.209660), float(6.905265), float(1.570796) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176081, 1, 11, 1, 369, float(4.528066), float(8.435292), float(6.905265), float(1.570796) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176082, 1, 11, 1, 369, float(-45.400524), float(2492.792236), float(6.905265), float(1.570796) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176083, 1, 11, 1, 369, float(-45.400742), float(2512.148193), float(6.905265), float(1.570796) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176084, 1, 11, 1, 369, float(-45.393375), float(2472.930908), float(6.905265), float(1.570796) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3831, 1, 176085, 1, 11, 1, 369, float(4.498831), float(-11.347507), float(6.905265), float(-1.570796) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    // Zeppelin Undercity -> Ogrimmar
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3031, 1, 176495, 1, 15, 1, 0, float(2068), float(289), float(97), float(-1.155328) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    pGameObj->SetUInt32Value(GAMEOBJECT_STATE,1);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
-    // Zeppelin Undercity -> Grom'Gol
-    pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 3031, 1, 164871, 1, 15, 1, 0, float(2068), float(289), float(97), float(-1.155328) );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS,40);
-    pGameObj->SetUInt32Value(GAMEOBJECT_STATE,1);
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-
+    // don't need this anymore cuz its in the world.save or sql table
     return true;
 }
 

@@ -3,4 +3,4 @@ TypeTable{GUID=hex}
 GUID->vendorGuid(*)
 amount->amount(5)
 sell[]->__Referencer__
-Creature_sell[UNIQUE(GUID,amount)]->itemGuid
+creatures_sell[UNIQUE(GUID,amount)]->itemGuid

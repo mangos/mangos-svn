@@ -56,6 +56,19 @@ sub from_string
     {
 	return unpack("i", pack("d", $value));
     }
+    elsif( $type_is eq "array_float" )
+    {
+	my @vals = split ' ', $value;
+	my $size = scalar(@vals);
+	my $result = "";
+	$result = unpack("i", pack("f", $vals[0]));
+	for(my $i=1; $i < $size; ++$i)
+	{
+	    $result = $result . " " . unpack("i", pack("f", $vals[$i]));
+	}
+	
+	return $result;
+    }
     elsif( $type_is =~ /^evaluate\((.*)\)$/ )
     {
 	my $tmp_val = eval($1);
@@ -75,7 +88,6 @@ sub from_string
 sub concatValues
 {
     my ($concat_arr, $def_values_arr, $obj_map, $cols, $col_value, $result_col_name) = @_;
-
     # concat_arr: array of concat columns
     # def_values_arr: arr of default values correspond to the concate columns
     # obj_map: map{key,value} where key is the column name, value is column value
