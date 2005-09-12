@@ -147,7 +147,7 @@ Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
 }
 
 // Game Object names
-const char* ObjectMgr::GetGameObjectName(uint32 id)
+const char* ObjectMgr::GetGameObjectName(uint32 id) const
 {
     static const char *si_unknownObjectName = "Unknown Object";
     GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
@@ -709,7 +709,7 @@ void ObjectMgr::LoadGameObjects()
 {
 
     // load game object info...
-    QueryResult *result = sDatabase.Query( "SELECT id,type,displayId,sound0,sound1,sound2,sound3,sound4,sound5,sound6,sound7,sound8,sound9,name FROM gameobjecttemplate" );
+    QueryResult *result = sDatabase.Query( "SELECT id,type,displayId,faction,flags,sound0,sound1,sound2,sound3,sound4,sound5,sound6,sound7,sound8,sound9,name FROM gameobjecttemplate" );
 
     if( !result )
     {
@@ -723,10 +723,13 @@ void ObjectMgr::LoadGameObjects()
     {
         fields = result->Fetch();
 	uint32 id = fields[0].GetUInt32();
-	GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(),
-						  fields[4].GetUInt32(),fields[5].GetUInt32(),fields[6].GetUInt32(),fields[7].GetUInt32(),
-						  fields[8].GetUInt32(),fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
-						  fields[12].GetUInt32(),fields[13].GetString());
+	GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(), 
+						  fields[4].GetUInt32(),
+						  fields[5].GetUInt32(),fields[6].GetUInt32(),fields[7].GetUInt32(),fields[8].GetUInt32(),
+						  fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
+						  fields[12].GetUInt32(),
+						  fields[13].GetUInt32(), fields[14].GetUInt32(),
+						  fields[15].GetString());
 	mGameObjectInfo[id] = info;
     }
     while( result->NextRow() );

@@ -54,7 +54,6 @@ void GameObject::Create(uint32 guidlow, const char *name, uint32 mapid, float x,
     SetFloatValue(GAMEOBJECT_FACING, ang);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0);
     SetUInt32Value(GAMEOBJECT_STATE, 1);
-    m_name = name;
 }
 
 
@@ -179,9 +178,10 @@ void GameObject::LoadFromDB(uint32 guid)
     ASSERT(result);
 
     Field *fields = result->Fetch();
-
+    uint32 name_id = fields[8].GetUInt32();
+    const GameObjectInfo *info = objmgr.GetGameObjectInfo(name_id);
     // guildlow[0], x[1], y[2], z[3], ang[4], zone[5], map[6], data[7], name_id[8], name[9]
-    Create(fields[0].GetUInt32(),fields[8].GetUInt32(),fields[6].GetUInt32(),fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+    Create(fields[0].GetUInt32(),info->name.c_str(),fields[6].GetUInt32(),fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
 
     m_zoneId = fields[5].GetUInt32();
     LoadValues(fields[7].GetString());
@@ -192,6 +192,8 @@ void GameObject::LoadFromDB(uint32 guid)
     SetFloatValue(GAMEOBJECT_FACING, m_orientation);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0);
     SetUInt32Value(GAMEOBJECT_STATE, 1);
+    SetUInt32Value(GAMEOBJECT_FACTION, info->faction);
+    SetUInt32Value(GAMEOBJECT_FLAGS, info->flags);
 
     delete result;
 }

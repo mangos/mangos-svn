@@ -4,6 +4,8 @@ gameobj->id(*)
 model->displayId(*)
 type->type
 name->name
+faction->faction
+flags->flags
 sound0->sound0
 sound1->sound1
 sound2->sound2
