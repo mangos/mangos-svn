@@ -136,23 +136,23 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 	return; // no luck..
     }
 
-    // temparary disable due to client will crash
-    return;
-    data.Initialize( SMSG_GAMEOBJECT_QUERY_RESPONSE );
-    data << (uint32)entryID;
+    data << (uint32)(entryID);
     data << (uint32)info->type;
     data << (uint32)info->displayId;
     data << info->name.c_str();
-    data << (uint32)info->sound0;
-    data << (uint32)info->sound1;
-    data << (uint32)info->sound2;
-    data << (uint32)info->sound3;
-    data << (uint32)info->sound4;
-    data << (uint32)info->sound5;
-    data << (uint32)info->sound6;
-    data << (uint32)info->sound7;
-    data << (uint32)info->sound8;
-    data << (uint32)info->sound9;
+    data << uint8(0) << uint8(0) << uint8(0);
+    data << uint32(info->sound0);
+    data << uint32(info->sound1);
+    data << uint32(info->sound2);
+    data << uint32(info->sound3);
+    data << uint32(info->sound4);
+    data << uint32(info->sound5);
+    data << uint32(info->sound6);
+    data << uint32(info->sound7);
+    data << uint32(info->sound8);
+    data << uint32(info->sound9);
+    data << uint16(0);
+    data << uint8(0);
     SendPacket( &data );
 }
 

@@ -145,7 +145,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         }
 
     // GameObjects
-    const char* GetGameObjectName(uint32 id);
+    const char* GetGameObjectName(uint32 id) const;
     const GameObjectInfo *GetGameObjectInfo(uint32 id) const
     {
 	GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
