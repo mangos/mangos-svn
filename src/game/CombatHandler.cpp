@@ -32,7 +32,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     // AttackSwing
-    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message" );
+    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
 
     Creature *pEnemy = objmgr.GetObject<Creature>(guid);
     if(!pEnemy)

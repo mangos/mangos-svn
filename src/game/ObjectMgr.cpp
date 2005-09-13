@@ -114,7 +114,7 @@ ObjectMgr::~ObjectMgr()
     {
         for( iter = GetGossipListBegin(a), end = GetGossipListEnd(a); iter != end; iter++ )
         {
-            delete iter->second->pOptions;
+            delete [] iter->second->pOptions;
             delete iter->second;
         }
         mGossipNpc[a].clear( );
@@ -1101,18 +1101,18 @@ void ObjectMgr::LoadGossipText()
 {
     GossipText *pGText;
 
-    QueryResult *result = sDatabase.Query( "SELECT * FROM npc_text" );
-    if( !result )
+    std::auto_ptr<QueryResult> result(sDatabase.Query( "SELECT * FROM npc_text" ));
+    if( result.get() == NULL )
         return;
-
+    
     do
     {
         Field *fields = result->Fetch();
-        pGText = new GossipText;
+        GossipText *pGText = new GossipText;
         pGText->ID = fields[0].GetUInt32();
         pGText->Text = fields[2].GetString();
         AddGossipText(pGText);
-
+	
     }while( result->NextRow() );
 }
 
@@ -1139,38 +1139,35 @@ GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid, uint32 mapid)
 
 void ObjectMgr::LoadGossips()
 {
-    GossipNpc *pGossip;
-
-    QueryResult *result = sDatabase.Query( "SELECT * FROM npc_gossip" );
-    if( !result )
+    std::auto_ptr<QueryResult> result(sDatabase.Query( "SELECT * FROM npc_gossip" ));
+    if( result.get() == NULL )
         return;
 
     do
     {
         Field *fields = result->Fetch();
-        pGossip = new GossipNpc;
+        GossipNpc *pGossip = new GossipNpc;
         pGossip->ID = fields[0].GetUInt32();
         pGossip->Guid = fields[1].GetUInt32();
         pGossip->TextID = fields[3].GetUInt32();
         pGossip->OptionCount = fields[4].GetUInt32();
-        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+	if( pGossip->OptionCount > 0 )
+	    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 
         std::stringstream query;
         query << "SELECT * FROM npc_options WHERE GOSSIP_ID=" << pGossip->ID;
-        QueryResult *result2 = sDatabase.Query( query.str().c_str() );
-        if( result2 )
+        std::auto_ptr<QueryResult> result2(sDatabase.Query( query.str().c_str() ));
+        if( result2.get() != NULL )
         {
             for(uint32 i=0; i<pGossip->OptionCount; i++)
             {
                 Field *fields1 = result2->Fetch();
-
                 pGossip->pOptions[i].ID = fields1[0].GetUInt32();
                 pGossip->pOptions[i].GossipID = fields1[1].GetUInt32();
                 pGossip->pOptions[i].Icon = fields1[2].GetUInt32();
                 pGossip->pOptions[i].OptionText = fields1[3].GetString();
                 pGossip->pOptions[i].NextTextID = fields1[4].GetUInt32();
                 pGossip->pOptions[i].Special = fields1[5].GetUInt32();
-
                 result2->NextRow();
             }
         }

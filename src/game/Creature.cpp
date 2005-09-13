@@ -834,18 +834,15 @@ void Creature::_LoadQuests()
     std::stringstream query;
     query << "SELECT * FROM creaturequestrelation WHERE creatureId=" << GetGUIDLow() << " ORDER BY questId";
 
-    QueryResult *result = sDatabase.Query( query.str().c_str() );
-    if(result)
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    if(result.get() != NULL)
     {
         do
         {
             Field *fields = result->Fetch();
-
             addQuest(fields[1].GetUInt32());
         }
         while( result->NextRow() );
-
-        delete result;
     }
 }
 
@@ -859,8 +856,8 @@ void Creature::_LoadMovement()
     std::stringstream query;
     query << "SELECT X,Y,Z FROM creatures_mov WHERE creatureId=" << GetGUIDLow();
 
-    QueryResult *result = sDatabase.Query( query.str().c_str() );
-    if(result)
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    if(result.get() != NULL)
     {
         do
         {
@@ -869,8 +866,6 @@ void Creature::_LoadMovement()
             addWaypoint( fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat());
         }
         while( result->NextRow() );
-
-        delete result;
     }
 }
 

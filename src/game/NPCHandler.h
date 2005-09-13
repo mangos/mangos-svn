@@ -53,6 +53,7 @@ struct GossipOptions
 
 struct GossipNpc
 {
+    GossipNpc(uint32 id=0, uint32 guid=0, uint32 tx_id=0, uint32 count=0) : ID(id), Guid(guid),TextID(tx_id),OptionCount(count),pOptions(NULL) {}
     uint32 ID;
     uint32 Guid;
     uint32 TextID;

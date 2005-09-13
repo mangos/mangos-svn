@@ -62,7 +62,7 @@ MapMgr::~MapMgr()
             delete [] _cells[i];
         }
 
-        delete _cells;
+        delete [] _cells;
     }
 }
 
