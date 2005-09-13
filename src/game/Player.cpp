@@ -198,11 +198,11 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
-    SetUInt32Value(UNIT_FIELD_STAT0, info->strength );
-    SetUInt32Value(UNIT_FIELD_STAT1, info->ability );
-    SetUInt32Value(UNIT_FIELD_STAT2, info->stamina );
-    SetUInt32Value(UNIT_FIELD_STAT3, info->intellect );
-    SetUInt32Value(UNIT_FIELD_STAT4, info->spirit );
+    SetUInt32Value(UNIT_FIELD_STR, info->strength );
+    SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
+    SetUInt32Value(UNIT_FIELD_STAMINA, info->stamina );
+    SetUInt32Value(UNIT_FIELD_IQ, info->intellect );
+    SetUInt32Value(UNIT_FIELD_SPIRIT, info->spirit );
     SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, baseattacktime[0] );
     SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, baseattacktime[1]  );
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
@@ -853,9 +853,9 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
     uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
     bool levelup = false;
     uint32 TotalHealthGain = 0, TotalManaGain = 0;
-    uint32 manaGain = GetUInt32Value(UNIT_FIELD_STAT4) / 2;
+    uint32 manaGain = GetUInt32Value(UNIT_FIELD_SPIRIT) / 2;
     uint32 newMana = GetUInt32Value(UNIT_FIELD_MAXPOWER1);
-    uint32 healthGain = GetUInt32Value(UNIT_FIELD_STAT2) / 2;
+    uint32 healthGain = GetUInt32Value(UNIT_FIELD_STAMINA) / 2;
     uint32 newHealth = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
 
     // Check for level-up
@@ -2434,27 +2434,28 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         Log::getSingleton().outString("removing mods for item %u ",item->GetGUIDLow());
     }
-    // FIXME: just an example
-    if (proto->ArcaneRes)
-        SetUInt32Value(UNIT_FIELD_RESISTANCES+0, GetUInt32Value(UNIT_FIELD_RESISTANCES+0) +
-            (apply ? proto->ArcaneRes : -(int32)proto->ArcaneRes));
+    // FIXED: ? Was missing armor and holy resistance
+   if (proto->Armor)
+        SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) +
+        (apply ? proto->Armor : -(int32)proto->Armor));
+	if (proto->HolyRes)
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) +
+        (apply ? proto->HolyRes : -(int32)proto->HolyRes));
     if (proto->FireRes)
-        SetUInt32Value(UNIT_FIELD_RESISTANCES+1, GetUInt32Value(UNIT_FIELD_RESISTANCES+1) +
-            (apply ? proto->FireRes : -(int32)proto->FireRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_02, GetUInt32Value(UNIT_FIELD_RESISTANCES_02) +
+        (apply ? proto->FireRes : -(int32)proto->FireRes));
     if (proto->NatureRes)
-        SetUInt32Value(UNIT_FIELD_RESISTANCES+2, GetUInt32Value(UNIT_FIELD_RESISTANCES+2) +
-            (apply ? proto->NatureRes : -(int32)proto->NatureRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_03, GetUInt32Value(UNIT_FIELD_RESISTANCES_03) +
+        (apply ? proto->NatureRes : -(int32)proto->NatureRes));
     if (proto->FrostRes)
-        SetUInt32Value(UNIT_FIELD_RESISTANCES+3, GetUInt32Value(UNIT_FIELD_RESISTANCES+3) +
-            (apply ? proto->FrostRes : -(int32)proto->FrostRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_04, GetUInt32Value(UNIT_FIELD_RESISTANCES_04) +
+        (apply ? proto->FrostRes : -(int32)proto->FrostRes));
     if (proto->ShadowRes)
-        SetUInt32Value(UNIT_FIELD_RESISTANCES+4, GetUInt32Value(UNIT_FIELD_RESISTANCES+4) +
-            (apply ? proto->ShadowRes : -(int32)proto->ShadowRes));
-    if (proto->Armor)
-    {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES+0, GetUInt32Value(UNIT_FIELD_RESISTANCES+0) +
-            (apply ? proto->Armor : -(int32)proto->Armor));
-    }
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_05, GetUInt32Value(UNIT_FIELD_RESISTANCES_05) +
+        (apply ? proto->ShadowRes : -(int32)proto->ShadowRes));
+	 if (proto->ArcaneRes)
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_06, GetUInt32Value(UNIT_FIELD_RESISTANCES_06) +
+        (apply ? proto->ArcaneRes : -(int32)proto->ArcaneRes));
 
     uint8 MINDAMAGEFIELD=(slot==EQUIPMENT_SLOT_OFFHAND)?UNIT_FIELD_MINOFFHANDDAMAGE:UNIT_FIELD_MINDAMAGE;
     uint8 MAXDAMAGEFIELD=(slot==EQUIPMENT_SLOT_OFFHAND)?UNIT_FIELD_MAXOFFHANDDAMAGE:UNIT_FIELD_MAXDAMAGE;

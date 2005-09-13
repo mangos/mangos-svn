@@ -233,7 +233,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << itemProto->DamageType[i];
     }
     data << itemProto->Armor;
-    data << itemProto->Field62;
+    data << itemProto->HolyRes;
     data << itemProto->FireRes;
     data << itemProto->NatureRes;
     data << itemProto->FrostRes;

@@ -470,13 +470,13 @@ void Creature::generateLoot()
 	itemsToGet = rand()%7; // 0 to 6 items
     }
     
-    m_lootMoney = creature_level * (rand()%5 + 1)*sWorld.getRate(RATE_DROP); //generate copper    
+    m_lootMoney = (uint32)(creature_level * (rand()%5 + 1)*sWorld.getRate(RATE_DROP)); //generate copper    
     
     if( itemsToGet == 0 )
 	return; // sorry dude.. nothing for you
 
     // Generate max value
-    MaxLootValue = ((creature_level * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5;
+    MaxLootValue = (int)(((creature_level * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5);
 
     /*
       We need an algorithm that mimic the randomless given the probabilities of each items.

@@ -38,7 +38,7 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
 {
     uint16 VictimLvl = pVictim->GetUInt32Value(UNIT_FIELD_LEVEL);
     uint16 AttackerLvl = pAttacker->GetUInt32Value(UNIT_FIELD_LEVEL);
-    int xp = (VictimLvl*5+45)*(1+0.05*(VictimLvl-AttackerLvl));
+    float xp = (VictimLvl*5+45)*(1+0.05*(VictimLvl-AttackerLvl));
     if( ( xp < 0 ) || ((VictimLvl<(AttackerLvl * 0.8)) && (AttackerLvl > 5)) )
         xp = 0;
     else
@@ -72,7 +72,7 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
             xp *= lvl_diff_mod;
         }
 */
-    return xp;
+    return (uint32)xp;
 }
 
 
@@ -90,12 +90,12 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
     }
 */
 
-    uint32 min_damage = pAttacker->GetFloatValue(UNIT_FIELD_MINDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
-    uint32 max_damage = pAttacker->GetFloatValue(UNIT_FIELD_MAXDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
+    float min_damage = pAttacker->GetFloatValue(UNIT_FIELD_MINDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
+    float max_damage = pAttacker->GetFloatValue(UNIT_FIELD_MAXDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
     // Ehh, sometimes min is bigger than max!?!?
     if (min_damage > max_damage)
     {
-        uint32 temp = max_damage;
+        float temp = max_damage;
         max_damage = min_damage;
         min_damage = temp;
     }
@@ -104,9 +104,9 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
     if(max_damage==0)
         max_damage=5;
 
-    uint32 diff = max_damage - min_damage + 1;
-    uint32 dmg = rand()%diff + (uint32)min_damage;
-    return dmg;
+    float diff = max_damage - min_damage + 1;
+    float dmg = rand()%(uint32)diff + (uint32)min_damage;
+    return (uint32)dmg;
 }
 
 

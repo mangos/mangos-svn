@@ -489,7 +489,7 @@ void ObjectMgr::LoadItemPrototypes()
             free(a);free(b);
         }
         pItemPrototype->Armor = fields[61].GetUInt32();
-        pItemPrototype->Field62 = fields[62].GetUInt32();
+        pItemPrototype->HolyRes = fields[62].GetUInt32();
         pItemPrototype->FireRes = fields[63].GetUInt32();
         pItemPrototype->NatureRes = fields[64].GetUInt32();
         pItemPrototype->FrostRes = fields[65].GetUInt32();
