@@ -33,10 +33,10 @@ typedef struct
     uint8   cmd;
     uint8   error;                                // 0x00
     uint16  size;                                 // 0x0026
-    uint8   gamename[4];                          // 'W*W'
+    uint8   gamename[4];                          // 'MaNGOS'
     uint8   version1;                             // 0x00
-    uint8   version2;                             // 0x08 (0.8.0)
-    uint8   version3;                             // 0x00
+    uint8   version2;                             // 0x00 (0.0.1)
+    uint8   version3;                             // 0x01
     uint16  build;                                // 3734
     uint8   platform[4];                          // 'x86'
     uint8   os[4];                                // 'Win'
