@@ -123,7 +123,7 @@ struct ItemPrototype
     float DamageMax[5];
     uint32 DamageType[5];
     uint32 Armor;
-    uint32 Field62;
+    uint32 HolyRes;
     uint32 FireRes;
     uint32 NatureRes;
     uint32 FrostRes;

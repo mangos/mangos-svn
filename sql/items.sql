@@ -83,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `items` (
   `dmg_max5` int(30) NOT NULL default '0',
   `dmg_type5` int(30) NOT NULL default '0',
   `armor` int(30) NOT NULL default '0',
-  `field62` int(30) NOT NULL default '0',
+  `holy_res` int(30) NOT NULL default '0',
   `fire_res` int(30) NOT NULL default '0',
   `nature_res` int(30) NOT NULL default '0',
   `frost_res` int(30) NOT NULL default '0',

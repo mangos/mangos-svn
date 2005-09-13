@@ -86,9 +86,27 @@ AC_CHECK_FUNCS(                                               \
    sqrt stpcpy strchr strpbrk strrchr strstr strtol strtoul   \
 )
 
-MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
+if test $sysconfdir = '${prefix}/etc'; then
+	MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"
+else
+  if test $sysconfdir = '/'; then
+	MANGOSD_CONFIG_TEMP="/mangosd.conf"
+  else
+	MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
+  fi
+fi
+
+if test $datadir = '${prefix}/share'; then
+	MANGOSD_DATA_TEMP="/etc/mangos"
+else
+   if test $datadir = '/'; then
+   	MANGOSD_DATA_TEMP="/mangos"
+   else
+	MANGOSD_DATA_TEMP="$datadir/mangos"
+   fi
+fi
+
 eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
-MANGOSD_DATA_TEMP="$datadir/mangos"
 eval "MANGOSD_DATA=$MANGOSD_DATA_TEMP"
 
 AC_SUBST(MANGOSD_CONFIG)

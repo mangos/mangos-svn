@@ -407,7 +407,7 @@ void Unit::Regenerate(uint16 field_cur, uint16 field_max, bool switch_)
     {
         if (curValue == 0)          return;
     }   float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH); float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);   float RageIncreaseRate = sWorld.getRate(RATE_POWER2);   float EnergyIncreaseRate = sWorld.getRate(RATE_POWER3);
-    uint16 Spirit = GetUInt32Value(UNIT_FIELD_STAT4);
+    uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
     uint16 Class = getClass();
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
@@ -1136,57 +1136,51 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
             uint32 index2 = 0;
             switch(mod->GetMiscValue())
             {
-                case 0:
-                {
-                    index = UNIT_FIELD_RESISTANCES;
+                case 0:{
+                    index = UNIT_FIELD_ARMOR;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
                 }break;
-                case 1:
-                {
-                    index = UNIT_FIELD_RESISTANCES+1;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+1 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+1;
+                case 1:{
+                    index = UNIT_FIELD_RESISTANCES_01;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
                 }break;
-                case 2:
-                {
-                    index = UNIT_FIELD_RESISTANCES+2;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+2 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+2;
+                case 2:{
+                    index = UNIT_FIELD_RESISTANCES_02;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
                 }break;
-                case 3:
-                {
-                    index = UNIT_FIELD_RESISTANCES+3;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+3 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+3;
+                case 3:{
+                    index = UNIT_FIELD_RESISTANCES_03;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
                 }break;
-                case 4:
-                {
-                    index = UNIT_FIELD_RESISTANCES+4;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+4 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+4;
+                case 4:{
+                    index = UNIT_FIELD_RESISTANCES_04;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
                 }break;
-                case 5:
-                {
-                    index = UNIT_FIELD_RESISTANCES+5;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+5 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+5;
+                case 5:{
+                    index = UNIT_FIELD_RESISTANCES_05;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
                 }break;
-                case -1:
-                {
-                    index = UNIT_FIELD_RESISTANCES+1;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+1 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+1;
+		        case 6:{
+                    index = UNIT_FIELD_RESISTANCES_06;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
+                }
+				break;
+                case -1:{
+                    index = UNIT_FIELD_RESISTANCES_06;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
                     for(uint32 i=0;i<6;i++)
-                        if(apply)
-                    {
-                        SetUInt32Value(index+i,GetUInt32Value(index+i)+mod->GetAmount());
-                        if(GetTypeId() == TYPEID_PLAYER)
-                            SetUInt32Value(index2+i,GetUInt32Value(index2+i)+mod->GetAmount());
-                    }
-                    else
-                    {
-                        SetUInt32Value(index+i,GetUInt32Value(index+i)-mod->GetAmount());
-                        if(GetTypeId() == TYPEID_PLAYER)
-                            SetUInt32Value(index2+i,GetUInt32Value(index2+i)-mod->GetAmount());
-                    }
+                        if(apply){
+                            SetUInt32Value(index+i,GetUInt32Value(index+i)+mod->GetAmount());
+                            if(GetTypeId() == TYPEID_PLAYER)
+                                SetUInt32Value(index2+i,GetUInt32Value(index2+i)+mod->GetAmount());
+                        }else{
+                            SetUInt32Value(index+i,GetUInt32Value(index+i)-mod->GetAmount());
+                            if(GetTypeId() == TYPEID_PLAYER)
+                                SetUInt32Value(index2+i,GetUInt32Value(index2+i)-mod->GetAmount());
+                        }
                     return;
                 }break;
-                default:
-                {
+                default:{
                     printf("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
                     return;
                 }break;
@@ -1262,59 +1256,54 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
         {
             uint16 index = 0;
             uint16 index2 = 0;
-            switch(mod->GetMiscValue())
+             switch(mod->GetMiscValue())
             {
-                case 0:
-                {
-                    index = UNIT_FIELD_RESISTANCES;
+                case 0:{
+                    index = UNIT_FIELD_ARMOR;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
                 }break;
-                case 1:
-                {
-                    index = UNIT_FIELD_RESISTANCES+1;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+1 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+1;
+                case 1:{
+                    index = UNIT_FIELD_RESISTANCES_01;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
                 }break;
-                case 2:
-                {
-                    index = UNIT_FIELD_RESISTANCES+2;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+2 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+2;
+                case 2:{
+                    index = UNIT_FIELD_RESISTANCES_02;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
                 }break;
-                case 3:
-                {
-                    index = UNIT_FIELD_RESISTANCES+3;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+3 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+3;
+                case 3:{
+                    index = UNIT_FIELD_RESISTANCES_03;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
                 }break;
-                case 4:
-                {
-                    index = UNIT_FIELD_RESISTANCES+4;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+4 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+4;
+                case 4:{
+                    index = UNIT_FIELD_RESISTANCES_04;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
                 }break;
-                case 5:
-                {
-                    index = UNIT_FIELD_RESISTANCES+5;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+5 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+5;
-                }break;
-                case -1:
-                {
-                    index = UNIT_FIELD_RESISTANCES+1;
-                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+1 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+1;
+                case 5:{
+                    index = UNIT_FIELD_RESISTANCES_05;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
+                }
+				case 6:{
+                    index = UNIT_FIELD_RESISTANCES_06;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
+                }
+				break;
+                case -1:{
+					// SHOULD BE ARCANE-- SHOULDN'T ?
+                    index = UNIT_FIELD_RESISTANCES_06;
+                    mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
                     for(uint32 i=0;i<5;i++)
-                        if(apply)
-                    {
-                        SetUInt32Value(index+i,GetUInt32Value(index+i)+mod->GetAmount());
-                        if(GetTypeId() == TYPEID_PLAYER)
-                            SetUInt32Value(index2+i,GetUInt32Value(index2+i)+mod->GetAmount());
-                    }
-                    else
-                    {
-                        SetUInt32Value(index+i,GetUInt32Value(index+i)-mod->GetAmount());
-                        if(GetTypeId() == TYPEID_PLAYER)
-                            SetUInt32Value(index2+i,GetUInt32Value(index2+i)-mod->GetAmount());
-                    }
+                        if(apply){
+                            SetUInt32Value(index+i,GetUInt32Value(index+i)+mod->GetAmount());
+                            if(GetTypeId() == TYPEID_PLAYER)
+                                SetUInt32Value(index2+i,GetUInt32Value(index2+i)+mod->GetAmount());
+                        }else{
+                            SetUInt32Value(index+i,GetUInt32Value(index+i)-mod->GetAmount());
+                            if(GetTypeId() == TYPEID_PLAYER)
+                                SetUInt32Value(index2+i,GetUInt32Value(index2+i)-mod->GetAmount());
+                        }
                     return;
                 }break;
-                default:
-                {
+                default:{
                     printf("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
                     return;
                 }break;
@@ -1361,54 +1350,45 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
         {
             uint16 index = 0;
             uint16 index2 = 0;
-            switch(mod->GetMiscValue())
+             switch(mod->GetMiscValue())
             {
-                case 0:
-                {
-                    index = UNIT_FIELD_STAT0;
+                case 0:{
+                    index = UNIT_FIELD_STR;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
                 }break;
-                case 1:
-                {
-                    index = UNIT_FIELD_STAT1;
+                case 1:{
+                    index = UNIT_FIELD_AGILITY;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
                 }break;
-                case 2:
-                {
-                    index = UNIT_FIELD_STAT2;
+                case 2:{
+                    index = UNIT_FIELD_STAMINA;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
                 }break;
-                case 3:
-                {
-                    index = UNIT_FIELD_STAT3;
+                case 3:{
+                    index = UNIT_FIELD_IQ;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
                 }break;
-                case 4:
-                {
-                    index = UNIT_FIELD_STAT4;
+                case 4:{
+                    index = UNIT_FIELD_SPIRIT;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
                 }break;
-                case -1:
-                {
-                    index = UNIT_FIELD_STAT0;
+                case -1:{
+					// -1 strenght ?
+                    index = UNIT_FIELD_STR;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
                     for(uint32 i=0;i<5;i++)
-                        if(apply)
-                    {
-                        SetUInt32Value(index+i,GetUInt32Value(index+i)+mod->GetAmount());
-                        if(GetTypeId() == TYPEID_PLAYER)
-                            SetUInt32Value(index2+i,GetUInt32Value(index2+i)+mod->GetAmount());
-                    }
-                    else
-                    {
-                        SetUInt32Value(index+i,GetUInt32Value(index+i)-mod->GetAmount());
-                        if(GetTypeId() == TYPEID_PLAYER)
-                            SetUInt32Value(index2+i,GetUInt32Value(index2+i)-mod->GetAmount());
-                    }
+                        if(apply){
+                            SetUInt32Value(index+i,GetUInt32Value(index+i)+mod->GetAmount());
+                            if(GetTypeId() == TYPEID_PLAYER)
+                                SetUInt32Value(index2+i,GetUInt32Value(index2+i)+mod->GetAmount());
+                        }else{
+                            SetUInt32Value(index+i,GetUInt32Value(index+i)-mod->GetAmount());
+                            if(GetTypeId() == TYPEID_PLAYER)
+                                SetUInt32Value(index2+i,GetUInt32Value(index2+i)-mod->GetAmount());
+                        }
                     return;
                 }break;
-                default:
-                {
+                default:{
                     printf("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
                     return;
                 }break;
