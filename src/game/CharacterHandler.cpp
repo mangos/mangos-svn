@@ -160,7 +160,7 @@ SMSG_CHAR_CREATE Error Codes:
 0x1B Position in Queue: 0
 0x1C This account has been banned
 0x1D This character is still logged on
-0x1E Your WoW subscription has expired
+0x1E Your subscription has expired
 0x1F This session has timed out
 0x20 This account has been temporarily suspended
 0x21 Retrieving realmlist
@@ -184,7 +184,7 @@ SMSG_CHAR_CREATE Error Codes:
 0x33 Deleting character
 0x34 Character deleted
 0x35 Character deletion failed
-0x36 Entering the WoW
+0x36 Entering the World
 0x37 Login successful
 0x38 World server down
 0x39 A character with that name already exists

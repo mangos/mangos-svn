@@ -460,7 +460,7 @@ void Unit::Regenerate(uint16 field_cur, uint16 field_max, bool switch_)
                    addvalue = uint32(((Spirit*0.11) * HealthIncreaseRate));
                    break;               }
                case 11: /* Druid = 11 */{
-                    /* TODO: change this one, cause on wowwow's forums hp regen
+                    /* TODO: change this one, cause hp regen
 					   formula for druid was UNKNOWN */
                     addvalue = uint32(((Spirit+10) * HealthIncreaseRate));
                     break;              }

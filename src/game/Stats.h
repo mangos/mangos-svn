@@ -29,10 +29,8 @@
 //
 //  Calculates XP given out by pVictim upon death.
 //  XP=(MOB_LEVEL*5+45)*(1+0.05*(MOB_LEVEL-PLAYER_LEVEL))
-//  from http://wowwow.game-host.org/viewtopic.php?t=857&sid=07e3a117e26e43358dd23cf260c0c7ad
 //
-//
-//old formula xp = (SUM(health,power1,power2,power3,power4) / 5) * (lvl_of_monster*2)
+//  old formula xp = (SUM(health,power1,power2,power3,power4) / 5) * (lvl_of_monster*2)
 ////////////////////////////////////////////////////////////////////////
 inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
 {

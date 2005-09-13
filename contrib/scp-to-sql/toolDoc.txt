@@ -1,7 +1,7 @@
 scp_to_sql conversion tool
 
 The purpose of the tool is to convert existing DB into sql tables so
-that WoWD (or any sql base wow server) can use those DB.  
+that any sql based game server can use those DB.
 The ideal of the tool is simple, you have
 data files and you want to convert to sql tables by creating maps.
 Note from the tool's perspective, the data source only follows a
