@@ -31,11 +31,11 @@
 #endif
 
 #if PLATFORM == PLATFORM_WIN32
-# define _FULLVERSION _VERSION "-SVN-win"
+# define _FULLVERSION "/" _VERSION " (Win32)"
 # define _MANGOSD_CONFIG  "mangosd.conf"
 # define _MANGOSD_DATA "data/"
 #else
-# define _FULLVERSION _VERSION "-SVN-*ix"
+# define _FULLVERSION "/" _VERSION " (Unix)"
 # define _MANGOSD_CONFIG  "@MANGOSD_CONFIG@"
 # define _MANGOSD_DATA "@MANGOSD_DATA@"
 #endif
