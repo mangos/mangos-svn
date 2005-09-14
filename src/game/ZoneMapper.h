@@ -22,19 +22,23 @@
 #define __ZONEMAPPER_H
 
 #include "Common.h"
+#include <bitset>
 
-#define MAXZONES 2777
+#define MAXZONES 3500
 
 class ZoneMapper
 {
-    public:
-        ZoneMapper();
-        ~ZoneMapper();
-        void SetZoneBitOn(uint32 zoneid);
-        void SetZoneBitOff(uint32 zoneid);
-        bool GetZoneBit(uint32 zoneid);
-    protected:
-        bool m_ZoneIDmap[MAXZONES];
+public:
+
+    ZoneMapper() : m_ZoneIDmap(0) {}
+    inline void SetZoneBitOn(uint32 zoneid) { m_ZoneIDmap.set(zoneid, 1); }
+    inline void SetZoneBitOff(uint32 zoneid) { m_ZoneIDmap.set(zoneid, 0); }
+    inline bool GetZoneBit(uint32 zoneid) { return m_ZoneIDmap.test(zoneid); }
+
+protected:
+    std::bitset<MAXZONES> m_ZoneIDmap;
 };
+
 extern ZoneMapper ZoneIDMap;
+
 #endif

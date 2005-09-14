@@ -20,33 +20,7 @@
 
 #include "Common.h"
 #include "ZoneMapper.h"
+
+// scope variables
 ZoneMapper ZoneIDMap;
-ZoneMapper::ZoneMapper()
-{
-    for (int i=0; i < MAXZONES; i++)
-        m_ZoneIDmap[i]=false;
-}
 
-
-ZoneMapper::~ZoneMapper()
-{
-
-}
-
-
-void ZoneMapper::SetZoneBitOn(uint32 zoneid)
-{
-    m_ZoneIDmap[zoneid]=true;
-}
-
-
-void ZoneMapper::SetZoneBitOff(uint32 zoneid)
-{
-    m_ZoneIDmap[zoneid]=false;
-}
-
-
-bool ZoneMapper::GetZoneBit(uint32 zoneid)
-{
-    return m_ZoneIDmap[zoneid];
-}

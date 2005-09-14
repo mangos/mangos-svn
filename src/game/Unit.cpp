@@ -651,8 +651,14 @@ void Unit::smsg_AttackStop(uint64 victimGuid)
 
 void Unit::smsg_AttackStart(Unit* pVictim)
 {
-    WorldPacket data;
     Player* pThis = objmgr.GetObject<Player>(GetGUID());
+    smsg_AttackStart(pVictim, pThis);
+}
+
+void Unit::smsg_AttackStart(Unit* pVictim, Player *pThis)
+{
+    WorldPacket data;
+
     // Prevent user from ignoring attack speed and stopping and start combat really really fast
     if(!isAttackReady())
         setAttackTimer(uint32(0));

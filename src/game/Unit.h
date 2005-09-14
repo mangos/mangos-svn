@@ -83,10 +83,13 @@ class Unit : public Object
         void RegenerateAll();
         void Regenerate(uint16 field_cur, uint16 field_max, bool switch_);  void setRegenTimer(uint32 time) {m_regenTimer = time;};
         // Morph stuff  - morph into something, and out of something
-        void DeMorph();
-
-        void smsg_AttackStart(Unit* pVictim);
-        void smsg_AttackStop(uint64 victimGuid);
+        void DeMorph();   
+    
+    // overloaded method add cuz most of the time, an initial swing is by the player
+    // and we do not need another hash search for the player
+    void smsg_AttackStart(Unit *pVictim, Player *p);
+    void smsg_AttackStart(Unit* pVictim);
+    void smsg_AttackStop(uint64 victimGuid);
 
         virtual void RemoveInRangeObject(Object* pObj)
         {
