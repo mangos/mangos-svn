@@ -1,173 +1,28 @@
-//// Things that are added / fixed:
+MaNGOS 0.0.1  (Sept 13, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/milestone/0.0.1
 
-+ Added siuollys' scp-to-sql converter to contrib/scp-to-sql/.
-+ Fixed mangos.conf. Packet logging for world and realm is set via bool
-  value.
-+ Added new GM command: ".addspw <entry id>" will add a creature via
-  template from the creaturetemplates table.
-+ Add sql/data/ with default data for player creation and command help.
-+ Set path to data directory via configure.
-+ Daemon will now use the path to mangosd.conf set via configure.
-+ Set daemon version via configure.
-+ Set path to mangosd.conf via configure.
-+ Update client release number to 4544.
-+ Area triggers now are read from database, see areatriggers.sql for table
-  structure and trigger data. port.bin is obsolete now.
-+ Realm configuration is now made through the database, see realms.sql for
-  table structure and sample realm entry.
-+ Fixed adding game objects (when u add a game object like mail and it save on
-  db the next time u load the server it crashes)
-+ Fixed getting off taxi, currently you have to type .dismount 2 times to get
-  off.
-+ Fixed banker.
-+ Increase the monsters speed when runing away from him.
-+ Fixed, when you sit mana & life should be healing faster, same for when you
-  sleep.
-+ Fixed Mana & Life not recovering at the same time.
-+ Added new GM command ".itemrmv itemid#" it will remove the ITEM of the
-  selected NPC (still needs some work it freezs the server for 1/2 second.)
-+ RAGE works but needs to regenarate when a creature hits you and stay,
-  currently its not added when you are hit and when you manually add it, it
-  starts to disapear.
-+ Added blizzard like Inventory full to loot and buy items.
-+ Added a auto save every 15 minutes.
-+ Added Support for banks slots.
-+ Fixed Gameobjects they save / load and don't crash so far.
-+ Rogue's energy now regen correctly (20 each time).
-+ Added a Remove all affect counter & kill Should be removed when we find out
-  what causes the infinate loop.
-+ Added a .gameobject <display_id><type_id><faction>fieldsentry>. Doesn't work
-  100% yet still needs work.
-+ Added new GM command ".allowmove" makes all NPC's walk around in random
-  waypoints, use it again to stop all npc's.
-+ Fixed elevators / zeppelins.
-+ Add spells on spell book (they do not show).
-+ Fixed game objects, they cannot be viewed in client 1.5.x, only in 1.4.2
-  (need to update opcode).
-+ Fixed mailing system (mail's body is still missing -- need the packets
-  structure for SMSG_MAIL_LIST_RESULT to add it).
-+ Fixed CPI usage, it goes 45-50% CPU when attacking mobs for some minutes.
-+ Added start spells in playercreateinfo.sql.
-+ The monster chase time is to short and they should move faster, very close
-  behind you.
-+ Fixed creatures. If you attack them and run, they get deleted. You have to
-  wait till they attack you back, to avoid them getting deleted.
-+ Fix server changing all NPCs flags to 0.
-+ Refix Spirit Healers. Can't right click them to resurrect you.
-+ Added new network code.
-+ Updated network code.
-+ Fixed creatures not attacking back when you attack them.
-+ Added ZoneMapper.h/.cpp.
-+ Fixed party bug that crashed the server with more than 4 players.
-+ Fixed item crashing server bug, when you draged items to the characters
-  window.
-+ Added new GM command ".infonpc". It will display name_id,guid,flag,faction,
-  and skinID of mobs.
-+ Fixed trainers.
-+ Fix Quests
-+ Spirit Healers can resurrect.
-+ Fixed Vendors.
-+ Character security levels are not yet working. All characters created have
-  level 4 securtiy.
-+ Fix wapring to grave yards.
-+ Fixed party.
-+ Fixed chat. /say /yell /party chat fixes to get those working.
-+ Fixed GUID.
-+ Fixed emotions.
-+ Fixed text NPC.
-+ Fixed GM commands.
-+ Fixed client getting stuck on login.
-+ Fixed item visual. You no longer are naked but you can not take off items
-  or put new ones on with out having to relog.
-+ Fixed item's, other people see you naked but you don't.
-+ Fixed range code.
-+ Fixed damage attack.
-+ Fixed all spells. Needs more checking, 99% working as of now. Skill line
-  still missing.
-+ Fixed health regeneration.
-+ Fixed mana regeneration.
-+ Fixed undead. Can not swimm in water, they sink to the ground.
-+ Fixed creature chasing you when you attack and run. Monster don't stop
-  chasing you.
-+ Fixed taxi's. You get stuck when you are going to get off the ride, you
-  have to manualy type .dismount.
-+ Fixed when creature stops running after and returns to its position. It must
-  be fully healed.
-+ Fixed item still beeing rolled off. (for good?:P)
-+ Fixed minor group bug that wouldn't let you kick members.
-+ Fixed party crashing server.
-+ Fixed change leader on party.
-+ Fixed client getting stuck on character realmlist on Linux.
-+ Fixed experience bug.
-+ Fixed spirit healers. People won't see them anymore.
-+ Fixed spirit healers, not automatically add in the npc_* tables with the
-  ".addsh" command.
+ MaNGOS 0.0.1 contains a great number of new features, improvements and
+ bug fixes. The following list contains all of them:
 
-//// MaNGOS features:
-+ Added realm selection, now you can link MaNGOS servers together.
-+ Added banned function on account table.
-+ Added fall damage.
-+ Added DeMorph() function to Unit class.
-+ When you die as night elf you turn into a wisp.
+ * NPC gossips now hash by Guid instead of ID. ID is meaningless and we should revisit its usage.
+ * Fixed client crash issue. GameObject still not interactive. Flags issues.
+ * Introduced new gameobjecttemplate table as well new map files.
+ * Added SCP-to-SQL converter to contrib/scp-to-sql/.
+ * MySQL 4.0 branch now is minimum requirement.
+ * Server causes client to core on unintialized memory. Also, remove some debug statement which causes problem when the DB is large
+ * Creature loot now reads from the creatureloot table. Use a new algorithm to select loot items that mimic the probabilities assigned in each item.
+ * Fixed configuration file, added proper settings for packet logging.
+ * Added default data for player creation and command help.
+ * Added GM command: .addspw #entry-id. Spawns a creature from creaturetemplate table by given #entry-id.
+ * Server randomly cores if DBC file failed to load. Fixes by intializing all DBC class internal variables.
+ * Daemon version and path to daemon configuration now set by build system on compile time.
+ * Allow connections from client release 4544
+ * Update solution and project files for latest Visual Studio .NET 2005 Beta 2 release.
+ * Fixed compiler error for gcc 4.0 or higher. Calling templated base class methods has to be explicit from 4.0 or higher on.
+ * Added contrib/ subdirectory for third-party tools.
+ * Applied MaNGOS code indention schema.
+ * Initial code checked into repository.
+ * Fork from WoW Daemon 0.9.0 branch.
+ * Fixed Bugs: #2, #3, #9, #10, #11
 
-Changelog:
-++++++++++++++++++++++++++++++++++++++++++++++++++
-Current CVS
-++++++++++++++++++++++++++++++++++++++++++++++++++
-* Obejct manager rewrite started - Ignatich
-* We use hash_maps now for objects, should help performance a lot - Ignatich
-* New chat commands - sYkez
-* Spell code rewrite started - Ignatich
-* Improved logging - sYkez
-* Some chat commands fixed - Ignatich
-* Chat fixed and improved support - Munky
-* Worldport fix - Munky, Ignatich and Rguy
-* Changed wowWData to dynamic buffers - Ignatich
-* More Handlers converted to new structure - Ignatich, sYkez, Mooseman
-* Initial work on big handler update  - Ignatich
-* Character screen fixes for 0.9.0 - Munky & RGuy
-* Namechange and general cleanup - sYkez
-
-++++++++++++++++++++++++++++++++++++++++++++++++++
-Pre 0.9.0.1
-++++++++++++++++++++++++++++++++++++++++++++++++++
-* Timers now use time difference provided by Server class
-* Movement code now interpolates monster movement
-* Commands can be nested now. (ex. !modify hp 100 100)
-* GPS command added
-* CMSG_NAME_QUERY fixed properly this time
-* Database code cleanup
-
-older changees:
-
-Command patch v3:
-
-* More command code cleanup
-* More detailed command responses
-* All command now automatically show help if you enter wrong number of arguments
-* You can call all commands via '.' and '!' (to satisfy '.' addicted users)
-* Fixed GetPlayerNameFromGUID
-
-Command patch v2:
-
-* New commands:
-    !gmlist - who list of active GMs
-    !displayid - change display id of a creature
-    !npcflag - change npcflag of a creature
-    !factionid - change faction of a creature
-* All commands fixed so creature commands no longer work on characters and vice verse. (!delete for example)
-* This patch also includes CMSG_NAME_QUERY CPU hog patch
-* Some db queues are more efficient now
-* Fixes by sYkez included too (should be in cvs already but pserver is down)
-* Combat crash fixed (same here)
-* Fixed identation for DatabaseInterface.cpp (really annoying)
-* Some smaller command code fixes and cleanups
-
-Command patch v1:
-
-* Now each command has it's own function
-* Advanced help system
-* Command completion
-* DB configurable security and help
-* Some fixes for lina's command patch
-* Some other fixes from my dev tree i can't remember
+ The complete list of closed tickets can be found here:
+   https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/query?status=closed&milestone=0.0.1
