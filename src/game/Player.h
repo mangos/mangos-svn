@@ -109,6 +109,9 @@ struct PlayerCreateInfo
     uint32 item[10];
     uint8 item_slot[10];
     uint16 spell[10];
+    uint16 skill[20];
+	  uint16 skillCuVal[20];
+	  uint16 skillMaxVal[20];
 };
 
 enum PlayerMovementType
