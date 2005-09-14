@@ -64,7 +64,7 @@ int main(int argc, char **argv)
 	 //setting up configuration
     if (!Config::getSingleton().SetSource(cfg_file.c_str()) )
     {
-        sLog.outError("\nCould not find configuration file %s.", _MANGOSD_CONFIG);
+        sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
     }
 
     Master::getSingleton().Run();
