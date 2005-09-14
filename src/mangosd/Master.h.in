@@ -27,7 +27,7 @@
 #include "Database/DatabaseEnv.h"
 
 #ifndef _VERSION
-# define _VERSION "0.0.1"
+# define _VERSION "@VERSION@"
 #endif
 
 #if PLATFORM == PLATFORM_WIN32
@@ -36,8 +36,8 @@
 # define _MANGOSD_DATA "data/"
 #else
 # define _FULLVERSION _VERSION "-SVN-*ix"
-# define _MANGOSD_CONFIG  "/etc/mangos/mangosd.conf"
-# define _MANGOSD_DATA "/etc/mangos"
+# define _MANGOSD_CONFIG  "@MANGOSD_CONFIG@"
+# define _MANGOSD_DATA "@MANGOSD_DATA@"
 #endif
 
 #define DEFAULT_LOOP_TIME 0                       /* 0 millisecs - instant */
