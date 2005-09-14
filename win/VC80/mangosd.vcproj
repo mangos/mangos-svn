@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="mangosd"
 	ProjectGUID="{A3A04E47-43A2-4C08-90B3-029CEF558594}"
+	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -15,7 +16,7 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin\Release"
+			OutputDirectory=".\..\..\"
 			IntermediateDirectory=".\Release"
 			ConfigurationType="1"
 			InheritedPropertySheets="UpgradeFromVC71.vsprops"
@@ -71,7 +72,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\Release/mangosd.exe"
+				OutputFile=".\..\..\mangos.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
@@ -106,7 +107,7 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\bin\Debug"
+			OutputDirectory=".\..\..\"
 			IntermediateDirectory=".\Debug"
 			ConfigurationType="1"
 			InheritedPropertySheets="UpgradeFromVC71.vsprops"
@@ -163,7 +164,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\Debug/mangosd.exe"
+				OutputFile=".\..\..\mangosd.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
@@ -245,7 +246,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h&#x0D;&#x0A;"
 					Outputs="Master.h"
 				/>
 			</FileConfiguration>
@@ -254,7 +255,7 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h&#x0D;&#x0A;"
 					Outputs="Master.h"
 				/>
 			</FileConfiguration>
