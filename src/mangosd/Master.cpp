@@ -70,16 +70,10 @@ Master::~Master()
 }
 
 
-bool Master::Run(const char *cfg_file)
+bool Master::Run()
 {
     sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
-
-    //setting up configuration
-    if (!Config::getSingleton().SetSource(cfg_file))
-    {
-        sLog.outError("\nCould not find configuration file %s.", _MANGOSD_CONFIG);
-    }
 
     _StartDB();
 
