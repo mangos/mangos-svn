@@ -802,6 +802,12 @@ void ObjectMgr::LoadPlayerCreateInfo()
         {
             pPlayerCreateInfo->spell[i] = fields[42+i].GetUInt16();
         }
+        for (i=0; i<20; i++)
+		    {
+		        pPlayerCreateInfo->skill[i] = fields[52+i*3].GetUInt16();
+						pPlayerCreateInfo->skillCuVal[i] = fields[53+i*3].GetUInt16();
+						pPlayerCreateInfo->skillMaxVal[i] = fields[54+i*3].GetUInt16();
+		    }
 
         AddPlayerCreateInfo(pPlayerCreateInfo);
 
