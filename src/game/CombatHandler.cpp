@@ -42,8 +42,9 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         return;                                   // we do not attack PCs for now
     }
 
-    GetPlayer()->addStateFlag(UF_ATTACKING);
-    GetPlayer()->smsg_AttackStart(pEnemy);
+    Player *pThis = GetPlayer();
+    pThis->addStateFlag(UF_ATTACKING);
+    pThis->smsg_AttackStart(pEnemy, pThis);
 }
 
 

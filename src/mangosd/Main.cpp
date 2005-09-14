@@ -24,11 +24,43 @@
 #include "Log.h"
 #include "Master.h"
 
+#include <iostream>
+
 uint8 loglevel = DEFAULT_LOG_LEVEL;
 
-int main( void )
+int usage(const char *prog)
 {
-    Master::getSingleton().Run();
+    std::cerr << "Usage: " << prog << std::endl;
+    std::cerr << "\t" << "-c: config_file [" << _MANGOSD_CONFIG << "]" << std::endl;
+    exit(1);
+}
 
+int main(int argc, char **argv)
+{
+
+    std::string cfg_file = _MANGOSD_CONFIG;
+    int c = 1;
+    while( c < argc )
+    {
+	const char *tmp = argv[c];
+	if( *tmp == '-' && std::string(tmp +1) == "c" )
+	{
+	    if( ++c >= argc )
+	    {
+		std::cerr << "Runtime-Error: -c option requires an input argument" << std::endl;
+		usage(argv[0]);
+	    }
+	    else
+		cfg_file = argv[c];
+	}
+	else
+	{
+	    std::cerr << "Runtime-Error: unsupported option " << tmp << std::endl;
+	    usage(argv[0]);
+	}
+	++c;
+    }
+
+    Master::getSingleton().Run(cfg_file.c_str());
     return 0;
 }
