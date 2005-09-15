@@ -1298,13 +1298,10 @@ void Spell::TriggerSpell()
             return;
         }
 
-        Spell *spell = new Spell(m_caster, spellInfo,false, 0);
-        WPAssert(spell);
-
+        Spell spell(m_caster, spellInfo,false, 0);
         SpellCastTargets targets;
         targets.m_unitTarget = m_targets.m_unitTarget;
-
-        spell->prepare(&targets);
+        spell.prepare(&targets);
     }
 }
 

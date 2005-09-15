@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WOWSERVER_QUEST_H
-#define WOWSERVER_QUEST_H
+#ifndef MANGOSSERVER_QUEST_H
+#define MANGOSSERVER_QUEST_H
 
 enum QuestStatus
 {

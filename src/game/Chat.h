@@ -23,8 +23,8 @@
 //
 //  Receives all messages with a chat-related opcode.
 //////////////////////////////////////////////////////////////////////
-#ifndef WOWSERVER_CHAT_H
-#define WOWSERVER_CHAT_H
+#ifndef MANGOSSERVER_CHAT_H
+#define MANGOSSERVER_CHAT_H
 
 class ChatHandler;
 class WorldSession;

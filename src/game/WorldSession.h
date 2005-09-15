@@ -123,6 +123,7 @@ class WorldSession
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
         // void HandleJoinChannelOpcode(WorldPacket& recvPacket);
         // void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
+        void HandleGameObjectUseOpcode(WorldPacket& recPacket);
 
         /// Opcode implemented in QueryHandler.cpp:
         void HandleNameQueryOpcode(WorldPacket& recvPacket);

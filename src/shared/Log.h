@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WOWSERVER_LOG_H
-#define WOWSERVER_LOG_H
+#ifndef MANGOSSERVER_LOG_H
+#define MANGOSSERVER_LOG_H
 
 #include "Common.h"
 #include "Singleton.h"
