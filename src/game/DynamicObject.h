@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WOWSERVER_DYNAMICOBJECT_H
-#define WOWSERVER_DYNAMICOBJECT_H
+#ifndef MANGOSSERVER_DYNAMICOBJECT_H
+#define MANGOSSERVER_DYNAMICOBJECT_H
 
 #include "Object.h"
 

@@ -48,10 +48,16 @@ public:
   LootMgr();
   ~LootMgr();
   void LoadLootTables(void);
-  inline const LootList& getCreaturesLootList(int id) const
+  inline const LootList& getCreaturesLootList(int id) const      
   {
     LootTable::const_iterator iter = i_creaturesLoot.find(id);
     return (iter == i_creaturesLoot.end() ? si_noLoot : *iter->second);
+  }
+
+  inline const LootList& getGameObjectsLootList(int id) const      
+  {
+    LootTable::const_iterator iter = i_gameObjectsLoot.find(id);
+    return (iter == i_gameObjectsLoot.end() ? si_noLoot : *iter->second);
   }
 
 private:

@@ -1153,29 +1153,36 @@ void ObjectMgr::LoadGossips()
     {
         Field *fields = result->Fetch();
         GossipNpc *pGossip = new GossipNpc;
-        pGossip->ID = fields[0].GetUInt32();
+	pGossip->ID = fields[0].GetUInt32();
         pGossip->Guid = fields[1].GetUInt32();
         pGossip->TextID = fields[3].GetUInt32();
         pGossip->OptionCount = fields[4].GetUInt32();
+
 	if( pGossip->OptionCount > 0 )
 	    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 
         std::stringstream query;
-        query << "SELECT * FROM npc_options WHERE GOSSIP_ID=" << pGossip->ID;
+        query << "SELECT * FROM npc_options WHERE GOSSIP_ID=" << pGossip->Guid;
         std::auto_ptr<QueryResult> result2(sDatabase.Query( query.str().c_str() ));
         if( result2.get() != NULL )
         {
-            for(uint32 i=0; i<pGossip->OptionCount; i++)
+	    unsigned int count = 0;
+	    bool still_good = true;
+	    while( count < pGossip->OptionCount && still_good)
             {
                 Field *fields1 = result2->Fetch();
-                pGossip->pOptions[i].ID = fields1[0].GetUInt32();
-                pGossip->pOptions[i].GossipID = fields1[1].GetUInt32();
-                pGossip->pOptions[i].Icon = fields1[2].GetUInt32();
-                pGossip->pOptions[i].OptionText = fields1[3].GetString();
-                pGossip->pOptions[i].NextTextID = fields1[4].GetUInt32();
-                pGossip->pOptions[i].Special = fields1[5].GetUInt32();
-                result2->NextRow();
+                pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+                pGossip->pOptions[count].GossipID = fields1[1].GetUInt32();
+                pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
+                pGossip->pOptions[count].OptionText = fields1[3].GetString();
+                pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+                pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+		++count;
+                still_good = result2->NextRow();
             }
+
+	    // incase the count does not match the number of options there
+	    pGossip->OptionCount = count;
         }
         AddGossip(pGossip);
     } while( result->NextRow() );

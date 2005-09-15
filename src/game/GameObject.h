@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WOWSERVER_GAMEOBJECT_H
-#define WOWSERVER_GAMEOBJECT_H
+#ifndef MANGOSSERVER_GAMEOBJECT_H
+#define MANGOSSERVER_GAMEOBJECT_H
 
 #include "Object.h"
 
