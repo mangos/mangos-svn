@@ -1,7 +1,26 @@
-#----------------------------
-# Table structure for playercreateinfo
-#----------------------------
-CREATE TABLE `playercreateinfo` (
+-- phpMyAdmin SQL Dump
+-- version 2.6.2
+-- http://www.phpmyadmin.net
+-- 
+-- Host: localhost
+-- Generation Time: Sep 15, 2005 at 07:44 AM
+-- Server version: 4.1.12
+-- PHP Version: 5.0.4
+-- 
+-- Database: `mangos`
+-- 
+
+-- --------------------------------------------------------
+
+-- 
+-- Table structure for table `playercreateinfo`
+-- 
+-- Creation: Sep 15, 2005 at 07:42 AM
+-- Last update: Sep 15, 2005 at 07:42 AM
+-- 
+
+DROP TABLE IF EXISTS `playercreateinfo`;
+CREATE TABLE IF NOT EXISTS `playercreateinfo` (
   `Index` tinyint(3) unsigned NOT NULL auto_increment,
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
@@ -59,61 +78,60 @@ CREATE TABLE `playercreateinfo` (
   `skill1MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill2` smallint(5) unsigned NOT NULL default '0',
   `skill2CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill2MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill2MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill3` smallint(5) unsigned NOT NULL default '0',
   `skill3CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill3MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill3MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill4` smallint(5) unsigned NOT NULL default '0',
   `skill4CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill4MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill4MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill5` smallint(5) unsigned NOT NULL default '0',
   `skill5CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill5MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill5MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill6` smallint(5) unsigned NOT NULL default '0',
   `skill6CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill6MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill6MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill7` smallint(5) unsigned NOT NULL default '0',
   `skill7CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill7MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill7MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill8` smallint(5) unsigned NOT NULL default '0',
   `skill8CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill8MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill8MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill9` smallint(5) unsigned NOT NULL default '0',
   `skill9CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill9MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill9MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill10` smallint(5) unsigned NOT NULL default '0',
   `skill10CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill10MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill10MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill11` smallint(5) unsigned NOT NULL default '0',
   `skill11CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill11MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill11MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill12` smallint(5) unsigned NOT NULL default '0',
   `skill12CuVal` smallint(5) unsigned NOT NULL default '0',
   `skill12MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill13` smallint(5) unsigned NOT NULL default '0',
   `skill13CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill13MaxVal` smallint(5) unsigned NOT NULL default '0',          
+  `skill13MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill14` smallint(5) unsigned NOT NULL default '0',
   `skill14CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill14MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill14MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill15` smallint(5) unsigned NOT NULL default '0',
   `skill15CuVal` smallint(5) unsigned NOT NULL default '0',
   `skill15MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill16` smallint(5) unsigned NOT NULL default '0',
   `skill16CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill16MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill16MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill17` smallint(5) unsigned NOT NULL default '0',
   `skill17CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill17MaxVal` smallint(5) unsigned NOT NULL default '0',  
+  `skill17MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill18` smallint(5) unsigned NOT NULL default '0',
   `skill18CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill18MaxVal` smallint(5) unsigned NOT NULL default '0', 
+  `skill18MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill19` smallint(5) unsigned NOT NULL default '0',
   `skill19CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill19MaxVal` smallint(5) unsigned NOT NULL default '0', 
+  `skill19MaxVal` smallint(5) unsigned NOT NULL default '0',
   `skill20` smallint(5) unsigned NOT NULL default '0',
   `skill20CuVal` smallint(5) unsigned NOT NULL default '0',
-  `skill20MaxVal` smallint(5) unsigned NOT NULL default '0',       
-    
+  `skill20MaxVal` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Index`)
-) TYPE=MyISAM;
+) TYPE=MyISAM AUTO_INCREMENT=1 ;
