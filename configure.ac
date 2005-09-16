@@ -12,7 +12,7 @@
 ## Process this file with autoconf to produce a configure script.
 
 AC_INIT([MaNGOS],
-        [0.0.1],
+        [0.0.2-SVN],
         [Massive Network Game Object Server],
         [mangos])
 
