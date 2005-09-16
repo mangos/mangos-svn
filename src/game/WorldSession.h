@@ -169,6 +169,10 @@ class WorldSession
         void HandleSpiritHealerActivateOpcode(WorldPacket& recvPacket);
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
+		
+		// Duel opcodes
+		void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
+		void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
         // Auction House opcodes
         void HandleAuctionHelloOpcode(WorldPacket& recvPacket);

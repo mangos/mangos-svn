@@ -476,6 +476,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outError("AddObject at CharacterHandler.cpp");
     objmgr.AddObject( pCurrChar );
     pCurrChar->PlaceOnMap();
+	std::stringstream ss;
+	ss << "UPDATE characters SET online = 1 WHERE guid = " << pCurrChar->GetGUID();
+    sDatabase.Execute(ss.str().c_str());
 
     // add skilllines from db
     for (uint16 sl = PLAYER_SKILL_INFO_1_1; sl < PLAYER_SKILL_INFO_1_1_381; sl += 3)
@@ -494,4 +497,5 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     std::string outstring = pCurrChar->GetName();
     outstring.append( " has entered the world." );
     sWorld.SendWorldText( outstring.c_str( ) );
+
 }

@@ -92,7 +92,7 @@ bool WorldSession::Update(uint32 diff)
                 if (table[i].status == STATUS_AUTHED ||
                     (table[i].status == STATUS_LOGGEDIN && _player))
                 {
-                    (this->*table[i].handler)(*packet);
+					(this->*table[i].handler)(*packet);
                 }
                 else
                 {
@@ -132,6 +132,9 @@ void WorldSession::LogoutPlayer(bool Save)
         std::string outstring = _player->GetName( );
         outstring.append( " has left the world." );
         sWorld.SendWorldText( outstring.c_str( ) );
+
+		std::stringstream ss;
+		ss << "UPDATE characters SET online = 0 WHERE guid = " << _player->GetGUID();
 
         // Remove ourself from a group
         if (_player->IsInGroup())
@@ -280,7 +283,10 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SPIRIT_HEALER_ACTIVATE,   STATUS_LOGGEDIN, &WorldSession::HandleSpiritHealerActivateOpcode    },
         { CMSG_NPC_TEXT_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandleNpcTextQueryOpcode            },
         { CMSG_BINDER_ACTIVATE,          STATUS_LOGGEDIN, &WorldSession::HandleBinderActivateOpcode          },
-        /// Item opcodes
+        /// Duel opcodes
+		{ CMSG_DUEL_ACCEPTED,            STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode	         },
+		{ CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
+		/// Item opcodes
         { CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
         { CMSG_DESTROYITEM,              STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode             },
         { CMSG_AUTOEQUIP_ITEM,           STATUS_LOGGEDIN, &WorldSession::HandleAutoEquipItemOpcode           },
