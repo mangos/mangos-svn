@@ -29,5 +29,6 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `zoneId` mediumint(8) unsigned NOT NULL default '0',
   `orientation` float NOT NULL default '0',
   `taximask` longtext NOT NULL,
+  `online` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) TYPE=MyISAM;
