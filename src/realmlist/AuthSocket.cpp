@@ -240,14 +240,15 @@ bool AuthSocket::_HandleLogonChallenge()
             // Deadknight Fix Start
             // ss << "SELECT password, gm FROM accounts WHERE login='" << _login << "'"; // password
             // password,banned
-            ss << "SELECT password, gm, banned FROM accounts WHERE login='" << _login << "'";
+            ss << "SELECT password, gm, banned, authentication FROM accounts WHERE login='" << _login << "'";
             QueryResult *result = sDatabase.Query(ss.str().c_str());
 
             if( result )
             {
-                int banned;
+                int banned, authentication;
                 banned = (*result)[2].GetUInt8(); //database banned field
-                if(banned == 1)
+				authentication = (*result)[3].GetUInt8();
+                if( (banned == 1) || (authentication == 0) )
                 {
                     res = CE_ACCOUNT_CLOSED;
                     delete result;
