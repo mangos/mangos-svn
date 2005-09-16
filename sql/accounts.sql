@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `accounts` (
   `email` varchar(50) NOT NULL default '',
   `joindate` timestamp NOT NULL,
   `banned` tinyint(1) NOT NULL default '0',
+  `authentication` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`acct`),
   UNIQUE KEY `acct` (`acct`)
 ) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB' AUTO_INCREMENT=1 ;
