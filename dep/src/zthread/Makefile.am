@@ -18,7 +18,7 @@
 ## CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 AM_CXXFLAGS = @COMPILER_OPTIONS@ @EXTRA_COMPILER_OPTIONS@
-INCLUDES = -I$(top_srcdir)/include
+INCLUDES += -I$(srcdir)/../../include -I$(srcdir)/../../include/zthread
 SUBDIRS=.
 
 libdir=$(prefix)/lib
