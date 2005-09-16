@@ -156,6 +156,9 @@
 				RelativePath="..\..\src\game\CombatHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\DuelHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Group.cpp">
 			</File>
 			<File
