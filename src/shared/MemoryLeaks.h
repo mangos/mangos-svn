@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WOWSERVER_MEMORY_H
-#define WOWSERVER_MEMORY_H
+#ifndef MANGOSSERVER_MEMORY_H
+#define MANGOSSERVER_MEMORY_H
 
 #include "Common.h"
 #include "Singleton.h"
