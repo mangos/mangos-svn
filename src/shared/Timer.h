@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WOW_TIMER_H
-#define WOW_TIMER_H
+#ifndef MANGOS_TIMER_H
+#define MANGOS_TIMER_H
 
 #if PLATFORM == PLATFORM_WIN32
 #   include <windows.h>

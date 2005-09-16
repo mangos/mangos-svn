@@ -208,7 +208,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
     // check for an accepted client version
     bool valid_version=false;
-    int accepted_versions[]=EXPECTED_WOW_CLIENT_BUILD;
+    int accepted_versions[]=EXPECTED_MANGOS_CLIENT_BUILD;
     for(int i=0;accepted_versions[i]&&(!valid_version);i++)
         if(ch->build==accepted_versions[i])
             valid_version=true;
