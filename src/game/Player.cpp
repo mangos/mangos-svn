@@ -1195,7 +1195,7 @@ void Player::SaveToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO characters (guid, acct, name, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask) VALUES ("
+    ss << "INSERT INTO characters (guid, acct, name, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask, online) VALUES ("
         << GetGUIDLow() << ", "                   // TODO: use full guids
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -1215,7 +1215,9 @@ void Player::SaveToDB()
     for( i = 0; i < 8; i++ )
         ss << m_taximask[i] << " ";
 
-    ss << "' )";
+    ss << "', ";
+	inworld ? ss << 1 : ss << 0;
+	ss << " )";
 
     sDatabase.Execute( ss.str().c_str() );
 

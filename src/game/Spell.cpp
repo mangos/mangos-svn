@@ -667,8 +667,16 @@ void Spell::SendResurrectRequest(Player* target)
     target->GetSession()->SendPacket(&data);
     return;
 }
+void Spell::SendDuelRequest(Player* caster, Player* target)
+{
+	WorldPacket data;
+	data.Initialize(SMSG_DUEL_REQUESTED);
+	data << target->GetGUID() << caster->GetGUID();
+	data << uint32(0) << uint8(0);
 
-
+	target->GetSession()->SendPacket(&data);
+	caster->GetSession()->SendPacket(&data);
+}
 void Spell::TakePower()
 {
     uint16 powerField;
@@ -696,7 +704,7 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
     Unit* unitTarget;
     // Item* itemTarget;
     GameObject* gameObjTarget;
-    Player* playerTarget;
+    Player* playerTarget, *playerCaster;
     WorldPacket data;
     data.clear();
     unitTarget = objmgr.GetObject<Creature>(guid);
@@ -705,8 +713,9 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
     // itemTarget = objmgr.GetObject<Item>(guid);
     gameObjTarget = objmgr.GetObject<GameObject>(guid);
     playerTarget = objmgr.GetObject<Player>(guid);
-
-    uint32 damage = 0;
+	playerCaster = objmgr.GetObject<Player>(m_caster->GetGUID());
+    
+	uint32 damage = 0;
     damage = CalculateDamage((uint8)i);
 
     switch(m_spellInfo->Effect[i])
@@ -1100,6 +1109,10 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
                 }
             }
         }break;
+		case 83:                                  //Duel
+		{
+			SendDuelRequest(playerCaster, playerTarget);
+		}
         case 87:                                  // Summon Totem (slot 1)
         case 88:                                  // Summon Totem (slot 2)
         case 89:                                  // Summon Totem (slot 3)
