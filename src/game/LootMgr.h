@@ -35,6 +35,19 @@ struct LootItem
     float chance;
 };
 
+// use to generate a sequence of number
+// given a start index (defaulted to be 0 - that's
+// the first number generated.. SequenceGen will
+// generate a sequence of number every time the
+// operator() is call.
+struct SequenceGen
+{
+    SequenceGen(short start_idx = -1) : i_current(start_idx) {}
+    short operator()(void) { return ++i_current; }
+    short i_current;
+};
+
+
 ///////////////
 /// LootMgr
 class LootMgr : public Singleton< LootMgr >

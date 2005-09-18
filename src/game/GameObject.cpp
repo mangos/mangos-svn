@@ -26,6 +26,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
+#include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
 
 GameObject::GameObject() : Object()
@@ -35,25 +36,21 @@ GameObject::GameObject() : Object()
 
     m_valuesCount = GAMEOBJECT_END;
     m_RespawnTimer = 0;
-    m_gold = 0;
-    m_ItemCount = 0;
 }
 
 void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang)
 {
-    Create(guidlow, objmgr.GetGameObjectName(name_id), mapid, x, y, z, ang);
-}
-
-void GameObject::Create(uint32 guidlow, const char *name, uint32 mapid, float x, float y, float z, float ang)
-{
+    const GameObjectInfo &info(*(objmgr.GetGameObjectInfo(name_id)));
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT, mapid, x, y, z, ang);
     SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
     SetFloatValue(GAMEOBJECT_POS_Y, y);
     SetFloatValue(GAMEOBJECT_POS_Z, z);
     SetFloatValue(GAMEOBJECT_FACING, ang);
-    SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0);
+    SetFloatValue(OBJECT_FIELD_SCALE_X, info.size);
     SetUInt32Value(GAMEOBJECT_STATE, 1);
+    SetUInt32Value(GAMEOBJECT_FACTION, info.faction);
+    SetUInt32Value(GAMEOBJECT_FLAGS, info.flags);
 }
 
 
@@ -93,56 +90,69 @@ void GameObject::Despawn(uint32 time)
     SendMessageToSet(&data,true);
 
     m_RespawnTimer = time;
-    m_ItemCount = 0;
 }
 
-
-bool GameObject::FillLoot(WorldPacket *data)
+void
+GameObject::_generateLoot(Player &player, std::vector<uint32> &item_id, std::vector<uint32> &item_count, std::vector<uint32> &display_ids, uint32 &gold) const
 {
-    FillItemList();
 
-    *data << this->GetGUID();
-    *data << uint8(0x01);
-    *data << m_gold;                              // Loot Money
-    *data << m_ItemCount;                         // item Count
-
-    for(uint8 i = 0; i<=m_ItemCount ; i++)
+    // this is not ready yet.. still need to solve the data first
+    return;
+    gold = 0;
+    
+    // Generate max value
+    const LootMgr::LootList &loot_list(LootMgr::getSingleton().getGameObjectsLootList(GetUInt32Value(OBJECT_FIELD_ENTRY)));
+    bool not_done = (loot_list.size());
+    std::vector<short> indexes(loot_list.size());
+    std::generate(indexes.begin(), indexes.end(), SequenceGen());
+    sLog.outDebug("Number of items to get %d.", loot_list.size());
+    
+    while (not_done)
     {
-        if (m_ItemAmount[i] > 0)
-        {
-            *data << uint8(i);
-            ItemPrototype* tmpLootItem = objmgr.GetItemPrototype(m_ItemList[i]);
-            if(!tmpLootItem)
-                return false;
-            *data << m_ItemList[i];
-            *data << uint32(m_ItemAmount[i]);
-            *data << uint32(tmpLootItem->DisplayInfoID);
-            *data << uint32(0) << uint32(0) << uint8(0);
-        }
+	// generate the item you need to pick
+	int idx = rand()%indexes.size();
+	const LootItem &item(loot_list[indexes[idx]]);
+	indexes.erase(indexes.begin()+idx);
+	ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
+	
+	if( pCurItem != NULL && item.chance >= (rand()%100) )
+	{
+	    item_id.push_back(item.itemid);
+	    item_count.push_back(1);
+	    display_ids.push_back(pCurItem->DisplayInfoID);
+	}
+	
+	not_done = indexes.size();
     }
-    return true;
 }
 
-
-void GameObject::FillItemList()
+bool GameObject::FillLoot(Player &player, WorldPacket *data)
 {
-    uint32 i = 0;
-    for(i=0;i<10;i++)
-    {
-        m_ItemAmount[i] = 0;
-        m_ItemList[i] = 0;
-    }
-    i = 0;
+    std::vector<uint32> item_id, item_count, display_ids;
+    uint32 gold;
 
-    // Silverleaf
-    if(GetUInt32Value(OBJECT_FIELD_ENTRY) == 1617 || GetUInt32Value(UNIT_FIELD_DISPLAYID) == 270)
+    if( GetUInt32Value(GAMEOBJECT_FACTION) == 94 )
     {
-        m_ItemCount = 1;
-        m_ItemAmount[i] = 1;                      //rand()%3;
-        m_ItemList[i] = 765;
+	_generateLoot(player, item_id, item_count, display_ids, gold);
+	*data << GUID_LOPART(this->GetGUID());
+	*data << uint8(0x01);
+	*data << uint32(gold);                  // Loot Money
+	*data << (uint8)item_id.size();        // item Count
+	
+	for(uint8 i = 0; i < item_id.size(); i++)
+	{
+	    *data << uint8(i+1);  // slot, must be greater than zero
+	    *data << (uint32)item_id[i];    // item id
+	    *data << uint32(item_count[i]); // quantity
+	    *data << uint32(display_ids[i]); // iconid
+	    *data << uint32(0) << uint32(0) << uint8(0);
+	}
+	
+	return true;
     }
+
+    return false;
 }
-
 
 void GameObject::SaveToDB()
 {
@@ -174,28 +184,23 @@ void GameObject::LoadFromDB(uint32 guid)
     std::stringstream ss;
     ss << "SELECT id,positionX,positionY,positionZ,orientation,zoneId,mapId,data,name_id FROM gameobjects WHERE id=" << guid;
 
-    QueryResult *result = sDatabase.Query( ss.str().c_str() );
-    ASSERT(result);
+    std::auto_ptr<QueryResult> result(sDatabase.Query( ss.str().c_str() ));
+
+    if( result.get() ==  NULL)
+	return;
 
     Field *fields = result->Fetch();
-    uint32 name_id = fields[8].GetUInt32();
-    const GameObjectInfo *info = objmgr.GetGameObjectInfo(name_id);
-    // guildlow[0], x[1], y[2], z[3], ang[4], zone[5], map[6], data[7], name_id[8], name[9]
-    Create(fields[0].GetUInt32(),info->name.c_str(),fields[6].GetUInt32(),fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
-
+    uint32 id= fields[0].GetUInt32();
+    float x = fields[1].GetFloat();
+    float y = fields[2].GetFloat();
+    float z = fields[3].GetFloat();
+    float ang = fields[4].GetFloat();
     m_zoneId = fields[5].GetUInt32();
-    LoadValues(fields[7].GetString());
-    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
-    SetFloatValue(GAMEOBJECT_POS_X, m_positionX);
-    SetFloatValue(GAMEOBJECT_POS_Y, m_positionY);
-    SetFloatValue(GAMEOBJECT_POS_Z, m_positionZ);
-    SetFloatValue(GAMEOBJECT_FACING, m_orientation);
-    SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0);
-    SetUInt32Value(GAMEOBJECT_STATE, 1);
-    SetUInt32Value(GAMEOBJECT_FACTION, info->faction);
-    SetUInt32Value(GAMEOBJECT_FLAGS, info->flags);
+    uint32 map_id = fields[6].GetUInt32();
+    uint32 name_id = fields[8].GetUInt32();
 
-    delete result;
+    LoadValues(fields[7].GetString());
+    Create(id, name_id, map_id, x, y, z, ang);       
 }
 
 

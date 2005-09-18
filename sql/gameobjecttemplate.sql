@@ -12,6 +12,7 @@ CREATE TABLE IF NOT EXISTS `gameobjecttemplate` (
   `name` varchar(100) NOT NULL default '0',
   `faction` int(4) NOT NULL default '0',
   `flags` int(4) NOT NULL default '0',
+  `size` float NOT NULL default '1.0',
   `sound0` int(11) NOT NULL default '0',
   `sound1` int(11) NOT NULL default '0',
   `sound2` int(11) NOT NULL default '0',

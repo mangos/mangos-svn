@@ -77,7 +77,7 @@ Object::~Object( )
 
 void Object::_Create( uint32 guidlow, uint32 guidhigh )
 {
-    _InitValues();
+    if(!m_uint32Values) _InitValues();
 
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
@@ -87,7 +87,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
 
 void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang )
 {
-    _InitValues();
+    if(!m_uint32Values) _InitValues();
 
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );

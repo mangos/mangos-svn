@@ -6,6 +6,7 @@ type->type
 name->name
 faction->faction
 flags->flags
+size->size(1.0)
 sound0->sound0
 sound1->sound1
 sound2->sound2
