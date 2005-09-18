@@ -2699,12 +2699,12 @@ void Player::DeathDurabilityLoss(double percent)
 void Player::RepopAtGraveyard()
 {
     // Make sure we dont get any random numbers, if we have no graveyard you will pop where your corpse is at (dead world).
-    float closestX = 0, closestY = 0, closestZ = 0, closestO = 0;
+    float closestX = 0, closestY = 0, closestZ = 0;//, closestO = 0;
     WorldPacket data;
-    float curX, curY, curZ;
-    bool first = true;
+  //  float curX, curY, curZ;
+//    bool first = true;
 
-    ObjectMgr::GraveyardMap::const_iterator itr;
+  /*  ObjectMgr::GraveyardMap::const_iterator itr;
     for (itr = objmgr.GetGraveyardListBegin(); itr != objmgr.GetGraveyardListEnd(); itr++)
     {
         GraveyardTeleport *pGrave = itr->second;
@@ -2725,6 +2725,20 @@ void Player::RepopAtGraveyard()
             }
         }
     }
+
+	Log::getSingleton( ).outDetail("position - X - %f - Y - %f - Z - %f", closestX, closestY, closestZ);*/
+
+	GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId() );
+
+	if(ClosestGrave)
+	{
+		//Log::getSingleton( ).outDetail("position - X - %f - Y - %f - Z - %f", ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z);
+		closestX = ClosestGrave->X;
+		closestY = ClosestGrave->Y;
+		closestZ = ClosestGrave->Z;
+		delete ClosestGrave;
+	}
+	
 
     if(closestX != 0 && closestY != 0 && closestZ != 0)
     {

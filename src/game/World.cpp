@@ -173,16 +173,20 @@ void World::SetInitialWorldSettings()
     Log::getSingleton( ).outString( "Loading Corpses..." );
     objmgr.LoadCorpses();
     // Load Gossip
-    Log::getSingleton( ).outString( "Loading Gossip Text..." );
-    objmgr.LoadGossipText();
+   // Log::getSingleton( ).outString( "Loading Gossip Text..." );
+   // objmgr.LoadGossipText();
 
-    Log::getSingleton( ).outString( "Loading Gossip Npc..." );
-    objmgr.LoadGossips();
+   /* Log::getSingleton( ).outString( "Loading Gossip Npc..." );
+    objmgr.LoadGossips();*/
     //Load graveyards
-    Log::getSingleton( ).outString( "Loading Graveyards..." );
-    objmgr.LoadGraveyards();
+   // Log::getSingleton( ).outString( "Loading Graveyards..." );
+   // objmgr.LoadGraveyards();
     Log::getSingleton( ).outString( "Loading Trainers..." );
     objmgr.LoadTrainerSpells();
+	//Load Teleport Coords
+    Log::getSingleton( ).outString( "Loading Teleport Coords..." );
+    objmgr.LoadTeleportCoords();
+
     Log::getSingleton( ).outString( "" );
     objmgr.SetHighestGuids();
 
@@ -190,9 +194,6 @@ void World::SetInitialWorldSettings()
 	Log::getSingleton().outString("Initialize loot tables...");
     LootMgr::getSingleton().LoadLootTables();
 
-    //Load Teleport Coords
-    Log::getSingleton( ).outString( "Loading Teleport Coords..." );
-    objmgr.LoadTeleportCoords();
     new SkillStore("DBC/SkillLineAbility.dbc");
     new EmoteStore("DBC/EmotesText.dbc");
     new SpellStore("DBC/Spell.dbc");

@@ -40,21 +40,22 @@ struct GossipText
 
 struct GossipOptions
 {
-    uint32 ID;
-    uint32 GossipID;
+    //uint32 ID;
+    uint32 Guid;
     uint16 Icon;
     std::string OptionText;
     uint32 NextTextID;
     uint32 Special;
-    float PoiX;
-    float PoiY;
-    float PoiZ;
+  //  float PoiX;
+   // float PoiY;
+  //  float PoiZ;
 };
 
 struct GossipNpc
 {
-    GossipNpc(uint32 id=0, uint32 guid=0, uint32 tx_id=0, uint32 count=0) : ID(id), Guid(guid),TextID(tx_id),OptionCount(count),pOptions(NULL) {}
-    uint32 ID;
+  //  GossipNpc(uint32 id=0, uint32 guid=0, uint32 tx_id=0, uint32 count=0) : ID(id), Guid(guid),TextID(tx_id),OptionCount(count),pOptions(NULL) {}
+	GossipNpc(uint32 guid=0, uint32 tx_id=0, uint32 count=0) : Guid(guid),TextID(tx_id),OptionCount(count), pOptions(NULL) {}
+   // uint32 ID;
     uint32 Guid;
     uint32 TextID;
     uint32 OptionCount;

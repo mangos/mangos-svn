@@ -23,13 +23,13 @@
 
 struct GraveyardTeleport
 {
-    uint32 ID;
+  //  uint32 ID;
     float X;
     float Y;
     float Z;
-    float O;
+   // float O;
     uint32 MapId;
-    uint32 ZoneId;
-    uint32 FactionID;
+   // uint32 ZoneId;
+    //uint32 FactionID;
 };
 #endif

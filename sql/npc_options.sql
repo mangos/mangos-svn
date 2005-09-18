@@ -21,11 +21,11 @@
 
 DROP TABLE IF EXISTS `npc_options`;
 CREATE TABLE IF NOT EXISTS `npc_options` (
-  `ID` int(11) NOT NULL default '0',
-  `GOSSIP_ID` int(11) NOT NULL default '0',
-  `TYPE` int(5) default NULL,
-  `OPTION` text NOT NULL,
-  `NPC_TEXT_NEXTID` int(11) default '0',
+  `ID` int(11) NOT NULL auto_increment,
+  `NPC_GUID` int(11) NOT NULL default '0',
+  `ICON` int(5) default NULL,
+  `OPTIONTEXT` text NOT NULL,
+  `NPC_TEXT_ID` int(11) default '0',
   `SPECIAL` int(11) default NULL,
   PRIMARY KEY  (`ID`)
 ) TYPE=MyISAM;

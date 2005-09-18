@@ -16,13 +16,12 @@
 -- Table structure for table `npc_text`
 -- 
 -- Creation: Sep 10, 2005 at 12:02 PM
--- Last update: Sep 10, 2005 at 12:02 PM
+-- Last update: 2005-09-18 14:33:51
 -- 
 
 DROP TABLE IF EXISTS `npc_text`;
 CREATE TABLE IF NOT EXISTS `npc_text` (
   `ID` int(11) NOT NULL default '0',
-  `TYPE_UNUSED` int(11) NOT NULL default '0',
   `TEXT` longtext NOT NULL,
   PRIMARY KEY  (`ID`)
 ) TYPE=MyISAM;

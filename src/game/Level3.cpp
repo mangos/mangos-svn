@@ -517,37 +517,44 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
     QueryResult *result;
     std::stringstream ss;
-    GraveyardTeleport *pGrave;
+  //  GraveyardTeleport *pGrave;
 
-    ss.rdbuf()->str("");
-    pGrave = new GraveyardTeleport;
+   // ss.rdbuf()->str("");
+  //  pGrave = new GraveyardTeleport;
 
-    result = sDatabase.Query( "SELECT MAX(ID) FROM graveyards" );
-    if( result )
+   // result = sDatabase.Query( "SELECT MAX(ID) FROM graveyards" );
+
+  /*  if( result )
     {
         pGrave->ID = (*result)[0].GetUInt32()+1;
 
         delete result;
-    }
-    pGrave->X = m_session->GetPlayer()->GetPositionX();
-    pGrave->Y = m_session->GetPlayer()->GetPositionY();
-    pGrave->Z = m_session->GetPlayer()->GetPositionZ();
-    pGrave->O = m_session->GetPlayer()->GetOrientation();
-    pGrave->ZoneId = m_session->GetPlayer()->GetZoneId();
-    pGrave->MapId = m_session->GetPlayer()->GetMapId();
-    pGrave->FactionID = 0;
+    }*/
+   // pGrave->X = m_session->GetPlayer()->GetPositionX();
+  //  pGrave->Y = m_session->GetPlayer()->GetPositionY();
+  //  pGrave->Z = m_session->GetPlayer()->GetPositionZ();
+    //pGrave->O = m_session->GetPlayer()->GetOrientation();
+  //  pGrave->ZoneId = m_session->GetPlayer()->GetZoneId();
+ //   pGrave->MapId = m_session->GetPlayer()->GetMapId();
+  //  pGrave->FactionID = 0;
 
-    ss << "INSERT INTO graveyards ( X, Y, Z, O, zoneId, mapId) VALUES ("
+/*    ss << "INSERT INTO graveyards ( X, Y, Z, O, zoneId, mapId) VALUES ("
         << pGrave->X << ", "
         << pGrave->Y << ", "
         << pGrave->Z << ", "
         << pGrave->O<< ", "
         << pGrave->ZoneId << ", "
-        << pGrave->MapId << ")";
+        << pGrave->MapId << ")";*/
+	
+	 ss << "INSERT INTO graveyards ( X, Y, Z, mapId) VALUES ("
+        << m_session->GetPlayer()->GetPositionX() << ", "
+        << m_session->GetPlayer()->GetPositionY() << ", "
+        << m_session->GetPlayer()->GetPositionZ() << ", "
+        << m_session->GetPlayer()->GetMapId() << ")";
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 
-    objmgr.AddGraveyard(pGrave);
+    //objmgr.AddGraveyard(pGrave);
     return true;
 }
 

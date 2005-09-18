@@ -97,19 +97,19 @@ ObjectMgr::~ObjectMgr()
     }
     mPlayerCreateInfo.clear( );
 
-    for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
+   /* for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
     {
         delete i->second;
     }
-    mGossipText.clear( );
+    mGossipText.clear( );*/
 
     for( GameObjectInfoMap::iterator iter = mGameObjectInfo.begin(); iter != mGameObjectInfo.end(); ++iter)
     {
-	delete iter->second;
+		delete iter->second;
     }
     mGameObjectInfo.clear();
 
-    GossipNpcMap::iterator iter, end;
+  /*  GossipNpcMap::iterator iter, end;
     for(int a=0; a < MAX_CONTINENTS; a++)
     {
         for( iter = GetGossipListBegin(a), end = GetGossipListEnd(a); iter != end; iter++ )
@@ -118,13 +118,13 @@ ObjectMgr::~ObjectMgr()
             delete iter->second;
         }
         mGossipNpc[a].clear( );
-    }
+    }*/
 
-    for( GraveyardMap::iterator i = mGraveyards.begin( ); i != mGraveyards.end( ); ++ i )
+   /* for( GraveyardMap::iterator i = mGraveyards.begin( ); i != mGraveyards.end( ); ++ i )
     {
         delete i->second;
     }
-    mGraveyards.clear( );
+    mGraveyards.clear( );*/
 }
 
 
@@ -1070,27 +1070,41 @@ void ObjectMgr::LoadCorpses()
     delete result;
 }
 
-
+/*
 void ObjectMgr::AddGossipText(GossipText *pGText)
 {
     ASSERT( pGText->ID );
     ASSERT( mGossipText.find(pGText->ID) == mGossipText.end() );
     mGossipText[pGText->ID] = pGText;
-}
+}*/
 
 
 GossipText *ObjectMgr::GetGossipText(uint32 ID)
 {
-    GossipTextMap::const_iterator itr;
+    /*GossipTextMap::const_iterator itr;
     for (itr = mGossipText.begin(); itr != mGossipText.end(); itr++)
     {
         if(itr->second->ID == ID)
             return itr->second;
     }
-    return NULL;
+    return NULL;*/
+
+	std::stringstream query;
+	query << "SELECT * FROM npc_text WHERE ID = " << ID;
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+    if( result.get() == NULL )
+        return NULL;
+
+	Field *fields = result->Fetch();
+    GossipText *pGText = new GossipText;
+    pGText->ID = fields[0].GetUInt32();
+    pGText->Text = fields[1].GetString();
+	
+	return pGText;
 }
 
-
+/*
 void ObjectMgr::LoadGossipText()
 {
     GossipText *pGText;
@@ -1104,33 +1118,70 @@ void ObjectMgr::LoadGossipText()
         Field *fields = result->Fetch();
         GossipText *pGText = new GossipText;
         pGText->ID = fields[0].GetUInt32();
-        pGText->Text = fields[2].GetString();
+        pGText->Text = fields[1].GetString();
         AddGossipText(pGText);
 	
     }while( result->NextRow() );
-}
+}*/
 
-
+/*
 void ObjectMgr::AddGossip(GossipNpc *pGossip)
 {
     Creature *cr =  _getCreature(pGossip->Guid);
     if( cr != NULL )
     {
-	const uint32 mapid = cr->GetMapId();;
-	ASSERT( pGossip->Guid );
-	ASSERT( mGossipNpc[mapid].find(pGossip->Guid) == mGossipNpc[mapid].end() );
-	mGossipNpc[mapid][pGossip->Guid] = pGossip;
+		const uint32 mapid = cr->GetMapId();;
+		ASSERT( pGossip->Guid );
+		ASSERT( mGossipNpc[mapid].find(pGossip->Guid) == mGossipNpc[mapid].end() );
+		mGossipNpc[mapid][pGossip->Guid] = pGossip;
     }
-}
+}*/
 
 
-GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid, uint32 mapid)
+GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid/*, uint32 mapid*/)
 {
-    GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
-    return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
+    //GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
+    //return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
+
+	std::stringstream query;
+	query << "SELECT * FROM npc_gossip WHERE NPC_GUID = " << guid;
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+    if( result.get() == NULL )
+        return NULL;
+
+	Field *fields = result->Fetch();
+	GossipNpc *pGossip = new GossipNpc;
+	pGossip->Guid = guid;
+	pGossip->TextID = fields[1].GetUInt32();
+	pGossip->OptionCount = 0;
+
+	std::stringstream query1;
+	query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << guid;
+	std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
+
+	if( result2.get() != NULL )
+	{
+		unsigned int count = 0;
+		pGossip->OptionCount = result2->GetRowCount();
+		pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+		do
+		{
+			Field *fields1 = result2->Fetch();
+			//pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+			pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
+			pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
+			pGossip->pOptions[count].OptionText = fields1[3].GetString();
+			pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+			pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+			++count;
+		}
+		while ( result2->NextRow() );
+	}
+	return pGossip;
 }
 
-
+/*
 void ObjectMgr::LoadGossips()
 {
     std::auto_ptr<QueryResult> result(sDatabase.Query( "SELECT * FROM npc_gossip" ));
@@ -1141,53 +1192,59 @@ void ObjectMgr::LoadGossips()
     {
         Field *fields = result->Fetch();
         GossipNpc *pGossip = new GossipNpc;
-	pGossip->ID = fields[0].GetUInt32();
-        pGossip->Guid = fields[1].GetUInt32();
-        pGossip->TextID = fields[3].GetUInt32();
-        pGossip->OptionCount = fields[4].GetUInt32();
+	   // pGossip->ID = fields[0].GetUInt32();
+        pGossip->Guid = fields[0].GetUInt32();
+        pGossip->TextID = fields[1].GetUInt32();
+//        pGossip->OptionCount = fields[4].GetUInt32();
+		pGossip->OptionCount = 0;
 
-	if( pGossip->OptionCount > 0 )
-	    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+	//	if( pGossip->OptionCount > 0 )
+	//		pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 
         std::stringstream query;
-        query << "SELECT * FROM npc_options WHERE GOSSIP_ID=" << pGossip->Guid;
+        query << "SELECT * FROM npc_options WHERE NPC_GUID =" << pGossip->Guid;
         std::auto_ptr<QueryResult> result2(sDatabase.Query( query.str().c_str() ));
         if( result2.get() != NULL )
         {
-	    unsigned int count = 0;
-	    bool still_good = true;
-	    while( count < pGossip->OptionCount && still_good)
-            {
-                Field *fields1 = result2->Fetch();
-                pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-                pGossip->pOptions[count].GossipID = fields1[1].GetUInt32();
-                pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
-                pGossip->pOptions[count].OptionText = fields1[3].GetString();
-                pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-                pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-		++count;
-                still_good = result2->NextRow();
-            }
+			unsigned int count = 0;
+			pGossip->OptionCount = result2->GetRowCount();
+			pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 
-	    // incase the count does not match the number of options there
-	    pGossip->OptionCount = count;
+		//	bool still_good = true;
+			do
+			{
+			//while( count < pGossip->OptionCount && still_good)
+			//{
+				Field *fields1 = result2->Fetch();
+				pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+				pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
+				pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
+				pGossip->pOptions[count].OptionText = fields1[3].GetString();
+				pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+				pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+				++count;
+				//still_good = result2->NextRow();
+			//}
+			}
+			while ( result2->NextRow() );
+			// incase the count does not match the number of options there
+			//pGossip->OptionCount = count;
         }
         AddGossip(pGossip);
     } while( result->NextRow() );
-}
+}*/
 
-
+/*
 void ObjectMgr::AddGraveyard(GraveyardTeleport *pgrave)
 {
     ASSERT( pgrave );
     ASSERT( mGraveyards.find(pgrave->ID) == mGraveyards.end() );
     mGraveyards[pgrave->ID] = pgrave;
-}
+}*/
 
-
+/*
 void ObjectMgr::LoadGraveyards()
 {
-    GraveyardTeleport *pgrave;
     QueryResult *result = sDatabase.Query( "SELECT * FROM graveyards" );
     if( !result )
         return;
@@ -1195,7 +1252,7 @@ void ObjectMgr::LoadGraveyards()
     do
     {
         Field *fields = result->Fetch();
-        pgrave = new GraveyardTeleport;
+        GraveyardTeleport *pgrave = new GraveyardTeleport;
         pgrave->ID = fields[0].GetUInt32();
         pgrave->X = fields[1].GetFloat();
         pgrave->Y = fields[2].GetFloat();
@@ -1208,8 +1265,28 @@ void ObjectMgr::LoadGraveyards()
         AddGraveyard(pgrave);
 
     }while( result->NextRow() );
-}
+}*/
 
+GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
+{
+	std::stringstream query;
+	query << "SELECT SQRT(POW(" << x << "-X,2)+POW(" << y << "-Y,2)+POW(" << z << "-Z,2)) as distance,X,Y,Z,mapId from graveyards where mapId = " << MapId << " ORDER BY distance ASC LIMIT 1";
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+    if( result.get() == NULL )
+        return NULL;
+	
+	Field *fields = result->Fetch();
+	GraveyardTeleport *pgrave = new GraveyardTeleport;
+	//pgrave->ID = fields[1].GetUInt32();
+	pgrave->X = fields[1].GetFloat();
+	pgrave->Y = fields[2].GetFloat();
+	pgrave->Z = fields[3].GetFloat();
+    pgrave->MapId = fields[4].GetUInt32();
+
+	return pgrave;
+}
 
 void ObjectMgr::LoadTeleportCoords()
 {
