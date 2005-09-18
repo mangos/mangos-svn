@@ -33,19 +33,17 @@
 
 #include "Define.h"
 #include "TypeContainer.h"
+#include "Policies/ThreadingModel.h"
 
 template
 <
   class OBJECT,
-  class OBJECTTYPES,
-  class LOADER,
+  class OBJECT_TYPES,
   class ThreadModel = SingleThreaded<OBJECT>
 >
 class MANGOS_DLL_DECL Grid
 {
 public:
-  /// ctor
-  Grid(GRIDLOADER &loader);
 
   /// dtor
   ~Grid();
@@ -69,17 +67,19 @@ public:
   unsigned int ObjectsInGrid(void) const;
 
 
-  /// Accessors: Returns a specific type of object in the OBJECTTYPES
-  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLER hdl) const { return i_container.find(hdl); }
-  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLER hdl) { return i_container.find(hdl); }
+  /// Accessors: Returns a specific type of object in the OBJECT_TYPES
+  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.find(hdl); }
+  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.find(hdl); }
 
+  // Mutators
+  template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.insert(obj, hdl); }
 
 private:
 
   typedef typename Guard ThreadingModel::Lock;
   typedef typename VolatileType ThreadingModel::VolatileType;
 
-  TypeContainer<OBJECTTYPES> i_container;
+  TypeContainer<OBJECT_TYPES> i_container;
 };
 
 

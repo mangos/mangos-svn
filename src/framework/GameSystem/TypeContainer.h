@@ -30,18 +30,18 @@
 #include <map>
 #include "TypeList.h"
 
-template<typename OBJECT_TYPES> struct ContainerList
+template<class CONTAINER_TYPE, class OBJECT_TYPES> struct ContainerList
 {
 };
 
-template<> struct ContainerList<TypeNull> {}; /* nothing is in type null */
-template<class H, class T> struct ContainerList<TypeList<H, T> >
+template<class T> struct ContainerList<T, TypeNull> {}; /* nothing is in type null */
+template<class CONTAINER_TYPE, class H, class T> struct ContainerMapList<CONTAINER_TYPE, TypeList<H, T> >
 {
-  std::map<OBJECT_HANDLE, H *> _elements;
+  std::map<OBJECT_HANDLE, H*> _elements;
   ContainerList<T> _TailElements;
-}
+};
   
-
+  
 template<class OBJECT_TYPES>
 class MANGOS_DLL_DECL TypeContainer
 {
@@ -61,7 +61,7 @@ public:
 
 
 private:
-  ContainerList i_elements;
+  ContainerList<OBJECT_TYPES> i_elements;
 };
 
 
