@@ -1,4 +1,4 @@
-/* Define.h
+/* GridLoader.h
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -17,25 +17,29 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_DEFINE_H
-#define MANGOS_DEFINE_H
+#ifndef MANGOS_GRIDLOADER_H
+#define MANGOS_GRIDLOADER_H
 
-#ifdef WIN32
+/*
+  @class GridLoader
+  The GridLoader is working in conjuction with the Grid and responsible
+  for loading and unloading object-types (one or more) when objects
+  enters a grid.  Unloading is scheduled and might be canceled if
+  an interested object re-enters.
+ */
 
-#ifdef MANGOS_WIN32_DLL_IMPORT
-#$define MANGOS_DLL_DECL __declspec(dllimport)
-#else
-#$define MANGOS_DLL_DECL __declspec(dllexport)
+#include "Define.h"
+
+template<class OBJECT, class OBJECTTYPES>
+class MANGOS_DLL_DECL GridLoader
+{
+public:
+
+  /// Loads the grid
+  void Load(OBJECT *obj);
+
+  /// Unloads the grid
+  void Unload(OBJECT *obj);
+};
+
 #endif
-
-#else
-#define MANGOS_DLEXPORT
-#endif
-
-#ifndef DEBUG
-#define MANGOS_INLINE inline
-#else
-#define MANGOS_INLINE
-#endif
-
-#endif 

@@ -1,4 +1,4 @@
-/* Define.h
+/* TypeList.h
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -17,25 +17,28 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_DEFINE_H
-#define MANGOS_DEFINE_H
+#ifndef MANGOS_TYPELIST_H
+#define MANGOS_TYPELIST_H
 
-#ifdef WIN32
+/*
+  @struct TypeList
+  TypeList is the most simple but yet the most power class of all.  It holds
+  at compile time the different type of objects in a linked list.
+ */
 
-#ifdef MANGOS_WIN32_DLL_IMPORT
-#$define MANGOS_DLL_DECL __declspec(dllimport)
-#else
-#$define MANGOS_DLL_DECL __declspec(dllexport)
+class TypeNull;
+
+struct TypeList<typename HEAD, typename TAIL>
+{
+  typedef HEAD Head;
+  typedef TAIL Tail;
+};
+
+// enough for now.. can be expand at any point in time as needed
+#define TYPELIST_1(T1)                  TypeList<T1,TypeNull>
+#define TYPELIST_2(T1, T2)              TypeList<T1, TYPELIST_1(T2) >
+#define TYPELIST_3(T1, T2, T3)          TypeList<T1, TYPELIST_2(T2, T3) >
+#define TYPELIST_4(T1, T2, T3, T4)      TypeList<T1, TYPELIST_3(T2, T3, T4) >
+#define TYPELIST_5(T1, T2, T3, T4, T5)  TypeList<T1, TYPELIST_4(T2, T3, T4, T5) >
+
 #endif
-
-#else
-#define MANGOS_DLEXPORT
-#endif
-
-#ifndef DEBUG
-#define MANGOS_INLINE inline
-#else
-#define MANGOS_INLINE
-#endif
-
-#endif 
