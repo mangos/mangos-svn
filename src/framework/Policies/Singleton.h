@@ -25,10 +25,6 @@
  * @brief class Singleton
  */
 
-// Required on IBM aix
-#ifdef __xlC__
-#pragma implementation("SingletonImp.h")
-#endif
 
 #include "CreationPolicy.h"
 #include "ThreadingModel.h"
@@ -38,10 +34,10 @@ namespace mangos
 {
     template
     <
-	typename T,
-	class ThreadingModel = SingleThreaded<T>,
-	class CreatePolicy = OperatorNew<T>,
-	class LifeTimePolicy = ObjectLifeTime<T>
+      typename T,
+      class ThreadingModel = MaNGOS::SingleThreaded<T>,
+      class CreatePolicy = MaNGOS::OperatorNew<T>,
+      class LifeTimePolicy = MaNGOS::ObjectLifeTime<T>
     >
     class MANGOS_DLL_DECL Singleton
     {

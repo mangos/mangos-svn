@@ -23,13 +23,13 @@
 #ifdef WIN32
 
 #ifdef MANGOS_WIN32_DLL_IMPORT
-#$define MANGOS_DLL_DECL __declspec(dllimport)
+#define MANGOS_DLL_DECL __declspec(dllimport)
 #else
-#$define MANGOS_DLL_DECL __declspec(dllexport)
+#define MANGOS_DLL_DECL __declspec(dllexport)
 #endif
 
 #else
-#define MANGOS_DLEXPORT
+#define MANGOS_DLL_DECL
 #endif
 
 #ifndef DEBUG
@@ -37,5 +37,7 @@
 #else
 #define MANGOS_INLINE
 #endif
+
+typedef unsigned int OBJECT_HANDLE;
 
 #endif 

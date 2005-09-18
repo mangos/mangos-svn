@@ -39,7 +39,7 @@ template
 <
   class OBJECT,
   class OBJECT_TYPES,
-  class ThreadModel = SingleThreaded<OBJECT>
+  class ThreadModel = MaNGOS::SingleThreaded<OBJECT>
 >
 class MANGOS_DLL_DECL Grid
 {
@@ -68,18 +68,19 @@ public:
 
 
   /// Accessors: Returns a specific type of object in the OBJECT_TYPES
-  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.find<SPECIFIC_OBJECT>(hdl); }
-  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.find<SPECIFIC_OBJECT>(hdl); }
+  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
+  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
 
   // Mutators
-  template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.insert<SPECIFIC_OBJECT>(obj, hdl); }
+  template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(obj, hdl); }
 
 private:
 
-  typedef typename Guard ThreadingModel::Lock;
-  typedef typename VolatileType ThreadingModel::VolatileType;
+  typedef typename ThreadModel::Lock Guard;
+  typedef typename ThreadModel::VolatileType VolatileType;
 
   TypeContainer<OBJECT_TYPES> i_container;
+  std::map<OBJECT_HANDLE, OBJECT *> i_objects;
 };
 
 

@@ -28,7 +28,8 @@
 
 class TypeNull;
 
-struct TypeList<typename HEAD, typename TAIL>
+template<class HEAD, class TAIL>
+struct TypeList
 {
   typedef HEAD Head;
   typedef TAIL Tail;

@@ -27,7 +27,7 @@
 
 #include "Define.h"
 
-namespace mangos
+namespace MaNGOS
 {
     inline void Guard(void *) {}
 

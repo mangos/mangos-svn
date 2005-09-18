@@ -25,23 +25,20 @@
 
 typedef void (* Destroyer)(void);
 
-namespace mangos
+namespace MaNGOS
 {
-  void at_exit( void (*func)() );
-  
-  template <class T>
-  class MANGOS_DLL_DECL ObjectLifeTime
-  {
-  public:
-    
-    inline static void ScheduleCall(T*, void (*destroyer)() ) 
+    void at_exit( void (*func)() );
+
+    template <class T>
+    class MANGOS_DLL_DECL ObjectLifeTime
     {
-      at_exit( destroyer );
-    }
-    
-    // Dead reference are unhandled
-    static void OnDeadReference(void) { throw std::runtime_error("Dead Reference"); } 
-  };
+    public:
+	inline static void ScheduleCall(T*, void (*destroyer)() ) 
+	{
+	    at_exit( destroyer );
+	}
+	static void OnDeadReference(void) { throw std::runtime_error("Dead Reference"); } // We don't handle Dead Reference for now
+    };
 }    
 
 #endif
