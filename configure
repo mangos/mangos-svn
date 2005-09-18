@@ -23279,7 +23279,7 @@ LINKER_OPTIONS="$LINKER_OPTIONS $LDFLAGS"
 
 
 
-                                                                                                                        ac_config_files="$ac_config_files ./Makefile doc/Makefile src/Makefile src/mangosd/Master.h src/mangosd/Makefile src/shared/Makefile src/realmlist/Makefile src/game/Makefile dep/Makefile dep/src/Makefile dep/src/zlib/Makefile dep/src/zthread/Makefile"
+                                                                                                                                  ac_config_files="$ac_config_files ./Makefile doc/Makefile src/Makefile src/mangosd/Master.h src/mangosd/Makefile src/framework/Makefile src/shared/Makefile src/realmlist/Makefile src/game/Makefile dep/Makefile dep/src/Makefile dep/src/zlib/Makefile dep/src/zthread/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -23850,6 +23850,7 @@ do
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "src/mangosd/Master.h" ) CONFIG_FILES="$CONFIG_FILES src/mangosd/Master.h" ;;
   "src/mangosd/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/mangosd/Makefile" ;;
+  "src/framework/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/framework/Makefile" ;;
   "src/shared/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shared/Makefile" ;;
   "src/realmlist/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/realmlist/Makefile" ;;
   "src/game/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/game/Makefile" ;;
