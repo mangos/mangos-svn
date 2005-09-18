@@ -250,7 +250,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float o = chr->GetOrientation();
 
     GameObject* pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), objmgr.GetGameObjectName(display_id), chr->GetMapId(), x, y, z, o);	
+    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o);	
     pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");

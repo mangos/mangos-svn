@@ -218,13 +218,12 @@ class Object
 
         void _InitValues()
         {
-            m_uint32Values = new uint32[ m_valuesCount ];
-
-            WPAssert(m_uint32Values);
-            memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
-
-            m_updateMask.SetCount(m_valuesCount);
-            ClearUpdateMask();
+		m_uint32Values = new uint32[ m_valuesCount ];
+		WPAssert(m_uint32Values);
+		memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
+		
+		m_updateMask.SetCount(m_valuesCount);
+		ClearUpdateMask();
         }
 
         void _Create (uint32 guidlow, uint32 guidhigh);

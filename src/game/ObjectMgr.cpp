@@ -146,23 +146,10 @@ Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
     return NULL;
 }
 
-// Game Object names
-const char* ObjectMgr::GetGameObjectName(uint32 id) const
-{
-    static const char *si_unknownObjectName = "Unknown Object";
-    GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
-    if( iter == mGameObjectInfo.end() )
-	return si_unknownObjectName;
-    
-    // don't create new object info here.. race condition and
-    // needed to lock it.  However, it is slow to do so
-    return iter->second->name.c_str();
-}
 
 //
 // Creature names
 //
-
 CreatureInfo *ObjectMgr::GetCreatureName(uint32 id)
 {
     CreatureNameMap::const_iterator itr = mCreatureNames.find( id );
@@ -709,11 +696,11 @@ void ObjectMgr::LoadGameObjects()
 {
 
     // load game object info...
-    QueryResult *result = sDatabase.Query( "SELECT id,type,displayId,faction,flags,sound0,sound1,sound2,sound3,sound4,sound5,sound6,sound7,sound8,sound9,name FROM gameobjecttemplate" );
+    QueryResult *result = sDatabase.Query( "SELECT id,type,displayId,faction,flags,sound0,sound1,sound2,sound3,sound4,sound5,sound6,sound7,sound8,sound9,size,name FROM gameobjecttemplate" );
 
     if( !result )
     {
-        // log no creatures error
+        // log no object error
         return;
     }
 
@@ -729,7 +716,8 @@ void ObjectMgr::LoadGameObjects()
 						  fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
 						  fields[12].GetUInt32(),
 						  fields[13].GetUInt32(), fields[14].GetUInt32(),
-						  fields[15].GetString());
+                                                  fields[15].GetFloat(),
+						  fields[16].GetString());
 	mGameObjectInfo[id] = info;
     }
     while( result->NextRow() );
@@ -1371,3 +1359,7 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 
     return guidlow;
 }
+
+
+// static initailization
+GameObjectInfo ObjectMgr::si_UnknownGameObjectInfo;

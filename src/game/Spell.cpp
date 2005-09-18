@@ -932,7 +932,7 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
 
             data.clear();
             data.Initialize(SMSG_LOOT_RESPONSE);
-            gameObjTarget->FillLoot(&data);
+            gameObjTarget->FillLoot(*playerTarget, &data);
             playerTarget->SetLootGUID(m_targets.m_unitTarget);
             playerTarget->GetSession()->SendPacket(&data);
         }break;

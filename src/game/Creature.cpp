@@ -506,7 +506,6 @@ void Creature::generateLoot()
 	
 	if( pCurItem != NULL && item.chance >= (rand()%100) )
 	{
-	    int item_level = pCurItem->ItemLevel;
 	    if( !(LootValue > MaxLootValue) )
 	    {
 		LootValue += pCurItem->BuyPrice;

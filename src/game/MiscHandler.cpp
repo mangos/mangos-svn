@@ -848,32 +848,20 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 void 
 WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message" );
-
     WorldPacket data;
     uint64 guid;
     recv_data >> guid;
 
-    const LootMgr::LootList &loot_list(LootMgr::getSingleton().getGameObjectsLootList(GUID_LOPART(guid)));
-    data.Initialize( SMSG_LOOT_RESPONSE );
-    data << guid;
-    data << uint8(1); // loot type
-    data << uint32(0); // loot money
-    data << uint8( loot_list.size() );              // num items
-
-    for(unsigned int idx=0; idx < loot_list.size() && idx < 10; ++idx)
+    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%d]", guid);   
+    GameObject *obj = objmgr.GetObject<GameObject>(guid);
+    
+    if( obj != NULL )
     {
-	const LootItem &item(loot_list[idx]);
-	ItemPrototype *curr_item = objmgr.GetItemPrototype(item.itemid);
-	if( curr_item != NULL )
+	data.Initialize( SMSG_LOOT_RESPONSE );
+	if( obj->FillLoot(*_player, &data) )
 	{
-	    data << uint8(idx+1); // item slot
-	    data << uint32(item.itemid);
-	    data << uint32(1); // quantity
-	    data << uint32(curr_item->DisplayInfoID); // display iconid
-	    data << uint8(0) << uint32(0) << uint32(0);
+	    _player->SetLootGUID(guid);
+	    SendPacket(&data);
 	}
     }
-
-    SendPacket(&data);
 }

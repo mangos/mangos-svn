@@ -145,11 +145,15 @@ class ObjectMgr : public Singleton < ObjectMgr >
         }
 
     // GameObjects
-    const char* GetGameObjectName(uint32 id) const;
+    const char* GetGameObjectName(uint32 id) const
+    {
+	return (GetGameObjectInfo(id))->name.c_str();
+    }
+
     const GameObjectInfo *GetGameObjectInfo(uint32 id) const
     {
 	GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
-	return (iter == mGameObjectInfo.end() ? NULL : iter->second);
+	return (iter == mGameObjectInfo.end() ? &si_UnknownGameObjectInfo : iter->second);
     }
 
         // Groups
@@ -478,6 +482,7 @@ private:
 	return NULL;
     }
 
+    static GameObjectInfo si_UnknownGameObjectInfo;
 };
 
 // According to C++ standard explicit template declarations should be in scope where ObjectMgr is.
