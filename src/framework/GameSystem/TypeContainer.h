@@ -29,18 +29,7 @@
 
 #include <map>
 #include "TypeList.h"
-
-template<class CONTAINER_TYPE, class OBJECT_TYPES> struct ContainerList
-{
-};
-
-template<class T> struct ContainerList<T, TypeNull> {}; /* nothing is in type null */
-template<class CONTAINER_TYPE, class H, class T> struct ContainerMapList<CONTAINER_TYPE, TypeList<H, T> >
-{
-  std::map<OBJECT_HANDLE, H*> _elements;
-  ContainerList<T> _TailElements;
-};
-  
+#include "TypeContainerFunctions.h"
   
 template<class OBJECT_TYPES>
 class MANGOS_DLL_DECL TypeContainer
@@ -48,13 +37,13 @@ class MANGOS_DLL_DECL TypeContainer
 public:
 
   template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) { return MaNGOS::Find<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl); }
-  template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) const { return MaNGOS::Find<SPECIFIC_TYPE, OBJECT_TYPES(i_elements, hdl); }
-  template<class SPECIFIC_OBJECT> bool insert(OBJECT_HANDLE hdl, SPECIFIC_OBJECT *obj) 
+  template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl) const { return MaNGOS::Find<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl); }
+  template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, SPECIFIC_TYPE *obj) 
   {
-    return MaNGOS::Insert<SPECIFIC_TYPE, OBJECT_TYPES>(objl hdl);
+    return MaNGOS::Insert<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl, obj);
   }
   
-  template<class SPECIFIC_OBJECT> SPECIFIC_TYPE* remove(OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE> SPECIFIC_TYPE* remove(OBJECT_HANDLE hdl)
   {
     return MaNGOS::Remove<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl);
   }

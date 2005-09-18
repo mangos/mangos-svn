@@ -16,13 +16,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-INCLUDES += -I$(srcdir)/framework
+INCLUDES += -I$(srcdir)/Platform -I$(srcdir)/Policies -I$(srcdir)/Utilities -I$(srcdir)/GameSystem
 noinst_LIBRARIES = libframework.a 
 
 libframework_a_SOURCES = \
-    Singleton.cpp ObjectLifeTime.cpp \
-    CreationPolicy.cpp ThreadingModel.cpp \
-    GridLoader.cpp \
-    TypeContainer.cpp \
-    Grid.h 
+    Policies/Singleton.cpp Policies/ObjectLifeTime.cpp \
+    Policies/CreationPolicy.cpp Policies/ThreadingModel.cpp \
+    GameSystem/GridLoader.cpp \
+    GameSystem/TypeContainer.cpp 
+
+
 

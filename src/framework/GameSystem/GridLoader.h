@@ -32,58 +32,59 @@
 #include "Grid.h"
 
 // load helper functions
-template<class OBJECT, typename GRID_TYPE, class T> LoadHelper<OBJECT, GRID_TYPE, T>(GRID_TYPE &grid, OBJECT *obj)
+template<typename GRID_TYPE, class T> void LoadHelper(GRID_TYPE &grid, T &t)
 {
-  T::Load(grid, obj); // loads a specific objects into the grid specific container
+  T::Load(grid); // loads a specific objects into the grid specific container
 }
 
 // termination condition
-template<class OBJECT, typename GRID_TYPE> LoadHelper<OBJECT, GRID_TYPE, TypeNull>(GRID_TYPE &grid, OBJECT *obj)
+template<typename GRID_TYPE, class H> void LoadHelper(GRID_TYPE &grid, TypeList<H, TypeNull> &t)
 {
+  H::Load(grid);
 }
 
 // Recursion
-template<class OBJECT, typename GRID_TYPE, class H, class T> LoadHelper<OBJECT, GRID_TYPE, TypeList<H,T> >(GRID_TYPE &grid, OBJECT *obj)
+template<typename GRID_TYPE, class H, class T> void LoadHelper(GRID_TYPE &grid, TypeList<H, T> &t)
 {
-  LoadHelper<OBJECT, GRID_TYPE, H>::Load(grid, obj);
-  LoadHelper<OBJBECT, GRID_TYPE, T>::Load(grid, obj);
+  H::Load(grid);
+  LoadHelper<GRID_TYPE, T>(grid);
 }
 
 
 // Unload helper functions
-template<typename GRID_TYPE, class T> UnloadHelper<OBJECT, GRID_TYPE, T>(GRID_TYPE &grid)
+template<typename GRID_TYPE, class T> void UnloadHelper(GRID_TYPE &grid, T &t)
 {
   T::Unload(grid); // loads a specific objects into the grid specific container
 }
 
 // termination condition
-template<typename GRID_TYPE> UnloadHelper<OBJECT, GRID_TYPE, TypeNull>(GRID_TYPE &grid)
+template<typename GRID_TYPE, class H> void UnloadHelper(GRID_TYPE &grid, TypeList<H, TypeNull> &t)
 {
+  H::Unload(grid);
 }
 
 // Recursion
-template<typename GRID_TYPE, class H, class T> UoadHelper<GRID_TYPE, TypeList<H,T> >(GRID_TYPE &grid)
+template<typename GRID_TYPE, class H, class T> void UnloadHelper(GRID_TYPE &grid, TypeList<H, T> &t)
 {
-  LoadHelper<GRID_TYPE, H>::Unload(grid, obj);
-  LoadHelper<GRID_TYPE, T>::Unload(grid, obj);
+  H::Unload(grid);
+  UnloadHelper<GRID_TYPE, T>(grid);
 }
 
 template<class OBJECT, class OBJECT_TYPES, class LOADER_TYPES>
 class MANGOS_DLL_DECL GridLoader
 {
-  typedef typename Grid<OBJECT, OBJECT_TYPES> GridType;
 public:
 
   /// Loads the grid
-  void Load(GridType &, OBJECT *obj)
+  void Load(Grid<OBJECT, OBJECT_TYPES> &grid, OBJECT *obj)
   {
-    LoadHelper<OBJECT, GridType, LOADER_TYPES>(grid, obj);
+    LoadHelper<OBJECT, Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid, obj);
   }
   
   /// Unloads the grid
-  void Unload(GridType &)
+  void Unload(Grid<OBJECT, OBJECT_TYPES> &grid)
   {
-    UnloaderHelper<GridType, LOADER_TYPES>(grid);
+    UnloadHelper<Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid);
   }
 };
 

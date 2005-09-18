@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include "Define.h"
 
-namespace mangos
+namespace MaNGOS
 {
     /**
      * OperatorNew policy creates an object on the heap using new.

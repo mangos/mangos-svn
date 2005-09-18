@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include "ObjectLifeTime.h"
 
-namespace opentool
+namespace MaNGOS
 {
     extern "C" void external_wrapper(void *p)
     {

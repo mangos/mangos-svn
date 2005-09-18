@@ -26,6 +26,19 @@
  * to access or mutate the container.
  */
 
+#include "Define.h"
+
+template<class OBJECT_TYPES> struct ContainerList
+{
+};
+
+template<> struct ContainerList<TypeNull> {}; /* nothing is in type null */
+template<class H, class T> struct ContainerList<TypeList<H, T> >
+{
+  std::map<OBJECT_HANDLE, H*> _elements;
+  ContainerList<T> _TailElements;
+};
+  
 
 namespace MaNGOS
 {
@@ -35,13 +48,13 @@ namespace MaNGOS
     return NULL;
   };
 
-  template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find<TypeList<SPECIFIC_TYPE, T> >(ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
   {
-    SPEICIFIC_TYPE::iterator iter = elements._elements.find(hdl);
+    typename SPECIFIC_TYPE::iterator iter = elements._elements.find(hdl);
     return (hdl == elements._elements.end() ? NULL : iter->second);
   }
   
-  template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find<TypeList<H, T> >(ContainerList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
   {
     return Find<T>(elements.TailElement, hdl);
   }
@@ -52,13 +65,13 @@ namespace MaNGOS
     return NULL;
   };
 
-  template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find<TypeList<SPECIFIC_TYPE, T> >(const ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find(const ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
   {
-    SPEICIFIC_TYPE::const_iterator iter = elements._elements.find(hdl);
+    typename SPECIFIC_TYPE::const_iterator iter = elements._elements.find(hdl);
     return (hdl == elements._elements.end() ? NULL : iter->second);
   }
   
-  template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find<TypeList<H, T> >(const ContainerList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(const ContainerList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
   {
     return Find<T>(elements.TailElement, hdl);
   }
@@ -71,30 +84,30 @@ namespace MaNGOS
   };
   
   // Bingo.. we have a match
-  template<class SPECIFIC_TYPE, class T> bool Insert<TypeList<SPECIFIC_TYPE, T> >(ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class T> bool Insert(ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
   {
-    SPECIFIC_TYPE::iterator iter = element._elements.find(hdl);
-    if( iter != element_.elements.end() )
+    typename SPECIFIC_TYPE::iterator iter = elements._elements.find(hdl);
+    if( iter != elements._elements.end() )
       return false;
 
-    element._elements[hdl] = obj;
+    elements._elements[hdl] = obj;
     return true;
   }
   
   // Recursion
-  template<class SPECIFIC_TYPE, class H, class T> bool Insert<TypeList<H, T> >(ContainerList<TypeList<H, T> >&elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class H, class T> bool Insert(ContainerList<TypeList<H, T> >&elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
   {
     return Insert<T>(elements.TailElement, obj, hdl);
   }
 
   // non-const remove method
-  template<class SPECIFIC_TYPE, class OBJECT_TYPES> bool Remove(ContainerList<OBJECT_TYPE> &, OBJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class OBJECT_TYPES> bool Remove(ContainerList<OBJECT_TYPES> &, OBJECT_HANDLE hdl)
   {
   }
 
-  template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, OBEJECT_HANDLE hdl)
+  template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
   {
-    SPECIFIC_TYPE::iterater iter = elements._elements.find(hdl);
+    typename SPECIFIC_TYPE::iterater iter = elements._elements.find(hdl);
     return (iter == elements._elements.end() ? NULL : iter->second);
   }
 
