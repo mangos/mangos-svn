@@ -1,0 +1,121 @@
+/* ThreadingModel.h
+ *
+ * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+#ifndef MANGOS_THREADINGMODEL_H
+#define MANGOS_THREADINGMODEL_H
+
+/**
+ * @class ThreadingModel<T>
+ *
+ */
+
+#include "Define.h"
+
+namespace mangos
+{
+    inline void Guard(void *) {}
+
+    template<typename MUTEX> class MANGOS_DLL_DECL GeneralLock
+    {
+    public:
+	GeneralLock(MUTEX &m) : i_mutex(m) 
+	{
+		i_mutex.lock();
+	}
+	
+	~GeneralLock()
+	{
+	    i_mutex.unlock();
+	}
+    private:
+	GeneralLock(const GeneralLock &); 
+	GeneralLock& operator=(const GeneralLock &); 
+	MUTEX &i_mutex;
+    };
+
+    template <class T>
+    class MANGOS_DLL_DECL SingleThreaded
+    {
+    public:
+
+	struct Lock // empty object
+	{
+	    Lock() {}
+	    Lock(const T &) {}
+	    Lock(const SingleThreaded<T> &) {} // for single threaded we ignore this
+	};
+	
+	typedef T VolatileType;
+    };
+
+    // object level lockable
+    template<typename T, class MUTEX>
+    class MANGOS_DLL_DECL ObjectLevelLockable
+    {
+    public:
+	ObjectLevelLockable() : i_mtx() {}
+
+	class Lock;
+	friend class Lock;
+
+	ObjectLevelLockable() {}
+	
+	class Lock 
+	{
+	public:
+	    Lock(ObjectLevelLockable<T, MUTEX> &host) : i_lock(host.i_mtx)
+	    {
+	    }
+
+	private:
+	    GeneralLock<MUTEX> &i_lock;
+	};
+
+	typedef volatile T VolatileType;
+    private:
+	MUTEX i_mtx;
+
+    };
+
+    template<class T, class MUTEX>
+    class MANGOS_DLL_DECL ClassLevelLockable
+    {
+    public:
+	class Lock;
+	friend class Lock;
+	typedef volatile T VolatileType;
+
+	ClassLevelLockable() {}
+
+	class Lock
+	{
+	public:
+	    Lock(T &host) { ClassLevelLockable<T, MUTEX>::si_mtx.lock(); }
+	    Lock(ClassLevelLockable<T, MUTEX> &) { ClassLevelLockable<T, MUTEX>::si_mtx.unlock(); }
+	    Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.lock(); }	    
+	    ~Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.unlock(); }	    
+	};
+
+    private:
+      MANGOS_DLL_DECL static MUTEX si_mtx;
+    };
+
+}
+
+#endif
