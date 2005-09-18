@@ -499,3 +499,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     sWorld.SendWorldText( outstring.c_str( ) );
 
 }
+
+void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data)
+{
+	Log::getSingleton( ).outString( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
+    WorldPacket data;
+	data.Initialize( SMSG_MEETING_STONE_INFO );
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+	SendPacket(&data);
+}

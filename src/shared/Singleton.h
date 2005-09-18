@@ -39,10 +39,9 @@ template < class type > class Singleton
         /// Constructor
         Singleton( )
         {
-            /// If you hit this assert, this singleton already exists -- you can't create another one!
-            WPAssert( mSingleton == 0 );
-            mSingleton = static_cast<type *>(this);
-        }
+           	WPAssert( mSingleton == 0 );
+			mSingleton = static_cast<type *>(this);
+		}
         /// Destructor
         ~Singleton( )
         {
@@ -56,7 +55,6 @@ template < class type > class Singleton
         static type * getSingletonPtr( ) { return mSingleton; }
 
     protected:
-
         /// Singleton pointer, must be set to 0 prior to creating the object
         static type * mSingleton;
 };

@@ -52,7 +52,7 @@ enum HIGHGUID
 class Group;
 class Path;
 
-#define MAX_CONTINENTS 500
+//#define MAX_CONTINENTS 500
 
 class ObjectMgr : public Singleton < ObjectMgr >
 {
@@ -69,9 +69,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef HM_NAMESPACE::hash_map<uint32, Corpse*> CorpseMap;
         // other objects
         typedef std::set< Group * > GroupSet;
-        typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
-        typedef HM_NAMESPACE::hash_map<uint32, GossipNpc*> GossipNpcMap;
-        typedef HM_NAMESPACE::hash_map<uint32, GraveyardTeleport*> GraveyardMap;
+        //typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
+       // typedef HM_NAMESPACE::hash_map<uint32, GossipNpc*> GossipNpcMap;
+       // typedef HM_NAMESPACE::hash_map<uint32, GraveyardTeleport*> GraveyardMap;
         typedef HM_NAMESPACE::hash_map<uint32, CreatureInfo*> CreatureNameMap;
         typedef HM_NAMESPACE::hash_map<uint32, GameObjectInfo *> GameObjectInfoMap;
         typedef HM_NAMESPACE::hash_map<uint32, ItemPrototype*> ItemPrototypeMap;
@@ -339,17 +339,20 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void SaveCorpses();
 
         // Gossip Stuff
-        void AddGossipText(GossipText *pGText);
-        void AddGossip(GossipNpc *pGossip);
+       // void AddGossipText(GossipText *pGText);
+        //void AddGossip(GossipNpc *pGossip);
         GossipText *GetGossipText(uint32 ID);
-        GossipNpc *GetGossipByGuid(uint32 guid, uint32 mapid);
-        GossipNpcMap::iterator GetGossipListBegin(uint32 mapid) { return mGossipNpc[mapid].begin(); }
-        GossipNpcMap::iterator GetGossipListEnd(uint32 mapid) { return mGossipNpc[mapid].end(); }
+        //GossipNpc *GetGossipByGuid(uint32 guid, uint32 mapid);
+		GossipNpc *GetGossipByGuid(uint32 guid);
+
+     //   GossipNpcMap::iterator GetGossipListBegin(uint32 mapid) { return mGossipNpc[mapid].begin(); }
+      //  GossipNpcMap::iterator GetGossipListEnd(uint32 mapid) { return mGossipNpc[mapid].end(); }
 
         // Death stuff
-        void AddGraveyard(GraveyardTeleport *pgrave);
-        GraveyardMap::iterator GetGraveyardListBegin() { return mGraveyards.begin(); }
-        GraveyardMap::iterator GetGraveyardListEnd() { return mGraveyards.end(); }
+       // void AddGraveyard(GraveyardTeleport *pgrave);
+		GraveyardTeleport *GetClosestGraveYard(float x, float y, float z, uint32 MapId);
+       // GraveyardMap::iterator GetGraveyardListBegin() { return mGraveyards.begin(); }
+       // GraveyardMap::iterator GetGraveyardListEnd() { return mGraveyards.end(); }
 
         // Teleport Stuff
         void AddTeleportCoords(TeleportCoords* TC)
@@ -378,9 +381,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void LoadTaxiPath();
         void LoadTaxiPathNodes();
         void LoadCorpses();
-        void LoadGossipText();
-        void LoadGossips();
-        void LoadGraveyards();
+       // void LoadGossipText();
+        //void LoadGossips();
+        //void LoadGraveyards();
         void LoadTeleportCoords();
         void LoadAuctions();
         void LoadAuctionItems();
@@ -464,11 +467,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
         TaxiPathNodesVec    vTaxiPathNodes;
 
         // Maps for Gossip stuff
-        GossipTextMap       mGossipText;
-        GossipNpcMap        mGossipNpc[MAX_CONTINENTS];
+       // GossipTextMap       mGossipText;
+        //GossipNpcMap        mGossipNpc[MAX_CONTINENTS];
 
         // Death Stuff
-        GraveyardMap        mGraveyards;
+       // GraveyardMap        mGraveyards;
 
         // Teleport Stuff
         TeleportMap         mTeleports;

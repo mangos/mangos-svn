@@ -25,9 +25,6 @@ CREATE TABLE IF NOT EXISTS `graveyards` (
   `X` float default NULL,
   `Y` float default NULL,
   `Z` float default NULL,
-  `O` float default NULL,
-  `zoneId` int(16) default NULL,
   `mapId` int(16) default NULL,
-  `faction_id` int(32) unsigned default NULL,
   PRIMARY KEY  (`ID`)
 ) TYPE=MyISAM AUTO_INCREMENT=1 ;

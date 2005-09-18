@@ -124,6 +124,7 @@ class WorldSession
         // void HandleJoinChannelOpcode(WorldPacket& recvPacket);
         // void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);
+		void HandleMeetingStoneInfo(WorldPacket& recPacket);
 
         /// Opcode implemented in QueryHandler.cpp:
         void HandleNameQueryOpcode(WorldPacket& recvPacket);

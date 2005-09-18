@@ -551,7 +551,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
-
+	Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
     Creature *unit = objmgr.GetObject<Creature>(guid);
     if (unit == NULL)
         return;

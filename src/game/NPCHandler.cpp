@@ -271,13 +271,16 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outString( "WORLD: Recieved CMSG_GOSSIP_HELLO" );
     WorldPacket data;
     uint64 guid;
+	uint32 option;
     GossipNpc *pGossip;
 
     recv_data >> guid;
 
-    pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
+	//pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
 
-    if(pGossip)
+	pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
+
+	if(pGossip)
     {
         data.Initialize( SMSG_GOSSIP_MESSAGE );
         data << guid;
@@ -292,8 +295,9 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         }
 
         // QUEST HANDLER
-        data << uint32(0);                        //quest count
+        data << uint32(0);  //quest count
         SendPacket(&data);
+		delete pGossip;
     }
 }
 
@@ -303,42 +307,64 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 {
+	Log::getSingleton( ).outDetail("WORLD: CMSG_GOSSIP_SELECT_OPTION");
     WorldPacket data;
     uint32 option;
     uint64 guid;
-    GossipNpc *pGossip;
 
     recv_data >> guid >> option;
-    Log::getSingleton( ).outDetail("WORLD: CMSG_GOSSIP_SELECT_OPTION Option %i Guid %.8X\n", option, guid );
 
-    pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
+    //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
+	
+	GossipNpc *pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
-    switch(pGossip->pOptions[option].Special)
-    {
-        case GOSSIP_POI:
-        {
+	if(pGossip)
+	{
+		switch(pGossip->pOptions[option].Special)
+		{
+			case GOSSIP_POI:
+			{
+				GossipText *pGossipText = objmgr.GetGossipText(pGossip->pOptions[option].NextTextID);
+				if(pGossipText)
+				{
+					data.Initialize( SMSG_GOSSIP_MESSAGE );
+					data << guid;
+					data << pGossip->TextID;
+					data << uint32(1);
+					data << uint32(0);
+					data << pGossip->pOptions[option].Icon;
+					data << pGossipText->Text;
+					data << uint32(0);
+					SendPacket(&data);
+					delete pGossipText;
+				}
+			}
+			break;
+			case GOSSIP_SPIRIT_HEALER_ACTIVE:
+			{
+				data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
+				data << guid;
+				SendPacket( &data );
+				data.Initialize( SMSG_GOSSIP_COMPLETE );
+				SendPacket( &data );
+			}break;
+			case GOSSIP_VENDOR:
+			{
+				data << guid;
+				HandleListInventoryOpcode( data );
+			}
+			break;
+			case GOSSIP_TRAINER:
+			{
+				data << guid;
+				HandleTrainerListOpcode( data );
+			}
+			break;
 
-        }break;
-        case GOSSIP_SPIRIT_HEALER_ACTIVE:
-        {
-            data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
-            data << guid;
-            SendPacket( &data );
-            data.Initialize( SMSG_GOSSIP_COMPLETE );
-            SendPacket( &data );
-        }break;
-        case GOSSIP_VENDOR:
-        {
-
-        }break;
-        case GOSSIP_TRAINER:
-        {
-
-        }break;
-
-        default: break;
-    }
-
+			default: break;
+		}
+		delete pGossip;
+	}
 }
 
 
@@ -382,7 +408,6 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint32 textID;
     uint32 uField0, uField1;
-    GossipText *pGossip;
 
     recv_data >> textID;
     Log::getSingleton( ).outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID );
@@ -391,14 +416,16 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
     GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET, uField0);
     GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET + 1, uField1);
 
-    pGossip = objmgr.GetGossipText(textID);
-    if(pGossip)
+    GossipText *pGossipText = objmgr.GetGossipText(textID);
+
+    if(pGossipText)
     {
         data.Initialize( SMSG_NPC_TEXT_UPDATE );
         data << textID;
         data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
-        data << pGossip->Text.c_str();
+        data << pGossipText->Text.c_str();
         SendPacket( &data );
+		delete pGossipText;
     }
 }
 
