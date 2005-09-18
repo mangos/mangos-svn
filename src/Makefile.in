@@ -180,7 +180,7 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-SUBDIRS = shared realmlist game mangosd
+SUBDIRS = framework shared realmlist game mangosd
 all: all-recursive
 
 .SUFFIXES:

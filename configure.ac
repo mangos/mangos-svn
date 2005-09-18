@@ -136,6 +136,7 @@ AC_CONFIG_FILES([
    src/Makefile
    src/mangosd/Master.h
    src/mangosd/Makefile
+   src/framework/Makefile
    src/shared/Makefile
    src/realmlist/Makefile
    src/game/Makefile
