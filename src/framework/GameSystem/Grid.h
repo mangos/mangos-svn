@@ -68,11 +68,11 @@ public:
 
 
   /// Accessors: Returns a specific type of object in the OBJECT_TYPES
-  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.find(hdl); }
-  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.find(hdl); }
+  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.find<SPECIFIC_OBJECT>(hdl); }
+  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.find<SPECIFIC_OBJECT>(hdl); }
 
   // Mutators
-  template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.insert(obj, hdl); }
+  template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.insert<SPECIFIC_OBJECT>(obj, hdl); }
 
 private:
 
