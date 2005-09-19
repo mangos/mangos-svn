@@ -4,6 +4,13 @@ MaNGOS 0.0.2  (???? ??, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  enhancements to the overall functionality of the daemon. A complete
  list of all updated items follows below:
  
+ * Added MapManager.
+ * Added handler for CMSG_MESSAGE_STONE_INFO.
+ * NPC gossip now handles options.
+ * Added core application framework.
+ * Fixed game objects to have proper sizes.
+ * Fixed ZThread build process.
+ * Add player online status.
  * Updated command descriptions to be more meaningful.
  * Update database table for playercreateinfo.
  * Added start skills to playercreateinfo database, dropping hard coded skills.
