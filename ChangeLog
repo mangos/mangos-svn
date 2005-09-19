@@ -14,7 +14,7 @@ MaNGOS 0.0.2  (???? ??, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  * Updated command descriptions to be more meaningful.
  * Update database table for playercreateinfo.
  * Added start skills to playercreateinfo database, dropping hard coded skills.
- * Added command line switch -c for poiting to a custom configuration file. By default file from _MANGOSD_CONFIG (defined in src/mangosd/Master.h.in) will be used.
+ * Added command line switch -c for pointing to a custom configuration file. By default file from _MANGOSD_CONFIG (defined in src/mangosd/Master.h.in) will be used.
  * Fixed Connection error during delivery Null the file Master.h
  * Fixed windows VC compiler error.
  * Fixed segmentation fault on zone map test due to access of array out of bound. Also, change m_ZoneIDmap to use bitset instead of the 4 bytes bool.
