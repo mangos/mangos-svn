@@ -79,7 +79,7 @@ private:
   typedef typename ThreadModel::Lock Guard;
   typedef typename ThreadModel::VolatileType VolatileType;
 
-  TypeContainer<OBJECT_TYPES> i_container;
+  TypeMapContainer<OBJECT_TYPES> i_container;
   std::map<OBJECT_HANDLE, OBJECT *> i_objects;
 };
 
