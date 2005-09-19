@@ -32,42 +32,40 @@
 #include "Grid.h"
 
 // load helper functions
-template<typename GRID_TYPE, class T> void LoadHelper(GRID_TYPE &grid, T &t)
+template<typename GRID_TYPE, class OBJECT, class T> void LoadHelper(GRID_TYPE &grid, OBJECT *obj, T &loader)
 {
-  T::Load(grid); // loads a specific objects into the grid specific container
+  loader.load(grid, obj); // loads a specific objects into the grid specific container
 }
 
-// termination condition
-template<typename GRID_TYPE, class H> void LoadHelper(GRID_TYPE &grid, TypeList<H, TypeNull> &t)
+// Terminate condition
+template<typename GRID_TYPE, class OBJECT> void LoadHelper(GRID_TYPE &grid, OBJECT *obj, ContainerList<TypeNull>)
 {
-  H::Load(grid);
 }
 
 // Recursion
-template<typename GRID_TYPE, class H, class T> void LoadHelper(GRID_TYPE &grid, TypeList<H, T> &t)
+template<typename GRID_TYPE, class OBJECT, class H, class T> void LoadHelper(GRID_TYPE &grid, OBJECT *obj, ContainerList<TypeList<H, T> >&loaders)
 {
-  H::Load(grid);
-  LoadHelper<GRID_TYPE, T>(grid);
+  loaders._element.load(grid, obj);
+  LoadHelper(grid, obj, loaders._TailElements);
 }
 
 
 // Unload helper functions
-template<typename GRID_TYPE, class T> void UnloadHelper(GRID_TYPE &grid, T &t)
+template<typename GRID_TYPE, class T> void UnloadHelper(GRID_TYPE &grid, T &loader)
 {
-  T::Unload(grid); // loads a specific objects into the grid specific container
+  loader.Unload(grid); // loads a specific objects into the grid specific container
 }
 
 // termination condition
-template<typename GRID_TYPE, class H> void UnloadHelper(GRID_TYPE &grid, TypeList<H, TypeNull> &t)
+template<typename GRID_TYPE> void UnloadHelper(GRID_TYPE &grid, ContainerList<TypeNull> &)
 {
-  H::Unload(grid);
 }
 
 // Recursion
-template<typename GRID_TYPE, class H, class T> void UnloadHelper(GRID_TYPE &grid, TypeList<H, T> &t)
+template<typename GRID_TYPE, class H, class T> void UnloadHelper(GRID_TYPE &grid, TypeList<H, T> &loaders)
 {
-  H::Unload(grid);
-  UnloadHelper<GRID_TYPE, T>(grid);
+  loaders._element.Unload(grid);
+  UnloadHelper<GRID_TYPE, T>(grid, loaders._TailElements);
 }
 
 template<class OBJECT, class OBJECT_TYPES, class LOADER_TYPES>
@@ -78,14 +76,17 @@ public:
   /// Loads the grid
   void Load(Grid<OBJECT, OBJECT_TYPES> &grid, OBJECT *obj)
   {
-    LoadHelper<OBJECT, Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid, obj);
+    LoadHelper<OBJECT, Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid, obj, i_loaders);
   }
   
   /// Unloads the grid
   void Unload(Grid<OBJECT, OBJECT_TYPES> &grid)
   {
-    UnloadHelper<Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid);
+    UnloadHelper<Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid, i_loaders);
   }
+
+private:
+  ContainerList<LOADER_TYPES> i_loaders;
 };
 
 

@@ -32,7 +32,7 @@
 #include "TypeContainerFunctions.h"
   
 template<class OBJECT_TYPES>
-class MANGOS_DLL_DECL TypeContainer
+class MANGOS_DLL_DECL TypeMapContainer
 {
 public:
 
@@ -50,7 +50,7 @@ public:
 
 
 private:
-  ContainerList<OBJECT_TYPES> i_elements;
+  ContainerMapList<OBJECT_TYPES> i_elements;
 };
 
 
