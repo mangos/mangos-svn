@@ -23,7 +23,7 @@ MaNGOS 0.0.2  (???? ??, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  * UpdateFields updated to 1.6.1, where ten fields where changed, regarding resistances and player stats fields.
  * Changed Opcodes to version 1.6.1. Two opcodes changed, two have been deleted and two have been added.
  * Fixed memory leak problems. The creation of new TYPE[] must delete with [] for correctness otherwise n-1 members are leaked.
- * Fixed Bugs: #13, #18
+ * Fixed Bugs: #13, #18, #19
 
  The complete list of closed tickets can be found here:
    https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/query?status=closed&milestone=0.0.1
