@@ -37,12 +37,17 @@
 typedef TYPE_LIST_2(Creature, GameObject) AllObjectTypes;
 typedef TYPE_LIST_2(CreatureLoader, GameObjectLoader) AllLoaders;
 
-struct Zone
+template<unsigned int T>
+class Zone
 {
+public:
   Zone();
   ~Zone();
-  std::bitset<MAX_GRID_PER_ZONE> i_gridStatus;
+
+private:
+  std::bitset<T> i_gridStatus;
   Grid<Player, AllObjectTypes> **i_Grids;
+  ContainerList<AllLoaders> i_loaders;
 };
 
 class MapManager : public Singleton<MapManager>
@@ -57,11 +62,18 @@ public:
   void ExitMap(Player *pl);
 
 private:
-  MapManager() : i_zoneStatus(0) {}; // not allows
+  MapManager();
   void PlayerEnterLocation(Player *, const unit32 &zone_id, const float &x, const float &y);
 
-  std::bitset<MAX_ZONES> i_zoneStatus;
-  std::map<uint32, Zone *> i_zones;
+  typedef std::vector<Zone<MAX_GRIDS_PER_ZONE> > ZonesType;
+  ZonesType i_zones;
 };
+
+// zone stuff
+template<unsigned int T>
+Zone<T>::Zone()
+{
+}
+
 
 #endif
