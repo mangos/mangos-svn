@@ -1,5 +1,5 @@
 TypeTable{name=string,guild=string,level=int}
-InfoTable{table=creaturetemplate,outfile=creaturetemplate.sql,fileName=creatures.scp}
+InfoTable{table=creaturetemplate,outfile=creaturetemplate.sql,fileName=creatures.scp,apply-preprocessor=npctext.scp}
 creature->entryid(*)
 model->modelid
 name->name
@@ -22,4 +22,6 @@ X->slot3model
 X->slot3pos
 type->type
 X->mount
+npctext_unk0_1->unk0
+
 

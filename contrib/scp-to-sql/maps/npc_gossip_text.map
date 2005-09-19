@@ -1,0 +1,4 @@
+InfoTable{table=npc_text,fileName=creatures.scp,outfile=npc_gossip_text.sql}
+TypeTable{npctext0_0=string}
+creature->ID
+npctext0_0->TEXT(*)

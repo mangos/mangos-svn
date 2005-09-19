@@ -247,6 +247,7 @@ sub insert_into_table
     my @col_values;
 
     # Handle Concat first
+    my $has_unique = 0;
     for my $key ( keys %{$lookup_map} )
     {
 	# (1) Handles concat
@@ -297,7 +298,7 @@ sub insert_into_table
 			++$count;
 		    }while($obj_val ne "");
 
-		    return; # currently the tool does not support mixing unique and non-unique
+		    $has_unique = 1;
 		}
 		else
 		{
@@ -359,7 +360,10 @@ sub insert_into_table
 
     }
 
-    dump_values($handle, \@columns, \@col_values, $table_name);
+    if( $has_unique == 0 )
+    {
+	dump_values($handle, \@columns, \@col_values, $table_name);
+    }
 
 }
 
