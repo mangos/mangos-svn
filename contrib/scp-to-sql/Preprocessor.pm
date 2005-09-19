@@ -162,13 +162,16 @@ sub apply
 
     for my $key ( keys %spawn_points )
     {
-	my $spawn_reference = $obj_map->{$spawn_points{$key}};
-	for my $ref_key( keys %{$spawn_reference} )
+	if( $key ne "" )
 	{
-	    $obj_map->{$key}{"Link_" . $ref_key} = $spawn_reference->{$ref_key};
+	    my $spawn_reference = $obj_map->{$spawn_points{$key}};
+	    for my $ref_key( keys %{$spawn_reference} )
+	    {
+		$obj_map->{$key}{"Link_" . $ref_key} = $spawn_reference->{$ref_key};
+	    }
+	    set_zone_id($obj_map->{$key});
+	    set_merge_template($obj_map->{$key}, \%merge_object, $merge_id);
+	    $obj_map->{$spawn_points{$key}} = {}; # for performance purposes.	
 	}
-	set_zone_id($obj_map->{$key});
-	set_merge_template($obj_map->{$key}, \%merge_object, $merge_id);
-	$obj_map->{$spawn_points{$key}} = {}; # for performance purposes.	
-    }
+    }    
 }
