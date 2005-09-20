@@ -8,5 +8,14 @@ See the COPYING file for copying conditions.
 Please submit bug reports at:
 https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/
 
+Version 0.0.2
+ * Most data conversions working.
+ * Database cleanup.
+ * More features working.
+ * Many bugs fixed.
+
 Version 0.0.1
-* Fork from WoW Daemon 0.9.0 branch.
+ * Data converter added.
+ * Build system improvements.
+ * Bug fixing and code cleaning.
+ * Fork from WoW Daemon 0.9.0 branch.
