@@ -798,6 +798,8 @@ void ObjectMgr::LoadPlayerCreateInfo()
 			}
         } while( items_result->NextRow() );
 
+		delete items_result;
+
 		spells_result = sDatabase.Query( "SELECT * FROM playercreateinfo_spells" );
 		do 
         {
@@ -808,6 +810,8 @@ void ObjectMgr::LoadPlayerCreateInfo()
 				pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
 			}
         } while( spells_result->NextRow() );
+
+		delete spells_result;
 
 		skills_result = sDatabase.Query( "SELECT * FROM playercreateinfo_skills" );
         do 
@@ -822,6 +826,8 @@ void ObjectMgr::LoadPlayerCreateInfo()
 			}
         } while( skills_result->NextRow() );
 
+		delete skills_result;
+
 		actions_result = sDatabase.Query( "SELECT * FROM playercreateinfo_actions" );
         do 
         {
@@ -835,6 +841,8 @@ void ObjectMgr::LoadPlayerCreateInfo()
 				pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
 			}
         } while( actions_result->NextRow() );
+
+		delete actions_result;
 
         AddPlayerCreateInfo(pPlayerCreateInfo);
 
