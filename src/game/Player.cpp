@@ -157,6 +157,9 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     baseattacktime[0] = 2000;
     baseattacktime[1] = 2000;
 
+	m_race = race;
+	m_class = class_;
+
     m_mapId = info->mapId;
     m_zoneId = info->zoneId;
     m_positionX = info->positionX;
@@ -222,31 +225,73 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
     Item *item;
-    for (i=0; i<10; i++)
+	uint32 titem;
+	uint8 titem_slot;
+	uint16 tspell, tskill[3], taction[4];
+	std::list<uint32>::iterator item_itr;
+	std::list<uint8>::iterator item_slot_itr;
+	std::list<uint16>::iterator spell_itr, skill_itr[3], action_itr[4];
+
+
+	item_itr = info->item.begin();
+	item_slot_itr = info->item_slot.begin();
+
+	for (; item_itr!=info->item.end(); item_itr++,item_slot_itr++)
     {
-        if ( (info->item[i]!=0) && (info->item_slot[i]!=0) )
+        titem = (*item_itr);
+		titem_slot = (*item_slot_itr);
+		if ( (titem!=0) && (titem_slot!=0) )
         {
             item = new Item();
-            item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), info->item[i], this);
-            AddItemToSlot(info->item_slot[i], item);
+            item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), titem, this);
+            AddItemToSlot(titem_slot, item);
         }
     }
 
-    for (i=0; i<10; i++)
+	spell_itr = info->spell.begin();
+
+	for (; spell_itr!=info->spell.end(); spell_itr++)
     {
-        if ( info->spell[i]!=0 )
+        tspell = (*spell_itr);
+		if ( (tspell!=0) )
         {
-            addSpell(info->spell[i], 0);
+            addSpell(tspell, 0);
         }
     }
-    
-    for (i=0; i<20; i++)
+	
+	for( i=0; i<3;i++)
+		skill_itr[i] = info->skill[i].begin();
+	
+	for (; skill_itr[0]!=info->skill[0].end() && skill_itr[1]!=info->skill[1].end() && skill_itr[2]!=info->skill[2].end(); )
     {
+        for( i=0; i<3;i++)
+			tskill[i] = (*skill_itr[i]);
 
-        if ( (info->skill[i]!=0) && (info->skillCuVal[i]!=0) && (info->skillMaxVal[i]!=0) )
+		if ( (tskill[0]!=0) && (tskill[1]!=0) && (tskill[2]!=0) )
         {
-            AddSkillLine(info->skill[i], info->skillCuVal[i], info->skillMaxVal[i]);
+            AddSkillLine(tskill[0],tskill[1],tskill[2]);
         }
+
+		for( i=0; i<3;i++)
+			skill_itr[i]++;
+    }
+
+	for( i=0; i<4;i++)
+		action_itr[i] = info->action[i].begin();
+	
+	
+	for (; action_itr[0]!=info->action[0].end() && action_itr[1]!=info->action[1].end();)
+    {
+        for( i=0; i<4 ;i++)
+			taction[i] = (*action_itr[i]);
+		
+
+		if ( (taction[0]!=0) && (taction[1]!=0) )
+        {
+            addAction((uint8)taction[0], taction[1], (uint8)taction[2], (uint8)taction[3]);
+        }
+		for( i=0; i<4 ;i++)
+			action_itr[i]++;
     }
 
     // Not worrying about this stuff for now
@@ -916,6 +961,7 @@ void Player::_LoadMail()
     // Clear spell list
     m_mail.clear();
 
+
     // Mail
     std::stringstream query;
     query << "SELECT * FROM mail WHERE reciever=" << GetGUIDLow();
@@ -1195,10 +1241,12 @@ void Player::SaveToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO characters (guid, acct, name, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask, online) VALUES ("
+    ss << "INSERT INTO characters (guid, acct, name, race, class, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask, online) VALUES ("
         << GetGUIDLow() << ", "                   // TODO: use full guids
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
+		<< m_race << ", "
+		<< m_class << ", "
         << m_mapId << ", "
         << m_zoneId << ", "
         << m_positionX << ", "
@@ -1368,20 +1416,22 @@ void Player::LoadFromDB( uint32 guid )
 
     // TODO: check for overflow
     m_name = fields[3].GetString();
+	m_race = fields[4].GetUInt8();
+	m_class = fields[5].GetUInt8();
 
-    m_positionX = fields[4].GetFloat();
-    m_positionY = fields[5].GetFloat();
-    m_positionZ = fields[6].GetFloat();
-    m_mapId = fields[7].GetUInt32();
-    m_zoneId = fields[8].GetUInt32();
-    m_orientation = fields[9].GetFloat();
+    m_positionX = fields[6].GetFloat();
+    m_positionY = fields[7].GetFloat();
+    m_positionZ = fields[8].GetFloat();
+    m_mapId = fields[9].GetUInt32();
+    m_zoneId = fields[10].GetUInt32();
+    m_orientation = fields[11].GetFloat();
 
     ZoneIDMap.SetZoneBitOn(m_zoneId);
 
     if( HasFlag(PLAYER_FLAGS, 0x10) )
         m_deathState = DEAD;
 
-    LoadTaxiMask( fields[10].GetString() );
+    LoadTaxiMask( fields[12].GetString() );
 
     delete result;
 
