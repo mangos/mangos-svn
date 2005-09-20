@@ -27,6 +27,8 @@
  */
 
 #include "Define.h"
+#include "TypeList.h"
+#include <map>
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements
@@ -40,7 +42,7 @@ template<class OBJECT_TYPES> struct ContainerMapList
 template<> struct ContainerMapList<TypeNull> {}; /* nothing is in type null */
 template<class H, class T> struct ContainerMapList<TypeList<H, T> >
 {
-  std::map<OBJECT_HANDLE, H*> _elements;
+  std::map<OBJECT_HANDLE, H*> _element;
   ContainerMapList<T> _TailElements;
 };
 
@@ -74,8 +76,8 @@ namespace MaNGOS
 
   template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
   {
-    typename SPECIFIC_TYPE::iterator iter = elements._elements.find(hdl);
-    return (hdl == elements._elements.end() ? NULL : iter->second);
+    typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
+    return (hdl == elements._element.end() ? NULL : iter->second);
   }
   
   template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
@@ -91,8 +93,8 @@ namespace MaNGOS
 
   template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find(const ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
   {
-    typename SPECIFIC_TYPE::const_iterator iter = elements._elements.find(hdl);
-    return (hdl == elements._elements.end() ? NULL : iter->second);
+    typename SPECIFIC_TYPE::const_iterator iter = elements._element.find(hdl);
+    return (hdl == elements._element.end() ? NULL : iter->second);
   }
   
   template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(const ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
@@ -110,11 +112,11 @@ namespace MaNGOS
   // Bingo.. we have a match
   template<class SPECIFIC_TYPE, class T> bool Insert(ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
   {
-    typename SPECIFIC_TYPE::iterator iter = elements._elements.find(hdl);
-    if( iter != elements._elements.end() )
+    typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
+    if( iter != elements._element.end() )
       return false;
 
-    elements._elements[hdl] = obj;
+    elements._element[hdl] = obj;
     return true;
   }
   
@@ -131,8 +133,8 @@ namespace MaNGOS
 
   template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
   {
-    typename SPECIFIC_TYPE::iterater iter = elements._elements.find(hdl);
-    return (iter == elements._elements.end() ? NULL : iter->second);
+    typename SPECIFIC_TYPE::iterater iter = elements._element.find(hdl);
+    return (iter == elements._element.end() ? NULL : iter->second);
   }
 
 
