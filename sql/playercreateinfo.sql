@@ -1,7 +1,8 @@
-#----------------------------
-# Table structure for playercreateinfo
-#----------------------------
-CREATE TABLE `playercreateinfo` (
+-----------------------------
+-- Table structure for playercreateinfo
+-----------------------------
+DROP TABLE IF EXISTS `playercreateinfo`;
+CREATE TABLE IF NOT EXISTS `playercreateinfo` (
   `Index` tinyint(3) unsigned NOT NULL auto_increment,
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
@@ -23,7 +24,7 @@ CREATE TABLE `playercreateinfo` (
   `BaseEnergy` mediumint(8) unsigned NOT NULL default '0',
   `attackpower` mediumint(8) unsigned NOT NULL default '0',
   `mindmg` float NOT NULL default '0',
-  `maxdmg` float NOT NULL default '0',
-    
+  `maxdmg` float NOT NULL default '0',    
   PRIMARY KEY  (`Index`)
 ) TYPE=MyISAM;
+
