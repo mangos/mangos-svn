@@ -745,63 +745,102 @@ void ObjectMgr::LoadGameObjects()
 
 void ObjectMgr::LoadPlayerCreateInfo()
 {
-    QueryResult *result = sDatabase.Query( "SELECT * FROM playercreateinfo" );
+    int i=0,j=0,k=0;
+	QueryResult *player_result, *items_result, *spells_result, *skills_result,*actions_result ;
+    Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
+	PlayerCreateInfo *pPlayerCreateInfo;
 
-    if( !result )
-        return;
 
-    PlayerCreateInfo *pPlayerCreateInfo;
-    int i;
+	player_result = sDatabase.Query( "SELECT * FROM playercreateinfo" );
+    
+	if( !player_result ) 
+		return;
 
     do
     {
-        Field *fields = result->Fetch();
+        player_fields = player_result->Fetch();
 
         pPlayerCreateInfo = new PlayerCreateInfo;
 
-        pPlayerCreateInfo->index = fields[0].GetUInt8();
-        pPlayerCreateInfo->race = fields[1].GetUInt8();
-        pPlayerCreateInfo->class_ = fields[2].GetUInt8();
-        pPlayerCreateInfo->mapId = fields[3].GetUInt32();
-        pPlayerCreateInfo->zoneId = fields[4].GetUInt32();
-        pPlayerCreateInfo->positionX = fields[5].GetFloat();
-        pPlayerCreateInfo->positionY = fields[6].GetFloat();
-        pPlayerCreateInfo->positionZ = fields[7].GetFloat();
-        pPlayerCreateInfo->displayId = fields[8].GetUInt16();
-        pPlayerCreateInfo->strength = fields[9].GetUInt8();
-        pPlayerCreateInfo->ability = fields[10].GetUInt8();
-        pPlayerCreateInfo->stamina = fields[11].GetUInt8();
-        pPlayerCreateInfo->intellect = fields[12].GetUInt8();
-        pPlayerCreateInfo->spirit = fields[13].GetUInt8();
-        pPlayerCreateInfo->health = fields[14].GetUInt32();
-        pPlayerCreateInfo->mana = fields[15].GetUInt32();
-        pPlayerCreateInfo->rage = fields[16].GetUInt32();
-        pPlayerCreateInfo->focus = fields[17].GetUInt32();
-        pPlayerCreateInfo->energy = fields[18].GetUInt32();
-        pPlayerCreateInfo->attackpower = fields[19].GetUInt32();
-        pPlayerCreateInfo->mindmg = fields[20].GetFloat();
-        pPlayerCreateInfo->maxdmg = fields[21].GetFloat();
-        for (i=0; i<10; i++)
+        pPlayerCreateInfo->index = player_fields[0].GetUInt8();
+        pPlayerCreateInfo->race = player_fields[1].GetUInt8();
+        pPlayerCreateInfo->class_ = player_fields[2].GetUInt8();
+        pPlayerCreateInfo->mapId = player_fields[3].GetUInt32();
+        pPlayerCreateInfo->zoneId = player_fields[4].GetUInt32();
+        pPlayerCreateInfo->positionX = player_fields[5].GetFloat();
+        pPlayerCreateInfo->positionY = player_fields[6].GetFloat();
+        pPlayerCreateInfo->positionZ = player_fields[7].GetFloat();
+        pPlayerCreateInfo->displayId = player_fields[8].GetUInt16();
+        pPlayerCreateInfo->strength = player_fields[9].GetUInt8();
+        pPlayerCreateInfo->ability = player_fields[10].GetUInt8();
+        pPlayerCreateInfo->stamina = player_fields[11].GetUInt8();
+        pPlayerCreateInfo->intellect = player_fields[12].GetUInt8();
+        pPlayerCreateInfo->spirit = player_fields[13].GetUInt8();
+        pPlayerCreateInfo->health = player_fields[14].GetUInt32();
+        pPlayerCreateInfo->mana = player_fields[15].GetUInt32();
+        pPlayerCreateInfo->rage = player_fields[16].GetUInt32();
+        pPlayerCreateInfo->focus = player_fields[17].GetUInt32();
+        pPlayerCreateInfo->energy = player_fields[18].GetUInt32();
+        pPlayerCreateInfo->attackpower = player_fields[19].GetUInt32();
+        pPlayerCreateInfo->mindmg = player_fields[20].GetFloat();
+        pPlayerCreateInfo->maxdmg = player_fields[21].GetFloat();
+
+
+		items_result = sDatabase.Query( "SELECT * FROM playercreateinfo_items" );
+		do 
         {
-            pPlayerCreateInfo->item[i] = fields[22+i*2].GetUInt32();
-            pPlayerCreateInfo->item_slot[i] = fields[23+i*2].GetUInt8();
-        }
-        for (i=0; i<10; i++)
+			if(!items_result) break;
+			items_fields = items_result->Fetch();
+			if( pPlayerCreateInfo->index == items_fields[0].GetUInt8() )
+			{
+				pPlayerCreateInfo->item.push_back(items_fields[1].GetUInt32());
+				pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
+			}
+        } while( items_result->NextRow() );
+
+		spells_result = sDatabase.Query( "SELECT * FROM playercreateinfo_spells" );
+		do 
         {
-            pPlayerCreateInfo->spell[i] = fields[42+i].GetUInt16();
-        }
-        for (i=0; i<20; i++)
-		    {
-		        pPlayerCreateInfo->skill[i] = fields[52+i*3].GetUInt16();
-						pPlayerCreateInfo->skillCuVal[i] = fields[53+i*3].GetUInt16();
-						pPlayerCreateInfo->skillMaxVal[i] = fields[54+i*3].GetUInt16();
-		    }
+			if(!spells_result) break;
+			spells_fields = spells_result->Fetch();
+			if( pPlayerCreateInfo->index == spells_fields[0].GetUInt8() )
+			{
+				pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
+			}
+        } while( spells_result->NextRow() );
+
+		skills_result = sDatabase.Query( "SELECT * FROM playercreateinfo_skills" );
+        do 
+        {
+			if(!skills_result) break;
+			skills_fields = skills_result->Fetch();
+			if( pPlayerCreateInfo->index == skills_fields[0].GetUInt8() )
+			{
+				pPlayerCreateInfo->skill[0].push_back(skills_fields[1].GetUInt16());
+				pPlayerCreateInfo->skill[1].push_back(skills_fields[2].GetUInt16());
+				pPlayerCreateInfo->skill[2].push_back(skills_fields[3].GetUInt16());
+			}
+        } while( skills_result->NextRow() );
+
+		actions_result = sDatabase.Query( "SELECT * FROM playercreateinfo_actions" );
+        do 
+        {
+			if(!actions_result) break;
+			actions_fields = actions_result->Fetch();
+			if( pPlayerCreateInfo->index == actions_fields[0].GetUInt8() )
+			{
+				pPlayerCreateInfo->action[0].push_back(actions_fields[1].GetUInt16());
+				pPlayerCreateInfo->action[1].push_back(actions_fields[2].GetUInt16());
+				pPlayerCreateInfo->action[2].push_back(actions_fields[3].GetUInt16());
+				pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
+			}
+        } while( actions_result->NextRow() );
 
         AddPlayerCreateInfo(pPlayerCreateInfo);
 
-    } while( result->NextRow() );
+    } while( player_result->NextRow() );
 
-    delete result;
+    delete player_result;
 }
 
 
@@ -1116,7 +1155,7 @@ void ObjectMgr::LoadGossipText()
     do
     {
         Field *fields = result->Fetch();
-        GossipText *pGText = new GossipText;
+        pGText = new GossipText;
         pGText->ID = fields[0].GetUInt32();
         pGText->Text = fields[1].GetString();
         AddGossipText(pGText);
@@ -1170,7 +1209,7 @@ GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid/*, uint32 mapid*/)
 			Field *fields1 = result2->Fetch();
 			//pGossip->pOptions[count].ID = fields1[0].GetUInt32();
 			pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-			pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
+			pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
 			pGossip->pOptions[count].OptionText = fields1[3].GetString();
 			pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
 			pGossip->pOptions[count].Special = fields1[5].GetUInt32();

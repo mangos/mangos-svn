@@ -106,12 +106,11 @@ struct PlayerCreateInfo
     uint32 attackpower;
     float mindmg;
     float maxdmg;
-    uint32 item[10];
-    uint8 item_slot[10];
-    uint16 spell[10];
-    uint16 skill[20];
-	  uint16 skillCuVal[20];
-	  uint16 skillMaxVal[20];
+    std::list<uint32> item;
+    std::list<uint8> item_slot;
+    std::list<uint16> spell;
+    std::list<uint16> skill[3];
+	std::list<uint16> action[4];
 };
 
 enum PlayerMovementType
@@ -415,6 +414,9 @@ class Player : public Unit
         uint64 m_lootGuid;
 
         std::string m_name;                       // max 21 character name
+		uint32 m_race;
+		uint32 m_class;
+
         uint8 m_outfitId;
 
         uint16 m_guildId;

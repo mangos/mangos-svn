@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `acct` bigint(20) unsigned NOT NULL default '0',
   `data` longtext NOT NULL,
   `name` varchar(21) NOT NULL default '',
+  `race` tinyint(2) NOT NULL default '',
+  `class` tinyint(2) NOT NULL default '',
   `positionX` float NOT NULL default '0',
   `positionY` float NOT NULL default '0',
   `positionZ` float NOT NULL default '0',

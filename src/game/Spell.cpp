@@ -672,7 +672,6 @@ void Spell::SendDuelRequest(Player* caster, Player* target)
 	WorldPacket data;
 	data.Initialize(SMSG_DUEL_REQUESTED);
 	data << target->GetGUID() << caster->GetGUID();
-	data << uint32(0) << uint8(0);
 
 	target->GetSession()->SendPacket(&data);
 	caster->GetSession()->SendPacket(&data);
