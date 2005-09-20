@@ -68,7 +68,7 @@ template<typename GRID_TYPE, class H, class T> void UnloadHelper(GRID_TYPE &grid
   UnloadHelper<GRID_TYPE, T>(grid, loaders._TailElements);
 }
 
-template<class OBJECT, class OBJECT_TYPES, class LOADER_TYPES>
+template<class OBJECT, class OBJECT_TYPES, class LOADER_TYPE>
 class MANGOS_DLL_DECL GridLoader
 {
 public:
@@ -76,7 +76,7 @@ public:
   /// Loads the grid
   void Load(Grid<OBJECT, OBJECT_TYPES> &grid, OBJECT *obj)
   {
-    LoadHelper<OBJECT, Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid, obj, i_loaders);
+      LoadHelper<OBJECT, Grid<OBJECT, OBJECT_TYPES>, LOADER_TYPES>(grid, obj, i_loaders);
   }
   
   /// Unloads the grid
@@ -86,7 +86,7 @@ public:
   }
 
 private:
-  ContainerList<LOADER_TYPES> i_loaders;
+  LOADER_TYPE i_loader;
 };
 
 

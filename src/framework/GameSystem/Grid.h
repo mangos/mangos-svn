@@ -35,6 +35,13 @@
 #include "TypeContainer.h"
 #include "Policies/ThreadingModel.h"
 
+struct GridCoord
+{
+    GridCoord(float x_val=0, float y_val=0) : x(x_val), y(y_val) {}
+    float x;
+    float y;
+};
+
 template
 <
   class OBJECT,
@@ -44,6 +51,8 @@ template
 class MANGOS_DLL_DECL Grid
 {
 public:
+
+    Grid(float x1, float y1, float x2, float y2) : i_coord1(x1,y1), i_coord2(x2,y2) {}
 
   /// dtor
   ~Grid();
@@ -66,7 +75,6 @@ public:
   /// Returns the number of object within the grid.
   unsigned int ObjectsInGrid(void) const;
 
-
   /// Accessors: Returns a specific type of object in the OBJECT_TYPES
   template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
   template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
@@ -75,12 +83,13 @@ public:
   template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(obj, hdl); }
 
 private:
+    
+    typedef typename ThreadModel::Lock Guard;
+    typedef typename ThreadModel::VolatileType VolatileType;
 
-  typedef typename ThreadModel::Lock Guard;
-  typedef typename ThreadModel::VolatileType VolatileType;
-
-  TypeMapContainer<OBJECT_TYPES> i_container;
-  std::map<OBJECT_HANDLE, OBJECT *> i_objects;
+    GridCoord i_coord1, i_coord2;
+    TypeMapContainer<OBJECT_TYPES> i_container;
+    std::map<OBJECT_HANDLE, OBJECT *> i_objects;
 };
 
 
