@@ -27,7 +27,7 @@
  */
 
 #include "Define.h"
-#include "TypeContainerFunctions.h"
+#include "TypeContainer.h"
 
 // visitor helper
 template<class VISITOR, class TYPE_CONTAINER> void VisitorHelper(VISITOR &v, TYPE_CONTAINER &c)
@@ -36,29 +36,26 @@ template<class VISITOR, class TYPE_CONTAINER> void VisitorHelper(VISITOR &v, TYP
 };
 
 // terminate condition for container list
-template<class VISITOR, class H> void VisitorHelper(VISITOR &v, ContainerList<TypeList<H, TypeNull> > &c)
+template<class VISITOR, class H> void VisitorHelper(VISITOR &v, ContainerList<TypeNull> &c)
 {
-    v.Visit(c._element);
 }
-
 
 // recursion for container list
 template<class VISITOR, class H, class T> void VisitorHelper(VISITOR &v, ContainerList<TypeList<H, T> > &c)
 {
-    v.Visit(c._element);
+    v.Visit(c._elements);
     v.Visit(c._TailElements);
 }
 
 // terminate condition container map list
-template<class VISITOR, class H> void VisitorHelper(VISITOR &v, ContainerMapList<TypeList<H, TypeNull> > &c)
+template<class VISITOR, class H> void VisitorHelper(VISITOR &v, ContainerMapList<TypeNull> &c)
 {
-    v.Visit(c._element);
 }
 
 // recursion container map list
 template<class VISITOR, class H, class T> void VisitorHelper(VISITOR &v, ContainerMapList<TypeList<H, T> > &c)
 {
-    v.Visit(c._element);
+    v.Visit(c._elements);
     v.Visit(c._TailElements);
 }
 

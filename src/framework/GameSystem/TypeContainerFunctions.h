@@ -30,118 +30,104 @@
 #include "TypeList.h"
 #include <map>
 
-/*
- * @class ContainerMapList is a mulit-type container for map elements
- * By itself its meaningless but collaborate along with TypeContainers,
- * it become the most powerfully container in the whole system.
- */
-template<class OBJECT_TYPES> struct ContainerMapList
-{
-};
-
-template<> struct ContainerMapList<TypeNull> {}; /* nothing is in type null */
-template<class H, class T> struct ContainerMapList<TypeList<H, T> >
-{
-  std::map<OBJECT_HANDLE, H*> _element;
-  ContainerMapList<T> _TailElements;
-};
-
-/*
- * @class ContainerList is a simple list of different types of elements
- *
- */
-template<class OBJECT_TYPES> struct ContainerList
-{
-};
-
-/* TypeNull is underfined */
-template<> struct ContainerList<TypeNull> 
-{
-}; 
-
-template<class H, class T> struct ContainerList<TypeList<H, T> >
-{
-  H _element;
-  ContainerMapList<T> _TailElements;
-};
-
 namespace MaNGOS
 {
-  /* ContainerMapList Helpers */
-  // non-const find functions
-  template<class SPECIFIC_TYPE, class OBJECT_TYPES> SPECIFIC_TYPE* Find(ContainerMapList<OBJECT_TYPES> &elements, OBJECT_HANDLE hdl)
-  {
-    return NULL;
-  };
-
-  template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
-  {
-    typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
-    return (hdl == elements._element.end() ? NULL : iter->second);
-  }
+    /* ContainerMapList Helpers */
+    // non-const find functions
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl)
+    {
+	typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
+	return (hdl == elements._element.end() ? NULL : iter->second);
+    };
+    
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl)
+    {
+	return NULL; // terminate recursion
+    }
   
-  template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
-  {
-    return Find<T>(elements.TailElement, hdl);
-  }
+    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerMapList<T> &elements, OBJECT_HANDLE hdl)
+    {
+	return NULL; // wrong container
+    }
 
-  // const find functions
-  template<class SPECIFIC_TYPE, class OBJECT_TYPES> SPECIFIC_TYPE* Find(const ContainerMapList<OBJECT_TYPES> &elements, OBJECT_HANDLE hdl)
-  {
-    return NULL;
-  };
+    template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
+    {
+	if( !Find(elements._elements, hdl) )
+	    return Find(elements.TailElement, hdl);
+    }
+    
+    // const find functions
+    template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl)
+    {
+	typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
+	return (hdl == elements._element.end() ? NULL : iter->second);
+    };
 
-  template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find(const ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
-  {
-    typename SPECIFIC_TYPE::const_iterator iter = elements._element.find(hdl);
-    return (hdl == elements._element.end() ? NULL : iter->second);
-  }
+    template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl)
+    {
+	return NULL;
+    }
+
+    template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find(const ContainerMapList<T> &elements, OBJECT_HANDLE hdl)
+    {
+	return NULL;
+    }
+
+
+    template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(const ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
+    {
+	if( !Find(elements._elements, hdl) )
+	    return Find(elements._TailElement, hdl);
+    }
+
+    // non-const insert functions
+    template<class SPECIFIC_TYPE> bool Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    {
+	elements._element[hdl] = obj;
+	return true;
+    };
+    
+    template<class SPECIFIC_TYPE> bool Insert(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    {
+	return false;
+    }
+
+    template<class SPECIFIC_TYPE, class T> bool Insert(ContainerMapList<T> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    {
+	return false; // wrong type...
+    }
   
-  template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(const ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
-  {
-    return Find<T>(elements.TailElement, hdl);
-  }
+    // Recursion
+    template<class SPECIFIC_TYPE, class H, class T> bool Insert(ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    {
+	if( !Insert(elements._elements, obj, hdl) )
+	    return Insert(elements._TailElement, obj, hdl);
+    }
 
-  // non-const insert functions
-  template<class SPECIFIC_TYPE, class OBJECT_TYPES> bool Insert(ContainerMapList<OBJECT_TYPES> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
-  {
-    return false;
-    // should be a compile time error
-  };
-  
-  // Bingo.. we have a match
-  template<class SPECIFIC_TYPE, class T> bool Insert(ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
-  {
-    typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
-    if( iter != elements._element.end() )
-      return false;
+    // non-const remove method
+    template<class SPECIFIC_TYPE> bool Remove(ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl)
+    {
+	typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
+	if( iter != elements._element.end() )
+	    elements._element.erase(iter);
+	return true; // found... terminate the search
+    }
+    
+    template<class SPECIFIC_TYPE> bool Remove(ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl)
+    {
+	return false;
+    }
 
-    elements._element[hdl] = obj;
-    return true;
-  }
-  
-  // Recursion
-  template<class SPECIFIC_TYPE, class H, class T> bool Insert(ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
-  {
-    return Insert<T>(elements.TailElement, obj, hdl);
-  }
+    template<class SPECIFIC_TYPE, class T> bool Remove(ContainerMapList<T> &elements, OBJECT_HANDLE hdl)
+    {
+	return false; // bad hit
+    }
 
-  // non-const remove method
-  template<class SPECIFIC_TYPE, class OBJECT_TYPES> bool Remove(ContainerMapList<OBJECT_TYPES> &, OBJECT_HANDLE hdl)
-  {
-  }
-
-  template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<SPECIFIC_TYPE, T> > &elements, OBJECT_HANDLE hdl)
-  {
-    typename SPECIFIC_TYPE::iterater iter = elements._element.find(hdl);
-    return (iter == elements._element.end() ? NULL : iter->second);
-  }
-
-
-  template<class SPECIFIC_TYPE, class T, class H> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<H, T> > &elements, OBJECT_HANDLE hdl)
-  {
-    return Remove(elements.TailElements, hdl);
-  }
+    template<class SPECIFIC_TYPE, class T, class H> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<H, T> > &elements, OBJECT_HANDLE hdl)
+    {
+	if( !Remove(elements._elements, hdl) )
+	    return Remove(elements._TailElements, hdl);
+    }
 
 }
 
