@@ -51,42 +51,46 @@ template
 class MANGOS_DLL_DECL Grid
 {
 public:
-
+    
     Grid(float x1, float y1, float x2, float y2) : i_coord1(x1,y1), i_coord2(x2,y2) {}
+    
+    /// dtor
+    ~Grid();
+    
+    /// Object enters the grid
+    void AddObject(OBJECT *obj);
+    
+    /// Object move out of the grid
+    void RemoveObject(OBJECT *obj);
+    
+    /// Refreshes the grid
+    void RefreshGrid(void);
+    
+    /// Locks a grid.  Any object enters must wait until the grid is unlock
+    void LockGrid(void);
+    
+    /// Unlocks the grid.
+    void UnlockGrid(void);
 
-  /// dtor
-  ~Grid();
-
-  /// Object enters the grid
-  void AddObject(OBJECT *obj);
-
-  /// Object move out of the grid
-  void RemoveObject(OBJECT *obj);
-
-  /// Refreshes the grid
-  void RefreshGrid(void);
-
-  /// Locks a grid.  Any object enters must wait until the grid is unlock
-  void LockGrid(void);
-
-  /// Unlocks the grid.
-  void UnlockGrid(void);
-
-  /// Returns the number of object within the grid.
-  unsigned int ObjectsInGrid(void) const;
-
-  /// Accessors: Returns a specific type of object in the OBJECT_TYPES
-  template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
-  template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
-
-  // Mutators
-  template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(obj, hdl); }
-
+    /// Grid Coordinate accessor
+    const GridCoord& GetLowerLeftCoord(void) const { return i_coord1; }
+    const GridCoord& GetUpperRightCoord(void) const { return i_coord2; }
+    
+    /// Returns the number of object within the grid.
+    unsigned int ObjectsInGrid(void) const { return i_objects.size(); }
+    
+    /// Accessors: Returns a specific type of object in the OBJECT_TYPES
+    template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
+    template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
+    
+    // Mutators
+    template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(obj, hdl); }
+    
 private:
     
     typedef typename ThreadModel::Lock Guard;
     typedef typename ThreadModel::VolatileType VolatileType;
-
+    
     GridCoord i_coord1, i_coord2;
     TypeMapContainer<OBJECT_TYPES> i_container;
     std::map<OBJECT_HANDLE, OBJECT *> i_objects;
