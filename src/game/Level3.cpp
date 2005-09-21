@@ -515,7 +515,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
 
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
-    QueryResult *result;
+    //QueryResult *result;
     std::stringstream ss;
   //  GraveyardTeleport *pGrave;
 

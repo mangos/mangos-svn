@@ -84,7 +84,7 @@ struct skilllines
 };
 struct PlayerCreateInfo
 {
-    uint8 index;
+    uint8 createId;
     uint8 race;
     uint8 class_;
     uint32 mapId;
