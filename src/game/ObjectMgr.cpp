@@ -333,14 +333,16 @@ void ObjectMgr::LoadCreatureNames()
 
 PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 {
+	uint32 createId;
+
 	QueryResult *player_result, *items_result, *spells_result, *skills_result,*actions_result ;
     Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
 	PlayerCreateInfo *pPlayerCreateInfo;
 
-	std::stringstream ss;
+	std::stringstream player_query,item_query,spell_query,skill_query,action_query;
 
-	ss << "SELECT * FROM playercreateinfo WHERE race = " << race << " AND class = " << class_;
-	player_result = sDatabase.Query( ss.str().c_str() );
+	player_query << "SELECT * FROM playercreateinfo WHERE race = " << race << " AND class = " << class_;
+	player_result = sDatabase.Query( player_query.str().c_str() );
     
 	if( !player_result ) 
 		return NULL;
@@ -350,6 +352,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 	player_fields = player_result->Fetch();
 
     pPlayerCreateInfo->createId = player_fields[0].GetUInt8();
+	createId = (uint32)pPlayerCreateInfo->createId;
     pPlayerCreateInfo->race = player_fields[1].GetUInt8();
     pPlayerCreateInfo->class_ = player_fields[2].GetUInt8();
     pPlayerCreateInfo->mapId = player_fields[3].GetUInt32();
@@ -372,65 +375,62 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     pPlayerCreateInfo->mindmg = player_fields[20].GetFloat();
     pPlayerCreateInfo->maxdmg = player_fields[21].GetFloat();
 
+	delete player_result;
 
-	items_result = sDatabase.Query( "SELECT * FROM playercreateinfo_items" );
+
+	item_query << "SELECT * FROM playercreateinfo_items WHERE createId = " << createId ;
+	items_result = sDatabase.Query( item_query.str().c_str() );
 	do 
     {
 		if(!items_result) break;
 		items_fields = items_result->Fetch();
-		if( pPlayerCreateInfo->createId == items_fields[0].GetUInt8() )
-		{
-			pPlayerCreateInfo->item.push_back(items_fields[1].GetUInt32());
-			pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
-		}
+		pPlayerCreateInfo->item.push_back(items_fields[1].GetUInt32());
+		pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
+
     } while( items_result->NextRow() );
 
 	delete items_result;
-
-	spells_result = sDatabase.Query( "SELECT * FROM playercreateinfo_spells" );
+	
+	spell_query << "SELECT * FROM playercreateinfo_spells WHERE createId = " << createId ;
+	spells_result = sDatabase.Query( spell_query.str().c_str() );
 	do 
     {
 		if(!spells_result) break;
 		spells_fields = spells_result->Fetch();
-		if( pPlayerCreateInfo->createId == spells_fields[0].GetUInt8() )
-		{
-			pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
-		}
+		pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
+
     } while( spells_result->NextRow() );
 
 	delete spells_result;
-
-	skills_result = sDatabase.Query( "SELECT * FROM playercreateinfo_skills" );
+	
+	skill_query << "SELECT * FROM playercreateinfo_skills WHERE createId = " << createId ;
+	skills_result = sDatabase.Query( skill_query.str().c_str() );
     do 
     {
 		if(!skills_result) break;
 		skills_fields = skills_result->Fetch();
-		if( pPlayerCreateInfo->createId == skills_fields[0].GetUInt8() )
-		{
-			pPlayerCreateInfo->skill[0].push_back(skills_fields[1].GetUInt16());
-			pPlayerCreateInfo->skill[1].push_back(skills_fields[2].GetUInt16());
-			pPlayerCreateInfo->skill[2].push_back(skills_fields[3].GetUInt16());
-		}
+		pPlayerCreateInfo->skill[0].push_back(skills_fields[1].GetUInt16());
+		pPlayerCreateInfo->skill[1].push_back(skills_fields[2].GetUInt16());
+		pPlayerCreateInfo->skill[2].push_back(skills_fields[3].GetUInt16());
+
     } while( skills_result->NextRow() );
 
 	delete skills_result;
 
-	actions_result = sDatabase.Query( "SELECT * FROM playercreateinfo_actions" );
+	action_query << "SELECT * FROM playercreateinfo_actions WHERE createId = " << createId ;
+	actions_result = sDatabase.Query( action_query.str().c_str() );
     do 
     {
 		if(!actions_result) break;
 		actions_fields = actions_result->Fetch();
-		if( pPlayerCreateInfo->createId == actions_fields[0].GetUInt8() )
-		{
-			pPlayerCreateInfo->action[0].push_back(actions_fields[1].GetUInt16());
-			pPlayerCreateInfo->action[1].push_back(actions_fields[2].GetUInt16());
-			pPlayerCreateInfo->action[2].push_back(actions_fields[3].GetUInt16());
-			pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
-		}
+		pPlayerCreateInfo->action[0].push_back(actions_fields[1].GetUInt16());
+		pPlayerCreateInfo->action[1].push_back(actions_fields[2].GetUInt16());
+		pPlayerCreateInfo->action[2].push_back(actions_fields[3].GetUInt16());
+		pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
+
     } while( actions_result->NextRow() );
 
 	delete actions_result;
-    delete player_result;
 
 	return pPlayerCreateInfo; 
 }
