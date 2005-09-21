@@ -26,7 +26,7 @@
  * to overload its types as a visit method is called.
  */
 
-#include "Define.h"
+#include "Platform/Define.h"
 #include "TypeContainer.h"
 
 // visitor helper

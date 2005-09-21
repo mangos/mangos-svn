@@ -20,12 +20,17 @@
 #ifndef MANGOS_OBJECTGRIDLOADER_H
 #define MANGOS_OBJECTGRIDLOADER_H
 
-#include "Grid.h"
 #include "Player.h"
 #include "GameObject.h"
 #include "Creature.h"
+#include "Utilities/TypeList.h"
+#include "Platform/Define.h"
+#include "GameSystem/Grid.h"
+#include "GameSystem/GridLoader.h"
 
-#define TYPE_LIST_2(GameObject, Creature)    AllObjectTypes
+
+
+typedef TYPELIST_2(GameObject, Creature)    AllObjectTypes;
 
 /*
  * @class ObjectGridLoader class implements a visitor patter for the ContainerMapList
@@ -51,7 +56,7 @@ private:
  * @class ObjectGridUnloader also implements the visitor pattern
  * for unloading the grid.
  */
-class MANGOS_DLL_DELC ObjectGridUnloader
+class MANGOS_DLL_DECL ObjectGridUnloader
 {
 public:
     ObjectGridUnloader(GridType &grid, Player *pl) : i_grid(grid), i_player(*pl) {}
@@ -64,6 +69,6 @@ private:
     Player &i_player;
 };
 
-typedef GridLoader<Player, AllObjecTypes, ObjectGridLoader, ObjectGridUnloader> GridLoaderType;
+typedef GridLoader<Player, AllObjectTypes, ObjectGridLoader, ObjectGridUnloader> GridLoaderType;
 
 #endif

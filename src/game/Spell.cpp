@@ -811,13 +811,13 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
             minDmg = maxDmg = 0;
             if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
             {
-                minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE);
-                maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+                minDmg = m_caster->GetUInt32Value(UNIT_FIELD_MINDAMAGE);
+                maxDmg = m_caster->GetUInt32Value(UNIT_FIELD_MAXDAMAGE);
             }
             else
             {
-                minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-                maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+                minDmg = m_caster->GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE);
+                maxDmg = m_caster->GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE);
             }
             uint32 randDmg = maxDmg-minDmg;
             uint32 dmg = minDmg;
@@ -1040,13 +1040,13 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
             minDmg = maxDmg = 0;
             if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
             {
-                minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE);
-                maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+                minDmg = m_caster->GetUInt32Value(UNIT_FIELD_MINDAMAGE);
+                maxDmg = m_caster->GetUInt32Value(UNIT_FIELD_MAXDAMAGE);
             }
             else
             {
-                minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-                maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+                minDmg = m_caster->GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE);
+                maxDmg = m_caster->GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE);
             }
             uint32 randDmg = maxDmg-minDmg;
             uint32 dmg = minDmg;
@@ -1457,9 +1457,9 @@ uint32 Spell::CalculateDamage(uint8 i)
     uint32 value = 0;
     float basePointsPerLevel = sqrt(m_spellInfo->EffectRealPointsPerLevel[i]*m_spellInfo->EffectRealPointsPerLevel[i]);
     float randomPointsPerLevel = sqrt(m_spellInfo->EffectDicePerLevel[i]*m_spellInfo->EffectDicePerLevel[i]);
-    uint32 basePoints = sqrt((float)(m_spellInfo->EffectBasePoints[i]*(float)m_spellInfo->EffectBasePoints[i]))+(m_caster->getLevel()*basePointsPerLevel);
-    uint32 randomPoints = sqrt((float)(m_spellInfo->EffectDieSides[i]*(float)m_spellInfo->EffectDieSides[i]))+(m_caster->getLevel()*randomPointsPerLevel);
-    uint32 comboDamage = sqrt((float)m_spellInfo->EffectPointsPerComboPoint[i]*(float)m_spellInfo->EffectPointsPerComboPoint[i]);
+    uint32 basePoints = uint32(sqrt((float)(m_spellInfo->EffectBasePoints[i]*(float)m_spellInfo->EffectBasePoints[i]))+(m_caster->getLevel()*basePointsPerLevel));
+    uint32 randomPoints = uint32(sqrt((float)(m_spellInfo->EffectDieSides[i]*(float)m_spellInfo->EffectDieSides[i]))+(m_caster->getLevel()*randomPointsPerLevel));
+    uint32 comboDamage = uint32(sqrt((float)m_spellInfo->EffectPointsPerComboPoint[i]*(float)m_spellInfo->EffectPointsPerComboPoint[i]));
     uint8 comboPoints = ((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
     if(randomPoints <= 1)

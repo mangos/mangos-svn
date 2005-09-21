@@ -511,10 +511,10 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
         auctionSubCatagory = tempcat2;
         rarityCheck = temprarity;
         auctionSlotID = tempslot;
-        tempcat1 = NULL;
-        tempcat2 = NULL;
-        temprarity = NULL;
-        tempslot = NULL;
+        tempcat1 = 0;
+        tempcat2 = 0;
+        temprarity = 0;
+        tempslot = 0;
     }
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
     if (cnt < 33)
@@ -573,10 +573,10 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
         auctionSubCatagory = tempcat2;
         rarityCheck = temprarity;
         auctionSlotID = tempslot;
-        tempcat1 = NULL;
-        tempcat2 = NULL;
-        temprarity = NULL;
-        tempslot = NULL;
+        tempcat1 = 0;
+        tempcat2 = 0;
+        temprarity = 0;
+        tempslot = 0;
     }
     data << uint32(cnt);
     SendPacket(&data);
