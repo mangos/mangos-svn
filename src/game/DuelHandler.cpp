@@ -34,6 +34,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
 
+
+
 }
 
 

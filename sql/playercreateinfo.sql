@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `playercreateinfo`;
 CREATE TABLE IF NOT EXISTS `playercreateinfo` (
-  `Index` tinyint(3) unsigned NOT NULL auto_increment,
+  `createId` tinyint(3) unsigned NOT NULL auto_increment,
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
   `mapID` mediumint(8) unsigned NOT NULL default '0',
@@ -43,5 +43,5 @@ CREATE TABLE IF NOT EXISTS `playercreateinfo` (
   `attackpower` mediumint(8) unsigned NOT NULL default '0',
   `mindmg` float NOT NULL default '0',
   `maxdmg` float NOT NULL default '0',
-  PRIMARY KEY  (`Index`)
+  PRIMARY KEY  (`createId`)
 ) TYPE=MyISAM AUTO_INCREMENT=44 ;

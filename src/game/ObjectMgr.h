@@ -77,7 +77,6 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef HM_NAMESPACE::hash_map<uint32, ItemPrototype*> ItemPrototypeMap;
         typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
         typedef HM_NAMESPACE::hash_map<uint32, Trainerspell*> TrainerspellMap;
-        typedef HM_NAMESPACE::hash_map<uint32, PlayerCreateInfo*> PlayerCreateInfoMap;
         typedef HM_NAMESPACE::hash_map<uint32, TaxiNodes*> TaxiNodesMap;
         typedef HM_NAMESPACE::hash_map<uint32, TaxiPath*> TaxiPathMap;
         typedef std::vector<TaxiPathNodes*> TaxiPathNodesVec;
@@ -290,23 +289,8 @@ class ObjectMgr : public Singleton < ObjectMgr >
             ASSERT( mTrainerspells.find(trainspell->Id) == mTrainerspells.end() );
             mTrainerspells[trainspell->Id] = trainspell;
         }
-        // Create Player Info
-        void AddPlayerCreateInfo(PlayerCreateInfo *playerCreate)
-        {
-            ASSERT( playerCreate );
-            mPlayerCreateInfo[playerCreate->index] = playerCreate;
-        }
-        PlayerCreateInfo* GetPlayerCreateInfo(uint8 race, uint8 class_) const
-        {
-            PlayerCreateInfoMap::const_iterator itr;
-            // Log::getSingleton().outError("race: %d, class: %d",race,class_);
-            for (itr = mPlayerCreateInfo.begin(); itr != mPlayerCreateInfo.end(); itr++)
-            {
-                if( (itr->second->race == race) && (itr->second->class_ == class_) )
-                    return itr->second;
-            }
-            return NULL;
-        }
+		// Function to get Player Info to database 
+        PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_); 
 
         // it's kind of db related, not sure where to put it
         uint64 GetPlayerGUIDByName(const char *name) const;
@@ -376,7 +360,6 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void SaveCreatureNames();
         void LoadItemPrototypes();
         void LoadTrainerSpells();
-        void LoadPlayerCreateInfo();
         void LoadTaxiNodes();
         void LoadTaxiPath();
         void LoadTaxiPathNodes();
@@ -457,9 +440,6 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // Quest data
         QuestMap            mQuests;
-
-        // Map of all starting infos needed for player creation
-        PlayerCreateInfoMap mPlayerCreateInfo;
 
         // Maps containing the infos for taxi paths
         TaxiNodesMap        mTaxiNodes;

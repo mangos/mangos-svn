@@ -151,7 +151,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     // Offhand     16
     // Ranged      17
 
-    PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(race, class_);
+    PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
     ASSERT(info);
 
     baseattacktime[0] = 2000;
@@ -293,6 +293,8 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 		for( i=0; i<4 ;i++)
 			action_itr[i]++;
     }
+
+	delete info;
 
     // Not worrying about this stuff for now
     m_guildId = 0;

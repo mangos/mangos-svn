@@ -161,9 +161,9 @@ void World::SetInitialWorldSettings()
     // Load initial GameObjects
     Log::getSingleton( ).outString( "Loading Gameobjects..." );
     objmgr.LoadGameObjects();
-    // Load player create info
+    /* Load player create info
     Log::getSingleton( ).outString( "Loading Environment..." );
-    objmgr.LoadPlayerCreateInfo();
+    objmgr.LoadPlayerCreateInfo();*/
     // Load taxi info
     Log::getSingleton( ).outString( "Loading TaxiPaths..." );
     objmgr.LoadTaxiNodes();
@@ -209,7 +209,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_SESSIONS].SetInterval(100);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
 
-    for(ObjectMgr::CreatureMap::const_iterator i = objmgr.Begin<Creature>();
+  for(ObjectMgr::CreatureMap::const_iterator i = objmgr.Begin<Creature>();
         i != objmgr.End<Creature>(); i++)
     {
         i->second->PlaceOnMap();
