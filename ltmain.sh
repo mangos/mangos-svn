@@ -82,6 +82,7 @@ magic="%%%MAGIC variable%%%"
 mkdir="mkdir"
 mv="mv -f"
 rm="rm -f"
+max_cmd_len=32768
 
 # Sed substitution that helps us do robust quoting.  It backslashifies
 # metacharacters that are still active within double-quoted strings.

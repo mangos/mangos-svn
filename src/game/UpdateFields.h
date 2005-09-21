@@ -18,8 +18,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#pragma once
-
 #define		 CONTAINER_ALIGN_PAD 0x31
 #define		 CONTAINER_END  90
 #define      CONTAINER_FIELD_NUM_SLOTS  0x30

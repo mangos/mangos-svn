@@ -27,8 +27,8 @@
 
 #include <map>
 #include <vector>
-#include "TypeList.h"
-#include "Define.h"
+#include "Platform/Define.h"
+#include "Utilities/TypeList.h"
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements

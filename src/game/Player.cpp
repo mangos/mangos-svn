@@ -65,9 +65,9 @@ Player::Player ( ): Unit()
     m_nextSave = 900000;                          /* 15 min after create */
 
     m_currentSpell = NULL;
-    m_resurrectGUID = NULL;
-    m_resurrectX = m_resurrectY = m_resurrectZ = NULL;
-    m_resurrectHealth = m_resurrectMana = NULL;
+    m_resurrectGUID = 0;
+    m_resurrectX = m_resurrectY = m_resurrectZ = 0;
+    m_resurrectHealth = m_resurrectMana = 0;
 
     // memset(m_items, 0, sizeof(Item*)*INVENTORY_SLOT_ITEM_END);
     memset(m_items, 0, sizeof(Item*)*BANK_SLOT_BAG_END);

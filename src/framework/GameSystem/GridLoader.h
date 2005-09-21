@@ -28,7 +28,7 @@
   an interested object re-enters.
  */
 
-#include "Define.h"
+#include "Platform/Define.h"
 #include "Grid.h"
 
 

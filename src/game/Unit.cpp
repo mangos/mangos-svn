@@ -49,7 +49,7 @@ Unit::Unit() : Object()
     m_deathState = ALIVE;
     m_currentSpell = NULL;
     m_meleeSpell = false;
-    m_addDmgOnce = NULL;
+    m_addDmgOnce = 0;
     m_TotemSlot1 = m_TotemSlot2 = m_TotemSlot3 = m_TotemSlot4  = 0;
     m_aura = NULL;
     m_auraCheck = 2000;
@@ -797,7 +797,7 @@ uint32 Unit::GetAffDuration(uint32 spellId,Unit* caster)
             return (*i)->GetDuration();
         }
     }
-    return NULL;
+    return 0;
 }
 
 

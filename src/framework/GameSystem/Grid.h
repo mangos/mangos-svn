@@ -31,7 +31,7 @@
   Grid's perspective, the loader meets its API requirement is suffice.
 */
 
-#include "Define.h"
+#include "Platform/Define.h"
 #include "TypeContainer.h"
 #include "Policies/ThreadingModel.h"
 

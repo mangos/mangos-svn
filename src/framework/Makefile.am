@@ -16,14 +16,15 @@
  # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  #
 
-INCLUDES += -I$(srcdir)/Platform -I$(srcdir)/Policies -I$(srcdir)/Utilities -I$(srcdir)/GameSystem
+INCLUDES += -I$(srcdir)
 noinst_LIBRARIES = libframework.a 
 
 libframework_a_SOURCES = \
     Policies/Singleton.cpp Policies/ObjectLifeTime.cpp \
     Policies/CreationPolicy.cpp Policies/ThreadingModel.cpp \
     GameSystem/GridLoader.cpp GameSystem/Grid.cpp\
-    GameSystem/TypeContainer.cpp 
+    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp
+
 
 
 

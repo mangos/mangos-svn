@@ -279,14 +279,14 @@ class Affect
             if(m_spellProto)
                 return m_spellProto->field154;
             else
-                return NULL;
+                return 0;
         }
         uint32 GetId() const
         {
             if(m_spellProto)
                 return m_spellProto->Id;
             else
-                return NULL;
+                return 0;
         }
 
         int32 GetDuration() const { return m_duration; }

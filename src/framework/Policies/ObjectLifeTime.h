@@ -21,7 +21,7 @@
 #define MANGOS_OBJECTLIFETIME_H
 
 #include <stdexcept>
-#include "Define.h"
+#include "Platform/Define.h"
 
 typedef void (* Destroyer)(void);
 

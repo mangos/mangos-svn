@@ -21,6 +21,8 @@
 #ifndef _ITEMPROTOTYPE_H
 #define _ITEMPROTOTYPE_H
 
+#include "Common.h"
+
 enum ITEM_STAT_TYPE
 {
     HEALTH     = 1,

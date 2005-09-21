@@ -25,7 +25,7 @@
  *
  */
 
-#include "Define.h"
+#include "Platform/Define.h"
 
 namespace MaNGOS
 {

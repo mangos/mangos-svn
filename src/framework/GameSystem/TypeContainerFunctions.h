@@ -26,8 +26,8 @@
  * to access or mutate the container.
  */
 
-#include "Define.h"
-#include "TypeList.h"
+#include "Platform/Define.h"
+#include "Utilities/TypeList.h"
 #include <map>
 
 namespace MaNGOS
