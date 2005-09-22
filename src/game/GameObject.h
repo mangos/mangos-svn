@@ -27,7 +27,7 @@ struct GameObjectInfo
 {
     GameObjectInfo(uint32 i=0, uint32 t=0, uint32 dis_id=0, uint32 f = 0, uint32 fl = 0, uint32 s0=0, uint32 s1=0, uint32 s2=0, uint32 s3 =0, uint32 s4=0,
 		   uint32 s5 = 0, uint32 s6 = 0, uint32 s7 = 0, 
-		   uint32 s8 = 0, uint32 s9 = 0, float sz = 1.0, const char *n = NULL) : id(i), type(t),displayId(dis_id), faction(f), flags(0), sound0(s0), sound1(s1), sound2(s2), sound3(s3), sound4(s4), sound5(s5), sound6(s6), sound7(s7), sound8(s8), sound9(s9), size(sz), name(n == NULL ? "Unknown Object" : n) {}
+		   uint32 s8 = 0, uint32 s9 = 0, float sz = 1.0, const char *n = NULL) : id(i), type(t),displayId(dis_id), faction(f), flags(fl), sound0(s0), sound1(s1), sound2(s2), sound3(s3), sound4(s4), sound5(s5), sound6(s6), sound7(s7), sound8(s8), sound9(s9), size(sz), name(n == NULL ? "Unknown Object" : n) {}
     uint32 id;
     uint32 type;
     uint32 displayId;
