@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS `areatriggers` (
   `coord_x` float default '0',
   `coord_y` float default '0',
   `coord_z` float default '0',
-  `totrigger` float default '0',
+  `totrigger` int(10) default '0',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `id` (`id`)
 ) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB' AUTO_INCREMENT=1 ;
