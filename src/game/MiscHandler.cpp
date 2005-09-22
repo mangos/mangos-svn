@@ -737,24 +737,39 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 {
     uint32 id;
     WorldPacket data;
-    printf("size: %u\n",recv_data.size());
     recv_data >> id;
-    printf("Id: %u = %s\n",id,Triggers[id].name);
-    if(Triggers[id].totrigger)
-    {
-        GetPlayer()->SetDontMove(true);
-        printf("Porting to %d - %f %f %f\n",Triggers[Triggers[id].totrigger].mapId,Triggers[Triggers[id].totrigger].pos.x , Triggers[Triggers[id].totrigger].pos.y , Triggers[Triggers[id].totrigger].pos.z);
-        data.Initialize(SMSG_TRANSFER_PENDING);
-        data << uint32(0);
-        SendPacket(&data);
-        GetPlayer()->RemoveFromMap();
-        data.Initialize(SMSG_NEW_WORLD);
-        data << Triggers[Triggers[id].totrigger].mapId << Triggers[Triggers[id].totrigger].pos.x << Triggers[Triggers[id].totrigger].pos.y << Triggers[Triggers[id].totrigger].pos.z << (float)0.0f;
-        SendPacket(&data);
-        GetPlayer()->SetMapId(Triggers[Triggers[id].totrigger].mapId);
-        GetPlayer()->SetPosition(Triggers[Triggers[id].totrigger].pos.x , Triggers[Triggers[id].totrigger].pos.y , Triggers[Triggers[id].totrigger].pos.z, 0);
-        GetPlayer()->SetDontMove(false);
-    }
+	AreaTrigger * at = objmgr.GetAreaTrigger(id);
+
+	if(at)
+	{
+		if(at->mapId = GetPlayer()->GetMapId())
+		{
+			GetPlayer()->BuildTeleportAckMsg(&data, at->X, at->Y, at->Z, 0.0f);
+			SendPacket(&data);
+
+			GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
+
+			GetPlayer()->BuildHeartBeatMsg(&data);
+			GetPlayer()->SendMessageToSet(&data, true);
+		}
+		else
+		{
+			data.Initialize(SMSG_TRANSFER_PENDING);
+			data << uint32(0);
+
+			SendPacket(&data);
+			GetPlayer()->RemoveFromMap();
+
+			data.Initialize(SMSG_NEW_WORLD);
+			data << at->mapId << at->X << at->Y << at->Z << 0.0f;
+			SendPacket( &data );
+
+			GetPlayer()->SetMapId(at->mapId);
+			GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
+		}
+
+		delete at;
+	}
 }
 
 

@@ -1322,6 +1322,44 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
 	return pgrave;
 }
 
+AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger)
+{
+	std::stringstream query;
+
+    query << "SELECT totrigger FROM areatriggers WHERE id = " << trigger;
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query(query.str().c_str()));
+
+    if (result.get() != NULL )
+    {
+		Field *fields = result->Fetch();
+		uint32 totrigger = fields[0].GetUInt32();
+		if( totrigger != 0)
+		{
+			std::stringstream query1;
+
+			query1 << "SELECT mapid,coord_x,coord_y,coord_z FROM areatriggers WHERE id = " << totrigger;
+
+			std::auto_ptr<QueryResult> result1(sDatabase.Query(query1.str().c_str()));
+
+			if ( result1.get() != NULL )
+			{
+				Field *fields1 = result1->Fetch();
+				AreaTrigger *at = new AreaTrigger;
+
+				at->mapId = fields1[0].GetUInt32();
+
+				at->X = fields1[1].GetFloat();
+				at->Y = fields1[2].GetFloat();
+				at->Z = fields1[3].GetFloat();
+
+				return at;
+			}
+		}
+    }
+	return NULL;
+}
+
 void ObjectMgr::LoadTeleportCoords()
 {
     QueryResult *result = sDatabase.Query( "SELECT * FROM teleport" );

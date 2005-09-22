@@ -282,22 +282,25 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
 	if(pGossip)
     {
-        data.Initialize( SMSG_GOSSIP_MESSAGE );
-        data << guid;
-        data << pGossip->TextID;
-        data << pGossip->OptionCount;
+		Creature * pCreature = objmgr.GetCreature(guid);
 
-        for(uint32 i=0; i<pGossip->OptionCount; i++)
-        {
-            data << i;
-            data << pGossip->pOptions[i].Icon;
-            data << pGossip->pOptions[i].OptionText;
-        }
+		data.Initialize( SMSG_GOSSIP_MESSAGE );
+		data << guid;
+		data << pGossip->TextID;
+		data << pGossip->OptionCount;
+
+		for(uint32 i=0; i < pGossip->OptionCount; i++)
+		{
+			data << i;
+			data << pGossip->pOptions[i].Icon;
+			data << pGossip->pOptions[i].OptionText;
+		}
+
+		delete pGossip;
 
         // QUEST HANDLER
         data << uint32(0);  //quest count
         SendPacket(&data);
-		delete pGossip;
     }
 }
 
@@ -320,50 +323,65 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 	if(pGossip)
 	{
-		switch(pGossip->pOptions[option].Special)
+		if(option == pGossip->OptionCount)
 		{
-			case GOSSIP_POI:
-			{
-				GossipText *pGossipText = objmgr.GetGossipText(pGossip->pOptions[option].NextTextID);
-				if(pGossipText)
-				{
-					data.Initialize( SMSG_GOSSIP_MESSAGE );
-					data << guid;
-					data << pGossip->TextID;
-					data << uint32(1);
-					data << uint32(0);
-					data << pGossip->pOptions[option].Icon;
-					data << pGossipText->Text;
-					data << uint32(0);
-					SendPacket(&data);
-					delete pGossipText;
-				}
-			}
-			break;
-			case GOSSIP_SPIRIT_HEALER_ACTIVE:
-			{
-				data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
-				data << guid;
-				SendPacket( &data );
-				data.Initialize( SMSG_GOSSIP_COMPLETE );
-				SendPacket( &data );
-			}break;
-			case GOSSIP_VENDOR:
-			{
-				data << guid;
-				HandleListInventoryOpcode( data );
-			}
-			break;
-			case GOSSIP_TRAINER:
-			{
-				data << guid;
-				HandleTrainerListOpcode( data );
-			}
-			break;
+			delete pGossip;
 
-			default: break;
+			data << guid;
+			HandleGossipHelloOpcode( data );
+
 		}
-		delete pGossip;
+		else if( option < pGossip->OptionCount)
+		{
+			switch(pGossip->pOptions[option].Special)
+			{
+				case GOSSIP_POI:
+				{
+					GossipText *pGossipText = objmgr.GetGossipText(pGossip->pOptions[option].NextTextID);
+
+					if(pGossipText)
+					{
+						data.Initialize( SMSG_GOSSIP_MESSAGE );
+						data << guid;
+						data << pGossip->TextID;
+						data << uint32(1);
+						data << uint32(pGossip->OptionCount);
+						data << uint16(pGossip->pOptions[option].Icon);
+						data << pGossipText->Text;
+						data << uint32(0);
+
+						delete pGossipText;
+
+						SendPacket(&data);			
+					}
+				}
+				break;
+				case GOSSIP_SPIRIT_HEALER_ACTIVE:
+				{
+					data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
+					data << guid;
+					SendPacket( &data );
+					data.Initialize( SMSG_GOSSIP_COMPLETE );
+					SendPacket( &data );
+
+				}
+				break;
+				case GOSSIP_VENDOR:
+				{
+					data << guid;
+					HandleListInventoryOpcode( data );
+				}
+				break;
+				case GOSSIP_TRAINER:
+				{
+					data << guid;
+					HandleTrainerListOpcode( data );
+				}
+				break;
+				default: break;
+			}
+			delete pGossip;
+		}
 	}
 }
 
