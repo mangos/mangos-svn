@@ -20,22 +20,25 @@
 #ifndef MANGOS_GRIDLOADER_H
 #define MANGOS_GRIDLOADER_H
 
-/*
+/**
   @class GridLoader
   The GridLoader is working in conjuction with the Grid and responsible
   for loading and unloading object-types (one or more) when objects
   enters a grid.  Unloading is scheduled and might be canceled if
-  an interested object re-enters.
+  an interested object re-enters.  GridLoader does not do the actuall
+  loading and unloading but implements as a template pattern that
+  delicate its loading and unloading for the actualy loader and unloader.
+  GridLoader manages the grid (both local and remote).
  */
 
 #include "Platform/Define.h"
 #include "Grid.h"
-
+#include "TypeContainerVisitor.h"
 
 template
 <
-    class OBJECT, 
-    class OBJECT_TYPES, 
+    class OBJECT,
+    class OBJECT_TYPES,
     class LOADER_TYPE,
     class UNLOADER_TYPE
 >
@@ -43,22 +46,26 @@ class MANGOS_DLL_DECL GridLoader
 {
 public:
     
-    /// Loads the grid
-    void Load(Grid<OBJECT, OBJECT_TYPES> &grid, OBJECT *obj)
+    /** Loads the grid
+     */
+    void Load(Grid<OBJECT, OBJECT_TYPES> &grid)
     {
-	grid.Lock();
-	LOADER_TYPE loader(grid, obj);
-	grid.Visit(loader);
-	grid.Unlock();
+	grid.LockGrid();
+	LOADER_TYPE loader(grid);
+	TypeContainerVisitor<LOADER_TYPE, TypeMapContainer<OBJECT_TYPES> > visitor(loader);
+	visitor.Visit(grid.i_container);
+	grid.UnlockGrid();
     }
     
-    /// Unloads the grid
+    /** Unloads the grid
+     */
     void Unload(Grid<OBJECT, OBJECT_TYPES> &grid)
     {
-	grid.Lock();
-	UNLOADER_TYPE unloader(grid.obj);
-	grid.Visit(unloader);
-	grid.Unlock();
+	grid.LockGrid();
+	UNLOADER_TYPE unloader(grid);
+	TypeContainerVisitor<UNLOADER_TYPE, TypeMapContainer<OBJECT_TYPES> > visitor(unloader);
+	visitor.Visit(grid.i_container);
+	grid.UnlockGrid();
     }
 };
 

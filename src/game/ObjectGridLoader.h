@@ -43,13 +43,12 @@ typedef Grid<Player, AllObjectTypes> GridType;
 class MANGOS_DLL_DECL ObjectGridLoader
 {
 public:
-    ObjectGridLoader(GridType &grid, Player *pl) : i_grid(grid), i_player(*pl) {}
+    ObjectGridLoader(GridType &grid) : i_grid(grid) {}
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
 private:
     GridType &i_grid;
-    Player &i_player;
 };
 
 /*
@@ -59,14 +58,13 @@ private:
 class MANGOS_DLL_DECL ObjectGridUnloader
 {
 public:
-    ObjectGridUnloader(GridType &grid, Player *pl) : i_grid(grid), i_player(*pl) {}
+    ObjectGridUnloader(GridType &grid, Player *pl) : i_grid(grid) {}
 
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
 private:
     GridType &i_grid;
-    Player &i_player;
 };
 
 typedef GridLoader<Player, AllObjectTypes, ObjectGridLoader, ObjectGridUnloader> GridLoaderType;

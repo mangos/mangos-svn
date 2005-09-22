@@ -65,6 +65,7 @@ libgame_a_SOURCES = \
 	ZoneMapper.cpp \
 	debugcmds.cpp \
         ObjectGridLoader.cpp \
+        Zone.cpp \
 	Affect.h \
 	Channel.h \
 	ChannelMgr.h \
@@ -99,4 +100,7 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h \
-	ZoneMapper.h
+	ZoneMapper.h \
+        ObjectGridLoader.h \
+        Zone.h
+
