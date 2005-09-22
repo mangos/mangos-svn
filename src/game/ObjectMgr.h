@@ -352,6 +352,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
             return NULL;
         }
 
+		// Areatrigger
+		AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger);
+
         // Serialization
         void LoadCreatures();
         void LoadGameObjects();

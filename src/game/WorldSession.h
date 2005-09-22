@@ -21,8 +21,6 @@
 #ifndef __WORLDSESSION_H
 #define __WORLDSESSION_H
 
-#define MAX_AREA_TRIGGER_SIZE  3709
-
 class Player;
 class WorldPacket;
 class WorldSocket;
@@ -40,20 +38,6 @@ enum SessionStatus
     STATUS_AUTHED = 0,
     STATUS_LOGGEDIN
 };
-
-typedef struct Cords
-{
-    float x,y,z;
-}Cords;
-
-typedef struct AreaTrigger
-{
-    int trigger;
-    char name[256];
-    uint32 mapId;
-    Cords pos;
-    int totrigger;
-}AreaTrigger;
 
 class WorldSession
 {
@@ -117,7 +101,9 @@ class WorldSession
         void HandleDelFriendOpcode(WorldPacket& recvPacket);
         void HandleBugOpcode(WorldPacket& recvPacket);
         void HandleSetAmmoOpcode(WorldPacket& recvPacket);
+
         void HandleAreaTriggerOpcode(WorldPacket& recvPacket);
+
         void HandleUpdateAccountData(WorldPacket& recvPacket);
         void HandleRequestAccountData(WorldPacket& recvPacket);
         void HandleSetActionButtonOpcode(WorldPacket& recvPacket);
@@ -229,7 +215,6 @@ class WorldSession
         /// Chat opcodes (Chat.cpp)
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
         void HandleTextEmoteOpcode(WorldPacket& recvPacket);
-        void HandleAreatriggerOpcode(WorldPacket& recvPacket);
 
         /// Corpse opcodes (Corpse.cpp)
         void HandleCorpseReclaimOpcode( WorldPacket& recvPacket );
@@ -254,8 +239,6 @@ class WorldSession
         void HandleChannelAnnounce(WorldPacket& recvPacket);
         void HandleChannelModerate(WorldPacket& recvPacket);
 
-        void PraseAreaTriggers();
-
         /// Helper functions
         void SetNpcFlagsForTalkToQuest(const uint64& guid, const uint64& targetGuid);
 
@@ -272,6 +255,5 @@ class WorldSession
         time_t _logoutTime;                       // time we received a logout request -- wait 20 seconds, and quit
 
         ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _recvQueue;
-        AreaTrigger Triggers[MAX_AREA_TRIGGER_SIZE];
 };
 #endif

@@ -32,4 +32,16 @@ struct GraveyardTeleport
    // uint32 ZoneId;
     //uint32 FactionID;
 };
+
+struct AreaTrigger
+{
+    //int trigger;
+   // char name[256];
+    uint32 mapId;
+	float X;
+	float Y;
+	float Z;
+    //int totrigger;
+};
+
 #endif

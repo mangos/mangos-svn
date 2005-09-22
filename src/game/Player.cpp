@@ -2515,7 +2515,7 @@ void Player::ResurrectPlayer()
     if(getRace() == 4)                            // NEs to turn back from Wisp.
     {
         DeMorph();
-    }
+ /*   }
 
     // hiding spirit healers to living players
     for (Object::InRangeSet::iterator iter = GetInRangeSetBegin();
@@ -2523,7 +2523,7 @@ void Player::ResurrectPlayer()
     {
         Creature *creat = objmgr.GetObject<Creature>((*iter)->GetGUID());
         if (creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
-            creat->DestroyForPlayer(this);
+            creat->DestroyForPlayer(this);*/
     }
 }
 

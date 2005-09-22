@@ -174,25 +174,3 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         sWorld.SendGlobalMessage(&data, this);
     }
 }
-
-
-void WorldSession::HandleAreatriggerOpcode( WorldPacket & recv_data )
-{
-    // WorldPacket data;
-    // Log::getSingleton( ).outString( "Areatrigger with some infos -> %x", recv_data.data );
-    /*
-    data.Initialize(SMSG_TRANSFER_PENDING);
-    data << uint32(1);
-    data << uint32(0x00005148); //48 51 00 00 00 00 00 00
-    data << uint32(0);
-    SendPacket(&data);
-
-    float x,y,z;
-    x = GetPlayer()->GetPositionX();
-    y = GetPlayer()->GetPositionY();
-    z = GetPlayer()->GetPositionZ();*/
-
-    // smsg_NewWorld(this, 0, float(-8949.95), float(-132.493), float(83.5312));
-    // smsg_NewWorld(this, 0, x, y, z);
-    // SendPacket(&data);
-}

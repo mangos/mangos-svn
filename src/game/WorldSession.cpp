@@ -34,7 +34,7 @@
 WorldSession::WorldSession(uint32 id, WorldSocket *sock) : _accountId(id), _socket(sock),
 _security(0), _player(0), _logoutTime(0)
 {
-    PraseAreaTriggers();
+
 }
 
 
@@ -318,7 +318,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         /// Chat opcodes
         { CMSG_MESSAGECHAT,              STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             },
         { CMSG_TEXT_EMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               },
-        { CMSG_AREATRIGGER,              STATUS_LOGGEDIN, &WorldSession::HandleAreatriggerOpcode             },
         /// Corpse Opcodes
         { CMSG_RECLAIM_CORPSE,           STATUS_LOGGEDIN, &WorldSession::HandleCorpseReclaimOpcode           },
         { CMSG_RESURRECT_RESPONSE,       STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode       },
@@ -361,7 +360,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
     return table;
 }
 
-
+/*
 void WorldSession::PraseAreaTriggers()
 {
     std::stringstream query;
@@ -385,4 +384,4 @@ void WorldSession::PraseAreaTriggers()
             area_tr.totrigger = fields[6].GetUInt32();
         } while( result->NextRow() && count < MAX_AREA_TRIGGER_SIZE );
     }
-}
+}*/
