@@ -21,10 +21,10 @@
 #include "Database/DatabaseEnv.h"
 
 // common method
-template<class T> void LoadHelper(const char* table, GridType &grid, Player &pl, std::map<OBJECT_HANDLE, T*> &m)
+template<class T> void LoadHelper(const char* table, GridType &grid, std::map<OBJECT_HANDLE, T*> &m)
 {
-    const GridCoord &coord1(grid.GetLowerLeftCoord());
-    const GridCoord &coord2(grid.GetUpperRightCoord());
+    const Coordinate &coord1(grid.GetLowerLeftCoord());
+    const Coordinate &coord2(grid.GetUpperRightCoord());
 
     std::stringstream query;
     query << "SELECT id from " << table << " WHERE positionX <=" << coord1.x << " and positionX <=" << coord2.x << " and positionY <=" << coord1.y << " and positionY <=" << coord2.y;
@@ -38,8 +38,8 @@ template<class T> void LoadHelper(const char* table, GridType &grid, Player &pl,
 	    Field *fields = result->Fetch();
 	    T *obj = new T;
 	    uint32 guid = fields[0].GetUInt32();
-	    //	    obj->LoadFromDB(guid);
-	    //	    m[guid] = obj;
+	    obj->LoadFromDB(guid);
+	    m[guid] = obj;
 	    
 	}while( result->NextRow() );
     }
@@ -48,13 +48,13 @@ template<class T> void LoadHelper(const char* table, GridType &grid, Player &pl,
 void
 ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
-    LoadHelper<GameObject>("gameobjects", i_grid, i_player, m);
+    LoadHelper<GameObject>("gameobjects", i_grid, m);
 }
 
 void
 ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-    LoadHelper<Creature>("creatures", i_grid, i_player, m);
+    LoadHelper<Creature>("creatures", i_grid, m);
 }
 
 

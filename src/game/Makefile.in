@@ -164,6 +164,7 @@ libgame_a_SOURCES = \
 	ZoneMapper.cpp \
 	debugcmds.cpp \
         ObjectGridLoader.cpp \
+        Zone.cpp \
 	Affect.h \
 	Channel.h \
 	ChannelMgr.h \
@@ -198,7 +199,9 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h \
-	ZoneMapper.h
+	ZoneMapper.h \
+        ObjectGridLoader.h \
+        Zone.h
 
 subdir = src/game
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -224,7 +227,7 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	TaxiHandler.$(OBJEXT) Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
 	World.$(OBJEXT) WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
 	WorldSocketMgr.$(OBJEXT) ZoneMapper.$(OBJEXT) \
-	debugcmds.$(OBJEXT) ObjectGridLoader.$(OBJEXT)
+	debugcmds.$(OBJEXT) ObjectGridLoader.$(OBJEXT) Zone.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -260,7 +263,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/UpdateData.Po ./$(DEPDIR)/World.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/WorldSession.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/WorldSocket.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/WorldSocketMgr.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/WorldSocketMgr.Po ./$(DEPDIR)/Zone.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ZoneMapper.Po ./$(DEPDIR)/debugcmds.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
@@ -351,6 +354,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSession.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocketMgr.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Zone.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ZoneMapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debugcmds.Po@am__quote@
 

@@ -35,12 +35,15 @@
 #include "TypeContainer.h"
 #include "Policies/ThreadingModel.h"
 
-struct GridCoord
+struct Coordinate
 {
-    GridCoord(float x_val=0, float y_val=0) : x(x_val), y(y_val) {}
+    Coordinate(float x_val=0, float y_val=0) : x(x_val), y(y_val) {}
     float x;
     float y;
 };
+
+// forward declaration
+template<class T, class O, class L, class U> class GridLoader;
 
 template
 <
@@ -50,40 +53,53 @@ template
 >
 class MANGOS_DLL_DECL Grid
 {
+    // allows the GridLoader to access its internals
+    template<class T, class O, class L, class U> friend class GridLoader;
 public:
     
     Grid(float x1, float y1, float x2, float y2) : i_coord1(x1,y1), i_coord2(x2,y2) {}
     
-    /// dtor
+    /** destructor to clean up its resources. This includes unloading the
+	grid if it has not been unload.
+     */
     ~Grid();
     
-    /// Object enters the grid
+    /** an object of interested enters the grid
+     */
     void AddObject(OBJECT *obj);
     
-    /// Object move out of the grid
+    /** an object of interested exits the grid
+     */
     void RemoveObject(OBJECT *obj);
     
-    /// Refreshes the grid
-    void RefreshGrid(void);
+    /** Refreshes/update the grid. This required for remote grids.
+     */
+    void RefreshGrid(void) { /* TBI */}
     
-    /// Locks a grid.  Any object enters must wait until the grid is unlock
-    void LockGrid(void);
+    /** Locks a grid.  Any object enters must wait until the grid is unlock.
+     */
+    void LockGrid(void) { /* TBI */ }
     
-    /// Unlocks the grid.
-    void UnlockGrid(void);
+    /** Unlocks the grid.
+     */
+    void UnlockGrid(void) { /* TBI */ }
 
-    /// Grid Coordinate accessor
-    const GridCoord& GetLowerLeftCoord(void) const { return i_coord1; }
-    const GridCoord& GetUpperRightCoord(void) const { return i_coord2; }
+    /** Grid Coordinate accessor.
+     */
+    const Coordinate& GetLowerLeftCoord(void) const { return i_coord1; }
+    const Coordinate& GetUpperRightCoord(void) const { return i_coord2; }
     
-    /// Returns the number of object within the grid.
+    /** Returns the number of object within the grid.
+     */
     unsigned int ObjectsInGrid(void) const { return i_objects.size(); }
     
-    /// Accessors: Returns a specific type of object in the OBJECT_TYPES
+    /** Accessors: Returns a specific type of object in the OBJECT_TYPES
+     */
     template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
     template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
     
-    // Mutators
+    /** Inserts a container type object into the grid.
+     */
     template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(obj, hdl); }
     
 private:
@@ -91,7 +107,7 @@ private:
     typedef typename ThreadModel::Lock Guard;
     typedef typename ThreadModel::VolatileType VolatileType;
     
-    GridCoord i_coord1, i_coord2;
+    Coordinate i_coord1, i_coord2;
     TypeMapContainer<OBJECT_TYPES> i_container;
     std::map<OBJECT_HANDLE, OBJECT *> i_objects;
 };

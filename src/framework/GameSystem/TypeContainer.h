@@ -113,6 +113,9 @@ public:
     {
 	return MaNGOS::Remove<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl);
     }
+
+    ContainerMapList<OBJECT_TYPES> & GetElements(void) { return i_elements; }
+    const ContainerMapList<OBJECT_TYPES> & GetElements(void) const { return i_elements;} 
     
 private:
     ContainerMapList<OBJECT_TYPES> i_elements;
