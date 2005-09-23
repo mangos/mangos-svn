@@ -1,4 +1,4 @@
-/* ZoneDefine.h
+/* Zone.h
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -28,7 +28,6 @@
 #include "Platform/Define.h"
 #include "Policies/ThreadingModel.h"
 #include "zthread/Mutex.h"
-#include "ZoneDefine.h"
 #include "ObjectGridLoader.h"
 
 class MANGOS_DLL_DECL Zone : public MaNGOS::ObjectLevelLockable<Zone, ZThread::Mutex>
@@ -70,7 +69,7 @@ class MANGOS_DLL_DECL Zone : public MaNGOS::ObjectLevelLockable<Zone, ZThread::M
     };
 
 public:
-    Zone(const float x1, const float x2, const float y1, const float y2) : i_coord1(x1,y1), i_coord2(x2,y2), i_grid(NULL)	
+    Zone(const float y2, const float y1, const float x2, const float x1) : i_coord1(x1,y1), i_coord2(x2,y2), i_grid(NULL)	
     {
     }
     
