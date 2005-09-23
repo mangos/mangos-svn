@@ -314,7 +314,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint32 option;
     uint64 guid;
-
+	
     recv_data >> guid >> option;
 
     //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
@@ -343,12 +343,19 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 					{
 						data.Initialize( SMSG_GOSSIP_MESSAGE );
 						data << guid;
-						data << pGossip->TextID;
-						data << uint32(1);
-						data << uint32(pGossip->OptionCount);
-						data << uint16(pGossip->pOptions[option].Icon);
-						data << pGossipText->Text;
-						data << uint32(0);
+						data << pGossip->pOptions[option].NextTextID;
+						data << uint32(0); //option count 0
+						//Todo: Fix for recursive options(options embeded in options)
+						//data << pGossip->OptionCount;
+
+						//for(uint32 i=0; i < pGossip->OptionCount; i++)
+						//{
+						//	data << i;
+						//	data << pGossip->pOptions[i].Icon;
+						//	data << pGossip->pOptions[i].OptionText;
+						//}
+
+						data << uint32(0); //quest count
 
 						delete pGossipText;
 
