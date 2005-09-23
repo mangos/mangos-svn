@@ -86,7 +86,7 @@ template<class H, class T> struct ContainerList<TypeList<H, T> >
 #include "TypeContainerFunctions.h"
 
 /*
- * @class TypeContainer contains a fixed number of types and is 
+ * @class TypeMapContainer contains a fixed number of types and is 
  * determined at compile time.  This is probably the most complicated
  * class and do its simplest thing, that is, holds objects
  * of different types.

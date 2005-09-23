@@ -32,8 +32,9 @@
 */
 
 #include "Platform/Define.h"
-#include "TypeContainer.h"
 #include "Policies/ThreadingModel.h"
+#include "TypeContainer.h"
+#include "TypeContainerVisitor.h"
 
 struct Coordinate
 {
@@ -43,7 +44,7 @@ struct Coordinate
 };
 
 // forward declaration
-template<class T, class O, class L, class U> class GridLoader;
+template<class T, class O> class GridLoader;
 
 template
 <
@@ -54,7 +55,7 @@ template
 class MANGOS_DLL_DECL Grid
 {
     // allows the GridLoader to access its internals
-    template<class T, class O, class L, class U> friend class GridLoader;
+    template<class T, class O> friend class GridLoader;
 public:
     
     Grid(float x1, float y1, float x2, float y2) : i_coord1(x1,y1), i_coord2(x2,y2) {}
@@ -84,6 +85,21 @@ public:
      */
     void UnlockGrid(void) { /* TBI */ }
 
+    /** Grid visitor for grid objects
+     */
+    template<class T> void VisitGridObjects(TypeContainerVisitor<T, TypeMapContainer<OBJECT_TYPES> > &visitor)
+    {
+	visitor.Visit(i_container);
+    }
+
+    /** Grid visitor for object of interested
+     */
+    template<class T> void VisitObjects(TypeContainerVisitor<T, ContainerMapList<OBJECT> > &visitor)
+    {
+	visitor.Visit(i_objects);
+    }
+
+
     /** Grid Coordinate accessor.
      */
     const Coordinate& GetLowerLeftCoord(void) const { return i_coord1; }
@@ -91,7 +107,7 @@ public:
     
     /** Returns the number of object within the grid.
      */
-    unsigned int ObjectsInGrid(void) const { return i_objects.size(); }
+    unsigned int ObjectsInGrid(void) const { return i_objects._element.size(); }
     
     /** Accessors: Returns a specific type of object in the OBJECT_TYPES
      */
@@ -109,7 +125,7 @@ private:
     
     Coordinate i_coord1, i_coord2;
     TypeMapContainer<OBJECT_TYPES> i_container;
-    std::map<OBJECT_HANDLE, OBJECT *> i_objects;
+    ContainerMapList<OBJECT> i_objects;
 };
 
 

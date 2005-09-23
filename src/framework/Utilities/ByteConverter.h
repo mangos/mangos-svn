@@ -1,4 +1,4 @@
-/* ZoneDefine.h
+/* ByteConverter.h
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -17,43 +17,30 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_ZONEDEFINE_H
-#define MANGOS_ZONEDEFINE_H
+#ifndef MANGOS_BYTECONVERTER_H
+#define MANGOS_BYTECONVERTER_H
 
-/*
- * Perphaps this is more quicker than loading in at run time
+/** ByteConverter reverse your byte order.  This is use
+    for cross platform where they have different endians.
  */
 
-#include "Common.h"
 
-enum zone_t
+namespace ByetConverter
+{
+    template<size_t T> 
+    inline void convert(char *val)
     {
-	ZONE_UNKNOWN = 0,
-	ZONE_141 = 141,
-	ZONE_12 = 12,
-	ZONE_406 = 406,
-	ZONE_15 = 15
-    };
-
-union
-{
-    uint32 uint32Value;
-    float float32Value;
-} ufields;
-
-template<zone_t T> 
-struct ZoneDefinition
-{
-};
-
-template<> struct ZoneDefinition<ZONE_406>
-{
-    enum { y2=1162534229, y1=3301748735, x2=1161185962, x1=3282684586 };
-};
-
-template<> struct ZoneDefinition<ZONE_15>
-{
-    enum { y2=3295920127, y1=3317860352, x2=3304991402, x1=3316443818 };
-};
+	std::swap(*val, *(val + T - 1));
+	convert<T - 2>(val + 1);
+    }
+    
+    template<> inline void convert<0>(char *val) {}
+    template<> void convert<1>(char *val); /* link time error all sizes have to be 2 to power n*/
+           
+    template<typename T> void apply(T *val)
+    {
+	convert<sizeof(T)>((char *)(val));
+    }
+}
 
 #endif

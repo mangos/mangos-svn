@@ -33,9 +33,9 @@
 typedef TYPELIST_2(GameObject, Creature)    AllObjectTypes;
 
 /*
- * @class ObjectGridLoader class implements a visitor patter for the ContainerMapList
- * becuase that's the container used for storing both GameObjects and Creatures
- * what's in the grid.
+ * @class ObjectGridLoader class implements a visitor pattern for the ContainerMapList
+ * because that's the container used for storing both GameObjects and Creatures
+ * which is in the grid.
  */
 
 typedef Grid<Player, AllObjectTypes> GridType;
@@ -43,12 +43,15 @@ typedef Grid<Player, AllObjectTypes> GridType;
 class MANGOS_DLL_DECL ObjectGridLoader
 {
 public:
-    ObjectGridLoader(GridType &grid) : i_grid(grid) {}
+    ObjectGridLoader(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+
+    void Load(GridType &grid);
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
 private:
     GridType &i_grid;
+    Player &i_player;
 };
 
 /*
@@ -58,15 +61,30 @@ private:
 class MANGOS_DLL_DECL ObjectGridUnloader
 {
 public:
-    ObjectGridUnloader(GridType &grid, Player *pl) : i_grid(grid) {}
+    ObjectGridUnloader(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
 
+    void Unload(GridType &grid);
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
 private:
     GridType &i_grid;
+    Player& i_player;
 };
 
-typedef GridLoader<Player, AllObjectTypes, ObjectGridLoader, ObjectGridUnloader> GridLoaderType;
+/** RemoveGridObject remove the objects in certain grid from this player.
+ *  Implements as a Visitor and executed thru unload.
+ */
+class MANGOS_DLL_DECL RemoveGridObject
+{
+    Player &i_player;
+public:
+    RemoveGridObject(Player &pl) : i_player(pl) {}
+    void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+    void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+    void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+};
+
+typedef GridLoader<Player, AllObjectTypes> GridLoaderType;
 
 #endif
