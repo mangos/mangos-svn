@@ -38,9 +38,7 @@
 template
 <
     class OBJECT,
-    class OBJECT_TYPES,
-    class LOADER_TYPE,
-    class UNLOADER_TYPE
+    class OBJECT_TYPES
 >
 class MANGOS_DLL_DECL GridLoader
 {
@@ -48,23 +46,21 @@ public:
     
     /** Loads the grid
      */
-    void Load(Grid<OBJECT, OBJECT_TYPES> &grid)
+    template<class LOADER>
+    void Load(Grid<OBJECT, OBJECT_TYPES> &grid, LOADER &loader)
     {
 	grid.LockGrid();
-	LOADER_TYPE loader(grid);
-	TypeContainerVisitor<LOADER_TYPE, TypeMapContainer<OBJECT_TYPES> > visitor(loader);
-	visitor.Visit(grid.i_container);
+	loader.Load(grid);
 	grid.UnlockGrid();
     }
     
     /** Unloads the grid
      */
-    void Unload(Grid<OBJECT, OBJECT_TYPES> &grid)
+    template<class UNLOADER>
+    void Unload(Grid<OBJECT, OBJECT_TYPES> &grid, UNLOADER &unloader)
     {
-	grid.LockGrid();
-	UNLOADER_TYPE unloader(grid);
-	TypeContainerVisitor<UNLOADER_TYPE, TypeMapContainer<OBJECT_TYPES> > visitor(unloader);
-	visitor.Visit(grid.i_container);
+	grid.LockGrid();	
+	unloader.Unload(grid);
 	grid.UnlockGrid();
     }
 };

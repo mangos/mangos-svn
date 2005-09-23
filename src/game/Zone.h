@@ -33,6 +33,42 @@
 
 class MANGOS_DLL_DECL Zone : public MaNGOS::ObjectLevelLockable<Zone, ZThread::Mutex>
 {
+    /** NotifyPlayer class is responsible to inform all players in the grid
+	that's within range the existence of the player.  As well, inform
+	the player himself the existence of other players
+     */
+    struct NotifyPlayer
+    {
+	NotifyPlayer(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+	void Visit(std::map<OBJECT_HANDLE, Player *> &);
+	GridType &i_grid;
+	Player &i_player;
+    };
+
+    /** NotifyObject class is responsible to inform all objects (that's creatures as well)
+	in the grid that's within range the existence of the player.
+     */
+    struct NotifyObject
+    {
+	NotifyObject(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+	void buildObjectData(UpdateData &, Object *);
+	void Visit(std::map<OBJECT_HANDLE, GameObject *> &);
+	void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+	GridType &i_grid;
+	Player &i_player;
+    };
+
+    /** PlayerUpdater class is responsible for updating all player and the objects
+	that's within range of the player (nothing else)
+     */
+    struct PlayerUpdater
+    {
+	GridType &i_grid;
+	uint32 i_timeDiff;
+	PlayerUpdater(GridType &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
+	void Visit(std::map<OBJECT_HANDLE, Player *> &);
+    };
+
 public:
     Zone(const float x1, const float x2, const float y1, const float y2) : i_coord1(x1,y1), i_coord2(x2,y2), i_grid(NULL)	
     {
@@ -46,6 +82,10 @@ public:
      */
     void RemovePlayer(Player *);    
 
+    /** Updates the zone with the time difference from the last update
+     */
+    void Update(uint32);
+
 private:
 
     typedef MaNGOS::ObjectLevelLockable<Zone, ZThread::Mutex>::Lock Guard;
@@ -55,5 +95,7 @@ private:
     // for now one grid...
     GridType *i_grid;
 };
+
+
 
 #endif

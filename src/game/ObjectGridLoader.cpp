@@ -40,7 +40,8 @@ template<class T> void LoadHelper(const char* table, GridType &grid, std::map<OB
 	    uint32 guid = fields[0].GetUInt32();
 	    obj->LoadFromDB(guid);
 	    m[guid] = obj;
-	    
+	    obj->AddToWorld();
+
 	}while( result->NextRow() );
     }
 };
@@ -57,6 +58,21 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     LoadHelper<Creature>("creatures", i_grid, m);
 }
 
+void
+ObjectGridLoader::Load(GridType &grid)
+{
+    TypeContainerVisitor<ObjectGridLoader, TypeMapContainer<AllObjectTypes> > loader(*this);
+    grid.VisitGridObjects(loader);
+}
+
+//==============================================//
+//      ObjectGridUnloader
+void 
+ObjectGridUnloader::Unload(GridType &grid)
+{
+    TypeContainerVisitor<ObjectGridUnloader, TypeMapContainer<AllObjectTypes> > unloader(*this);
+    grid.VisitGridObjects(unloader);
+}
 
 void
 ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)

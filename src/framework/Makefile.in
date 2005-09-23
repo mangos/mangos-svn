@@ -103,8 +103,9 @@ noinst_LIBRARIES = libframework.a
 libframework_a_SOURCES = \
     Policies/Singleton.cpp Policies/ObjectLifeTime.cpp \
     Policies/CreationPolicy.cpp Policies/ThreadingModel.cpp \
+    Utilities/Reference.cpp \
     GameSystem/GridLoader.cpp GameSystem/Grid.cpp\
-    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp
+    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp 
 
 subdir = src/framework
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -116,8 +117,8 @@ libframework_a_AR = $(AR) cru
 libframework_a_LIBADD =
 am_libframework_a_OBJECTS = Singleton.$(OBJEXT) ObjectLifeTime.$(OBJEXT) \
 	CreationPolicy.$(OBJEXT) ThreadingModel.$(OBJEXT) \
-	GridLoader.$(OBJEXT) Grid.$(OBJEXT) TypeContainer.$(OBJEXT) \
-	TypeContainerVisitor.$(OBJEXT)
+	Reference.$(OBJEXT) GridLoader.$(OBJEXT) Grid.$(OBJEXT) \
+	TypeContainer.$(OBJEXT) TypeContainerVisitor.$(OBJEXT)
 libframework_a_OBJECTS = $(am_libframework_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -129,7 +130,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/CreationPolicy.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Grid.Po ./$(DEPDIR)/GridLoader.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ObjectLifeTime.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/Singleton.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Reference.Po ./$(DEPDIR)/Singleton.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ThreadingModel.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/TypeContainer.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/TypeContainerVisitor.Po
@@ -164,6 +165,7 @@ Singleton.$(OBJEXT): Policies/Singleton.cpp
 ObjectLifeTime.$(OBJEXT): Policies/ObjectLifeTime.cpp
 CreationPolicy.$(OBJEXT): Policies/CreationPolicy.cpp
 ThreadingModel.$(OBJEXT): Policies/ThreadingModel.cpp
+Reference.$(OBJEXT): Utilities/Reference.cpp
 GridLoader.$(OBJEXT): GameSystem/GridLoader.cpp
 Grid.$(OBJEXT): GameSystem/Grid.cpp
 TypeContainer.$(OBJEXT): GameSystem/TypeContainer.cpp
@@ -183,6 +185,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridLoader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectLifeTime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Reference.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Singleton.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadingModel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TypeContainer.Po@am__quote@
@@ -280,6 +283,24 @@ ThreadingModel.lo: Policies/ThreadingModel.cpp
 @AMDEP_TRUE@	depfile='$(DEPDIR)/ThreadingModel.Plo' tmpdepfile='$(DEPDIR)/ThreadingModel.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ThreadingModel.lo `test -f 'Policies/ThreadingModel.cpp' || echo '$(srcdir)/'`Policies/ThreadingModel.cpp
+
+Reference.o: Utilities/Reference.cpp
+@AMDEP_TRUE@	source='Utilities/Reference.cpp' object='Reference.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/Reference.Po' tmpdepfile='$(DEPDIR)/Reference.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Reference.o `test -f 'Utilities/Reference.cpp' || echo '$(srcdir)/'`Utilities/Reference.cpp
+
+Reference.obj: Utilities/Reference.cpp
+@AMDEP_TRUE@	source='Utilities/Reference.cpp' object='Reference.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/Reference.Po' tmpdepfile='$(DEPDIR)/Reference.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Reference.obj `cygpath -w Utilities/Reference.cpp`
+
+Reference.lo: Utilities/Reference.cpp
+@AMDEP_TRUE@	source='Utilities/Reference.cpp' object='Reference.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/Reference.Plo' tmpdepfile='$(DEPDIR)/Reference.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Reference.lo `test -f 'Utilities/Reference.cpp' || echo '$(srcdir)/'`Utilities/Reference.cpp
 
 GridLoader.o: GameSystem/GridLoader.cpp
 @AMDEP_TRUE@	source='GameSystem/GridLoader.cpp' object='GridLoader.o' libtool=no @AMDEPBACKSLASH@

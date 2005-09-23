@@ -1,4 +1,4 @@
-/* ZoneDefine.h
+/* ReferenceHolder.h
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -17,43 +17,26 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_ZONEDEFINE_H
-#define MANGOS_ZONEDEFINE_H
+#ifndef MANGOS_REFERENCEHOLDER_H
+#define MANGOS_REFERENCEHOLDER_H
 
-/*
- * Perphaps this is more quicker than loading in at run time
+
+/** ReferenceHolder holds the actualy referenced obejct as well the refence
+    count.  The ReferenecHolder implements as a policy base object and
+    will decided by the Reference class to be consnsitent.
  */
 
-#include "Common.h"
-
-enum zone_t
-    {
-	ZONE_UNKNOWN = 0,
-	ZONE_141 = 141,
-	ZONE_12 = 12,
-	ZONE_406 = 406,
-	ZONE_15 = 15
-    };
-
-union
+template
+<
+    typename T, 
+    class THREADING_MODEL
+>
+struct ReferenceHolder : public THREADING_MODEL
 {
-    uint32 uint32Value;
-    float float32Value;
-} ufields;
-
-template<zone_t T> 
-struct ZoneDefinition
-{
-};
-
-template<> struct ZoneDefinition<ZONE_406>
-{
-    enum { y2=1162534229, y1=3301748735, x2=1161185962, x1=3282684586 };
-};
-
-template<> struct ZoneDefinition<ZONE_15>
-{
-    enum { y2=3295920127, y1=3317860352, x2=3304991402, x1=3316443818 };
+    explicit ReferenceHolder(T *ref) : i_referencee(ref), i_referenceCount(0) {}
+    T *i_referencee;
+    unsigned int i_referenceCount;
+    typedef typename THREADING_MODEL::Lock Lock;
 };
 
 #endif

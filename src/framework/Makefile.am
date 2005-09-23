@@ -22,8 +22,12 @@ noinst_LIBRARIES = libframework.a
 libframework_a_SOURCES = \
     Policies/Singleton.cpp Policies/ObjectLifeTime.cpp \
     Policies/CreationPolicy.cpp Policies/ThreadingModel.cpp \
+    Utilities/Reference.cpp \
     GameSystem/GridLoader.cpp GameSystem/Grid.cpp\
-    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp
+    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp 
+
+
+
 
 
 
