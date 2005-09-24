@@ -21,7 +21,7 @@
 #ifndef MANGOSSERVER_PATH_H
 #define MANGOSSERVER_PATH_H
 
-struct TaxiNodes
+/*struct TaxiNodes
 {
     uint8 id;
     // std::string name;
@@ -46,7 +46,7 @@ struct TaxiPathNodes
     float x,y,z;
     // uint32 unkown1;
     // uint32 unkown2;
-};
+};*/
 
 class Path
 {

@@ -165,10 +165,10 @@ void World::SetInitialWorldSettings()
     Log::getSingleton( ).outString( "Loading Environment..." );
     objmgr.LoadPlayerCreateInfo();*/
     // Load taxi info
-    Log::getSingleton( ).outString( "Loading TaxiPaths..." );
-    objmgr.LoadTaxiNodes();
-    objmgr.LoadTaxiPath();
-    objmgr.LoadTaxiPathNodes();
+    //Log::getSingleton( ).outString( "Loading TaxiPaths..." );
+    //objmgr.LoadTaxiNodes();
+    //objmgr.LoadTaxiPath();
+    //objmgr.LoadTaxiPathNodes();
     // Load Corpses
     Log::getSingleton( ).outString( "Loading Corpses..." );
     objmgr.LoadCorpses();

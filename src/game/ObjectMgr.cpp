@@ -838,7 +838,7 @@ void ObjectMgr::LoadGameObjects()
 	delete result;
     }
 }
-
+/*
 void ObjectMgr::LoadTaxiNodes()
 {
     QueryResult *result = sDatabase.Query( "SELECT * FROM taxinodes" );
@@ -867,9 +867,9 @@ void ObjectMgr::LoadTaxiNodes()
     } while( result->NextRow() );
 
     delete result;
-}
+}*/
 
-
+/*
 void ObjectMgr::LoadTaxiPath()
 {
     QueryResult *result = sDatabase.Query( "SELECT * FROM taxipath" );
@@ -894,9 +894,9 @@ void ObjectMgr::LoadTaxiPath()
     } while( result->NextRow() );
 
     delete result;
-}
+}*/
 
-
+/*
 void ObjectMgr::LoadTaxiPathNodes()
 {
     QueryResult *result = sDatabase.Query( "SELECT * FROM taxipathnodes ORDER BY 'index'" );
@@ -926,12 +926,12 @@ void ObjectMgr::LoadTaxiPathNodes()
     } while( result->NextRow() );
 
     delete result;
-}
+}*/
 
 
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
-    TaxiPathMap::const_iterator itr;
+    /*TaxiPathMap::const_iterator itr;
     TaxiPathNodesVec::iterator pathnodes_itr;
     uint8 field;
 
@@ -951,7 +951,21 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 
             }
         }
-    }
+    }*/
+	std::stringstream query;
+	query << "SELECT taxipath.destination FROM taxipath WHERE taxipath.source = " << curloc << " ORDER BY destination LIMIT 1";
+	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+	if( result.get() == NULL )
+	{
+        return 1;
+	}
+	Field *fields = result->Fetch();
+	uint8 destination = fields[0].GetUInt8();
+	uint8 field = (uint8)((destination - 1) / 32);
+	Mask[field] |= 1 << ( (destination - 1 ) % 32 );
 
     return 1;
 }
@@ -959,11 +973,27 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
-    uint32 nearest = 0;
-    float distance = -1;
-    float nx, ny, nz, nd;
+	/*uint32 nearest = 0;
+	float distance = -1;
+	float nx, ny, nz, nd;*/
 
-    TaxiNodesMap::const_iterator nodes_itr;
+	std::stringstream query;
+
+	query << "SELECT taxinodes.ID, SQRT(pow(taxinodes.x-(" << x << "),2)+pow(taxinodes.y-(" << y << "),2)+pow(taxinodes.z-(" << z << "),2)) as distance ";
+	query << "FROM taxinodes WHERE taxinodes.continent = " << mapid << " ORDER BY distance LIMIT 1";
+
+	//Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+    if( result.get() == NULL )
+	{
+        return 0;
+	}
+	Field *fields = result->Fetch();
+	return fields[0].GetUInt8();
+
+	/*TaxiNodesMap::const_iterator nodes_itr;
     TaxiPathMap::const_iterator path_itr;
     TaxiPathNodesVec::iterator pathnodes_itr;
 
@@ -1005,26 +1035,60 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
         }
     }
 
-    return nearest;
+    return nearest;*/
 }
 
 
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
-    TaxiPathMap::const_iterator itr;
+    /*TaxiPathMap::const_iterator itr;
 
     for (itr = mTaxiPath.begin(); itr != mTaxiPath.end(); itr++)
     {
         if( (itr->second->source == source) && (itr->second->destination == destination) )
             path = itr->second->id;
         cost = itr->second->price;
-    }
+    }*/
+
+	std::stringstream query;
+
+	query << "SELECT taxipath.price, taxipath.ID FROM taxipath WHERE taxipath.source = " << source << " AND taxipath.destination = " << destination;
+	
+	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+    if( result.get() == NULL )
+	{
+		path = 0;
+		cost = 0;
+		return;
+	}
+	Field *fields = result->Fetch();
+	cost = fields[0].GetUInt32();
+	path = fields[1].GetUInt16();
 }
 
 
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
-    TaxiNodesMap::const_iterator itr;
+	std::stringstream query;
+
+	query << "SELECT taxinodes.mount FROM taxinodes WHERE taxinodes.ID = " << id;
+	
+	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+	if( result.get() == NULL )
+	{
+		return 0;
+	}
+
+	Field *fields = result->Fetch();
+	return fields[0].GetUInt16();
+
+    /*TaxiNodesMap::const_iterator itr;
 
     for (itr = mTaxiNodes.begin(); itr != mTaxiNodes.end(); itr++)
     {
@@ -1032,13 +1096,43 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
             return itr->second->mount;
     }
 
-    return 0;
+    return 0;*/
 }
 
 
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path *pathnodes )
 {
-    uint16 i = 0;
+	std::stringstream query;
+
+	query << "SELECT taxipathnodes.X, taxipathnodes.Y, taxipathnodes.Z FROM taxipathnodes WHERE taxipathnodes.path = " << path;
+	
+	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+
+	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+
+	if( result.get() == NULL )
+	{
+		 pathnodes->setLength( 0 );
+	}
+	
+	uint16 count = result->GetRowCount();
+
+	Log::getSingleton( ).outDebug(" ROW COUNT %u ",count);
+
+	pathnodes->setLength( count );
+
+	uint16 i = 0;
+
+	do
+	{
+		Field *fields = result->Fetch();
+		pathnodes->getNodes( )[ i ].x = fields[0].GetFloat();
+        pathnodes->getNodes( )[ i ].y = fields[1].GetFloat();
+        pathnodes->getNodes( )[ i ].z = fields[2].GetFloat();
+        i++;
+	} while( result->NextRow() );
+
+    /*uint16 i = 0;
 
     for( TaxiPathNodesVec::iterator itr = vTaxiPathNodes.begin();
         itr != vTaxiPathNodes.end(); ++itr )
@@ -1062,7 +1156,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path *pathnodes )
             pathnodes->getNodes( )[ i ].z = (*itr)->z;
             i++;
         }
-    }
+    }*/
 }
 
 
