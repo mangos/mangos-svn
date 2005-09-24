@@ -455,6 +455,12 @@ MAIN: {
 	Preprocessor::apply(\%object_map, \%lookup_map, $info_table{"apply-preprocessor"});
 	printf ".................................DONE\r\n";
     }
+    elsif( $info_table{"apply-zone"} ne "" )
+    {
+	printf "Applying processing zones................\r\n";
+	Preprocessor::apply_zone(\%object_map);
+	printf ".................................DONE\r\n";
+    }
 
     # validate output file
     my $sql_file = $info_table{"outfile"};

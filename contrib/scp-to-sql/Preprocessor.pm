@@ -2,7 +2,7 @@
 package Preprocessor;
 
 our @ISA = qw(Exporter);
-our @EXPORT_OK = qw(apply);
+our @EXPORT_OK = qw(apply,appl_zone);
 our $VERSION = 1.0;
 
 
@@ -174,4 +174,48 @@ sub apply
 	    $obj_map->{$spawn_points{$key}} = {}; # for performance purposes.	
 	}
     }    
+}
+
+sub apply_zone
+{
+    my ($obj_map) = @_;
+
+    for my $key( keys %{$obj_map} )
+    {
+	if( $key ne "" )
+	{
+	    my $obj_map_item = $obj_map->{$key};
+	    my $entry_id = $obj_map_item->{"ENTRY"};
+	    if( $entry_id eq 1 )
+	    {
+		# this is a spawn point
+		$obj_map->{$key} = {}; 
+	    }
+	    else
+	    {
+		my @xyz = split ' ', $obj_map_item->{"XYZ"};
+		
+		# x1 = [0], y1[1], x2[2], y2[3]
+		my $size = scalar(@xyz);
+		if( $size > 1 )
+		{
+		    for my $zone_key( keys %{$zoneid_map})
+		    {
+			my $arr_ref = $zoneid_map->{$zone_key};
+			my $y2 = $arr_ref->[0];
+			my $y1 = $arr_ref->[1];
+			my $x2 = $arr_ref->[2];
+			my $x1 = $arr_ref->[3];
+			
+			# if X1 <= posX <= X2 and Y1 <= posY <= Y2 then we have hit a home run.
+			if( $xyz[0] >= $x1 && $xyz[0] <= $x2 &&
+			    $xyz[1] >= $y1 && $xyz[1] <= $y2 )
+			{
+			    $obj_map_item->{"ZONE"} = $zone_key;
+			}
+		    }	   
+		}
+	    }
+	}
+    }
 }
