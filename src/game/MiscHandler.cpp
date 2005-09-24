@@ -428,7 +428,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
             fields = result->Fetch();
             friendstr[i].PlayerGUID = fields[2].GetUInt64();
             pObj=objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
-            if(pObj)
+            if(pObj && pObj->IsInWorld())
             {
                 friendstr[i].Status = 1;
                 friendstr[i].Area = pObj->GetZoneId();
@@ -498,70 +498,76 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_ADD_FRIEND"  );
 
     std::string friendName = "UNKNOWN";
+	std::stringstream fquery;
+	unsigned char friendResult = FRIEND_NOT_FOUND;
+	Player *pfriend=NULL;
+	uint64 friendGuid = 0;
+    uint32 friendArea = 0, friendLevel = 0, friendClass = 0;
+	WorldPacket data;
+
     recv_data >> friendName;
 
     Log::getSingleton( ).outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
-
-    unsigned char friendResult = FRIEND_NOT_FOUND;
-    uint64 friendGuid = 0;
-    uint32 friendArea = 0;
-    uint32 friendLevel = 0;
-    uint32 friendClass = 0;
-    WorldPacket data;
-
-    // TODO: Add Friend To list, and fill in FriendResult.//fixed
+	
+    
+   
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
-    if (friendGuid > 0)
+	pfriend = objmgr.GetObject<Player>(friendGuid);
+
+	fquery << "SELECT * FROM social WHERE friendid = " << friendGuid;
+
+	if(sDatabase.Query( fquery.str().c_str() )) friendResult = FRIEND_ALREADY;
+	if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
+	
+	// Send response.
+    data.Initialize( SMSG_FRIEND_STATUS );
+
+    if (friendGuid > 0 && friendResult!=FRIEND_ALREADY && friendResult!=FRIEND_SELF)
     {
-        if( objmgr.GetObject<Player>(friendGuid) != NULL )
+        if( pfriend != NULL && pfriend->IsInWorld())
+		{
             friendResult = FRIEND_ADDED_ONLINE;
+			friendArea = pfriend->GetZoneId();
+			friendLevel = pfriend->getLevel();
+			friendClass = pfriend->getClass();
+			
+			data << (uint8)friendResult << (uint64)friendGuid;
+            data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
+			
+			// Deadknight addon start add buffer to social table
+			std::stringstream query;
+			uint64 guid;
+			guid=GetPlayer()->GetGUID();
+
+			query << "INSERT INTO `social` VALUES ('" << friendName << "', " << guid << ", " << friendGuid << ", 'FRIEND')" ;
+			sDatabase.Query( query.str().c_str() );	
+
+		}
         else
             friendResult = FRIEND_ADDED_OFFLINE;
 
         Log::getSingleton( ).outDetail( "WORLD: %s Guid found '%ld' area:%d Level:%d Class:%d. ",
-            friendName.c_str(), friendGuid, friendArea, friendLevel, friendClass );
+            friendName.c_str(), friendGuid, friendArea, friendLevel, friendClass);
 
     }
-    else
-    {
+	else if(friendResult==FRIEND_ALREADY)
+	{
+		data << (uint8)friendResult << (uint64)friendGuid;
+		Log::getSingleton( ).outDetail( "WORLD: %s Guid Already a Friend ", friendName.c_str() );
+	}
+	else if(friendResult==FRIEND_SELF)
+	{
+		data << (uint8)friendResult << (uint64)friendGuid;
+		Log::getSingleton( ).outDetail( "WORLD: %s Guid Is you! ", friendName.c_str() );
+	}
+	else
+	{
+		data << (uint8)friendResult << (uint64)friendGuid;
         Log::getSingleton( ).outDetail( "WORLD: %s Guid not found ", friendName.c_str() );
-    }
+	}
 
-    // Send response.
-    data.Initialize( SMSG_FRIEND_STATUS );
-
-    if (!strcmp(GetPlayer()->GetName(),friendName.c_str()))
-    {
-        friendResult = FRIEND_SELF;
-        data << (uint8)friendResult << (uint64)friendGuid;
-    }
-    else
-    {
-        if (friendResult ==  FRIEND_ADDED_ONLINE || friendResult == FRIEND_ONLINE ||
-            friendResult ==  FRIEND_OFFLINE
-            //|| FriendResult ==  FRIEND_ADDED_OFFLINE
-            )
-        {
-            data << (uint8)friendResult << (uint64)friendGuid;
-            data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
-
-        }
-        else
-        {
-            data << (uint8)friendResult << (uint64)friendGuid;
-        }
-
-        // Deadknight addon start add buffer to social table
-        std::stringstream query;
-        uint64 guid;
-        guid=GetPlayer()->GetGUID();
-
-        query << "INSERT INTO `social` VALUES ('" << friendName << "', " << guid << ", " << friendGuid << ", 'FRIEND')" ;
-        sDatabase.Query( query.str().c_str() );
-        // Finish
-    }
-
+    // Finish
     SendPacket( &data );
 
     Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
