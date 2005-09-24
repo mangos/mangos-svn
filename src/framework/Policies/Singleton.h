@@ -57,8 +57,8 @@ namespace MaNGOS
 	
 	// data structure
 	typedef typename ThreadingModel::VolatileType * SingletonType;
-        MANGOS_DLL_DECL static SingletonType si_instance;
-	MANGOS_DLL_DECL static bool si_destroyed;
+    static SingletonType si_instance;
+	static bool si_destroyed;
     };
 }
 

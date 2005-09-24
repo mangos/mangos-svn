@@ -36,7 +36,7 @@
 #include "TypeContainer.h"
 #include "TypeContainerVisitor.h"
 
-struct Coordinate
+struct MANGOS_DLL_DECL Coordinate
 {
     Coordinate(float x_val=0, float y_val=0) : x(x_val), y(y_val) {}
     float x;
