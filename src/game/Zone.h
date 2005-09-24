@@ -30,6 +30,14 @@
 #include "zthread/Mutex.h"
 #include "ObjectGridLoader.h"
 
+typedef enum
+  {
+    ZONE_STATUS_INVALID,
+    ZONE_STATUS_ACTIVE,
+    ZONE_STATUS_IDLE,
+    ZONE_STATUS_QUEUED
+  } zone_status_t;
+
 class MANGOS_DLL_DECL Zone : public MaNGOS::ObjectLevelLockable<Zone, ZThread::Mutex>
 {
     /** NotifyPlayer class is responsible to inform all players in the grid
@@ -69,7 +77,8 @@ class MANGOS_DLL_DECL Zone : public MaNGOS::ObjectLevelLockable<Zone, ZThread::M
     };
 
 public:
-    Zone(const float y2, const float y1, const float x2, const float x1) : i_coord1(x1,y1), i_coord2(x2,y2), i_grid(NULL)	
+  Zone() : i_status(ZONE_STATUS_INVALID), i_coord1(0,0), i_coord2(0,0), i_grid(NULL) {};
+  Zone(const float y2, const float y1, const float x2, const float x1) : i_status(ZONE_STATUS_ACTIVE), i_coord1(x1,y1), i_coord2(x2,y2), i_grid(NULL)	
     {
     }
     
@@ -85,9 +94,16 @@ public:
      */
     void Update(uint32);
 
+    inline bool InZone(const float x, const float y)
+    {
+        return( i_coord1.x <= x && x >= i_coord2.x && i_coord1.y <= y && y <= i_coord2.y );
+    }
+  
+
 private:
 
     typedef MaNGOS::ObjectLevelLockable<Zone, ZThread::Mutex>::Lock Guard;
+    zone_status_t i_status;
     Coordinate i_coord1;
     Coordinate i_coord2;
     

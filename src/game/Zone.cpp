@@ -214,5 +214,7 @@ void
 Zone::PlayerUpdater::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+      {
 	iter->second->Update(i_timeDiff);
+      }
 }

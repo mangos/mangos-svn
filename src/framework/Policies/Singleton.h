@@ -30,7 +30,7 @@
 #include "ThreadingModel.h"
 #include "ObjectLifeTime.h"
 
-namespace mangos
+namespace MaNGOS
 {
     template
     <

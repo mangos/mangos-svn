@@ -66,6 +66,7 @@ libgame_a_SOURCES = \
 	debugcmds.cpp \
         ObjectGridLoader.cpp \
         Zone.cpp \
+	MapManager.cpp \
 	Affect.h \
 	Channel.h \
 	ChannelMgr.h \
