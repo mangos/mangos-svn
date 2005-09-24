@@ -77,9 +77,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef HM_NAMESPACE::hash_map<uint32, ItemPrototype*> ItemPrototypeMap;
         typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
         typedef HM_NAMESPACE::hash_map<uint32, Trainerspell*> TrainerspellMap;
-        typedef HM_NAMESPACE::hash_map<uint32, TaxiNodes*> TaxiNodesMap;
-        typedef HM_NAMESPACE::hash_map<uint32, TaxiPath*> TaxiPathMap;
-        typedef std::vector<TaxiPathNodes*> TaxiPathNodesVec;
+        //typedef HM_NAMESPACE::hash_map<uint32, TaxiNodes*> TaxiNodesMap;
+        //typedef HM_NAMESPACE::hash_map<uint32, TaxiPath*> TaxiPathMap;
+        //typedef std::vector<TaxiPathNodes*> TaxiPathNodesVec;
         typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
 
         // objects
@@ -297,7 +297,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
 
         // taxi code
-        void AddTaxiNodes(TaxiNodes *taxiNodes)
+       /* void AddTaxiNodes(TaxiNodes *taxiNodes)
         {
             ASSERT( taxiNodes );
             mTaxiNodes[taxiNodes->id] = taxiNodes;
@@ -311,7 +311,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         {
             ASSERT( taxiPathNodes );
             vTaxiPathNodes.push_back(taxiPathNodes);
-        }
+        }*/
         bool GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask );
         uint32 GetNearestTaxiNode( float x, float y, float z, uint32 mapid );
         void GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost);
@@ -363,9 +363,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void SaveCreatureNames();
         void LoadItemPrototypes();
         void LoadTrainerSpells();
-        void LoadTaxiNodes();
-        void LoadTaxiPath();
-        void LoadTaxiPathNodes();
+       // void LoadTaxiNodes();
+       // void LoadTaxiPath();
+       // void LoadTaxiPathNodes();
         void LoadCorpses();
        // void LoadGossipText();
         //void LoadGossips();
@@ -445,9 +445,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
         QuestMap            mQuests;
 
         // Maps containing the infos for taxi paths
-        TaxiNodesMap        mTaxiNodes;
-        TaxiPathMap         mTaxiPath;
-        TaxiPathNodesVec    vTaxiPathNodes;
+        //TaxiNodesMap        mTaxiNodes;
+       // TaxiPathMap         mTaxiPath;
+       // TaxiPathNodesVec    vTaxiPathNodes;
 
         // Maps for Gossip stuff
        // GossipTextMap       mGossipText;

@@ -48,6 +48,9 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode( WorldPacket & recv_data )
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
 
+
+	Log::getSingleton( ).outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
+
     field = (uint8)((curloc - 1) / 32);
     submask = 1<<((curloc-1)%32);
 
@@ -86,6 +89,8 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
+
+	Log::getSingleton( ).outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
     if ( curloc == 0 )
         return;
@@ -152,8 +157,9 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
 
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
-    objmgr.GetTaxiPathNodes( path, &pathnodes );
+	objmgr.GetTaxiPathNodes( path, &pathnodes );
     MountId = objmgr.GetTaxiMount(sourcenode);
+
     // MOUNTDISPLAYID
     // bat: 1566
     // gryph: 1147
@@ -163,13 +169,12 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
 
     // Check for valid node
-    if ( MountId == 0 )
+    if ( MountId == 0 || (path == 0 && cost == 0))
     {
         data << uint32( 1 );
         SendPacket( &data );
         return;
     }
-
     // Check for gold
     newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - cost);
     if(newmoney < 0 )
@@ -199,6 +204,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     // 36.7407
     uint32 traveltime = uint32(pathnodes.getTotalLength( ) * 32);
+	//uint32 traveltime = uint32(pathnodes.getTotalLength( ) * 16);
 
     GetPlayer()->setMountPos( pathnodes.getNodes( )[ pathnodes.getLength( ) - 1 ].x,
         pathnodes.getNodes( )[ pathnodes.getLength( ) - 1 ].y,
@@ -219,5 +225,5 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     WPAssert( data.size() == 37 + pathnodes.getLength( ) * 4 * 3 );
 
     GetPlayer()->SendMessageToSet(&data, true);
-    GetPlayer()->setDismountTimer(traveltime);
+    GetPlayer()->setDismountTimer((uint32)(traveltime*(0.53)));
 }
