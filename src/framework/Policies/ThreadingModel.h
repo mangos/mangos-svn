@@ -113,7 +113,7 @@ namespace MaNGOS
 	};
 
     private:
-      MANGOS_DLL_DECL static MUTEX si_mtx;
+      static MUTEX si_mtx;
     };
 
 }

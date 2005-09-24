@@ -45,7 +45,6 @@ class MANGOS_DLL_DECL Referencer
 {
     typedef typename THREADING_MODEL::Lock Lock;
     typedef ReferenceHolder<T, THREADING_MODEL> ReferenceeHolder;
-    
 public:
     
     /// Constructs a referencer.
@@ -60,8 +59,8 @@ public:
     /// Referencee accessor
     T* referencee(void) { return (i_holder == NULL ? NULL : i_holder->i_referencee); }
     const T* referencee(void) const { return (i_holder == NULL ? NULL : i_holder->i_referencee); }
-    T& referencee(void) throw (std::runtime_error) { return _referencee(); }
-    const T& referencee(void) const throw (std::runtime_error) { return const_cast<Referencer *>(this)->_referencee(); }
+	T& referencee(void){ return _referencee(); }
+    const T& referencee(void) const { return const_cast<Referencer *>(this)->_referencee(); }
     
     /// cast operators
     T* operator*() { return (i_holder == NULL ? NULL : i_holder->i_referencee); }
@@ -79,14 +78,14 @@ public:
     bool isNull(void) const { return i_holder == NULL; }
     
 private:
-	
-    T& _referencee(void) throw (std::runtime_error)
-    {
-	if( i_holder == NULL )
-	    throw std::runtime_error("Invalid access to null pointer");
-	return *i_holder->i_referencee;
-    }
     
+	T& _referencee(void) 
+    {
+		if( i_holder == NULL )
+			throw std::runtime_error("Invalid access to null pointer");
+		return *i_holder->i_referencee;
+    }
+
     void deReference(ReferenceeHolder *);
     void addReference(ReferenceeHolder *);
     
