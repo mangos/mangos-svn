@@ -27,53 +27,55 @@
  * are all managed by the MapManager.
  */ 
 
-#include "TypeList.h"
-#include "Grid.h"
-#include "GridLoader.h"
-#include "Creature.h"
-#include "GameObject.h"
-#include "Player.h"
+#include "Platform/Define.h"
+#include "Policies/Singleton.h"
+#include "zthread/Mutex.h"
+#include "Zone.h"
+#include "Common.h"
 
-typedef TYPE_LIST_2(Creature, GameObject) AllObjectTypes;
-typedef TYPE_LIST_2(CreatureLoader, GameObjectLoader) AllLoaders;
+#include <bitset>
 
-template<unsigned int T>
-class Zone
+// forward declaration..
+class Player;
+
+#define MAX_ZONES_ID 3500
+
+class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >
 {
-public:
-  Zone();
-  ~Zone();
-
-private:
-  std::bitset<T> i_gridStatus;
-  Grid<Player, AllObjectTypes> **i_Grids;
-  ContainerList<AllLoaders> i_loaders;
-};
-
-class MapManager : public Singleton<MapManager>
-{
-public:
+  /** Only allow the creation policy creates a singleton
+   */
   friend class MaNGOS::OperatorNew<MapManager>;
+  typedef HM_NAMESPACE::hash_map<uint32, Zone*> ZoneMapType;
+  typedef std::pair<HM_NAMESPACE::hash_map<uint32, Zone*>::iterator, bool>  ZoneMapPair;
+
+public:
 
   /// player enters the map.
-  inline void EnterMap(Player *pl) { PlayerEnterLocation(pl, pl.GetZoneId(), pl.GetPositionX(), pl.GetPositionY()); }
+  void EnterMap(Player *pl);
 
   /// Player exit a location in the map
   void ExitMap(Player *pl);
 
+  /** Updates the stored map information given the time difference
+   * from last update
+   */
+  void Update(uint32);
+
 private:
   MapManager();
-  void PlayerEnterLocation(Player *, const unit32 &zone_id, const float &x, const float &y);
+  ~MapManager();
 
-  typedef std::vector<Zone<MAX_GRIDS_PER_ZONE> > ZonesType;
-  ZonesType i_zones;
+  // prevent copy constructor and assignemnt operator on a singleton
+  MapManager(const MapManager &);
+  MapManager& operator=(const MapManager &);
+
+  void PlayerEnterLocation(Player *, const uint32 &zone_id, const float &x, const float &y);
+
+  typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;
+  std::bitset<MAX_ZONES_ID> i_zoneState;
+  ZoneMapType i_zones;
+
 };
-
-// zone stuff
-template<unsigned int T>
-Zone<T>::Zone()
-{
-}
 
 
 #endif
