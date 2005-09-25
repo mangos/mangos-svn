@@ -378,7 +378,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 	delete player_result;
 
 
-	item_query << "SELECT * FROM playercreateinfo_items WHERE createId = " << createId ;
+	item_query << "SELECT * FROM playercreateinfo_items WHERE createId = 0 OR createId = " << createId ;
 	items_result = sDatabase.Query( item_query.str().c_str() );
 	do 
     {
@@ -391,7 +391,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
 	delete items_result;
 	
-	spell_query << "SELECT * FROM playercreateinfo_spells WHERE createId = " << createId ;
+	spell_query << "SELECT * FROM playercreateinfo_spells WHERE createId = 0 OR createId = " << createId ;
 	spells_result = sDatabase.Query( spell_query.str().c_str() );
 	do 
     {
@@ -403,7 +403,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
 	delete spells_result;
 	
-	skill_query << "SELECT * FROM playercreateinfo_skills WHERE createId = " << createId ;
+	skill_query << "SELECT * FROM playercreateinfo_skills WHERE createId = 0 OR createId = " << createId ;
 	skills_result = sDatabase.Query( skill_query.str().c_str() );
     do 
     {
@@ -417,7 +417,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
 	delete skills_result;
 
-	action_query << "SELECT * FROM playercreateinfo_actions WHERE createId = " << createId ;
+	action_query << "SELECT * FROM playercreateinfo_actions WHERE createId = 0 OR createId = " << createId ;
 	actions_result = sDatabase.Query( action_query.str().c_str() );
     do 
     {
