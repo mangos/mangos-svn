@@ -19,6 +19,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zthread", "VC80\zthread.vcp
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "VC80\zlib.vcproj", "{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "framework", "VC80\framework.vcproj", "{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -49,6 +51,10 @@ Global
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Debug|Win32.Build.0 = Debug|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release|Win32.ActiveCfg = Release|Win32
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}.Release|Win32.Build.0 = Release|Win32
+		{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}.Debug|Win32.ActiveCfg = Debug|Win32
+		{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}.Debug|Win32.Build.0 = Debug|Win32
+		{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}.Release|Win32.ActiveCfg = Release|Win32
+		{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
