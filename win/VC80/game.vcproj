@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\framework"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -116,7 +116,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\framework"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -315,11 +315,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\Zone.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Zone.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ZoneDefine.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\ZoneMapper.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\ZoneMapper.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ZoneSearcher.h"
 				>
 			</File>
 		</Filter>
