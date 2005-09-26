@@ -1,26 +1,31 @@
--- phpMyAdmin SQL Dump
--- version 2.6.2
--- http://www.phpmyadmin.net
--- 
--- Host: localhost
--- Generation Time: Sep 21, 2005 at 09:04 AM
--- Server version: 4.1.12
--- PHP Version: 5.0.4
--- 
--- Database: `mangos`
--- 
+# phpMyAdmin SQL Dump
+# version 2.5.3
+# http://www.phpmyadmin.net
+#
+# Host: localhost
+# Generation Time: Sep 26, 2005 at 01:34 AM
+# Server version: 4.0.15
+# PHP Version: 4.3.3
+#
+# Database : `mangos`
+#
 
--- --------------------------------------------------------
+# --------------------------------------------------------
 
--- 
--- Table structure for table `playercreateinfo_spells`
--- 
--- Creation: Sep 20, 2005 at 12:14 PM
--- Last update: Sep 20, 2005 at 12:14 PM
--- 
+#
+# Table structure for table `playercreateinfo_spells`
+#
+# Creation: Sep 25, 2005 at 09:07 PM
+# Last update: Sep 26, 2005 at 01:09 AM
+#
 
 DROP TABLE IF EXISTS `playercreateinfo_spells`;
-CREATE TABLE IF NOT EXISTS `playercreateinfo_spells` (
-  `createId` tinyint(3) unsigned NOT NULL default '0',
-  `spell` mediumint(8) unsigned NOT NULL default '0'
+CREATE TABLE `playercreateinfo_spells` (
+  `CreateId` varchar(255) default NULL,
+  `Spell` varchar(255) default NULL,
+  `Note` varchar(255) default NULL
 ) TYPE=MyISAM;
+
+#
+# Dumping data for table `playercreateinfo_spells`
+#
