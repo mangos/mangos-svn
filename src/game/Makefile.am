@@ -29,6 +29,7 @@ libgame_a_SOURCES = \
 	CombatHandler.cpp \
 	Corpse.cpp \
 	Creature.cpp \
+	debugcmds.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
 	GameObject.cpp \
@@ -42,11 +43,13 @@ libgame_a_SOURCES = \
 	Level3.cpp \
 	LootMgr.cpp \
 	Mail.cpp \
+	MapManager.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
 	Object.cpp \
+	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
 	Player.cpp \
@@ -62,11 +65,8 @@ libgame_a_SOURCES = \
 	WorldSession.cpp \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
+	Zone.cpp \
 	ZoneMapper.cpp \
-	debugcmds.cpp \
-        ObjectGridLoader.cpp \
-        Zone.cpp \
-	MapManager.cpp \
 	Affect.h \
 	Channel.h \
 	ChannelMgr.h \
@@ -84,6 +84,7 @@ libgame_a_SOURCES = \
 	MapMgr.h \
 	NameTables.h \
 	NPCHandler.h \
+	ObjectGridLoader.h \
 	Object.h \
 	ObjectMgr.h \
 	Opcodes.h \
@@ -101,7 +102,5 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h \
-	ZoneMapper.h \
-        ObjectGridLoader.h \
-        Zone.h
-
+	Zone.h \
+	ZoneMapper.h
