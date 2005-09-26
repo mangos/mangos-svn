@@ -1,28 +1,34 @@
--- phpMyAdmin SQL Dump
--- version 2.6.2
--- http://www.phpmyadmin.net
--- 
--- Host: localhost
--- Generation Time: Sep 21, 2005 at 09:04 AM
--- Server version: 4.1.12
--- PHP Version: 5.0.4
--- 
--- Database: `mangos`
--- 
+# phpMyAdmin SQL Dump
+# version 2.5.3
+# http://www.phpmyadmin.net
+#
+# Host: localhost
+# Generation Time: Sep 26, 2005 at 01:33 AM
+# Server version: 4.0.15
+# PHP Version: 4.3.3
+#
+# Database : `mangos`
+#
 
--- --------------------------------------------------------
+# --------------------------------------------------------
 
--- 
--- Table structure for table `playercreateinfo_skills`
--- 
--- Creation: Sep 20, 2005 at 12:14 PM
--- Last update: Sep 20, 2005 at 12:14 PM
--- 
+#
+# Table structure for table `playercreateinfo_skills`
+#
+# Creation: Sep 25, 2005 at 06:57 PM
+# Last update: Sep 26, 2005 at 12:31 AM
+# Last check: Sep 25, 2005 at 07:02 PM
+#
 
 DROP TABLE IF EXISTS `playercreateinfo_skills`;
-CREATE TABLE IF NOT EXISTS `playercreateinfo_skills` (
-  `createId` tinyint(3) unsigned NOT NULL default '0',
-  `skill` smallint(5) unsigned NOT NULL default '0',
-  `skillCuVal` smallint(5) unsigned NOT NULL default '0',
-  `skillMaxVal` smallint(5) unsigned NOT NULL default '0'
+CREATE TABLE `playercreateinfo_skills` (
+  `CreateId` varchar(255) default NULL,
+  `Skill` varchar(255) default NULL,
+  `SkillMin` varchar(255) default NULL,
+  `SkillMax` varchar(255) default NULL,
+  `Note` varchar(255) default NULL
 ) TYPE=MyISAM;
+
+#
+# Dumping data for table `playercreateinfo_skills`
+#
