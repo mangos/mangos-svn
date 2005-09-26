@@ -1,114 +1,164 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="7.10"
+	Version="8,00"
 	Name="framework"
 	ProjectGUID="{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}"
 	RootNamespace="framework"
-	Keyword="ManagedCProj">
+	Keyword="ManagedCProj"
+	>
 	<Platforms>
 		<Platform
-			Name="Win32"/>
+			Name="Win32"
+		/>
 	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="./framework__Win32_debug"
 			IntermediateDirectory="./framework__Win32_debug"
 			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
 			CharacterSet="2"
-			ManagedExtensions="FALSE">
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zl"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../src/framework"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
-				MinimalRebuild="FALSE"
+				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				UsePrecompiledHeader="2"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
 				AssemblerListingLocation="./framework__Win32_Debug/"
 				ObjectFile="./framework__Win32_Debug/"
 				ProgramDataBaseFileName="./framework__Win32_Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Debug/framework.lib"/>
+				OutputFile="./framework__Win32_Debug/framework.lib"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="./framework__Win32_release"
 			IntermediateDirectory="./framework_Win32_release"
 			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
 			CharacterSet="2"
-			ManagedExtensions="FALSE">
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zl"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="../../src/framework"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
-				MinimalRebuild="FALSE"
+				StringPooling="true"
+				MinimalRebuild="false"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				UsePrecompiledHeader="2"
+				EnableFunctionLevelLinking="true"
+				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="./Release/framework.pch"
 				AssemblerListingLocation="./framework__Win32_Release/"
 				ObjectFile="./framework__Win32_Release/"
 				ProgramDataBaseFileName="./framework__Win32_Release/"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
+				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
-				CompileAs="0"/>
+				CompileAs="0"
+			/>
 			<Tool
-				Name="VCCustomBuildTool"/>
+				Name="VCManagedResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCLibrarianTool"/>
+				Name="VCResourceCompilerTool"
+			/>
 			<Tool
-				Name="VCMIDLTool"/>
+				Name="VCPreLinkEventTool"
+			/>
 			<Tool
-				Name="VCPostBuildEventTool"/>
+				Name="VCLibrarianTool"
+			/>
 			<Tool
-				Name="VCPreBuildEventTool"/>
+				Name="VCALinkTool"
+			/>
 			<Tool
-				Name="VCPreLinkEventTool"/>
+				Name="VCXDCMakeTool"
+			/>
 			<Tool
-				Name="VCResourceCompilerTool"/>
+				Name="VCBscMakeTool"
+			/>
 			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="VCFxCopTool"
+			/>
 			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="VCPostBuildEventTool"
+			/>
 		</Configuration>
 	</Configurations>
 	<References>
@@ -116,96 +166,122 @@
 	<Files>
 		<Filter
 			Name="GameSystem"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\Grid.cpp">
+				RelativePath="..\..\src\framework\GameSystem\Grid.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\Grid.h">
+				RelativePath="..\..\src\framework\GameSystem\Grid.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\GridLoader.cpp">
+				RelativePath="..\..\src\framework\GameSystem\GridLoader.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\GridLoader.h">
+				RelativePath="..\..\src\framework\GameSystem\GridLoader.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\GridLoaderP.h">
+				RelativePath="..\..\src\framework\GameSystem\GridLoaderP.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainer.cpp">
+				RelativePath="..\..\src\framework\GameSystem\TypeContainer.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainer.h">
+				RelativePath="..\..\src\framework\GameSystem\TypeContainer.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctions.h">
+				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctions.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.cpp">
+				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.h">
+				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Platform"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\src\framework\Platform\Define.h">
+				RelativePath="..\..\src\framework\Platform\Define.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Policies"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\src\framework\Policies\CreationPolicy.cpp">
+				RelativePath="..\..\src\framework\Policies\CreationPolicy.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\CreationPolicy.h">
+				RelativePath="..\..\src\framework\Policies\CreationPolicy.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.cpp">
+				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.h">
+				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\Singleton.cpp">
+				RelativePath="..\..\src\framework\Policies\Singleton.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\Singleton.h">
+				RelativePath="..\..\src\framework\Policies\Singleton.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\SingletonImp.h">
+				RelativePath="..\..\src\framework\Policies\SingletonImp.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ThreadingModel.cpp">
+				RelativePath="..\..\src\framework\Policies\ThreadingModel.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ThreadingModel.h">
+				RelativePath="..\..\src\framework\Policies\ThreadingModel.h"
+				>
 			</File>
 		</Filter>
 		<Filter
 			Name="Utilities"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\src\framework\Utilities\ByteConverter.h">
+				RelativePath="..\..\src\framework\Utilities\ByteConverter.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\Reference.cpp">
+				RelativePath="..\..\src\framework\Utilities\Reference.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\Reference.h">
+				RelativePath="..\..\src\framework\Utilities\Reference.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\ReferenceHolder.h">
+				RelativePath="..\..\src\framework\Utilities\ReferenceHolder.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\ReferenceImpl.h">
+				RelativePath="..\..\src\framework\Utilities\ReferenceImpl.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\TypeList.h">
+				RelativePath="..\..\src\framework\Utilities\TypeList.h"
+				>
 			</File>
 		</Filter>
 	</Files>
