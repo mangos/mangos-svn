@@ -68,8 +68,9 @@ class MapCell;
 class Object
 {
     public:
+#ifndef ENABLE_GRID_SYSTEM
         typedef std::set<Object*> InRangeSet;
-
+#endif
         virtual ~Object ( );
 
         virtual void Update ( float time ) { }
@@ -191,6 +192,7 @@ class Object
             return (dx*dx) + (dy*dy);
         }
 
+#ifndef ENABLE_GRID_SYSTEM
         // In-range object management, not sure if we need it
         bool IsInRangeSet(Object* pObj) { return !(m_objectsInRange.find(pObj) == m_objectsInRange.end()); }
         virtual void AddInRangeObject(Object* pObj) { m_objectsInRange.insert(pObj); }
@@ -199,7 +201,7 @@ class Object
 
         inline InRangeSet::iterator GetInRangeSetBegin() { return m_objectsInRange.begin(); }
         inline InRangeSet::iterator GetInRangeSetEnd() { return m_objectsInRange.end(); }
-
+#endif
         void SendMessageToSet(WorldPacket *data, bool self);
 
         //! Fill values with data from a space seperated string of uint32s.
@@ -291,8 +293,11 @@ class Object
         //! True if object was updated
         bool m_objectUpdated;
 
+#ifndef ENABLE_GRID_SYSTEM
         //! Set of Objects in range.
         //! TODO: that functionality should be moved into WorldServer.
         std::set<Object*> m_objectsInRange;
+#endif
+
 };
 #endif

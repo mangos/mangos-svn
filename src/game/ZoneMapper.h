@@ -21,6 +21,7 @@
 #ifndef __ZONEMAPPER_H
 #define __ZONEMAPPER_H
 
+#ifndef ENABLE_GRID_SYSTEM
 #include "Common.h"
 #include <bitset>
 
@@ -40,5 +41,7 @@ protected:
 };
 
 extern ZoneMapper ZoneIDMap;
+// This file will be remove when grid system is enabled
+#endif
 
 #endif

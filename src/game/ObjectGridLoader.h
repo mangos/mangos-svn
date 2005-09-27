@@ -20,17 +20,18 @@
 #ifndef MANGOS_OBJECTGRIDLOADER_H
 #define MANGOS_OBJECTGRIDLOADER_H
 
-#include "Player.h"
-#include "GameObject.h"
-#include "Creature.h"
 #include "Utilities/TypeList.h"
 #include "Platform/Define.h"
 #include "GameSystem/Grid.h"
 #include "GameSystem/GridLoader.h"
+#include "Player.h"
+#include "GameObject.h"
+#include "Creature.h"
+#include "DynamicObject.h"
+#include "Corpse.h"
 
 
-
-typedef TYPELIST_2(GameObject, Creature)    AllObjectTypes;
+typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllObjectTypes;
 
 /*
  * @class ObjectGridLoader class implements a visitor pattern for the ContainerMapList
@@ -49,6 +50,17 @@ public:
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
+
+    void Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+    {
+	/* we don't load in corpses */
+    }
+
+    void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+    {
+	/* we don't load in dynamic objects.. we add it in dynamically */
+    }
+
 private:
     GridType &i_grid;
     Player &i_player;
@@ -61,30 +73,23 @@ private:
 class MANGOS_DLL_DECL ObjectGridUnloader
 {
 public:
-    ObjectGridUnloader(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+    ObjectGridUnloader(GridType &grid) : i_grid(grid) {}
 
     void Unload(GridType &grid);
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+    void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+    void Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
 
 private:
     GridType &i_grid;
-    Player& i_player;
-};
-
-/** RemoveGridObject remove the objects in certain grid from this player.
- *  Implements as a Visitor and executed thru unload.
- */
-class MANGOS_DLL_DECL RemoveGridObject
-{
-    Player &i_player;
-public:
-    RemoveGridObject(Player &pl) : i_player(pl) {}
-    void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-    void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
-    void Visit(std::map<OBJECT_HANDLE, Player *> &m);
 };
 
 typedef GridLoader<Player, AllObjectTypes> GridLoaderType;
+typedef std::map<OBJECT_HANDLE, Player* > PlayerMapType;
+typedef std::map<OBJECT_HANDLE, Creature* > CreatureMapType;
+typedef std::map<OBJECT_HANDLE, GameObject* > GameObjectMapType;
+typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
+typedef std::map<OBJECT_HANDLE, Corpse* > CorpseMapType;
 
 #endif

@@ -23,11 +23,8 @@
 // common method
 template<class T> void LoadHelper(const char* table, GridType &grid, std::map<OBJECT_HANDLE, T*> &m)
 {
-    const Coordinate &coord1(grid.GetLowerLeftCoord());
-    const Coordinate &coord2(grid.GetUpperRightCoord());
-
     std::stringstream query;
-    query << "SELECT id from " << table << " WHERE positionX <=" << coord1.x << " and positionX <=" << coord2.x << " and positionY <=" << coord1.y << " and positionY <=" << coord2.y;
+    query << "SELECT id from " << table << " WHERE grid_id=" << grid.GetGridId();
     
     std::auto_ptr<QueryResult> result(sDatabase.Query(query.str().c_str()));
     
@@ -58,6 +55,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     LoadHelper<Creature>("creatures", i_grid, m);
 }
 
+
 void
 ObjectGridLoader::Load(GridType &grid)
 {
@@ -78,6 +76,22 @@ void
 ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
     for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	delete iter->second;
+    m.clear();
+}
+
+void
+ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+{
+    for(std::map<OBJECT_HANDLE, DynamicObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	delete iter->second;
+    m.clear();
+}
+
+void
+ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
 	delete iter->second;
     m.clear();
 }

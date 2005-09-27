@@ -36,12 +36,13 @@
 #include "TypeContainer.h"
 #include "TypeContainerVisitor.h"
 
-struct MANGOS_DLL_DECL Coordinate
-{
-    Coordinate(float x_val=0, float y_val=0) : x(x_val), y(y_val) {}
-    float x;
-    float y;
-};
+typedef enum
+    {        
+	GRID_STATUS_INVALID,
+	GRID_STATUS_ACTIVE,
+	GRID_STATUS_IDLE,
+	GRID_STATUS_REMOVAL
+    } grid_status_t;
 
 // forward declaration
 template<class T, class O> class GridLoader;
@@ -58,20 +59,23 @@ class MANGOS_DLL_DECL Grid
     template<class T, class O> friend class GridLoader;
 public:
     
-    Grid(float x1, float y1, float x2, float y2) : i_coord1(x1,y1), i_coord2(x2,y2) {}
+    explicit Grid(unsigned int id) : i_gridId(id), i_gridStatus(GRID_STATUS_INVALID) {}
     
     /** destructor to clean up its resources. This includes unloading the
 	grid if it has not been unload.
-     */
-    ~Grid();
+    */
+    ~Grid() {}
     
     /** an object of interested enters the grid
      */
-    void AddObject(OBJECT *obj);
+    void AddObject(OBJECT *obj, OBJECT_HANDLE hdl) { i_objects._element[hdl] = obj; }
     
     /** an object of interested exits the grid
      */
-    void RemoveObject(OBJECT *obj);
+    void RemoveObject(OBJECT *obj, OBJECT_HANDLE hdl)
+    {
+	i_objects._element.erase(hdl);      
+    }
     
     /** Refreshes/update the grid. This required for remote grids.
      */
@@ -84,26 +88,26 @@ public:
     /** Unlocks the grid.
      */
     void UnlockGrid(void) { /* TBI */ }
-
+    
     /** Grid visitor for grid objects
      */
     template<class T> void VisitGridObjects(TypeContainerVisitor<T, TypeMapContainer<OBJECT_TYPES> > &visitor)
     {
 	visitor.Visit(i_container);
     }
-
+    
     /** Grid visitor for object of interested
      */
     template<class T> void VisitObjects(TypeContainerVisitor<T, ContainerMapList<OBJECT> > &visitor)
     {
 	visitor.Visit(i_objects);
     }
-
-
-    /** Grid Coordinate accessor.
+    
+    
+    /** Grid id accessor
      */
-    const Coordinate& GetLowerLeftCoord(void) const { return i_coord1; }
-    const Coordinate& GetUpperRightCoord(void) const { return i_coord2; }
+    const unsigned int GetGridId(void) const { return i_gridId; }
+    void SetGridId(unsigned int id) const { i_gridId = id; }
     
     /** Returns the number of object within the grid.
      */
@@ -111,19 +115,27 @@ public:
     
     /** Accessors: Returns a specific type of object in the OBJECT_TYPES
      */
-    template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
-    template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
+    template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
+    template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl) { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
     
     /** Inserts a container type object into the grid.
      */
-    template<class SPECIFIC_OBJECT> bool AddObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(obj, hdl); }
+    template<class SPECIFIC_OBJECT> bool AddGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(hdl, obj); }
+
+    /** Removes a containter type object from the grid
+     */
+    template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(hdl); }
+
+    inline grid_status_t GetGridStatus(void) const { return i_gridStatus; }
+    inline void SetGridStatus(grid_status_t s) { i_gridStatus = s; }
     
 private:
     
     typedef typename ThreadModel::Lock Guard;
     typedef typename ThreadModel::VolatileType VolatileType;
     
-    Coordinate i_coord1, i_coord2;
+    unsigned int i_gridId;
+    grid_status_t i_gridStatus;
     TypeMapContainer<OBJECT_TYPES> i_container;
     ContainerMapList<OBJECT> i_objects;
 };

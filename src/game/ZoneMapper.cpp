@@ -18,9 +18,11 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef ENABLE_GRID_SYSTEM
 #include "Common.h"
 #include "ZoneMapper.h"
 
 // scope variables
 ZoneMapper ZoneIDMap;
 
+#endif

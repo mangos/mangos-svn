@@ -157,27 +157,17 @@ void World::SetInitialWorldSettings()
     // Load initial creatures
     Log::getSingleton( ).outString( "Loading Creatures..." );
     objmgr.LoadCreatureNames();
+
+#ifndef ENABLE_GRID_SYSTEM
     objmgr.LoadCreatures();
     // Load initial GameObjects
     Log::getSingleton( ).outString( "Loading Gameobjects..." );
     objmgr.LoadGameObjects();
-    /* Load player create info
-    Log::getSingleton( ).outString( "Loading Environment..." );
-    objmgr.LoadPlayerCreateInfo();*/
-    // Load taxi info
-    //Log::getSingleton( ).outString( "Loading TaxiPaths..." );
-    //objmgr.LoadTaxiNodes();
-    //objmgr.LoadTaxiPath();
-    //objmgr.LoadTaxiPathNodes();
     // Load Corpses
     Log::getSingleton( ).outString( "Loading Corpses..." );
     objmgr.LoadCorpses();
-    // Load Gossip
-   // Log::getSingleton( ).outString( "Loading Gossip Text..." );
-   // objmgr.LoadGossipText();
+#endif
 
-   /* Log::getSingleton( ).outString( "Loading Gossip Npc..." );
-    objmgr.LoadGossips();*/
     //Load graveyards
    // Log::getSingleton( ).outString( "Loading Graveyards..." );
    // objmgr.LoadGraveyards();
@@ -418,6 +408,7 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_OBJECTS].Reset();
 
+#ifndef ENABLE_GRID_SYSTEM
         ObjectMgr::PlayerMap::iterator chriter;
         ObjectMgr::CreatureMap::iterator iter;
         ObjectMgr::GameObjectMap::iterator giter;
@@ -440,6 +431,7 @@ void World::Update(time_t diff)
     {
         iter->second->Update(diff);
     }
+#endif
 }
 
 
