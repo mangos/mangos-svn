@@ -161,6 +161,12 @@
 				RelativePath="..\..\src\game\DuelHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\GridNotifiers.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridNotifiers.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Group.cpp">
 			</File>
 			<File
@@ -176,7 +182,19 @@
 				RelativePath="..\..\src\game\Mail.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\Map.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Map.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\MapCell.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\MapManager.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\MapManager.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\MapMgr.cpp">
@@ -192,6 +210,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\NPCHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ObjectGridLoader.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ObjectGridLoader.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Path.h">
@@ -236,22 +260,10 @@
 				RelativePath="..\..\src\game\World.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\Zone.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\Zone.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneDefine.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\ZoneMapper.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\ZoneMapper.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneSearcher.h">
 			</File>
 		</Filter>
 		<Filter
