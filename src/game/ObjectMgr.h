@@ -64,16 +64,19 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef HM_NAMESPACE::hash_map<uint32, Player*> PlayerMap;
         typedef HM_NAMESPACE::hash_map<uint32, Creature*> CreatureMap;
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
-        typedef HM_NAMESPACE::hash_map<uint32, DynamicObject*> DynamicObjectMap;
-        typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectMap;
-        typedef HM_NAMESPACE::hash_map<uint32, Corpse*> CorpseMap;
+
         // other objects
         typedef std::set< Group * > GroupSet;
         //typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
        // typedef HM_NAMESPACE::hash_map<uint32, GossipNpc*> GossipNpcMap;
        // typedef HM_NAMESPACE::hash_map<uint32, GraveyardTeleport*> GraveyardMap;
+#ifndef ENABLE_GRID_SYSTEM
         typedef HM_NAMESPACE::hash_map<uint32, CreatureInfo*> CreatureNameMap;
         typedef HM_NAMESPACE::hash_map<uint32, GameObjectInfo *> GameObjectInfoMap;
+        typedef HM_NAMESPACE::hash_map<uint32, DynamicObject*> DynamicObjectMap;
+        typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectMap;
+        typedef HM_NAMESPACE::hash_map<uint32, Corpse*> CorpseMap;
+#endif
         typedef HM_NAMESPACE::hash_map<uint32, ItemPrototype*> ItemPrototypeMap;
         typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
         typedef HM_NAMESPACE::hash_map<uint32, Trainerspell*> TrainerspellMap;
@@ -356,8 +359,12 @@ class ObjectMgr : public Singleton < ObjectMgr >
 		AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger);
 
         // Serialization
+#ifndef ENABLE_GRID_SYSTEM
         void LoadCreatures();
         void LoadGameObjects();
+        void LoadCorpses();
+#endif
+
         void LoadQuests();
         void LoadCreatureNames();
         void SaveCreatureNames();
@@ -366,7 +373,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
        // void LoadTaxiNodes();
        // void LoadTaxiPath();
        // void LoadTaxiPathNodes();
-        void LoadCorpses();
+
        // void LoadGossipText();
         //void LoadGossips();
         //void LoadGraveyards();
@@ -399,6 +406,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
 
+#ifndef ENABLE_GRID_SYSTEM
         // Map of active characters in the game
         PlayerMap           mPlayers;
 
@@ -413,6 +421,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // Map of corpse objects
         CorpseMap           mCorpses;
+#endif
 
         // Group List
         GroupSet            mGroupSet;
@@ -460,6 +469,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         TeleportMap         mTeleports;
 
 private:
+#ifndef ENABLE_GRID_SYSTEM
     Creature* _getCreature(uint32 guid)
     {
 	CreatureMap::const_iterator itr = mCreatures.find(guid);
@@ -467,12 +477,12 @@ private:
 	    return itr->second;
 	return NULL;
     }
-
+#endif
     static GameObjectInfo si_UnknownGameObjectInfo;
 };
 
 // According to C++ standard explicit template declarations should be in scope where ObjectMgr is.
-
+#ifndef ENABLE_GRID_SYSTEM
 template<> inline HM_NAMESPACE::hash_map<uint32,DynamicObject*>& ObjectMgr::_GetContainer<DynamicObject>()
 { return mDynamicObjects; }
 template<> inline HM_NAMESPACE::hash_map<uint32,Creature*>& ObjectMgr::_GetContainer<Creature>()
@@ -494,6 +504,7 @@ template<> inline TYPEID ObjectMgr::_GetTypeId<Player>() const
 { return TYPEID_PLAYER; }
 template<> inline TYPEID ObjectMgr::_GetTypeId<Corpse>() const
 { return TYPEID_CORPSE; }
+#endif
 
 #define objmgr ObjectMgr::getSingleton()
 #endif

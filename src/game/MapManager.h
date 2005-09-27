@@ -23,58 +23,46 @@
 /*
  * @class MapManager
  * MapMaanger manages the area in the game.  The world in MaNGOS is devided into
- * zones and each zone further devided into Grids. Each zone and hences grids
- * are all managed by the MapManager.
+ * different maps (zones) and each map further divided into grids.  The
+ * responsibility of a map manager is only manages the creation/destruction of maps,
+ * nothing more nor less.
  */ 
 
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "zthread/Mutex.h"
-#include "Zone.h"
 #include "Common.h"
+#include "Map.h"
 
-#include <bitset>
-
-// forward declaration..
-class Player;
-
-#define MAX_ZONES_ID 3500
 
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >
 {
-  /** Only allow the creation policy creates a singleton
-   */
-  friend class MaNGOS::OperatorNew<MapManager>;
-  typedef HM_NAMESPACE::hash_map<uint32, Zone*> ZoneMapType;
-  typedef std::pair<HM_NAMESPACE::hash_map<uint32, Zone*>::iterator, bool>  ZoneMapPair;
-
+    /** Only allow the creation policy creates a singleton
+     */
+    friend class MaNGOS::OperatorNew<MapManager>;
+    typedef HM_NAMESPACE::hash_map<uint32, Map*> MapMapType;
+    typedef std::pair<HM_NAMESPACE::hash_map<uint32, Map*>::iterator, bool>  MapMapPair;
+    
 public:
-
-  /// player enters the map.
-  void EnterMap(Player *pl);
-
-  /// Player exit a location in the map
-  void ExitMap(Player *pl);
-
-  /** Updates the stored map information given the time difference
-   * from last update
-   */
-  void Update(uint32);
-
+    
+    Map* GetMap(uint32);
+    
 private:
-  MapManager();
-  ~MapManager();
+    MapManager();
+    ~MapManager();
+    
+    // prevent copy constructor and assignemnt operator on a singleton
+    MapManager(const MapManager &);
+    MapManager& operator=(const MapManager &);
 
-  // prevent copy constructor and assignemnt operator on a singleton
-  MapManager(const MapManager &);
-  MapManager& operator=(const MapManager &);
+    inline Map* _getMap(uint32 id) 
+    {
+	MapMapType::iterator iter = i_maps.find(id);
+	return (iter == i_maps.end() ? NULL : iter->second);
+    }
 
-  void PlayerEnterLocation(Player *, const uint32 &zone_id, const float &x, const float &y);
-
-  typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;
-  std::bitset<MAX_ZONES_ID> i_zoneState;
-  ZoneMapType i_zones;
-
+    typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;    
+    MapMapType i_maps;
 };
 
 

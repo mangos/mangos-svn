@@ -49,6 +49,7 @@ ObjectMgr::~ObjectMgr()
     }
     mCreatureNames.clear();
 
+#ifndef ENABLE_GRID_SYSTEM
     for( CreatureMap::iterator i = mCreatures.begin( ); i != mCreatures.end( ); ++ i )
     {
         delete i->second;
@@ -72,6 +73,7 @@ ObjectMgr::~ObjectMgr()
         delete i->second;
     }
     mCorpses.clear( );
+#endif
 
     for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); ++ i )
     {
@@ -759,7 +761,7 @@ void ObjectMgr::LoadQuests()
     delete result;
 }
 
-
+#ifndef ENABLE_GRID_SYSTEM
 void ObjectMgr::LoadCreatures()
 {
     QueryResult *result = sDatabase.Query( "SELECT id FROM creatures" );
@@ -838,6 +840,9 @@ void ObjectMgr::LoadGameObjects()
 	delete result;
     }
 }
+// end of ENABLE_GRID_SYSTEM
+#endif
+
 /*
 void ObjectMgr::LoadTaxiNodes()
 {

@@ -27,6 +27,9 @@ class MapCell;
 // Distance a Player can "see" other objects and receive updates from them
 #define UPDATE_DISTANCE 155.8
 
+#ifndef ENABLE_GRID_SYSTEM
+
+// This file will be removed once verything works....
 enum MapMgrTimers
 {
     MMUPDATE_OBJECTS = 0,
@@ -77,4 +80,6 @@ class MapMgr
         ObjectSet _updatedObjects;
         IntervalTimer _timers[MMUPDATE_COUNT];
 };
+#endif
+
 #endif

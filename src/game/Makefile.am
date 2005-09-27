@@ -43,7 +43,6 @@ libgame_a_SOURCES = \
 	Level3.cpp \
 	LootMgr.cpp \
 	Mail.cpp \
-	MapManager.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
@@ -65,7 +64,9 @@ libgame_a_SOURCES = \
 	WorldSession.cpp \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
-	Zone.cpp \
+	Map.cpp \
+        GridNotifiers.cpp \
+	MapManager.cpp \
 	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \
@@ -102,5 +103,6 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h \
-	Zone.h \
+	Map.h \
+	GridNotifiers.h \
 	ZoneMapper.h
