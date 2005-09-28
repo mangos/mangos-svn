@@ -4,6 +4,7 @@
 	Version="8,00"
 	Name="game"
 	ProjectGUID="{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
+	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -215,6 +216,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\GridNotifiers.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridNotifiers.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Group.cpp"
 				>
 			</File>
@@ -235,7 +244,23 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\Map.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Map.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\MapCell.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MapManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MapManager.h"
 				>
 			</File>
 			<File
@@ -256,6 +281,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\NPCHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ObjectGridLoader.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ObjectGridLoader.h"
 				>
 			</File>
 			<File
@@ -315,27 +348,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Zone.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\Zone.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneDefine.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\ZoneMapper.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\ZoneMapper.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneSearcher.h"
 				>
 			</File>
 		</Filter>
