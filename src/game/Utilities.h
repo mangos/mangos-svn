@@ -8,7 +8,7 @@
 
 // old code
 // VISIBILITY_RANGE = UPDATE_DISTANCE*UPDATE_DISTANCE = 155.8*155.8 = 24274
-#define VISIBILITY_RANGE    SIZE_OF_GRIDS
+#define VISIBILITY_RANGE    24274
 
 namespace MaNGOS
 {
@@ -30,8 +30,7 @@ namespace MaNGOS
 	    assert(obj1->GetMapId() == obj2->GetMapId());
 	    float dx  = obj2->GetPositionX() - obj1->GetPositionX();
 	    float dy  = obj2->GetPositionY() - obj1->GetPositionY();
-	    float dz  = obj2->GetPositionZ() - obj1->GetPositionZ();	
-	    return((dx*dx) + (dy*dy) + (dz*dz));
+	    return( ((dx*dx) + (dy*dy)) <= VISIBILITY_RANGE );
 	}
     }
 }

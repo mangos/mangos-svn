@@ -30,7 +30,7 @@ static void grid_compression(const char *src_tbl, const char *dest_tbl)
     sDatabase.Execute( ss.str().c_str() );
 }
 
-MapManager::MapManager() : i_gridCleanUpDelay()
+MapManager::MapManager() : i_gridCleanUpDelay(1000*300)
 {
     i_timer.SetInterval(100);
 }

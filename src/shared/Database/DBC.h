@@ -29,7 +29,12 @@
 
 #include <string.h>
 #define MAX_PATH 1024
+#if __GNUC__ >= 4
 #define __fastcall __attribute__((__fastcall__))
+#else
+#define __fastcall
+#endif
+
 #endif
 
 enum DBCFmat
