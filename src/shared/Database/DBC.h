@@ -29,10 +29,8 @@
 
 #include <string.h>
 #define MAX_PATH 1024
-
+#define __fastcall __attribute__((__fastcall__))
 #endif
-
-#include "Common.h"
 
 enum DBCFmat
 {
