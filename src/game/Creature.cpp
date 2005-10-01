@@ -238,6 +238,7 @@ void Creature::Update( uint32 p_time )
         return;
     }    
 #else
+    return;
     // if no player in the zone.. why bother updating me
     if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
 	return;
