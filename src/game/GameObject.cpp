@@ -29,6 +29,10 @@
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#endif
+
 GameObject::GameObject() : Object()
 {
     m_objectType |= TYPE_GAMEOBJECT;
@@ -66,20 +70,21 @@ void GameObject::Update(uint32 p_time)
         {
             if(!this->IsInWorld())
             {
+#ifndef ENABLE_GRID_SYSTEM
                 PlaceOnMap();
+#endif
             }
 
             data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
             data << GetGUID();
             SendMessageToSet(&data,true);
-
             SetUInt32Value(GAMEOBJECT_STATE,1);
             m_RespawnTimer = 0;
         }
     }
 }
 
-
+#ifndef ENABLE_GRID_SYSTEM
 void GameObject::Despawn(uint32 time)
 {
     WorldPacket data;
@@ -91,6 +96,7 @@ void GameObject::Despawn(uint32 time)
 
     m_RespawnTimer = time;
 }
+#endif
 
 void
 GameObject::_generateLoot(Player &player, std::vector<uint32> &item_id, std::vector<uint32> &item_count, std::vector<uint32> &display_ids, uint32 &gold) const

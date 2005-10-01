@@ -41,6 +41,10 @@
 // this offset is computed base on SIZE_OF_GRIDS/2
 #define CENTER_GRID_OFFSET      266.66666
 
+// minimum time to delay is 60 seconds
+#define MIN_GRID_DELAY          60*1000
+
+#ifdef ENABLE_GRID_SYSTEM
 // foward declaration
 namespace ZThread
 {
@@ -48,9 +52,20 @@ namespace ZThread
     class ReadWriteLock;
 }
 
+
 struct MANGOS_DLL_DECL GridPair
 {
     GridPair(uint32 x=0, uint32 y=0) : x_coord(x), y_coord(y) {}
+    GridPair(const GridPair &obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
+    bool operator==(const GridPair &obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
+    bool operator!=(const GridPair &obj) const { return !operator==(obj); }
+    GridPair& operator=(const GridPair &obj) 
+    {
+	this->~GridPair();
+	new (this) GridPair(obj);
+	return *this;
+    }
+
     uint32 x_coord;
     uint32 y_coord;
 };
@@ -59,7 +74,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 {    
 public:
 
-    Map(uint32 id);
+    Map(uint32 id, time_t);
 
     void Add(Player *);
     void Add(Creature *);
@@ -73,49 +88,118 @@ public:
     void Remove(DynamicObject *, bool);
     void Remove(Corpse *, bool);
 
+    void RemoveFromMap(Player *);
+    void RemoveFromMap(Creature *obj) { Remove(obj, false); }
+    void RemoveFromMap(GameObject *obj) { Remove(obj, false); }
+    void RemoveFromMap(DynamicObject *obj) { Remove(obj, false); }
+    void RemoveFromMap(Corpse *obj) { Remove(obj, false); }
+
     void Update(uint32);
     
     GridPair CalculateGrid(const float &x, const float &y) const;
-    uint64 CalculateGridMask(const uint32 &x, const uint32 &y) const;
+    uint64 CalculateGridMask(const uint32 &y) const;
+
+    /** MessageBoardcast is a player sending messages to all near by
+     * players in his/her grid
+     */
+    void MessageBoardcast(Player *, WorldPacket *, bool to_self);
+
+    /** MessageBoardcast a message to all players within the range of the object
+     */
+    void MessageBoardcast(Object *, WorldPacket *);
+
+    /** Relocation of a player means a player has moved on the map
+     */
+    void PlayerRelocation(Player *, const float &x, const float &y, const float &z, const float &angl);
+
+    /** Relocation of an object means an object moved such as
+     * creatures running after you
+     */
+  template<class T> void ObjectRelocation(T *obj, const float &x, const float &y, const float &, const float &);
+
+    /** Sets the timer interval
+     */
+    void SetTimer(uint32 t) 
+    { 
+	i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
+    }
+
+    inline bool IsActiveGrid(Object *obj) const
+    {
+	GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
+	return( i_grids[p.x_coord][p.y_coord]->GetGridStatus() == GRID_STATUS_ACTIVE );
+    }
 
 private:
     bool loaded(const GridPair &) const;
+    void EnsurePlayerInGrid(const GridPair&, Player*);
+    uint64  EnsureGridCreated(const GridPair &);
+
     template<class T> GridType* AddType(T *obj);
     template<class T> GridType* RemoveType(T *obj, bool);
 
     uint32 i_id;
-    bool i_hasGrids;
 
     // no register cache.. need to use it to sync stuff
-    volatile uint64 i_gridMask;
-    volatile uint64 i_gridStatus;
+    volatile uint64 i_gridMask[MAX_NUMBER_OF_GRIDS];
+    volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
         
     typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
-    typedef ZThread::Lockable GridLockType;
-    typedef MaNGOS::GeneralLock<ZThread::Lockable> GridGuard;
+    //    typedef ZThread::Lockable GridLockType;
+    //    typedef MaNGOS::GeneralLock<ZThread::Lockable> GridGuard;
     typedef ZThread::FairReadWriteLock GridRWLock;
 
-    GridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    GridRWLock *i_guards[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+    struct GridInfo
+    {
+	GridInfo(time_t expiry) : i_timer(expiry) {}
+	GridRWLock i_lock;
+	TimeTracker i_timer;
+    };
 
+    template<class MUTEX, class LOCK_TYPE>
+    struct RGuard
+    {
+	RGuard(MUTEX &l) : i_lock(l.getReadLock()) {}
+	MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
+    };
+
+    template<class MUTEX, class LOCK_TYPE>
+    struct WGuard
+    {
+	WGuard(MUTEX &l) : i_lock(l.getWriteLock()) {}
+	MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
+    };
+
+    
+    typedef RGuard<GridRWLock, ZThread::Lockable> ReadGuard;
+    typedef WGuard<GridRWLock, ZThread::Lockable> WriteGuard;
+
+    GridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+    GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+    time_t i_gridExpiry;
 };
 
 inline
 GridPair
 Map::CalculateGrid(const float &x, const float &y) const
 {
-    int x_offset = int((x - CENTER_GRID_OFFSET)/SIZE_OF_GRIDS);
-    int y_offset = int((y - CENTER_GRID_OFFSET)/SIZE_OF_GRIDS);
-    return GridPair(x_offset+CENTER_GRID_ID, y_offset+CENTER_GRID_ID);
+    float x_offset = (x - (float)CENTER_GRID_OFFSET)/(float)SIZE_OF_GRIDS;
+    float y_offset = (y - (float)CENTER_GRID_OFFSET)/(float)SIZE_OF_GRIDS;
+
+    // avoid round off errors
+    int x_val = int(x_offset+CENTER_GRID_ID + 0.5);
+    int y_val = int(y_offset+CENTER_GRID_ID + 0.5); 
+    return GridPair(x_val, y_val);
 }
 
 inline
 uint64
-Map::CalculateGridMask(const uint32 &x, const uint32 &y) const
+Map::CalculateGridMask(const uint32 &y) const
 {
-    uint32 idx = MAX_NUMBER_OF_GRIDS*x + y;
-    uint64 mask = 1 << idx;
+    uint64 mask = 1;
+    mask <<= y;
     return mask;
 }
+#endif
 
 #endif

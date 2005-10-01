@@ -30,6 +30,10 @@
 #include "Affect.h"
 #include "UpdateMask.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
+
 //////////////////////////////////////////////////////////////
 /// This function handles MSG_TABARDVENDOR_ACTIVATE:
 //////////////////////////////////////////////////////////////
@@ -281,8 +285,12 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
 	if(pGossip)
-    {
+	{
+#ifndef ENABLE_GRID_SYSTEM
 		Creature * pCreature = objmgr.GetCreature(guid);
+#else
+		Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
 
 		data.Initialize( SMSG_GOSSIP_MESSAGE );
 		data << guid;

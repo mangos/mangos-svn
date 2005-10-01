@@ -54,7 +54,9 @@ public:
     
     void Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang);
     void Update(uint32 p_time);    
+#ifndef ENABLE_GRID_SYSTEM
     void Despawn(uint32 time);
+#endif
     bool FillLoot(Player &, WorldPacket *data);
         
     // Serialization

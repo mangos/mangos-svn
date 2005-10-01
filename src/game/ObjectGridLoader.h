@@ -44,16 +44,14 @@ typedef Grid<Player, AllObjectTypes> GridType;
 class MANGOS_DLL_DECL ObjectGridLoader
 {
 public:
-    ObjectGridLoader(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+    ObjectGridLoader(GridType &grid, Player &pl, uint32 id) : i_grid(grid), i_player(pl), i_mapId(id) {}
 
     void Load(GridType &grid);
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
     void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
-
     void Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
     {
-	/* we don't load in corpses */
     }
 
     void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
@@ -64,6 +62,7 @@ public:
 private:
     GridType &i_grid;
     Player &i_player;
+    uint32 i_mapId;
 };
 
 /*

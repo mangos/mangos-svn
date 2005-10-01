@@ -33,6 +33,11 @@
 #include "LootMgr.h"
 #include <zlib/zlib.h>
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#endif
+
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_REPOP_REQUEST Message" );
@@ -48,8 +53,11 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     uint32 itemid = 0;
     uint8 lootSlot = 0;
     WorldPacket data;
-
+#ifndef ENABLE_GRID_SYSTEM
     Creature* pCreature = objmgr.GetObject<Creature>(GetPlayer()->GetLootGUID());
+#else
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, _player->GetLootGUID());
+#endif
     if (!pCreature)
         return;
 
@@ -102,8 +110,11 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     uint32 newcoinage = 0;
-
+#ifndef ENABLE_GRID_SYSTEM
     Creature* pCreature = objmgr.GetObject<Creature>(GetPlayer()->GetLootGUID());
+#else
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, _player->GetLootGUID());
+#endif
     if (!pCreature)
         return;
 
@@ -123,7 +134,11 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
+#ifndef ENABLE_GRID_SYSTEM
     Creature* pCreature = objmgr.GetObject<Creature>(guid);
+#else
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
     if (!pCreature)
         return;
 
@@ -189,9 +204,13 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_WHO Message" );
-
+#ifndef ENABLE_GRID_SYSTEM
     ObjectMgr::PlayerMap::const_iterator itr;
     for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
+#else
+	ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
+    for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+#endif
     {
         if ( itr->second->GetName() )
         {
@@ -204,7 +223,11 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_WHO );
     data << uint64( clientcount );
 
+#ifndef ENABLE_GRID_SYSTEM
     for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
+#else
+	for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+#endif
     {
         if ( itr->second->GetName() && (countcheck  < clientcount))
         {
@@ -427,7 +450,11 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
         {
             fields = result->Fetch();
             friendstr[i].PlayerGUID = fields[2].GetUInt64();
+#ifndef ENABLE_GRID_SYSTEM
             pObj=objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
+#else
+	    pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
+#endif
             if(pObj && pObj->IsInWorld())
             {
                 friendstr[i].Status = 1;
@@ -448,7 +475,11 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
             while( result->NextRow() )
             {
                 friendstr[i].PlayerGUID = fields[2].GetUInt64();
+#ifndef ENABLE_GRID_SYSTEM
                 pObj = objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
+#else
+		pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
+#endif
                 if(pObj)
                 {
                     friendstr[i].Status = 1;
@@ -513,8 +544,11 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     
    
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
+#ifndef ENABLE_GRID_SYSTEM
 	pfriend = objmgr.GetObject<Player>(friendGuid);
-
+#else
+	pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
+#endif
 	fquery << "SELECT * FROM social WHERE friendid = " << friendGuid;
 
 	if(sDatabase.Query( fquery.str().c_str() )) friendResult = FRIEND_ALREADY;
@@ -722,7 +756,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     GetPlayer()->BuildTeleportAckMsg(&data, GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
     GetPlayer()->GetSession()->SendPacket(&data);
     GetPlayer()->SetPosition(GetPlayer()->m_resurrectX ,GetPlayer()->m_resurrectY ,GetPlayer()->m_resurrectZ,GetPlayer()->GetOrientation());
-
     GetPlayer()->m_resurrectGUID = 0;
     GetPlayer()->m_resurrectHealth = GetPlayer()->m_resurrectHealth = 0;
     GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;
@@ -752,9 +785,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 		{
 			GetPlayer()->BuildTeleportAckMsg(&data, at->X, at->Y, at->Z, 0.0f);
 			SendPacket(&data);
-
 			GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
-
 			GetPlayer()->BuildHeartBeatMsg(&data);
 			GetPlayer()->SendMessageToSet(&data, true);
 		}
@@ -764,8 +795,11 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 			data << uint32(0);
 
 			SendPacket(&data);
+#ifndef ENABLE_GRID_SYSTEM
 			GetPlayer()->RemoveFromMap();
-
+#else
+			MapManager::Instance().GetMap(GetPlayer()->GetMapId())->RemoveFromMap(GetPlayer());
+#endif
 			data.Initialize(SMSG_NEW_WORLD);
 			data << at->mapId << at->X << at->Y << at->Z << 0.0f;
 			SendPacket( &data );
@@ -874,7 +908,11 @@ WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%d]", guid);   
+#ifndef ENABLE_GRID_SYSTEM
     GameObject *obj = objmgr.GetObject<GameObject>(guid);
+#else
+    GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
+#endif
     
     if( obj != NULL )
     {

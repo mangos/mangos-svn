@@ -21,13 +21,13 @@
 #include "Database/DatabaseEnv.h"
 
 // common method
-template<class T> void LoadHelper(const char* table, GridType &grid, std::map<OBJECT_HANDLE, T*> &m)
+template<class T> void LoadHelper(const char* table, GridType &grid, uint32 map_id, std::map<OBJECT_HANDLE, T*> &m)
 {
     std::stringstream query;
-    query << "SELECT id from " << table << " WHERE grid_id=" << grid.GetGridId();
+    query << "SELECT guid from " << table << " WHERE grid_id=" << grid.GetGridId() << " and mapId=" << map_id;
     
     std::auto_ptr<QueryResult> result(sDatabase.Query(query.str().c_str()));
-    
+    unsigned int count = 0;
     if( result.get() != NULL )
     {
 	do
@@ -38,21 +38,24 @@ template<class T> void LoadHelper(const char* table, GridType &grid, std::map<OB
 	    obj->LoadFromDB(guid);
 	    m[guid] = obj;
 	    obj->AddToWorld();
+	    ++count;
 
 	}while( result->NextRow() );
     }
+
+    sLog.outDebug("%d objects loaded for grid %d from table %s", count, grid.GetGridId(), table);
 };
 
 void
 ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
 {
-    LoadHelper<GameObject>("gameobjects", i_grid, m);
+    LoadHelper<GameObject>("gameobjects_grid", i_grid, i_mapId, m);
 }
 
 void
 ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-    LoadHelper<Creature>("creatures", i_grid, m);
+    LoadHelper<Creature>("creatures_grid", i_grid,i_mapId, m);
 }
 
 

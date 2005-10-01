@@ -33,6 +33,10 @@
 #include "ZoneMapper.h"
 #include "LootMgr.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#endif
+
 Creature::Creature() : Unit()
 {
     mQuestIds.clear();
@@ -117,6 +121,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
             }
             else
             {
+#ifndef ENABLE_GRID_SYSTEM
                 float q = (float)m_timeMoved / (float)m_timeToMove;
                 m_positionX += (m_destinationX - m_positionX) * q;
                 m_positionY += (m_destinationY - m_positionY) * q;
@@ -128,6 +133,25 @@ void Creature::UpdateMobMovement( uint32 p_time)
                 AI_SendMoveToPacket(m_destinationX, m_destinationY, m_destinationZ, m_timeToMove, m_moveSpeed == 7.0*0.001);
 
                 m_moveTimer = (UNIT_MOVEMENT_INTERPOLATE_INTERVAL < m_timeToMove) ? UNIT_MOVEMENT_INTERPOLATE_INTERVAL : m_timeToMove;
+#else
+		// Movement of creates should be updated first before sending the packet.. in case
+		// creature travel out of the grid.. for instances, chasing a player around to different
+		// location
+                float q = (float)m_timeMoved / (float)m_timeToMove;
+                float x = m_positionX + ((m_destinationX - m_positionX) * q);
+                float y = m_positionY + ((m_destinationY - m_positionY) * q);
+                float z = m_positionZ + ((m_destinationZ - m_positionZ) * q);
+
+                m_timeToMove -= m_timeMoved;
+                m_timeMoved = 0;
+
+                AI_SendMoveToPacket(x, y, z, m_timeToMove, m_moveSpeed == 7.0*0.001);
+		m_positionX = x;
+		m_positionY = y;
+		m_positionZ = z;
+
+                m_moveTimer = (UNIT_MOVEMENT_INTERPOLATE_INTERVAL < m_timeToMove) ? UNIT_MOVEMENT_INTERPOLATE_INTERVAL : m_timeToMove;
+#endif
             }
         }                                         // still moving
     }
@@ -196,7 +220,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
 void Creature::Update( uint32 p_time )
 {
     Unit::Update( p_time );
-
+#ifndef ENABLE_GRID_SYSTEM
     if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
     {
         // Still Moving well then lets stop
@@ -212,8 +236,12 @@ void Creature::Update( uint32 p_time )
             m_creatureState = STOPPED;
         }
         return;
-    }
-
+    }    
+#else
+    // if no player in the zone.. why bother updating me
+    if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
+	return;
+#endif
     if (m_deathState == JUST_DIED)
     {
         this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
@@ -235,9 +263,9 @@ void Creature::Update( uint32 p_time )
         {
             // time to respawn!
             Log::getSingleton( ).outDetail("Removing corpse...");
-
+#ifndef ENABLE_GRID_SYSTEM
             RemoveFromMap();
-
+#endif
             m_respawnTimer = m_respawnDelay;
             setDeathState(DEAD);
 
@@ -260,7 +288,9 @@ void Creature::Update( uint32 p_time )
             // WorldPacket data;
             Log::getSingleton( ).outDetail("Respawning...");
             SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+#ifndef ENABLE_GRID_SYSTEM
             PlaceOnMap();
+#endif
             setDeathState(ALIVE);
             m_creatureState = STOPPED;            // after respawn monster can move
         }
@@ -675,11 +705,15 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
     data << x << y << z;
     WPAssert( data.size() == 49 );
     SendMessageToSet( &data, false );
+#ifdef ENABLE_GRID_SYSTEM
+    MapManager::Instance().GetMap(m_mapId)->ObjectRelocation(this, x, y, z, m_orientation);
+#endif
 }
 
 
 void Creature::AI_MoveTo(float x, float y, float z, bool run)
 {
+#ifndef ENABLE_GRID_SYSTEM
     float dx = x - m_positionX;
     float dy = y - m_positionY;
     float dz = z - m_positionZ;
@@ -707,6 +741,37 @@ void Creature::AI_MoveTo(float x, float y, float z, bool run)
 
     if(m_creatureState != MOVING)
         m_creatureState = MOVING;
+#else
+    float dx = x - m_positionX;
+    float dy = y - m_positionY;
+    float dz = z - m_positionZ;
+
+    float distance = sqrt((dx*dx) + (dy*dy) + (dz*dz));
+    if(!distance)
+        return;
+
+    float speed=0;
+    if(!run)
+        m_moveSpeed = 2.5f*0.001f;
+    else
+        m_moveSpeed = 7.0f*0.001f;
+
+    uint32 moveTime = (uint32) (distance / m_moveSpeed);
+    AI_SendMoveToPacket(x, y, z, moveTime, run);
+
+    /* new position
+     */
+    m_destinationX = x;
+    m_destinationY = y;
+    m_destinationZ = z;
+
+    m_timeToMove = moveTime;
+    // update every 300 msecs
+    m_moveTimer =  UNIT_MOVEMENT_INTERPOLATE_INTERVAL;
+
+    if(m_creatureState != MOVING)
+        m_creatureState = MOVING;
+#endif
 }
 
 

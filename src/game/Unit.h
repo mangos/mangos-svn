@@ -29,6 +29,7 @@
 class Affect;
 class Modifier;
 class Spell;
+class DynamicObject;
 
 enum DeathState
 {
@@ -91,6 +92,7 @@ class Unit : public Object
     void smsg_AttackStart(Unit* pVictim);
     void smsg_AttackStop(uint64 victimGuid);
 
+#ifndef ENABLE_GRID_SYSTEM
         virtual void RemoveInRangeObject(Object* pObj)
         {
             if(pObj->GetTypeId() == TYPEID_PLAYER || pObj->GetTypeId() == TYPEID_UNIT)
@@ -101,6 +103,10 @@ class Unit : public Object
             }
             Object::RemoveInRangeObject(pObj);
         }
+#else
+    virtual void DealWithSpellDamage(DynamicObject &);
+    virtual void MoveOutOfRange(Player &) { /* the player just moved out of my range */ }
+#endif
 
         /// Combat / Death Status
         bool isAlive() { return m_deathState == ALIVE; };

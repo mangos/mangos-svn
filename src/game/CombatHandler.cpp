@@ -25,6 +25,10 @@
 #include "World.h"
 #include "ObjectMgr.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
+
 void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -33,8 +37,11 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
     // AttackSwing
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-
+#ifndef ENABLE_GRID_SYSTEM
     Creature *pEnemy = objmgr.GetObject<Creature>(guid);
+#else
+    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
     if(!pEnemy)
     {
         Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",

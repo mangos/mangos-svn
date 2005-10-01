@@ -26,7 +26,9 @@
 class Object;
 class WorldPacket;
 class WorldSession;
+#ifndef ENABLE_GRID_SYSTEM
 class MapMgr;
+#endif
 
 enum WorldTimers
 {
@@ -87,9 +89,10 @@ class World : public Singleton<World>
         // update the world server every frame
         void Update(time_t diff);
 
+#ifndef ENABLE_GRID_SYSTEM
         // get map manager
         MapMgr* GetMap(uint32 id);
-
+#endif
         void setRate(int index,float value)
         {
             if((index>=0)&&(index<MAX_RATES))
@@ -124,10 +127,10 @@ class World : public Singleton<World>
 
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
-
+#ifndef ENABLE_GRID_SYSTEM
         typedef HM_NAMESPACE::hash_map<uint32, MapMgr*> MapMgrMap;
         MapMgrMap m_maps;
-
+#endif
         float regen_values[5];
         uint32 m_playerLimit;
         bool m_allowMovement;

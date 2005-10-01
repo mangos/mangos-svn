@@ -28,6 +28,10 @@
 #include "Player.h"
 #include "Quest.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
+
 void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_STATUS_QUERY" );
@@ -37,7 +41,11 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
+#ifndef ENABLE_GRID_SYSTEM
     Creature *pCreature = objmgr.GetObject<Creature>(guid);
+#else
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
     if (!pCreature)
     {
         Log::getSingleton( ).outError( "WORLD: received incorrect guid in CMSG_QUESTGIVER_STATUS_QUERY" );
@@ -65,7 +73,11 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     recv_data >> guid;
+#ifndef ENABLE_GRID_SYSTEM
     pCreature = objmgr.GetObject<Creature>(guid);
+#else
+    pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
     if(!pCreature)
     {
         Log::getSingleton( ).outError( "WORLD: received incorrect guid in SMSG_QUESTGIVER_REQUEST_ITEMS" );
@@ -248,7 +260,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     }
 
     Creature *pCreature = NULL;
-
+#ifndef ENABLE_GRID_SYSTEM
     for( ObjectMgr::CreatureMap::const_iterator i = objmgr.Begin<Creature>();
         i != objmgr.End<Creature>(); ++ i )
     {
@@ -258,6 +270,14 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
                 pCreature = i->second;            // FIXME: break?
         }
     }
+#else
+    for(Player::InRangeUnitsMapType::iterator iter=_player->InRangeUnitsBegin(); iter != _player->InRangeUnitsEnd(); ++iter)
+    {
+	pCreature = dynamic_cast<Creature *>(iter->second);
+	if( pCreature != NULL && pCreature->hasQuest(quest_id) )
+	    break;
+    }
+#endif
 
     WPAssert( pCreature != NULL );
 

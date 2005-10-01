@@ -32,6 +32,10 @@
 #include "Timer.h"
 #include <signal.h>
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#endif
+
 createFileSingleton( Master );
 
 volatile bool Master::m_stopEvent = false;
@@ -91,7 +95,7 @@ bool Master::Run()
 
     port_t wsport, rmport;
     rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
+    wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );    
 
     // load regeneration rates.
     sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
@@ -100,6 +104,20 @@ bool Master::Run()
     sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
     sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
     sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
+
+#ifdef ENABLE_GRID_SYSTEM
+    // default Grid unload will be 5 minutes after everyone moved out.
+    // Note.. minium is 1 minute. (5*60=300)
+    uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);    
+    sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
+    grid_clean_up_delay *= 1000;
+    MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
+
+    // default update is 100 milli seconds
+    uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
+    sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
+    MapManager::Instance().SetMapUpdateInterval(map_update_interval);
+#endif
 
     sRealmList.setServerPort(wsport);
     sRealmList.GetAndAddRealms ();

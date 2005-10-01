@@ -31,6 +31,11 @@
 #include "World.h"
 #include "NameTables.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#endif
+
 WorldSession::WorldSession(uint32 id, WorldSocket *sock) : _accountId(id), _socket(sock),
 _security(0), _player(0), _logoutTime(0)
 {
@@ -160,11 +165,19 @@ void WorldSession::LogoutPlayer(bool Save)
         if (_player->IsInWorld())
         {
             sLog.outDebug( "SESSION: removing player from world" );
+#ifndef ENABLE_GRID_SYSTEM
             _player->RemoveFromMap();
+#else
+	    MapManager::Instance().GetMap(_player->GetMapId())->RemoveFromMap(_player);
+	    ObjectAccessor::Instance().RemovePlayer(_player);
+#endif
         }
 
+#ifndef ENABLE_GRID_SYSTEM
         objmgr.RemoveObject(_player);
-
+#else
+	MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
+#endif
         if(Save)
         {
             // Save the player

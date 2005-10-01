@@ -32,6 +32,11 @@
 #include "Opcodes.h"
 #include "Chat.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#endif
+
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
     for(uint32 i = 0; table[i].Name != NULL; i++)
@@ -330,7 +335,7 @@ bool ChatHandler::HandleMountCommand(const char* args)
     data << m_session->GetPlayer( )->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
     data << speed;
     WPAssert(data.size() == 12);
-    m_session->GetPlayer( )->SendMessageToSet( &data, true );
+    m_session->GetPlayer( )->SendMessageToSet(&data, true);
 
     char cmount[256];
     sprintf(cmount, "You have a level %i mount at %i speed.", num, (int)speed);
@@ -373,8 +378,13 @@ bool ChatHandler::HandleGMListCommand(const char* args)
     WorldPacket data;
     bool first = true;
 
+#ifndef ENABLE_GRID_SYSTEM
     ObjectMgr::PlayerMap::const_iterator itr;
     for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
+#else
+	ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
+	for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+#endif
     {
         if(itr->second->GetSession()->GetSecurity())
         {
