@@ -32,6 +32,10 @@
 
 createFileSingleton( ChatHandler );
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#endif
+
 ChatHandler::ChatHandler()
 {
 
@@ -389,8 +393,12 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
     pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000);
     pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
     Log::getSingleton( ).outError("AddObject at Chat.cpp");
+#ifndef ENABLE_GRID_SYSTEM
     objmgr.AddObject(pCreature);
     pCreature->PlaceOnMap();
+#else
+    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
+#endif
 
     pCreature->SaveToDB();
 }
@@ -403,9 +411,11 @@ void ChatHandler::smsg_NewWorld(WorldSession *session, uint32 mapid, float x, fl
     data << uint32(0);
 
     session->SendPacket(&data);
-
+#ifndef ENABLE_GRID_SYSTEM
     session->GetPlayer()->RemoveFromMap();
-
+#else
+    MapManager::Instance().GetMap(session->GetPlayer()->GetMapId())->RemoveFromMap(session->GetPlayer());
+#endif
     // Build a NEW WORLD packet
     data.Initialize(SMSG_NEW_WORLD);
     data << (uint32)mapid << (float)x << (float)y << (float)z << (float)0.0f;

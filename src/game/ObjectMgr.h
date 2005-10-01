@@ -61,18 +61,17 @@ class ObjectMgr : public Singleton < ObjectMgr >
         ~ObjectMgr();
 
         // objects
-        typedef HM_NAMESPACE::hash_map<uint32, Player*> PlayerMap;
-        typedef HM_NAMESPACE::hash_map<uint32, Creature*> CreatureMap;
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
+        typedef HM_NAMESPACE::hash_map<uint32, CreatureInfo*> CreatureNameMap;
+        typedef HM_NAMESPACE::hash_map<uint32, GameObjectInfo *> GameObjectInfoMap;
+        typedef HM_NAMESPACE::hash_map<uint32, Player*> PlayerMap;
 
         // other objects
         typedef std::set< Group * > GroupSet;
-        //typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
-       // typedef HM_NAMESPACE::hash_map<uint32, GossipNpc*> GossipNpcMap;
-       // typedef HM_NAMESPACE::hash_map<uint32, GraveyardTeleport*> GraveyardMap;
+
 #ifndef ENABLE_GRID_SYSTEM
-        typedef HM_NAMESPACE::hash_map<uint32, CreatureInfo*> CreatureNameMap;
-        typedef HM_NAMESPACE::hash_map<uint32, GameObjectInfo *> GameObjectInfoMap;
+
+        typedef HM_NAMESPACE::hash_map<uint32, Creature*> CreatureMap;
         typedef HM_NAMESPACE::hash_map<uint32, DynamicObject*> DynamicObjectMap;
         typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectMap;
         typedef HM_NAMESPACE::hash_map<uint32, Corpse*> CorpseMap;
@@ -141,10 +140,12 @@ class ObjectMgr : public Singleton < ObjectMgr >
             return NULL;
         }
 
+#ifndef ENABLE_GRID_SYSTEM
         Creature* GetCreature(uint64 guid)
         {
 	    return _getCreature(GUID_LOPART(guid));
         }
+#endif
 
     // GameObjects
     const char* GetGameObjectName(uint32 id) const
@@ -321,10 +322,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
         uint16 GetTaxiMount( uint32 id );
         void GetTaxiPathNodes( uint32 path, Path *pathnodes );
 
+#ifndef ENABLE_GRID_SYSTEM
         // Corpse Stuff
         Corpse *GetCorpseByOwner(Player *pOwner);
         void SaveCorpses();
-
+#endif
         // Gossip Stuff
        // void AddGossipText(GossipText *pGText);
         //void AddGossip(GossipNpc *pGossip);
@@ -406,10 +408,10 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
 
-#ifndef ENABLE_GRID_SYSTEM
         // Map of active characters in the game
         PlayerMap           mPlayers;
 
+#ifndef ENABLE_GRID_SYSTEM
         // Map of active creatures in the game
         CreatureMap         mCreatures;
 

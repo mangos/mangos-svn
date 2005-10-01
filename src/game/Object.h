@@ -88,6 +88,7 @@ class Object
 
         // type
         const uint8& GetTypeId() const { return m_objectTypeId; }
+        bool isType(uint8 mask) const { return (mask & m_objectTypeId); }
 
         // void BuildUpdateMsgHeader( WorldPacket *data ) const;
 
@@ -104,17 +105,20 @@ class Object
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
+#ifndef ENABLE_GRID_SYSTEM
         bool SetPosition( float newX, float newY, float newZ, float newOrientation, bool allowPorting = false );
-
+#endif
         const float& GetPositionX( ) const { return m_positionX; }
         const float& GetPositionY( ) const { return m_positionY; }
         const float& GetPositionZ( ) const { return m_positionZ; }
         const float& GetOrientation( ) const { return m_orientation; }
 
+#ifndef ENABLE_GRID_SYSTEM
         //! Only for MapMgr use
         MapCell* GetMapCell() const { return m_mapCell; }
         //! Only for MapMgr use
         void SetMapCell(MapCell* cell) { m_mapCell = cell; }
+#endif
 
         const uint32& GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
@@ -210,11 +214,12 @@ class Object
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
+#ifndef ENABLE_GRID_SYSTEM
         //! Add object to map
         void PlaceOnMap();
         //! Remove object from map
         void RemoveFromMap();
-
+#endif
     protected:
         Object ( );
 
@@ -248,11 +253,12 @@ class Object
         uint32 m_zoneId;
         //! Continent/map id.
         uint32 m_mapId;
+#ifndef ENABLE_GRID_SYSTEM
         //! Map manager
         MapMgr *m_mapMgr;
         //! Current map cell
         MapCell *m_mapCell;
-
+#endif
         // TODO: use vectors here
         float m_positionX;
         float m_positionY;

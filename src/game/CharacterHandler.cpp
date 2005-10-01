@@ -31,6 +31,11 @@
 #include "Chat.h"
 #include "Auth/md5.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#endif
+
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -474,10 +479,15 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // Send a message to other clients that a new player has entered the world
     // And let this client know we're in game
     Log::getSingleton( ).outError("AddObject at CharacterHandler.cpp");
+#ifndef ENABLE_GRID_SYSTEM
     objmgr.AddObject( pCurrChar );
     pCurrChar->PlaceOnMap();
-	std::stringstream ss;
-	ss << "UPDATE characters SET online = 1 WHERE guid = " << pCurrChar->GetGUID();
+#else
+    MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
+    ObjectAccessor::Instance().InsertPlayer(pCurrChar);
+#endif
+    std::stringstream ss;
+    ss << "UPDATE characters SET online = 1 WHERE guid = " << pCurrChar->GetGUID();
     sDatabase.Execute(ss.str().c_str());
 
     // add skilllines from db

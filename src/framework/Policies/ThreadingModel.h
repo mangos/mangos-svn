@@ -60,7 +60,7 @@ namespace MaNGOS
 	    Lock(const T &) {}
 	    Lock(const SingleThreaded<T> &) {} // for single threaded we ignore this
 	};
-	
+
 	typedef T VolatileType;
     };
 
@@ -85,6 +85,7 @@ namespace MaNGOS
 	};
 
 	typedef volatile T VolatileType;
+
     private:
 	// prevent the compiler creating a copy construct
 	ObjectLevelLockable(const ObjectLevelLockable<T, MUTEX> &); 

@@ -25,7 +25,7 @@
  */
 
 
-namespace ByetConverter
+namespace ByteConverter
 {
     template<size_t T> 
     inline void convert(char *val)

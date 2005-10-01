@@ -16,68 +16,107 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
+#ifdef ENABLE_GRID_SYSTEM
 #include "Map.h"
 #include "GridNotifiers.h"
+#include "Player.h"
+#include "WorldSession.h"
+#include "Log.h"
 
-Map::Map(uint32 id) : i_id(id), i_gridMask(0), i_gridStatus(0)
+// 3 minutes
+#define DEFAULT_GRID_EXPIRY     300
+
+
+Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
+    {
+	i_gridMask[idx] = 0;
+	i_gridStatus[idx] = 0;
 	for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
 	{
 	    i_grids[idx][j] = NULL;
-	    i_guards[idx][j] = NULL;
+	    i_info[idx][j] = NULL;
 	}
+    }
 }
 
+uint64
+Map::EnsureGridCreated(const GridPair &p)
+{
+    uint64 mask = CalculateGridMask(p.y_coord);
+
+    if( !(i_gridMask[p.x_coord] & mask) )
+    {
+	Guard guard(*this);
+	if( !(i_gridMask[p.x_coord] & mask) )
+	{
+	    i_grids[p.x_coord][p.y_coord] = new GridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
+	    i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry);
+	    i_gridMask[p.x_coord] |= mask; // sets the mask on
+	}	
+    }
+
+    return mask;
+}
+
+void
+Map::EnsurePlayerInGrid(const GridPair &p, Player *player)
+{
+    uint64 mask = EnsureGridCreated(p);
+    GridType *grid = i_grids[p.x_coord][p.y_coord];
+    assert(grid != NULL);
+    if( !(i_gridStatus[p.x_coord] & mask) )
+    {
+	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+	if( !(i_gridStatus[p.x_coord] & mask) )
+	{
+	    sLog.outDebug("Player %s triggers of loading grid [%d,%d] on map %d", player->GetName(), p.x_coord, p.y_coord, i_id);
+	    GridLoaderType loader;
+	    ObjectGridLoader gloader(*grid, *player, i_id);
+	    loader.Load(*grid, gloader);
+	    grid->AddObject(player, player->GetGUID());
+	    i_gridStatus[p.x_coord] |= mask;
+	}
+    }
+    else
+    {
+	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+	grid->AddObject(player, player->GetGUID());
+
+    }
+}
 
 void
 Map::Add(Player *player)
 {
     GridPair p = CalculateGrid(player->GetPositionX(), player->GetPositionY());
+    
     assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
-    
-    uint64 mask = CalculateGridMask(p.x_coord, p.y_coord);
 
-    if( !(i_gridMask & mask) )
-    {
-	Guard guard(*this);
-	if( !(i_gridMask & mask) )
-	{
-	    i_grids[p.x_coord][p.y_coord] = new GridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
-	    i_guards[p.x_coord][p.y_coord] = new GridRWLock();
-	    i_gridMask &= mask;
-	}	
-    }
-
-    GridType *grid = i_grids[p.x_coord][p.y_coord];
-    assert(grid != NULL);
-    if( !(i_gridStatus & mask) )
-    {
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getWriteLock();
-	GridGuard guard(lock);
-	if( !(i_gridStatus & mask) )
-	{
-	    sLog.outDebug("Player %s triggers of loading grid [%d,%d] on map %d", player->GetGUID(), p.x_coord, p.y_coord, i_id);
-	    GridLoaderType loader;
-	    ObjectGridLoader gloader(*grid, *player);
-	    loader.Load(*grid, gloader);
-	    grid->AddObject(player, player->GetGUID());
-	    i_gridStatus &= mask;
-	}
-    }
-    else
-    {
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getWriteLock();
-	GridGuard guard(lock);
-	grid->AddObject(player, player->GetGUID());
-
-    }
+    EnsurePlayerInGrid(p, player);
    
-    grid->SetGridStatus(GRID_STATUS_ACTIVE);
-    // check to see if the grid status is loaded...
+    sLog.outDebug("Player %s enters grid[%d, %d]", player->GetName(), p.x_coord, p.y_coord);
+    GridType &grid(*i_grids[p.x_coord][p.y_coord]);
+    MaNGOS::PlayerNotifier notifier(grid, *player);
+
+    {   // don't remove the scope braces.. its for performance..
+	ReadGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+	grid.SetGridStatus(GRID_STATUS_ACTIVE);
+	
+	// notify players that a new player is in
+	TypeContainerVisitor<MaNGOS::PlayerNotifier, ContainerMapList<Player> > player_notifier(notifier);
+	grid.VisitObjects(player_notifier);
+	TypeContainerVisitor<MaNGOS::PlayerNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+	grid.VisitGridObjects(object_notifier);
+    }
+
+    // notify creatures around by putting them in range if they are
+    TypeContainerVisitor<MaNGOS::PlayerNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+    grid.VisitGridObjects(object_notifier);
 }
+
 
 template<class T>
 GridType*
@@ -88,27 +127,77 @@ Map::AddType(T *obj)
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
 
     if( !loaded(p) )
+    {
+	sLog.outError("Doesn't make sense to add the object to a grid that's no loaded [guid=%d]", obj->GetGUID());
 	return NULL; // doesn't make sense to add a creature to a location where there's no one
+    }
 
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert( grid != NULL );
 
     {
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getWriteLock();
-	GridGuard guard(lock);       
+	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
 	(*grid).template AddGridObject<T>(obj, obj->GetGUID());
 	grid->SetGridStatus(GRID_STATUS_ACTIVE);
     }
-	
+
+    sLog.outDebug("Object %d enters grid[%d,%d]", obj->GetGUID(), p.x_coord, p.y_coord);
     // now update things.. only required a read lock
+    ReadGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+    MaNGOS::ObjectEnterNotifier<T> notifier(*grid, *obj);
+    TypeContainerVisitor<MaNGOS::ObjectEnterNotifier<T>, ContainerMapList<Player> > player_notifier(notifier);
+    grid->VisitObjects(player_notifier);	
+}
+
+void
+Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
+{
+    if( to_self )
+	player->GetSession()->SendPacket(msg);
+
+    GridPair p = CalculateGrid(player->GetPositionX(), player->GetPositionY());
+    assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
+	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
+
+    if( !loaded(p) )
+	return; // doesn't make sense to add a creature to a location where there's no one  
     
+    GridType *grid = i_grids[p.x_coord][p.y_coord];
+    assert( grid != NULL );
+    if( grid->ObjectsInGrid() > 0 )
+    {
+	ReadGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+	MaNGOS::MessageDeliverer post_man(*player, msg);
+	TypeContainerVisitor<MaNGOS::MessageDeliverer, ContainerMapList<Player> > message(post_man);
+	grid->VisitObjects(message);
+    }
+}
+
+void
+Map::MessageBoardcast(Object *obj, WorldPacket *msg)
+{
+    GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
+    assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
+	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
+
+    if( !loaded(p) )
+	return; // doesn't make sense to add a creature to a location where there's no one  
+    
+    GridType *grid = i_grids[p.x_coord][p.y_coord];
+    assert( grid != NULL );
+    if( grid->ObjectsInGrid() > 0 )
+    {
+	ReadGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+	MaNGOS::ObjectMessageDeliverer post_man(*obj, msg);
+	TypeContainerVisitor<MaNGOS::ObjectMessageDeliverer, ContainerMapList<Player> > message(post_man);
+	grid->VisitObjects(message);
+    }
 }
 
 void
 Map::Add(Creature *creature)
 {
-    GridType *grid = AddType<Creature>(creature);
-    
+    GridType *grid = AddType<Creature>(creature);    
 }
 
 void
@@ -135,51 +224,82 @@ Map::Add(Corpse *obj)
 bool
 Map::loaded(const GridPair &p) const
 {
-    uint64 mask = CalculateGridMask(p.x_coord, p.y_coord);
-    return ( !(i_gridMask & mask) || !(i_gridStatus & mask) );
+    uint64 mask = CalculateGridMask(p.y_coord);
+    return ( (i_gridMask[p.x_coord] & mask)  && (i_gridStatus[p.x_coord] & mask) );
 }
 
 // update map
 void
 Map::Update(uint32 t_diff)
 {
-    uint64 mask = 1;
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
+	uint64 mask = 1;
 	for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
 	{
-	    if( i_gridMask & mask )
+	    if( i_gridMask[i] & mask )
 	    {
-		assert(i_grids[i][j] != NULL);
+		assert(i_grids[i][j] != NULL && i_info[i][j] != NULL);
 		GridType &grid(*i_grids[i][j]);
+		GridInfo &info(*i_info[i][j]);
 		if( grid.ObjectsInGrid() > 0 )
-		{
-		    MaNGOS::GridUpdater updater(grid, t_diff);
-		    TypeContainerVisitor<MaNGOS::GridUpdater, ContainerMapList<Player> > player_notifier(updater);
-		    grid.VisitObjects(player_notifier);
-		    TypeContainerVisitor<MaNGOS::GridUpdater, TypeMapContainer<AllObjectTypes> > object_notifier(updater);
-		    grid.VisitGridObjects(object_notifier);
+		{       
+		    {
+			ReadGuard guard(i_info[i][j]->i_lock);
 
-		    // now update packets..
+			// update the object
+			MaNGOS::GridUpdater updater(grid, t_diff);
+			TypeContainerVisitor<MaNGOS::GridUpdater, ContainerMapList<Player> > player_notifier(updater);
+			grid.VisitObjects(player_notifier);
+			TypeContainerVisitor<MaNGOS::GridUpdater, TypeMapContainer<AllObjectTypes> > object_notifier(updater);
+			grid.VisitGridObjects(object_notifier);
+		    }
+
+		    // now update packets.. it uses the same notifier as the player moves..
+		    // (1) update its inrange objects (remove the out of range)
+		    // (2) update the newly in range
+		    //MaNGOS::PlayerUpdatePacket update_packet(*i_grids[i][j]);
+		    //TypeContainerVisitor<MaNGOS::PlayerUpdatePacket, ContainerMapList<Player> > player_update(update_packet);
+		    //graid.VisitObjects(player_update);
 		}
 		else
 		{
 		    if( grid.GetGridStatus() == GRID_STATUS_REMOVAL )
 		    {
 			// unloading the grid....
-			sLog.outDebug("Unloading grid %d for map %d", grid.GetGridId(), i_id);
-			ObjectGridUnloader unloader(grid);
-			TypeContainerVisitor<ObjectGridUnloader, TypeMapContainer<AllObjectTypes> > object_unload(unloader);
-			grid.VisitGridObjects(object_unload);
-			i_gridMask &= ~mask;
+			info.i_timer.Update(t_diff);
+			if( info.i_timer.Passed() )
+			{
+			    sLog.outDebug("Unloading grid %d for map %d", grid.GetGridId(), i_id);
+			    {
+				WriteGuard guard(i_info[i][j]->i_lock);
+				ObjectGridUnloader unloader(grid);
+				TypeContainerVisitor<ObjectGridUnloader, TypeMapContainer<AllObjectTypes> > object_unload(unloader);
+				i_gridMask[i] &= ~mask; // clears the bit
+				i_gridStatus[i] &= ~mask;
+				grid.VisitGridObjects(object_unload);
+				delete i_grids[i][j];
+				i_grids[i][j] = NULL;
+			    }
+			    
+			    delete i_info[i][j];
+			    i_info[i][j] = NULL;
+			}
 		    }
-		    else
+		    else if( grid.GetGridStatus() == GRID_STATUS_IDLE )
 		    {
 			// schedule for removale
 			grid.SetGridStatus(GRID_STATUS_REMOVAL);
+			info.i_timer.Reset(i_gridExpiry); // starts the count count of removal
+		       
+		    }
+		    else
+		    {
+			grid.SetGridStatus(GRID_STATUS_IDLE);
 		    }
 		}
 	    }
+	    mask <<= 1;
 	}
     }
 }
@@ -191,30 +311,26 @@ Map::Remove(Player *player, bool remove)
     assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
     
-    uint64 mask = CalculateGridMask(p.x_coord, p.y_coord);
+    uint64 mask = CalculateGridMask(p.y_coord);
 
-    if( !(i_gridMask & mask) )
+    if( !(i_gridMask[p.x_coord] & mask) )
     {
 	assert( false );	
 	return; // hmm...  how can we end up here
     }
 
+    sLog.outDebug("Remove player %d from grid[%d,%d]", player->GetGUID(), p.x_coord, p.y_coord);
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert(grid != NULL);
     
     {  // do not remove the scope braces... fro performances
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getWriteLock();
-	GridGuard guard(lock);
+	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
 	grid->RemoveObject(player, player->GetGUID());
+	player->RemoveFromWorld();
     }
     
-    {
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getReadLock();
-	MaNGOS::ExitNotifier notifier(*grid, *player);
-	TypeContainerVisitor<MaNGOS::ExitNotifier, ContainerMapList<Player> > player_notifier(notifier);
-	grid->VisitObjects(player_notifier);
-    }
 
+    player->DestroyInRange();    
     if( remove )
 	delete player;
 }
@@ -230,26 +346,31 @@ Map::RemoveType(T *obj, bool remove)
     if( !loaded(p) )
 	return NULL; // doesn't make sense to remove a creature in a location where its nothing
 
+    sLog.outDebug("Remove object % from grid[%d,%d]", obj->GetGUID(), p.x_coord, p.y_coord);
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert( grid != NULL );
 
     {  // do not remove the scope braces... fro performances
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getWriteLock();
-	GridGuard guard(lock);
+	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
 	(*grid).template RemoveGridObject<T>(obj, obj->GetGUID());
     }
 
     // now notify the players this creature is gone..
     {
-	GridLockType &lock = i_guards[p.x_coord][p.y_coord]->getReadLock();
-	GridGuard guard(lock);
-	MaNGOS::InRangeRemover range_remover(*grid, obj);
+	ReadGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
+	MaNGOS::InRangeRemover range_remover(*grid, *obj);
 	TypeContainerVisitor<MaNGOS::InRangeRemover, ContainerMapList<Player> > player_notifier(range_remover);
 	grid->VisitObjects(player_notifier);
     }
     
     if( remove )
 	delete obj;
+}
+
+void
+Map::RemoveFromMap(Player *player)
+{
+    RemoveType<Player>(player, false);
 }
 
 void
@@ -276,4 +397,72 @@ Map::Remove(DynamicObject *obj, bool remove)
     RemoveType<DynamicObject>(obj, remove);
 }
 
+void
+Map::PlayerRelocation(Player *player, const float &x, const float &y, const float &z, const float &orientation)
+{
+    GridPair old_grid = CalculateGrid(player->GetPositionX(), player->GetPositionY());
+    GridPair new_grid = CalculateGrid(x, y);
 
+    if( old_grid != new_grid )
+    {
+	sLog.outDebug("Player %s relocation grid[%d,%d]->grid[%d,%d]", player->GetName(), old_grid.x_coord, old_grid.y_coord,new_grid.x_coord, new_grid.y_coord);       	
+	
+	// Remove in range objects for the old grid
+	GridType &grid(*i_grids[old_grid.x_coord][old_grid.y_coord]);
+	MaNGOS::PlayerRelocationNotifier notifier(*player);
+	TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
+	grid.VisitObjects(player_notifier);
+	TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+	grid.VisitGridObjects(object_notifier);
+
+	{
+	    WriteGuard guard(i_info[old_grid.x_coord][old_grid.y_coord]->i_lock);
+	    grid.RemoveObject(player, player->GetGUID());	    
+	}
+	EnsurePlayerInGrid(new_grid, player);
+    }
+    
+
+    // now inform all others in the grid of your activity
+    GridType *grid = i_grids[new_grid.x_coord][new_grid.y_coord];
+    assert(grid != NULL);    
+
+    UpdateData data;
+    player->Relocate(x, y, z, orientation);
+    MaNGOS::PlayerRelocationNotifier notifier(*player);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
+    grid->VisitObjects(player_notifier);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+    grid->VisitGridObjects(object_notifier);
+}
+
+
+template<class T>
+void
+Map::ObjectRelocation(T *obj, const float &x, const float &y, const float &z, const float &ang)
+{
+    GridPair new_grid = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
+    GridPair old_grid = CalculateGrid(x, y);
+
+    if( old_grid != new_grid )
+    {
+	WriteGuard guard(i_info[old_grid.x_coord][old_grid.y_coord]->i_lock);
+	(*i_grids[old_grid.x_coord][old_grid.y_coord]).template RemoveGridObject<T>(obj, obj->GetGUID());
+    }
+  
+    EnsureGridCreated(new_grid);
+    WriteGuard guard(i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
+    (*i_grids[new_grid.x_coord][new_grid.y_coord]).template AddGridObject<T>(obj, obj->GetGUID());
+
+    // we still need to update the players to see if this guy
+    // is move out of the player's range OR has moved in
+    // the player's range.
+}
+
+// explicit template instantiation
+template void Map::ObjectRelocation<Creature>(Creature *, const float &, const float &, const float &, const float &);
+template void Map::ObjectRelocation<GameObject>(GameObject *, const float &, const float &, const float &, const float &);
+template void Map::ObjectRelocation<DynamicObject>(DynamicObject *, const float &, const float &, const float &, const float &);
+template void Map::ObjectRelocation<Corpse>(Corpse *, const float &, const float &, const float &, const float &);
+
+#endif

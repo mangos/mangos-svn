@@ -27,6 +27,8 @@
 
 struct Mail;
 class Channel;
+class DynamicObject;
+class Creature;
 
 //====================================================================
 //  Inventory
@@ -227,7 +229,7 @@ class WorldSession;
 class Player : public Unit
 {
     friend class WorldSession;
-    public:
+public:
         Player ( );
         ~Player ( );
 
@@ -385,6 +387,71 @@ class Player : public Unit
 
         void SetDontMove(bool dontMove);
         bool GetDontMove() { return m_dontMove; }
+#ifdef ENABLE_GRID_SYSTEM
+    typedef HM_NAMESPACE::hash_map<uint32, Object *> InRangeObjectsMapType;
+    typedef HM_NAMESPACE::hash_map<uint32, Unit *> InRangeUnitsMapType;
+
+    Unit* GetInRangeUnit(uint64 guid)
+    {
+	InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(guid);
+	return(iter == i_inRangeUnits.end() ? NULL : iter->second);
+    }
+
+    Object* GetInRangeObject(uint64 guid)
+    {
+	InRangeObjectsMapType::iterator iter = i_inRangeObjects.find(guid);
+	return(iter == i_inRangeObjects.end() ? NULL : iter->second);
+    }
+
+    void SetCoordinate(const float &x, const float &y, const float &z, const float &orientation);
+    void AddInRangeObject(Object *obj) { i_inRangeObjects[obj->GetGUID()] = obj; }
+    bool RemoveInRangeObject(Object *obj) 
+    {
+	InRangeObjectsMapType::iterator iter= i_inRangeObjects.find(obj->GetGUID());
+	if( iter != i_inRangeObjects.end() )
+	{
+	    i_inRangeObjects.erase(iter);
+	    return true;
+	}
+	return false;
+    }
+    void AddInRangeObject(Unit *obj) { i_inRangeUnits[obj->GetGUID()] = obj; }
+    bool RemoveInRangeObject(Unit *obj)
+    {
+	InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(obj->GetGUID());
+	if( iter != i_inRangeUnits.end() )
+	{
+	    i_inRangeUnits.erase(iter);
+	    return true;
+	}
+	return false;
+    }
+
+    bool isInRange(Object *obj) const { return isInRangeObject(obj->GetGUID()); }
+    bool isInRange(Unit *obj) const { return isInRangeUnit(obj->GetGUID()); }
+    bool isInRangeObject(uint64 guid) const { return (i_inRangeObjects.find(guid) != i_inRangeObjects.end()); }
+    bool isInRangeUnit(uint64 guid) const { return (i_inRangeUnits.find(guid) != i_inRangeUnits.end()); }
+    InRangeObjectsMapType::iterator InRangeObjectsBegin(void) { return i_inRangeObjects.begin(); }
+    InRangeObjectsMapType::iterator InRangeObjectsEnd(void) { return i_inRangeObjects.end(); }
+    InRangeUnitsMapType::iterator InRangeUnitsBegin(void) { return i_inRangeUnits.begin(); }
+    InRangeUnitsMapType::iterator InRangeUnitsEnd(void) { return i_inRangeUnits.end(); }
+    void DealWithSpellDamage(DynamicObject &);
+    bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
+    void SendMessageToSet(WorldPacket *data, bool self);
+    void Relocate(const float &x, const float &y, const float &z, const float &orientation)
+    {
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
+	m_orientation = orientation;
+    }
+    
+    // methods that the user updates his in range objects
+    void UpdateInRange(UpdateData &);
+    void MoveOutOfRange(Player &player);
+    void MoveInRange(Player &player);
+    void DestroyInRange(void);
+#endif
 
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
@@ -480,5 +547,11 @@ class Player : public Unit
         std::list<Channel*> m_channels;
 
         bool m_dontMove;
+
+#ifdef ENABLE_GRID_SYSTEM
+    InRangeObjectsMapType i_inRangeObjects;
+    InRangeUnitsMapType i_inRangeUnits;
+#endif
+
 };
 #endif

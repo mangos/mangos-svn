@@ -34,6 +34,10 @@
 #include "Log.h"
 #include "Unit.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
+
 bool ChatHandler::HandleDebugInArcCommand(const char* args)
 {
     WorldPacket data;
@@ -42,7 +46,11 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid != 0)
     {
+#ifndef ENABLE_GRID_SYSTEM
         if(!(obj = (Object*)objmgr.GetObject<Player>(guid)) && !(obj = (Object*)objmgr.GetObject<Creature>(guid)))
+#else
+        if(!(obj = (Object*)ObjectAccessor::Instance().GetPlayer(*m_session->GetPlayer(), guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
+#endif
         {
             FillSystemMessageData(&data, m_session, "You should select a character or a creature.");
             m_session->SendPacket( &data );

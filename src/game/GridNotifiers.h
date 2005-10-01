@@ -29,9 +29,10 @@
  */
 
 #include "ObjectGridLoader.h"
+#include "ByteBuffer.h"
+#include "UpdateData.h"
 
 class Player;
-class UpdateData;
 
 namespace MaNGOS
 {
@@ -40,7 +41,7 @@ namespace MaNGOS
 	the player himself the existence of other players. It also grap
 	the objects within its visibility.
      */
-    struct PlayerNotifier
+    struct MANGOS_DLL_DECL PlayerNotifier
     {
 	PlayerNotifier(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
 	void Visit(PlayerMapType &);
@@ -54,7 +55,7 @@ namespace MaNGOS
 
     /** ExitNotifier notifies player's exit status...
      */
-    struct ExitNotifier
+    struct MANGOS_DLL_DECL ExitNotifier
     {
 	ExitNotifier(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
 	void Visit(PlayerMapType &);
@@ -65,12 +66,12 @@ namespace MaNGOS
     /** InRangeRemove removes the objects in range of a player due to the
      * object's lifetime is up
      */
-    struct InRangeRemover
+    struct MANGOS_DLL_DECL InRangeRemover
     {
-	InRangeRemover(GridType& grid, Object *obj) : i_grid(grid), i_object(obj) {}
-	void Visit(PlayerMapType &);
+	InRangeRemover(GridType& grid, Object &obj) : i_grid(grid), i_object(obj) {}
+	void Visit(PlayerMapType &);	
 	GridType &i_grid;
-	Object *i_object;
+	Object &i_object;
     };
 
 
@@ -95,10 +96,13 @@ namespace MaNGOS
 	void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
     };
 
-    /** GridObjectNotifer updates the packets for all objects in the grid
+    /** PlayerUpdatePacket pretty much do what PlayerRelocation except for all players
      */
-    struct GridObjectNotifer
+    struct MANGOS_DLL_DECL PlayerUpdatePacket
     {
+	GridType &i_grid;
+	PlayerUpdatePacket(GridType &grid) : i_grid(grid) {}
+	void Visit(PlayerMapType &);
     };
 
     /** ObjectRemoverNotifer is responsible for update the grid status when an
@@ -124,23 +128,45 @@ namespace MaNGOS
 	MessageDeliverer(Player &pl, WorldPacket *msg) : i_player(pl), i_message(msg) {}
 	void Visit(PlayerMapType &m);
     };
+
+    /** ObjectMessageDeliverer is a message from unit or object (a non player to his in range 
+     * players
+     */
+    struct MANGOS_DLL_DECL ObjectMessageDeliverer
+    {
+	Object &i_object;
+	WorldPacket *i_message;
+	ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
+	void Visit(PlayerMapType &m);
+    };
     
     /** PositionRelocationNotifier informs the map manager that certain object
      * moved it position. Its up to the MapManager to ensure that the
      * object is still within its zone.  Its up to the zone that the object is within its
      * grid. etc..
-   */
+     */
+    struct MANGOS_DLL_DECL PlayerRelocationNotifier
+    {
+	Player &i_player;
+	UpdateData i_data;
+	PlayerRelocationNotifier(Player& player) : i_player(player) {}
+	~PlayerRelocationNotifier();
+	void Visit(PlayerMapType &);
+	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);	
+    };
+
+    /** ObjectEnterNotifer notifies the players an brand new object has arrived.
+     * put them in arange to the player if it is.  This likely due to spawn.
+     */
     template<class T>
-    struct MANGOS_DLL_DECL PositionRelocationNotifier
+    struct MANGOS_DLL_DECL ObjectEnterNotifier
     {
 	T& i_object;
-	PositionRelocationNotifier(T& obj) : i_object(obj) {}
-	void Visit(PlayerMapType &) {}
-	void Visit(CreatureMapType &) {}
-	void Visit(DynamicObjectMapType &) {}
-	void Visit(GameObjectMapType &) {}
-	void Visit(CorpseMapType &) {}
+	GridType &i_grid;
+	ObjectEnterNotifier(GridType &grid, T& obj) : i_grid(grid), i_object(obj) {}
+	void Visit(PlayerMapType &);
     };
+
 }
 
 #endif

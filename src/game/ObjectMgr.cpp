@@ -1164,7 +1164,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path *pathnodes )
     }*/
 }
 
-
+#ifndef ENABLE_GRID_SYSTEM
 Corpse *ObjectMgr::GetCorpseByOwner(Player *pOwner)
 {
     CorpseMap::const_iterator itr;
@@ -1202,6 +1202,7 @@ void ObjectMgr::LoadCorpses()
 
     delete result;
 }
+#endif
 
 /*
 void ObjectMgr::AddGossipText(GossipText *pGText)

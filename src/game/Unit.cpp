@@ -35,6 +35,11 @@
 #include "Affect.h"
 #include <math.h>
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#endif
+
 #define DEG2RAD (M_PI/180.0)
 #define M_PI       3.14159265358979323846
 
@@ -183,7 +188,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
                 xp /= pGroup->GetMembersCount();
                 for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
                 {
+#ifndef ENABLE_GRID_SYSTEM
                     Player *pGroupGuy = objmgr.GetObject<Player>(pGroup->GetMemberGUID(i));
+#else
+		    Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
+#endif
                     pGroupGuy->GiveXP(xp, victimGuid);
 
                     if (pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -651,7 +660,11 @@ void Unit::smsg_AttackStop(uint64 victimGuid)
 
 void Unit::smsg_AttackStart(Unit* pVictim)
 {
+#ifndef ENABLE_GRID_SYSTEM
     Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
     smsg_AttackStart(pVictim, pThis);
 }
 
@@ -1879,7 +1892,11 @@ void Unit::_UpdateAura()
     if(GetTypeId() != TYPEID_PLAYER || !m_aura)
         return;
 
+#ifndef ENABLE_GRID_SYSTEM
     Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player* pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
 
     Player* pGroupGuy;
     Group* pGroup;
@@ -1896,7 +1913,11 @@ void Unit::_UpdateAura()
     {
         for(uint32 i=0;i<pGroup->GetMembersCount();i++)
         {
+#ifndef ENABLE_GRID_SYSTEM
             pGroupGuy = objmgr.GetObject<Player>(pGroup->GetMemberGUID(i));
+#else
+	    pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
+#endif
             if(!pGroupGuy)
                 continue;
             if(pGroupGuy->GetGUID() == GetGUID())
@@ -1952,9 +1973,13 @@ void Unit::_UpdateSpells( uint32 time )
         uint8 AffResult = aff->Update( time );
         if( AffResult == 2 || AffResult == 6 || AffResult == 10 || AffResult == 14)
         {
+#ifndef ENABLE_GRID_SYSTEM
             Unit *attacker = (Unit*) objmgr.GetObject<Player>(aff->GetCasterGUID());
             if(!attacker)
                 attacker = (Unit*) objmgr.GetObject<Creature>(aff->GetCasterGUID());
+#else
+	    Unit *attacker = ObjectAccessor::Instance().FindPlayer(aff->GetCasterGUID());
+#endif
 
             // FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
             if(attacker)
@@ -1986,9 +2011,13 @@ void Unit::_UpdateSpells( uint32 time )
         }
         if( AffResult == 8 || AffResult == 10 || AffResult == 12 || AffResult == 14)
         {
+#ifndef ENABLE_GRID_SYSTEM
             Unit *attacker = (Unit*) objmgr.GetObject<Player>(aff->GetCasterGUID());
             if(!attacker)
                 attacker = (Unit*) objmgr.GetObject<Creature>(aff->GetCasterGUID());
+#else
+	    Unit *attacker = ObjectAccessor::Instance().FindPlayer(aff->GetCasterGUID());
+#endif
 
             // FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
             if(attacker)
@@ -2253,7 +2282,11 @@ bool Unit::setInFront(Unit* target, float distance)
         {
             orientation = float(2*M_PI)/360*(orientation-90.0f);
             Log::getSingleton().outError("Orentation: %f",orientation);
+#ifndef ENABLE_GRID_SYSTEM
             SetPosition(GetPositionX(), GetPositionY(), GetPositionZ(), orientation);
+#else
+	    m_orientation = orientation;
+#endif
             break;
         }else
         orientation += 90;
@@ -2292,3 +2325,12 @@ float Unit::CalcDistance(float PaX, float PaY, float PaZ, float PbX, float PbY, 
     return sqrt(zdest*zdest + ydest*ydest + xdest*xdest);
 }
 */
+
+#ifdef ENABLE_GRID_SYSTEM
+void
+Unit::DealWithSpellDamage(DynamicObject &obj)
+{
+    obj.DealWithSpellDamage(*this);
+}
+
+#endif

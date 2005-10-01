@@ -67,6 +67,7 @@ libgame_a_SOURCES = \
 	Map.cpp \
         GridNotifiers.cpp \
 	MapManager.cpp \
+        ObjectAccessor.cpp \
 	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \

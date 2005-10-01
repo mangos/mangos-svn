@@ -37,6 +37,10 @@
 #include "ChannelMgr.h"
 #include "LootMgr.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#endif
+
 initialiseSingleton( World );
 
 World::World()
@@ -199,6 +203,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_SESSIONS].SetInterval(100);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
 
+#ifndef ENABLE_GRID_SYSTEM
   for(ObjectMgr::CreatureMap::const_iterator i = objmgr.Begin<Creature>();
         i != objmgr.End<Creature>(); i++)
     {
@@ -216,7 +221,9 @@ void World::SetInitialWorldSettings()
     {
         i->second->PlaceOnMap();
     }
-
+#else
+    MapManager::Instance().Initialize();
+#endif
     Log::getSingleton( ).outString( "WORLD: SetInitialWorldSettings done" );
 }
 
@@ -403,12 +410,13 @@ void World::Update(time_t diff)
             }
         }
     }
+
+#ifndef ENABLE_GRID_SYSTEM
     // TODO: make sure that all objects get their updates, not just characters and creatures
     if (m_timers[WUPDATE_OBJECTS].Passed())
     {
         m_timers[WUPDATE_OBJECTS].Reset();
 
-#ifndef ENABLE_GRID_SYSTEM
         ObjectMgr::PlayerMap::iterator chriter;
         ObjectMgr::CreatureMap::iterator iter;
         ObjectMgr::GameObjectMap::iterator giter;
@@ -430,6 +438,12 @@ void World::Update(time_t diff)
     for (MapMgrMap::iterator iter = m_maps.begin(); iter != m_maps.end(); iter++)
     {
         iter->second->Update(diff);
+    }
+#else
+    if (m_timers[WUPDATE_OBJECTS].Passed())
+    {
+        m_timers[WUPDATE_OBJECTS].Reset();
+	MapManager::Instance().Update(diff);
     }
 #endif
 }
@@ -457,7 +471,7 @@ void World::SendWorldText(const char* text, WorldSession *self)
     SendGlobalMessage(&data, self);
 }
 
-
+#ifndef ENABLE_GRID_SYSTEM
 MapMgr* World::GetMap(uint32 id)
 {
     MapMgrMap::iterator iter = m_maps.find(id);
@@ -471,3 +485,4 @@ MapMgr* World::GetMap(uint32 id)
 
     return newMap;
 }
+#endif

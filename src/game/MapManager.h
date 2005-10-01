@@ -20,6 +20,7 @@
 #ifndef MANGOS_MAPMANAGER_H
 #define MANGOS_MAPMANAGER_H
 
+#ifdef ENABLE_GRID_SYSTEM
 /*
  * @class MapManager
  * MapMaanger manages the area in the game.  The world in MaNGOS is devided into
@@ -46,7 +47,20 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 public:
     
     Map* GetMap(uint32);
-    
+    void Initialize(void);
+    void Update(time_t);
+
+    inline void SetGridCleanUpDelay(uint32 t) { i_gridCleanUpDelay = t; }
+    inline void SetMapUpdateInterval(uint32 t) 
+    {
+	// minimum of 100 ms
+	if( t > 100 )
+	{
+	    i_timer.SetInterval(t);
+	    i_timer.Reset();
+	}
+    }
+
 private:
     MapManager();
     ~MapManager();
@@ -62,8 +76,10 @@ private:
     }
 
     typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;    
+    uint32 i_gridCleanUpDelay;
     MapMapType i_maps;
+    IntervalTimer i_timer;
 };
 
-
+#endif
 #endif

@@ -29,6 +29,10 @@
 #include "Player.h"
 #include "Group.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
+
 //////////////////////////////////////////////////////////////
 /// This function handles CMSG_GROUP_INVITE
 //////////////////////////////////////////////////////////////
@@ -129,7 +133,11 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
     WorldPacket data;
     Player * player;
 
+#ifndef ENABLE_GRID_SYSTEM
     player = objmgr.GetObject<Player>( GetPlayer()->GetGroupLeader() );
+#else
+    player = ObjectAccessor::Instance().FindPlayer(GetPlayer()->GetGroupLeader());
+#endif
     if ( !player )
         return;
 
@@ -186,7 +194,11 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_GROUP_DECLINE );
     data << GetPlayer()->GetName();
 
+#ifndef ENABLE_GRID_SYSTEM
     Player *player = objmgr.GetObject<Player>( GetPlayer()->GetGroupLeader() );
+#else
+    Player *player = ObjectAccessor::Instance().FindPlayer(_player->GetGroupLeader());
+#endif
     if ( !player )
         return;
 

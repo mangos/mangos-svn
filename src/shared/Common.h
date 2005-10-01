@@ -86,7 +86,13 @@
 //#include <iostream>
 #if COMPILER == COMPILER_GNU && __GNUC__ >= 3
 #include <ext/hash_map>
+
+#if __GNUC__ >= 4
 #define __fastcall __attribute__((__fastcall__))
+#else
+#define __fastcall
+#endif
+
 #else
 #include <hash_map>
 #endif
