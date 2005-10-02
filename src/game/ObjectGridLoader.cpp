@@ -19,6 +19,10 @@
 
 #include "ObjectGridLoader.h"
 #include "Database/DatabaseEnv.h"
+#include "ObjectAccessor.h"
+#include "Utilities.h"
+
+
 
 // common method
 template<class T> void LoadHelper(const char* table, GridType &grid, uint32 map_id, std::map<OBJECT_HANDLE, T*> &m)
@@ -37,7 +41,10 @@ template<class T> void LoadHelper(const char* table, GridType &grid, uint32 map_
 	    uint32 guid = fields[0].GetUInt32();
 	    obj->LoadFromDB(guid);
 	    m[guid] = obj;
-	    obj->AddToWorld();
+
+	    // spirit healer doesn't exist in the world ...
+	    if( !MaNGOS::Utilities::IsSpiritHealer(obj) )
+		obj->AddToWorld();
 	    ++count;
 
 	}while( result->NextRow() );
@@ -75,34 +82,44 @@ ObjectGridUnloader::Unload(GridType &grid)
     grid.VisitGridObjects(unloader);
 }
 
-void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
-{
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	delete iter->second;
-    m.clear();
-}
 
+template<>
 void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+ObjectGridUnloader::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-    for(std::map<OBJECT_HANDLE, DynamicObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	delete iter->second;
-    m.clear();
-}
-
-void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
-{
-    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	delete iter->second;
-    m.clear();
-}
-
-void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
-{
+    // this is slow we need to fix this
+    // when the grid unloads, we have to ensure
+    // if a player still holds an inrange object in
+    // the unloading grid.. we need to remove it.
+    // When we have a state machine, it can resolve this
+#ifdef ENABLE_GRID_SYSTEM
+    ObjectAccessor::PlayerMapType &pm(ObjectAccessor::Instance().GetPlayers());
     for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	for(ObjectAccessor::PlayerMapType::iterator iter=pm.begin(); iter != pm.end(); iter++)
+	    iter->second->RemoveInRangeObject(iter->second);
 	delete iter->second;
+    }
+#endif
     m.clear();
 }
+
+template<class T>
+void
+ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
+{
+#ifdef ENABLE_GRID_SYSTEM
+    ObjectAccessor::PlayerMapType &pm(ObjectAccessor::Instance().GetPlayers());    
+    for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	for(ObjectAccessor::PlayerMapType::iterator iter=pm.begin(); iter != pm.end(); iter++)
+	    iter->second->RemoveInRangeObject(iter->second);
+	delete iter->second;
+    }
+#endif
+    m.clear();
+}
+
+template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m);

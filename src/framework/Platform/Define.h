@@ -38,6 +38,10 @@
 #define MANGOS_INLINE
 #endif
 
-typedef unsigned int OBJECT_HANDLE;
+#ifdef _MSC_VER
+typedef __int64   OBJECT_HANDLE;
+#else
+typedef unsigned long long OBJECT_HANDLE;
+#endif
 
 #endif 

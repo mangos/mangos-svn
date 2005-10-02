@@ -438,13 +438,6 @@ public:
     void DealWithSpellDamage(DynamicObject &);
     bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
     void SendMessageToSet(WorldPacket *data, bool self);
-    void Relocate(const float &x, const float &y, const float &z, const float &orientation)
-    {
-	m_positionX = x;
-	m_positionY = y;
-	m_positionZ = z;
-	m_orientation = orientation;
-    }
     
     // methods that the user updates his in range objects
     void UpdateInRange(UpdateData &);

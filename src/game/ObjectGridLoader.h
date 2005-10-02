@@ -75,11 +75,7 @@ public:
     ObjectGridUnloader(GridType &grid) : i_grid(grid) {}
 
     void Unload(GridType &grid);
-    void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-    void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
-    void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
-    void Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
-
+    template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
 private:
     GridType &i_grid;
 };
