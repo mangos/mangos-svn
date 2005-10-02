@@ -40,18 +40,21 @@ using namespace MaNGOS;
 static
 void buildUnitData(Player &player, UpdateData &update_data, Unit *obj)
 {
-    if( Utilities::is_in_range(obj, &player) )
-    {
-	sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
-	obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
 #ifdef ENABLE_GRID_SYSTEM
-	player.AddInRangeObject(obj);
-    }       
-    else if( player.RemoveInRangeObject(obj) )
+    if( obj->IsInWorld() )
     {
-	obj->BuildOutOfRangeUpdateBlock(&update_data);
-#endif
+	if( Utilities::is_in_range(obj, &player) )
+	{
+	    //sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
+	    obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
+	    player.AddInRangeObject(obj);
+	}       
+	else if( player.RemoveInRangeObject(obj) )
+	{
+	    obj->BuildOutOfRangeUpdateBlock(&update_data);
+	}
     }
+#endif
 }
 
 static
@@ -59,7 +62,7 @@ void buildObjectData(Player &player, UpdateData &update_data, Object *obj)
 {
     if( Utilities::is_in_range(obj, &player) )
     {
-	sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
+	//sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
 	obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
 #ifdef ENABLE_GRID_SYSTEM
 	player.AddInRangeObject(obj);
@@ -285,22 +288,25 @@ PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, T*> &m)
 #ifdef ENABLE_GRID_SYSTEM
     for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-	if( i_player.isInRange(iter->second) )
+	if( iter->second->IsInWorld() )
 	{
-	    // let's check to see if the object moved out of my range after relocation.
-	    if( !MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
+	    if( i_player.isInRange(iter->second) )
 	    {
-		// build out of range for this object
-		iter->second->BuildOutOfRangeUpdateBlock(&i_data);		
-		i_player.RemoveInRangeObject(iter->second);
+		// let's check to see if the object moved out of my range after relocation.
+		if( !MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
+		{
+		    // build out of range for this object
+		    iter->second->BuildOutOfRangeUpdateBlock(&i_data);		
+		    i_player.RemoveInRangeObject(iter->second);
+		}
 	    }
-	}
-	else if( MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
-	{
-	    // new object moved in range... due to player movement
-	    // build in range packet and put it in my pocket..
-	    iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-	    i_player.AddInRangeObject(iter->second);
+	    else if( MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
+	    {
+		// new object moved in range... due to player movement
+		// build in range packet and put it in my pocket..
+		iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+		i_player.AddInRangeObject(iter->second);
+	    }
 	}
     }
 #endif
@@ -317,6 +323,25 @@ PlayerRelocationNotifier::~PlayerRelocationNotifier()
 }
 
 
+//===============================================//
+//        ObjectRelocationNotifier
+template<>
+void
+ObjectRelocationNotifier<Creature>::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+	if( Utilities::is_in_range(&i_object, iter->second) )
+	    iter->second->AddInRangeObject(&i_object);
+}
+
+template<class T>
+void
+ObjectRelocationNotifier<T>::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+	if( Utilities::is_in_range(&i_object, iter->second) )
+	    iter->second->AddInRangeObject(&i_object);
+}
 
 //====================================================//
 //           ObjectEnterNotifier
@@ -379,4 +404,8 @@ template void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> 
 template void ObjectEnterNotifier<GameObject>::Visit(PlayerMapType &);
 template void ObjectEnterNotifier<Corpse>::Visit(PlayerMapType &);
 template void ObjectEnterNotifier<DynamicObject>::Visit(PlayerMapType &);
+
+template void ObjectRelocationNotifier<GameObject>::Visit(PlayerMapType &);
+template void ObjectRelocationNotifier<Corpse>::Visit(PlayerMapType &);
+template void ObjectRelocationNotifier<DynamicObject>::Visit(PlayerMapType &);
 

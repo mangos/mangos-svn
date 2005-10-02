@@ -41,10 +41,10 @@ MapManager::~MapManager()
 	delete iter->second;   
 
     std::stringstream ss;
-    ss << "DELLETE from creatures_grid";
+    ss << "DELETE from creatures_grid";
     sDatabase.Execute( ss.str().c_str() );
     ss.str("");
-    ss << "DELLETE from gameobjects_grid";
+    ss << "DELETE from gameobjects_grid";
     sDatabase.Execute( ss.str().c_str() );
 }
 
@@ -53,6 +53,7 @@ MapManager::Initialize()
 {
     sLog.outDebug("Grid compression apply on creatures....");
     grid_compression("creatures", "creatures_grid");
+    sLog.outDebug("Grid compression apply on gameobjects....");
     grid_compression("gameobjects", "gameobjects_grid");
 }
 

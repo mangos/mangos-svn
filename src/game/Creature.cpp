@@ -106,9 +106,13 @@ void Creature::UpdateMobMovement( uint32 p_time)
                 // wait before next move
                 m_moveTimer = rand() % (m_moveRun ? 5000 : 10000);
 
+#ifndef ENABLE_GRID_SYSTEM
                 m_positionX = m_destinationX;
                 m_positionY = m_destinationY;
                 m_positionZ = m_destinationZ;
+#else
+		MapManager::Instance().GetMap(m_mapId)->ObjectRelocation(this, m_destinationX, m_destinationY, m_destinationZ, m_orientation);		
+#endif
 
                 if(((uint32)m_positionX==respawn_cord[0])&&
                     ((uint32)m_positionY==respawn_cord[1])&&
@@ -146,10 +150,6 @@ void Creature::UpdateMobMovement( uint32 p_time)
                 m_timeMoved = 0;
 
                 AI_SendMoveToPacket(x, y, z, m_timeToMove, m_moveSpeed == 7.0*0.001);
-		m_positionX = x;
-		m_positionY = y;
-		m_positionZ = z;
-
                 m_moveTimer = (UNIT_MOVEMENT_INTERPOLATE_INTERVAL < m_timeToMove) ? UNIT_MOVEMENT_INTERPOLATE_INTERVAL : m_timeToMove;
 #endif
             }
@@ -222,6 +222,10 @@ void Creature::Update( uint32 p_time )
     Unit::Update( p_time );
 #ifndef ENABLE_GRID_SYSTEM
     if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
+#else
+    // if no player in the zone.. why bother updating me
+    if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
+#endif
     {
         // Still Moving well then lets stop
         if(m_creatureState == MOVING)
@@ -237,12 +241,7 @@ void Creature::Update( uint32 p_time )
         }
         return;
     }    
-#else
-    return;
-    // if no player in the zone.. why bother updating me
-    if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
-	return;
-#endif
+
     if (m_deathState == JUST_DIED)
     {
         this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
@@ -266,6 +265,9 @@ void Creature::Update( uint32 p_time )
             Log::getSingleton( ).outDetail("Removing corpse...");
 #ifndef ENABLE_GRID_SYSTEM
             RemoveFromMap();
+#else
+	    // TheDeadManager::Instance().Dead(me);
+	    // MapManager::Instance().GetMap(m_mapId)->Remove(this);
 #endif
             m_respawnTimer = m_respawnDelay;
             setDeathState(DEAD);
@@ -291,6 +293,8 @@ void Creature::Update( uint32 p_time )
             SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 #ifndef ENABLE_GRID_SYSTEM
             PlaceOnMap();
+#else
+	    // TheDeadManager::Instance().Revive(this);
 #endif
             setDeathState(ALIVE);
             m_creatureState = STOPPED;            // after respawn monster can move
@@ -304,8 +308,10 @@ void Creature::Update( uint32 p_time )
         {
             RegenerateAll();
         }
+#ifndef ENABLE_GRID_SYSTEM
         UpdateMobMovement( p_time );
         AI_Update();
+#endif
 
         // Clear the NPC flags bit so it doesn't get auto- updated each frame. NPC flags are set per player and this would ruin is
         // unsetUpdateMaskBit(UNIT_NPC_FLAGS);
@@ -759,13 +765,6 @@ void Creature::AI_MoveTo(float x, float y, float z, bool run)
 
     uint32 moveTime = (uint32) (distance / m_moveSpeed);
     AI_SendMoveToPacket(x, y, z, moveTime, run);
-
-    /* new position
-     */
-    m_destinationX = x;
-    m_destinationY = y;
-    m_destinationZ = z;
-
     m_timeToMove = moveTime;
     // update every 300 msecs
     m_moveTimer =  UNIT_MOVEMENT_INTERPOLATE_INTERVAL;

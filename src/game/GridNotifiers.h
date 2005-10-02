@@ -140,7 +140,7 @@ namespace MaNGOS
 	void Visit(PlayerMapType &m);
     };
     
-    /** PositionRelocationNotifier informs the map manager that certain object
+    /** PlayerRelocationNotifier informs the map manager that certain object
      * moved it position. Its up to the MapManager to ensure that the
      * object is still within its zone.  Its up to the zone that the object is within its
      * grid. etc..
@@ -153,6 +153,16 @@ namespace MaNGOS
 	~PlayerRelocationNotifier();
 	void Visit(PlayerMapType &);
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);	
+    };
+
+    /** ObjectRelocation is when an objects moves (should ships, elevators, creatures)
+     */
+    template<class T>
+    struct MANGOS_DLL_DECL ObjectRelocationNotifier
+    {
+	T& i_object;
+	ObjectRelocationNotifier(T& obj) : i_object(obj) {}
+	void Visit(PlayerMapType &);
     };
 
     /** ObjectEnterNotifer notifies the players an brand new object has arrived.

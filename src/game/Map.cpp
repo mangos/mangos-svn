@@ -103,7 +103,6 @@ Map::Add(Player *player)
 
     {   // don't remove the scope braces.. its for performance..
 	ReadGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
-	grid.SetGridStatus(GRID_STATUS_ACTIVE);
 	
 	// notify players that a new player is in
 	TypeContainerVisitor<MaNGOS::PlayerNotifier, ContainerMapList<Player> > player_notifier(notifier);
@@ -138,7 +137,6 @@ Map::AddType(T *obj)
     {
 	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
 	(*grid).template AddGridObject<T>(obj, obj->GetGUID());
-	grid->SetGridStatus(GRID_STATUS_ACTIVE);
     }
 
     sLog.outDebug("Object %d enters grid[%d,%d]", obj->GetGUID(), p.x_coord, p.y_coord);
@@ -237,6 +235,8 @@ Map::Update(uint32 t_diff)
 	uint64 mask = 1;
 	for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
 	{
+	    uint64 mask2 = CalculateGridMask(j);
+	    assert(mask2 == mask);
 	    if( i_gridMask[i] & mask )
 	    {
 		assert(i_grids[i][j] != NULL && i_info[i][j] != NULL);
@@ -245,9 +245,8 @@ Map::Update(uint32 t_diff)
 		if( grid.ObjectsInGrid() > 0 )
 		{       
 		    {
-			ReadGuard guard(i_info[i][j]->i_lock);
-
 			// update the object
+			grid.SetGridStatus(GRID_STATUS_ACTIVE);
 			MaNGOS::GridUpdater updater(grid, t_diff);
 			TypeContainerVisitor<MaNGOS::GridUpdater, ContainerMapList<Player> > player_notifier(updater);
 			grid.VisitObjects(player_notifier);
@@ -270,7 +269,7 @@ Map::Update(uint32 t_diff)
 			info.i_timer.Update(t_diff);
 			if( info.i_timer.Passed() )
 			{
-			    sLog.outDebug("Unloading grid %d for map %d", grid.GetGridId(), i_id);
+			    sLog.outDebug("Unloading grid[%d,%d] for map %d", i,j, i_id);
 			    {
 				WriteGuard guard(i_info[i][j]->i_lock);
 				ObjectGridUnloader unloader(grid);
@@ -319,7 +318,7 @@ Map::Remove(Player *player, bool remove)
 	return; // hmm...  how can we end up here
     }
 
-    sLog.outDebug("Remove player %d from grid[%d,%d]", player->GetGUID(), p.x_coord, p.y_coord);
+    sLog.outDebug("Remove player %s from grid[%d,%d]", player->GetName(), p.x_coord, p.y_coord);
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert(grid != NULL);
     
@@ -330,7 +329,6 @@ Map::Remove(Player *player, bool remove)
     }
     
 
-    player->DestroyInRange();    
     if( remove )
 	delete player;
 }
@@ -441,22 +439,35 @@ template<class T>
 void
 Map::ObjectRelocation(T *obj, const float &x, const float &y, const float &z, const float &ang)
 {
-    GridPair new_grid = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
-    GridPair old_grid = CalculateGrid(x, y);
+    GridPair old_grid = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
+    GridPair new_grid = CalculateGrid(x, y);
 
     if( old_grid != new_grid )
     {
-	WriteGuard guard(i_info[old_grid.x_coord][old_grid.y_coord]->i_lock);
-	(*i_grids[old_grid.x_coord][old_grid.y_coord]).template RemoveGridObject<T>(obj, obj->GetGUID());
-    }
+	sLog.outDebug("This creature %d moved from grid[%d,%d] to grid[%d,%d].", obj->GetGUID(), old_grid.x_coord, old_grid.x_coord, new_grid.x_coord, new_grid.y_coord);
+
+	{
+	    assert(i_info[old_grid.x_coord][old_grid.y_coord] != NULL);
+	    WriteGuard guard(i_info[old_grid.x_coord][old_grid.y_coord]->i_lock);
+	    (*i_grids[old_grid.x_coord][old_grid.y_coord]).template RemoveGridObject<T>(obj, obj->GetGUID());
+	}
   
-    EnsureGridCreated(new_grid);
-    WriteGuard guard(i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
-    (*i_grids[new_grid.x_coord][new_grid.y_coord]).template AddGridObject<T>(obj, obj->GetGUID());
+	EnsureGridCreated(new_grid);    
+	{
+	    WriteGuard guard(i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
+	    (*i_grids[new_grid.x_coord][new_grid.y_coord]).template AddGridObject<T>(obj, obj->GetGUID());
+	}
+    }
 
     // we still need to update the players to see if this guy
     // is move out of the player's range OR has moved in
     // the player's range.
+    GridType &grid(*i_grids[new_grid.x_coord][new_grid.y_coord]);
+    ReadGuard (i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
+    obj->Relocate(x, y, z, ang);
+    MaNGOS::ObjectRelocationNotifier<T> notifier(*obj);
+    TypeContainerVisitor<MaNGOS::ObjectRelocationNotifier<T>, ContainerMapList<Player> > player_notifier(notifier);
+    grid.VisitObjects(player_notifier);    
 }
 
 // explicit template instantiation
