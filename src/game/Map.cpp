@@ -463,7 +463,7 @@ Map::ObjectRelocation(T *obj, const float &x, const float &y, const float &z, co
     // is move out of the player's range OR has moved in
     // the player's range.
     GridType &grid(*i_grids[new_grid.x_coord][new_grid.y_coord]);
-    ReadGuard (i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
+    ReadGuard guard(i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
     obj->Relocate(x, y, z, ang);
     MaNGOS::ObjectRelocationNotifier<T> notifier(*obj);
     TypeContainerVisitor<MaNGOS::ObjectRelocationNotifier<T>, ContainerMapList<Player> > player_notifier(notifier);
