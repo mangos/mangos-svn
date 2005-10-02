@@ -30,6 +30,7 @@
 #include "Utilities/TypeList.h"
 #include <map>
 
+
 namespace MaNGOS
 {
     /* ContainerMapList Helpers */
@@ -47,13 +48,13 @@ namespace MaNGOS
   
     template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerMapList<T> &elements, OBJECT_HANDLE hdl)
     {
-	return NULL; // wrong container
+	return NULL; // this is a missed
     }
 
     template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl)
     {
-	if( !Find(elements._elements, hdl) )
-	    return Find(elements.TailElement, hdl);
+	SPECIFIC_TYPE* t = Find(elements._elements, hdl);
+	return (t != NULL ? t :Find(elements.TailElement, hdl));
     }
     
     // const find functions
@@ -81,52 +82,59 @@ namespace MaNGOS
     }
 
     // non-const insert functions
-    template<class SPECIFIC_TYPE> bool Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-	elements._element[hdl] = obj;
-	return true;
+	elements._element[hdl] = obj;	
+	return obj;
     };
     
-    template<class SPECIFIC_TYPE> bool Insert(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-	return false;
+	return NULL;
     }
 
-    template<class SPECIFIC_TYPE, class T> bool Insert(ContainerMapList<T> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    // this is a missed
+    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Insert(ContainerMapList<T> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl) 
     {
-	return false; // wrong type...
+	return NULL; // a missed
     }
-  
+
     // Recursion
-    template<class SPECIFIC_TYPE, class H, class T> bool Insert(ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Insert(ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-	if( !Insert(elements._elements, obj, hdl) )
-	    return Insert(elements._TailElement, obj, hdl);
+	SPECIFIC_TYPE* t= Insert(elements._elements, obj, hdl);
+	return (t != NULL ? t : Insert(elements._TailElements, obj, hdl));
     }
 
     // non-const remove method
-    template<class SPECIFIC_TYPE> bool Remove(ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
 	typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
 	if( iter != elements._element.end() )
+	{
 	    elements._element.erase(iter);
-	return true; // found... terminate the search
+	    return iter->second;
+	}
+
+	return NULL; // found... terminate the search
     }
     
-    template<class SPECIFIC_TYPE> bool Remove(ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-	return false;
+	return NULL;
     }
 
-    template<class SPECIFIC_TYPE, class T> bool Remove(ContainerMapList<T> &elements, OBJECT_HANDLE hdl)
+    // this is a missed
+    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<T> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl) 
     {
-	return false; // bad hit
+	return NULL; // a missed
     }
 
-    template<class SPECIFIC_TYPE, class T, class H> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<H, T> > &elements, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE, class T, class H> SPECIFIC_TYPE* Remove(ContainerMapList<TypeList<H, T> > &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-	if( !Remove(elements._elements, hdl) )
-	    return Remove(elements._TailElements, hdl);
+	// The head element is bad	
+	SPECIFIC_TYPE* t = Remove(elements._elements, obj, hdl);	
+	return ( t != NULL ? t : Remove(elements._TailElements, obj, hdl) );
     }
 
 }

@@ -73,8 +73,10 @@ public:
     /** an object of interested exits the grid
      */
     void RemoveObject(OBJECT *obj, OBJECT_HANDLE hdl)
-    {
-	i_objects._element.erase(hdl);      
+    {	
+	typename std::map<OBJECT_HANDLE, OBJECT *>::iterator iter= i_objects._element.find(hdl);
+	if( iter != i_objects._element.end() )
+	    i_objects._element.erase(iter);      
     }
     
     /** Refreshes/update the grid. This required for remote grids.
@@ -107,7 +109,7 @@ public:
     /** Grid id accessor
      */
     const unsigned int GetGridId(void) const { return i_gridId; }
-    void SetGridId(unsigned int id) const { i_gridId = id; }
+   void SetGridId(unsigned int id) const { i_gridId = id; }
     
     /** Returns the number of object within the grid.
      */
@@ -124,7 +126,7 @@ public:
 
     /** Removes a containter type object from the grid
      */
-    template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(hdl); }
+    template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl); }
 
     inline grid_status_t GetGridStatus(void) const { return i_gridStatus; }
     inline void SetGridStatus(grid_status_t s) { i_gridStatus = s; }

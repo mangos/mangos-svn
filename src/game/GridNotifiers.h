@@ -85,7 +85,8 @@ namespace MaNGOS
 
 	template<class T> void updateObjects(std::map<OBJECT_HANDLE, T *> &m)
 	{
-	    for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	    std::map<OBJECT_HANDLE, T *> tmp(m);
+	    for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
 		iter->second->Update(i_timeDiff);
 	}
 

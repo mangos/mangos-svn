@@ -105,13 +105,15 @@ public:
     /// inserts a specific object into the container
     template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, SPECIFIC_TYPE *obj) 
     {
-	return MaNGOS::Insert<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, obj, hdl);
+	SPECIFIC_TYPE* t = MaNGOS::Insert(i_elements, obj, hdl);
+	return (t != NULL);
     }
     
     ///  Removes the object from the container, and returns the removed object
-    template<class SPECIFIC_TYPE> bool remove(OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj, OBJECT_HANDLE hdl)
     {
-	return MaNGOS::Remove<SPECIFIC_TYPE, OBJECT_TYPES>(i_elements, hdl);
+	SPECIFIC_TYPE* t = MaNGOS::Remove(i_elements, obj, hdl);
+	return (t != NULL);
     }
 
     ContainerMapList<OBJECT_TYPES> & GetElements(void) { return i_elements; }
