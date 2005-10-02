@@ -292,9 +292,13 @@ Map::Update(uint32 t_diff)
 			info.i_timer.Reset(i_gridExpiry); // starts the count count of removal
 		       
 		    }
-		    else
+		    else if( grid.GetGridStatus() == GRID_STATUS_ACTIVE )
 		    {
 			grid.SetGridStatus(GRID_STATUS_IDLE);
+		    }
+		    else
+		    {
+			// invalid status don't triggers unload..
 		    }
 		}
 	    }
@@ -407,6 +411,10 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 	
 	// Remove in range objects for the old grid
 	GridType &grid(*i_grids[old_grid.x_coord][old_grid.y_coord]);
+
+	// not to figure out the objects are still in range from the old grid.. the player has be
+	// be in a new position
+	player->Relocate(x, y, z, orientation);
 	MaNGOS::PlayerRelocationNotifier notifier(*player);
 	TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
 	grid.VisitObjects(player_notifier);
@@ -419,14 +427,13 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 	}
 	EnsurePlayerInGrid(new_grid, player);
     }
-    
+    else
+        player->Relocate(x, y, z, orientation);
 
     // now inform all others in the grid of your activity
     GridType *grid = i_grids[new_grid.x_coord][new_grid.y_coord];
     assert(grid != NULL);    
 
-    UpdateData data;
-    player->Relocate(x, y, z, orientation);
     MaNGOS::PlayerRelocationNotifier notifier(*player);
     TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
     grid->VisitObjects(player_notifier);
@@ -444,7 +451,7 @@ Map::ObjectRelocation(T *obj, const float &x, const float &y, const float &z, co
 
     if( old_grid != new_grid )
     {
-	sLog.outDebug("This creature %d moved from grid[%d,%d] to grid[%d,%d].", obj->GetGUID(), old_grid.x_coord, old_grid.x_coord, new_grid.x_coord, new_grid.y_coord);
+	sLog.outDebug("This creature "I64FMT" moved from grid[%d,%d] to grid[%d,%d].", obj->GetGUID(), old_grid.x_coord, old_grid.y_coord, new_grid.x_coord, new_grid.y_coord);
 
 	{
 	    assert(i_info[old_grid.x_coord][old_grid.y_coord] != NULL);
@@ -468,6 +475,8 @@ Map::ObjectRelocation(T *obj, const float &x, const float &y, const float &z, co
     MaNGOS::ObjectRelocationNotifier<T> notifier(*obj);
     TypeContainerVisitor<MaNGOS::ObjectRelocationNotifier<T>, ContainerMapList<Player> > player_notifier(notifier);
     grid.VisitObjects(player_notifier);    
+    
+    // what about move into other creatures location and start an attack?
 }
 
 // explicit template instantiation

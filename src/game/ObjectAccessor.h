@@ -66,10 +66,18 @@ public:
     inline PlayerMapType& GetPlayers(void) { return i_players; }
     void InsertPlayer(Player *);
     void RemovePlayer(Player *);
+
     inline void AddUpdateObject(Object *obj)
     {
 	Guard guard;
 	i_updateObjects.push_back(obj);
+    }
+
+    inline void RemoveUpdateObject(Object *obj)
+    {
+	std::vector<Object *>::iterator iter = std::find(i_updateObjects.begin(), i_updateObjects.end(), obj);
+	if( iter != i_updateObjects.end() )
+	    i_updateObjects.erase(iter);	
     }
 
     void Update(void);

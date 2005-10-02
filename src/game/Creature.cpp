@@ -111,7 +111,8 @@ void Creature::UpdateMobMovement( uint32 p_time)
                 m_positionY = m_destinationY;
                 m_positionZ = m_destinationZ;
 #else
-		MapManager::Instance().GetMap(m_mapId)->ObjectRelocation(this, m_destinationX, m_destinationY, m_destinationZ, m_orientation);		
+		assert( m_destinationX != 0 && m_destinationZ != 0 && m_destinationY != 0);
+		MapManager::Instance().GetMap(m_mapId)->ObjectRelocation<Creature>(this, m_destinationX, m_destinationY, m_destinationZ, m_orientation);		
 #endif
 
                 if(((uint32)m_positionX==respawn_cord[0])&&
@@ -222,10 +223,6 @@ void Creature::Update( uint32 p_time )
     Unit::Update( p_time );
 #ifndef ENABLE_GRID_SYSTEM
     if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
-#else
-    // if no player in the zone.. why bother updating me
-    if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
-#endif
     {
         // Still Moving well then lets stop
         if(m_creatureState == MOVING)
@@ -242,6 +239,22 @@ void Creature::Update( uint32 p_time )
         return;
     }    
 
+#else
+    // if no player in the zone.. why bother updating me
+    if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
+    {
+	if( m_creatureState = MOVING )
+	{
+	    m_moveSpeed = 7.0f*0.001f; // ???
+	    m_moveTimer = 0;
+            m_destinationX = m_destinationY = m_destinationZ = 0;
+            m_timeMoved = 0;
+            m_timeToMove = 0;
+            m_creatureState = STOPPED;
+        }
+        return;
+    }
+#endif
     if (m_deathState == JUST_DIED)
     {
         this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
@@ -268,6 +281,7 @@ void Creature::Update( uint32 p_time )
 #else
 	    // TheDeadManager::Instance().Dead(me);
 	    // MapManager::Instance().GetMap(m_mapId)->Remove(this);
+	    this->RemoveFromWorld();
 #endif
             m_respawnTimer = m_respawnDelay;
             setDeathState(DEAD);
@@ -294,6 +308,7 @@ void Creature::Update( uint32 p_time )
 #ifndef ENABLE_GRID_SYSTEM
             PlaceOnMap();
 #else
+	    this->AddToWorld(); // ?? not sure
 	    // TheDeadManager::Instance().Revive(this);
 #endif
             setDeathState(ALIVE);
@@ -308,10 +323,9 @@ void Creature::Update( uint32 p_time )
         {
             RegenerateAll();
         }
-#ifndef ENABLE_GRID_SYSTEM
+
         UpdateMobMovement( p_time );
         AI_Update();
-#endif
 
         // Clear the NPC flags bit so it doesn't get auto- updated each frame. NPC flags are set per player and this would ruin is
         // unsetUpdateMaskBit(UNIT_NPC_FLAGS);
@@ -713,7 +727,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
     WPAssert( data.size() == 49 );
     SendMessageToSet( &data, false );
 #ifdef ENABLE_GRID_SYSTEM
-    MapManager::Instance().GetMap(m_mapId)->ObjectRelocation(this, x, y, z, m_orientation);
+    MapManager::Instance().GetMap(m_mapId)->ObjectRelocation<Creature>(this, x, y, z, m_orientation);
 #endif
 }
 
@@ -752,6 +766,10 @@ void Creature::AI_MoveTo(float x, float y, float z, bool run)
     float dx = x - m_positionX;
     float dy = y - m_positionY;
     float dz = z - m_positionZ;
+
+    m_destinationX = x;
+    m_destinationY = y;
+    m_destinationZ = z;
 
     float distance = sqrt((dx*dx) + (dy*dy) + (dz*dz));
     if(!distance)
