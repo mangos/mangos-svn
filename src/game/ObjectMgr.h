@@ -136,7 +136,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
             return NULL;
 #else
-	    ObjectAccessor::Instance().FindPlayerByName(name);
+	    return ObjectAccessor::Instance().FindPlayerByName(name);
 #endif
         }
 
