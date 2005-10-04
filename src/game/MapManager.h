@@ -20,7 +20,7 @@
 #ifndef MANGOS_MAPMANAGER_H
 #define MANGOS_MAPMANAGER_H
 
-#ifdef ENABLE_GRID_SYSTEM
+
 /*
  * @class MapManager
  * MapMaanger manages the area in the game.  The world in MaNGOS is devided into
@@ -81,5 +81,5 @@ private:
     IntervalTimer i_timer;
 };
 
-#endif
+
 #endif

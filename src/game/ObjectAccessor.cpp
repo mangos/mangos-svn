@@ -11,7 +11,6 @@
 #include "Item.h"
 
 #ifdef ENABLE_GRID_SYSTEM
-
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
@@ -165,3 +164,4 @@ ObjectAccessor::_buildPacket(Player *pl, Player *bpl, UpdateDataMapType &update_
 }
 
 #endif
+

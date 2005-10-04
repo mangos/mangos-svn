@@ -42,9 +42,10 @@ class DynamicObject;
 class Corpse;
 class Object;
 
-#ifdef ENABLE_GRID_SYSTEM
+
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex> >
 {
+#ifdef ENABLE_GRID_SYSTEM
     friend class MaNGOS::OperatorNew<ObjectAccessor>;
     ObjectAccessor() {}
     ObjectAccessor(const ObjectAccessor &);
@@ -83,8 +84,8 @@ private:
     void _buildUpdateObject(Object *, UpdateDataMapType &);
     void _buildPacket(Player *, Player *, UpdateDataMapType &);
     std::vector<Object *> i_objects;
-
+#endif
 };
 
-#endif
+
 #endif

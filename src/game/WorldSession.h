@@ -128,6 +128,7 @@ class WorldSession
         /// Opcode implemented in MovementHandler.cpp
         void HandleMovementOpcodes(WorldPacket& recvPacket);
         void HandleFallOpcode( WorldPacket & recv_data );
+    void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
 
         /// Opcodes implemented in GroupHandler.cpp:
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);

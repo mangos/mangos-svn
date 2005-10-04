@@ -107,7 +107,8 @@ class Object
 
 #ifndef ENABLE_GRID_SYSTEM
         bool SetPosition( float newX, float newY, float newZ, float newOrientation, bool allowPorting = false );
-#else
+#endif
+
     void Relocate(const float &x, const float &y, const float &z, const float &orientation)
     {
 	m_positionX = x;
@@ -115,7 +116,7 @@ class Object
 	m_positionZ = z;
 	m_orientation = orientation;
     }
-#endif
+
         const float& GetPositionX( ) const { return m_positionX; }
         const float& GetPositionY( ) const { return m_positionY; }
         const float& GetPositionZ( ) const { return m_positionZ; }
