@@ -187,4 +187,7 @@ typedef unsigned char        uint8;
 
 // fix buggy MSVC's for variable scoping to be reliable =S
 #define for if(true) for
+
+#define LOGOUTDELAY 600 // ~ 1 min
+
 #endif

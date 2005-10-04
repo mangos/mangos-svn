@@ -83,6 +83,9 @@ Player::Player ( ): Unit()
     m_isInvited = false;
 
     m_dontMove = false;
+	
+	logoutDelay = LOGOUTDELAY;
+	inCombat = false;
 }
 
 
@@ -187,7 +190,10 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
         case MAGE    : powertype = 0; break;
         case WARLOCK : powertype = 0; break;
         case DRUID   : powertype = 0; break;
-    }                                             // 2 = Focus (unused)
+    }   
+                                          // 2 = Focus (unused)
+
+
 
     // Set Starting stats for char
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
@@ -204,7 +210,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
     //SetUInt32Value(UNIT_FIELD_MAXPOWER5, 5 );
     SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 1 );
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 1 ); //<<<< BUG
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
@@ -324,6 +330,9 @@ void Player::Update( uint32 p_time )
 
     if (m_state & UF_ATTACKING)
     {
+		inCombat = true;
+		logoutDelay = LOGOUTDELAY;
+
         // In combat!
         if (isAttackReady())
         {
@@ -371,7 +380,13 @@ void Player::Update( uint32 p_time )
                 }
             }
         }
-    }
+    } else { //This is a time to be able the logout after a combat!
+		if( logoutDelay ) logoutDelay--;
+		else {
+		  logoutDelay = LOGOUTDELAY;
+		  inCombat = false;
+		}
+	}
 
     // only regenerate if alive
     if (isAlive())

@@ -49,6 +49,18 @@ enum Classes
     DRUID = 11,
 };
 
+enum Races
+{
+    HUMAN = 1,
+    ORC = 2,
+    DWARF = 3,
+    NIGHT ELF = 4,
+    UNDEAD = 5,
+    TAUREN = 6,
+    GNOME = 7,
+    TROLL = 8,
+};
+
 struct quest_status
 {
     quest_status()
@@ -326,6 +338,12 @@ public:
         bool IsGroupMember(Player *plyr);
 
         // Items
+	    void UpdateSlot(uint8 slot)
+	    {
+	    	//Isso eh pra atualizar o item... evita q ele fique cinza e inacessivel
+            Item* Up = RemoveItemFromSlot(slot);
+            if (Up != NULL) AddItemToSlot(slot, Up);
+     	}
         void SwapItemSlots(uint8 srcslot, uint8 dstslot);
         Item* GetItemBySlot(uint8 slot) const
         {
@@ -515,6 +533,11 @@ public:
         uint64 m_groupLeader;
         bool m_isInGroup;
         bool m_isInvited;
+
+		//If Player is in combat
+        bool inCombat;
+	    //Time to logout after a combat
+	    int logoutDelay;
 
         // items the player has bid on
         std::list<bidentry*> m_bids;

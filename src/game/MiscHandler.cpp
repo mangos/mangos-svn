@@ -255,18 +255,25 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
-// TODO: fix this
-/*
-    data.Initialize( SMSG_LOGOUT_RESPONSE );
-    //data << (uint8)0xC;
-    data << uint32(0); //Filler
-    data << uint8(0); //Logout accepted
-    SendPacket( &data );
+    if( !(GetPlayer()->inCombat) ){ //Nao esta em combate
+      data.Initialize( SMSG_LOGOUT_RESPONSE );
+      data << uint32(0); //Filler
+      data << uint8(0); //Logout accepted
+      SendPacket( &data );
+      //Essa funcao coloca o tempo atual numa variavel chamada _logouttime (WorldSession.h)
+	  //Essa variavel eh verificada a cada WorldSession::Update atraves da funcao ShouldLogout()
+	  //Caso essa funcao retorne TRUE entao o logout sera efetuado!
+      LogoutRequest(time(NULL));
+    }
+    else {
+	  data.Initialize( SMSG_LOGOUT_RESPONSE );
+	  data << (uint8)0xC; //Logout not accepted
+	  data << uint32(0);  //Filler
+	  data << uint8(0);
+	  SendPacket( &data );
 
-    LogoutRequest(time(NULL));
-*/
-
-    LogoutPlayer(true);
+	  LogoutRequest(0);
+    }
 }
 
 
