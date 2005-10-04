@@ -37,7 +37,7 @@
 void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-    UpdateData upd;
+	UpdateData upd;
     uint8 srcslot, dstslot;
 
     recv_data >> srcslot >> dstslot;
@@ -45,31 +45,59 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     Log::getSingleton().outDetail("ITEM: swap, src slot: %u dst slot: %u", (uint32)srcslot, (uint32)dstslot);
 
     // these are the bags slots...ignore it for now
-    // if (dstslot >= INVENTORY_SLOT_BAG_1 && dstslot <= INVENTORY_SLOT_BAG_4)
-    //     dstslot = srcslot;
+    //if (dstslot >= INVENTORY_SLOT_BAG_1 && dstslot <= INVENTORY_SLOT_BAG_4)
+    //    dstslot = srcslot;
 
-    // these are then bankbag slots...ignore them for now
-    // if (dstslot >= 63 && dstslot <= 69)
-    //     dstslot = srcslot;
+	// these are then bankbag slots...ignore them for now
+    //if (dstslot >= 63 && dstslot <= 69)
+    //    dstslot = srcslot;
 
     Item * dstitem = GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = GetPlayer()->GetItemBySlot(srcslot);
 
+	Log::getSingleton().outDetail(" #SKILL: %u", (uint32)srcitem->GetProto()->RequiredSkill );
+
     // check to make sure items are not being put in wrong spots
-    if ((srcslot >= INVENTORY_SLOT_ITEM_START && dstslot < INVENTORY_SLOT_ITEM_END) ||
-        (dstslot >= INVENTORY_SLOT_BAG_START && dstslot < INVENTORY_SLOT_BAG_END))
+	if ( (srcslot >= INVENTORY_SLOT_BAG_START && srcslot < BANK_SLOT_BAG_END)&&
+		 (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
+	   )
     {
-        uint8 error;
-        if (!srcitem || (error=GetPlayer()->CanEquipItemInSlot(dstslot, srcitem->GetProto())))
+        uint8 error = GetPlayer()->CanEquipItemInSlot(dstslot, srcitem->GetProto());
+        if (!srcitem || error)
         {
             data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-            data << error;
-            data << (dstitem ? dstitem->GetGUID() : uint64(0));
-            data << (srcitem ? srcitem->GetGUID() : uint64(0));
-            data << uint8(0);
+            data << (uint8)error;
+            data << (uint64)srcitem->GetProto()->RequiredLevel;
+            data << (uint64)0;
+            data << (uint8)0;
 
             SendPacket( &data );
-            return;
+			//Atualiza os slots
+            GetPlayer()->UpdateSlot(srcslot);
+			GetPlayer()->UpdateSlot(dstslot);
+			return;
+        }
+    }
+	//Se existir um item no destino é preciso saber se ele pode trocar de lugar com o item da fonte        
+    if(srcslot >= EQUIPMENT_SLOT_START && srcslot < EQUIPMENT_SLOT_END )
+	{
+	    if(dstitem)
+        {
+	        uint8 error = GetPlayer()->CanEquipItemInSlot(srcslot, dstitem->GetProto());
+            if (error)
+	    	{
+                data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
+                data << (uint8)error;
+                data << (uint64)dstitem->GetProto()->RequiredLevel;
+                data << (uint64)0;
+                data << (uint8)0;
+
+                SendPacket( &data );
+                //Atualiza os slots
+				GetPlayer()->UpdateSlot(srcslot);
+				GetPlayer()->UpdateSlot(dstslot);
+                return;
+	    	}
         }
     }
 
@@ -77,7 +105,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     if (srcslot == dstslot)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(0x0c) ;
+        data << uint8(0x16); //item is not fount
         data << (dstitem ? dstitem->GetGUID() : uint64(0));
         data << (srcitem ? srcitem->GetGUID() : uint64(0));
         data << uint8(0);
@@ -86,11 +114,17 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
         return;
     }
 
+
+	static int i = 0;
+	Log::getSingleton().outDetail(" #FACTION: %u", (uint32)i );
+    GetPlayer()->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE , (uint32)i);
+    i++;
+
     // swap items
     GetPlayer()->SwapItemSlots(srcslot, dstslot);
 
-    // GetPlayer( )->BuildUpdateObjectMsg( &data, &updateMask );
-    // GetPlayer( )->SendMessageToSet( &data, false );
+//    GetPlayer( )->BuildUpdateObjectMsg( &data, &updateMask );
+//    GetPlayer( )->SendMessageToSet( &data, false );
 }
 
 
@@ -130,13 +164,15 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
     Log::getSingleton().outDetail("ITEM: autoequip, src slot: %u dst slot: %u", (uint32)srcslot, (uint32)dstslot);
 
-    Item *item = GetPlayer()->GetItemBySlot(dstslot);
+    Item *item  = GetPlayer()->GetItemBySlot(dstslot);
+
+	//Se o item nao existe
     if(!item)
     {
         Log::getSingleton().outDetail("ITEM: tried to equip non-existant item");
 
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(0x0c);                      // TODO: set correct error code
+        data << uint8(0x16); //item is not found
         data << uint64(0);
         data << uint64(0);
         data << uint8(0);
@@ -146,6 +182,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         return;
     }
 
+	//Se o nivel do item é compativel com o nivel do CHAR
     uint32 charLvl = GetPlayer()->getLevel();
     uint32 itemLvl = item->GetProto()->RequiredLevel;
 
@@ -154,33 +191,49 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     if( charLvl < itemLvl)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(0x0c);                      // TODO: set correct error value
-        data << item->GetGUID();
-        data << uint64(0);
-        data << uint8(0);
-
+        data << (uint8)0x01; // You must reached on level ? to use that item
+        data << (uint64)item->GetProto()->RequiredLevel;
+        data << (uint64)0;
+        data << (uint8)0;
+        
         SendPacket( &data );
-
+        GetPlayer()->UpdateSlot(dstslot);
         return;
     }
 
+	//Acha um slot vazio
     uint8 slot = GetPlayer()->FindFreeItemSlot(item->GetProto()->InventoryType);
-
+    //Se o slot retornado nao for fora da BAG
     if (slot == INVENTORY_SLOT_ITEM_END)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(0x0c);                      // TODO: set correct error code
+        data << uint8(0x03); //that item do not go in this slot
         data << item->GetGUID();
         data << uint64(0);
         data << uint8(0);
         WPAssert(data.size() == 18);
         SendPacket( &data );
+		GetPlayer()->UpdateSlot(dstslot);
+        return;
+    }
+
+    //Se o item da bag pode equipar o CHAR
+	uint8 error = GetPlayer()->CanEquipItemInSlot(slot, item->GetProto());  
+	
+    if ( error )
+    {
+        data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
+        data << error;        
+        data << (uint64)item->GetProto()->RequiredLevel;
+        data << (uint64)0;
+        data << (uint8)0;
+        SendPacket( &data );
+		GetPlayer()->UpdateSlot(dstslot);
         return;
     }
 
     GetPlayer()->SwapItemSlots(dstslot, slot);
 }
-
 
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
