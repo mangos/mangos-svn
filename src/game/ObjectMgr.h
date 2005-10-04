@@ -52,6 +52,10 @@ enum HIGHGUID
 class Group;
 class Path;
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
+
 //#define MAX_CONTINENTS 500
 
 class ObjectMgr : public Singleton < ObjectMgr >
@@ -122,6 +126,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         Player* GetPlayer(const char* name)
         {
+#ifndef ENABLE_GRID_SYSTEM
             PlayerMap::const_iterator itr;
             for (itr = mPlayers.begin(); itr != mPlayers.end(); itr++)
             {
@@ -130,14 +135,22 @@ class ObjectMgr : public Singleton < ObjectMgr >
             }
 
             return NULL;
+#else
+	    ObjectAccessor::Instance().FindPlayerByName(name);
+#endif
         }
+
 
         Player* GetPlayer(uint64 guid)
         {
+#ifndef ENABLE_GRID_SYSTEM
             PlayerMap::const_iterator itr = mPlayers.find(GUID_LOPART(guid));
             if (itr != mPlayers.end())
                 return itr->second;
             return NULL;
+#else
+	    return ObjectAccessor::Instance().FindPlayer(guid);
+#endif
         }
 
 #ifndef ENABLE_GRID_SYSTEM

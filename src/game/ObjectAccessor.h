@@ -29,7 +29,9 @@
 #include "zthread/FastMutex.h"
 #include "Common.h"
 
-#include <vector>
+#include "ByteBuffer.h"
+#include "UpdateData.h"
+
 
 class Creature;
 class Player;
@@ -67,24 +69,21 @@ public:
     void InsertPlayer(Player *);
     void RemovePlayer(Player *);
 
-    inline void AddUpdateObject(Object *obj)
-    {
-	Guard guard;
-	i_updateObjects.push_back(obj);
-    }
-
-    inline void RemoveUpdateObject(Object *obj)
-    {
-	std::vector<Object *>::iterator iter = std::find(i_updateObjects.begin(), i_updateObjects.end(), obj);
-	if( iter != i_updateObjects.end() )
-	    i_updateObjects.erase(iter);	
-    }
+    void AddUpdateObject(Object *obj);
 
     void Update(void);
+
 private:
     PlayerMapType i_players;
-    std::vector<Object *> i_updateObjects;
+
+    typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;  
+    typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;  
     typedef MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>::Lock Guard;
+
+    void _buildUpdateObject(Object *, UpdateDataMapType &);
+    void _buildPacket(Player *, Player *, UpdateDataMapType &);
+    std::vector<Object *> i_objects;
+
 };
 
 #endif

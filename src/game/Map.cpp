@@ -125,12 +125,7 @@ Map::AddType(T *obj)
     assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
 
-    if( !loaded(p) )
-    {
-	sLog.outError("Doesn't make sense to add the object to a grid that's no loaded [guid=%d]", obj->GetGUID());
-	return NULL; // doesn't make sense to add a creature to a location where there's no one
-    }
-
+    EnsureGridCreated(p);
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert( grid != NULL );
 
@@ -158,7 +153,7 @@ Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
 
     if( !loaded(p) )
-	return; // doesn't make sense to add a creature to a location where there's no one  
+	return; // dude.. how did I end up in a grid that's no loaded...
     
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert( grid != NULL );
@@ -179,7 +174,7 @@ Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
 
     if( !loaded(p) )
-	return; // doesn't make sense to add a creature to a location where there's no one  
+	return; // ignore the creature.. no one there to hear him
     
     GridType *grid = i_grids[p.x_coord][p.y_coord];
     assert( grid != NULL );
@@ -319,7 +314,7 @@ Map::Remove(Player *player, bool remove)
     if( !(i_gridMask[p.x_coord] & mask) )
     {
 	assert( false );	
-	return; // hmm...  how can we end up here
+	return; // hmm...  how can we end up here in an unloaded grid
     }
 
     sLog.outDebug("Remove player %s from grid[%d,%d]", player->GetName(), p.x_coord, p.y_coord);
@@ -412,7 +407,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 	// Remove in range objects for the old grid
 	GridType &grid(*i_grids[old_grid.x_coord][old_grid.y_coord]);
 
-	// not to figure out the objects are still in range from the old grid.. the player has be
+	// inorder to figure out the objects are still in range from the old grid.. the player has to
 	// be in a new position
 	player->Relocate(x, y, z, orientation);
 	MaNGOS::PlayerRelocationNotifier notifier(*player);

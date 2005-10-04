@@ -6,6 +6,9 @@
 #include "GameObject.h"
 #include "DynamicObject.h"
 #include "Corpse.h"
+#include "WorldSession.h"
+#include "WorldPacket.h"
+#include "Item.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 
@@ -77,14 +80,88 @@ ObjectAccessor::InsertPlayer(Player *pl)
 void
 ObjectAccessor::RemovePlayer(Player *pl)
 {
+    Guard guard(*this);
     PlayerMapType::iterator iter = i_players.find(pl->GetGUID());
     if( iter != i_players.end() )
 	i_players.erase(iter);
+
+    std::vector<Object *>::iterator iter2 = std::find(i_objects.begin(), i_objects.end(), (Object *)pl);
+    if( iter2 != i_objects.end() )
+	i_objects.erase(iter2);
 }
 
 void
 ObjectAccessor::Update()
 {
+    UpdateDataMapType update_players;
+    {
+	Guard guard(*this);    
+	for(std::vector<Object *>::iterator iter=i_objects.begin(); iter != i_objects.end(); ++iter)
+	{
+	    _buildUpdateObject(*iter, update_players);
+	    (*iter)->ClearUpdateMask();
+	}
+	i_objects.clear();
+    }
+
+    
+    for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
+    {
+	WorldPacket packet;
+	iter->second.BuildPacket(&packet);
+	iter->first->GetSession()->SendPacket(&packet);
+    }
+}
+
+void
+ObjectAccessor::AddUpdateObject(Object *obj)
+{
+    Guard guard(*this);
+    i_objects.push_back(obj);
+}
+
+void
+ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
+{
+    Player *pl = NULL;
+    if( obj->isType(TYPEID_PLAYER) )
+    {
+	pl = dynamic_cast<Player *>(obj);
+    }
+    else if( obj->isType(TYPEID_ITEM | TYPEID_CONTAINER) )
+    {
+	Item *item = dynamic_cast<Item *>(obj);
+	assert( item != NULL );
+	pl = item->GetOwner();
+    }
+
+    if( pl == NULL )
+	return;
+
+    _buildPacket(pl, pl, update_players); // bulid myself for myself
+    // update the in range players
+    for(Player::InRangeUnitsMapType::iterator iter=pl->InRangeUnitsBegin(); iter != pl->InRangeUnitsEnd(); ++iter)
+    {
+	Player *for_pl = dynamic_cast<Player *>(iter->second);
+	if( for_pl != NULL )
+	    _buildPacket(for_pl, pl, update_players); // build myself for my in range players
+    }
+}
+
+void
+ObjectAccessor::_buildPacket(Player *pl, Player *bpl, UpdateDataMapType &update_players)
+{
+    UpdateDataMapType::iterator iter = update_players.find(pl);
+
+    if( iter == update_players.end() )
+    {
+	std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataValueType(pl, UpdateData()) );
+	assert(p.second);
+	iter = p.first;
+    }
+    
+    bpl->BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
+
 }
 
 #endif
