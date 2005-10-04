@@ -114,12 +114,6 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-
-	static int i = 0;
-	Log::getSingleton().outDetail(" #FACTION: %u", (uint32)i );
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE , (uint32)i);
-    i++;
-
     // swap items
     GetPlayer()->SwapItemSlots(srcslot, dstslot);
 
