@@ -421,10 +421,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
 
+
+#ifndef ENABLE_GRID_SYSTEM
         // Map of active characters in the game
         PlayerMap           mPlayers;
 
-#ifndef ENABLE_GRID_SYSTEM
         // Map of active creatures in the game
         CreatureMap         mCreatures;
 

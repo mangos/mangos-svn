@@ -1,5 +1,5 @@
 
-#ifdef ENABLE_GRID_SYSTEM
+
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
 #include "Database/DatabaseEnv.h"
@@ -87,8 +87,9 @@ MapManager::Update(time_t diff)
     Guard guard(*this);
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
 	iter->second->Update(diff);
-
+#ifdef ENABLE_GRID_SYSTEM
     ObjectAccessor::Instance().Update();
+#endif
 }
 
-#endif
+

@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifdef ENABLE_GRID_SYSTEM
+
 #include "Map.h"
 #include "GridNotifiers.h"
 #include "Player.h"
@@ -118,7 +118,7 @@ Map::Add(Player *player)
 
 
 template<class T>
-GridType*
+void
 Map::AddType(T *obj)
 {
     GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
@@ -190,28 +190,25 @@ Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 void
 Map::Add(Creature *creature)
 {
-    GridType *grid = AddType<Creature>(creature);    
+    AddType<Creature>(creature);    
 }
 
 void
 Map::Add(DynamicObject *obj)
 {
-    GridType *grid = AddType<DynamicObject>(obj);
-    
+    AddType<DynamicObject>(obj);    
 }
 
 void
 Map::Add(GameObject *obj)
 {
-    GridType *grid = AddType<GameObject>(obj);
-    
+    AddType<GameObject>(obj);    
 }
 
 void
 Map::Add(Corpse *obj)
 {
-    GridType *grid = AddType<Corpse>(obj);
-    
+    AddType<Corpse>(obj);    
 }
 
 bool
@@ -333,7 +330,7 @@ Map::Remove(Player *player, bool remove)
 }
 
 template<class T>
-GridType*
+void
 Map::RemoveType(T *obj, bool remove)
 {
     GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
@@ -341,7 +338,7 @@ Map::RemoveType(T *obj, bool remove)
 	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
 
     if( !loaded(p) )
-	return NULL; // doesn't make sense to remove a creature in a location where its nothing
+	return; // doesn't make sense to remove a creature in a location where its nothing
 
     sLog.outDebug("Remove object % from grid[%d,%d]", obj->GetGUID(), p.x_coord, p.y_coord);
     GridType *grid = i_grids[p.x_coord][p.y_coord];
@@ -480,4 +477,4 @@ template void Map::ObjectRelocation<GameObject>(GameObject *, const float &, con
 template void Map::ObjectRelocation<DynamicObject>(DynamicObject *, const float &, const float &, const float &, const float &);
 template void Map::ObjectRelocation<Corpse>(Corpse *, const float &, const float &, const float &, const float &);
 
-#endif
+

@@ -387,6 +387,8 @@ public:
 
         void SetDontMove(bool dontMove);
         bool GetDontMove() { return m_dontMove; }
+
+
 #ifdef ENABLE_GRID_SYSTEM
     typedef HM_NAMESPACE::hash_map<uint32, Object *> InRangeObjectsMapType;
     typedef HM_NAMESPACE::hash_map<uint32, Unit *> InRangeUnitsMapType;
@@ -445,6 +447,7 @@ public:
     void MoveInRange(Player &player);
     void DestroyInRange(void);
 #endif
+
 
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;

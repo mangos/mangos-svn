@@ -200,3 +200,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     GetPlayer()->SendMessageToSet(&data, false);
 }
+
+void
+WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
+{
+    uint32 guild, time;
+    recv_data >> guild >> time;
+}

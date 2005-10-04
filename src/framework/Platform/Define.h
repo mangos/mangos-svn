@@ -23,9 +23,15 @@
 #ifdef WIN32
 
 #ifdef MANGOS_WIN32_DLL_IMPORT
+
 #define MANGOS_DLL_DECL __declspec(dllimport)
 #else
+#ifdef MANGOS_WIND_DLL_EXPORT
 #define MANGOS_DLL_DECL __declspec(dllexport)
+#else
+#define MANGOS_DLL_DECL
+#endif
+
 #endif
 
 #else

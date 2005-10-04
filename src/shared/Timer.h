@@ -63,7 +63,7 @@ class IntervalTimer
         time_t _current;
 };
 
-#ifdef ENABLE_GRID_SYSTEM
+
 /** TimeTracker is a new IntervalTimer class that uses only
  * one time_t to track the time that's expired  This is
  * important when we want to save mem and have alot of
@@ -81,6 +81,6 @@ struct TimeTracker
     time_t i_expiryTime;
 };
 
-#endif
+
 
 #endif

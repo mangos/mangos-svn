@@ -44,7 +44,6 @@
 // minimum time to delay is 60 seconds
 #define MIN_GRID_DELAY          60*1000
 
-#ifdef ENABLE_GRID_SYSTEM
 // foward declaration
 namespace ZThread
 {
@@ -135,8 +134,8 @@ private:
     void EnsurePlayerInGrid(const GridPair&, Player*);
     uint64  EnsureGridCreated(const GridPair &);
 
-    template<class T> GridType* AddType(T *obj);
-    template<class T> GridType* RemoveType(T *obj, bool);
+    template<class T> void AddType(T *obj);
+    template<class T> void RemoveType(T *obj, bool);
 
     uint32 i_id;
 
@@ -200,6 +199,6 @@ Map::CalculateGridMask(const uint32 &y) const
     mask <<= y;
     return mask;
 }
-#endif
+
 
 #endif
