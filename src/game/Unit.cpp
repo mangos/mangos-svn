@@ -681,7 +681,7 @@ void Unit::smsg_AttackStart(Unit* pVictim, Player *pThis)
         data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);
         data << uint8(2);
-        data << uint8(0x52);                      // Target out of Range
+        data << uint8(0x53);                      // Target out of Range
         if(pThis)
             pThis->GetSession()->SendPacket(&data);
     }
@@ -691,7 +691,7 @@ void Unit::smsg_AttackStart(Unit* pVictim, Player *pThis)
         data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);
         data << uint8(2);
-        data << uint8(0x75);                      // Target not in Front
+        data << uint8(0x76);                      // Target not in Front
         if(pThis)
             pThis->GetSession()->SendPacket(&data);
     }
@@ -2058,7 +2058,7 @@ void Unit::InterruptSpell()
 {
     if(m_currentSpell)
     {
-        m_currentSpell->SendInterrupted(0x1f);
+        m_currentSpell->SendInterrupted(0x20);
         m_currentSpell->cancel();
         m_currentSpell = NULL;
     }
