@@ -493,7 +493,7 @@ void Spell::update(uint32 difftime)
         m_castPositionZ != m_caster->GetPositionZ() )
     {
         SendInterrupted(0);
-        SendCastResult(0x1F);                     // Interrupted
+        SendCastResult(0x20);                     // Interrupted
         if(m_spellState == SPELL_STATE_CASTING)
         {
             m_caster->RemoveAffectById(m_spellInfo->Id);
@@ -1467,19 +1467,19 @@ uint8 Spell::CanCast()
     if(target)
     {
         if(!m_caster->isInFront(target,GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex))))
-            castResult = 0x75;                    // Target needs to be in Front of you
+            castResult = 0x76;                    // Target needs to be in Front of you
         if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()) > GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex)))
-            castResult = 0x52;                    // Target out of Range
+            castResult = 0x56;                    // Target out of Range
     }
 
     if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
     {
         if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex)))
-            castResult = 0x52;                    // Target out of Range
+            castResult = 0x56;                    // Target out of Range
     }
 
     if(m_caster->m_silenced)
-        castResult = 0x59;
+        castResult = 0x5A;
 
     castResult = CheckItems();
 /*
@@ -1494,7 +1494,7 @@ uint8 Spell::CanCast()
         }
         if(i != ((Player*)m_caster)->getSpellList().end())
         {
-            castResult = 0x1F;
+            castResult = 0x20;
             FILE *pFile = fopen("spells.log", "a+");
             fprintf(pFile,"Player: %u tried to use a not known spell: %u\n", m_caster->GetGUID(),m_spellInfo->Id);
             fclose(pFile);
