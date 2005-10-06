@@ -539,6 +539,8 @@ public:
 	    //Time to logout after a combat
 	    int logoutDelay;
 
+		bool faction_update;
+
         // items the player has bid on
         std::list<bidentry*> m_bids;
 
