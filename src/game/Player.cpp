@@ -2629,7 +2629,7 @@ void Player::ResurrectPlayer()
 {
     RemoveFlag(PLAYER_FLAGS, 0x10);
     setDeathState(ALIVE);
-    if(getRace() == 4)                            // NEs to turn back from Wisp.
+    if(getRace() == NIGHTELF)                     // NEs to turn back from Wisp.
     {
         DeMorph();
  /*   }
@@ -2668,7 +2668,7 @@ void Player::KillPlayer()
     SetFlag( UNIT_DYNAMIC_FLAGS, 0x00 );
     CreateCorpse();
 
-    if(getRace() == 4)                            // NEs
+    if(getRace() == NIGHTELF)                     // NEs
     {
         this->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);
     }

@@ -231,28 +231,28 @@ bool ChatHandler::HandleMountCommand(const char* args)
         {
             switch(theRace)
             {
-                case 1:                           //HUMAN
+                case HUMAN:                       //HUMAN
                     mId=1147;
                     break;
-                case 2:                           //ORC
+                case ORC:                         //ORC
                     mId=295;
                     break;
-                case 3:                           //DWARF
+                case DWARF:                       //DWARF
                     mId=1147;
                     break;
-                case 4:                           //NIGHT ELF
+                case NIGHTELF:                    //NIGHT ELF
                     mId=479;
                     break;
-                case 5:                           //UNDEAD
+                case UNDEAD_PLAYER:               //UNDEAD
                     mId=1147;                     //need to change
                     break;
-                case 6:                           //TAUREN
+                case TAUREN:                      //TAUREN
                     mId=295;
                     break;
-                case 7:                           //GNOME
+                case GNOME:                       //GNOME
                     mId=1147;
                     break;
-                case 8:                           //TROLL
+                case TROLL:                       //TROLL
                     mId=479;
                     break;
             }
@@ -261,28 +261,28 @@ bool ChatHandler::HandleMountCommand(const char* args)
         {
             switch(theRace)
             {
-                case 1:                           //HUMAN
+                case HUMAN:                       //HUMAN
                     mId=1531;
                     break;
-                case 2:                           //ORC
+                case ORC:                         //ORC
                     mId=207;                      //need to change
                     break;
-                case 3:                           //DWARF
+                case DWARF:                       //DWARF
                     mId=2786;
                     break;
-                case 4:                           //NIGHT ELF
+                case NIGHTELF:                    //NIGHT ELF
                     mId=720;
                     break;
-                case 5:                           //UNDEAD
+                case UNDEAD_PLAYER:               //UNDEAD
                     mId=2346;
                     break;
-                case 6:                           //TAUREN
+                case TAUREN:                      //TAUREN
                     mId=180;
                     break;
-                case 7:                           //GNOME
+                case GNOME:                       //GNOME
                     mId=1147;                     //need to change
                     break;
-                case 8:                           //TROLL
+                case TROLL:                       //TROLL
                     mId=1340;
                     break;
             }
@@ -291,28 +291,28 @@ bool ChatHandler::HandleMountCommand(const char* args)
         {
             switch(theRace)
             {
-                case 1:                           //HUMAN
+                case HUMAN:                           //HUMAN
                     mId=236;
                     break;
-                case 2:                           //ORC
+                case ORC:                           //ORC
                     mId=207;
                     break;
-                case 3:                           //DWARF
+                case DWARF:                       //DWARF
                     mId=2186;
                     break;
-                case 4:                           //NIGHT ELF
+                case NIGHTELF:                    //NIGHT ELF
                     mId=632;
                     break;
-                case 5:                           //UNDEAD
+                case UNDEAD_PLAYER:               //UNDEAD
                     mId=5050;
                     break;
-                case 6:                           //TAUREN
+                case TAUREN:                      //TAUREN
                     mId=1220;
                     break;
-                case 7:                           //GNOME
+                case GNOME:                       //GNOME
                     mId=748;                      //need to change
                     break;
-                case 8:                           //TROLL
+                case TROLL:                       //TROLL
                     mId=2320;
                     break;
             }
