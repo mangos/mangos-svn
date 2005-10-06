@@ -209,3 +209,7 @@ class ChatHandler : public Singleton<ChatHandler>
 
 #define sChatHandler ChatHandler::getSingleton()
 #endif
+
+//UQ1: Generic string formatting for output... CHECKME: May want this somewhere else??? Located in Chat.cpp
+char *fmtstring( char *format, ... );
+
