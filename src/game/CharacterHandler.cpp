@@ -393,7 +393,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(theRace, 1);
     ASSERT(info);
 
-    if (theRace == 1)                             // Human
+    if (theRace == HUMAN)                         // Human
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -404,7 +404,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                 }
     }
 
-    if (theRace == 2)                             // Orc
+    if (theRace == ORC)                           // Orc
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -415,7 +415,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                 }
     }
 
-    if (theRace == 3)                             // Dwarf
+    if (theRace == DWARF)                         // Dwarf
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -425,7 +425,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == 4)                             // Night Elves
+    if (theRace == NIGHTELF)                      // Night Elves
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -435,7 +435,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == 5)                             // Undead
+    if (theRace == UNDEAD_PLAYER)                 // Undead
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -445,7 +445,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == 6)                             // Tauren
+    if (theRace == TAUREN)                        // Tauren
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -455,7 +455,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == 7)                             // Gnome
+    if (theRace == GNOME)                        // Gnome
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -465,7 +465,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == 8)                             // Troll
+    if (theRace == TROLL)                        // Troll
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
