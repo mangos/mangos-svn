@@ -86,6 +86,8 @@ Player::Player ( ): Unit()
 	
 	logoutDelay = LOGOUTDELAY;
 	inCombat = false;
+
+	faction_update = false;
 }
 
 
@@ -191,9 +193,22 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
         case WARLOCK : powertype = 0; break;
         case DRUID   : powertype = 0; break;
     }   
-                                          // 2 = Focus (unused)
-
-
+                                         // 2 = Focus (unused)
+    //Set faction
+    uint32 faction = NoFaction;
+    switch(race)
+    {
+	    case HUMAN:
+        case DWARF:
+		case NIGHTELF:
+	    case GNOME: 
+			 faction = Alliance; break;
+		case ORC:
+		case UNDEAD_PLAYER:
+		case TAUREN:
+		case TROLL:
+             faction = Horde; break;
+	}
 
     // Set Starting stats for char
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
@@ -210,7 +225,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
     //SetUInt32Value(UNIT_FIELD_MAXPOWER5, 5 );
     SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 1 ); //<<<< BUG
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); //this sets the faction horde, alliance or NoFaction in case of any bug
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
@@ -324,7 +339,18 @@ void Player::Update( uint32 p_time )
     if(!IsInWorld())
         return;
 
-    WorldPacket data;
+	//PROBLEM: When you create a CHAR, the faction is set. But it isnt work, only after you 
+	//do a .mount command or an SwapItems faction system is actived. 
+    //TODO: Find a better way to do faction system to be actived.
+	/*
+	if(!faction_update)
+	{
+	    //Update Player´s data cause faction system needs it to work
+        UpdateSlot(0);
+	    faction_update = true;
+	}
+    */
+	WorldPacket data;
 
     Unit::Update( p_time );
 

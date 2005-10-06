@@ -31,6 +31,60 @@ class Modifier;
 class Spell;
 class DynamicObject;
 
+enum Factions
+{
+    // Fields
+    Alliance = 0x73,
+    ArgentDawn = 0x16,
+    BattlegroundNeutral = 0x17,
+    Beast = 0x20,
+    BlacksmithingArmorSmithing = 13,
+    BlacksmithingAxeSmithing = 14,
+    BlacksmithingDragonScaleSmithing = 0x13,
+    BlacksmithingElementalSmithing = 20,
+    BlacksmithingGnomeSmithing = 0x11,
+    BlacksmithingGoblinSmithing = 0x12,
+    BlacksmithingHammerSmithing = 15,
+    BlacksmithingSwordSmithing = 0x10,
+    BlacksmithingTribalSmithing = 0x15,
+    BloodsailBuccaneers = 0x18,
+    BootyBay = 10,
+    CaerDarrow = 0x19,
+    DarkspearTrolls = 5,
+    Darnasus = 1,
+    Everlook = 11,
+    EvilBeast = 0x2c,
+    Friend = 0x23,
+    FrostwolfClan = 0x1a,
+    Gadgetzan = 12,
+    GellisClanCentaur = 0x1b,
+    GnomereganExiles = 2,
+    Horde = 6,
+    HydraxianWaterlords = 0x2a,
+    IronForge = 3,
+    MagranClanCentaure = 0x1d,
+    Monster = 60,
+    MoroGai = 30,
+    NoFaction = 0,
+    Ogrimmar = 6,
+    Prey = 0x1f,
+    Ratchet = 13,
+    RavasawrTrainers = 0x24,
+    Ravenholdt = 0x2b,
+    ShatterspearTrolls = 0x21,
+    Shendralar = 0x22,
+    SteamWheedleCartel = 9,
+    StormpikeGuard = 0x29,
+    Stormwind = 4,
+    Syndicate = 0x1c,
+    ThoriumBrotherhood = 0x25,
+    ThunderBluff = 7,
+    ThundermawFurbolgs = 0x26,
+    Undercity = 8,
+    WildHammerClan = 0x27,
+    WinterSaberTrainers = 40
+};
+
 enum DeathState
 {
     ALIVE = 0,                                    // Unit is alive and well

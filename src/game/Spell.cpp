@@ -414,7 +414,7 @@ void Spell::cancel()
     if(m_spellState == SPELL_STATE_PREPARING)
     {
         SendInterrupted(0);
-        SendCastResult(0x1F);                     // Interrupted
+        SendCastResult(0x20);                     // Interrupted
     }
     else if(m_spellState = SPELL_STATE_CASTING)
     {
