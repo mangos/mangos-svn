@@ -333,6 +333,13 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 
 }
 
+#ifndef ENABLE_GRID_SYSTEM
+#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
+extern uint32 NumActivePlayers;
+extern uint64 ActivePlayers[PLAYERS_MAX];
+extern float PlayerPositions[PLAYERS_MAX][1]; // UQ1: Defined in World.cpp...
+extern char *fmtstring( char *format, ... );
+#endif //ENABLE_GRID_SYSTEM
 
 void Player::Update( uint32 p_time )
 {
@@ -354,6 +361,16 @@ void Player::Update( uint32 p_time )
 
     Unit::Update( p_time );
 
+#ifndef ENABLE_GRID_SYSTEM
+	// UQ1: Update PlayerPositions Array...
+	uint64 guid = this->GetGUID();
+	
+	Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, GetPositionX()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/, GetPositionY()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/));
+	
+	PlayerPositions[guid][0] = GetPositionX();//objmgr.GetObject<Player>(guid)->GetPositionX();
+	PlayerPositions[guid][1] = GetPositionY();//objmgr.GetObject<Player>(guid)->GetPositionY();
+#endif //ENABLE_GRID_SYSTEM
+
     if (m_state & UF_ATTACKING)
     {
 		inCombat = true;
@@ -367,7 +384,7 @@ void Player::Update( uint32 p_time )
 #ifndef ENABLE_GRID_SYSTEM
             pVictim = objmgr.GetObject<Creature>(m_curSelection);
 #else
-	    pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
+			pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
 #endif
 
             if (!pVictim)
@@ -756,11 +773,11 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
         {
             nextLvlXP = ((int)((((double)(8 * level * ((level * 5) + 45)))/100)+0.5))*100;
         }
-        else if( level = 31 )
+        else if( level == 31 )
         {
             nextLvlXP = ((int)((((double)(((8 * level) + 3) * ((level * 5) + 45)))/100)+0.5))*100;
         }
-        else if( level = 32 )
+        else if( level == 32 )
         {
             nextLvlXP = ((int)((((double)(((8 * level) + 6) * ((level * 5) + 45)))/100)+0.5))*100;
         }
