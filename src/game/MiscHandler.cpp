@@ -339,6 +339,7 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
+#include "Object.h"
 
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 {
