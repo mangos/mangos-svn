@@ -351,10 +351,10 @@ void Creature::Update( uint32 p_time )
 
 	//Log::getSingleton( ).outDetail("Creature::Update called!");
 
+#ifndef ENABLE_GRID_SYSTEM
 	if (NumActivePlayers == 0)
 		return; // UQ1: If there's no players online, why think???
 
-#ifndef ENABLE_GRID_SYSTEM
 /*    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
     {
         // Still Moving well then lets stop
