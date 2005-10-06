@@ -184,7 +184,8 @@ bool Master::_StartDB()
     if(!sDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to database");
-        return false;
+		exit(1);
+        //return false;
     }
 
     return true;
