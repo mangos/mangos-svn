@@ -85,6 +85,12 @@ void World::AddSession(WorldSession* s)
     m_sessions[s->GetAccountId()] = s;
 }
 
+#ifndef ENABLE_GRID_SYSTEM
+#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
+uint32 NumActivePlayers = 0;
+uint64 ActivePlayers[PLAYERS_MAX];
+float PlayerPositions[PLAYERS_MAX][1];
+#endif //ENABLE_GRID_SYSTEM
 
 void World::SetInitialWorldSettings()
 {
@@ -148,6 +154,13 @@ void World::SetInitialWorldSettings()
     mPrices[60] = 7200;
 
     new ChannelMgr;
+
+#ifndef ENABLE_GRID_SYSTEM
+	// Set up player positions array (for NPC movement speedup)...
+	Log::getSingleton( ).outString( "Setting up a player positions array...." );
+	memset(&PlayerPositions,0,sizeof(PlayerPositions));
+	memset(&ActivePlayers,-1,sizeof(ActivePlayers));
+#endif //ENABLE_GRID_SYSTEM
 
     // Load quests
     Log::getSingleton( ).outString( "Loading Quests..." );

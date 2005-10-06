@@ -32,6 +32,7 @@
 #include "Log.h"
 #include "ZoneMapper.h"
 #include "LootMgr.h"
+#include "Chat.h" // UQ1: for string formatting...
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
@@ -81,6 +82,8 @@ Creature::~Creature()
 void Creature::UpdateMobMovement( uint32 p_time)
 {
     uint32 timediff = 0;
+
+	//Log::getSingleton( ).outDetail("Creature::UpdateMobMovement called!");
 
     if(m_moveTimer > 0)
     {
@@ -170,9 +173,13 @@ void Creature::UpdateMobMovement( uint32 p_time)
         // If creature has no waypoints just wander aimlessly around spawnpoint
         if(m_nWaypoints==0)                       //no waypoints
         {
+			// UQ1: Testing random movement...
+/*			m_moveRandom = true;
+
             if(m_moveRandom)
             {
-                if((rand()%10)==0)
+                //if((rand()%10)==0)
+				if (m_moveTimer < timeGetTime())
                 {
                     float wanderDistance=rand()%4+2;
                     float wanderX=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
@@ -182,14 +189,60 @@ void Creature::UpdateMobMovement( uint32 p_time)
                     if(getdistance(m_positionX,m_positionY,respawn_cord[0],respawn_cord[1])>10)
                     {
                         //return home
-                        AI_MoveTo(respawn_cord[0],respawn_cord[1],respawn_cord[2],false);
+						//Log::getSingleton( ).outDetail("Creature (return home) moving to %f %f %f (time %i)\n", respawn_cord[0],respawn_cord[1],respawn_cord[2], timeGetTime());
+                        //AI_MoveTo(respawn_cord[0],respawn_cord[1],respawn_cord[2],false);
+						m_moveTimer = timeGetTime() + 1000;
+						AI_SendMoveToPacket(respawn_cord[0],respawn_cord[1],respawn_cord[2], 1000, 0);
                     }
                     else
                     {
-                        AI_MoveTo(m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ,false);
+						//Log::getSingleton( ).outDetail("Creature moving to %f %f %f (time %i)\n", m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ, timeGetTime());
+                        //AI_MoveTo(m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ,false);
+						m_moveTimer = timeGetTime() + 1000;
+						AI_SendMoveToPacket(m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ, 1000, 0);
                     }
                 }
-            }
+            }*/
+
+			// UQ1: Try auto-generating waypoints...
+			uint32 loop;
+			float x, y, z;
+
+#define MAX_RAND_WAYPOINTS 8
+
+			//Log::getSingleton( ).outDetail(fmtstring("Creature %s (at %f %f %f) generating random waypoints.\n", GetName(), respawn_cord[0], respawn_cord[1], respawn_cord[2]));
+
+			if (!respawn_cord || !respawn_cord[0] || !respawn_cord[1] || !respawn_cord[2])
+				return;
+
+			for (loop = 0; loop < MAX_RAND_WAYPOINTS; loop++)
+			{
+				//float wanderDistance=rand()%4+2;
+				float wanderDistance=16;
+				float wanderX=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
+				float wanderY=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
+				float wanderZ=0;              // FIX ME ( i dont know how to get apropriate Z coord, maybe use client height map data)
+
+				if (m_nWaypoints == 0)
+				{// First waypoint, start from the respawn point...
+					x = respawn_cord[0]+wanderX;
+					y = respawn_cord[1]+wanderY;
+					z = respawn_cord[2]+wanderZ;
+				}
+				else
+				{// In route waypoint, start from the last added point...
+					x = m_waypoints[m_nWaypoints-1][0]+wanderX;
+					y = m_waypoints[m_nWaypoints-1][1]+wanderY;
+					z = m_waypoints[m_nWaypoints-1][2]+wanderZ;
+				}
+
+				m_waypoints[m_nWaypoints][0] = x;
+				m_waypoints[m_nWaypoints][1] = y;
+				m_waypoints[m_nWaypoints][2] = z;
+				m_nWaypoints++;
+			}
+			m_nWaypoints--;
+			m_canMove = true;
             return;
         }
         else                                      //we do have waypoints
@@ -201,6 +254,8 @@ void Creature::UpdateMobMovement( uint32 p_time)
             }
             else                                  //random move is not on lets follow the path
             {
+				//Log::getSingleton( ).outDetail("Creature (%s) following waypoints.\n", m_name);
+
                 // Are we on the last waypoint? if so walk back
                 if (m_currentWaypoint == (m_nWaypoints-1))
                     m_moveBackward = true;
@@ -217,12 +272,90 @@ void Creature::UpdateMobMovement( uint32 p_time)
     }
 }
 
+#ifndef ENABLE_GRID_SYSTEM
+#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
+extern uint32 NumActivePlayers;
+extern uint64 ActivePlayers[PLAYERS_MAX];
+extern float PlayerPositions[PLAYERS_MAX][1]; // UQ1: Defined in World.cpp...
+
+#define VectorSubtract(a,b,c)	((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2])
+
+float VectorLength(float v[2])
+{
+	int		i;
+	double	length;
+	
+	length = 0;
+	for (i=0 ; i< 3 ; i++)
+		length += v[i]*v[i];
+	length = sqrt (length);		// FIXME
+
+	return length;
+}
+
+float Distance(float from1, float from2, float from3, float to1, float to2, float to3)
+{
+	float dir[2];
+	float v1a[2];
+	float v2a[2];
+
+	v1a[0] = from1;
+	v1a[1] = from2;
+	v1a[2] = from3;
+	v2a[0] = to1;
+	v2a[1] = to2;
+	v2a[2] = to3;
+
+	VectorSubtract(v2a, v1a, dir);
+	return VectorLength(dir);
+}
+
+float DistanceNoHeight(float from1, float from2, float to1, float to2)
+{
+	float dir[2];
+	float v1a[2];
+	float v2a[2];
+
+	v1a[0] = from1;
+	v1a[1] = from2;
+	v1a[2] = 0;
+	v2a[0] = to1;
+	v2a[1] = to2;
+	v2a[2] = 0;
+
+	VectorSubtract(v2a, v1a, dir);
+	return VectorLength(dir);
+}
+
+float HeightDistance(float from, float to)
+{
+	float dir[2];
+	float v1a[2];
+	float v2a[2];
+
+	v1a[0] = 0;
+	v1a[1] = 0;
+	v1a[2] = from;
+	v2a[0] = 0;
+	v2a[1] = 0;
+	v2a[2] = to;
+
+	VectorSubtract(v2a, v1a, dir);
+	return VectorLength(dir);
+}
+#endif //ENABLE_GRID_SYSTEM
 
 void Creature::Update( uint32 p_time )
 {
     Unit::Update( p_time );
+
+	//Log::getSingleton( ).outDetail("Creature::Update called!");
+
+	if (NumActivePlayers == 0)
+		return; // UQ1: If there's no players online, why think???
+
 #ifndef ENABLE_GRID_SYSTEM
-    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
+/*    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
     {
         // Still Moving well then lets stop
         if(m_creatureState == MOVING)
@@ -235,9 +368,38 @@ void Creature::Update( uint32 p_time )
             m_timeMoved = 0;
             m_timeToMove = 0;
             m_creatureState = STOPPED;
+			//return;
         }
-        return;
-    }    
+		//return;
+    }    */
+
+	//UQ1: This should be much faster (use less CPU time)...
+	uint32 loop;
+
+	for (loop = 0; loop < NumActivePlayers; loop++)
+	{// Exit procedure here if no players are close...
+#define MAX_CREATURE_DIST 10//2 //50 //10
+		float distance = DistanceNoHeight/*getdistance*/(PlayerPositions[ActivePlayers[loop]][0],PlayerPositions[ActivePlayers[loop]][1],respawn_cord[0], respawn_cord[1]);
+
+		if(distance>MAX_CREATURE_DIST)
+		{
+			// Still Moving well then lets stop
+			if(m_creatureState == MOVING)
+			{
+				// Stop Moving
+				m_moveSpeed = 7.0f*0.001f;
+				AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
+				m_moveTimer = 0;
+				m_destinationX = m_destinationY = m_destinationZ = 0;
+				m_timeMoved = 0;
+				m_timeToMove = 0;
+	            m_creatureState = STOPPED;
+			}
+			return;
+		}
+		//else
+			//Log::getSingleton( ).outDetail(fmtstring("Creature %s (at %f %f) Player (at %f %f) distance %f.", GetName(), respawn_cord[0], respawn_cord[1], PlayerPositions[ActivePlayers[loop]][0],PlayerPositions[ActivePlayers[loop]][1], distance));
+	}
 
 #else
     // if no player in the zone.. why bother updating me
@@ -251,6 +413,7 @@ void Creature::Update( uint32 p_time )
             m_timeMoved = 0;
             m_timeToMove = 0;
             m_creatureState = STOPPED;
+			//return;
         }
         return;
     }
