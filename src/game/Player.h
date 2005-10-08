@@ -316,6 +316,35 @@ public:
             m_resurrectMana = mana;
         };
 
+		uint32 getFaction()
+		{
+			return m_faction;
+		};
+
+		void setFaction(uint8 race, uint32 faction)
+		{
+	         //Set faction
+			if(race > 0)
+			{
+                 m_faction = NoFaction;
+                 switch(race)
+                 {
+			         case HUMAN:
+                     case DWARF:
+		             case NIGHTELF:
+	                 case GNOME: 
+			             m_faction = Alliance; break;
+		             case ORC:
+		             case UNDEAD_PLAYER:
+		             case TAUREN:
+		             case TROLL:
+                         m_faction = Horde; break;
+	             }
+			} else m_faction = faction;
+
+			SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
+		};
+
         //action bar
         inline std::list<struct actions> getActionList() { return m_actions; };
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
@@ -502,6 +531,7 @@ public:
         std::string m_name;                       // max 21 character name
 		uint32 m_race;
 		uint32 m_class;
+		uint32 m_faction;
 
         uint8 m_outfitId;
 
