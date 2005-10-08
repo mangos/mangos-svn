@@ -87,7 +87,6 @@ Player::Player ( ): Unit()
 	logoutDelay = LOGOUTDELAY;
 	inCombat = false;
 
-	faction_update = false;
 }
 
 
@@ -210,13 +209,17 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     //SetUInt32Value(UNIT_FIELD_MAXPOWER5, 5 );
     SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
     
-	setFaction(m_race, 0);
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction ); //this sets the faction horde, alliance or NoFaction in case of any bug
+	setFaction(m_race, 0); //this sets the faction horde, alliance or NoFaction in case of any bug
+    //SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction ); 
     
 	SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
-    SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
+    
+	//This set blue color to player, GHOST MODE
+	//SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
+	SetUInt32Value(UNIT_FIELD_FLAGS , 0x00000000 );
+
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
     SetUInt32Value(UNIT_FIELD_STAMINA, info->stamina );
@@ -324,14 +327,6 @@ void Player::Update( uint32 p_time )
 {
     if(!IsInWorld())
         return;
-
-	//TODO: i'm not sure if is this the place to do a faction update
-	if(faction_update)
-	{
-	    //Update Player´s data cause faction system needs it to work
-        setFaction(m_race, 0);
-	    faction_update = false;
-	}
     
 	WorldPacket data;
 
@@ -2678,6 +2673,9 @@ void Player::BuildPlayerRepop()
 void Player::ResurrectPlayer()
 {
     RemoveFlag(PLAYER_FLAGS, 0x10);
+    //Remove ghost mode, the picture of player appears green again
+	RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
+
     setDeathState(ALIVE);
     if(getRace() == NIGHTELF)                     // NEs to turn back from Wisp.
     {
