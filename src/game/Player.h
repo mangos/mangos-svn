@@ -377,6 +377,11 @@ public:
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
+#ifndef ENABLE_GRID_SYSTEM
+		// UQ1: Positional Array Update...
+		void SetPlayerPositionArray();
+#endif //ENABLE_GRID_SYSTEM
+
         // Death Stuff
         void SpawnCorpseBody();
         void SpawnCorpseBones();
@@ -573,6 +578,8 @@ public:
     InRangeObjectsMapType i_inRangeObjects;
     InRangeUnitsMapType i_inRangeUnits;
 #endif
+
+	time_t m_nextThinkTime;
 
 };
 #endif

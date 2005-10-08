@@ -222,6 +222,11 @@ Map::loaded(const GridPair &p) const
 void
 Map::Update(uint32 t_diff)
 {
+	if (m_nextThinkTime > time(NULL))
+		return; // Think once every 5 secs only for GameObject updates...
+
+	m_nextThinkTime = time(NULL) + 5;
+
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
 	uint64 mask = 1;

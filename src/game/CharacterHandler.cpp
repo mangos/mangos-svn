@@ -234,7 +234,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
-extern uint64 ActivePlayers[PLAYERS_MAX];
+extern long long ActivePlayers[PLAYERS_MAX];
 #endif //ENABLE_GRID_SYSTEM
 
 void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
@@ -496,7 +496,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 #ifndef ENABLE_GRID_SYSTEM
 	// Set GUID for this player in the active players array...
-	ActivePlayers[pCurrChar->GetGUID()];
+	std::stringstream ss2;
+	ss2.rdbuf()->str("");
+	ss2 << pCurrChar->GetGUID();
+	long long int guid = atoi(ss2.str().c_str());
+
+	ActivePlayers[NumActivePlayers] = guid;
+	Log::getSingleton( ).outDetail( "Active player %u set to player %s (GUID: %i).", NumActivePlayers, pCurrChar->GetName(), guid );
+
 	NumActivePlayers++;
 #endif //ENABLE_GRID_SYSTEM
 

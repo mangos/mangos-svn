@@ -64,6 +64,11 @@ void DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, fl
 
 void DynamicObject::Update(uint32 p_time)
 {
+	if (m_nextThinkTime > time(NULL))
+		return; // Think once every 5 secs only for GameObject updates...
+
+	m_nextThinkTime = time(NULL) + 5;
+
     bool deleteThis = false;
     WorldPacket data;
     // Delete Timer

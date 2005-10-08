@@ -333,14 +333,6 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
-extern uint32 NumActivePlayers;
-extern uint64 ActivePlayers[PLAYERS_MAX];
-extern float PlayerPositions[PLAYERS_MAX][1]; // UQ1: Defined in World.cpp...
-extern char *fmtstring( char *format, ... );
-#endif //ENABLE_GRID_SYSTEM
-
 void Player::Update( uint32 p_time )
 {
     if(!IsInWorld())
@@ -361,15 +353,17 @@ void Player::Update( uint32 p_time )
 
     Unit::Update( p_time );
 
-#ifndef ENABLE_GRID_SYSTEM
+//#ifndef ENABLE_GRID_SYSTEM
 	// UQ1: Update PlayerPositions Array...
-	uint64 guid = this->GetGUID();
+//	uint64 guid = this->GetGUID();
+	//Player *chr = GetSession()->GetPlayer();
 	
-	Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, GetPositionX()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/, GetPositionY()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/));
-	
-	PlayerPositions[guid][0] = GetPositionX();//objmgr.GetObject<Player>(guid)->GetPositionX();
-	PlayerPositions[guid][1] = GetPositionY();//objmgr.GetObject<Player>(guid)->GetPositionY();
-#endif //ENABLE_GRID_SYSTEM
+	//Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, chr->GetPositionX(), chr->GetPositionY()));
+//	Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, GetPositionX()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/, GetPositionY()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/));
+
+//	PlayerPositions[guid][0] = GetPositionX();//objmgr.GetObject<Player>(guid)->GetPositionX();
+//	PlayerPositions[guid][1] = GetPositionY();//objmgr.GetObject<Player>(guid)->GetPositionY();
+//#endif //ENABLE_GRID_SYSTEM
 
     if (m_state & UF_ATTACKING)
     {
@@ -503,8 +497,12 @@ void Player::Update( uint32 p_time )
     // UpdateObject();
 */
 
-}
+#ifndef ENABLE_GRID_SYSTEM
+	//this->Update(p_time);
+	SetPlayerPositionArray();
+#endif //ENABLE_GRID_SYSTEM
 
+}
 
 void Player::BuildEnumData( WorldPacket * p_data )
 {
@@ -1291,6 +1289,74 @@ void Player::DestroyForPlayer( Player *target ) const
     }
 }
 
+#ifndef ENABLE_GRID_SYSTEM
+#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
+extern uint32 NumActivePlayers;
+extern long long ActivePlayers[PLAYERS_MAX];
+extern float PlayerPositions[PLAYERS_MAX][2]; // UQ1: Defined in World.cpp...
+extern long int PlayerZones[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
+extern long int PlayerMaps[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
+extern char *fmtstring( char *format, ... );
+
+void Player::SetPlayerPositionArray()
+{
+	if (m_nextThinkTime > time(NULL))
+		return; // Think once every 3 secs only for players update...
+
+	m_nextThinkTime = time(NULL) + 3;
+
+	// UQ1: Update PlayerPositions Array...
+	std::stringstream ss;
+	std::stringstream ss2;
+	std::stringstream ss3;
+	std::stringstream ss4;
+	std::stringstream ss5;
+	std::stringstream ss6;
+	std::stringstream ss7;
+
+    ss.rdbuf()->str("");
+	ss << GetGUID();
+	long long int guid = atoi(ss.str().c_str());
+//	Log::getSingleton( ).outDetail("GUID: %s->%i.", ss.str().c_str(), guid);
+
+	ss2.rdbuf()->str("");
+	ss2 << GetMapId();//m_mapId;
+	long int mapId = atoi(ss2.str().c_str());
+//	Log::getSingleton( ).outDetail("mapId: %s->%i.", ss2.str().c_str(), mapId);
+
+	ss3.rdbuf()->str("");
+	ss3 << GetZoneId();//m_zoneId;
+	long int zoneId = atoi(ss3.str().c_str());
+//	Log::getSingleton( ).outDetail("zoneId: %s->%i.", ss3.str().c_str(), zoneId);
+
+	ss4.rdbuf()->str("");
+	ss4 << GetPositionX();//m_positionX;
+	float x = (float)atof(ss4.str().c_str());
+//	Log::getSingleton( ).outDetail("x: %s->%f.", ss4.str().c_str(), x);
+
+	ss5.rdbuf()->str("");
+	ss5 << GetPositionY();//m_positionY;
+	float y = (float)atof(ss5.str().c_str());
+//	Log::getSingleton( ).outDetail("y: %s->%f.", ss5.str().c_str(), y);
+
+	ss6.rdbuf()->str("");
+	ss6 << GetPositionZ();//m_positionZ;
+	float z = (float)atof(ss6.str().c_str());
+//	Log::getSingleton( ).outDetail("z: %s->%f.", ss6.str().c_str(), z);
+
+	if (PlayerZones[guid] != zoneId || PlayerMaps[guid] != mapId)
+	{
+		Log::getSingleton( ).outDetail("Update player %s (GUID: %i).", GetName(), guid);
+		Log::getSingleton( ).outDetail("at Zone %i of Map %i position %f %f %f.", zoneId, mapId, x, y, z);
+	}
+
+	PlayerMaps[guid] = mapId;
+	PlayerZones[guid] = zoneId;
+	PlayerPositions[guid][0] = x;
+	PlayerPositions[guid][1] = y;
+	PlayerPositions[guid][2] = z;
+}
+#endif //ENABLE_GRID_SYSTEM
 
 void Player::SaveToDB()
 {
@@ -3232,6 +3298,7 @@ Player::SetPosition(const float &x, const float &y, const float &z, const float 
 
     if( old_x != x || old_y != y )
 	m->PlayerRelocation(this, x, y, z, orientation);
+
     return true;
 }
 

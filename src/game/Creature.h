@@ -236,6 +236,8 @@ class Creature : public Unit
         uint32 m_timeToMove;
         uint32 m_timeMoved;
 
+		time_t m_nextThinkTime;
+
         /// Misc
         uint8 m_emoteState;
         std::string m_name;

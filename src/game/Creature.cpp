@@ -254,7 +254,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
             }
             else                                  //random move is not on lets follow the path
             {
-				//Log::getSingleton( ).outDetail("Creature (%s) following waypoints.\n", m_name);
+				//Log::getSingleton( ).outDetail("Creature (%s) following waypoints.\n", GetName());
 
                 // Are we on the last waypoint? if so walk back
                 if (m_currentWaypoint == (m_nWaypoints-1))
@@ -275,8 +275,10 @@ void Creature::UpdateMobMovement( uint32 p_time)
 #ifndef ENABLE_GRID_SYSTEM
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
-extern uint64 ActivePlayers[PLAYERS_MAX];
-extern float PlayerPositions[PLAYERS_MAX][1]; // UQ1: Defined in World.cpp...
+extern long long ActivePlayers[PLAYERS_MAX];
+extern float PlayerPositions[PLAYERS_MAX][2]; // UQ1: Defined in World.cpp...
+extern long int PlayerZones[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
+extern long int PlayerMaps[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
 
 #define VectorSubtract(a,b,c)	((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2])
 
@@ -290,7 +292,7 @@ float VectorLength(float v[2])
 		length += v[i]*v[i];
 	length = sqrt (length);		// FIXME
 
-	return length;
+	return (float)length;
 }
 
 float Distance(float from1, float from2, float from3, float to1, float to2, float to3)
@@ -307,7 +309,7 @@ float Distance(float from1, float from2, float from3, float to1, float to2, floa
 	v2a[2] = to3;
 
 	VectorSubtract(v2a, v1a, dir);
-	return VectorLength(dir);
+	return (float)VectorLength(dir);
 }
 
 float DistanceNoHeight(float from1, float from2, float to1, float to2)
@@ -324,7 +326,7 @@ float DistanceNoHeight(float from1, float from2, float to1, float to2)
 	v2a[2] = 0;
 
 	VectorSubtract(v2a, v1a, dir);
-	return VectorLength(dir);
+	return (float)VectorLength(dir);
 }
 
 float HeightDistance(float from, float to)
@@ -345,17 +347,17 @@ float HeightDistance(float from, float to)
 }
 #endif //ENABLE_GRID_SYSTEM
 
+extern float max_creature_distance;
+
 void Creature::Update( uint32 p_time )
 {
+	if (m_nextThinkTime > time(NULL))
+		return; // Think once every 10 secs only for creatures that are not near a player...
+
     Unit::Update( p_time );
 
-	//Log::getSingleton( ).outDetail("Creature::Update called!");
-
 #ifndef ENABLE_GRID_SYSTEM
-	if (NumActivePlayers == 0)
-		return; // UQ1: If there's no players online, why think???
-
-/*    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
+	/*    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
     {
         // Still Moving well then lets stop
         if(m_creatureState == MOVING)
@@ -372,33 +374,91 @@ void Creature::Update( uint32 p_time )
         }
 		//return;
     }    */
+	
+	if (NumActivePlayers == 0)
+		return; // UQ1: If there's no players online, why think???
+
+	std::stringstream ss;
+	ss.rdbuf()->str("");
+	ss << GetMapId();//m_mapId;
+	long int mapId = atoi(ss.str().c_str());
+	//Log::getSingleton( ).outDetail("mapId: %s->%i.", ss.str().c_str(), mapId);
+
+	std::stringstream ss2;
+	ss2.rdbuf()->str("");
+	ss2 << GetZoneId();//m_zoneId;
+	long int zoneId = atoi(ss2.str().c_str());
+	//Log::getSingleton( ).outDetail("zoneId: %s->%i.", ss2.str().c_str(), zoneId);
+
+	std::stringstream ss3;
+	ss3.rdbuf()->str("");
+	ss3 << GetPositionX();//m_positionX;
+	float x = (float)atof(ss3.str().c_str());
+	//Log::getSingleton( ).outDetail("x: %s->%f.", ss3.str().c_str(), x);
+
+	std::stringstream ss4;
+	ss4.rdbuf()->str("");
+	ss4 << GetPositionY();//m_positionY;
+	float y = (float)atof(ss4.str().c_str());
+	//Log::getSingleton( ).outDetail("y: %s->%f.", ss4.str().c_str(), y);
+
+	std::stringstream ss5;
+	ss5.rdbuf()->str("");
+	ss5 << GetPositionZ();//m_positionZ;
+	float z = (float)atof(ss5.str().c_str());
+	//Log::getSingleton( ).outDetail("z: %s->%f.", ss5.str().c_str(), z);
+
+	//if (zoneId == 40)
+	//	Log::getSingleton( ).outDetail("Creature %s is in map (%i) and zone (%i) - Position %f %f %f!", GetName(), mapId, zoneId, x, y, z);
 
 	//UQ1: This should be much faster (use less CPU time)...
 	uint32 loop;
+	boolean do_full_think = false;
 
 	for (loop = 0; loop < NumActivePlayers; loop++)
 	{// Exit procedure here if no players are close...
-#define MAX_CREATURE_DIST 10//2 //50 //10
-		float distance = DistanceNoHeight/*getdistance*/(PlayerPositions[ActivePlayers[loop]][0],PlayerPositions[ActivePlayers[loop]][1],respawn_cord[0], respawn_cord[1]);
+//#define MAX_CREATURE_DIST 100//2 //50 //10
+		//Log::getSingleton( ).outDetail("Player %u (GUID: %i) is in map (%i) and zone (%i) - Position %f %f %f!", loop, ActivePlayers[loop], PlayerMaps[ActivePlayers[loop]], PlayerZones[ActivePlayers[loop]], PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], PlayerPositions[ActivePlayers[loop]][2]);
 
-		if(distance>MAX_CREATURE_DIST)
+		if (PlayerMaps[ActivePlayers[loop]] != mapId)
+			continue;
+
+		//Log::getSingleton( ).outDetail("Creature %s is in same map (%i) (zone %i)!", GetName(), mapId, zoneId);
+
+		if (PlayerZones[ActivePlayers[loop]] != zoneId)
+			continue;
+
+		//Log::getSingleton( ).outDetail("Creature %s is in same map (%i) and zone (%i)!", GetName(), mapId, zoneId);
+
+		//float distance = DistanceNoHeight/*getdistance*/(PlayerPositions[ActivePlayers[loop]][0],PlayerPositions[ActivePlayers[loop]][1],respawn_cord[0], respawn_cord[1]);
+		float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
+
+		if(distance<=max_creature_distance/*MAX_CREATURE_DIST*/)
 		{
-			// Still Moving well then lets stop
-			if(m_creatureState == MOVING)
-			{
-				// Stop Moving
-				m_moveSpeed = 7.0f*0.001f;
-				AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
-				m_moveTimer = 0;
-				m_destinationX = m_destinationY = m_destinationZ = 0;
-				m_timeMoved = 0;
-				m_timeToMove = 0;
-	            m_creatureState = STOPPED;
-			}
-			return;
+			//Log::getSingleton( ).outDetail("Creature %s is close enough (distance: %f)!", GetName(), distance);
+			do_full_think = true;
+			m_nextThinkTime = time(NULL);
+			break;
 		}
-		//else
-			//Log::getSingleton( ).outDetail(fmtstring("Creature %s (at %f %f) Player (at %f %f) distance %f.", GetName(), respawn_cord[0], respawn_cord[1], PlayerPositions[ActivePlayers[loop]][0],PlayerPositions[ActivePlayers[loop]][1], distance));
+	}
+
+	if (!do_full_think)
+	{
+		// Still Moving well then lets stop
+		if(m_creatureState == MOVING)
+		{
+			// Stop Moving
+			m_moveSpeed = 7.0f*0.001f;
+			AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
+			m_moveTimer = 0;
+			m_destinationX = m_destinationY = m_destinationZ = 0;
+			m_timeMoved = 0;
+			m_timeToMove = 0;
+			m_creatureState = STOPPED;
+		}
+
+		m_nextThinkTime = time(NULL) + 10;
+		return;
 	}
 
 #else
@@ -415,8 +475,11 @@ void Creature::Update( uint32 p_time )
             m_creatureState = STOPPED;
 			//return;
         }
+		m_nextThinkTime = time(NULL) + 10;
         return;
     }
+
+	m_nextThinkTime = time(NULL);
 #endif
     if (m_deathState == JUST_DIED)
     {
