@@ -321,6 +321,8 @@ public:
 			return m_faction;
 		};
 
+        //this sets the faction horde, alliance or NoFaction in case of any bug
+		//Or sets a faction passed by parameter in case of race is < 0
 		void setFaction(uint8 race, uint32 faction)
 		{
 	         //Set faction
@@ -573,8 +575,6 @@ public:
         bool inCombat;
 	    //Time to logout after a combat
 	    int logoutDelay;
-
-		bool faction_update;
 
         // items the player has bid on
         std::list<bidentry*> m_bids;
