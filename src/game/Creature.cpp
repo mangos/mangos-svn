@@ -415,10 +415,23 @@ void Creature::Update( uint32 p_time )
 	uint32 loop;
 	boolean do_full_think = false;
 
+	if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
+		return; // These guys shouldn't move...
+
 	for (loop = 0; loop < NumActivePlayers; loop++)
 	{// Exit procedure here if no players are close...
 //#define MAX_CREATURE_DIST 100//2 //50 //10
 		//Log::getSingleton( ).outDetail("Player %u (GUID: %i) is in map (%i) and zone (%i) - Position %f %f %f!", loop, ActivePlayers[loop], PlayerMaps[ActivePlayers[loop]], PlayerZones[ActivePlayers[loop]], PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], PlayerPositions[ActivePlayers[loop]][2]);
+
+		
 
 		if (PlayerMaps[ActivePlayers[loop]] != mapId)
 			continue;
@@ -438,6 +451,31 @@ void Creature::Update( uint32 p_time )
 			//Log::getSingleton( ).outDetail("Creature %s is close enough (distance: %f)!", GetName(), distance);
 			do_full_think = true;
 			m_nextThinkTime = time(NULL);
+
+			if(distance<=50)
+			{// If close enough, attack...
+				if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
+					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
+					continue;
+
+				if(m_attackers.empty())
+				{
+					Unit *pVictim = (Unit*) objmgr.GetObject<Player>(ActivePlayers[loop]);
+					WPAssert(pVictim);
+
+					if (pVictim->isAlive())
+					{
+						m_attackers.insert(pVictim);
+					}
+				}
+			}
 			break;
 		}
 	}
