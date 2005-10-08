@@ -1271,6 +1271,88 @@ void ObjectMgr::AddGossip(GossipNpc *pGossip)
     }
 }*/
 
+/*GossipNpc *ObjectMgr::DefaultGossip()
+{
+    //GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
+    //return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
+
+	GossipNpc *pGossip = new GossipNpc;
+	pGossip->Guid = 999999;
+	pGossip->TextID = 999999;
+	pGossip->OptionCount = 0;
+
+	std::stringstream query1;
+	query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << 999999;
+	std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
+
+	if( result2.get() != NULL )
+	{
+		unsigned int count = 0;
+		pGossip->OptionCount = result2->GetRowCount();
+		pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+		do
+		{
+			Field *fields1 = result2->Fetch();
+			//pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+			pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
+			pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
+			pGossip->pOptions[count].OptionText = fields1[3].GetString();
+			pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+			pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+			++count;
+		}
+		while ( result2->NextRow() );
+	}
+	return pGossip;
+}*/
+
+GossipNpc *ObjectMgr::DefaultGossip()
+{
+	GossipNpc *pGossip = new GossipNpc;
+	pGossip->Guid = 999999;
+	pGossip->TextID = 999999;
+	pGossip->OptionCount = 0;
+
+	pGossip->OptionCount = 1;
+	pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+	pGossip->pOptions[0].Guid = 999999;
+	pGossip->pOptions[0].Icon = 1;
+	pGossip->pOptions[0].OptionText = "Goodbye.";
+	pGossip->pOptions[0].NextTextID = 999999;
+	pGossip->pOptions[0].Special = 0;
+
+	pGossip->pOptions[1].Guid = 999999;
+	pGossip->pOptions[1].Icon = 1;
+	pGossip->pOptions[1].OptionText = "Goodbye.";
+	pGossip->pOptions[1].NextTextID = 999999;
+	pGossip->pOptions[1].Special = 0;
+
+	return pGossip;
+}
+
+GossipNpc *ObjectMgr::DefaultVendorGossip()
+{
+	GossipNpc *pGossip = new GossipNpc;
+	pGossip->Guid = 999999;
+	pGossip->TextID = 999999;
+	pGossip->OptionCount = 0;
+
+	pGossip->OptionCount = 1;
+	pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+	pGossip->pOptions[0].Guid = 999999;
+	pGossip->pOptions[0].Icon = 1;
+	pGossip->pOptions[0].OptionText = "Goodbye.";
+	pGossip->pOptions[0].NextTextID = 999999;
+	pGossip->pOptions[0].Special = 3;
+
+	pGossip->pOptions[1].Guid = 999999;
+	pGossip->pOptions[1].Icon = 1;
+	pGossip->pOptions[1].OptionText = "Goodbye.";
+	pGossip->pOptions[1].NextTextID = 999999;
+	pGossip->pOptions[1].Special = 3;
+
+	return pGossip;
+}
 
 GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid/*, uint32 mapid*/)
 {

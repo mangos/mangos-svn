@@ -1156,7 +1156,7 @@ void Creature::_LoadGoods()
             {
                 // this should never happen unless someone has been fucking with the dbs
                 // complain and break :P
-                Log::getSingleton( ).outError( "Vendor %u has too many items. Check the DB!", GetGUIDLow() );
+                Log::getSingleton( ).outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetGUIDLow(), getItemCount(), MAX_CREATURE_ITEMS );
                 break;
             }
 
