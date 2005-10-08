@@ -169,7 +169,6 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     }
 }
 
-
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 flags, time;

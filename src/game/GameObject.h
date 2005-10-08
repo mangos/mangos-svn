@@ -67,6 +67,8 @@ public:
 protected:
     void _generateLoot(Player &, std::vector<uint32> &, std::vector<uint32>&, std::vector<uint32> &, uint32 &) const;    
     uint32 m_RespawnTimer;
+
+	time_t m_nextThinkTime;
 };
 
 #endif

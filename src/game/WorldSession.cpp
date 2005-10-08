@@ -131,7 +131,7 @@ bool WorldSession::Update(uint32 diff)
 #ifndef ENABLE_GRID_SYSTEM
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
-extern uint64 ActivePlayers[PLAYERS_MAX];
+extern long long ActivePlayers[PLAYERS_MAX];
 #endif //ENABLE_GRID_SYSTEM
 
 void WorldSession::LogoutPlayer(bool Save)
@@ -149,6 +149,11 @@ void WorldSession::LogoutPlayer(bool Save)
 #ifndef ENABLE_GRID_SYSTEM
 		boolean found = false;
 		uint32 loop = 0;
+		
+		std::stringstream ss2;
+		ss2.rdbuf()->str("");
+		ss2 << _player->GetGUID();
+		long long int guid = atoi(ss2.str().c_str());
 
 		// Remove the player from the player list...
 		for (loop = 0; loop < NumActivePlayers; loop++)
@@ -157,7 +162,7 @@ void WorldSession::LogoutPlayer(bool Save)
 			{
 				ActivePlayers[loop] = ActivePlayers[loop+1];
 			}
-			else if (ActivePlayers[loop] == _player->GetGUID())
+			else if (ActivePlayers[loop] == guid)
 			{
 				found = true;
 				ActivePlayers[loop] = ActivePlayers[loop+1];

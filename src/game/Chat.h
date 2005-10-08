@@ -184,6 +184,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleMoveCommand(const char* args);
         bool HandleLearnCommand(const char* args);
         bool HandleObjectCommand(const char* args);
+		bool HandleCreatureDistanceCommand(const char* args);
         bool HandleGameObjectCommand(const char* args);
         bool HandleAnimCommand(const char* args);
         bool HandleStandStateCommand(const char* args);

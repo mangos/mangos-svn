@@ -138,6 +138,8 @@ class World : public Singleton<World>
 
         time_t m_gameTime;
         time_t m_lastTick;
+
+		time_t m_nextThinkTime;
 };
 
 #define sWorld World::getSingleton()

@@ -894,6 +894,22 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     return true;
 }
 
+float max_creature_distance = 160;
+
+bool ChatHandler::HandleCreatureDistanceCommand(const char* args)
+{
+	WorldPacket data;
+
+    if (!*args)
+        return false;
+
+	max_creature_distance = (float)atof((char*)args);
+
+	FillSystemMessageData(&data, m_session, fmtstring("Creature max think distance set to %f (units from nearest player).", max_creature_distance));
+    m_session->SendPacket(&data);
+
+	return true;
+}
 
 bool ChatHandler::HandleObjectCommand(const char* args)
 {

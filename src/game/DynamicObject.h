@@ -62,5 +62,7 @@ class DynamicObject : public Object
         float m_PeriodicDamageRadius;
 
         uint32 m_aliveDuration;
+
+		time_t m_nextThinkTime;
 };
 #endif

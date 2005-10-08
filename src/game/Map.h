@@ -176,6 +176,8 @@ private:
     GridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     time_t i_gridExpiry;
+
+	time_t m_nextThinkTime;
 };
 
 inline
