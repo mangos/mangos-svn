@@ -284,6 +284,33 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
 	pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
+	if (!pGossip)
+	{// UQ1: Add some defaults???
+		Creature *unit = objmgr.GetObject<Creature>(guid);
+
+		if (!unit)
+		{
+		}
+		else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
+		{// If they have any items to sell, then default to vendor...
+			pGossip = objmgr.DefaultVendorGossip();
+			//Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+
+			data << guid;
+			HandleListInventoryOpcode( data );
+			return;
+		}
+		/*else if (sSkillStore.GetNumRows() > 0) 
+		{// No items, but has skills to teach.. Send trainer list...
+			pGossip = objmgr.DefaultGossip();
+			//Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+
+			data << guid;
+			HandleTrainerListOpcode( data );
+			return;
+		}*/
+	}
+
 	if(pGossip)
 	{
 #ifndef ENABLE_GRID_SYSTEM
@@ -328,6 +355,42 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
 	
 	GossipNpc *pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
+
+	if (!pGossip)
+	{// UQ1: Add some defaults???
+		Creature *unit = objmgr.GetObject<Creature>(guid);
+
+		if (!unit)
+		{
+		}
+		else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
+		{// Has items, so they are a vendor...
+			pGossip = objmgr.DefaultVendorGossip();
+			//Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+
+			data << guid;
+			HandleListInventoryOpcode( data );
+			return;
+		}
+		/*else if (sSkillStore.GetNumRows() > 0) 
+		{// No items, but has skills to teach.. Send trainer list...
+			pGossip = objmgr.DefaultGossip();
+			//Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+
+			data << guid;
+			HandleTrainerListOpcode( data );
+			return;
+		}
+		else
+		{
+			pGossip = objmgr.DefaultGossip();
+			//Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+
+			data << guid;
+			HandleGossipHelloOpcode( data );
+			return;
+		}*/
+	}
 
 	if(pGossip)
 	{

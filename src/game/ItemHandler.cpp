@@ -630,7 +630,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     // get actual Item Count better then alot of spaces :D
     for(i = 0; i < numitems; i ++ )
     {
-        if(unit->getItemId(i) != 0) actualnumitems += 1;
+        if(unit->getItemId(i) != 0) actualnumitems++;
     }
     uint32 guidlow = GUID_LOPART(guid);
 
@@ -641,7 +641,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     // each item has seven uint32's
 
     ItemPrototype * curItem;
-    for(i = 0; i < numitems; i ++ )
+    for(i = 0; i < numitems; i++ )
     {
         if(unit->getItemId(i) != 0)
         {

@@ -60,10 +60,10 @@ void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
 void GameObject::Update(uint32 p_time)
 {
-	if (m_nextThinkTime > time(NULL))
+	/*if (m_nextThinkTime > time(NULL))
 		return; // Think once every 5 secs only for GameObject updates...
 
-	m_nextThinkTime = time(NULL) + 5;
+	m_nextThinkTime = time(NULL) + 5;*/
 
     WorldPacket data;
     // Respawn Timer
