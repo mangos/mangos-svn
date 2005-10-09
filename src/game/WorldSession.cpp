@@ -147,7 +147,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		ss << "UPDATE characters SET online = 0 WHERE guid = " << _player->GetGUID();
 
 #ifndef ENABLE_GRID_SYSTEM
-		boolean found = false;
+		bool found = false;
 		uint32 loop = 0;
 		
 		std::stringstream ss2;
