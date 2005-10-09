@@ -55,7 +55,8 @@ am_libframework_a_OBJECTS = Singleton.$(OBJEXT) \
 	ObjectLifeTime.$(OBJEXT) CreationPolicy.$(OBJEXT) \
 	ThreadingModel.$(OBJEXT) Reference.$(OBJEXT) \
 	GridLoader.$(OBJEXT) Grid.$(OBJEXT) TypeContainer.$(OBJEXT) \
-	TypeContainerVisitor.$(OBJEXT)
+	TypeContainerVisitor.$(OBJEXT) ObjectRegistry.$(OBJEXT) \
+	FactoryHolder.$(OBJEXT)
 libframework_a_OBJECTS = $(am_libframework_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -190,7 +191,8 @@ libframework_a_SOURCES = \
     Policies/CreationPolicy.cpp Policies/ThreadingModel.cpp \
     Utilities/Reference.cpp \
     GameSystem/GridLoader.cpp GameSystem/Grid.cpp\
-    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp 
+    GameSystem/TypeContainer.cpp GameSystem/TypeContainerVisitor.cpp \
+    Dynamic/ObjectRegistry.cpp Dynamic/FactoryHolder.cpp 
 
 all: all-am
 
@@ -240,9 +242,11 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CreationPolicy.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FactoryHolder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridLoader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectLifeTime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectRegistry.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Reference.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Singleton.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadingModel.Po@am__quote@
@@ -395,6 +399,34 @@ TypeContainerVisitor.obj: GameSystem/TypeContainerVisitor.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/TypeContainerVisitor.cpp' object='TypeContainerVisitor.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TypeContainerVisitor.obj `if test -f 'GameSystem/TypeContainerVisitor.cpp'; then $(CYGPATH_W) 'GameSystem/TypeContainerVisitor.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/TypeContainerVisitor.cpp'; fi`
+
+ObjectRegistry.o: Dynamic/ObjectRegistry.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ObjectRegistry.o -MD -MP -MF "$(DEPDIR)/ObjectRegistry.Tpo" -c -o ObjectRegistry.o `test -f 'Dynamic/ObjectRegistry.cpp' || echo '$(srcdir)/'`Dynamic/ObjectRegistry.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ObjectRegistry.Tpo" "$(DEPDIR)/ObjectRegistry.Po"; else rm -f "$(DEPDIR)/ObjectRegistry.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/ObjectRegistry.cpp' object='ObjectRegistry.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ObjectRegistry.o `test -f 'Dynamic/ObjectRegistry.cpp' || echo '$(srcdir)/'`Dynamic/ObjectRegistry.cpp
+
+ObjectRegistry.obj: Dynamic/ObjectRegistry.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ObjectRegistry.obj -MD -MP -MF "$(DEPDIR)/ObjectRegistry.Tpo" -c -o ObjectRegistry.obj `if test -f 'Dynamic/ObjectRegistry.cpp'; then $(CYGPATH_W) 'Dynamic/ObjectRegistry.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/ObjectRegistry.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ObjectRegistry.Tpo" "$(DEPDIR)/ObjectRegistry.Po"; else rm -f "$(DEPDIR)/ObjectRegistry.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/ObjectRegistry.cpp' object='ObjectRegistry.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ObjectRegistry.obj `if test -f 'Dynamic/ObjectRegistry.cpp'; then $(CYGPATH_W) 'Dynamic/ObjectRegistry.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/ObjectRegistry.cpp'; fi`
+
+FactoryHolder.o: Dynamic/FactoryHolder.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FactoryHolder.o -MD -MP -MF "$(DEPDIR)/FactoryHolder.Tpo" -c -o FactoryHolder.o `test -f 'Dynamic/FactoryHolder.cpp' || echo '$(srcdir)/'`Dynamic/FactoryHolder.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/FactoryHolder.Tpo" "$(DEPDIR)/FactoryHolder.Po"; else rm -f "$(DEPDIR)/FactoryHolder.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/FactoryHolder.cpp' object='FactoryHolder.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FactoryHolder.o `test -f 'Dynamic/FactoryHolder.cpp' || echo '$(srcdir)/'`Dynamic/FactoryHolder.cpp
+
+FactoryHolder.obj: Dynamic/FactoryHolder.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FactoryHolder.obj -MD -MP -MF "$(DEPDIR)/FactoryHolder.Tpo" -c -o FactoryHolder.obj `if test -f 'Dynamic/FactoryHolder.cpp'; then $(CYGPATH_W) 'Dynamic/FactoryHolder.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/FactoryHolder.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/FactoryHolder.Tpo" "$(DEPDIR)/FactoryHolder.Po"; else rm -f "$(DEPDIR)/FactoryHolder.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/FactoryHolder.cpp' object='FactoryHolder.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FactoryHolder.obj `if test -f 'Dynamic/FactoryHolder.cpp'; then $(CYGPATH_W) 'Dynamic/FactoryHolder.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/FactoryHolder.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

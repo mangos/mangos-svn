@@ -20,6 +20,8 @@
 #ifndef MANGOS_DEFINE_H
 #define MANGOS_DEFINE_H
 
+#include "Platform/CompilerDefs.h"
+
 #ifdef WIN32
 
 #ifdef MANGOS_WIN32_DLL_IMPORT
@@ -44,10 +46,24 @@
 #define MANGOS_INLINE
 #endif
 
-#ifdef _MSC_VER
-typedef __int64   OBJECT_HANDLE;
+#if COMPILER == COMPILER_MICROSOFT
+typedef __int64   int64;
 #else
-typedef unsigned long long OBJECT_HANDLE;
+typedef long long int64;
 #endif
+typedef long        int32;
+typedef short       int16;
+typedef char        int8;
+
+#if COMPILER == COMPILER_MICROSOFT
+typedef unsigned __int64   uint64;
+#else
+typedef unsigned long long  uint64;
+typedef unsigned long      DWORD;
+#endif
+typedef unsigned long        uint32;
+typedef unsigned short       uint16;
+typedef unsigned char        uint8;
+typedef uint64 OBJECT_HANDLE;
 
 #endif 
