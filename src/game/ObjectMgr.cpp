@@ -26,6 +26,7 @@
 #include "World.h"
 #include "WorldSession.h"
 #include "Group.h"
+#include "ProgressBar.cpp"
 
 createFileSingleton( ObjectMgr );
 
@@ -510,6 +511,9 @@ void ObjectMgr::LoadItemPrototypes()
     if( !result )
         return;
 
+/// get number of rows for items
+    barGoLink bar( result->GetRowCount() );
+
     ItemPrototype *pItemPrototype;
     int i;
 
@@ -525,6 +529,8 @@ void ObjectMgr::LoadItemPrototypes()
     do
     {
         Field *fields = result->Fetch();
+/// print bar step
+        bar.step();
 
         if( !fields[0].GetUInt32() )
         {
@@ -632,9 +638,14 @@ void ObjectMgr::LoadTrainerSpells()
 
     Trainerspell *TrainSpell;
 
+/// get number of rows for trainers
+    barGoLink bar( result->GetRowCount() );
+
     do
     {
         Field *fields = result->Fetch();
+/// print bar step
+        bar.step();
 
         TrainSpell = new Trainerspell;
         TrainSpell->Id = fields[0].GetUInt32();
@@ -698,10 +709,14 @@ void ObjectMgr::LoadQuests()
         return;
 
     Quest *pQuest;
+/// get number of rows for quests
+    barGoLink bar( result->GetRowCount() );
 
     do
     {
         Field *fields = result->Fetch();
+/// print bar step
+        bar.step();
 
         pQuest = new Quest;
 
@@ -783,10 +798,15 @@ void ObjectMgr::LoadCreatures()
 
     Creature* unit;
     Field *fields;
+/// get number of rows for creatures
+    barGoLink bar( result->GetRowCount() );
 
     do
     {
         fields = result->Fetch();
+
+/// print bar step
+        bar.step();
 
         unit = new Creature;
         ASSERT(unit);
@@ -813,10 +833,14 @@ void ObjectMgr::LoadGameObjects()
     }
 
     Field *fields;
+/// get number of rows for items
+    barGoLink bar( result->GetRowCount() );
 
     do
     {
         fields = result->Fetch();
+/// print bar step
+        bar.step();
 	uint32 id = fields[0].GetUInt32();
 	GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(), 
 						  fields[4].GetUInt32(),
@@ -834,6 +858,7 @@ void ObjectMgr::LoadGameObjects()
 
     // Load game objects
     result = sDatabase.Query("SELECT id FROM gameobjects");
+
     if( result )
     {
 	do
@@ -1193,12 +1218,19 @@ void ObjectMgr::LoadCorpses()
     Corpse *pCorpse;
 
     QueryResult *result = sDatabase.Query( "SELECT * FROM Corpses" );
+
     if( !result )
         return;
+
+/// get number of rows for items
+        barGoLink bar( result->GetRowCount() );
+
     do
     {
         pCorpse = new Corpse;
         Field *fields = result->Fetch();
+/// print bar step
+        bar.step();
         pCorpse->Create(fields[0].GetUInt32());
 
         pCorpse->SetPosition(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
@@ -1553,16 +1585,22 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger)
 
 void ObjectMgr::LoadTeleportCoords()
 {
-    QueryResult *result = sDatabase.Query( "SELECT * FROM teleport" );
+///    QueryResult *result = sDatabase.Query( "SELECT * FROM teleport" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM teleport_cords" );
 
     if( !result )
         return;
 
     TeleportCoords *pTC;
 
+/// get number of rows for teleport_coords
+    barGoLink bar( result->GetRowCount() );
+
     do
     {
         Field *fields = result->Fetch();
+/// print bar step
+        bar.step();
 
         pTC = new TeleportCoords;
         pTC->id = fields[0].GetUInt32();
