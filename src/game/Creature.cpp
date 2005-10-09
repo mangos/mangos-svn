@@ -500,6 +500,19 @@ void Creature::Update( uint32 p_time )
 	}
 
 #else
+	// some guys don't move
+	if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
+	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
+	    return; // These guys shouldn't move...
+
+
     // if no player in the zone.. why bother updating me
     if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
     {
@@ -513,11 +526,13 @@ void Creature::Update( uint32 p_time )
             m_creatureState = STOPPED;
 			//return;
         }
-		m_nextThinkTime = time(NULL) + 10;
+
+	m_nextThinkTime = time(NULL) + 10;
         return;
     }
 
-	m_nextThinkTime = time(NULL);
+    m_nextThinkTime = time(NULL);
+
 #endif
     if (m_deathState == JUST_DIED)
     {
