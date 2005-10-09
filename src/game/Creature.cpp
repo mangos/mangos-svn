@@ -280,26 +280,26 @@ extern float PlayerPositions[PLAYERS_MAX][2]; // UQ1: Defined in World.cpp...
 extern long int PlayerZones[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
 extern long int PlayerMaps[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
 
-#define VectorSubtract(a,b,c)	((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2])
+//#define VectorSubtract(a,b,c) ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2])
+#define VectorSubtract(a,b,c) c[0]=(a[0])-(b[0]); c[1]=(a[1])-(b[1]); c[2]=(a[2])-(b[2])
 
-float VectorLength(float v[2])
+float VectorLength(float v[3])
 {
 	int		i;
 	double	length;
 	
 	length = 0;
-	for (i=0 ; i< 3 ; i++)
+	for (i=0 ; i < 3 ; i++)
 		length += v[i]*v[i];
 	length = sqrt (length);		// FIXME
-
 	return (float)length;
 }
 
 float Distance(float from1, float from2, float from3, float to1, float to2, float to3)
 {
-	float dir[2];
-	float v1a[2];
-	float v2a[2];
+	float vec[3];
+	float v1a[3];
+	float v2a[3];
 
 	v1a[0] = from1;
 	v1a[1] = from2;
@@ -308,15 +308,15 @@ float Distance(float from1, float from2, float from3, float to1, float to2, floa
 	v2a[1] = to2;
 	v2a[2] = to3;
 
-	VectorSubtract(v2a, v1a, dir);
-	return (float)VectorLength(dir);
+	VectorSubtract(v2a, v1a, vec);
+	return (float)VectorLength(vec);
 }
 
 float DistanceNoHeight(float from1, float from2, float to1, float to2)
 {
-	float dir[2];
-	float v1a[2];
-	float v2a[2];
+	float vec[3];
+	float v1a[3];
+	float v2a[3];
 
 	v1a[0] = from1;
 	v1a[1] = from2;
@@ -325,15 +325,15 @@ float DistanceNoHeight(float from1, float from2, float to1, float to2)
 	v2a[1] = to2;
 	v2a[2] = 0;
 
-	VectorSubtract(v2a, v1a, dir);
-	return (float)VectorLength(dir);
+	VectorSubtract(v2a, v1a, vec); 
+	return (float)VectorLength(vec);
 }
 
 float HeightDistance(float from, float to)
 {
-	float dir[2];
-	float v1a[2];
-	float v2a[2];
+	float vec[3];
+	float v1a[3];
+	float v2a[3];
 
 	v1a[0] = 0;
 	v1a[1] = 0;
@@ -342,8 +342,8 @@ float HeightDistance(float from, float to)
 	v2a[1] = 0;
 	v2a[2] = to;
 
-	VectorSubtract(v2a, v1a, dir);
-	return VectorLength(dir);
+	VectorSubtract(v2a, v1a, vec);
+	return VectorLength(vec);
 }
 #endif //ENABLE_GRID_SYSTEM
 
@@ -413,7 +413,7 @@ void Creature::Update( uint32 p_time )
 
 	//UQ1: This should be much faster (use less CPU time)...
 	uint32 loop;
-	boolean do_full_think = false;
+	bool do_full_think = false;
 
 	if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
 		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
