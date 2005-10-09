@@ -294,6 +294,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
 		if (!unit)
 		{
+			return;
 		}
 		else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
 		{// If they have any items to sell, then default to vendor...
@@ -360,6 +361,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 	
 	GossipNpc *pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
+#ifdef __DISABLED__
 	if (!pGossip)
 	{// UQ1: Add some defaults???
 #ifndef ENABLE_GRID_SYSTEM
@@ -370,6 +372,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 		if (!unit)
 		{
+			return;
 		}
 		else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
 		{// Has items, so they are a vendor...
@@ -399,6 +402,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 			return;
 		}*/
 	}
+#endif //__DISABLED__
 
 	if(pGossip)
 	{

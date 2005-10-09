@@ -103,7 +103,6 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
 }
 
-
 void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 {
 
@@ -123,6 +122,8 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newcoinage);
 }
 
+extern int num_item_prototypes;
+extern uint32 item_proto_ids[64550];
 
 void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 {
@@ -131,6 +132,8 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     uint8 i, tmpItemsCount = 0;
     ItemPrototype *tmpLootItem;
     WorldPacket data;
+	uint16 num_loot_items = 0;
+	uint32 loot_items_list[16];
 
     recv_data >> guid;
 
@@ -158,23 +161,124 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     // 0 =  Premission Denied | 1 = 4 = 5 = 2 = Death | 3 = Fishing
     data << uint8(1);                             //loot Type
     data << uint32(pCreature->getLootMoney());
-    data << uint8(tmpItemsCount);
-    // for(i = 0; i < tmpItemsCount ; i++)
-    for(i = 0; i<pCreature->getItemCount() ; i++)
-    {
-        if (pCreature->getItemAmount((int)i) > 0)
-        {
-            data << uint8(i+1);                   //Item Slot, must be > 0
-            tmpLootItem = objmgr.GetItemPrototype(pCreature->getItemId((int)i));
-            //item ID
-            data << uint32(pCreature->getItemId((int)i));
-            //quantity
-            data << uint32(pCreature->getItemAmount((int)i));
-            //Display IconID
-            data << uint32(tmpLootItem->DisplayInfoID);
-            data << uint8(0) << uint32(0) << uint32(0);
+
+	if (pCreature->getItemCount() > 0)
+	{
+	    data << uint8(tmpItemsCount);
+	    // for(i = 0; i < tmpItemsCount ; i++)
+		for(i = 0; i<pCreature->getItemCount() ; i++)
+		{
+			if (pCreature->getItemAmount((int)i) > 0)
+			{
+				data << uint8(i+1);                   //Item Slot, must be > 0
+				tmpLootItem = objmgr.GetItemPrototype(pCreature->getItemId((int)i));
+				//item ID
+				data << uint32(pCreature->getItemId((int)i));
+				//quantity
+				data << uint32(pCreature->getItemAmount((int)i));
+				//Display IconID
+				data << uint32(tmpLootItem->DisplayInfoID);
+				data << uint8(0) << uint32(0) << uint32(0);
+			}
+		}
+	}
+	else
+	{// UQ1: Generate some random loot items...
+		uint32 level = pCreature->getLevel();
+		int number_of_items = irand(0, 12);
+		int tries = 0;
+
+		num_loot_items = 0;
+
+		if (number_of_items > 4 && _player->getLevel() < 5)
+			number_of_items = irand(1, 4);
+
+		if (number_of_items > 6 && _player->getLevel() < 10)
+			number_of_items = irand(1, 6);
+
+		if (number_of_items > 8 && _player->getLevel() < 20)
+			number_of_items = irand(1, 8);
+
+		if (number_of_items > 10 && _player->getLevel() < 40)
+			number_of_items = irand(1, 10);
+
+		for(i = 0; i<number_of_items ; i++)
+		{
+			uint32 loot_item;
+
+
+			if (num_item_prototypes > 32768)
+				loot_item = irand(0, 32768) + irand(0, (num_item_prototypes-32768));
+			else
+				loot_item = irand(0, num_item_prototypes);
+
+			tmpLootItem = objmgr.GetItemPrototype(item_proto_ids[loot_item]);
+
+			while (!(tmpLootItem && tmpLootItem->DisplayInfoID) 
+				|| tmpLootItem->ItemLevel > _player->getLevel()*1.5 
+				|| tmpLootItem->Field107 == -1) // Quest Item ???
+			{
+				/*if (!tmpLootItem)
+				{
+					Log::getSingleton( ).outDebug( "Loot item ID: %u does not exist.", item_proto_ids[loot_item]);   
+				}
+				else if (!tmpLootItem->DisplayInfoID)
+				{
+					Log::getSingleton( ).outDebug( "Loot item ID: %u has no display ID.", item_proto_ids[loot_item]);   
+				}
+				else if (tmpLootItem->ItemLevel > _player->getLevel()*1.5)
+				{
+					Log::getSingleton( ).outDebug( "Loot item ID: %u is too higher level for player (%u > %u).", item_proto_ids[loot_item], tmpLootItem->ItemLevel, _player->getLevel()*1.5);   
+				}*/
+
+				if (num_item_prototypes > 32768)
+					loot_item = irand(0, 32768) + irand(0, (num_item_prototypes-32768));
+				else
+					loot_item = irand(0, (num_item_prototypes-32768));
+
+				tmpLootItem = objmgr.GetItemPrototype(item_proto_ids[loot_item]);
+				tries++;
+
+				if (tries >= 50)
+					break;
+			}
+
+			if (tries >= 50)
+				break;
+
+			loot_items_list[num_loot_items] = item_proto_ids[loot_item];
+
+			// Add item to the creature for the next loot...
+			pCreature->setItemId(pCreature->getItemCount(), item_proto_ids[loot_item]);
+            pCreature->setItemAmount(pCreature->getItemCount(), 1);
+			pCreature->increaseItemCount();
+
+			num_loot_items++;
+			tmpItemsCount++;
         }
-    }
+
+		//tmpItemsCount--;
+		Log::getSingleton( ).outDebug( "Randomly generated %i loot items (from %i prototypes).", num_loot_items, num_item_prototypes);   
+
+		data << uint8(tmpItemsCount);
+
+		for(i = 0; i<num_loot_items ; i++)
+		{
+			tmpLootItem = objmgr.GetItemPrototype(loot_items_list[i]);
+
+			data << uint8(i+1);                   //Item Slot, must be > 0
+			//item ID
+			data << uint32(loot_items_list[i]);
+			//quantity
+			data << uint32(1);
+			//Display IconID
+			data << uint32(tmpLootItem->DisplayInfoID);
+			data << uint8(0) << uint32(0) << uint32(0);
+		}
+
+		// For assertion below...
+		tmpDataLen = data.size();
+	}
 
     WPAssert(data.size() == tmpDataLen);
     SendPacket( &data );

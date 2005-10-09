@@ -500,6 +500,8 @@ void ObjectMgr::LoadAuctions()
 
 }
 
+int num_item_prototypes = 0;
+uint32 item_proto_ids[64550];
 
 void ObjectMgr::LoadItemPrototypes()
 {
@@ -510,6 +512,8 @@ void ObjectMgr::LoadItemPrototypes()
 
     ItemPrototype *pItemPrototype;
     int i;
+
+	memset(&item_proto_ids,-1,sizeof(item_proto_ids));
 
     if( result->GetFieldCount() < 113 )
     {
@@ -531,6 +535,12 @@ void ObjectMgr::LoadItemPrototypes()
         pItemPrototype = new ItemPrototype;
 
         pItemPrototype->ItemId = fields[0].GetUInt32();
+
+		// For random selection loots...
+		item_proto_ids[num_item_prototypes] = fields[0].GetUInt32();
+		//Log::getSingleton( ).outDebug( "Loot item ID: %u added.", item_proto_ids[num_item_prototypes]);
+		num_item_prototypes++;
+
         pItemPrototype->Class = fields[2].GetUInt32();
         pItemPrototype->SubClass = fields[3].GetUInt32();
         pItemPrototype->Name1 = fields[4].GetString();
@@ -607,7 +617,6 @@ void ObjectMgr::LoadItemPrototypes()
         pItemPrototype->MaxDurability = fields[112].GetUInt32();
 
         AddItemPrototype(pItemPrototype);
-
     } while( result->NextRow() );
 
     delete result;
@@ -1337,7 +1346,7 @@ GossipNpc *ObjectMgr::DefaultVendorGossip()
 	pGossip->TextID = 999999;
 	pGossip->OptionCount = 0;
 
-	pGossip->OptionCount = 1;
+/*	pGossip->OptionCount = 1;
 	pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 	pGossip->pOptions[0].Guid = 999999;
 	pGossip->pOptions[0].Icon = 1;
@@ -1349,7 +1358,7 @@ GossipNpc *ObjectMgr::DefaultVendorGossip()
 	pGossip->pOptions[1].Icon = 1;
 	pGossip->pOptions[1].OptionText = "Goodbye.";
 	pGossip->pOptions[1].NextTextID = 999999;
-	pGossip->pOptions[1].Special = 3;
+	pGossip->pOptions[1].Special = 3;*/
 
 	return pGossip;
 }

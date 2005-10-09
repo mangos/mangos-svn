@@ -409,6 +409,7 @@ namespace ZThread {
 
       // Result of running a task that threw an exception.
       ZTDEBUG("The task has thrown an unhandled exception\n");
+	  //assert(0); // UQ1: Go to debugger...
     
     }
 
