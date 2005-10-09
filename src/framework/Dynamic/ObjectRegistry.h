@@ -21,21 +21,23 @@
 #define MANGOS_OBJECTREGISTRY_H
 
 #include "Platform/Define.h"
+#include "Utilities/HashMap.h"
+#include "Policies/Singleton.h"
 
 /** ObjectRegistry holds all registry item of the same type
  */
 template<class T>
 class MANGOS_DLL_DECL ObjectRegistry
 {
-    typedef std::map<std::string, T *> RegistryMapType;
+    typedef hash_map<std::string, T *> RegistryMapType;
     RegistryMapType i_registeredObjects;
-
+    friend class MaNGOS::OperatorNew<ObjectRegistry<T> >;
 
     // protected for friend use since it should be a singleton
     ObjectRegistry() {}
     ~ObjectRegistry() 
     {
-	for(RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+	for(typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
 	    delete iter->second;
 	i_registeredObjects.clear();
     }
@@ -45,7 +47,7 @@ public:
     /// Returns a registry item
     const T* GetRegistryItem(const char *name) const
     {
-	for(RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+	for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
 	    if( iter->first == std::string(name) )
 		return iter->second;
 	return NULL;
@@ -54,7 +56,7 @@ public:
     /// Inserts a registry item
     bool InsertItem(T *obj, const char *name, bool override = false)
     {
-	RegistryMapType::iterator iter = i_registeredObjects.find(name);
+	typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
 	if( iter != i_registeredObjects.end() )
 	{
 	    if( !override )
@@ -70,7 +72,7 @@ public:
     /// Removes a registry item
     void RemoveItem(const char *name, bool delete_object = true)
     {
-	RegistryMapType::iterator iter = i_registeredObjects.find(name);
+	typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
 	if( iter != i_registeredObjects.end() )
 	{
 	    if( delete_object )
@@ -86,12 +88,13 @@ public:
     }
 
     /// Return a list of registered items
-    unsinged int GetRegisteredItems(std::vector<std::string> &l) const
+    unsigned int GetRegisteredItems(std::vector<std::string> &l) const
     {
 	unsigned int sz = l.size();
 	l.resize(sz + i_registeredObjects.size());
-	for(RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+	for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
 	    l[sz] = iter->frist;
+	return i_registeredObjects.size();
     }
 };
 
