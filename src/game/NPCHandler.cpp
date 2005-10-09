@@ -286,7 +286,11 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
 	if (!pGossip)
 	{// UQ1: Add some defaults???
+#ifndef ENABLE_GRID_SYSTEM
 		Creature *unit = objmgr.GetObject<Creature>(guid);
+#else
+		Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+#endif
 
 		if (!unit)
 		{
@@ -358,7 +362,11 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 	if (!pGossip)
 	{// UQ1: Add some defaults???
+#ifndef ENABLE_GRID_SYSTEM
 		Creature *unit = objmgr.GetObject<Creature>(guid);
+#else
+		Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+#endif
 
 		if (!unit)
 		{
