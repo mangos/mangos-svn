@@ -676,11 +676,13 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
         }
     }
 
+	if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
+		return; // Let's just skip it if we can't use the vendor.. (Default system)
+
     WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
     SendPacket( &data );
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
 }
-
 
 /*
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )

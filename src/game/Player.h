@@ -612,4 +612,8 @@ public:
 	time_t m_nextThinkTime;
 
 };
+
+// UQ1: Defined in Player.cpp... CHECKME: Move somewhere else???
+int irand(int min, int max);
+
 #endif

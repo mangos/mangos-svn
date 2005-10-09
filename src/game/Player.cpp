@@ -3348,3 +3348,37 @@ Player::DestroyInRange()
 #endif
 
 #endif
+
+//
+// UQ!: CHECKME: Move this code somewhere else???
+//
+
+//
+// Random integer function...
+//
+
+// Returns an integer min <= x <= max (ie inclusive)
+
+static unsigned long	holdrand = 0x89abcdef;
+
+void Rand_Init(int seed)
+{
+	holdrand = seed;
+}
+
+int irand(int min, int max)
+{
+	int		result;
+
+	assert((max - min) < 32768);
+
+	max++;
+	holdrand = (holdrand * 214013L) + 2531011L;
+	result = holdrand >> 17;
+	result = ((result * (max - min)) >> 15) + min;
+	return(result);
+}
+
+//
+// End of random integer function...
+//
