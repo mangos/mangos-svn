@@ -9,6 +9,7 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "Item.h"
+#include "Container.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
@@ -127,11 +128,17 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     {
 	pl = dynamic_cast<Player *>(obj);
     }
-    else if( obj->isType(TYPEID_ITEM | TYPEID_CONTAINER) )
+    else if( obj->isType(TYPE_ITEM ))
     {
 	Item *item = dynamic_cast<Item *>(obj);
 	assert( item != NULL );
 	pl = item->GetOwner();
+    }
+    else if( obj->isType(TYPE_CONTAINER) )
+    {
+	Container *c = dynamic_cast<Container *>(obj);
+	assert( c != NULL );
+	pl = c->GetOwner();
     }
 
     if( pl == NULL )

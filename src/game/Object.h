@@ -88,7 +88,7 @@ class Object
 
         // type
         const uint8& GetTypeId() const { return m_objectTypeId; }
-        bool isType(uint8 mask) const { return (mask & m_objectTypeId); }
+        bool isType(uint8 mask) const { return (mask & m_objectType); }
 
         // void BuildUpdateMsgHeader( WorldPacket *data ) const;
 
