@@ -189,7 +189,7 @@ class WorldSession
         void HandleBuyItemInSlotOpcode(WorldPacket& recvPacket);
         void HandleBuyItemOpcode(WorldPacket& recvPacket);
         void HandleListInventoryOpcode(WorldPacket& recvPacket);
-        // void HandleAutoStoreBagItemOpcode(WorldPacket& recvPacket);
+        //void HandleAutoStoreBagItemOpcode(WorldPacket& recvPacket);
 
         /// Combat opcodes (CombatHandler.cpp)
         void HandleAttackSwingOpcode(WorldPacket& recvPacket);

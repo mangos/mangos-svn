@@ -314,6 +314,20 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 			HandleTrainerListOpcode( data );
 			return;
 		}*/
+		else
+		{
+			int choice = 999990+irand(3,9);
+
+			data.Initialize( SMSG_GOSSIP_MESSAGE );
+			data << guid;
+
+			data << uint32(choice);
+			data << uint32(0);
+
+			// QUEST HANDLER
+			data << uint32(0);  //quest count
+			SendPacket(&data);
+		}
 	}
 
 	if(pGossip)
