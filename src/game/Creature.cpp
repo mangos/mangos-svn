@@ -770,34 +770,33 @@ void Creature::generateLoot()
     memset(item_list, 0, 8*128);
     itemcount = 0; //set Total Unit Item count to 0
     int LootValue = 0, MaxLootValue = 0;
-    int i;
     
     // max items to give for this creature
     int itemsToGet = 0;
     int creature_level = getLevel();
     if(creature_level < 10)
     {
-	itemsToGet = rand()%2; // 0 or 1 items
+	    itemsToGet = rand()%2; // 0 or 1 items
     }
     else if(creature_level < 25)
     {
-	itemsToGet = rand()%3; // 0 to 2 items
+	    itemsToGet = rand()%3; // 0 to 2 items
     }
     else if(creature_level < 40)
     {
-	itemsToGet = rand()%4; // 0 to 3 items
+		itemsToGet = rand()%4; // 0 to 3 items
     }
     else if(creature_level < 60)
     {
-	itemsToGet = rand()%5; // 0 to 4 items
+		itemsToGet = rand()%5; // 0 to 4 items
     }
     else if(creature_level < 80)
     {
-	itemsToGet = rand()%6; // 0 to 5 items
+		itemsToGet = rand()%6; // 0 to 5 items
     }
     else 
     {
-	itemsToGet = rand()%7; // 0 to 6 items
+		itemsToGet = rand()%7; // 0 to 6 items
     }
     
     m_lootMoney = (uint32)(creature_level * (rand()%5 + 1)*sWorld.getRate(RATE_DROP)); //generate copper    
