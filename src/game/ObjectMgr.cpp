@@ -1347,14 +1347,14 @@ void ObjectMgr::AddGossip(GossipNpc *pGossip)
 	return pGossip;
 }*/
 
-GossipNpc *ObjectMgr::DefaultGossip()
+GossipNpc *ObjectMgr::DefaultGossip(uint32 guid)
 {
 	GossipNpc *pGossip = new GossipNpc;
-	pGossip->Guid = 999999;
+	pGossip->Guid = guid;
 	pGossip->TextID = 999999;
 	pGossip->OptionCount = 0;
 
-	pGossip->OptionCount = 1;
+	/*pGossip->OptionCount = 2;
 	pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 	pGossip->pOptions[0].Guid = 999999;
 	pGossip->pOptions[0].Icon = 1;
@@ -1366,7 +1366,7 @@ GossipNpc *ObjectMgr::DefaultGossip()
 	pGossip->pOptions[1].Icon = 1;
 	pGossip->pOptions[1].OptionText = "Goodbye.";
 	pGossip->pOptions[1].NextTextID = 999999;
-	pGossip->pOptions[1].Special = 0;
+	pGossip->pOptions[1].Special = 0;*/
 
 	return pGossip;
 }

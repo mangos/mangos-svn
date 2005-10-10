@@ -346,7 +346,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         GossipText *GetGossipText(uint32 ID);
         //GossipNpc *GetGossipByGuid(uint32 guid, uint32 mapid);
 		GossipNpc *GetGossipByGuid(uint32 guid);
-		GossipNpc *DefaultGossip();
+		GossipNpc *DefaultGossip(uint32 guid);
 		GossipNpc *DefaultVendorGossip();
 
      //   GossipNpcMap::iterator GetGossipListBegin(uint32 mapid) { return mGossipNpc[mapid].begin(); }
