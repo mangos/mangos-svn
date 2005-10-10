@@ -85,7 +85,7 @@ ObjectAccessor::RemovePlayer(Player *pl)
     if( iter != i_players.end() )
 	i_players.erase(iter);
 
-    std::vector<Object *>::iterator iter2 = std::find(i_objects.begin(), i_objects.end(), (Object *)pl);
+    std::set<Object *>::iterator iter2 = std::find(i_objects.begin(), i_objects.end(), (Object *)pl);
     if( iter2 != i_objects.end() )
 	i_objects.erase(iter2);
 }
@@ -96,7 +96,7 @@ ObjectAccessor::Update()
     UpdateDataMapType update_players;
     {
 	Guard guard(*this);    
-	for(std::vector<Object *>::iterator iter=i_objects.begin(); iter != i_objects.end(); ++iter)
+	for(std::set<Object *>::iterator iter=i_objects.begin(); iter != i_objects.end(); ++iter)
 	{
 	    _buildUpdateObject(*iter, update_players);
 	    (*iter)->ClearUpdateMask();
@@ -117,14 +117,14 @@ void
 ObjectAccessor::AddUpdateObject(Object *obj)
 {
     Guard guard(*this);
-    i_objects.push_back(obj);
+    i_objects.insert(obj);
 }
 
 void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
 {
     Player *pl = NULL;
-    if( obj->isType(TYPEID_PLAYER) )
+    if( obj->isType(TYPE_PLAYER) )
     {
 	pl = dynamic_cast<Player *>(obj);
     }

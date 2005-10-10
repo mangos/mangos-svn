@@ -32,6 +32,7 @@
 #include "ByteBuffer.h"
 #include "UpdateData.h"
 
+#include <set>
 
 class Creature;
 class Player;
@@ -83,7 +84,7 @@ private:
 
     void _buildUpdateObject(Object *, UpdateDataMapType &);
     void _buildPacket(Player *, Player *, UpdateDataMapType &);
-    std::vector<Object *> i_objects;
+    std::set<Object *> i_objects;
 #endif
 };
 
