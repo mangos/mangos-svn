@@ -271,9 +271,9 @@ libgame_a_SOURCES = \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
 	Map.cpp \
-        GridNotifiers.cpp \
+	GridNotifiers.cpp \
 	MapManager.cpp \
-        ObjectAccessor.cpp \
+	ObjectAccessor.cpp \
 	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \

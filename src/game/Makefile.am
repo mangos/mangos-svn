@@ -33,6 +33,7 @@ libgame_a_SOURCES = \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
 	GameObject.cpp \
+	GridNotifiers.cpp \
 	Group.cpp \
 	GroupHandler.cpp \
 	Item.cpp \
@@ -43,10 +44,13 @@ libgame_a_SOURCES = \
 	Level3.cpp \
 	LootMgr.cpp \
 	Mail.cpp \
+	Map.cpp \
+	MapManager.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
+	ObjectAccessor.cpp \
 	Object.cpp \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
@@ -64,10 +68,6 @@ libgame_a_SOURCES = \
 	WorldSession.cpp \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
-	Map.cpp \
-        GridNotifiers.cpp \
-	MapManager.cpp \
-        ObjectAccessor.cpp \
 	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \
@@ -77,12 +77,14 @@ libgame_a_SOURCES = \
 	Creature.h \
 	DynamicObject.h \
 	GameObject.h \
+	GridNotifiers.h \
 	Group.h \
 	Item.h \
 	ItemPrototype.h \
 	LootMgr.h \
 	Mail.h \
 	MapCell.h \
+	Map.h \
 	MapMgr.h \
 	NameTables.h \
 	NPCHandler.h \
@@ -104,6 +106,4 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h \
-	Map.h \
-	GridNotifiers.h \
 	ZoneMapper.h
