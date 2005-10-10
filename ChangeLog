@@ -4,9 +4,20 @@ MaNGOS 0.0.2  (???? ??, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  enhancements to the overall functionality of the daemon. A complete
  list of all updated items follows below:
  
+ * Added progress bars for daemo startup loading.
+ * Grid system can be enabled by compiling with ENABLE_GRID_SYSTEM flag.
+ * Player factions working.
+ * Vendors now work without the need for gossip text as long as they have objects to sell.
+ * NPC attack code added.
+ * NPC movement support added when there are no waypoints.
+ * Character logout now only possible when character is not in combat.
+ * Fixes for item swapping.
+ * Fixed friends list.
+ * Player creation info has been updated.
+ * Added support Demand Grid loading.
  * Added MapManager.
  * Added handler for CMSG_MESSAGE_STONE_INFO.
- * NPC gossip now handles options.
+ * NPC gossip now handles options, and provides some default options.
  * Added core application framework.
  * Fixed game objects to have proper sizes.
  * Fixed ZThread build process.
@@ -23,7 +34,7 @@ MaNGOS 0.0.2  (???? ??, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  * UpdateFields updated to 1.6.1, where ten fields where changed, regarding resistances and player stats fields.
  * Changed Opcodes to version 1.6.1. Two opcodes changed, two have been deleted and two have been added.
  * Fixed memory leak problems. The creation of new TYPE[] must delete with [] for correctness otherwise n-1 members are leaked.
- * Fixed Bugs: #13, #18, #19
+ * Fixed Bugs: #12, #13, #18, #19
 
  The complete list of closed tickets can be found here:
    https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/query?status=closed&milestone=0.0.1
