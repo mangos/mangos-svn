@@ -1091,6 +1091,26 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     m_spells.push_back(newspell);
 }
 
+//add by vendy 2005/10/9 22:43
+/*!
+ \brief  removeSpell remove Spell.
+ \sa     NONE
+ \param  spell_id ID that you want to remove
+ \return TRUE for ok else return FALSE
+*/
+bool Player::removeSpell(uint16 spell_id)
+{
+	std::list<struct spells>::iterator itr;
+    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    {
+		if (itr->spellId == spell_id)
+		{
+            m_spells.erase(itr);
+			return true;
+		}
+	}
+	return false;
+}
 
 Mail* Player::GetMail(uint32 id)
 {
