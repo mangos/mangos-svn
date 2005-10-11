@@ -29,7 +29,7 @@
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
-    time_t base = time(NULL);
+	time_t base = time(NULL);
     time_t etime = base + (30 * 3600);
     WorldPacket data;
     uint64 sender,item;
@@ -44,15 +44,30 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     Log::getSingleton().outString("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),reciever.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
     mID = objmgr.GenerateMailID();
 
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    SendPacket(&data);
-    Player* pl = GetPlayer();
-    if (item != 0)
-    {
-        uint32 slot = pl->GetSlotByItemGUID(item);
+	Player* pl = GetPlayer();
+
+    WorldPacket tmpData;                    
+	uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE); //get player money
+
+	if (tmpMoney - money < 30){             //add by vendy
+        
+		tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
+        tmpData << uint32(0);
+        tmpData << uint32(0);
+        tmpData << uint32(3);
+        SendPacket(&tmpData);	 //not enough money
+		   
+	}else{
+
+        data.Initialize(SMSG_SEND_MAIL_RESULT);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        SendPacket(&data);
+        
+        if (item != 0)
+        {
+            uint32 slot = pl->GetSlotByItemGUID(item);
         Item *it = pl->GetItemBySlot((uint8)slot);
         objmgr.AddMItem(it);
 
@@ -67,36 +82,38 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         sDatabase.Execute( ss.str().c_str() );
 
         pl->RemoveItemFromSlot((uint8)slot);
-    }
-    uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
-    pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
-    uint64 rc = objmgr.GetPlayerGUIDByName(reciever.c_str());
-    Player *recieve = objmgr.GetPlayer(reciever.c_str());
-    if (recieve)
-    {
-        Mail* m = new Mail;
-        m->messageID = mID;
-        m->sender = GUID_LOPART(sender);
-        m->reciever = GUID_LOPART(rc);
-        m->subject = subject;
-        m->body = body;
-        m->item = GUID_LOPART(item);
-        m->money = money;
-        m->time = etime;
-        m->COD = 0;
-        m->checked = 0;
-        recieve->AddMail(m);
-    }
+        }
+        uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
+        pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
+        uint64 rc = objmgr.GetPlayerGUIDByName(reciever.c_str());
+        Player *recieve = objmgr.GetPlayer(reciever.c_str());
+        if (recieve)
+        {
+            Mail* m = new Mail;
+            m->messageID = mID;
+            //m->sender = GUID_LOPART(sender); bug fix by vendy 
+            m->sender =   pl->GetGUIDLow();  //add by vendy
+            m->reciever = GUID_LOPART(rc);
+			m->subject = subject;
+			m->body = body;
+			m->item = GUID_LOPART(item);
+			m->money = money;
+			m->time = etime;
+			m->COD = 0;
+			m->checked = 0;
+			recieve->AddMail(m);
+		}
 
-    std::stringstream delinvq;
-    // TODO: use full guids
-    delinvq << "DELETE FROM mail WHERE mailID = " << mID;
-    sDatabase.Execute( delinvq.str().c_str( ) );
-    std::stringstream ss;
-    ss << "INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ( " <<
-        mID << ", " << pl->GetGUIDLow() << ", " << GUID_LOPART(rc) << ",' " << subject.c_str() << "' ,' " <<
-        body.c_str() << "', " << GUID_LOPART(item) << ", " << etime << ", " << money << ", " << 0 << ", " << 0 << " )";
-    sDatabase.Execute( ss.str().c_str( ) );
+		std::stringstream delinvq;
+		// TODO: use full guids
+		delinvq << "DELETE FROM mail WHERE mailID = " << mID;
+		sDatabase.Execute( delinvq.str().c_str( ) );
+		std::stringstream ss;
+		ss << "INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ( " <<
+			mID << ", " << pl->GetGUIDLow() << ", " << GUID_LOPART(rc) << ",' " << subject.c_str() << "' ,' " <<
+			body.c_str() << "', " << GUID_LOPART(item) << ", " << etime << ", " << money << ", " << 0 << ", " << 0 << " )";
+		sDatabase.Execute( ss.str().c_str( ) );
+	}
 }
 
 
@@ -251,11 +268,20 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     std::list<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
+		uint32 sender1=(*itr)->sender,sender2=0,msgID=(*itr)->messageID; //add this for test by vendy
+       
+		data << uint32(msgID);
+        data << uint8(0);
+		data << uint32(sender1);
+        data << uint32(sender2);                        //sender high GUID
+
+/*
         data << uint32((*itr)->messageID);
         data << uint8(0);
-        data << uint32((*itr)->sender);
+		data << uint32((*itr)->sender);
         data << uint32(0);                        //sender high GUID
-        data << (*itr)->subject.c_str();
+*/       
+		data << (*itr)->subject.c_str();
         if((*itr)->body.c_str()!=NULL)            //do we have a body?
             data << uint32((*itr)->messageID);
         else
@@ -302,7 +328,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     Mail *itr;
     // for (itr = pl->GetmailBegin(); (*itr)->messageID != mailguid && itr != pl->GetmailEnd() ;itr++) ;
     itr = pl->GetMail(mailguid);
-    if(!itr)
+    if(itr)   // modify by vendy
     {
         data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
         data << mailguid;

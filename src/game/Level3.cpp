@@ -894,6 +894,56 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     return true;
 }
 
+//add by vendy for unlearn spell 2005/10/9 23:26
+bool ChatHandler::HandleUnLearnCommand(const char* args)
+{
+    WorldPacket data;
+
+    if (!*args)  //如果一个参数都没
+        return false;
+
+    //uint32 spell = atol((char*)args);
+    
+	uint32 minS;
+	uint32 maxS;
+    uint32 tmp;
+
+    char* startS = strtok((char*)args, " ");
+    char* endS = strtok(NULL, " ");
+
+	if(!endS){        //如果没有第二个参数
+        minS = (uint32)atol(startS);
+		maxS =  minS+1;
+	}else{       //以下确保minS少于maxS,且不等于
+        minS = (uint32)atol(startS);
+		maxS = (uint32)atol(endS);
+		if(maxS>=minS){
+           maxS=maxS+1;
+		}else{
+		   tmp=maxS;
+           maxS=minS+1;
+           tmp=maxS;
+		}
+	}
+
+    for(uint32 spell=minS;spell<maxS;spell++) {
+	    if (m_session->GetPlayer()->HasSpell(spell)) // check to see if char already learned spell
+	    {
+    	    data.Initialize(SMSG_REMOVED_SPELL);
+	        data << (uint32)spell; 
+	        m_session->SendPacket( &data ); 
+		    m_session->GetPlayer()->removeSpell(spell);
+	    }else{
+		    FillSystemMessageData(&data, m_session, "You already forget that spell.");
+            m_session->SendPacket(&data);
+		//return true;
+	    }
+	}
+
+    return true;
+}
+
+
 float max_creature_distance = 160;
 
 bool ChatHandler::HandleCreatureDistanceCommand(const char* args)
