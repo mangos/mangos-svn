@@ -73,20 +73,20 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	Chat.$(OBJEXT) ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
 	Corpse.$(OBJEXT) Creature.$(OBJEXT) debugcmds.$(OBJEXT) \
 	DuelHandler.$(OBJEXT) DynamicObject.$(OBJEXT) \
-	GameObject.$(OBJEXT) Group.$(OBJEXT) GroupHandler.$(OBJEXT) \
-	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
-	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
-	LootMgr.$(OBJEXT) Mail.$(OBJEXT) MapMgr.$(OBJEXT) \
+	GameObject.$(OBJEXT) GridNotifiers.$(OBJEXT) Group.$(OBJEXT) \
+	GroupHandler.$(OBJEXT) Item.$(OBJEXT) ItemHandler.$(OBJEXT) \
+	Level0.$(OBJEXT) Level1.$(OBJEXT) Level2.$(OBJEXT) \
+	Level3.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) \
+	Map.$(OBJEXT) MapManager.$(OBJEXT) MapMgr.$(OBJEXT) \
 	MiscHandler.$(OBJEXT) MovementHandler.$(OBJEXT) \
-	NPCHandler.$(OBJEXT) Object.$(OBJEXT) \
+	NPCHandler.$(OBJEXT) ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
 	Opcodes.$(OBJEXT) Player.$(OBJEXT) QueryHandler.$(OBJEXT) \
 	QuestHandler.$(OBJEXT) SkillHandler.$(OBJEXT) Spell.$(OBJEXT) \
 	SpellHandler.$(OBJEXT) TaxiHandler.$(OBJEXT) Unit.$(OBJEXT) \
 	UpdateData.$(OBJEXT) World.$(OBJEXT) WorldSession.$(OBJEXT) \
-	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT) Map.$(OBJEXT) \
-	GridNotifiers.$(OBJEXT) MapManager.$(OBJEXT) \
-	ObjectAccessor.$(OBJEXT) ZoneMapper.$(OBJEXT)
+	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT) \
+	ZoneMapper.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -239,6 +239,7 @@ libgame_a_SOURCES = \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
 	GameObject.cpp \
+	GridNotifiers.cpp \
 	Group.cpp \
 	GroupHandler.cpp \
 	Item.cpp \
@@ -249,10 +250,13 @@ libgame_a_SOURCES = \
 	Level3.cpp \
 	LootMgr.cpp \
 	Mail.cpp \
+	Map.cpp \
+	MapManager.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
+	ObjectAccessor.cpp \
 	Object.cpp \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
@@ -270,10 +274,6 @@ libgame_a_SOURCES = \
 	WorldSession.cpp \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
-	Map.cpp \
-	GridNotifiers.cpp \
-	MapManager.cpp \
-	ObjectAccessor.cpp \
 	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \
@@ -283,12 +283,14 @@ libgame_a_SOURCES = \
 	Creature.h \
 	DynamicObject.h \
 	GameObject.h \
+	GridNotifiers.h \
 	Group.h \
 	Item.h \
 	ItemPrototype.h \
 	LootMgr.h \
 	Mail.h \
 	MapCell.h \
+	Map.h \
 	MapMgr.h \
 	NameTables.h \
 	NPCHandler.h \
@@ -310,8 +312,6 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h \
-	Map.h \
-	GridNotifiers.h \
 	ZoneMapper.h
 
 all: all-am
