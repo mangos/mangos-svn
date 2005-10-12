@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,NDEBUG,_CONSOLE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -71,7 +71,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\Release\mangosd.exe"
+				OutputFile=".\..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
@@ -133,7 +133,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,_DEBUG,_CONSOLE"
 				IgnoreStandardIncludePath="false"
 				BasicRuntimeChecks="3"
