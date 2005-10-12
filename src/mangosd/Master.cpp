@@ -176,7 +176,8 @@ bool Master::_StartDB()
     if(!sConfig.GetString("DatabaseInfo", &dbstring))
     {
         sLog.outError("Database not specified");
-        return false;
+		exit(1);
+        //return false;
     }
 
     sLog.outString("Database: %s", dbstring.c_str() );

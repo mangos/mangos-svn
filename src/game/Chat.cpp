@@ -344,7 +344,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     else if (type == CHAT_MSG_WHISPER_INFORM)
     {
         // Convert ChannelName back to the to Players GUID
-        guid = uint64(channelName);               //session ? session->GetPlayer()->GetGUID() : 0; // FIXME: may be receiver?
+        guid = uint32(channelName);               //session ? session->GetPlayer()->GetGUID() : 0; // FIXME: may be receiver?
     }
 
     *data << guid;

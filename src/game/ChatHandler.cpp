@@ -79,13 +79,13 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 msg = "Player '";
                 msg += to.c_str();
                 msg += "' is not online (Names are case sensitive)";
-                sChatHandler.FillSystemMessageData( &data, this, msg.c_str() );
+                sChatHandler.FillSystemMessageData( &data, this ,msg.c_str() );
                 SendPacket(&data);
                 break;
             }
             player->GetSession()->SendPacket(&data);
             // Sent the to Users id as the channel, this should be fine as it's not used for wisper
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_WHISPER_INFORM, LANG_UNIVERSAL, ((char *)(player->GetGUID())), msg.c_str() );
+	    sChatHandler.FillMessageData(&data, this, CHAT_MSG_WHISPER_INFORM, LANG_UNIVERSAL, ((char *)(player->GetGUID())), msg.c_str() );
             SendPacket(&data);
         } break;
         case CHAT_MSG_YELL:
