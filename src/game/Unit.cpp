@@ -1629,7 +1629,7 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
                 pts->trigger = parent->GetSpellProto()->EffectBasePoints[i];
                 pts->procChance = parent->GetSpellProto()->procChance;
                 pts->procFlags = parent->GetSpellProto()->procFlags;
-                parent->GetSpellProto()->procCharges == 0 ? pts->procCharges = -1
+                parent->GetSpellProto()->procCharges == 0 ? pts->procCharges = 0
                     : pts->procCharges = parent->GetSpellProto()->procCharges;
                 m_procSpells.push_back((*pts));
             }
