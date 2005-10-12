@@ -13,7 +13,7 @@
 
 AC_INIT([MaNGOS],
         [0.0.2-SVN],
-        [Massive Network Game Object Server],
+        [https://opensvn.csie.org/traccgi/MaNGOS/],
         [mangos])
 
 AC_PREREQ(2.5)
@@ -25,14 +25,18 @@ INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/openssl
 AC_SUBST(INCLUDES)
 LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
 AC_SUBST(LDFLAGS)
+
+dnl Automake is needed for the build system.
+dnl 
 AM_INIT_AUTOMAKE
 AM_MAINTAINER_MODE
 
 # Checks for programs.
-AC_PROG_CC
+AC_PROG_CC(gcc cc)
 AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
+AM_PROG_LIBTOOL
 
 LIBZTHREAD_MAJOR_VERSION=2
 LIBZTHREAD_MINOR_VERSION=3
@@ -97,6 +101,24 @@ AC_CHECK_FUNCS(                                               \
    gettimeofday localtime_r memset rint select socket         \
    sqrt stpcpy strchr strpbrk strrchr strstr strtol strtoul   \
 )
+
+AC_MSG_CHECKING(whether to include debug info in library)
+MANGOSD_DEBUG_INFO=no
+AC_ARG_WITH(debug-info,
+[
+Debugging options:
+
+  --with-debug-info       Include debug info in library],
+[
+    if test "$withval" = "yes" ; then
+	CFLAGS="-g $CFLAGS"
+	CXXFLAGS="-g $CXXFLAGS"
+	MANGOSD_DEBUG_INFO=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
 
 if test $sysconfdir = '${prefix}/etc'; then
 	MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"

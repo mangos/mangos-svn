@@ -4,6 +4,7 @@ MaNGOS 0.0.2  (???? ??, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  enhancements to the overall functionality of the daemon. A complete
  list of all updated items follows below:
  
+ * Added building with debug info from configure. Use --with-debug-info switch to include debug info.
  * Added progress bars for daemo startup loading.
  * Grid system can be enabled by compiling with ENABLE_GRID_SYSTEM flag.
  * Player factions working.
