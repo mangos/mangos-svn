@@ -29,7 +29,7 @@
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
-	time_t base = time(NULL);
+    time_t base = time(NULL);
     time_t etime = base + (30 * 3600);
     WorldPacket data;
     uint64 sender,item;
@@ -47,9 +47,10 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 	Player* pl = GetPlayer();
 
     WorldPacket tmpData;                    
-	uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE); //get player money
+    uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE); //get player money
 
-	if (tmpMoney - money < 30){             //add by vendy
+    if (tmpMoney - money < 30)    //add by vendy
+    {             
         
 		tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
         tmpData << uint32(0);
@@ -57,7 +58,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         tmpData << uint32(3);
         SendPacket(&tmpData);	 //not enough money
 		   
-	}else{
+    }
+    else
+    {
 
         data.Initialize(SMSG_SEND_MAIL_RESULT);
         data << uint32(0);
@@ -68,20 +71,20 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         if (item != 0)
         {
             uint32 slot = pl->GetSlotByItemGUID(item);
-        Item *it = pl->GetItemBySlot((uint8)slot);
-        objmgr.AddMItem(it);
+            Item *it = pl->GetItemBySlot((uint8)slot);
+            objmgr.AddMItem(it);
 
-        std::stringstream ss;
-        ss << "INSERT INTO mailed_items (guid, data) VALUES ("
-            << it->GetGUIDLow() << ", '";         // TODO: use full guids
-        for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-        {
-            ss << it->GetUInt32Value(i) << " ";
-        }
-        ss << "' )";
-        sDatabase.Execute( ss.str().c_str() );
+            std::stringstream ss;
+            ss << "INSERT INTO mailed_items (guid, data) VALUES ("
+               << it->GetGUIDLow() << ", '";         // TODO: use full guids
+            for(uint16 i = 0; i < it->GetValuesCount(); i++ )
+            {
+               ss << it->GetUInt32Value(i) << " ";
+            }
+            ss << "' )";
+            sDatabase.Execute( ss.str().c_str() );
 
-        pl->RemoveItemFromSlot((uint8)slot);
+            pl->RemoveItemFromSlot((uint8)slot);
         }
         uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
         pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
@@ -91,29 +94,28 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         {
             Mail* m = new Mail;
             m->messageID = mID;
-            //m->sender = GUID_LOPART(sender); bug fix by vendy 
-            m->sender =   pl->GetGUIDLow();  //add by vendy
+            m->sender =   pl->GetGUIDLow();  
             m->reciever = GUID_LOPART(rc);
-			m->subject = subject;
-			m->body = body;
-			m->item = GUID_LOPART(item);
-			m->money = money;
-			m->time = etime;
-			m->COD = 0;
-			m->checked = 0;
-			recieve->AddMail(m);
-		}
+            m->subject = subject;
+            m->body = body;
+            m->item = GUID_LOPART(item);
+            m->money = money;
+            m->time = etime;
+            m->COD = 0;
+            m->checked = 0;
+            recieve->AddMail(m);
+        }
 
-		std::stringstream delinvq;
+        std::stringstream delinvq;
 		// TODO: use full guids
-		delinvq << "DELETE FROM mail WHERE mailID = " << mID;
-		sDatabase.Execute( delinvq.str().c_str( ) );
-		std::stringstream ss;
-		ss << "INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ( " <<
-			mID << ", " << pl->GetGUIDLow() << ", " << GUID_LOPART(rc) << ",' " << subject.c_str() << "' ,' " <<
-			body.c_str() << "', " << GUID_LOPART(item) << ", " << etime << ", " << money << ", " << 0 << ", " << 0 << " )";
-		sDatabase.Execute( ss.str().c_str( ) );
-	}
+        delinvq << "DELETE FROM mail WHERE mailID = " << mID;
+        sDatabase.Execute( delinvq.str().c_str( ) );
+        std::stringstream ss;
+        ss << "INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ( " <<
+            mID << ", " << pl->GetGUIDLow() << ", " << GUID_LOPART(rc) << ",' " << subject.c_str() << "' ,' " <<
+        body.c_str() << "', " << GUID_LOPART(item) << ", " << etime << ", " << money << ", " << 0 << ", " << 0 << " )";
+        sDatabase.Execute( ss.str().c_str( ) );
+    }
 }
 
 
@@ -268,19 +270,11 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     std::list<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
-		uint32 sender1=(*itr)->sender,sender2=0,msgID=(*itr)->messageID; //add this for test by vendy
-       
-		data << uint32(msgID);
-        data << uint8(0);
-		data << uint32(sender1);
-        data << uint32(sender2);                        //sender high GUID
-
-/*
         data << uint32((*itr)->messageID);
         data << uint8(0);
 		data << uint32((*itr)->sender);
         data << uint32(0);                        //sender high GUID
-*/       
+      
 		data << (*itr)->subject.c_str();
         if((*itr)->body.c_str()!=NULL)            //do we have a body?
             data << uint32((*itr)->messageID);
@@ -328,7 +322,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     Mail *itr;
     // for (itr = pl->GetmailBegin(); (*itr)->messageID != mailguid && itr != pl->GetmailEnd() ;itr++) ;
     itr = pl->GetMail(mailguid);
-    if(itr)   // modify by vendy
+    if(itr)   
     {
         data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
         data << mailguid;
@@ -338,4 +332,57 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     }
     else
         Log::getSingleton().outError("We got mailguid: %d but there is no such mail.",mailguid);
+}
+//add by  vendy
+void WorldSession::HandleMailCreateTextItem(WorldPacket	& recv_data	)
+{
+	uint32 unk1,unk2,mailid;
+
+	recv_data >> unk1 >> unk2 >> mailid;
+
+	Log::getSingleton().outString("HandleMailCreateTextItem	unk1=%d,unk2=%d,mailid=%d",unk1,unk2,mailid);
+
+	uint32 sbit2=5;
+	bool   slotfree=false;
+	WorldPacket	Data;
+	uint8 i,slot;
+
+	Player*	pl = GetPlayer();
+	//Item *item = new Item();
+	//Item *it=	  //GetMItem(889); 
+
+	for(i =	INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END;	i++)
+	{
+		if (GetPlayer()->GetItemBySlot(i) == NULL)
+		{
+			slot = i;
+			slotfree=true;
+			break;
+		}
+	}
+	if (slotfree)
+	{
+		Item *item = new Item();
+		//item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
+		
+		// add for test	by vendy fix me
+		// you need	to create a	litter item	to database	and	add	this item pagetext id and pagetext
+		item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),	889, GetPlayer());
+		GetPlayer()->AddItemToSlot(	slot, item );
+
+		Data.Initialize(SMSG_SEND_MAIL_RESULT);
+		Data <<	uint32(mailid);
+		Data <<	uint32(sbit2);
+		Data <<	uint32(0);
+		SendPacket(&Data);	  //delete mail	copy
+	}
+	else
+	{ 
+		Data.Initialize(SMSG_SEND_MAIL_RESULT);
+		Data <<	uint32(mailid);
+		Data <<	uint32(0);
+		Data <<	uint32(1);
+		SendPacket(&Data);	 //error ,bag is full
+	}
+    
 }
