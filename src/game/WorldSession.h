@@ -179,6 +179,7 @@ class WorldSession
         void HandleReturnToSender( WorldPacket & recv_data );
         void HandleMailDelete( WorldPacket & recv_data );
         void HandleItemTextQuery( WorldPacket & recv_data);
+        void HandleMailCreateTextItem(WorldPacket & recv_data );
 
         /// Item opcodes (ItemHandler.cpp)
         void HandleSwapInvItemOpcode(WorldPacket& recvPacket);

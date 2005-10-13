@@ -304,8 +304,8 @@ public:
         // spells
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
-		void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
-		bool removeSpell(uint16 spell_id); //add by vendy 2005/10/9 22:43
+        void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
+        bool removeSpell(uint16 spell_id); //add by vendy 2005/10/9 22:43
         inline std::list<struct spells> getSpellList() { return m_spells; };
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
