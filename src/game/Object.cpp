@@ -124,8 +124,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     //they can see ANYONE or ANYTHING in a 30f radius from their corpse//FIX ME
 #ifndef ENABLE_GRID_SYSTEM
     Creature *creat = objmgr.GetObject<Creature>(GetGUID());
-#else
-    Creature *creat = ObjectAccessor::Instance().GetCreature(*target, GetGUID());
+#else    
+    Creature *creat = dynamic_cast<Creature *>(this);
 #endif
     if(target->isAlive())
     {

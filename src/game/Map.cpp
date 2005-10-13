@@ -110,10 +110,6 @@ Map::Add(Player *player)
 	TypeContainerVisitor<MaNGOS::PlayerNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
 	grid.VisitGridObjects(object_notifier);
     }
-
-    // notify creatures around by putting them in range if they are
-    TypeContainerVisitor<MaNGOS::PlayerNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-    grid.VisitGridObjects(object_notifier);
 }
 
 
