@@ -46,7 +46,7 @@ class Object;
 
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex> >
 {
-#ifdef ENABLE_GRID_SYSTEM
+
     friend class MaNGOS::OperatorNew<ObjectAccessor>;
     ObjectAccessor() {}
     ObjectAccessor(const ObjectAccessor &);
@@ -72,9 +72,10 @@ public:
     void RemovePlayer(Player *);
 
     void AddUpdateObject(Object *obj);
-
+    void RemoveUpdateObject(Object *obj);
     void Update(void);
 
+    template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
 private:
     PlayerMapType i_players;
 
@@ -85,7 +86,7 @@ private:
     void _buildUpdateObject(Object *, UpdateDataMapType &);
     void _buildPacket(Player *, Player *, UpdateDataMapType &);
     std::set<Object *> i_objects;
-#endif
+
 };
 
 

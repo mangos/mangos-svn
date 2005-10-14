@@ -281,7 +281,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GAMEOBJECT_QUERY,         STATUS_LOGGEDIN, &WorldSession::HandleGameObjectQueryOpcode         },
         /// Movement opcodes
         { MSG_MOVE_HEARTBEAT,            STATUS_LOGGEDIN, &WorldSession::HandleMoveHeartbeatOpcode           },
-        { CMSG_SET_ACTIVE_MOVER,         STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode           },
         { MSG_MOVE_WORLDPORT_ACK,        STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
         { MSG_MOVE_JUMP,                 STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_FORWARD,        STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },

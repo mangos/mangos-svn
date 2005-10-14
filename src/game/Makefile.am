@@ -34,6 +34,7 @@ libgame_a_SOURCES = \
 	DynamicObject.cpp \
 	GameObject.cpp \
 	GridNotifiers.cpp \
+        GridStates.cpp \
 	Group.cpp \
 	GroupHandler.cpp \
 	Item.cpp \
@@ -46,6 +47,8 @@ libgame_a_SOURCES = \
 	Mail.cpp \
 	Map.cpp \
 	MapManager.cpp \
+        RedZoneDistrict.cpp \
+        CreatureAI.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \

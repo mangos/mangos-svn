@@ -41,6 +41,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Utilities.h"
+#include "RedZoneDistrict.h"
 #endif
 
 Player::Player ( ): Unit()

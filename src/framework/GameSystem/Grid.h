@@ -38,11 +38,12 @@
 
 typedef enum
     {        
-	GRID_STATUS_INVALID,
-	GRID_STATUS_ACTIVE,
-	GRID_STATUS_IDLE,
-	GRID_STATUS_REMOVAL
-    } grid_status_t;
+	GRID_STATE_INVALID = 0,
+	GRID_STATE_ACTIVE = 1,
+	GRID_STATE_IDLE = 2,
+	GRID_STATE_REMOVAL= 3,
+	MAX_GRID_STATE = 4
+    } grid_state_t;
 
 // forward declaration
 template<class T, class O> class GridLoader;
@@ -59,7 +60,7 @@ class MANGOS_DLL_DECL Grid
     template<class T, class O> friend class GridLoader;
 public:
     
-    explicit Grid(unsigned int id) : i_gridId(id), i_gridStatus(GRID_STATUS_INVALID) {}
+    explicit Grid(unsigned int id) : i_gridId(id), i_gridState(GRID_STATE_INVALID) {}
     
     /** destructor to clean up its resources. This includes unloading the
 	grid if it has not been unload.
@@ -128,8 +129,8 @@ public:
      */
     template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl); }
 
-    inline grid_status_t GetGridStatus(void) const { return i_gridStatus; }
-    inline void SetGridStatus(grid_status_t s) { i_gridStatus = s; }
+    inline grid_state_t GetGridState(void) const { return i_gridState; }
+    inline void SetGridState(grid_state_t s) { i_gridState = s; }
     
 private:
     
@@ -137,7 +138,7 @@ private:
     typedef typename ThreadModel::VolatileType VolatileType;
     
     unsigned int i_gridId;
-    grid_status_t i_gridStatus;
+    grid_state_t i_gridState;
     TypeMapContainer<OBJECT_TYPES> i_container;
     ContainerMapList<OBJECT> i_objects;
 };

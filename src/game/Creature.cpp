@@ -351,12 +351,13 @@ extern float max_creature_distance;
 
 void Creature::Update( uint32 p_time )
 {
-	if (m_nextThinkTime > time(NULL))
-		return; // Think once every 10 secs only for creatures that are not near a player...
-
-    Unit::Update( p_time );
 
 #ifndef ENABLE_GRID_SYSTEM
+    if (m_nextThinkTime > time(NULL))
+	return; // Think once every 10 secs only for creatures that are not near a player...
+    
+    Unit::Update( p_time );
+
 	/*    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
     {
         // Still Moving well then lets stop
@@ -500,6 +501,9 @@ void Creature::Update( uint32 p_time )
 	}
 
 #else
+	
+	Unit::Update( p_time );
+
 	// some guys don't move
 	if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
 	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
