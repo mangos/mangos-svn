@@ -282,6 +282,12 @@
 				RelativePath="..\..\src\game\Creature.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\CreatureAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAI.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\DynamicObject.cpp">
 			</File>
 			<File
@@ -292,6 +298,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\GameObject.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridStates.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridStates.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Item.cpp">
@@ -331,6 +343,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Player.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\RedZoneDistrict.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\RedZoneDistrict.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Unit.cpp">
