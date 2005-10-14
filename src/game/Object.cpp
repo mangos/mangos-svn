@@ -125,7 +125,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 #ifndef ENABLE_GRID_SYSTEM
     Creature *creat = objmgr.GetObject<Creature>(GetGUID());
 #else    
-    Creature *creat = dynamic_cast<Creature *>(const_cast<Object *>(this));
+    const Creature *creat = dynamic_cast<const Creature *>(this);
 #endif
     if(target->isAlive())
     {

@@ -51,6 +51,34 @@ namespace ZThread
     class ReadWriteLock;
 }
 
+typedef ZThread::FairReadWriteLock GridRWLock;
+
+template<class MUTEX, class LOCK_TYPE>
+struct RGuard
+{
+    RGuard(MUTEX &l) : i_lock(l.getReadLock()) {}
+    MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
+};
+
+template<class MUTEX, class LOCK_TYPE>
+struct WGuard
+{
+    WGuard(MUTEX &l) : i_lock(l.getWriteLock()) {}
+    MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
+};
+
+
+typedef RGuard<GridRWLock, ZThread::Lockable> GridReadGuard;
+typedef WGuard<GridRWLock, ZThread::Lockable> GridWriteGuard;
+
+
+struct GridInfo
+{
+    GridInfo(time_t expiry) : i_timer(expiry) {}
+    GridRWLock i_lock;
+    TimeTracker i_timer;
+};
+
 
 struct MANGOS_DLL_DECL GridPair
 {
@@ -93,7 +121,7 @@ public:
     void RemoveFromMap(DynamicObject *obj) { Remove(obj, false); }
     void RemoveFromMap(Corpse *obj) { Remove(obj, false); }
 
-    void Update(uint32);
+    void Update(const uint32&);
     
     GridPair CalculateGrid(const float &x, const float &y) const;
     uint64 CalculateGridMask(const uint32 &y) const;
@@ -114,7 +142,7 @@ public:
     /** Relocation of an object means an object moved such as
      * creatures running after you
      */
-  template<class T> void ObjectRelocation(T *obj, const float &x, const float &y, const float &, const float &);
+    template<class T> void ObjectRelocation(T *obj, const float &x, const float &y, const float &, const float &);
 
     /** Sets the timer interval
      */
@@ -126,12 +154,30 @@ public:
     inline bool IsActiveGrid(Object *obj) const
     {
 	GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
-	return( i_grids[p.x_coord][p.y_coord]->GetGridStatus() == GRID_STATUS_ACTIVE );
+	return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
     }
+
+    /// Unloads the given grid
+    bool UnloadGrid(const uint32 &x, const uint32 &y);
+
+    /// Signals a red zone alert
+    void ZoneAlert(Player &, const GridPair &, const uint8 &mask);
+
+    void ResetGridExpiry(GridInfo &info) const
+    {
+	info.i_timer.Reset(i_gridExpiry);
+    }
+
+    time_t GetGridExpiry(void) const { return i_gridExpiry; }
+    uint32 GetId(void) const { return i_id; }
+
+
+    static void InitStateMachine(void);
 
 private:
     bool loaded(const GridPair &) const;
-    void EnsurePlayerInGrid(const GridPair&, Player*);
+    void EnsurePlayerInGrid(const GridPair&, Player*, bool add_player);
+    void NotifyPlayerInRange(const GridPair &, Player *);
     uint64  EnsureGridCreated(const GridPair &);
 
     template<class T> void AddType(T *obj);
@@ -144,40 +190,12 @@ private:
     volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
         
     typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
-    //    typedef ZThread::Lockable GridLockType;
-    //    typedef MaNGOS::GeneralLock<ZThread::Lockable> GridGuard;
-    typedef ZThread::FairReadWriteLock GridRWLock;
-
-    struct GridInfo
-    {
-	GridInfo(time_t expiry) : i_timer(expiry) {}
-	GridRWLock i_lock;
-	TimeTracker i_timer;
-    };
-
-    template<class MUTEX, class LOCK_TYPE>
-    struct RGuard
-    {
-	RGuard(MUTEX &l) : i_lock(l.getReadLock()) {}
-	MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
-    };
-
-    template<class MUTEX, class LOCK_TYPE>
-    struct WGuard
-    {
-	WGuard(MUTEX &l) : i_lock(l.getWriteLock()) {}
-	MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
-    };
-
-    
-    typedef RGuard<GridRWLock, ZThread::Lockable> ReadGuard;
-    typedef WGuard<GridRWLock, ZThread::Lockable> WriteGuard;
+    typedef GridReadGuard ReadGuard;
+    typedef GridWriteGuard WriteGuard;
 
     GridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     time_t i_gridExpiry;
-
-	time_t m_nextThinkTime;
 };
 
 inline

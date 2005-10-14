@@ -31,8 +31,11 @@
 #include "ObjectGridLoader.h"
 #include "ByteBuffer.h"
 #include "UpdateData.h"
+#include "ObjectAccessor.h"
 
 class Player;
+class Map;
+
 
 namespace MaNGOS
 {
@@ -176,6 +179,18 @@ namespace MaNGOS
 	GridType &i_grid;
 	ObjectEnterNotifier(GridType &grid, T& obj) : i_grid(grid), i_object(obj) {}
 	void Visit(PlayerMapType &);
+    };
+
+    /** ValidateGridUnload is a grid validater to ensure that the following grid
+     * is safe to unload
+     */
+    struct MANGOS_DLL_DECL ValidateGridUnload
+    {
+	ValidateGridUnload(ObjectAccessor::PlayerMapType &, Map &, const uint32 &, const uint32 &);
+	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);
+	bool IsOkToUnload(void) const { return i_isOk; }
+	bool i_isOk;
+	std::vector<Player *> i_players;
     };
 
 }

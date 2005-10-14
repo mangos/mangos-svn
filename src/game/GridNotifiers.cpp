@@ -18,7 +18,6 @@
  */
 
 
-
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -37,13 +36,14 @@ using namespace MaNGOS;
  * this builds the object's data for the player NOT player's
  * data for the object.
  */
+
 static
 void buildUnitData(Player &player, UpdateData &update_data, Unit *obj)
 {
 #ifdef ENABLE_GRID_SYSTEM
     if( obj->IsInWorld() )
     {
-	if( Utilities::is_in_range(obj, &player) )
+	if( Utilities::is_in_range(&player, obj) )
 	{
 	    //sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
 	    obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
@@ -60,7 +60,7 @@ void buildUnitData(Player &player, UpdateData &update_data, Unit *obj)
 static
 void buildObjectData(Player &player, UpdateData &update_data, Object *obj)
 {
-    if( Utilities::is_in_range(obj, &player) )
+    if( Utilities::is_in_range(&player, obj) )
     {
 	//sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
 	obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
@@ -330,7 +330,7 @@ void
 ObjectRelocationNotifier<Creature>::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-	if( Utilities::is_in_range(&i_object, iter->second) )
+	if( Utilities::is_in_range(iter->second, &i_object) )
 	    iter->second->AddInRangeObject(&i_object);
 }
 
@@ -339,7 +339,7 @@ void
 ObjectRelocationNotifier<T>::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-	if( Utilities::is_in_range(&i_object, iter->second) )
+	if( Utilities::is_in_range(iter->second, &i_object) )
 	    iter->second->AddInRangeObject(&i_object);
 }
 
@@ -393,7 +393,48 @@ PlayerUpdatePacket::Visit(PlayerMapType &m)
     }
 }
 
+#ifdef ENABLE_GRID_SYSTEM
+//====================================//
+//       ValidateGridUnload
+ValidateGridUnload::ValidateGridUnload(ObjectAccessor::PlayerMapType &players, Map &m, const uint32 &x, const uint32 &y) : i_isOk(true)
+{    
+    // we only check players in adjacent grids
+    i_players.reserve(players.size());
+    for(ObjectAccessor::PlayerMapType::const_iterator iter=players.begin(); iter != players.end(); ++iter)
+    {
+	GridPair p(m.CalculateGrid(iter->second->GetPositionX(), iter->second->GetPositionY()));
+	if( p.x_coord > (x + 1) || p.x_coord < (x - 1) || p.y_coord > (y + 1) || p.y_coord < (y - 1) )
+	    continue;
+	i_players.push_back(iter->second); // only interested players in adjacent grids
+    }
+}
 
+template<class T>
+void
+ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, T *> &m)
+{
+    if( !i_isOk )
+	return;
+
+    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	for(std::vector<Player *>::iterator p=i_players.begin(); p != i_players.end(); ++p)
+	{
+	    if( (*p)->isInRange(iter->second) )
+	    {
+		i_isOk = false;
+		return;
+	    }
+	}
+    }
+}
+
+template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, Creature *> &);
+template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, GameObject *> &);
+template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &);
+template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, Corpse *> &);
+
+#endif
 
 // specialization....
 template void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);

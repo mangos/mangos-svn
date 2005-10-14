@@ -5,6 +5,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
+#include "RedZoneDistrict.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
@@ -55,6 +56,8 @@ MapManager::Initialize()
     grid_compression("creatures", "creatures_grid");
     sLog.outDebug("Grid compression apply on gameobjects....");
     grid_compression("gameobjects", "gameobjects_grid");
+    Map::InitStateMachine();
+    RedZone::Initialize();
 }
 
 Map*

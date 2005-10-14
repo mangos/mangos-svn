@@ -22,9 +22,22 @@
 #include "Player.h"
 #include "WorldSession.h"
 #include "Log.h"
+#include "GridStates.h"
+#include "RedZoneDistrict.h"
 
 // 3 minutes
 #define DEFAULT_GRID_EXPIRY     300
+static GridState* si_GridStates[MAX_GRID_STATE];
+
+// static initialization
+void 
+Map::InitStateMachine()
+{
+    si_GridStates[GRID_STATE_INVALID] = new InvalidState;
+    si_GridStates[GRID_STATE_ACTIVE] = new ActiveState;
+    si_GridStates[GRID_STATE_IDLE] = new IdleState;
+    si_GridStates[GRID_STATE_REMOVAL] = new RemovalState;
+}
 
 
 Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
@@ -61,7 +74,7 @@ Map::EnsureGridCreated(const GridPair &p)
 }
 
 void
-Map::EnsurePlayerInGrid(const GridPair &p, Player *player)
+Map::EnsurePlayerInGrid(const GridPair &p, Player *player, bool add_player)
 {
     uint64 mask = EnsureGridCreated(p);
     GridType *grid = i_grids[p.x_coord][p.y_coord];
@@ -75,11 +88,13 @@ Map::EnsurePlayerInGrid(const GridPair &p, Player *player)
 	    GridLoaderType loader;
 	    ObjectGridLoader gloader(*grid, *player, i_id);
 	    loader.Load(*grid, gloader);
+
+	    if( add_player )
 	    grid->AddObject(player, player->GetGUID());
 	    i_gridStatus[p.x_coord] |= mask;
 	}
     }
-    else
+    else if( add_player )
     {
 	WriteGuard guard(i_info[p.x_coord][p.y_coord]->i_lock);
 	grid->AddObject(player, player->GetGUID());
@@ -88,16 +103,8 @@ Map::EnsurePlayerInGrid(const GridPair &p, Player *player)
 }
 
 void
-Map::Add(Player *player)
+Map::NotifyPlayerInRange(const GridPair &p, Player *player)
 {
-    GridPair p = CalculateGrid(player->GetPositionX(), player->GetPositionY());
-    
-    assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
-	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
-
-    EnsurePlayerInGrid(p, player);
-   
-    sLog.outDebug("Player %s enters grid[%d, %d]", player->GetName(), p.x_coord, p.y_coord);
     GridType &grid(*i_grids[p.x_coord][p.y_coord]);
     MaNGOS::PlayerNotifier notifier(grid, *player);
 
@@ -110,6 +117,21 @@ Map::Add(Player *player)
 	TypeContainerVisitor<MaNGOS::PlayerNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
 	grid.VisitGridObjects(object_notifier);
     }
+}
+
+
+
+void
+Map::Add(Player *player)
+{
+    GridPair p = CalculateGrid(player->GetPositionX(), player->GetPositionY());
+    
+    assert( p.x_coord >= 0 && p.x_coord < MAX_NUMBER_OF_GRIDS &&
+	    p.y_coord >= 0 && p.y_coord < MAX_NUMBER_OF_GRIDS );
+
+    sLog.outDebug("Player %s enters grid[%d, %d]", player->GetName(), p.x_coord, p.y_coord);
+    EnsurePlayerInGrid(p, player, true);
+    NotifyPlayerInRange(p, player);
 }
 
 
@@ -216,85 +238,21 @@ Map::loaded(const GridPair &p) const
 
 // update map
 void
-Map::Update(uint32 t_diff)
+Map::Update(const uint32 &t_diff)
 {
-	if (m_nextThinkTime > time(NULL))
-		return; // Think once every 5 secs only for GameObject updates...
-
-	m_nextThinkTime = time(NULL) + 5;
-
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
 	uint64 mask = 1;
 	for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
 	{
-	    uint64 mask2 = CalculateGridMask(j);
-	    assert(mask2 == mask);
 	    if( i_gridMask[i] & mask )
 	    {
 		assert(i_grids[i][j] != NULL && i_info[i][j] != NULL);
 		GridType &grid(*i_grids[i][j]);
 		GridInfo &info(*i_info[i][j]);
-		if( grid.ObjectsInGrid() > 0 )
-		{       
-		    {
-			// update the object
-			grid.SetGridStatus(GRID_STATUS_ACTIVE);
-			MaNGOS::GridUpdater updater(grid, t_diff);
-			TypeContainerVisitor<MaNGOS::GridUpdater, ContainerMapList<Player> > player_notifier(updater);
-			grid.VisitObjects(player_notifier);
-			TypeContainerVisitor<MaNGOS::GridUpdater, TypeMapContainer<AllObjectTypes> > object_notifier(updater);
-			grid.VisitGridObjects(object_notifier);
-		    }
-
-		    // now update packets.. it uses the same notifier as the player moves..
-		    // (1) update its inrange objects (remove the out of range)
-		    // (2) update the newly in range
-		    //MaNGOS::PlayerUpdatePacket update_packet(*i_grids[i][j]);
-		    //TypeContainerVisitor<MaNGOS::PlayerUpdatePacket, ContainerMapList<Player> > player_update(update_packet);
-		    //graid.VisitObjects(player_update);
-		}
-		else
-		{
-		    if( grid.GetGridStatus() == GRID_STATUS_REMOVAL )
-		    {
-			// unloading the grid....
-			info.i_timer.Update(t_diff);
-			if( info.i_timer.Passed() )
-			{
-			    sLog.outDebug("Unloading grid[%d,%d] for map %d", i,j, i_id);
-			    {
-				WriteGuard guard(i_info[i][j]->i_lock);
-				ObjectGridUnloader unloader(grid);
-				TypeContainerVisitor<ObjectGridUnloader, TypeMapContainer<AllObjectTypes> > object_unload(unloader);
-				i_gridMask[i] &= ~mask; // clears the bit
-				i_gridStatus[i] &= ~mask;
-				grid.VisitGridObjects(object_unload);
-				delete i_grids[i][j];
-				i_grids[i][j] = NULL;
-			    }
-			    
-			    delete i_info[i][j];
-			    i_info[i][j] = NULL;
-			}
-		    }
-		    else if( grid.GetGridStatus() == GRID_STATUS_IDLE )
-		    {
-			// schedule for removale
-			grid.SetGridStatus(GRID_STATUS_REMOVAL);
-			info.i_timer.Reset(i_gridExpiry); // starts the count count of removal
-		       
-		    }
-		    else if( grid.GetGridStatus() == GRID_STATUS_ACTIVE )
-		    {
-			grid.SetGridStatus(GRID_STATUS_IDLE);
-		    }
-		    else
-		    {
-			// invalid status don't triggers unload..
-		    }
-		}
+		si_GridStates[grid.GetGridState()]->Update(*this, grid, info, i, j, t_diff);
 	    }
+
 	    mask <<= 1;
 	}
     }
@@ -407,7 +365,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 
 	// inorder to figure out the objects are still in range from the old grid.. the player has to
 	// be in a new position
-	player->Relocate(x, y, z, orientation);
+	player->Relocate(x, y, z, orientation);      
 	MaNGOS::PlayerRelocationNotifier notifier(*player);
 	TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
 	grid.VisitObjects(player_notifier);
@@ -418,7 +376,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 	    WriteGuard guard(i_info[old_grid.x_coord][old_grid.y_coord]->i_lock);
 	    grid.RemoveObject(player, player->GetGUID());	    
 	}
-	EnsurePlayerInGrid(new_grid, player);
+	EnsurePlayerInGrid(new_grid, player, true);
     }
     else
         player->Relocate(x, y, z, orientation);
@@ -427,11 +385,15 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
     GridType *grid = i_grids[new_grid.x_coord][new_grid.y_coord];
     assert(grid != NULL);    
 
-    MaNGOS::PlayerRelocationNotifier notifier(*player);
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
-    grid->VisitObjects(player_notifier);
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-    grid->VisitGridObjects(object_notifier);
+    {
+	ReadGuard guard(i_info[new_grid.x_coord][new_grid.y_coord]->i_lock);
+	MaNGOS::PlayerRelocationNotifier notifier(*player);
+	TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_notifier(notifier);
+	grid->VisitObjects(player_notifier);
+	TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+	grid->VisitGridObjects(object_notifier);
+    }
+    grid->SetGridState(GRID_STATE_ACTIVE);
 }
 
 
@@ -470,6 +432,85 @@ Map::ObjectRelocation(T *obj, const float &x, const float &y, const float &z, co
     grid.VisitObjects(player_notifier);    
     
     // what about move into other creatures location and start an attack?
+}
+
+bool
+Map::UnloadGrid(const uint32 &x, const uint32 &y)
+{
+    GridType *grid = i_grids[x][y];
+    assert( grid != NULL && i_info[x][y] != NULL );
+    sLog.outDebug("Unloading grid[%d,%d] for map %d", x,y, i_id);
+    {
+	WriteGuard guard(i_info[x][y]->i_lock); // prevent ALL activities until this is done..
+
+	/** Before we unload.. ensure no player has referenced to the grid...
+	 */
+	ObjectAccessor::PlayerMapType& players(ObjectAccessor::Instance().GetPlayers());
+	MaNGOS::ValidateGridUnload validater(players, *this, x, y);
+	TypeContainerVisitor<MaNGOS::ValidateGridUnload, TypeMapContainer<AllObjectTypes> > object_validater(validater);
+	grid->VisitGridObjects(object_validater);
+	
+	if( !validater.IsOkToUnload() )
+	    return false;
+
+	ObjectGridUnloader unloader(*grid);
+	TypeContainerVisitor<ObjectGridUnloader, TypeMapContainer<AllObjectTypes> > object_unload(unloader);
+	uint64 mask = CalculateGridMask(y);
+	i_gridMask[x] &= ~mask; // clears the bit
+	i_gridStatus[y] &= ~mask;
+	grid->VisitGridObjects(object_unload);
+	delete i_grids[x][y];
+	i_grids[x][y] = NULL;
+    }
+    
+    delete i_info[x][y];
+    i_info[x][y] = NULL;
+    return true;
+}
+
+void
+Map::ZoneAlert(Player &player, const GridPair &p, const uint8 &mask)
+{
+    if( mask == RedZoneDistrict::si_UpperLeftCorner )
+    {
+	GridPair p_1(p.x_coord-1, p.y_coord-1);
+	GridPair p_2(p.x_coord, p.y_coord-1);
+	GridPair p_3(p.x_coord-1, p.y_coord);
+    }
+    else if ( mask == RedZoneDistrict::si_UpperRightCorner )
+    {
+	GridPair p_1(p.x_coord, p.y_coord-1);
+	GridPair p_2(p.x_coord+1, p.y_coord-1);
+	GridPair p_3(p.x_coord+1, p.y_coord);
+    }
+    else if( mask == RedZoneDistrict::si_LowerLeftCorner )
+    {
+	GridPair p_1(p.x_coord-1, p.y_coord);
+	GridPair p_2(p.x_coord-1, p.y_coord+1);
+	GridPair p_3(p.x_coord, p.y_coord+1);
+    }
+    else if( mask == RedZoneDistrict::si_LowerRightCorner )
+    {
+	GridPair p_1(p.x_coord, p.y_coord+1);
+	GridPair p_2(p.x_coord+1, p.y_coord+1);
+	GridPair p_3(p.x_coord+1, p.y_coord);
+    }
+    else if( mask == RedZoneDistrict::si_LeftCenter )
+    {
+	GridPair p_1(p.x_coord-1, p.y_coord);
+    }
+    else if( mask == RedZoneDistrict::si_RightCenter )
+    {
+	GridPair p_1(p.x_coord+1, p.y_coord);
+    }
+    else if( mask == RedZoneDistrict::si_UpperCenter )
+    {
+	GridPair p_1(p.x_coord, p.y_coord-1);
+    }
+    else if( mask == RedZoneDistrict::si_LowerCenter )
+    {
+	GridPair p_1(p.x_coord, p.y_coord+1);
+    }
 }
 
 // explicit template instantiation

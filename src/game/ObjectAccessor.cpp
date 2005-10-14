@@ -11,11 +11,12 @@
 #include "Item.h"
 #include "Container.h"
 
-#ifdef ENABLE_GRID_SYSTEM
+
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
+#ifdef ENABLE_GRID_SYSTEM
 Creature*
 ObjectAccessor::GetCreature(Player &player, uint64 guid)
 {
@@ -51,7 +52,7 @@ ObjectAccessor::GetDynamicObject(Player &player, uint64 guid)
 {
     return dynamic_cast<DynamicObject *>(player.GetInRangeObject(guid));
 }
-
+#endif
 
 Player*
 ObjectAccessor::FindPlayer(uint64 guid)
@@ -121,6 +122,31 @@ ObjectAccessor::AddUpdateObject(Object *obj)
 }
 
 void
+ObjectAccessor::RemoveUpdateObject(Object *obj)
+{
+    Guard guard(*this);
+    std::set<Object *>::iterator iter = i_objects.find(obj);
+    if( iter != i_objects.end() )
+	i_objects.erase( iter );
+}
+
+template<class T>
+void
+ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &m)
+{
+    if( m.size() == 0 )
+	return;
+
+    Guard guard(*this);
+    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	std::set<Object *>::iterator obj = i_objects.find(iter->second);
+	if( obj != i_objects.end() )
+	    i_objects.erase( obj );
+    }
+}
+
+void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
 {
     Player *pl = NULL;
@@ -143,7 +169,7 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
 
     if( pl == NULL )
 	return;
-
+#ifdef ENABLE_GRID_SYSTEM
     _buildPacket(pl, pl, update_players); // bulid myself for myself
     // update the in range players
     for(Player::InRangeUnitsMapType::iterator iter=pl->InRangeUnitsBegin(); iter != pl->InRangeUnitsEnd(); ++iter)
@@ -152,6 +178,7 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
 	if( for_pl != NULL )
 	    _buildPacket(for_pl, pl, update_players); // build myself for my in range players
     }
+#endif
 }
 
 void
@@ -170,5 +197,12 @@ ObjectAccessor::_buildPacket(Player *pl, Player *bpl, UpdateDataMapType &update_
 
 }
 
-#endif
+
+template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, GameObject *> &m);
+template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m);
+template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Creature *> &m);
+
+
+
 

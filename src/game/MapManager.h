@@ -50,7 +50,13 @@ public:
     void Initialize(void);
     void Update(time_t);
 
-    inline void SetGridCleanUpDelay(uint32 t) { i_gridCleanUpDelay = t; }
+    inline void SetGridCleanUpDelay(uint32 t) 
+    { 
+	if( t < MIN_GRID_DELAY )
+	    i_gridCleanUpDelay = MIN_GRID_DELAY;
+	else
+	    i_gridCleanUpDelay = t; 
+    }
     inline void SetMapUpdateInterval(uint32 t) 
     {
 	// minimum of 100 ms

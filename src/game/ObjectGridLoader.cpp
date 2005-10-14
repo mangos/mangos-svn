@@ -83,37 +83,14 @@ ObjectGridUnloader::Unload(GridType &grid)
 }
 
 
-template<>
-void
-ObjectGridUnloader::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &m)
-{
-    // this is slow we need to fix this
-    // when the grid unloads, we have to ensure
-    // if a player still holds an inrange object in
-    // the unloading grid.. we need to remove it.
-    // When we have a state machine, it can resolve this
-#ifdef ENABLE_GRID_SYSTEM
-    ObjectAccessor::PlayerMapType &pm(ObjectAccessor::Instance().GetPlayers());
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-	for(ObjectAccessor::PlayerMapType::iterator iter=pm.begin(); iter != pm.end(); iter++)
-	    iter->second->RemoveInRangeObject(iter->second);
-	delete iter->second;
-    }
-#endif
-    m.clear();
-}
-
 template<class T>
 void
 ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
 {
 #ifdef ENABLE_GRID_SYSTEM
-    ObjectAccessor::PlayerMapType &pm(ObjectAccessor::Instance().GetPlayers());    
+    ObjectAccessor::Instance().RemoveUpdateObjects(m);
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-	for(ObjectAccessor::PlayerMapType::iterator iter=pm.begin(); iter != pm.end(); iter++)
-	    iter->second->RemoveInRangeObject(iter->second);
 	delete iter->second;
     }
 #endif
@@ -123,3 +100,4 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
 template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
+template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, Creature *> &m);
