@@ -18,7 +18,6 @@ ActiveState::Update(Map &m, GridType &grid, GridInfo & info, const uint32 &x, co
 	grid.SetGridState(GRID_STATE_IDLE);
     else
     {
-	GridReadGuard guard(info.i_lock);
 	MaNGOS::GridUpdater updater(grid, t_diff);
 	TypeContainerVisitor<MaNGOS::GridUpdater, ContainerMapList<Player> > player_notifier(updater);
 	grid.VisitObjects(player_notifier);
