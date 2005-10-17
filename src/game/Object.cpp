@@ -154,7 +154,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
             UpdateMask updateMask;
             updateMask.SetCount( m_valuesCount );
-            _SetCreateBits( &updateMask, target );
+             _SetCreateBits( &updateMask, target );
             _BuildValuesUpdate( &buf, &updateMask );
 
             data->AddUpdateBlock(buf);
