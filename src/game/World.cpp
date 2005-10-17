@@ -85,14 +85,14 @@ void World::AddSession(WorldSession* s)
     m_sessions[s->GetAccountId()] = s;
 }
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 uint32 NumActivePlayers = 0;
 long long ActivePlayers[PLAYERS_MAX];
 float PlayerPositions[PLAYERS_MAX][2];
 long int PlayerZones[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
 long int PlayerMaps[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
 void World::SetInitialWorldSettings()
 {

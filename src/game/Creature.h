@@ -184,6 +184,38 @@ class Creature : public Unit
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
+		// UQ1: We desperately need this working... We can't keep having friendlys attacking us!!!
+/*		uint32 getFaction()
+		{
+			return m_faction;
+		};
+
+        //this sets the faction horde, alliance or NoFaction in case of any bug
+		//Or sets a faction passed by parameter in case of race is < 0
+		void setFaction(uint8 race)
+		{
+	         //Set faction
+			if(race > 0)
+			{
+                 m_faction = NoFaction;
+                 switch(race)
+                 {
+			         case HUMAN:
+                     case DWARF:
+		             case NIGHTELF:
+	                 case GNOME: 
+			             m_faction = Alliance; break;
+		             case ORC:
+		             case UNDEAD_PLAYER:
+		             case TAUREN:
+		             case TROLL:
+                         m_faction = Horde; break;
+	             }
+			} else m_faction = NoFaction;
+
+			SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
+		};*/
+
     protected:
         void _LoadGoods();
         void _LoadQuests();
@@ -228,6 +260,9 @@ class Creature : public Unit
         // will be changed to list
         float m_waypoints[MAX_CREATURE_WAYPOINTS][3];
         float m_moveSpeed;
+
+		// Faction IDs...
+		uint32 m_faction;
 
         float m_destinationX;
         float m_destinationY;
