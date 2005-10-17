@@ -944,6 +944,57 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
     return true;
 }
 
+//add by vendy for add item to slot 2005/10/16 20:32
+bool ChatHandler::HandleAddItemCommand(const char* args)
+{
+	
+    WorldPacket data;
+
+    if (!*args)  
+        return false;
+
+	char* citemid = strtok((char*)args, " ");
+    char* cPos = strtok(NULL, " ");
+    char* cVal = strtok(NULL, " ");
+
+	uint32 itemid=atol(citemid);
+
+	Player*	pl = m_session->GetPlayer();
+	bool   slotfree=false;
+	uint8  i,slot;
+    uint32 Pos=5,Val=1;
+	
+
+	for(i =	INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END;	i++)
+	{
+		if (pl->GetItemBySlot(i) == NULL)
+		{
+			slot = i;
+			slotfree=true;
+			break;
+		}
+	}
+	if (slotfree)
+	{
+		Item *item = new Item();	
+		item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),	itemid, pl);
+		
+		//添加物品属性
+		if ((cPos) && (cVal)){
+		    Pos=(uint32)atol(cPos);
+            Val=(uint32)atol(cVal);
+			//for(int j=Pos;j<Val;j++)
+			item->SetUInt32Value( Pos, Val );
+		}
+
+		pl->AddItemToSlot(	slot, item );
+	}else{
+        FillSystemMessageData(&data, m_session, "Bag is full.");
+        m_session->SendPacket(&data);
+	}
+
+    return true;
+}
 
 float max_creature_distance = 160;
 

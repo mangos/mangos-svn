@@ -46,6 +46,9 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
     m_itemProto = objmgr.GetItemPrototype( itemid );
     ASSERT(m_itemProto);
 
+	//for(int i=5;i<m_valuesCount;i++)
+    //     SetUInt32Value( i, 1 );
+
     SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
     SetUInt32Value( ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
 

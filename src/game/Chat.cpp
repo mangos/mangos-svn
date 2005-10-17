@@ -110,7 +110,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "itemmove",    2, &ChatHandler::HandleItemMoveCommand,      "",   NULL },
         { "kick",        1, &ChatHandler::HandleNYICommand,           "",   NULL },
         { "learn",       3, &ChatHandler::HandleLearnCommand,         "",   NULL },
-        { "modify",      1, NULL,                                     "",   modifyCommandTable },
+        { "unlearn",     3, &ChatHandler::HandleUnLearnCommand,       "",   NULL },//add by vendy
+		{ "modify",      1, NULL,                                     "",   modifyCommandTable },
         { "debug",       1, NULL,                                     "",   debugCommandTable },
         { "morph",       3, &ChatHandler::HandleMorphCommand,         "",   NULL },
         { "mount",       0, &ChatHandler::HandleMountCommand,         "",   NULL },
@@ -145,6 +146,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "showarea",    3, &ChatHandler::HandleShowAreaCommand,      "",   NULL },
         { "hidearea",    3, &ChatHandler::HandleHideAreaCommand,      "",   NULL },
         { "addspw",      2, &ChatHandler::HandleAddSpwCommand,        "",   NULL },
+		{ "additem",     3, &ChatHandler::HandleAddItemCommand,       "",   NULL }, //add by vendy
         { NULL,          0, NULL,                                     "",   NULL }
     };
 

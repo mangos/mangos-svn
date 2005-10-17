@@ -203,6 +203,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleLevelUpCommand(const char* args);
         bool HandleShowAreaCommand(const char* args);
         bool HandleHideAreaCommand(const char* args);
+        bool HandleAddItemCommand(const char* args); //add by vendy
 
         Player* getSelectedChar(WorldSession *client);
 
