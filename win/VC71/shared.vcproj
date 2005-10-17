@@ -26,6 +26,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\shared___Win32_Release/shared.pch"
 				AssemblerListingLocation=".\shared___Win32_Release/"
@@ -77,6 +78,7 @@
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\shared___Win32_Debug/shared.pch"
 				AssemblerListingLocation=".\shared___Win32_Debug/"
@@ -253,6 +255,12 @@
 			Name="Auth"
 			Filter="">
 			<File
+				RelativePath="..\..\src\shared\Auth\AuthCrypt.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Auth\AuthCrypt.h">
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Auth\BigNumber.cpp">
 			</File>
 			<File
@@ -263,12 +271,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Auth\Sha1.h">
-			</File>
-			<File
-				RelativePath="..\..\src\shared\Auth\AuthCrypt.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\shared\Auth\AuthCrypt.h">
 			</File>
 		</Filter>
 		<Filter
