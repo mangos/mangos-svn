@@ -409,10 +409,10 @@ public:
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 		// UQ1: Positional Array Update...
 		void SetPlayerPositionArray();
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
         // Death Stuff
         void SpawnCorpseBody();

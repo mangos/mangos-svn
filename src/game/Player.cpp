@@ -477,10 +477,10 @@ void Player::Update( uint32 p_time )
     // UpdateObject();
 */
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 	//this->Update(p_time);
 	SetPlayerPositionArray();
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
 }
 
@@ -1289,7 +1289,7 @@ void Player::DestroyForPlayer( Player *target ) const
     }
 }
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
 extern long long ActivePlayers[PLAYERS_MAX];
@@ -1356,7 +1356,7 @@ void Player::SetPlayerPositionArray()
 	PlayerPositions[guid][1] = y;
 	PlayerPositions[guid][2] = z;
 }
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
 void Player::SaveToDB()
 {

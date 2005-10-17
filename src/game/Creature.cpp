@@ -272,7 +272,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
     }
 }
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
 extern long long ActivePlayers[PLAYERS_MAX];
@@ -345,37 +345,20 @@ float HeightDistance(float from, float to)
 	VectorSubtract(v2a, v1a, vec);
 	return VectorLength(vec);
 }
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
 extern float max_creature_distance;
 
 void Creature::Update( uint32 p_time )
 {
+	//boolean isVendor = false;
 
-#ifndef ENABLE_GRID_SYSTEM
-    if (m_nextThinkTime > time(NULL))
-	return; // Think once every 10 secs only for creatures that are not near a player...
-    
-    Unit::Update( p_time );
+#ifndef __NO_PLAYERS_ARRAY__
+	uint32 loop;
 
-	/*    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
-    {
-        // Still Moving well then lets stop
-        if(m_creatureState == MOVING)
-        {
-            // Stop Moving
-            m_moveSpeed = 7.0f*0.001f;
-            AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
-            m_moveTimer = 0;
-            m_destinationX = m_destinationY = m_destinationZ = 0;
-            m_timeMoved = 0;
-            m_timeToMove = 0;
-            m_creatureState = STOPPED;
-			//return;
-        }
-		//return;
-    }    */
-	
+	if (m_nextThinkTime > time(NULL))
+		return; // Think once every 10 secs only for creatures that are not near a player...
+
 	if (NumActivePlayers == 0)
 		return; // UQ1: If there's no players online, why think???
 
@@ -408,13 +391,12 @@ void Creature::Update( uint32 p_time )
 	ss5 << GetPositionZ();//m_positionZ;
 	float z = (float)atof(ss5.str().c_str());
 	//Log::getSingleton( ).outDetail("z: %s->%f.", ss5.str().c_str(), z);
+#endif //__NO_PLAYERS_ARRAY__
 
-	//if (zoneId == 40)
-	//	Log::getSingleton( ).outDetail("Creature %s is in map (%i) and zone (%i) - Position %f %f %f!", GetName(), mapId, zoneId, x, y, z);
+	//if (this->getItemCount() > 0 && this->getItemCount() < MAX_CREATURE_ITEMS)
+	//	isVendor = true;
 
-	//UQ1: This should be much faster (use less CPU time)...
-	uint32 loop;
-	bool do_full_think = false;
+	Unit::Update( p_time );
 
 	if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
 		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
@@ -427,36 +409,65 @@ void Creature::Update( uint32 p_time )
 		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
 		return; // These guys shouldn't move...
 
+	/*if (isVendor
+		//|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
+		//|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
+		|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER))
+		return; // These guys shouldn't move...*/
+
+#ifndef ENABLE_GRID_SYSTEM
+
+#ifdef __NO_PLAYERS_ARRAY__
+	if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
+    {
+        // Still Moving well then lets stop
+        if(m_creatureState == MOVING)
+        {
+            // Stop Moving
+            m_moveSpeed = 7.0f*0.001f;
+            AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
+            m_moveTimer = 0;
+            m_destinationX = m_destinationY = m_destinationZ = 0;
+            m_timeMoved = 0;
+            m_timeToMove = 0;
+            m_creatureState = STOPPED;
+        }
+		return;
+    } 
+	
+#else //!__NO_PLAYERS_ARRAY__
+	//UQ1: This should be much faster (use less CPU time)...
+	bool do_full_think = false;
+
 	for (loop = 0; loop < NumActivePlayers; loop++)
 	{// Exit procedure here if no players are close...
-//#define MAX_CREATURE_DIST 100//2 //50 //10
-		//Log::getSingleton( ).outDetail("Player %u (GUID: %i) is in map (%i) and zone (%i) - Position %f %f %f!", loop, ActivePlayers[loop], PlayerMaps[ActivePlayers[loop]], PlayerZones[ActivePlayers[loop]], PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], PlayerPositions[ActivePlayers[loop]][2]);
-
-		
+		bool sameFaction = false;
 
 		if (PlayerMaps[ActivePlayers[loop]] != mapId)
 			continue;
 
-		//Log::getSingleton( ).outDetail("Creature %s is in same map (%i) (zone %i)!", GetName(), mapId, zoneId);
+		// UQ1: Some NPCs have wrong zoneIds ??? WTF???
+		//if (PlayerZones[ActivePlayers[loop]] != zoneId)
+		//	continue;
 
-		if (PlayerZones[ActivePlayers[loop]] != zoneId)
-			continue;
-
-		//Log::getSingleton( ).outDetail("Creature %s is in same map (%i) and zone (%i)!", GetName(), mapId, zoneId);
-
-		//float distance = DistanceNoHeight/*getdistance*/(PlayerPositions[ActivePlayers[loop]][0],PlayerPositions[ActivePlayers[loop]][1],respawn_cord[0], respawn_cord[1]);
 		float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
 
-		if(distance<=max_creature_distance/*MAX_CREATURE_DIST*/)
+		if(distance<=max_creature_distance)
 		{
-			//Log::getSingleton( ).outDetail("Creature %s is close enough (distance: %f)!", GetName(), distance);
 			do_full_think = true;
 			m_nextThinkTime = time(NULL);
 
-			if(distance<=50)
+//			if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == objmgr.GetObject<Player>(ActivePlayers[loop])->getFaction())
+//				sameFaction = true; // Same faction as us...
+
+			if(distance<=50 && !sameFaction)
 			{// If close enough, attack...
 				if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
-					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
+					//|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
 					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
 					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
 					|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
@@ -499,31 +510,17 @@ void Creature::Update( uint32 p_time )
 		m_nextThinkTime = time(NULL) + 10;
 		return;
 	}
+#endif //__NO_PLAYERS_ARRAY__
 
-#else
+#else //ENABLE_GRID_SYSTEM
 	
-	Unit::Update( p_time );
-
-	// some guys don't move
-	if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
-	    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
-	    return; // These guys shouldn't move...
-
-
     // if no player in the zone.. why bother updating me
     if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
     {
-	if( m_creatureState = MOVING )
-	{
-	    m_moveSpeed = 7.0f*0.001f; // ???
-	    m_moveTimer = 0;
+		if( m_creatureState = MOVING )
+		{
+			m_moveSpeed = 7.0f*0.001f; // ???
+			m_moveTimer = 0;
             m_destinationX = m_destinationY = m_destinationZ = 0;
             m_timeMoved = 0;
             m_timeToMove = 0;
@@ -531,13 +528,60 @@ void Creature::Update( uint32 p_time )
 			//return;
         }
 
-	m_nextThinkTime = time(NULL) + 10;
+		m_nextThinkTime = time(NULL) + 10;
         return;
     }
 
+#ifndef __NO_PLAYERS_ARRAY__
+	/* UQ1: Attack checking */
+	for (loop = 0; loop < NumActivePlayers; loop++)
+	{// Exit procedure here if no players are close...
+		bool sameFaction = false;
+
+		if (PlayerMaps[ActivePlayers[loop]] != mapId)
+			continue;
+
+		//if (PlayerZones[ActivePlayers[loop]] != zoneId)
+		//	continue;
+
+//		if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == objmgr.GetObject<Player>(ActivePlayers[loop])->getFaction())
+//			sameFaction = true; // Same faction as us...
+
+		float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
+
+		if(distance<=50 && !sameFaction)
+		{// If close enough, attack...
+			if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
+				//|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
+				|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
+				continue;
+
+			if(m_attackers.empty())
+			{
+				Unit *pVictim = (Unit*) ObjectAccessor::Instance().FindPlayer(ActivePlayers[loop]);
+				WPAssert(pVictim);
+
+				if (pVictim->isAlive())
+				{
+					m_attackers.insert(pVictim);
+				}
+			}
+
+			break; // We found an enemy to attack... Exit the loop...
+		}
+	}
+#endif //__NO_PLAYERS_ARRAY__
+
     m_nextThinkTime = time(NULL);
 
-#endif
+#endif //ENABLE_GRID_SYSTEM
+
     if (m_deathState == JUST_DIED)
     {
         this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
@@ -607,7 +651,9 @@ void Creature::Update( uint32 p_time )
             RegenerateAll();
         }
 
-        UpdateMobMovement( p_time );
+		if (GetTypeId() != TYPEID_CORPSE)
+			UpdateMobMovement( p_time );
+
         AI_Update();
 
         // Clear the NPC flags bit so it doesn't get auto- updated each frame. NPC flags are set per player and this would ruin is

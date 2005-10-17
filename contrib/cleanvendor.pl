@@ -5,13 +5,13 @@ require DBI;
 $database = "mangos";
 
 # Database server
-$dbserver = "xxx.xxx.xxx.xxx";
+$dbserver = "127.0.0.1";
 
 # Database Username which can access finance database
-$dbuser = "mangosuser";
+$dbuser = "root";
 
 # Database Password
-$dbpass = "mangospass";
+$dbpass = "sexgame98";
 
 
 &connectdb;

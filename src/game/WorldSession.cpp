@@ -128,11 +128,11 @@ bool WorldSession::Update(uint32 diff)
     return true;
 }
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 #define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
 extern long long ActivePlayers[PLAYERS_MAX];
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
 void WorldSession::LogoutPlayer(bool Save)
 {
@@ -146,7 +146,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		std::stringstream ss;
 		ss << "UPDATE characters SET online = 0 WHERE guid = " << _player->GetGUID();
 
-#ifndef ENABLE_GRID_SYSTEM
+#ifndef __NO_PLAYERS_ARRAY__
 		bool found = false;
 		uint32 loop = 0;
 		
@@ -170,7 +170,7 @@ void WorldSession::LogoutPlayer(bool Save)
 		}
 
 		NumActivePlayers--;
-#endif //ENABLE_GRID_SYSTEM
+#endif //__NO_PLAYERS_ARRAY__
 
         // Remove ourself from a group
         if (_player->IsInGroup())
