@@ -2750,9 +2750,8 @@ void Player::CreateCorpse()
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 #ifndef ENABLE_GRID_SYSTEM
     pCorpse = objmgr.GetCorpseByOwner(this);
-#else
-    pCorpse = ObjectAccessor::Instance().GetCorpse(*this, GetGUID());
 #endif
+
     if(!pCorpse)
     {
         pCorpse = new Corpse();

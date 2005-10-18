@@ -120,6 +120,38 @@ Debugging options:
 ])
 AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
 
+# check for grid system enable
+AC_MSG_CHECKING(whether grid system is enabled)
+MANGOSD_ENABLE_GRID=no
+AC_ARG_ENABLE(grid-system,
+[--enable-grid-system Turn on grid system],
+[
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
+	CXXFLAGS="-DENABLE_GRID_SYSTEM $CXXFLAGS"
+	MANGOSD_ENABLE_GRID=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_GRID)
+
+# check for enable new framework
+AC_MSG_CHECKING(whether new framework is enabled)
+MANGOSD_ENABLE_NEW_FRAMEWORK=no
+AC_ARG_ENABLE(new-framework,
+[--enable-new-framework Enable new framework],
+[
+    if test "$enableval" = "yes" ; then
+	MANGOSD_ENABLE_NEW_FRAMEWORK=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)          
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_NEW_FRAMEWORK)
+AM_CONDITIONAL(NEWFRAMEWORK, test x$MANGOS_ENABLE_NEW_FRAMEWORK = x$yes)
+
+
 if test $sysconfdir = '${prefix}/etc'; then
 	MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"
 else

@@ -13,6 +13,9 @@
 #define VISIBILITY_RANGE    10000
 #define SPIRIT_HEALER       5233
 
+// 160*160
+#define IN_LINE_OF_SIGHT         25600
+
 namespace MaNGOS
 {
     namespace Utilities
@@ -36,6 +39,14 @@ namespace MaNGOS
 	{
 	    assert(obj1->GetMapId() == obj2->GetMapId());
 	    return (calculate_distance_square(obj1->GetPositionX(), obj1->GetPositionY(), obj1->GetPositionZ(), obj2->GetPositionX(), obj2->GetPositionY(), obj2->GetPositionZ()) < VISIBILITY_RANGE);
+	}
+
+	/** is_in_line_of_sight calculates where unit1 is in the line of sight of unit2.  Note the orientation
+	 * of unit 2 is no necessary cuz what unit1 facing determines he/she can see unit2
+	 */
+	inline bool is_in_line_of_sight(const Unit &unit1, const Unit &unit2, const float off_set)
+	{
+	    return( (calculate_distance_square(unit1.GetPositionX(), unit1.GetPositionY(), unit1.GetPositionZ(), unit2.GetPositionX(), unit2.GetPositionY(), unit2.GetPositionZ())*off_set) <= IN_LINE_OF_SIGHT );
 	}
 
 	// helpful functions determining if its a spirit healer
