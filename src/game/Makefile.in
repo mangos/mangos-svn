@@ -147,7 +147,6 @@ libgame_a_SOURCES = \
 	Map.cpp \
 	MapManager.cpp \
         RedZoneDistrict.cpp \
-        CreatureAI.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
@@ -210,6 +209,12 @@ libgame_a_SOURCES = \
 	WorldSocketMgr.h \
 	ZoneMapper.h
 
+
+@NEWFRAMEWORK_TRUE@libgame_a_LIBADD = CreatureAI.cpp \
+@NEWFRAMEWORK_TRUE@        NullCreatureAI.cpp \
+@NEWFRAMEWORK_TRUE@	CreatureAISelector.cpp \
+@NEWFRAMEWORK_TRUE@        AggressorAI.cpp 
+
 subdir = src/game
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
@@ -217,7 +222,10 @@ CONFIG_CLEAN_FILES =
 LIBRARIES = $(noinst_LIBRARIES)
 
 libgame_a_AR = $(AR) cru
-libgame_a_LIBADD =
+@NEWFRAMEWORK_TRUE@libgame_a_DEPENDENCIES = CreatureAI.cpp \
+@NEWFRAMEWORK_TRUE@	NullCreatureAI.cpp CreatureAISelector.cpp \
+@NEWFRAMEWORK_TRUE@	AggressorAI.cpp
+@NEWFRAMEWORK_FALSE@libgame_a_DEPENDENCIES =
 am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	ChannelHandler.$(OBJEXT) CharacterHandler.$(OBJEXT) \
 	Chat.$(OBJEXT) ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
@@ -228,10 +236,9 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
 	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
 	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
-	MapManager.$(OBJEXT) RedZoneDistrict.$(OBJEXT) \
-	CreatureAI.$(OBJEXT) MapMgr.$(OBJEXT) MiscHandler.$(OBJEXT) \
-	MovementHandler.$(OBJEXT) NPCHandler.$(OBJEXT) \
-	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
+	MapManager.$(OBJEXT) RedZoneDistrict.$(OBJEXT) MapMgr.$(OBJEXT) \
+	MiscHandler.$(OBJEXT) MovementHandler.$(OBJEXT) \
+	NPCHandler.$(OBJEXT) ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
 	Opcodes.$(OBJEXT) Player.$(OBJEXT) QueryHandler.$(OBJEXT) \
 	QuestHandler.$(OBJEXT) SkillHandler.$(OBJEXT) Spell.$(OBJEXT) \
@@ -253,8 +260,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/CharacterHandler.Po ./$(DEPDIR)/Chat.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ChatHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/CombatHandler.Po ./$(DEPDIR)/Corpse.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/Creature.Po ./$(DEPDIR)/CreatureAI.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/DuelHandler.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/Creature.Po ./$(DEPDIR)/DuelHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/DynamicObject.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/GameObject.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/GridNotifiers.Po \
@@ -337,7 +343,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CombatHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Corpse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Creature.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CreatureAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DuelHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DynamicObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GameObject.Po@am__quote@

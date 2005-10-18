@@ -48,7 +48,6 @@ libgame_a_SOURCES = \
 	Map.cpp \
 	MapManager.cpp \
         RedZoneDistrict.cpp \
-        CreatureAI.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
@@ -110,3 +109,10 @@ libgame_a_SOURCES = \
 	WorldSocket.h \
 	WorldSocketMgr.h \
 	ZoneMapper.h
+
+if NEWFRAMEWORK
+libgame_a_LIBADD = CreatureAI.cpp \
+        NullCreatureAI.cpp \
+	CreatureAISelector.cpp \
+        AggressorAI.cpp 
+endif
