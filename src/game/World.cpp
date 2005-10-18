@@ -213,6 +213,11 @@ void World::SetInitialWorldSettings()
     new DurationStore("DBC/SpellDuration.dbc");
     new RadiusStore("DBC/SpellRadius.dbc");
     new TalentStore("DBC/Talent.dbc");
+    //Made by Andre2k2
+    new AreaTableStore("DBC/AreaTable.dbc");
+	new WorldMapAreaStore("DBC/WorldMapArea.dbc");
+	new WorldMapOverlayStore("DBC/WorldMapOverlay.dbc");
+    //end Made
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
 
     // set timers

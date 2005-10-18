@@ -30,6 +30,13 @@ implementIndexedDBCStore(EmoteStore,emoteentry)
 implementIndexedDBCStore(RadiusStore,SpellRadius)
 implementIndexedDBCStore(CastTimeStore,SpellCastTime)
 implementIndexedDBCStore(TalentStore,TalentEntry)
+
+//Made by Andre2k2
+implementIndexedDBCStore(AreaTableStore,AreaTableEntry)
+implementIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry)
+implementIndexedDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry)
+//end Made
+
 implementDBCStore(SkillStore,skilllinespell)
 // When loading this DBC, just write new SpellStore("spell.dbc");
 float GetRadius(SpellRadius *radius)
