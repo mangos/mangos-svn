@@ -242,6 +242,68 @@ struct SpellDuration
     uint32 Duration2;
     uint32 Duration3;
 };
+
+//Made by Andre2k2
+struct AreaTableEntry
+{
+	uint32 ID;
+	uint32 map;
+	uint32 zone;
+	uint32 exploreFlag;
+	uint32 ukn1;
+	uint32 ukn2;
+	uint32 ukn3;
+	uint32 ukn4;
+	uint32 ukn5;
+	uint32 ukn6;
+	uint32 ukn7;
+	uint32 name;
+	uint32 ukn8;
+	uint32 ukn9;
+	uint32 ukn10;
+	uint32 ukn11;
+	uint32 ukn12;
+	uint32 ukn13;
+	uint32 ukn14;
+	uint32 ukn15;
+	uint32 ukn16;
+};
+
+//Made by Andre2k2
+struct WorldMapAreaEntry
+{
+    uint32 ID;
+	uint32 map;
+	uint32 areaTableID;
+	uint32 name;
+	float  areaVertexY1;
+	float  areaVertexY2;
+	float  areaVertexX1;
+	float  areaVertexX2;
+};
+
+//Made by Andre2k2
+struct WorldMapOverlayEntry
+{
+    uint32 ID;
+	uint32 worldMapAreaID;
+	uint32 areaTableID;
+	uint32 unk1;
+	uint32 unk2;
+	uint32 unk3;
+	uint32 unk4;
+	uint32 unk5;
+	uint32 name;
+	uint32 areaH; //in pixels
+	uint32 areaW; //in pixels
+	uint32 unk6;  //I think columns #12, #13, #14 and #15
+	uint32 unk7;  //are some kind of positions, but i did not
+	uint32 unk8;  //discover what exactly.
+	uint32 unk9;
+	uint32 drawX; //in pixels
+	uint32 drawY; //in pixels
+};
+
 float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
@@ -255,7 +317,13 @@ defineIndexedDBCStore(EmoteStore,emoteentry);
 defineIndexedDBCStore(RadiusStore,SpellRadius);
 defineIndexedDBCStore(CastTimeStore,SpellCastTime);
 defineIndexedDBCStore(TalentStore,TalentEntry);
+//Made by Andre2k2
+defineIndexedDBCStore(AreaTableStore,AreaTableEntry);
+defineIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry);
+defineIndexedDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
+//end Made
 defineDBCStore(SkillStore,skilllinespell);
+
 #define sSpellStore SpellStore::getSingleton()
 #define sSkillStore SkillStore::getSingleton()
 #define sEmoteStore EmoteStore::getSingleton()
@@ -264,4 +332,9 @@ defineDBCStore(SkillStore,skilllinespell);
 #define sSpellRadius RadiusStore::getSingleton()
 #define sCastTime CastTimeStore::getSingleton()
 #define sTalentStore TalentStore::getSingleton()
+//Made by Andre2k2
+#define sAreaTableStore AreaTableStore::getSingleton()
+#define sWorldMapAreaStore WorldMapAreaStore::getSingleton()
+#define sWorldMapOverlayStore WorldMapOverlayStore::getSingleton()
+//end Made
 #endif
