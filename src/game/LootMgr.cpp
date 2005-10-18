@@ -21,7 +21,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-
+#include "ProgressBar.hpp"
 
 createFileSingleton( LootMgr );
 
@@ -62,9 +62,10 @@ LootMgr::_populateLootTemplate(const char *loot_table_name, LootTable &loot_tabl
     {      
 	int curId = -1;
 	LootList *table = NULL;
-	
+	barGoLink bar( result->GetRowCount() );
 	do 
 	{	 
+	    bar.step();
 	    Field *fields = result->Fetch();
 	    int entry_id = fields[0].GetUInt32(); 
 	    

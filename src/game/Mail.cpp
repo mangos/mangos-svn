@@ -389,3 +389,4 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     }
     
 }
+

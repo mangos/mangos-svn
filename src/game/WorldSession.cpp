@@ -397,6 +397,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_MAIL_RETURN_TO_SENDER,    STATUS_LOGGEDIN, &WorldSession::HandleReturnToSender                },
         { CMSG_MAIL_DELETE,              STATUS_LOGGEDIN, &WorldSession::HandleMailDelete                    },
         { CMSG_MAIL_CREATE_TEXT_ITEM,    STATUS_LOGGEDIN, &WorldSession::HandleMailCreateTextItem            },//add by vendy
+	/// Cinema opcode
+        { CMSG_COMPLETE_CINEMATIC,	 STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema            },//add by sani
 
         /// End of table
         { 0,                             0,               NULL                                               }

@@ -241,6 +241,9 @@ class WorldSession
         void HandleChannelAnnounce(WorldPacket& recvPacket);
         void HandleChannelModerate(WorldPacket& recvPacket);
 
+	/// cinema
+        void HandleCompleteCinema(WorldPacket& recvPacket);
+
         /// Helper functions
         void SetNpcFlagsForTalkToQuest(const uint64& guid, const uint64& targetGuid);
 
