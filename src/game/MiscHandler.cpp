@@ -1012,6 +1012,13 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
 }
 
+/// cinema
+void WorldSession::HandleCompleteCinema( WorldPacket & recv_data )
+{
+    Log::getSingleton( ).outDebug( "WORLD: Player is watching cinema" );
+}
+
+
 void 
 WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {

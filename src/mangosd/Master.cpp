@@ -129,8 +129,9 @@ bool Master::Run()
     {
         delete World::getSingletonPtr();
         _StopDB();
-
-        return 0;
+	sLog.outString( "MaNGOS can not bind to that port" );
+	exit(1);
+///        return 0;
     }
 
     h.Add(&worldListenSocket);
@@ -189,6 +190,11 @@ bool Master::_StartDB()
         //return false;
     }
 
+/// clean online table
+	std::stringstream query;
+        query << "UPDATE characters SET online=0";
+        QueryResult *result = sDatabase.Query( query.str().c_str() );
+	delete result;
     return true;
 }
 
