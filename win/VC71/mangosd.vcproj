@@ -83,7 +83,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,_DEBUG,_CONSOLE"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
@@ -162,6 +162,12 @@
 				RelativePath="..\..\Todo">
 			</File>
 		</Filter>
+		<File
+			RelativePath="..\..\src\mangosd\HttpdRunnable.cpp">
+		</File>
+		<File
+			RelativePath="..\..\src\mangosd\HttpdRunnable.h">
+		</File>
 		<File
 			RelativePath="..\..\src\mangosd\Main.cpp">
 		</File>
