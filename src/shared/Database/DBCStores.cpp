@@ -34,7 +34,7 @@ implementIndexedDBCStore(TalentStore,TalentEntry)
 //Made by Andre2k2
 implementIndexedDBCStore(AreaTableStore,AreaTableEntry)
 implementIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry)
-implementIndexedDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry)
+implementDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry)
 //end Made
 
 implementDBCStore(SkillStore,skilllinespell)

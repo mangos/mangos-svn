@@ -127,6 +127,16 @@ struct PlayerCreateInfo
 	std::list<uint16> action[4];
 };
 
+struct Areas
+{
+	uint32 areaFlag;
+	uint32 zone;
+	float x1;
+	float x2;
+	float y1;
+	float y2;
+};
+
 enum PlayerMovementType
 {
     MOVE_ROOT       = 1,
@@ -502,7 +512,10 @@ public:
     void MoveInRange(Player &player);
     void DestroyInRange(void);
 #endif
-
+	//Explore Area System
+	void CheckExploreSystem(void);
+	// Initialize the possible areas that player will discover.
+    void InitExploreSystem(void);
 
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
@@ -528,6 +541,8 @@ public:
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
+
+		std::list<struct Areas> areas;
 
         uint64 m_lootGuid;
 
