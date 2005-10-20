@@ -457,11 +457,12 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
         return;
 
     oldZone = GetPlayer( )->GetZoneId();
-
     // Setting new zone
     GetPlayer()->SetZoneId((uint16)newZone);
-}
 
+	// Initialize the possible areas that player will discover.
+	GetPlayer()->InitExploreSystem();
+}
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
 {

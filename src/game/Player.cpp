@@ -3369,6 +3369,68 @@ Player::DestroyInRange()
 
 #endif
 
+void Player::CheckExploreSystem(void)
+{
+
+}
+
+void Player::InitExploreSystem(void)
+{
+	struct Areas newArea;
+	areas.clear();
+
+	Log::getSingleton( ).outString("PLAYER: InitExploreSystem");
+
+	unsigned int a = sWorldMapOverlayStore.GetNumRows();
+
+	for(unsigned int i = 0; i < sWorldMapOverlayStore.GetNumRows(); i++)
+	{
+		//Log::getSingleton( ).outString("ROWS: %u i: %u", a, i);
+
+		//Load data from WorldMapOverlay.dbc
+		WorldMapOverlayEntry *overlay = sWorldMapOverlayStore.LookupEntry(i);
+
+		if( overlay )
+		{
+			//Log::getSingleton( ).outString("Overlay OK: %u %u %u ", overlay->ID, overlay->worldMapAreaID, overlay->areaTableID);
+			
+			//Load data of the zone
+			WorldMapAreaEntry *map = sWorldMapAreaStore.LookupEntry( overlay->worldMapAreaID );
+			if(!map) continue;
+
+			//Log::getSingleton( ).outString("Zone OK: %u %u", map->ID, map->map);
+			
+			//Do not add an area out of zone
+			if(map->areaTableID != GetZoneId()) continue;
+
+			//Log::getSingleton( ).outString("AreaTable == ZoneID: OK");
+
+			//Load data of the area
+			AreaTableEntry *area = sAreaTableStore.LookupEntry( overlay->areaTableID );
+			if(!area) continue;
+			
+			//Log::getSingleton( ).outString("AreaTable OK: %u %u", area->ID, area->exploreFlag);
+			
+			//Insert a new area into the areas list
+			newArea.zone = map->areaTableID;
+			newArea.areaFlag = area->exploreFlag;
+			
+			//TODO: I am not sure about this formula
+			float ry = abs((map->areaVertexY2 - map->areaVertexY1)/1024); //1000
+			float rx = abs((map->areaVertexX2 - map->areaVertexX1)/768);  //660
+			
+			newArea.x2 = map->areaVertexX1 - (overlay->drawX * rx);
+			newArea.y2 = map->areaVertexY1 - (overlay->drawY * ry);
+			newArea.x1 = newArea.x2 + ((overlay->areaH/2)*rx);
+			newArea.y1 = newArea.y2 + ((overlay->areaW/2)*ry);
+			
+			areas.push_back(newArea);
+
+			Log::getSingleton( ).outString("### A %u, M %u: X1 %f, Y1 %f, X2 %f, Y2 %f", newArea.areaFlag, newArea.zone, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
+		}
+	}
+}
+
 //
 // UQ!: CHECKME: Move this code somewhere else???
 //

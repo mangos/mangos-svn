@@ -294,8 +294,8 @@ struct WorldMapOverlayEntry
 	uint32 unk4;
 	uint32 unk5;
 	uint32 name;
-	uint32 areaH; //in pixels
-	uint32 areaW; //in pixels
+	uint32 areaH; //in pixels 2x
+	uint32 areaW; //in pixels 2x
 	uint32 unk6;  //I think columns #12, #13, #14 and #15
 	uint32 unk7;  //are some kind of positions, but i did not
 	uint32 unk8;  //discover what exactly.
@@ -320,7 +320,8 @@ defineIndexedDBCStore(TalentStore,TalentEntry);
 //Made by Andre2k2
 defineIndexedDBCStore(AreaTableStore,AreaTableEntry);
 defineIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry);
-defineIndexedDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
+
+defineDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
 //end Made
 defineDBCStore(SkillStore,skilllinespell);
 
