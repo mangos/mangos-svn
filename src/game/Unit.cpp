@@ -119,11 +119,11 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 {
-    Log::getSingleton( ).outError("DealDamageStart");
+    Log::getSingleton( ).outDebug("DealDamageStart");
     uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
     if (health <= damage && pVictim->isAlive())
     {
-        Log::getSingleton( ).outError("DealDamageDied");
+        Log::getSingleton( ).outDebug("DealDamageDied");
         if(pVictim->GetTypeId() == TYPEID_UNIT)
             ((Creature*)pVictim)->generateLoot();
 
@@ -132,7 +132,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         if(pVictim->GetTypeId() == TYPEID_PLAYER)
             _RemoveAllItemMods();
 */
-        Log::getSingleton( ).outError("DealDamageAffects");
+        Log::getSingleton( ).outDebug("DealDamageAffects");
         pVictim->RemoveAllAffects();
 
         /* victim died! */
@@ -147,7 +147,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         attackerGuid = GetGUID();
         victimGuid = pVictim->GetGUID();
 
-        Log::getSingleton( ).outError("DealDamageAttackStop");
+        Log::getSingleton( ).outDebug("DealDamageAttackStop");
         pVictim->smsg_AttackStop(attackerGuid);
 
         /* Send MSG_MOVE_ROOT   0xe7 */
@@ -156,23 +156,23 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
     Set update values... try flags 917504
     health
 */
-        Log::getSingleton( ).outError("DealDamageHealth1");
+        Log::getSingleton( ).outDebug("DealDamageHealth1");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
 
         /* then another update message, sets health to 0, maxhealth to 100, and dynamic flags */
-        Log::getSingleton( ).outError("DealDamageHealth2");
+        Log::getSingleton( ).outDebug("DealDamageHealth2");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
         pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
-            Log::getSingleton( ).outError("DealDamageNotPlayer");
+            Log::getSingleton( ).outDebug("DealDamageNotPlayer");
             pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
         }
 
         if (GetTypeId() == TYPEID_PLAYER)
         {
-            Log::getSingleton( ).outError("DealDamageIsPlayer");
+            Log::getSingleton( ).outDebug("DealDamageIsPlayer");
             uint32 xp = CalculateXpToGive(pVictim, this);
 
             // check running quests in case this monster belongs to it
@@ -201,7 +201,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             }
             else
             {
-                Log::getSingleton( ).outError("DealDamageNotInGroup");
+                Log::getSingleton( ).outDebug("DealDamageNotInGroup");
                 // update experience
                 ((Player*)this)->GiveXP(xp, victimGuid);
 
@@ -211,7 +211,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         }
         else
         {
-            Log::getSingleton( ).outError("DealDamageIsCreature");
+            Log::getSingleton( ).outDebug("DealDamageIsCreature");
             smsg_AttackStop(victimGuid);
             RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
             addStateFlag(UF_TARGET_DIED);
@@ -219,7 +219,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
     }
     else
     {
-        Log::getSingleton( ).outError("DealDamageAlive");
+        Log::getSingleton( ).outDebug("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
 
         // this need alot of work.
@@ -282,7 +282,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 */
 
     }
-    Log::getSingleton( ).outError("DealDamageEnd");
+    Log::getSingleton( ).outDebug("DealDamageEnd");
 }
 
 
