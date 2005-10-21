@@ -87,7 +87,6 @@ Player::Player ( ): Unit()
 	
 	logoutDelay = LOGOUTDELAY;
 	inCombat = false;
-
 }
 
 
@@ -332,6 +331,8 @@ void Player::Update( uint32 p_time )
 	WorldPacket data;
 
     Unit::Update( p_time );
+
+	CheckExploreSystem();
 
 //#ifndef ENABLE_GRID_SYSTEM
 	// UQ1: Update PlayerPositions Array...
@@ -3300,6 +3301,9 @@ Player::SetPosition(const float &x, const float &y, const float &z, const float 
 
     if( old_x != x || old_y != y )
 	m->PlayerRelocation(this, x, y, z, orientation);
+	
+	//Check new areas to discover
+	CheckExploreSystem();
 
     return true;
 }
@@ -3371,6 +3375,31 @@ Player::DestroyInRange()
 
 void Player::CheckExploreSystem(void)
 {
+	for(std::list<struct Areas>::iterator itr = areas.begin(); itr != areas.end(); ++itr)
+	{
+		if( m_positionX <= itr->x1 && m_positionX >= itr->x2 && 
+			m_positionY <= itr->y1 && m_positionY >= itr->y2)
+		{
+            //Discover a new area!
+			int offset = itr->areaFlag / 32;
+			uint32 val = (uint32)(1 << (itr->areaFlag % 32));
+			uint32 currFields = GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
+			//If area was not disvovered
+            if( !(currFields & val) )
+			{
+				//Set the new area into the player's field
+				SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
+				//Get Player's level
+				uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+				//Set XP gain
+				GiveXP( level*10, GetGUID() );
+				//Send a MSG to client
+				//Some_function_to_do_it(); ??? Can you do?
+				Log::getSingleton( ).outDetail("Player %u discovered a new area (%u) at zone %u.", GetGUID(), itr->areaFlag, itr->zone);
+			}
+			//Log::getSingleton( ).outDetail("Player %u are into area %u at zone %u.", GetGUID(), itr->areaFlag, itr->zone);
+		}
+	}
 
 }
 
@@ -3379,45 +3408,31 @@ void Player::InitExploreSystem(void)
 	struct Areas newArea;
 	areas.clear();
 
-	Log::getSingleton( ).outString("PLAYER: InitExploreSystem");
-
-	unsigned int a = sWorldMapOverlayStore.GetNumRows();
+	Log::getSingleton( ).outDetail("PLAYER: InitExploreSystem");
 
 	for(unsigned int i = 0; i < sWorldMapOverlayStore.GetNumRows(); i++)
 	{
-		//Log::getSingleton( ).outString("ROWS: %u i: %u", a, i);
-
 		//Load data from WorldMapOverlay.dbc
 		WorldMapOverlayEntry *overlay = sWorldMapOverlayStore.LookupEntry(i);
 
 		if( overlay )
 		{
-			//Log::getSingleton( ).outString("Overlay OK: %u %u %u ", overlay->ID, overlay->worldMapAreaID, overlay->areaTableID);
-			
 			//Load data of the zone
 			WorldMapAreaEntry *map = sWorldMapAreaStore.LookupEntry( overlay->worldMapAreaID );
-			if(!map) continue;
-
-			//Log::getSingleton( ).outString("Zone OK: %u %u", map->ID, map->map);
-			
+			if(!map) continue;	
 			//Do not add an area out of zone
 			if(map->areaTableID != GetZoneId()) continue;
-
-			//Log::getSingleton( ).outString("AreaTable == ZoneID: OK");
-
 			//Load data of the area
 			AreaTableEntry *area = sAreaTableStore.LookupEntry( overlay->areaTableID );
-			if(!area) continue;
-			
-			//Log::getSingleton( ).outString("AreaTable OK: %u %u", area->ID, area->exploreFlag);
-			
+			if(!area) continue;	
+
 			//Insert a new area into the areas list
 			newArea.zone = map->areaTableID;
 			newArea.areaFlag = area->exploreFlag;
 			
-			//TODO: I am not sure about this formula
-			float ry = abs((map->areaVertexY2 - map->areaVertexY1)/1024); //1000
-			float rx = abs((map->areaVertexX2 - map->areaVertexX1)/768);  //660
+			//TODO: I am not sure about this formula, but is something near it.
+			float ry = abs((map->areaVertexY2 - map->areaVertexY1)/1024); //maybe 1000
+			float rx = abs((map->areaVertexX2 - map->areaVertexX1)/768);  //maybe 660
 			
 			newArea.x2 = map->areaVertexX1 - (overlay->drawX * rx);
 			newArea.y2 = map->areaVertexY1 - (overlay->drawY * ry);
@@ -3426,7 +3441,7 @@ void Player::InitExploreSystem(void)
 			
 			areas.push_back(newArea);
 
-			Log::getSingleton( ).outString("### A %u, M %u: X1 %f, Y1 %f, X2 %f, Y2 %f", newArea.areaFlag, newArea.zone, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
+			Log::getSingleton( ).outDetail("Add new area: Flag %u, Zone %u: (%f, %f) (%f, %f)", newArea.areaFlag, newArea.zone, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
 		}
 	}
 }

@@ -478,6 +478,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Player *pCurrChar = GetPlayer();
 
+	pCurrChar->InitExploreSystem();
+
     // Now send all A9's
     // Add character to the ingame list
     // Build the in-range set
