@@ -129,8 +129,8 @@ struct PlayerCreateInfo
 
 struct Areas
 {
+	uint32 areaID;
 	uint32 areaFlag;
-	uint32 zone;
 	float x1;
 	float x2;
 	float y1;
