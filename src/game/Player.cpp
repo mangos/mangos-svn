@@ -33,6 +33,7 @@
 #include "Stats.h"
 #include "UpdateData.h"
 #include "Channel.h"
+#include "Chat.h"
 #include "ZoneMapper.h"
 //Groupcheck
 #include "Group.h"
@@ -3375,7 +3376,9 @@ Player::DestroyInRange()
 
 void Player::CheckExploreSystem(void)
 {
-	for(std::list<struct Areas>::iterator itr = areas.begin(); itr != areas.end(); ++itr)
+	WorldPacket data;
+
+	for(std::list<Areas>::iterator itr = areas.begin(); itr != areas.end(); ++itr)
 	{
 		if( m_positionX <= itr->x1 && m_positionX >= itr->x2 && 
 			m_positionY <= itr->y1 && m_positionY >= itr->y2)
@@ -3390,12 +3393,17 @@ void Player::CheckExploreSystem(void)
 				//Set the new area into the player's field
 				SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 				//Get Player's level
-				uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+				uint16 XP = (uint16)(GetUInt32Value(UNIT_FIELD_LEVEL)*10);
 				//Set XP gain
-				GiveXP( level*10, GetGUID() );
+				GiveXP( (uint32)XP, GetGUID() );
+
 				//Send a MSG to client
-				//Some_function_to_do_it(); ??? Can you do?
-				Log::getSingleton( ).outDetail("Player %u discovered a new area (%u) at zone %u.", GetGUID(), itr->areaFlag, itr->zone);
+				data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
+				data << (uint32)itr->areaID; //Area ID
+				data << (uint32)XP;          //XP
+				m_session->SendPacket(&data);
+
+				Log::getSingleton( ).outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), itr->areaID);
 			}
 			//Log::getSingleton( ).outDetail("Player %u are into area %u at zone %u.", GetGUID(), itr->areaFlag, itr->zone);
 		}
@@ -3405,7 +3413,7 @@ void Player::CheckExploreSystem(void)
 
 void Player::InitExploreSystem(void)
 {
-	struct Areas newArea;
+	Areas newArea;
 	areas.clear();
 
 	Log::getSingleton( ).outDetail("PLAYER: InitExploreSystem");
@@ -3418,30 +3426,30 @@ void Player::InitExploreSystem(void)
 		if( overlay )
 		{
 			//Load data of the zone
-			WorldMapAreaEntry *map = sWorldMapAreaStore.LookupEntry( overlay->worldMapAreaID );
-			if(!map) continue;	
+			WorldMapAreaEntry *zone = sWorldMapAreaStore.LookupEntry( overlay->worldMapAreaID );
+			if(!zone) continue;	
 			//Do not add an area out of zone
-			if(map->areaTableID != GetZoneId()) continue;
+			if(zone->areaTableID != GetZoneId()) continue;
 			//Load data of the area
 			AreaTableEntry *area = sAreaTableStore.LookupEntry( overlay->areaTableID );
 			if(!area) continue;	
 
 			//Insert a new area into the areas list
-			newArea.zone = map->areaTableID;
+			newArea.areaID = area->ID;
 			newArea.areaFlag = area->exploreFlag;
 			
 			//TODO: I am not sure about this formula, but is something near it.
-			float ry = abs((map->areaVertexY2 - map->areaVertexY1)/1024); //maybe 1000
-			float rx = abs((map->areaVertexX2 - map->areaVertexX1)/768);  //maybe 660
+			float ry = abs((zone->areaVertexY2 - zone->areaVertexY1)/1024); //maybe 1000
+			float rx = abs((zone->areaVertexX2 - zone->areaVertexX1)/768);  //maybe 660
 			
-			newArea.x2 = map->areaVertexX1 - (overlay->drawX * rx);
-			newArea.y2 = map->areaVertexY1 - (overlay->drawY * ry);
+			newArea.x2 = zone->areaVertexX1 - (overlay->drawX * rx);
+			newArea.y2 = zone->areaVertexY1 - (overlay->drawY * ry);
 			newArea.x1 = newArea.x2 + ((overlay->areaH/2)*rx);
 			newArea.y1 = newArea.y2 + ((overlay->areaW/2)*ry);
 			
 			areas.push_back(newArea);
 
-			Log::getSingleton( ).outDetail("Add new area: Flag %u, Zone %u: (%f, %f) (%f, %f)", newArea.areaFlag, newArea.zone, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
+			Log::getSingleton( ).outDetail("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
 		}
 	}
 }
