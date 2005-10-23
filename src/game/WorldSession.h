@@ -110,7 +110,7 @@ class WorldSession
         // void HandleJoinChannelOpcode(WorldPacket& recvPacket);
         // void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);
-		void HandleMeetingStoneInfo(WorldPacket& recPacket);
+	void HandleMeetingStoneInfo(WorldPacket& recPacket);
 
         /// Opcode implemented in QueryHandler.cpp:
         void HandleNameQueryOpcode(WorldPacket& recvPacket);
@@ -128,7 +128,11 @@ class WorldSession
         /// Opcode implemented in MovementHandler.cpp
         void HandleMovementOpcodes(WorldPacket& recvPacket);
         void HandleFallOpcode( WorldPacket & recv_data );
-    void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
+        void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
+	void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
+
+	/// Battlefield status
+	void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);
 
         /// Opcodes implemented in GroupHandler.cpp:
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);
@@ -159,8 +163,8 @@ class WorldSession
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
 		
 		// Duel opcodes
-		void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
-		void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
+	void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
+	void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
         // Auction House opcodes
         void HandleAuctionHelloOpcode(WorldPacket& recvPacket);
@@ -243,6 +247,7 @@ class WorldSession
 
 	/// cinema
         void HandleCompleteCinema(WorldPacket& recvPacket);
+	void HandleNextCinematicCamera(WorldPacket& recvPacket);
 
         /// Helper functions
         void SetNpcFlagsForTalkToQuest(const uint64& guid, const uint64& targetGuid);
