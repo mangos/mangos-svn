@@ -45,6 +45,8 @@
 #include "RedZoneDistrict.h"
 #endif
 
+#include <cmath>
+
 Player::Player ( ): Unit()
 {
     m_objectType |= TYPE_PLAYER;
