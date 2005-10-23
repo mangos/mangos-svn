@@ -38,8 +38,8 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 	UpdateData upd;
-///    uint8 srcslot, dstslot;
-    uint32 srcslot, dstslot;
+    uint8 srcslot, dstslot;
+	//    uint32 srcslot, dstslot;
 
     recv_data >> srcslot >> dstslot;
 
