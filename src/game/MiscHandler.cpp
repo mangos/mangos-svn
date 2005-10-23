@@ -1019,9 +1019,28 @@ void WorldSession::HandleCompleteCinema( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Player is watching cinema" );
 }
 
+void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
+{
+    Log::getSingleton( ).outDebug( "WORLD: Which movie to play" );
+}
 
-void 
-WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
+/// battlefield status 
+void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
+{
+    /// TODO need to be finished
+    Log::getSingleton( ).outDebug( "WORLD: Battleground status - not yet" );
+}
+
+
+/// move_time_skipped
+/// TODO - its to fix lag issues when player is moving dont know how it works
+void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
+{
+    /// TODO need to be finished
+    Log::getSingleton( ).outDebug( "WORLD: Move time lag/synchronization fix - not yet" );
+}
+
+void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;

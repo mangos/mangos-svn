@@ -269,7 +269,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_AREATRIGGER,              STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             },
         { CMSG_UPDATE_ACCOUNT_DATA,      STATUS_LOGGEDIN, &WorldSession::HandleUpdateAccountData             },
         { CMSG_REQUEST_ACCOUNT_DATA,     STATUS_LOGGEDIN, &WorldSession::HandleRequestAccountData            },
-		{ CMSG_MEETING_STONE_INFO,       STATUS_LOGGEDIN, &WorldSession::HandleMeetingStoneInfo              },
+	{ CMSG_MEETING_STONE_INFO,       STATUS_LOGGEDIN, &WorldSession::HandleMeetingStoneInfo              },
         // { CMSG_JOIN_CHANNEL,             STATUS_LOGGEDIN, &WorldSession::HandleJoinChannelOpcode          },
         // { CMSG_LEAVE_CHANNEL,            STATUS_LOGGEDIN, &WorldSession::HandleLeaveChannelOpcode         },
         { CMSG_GAMEOBJ_USE,              STATUS_LOGGEDIN, &WorldSession::HandleGameObjectUseOpcode           },
@@ -329,8 +329,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_NPC_TEXT_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandleNpcTextQueryOpcode            },
         { CMSG_BINDER_ACTIVATE,          STATUS_LOGGEDIN, &WorldSession::HandleBinderActivateOpcode          },
         /// Duel opcodes
-		{ CMSG_DUEL_ACCEPTED,            STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode	         },
-		{ CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
+	{ CMSG_DUEL_ACCEPTED,            STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode	         },
+	{ CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
 		/// Item opcodes
         { CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
         { CMSG_DESTROYITEM,              STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode             },
@@ -399,7 +399,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_MAIL_CREATE_TEXT_ITEM,    STATUS_LOGGEDIN, &WorldSession::HandleMailCreateTextItem            },//add by vendy
 	/// Cinema opcode
         { CMSG_COMPLETE_CINEMATIC,	 STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema            },//add by sani
-
+        { CMSG_NEXT_CINEMATIC_CAMERA,	 STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera            },//add by sani
+	// Battlefield
+	{ CMSG_BATTLEFIELD_STATUS,	 STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode		},
+	// move time skipp 
+	{ CMSG_MOVE_TIME_SKIPPED,	 STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode		},
         /// End of table
         { 0,                             0,               NULL                                               }
     };
