@@ -442,6 +442,9 @@ public:
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);
         void CleanupChannels();
+		
+				// friends stuff
+				void BroadcastToFriends(std::string msg);
 
         // skilllines
         bool HasSkillLine(uint32 id);

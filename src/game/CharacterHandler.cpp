@@ -523,11 +523,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
     // end
 
-    Log::getSingleton( ).outDetail( "WORLD: Created new player for existing players (%s)", pCurrChar->GetName() );
+    //Log::getSingleton( ).outDetail( "WORLD: Created new player for existing players (%s)", pCurrChar->GetName() );
 
     std::string outstring = pCurrChar->GetName();
-    outstring.append( " has entered the world." );
-    sWorld.SendWorldText( outstring.c_str( ) );
+    outstring.append( " has come online." );
+		pCurrChar->BroadcastToFriends(outstring);
 
 }
 

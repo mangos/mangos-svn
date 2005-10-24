@@ -31,6 +31,7 @@
 #include "Auth/Sha1.h"
 #include "UpdateData.h"
 #include "LootMgr.h"
+#include "Chat.h"
 #include <zlib/zlib.h>
 
 #ifdef ENABLE_GRID_SYSTEM
@@ -457,12 +458,11 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
         return;
 
     oldZone = GetPlayer( )->GetZoneId();
+
     // Setting new zone
     GetPlayer()->SetZoneId((uint16)newZone);
-
-	// Initialize the possible areas that player will discover.
-	GetPlayer()->InitExploreSystem();
 }
+
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
 {
@@ -526,39 +526,31 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
+    WorldPacket data, dataI;
 
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_FRIEND_LIST"  );
-    // TODO: send SMSG_FRIEND_LIST with a list of friend->fixed
-    // <nothin>void Player::LoadFromDB( uint32 guid )
-    // <nothin>add a new function in Player
-    // <nothin>_LoadFriendList();
-    // <nothin>and _SaveFriendList();
-    // <Deadknight>ok
-    // <Deadknight> after that one goes to logout other one?
-    // <nothin>call _SaveFriendList(); in void Player::SaveToDB()
-    // <Deadknight>ha
-    // Deadknight
-    unsigned char Counter=0;
+
+    unsigned char Counter=0, nrignore=0;
+		int i=0;
     uint64 guid;
-    std::stringstream query;
-    std::stringstream query2;
-    int i=0;
+    std::stringstream query,query2,query3,query4;
+		Field *fields;
     Player* pObj;
     FriendStr friendstr[255];
 
     guid=GetPlayer()->GetGUID();
 
-    query << "SELECT COUNT(*) FROM `social` where guid='" << guid << "'";
+    query << "SELECT COUNT(*) FROM `social` where flags = 'FRIEND' AND guid='" << guid << "'";
     QueryResult *result = sDatabase.Query( query.str().c_str() );
 
     if(result)
     {
-        Field *fields = result->Fetch();
+        fields = result->Fetch();
         Counter=fields[0].GetUInt32();
 
-        query2 << "SELECT * FROM `social` where guid='" << guid << "'";
+        query2 << "SELECT * FROM `social` where flags = 'FRIEND' AND guid='" << guid << "'";
         result = sDatabase.Query( query2.str().c_str() );
+        
         if(result)
         {
             fields = result->Fetch();
@@ -612,18 +604,15 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
             }
         }
     }
-    else
-    {
-        sLog.outError("There is no social table");
-    }
-    //Finish
+
+    // Sending Friend List
 
     data.Initialize( SMSG_FRIEND_LIST );
     data << Counter;
 
     for (int j=0; j<Counter; j++)
     {
-        // adding friend
+
         Log::getSingleton( ).outDetail( "WORLD: Adding Friend - Guid:%ld, Status:%d, Area:%d, Level:%d Class:%d",friendstr[j].PlayerGUID, friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
 
         data << friendstr[j].PlayerGUID << friendstr[j].Status ;
@@ -632,8 +621,38 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     }
 
     SendPacket( &data );
-
     Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
+
+	// Sending Ignore List
+
+	query3 << "SELECT COUNT(*) FROM `social` where flags = 'IGNORE' AND guid='" << guid << "'";
+  result = sDatabase.Query( query3.str().c_str() );
+	
+	if(!result) return;
+	
+	fields = result->Fetch();
+  nrignore=fields[0].GetUInt32();
+
+
+	dataI.Initialize( SMSG_IGNORE_LIST );
+  dataI << nrignore;
+
+	query4 << "SELECT * FROM `social` where flags = 'IGNORE' AND guid='" << guid << "'";
+  result = sDatabase.Query( query4.str().c_str() );
+  
+	if(!result) return;
+	
+  do
+    {
+    	
+				fields = result->Fetch();
+        dataI << fields[2].GetUInt64();
+
+   	}while( result->NextRow() );
+
+
+  SendPacket( &dataI );
+	Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 
 
@@ -662,7 +681,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 #else
 	pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
 #endif
-	fquery << "SELECT * FROM social WHERE friendid = " << friendGuid;
+	fquery << "SELECT * FROM social WHERE flags = 'FRIEND' AND friendid = " << friendGuid;
 
 	if(sDatabase.Query( fquery.str().c_str() )) friendResult = FRIEND_ALREADY;
 	if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
@@ -701,17 +720,17 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 	else if(friendResult==FRIEND_ALREADY)
 	{
 		data << (uint8)friendResult << (uint64)friendGuid;
-		Log::getSingleton( ).outDetail( "WORLD: %s Guid Already a Friend ", friendName.c_str() );
+		Log::getSingleton( ).outDetail( "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
 	}
 	else if(friendResult==FRIEND_SELF)
 	{
 		data << (uint8)friendResult << (uint64)friendGuid;
-		Log::getSingleton( ).outDetail( "WORLD: %s Guid Is you! ", friendName.c_str() );
+		Log::getSingleton( ).outDetail( "WORLD: %s Guid can't add himself. ", friendName.c_str() );
 	}
 	else
 	{
 		data << (uint8)friendResult << (uint64)friendGuid;
-        Log::getSingleton( ).outDetail( "WORLD: %s Guid not found ", friendName.c_str() );
+        Log::getSingleton( ).outDetail( "WORLD: %s Guid not found. ", friendName.c_str() );
 	}
 
     // Finish
@@ -719,7 +738,6 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
 }
-
 
 void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 {
@@ -747,7 +765,7 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
     uint64 guid;
     guid=GetPlayer()->GetGUID();
 
-    query << "DELETE FROM `social` WHERE `guid`=" << guid << " AND `friendid`=" << FriendGUID;
+    query << "DELETE FROM `social` WHERE flags = 'FRIEND' AND `guid`=" << guid << " AND `friendid`=" << FriendGUID;
     sDatabase.Query( query.str().c_str() );
     // Finish
 
@@ -756,6 +774,104 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );
 }
 
+void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
+{
+    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_ADD_IGNORE"  );
+
+    std::string IgnoreName = "UNKNOWN";
+	std::stringstream iquery;
+	unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
+	Player *pIgnore=NULL;
+	uint64 IgnoreGuid = 0;
+
+	WorldPacket data;
+
+    recv_data >> IgnoreName;
+
+    Log::getSingleton( ).outDetail( "WORLD: %s asked to Ignore: '%s'",
+        GetPlayer()->GetName(), IgnoreName.c_str() );
+	
+    
+   
+    IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
+#ifndef ENABLE_GRID_SYSTEM
+	pIgnore = objmgr.GetObject<Player>(IgnoreGuid);
+#else
+	pIgnore = ObjectAccessor::Instance().FindPlayer(IgnoreGuid);
+#endif
+	iquery << "SELECT * FROM social WHERE flags = 'IGNORE' AND friendid = " << IgnoreGuid;
+
+	if(sDatabase.Query( iquery.str().c_str() )) ignoreResult = FRIEND_IGNORE_ALREADY;
+	if (!strcmp(GetPlayer()->GetName(),IgnoreName.c_str())) ignoreResult = FRIEND_IGNORE_SELF;
+	
+	// Send response.
+    data.Initialize( SMSG_FRIEND_STATUS );
+
+    if (pIgnore && ignoreResult!=FRIEND_IGNORE_ALREADY && ignoreResult!=FRIEND_IGNORE_SELF)
+    {
+        ignoreResult = FRIEND_IGNORE_ADDED;
+				
+		// Deadknight addon start add buffer to social table
+		std::stringstream query;
+		uint64 guid;
+		guid=GetPlayer()->GetGUID();
+
+		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+
+		query << "INSERT INTO `social` VALUES ('" << IgnoreName << "', " << guid << ", " << IgnoreGuid << ", 'IGNORE')" ;
+		sDatabase.Query( query.str().c_str() );	
+    }
+	else if(ignoreResult==FRIEND_IGNORE_ALREADY)
+	{
+		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+		Log::getSingleton( ).outDetail( "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
+	}
+	else if(ignoreResult==FRIEND_IGNORE_SELF)
+	{
+		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+		Log::getSingleton( ).outDetail( "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
+	}
+	else
+	{
+		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+        Log::getSingleton( ).outDetail( "WORLD: %s Guid not found. ", IgnoreName.c_str() );
+	}
+
+    // Finish
+    SendPacket( &data );
+
+    Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
+}
+
+void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
+{
+    uint64 IgnoreGUID;
+    WorldPacket data;
+
+    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_DEL_IGNORE"  );
+    recv_data >> IgnoreGUID;
+
+    unsigned char IgnoreResult = FRIEND_IGNORE_REMOVED;
+
+    // Send response.
+    data.Initialize( SMSG_FRIEND_STATUS );
+
+    data << (uint8)IgnoreResult << (uint64)IgnoreGUID;
+
+
+    std::stringstream query;
+    uint64 guid;
+    guid=GetPlayer()->GetGUID();
+
+    query << "DELETE FROM `social` WHERE flags = 'IGNORE' AND `guid`=" << guid << " AND `friendid`=" << IgnoreGUID;
+    sDatabase.Query( query.str().c_str() );
+
+
+    SendPacket( &data );
+
+    Log::getSingleton( ).outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );
+
+}
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 {

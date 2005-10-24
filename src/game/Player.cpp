@@ -35,6 +35,7 @@
 #include "Channel.h"
 #include "Chat.h"
 #include "ZoneMapper.h"
+#include "Chat.h"
 //Groupcheck
 #include "Group.h"
 
@@ -3135,6 +3136,34 @@ void Player::CleanupChannels()
         (*i)->Leave(this,false);
 }
 
+void Player::BroadcastToFriends(std::string msg)
+{
+    	std::stringstream query;
+		QueryResult *result;
+    	Field *fields;
+		Player *pfriend;
+						
+        query << "SELECT * FROM `social` where flags = 'FRIEND' AND guid='" << GetGUID() << "'";
+        result = sDatabase.Query( query.str().c_str() );
+
+        if(!result) return;
+
+        do
+        {
+            WorldPacket data;
+            fields = result->Fetch();
+            
+            sChatHandler.FillSystemMessageData(&data, 0, msg.c_str());
+#ifndef ENABLE_GRID_SYSTEM
+            pfriend = objmgr.GetObject<Player>(fields[2].GetUInt64());
+#else
+	    	pfriend = ObjectAccessor::Instance().FindPlayer(fields[2].GetUInt64());
+#endif
+            if (pfriend && pfriend->IsInWorld())
+                pfriend->GetSession()->SendPacket(&data);
+                
+        }while( result->NextRow() );
+}
 
 // skilllines
 bool Player::HasSkillLine(uint32 id)
