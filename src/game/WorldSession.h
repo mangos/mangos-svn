@@ -99,6 +99,8 @@ class WorldSession
         void HandleFriendListOpcode(WorldPacket& recvPacket);
         void HandleAddFriendOpcode(WorldPacket& recvPacket);
         void HandleDelFriendOpcode(WorldPacket& recvPacket);
+        void HandleAddIgnoreOpcode(WorldPacket& recvPacket);
+        void HandleDelIgnoreOpcode(WorldPacket& recvPacket);        
         void HandleBugOpcode(WorldPacket& recvPacket);
         void HandleSetAmmoOpcode(WorldPacket& recvPacket);
 

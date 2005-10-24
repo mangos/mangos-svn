@@ -138,11 +138,7 @@ void WorldSession::LogoutPlayer(bool Save)
 {
     if (_player)
     {
-        // Issue a message saying we left the world
-        std::string outstring = _player->GetName( );
-        outstring.append( " has left the world." );
-        sWorld.SendWorldText( outstring.c_str( ) );
-
+    	
 		std::stringstream ss;
 		ss << "UPDATE characters SET online = 0 WHERE guid = " << _player->GetGUID();
 
@@ -264,6 +260,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_FRIEND_LIST,              STATUS_LOGGEDIN, &WorldSession::HandleFriendListOpcode              },
         { CMSG_ADD_FRIEND,               STATUS_LOGGEDIN, &WorldSession::HandleAddFriendOpcode               },
         { CMSG_DEL_FRIEND,               STATUS_LOGGEDIN, &WorldSession::HandleDelFriendOpcode               },
+        { CMSG_ADD_IGNORE,               STATUS_LOGGEDIN, &WorldSession::HandleAddIgnoreOpcode               },
+        { CMSG_DEL_IGNORE,               STATUS_LOGGEDIN, &WorldSession::HandleDelIgnoreOpcode               },	
         { CMSG_BUG,                      STATUS_LOGGEDIN, &WorldSession::HandleBugOpcode                     },
         { CMSG_SET_AMMO,                 STATUS_LOGGEDIN, &WorldSession::HandleSetAmmoOpcode                 },
         { CMSG_AREATRIGGER,              STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             },
