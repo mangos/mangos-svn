@@ -108,6 +108,9 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 		
 	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
+	if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
+		unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+
     cnt = 0;
     if(strainer)
     {
@@ -127,7 +130,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 				|| (skill->skilline == strainer->skilline16) || (skill->skilline == strainer->skilline17) || (skill->skilline == strainer->skilline18)
 				|| (skill->skilline == strainer->skilline19) || (skill->skilline == strainer->skilline20))
             {
-                //Log::getSingleton().outString("skill %u with skillline %u matches",skill->spell,skill->skilline);
+                Log::getSingleton().outString("skill %u with skillline %u matches",skill->spell,skill->skilline);
                 SpellEntry *proto = sSpellStore.LookupEntry(skill->spell);
                 if ((proto) /*&& (proto->spellLevel != 0)*/)
                 {
@@ -196,6 +199,9 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
                 }
             }
         }
+
+		//Log::getSingleton().outString("added count = %u",num_added);
+
         data << "Hello! Ready for some training?";
         SendPacket( &data );
     }
@@ -334,6 +340,9 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	if (!pGossip)
 		pGossip = objmgr.GetGossipByGuid(guid);
 
+	if (!pGossip)
+		pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
+
 	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
 	if (!pGossip /*|| strainer*/)
@@ -438,6 +447,9 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 	if (!pGossip)
 		pGossip = objmgr.GetGossipByGuid(guid);
+
+	if (!pGossip)
+		pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
 
 //#ifdef __DISABLED__
 	if (!pGossip)
