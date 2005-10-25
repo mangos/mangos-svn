@@ -36,6 +36,7 @@
 #include "Database/DBCStores.h"
 #include "ChannelMgr.h"
 #include "LootMgr.h"
+#include "ProgressBar.hpp"
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
@@ -198,27 +199,42 @@ void World::SetInitialWorldSettings()
     Log::getSingleton( ).outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
 
-    Log::getSingleton( ).outString( "" );
+    //Log::getSingleton( ).outString( "" );
     objmgr.SetHighestGuids();
 
 	// Loading loot templates
 	Log::getSingleton().outString("Initialize loot tables...");
     LootMgr::getSingleton().LoadLootTables();
 
+	Log::getSingleton().outString("Initialize data stores...");
+	barGoLink bar( 11 );
+	bar.step();
     new SkillStore("DBC/SkillLineAbility.dbc");
+	bar.step();
     new EmoteStore("DBC/EmotesText.dbc");
+	bar.step();
     new SpellStore("DBC/Spell.dbc");
+	bar.step();
     new RangeStore("DBC/SpellRange.dbc");
+	bar.step();
     new CastTimeStore("DBC/SpellCastTimes.dbc");
+	bar.step();
     new DurationStore("DBC/SpellDuration.dbc");
+	bar.step();
     new RadiusStore("DBC/SpellRadius.dbc");
+	bar.step();
     new TalentStore("DBC/Talent.dbc");
+	bar.step();
     //Made by Andre2k2
     new AreaTableStore("DBC/AreaTable.dbc");
+	bar.step();
 	new WorldMapAreaStore("DBC/WorldMapArea.dbc");
+	bar.step();
 	new WorldMapOverlayStore("DBC/WorldMapOverlay.dbc");
     //end Made
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
+
+	Log::getSingleton( ).outString( "" );
 
     // set timers
     m_timers[WUPDATE_OBJECTS].SetInterval(100);

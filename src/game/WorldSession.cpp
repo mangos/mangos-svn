@@ -111,11 +111,11 @@ bool WorldSession::Update(uint32 diff)
         }
 
         if (table[i].handler == NULL)
-            Log::getSingleton().outError( "SESSION: recieved unhandled opcode %s (0x%.4X)",
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-                packet->GetOpcode());
+			Log::getSingleton().outError( "SESSION: recieved unhandled opcode %s (0x%.4X)",
+				LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+				packet->GetOpcode());
 
-        delete packet;
+		delete packet;
     }
 
     time_t currTime = time(NULL);                 // FIXME: use timediff
