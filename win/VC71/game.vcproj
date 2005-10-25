@@ -250,6 +250,9 @@
 				RelativePath="..\..\src\game\TaxiHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\TradeHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\UpdateData.cpp">
 			</File>
 			<File
