@@ -26,6 +26,7 @@
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
 #include "WorldRunnable.h"
+#include "HttpdRunnable.h"
 #include "World.h"
 #include "RealmList.h"
 #include "Log.h"
@@ -73,6 +74,7 @@ Master::~Master()
 {
 }
 
+#include "../shared/Database/DataStore.h"
 
 bool Master::Run()
 {
@@ -140,6 +142,9 @@ bool Master::Run()
     _HookSignals();
 
     ZThread::Thread t(new WorldRunnable);
+
+	// UQ1: Httpd
+	ZThread::Thread t2(new HttpdRunnable);
 
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
