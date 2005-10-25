@@ -672,6 +672,8 @@ void Creature::Create (uint32 guidlow, const char* name, uint32 mapid, float x, 
     respawn_cord[2] = z;
 
     m_name = name;
+
+	AI_SendCreaturePacket( guidlow );
 }
 
 
@@ -1031,8 +1033,16 @@ void Creature::AI_Update()
                 else
                 {
 */
+				//CreatureInfo* ci = objmgr.GetCreatureName(GetGUID());
+				
+				
+				// UQ1: Add damage values...
+				uint32 minDmg = this->GetUInt32Value(UNIT_FIELD_MINDAMAGE);
+				uint32 maxDmg = this->GetUInt32Value(UNIT_FIELD_MAXDAMAGE);
+				uint32 damge = irand(minDmg, maxDmg);
+
                 setAttackTimer(0);
-                AttackerStateUpdate(closestTarget, 0);
+                AttackerStateUpdate(closestTarget, damge);
                 // }
 
             }
@@ -1059,6 +1069,129 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 #endif
 }
 
+/*
+if (mobile1 != null)
+            {
+                int num1 = 4;
+                Converter.ToBytes(id, this.tempBuff, ref num1);
+                Converter.ToBytes(mobile1.Name, this.tempBuff, ref num1);
+                Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                if (mobile1.Name2 != null)
+                {
+                    Converter.ToBytes(mobile1.Name2, this.tempBuff, ref num1);
+                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                }
+                else
+                {
+                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                }
+                Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                if (mobile1.Guild != null)
+                {
+                    Converter.ToBytes(mobile1.Guild, this.tempBuff, ref num1);
+                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                }
+                else
+                {
+                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
+                }
+                Converter.ToBytes(mobile1.Flags1, this.tempBuff, ref num1);
+                if ((mobile1.NpcType & 2) > 0)
+                {
+                    Converter.ToBytes(7, this.tempBuff, ref num1);
+                }
+                else
+                {
+                    Converter.ToBytes(0, this.tempBuff, ref num1);
+                }
+                Converter.ToBytes(mobile1.NpcType, this.tempBuff, ref num1);
+                Converter.ToBytes(mobile1.Unk4, this.tempBuff, ref num1);
+                Converter.ToBytes(0, this.tempBuff, ref num1);
+                Converter.ToBytes(0, this.tempBuff, ref num1);
+                this.Send(OpCodes.SMSG_CREATURE_QUERY_RESPONSE, this.tempBuff, num1);
+            }
+*/
+
+void Creature::AI_SendCreaturePacket( uint32 guidlow )
+{
+/*    WorldPacket data;
+    uint32 entry = guidlow;
+    uint64 guid = GetGUID();
+    CreatureInfo *ci;
+
+	guid = GetGUID();
+
+    ci = objmgr.GetCreatureName(entry);
+	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - entry: %u guid: %u", ci->Name.c_str());
+
+    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+    data << (uint32)GetGUID();//entry;
+	
+	
+    data << ci->Name.c_str();
+    //data << uint8(0) << uint8(0) << uint8(0);
+	data << uint32(0);
+	if (stricmp(ci->SubName.c_str(), ""))
+		data << ci->SubName.c_str();                  // Subname
+
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+
+	//if (mobile1.Guild != null)
+	//	data << uint32(0);
+
+	data << uint32(0);
+
+	data << uint32(0); //flags
+
+	if ((ci->Type & 2) > 0)
+	{
+		data << uint32(7);
+	}
+	else
+	{
+		data << uint32(0);
+	}
+	data << uint32(ci->Type);
+
+	data << ci->unknown4;                         // unknown 5
+	data << uint32(0);
+	data << uint32(0);
+
+//    data << ci->DisplayID;                        // DisplayID
+*/	
+
+	//UQ1: WowwoW Style...
+/*	data << ci->SubName.c_str();
+    data << ci->Name.c_str();
+    
+	data << uint8(0);
+	data << uint8(0);
+	// UQ1: This one is actually for guild id..
+	//if (mobile1.Guild != null)
+	//	data << uint32(0); // guild id, if it has one??...
+	data << uint8(0); //
+	data << uint32(0); // Flags
+
+	if ((ci->Type & 2) > 0)
+	{
+		data << uint8(7);
+	}
+	else
+	{
+		data << uint32(0);
+	}
+
+    data << ci->Type;                             // Creature Type
+    data << ci->unknown4;                         // unknown 4
+	data << uint32(0);
+	data << ci->DisplayID;                        // DisplayID*/
+
+    //SendPacket( &data );
+//	SendMessageToSet( &data, false );
+}
 
 void Creature::AI_MoveTo(float x, float y, float z, bool run)
 {
@@ -1187,6 +1320,12 @@ void Creature::LoadFromDB(uint32 guid)
     m_moveRun = fields[10].GetBool();
 
     LoadValues(fields[7].GetString());
+
+	
+	// UQ1: Added nameID.
+	SetNameId(fields[8].GetUInt32());
+	//m_nameId = fields[8].GetUInt32();
+	//Log::getSingleton( ).outDebug( "Added creature %u (%u) - %s.", m_nameId, GetNameID(), objmgr.GetCreatureName(fields[8].GetUInt32())->Name.c_str() );
 
     delete result;
 

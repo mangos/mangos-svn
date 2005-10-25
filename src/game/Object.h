@@ -86,6 +86,9 @@ class Object
         const uint32& GetGUIDLow() const { return m_uint32Values[0]; }
         const uint32& GetGUIDHigh() const { return m_uint32Values[1]; }
 
+		const uint32 GetNameID() const { return m_nameId; }
+		void SetNameId(uint32 nameId) { m_nameId = nameId; }
+
         // type
         const uint8& GetTypeId() const { return m_objectTypeId; }
         bool isType(uint8 mask) const { return (mask & m_objectType); }
@@ -257,6 +260,8 @@ class Object
         uint16 m_objectType;
         //! Type id.
         uint8 m_objectTypeId;
+
+		uint32 m_nameId;
 
         //! Zone id.
         uint32 m_zoneId;

@@ -305,6 +305,12 @@ class ObjectMgr : public Singleton < ObjectMgr >
             ASSERT( trainspell );
             ASSERT( mTrainerspells.find(trainspell->Id) == mTrainerspells.end() );
             mTrainerspells[trainspell->Id] = trainspell;
+
+/*			Log::getSingleton( ).outDebug( "Trainerspell: mTrainerspells[%u] = %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, and %u."
+				, trainspell->Id
+				, trainspell->skilline1, trainspell->skilline2, trainspell->skilline3, trainspell->skilline4, trainspell->skilline5, trainspell->skilline6, trainspell->skilline7, trainspell->skilline8, trainspell->skilline9, trainspell->skilline10
+				, trainspell->skilline11, trainspell->skilline12, trainspell->skilline13, trainspell->skilline14, trainspell->skilline15, trainspell->skilline16, trainspell->skilline17, trainspell->skilline18, trainspell->skilline19, trainspell->skilline20);
+*/
         }
 		// Function to get Player Info to database 
         PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_); 

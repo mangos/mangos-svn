@@ -100,6 +100,7 @@ class Creature : public Unit
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run);
         void AI_ChangeState(CreatureState state) { m_creatureState = state; }
         void AI_MoveTo(float x, float y, float z, bool run);
+		void Creature::AI_SendCreaturePacket( uint32 guidlow );
 
         /// Movement
         bool addWaypoint(float x, float y, float z);

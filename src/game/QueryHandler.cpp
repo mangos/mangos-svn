@@ -60,7 +60,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
     }
     else
     {
-        race = pChar->getRace();
+		race = pChar->getRace();
         gender = pChar->getGender();
         cl = pChar->getClass();
         name = pChar->GetName();
@@ -103,12 +103,15 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 
     recv_data >> entry;
     recv_data >> guid;
+	//entry=guid;
 
     ci = objmgr.GetCreatureName(entry);
-    Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s'", ci->Name.c_str());
+	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - entry: %u guid: %u", ci->Name.c_str());
 
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
+	
+	/*
     data << ci->Name.c_str();
     data << uint8(0) << uint8(0) << uint8(0);
     data << ci->SubName.c_str();                  // Subname
@@ -118,6 +121,40 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data << ci->unknown3;                         // unknown 4
     data << ci->unknown4;                         // unknown 5
     data << ci->DisplayID;                        // DisplayID
+	*/
+
+	//UQ1: WowwoW Style...
+	data << ci->Name.c_str();
+	data << uint32(0);
+	if (stricmp(ci->SubName.c_str(), ""))
+		data << ci->SubName.c_str();                  // Subname
+
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+
+	//if (mobile1.Guild != null)
+	//	data << uint32(0);
+
+	data << uint32(0);
+
+	data << uint32(0); //flags
+
+	if ((ci->Type & 2) > 0)
+	{
+		data << uint32(7);
+	}
+	else
+	{
+		data << uint32(0);
+	}
+	data << uint32(ci->Type);
+
+	data << ci->unknown4;                         // unknown 5
+	data << uint32(0);
+	data << uint32(0);
+
+//    data << ci->DisplayID;                        // DisplayID
 
     SendPacket( &data );
 }

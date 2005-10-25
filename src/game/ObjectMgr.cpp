@@ -155,6 +155,7 @@ CreatureInfo *ObjectMgr::GetCreatureName(uint32 id)
 
     // returning unknown creature if no data found
 
+	//Log::getSingleton( ).outDetail("Creature: %u is an Unknown Being!\n", id);
     CreatureInfo *ci=new CreatureInfo;
     ci->Name = "Unknown Being";
     ci->Id=id;
@@ -314,7 +315,7 @@ void ObjectMgr::LoadCreatureNames()
             cn->DisplayID = fields[4].GetUInt32();
 
 	    // Adding unknowns here later
-            cn->unknown1 = 0; 
+			cn->unknown1 = 0; 
             cn->unknown2 = 0; 
             cn->unknown3 = 0; 
             cn->unknown4 = 0; 
@@ -648,12 +649,30 @@ void ObjectMgr::LoadTrainerSpells()
         bar.step();
 
         TrainSpell = new Trainerspell;
+
         TrainSpell->Id = fields[0].GetUInt32();
         TrainSpell->skilline1 = fields[1].GetUInt32();
         TrainSpell->skilline2 = fields[2].GetUInt32();
         TrainSpell->skilline3 = fields[3].GetUInt32();
-        TrainSpell->maxlvl = fields[4].GetUInt32();
-        TrainSpell->charclass = fields[5].GetUInt32();
+		TrainSpell->skilline4 = fields[4].GetUInt32();
+        TrainSpell->skilline5 = fields[5].GetUInt32();
+        TrainSpell->skilline6 = fields[6].GetUInt32();
+		TrainSpell->skilline7 = fields[7].GetUInt32();
+        TrainSpell->skilline8 = fields[8].GetUInt32();
+        TrainSpell->skilline9 = fields[9].GetUInt32();
+		TrainSpell->skilline10 = fields[10].GetUInt32();
+        TrainSpell->skilline11 = fields[11].GetUInt32();
+        TrainSpell->skilline12 = fields[12].GetUInt32();
+		TrainSpell->skilline13 = fields[13].GetUInt32();
+        TrainSpell->skilline14 = fields[14].GetUInt32();
+        TrainSpell->skilline15 = fields[15].GetUInt32();
+		TrainSpell->skilline16 = fields[16].GetUInt32();
+        TrainSpell->skilline17 = fields[17].GetUInt32();
+        TrainSpell->skilline18 = fields[18].GetUInt32();
+		TrainSpell->skilline19 = fields[19].GetUInt32();
+        TrainSpell->skilline20 = fields[20].GetUInt32();
+        TrainSpell->maxlvl = fields[21].GetUInt32();
+        TrainSpell->charclass = fields[22].GetUInt32();
         AddTrainerspell(TrainSpell);
     } while (result->NextRow());
     delete result;
