@@ -21,9 +21,11 @@
 #include "Common.h"
 #include "Log.h"
 #include "World.h"
-#include "HttpdRunnable.h"
 #include "Master.h"
 #include "Timer.h"
+
+#ifdef ENABLE_HTTPD_SYSTEM
+#include "HttpdRunnable.h"
 
 void HttpdRunnable::run()
 {
@@ -43,3 +45,4 @@ void HttpdRunnable::run()
         ZThread::Thread::sleep(50);
     }
 }
+#endif
