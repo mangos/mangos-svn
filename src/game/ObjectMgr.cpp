@@ -237,7 +237,7 @@ uint32 ObjectMgr::AddCreatureSubName(const char* name, const char* subname, uint
     AddCreatureName(cInfo);
 
     std::stringstream ss;
-    ss << "INSERT INTO creaturetemplate (entryid,_name,subname,modelid) VALUES (" << id << ", '" << name;
+    ss << "INSERT INTO creaturetemplate (entryid,name,subname,modelid) VALUES (" << id << ", '" << name;
     ss << "', '" << subname << "', '" << displayid << "')";
     sDatabase.Execute( ss.str( ).c_str( ) );
 
@@ -300,7 +300,7 @@ void ObjectMgr::AddCreatureName(uint32 id, const char* name, uint32 displayid)
 void ObjectMgr::LoadCreatureNames()
 {
     CreatureInfo *cn;
-    QueryResult *result = sDatabase.Query( "SELECT entryid,name,subname,type,modelid FROM creaturetemplate" );
+    QueryResult *result = sDatabase.Query( "SELECT entryid,name,IFNULL(subname,''),type,modelid FROM creaturetemplate" );
     if(result)
     {
         do
