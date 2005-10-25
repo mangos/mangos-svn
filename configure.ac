@@ -120,6 +120,22 @@ Debugging options:
 ])
 AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
 
+# check for httpd system enable
+AC_MSG_CHECKING(whether httpd system is enabled)
+MANGOSD_ENABLE_HTTPD=no
+AC_ARG_ENABLE(httpd-integrated,
+[--enable-httpd-integrated Turn on httpd integrated system],
+[
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-DENABLE_HTTPD_SYSTEM $CFLAGS"
+	CXXFLAGS="-DENABLE_HTTPD_SYSTEM $CXXFLAGS"
+	MANGOSD_ENABLE_HTTPD=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_HTTPD)
+
 # check for grid system enable
 AC_MSG_CHECKING(whether grid system is enabled)
 MANGOSD_ENABLE_GRID=no

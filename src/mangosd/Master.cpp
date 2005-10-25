@@ -26,7 +26,6 @@
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
 #include "WorldRunnable.h"
-#include "HttpdRunnable.h"
 #include "World.h"
 #include "RealmList.h"
 #include "Log.h"
@@ -35,6 +34,10 @@
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
+#endif
+
+#ifdef ENABLE_HTTPD_SYSTEM
+#include "HttpdRunnable.h"
 #endif
 
 createFileSingleton( Master );
@@ -144,7 +147,10 @@ bool Master::Run()
     ZThread::Thread t(new WorldRunnable);
 
 	// UQ1: Httpd
+#ifdef ENABLE_HTTPD_SYSTEM
 	ZThread::Thread td(new HttpdRunnable);
+#endif
+
 
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
