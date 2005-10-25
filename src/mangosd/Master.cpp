@@ -144,7 +144,7 @@ bool Master::Run()
     ZThread::Thread t(new WorldRunnable);
 
 	// UQ1: Httpd
-	ZThread::Thread t2(new HttpdRunnable);
+	ZThread::Thread td(new HttpdRunnable);
 
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();

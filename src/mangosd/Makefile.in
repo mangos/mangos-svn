@@ -123,8 +123,9 @@ mangosd_SOURCES = \
     Master.cpp \
     WorldRunnable.cpp \
     Master.h \
-    WorldRunnable.h
-
+    WorldRunnable.h \
+    HttpdRunnable.cpp \
+    HttpdRunnable.h
 
 mangosd_LDADD = -lgame -ldatabase -lrealmlist -lconfig -lauth -lshared -lframework -lZThread -lzlib  -lnetwork
 
@@ -147,7 +148,7 @@ bin_PROGRAMS = mangosd$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_mangosd_OBJECTS = Main.$(OBJEXT) Master.$(OBJEXT) \
-	WorldRunnable.$(OBJEXT)
+	WorldRunnable.$(OBJEXT) HttpdRunnable.$(OBJEXT)
 mangosd_OBJECTS = $(am_mangosd_OBJECTS)
 mangosd_DEPENDENCIES =
 
@@ -158,7 +159,7 @@ LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/Main.Po ./$(DEPDIR)/Master.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/WorldRunnable.Po
+@AMDEP_TRUE@	./$(DEPDIR)/WorldRunnable.Po ./$(DEPDIR)/HttpdRunnable.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -233,6 +234,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Master.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldRunnable.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HttpdRunnable.Po@am__quote@
 
 distclean-depend:
 	-rm -rf ./$(DEPDIR)
