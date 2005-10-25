@@ -329,6 +329,19 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         /// Duel opcodes
 	{ CMSG_DUEL_ACCEPTED,            STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode	         },
 	{ CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
+
+		///Trade Opcodes
+		{ CMSG_ACCEPT_TRADE,				 STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode	 },
+		{ CMSG_BEGIN_TRADE,					 STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode		 },
+		{ CMSG_BUSY_TRADE,					 STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode		 },
+		{ CMSG_CANCEL_TRADE,				 STATUS_LOGGEDIN, &WorldSession::HandleCancelTradeOpcode	 },
+		{ CMSG_CLEAR_TRADE_ITEM,			 STATUS_LOGGEDIN, &WorldSession::HandleClearTradeItemOpcode	 },
+		{ CMSG_IGNORE_TRADE,				 STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode	 },
+		{ CMSG_INITIATE_TRADE,				 STATUS_LOGGEDIN, &WorldSession::HandleInitiateTradeOpcode	 },
+		{ CMSG_SET_TRADE_GOLD,				 STATUS_LOGGEDIN, &WorldSession::HandleSetTradeGoldOpcode	 },
+		{ CMSG_SET_TRADE_ITEM,				 STATUS_LOGGEDIN, &WorldSession::HandleSetTradeItemOpcode	 },
+		{ CMSG_UNACCEPT_TRADE,				 STATUS_LOGGEDIN, &WorldSession::HandleUnacceptTradeOpcode	 },
+
 		/// Item opcodes
         { CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
         { CMSG_DESTROYITEM,              STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode             },

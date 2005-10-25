@@ -165,8 +165,20 @@ class WorldSession
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
 		
 		// Duel opcodes
-	void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
-	void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
+		void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
+		void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
+
+		//Trade opcodes
+		void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
+		void HandleBeginTradeOpcode(WorldPacket& recvPacket);
+		void HandleBusyTradeOpcode(WorldPacket& recvPacket);
+		void HandleCancelTradeOpcode(WorldPacket& recvPacket);
+		void HandleClearTradeItemOpcode(WorldPacket& recvPacket);
+		void HandleIgnoreTradeOpcode(WorldPacket& recvPacket);
+		void HandleInitiateTradeOpcode(WorldPacket& recvPacket);
+		void HandleSetTradeGoldOpcode(WorldPacket& recvPacket);
+		void HandleSetTradeItemOpcode(WorldPacket& recvPacket);
+		void HandleUnacceptTradeOpcode(WorldPacket& recvPacket);
 
         // Auction House opcodes
         void HandleAuctionHelloOpcode(WorldPacket& recvPacket);
