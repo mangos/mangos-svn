@@ -59,12 +59,12 @@
 
 /* #defines and typedefs */
 #ifdef WIN32
-#define APPTITLE	"Null httpd"
-#define DEFAULT_BASE_DIR "C:\\httpd"
+#define APPTITLE	"Mangos Internal HTTPD 0.0.1"
+#define DEFAULT_BASE_DIR ".\\"
 #else
-#define DEFAULT_BASE_DIR "/usr/local/httpd"
+#define DEFAULT_BASE_DIR "./"
 #endif
-#define SERVER_NAME	"Null httpd 0.5.1"
+#define SERVER_NAME	"Mangos Internal HTTPD 0.0.1"
 
 #define MAX_POSTSIZE	33554432 /* arbitrary 32 MB limit for POST request sizes */
 #define MAX_REPLYSIZE	65536 /* arbitrary 64 KB limit for reply buffering */
@@ -132,6 +132,7 @@ typedef struct {
 	char server_base_dir[255];
 	char server_bin_dir[255];
 	char server_cgi_dir[255];
+	char server_cgi_bin_dir[255];
 	char server_etc_dir[255];
 	char server_htdocs_dir[255];
 	char server_hostname[64];

@@ -82,9 +82,10 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
-				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,_DEBUG,_CONSOLE"
+				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,_DEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"

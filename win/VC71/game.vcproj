@@ -23,7 +23,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				StringPooling="FALSE"
 				MinimalRebuild="FALSE"
 				BasicRuntimeChecks="3"
@@ -176,6 +176,9 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\GroupHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\httpd\src\http.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\ItemHandler.cpp">
