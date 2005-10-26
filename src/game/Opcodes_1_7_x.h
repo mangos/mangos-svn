@@ -3,8 +3,8 @@
 #pragma once
 // Copyright (C) 2004 WoWD Team
 
-#ifndef _OPCODES_H
-#define _OPCODES_H
+#ifndef _OPCODES_1_7_x_H
+#define _OPCODES_1_7_x_H
 
 // NOTE: All SERVER opcodes are now uint16's, as of patch 4 (3807/0.9.0)
 //       Client opcodes are still uint32 as far as we know.

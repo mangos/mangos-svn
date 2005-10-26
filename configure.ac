@@ -152,6 +152,22 @@ AC_ARG_ENABLE(grid-system,
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_GRID)
 
+# check for 1.7.x protocol support
+AC_MSG_CHECKING(whether 1.7.x support is enabled)
+MANGOSD_ENABLE_17X=no
+AC_ARG_ENABLE(17x,
+[  --enable-17x Turn on 1.7.x support],
+[
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
+	CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
+	MANGOSD_ENABLE_17X=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_17X)
+
 # check for enable new framework
 AC_MSG_CHECKING(whether new framework is enabled)
 MANGOSD_ENABLE_NEW_FRAMEWORK=no
