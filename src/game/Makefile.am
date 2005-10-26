@@ -57,6 +57,7 @@ libgame_a_SOURCES = \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
+	Opcodes_1_7_x.cpp \
 	Player.cpp \
 	QueryHandler.cpp \
 	QuestHandler.cpp \
@@ -95,6 +96,7 @@ libgame_a_SOURCES = \
 	Object.h \
 	ObjectMgr.h \
 	Opcodes.h \
+	Opcodes_1_7_x.h \
 	Path.h \
 	Player.h \
 	Quest.h \
@@ -104,6 +106,7 @@ libgame_a_SOURCES = \
 	Unit.h \
 	UpdateData.h \
 	UpdateFields.h \
+	UpdateFields_1_7_x.h \
 	UpdateMask.h \
 	World.h \
 	WorldSession.h \

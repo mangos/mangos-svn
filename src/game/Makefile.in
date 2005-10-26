@@ -85,12 +85,13 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	MovementHandler.$(OBJEXT) NPCHandler.$(OBJEXT) \
 	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
-	Opcodes.$(OBJEXT) Player.$(OBJEXT) QueryHandler.$(OBJEXT) \
-	QuestHandler.$(OBJEXT) SkillHandler.$(OBJEXT) Spell.$(OBJEXT) \
-	SpellHandler.$(OBJEXT) TaxiHandler.$(OBJEXT) \
-	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
-	World.$(OBJEXT) WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
-	WorldSocketMgr.$(OBJEXT) ZoneMapper.$(OBJEXT)
+	Opcodes.$(OBJEXT) Opcodes_1_7_x.$(OBJEXT) Player.$(OBJEXT) \
+	QueryHandler.$(OBJEXT) QuestHandler.$(OBJEXT) \
+	SkillHandler.$(OBJEXT) Spell.$(OBJEXT) SpellHandler.$(OBJEXT) \
+	TaxiHandler.$(OBJEXT) TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
+	UpdateData.$(OBJEXT) World.$(OBJEXT) WorldSession.$(OBJEXT) \
+	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT) \
+	ZoneMapper.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -269,6 +270,7 @@ libgame_a_SOURCES = \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
+	Opcodes_1_7_x.cpp \
 	Player.cpp \
 	QueryHandler.cpp \
 	QuestHandler.cpp \
@@ -307,6 +309,7 @@ libgame_a_SOURCES = \
 	Object.h \
 	ObjectMgr.h \
 	Opcodes.h \
+	Opcodes_1_7_x.h \
 	Path.h \
 	Player.h \
 	Quest.h \
@@ -316,6 +319,7 @@ libgame_a_SOURCES = \
 	Unit.h \
 	UpdateData.h \
 	UpdateFields.h \
+	UpdateFields_1_7_x.h \
 	UpdateMask.h \
 	World.h \
 	WorldSession.h \
@@ -411,6 +415,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectGridLoader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes_1_7_x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueryHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestHandler.Po@am__quote@
