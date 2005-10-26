@@ -23,8 +23,8 @@ bin_PROGRAMS = mangosd
 mangosd_SOURCES = \
     Main.cpp \
     Master.cpp \
-    WorldRunnable.cpp \
     Master.h \
+    WorldRunnable.cpp \
     WorldRunnable.h \
     HttpdRunnable.cpp \
     HttpdRunnable.h

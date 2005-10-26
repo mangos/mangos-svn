@@ -34,7 +34,7 @@ libgame_a_SOURCES = \
 	DynamicObject.cpp \
 	GameObject.cpp \
 	GridNotifiers.cpp \
-        GridStates.cpp \
+	GridStates.cpp \
 	Group.cpp \
 	GroupHandler.cpp \
 	Item.cpp \
@@ -47,7 +47,7 @@ libgame_a_SOURCES = \
 	Mail.cpp \
 	Map.cpp \
 	MapManager.cpp \
-        RedZoneDistrict.cpp \
+	RedZoneDistrict.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
@@ -64,6 +64,7 @@ libgame_a_SOURCES = \
 	Spell.cpp \
 	SpellHandler.cpp \
 	TaxiHandler.cpp \
+	TradeHandler.cpp \
 	Unit.cpp \
 	UpdateData.cpp \
 	World.cpp \
@@ -111,8 +112,9 @@ libgame_a_SOURCES = \
 	ZoneMapper.h
 
 if NEWFRAMEWORK
-libgame_a_LIBADD = CreatureAI.cpp \
-        NullCreatureAI.cpp \
+libgame_a_LIBADD = \
+	AggressorAI.cpp \
+	CreatureAI.cpp \
 	CreatureAISelector.cpp \
-        AggressorAI.cpp 
+	NullCreatureAI.cpp
 endif

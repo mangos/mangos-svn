@@ -124,7 +124,7 @@ AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
 AC_MSG_CHECKING(whether httpd system is enabled)
 MANGOSD_ENABLE_HTTPD=no
 AC_ARG_ENABLE(httpd-integrated,
-[--enable-httpd-integrated Turn on httpd integrated system],
+[  --enable-httpd-integrated Turn on httpd integrated system],
 [
     if test "$enableval" = "yes" ; then
 	CFLAGS="-DENABLE_HTTPD_SYSTEM $CFLAGS"
@@ -140,7 +140,7 @@ AC_MSG_RESULT($MANGOSD_ENABLE_HTTPD)
 AC_MSG_CHECKING(whether grid system is enabled)
 MANGOSD_ENABLE_GRID=no
 AC_ARG_ENABLE(grid-system,
-[--enable-grid-system Turn on grid system],
+[  --enable-grid-system Turn on grid system],
 [
     if test "$enableval" = "yes" ; then
 	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
@@ -156,7 +156,7 @@ AC_MSG_RESULT($MANGOSD_ENABLE_GRID)
 AC_MSG_CHECKING(whether new framework is enabled)
 MANGOSD_ENABLE_NEW_FRAMEWORK=no
 AC_ARG_ENABLE(new-framework,
-[--enable-new-framework Enable new framework],
+[  --enable-new-framework Enable new framework],
 [
     if test "$enableval" = "yes" ; then
 	MANGOSD_ENABLE_NEW_FRAMEWORK=yes
@@ -215,6 +215,7 @@ AC_SUBST(LT_REVISION)
 AC_CONFIG_FILES([
    ./Makefile
    doc/Makefile
+   sql/Makefile
    src/Makefile
    src/mangosd/Master.h
    src/mangosd/Makefile
