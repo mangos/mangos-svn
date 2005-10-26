@@ -6,6 +6,7 @@
 	ProjectGUID="{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}"
 	RootNamespace="framework"
 	Keyword="ManagedCProj"
+	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -44,10 +45,11 @@
 				AdditionalOptions="/Zl"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
 				AssemblerListingLocation="./framework__Win32_Debug/"
@@ -122,6 +124,7 @@
 				MinimalRebuild="false"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile="./Release/framework.pch"
 				AssemblerListingLocation="./framework__Win32_Release/"
@@ -143,6 +146,80 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="1_7_x Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			ManagedExtensions="0"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zl"
+				Optimization="0"
+				AdditionalIncludeDirectories="../../src/framework"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
+				AssemblerListingLocation="./framework__Win32_Debug/"
+				ObjectFile="./framework__Win32_Debug/"
+				ProgramDataBaseFileName="./framework__Win32_Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile="./framework__Win32_Debug/framework.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
