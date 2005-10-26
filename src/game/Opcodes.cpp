@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _VERSION_1_7_0_
+
 #include "Common.h"
 #include "Opcodes.h"
 #include "NameTables.h"
@@ -716,3 +718,5 @@ NameTableEntry g_worldOpcodeNames[] =
     { UMSG_UPDATE_GUILD,                            "UMSG_UPDATE_GUILD" },
 	{ 0,                                            0 }
 };
+
+#endif //_VERSION_1_7_0_

@@ -1667,7 +1667,8 @@ void ObjectMgr::SetHighestGuids()
     }
 
     // result = sDatabase.Query( "SELECT MAX(name_id) FROM creature_names" );
-    result = sDatabase.Query( "SELECT MAX(entryid) FROM creaturetemplate" );
+    //result = sDatabase.Query( "SELECT MAX(entryid) FROM creaturetemplate" );
+	result = sDatabase.Query( "SELECT MAX(modelid) FROM creaturetemplate" );
     if( result )
     {
         m_hiNameGuid = (*result)[0].GetUInt32()+1;

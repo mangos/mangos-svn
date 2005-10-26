@@ -137,6 +137,71 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="1_7_x Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
+				PreprocessorDefinitions="VERSION=&quot;0.0.1&quot;,WIN32,_DEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
+				IgnoreStandardIncludePath="FALSE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				RuntimeTypeInfo="TRUE"
+				PrecompiledHeaderFile=".\Debug/mangosd.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="3"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				OutputFile=".\..\..\bin\Debug\mangosd.exe"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="..\..\dep\lib\debug"
+				GenerateDebugInformation="TRUE"
+				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
+				SubSystem="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -187,6 +252,14 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Debug|Win32">
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h
+"
+					Outputs="Master.h"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="1_7_x Debug|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h

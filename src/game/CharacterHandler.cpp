@@ -534,10 +534,12 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data)
 {
 	Log::getSingleton( ).outString( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
-    WorldPacket data;
+#ifndef _VERSION_1_7_0_ // UQ1: Don't know how to support this..
+	WorldPacket data;
 	data.Initialize( SMSG_MEETING_STONE_INFO );
 	data << uint32(0);
 	data << uint32(0);
 	data << uint32(0);
 	SendPacket(&data);
+#endif //_VERSION_1_7_0_
 }
