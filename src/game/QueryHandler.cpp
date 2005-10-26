@@ -111,7 +111,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
 	
-	/*
     data << ci->Name.c_str();
     data << uint8(0) << uint8(0) << uint8(0);
     data << ci->SubName.c_str();                  // Subname
@@ -121,9 +120,8 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data << ci->unknown3;                         // unknown 4
     data << ci->unknown4;                         // unknown 5
     data << ci->DisplayID;                        // DisplayID
-	*/
 
-	//UQ1: WowwoW Style...
+/*	//UQ1: WowwoW Style...
 	data << ci->Name.c_str();
 	data << uint32(0);
 	if (stricmp(ci->SubName.c_str(), ""))
@@ -155,7 +153,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 	data << uint32(0);
 
 //    data << ci->DisplayID;                        // DisplayID
-
+*/
     SendPacket( &data );
 }
 

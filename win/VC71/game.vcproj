@@ -423,6 +423,9 @@
 				RelativePath="..\..\src\game\UpdateFields.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\Updatefields_1_7_x.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\UpdateMask.h">
 			</File>
 			<File

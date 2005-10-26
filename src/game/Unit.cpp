@@ -652,6 +652,9 @@ void Unit::smsg_AttackStop(uint64 victimGuid)
     data << GetGUID();
     data << victimGuid;
     data << uint32( 0 );
+#ifdef _VERSION_1_7_0_
+	data << uint32( 0 ); // UQ1: ??? crash in 1.7.x
+#endif //_VERSION_1_7_0_
     SendMessageToSet(&data, true);
     Log::getSingleton( ).outDetail("%u %X stopped attacking "I64FMT,
         GetGUIDLow(), GetGUIDHigh(), victimGuid);

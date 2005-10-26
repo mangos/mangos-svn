@@ -58,6 +58,9 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
     data.Initialize( SMSG_QUESTGIVER_STATUS );
     data << guid << questStatus;
+#ifdef _VERSION_1_7_0_
+	data << uint32(0);
+#endif //_VERSION_1_7_0_
     SendPacket( &data );
 
     Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS" );
