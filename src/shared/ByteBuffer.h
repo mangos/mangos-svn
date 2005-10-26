@@ -262,6 +262,13 @@ class ByteBuffer
             ASSERT(pos + cnt <= size());
             memcpy(&_storage[pos], src, cnt);
         }
+		void print_storage()
+		{
+			printf("STORAGE_SIZE: %u\n", size() );
+			for(int i = 0; i < size(); i++)
+				printf("%u - ", read<uint8>(i) );
+		}
+
 
         // void insert(size_t pos, const uint8 *src, size_t cnt) {
         //     std::copy(src, src + cnt, inserter(_storage, _storage.begin() + pos));
