@@ -95,15 +95,14 @@ void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
 /// This function handles CMSG_CREATURE_QUERY:
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
-{
+{// UQ1: !!! FIXME !!! This seems to do absolutely nothing!!! We have this really wrong!
     WorldPacket data;
     uint32 entry;
     uint64 guid;
     CreatureInfo *ci;
 
-    recv_data >> entry;
+	recv_data >> entry;
     recv_data >> guid;
-	//entry=guid;
 
     ci = objmgr.GetCreatureName(entry);
 	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - entry: %u guid: %u", ci->Name.c_str());
@@ -111,33 +110,16 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
 	
-    data << ci->Name.c_str();
-    data << uint8(0) << uint8(0) << uint8(0);
-    data << ci->SubName.c_str();                  // Subname
-    data << ci->unknown1;                         // unknown 1
-    data << ci->Type;                             // Creature Type
-    data << ci->unknown2;                         // unknown 3
-    data << ci->unknown3;                         // unknown 4
-    data << ci->unknown4;                         // unknown 5
-    data << ci->DisplayID;                        // DisplayID
+	//if (stricmp(ci->Name.c_str(), ""))
+		data << ci->Name.c_str();
 
-/*	//UQ1: WowwoW Style...
-	data << ci->Name.c_str();
-	data << uint32(0);
-	if (stricmp(ci->SubName.c_str(), ""))
+    data << uint8(0) << uint8(0) << uint8(0);
+	
+	//if (stricmp(ci->SubName.c_str(), ""))
 		data << ci->SubName.c_str();                  // Subname
 
-	data << uint32(0);
-	data << uint32(0);
-	data << uint32(0);
-
-	//if (mobile1.Guild != null)
-	//	data << uint32(0);
-
-	data << uint32(0);
-
-	data << uint32(0); //flags
-
+    data << ci->unknown1;                         // unknown 1
+	/*
 	if ((ci->Type & 2) > 0)
 	{
 		data << uint32(7);
@@ -146,14 +128,46 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 	{
 		data << uint32(0);
 	}
-	data << uint32(ci->Type);
+	*/
+    data << ci->Type;                             // Creature Type
+    data << ci->unknown2;                         // unknown 3
+    data << ci->unknown3;                         // unknown 4
+    data << ci->unknown4;                         // unknown 5
+    data << ci->DisplayID;                        // DisplayID
+
+	//UQ1: WowwoW Style...
+/*	data << ci->Name.c_str();
+	data << uint8(0);
+	if (stricmp(ci->SubName.c_str(), ""))
+		data << ci->SubName.c_str();                  // Subname
+
+	data << uint8(0);
+	data << uint8(0);
+	data << uint8(0);
+
+	//if (mobile1.Guild != null)
+	//	data << uint32(0);
+
+	data << uint8(0);
+
+	data << uint8(0); //flags
+
+	if ((ci->Type & 2) > 0)
+	{
+		data << uint8(7);
+	}
+	else
+	{
+		data << uint8(0);
+	}
+	data << uint8(ci->Type);
 
 	data << ci->unknown4;                         // unknown 5
-	data << uint32(0);
-	data << uint32(0);
+	data << uint8(0);
+	data << uint8(0);
 
-//    data << ci->DisplayID;                        // DisplayID
-*/
+    data << ci->DisplayID;                        // DisplayID*/
+
     SendPacket( &data );
 }
 
