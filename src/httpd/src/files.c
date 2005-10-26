@@ -96,6 +96,17 @@ int dirlist(int sid)
 	snprintf(index, sizeof(index)-1, "%s/%s/index.html", config.server_htdocs_dir, directory);
 	decodeurl(index);
 	fixslashes(index);
+	if (stat(index, &sb)!=0) {
+		snprintf(index, sizeof(index)-1, "%s/%s/index.htm", config.server_htdocs_dir, directory);
+		decodeurl(index);
+		fixslashes(index);
+	}
+/*	if (stat(index, &sb)!=0) {
+		snprintf(index, sizeof(index)-1, "%s/%s/index.php", config.server_cgi_dir, directory);
+		decodeurl(index);
+		fixslashes(index);
+	}*/
+
 	if (stat(index, &sb)==0) {
 		sendfile(sid, index);
 		return 0;

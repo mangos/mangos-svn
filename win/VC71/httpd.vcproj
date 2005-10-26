@@ -27,7 +27,8 @@
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="1"
 				WarningLevel="3"
-				DebugInformationFormat="3"/>
+				DebugInformationFormat="3"
+				CallingConvention="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
@@ -124,6 +125,9 @@
 				RelativePath="..\..\src\httpd\src\server.c">
 			</File>
 			<File
+				RelativePath="..\..\src\httpd\src\thread_interface.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\httpd\src\win32.c">
 			</File>
 		</Filter>
@@ -131,6 +135,9 @@
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File
+				RelativePath="..\..\src\httpd\src\http.h">
+			</File>
 			<File
 				RelativePath="..\..\src\httpd\src\main.h">
 			</File>

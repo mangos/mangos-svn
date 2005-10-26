@@ -453,7 +453,7 @@ void CGIkilltimer(void *x)
  ***************************************************************************/
 void init()
 {
-	printf("%s\r\n", SERVER_NAME);
+	printf("Initializing %s.\r\n", SERVER_NAME);
 	pthread_mutex_init(&Lock.Crypt, NULL);
 	pthread_mutex_init(&Lock.Global, NULL);
 	pthread_mutex_init(&Lock.SQL, NULL);
@@ -468,6 +468,7 @@ void init()
 	logaccess(0, "Starting %s", SERVER_NAME);
 	conn=calloc(config.server_maxconn, sizeof(CONNECTION));
 	sockinit();
+	printf("Initialized %s.\r\n", SERVER_NAME);
 }
 
 #ifdef WIN32
@@ -601,3 +602,52 @@ void accept_loop(void *x)
 	}
 	return;
 }
+
+/****************************************************************************
+ *	internal_accept_loop()
+ *
+ *	Purpose	: Function to handle incoming socket connections
+ *	Args	: None
+ *	Returns	: void
+ *	Notes	: Created as a thread in Win32
+ ***************************************************************************/
+void internal_accept_loop(void *x)
+{
+	pthread_attr_t thr_attr;
+	int i, fromlen;
+
+	//for (;;) {
+		for (i=0;;i++) {
+			if (i>=config.server_maxconn) {
+				sleep(1);
+				i=0;
+				continue;
+			}
+			if (conn[i].socket==0) break;
+		}
+		if (conn[i].PostData!=NULL) free(conn[i].PostData);
+		if (conn[i].dat!=NULL) free(conn[i].dat);
+		memset((char *)&conn[i], 0, sizeof(conn[i]));
+		fromlen=sizeof(conn[i].ClientAddr);
+		conn[i].socket=accept(ListenSocket, (struct sockaddr *)&conn[i].ClientAddr, &fromlen);
+#ifdef WIN32
+		if (conn[i].socket==INVALID_SOCKET) {
+			logerror("accept() died...  restarting...");
+			closesocket(ListenSocket);
+			WSACleanup();
+			exit(0);
+#else
+		if (conn[i].socket<0) {
+			continue;
+#endif
+		} else {
+			conn[i].id=1;
+			if (pthread_create(&conn[i].handle, &thr_attr, htloop, (void *)i)==-1) {
+				logerror("htloop() failed...");
+				exit(0);
+			}
+		}
+	//}
+	//return;
+}
+

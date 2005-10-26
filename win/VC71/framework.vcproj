@@ -23,7 +23,7 @@
 				AdditionalOptions="/Zl"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				MinimalRebuild="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"

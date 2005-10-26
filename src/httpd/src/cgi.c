@@ -189,7 +189,11 @@ int cgi_main()
 	if (args[1]==NULL) {
 		snprintf(Command, sizeof(Command)-1, "%s", cgifilename);
 	} else {
-		snprintf(Command, sizeof(Command)-1, "%s \"%s\"", cgi_types[i][1], cgifilename);
+		snprintf(Command, sizeof(Command)-1, "%s\\%s \"%s\"", config.server_cgi_bin_dir, cgi_types[i][1], cgifilename);
+		//snprintf(Command, sizeof(Command)-1, "%s \"%s\"", cgi_types[i][1], cgifilename); // UQ1: Added path to config file...
+#ifdef _DEBUG
+		logerror("CGI Command: [%s].\n", Command);
+#endif
 	}
 	for (i=0, n=0;env[i]!=NULL;i++) {
 		if (n+strlen(env[i])>sizeof(Environ)) break;

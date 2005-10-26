@@ -38,6 +38,9 @@
 
 #ifdef ENABLE_HTTPD_SYSTEM
 #include "HttpdRunnable.h"
+#include "../httpd/src/http.h"
+
+createFileSingleton( Httpd );
 #endif
 
 createFileSingleton( Master );
@@ -148,6 +151,9 @@ bool Master::Run()
 
 	// UQ1: Httpd
 #ifdef ENABLE_HTTPD_SYSTEM
+//	new Httpd;
+	sHttpd.SetInitialHttpdSettings();
+
 	ZThread::Thread td(new HttpdRunnable);
 #endif
 
@@ -171,6 +177,12 @@ bool Master::Run()
 
     t.wait();
     delete World::getSingletonPtr();
+
+	// UQ1: Httpd
+#ifdef ENABLE_HTTPD_SYSTEM
+	td.wait();
+    delete Httpd::getSingletonPtr();
+#endif
 
     _StopDB();
 

@@ -26,6 +26,7 @@
 
 #ifdef ENABLE_HTTPD_SYSTEM
 #include "HttpdRunnable.h"
+#include "../httpd/src/http.h"
 
 void HttpdRunnable::run()
 {
@@ -40,6 +41,7 @@ void HttpdRunnable::run()
         realCurrTime = getMSTime();
         //sWorld.Update( realCurrTime - realPrevTime );
 		//sHttpd.Update( realCurrTime - realPrevTime );
+		sHttpd.Update( realCurrTime - realPrevTime );
         realPrevTime = realCurrTime;
 
         ZThread::Thread::sleep(50);

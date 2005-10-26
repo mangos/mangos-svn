@@ -57,11 +57,13 @@ int config_read()
 	}
 	snprintf(config.server_bin_dir, sizeof(config.server_bin_dir)-1, "%s/bin", config.server_base_dir);
 	snprintf(config.server_cgi_dir, sizeof(config.server_cgi_dir)-1, "%s/cgi-bin", config.server_base_dir);
+	snprintf(config.server_cgi_bin_dir, sizeof(config.server_cgi_bin_dir)-1, "");
 	snprintf(config.server_etc_dir, sizeof(config.server_etc_dir)-1, "%s/etc", config.server_base_dir);
 	snprintf(config.server_htdocs_dir, sizeof(config.server_htdocs_dir)-1, "%s/htdocs", config.server_base_dir);
 	fixslashes(config.server_base_dir);
 	fixslashes(config.server_bin_dir);
 	fixslashes(config.server_cgi_dir);
+	fixslashes(config.server_cgi_bin_dir);
 	fixslashes(config.server_etc_dir);
 	fixslashes(config.server_htdocs_dir);
 	config.server_loglevel=1;
@@ -103,6 +105,7 @@ int config_read()
 		fprintf(fp, "SERVER_BASE_DIR = \"%s\"\n", config.server_base_dir);
 		fprintf(fp, "SERVER_BIN_DIR  = \"%s\"\n", config.server_bin_dir);
 		fprintf(fp, "SERVER_CGI_DIR  = \"%s\"\n", config.server_cgi_dir);
+		fprintf(fp, "SERVER_CGI_BIN_DIR  = \"%s\"\n", config.server_cgi_bin_dir);
 		fprintf(fp, "SERVER_ETC_DIR  = \"%s\"\n", config.server_etc_dir);
 		fprintf(fp, "SERVER_HTTP_DIR = \"%s\"\n", config.server_htdocs_dir);
 		fprintf(fp, "SERVER_LOGLEVEL = \"%d\"\n", config.server_loglevel);
@@ -137,6 +140,8 @@ int config_read()
 				strncpy(config.server_bin_dir, pVal, sizeof(config.server_bin_dir)-1);
 			} else if (strcmp(pVar, "SERVER_CGI_DIR")==0) {
 				strncpy(config.server_cgi_dir, pVal, sizeof(config.server_cgi_dir)-1);
+			} else if (strcmp(pVar, "SERVER_CGI_BIN_DIR")==0) {
+				strncpy(config.server_cgi_bin_dir, pVal, sizeof(config.server_cgi_bin_dir)-1);
 			} else if (strcmp(pVar, "SERVER_ETC_DIR")==0) {
 				strncpy(config.server_etc_dir, pVal, sizeof(config.server_etc_dir)-1);
 			} else if (strcmp(pVar, "SERVER_HTTP_DIR")==0) {
