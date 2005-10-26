@@ -1,6 +1,5 @@
 #ifdef _VERSION_1_7_0_
 
-//#include "StdAfx.h"
 #include "Common.h"
 #include "Opcodes.h"
 #include "NameTables.h"

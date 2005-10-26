@@ -169,14 +169,16 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     }
 }
 
+/*
 #include "NameTables.h"
 extern NameTableEntry g_worldOpcodeNames[];
+*/
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 flags, time;
     float x, y, z, orientation;
-	uint32 nothing;
+//	uint32 nothing;
     // float unk1, unk2, unk3, unk4, unk5;
 
     if(GetPlayer()->GetDontMove())
@@ -203,6 +205,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     data.Initialize( recv_data.GetOpcode() );
 
 #ifdef _VERSION_1_7_0_
+/*
 #ifdef _DEBUG
 	std::stringstream ss1;
 	ss1.rdbuf()->str("");
@@ -232,43 +235,16 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 	uint16 nothingb3 = (uint16)atoi(ss5.str().c_str());
 	uint8 nothingb4 = (uint8)atoi(ss5.str().c_str());
 
-/*	std::stringstream ss6;
-	ss6.rdbuf()->str("");
-	ss6 << nothing2;
-	float nothingb2 = (float)atof(ss6.str().c_str());
-
-	std::stringstream ss7;
-	ss7.rdbuf()->str("");
-	ss7 << nothing3;
-	float nothingb3 = (float)atof(ss7.str().c_str());
-
-	std::stringstream ss8;
-	ss8.rdbuf()->str("");
-	ss8 << nothing4;
-	float nothingb4 = (float)atof(ss8.str().c_str());
-
-	std::stringstream ss9;
-	ss9.rdbuf()->str("");
-	ss9 << nothing5;
-	float nothingb5 = (float)atof(ss9.str().c_str());
-
-	std::stringstream ss10;
-	ss10.rdbuf()->str("");
-	ss10 << nothing6;
-	float nothingb6 = (float)atof(ss10.str().c_str());
-*/
-
 	Log::getSingleton().outDebug( "SESSION: recieved opcode %s (0x%.4X) - Origin: %f %f %f (%f).",
 			LookupName(recv_data.GetOpcode(), g_worldOpcodeNames),
 			recv_data.GetOpcode(), x2, y2, z2, orientation2);
 
-	Log::getSingleton().outDebug( "Nothings are [%f] [%u] [%u] [%u].",
-			nothingb, nothingb2, nothingb3, nothingb4);
-/*	
+//	Log::getSingleton().outDebug( "Nothings are [%f] [%u] [%u] [%u].",
+//			nothingb, nothingb2, nothingb3, nothingb4);
+
 	Log::getSingleton().outDebug( "Nothings: [%f] [%f].",
 			nothingb, nothingb2);
-*/
-#endif //_DEBUG
+#endif //_DEBUG*/
     data << GetPlayer()->GetGUID();
 	data << flags << time;
 	data << x << y << z << orientation;
