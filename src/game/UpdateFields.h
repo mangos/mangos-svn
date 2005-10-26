@@ -18,6 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef _VERSION_1_7_0_
+
+#include "Updatefields_1_7_x.h"
+
+#else //!_VERSION_1_7_0_
+
 #define		 CONTAINER_ALIGN_PAD 0x31
 #define		 CONTAINER_END  90
 #define      CONTAINER_FIELD_NUM_SLOTS  0x30
@@ -1320,3 +1326,5 @@
 #define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY  0x25
 #define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01  0x26
 #define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02  0x27
+
+#endif //_VERSION_1_7_0_

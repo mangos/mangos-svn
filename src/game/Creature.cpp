@@ -1039,6 +1039,10 @@ void Creature::AI_Update()
 				// UQ1: Add damage values...
 				uint32 minDmg = this->GetUInt32Value(UNIT_FIELD_MINDAMAGE);
 				uint32 maxDmg = this->GetUInt32Value(UNIT_FIELD_MAXDAMAGE);
+
+				if (maxDmg > 32768)
+					maxDmg = 32767; // For integer random function... 32767 should be plenty anyway.. Think its just a db error.
+
 				uint32 damge = irand(minDmg, maxDmg);
 
                 setAttackTimer(0);

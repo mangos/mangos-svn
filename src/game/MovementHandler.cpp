@@ -269,28 +269,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 			nothingb, nothingb2);
 */
 #endif //_DEBUG
-
-	if (recv_data.GetOpcode() == MSG_MOVE_SET_FACING)
-	{
-		data << GetPlayer()->GetGUID();
-		data << flags << time;
-		data << x << y << z << orientation;
-		data << nothing << uint32(0) << uint32(0) << uint32(0);
-	}
-	else if (recv_data.GetOpcode() == MSG_MOVE_SET_PITCH)
-	{
-		data << GetPlayer()->GetGUID();
-		data << flags << time;
-		data << x << y << z << orientation;
-		data << nothing << uint32(0) << uint32(0) << uint32(0);
-	}
-	else
-	{
-	    data << GetPlayer()->GetGUID();
-		data << flags << time;
-		data << x << y << z << orientation;
-		data  << nothing << uint32(0) << uint32(0) << uint32(0);
-	}
+    data << GetPlayer()->GetGUID();
+	data << flags << time;
+	data << x << y << z << orientation;
+	data  << nothing << uint32(0) << uint32(0) << uint32(0);
 #else //!_VERSION_1_7_0_
 	data << GetPlayer()->GetGUID();
 	data << flags << time;
