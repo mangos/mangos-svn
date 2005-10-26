@@ -178,7 +178,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 flags, time;
     float x, y, z, orientation;
-//	uint32 nothing;
+	uint32 nothing;
     // float unk1, unk2, unk3, unk4, unk5;
 
     if(GetPlayer()->GetDontMove())
