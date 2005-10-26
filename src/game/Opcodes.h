@@ -18,6 +18,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef _VERSION_1_7_0_
+#include "Opcodes_1_7_x.h"
+#else //!_VERSION_1_7_0_
+
 #ifndef _OPCODES_H
 #define _OPCODES_H
 
@@ -788,3 +792,5 @@ typedef struct
     uint32 Class;
 } FriendStr ;
 #endif
+
+#endif //_VERSION_1_7_0_

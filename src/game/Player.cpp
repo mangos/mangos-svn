@@ -2571,7 +2571,9 @@ void Player::SetMovement(uint8 pType)
         case MOVE_LAND_WALK:
         {
             data.Initialize(SMSG_MOVE_LAND_WALK);
-            data << GetUInt32Value( OBJECT_FIELD_GUID );
+			//UQ1: Why ?
+			//data << GetUInt32Value( OBJECT_FIELD_GUID );
+			data << GetGUID();
             GetSession()->SendPacket( &data );
         }break;
         default:break;

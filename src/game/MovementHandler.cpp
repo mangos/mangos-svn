@@ -169,17 +169,26 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     }
 }
 
+#include "NameTables.h"
+extern NameTableEntry g_worldOpcodeNames[];
+
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
     uint32 flags, time;
     float x, y, z, orientation;
+	uint32 nothing;
     // float unk1, unk2, unk3, unk4, unk5;
 
     if(GetPlayer()->GetDontMove())
         return;
 
+#ifdef _VERSION_1_7_0_
+	recv_data >> flags >> time;
+    recv_data >> x >> y >> z >> orientation >> nothing;
+#else //!_VERSION_1_7_0_
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
+#endif //_VERSION_1_7_0_
 
     if( GetPlayer() && !GetPlayer( )->SetPosition(x, y, z, orientation) )
     {
@@ -193,9 +202,100 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     WorldPacket data;
     data.Initialize( recv_data.GetOpcode() );
 
-    data << GetPlayer()->GetGUID();
-    data << flags << time;
-    data << x << y << z << orientation;
+#ifdef _VERSION_1_7_0_
+#ifdef _DEBUG
+	std::stringstream ss1;
+	ss1.rdbuf()->str("");
+	ss1 << x;
+	float x2 = (float)atof(ss1.str().c_str());
+
+	std::stringstream ss2;
+	ss2.rdbuf()->str("");
+	ss2 << y;
+	float y2 = (float)atof(ss2.str().c_str());
+
+	std::stringstream ss3;
+	ss3.rdbuf()->str("");
+	ss3 << z;
+	float z2 = (float)atof(ss3.str().c_str());
+
+	std::stringstream ss4;
+	ss4.rdbuf()->str("");
+	ss4 << orientation;
+	float orientation2 = (float)atof(ss4.str().c_str());
+
+	std::stringstream ss5;
+	ss5.rdbuf()->str("");
+	ss5 << nothing;
+	float nothingb = (float)atof(ss5.str().c_str());
+	uint32 nothingb2 = (uint32)atoi(ss5.str().c_str());
+	uint16 nothingb3 = (uint16)atoi(ss5.str().c_str());
+	uint8 nothingb4 = (uint8)atoi(ss5.str().c_str());
+
+/*	std::stringstream ss6;
+	ss6.rdbuf()->str("");
+	ss6 << nothing2;
+	float nothingb2 = (float)atof(ss6.str().c_str());
+
+	std::stringstream ss7;
+	ss7.rdbuf()->str("");
+	ss7 << nothing3;
+	float nothingb3 = (float)atof(ss7.str().c_str());
+
+	std::stringstream ss8;
+	ss8.rdbuf()->str("");
+	ss8 << nothing4;
+	float nothingb4 = (float)atof(ss8.str().c_str());
+
+	std::stringstream ss9;
+	ss9.rdbuf()->str("");
+	ss9 << nothing5;
+	float nothingb5 = (float)atof(ss9.str().c_str());
+
+	std::stringstream ss10;
+	ss10.rdbuf()->str("");
+	ss10 << nothing6;
+	float nothingb6 = (float)atof(ss10.str().c_str());
+*/
+
+	Log::getSingleton().outDebug( "SESSION: recieved opcode %s (0x%.4X) - Origin: %f %f %f (%f).",
+			LookupName(recv_data.GetOpcode(), g_worldOpcodeNames),
+			recv_data.GetOpcode(), x2, y2, z2, orientation2);
+
+	Log::getSingleton().outDebug( "Nothings are [%f] [%u] [%u] [%u].",
+			nothingb, nothingb2, nothingb3, nothingb4);
+/*	
+	Log::getSingleton().outDebug( "Nothings: [%f] [%f].",
+			nothingb, nothingb2);
+*/
+#endif //_DEBUG
+
+	if (recv_data.GetOpcode() == MSG_MOVE_SET_FACING)
+	{
+		data << GetPlayer()->GetGUID();
+		data << flags << time;
+		data << x << y << z << orientation;
+		data << nothing << uint32(0) << uint32(0) << uint32(0);
+	}
+	else if (recv_data.GetOpcode() == MSG_MOVE_SET_PITCH)
+	{
+		data << GetPlayer()->GetGUID();
+		data << flags << time;
+		data << x << y << z << orientation;
+		data << nothing << uint32(0) << uint32(0) << uint32(0);
+	}
+	else
+	{
+	    data << GetPlayer()->GetGUID();
+		data << flags << time;
+		data << x << y << z << orientation;
+		data  << nothing << uint32(0) << uint32(0) << uint32(0);
+	}
+#else //!_VERSION_1_7_0_
+	data << GetPlayer()->GetGUID();
+	data << flags << time;
+	data << x << y << z << orientation;
+#endif //_VERSION_1_7_0_
 
     GetPlayer()->SendMessageToSet(&data, false);
 }
