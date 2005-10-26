@@ -1037,11 +1037,33 @@ void Creature::AI_Update()
 				
 				
 				// UQ1: Add damage values...
-				uint32 minDmg = this->GetUInt32Value(UNIT_FIELD_MINDAMAGE);
-				uint32 maxDmg = this->GetUInt32Value(UNIT_FIELD_MAXDAMAGE);
+#ifndef _VERSION_1_7_0_
+				uint32 minDmg = (this->GetUInt32Value(UNIT_FIELD_MINDAMAGE));
+				uint32 maxDmg = (this->GetUInt32Value(UNIT_FIELD_MAXDAMAGE));
+#else //_VERSION_1_7_0_
+				// Damage values in the new DB are too high... All over 1000... So..
+				uint32 minDmg = irand(0, getLevel());
+				uint32 maxDmg = irand(minDmg, getLevel());
 
+				if (getLevel() < 20)
+					maxDmg*=(getLevel()*0.3);
+#endif //_VERSION_1_7_0_
+				
+				// Fix for bad creature info...
 				if (maxDmg > 32768)
-					maxDmg = 32767; // For integer random function... 32767 should be plenty anyway.. Think its just a db error.
+				{
+					if (minDmg > 32768)
+						maxDmg = irand(0, getLevel());
+					else
+						maxDmg = irand(minDmg, getLevel());
+					//maxDmg = 32767; // For integer random function... 32767 should be plenty anyway.. Think its just a db error.
+				}
+
+				if (minDmg > 32768)
+				{
+					minDmg = irand(minDmg, getLevel());
+					//maxDmg = 32767; // For integer random function... 32767 should be plenty anyway.. Think its just a db error.
+				}
 
 				uint32 damge = irand(minDmg, maxDmg);
 

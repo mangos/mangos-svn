@@ -568,6 +568,11 @@ void Spell::SendCastResult(uint8 result)
     if(result != 0)
         data << uint8(2);
     data << result;
+
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
+
     ((Player*)m_caster)->GetSession()->SendPacket(&data);
 }
 
@@ -611,6 +616,11 @@ void Spell::SendSpellGo()
     writeSpellGoTargets(&data);
 
     data << (uint8)0;                             // number of misses
+
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
+
     m_targets.write( &data );
     m_caster->SendMessageToSet(&data, true);
 }
@@ -697,6 +707,10 @@ void Spell::SendChannelUpdate(uint32 time)
     data.Initialize( MSG_CHANNEL_UPDATE );
     data << time;
 
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
+
     ((Player*)m_caster)->GetSession()->SendPacket( &data );
 
     if(time == 0)
@@ -727,6 +741,11 @@ void Spell::SendChannelStart(uint32 duration)
         data.Initialize( MSG_CHANNEL_START );
         data << m_spellInfo->Id;
         data << duration;
+
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
+
         ((Player*)m_caster)->GetSession()->SendPacket( &data );
     }
 
@@ -744,6 +763,10 @@ void Spell::SendResurrectRequest(Player* target)
     data.Initialize(SMSG_RESURRECT_REQUEST);
     data << m_caster->GetGUID();
     data << uint32(0) << uint8(0);
+
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
 
     target->GetSession()->SendPacket(&data);
     return;
@@ -1637,8 +1660,14 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
 
     data.Initialize(SMSG_TRANSFER_PENDING);
     data << uint32(0);
-    if(pTarget)
+    
+	if(pTarget)
+	{
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
         pTarget->GetSession()->SendPacket(&data);
+	}
 
 #ifndef ENABLE_GRID_SYSTEM
     Target->RemoveFromMap();
@@ -1650,7 +1679,12 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     data.Initialize(SMSG_NEW_WORLD);
     data << TC->mapId << TC->x << TC->y << TC->z << (float)0.0f;
     if(pTarget)
+	{
+#ifdef _VERSION_1_7_0_
+	data << uint32(0) << uint32(0) << uint32(0); 
+#endif //_VERSION_1_7_0_
         pTarget->GetSession()->SendPacket(&data);
+	}
 
     // TODO: clear attack list
 
