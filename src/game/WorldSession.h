@@ -168,7 +168,7 @@ class WorldSession
 		void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
 		void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
-		//Trade opcodes
+		//Trade opcodes (TradeHandler.cpp)
 		void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
 		void HandleBeginTradeOpcode(WorldPacket& recvPacket);
 		void HandleBusyTradeOpcode(WorldPacket& recvPacket);
