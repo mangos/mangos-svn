@@ -54,6 +54,11 @@ class WorldSession
         void SetSocket(WorldSocket *sock);
         void SetPlayer(Player *plr) { _player = plr; }
 
+		bool isLogingOut()
+		{
+			if (_logoutTime) return true;
+			else return false;
+		}
         void LogoutRequest(time_t requestTime)
         {
             _logoutTime = requestTime;
