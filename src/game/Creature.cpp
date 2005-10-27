@@ -464,7 +464,11 @@ void Creature::Update( uint32 p_time )
 //			if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == objmgr.GetObject<Player>(ActivePlayers[loop])->getFaction())
 //				sameFaction = true; // Same faction as us...
 
-			if(distance<=50 && !sameFaction)
+    		Unit *pVictim = (Unit*) objmgr.GetObject<Player>(ActivePlayers[loop]);
+			WPAssert(pVictim);
+
+			//if(distance<=50 && !sameFaction)
+            if(distance<=GetAttackDistance(pVictim) && !sameFaction)
 			{// If close enough, attack...
 				if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
 					//|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
@@ -479,8 +483,8 @@ void Creature::Update( uint32 p_time )
 
 				if(m_attackers.empty())
 				{
-					Unit *pVictim = (Unit*) objmgr.GetObject<Player>(ActivePlayers[loop]);
-					WPAssert(pVictim);
+					//Unit *pVictim = (Unit*) objmgr.GetObject<Player>(ActivePlayers[loop]);
+					//WPAssert(pVictim);
 
 					if (pVictim->isAlive())
 					{
@@ -549,7 +553,11 @@ void Creature::Update( uint32 p_time )
 
 		float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
 
-		if(distance<=50 && !sameFaction)
+		Unit *pVictim = (Unit*) ObjectAccessor::Instance().FindPlayer(ActivePlayers[loop]);
+		WPAssert(pVictim);
+
+		//if(distance<=50 && !sameFaction)
+		if(distance<=GetAttackDistance(pVictim) && !sameFaction)
 		{// If close enough, attack...
 			if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
 				//|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
@@ -564,8 +572,8 @@ void Creature::Update( uint32 p_time )
 
 			if(m_attackers.empty())
 			{
-				Unit *pVictim = (Unit*) ObjectAccessor::Instance().FindPlayer(ActivePlayers[loop]);
-				WPAssert(pVictim);
+				//Unit *pVictim = (Unit*) ObjectAccessor::Instance().FindPlayer(ActivePlayers[loop]);
+				//WPAssert(pVictim);
 
 				if (pVictim->isAlive())
 				{
@@ -1457,4 +1465,30 @@ void Creature::DeleteFromDB()
     sDatabase.Execute(sql);
     sprintf(sql, "DELETE FROM creaturequestrelation WHERE creatureId=%u", GetGUIDLow());
     sDatabase.Execute(sql);
+}
+
+//add by vendy Check Attack distance  
+float Creature::GetAttackDistance(Unit *pl)
+{
+    uint16 playlevel     = (uint16)pl->GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint16 creaturelevel = (uint16)this->GetUInt32Value(UNIT_FIELD_LEVEL);
+    int16 leveldif      = playlevel - creaturelevel;
+
+    float RetDistance=10.0;
+
+    if ( leveldif > 9 )
+    { 
+        RetDistance = 3;        	
+    }
+    else
+    {
+	    if (leveldif > 0)
+            RetDistance =  10 *  GetFloatValue(UNIT_FIELD_COMBATREACH) - 2*(float)leveldif;
+	    else
+            RetDistance = 10 *  GetFloatValue(UNIT_FIELD_COMBATREACH);
+	    RetDistance = RetDistance>50?50:RetDistance;
+	    RetDistance = RetDistance<3?3:RetDistance;
+	}
+
+    return RetDistance;
 }

@@ -277,5 +277,9 @@ class Creature : public Unit
         /// Misc
         uint8 m_emoteState;
         std::string m_name;
+        
+		///	Check attack distance
+        float GetAttackDistance(Unit *pl);
+
 };
 #endif
