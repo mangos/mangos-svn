@@ -91,6 +91,7 @@ Player::Player ( ): Unit()
 	
 	logoutDelay = LOGOUTDELAY;
 	inCombat = false;
+	pTrader = NULL;
 }
 
 

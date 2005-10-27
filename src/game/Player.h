@@ -623,6 +623,9 @@ public:
 
         bool m_dontMove;
 
+		//This is not a good ideia in OO project
+		//TODO: Set functions to return this and reply into the code
+		Player *pTrader;
 		Player *DuelVsPlayer;
 	    Player *DuelSendPlayer;
 
