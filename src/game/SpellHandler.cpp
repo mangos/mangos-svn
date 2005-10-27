@@ -102,13 +102,45 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
-    WPAssert(spell);
+	if (spellId == 7266){ //DUEL spell id
+	    
+		uint16 unk1;
+        uint64 duelplid;
+	    WorldPacket data;
+        Player *pl;
 
-    SpellCastTargets targets;
-    targets.read(&recvPacket,GetPlayer()->GetGUID());
+	    recvPacket >> unk1;  //?? I don't Know 
+	    recvPacket >> duelplid; // this is send duel vs player GUID
 
-    spell->prepare(&targets);
+		Log::getSingleton( ).outError("WORLD: Send SMSG_DUEL_REQUESTED !");
+
+	    pl     = GetPlayer(); //get duel sender
+		pl->DuelVsPlayer = objmgr.GetPlayer(duelplid);
+        pl->DuelSendPlayer = pl;
+
+		pl->DuelVsPlayer->DuelVsPlayer = pl;
+        pl->DuelVsPlayer->DuelSendPlayer = pl;
+
+		WPAssert(pl);
+		WPAssert(pl->DuelVsPlayer);
+
+		data.Initialize(SMSG_DUEL_REQUESTED);
+        data << (uint64)duelplid; 
+		data << (uint64)pl->GetGUID(); 
+
+		pl->GetSession()->SendPacket(&data);
+		pl->DuelVsPlayer->GetSession()->SendPacket(&data);
+
+	}else{
+
+		Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
+		WPAssert(spell);
+
+		SpellCastTargets targets;
+        targets.read(&recvPacket,GetPlayer()->GetGUID());
+
+        spell->prepare(&targets);
+	}
 }
 
 

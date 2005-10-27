@@ -29,13 +29,73 @@
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
+    sLog.outString( "HandleDuelAcceptedOpcode.\n" );
+    //if you want to  get this handle , learn spell 7266 first, 
+	//I don't how to do ,Please FIX ME
+	uint64 guid;
+    
+	recvPacket >> guid;
+
+	Player *pl;
+	WorldPacket data;
+
+	WorldPacket packet,packetR;
+    UpdateData updata;
+
+	pl     = GetPlayer(); // get duel sender
+	
+	pl->DuelVsPlayer->BuildCreateUpdateBlockForPlayer( &updata, pl );
+    updata.BuildPacket(&packet);
+    pl->GetSession()->SendPacket( &packet );
+	data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+    data << (uint64)guid; 
+	pl->GetSession()->SendPacket(&data);  
+
+	updata.Clear();
+
+    pl->BuildCreateUpdateBlockForPlayer( &updata, pl->DuelVsPlayer );
+    updata.BuildPacket(&packet);
+    pl->DuelVsPlayer->GetSession()->SendPacket( &packet );
+
+	data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+    data << (uint64)guid; 
+	pl->DuelVsPlayer->GetSession()->SendPacket(&data);			
+
+	data.Initialize(SMSG_PET_BROKEN | CMSG_LEARN_SPELL);
+    data << (uint64)0xbb8; 
+	pl->GetSession()->SendPacket(&data);	
+	pl->DuelVsPlayer->GetSession()->SendPacket(&data);		
 
 }
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
+	sLog.outString( "HandleDuelCancelledOpcode.\n" );
+    //First time is work ,but can't send duel again , I don't know why
+	//Please FIX ME
+    uint64 guid;
+	Player *pl;
+	WorldPacket data;
 
+    recvPacket >> guid;
 
+	pl     = GetPlayer(); //get player
+	WPAssert(pl->DuelVsPlayer );
+	
+	pl->SetUInt32Value(PLAYER_DUEL_ARBITER,0);
+	pl->SetUInt32Value(PLAYER_DUEL_ARBITER_01,0);
+	pl->SetUInt32Value(PLAYER_DUEL_TEAM,0);
 
+	pl->DuelVsPlayer->SetUInt32Value(PLAYER_DUEL_ARBITER,0);
+	pl->DuelVsPlayer->SetUInt32Value(PLAYER_DUEL_ARBITER_01,0);
+	pl->DuelVsPlayer->SetUInt32Value(PLAYER_DUEL_TEAM,0);
+
+	data.Initialize(SMSG_DUEL_COMPLETE);
+    data << (uint8)0; // Duel Cancel
+	pl->GetSession()->SendPacket(&data);
+	pl->DuelVsPlayer->GetSession()->SendPacket(&data);
+
+	//pl->DuelVsPlayer = NULL;
+	//pl->DuelSendPlayer = NULL;
 }
 
 

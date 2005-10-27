@@ -623,6 +623,10 @@ public:
 
         bool m_dontMove;
 
+		Player *DuelVsPlayer;
+	    Player *DuelSendPlayer;
+
+
 #ifdef ENABLE_GRID_SYSTEM
     InRangeObjectsMapType i_inRangeObjects;
     InRangeUnitsMapType i_inRangeUnits;
