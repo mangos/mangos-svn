@@ -15,29 +15,24 @@ AC_INIT([MaNGOS],
         [0.0.2-SVN],
         [https://opensvn.csie.org/traccgi/MaNGOS/],
         [mangos])
-
-AC_PREREQ(2.5)
-
-if test -d obj; then rm -rf obj; fi
-
-AM_CONFIG_HEADER( config.h )
-INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
-AC_SUBST(INCLUDES)
-LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
-AC_SUBST(LDFLAGS)
+AM_CONFIG_HEADER([config.h])
+AC_CONFIG_SRCDIR(src/mangosd/Main.cpp)
 
 dnl Automake is needed for the build system.
-dnl 
-AM_INIT_AUTOMAKE
+dnl
+AM_INIT_AUTOMAKE([1.6 dist-bzip2])
 AM_MAINTAINER_MODE
 
-# Checks for programs.
 AC_PROG_CC(gcc cc)
 AC_PROG_CXX
 AC_PROG_RANLIB
 AC_PROG_LIBTOOL
+AC_LANG([C++])
+
+dnl Checks for programs.
 AM_PROG_LIBTOOL
 
+dnl Set up ZThread build.
 LIBZTHREAD_MAJOR_VERSION=2
 LIBZTHREAD_MINOR_VERSION=3
 LIBZTHREAD_MICRO_VERSION=2
@@ -49,7 +44,14 @@ LT_AGE=$LIBZTHREAD_MICRO_VERSION
 COMPILER_OPTIONS=""
 LINKER_OPTIONS=""
 
-# Checks for libraries.
+INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
+AC_SUBST(INCLUDES)
+LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
+AC_SUBST(LDFLAGS)
+
+dnl Checks for libraries.
+
+dnl Checks for library functions.
 AC_CHECK_LIB( pthread, pthread_create, [],
     [LDFLAGS="-pthread $LDFLAGS"
      AC_TRY_LINK([char pthread_create();],
@@ -64,7 +66,7 @@ AC_CHECK_LIB( ssl, SHA1_Init, [], [AC_CHECK_LIB(ssl, SHA1_Init,[],[AC_MSG_ERROR(
 CPPFLAGS_SAVE=$CPPFLAGS
 CPPFLAGS=$INCLUDES $CPPFLAGS
 
-# Checks for header files.
+dnl Checks for header files.
 AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_HEADER_TIME
@@ -76,7 +78,7 @@ AC_CHECK_HEADERS(                                             \
 
 CPPFLAGS=$CPPFLAGS_SAVE
 
-# Checks for typedefs, structures, and compiler characteristics.
+dnl Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
 AC_C_VOLATILE
@@ -86,7 +88,7 @@ AC_TYPE_SIGNAL
 AC_STRUCT_TM
 AC_CHECK_TYPES([ ptrdiff_t ])
 
-# Checks for library functions.
+dnl Checks for library functions.
 AC_FUNC_MEMCMP
 AC_FUNC_STRCOLL
 AC_FUNC_ALLOCA
@@ -234,12 +236,14 @@ AC_CONFIG_FILES([
    doc/Makefile
    sql/Makefile
    src/Makefile
+   src/shared/Makefile
+   src/realmlist/Makefile
    src/mangosd/Master.h
    src/mangosd/Makefile
    src/framework/Makefile
-   src/shared/Makefile
-   src/realmlist/Makefile
    src/game/Makefile
+   src/bindings/Makefile
+   src/bindings/python/Makefile
    dep/Makefile
    dep/src/Makefile
    dep/src/zlib/Makefile

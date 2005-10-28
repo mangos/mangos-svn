@@ -15,5 +15,14 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-SUBDIRS = framework shared realmlist game mangosd bindings
+INCLUDES += -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared -I$(srcdir)/../../game -I$(srcdir)/../../framework
 
+noinst_LIBRARIES = libmangospython.a
+
+libmangospython_a_SOURCES = \
+	AddSourcesHere.cpp
+
+if NEWFRAMEWORK
+libmangospython_a_LIBADD = \
+	AddNewFrameworkRelatedSourcesHere.cpp
+endif
