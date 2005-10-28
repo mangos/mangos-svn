@@ -68,6 +68,7 @@ TRADE RESPONSE OPCODES
 	21: Trial accounts cannot...
 
  SMSG_TRADE_STATUS_EXTENDED
+	1: Send itens and gold?
 
 */
 
@@ -84,14 +85,15 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 
 	WorldPacket data;
 
-	//Opens trade window to me
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)2; //Open trade window
-	SendPacket(&data);
 	//Opens trade window to my partner
 	data.Initialize(SMSG_TRADE_STATUS);
 	data << (uint32)2; //Open trade window
 	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+	
+	//Opens trade window to me
+	data.Initialize(SMSG_TRADE_STATUS);
+	data << (uint32)2; //Open trade window 
+	SendPacket(&data);
 }
 
 void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
@@ -107,21 +109,7 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 
 	WorldPacket data;
 
-	GetPlayer()->SetTarget( GetPlayer()->pTrader->GetGUID() );
-
-	//Closes trade window
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)12; //Closes trade window
-	SendPacket(&data);
-
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)12; //Closes trade window
-	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
-
-	//Send cancel MSG
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)3; //Trade Canceled
-	SendPacket(&data);
+	//GetPlayer()->SetTarget( GetPlayer()->pTrader->GetGUID() );
 
 	data.Initialize(SMSG_TRADE_STATUS);
 	data << (uint32)3; //Trade Canceled

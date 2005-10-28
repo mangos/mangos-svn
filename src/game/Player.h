@@ -626,6 +626,8 @@ public:
         std::list<Channel*> m_channels;
 
         bool m_dontMove;
+		
+		Player *pTrader;
 
 		//Player *DuelVsPlayer;
 	    //Player *DuelSendPlayer;
