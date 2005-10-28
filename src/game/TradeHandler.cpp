@@ -109,14 +109,13 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 
 	WorldPacket data;
 
-	//GetPlayer()->SetTarget( GetPlayer()->pTrader->GetGUID() );
-
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)3; //Trade Canceled
-	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
-
+	if( GetPlayer()->pTrader )
+	{
+		data.Initialize(SMSG_TRADE_STATUS);
+		data << (uint32)3; //Trade Canceled
+		GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+	}
 	//Set the trader as NULL
-	GetPlayer()->pTrader->pTrader = NULL;
 	GetPlayer()->pTrader = NULL;
 }
 
@@ -220,7 +219,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
 	//Send a MSG to player
 	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32) 1; //Confirmation message
+	data << (uint32) 1; //Begin Trade request
 	data << (uint64) GetPlayer()->GetGUID();
 	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
 }
@@ -229,12 +228,12 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
 	Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Gold %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
-
+/*
 	WorldPacket data;
 	uint32 gold;
 
 	recvPacket >> gold;
-	
+	/*
 	static unsigned int T = 0;
 
 	data.Initialize(SMSG_TRADE_STATUS);
@@ -243,6 +242,7 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 	SendPacket(&data);
 	
 	T++;
+	*/
 }
 
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
