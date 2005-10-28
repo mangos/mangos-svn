@@ -3,19 +3,19 @@
  * Copyright (C) 2004 Wow Daemon
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * This	program	is free	software; you can redistribute it and/or modify
+ * it under	the	terms of the GNU General Public	License	as published by
+ * the Free	Software Foundation; either	version	2 of the License, or
+ * (at your	option)	any	later version.
  *
- * This program is distributed in the hope that it will be useful,
+ * This	program	is distributed in the hope that	it will	be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A	PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ * You should have received	a copy of the GNU General Public License
+ * along with this program;	if not,	write to the Free Software
+ * Foundation, Inc., 59	Temple Place, Suite	330, Boston, MA	 02111-1307	 USA
  */
 
 #include "Common.h"
@@ -26,77 +26,77 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "Spell.h"
-#include "UpdateData.h"
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
-    sLog.outString( "HandleDuelAcceptedOpcode.\n" );
-    //if you want to  get this handle , learn spell 7266 first, 
-	//I don't how to do ,Please FIX ME
+	sLog.outString(	"HandleDuelAcceptedOpcode.\n" );
+
+	//if you want to  get this handle ,	learn spell	7266 first,	
+	//I	don't how to do	,Please	FIX	ME
 	uint64 guid;
-    
+	
 	recvPacket >> guid;
 
 	Player *pl;
-	WorldPacket data;
+	Player *plTarget;
+	WorldPacket	data;
 
-	WorldPacket packet,packetR;
-    UpdateData updata;
+	WorldPacket	packet,packetR;
+	UpdateData updata;
 
-	pl     = GetPlayer(); // get duel sender
+	pl	   = GetPlayer(); // get duel sender
+	plTarget = objmgr.GetPlayer(pl->m_duelGUID);
 	
-	pl->DuelVsPlayer->BuildCreateUpdateBlockForPlayer( &updata, pl );
-    updata.BuildPacket(&packet);
-    pl->GetSession()->SendPacket( &packet );
+	plTarget->BuildCreateUpdateBlockForPlayer( &updata,	pl );
+	updata.BuildPacket(&packet);
+	pl->GetSession()->SendPacket( &packet );
 	data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-    data << (uint64)guid; 
+	data <<	(uint64)guid; 
 	pl->GetSession()->SendPacket(&data);  
 
 	updata.Clear();
 
-    pl->BuildCreateUpdateBlockForPlayer( &updata, pl->DuelVsPlayer );
-    updata.BuildPacket(&packet);
-    pl->DuelVsPlayer->GetSession()->SendPacket( &packet );
+	pl->BuildCreateUpdateBlockForPlayer( &updata, plTarget);
+	updata.BuildPacket(&packet);
+	plTarget->GetSession()->SendPacket(	&packet	);
 
 	data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-    data << (uint64)guid; 
-	pl->DuelVsPlayer->GetSession()->SendPacket(&data);			
+	data <<	(uint64)guid; 
+	plTarget->GetSession()->SendPacket(&data);			
 
-	data.Initialize(SMSG_PET_BROKEN | CMSG_LEARN_SPELL);
-    data << (uint64)0xbb8; 
+	data.Initialize(SMSG_PET_BROKEN	| CMSG_LEARN_SPELL);
+	data <<	(uint64)0xbb8; 
 	pl->GetSession()->SendPacket(&data);	
-	pl->DuelVsPlayer->GetSession()->SendPacket(&data);		
+	plTarget->GetSession()->SendPacket(&data);		
+
+	pl->m_isInDuel = true;
+	plTarget->m_isInDuel = true;
 
 }
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
-	sLog.outString( "HandleDuelCancelledOpcode.\n" );
-    //First time is work ,but can't send duel again , I don't know why
-	//Please FIX ME
-    uint64 guid;
+	sLog.outString(	"HandleDuelCancelledOpcode.\n" );
+
+
+	uint64 guid;
 	Player *pl;
-	WorldPacket data;
+	Player *plTarget;
+	WorldPacket	data;
 
-    recvPacket >> guid;
+	recvPacket >> guid;
 
-	pl     = GetPlayer(); //get player
-	WPAssert(pl->DuelVsPlayer );
-	
-	pl->SetUInt32Value(PLAYER_DUEL_ARBITER,0);
-	pl->SetUInt32Value(PLAYER_DUEL_ARBITER_01,0);
-	pl->SetUInt32Value(PLAYER_DUEL_TEAM,0);
-
-	pl->DuelVsPlayer->SetUInt32Value(PLAYER_DUEL_ARBITER,0);
-	pl->DuelVsPlayer->SetUInt32Value(PLAYER_DUEL_ARBITER_01,0);
-	pl->DuelVsPlayer->SetUInt32Value(PLAYER_DUEL_TEAM,0);
+	pl		 = GetPlayer();	//get player
+	plTarget = objmgr.GetPlayer(pl->m_duelGUID);
 
 	data.Initialize(SMSG_DUEL_COMPLETE);
-    data << (uint8)0; // Duel Cancel
+	data <<	(uint8)0;		// Duel	Cancel
 	pl->GetSession()->SendPacket(&data);
-	pl->DuelVsPlayer->GetSession()->SendPacket(&data);
+	plTarget->GetSession()->SendPacket(&data);
 
-	//pl->DuelVsPlayer = NULL;
-	//pl->DuelSendPlayer = NULL;
+	pl->m_isInDuel = false;
+	plTarget->m_isInDuel = false;
+
+
 }
 
 

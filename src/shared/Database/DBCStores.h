@@ -94,7 +94,7 @@ struct skilllinespell
 };
 struct SpellEntry
 {
-    uint32 Id;
+    uint32 Id;                     //0
     uint32 School;
     uint32 Category;
     uint32 field4;
@@ -103,17 +103,17 @@ struct SpellEntry
     uint32 AttributesEx;
     uint32 field8;
     uint32 field9;
-    uint32 Targets;
-    uint32 TargetCreatureType;
-    uint32 RequiresSpellFocus;
-    uint32 CasterAuraState;
-    uint32 TargetAuraState;
-    uint32 CastingTimeIndex;
+    uint32 Targets;               //10
+    uint32 TargetCreatureType;    //11
+    uint32 RequiresSpellFocus;    //12
+    uint32 CasterAuraState;       //13
+    uint32 TargetAuraState;       //14
+    uint32 CastingTimeIndex;      //15
     uint32 RecoveryTime;
     uint32 CategoryRecoveryTime;
     uint32 InterruptFlags;
     uint32 AuraInterruptFlags;
-    uint32 ChannelInterruptFlags;
+    uint32 ChannelInterruptFlags;  //20
     uint32 procFlags;
     uint32 procChance;
     uint32 procCharges;
@@ -123,26 +123,26 @@ struct SpellEntry
     uint32 DurationIndex;
     uint32 powerType;
     uint32 manaCost;
-    uint32 manaCostPerlevel;
+    uint32 manaCostPerlevel;        //30
     uint32 manaPerSecond;
     uint32 manaPerSecondPerLevel;
     uint32 rangeIndex;
     float speed;
     uint32 modalNextSpell;
-    uint32 field36;
-    uint32 Totem[2];
-    uint32 Reagent[8];
-    uint32 ReagentCount[8];
-    uint32 EquippedItemClass;
-    uint32 EquippedItemSubClass;
-    uint32 Effect[3];
-    uint32 EffectDieSides[3];
-    uint32 EffectBaseDice[3];
-    float EffectDicePerLevel[3];
-    float EffectRealPointsPerLevel[3];
-    int32 EffectBasePoints[3];
-    uint32 EffectImplicitTargetA[3];
-    uint32 EffectImplicitTargetB[3];
+    uint32 field36;                   //36
+    uint32 Totem[2];                  //37-38
+    uint32 Reagent[8];                //39-46
+    uint32 ReagentCount[8];           //47-54
+    uint32 EquippedItemClass;         //55
+    uint32 EquippedItemSubClass;      //56 
+    uint32 Effect[3];                 //57-59
+    uint32 EffectDieSides[3];         //60-62
+    uint32 EffectBaseDice[3];         //63-65 
+    float EffectDicePerLevel[3];      //66-68
+    float EffectRealPointsPerLevel[3];//70-72
+    int32 EffectBasePoints[3];        //73-75
+    uint32 EffectImplicitTargetA[3];  //76-78
+    uint32 EffectImplicitTargetB[3];  //79-81
     uint32 EffectRadiusIndex[3];
     uint32 EffectApplyAuraName[3];
     uint32 EffectAmplitude[3];
