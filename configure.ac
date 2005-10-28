@@ -184,8 +184,9 @@ AC_MSG_RESULT($MANGOSD_ENABLE_NEW_FRAMEWORK)
 AM_CONDITIONAL(NEWFRAMEWORK, test x$MANGOS_ENABLE_NEW_FRAMEWORK = x$yes)
 
 
+MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 if test $sysconfdir = '${prefix}/etc'; then
-	MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"
+    MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"
 else
   if test $sysconfdir = '/'; then
 	MANGOSD_CONFIG_TEMP="/mangosd.conf"
@@ -195,7 +196,7 @@ else
 fi
 
 if test $datadir = '${prefix}/share'; then
-	MANGOSD_DATA_TEMP="/etc/mangos"
+    MANGOSD_DATA_TEMP="/etc/mangos"
 else
    if test $datadir = '/'; then
    	MANGOSD_DATA_TEMP="/mangos"
