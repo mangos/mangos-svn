@@ -11,6 +11,7 @@
 
 ## Process this file with autoconf to produce a configure script.
 
+AC_PREREQ(2.59)
 AC_INIT([MaNGOS],
         [0.0.2-SVN],
         [https://opensvn.csie.org/traccgi/MaNGOS/],
@@ -31,6 +32,21 @@ AC_LANG([C++])
 
 dnl Checks for programs.
 AM_PROG_LIBTOOL
+
+dnl
+dnl use defaults if cross-compiling, otherwise use the default path.
+dnl
+if test "$cross_compiling" = "yes"; then
+    MYPATH=":"
+else
+#    MYPATH="/bin:/usr/bin:/usr/local/bin:$PATH:/sbin:/usr/sbin:/usr/local/sbin:/opt/gnu/bin"
+    MYPATH=$PATH
+fi
+
+dnl
+dnl Find some common programs
+dnl
+AC_PATH_PROG(__PYTHON, python, /usr/bin/python, $MYPATH)
 
 dnl Set up ZThread build.
 LIBZTHREAD_MAJOR_VERSION=2
@@ -103,6 +119,75 @@ AC_CHECK_FUNCS(                                               \
    gettimeofday localtime_r memset rint select socket         \
    sqrt stpcpy strchr strpbrk strrchr strstr strtol strtoul   \
 )
+
+dnl
+dnl Auto-detect which python bindings should be built.
+dnl
+withval=auto
+AC_ARG_WITH(python, [  --with-python           build python bindings ])
+
+WITH_PYTHON_VERSION=$withval
+if test $withval = auto ; then
+
+AC_MSG_CHECKING(for python 2.4)
+AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <python2.4/Python.h>
+main() {
+  exit(strncmp("2.4", PY_VERSION, 3));
+} ]])],[withval=yes],[withval=no],[withval=yes])
+  AC_MSG_RESULT($withval)
+  if test $withval = yes ; then
+    WITH_PYTHON_VERSION="2.4"
+  else
+    
+  AC_MSG_CHECKING(for python 2.3)
+  AC_RUN_IFELSE([AC_LANG_SOURCE([[
+  #include <python2.3/Python.h>
+  main() {
+    exit(strncmp("2.3", PY_VERSION, 3));
+  } ]])],[withval=yes],[withval=no],[withval=yes])
+    AC_MSG_RESULT($withval)
+    if test $withval = yes ; then
+      WITH_PYTHON_VERSION="2.3"
+    else
+    
+      AC_MSG_CHECKING(for python 2.2)
+      AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    #include <python2.2/Python.h>
+    main() {
+      exit(strncmp("2.2", PY_VERSION, 3));
+    } ]])],[withval=yes],[withval=no],[withval=yes])
+      AC_MSG_RESULT($withval)
+      if test $withval = yes ; then
+        WITH_PYTHON_VERSION="2.2"
+      else
+    
+        AC_MSG_CHECKING(for python 1.5.2)
+        AC_RUN_IFELSE([AC_LANG_SOURCE([[
+    #include <python1.5/Python.h>
+    main() {
+      exit(strcmp("1.5.2", PY_VERSION));
+    } ]])],[withval=yes],[withval=no],[withval=yes])
+        AC_MSG_RESULT($withval)
+        if test $withval = yes ; then
+          WITH_PYTHON_VERSION="1.5"
+        fi
+      fi
+    fi
+  fi
+fi
+
+if test "$WITH_PYTHON_VERSION" != no ; then
+  WITH_PYTHON_SUBDIR=python
+  WITH_PYTHON_SUBPACKAGE=1
+else
+  WITH_PYTHON_SUBDIR=
+  WITH_PYTHON_SUBPACKAGE=0
+fi
+
+AC_SUBST(WITH_PYTHON_SUBDIR)
+AC_SUBST(WITH_PYTHON_SUBPACKAGE)
+AC_SUBST(WITH_PYTHON_VERSION)
 
 AC_MSG_CHECKING(whether to include debug info in library)
 MANGOSD_DEBUG_INFO=no
@@ -198,7 +283,7 @@ else
 fi
 
 if test $datadir = '${prefix}/share'; then
-    MANGOSD_DATA_TEMP="/etc/mangos"
+    MANGOSD_DATA_TEMP="$prefix/share/mangos"
 else
    if test $datadir = '/'; then
    	MANGOSD_DATA_TEMP="/mangos"

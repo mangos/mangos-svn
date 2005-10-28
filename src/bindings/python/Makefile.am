@@ -17,12 +17,12 @@
 
 INCLUDES += -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared -I$(srcdir)/../../game -I$(srcdir)/../../framework
 
-noinst_LIBRARIES = libmangospython.a
+# noinst_LIBRARIES = libmangospython.a
 
-libmangospython_a_SOURCES = \
-	AddSourcesHere.cpp
+#libmangospython_a_SOURCES = \
+#	AddSourcesHere.cpp
 
-if NEWFRAMEWORK
-libmangospython_a_LIBADD = \
-	AddNewFrameworkRelatedSourcesHere.cpp
-endif
+#if NEWFRAMEWORK
+#libmangospython_a_LIBADD = \
+#	AddNewFrameworkRelatedSourcesHere.cpp
+#endif
