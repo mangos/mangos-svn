@@ -239,6 +239,10 @@ void Spell::FillTargetMap()
 
                     }
                 }break;
+				case 25:                   //Target is duel vs player add by vendy
+				{
+					tmpMap.push_back(m_targets.m_unitTarget);
+				}break;
                 case 26:                          // Gameobject/Item Target
                 {
                     if(m_targets.m_unitTarget)
@@ -775,10 +779,16 @@ void Spell::SendDuelRequest(Player* caster, Player* target)
 {
 	WorldPacket data;
 	data.Initialize(SMSG_DUEL_REQUESTED);
-	//data << target->GetGUID() << caster->GetGUID();
-
+	data << target->GetGUID() << caster->GetGUID();
+    
 	target->GetSession()->SendPacket(&data);
 	caster->GetSession()->SendPacket(&data);
+
+	caster->SetDuelVsGUID(target->GetGUID());
+    target->SetDuelVsGUID(caster->GetGUID());
+
+	caster->SetInDuel(false);
+	target->SetInDuel(false);
 }
 void Spell::TakePower()
 {
@@ -1229,7 +1239,7 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
         }break;
 		case 83:                                  //Duel
 		{
-			SendDuelRequest(playerCaster, playerTarget);
+			SendDuelRequest(playerCaster, playerTarget); 
 		}
         case 87:                                  // Summon Totem (slot 1)
         case 88:                                  // Summon Totem (slot 2)

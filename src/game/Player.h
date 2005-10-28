@@ -376,6 +376,10 @@ public:
         void UnSetInvited() { m_isInvited = false; }
         void UnSetInGroup() { m_isInGroup = false; }
 
+		//duel 
+		void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
+		void SetInDuel(const bool &val) { m_isInDuel = val; }
+
         // Deadknight isGroupMember(plyr)
         bool IsGroupMember(Player *plyr);
 
@@ -623,11 +627,12 @@ public:
 
         bool m_dontMove;
 
-		//This is not a good ideia in OO project
-		//TODO: Set functions to return this and reply into the code
-		Player *pTrader;
-		Player *DuelVsPlayer;
-	    Player *DuelSendPlayer;
+		//Player *DuelVsPlayer;
+	    //Player *DuelSendPlayer;
+
+		//duel 
+		uint64 m_duelGUID;
+		bool   m_isInDuel;
 
 
 #ifdef ENABLE_GRID_SYSTEM
