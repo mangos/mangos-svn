@@ -596,7 +596,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, uint32 spellID, uint32 damage, uint32 
     DealDamage(pVictim, damage, procFlag);
 }
 
-
+/*
 void Unit::AttackerStateUpdate(Unit *pVictim,uint32 damage)
 {
     uint32 procFlag = 0;
@@ -605,7 +605,7 @@ void Unit::AttackerStateUpdate(Unit *pVictim,uint32 damage)
         return;
 
     WorldPacket data;
-    uint32 hit_status = 0xe2;
+    uint32 hitInfo = 0xe2;
     uint32 damageType = 0;
 
     if(damage == 0)
@@ -613,11 +613,11 @@ void Unit::AttackerStateUpdate(Unit *pVictim,uint32 damage)
     else
         damageType = 1;
 
-    uint32 some_value = 0xffffffff;
-    some_value = 0x0;
+    uint32 unknownValue = 0xffffffff;
+    unknownValue = 0x0;
 
     data.Initialize(SMSG_ATTACKERSTATEUPDATE);
-    data << (uint32)hit_status;                   // Attack flags
+    data << (uint32)hitInfo;                   // Attack flags
     data << GetGUID();
     data << pVictim->GetGUID();
     data << (uint32)damage;
@@ -643,6 +643,317 @@ void Unit::AttackerStateUpdate(Unit *pVictim,uint32 damage)
 
     DealDamage(pVictim, damage, procFlag);
 }
+*/
+
+// UQ1: Emotions list...
+#define EMOTE_ONESHOT_NONE 0 
+#define EMOTE_ONESHOT_TALK 1 
+#define EMOTE_ONESHOT_BOW  2 
+#define EMOTE_ONESHOT_WAVE 3 
+#define EMOTE_ONESHOT_CHEER  4 
+#define EMOTE_ONESHOT_EXCLAMATION 5 
+#define EMOTE_ONESHOT_QUESTION 6 
+#define EMOTE_ONESHOT_EAT  7 
+#define EMOTE_STATE_DANCE  10 
+#define EMOTE_ONESHOT_LAUGH  11 
+#define EMOTE_STATE_SLEEP  12 
+#define EMOTE_STATE_SIT  13 
+#define EMOTE_ONESHOT_RUDE 14 
+#define EMOTE_ONESHOT_ROAR 15 
+#define EMOTE_ONESHOT_KNEEL  16 
+#define EMOTE_ONESHOT_KISS 17 
+#define EMOTE_ONESHOT_CRY  18 
+#define EMOTE_ONESHOT_CHICKEN  19 
+#define EMOTE_ONESHOT_BEG  20 
+#define EMOTE_ONESHOT_APPLAUD  21 
+#define EMOTE_ONESHOT_SHOUT  22 
+#define EMOTE_ONESHOT_FLEX 23 
+#define EMOTE_ONESHOT_SHY  24 
+#define EMOTE_ONESHOT_POINT  25 
+#define EMOTE_STATE_STAND  26 
+#define EMOTE_STATE_READYUNARMED  27 
+#define EMOTE_STATE_WORK 28 
+#define EMOTE_STATE_POINT  29 
+#define EMOTE_STATE_NONE 30 
+#define EMOTE_ONESHOT_WOUND  33 
+#define EMOTE_ONESHOT_WOUNDCRITICAL 34 
+#define EMOTE_ONESHOT_ATTACKUNARMED 35 
+#define EMOTE_ONESHOT_ATTACK1H 36 
+#define EMOTE_ONESHOT_ATTACK2HTIGHT 37 
+#define EMOTE_ONESHOT_ATTACK2HLOOSE 38 
+#define EMOTE_ONESHOT_PARRYUNARMED  39 
+#define EMOTE_ONESHOT_PARRYSHIELD 43 
+#define EMOTE_ONESHOT_READYUNARMED  44 
+#define EMOTE_ONESHOT_READY1H  45 
+#define EMOTE_ONESHOT_READYBOW 48 
+#define EMOTE_ONESHOT_SPELLPRECAST  50 
+#define EMOTE_ONESHOT_SPELLCAST 51 
+#define EMOTE_ONESHOT_BATTLEROAR  53 
+#define EMOTE_ONESHOT_SPECIALATTACK1H 54 
+#define EMOTE_ONESHOT_KICK 60 
+#define EMOTE_ONESHOT_ATTACKTHROWN  61 
+#define EMOTE_STATE_STUN 64 
+#define EMOTE_STATE_DEAD 65 
+#define EMOTE_ONESHOT_SALUTE 66 
+#define EMOTE_STATE_KNEEL  68 
+#define EMOTE_STATE_USESTANDING 69 
+#define EMOTE_ONESHOT_WAVE_NOSHEATHE 70 
+#define EMOTE_ONESHOT_CHEER_NOSHEATHE  71 
+#define EMOTE_ONESHOT_EAT_NOSHEATHE 92 
+#define EMOTE_STATE_STUN_NOSHEATHE  93 
+#define EMOTE_ONESHOT_DANCE  94 
+#define EMOTE_ONESHOT_SALUTE_NOSHEATH  113 
+#define EMOTE_STATE_USESTANDING_NOSHEATHE  133 
+#define EMOTE_ONESHOT_LAUGH_NOSHEATHE  153 
+#define EMOTE_STATE_WORK_NOSHEATHE  173 
+#define EMOTE_STATE_SPELLPRECAST  193 
+#define EMOTE_ONESHOT_READYRIFLE  213 
+#define EMOTE_STATE_READYRIFLE 214 
+#define EMOTE_STATE_WORK_NOSHEATHE_MINING  233 
+#define EMOTE_STATE_WORK_NOSHEATHE_CHOPWOOD 234 
+#define EMOTE_zzOLDONESHOT_LIFTOFF  253 
+#define EMOTE_ONESHOT_LIFTOFF  254 
+#define EMOTE_ONESHOT_YES  273 
+#define EMOTE_ONESHOT_NO 274 
+#define EMOTE_ONESHOT_TRAIN  275 
+#define EMOTE_ONESHOT_LAND 293 
+#define EMOTE_STATE_READY1H  333 
+#define EMOTE_STATE_AT_EASE  313 
+#define EMOTE_STATE_SPELLKNEELSTART 353 
+#define EMOTE_STATE_SUBMERGED  373 
+#define EMOTE_ONESHOT_SUBMERGE 374
+
+void Unit::HandleEmoteCommand(uint32 anim_id)
+{
+    WorldPacket data;
+
+    data.Initialize( SMSG_EMOTE );
+    data << anim_id << GetGUID();
+    WPAssert(data.size() == 12);
+	
+	SendMessageToSet(&data, true);
+}
+
+void Unit::DoAttackDamage(Unit *pVictim, uint32 damage, uint32 blocked_amount, uint32 damageType, uint32 hitInfo, uint32 victimState)
+{
+	if (GetUnitCriticalChance() * 655.36f >= (uint16)irand(0, 512))
+	{
+		hitInfo = 0xEA;
+		damage *= 2;
+		damageType = 1;
+
+        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
+
+	}
+	if (pVictim->GetUnitParryChance() * 655.36f >= (uint16)irand(0, 512))
+	{
+		//hitInfo = 0x20;
+		damage = 0;
+		victimState = 2;
+
+		HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+	}
+	if (pVictim->GetUnitDodgeChance() * 655.36f >= (uint16)irand(0, 512))
+	{
+		//hitInfo = 0x20;
+		damage = 0;
+		victimState = 3;
+
+		HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+	}
+	if (pVictim->GetUnitBlockChance() * 655.36f >= (uint16)irand(0, 512))
+	{
+		//hitInfo = 0x20;
+		blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 10));
+			
+		if (blocked_amount < damage) 
+		{
+			damage = damage - blocked_amount;
+		}
+		else 
+		{
+			damage = 0;
+		}
+
+		if (pVictim->isPlayer() && pVictim->GetUnitBlockValue())
+		{
+			HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+		}
+		if (pVictim->isPlayer() && pVictim->GetUnitBlockValue() == 0)
+		{
+			HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+		}
+
+		victimState = 4;
+	}
+}
+
+void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
+{
+	WorldPacket data;
+    uint32	spell = 0;
+    uint32	hitInfo = 0x22;
+	uint32	damageType = 0;
+	uint32	extraSpellID = 0;
+	uint32	extraSpellDamge = 0;
+	uint32	blocked_amount = 0;
+	uint32	victimState = 1;
+	int32	attackerSkill = GetUnitMeleeSkill();
+	int32	victimSkill = pVictim->GetUnitMeleeSkill();
+	float	chanceToHit = 100.0f;
+	uint32	unknownValue = 0x0;
+	bool	hit;
+	uint32	victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
+	uint32	attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
+
+	// UQ1: I will base hit/miss on agility values...
+	if (victimAgility < attackerAgility)
+	{
+		if (irand(0,(int)attackerAgility-victimAgility) >= 5)
+			hit = true;
+		else
+			hit = false;
+	}
+	else if (victimAgility > attackerAgility)
+	{
+		if (irand(0,(int)victimAgility-attackerAgility) <= 5)
+			hit = true;
+		else
+			hit = false;
+	}
+	else
+	{
+		if (irand(0,5) >= 2)
+			hit = true;
+		else
+			hit = false;
+	}
+
+	if (pVictim->isDead())
+	{
+		smsg_AttackStop(pVictim->GetGUID());
+		return;
+	}
+
+	if ((m_currentSpell != NULL) && !m_meleeSpell) 
+		return;
+
+	if (isStunned()) 
+		return;
+
+    if(damage == 0) 
+		damage = CalculateDamage (this);
+	else 
+		damageType = 1;	
+
+    if(hit) 
+		hitInfo = 0;
+
+    if (m_meleeSpell == true)
+    {// If we are casting some sort of melee spell, then we need to finish it...
+        if(m_currentSpell != NULL && m_currentSpell->getState() == SPELL_STATE_IDLE)
+		{
+            spell = m_currentSpell->m_spellInfo->Id;
+            m_currentSpell->SendCastResult(0);
+            m_currentSpell->SendSpellGo();
+            
+			for(uint32 i=0;i<2;i++)
+			{// Add spell FX...
+                m_currentSpell->HandleEffects(m_currentSpell->m_targets.m_unitTarget,i);
+			}
+
+            m_currentSpell->finish();
+        }
+    }
+	
+	if (isPlayer() && pVictim->isUnit())
+	{// When a player is attacking an NPC, adjust the chance we will hit to suit the level of the Player+NPC...
+		if (attackerSkill <= victimSkill - 24) 
+		{// They are too higher level for us!
+			chanceToHit = 0;
+		} 
+		else 
+		{
+			if (attackerSkill <= victimSkill)
+			{
+				chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
+			}
+		}
+		
+		if (chanceToHit < 15.0f) 
+			chanceToHit = 15.0f;
+	}
+
+
+	if (chanceToHit * 655.36f >= (uint16)irand(0, 32767))
+	{
+		if (isPlayer() && pVictim->isUnit())
+		{// When a player is attacking an NPC, adjust damage values to suit the level of the Player+NPC...
+			if (attackerSkill < victimSkill - 20) 
+			{
+				damage = (damage * 30) / 100;
+			}
+			else
+			{
+				if (attackerSkill < victimSkill - 10) 
+				{
+					damage = (damage * 60) / 100;
+				}
+			}
+		}
+	} 
+	else 
+	{
+		damage = 0;
+	}
+
+
+	if (damage)
+	{
+		DoAttackDamage(pVictim, damage, blocked_amount, damageType, hitInfo, victimState);
+	}
+	
+	if (extraSpellID && extraSpellDamge)
+	{
+		SpellNonMeleeDamageLog (pVictim, extraSpellID, extraSpellDamge);
+		return;
+	}
+
+    data.Initialize(SMSG_ATTACKERSTATEUPDATE);
+    data << (uint32)hitInfo;			// Attack flags
+    data << GetGUID();					// Guid of Attacker
+    data << pVictim->GetGUID();			// Guid of Victim
+    data << (uint32)damage;				// Damage amount
+
+    data << (uint8)1;					// Damage type counter
+    data << damageType;					// Damage type: 0 = white font, 1 = yellow font
+    data << (float)damage;				// damage amount - for accuracy
+    data << (uint32)damage;				// damage amount - for screen display
+    data << (uint32)0;					// absorbed ammount
+
+#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+	data << (uint32)0;					// unknown field (in 1.7+)
+#endif //defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+    data << (uint32)victimState;		// victim state
+
+	//data << (uint32)0;				// victim round duration
+    
+	data << (uint32)extraSpellDamge;	// spell damage amount
+    data << (uint32)extraSpellID;		// spell damage id
+    data << (uint32)blocked_amount;		// blocked ammount
+
+    WPAssert(data.size() == 61);
+    SendMessageToSet(&data, true);
+
+	if (isPlayer())
+		Log::getSingleton( ).outDebug("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg.",
+			GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
+	else
+		Log::getSingleton( ).outDebug("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg.",
+			GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
+
+    DealDamage(pVictim, damage, 0);
+}
 
 
 void Unit::smsg_AttackStop(uint64 victimGuid)
@@ -652,9 +963,9 @@ void Unit::smsg_AttackStop(uint64 victimGuid)
     data << GetGUID();
     data << victimGuid;
     data << uint32( 0 );
-#ifdef _VERSION_1_7_0_
-    data << uint32( 0 ); // UQ1: ??? crash in 1.7.x
-#endif //_VERSION_1_7_0_
+#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+	data << (uint32)0;					// unknown field (in 1.7+)
+#endif //defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
     SendMessageToSet(&data, true);
     Log::getSingleton( ).outDetail("%u %X stopped attacking "I64FMT,
         GetGUIDLow(), GetGUIDHigh(), victimGuid);
@@ -677,7 +988,9 @@ void Unit::smsg_AttackStart(Unit* pVictim, Player *pThis)
 
     // Prevent user from ignoring attack speed and stopping and start combat really really fast
     if(!isAttackReady())
+	{
         setAttackTimer(uint32(0));
+	}
     else if(!canReachWithAttack(pVictim))
     {
         setAttackTimer(uint32(500));
@@ -710,7 +1023,6 @@ void Unit::smsg_AttackStart(Unit* pVictim, Player *pThis)
     // addUnitFlag(0x00080000);
     // setUpdateMaskBit(UNIT_FIELD_FLAGS );
 }
-
 
 bool Unit::AddAffect(Affect *aff, bool uniq)
 {
