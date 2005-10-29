@@ -2618,6 +2618,95 @@ void Unit::DeMorph()
     this->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayid);
 }
 
+float 
+Unit::GetUnitDodgeChance()
+{
+#ifndef ENABLE_GRID_SYSTEM
+    Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+    if (pThis) // Players only???
+	return (float)m_uint32Values[ PLAYER_DODGE_PERCENTAGE ]; 
+    else
+	return (float)0;
+}
+
+float 
+Unit::GetUnitParryChance()
+{ 
+#ifndef ENABLE_GRID_SYSTEM
+    Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+    if (pThis) // Players only???
+	return (float)m_uint32Values[ PLAYER_PARRY_PERCENTAGE ]; 
+    else
+	return (float)0;
+}
+
+float
+Unit::GetUnitCriticalChance()
+{ 
+#ifndef ENABLE_GRID_SYSTEM
+    Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+    if (pThis) // Players only???
+	return (float)m_uint32Values[ PLAYER_CRIT_PERCENTAGE ]; 
+    else
+	return (float)0;
+}
+
+
+float
+Unit::GetUnitBlockChance()
+{ 
+#ifndef ENABLE_GRID_SYSTEM
+    Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+    if (pThis) // Players only???
+	return (float)m_uint32Values[ PLAYER_BLOCK_PERCENTAGE ]; 
+    else
+	return (float)0;
+}
+
+bool
+Unit::isUnit()
+{
+#ifndef ENABLE_GRID_SYSTEM
+    Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+    
+    if (pThis)
+	return false;
+    else
+	return true;
+}
+
+
+bool
+Unit::isPlayer()
+{
+#ifndef ENABLE_GRID_SYSTEM
+    Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+    Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+    
+    if (pThis)
+	return true;
+    else
+	return false;
+}
+
+
 
 /*
 float Unit::CalcDistance(Unit *Ua, Unit *Ub)

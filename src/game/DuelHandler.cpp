@@ -62,7 +62,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         updata.BuildPacket(&packet);
         plTarget->GetSession()->SendPacket( &packet );
 
-        updata.Clear;
+        updata.Clear();
 
         plTarget->BuildCreateUpdateBlockForPlayer( &updata, pl );
         updata.BuildPacket(&packet);
