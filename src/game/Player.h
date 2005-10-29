@@ -628,6 +628,9 @@ public:
         bool m_dontMove;
 		
 		Player *pTrader;
+		bool acceptTrade;
+		uint32 tradeItems[7];
+		uint32 tradeGold;
 
 		//Player *DuelVsPlayer;
 	    //Player *DuelSendPlayer;
