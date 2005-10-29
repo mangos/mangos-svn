@@ -26,7 +26,7 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "Player.h"
-//#include "Spell.h"
+#include "Item.h"
 #include "Chat.h"
 
 /*
@@ -72,10 +72,113 @@ TRADE RESPONSE OPCODES
 
 */
 
+
+void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& recvPacket)
+{
+	Log::getSingleton( ).outDebug( "\nWORLD: Ignore Trade %u", GetPlayer()->GetGUID());
+	recvPacket.print_storage();
+}
+
+void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
+{
+	Log::getSingleton( ).outDebug( "\nWORLD: Busy Trade %u", GetPlayer()->GetGUID());
+	recvPacket.print_storage();
+}
+
+void WorldSession::ClearTrade()
+{
+	GetPlayer()->tradeGold = 0;
+	GetPlayer()->acceptTrade = false;
+	for(int i=0; i<7; i++)
+		GetPlayer()->tradeItems[i] = 0;
+}
+
+void WorldSession::UpdateTrade()
+{
+	WorldPacket data;
+	Player *pThis = GetPlayer();
+	Item *Item = NULL;
+
+	data.Initialize(SMSG_TRADE_STATUS_EXTENDED);
+	data << (uint32) 1;
+	data << (uint32) 7; //I am not sure
+	data << (uint32) 0;
+	data << (uint32) GetPlayer()->tradeGold;
+	data << (uint32) 0;
+	for(int i=0; i<7; i++)
+	{
+		Item = pThis->GetItemBySlot( pThis->tradeItems[i] );
+
+		data << (uint32) i;
+		if(Item)
+		{
+			data << (uint32) Item->GetProto()->ItemId; //maybe GUID
+			data << (uint32) 0;
+			data << (uint32) Item->GetProto()->MaxCount;
+		}
+		else
+		{
+			data << (uint32) 0;
+			data << (uint32) 0;
+			data << (uint32) 0;
+		}		
+		for(int j=0; j<12; j++)
+			data << (uint32) 0;
+	}
+	pThis->pTrader->GetSession()->SendPacket(&data);
+
+}
+
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
 	Log::getSingleton( ).outDebug( "\nWORLD: Accept Trade %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
+
+	WorldPacket data;
+
+	if ( !GetPlayer()->pTrader ) return;
+
+	if ( GetPlayer()->pTrader->acceptTrade )
+	{
+		//Do trade
+
+		//Clear
+		ClearTrade();
+
+		//Trade Complete
+		data.Initialize(SMSG_TRADE_STATUS);
+		data << (uint32)8;
+		GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+	
+		data.Initialize(SMSG_TRADE_STATUS);
+		data << (uint32)8;
+		SendPacket(&data);
+	}
+	else
+	{
+		//Accept trade
+		data.Initialize(SMSG_TRADE_STATUS);
+		data << (uint32)4;
+		GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+
+		GetPlayer()->acceptTrade = true;
+	}
+
+}
+
+void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
+{
+	Log::getSingleton( ).outDebug( "\nWORLD: Unaccept Trade %u", GetPlayer()->GetGUID());
+	recvPacket.print_storage();
+
+	WorldPacket data;
+
+	//Unaccept trade
+	data.Initialize(SMSG_TRADE_STATUS);
+	data << (uint32)7;
+	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+
+	GetPlayer()->acceptTrade = false;
 }
 
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
@@ -89,17 +192,13 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 	data.Initialize(SMSG_TRADE_STATUS);
 	data << (uint32)2; //Open trade window
 	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
-	
+	GetPlayer()->pTrader->GetSession()->ClearTrade();
+
 	//Opens trade window to me
 	data.Initialize(SMSG_TRADE_STATUS);
 	data << (uint32)2; //Open trade window 
 	SendPacket(&data);
-}
-
-void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
-{
-	Log::getSingleton( ).outDebug( "\nWORLD: Busy Trade %u", GetPlayer()->GetGUID());
-	recvPacket.print_storage();
+	ClearTrade();
 }
 
 void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
@@ -117,18 +216,7 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 	}
 	//Set the trader as NULL
 	GetPlayer()->pTrader = NULL;
-}
-
-void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
-{
-	Log::getSingleton( ).outDebug( "\nWORLD: Clear Trade Item %u", GetPlayer()->GetGUID());
-	recvPacket.print_storage();
-}
-
-void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& recvPacket)
-{
-	Log::getSingleton( ).outDebug( "\nWORLD: Ignore Trade %u", GetPlayer()->GetGUID());
-	recvPacket.print_storage();
+	ClearTrade();
 }
 
 void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
@@ -215,7 +303,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 */
 
 	GetPlayer()->pTrader = pOther; 
-	pOther->pTrader = GetPlayer();    
+	pOther->pTrader = GetPlayer();  
 
 	//Send a MSG to player
 	data.Initialize(SMSG_TRADE_STATUS);
@@ -228,31 +316,48 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
 	Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Gold %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
-/*
+
 	WorldPacket data;
 	uint32 gold;
 
 	recvPacket >> gold;
-	/*
-	static unsigned int T = 0;
 
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)T; 
-	data << (uint32) gold;
-	SendPacket(&data);
-	
-	T++;
-	*/
+	GetPlayer()->tradeGold = gold;
+
+	UpdateTrade();
+
 }
 
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 {
 	Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Item %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
+	
+	WorldPacket data;
+	uint8 tradeSlot;
+	uint8 trash;
+	uint8 bagSlot;
+
+	recvPacket >> tradeSlot;
+	recvPacket >> trash;
+	recvPacket >> bagSlot;
+
+	GetPlayer()->tradeItems[tradeSlot] = bagSlot;
+
+	UpdateTrade();
 }
 
-void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 {
-	Log::getSingleton( ).outDebug( "\nWORLD: Unaccept Trade %u", GetPlayer()->GetGUID());
+	Log::getSingleton( ).outDebug( "\nWORLD: Clear Trade Item %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
+
+	WorldPacket data;
+	uint32 slot;
+
+	recvPacket >> slot;
+
+	GetPlayer()->tradeItems[slot] = 0;
+
+	UpdateTrade();
 }
