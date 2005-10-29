@@ -385,6 +385,8 @@ public:
 		//duel 
 		void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
 		void SetInDuel(const bool &val) { m_isInDuel = val; }
+		void SetDuelSenderGUID(const uint64 &guid) { m_duelSenderGUID = guid; }
+		
 
         // Deadknight isGroupMember(plyr)
         bool IsGroupMember(Player *plyr);
@@ -632,18 +634,16 @@ public:
         std::list<Channel*> m_channels;
 
         bool m_dontMove;
-		
+
 		Player *pTrader;
 		bool acceptTrade;
 		int tradeItems[7];
 		uint32 tradeGold;
 
-		//Player *DuelVsPlayer;
-	    //Player *DuelSendPlayer;
-
 		//duel 
 		uint64 m_duelGUID;
 		bool   m_isInDuel;
+		uint64 m_duelSenderGUID;
 
 
 #ifdef ENABLE_GRID_SYSTEM

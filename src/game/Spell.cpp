@@ -775,12 +775,17 @@ void Spell::SendResurrectRequest(Player* target)
     target->GetSession()->SendPacket(&data);
     return;
 }
-void Spell::SendDuelRequest(Player* caster, Player* target)
+void Spell::SendDuelRequest(Player* caster, Player* target,uint64 ArbiterID)
 {
 	WorldPacket data;
 	data.Initialize(SMSG_DUEL_REQUESTED);
-	data << target->GetGUID() << caster->GetGUID();
-    
+	//data << target->GetGUID() << caster->GetGUID();
+    //uint64 ArbiterID = HIGHGUID_GAMEOBJECT;  //flag object ID
+    //uint32 guidlow = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
+    //ArbiterID = ArbiterID << 8 + guidlow;
+
+	data << ArbiterID << caster->GetGUID();
+
 	target->GetSession()->SendPacket(&data);
 	caster->GetSession()->SendPacket(&data);
 
@@ -789,6 +794,9 @@ void Spell::SendDuelRequest(Player* caster, Player* target)
 
 	caster->SetInDuel(false);
 	target->SetInDuel(false);
+
+	caster->SetDuelSenderGUID(caster->GetGUID());
+	target->SetDuelSenderGUID(caster->GetGUID());
 }
 void Spell::TakePower()
 {
@@ -1239,7 +1247,25 @@ void Spell::HandleEffects(uint64 guid,uint32 i)
         }break;
 		case 83:                                  //Duel
 		{
-			SendDuelRequest(playerCaster, playerTarget); 
+            // spawn a new one
+            GameObject* pGameObj = new GameObject();
+            uint16 display_id = m_spellInfo->EffectMiscValue[i];
+
+            // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
+	    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation());
+	    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i]);
+	    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16);
+            pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
+            pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
+            Log::getSingleton( ).outError("AddObject at Spell.cpp 1100");
+#ifndef ENABLE_GRID_SYSTEM
+            objmgr.AddObject(pGameObj);
+            pGameObj->PlaceOnMap();
+#else
+	    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+#endif
+			SendDuelRequest(playerCaster, playerTarget , pGameObj->GetGUID()); 
+
 		}
         case 87:                                  // Summon Totem (slot 1)
         case 88:                                  // Summon Totem (slot 2)

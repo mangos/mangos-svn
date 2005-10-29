@@ -143,16 +143,16 @@ struct SpellEntry
     int32 EffectBasePoints[3];        //73-75
     uint32 EffectImplicitTargetA[3];  //76-78
     uint32 EffectImplicitTargetB[3];  //79-81
-    uint32 EffectRadiusIndex[3];
-    uint32 EffectApplyAuraName[3];
-    uint32 EffectAmplitude[3];
-    uint32 Effectunknown[3];
-    uint32 EffectChainTarget[3];
-    uint32 EffectItemType[3];
-    uint32 EffectMiscValue[3];
-    uint32 EffectTriggerSpell[3];
-    float EffectPointsPerComboPoint[3];
-    uint32 SpellVisual;
+    uint32 EffectRadiusIndex[3];      //82-84
+    uint32 EffectApplyAuraName[3];    //85-87
+    uint32 EffectAmplitude[3];        //88-90
+    uint32 Effectunknown[3];          //91-92
+    uint32 EffectChainTarget[3];      //93-95
+    uint32 EffectItemType[3];         //96-98
+    uint32 EffectMiscValue[3];         //99-102
+    uint32 EffectTriggerSpell[3];      //103-105
+    float EffectPointsPerComboPoint[3];//106-108
+    uint32 SpellVisual;                //109 
     uint32 field110;
     uint32 SpellIconID;
     uint32 activeIconID;
