@@ -90,7 +90,7 @@ void WorldSession::ClearTrade()
 	GetPlayer()->tradeGold = 0;
 	GetPlayer()->acceptTrade = false;
 	for(int i=0; i<7; i++)
-		GetPlayer()->tradeItems[i] = 0;
+		GetPlayer()->tradeItems[i] = -1;
 }
 
 void WorldSession::UpdateTrade()
@@ -103,14 +103,14 @@ void WorldSession::UpdateTrade()
 
 	data.Initialize(SMSG_TRADE_STATUS_EXTENDED);
 	data << (uint8 ) 1;
-	data << (uint32) 7; //I am not sure
+	data << (uint32) 7;
 	data << (uint32) 0;
 	data << (uint32) GetPlayer()->tradeGold;
 	data << (uint32) 0;
 	for(int i=0; i<7; i++)
 	{
-		item = pThis->GetItemBySlot( (uint8) pThis->tradeItems[i] );
-
+		item = (pThis->tradeItems[i] >= 0 ? pThis->GetItemBySlot( (uint8) pThis->tradeItems[i] ) : NULL);
+		
 		data << (uint8) i;
 		if(item)
 		{
@@ -140,14 +140,27 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
 	if ( !GetPlayer()->pTrader ) return;
 
+	GetPlayer()->acceptTrade = true;
+
 	if ( GetPlayer()->pTrader->acceptTrade )
 	{
-		GetPlayer()->acceptTrade = false;
-		GetPlayer()->pTrader->acceptTrade = false;
-
+		data.Initialize(SMSG_TRADE_STATUS);
+		data << (uint32)4;
+		GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+		
 		//Conditions
 		
+		if(false)
+		{
+			return;
+		}
+
 		//Do trade
+			GetPlayer()->setGold( -((int) GetPlayer()->tradeGold) );			
+			GetPlayer()->setGold( GetPlayer()->pTrader->tradeGold );
+
+			GetPlayer()->pTrader->setGold( -((int) GetPlayer()->pTrader->tradeGold) );			
+			GetPlayer()->pTrader->setGold( GetPlayer()->tradeGold );
 
 		//Clear
 		ClearTrade();
@@ -160,6 +173,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 		data.Initialize(SMSG_TRADE_STATUS);
 		data << (uint32)8;
 		SendPacket(&data);
+
+		GetPlayer()->pTrader->pTrader = NULL;
+		GetPlayer()->pTrader = NULL;
+
 	}
 	else
 	{
@@ -167,8 +184,6 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 		data.Initialize(SMSG_TRADE_STATUS);
 		data << (uint32)4;
 		GetPlayer()->pTrader->GetSession()->SendPacket(&data);
-
-		GetPlayer()->acceptTrade = true;
 	}
 
 }
@@ -186,6 +201,7 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
 
 	GetPlayer()->acceptTrade = false;
+
 }
 
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
@@ -324,7 +340,6 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 	Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Gold %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
 
-	WorldPacket data;
 	uint32 gold;
 
 	recvPacket >> gold;
@@ -340,7 +355,6 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 	Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Item %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
 	
-	WorldPacket data;
 	uint8 tradeSlot;
 	uint8 trash;
 	uint8 bagSlot;
@@ -349,7 +363,7 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 	recvPacket >> trash;
 	recvPacket >> bagSlot;
 
-	GetPlayer()->tradeItems[tradeSlot] = (uint32) bagSlot;
+	GetPlayer()->tradeItems[tradeSlot] = (int) bagSlot;
 
 	UpdateTrade();
 }
@@ -359,10 +373,10 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 	Log::getSingleton( ).outDebug( "\nWORLD: Clear Trade Item %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
 
-	//WorldPacket data;
-	//uint8 slot;
-	//recvPacket >> slot;
-	//GetPlayer()->tradeItems[slot] = 0;
+	uint8 slot;
+	recvPacket >> slot;
+	
+	GetPlayer()->tradeItems[slot] = -1;
 
 	UpdateTrade();
 }
