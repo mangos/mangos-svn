@@ -94,7 +94,7 @@ struct skilllinespell
 };
 struct SpellEntry
 {
-    uint32 Id;                     //0
+    uint32 Id;                                    //0
     uint32 School;
     uint32 Category;
     uint32 field4;
@@ -103,17 +103,17 @@ struct SpellEntry
     uint32 AttributesEx;
     uint32 field8;
     uint32 field9;
-    uint32 Targets;               //10
-    uint32 TargetCreatureType;    //11
-    uint32 RequiresSpellFocus;    //12
-    uint32 CasterAuraState;       //13
-    uint32 TargetAuraState;       //14
-    uint32 CastingTimeIndex;      //15
+    uint32 Targets;                               //10
+    uint32 TargetCreatureType;                    //11
+    uint32 RequiresSpellFocus;                    //12
+    uint32 CasterAuraState;                       //13
+    uint32 TargetAuraState;                       //14
+    uint32 CastingTimeIndex;                      //15
     uint32 RecoveryTime;
     uint32 CategoryRecoveryTime;
     uint32 InterruptFlags;
     uint32 AuraInterruptFlags;
-    uint32 ChannelInterruptFlags;  //20
+    uint32 ChannelInterruptFlags;                 //20
     uint32 procFlags;
     uint32 procChance;
     uint32 procCharges;
@@ -123,36 +123,36 @@ struct SpellEntry
     uint32 DurationIndex;
     uint32 powerType;
     uint32 manaCost;
-    uint32 manaCostPerlevel;        //30
+    uint32 manaCostPerlevel;                      //30
     uint32 manaPerSecond;
     uint32 manaPerSecondPerLevel;
     uint32 rangeIndex;
     float speed;
     uint32 modalNextSpell;
-    uint32 field36;                   //36
-    uint32 Totem[2];                  //37-38
-    uint32 Reagent[8];                //39-46
-    uint32 ReagentCount[8];           //47-54
-    uint32 EquippedItemClass;         //55
-    uint32 EquippedItemSubClass;      //56 
-    uint32 Effect[3];                 //57-59
-    uint32 EffectDieSides[3];         //60-62
-    uint32 EffectBaseDice[3];         //63-65 
-    float EffectDicePerLevel[3];      //66-68
-    float EffectRealPointsPerLevel[3];//70-72
-    int32 EffectBasePoints[3];        //73-75
-    uint32 EffectImplicitTargetA[3];  //76-78
-    uint32 EffectImplicitTargetB[3];  //79-81
-    uint32 EffectRadiusIndex[3];      //82-84
-    uint32 EffectApplyAuraName[3];    //85-87
-    uint32 EffectAmplitude[3];        //88-90
-    uint32 Effectunknown[3];          //91-92
-    uint32 EffectChainTarget[3];      //93-95
-    uint32 EffectItemType[3];         //96-98
-    uint32 EffectMiscValue[3];         //99-102
-    uint32 EffectTriggerSpell[3];      //103-105
-    float EffectPointsPerComboPoint[3];//106-108
-    uint32 SpellVisual;                //109 
+    uint32 field36;                               //36
+    uint32 Totem[2];                              //37-38
+    uint32 Reagent[8];                            //39-46
+    uint32 ReagentCount[8];                       //47-54
+    uint32 EquippedItemClass;                     //55
+    uint32 EquippedItemSubClass;                  //56
+    uint32 Effect[3];                             //57-59
+    uint32 EffectDieSides[3];                     //60-62
+    uint32 EffectBaseDice[3];                     //63-65
+    float EffectDicePerLevel[3];                  //66-68
+    float EffectRealPointsPerLevel[3];            //70-72
+    int32 EffectBasePoints[3];                    //73-75
+    uint32 EffectImplicitTargetA[3];              //76-78
+    uint32 EffectImplicitTargetB[3];              //79-81
+    uint32 EffectRadiusIndex[3];                  //82-84
+    uint32 EffectApplyAuraName[3];                //85-87
+    uint32 EffectAmplitude[3];                    //88-90
+    uint32 Effectunknown[3];                      //91-92
+    uint32 EffectChainTarget[3];                  //93-95
+    uint32 EffectItemType[3];                     //96-98
+    uint32 EffectMiscValue[3];                    //99-102
+    uint32 EffectTriggerSpell[3];                 //103-105
+    float EffectPointsPerComboPoint[3];           //106-108
+    uint32 SpellVisual;                           //109
     uint32 field110;
     uint32 SpellIconID;
     uint32 activeIconID;
@@ -208,23 +208,23 @@ struct Trainerspell
     uint32 skilline1;
     uint32 skilline2;
     uint32 skilline3;
-	uint32 skilline4;
-	uint32 skilline5;
-	uint32 skilline6;
-	uint32 skilline7;
-	uint32 skilline8;
-	uint32 skilline9;
-	uint32 skilline10;
-	uint32 skilline11;
-	uint32 skilline12;
-	uint32 skilline13;
-	uint32 skilline14;
-	uint32 skilline15;
-	uint32 skilline16;
-	uint32 skilline17;
-	uint32 skilline18;
-	uint32 skilline19;
-	uint32 skilline20;
+    uint32 skilline4;
+    uint32 skilline5;
+    uint32 skilline6;
+    uint32 skilline7;
+    uint32 skilline8;
+    uint32 skilline9;
+    uint32 skilline10;
+    uint32 skilline11;
+    uint32 skilline12;
+    uint32 skilline13;
+    uint32 skilline14;
+    uint32 skilline15;
+    uint32 skilline16;
+    uint32 skilline17;
+    uint32 skilline18;
+    uint32 skilline19;
+    uint32 skilline20;
     uint32 maxlvl;
     uint32 charclass;
 };
@@ -263,62 +263,62 @@ struct SpellDuration
 //Made by Andre2k2
 struct AreaTableEntry
 {
-	uint32 ID;
-	uint32 map;
-	uint32 zone;
-	uint32 exploreFlag;
-	uint32 ukn1;
-	uint32 ukn2;
-	uint32 ukn3;
-	uint32 ukn4;
-	uint32 ukn5;
-	uint32 ukn6;
-	uint32 ukn7;
-	uint32 name;
-	uint32 ukn8;
-	uint32 ukn9;
-	uint32 ukn10;
-	uint32 ukn11;
-	uint32 ukn12;
-	uint32 ukn13;
-	uint32 ukn14;
-	uint32 ukn15;
-	uint32 ukn16;
+    uint32 ID;
+    uint32 map;
+    uint32 zone;
+    uint32 exploreFlag;
+    uint32 ukn1;
+    uint32 ukn2;
+    uint32 ukn3;
+    uint32 ukn4;
+    uint32 ukn5;
+    uint32 ukn6;
+    uint32 ukn7;
+    uint32 name;
+    uint32 ukn8;
+    uint32 ukn9;
+    uint32 ukn10;
+    uint32 ukn11;
+    uint32 ukn12;
+    uint32 ukn13;
+    uint32 ukn14;
+    uint32 ukn15;
+    uint32 ukn16;
 };
 
 //Made by Andre2k2
 struct WorldMapAreaEntry
 {
     uint32 ID;
-	uint32 map;
-	uint32 areaTableID;
-	uint32 name;
-	float  areaVertexY1;
-	float  areaVertexY2;
-	float  areaVertexX1;
-	float  areaVertexX2;
+    uint32 map;
+    uint32 areaTableID;
+    uint32 name;
+    float  areaVertexY1;
+    float  areaVertexY2;
+    float  areaVertexX1;
+    float  areaVertexX2;
 };
 
 //Made by Andre2k2
 struct WorldMapOverlayEntry
 {
     uint32 ID;
-	uint32 worldMapAreaID;
-	uint32 areaTableID;
-	uint32 unk1;
-	uint32 unk2;
-	uint32 unk3;
-	uint32 unk4;
-	uint32 unk5;
-	uint32 name;
-	uint32 areaW; //in pixels 2x
-	uint32 areaH; //in pixels 2x
-	uint32 unk6;  //I think columns #12, #13, #14 and #15
-	uint32 unk7;  //are some kind of positions, but i did not
-	uint32 unk8;  //discover what exactly.
-	uint32 unk9;
-	uint32 drawX; //in pixels
-	uint32 drawY; //in pixels
+    uint32 worldMapAreaID;
+    uint32 areaTableID;
+    uint32 unk1;
+    uint32 unk2;
+    uint32 unk3;
+    uint32 unk4;
+    uint32 unk5;
+    uint32 name;
+    uint32 areaW;                                 //in pixels 2x
+    uint32 areaH;                                 //in pixels 2x
+    uint32 unk6;                                  //I think columns #12, #13, #14 and #15
+    uint32 unk7;                                  //are some kind of positions, but i did not
+    uint32 unk8;                                  //discover what exactly.
+    uint32 unk9;
+    uint32 drawX;                                 //in pixels
+    uint32 drawY;                                 //in pixels
 };
 
 float GetRadius(SpellRadius *radius);

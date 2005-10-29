@@ -51,7 +51,7 @@ class DataStore : public Singleton<DataStore<T> >
         {
             return d.GetRows();
         }
-		void LoadDataStore(const char* filename)
+        void LoadDataStore(const char* filename)
         {
             d.Load(filename);
         }

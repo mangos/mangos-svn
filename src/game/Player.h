@@ -124,17 +124,17 @@ struct PlayerCreateInfo
     std::list<uint8> item_slot;
     std::list<uint16> spell;
     std::list<uint16> skill[3];
-	std::list<uint16> action[4];
+    std::list<uint16> action[4];
 };
 
 struct Areas
 {
-	uint32 areaID;
-	uint32 areaFlag;
-	float x1;
-	float x2;
-	float y1;
-	float y2;
+    uint32 areaID;
+    uint32 areaFlag;
+    float x1;
+    float x2;
+    float y1;
+    float y2;
 };
 
 enum PlayerMovementType
@@ -251,7 +251,7 @@ class WorldSession;
 class Player : public Unit
 {
     friend class WorldSession;
-public:
+    public:
         Player ( );
         ~Player ( );
 
@@ -315,7 +315,7 @@ public:
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
-        bool removeSpell(uint16 spell_id); //add by vendy 2005/10/9 22:43
+        bool removeSpell(uint16 spell_id);        //add by vendy 2005/10/9 22:43
         inline std::list<struct spells> getSpellList() { return m_spells; };
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
@@ -327,42 +327,42 @@ public:
             m_resurrectMana = mana;
         };
 
-		uint32 getFaction()
-		{
-			return m_faction;
-		};
+        uint32 getFaction()
+        {
+            return m_faction;
+        };
 
-		void setGold(int gold)
-		{
-			uint32 moneyuser = GetUInt32Value(PLAYER_FIELD_COINAGE);
-			SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
-		}
+        void setGold(int gold)
+        {
+            uint32 moneyuser = GetUInt32Value(PLAYER_FIELD_COINAGE);
+            SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
+        }
 
         //this sets the faction horde, alliance or NoFaction in case of any bug
-		//Or sets a faction passed by parameter in case of race is < 0
-		void setFaction(uint8 race, uint32 faction)
-		{
-			//Set faction
-			if(race > 0)
-			{
-                 m_faction = NoFaction;
-                 switch(race)
-                 {
-			         case HUMAN:
-                     case DWARF:
-		             case NIGHTELF:
-	                 case GNOME: 
-			             m_faction = Alliance; break;
-		             case ORC:
-		             case UNDEAD_PLAYER:
-		             case TAUREN:
-		             case TROLL:
-                         m_faction = Horde; break;
-	             }
-			} else m_faction = faction;
+        //Or sets a faction passed by parameter in case of race is < 0
+        void setFaction(uint8 race, uint32 faction)
+        {
+            //Set faction
+            if(race > 0)
+            {
+                m_faction = NoFaction;
+                switch(race)
+                {
+                    case HUMAN:
+                    case DWARF:
+                    case NIGHTELF:
+                    case GNOME:
+                        m_faction = Alliance; break;
+                    case ORC:
+                    case UNDEAD_PLAYER:
+                    case TAUREN:
+                    case TROLL:
+                        m_faction = Horde; break;
+                }
+            } else m_faction = faction;
 
-			SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
-		};
+            SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
+        };
 
         //action bar
         inline std::list<struct actions> getActionList() { return m_actions; };
@@ -382,22 +382,21 @@ public:
         void UnSetInvited() { m_isInvited = false; }
         void UnSetInGroup() { m_isInGroup = false; }
 
-		//duel 
-		void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
-		void SetInDuel(const bool &val) { m_isInDuel = val; }
-		void SetDuelSenderGUID(const uint64 &guid) { m_duelSenderGUID = guid; }
-		
+        //duel
+        void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
+        void SetInDuel(const bool &val) { m_isInDuel = val; }
+        void SetDuelSenderGUID(const uint64 &guid) { m_duelSenderGUID = guid; }
 
         // Deadknight isGroupMember(plyr)
         bool IsGroupMember(Player *plyr);
 
         // Items
-	    void UpdateSlot(uint8 slot)
-	    {
-	    	//Isso eh pra atualizar o item... evita q ele fique cinza e inacessivel
+        void UpdateSlot(uint8 slot)
+        {
+            //Isso eh pra atualizar o item... evita q ele fique cinza e inacessivel
             Item* Up = RemoveItemFromSlot(slot);
             if (Up != NULL) AddItemToSlot(slot, Up);
-     	}
+        }
         void SwapItemSlots(uint8 srcslot, uint8 dstslot);
         Item* GetItemBySlot(uint8 slot) const
         {
@@ -432,9 +431,9 @@ public:
         void DeleteFromDB();
 
 #ifndef __NO_PLAYERS_ARRAY__
-		// UQ1: Positional Array Update...
-		void SetPlayerPositionArray();
-#endif //__NO_PLAYERS_ARRAY__
+        // UQ1: Positional Array Update...
+        void SetPlayerPositionArray();
+#endif                                        //__NO_PLAYERS_ARRAY__
 
         // Death Stuff
         void SpawnCorpseBody();
@@ -454,9 +453,9 @@ public:
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);
         void CleanupChannels();
-		
-				// friends stuff
-				void BroadcastToFriends(std::string msg);
+
+        // friends stuff
+        void BroadcastToFriends(std::string msg);
 
         // skilllines
         bool HasSkillLine(uint32 id);
@@ -468,69 +467,68 @@ public:
         void SetDontMove(bool dontMove);
         bool GetDontMove() { return m_dontMove; }
 
-
 #ifdef ENABLE_GRID_SYSTEM
-    typedef HM_NAMESPACE::hash_map<uint32, Object *> InRangeObjectsMapType;
-    typedef HM_NAMESPACE::hash_map<uint32, Unit *> InRangeUnitsMapType;
+        typedef HM_NAMESPACE::hash_map<uint32, Object *> InRangeObjectsMapType;
+        typedef HM_NAMESPACE::hash_map<uint32, Unit *> InRangeUnitsMapType;
 
-    Unit* GetInRangeUnit(uint64 guid)
-    {
-	InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(guid);
-	return(iter == i_inRangeUnits.end() ? NULL : iter->second);
-    }
+        Unit* GetInRangeUnit(uint64 guid)
+        {
+            InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(guid);
+            return(iter == i_inRangeUnits.end() ? NULL : iter->second);
+        }
 
-    Object* GetInRangeObject(uint64 guid)
-    {
-	InRangeObjectsMapType::iterator iter = i_inRangeObjects.find(guid);
-	return(iter == i_inRangeObjects.end() ? NULL : iter->second);
-    }
+        Object* GetInRangeObject(uint64 guid)
+        {
+            InRangeObjectsMapType::iterator iter = i_inRangeObjects.find(guid);
+            return(iter == i_inRangeObjects.end() ? NULL : iter->second);
+        }
 
-    void SetCoordinate(const float &x, const float &y, const float &z, const float &orientation);
-    void AddInRangeObject(Object *obj) { i_inRangeObjects[obj->GetGUID()] = obj; }
-    bool RemoveInRangeObject(Object *obj) 
-    {
-	InRangeObjectsMapType::iterator iter= i_inRangeObjects.find(obj->GetGUID());
-	if( iter != i_inRangeObjects.end() )
-	{
-	    i_inRangeObjects.erase(iter);
-	    return true;
-	}
-	return false;
-    }
-    void AddInRangeObject(Unit *obj) { i_inRangeUnits[obj->GetGUID()] = obj; }
-    bool RemoveInRangeObject(Unit *obj)
-    {
-	InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(obj->GetGUID());
-	if( iter != i_inRangeUnits.end() )
-	{
-	    i_inRangeUnits.erase(iter);
-	    return true;
-	}
-	return false;
-    }
+        void SetCoordinate(const float &x, const float &y, const float &z, const float &orientation);
+        void AddInRangeObject(Object *obj) { i_inRangeObjects[obj->GetGUID()] = obj; }
+        bool RemoveInRangeObject(Object *obj)
+        {
+            InRangeObjectsMapType::iterator iter= i_inRangeObjects.find(obj->GetGUID());
+            if( iter != i_inRangeObjects.end() )
+            {
+                i_inRangeObjects.erase(iter);
+                return true;
+            }
+            return false;
+        }
+        void AddInRangeObject(Unit *obj) { i_inRangeUnits[obj->GetGUID()] = obj; }
+        bool RemoveInRangeObject(Unit *obj)
+        {
+            InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(obj->GetGUID());
+            if( iter != i_inRangeUnits.end() )
+            {
+                i_inRangeUnits.erase(iter);
+                return true;
+            }
+            return false;
+        }
 
-    bool isInRange(Object *obj) const { return isInRangeObject(obj->GetGUID()); }
-    bool isInRange(Unit *obj) const { return isInRangeUnit(obj->GetGUID()); }
-    bool isInRangeObject(uint64 guid) const { return (i_inRangeObjects.find(guid) != i_inRangeObjects.end()); }
-    bool isInRangeUnit(uint64 guid) const { return (i_inRangeUnits.find(guid) != i_inRangeUnits.end()); }
-    InRangeObjectsMapType::iterator InRangeObjectsBegin(void) { return i_inRangeObjects.begin(); }
-    InRangeObjectsMapType::iterator InRangeObjectsEnd(void) { return i_inRangeObjects.end(); }
-    InRangeUnitsMapType::iterator InRangeUnitsBegin(void) { return i_inRangeUnits.begin(); }
-    InRangeUnitsMapType::iterator InRangeUnitsEnd(void) { return i_inRangeUnits.end(); }
-    void DealWithSpellDamage(DynamicObject &);
-    bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
-    void SendMessageToSet(WorldPacket *data, bool self);
-    
-    // methods that the user updates his in range objects
-    void UpdateInRange(UpdateData &);
-    void MoveOutOfRange(Player &player);
-    void MoveInRange(Player &player);
-    void DestroyInRange(void);
+        bool isInRange(Object *obj) const { return isInRangeObject(obj->GetGUID()); }
+        bool isInRange(Unit *obj) const { return isInRangeUnit(obj->GetGUID()); }
+        bool isInRangeObject(uint64 guid) const { return (i_inRangeObjects.find(guid) != i_inRangeObjects.end()); }
+        bool isInRangeUnit(uint64 guid) const { return (i_inRangeUnits.find(guid) != i_inRangeUnits.end()); }
+        InRangeObjectsMapType::iterator InRangeObjectsBegin(void) { return i_inRangeObjects.begin(); }
+        InRangeObjectsMapType::iterator InRangeObjectsEnd(void) { return i_inRangeObjects.end(); }
+        InRangeUnitsMapType::iterator InRangeUnitsBegin(void) { return i_inRangeUnits.begin(); }
+        InRangeUnitsMapType::iterator InRangeUnitsEnd(void) { return i_inRangeUnits.end(); }
+        void DealWithSpellDamage(DynamicObject &);
+        bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
+        void SendMessageToSet(WorldPacket *data, bool self);
+
+        // methods that the user updates his in range objects
+        void UpdateInRange(UpdateData &);
+        void MoveOutOfRange(Player &player);
+        void MoveInRange(Player &player);
+        void DestroyInRange(void);
 #endif
-	//Explore Area System
-	void CheckExploreSystem(void);
-	// Initialize the possible areas that player will discover.
-    void InitExploreSystem(void);
+        //Explore Area System
+        void CheckExploreSystem(void);
+        // Initialize the possible areas that player will discover.
+        void InitExploreSystem(void);
 
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
@@ -557,14 +555,14 @@ public:
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
 
-		std::list<struct Areas> areas;
+        std::list<struct Areas> areas;
 
         uint64 m_lootGuid;
 
         std::string m_name;                       // max 21 character name
-		uint32 m_race;
-		uint32 m_class;
-		uint32 m_faction;
+        uint32 m_race;
+        uint32 m_class;
+        uint32 m_faction;
 
         uint8 m_outfitId;
 
@@ -602,10 +600,10 @@ public:
         bool m_isInGroup;
         bool m_isInvited;
 
-		//If Player is in combat
+        //If Player is in combat
         bool inCombat;
-	    //Time to logout after a combat
-	    int logoutDelay;
+        //Time to logout after a combat
+        int logoutDelay;
 
         // items the player has bid on
         std::list<bidentry*> m_bids;
@@ -635,27 +633,25 @@ public:
 
         bool m_dontMove;
 
-		Player *pTrader;
-		bool acceptTrade;
-		int tradeItems[7];
-		uint32 tradeGold;
+        Player *pTrader;
+        bool acceptTrade;
+        int tradeItems[7];
+        uint32 tradeGold;
 
-		//duel 
-		uint64 m_duelGUID;
-		bool   m_isInDuel;
-		uint64 m_duelSenderGUID;
-
+        //duel
+        uint64 m_duelGUID;
+        bool   m_isInDuel;
+        uint64 m_duelSenderGUID;
 
 #ifdef ENABLE_GRID_SYSTEM
-    InRangeObjectsMapType i_inRangeObjects;
-    InRangeUnitsMapType i_inRangeUnits;
+        InRangeObjectsMapType i_inRangeObjects;
+        InRangeUnitsMapType i_inRangeUnits;
 #endif
 
-	time_t m_nextThinkTime;
+        time_t m_nextThinkTime;
 
 };
 
 // UQ1: Defined in Player.cpp... CHECKME: Move somewhere else???
 int irand(int min, int max);
-
 #endif

@@ -88,9 +88,9 @@ struct MANGOS_DLL_DECL GridPair
     bool operator!=(const GridPair &obj) const { return !operator==(obj); }
     GridPair& operator=(const GridPair &obj) 
     {
-	this->~GridPair();
-	new (this) GridPair(obj);
-	return *this;
+    this->~GridPair();
+    new (this) GridPair(obj);
+    return *this;
     }
 
     uint32 x_coord;
@@ -148,13 +148,13 @@ public:
      */
     void SetTimer(uint32 t) 
     { 
-	i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
+    i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
     }
 
     inline bool IsActiveGrid(Object *obj) const
     {
-	GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
-	return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
+    GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
+    return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
     }
 
     /// Unloads the given grid
@@ -165,7 +165,7 @@ public:
 
     void ResetGridExpiry(GridInfo &info) const
     {
-	info.i_timer.Reset(i_gridExpiry);
+    info.i_timer.Reset(i_gridExpiry);
     }
 
     time_t GetGridExpiry(void) const { return i_gridExpiry; }

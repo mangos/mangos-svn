@@ -29,8 +29,7 @@ LootMgr::LootMgr()
 {
 }
 
-void
-LootMgr::LoadLootTables()
+void LootMgr::LoadLootTables()
 {    
     _populateLootTemplate("creatureloot", i_creaturesLoot);
     _populateLootTemplate("gameobj_loot", i_gameObjectsLoot);
@@ -49,8 +48,7 @@ LootMgr::~LootMgr()
 }
 
 
-void
-LootMgr::_populateLootTemplate(const char *loot_table_name, LootTable &loot_table)
+void LootMgr::_populateLootTemplate(const char *loot_table_name, LootTable &loot_table)
 {
   // Note the item should be entryid,itemid,percentchance..
     std::stringstream id_query;
@@ -60,40 +58,40 @@ LootMgr::_populateLootTemplate(const char *loot_table_name, LootTable &loot_tabl
     
     if( result.get() != NULL )
     {      
-	int curId = -1;
-	LootList *table = NULL;
-	barGoLink bar( result->GetRowCount() );
-	do 
-	{	 
-	    bar.step();
-	    Field *fields = result->Fetch();
-	    int entry_id = fields[0].GetUInt32(); 
-	    
-	    if( entry_id != curId )
-	    {
-		LootTable::iterator next_table = loot_table.find(entry_id);
-		curId = entry_id;
+    int curId = -1;
+    LootList *table = NULL;
+    barGoLink bar( result->GetRowCount() );
+    do 
+    {     
+        bar.step();
+        Field *fields = result->Fetch();
+        int entry_id = fields[0].GetUInt32(); 
+        
+        if( entry_id != curId )
+        {
+        LootTable::iterator next_table = loot_table.find(entry_id);
+        curId = entry_id;
 
-		// Note, doing this is faster than each select by a where clause
-		// or order the selection.  The penalty is one hash search per 
-		// key change which is faster than searching or
-		// a where clause in each key.  I'll make the loading faster
-		// by indexing
-		if( next_table == loot_table.end() )
-		{
-		    ++count;
-		    table = new LootList;
-		    loot_table[curId] = table; // next table
-		}
-		else
-		{
-		    table = next_table->second;
-		}
-	    }
-	    
-	    table->push_back(LootItem(fields[1].GetUInt32(), fields[2].GetFloat()*100));
-	    
-	} while( result->NextRow() );
+        // Note, doing this is faster than each select by a where clause
+        // or order the selection.  The penalty is one hash search per 
+        // key change which is faster than searching or
+        // a where clause in each key.  I'll make the loading faster
+        // by indexing
+        if( next_table == loot_table.end() )
+        {
+            ++count;
+            table = new LootList;
+            loot_table[curId] = table; // next table
+        }
+        else
+        {
+            table = next_table->second;
+        }
+        }
+        
+        table->push_back(LootItem(fields[1].GetUInt32(), fields[2].GetFloat()*100));
+        
+    } while( result->NextRow() );
     }
     
     sLog.outDebug("Loaded %d loot templates for table %s", count, loot_table_name);

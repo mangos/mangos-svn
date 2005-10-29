@@ -37,92 +37,89 @@ void BuildDuelPacket(uint64 ObjID,uint64 Cast, uint64 Target)
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
 
-	sLog.outString(	"HandleDuelAcceptedOpcode.\n" );
+    sLog.outString( "HandleDuelAcceptedOpcode.\n" );
 
-	//if you want to  get this handle ,	learn spell	7266 first,	
-	//I	don't how to do	,Please	FIX	ME
-	uint64 guid;
-	
-	recvPacket >> guid;
+    //if you want to  get this handle ,	learn spell	7266 first,
+    //I	don't how to do	,Please	FIX	ME
+    uint64 guid;
 
-	Player *pl;
-	Player *plTarget;
-	WorldPacket	data;
-    
-	WorldPacket	packet,packetR;
-	UpdateData updata;
-	
-	pl	   = GetPlayer(); // get duel sender
-	plTarget = objmgr.GetPlayer(pl->m_duelGUID);
+    recvPacket >> guid;
+
+    Player *pl;
+    Player *plTarget;
+    WorldPacket data;
+
+    WorldPacket packet,packetR;
+    UpdateData updata;
+
+    pl     = GetPlayer();                         // get duel sender
+    plTarget = objmgr.GetPlayer(pl->m_duelGUID);
     //pl->build
 
-	if(pl->m_duelSenderGUID == pl->GetGUID())
-	{
+    if(pl->m_duelSenderGUID == pl->GetGUID())
+    {
         pl->BuildCreateUpdateBlockForPlayer( &updata, plTarget );
         updata.BuildPacket(&packet);
         plTarget->GetSession()->SendPacket( &packet );
 
-		updata.Clear;
+        updata.Clear;
 
         plTarget->BuildCreateUpdateBlockForPlayer( &updata, pl );
         updata.BuildPacket(&packet);
         pl->GetSession()->SendPacket( &packet );
 
-	    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-	    data <<	(uint64)guid; 
-	    pl->GetSession()->SendPacket(&data);  
-		plTarget->GetSession()->SendPacket(&data);	
+        data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+        data << (uint64)guid;
+        pl->GetSession()->SendPacket(&data);
+        plTarget->GetSession()->SendPacket(&data);
 
-	}else{
-		data.Initialize(SMSG_PET_BROKEN	| CMSG_LEARN_SPELL);
-	    data <<	(uint64)0xbb8; 
-	    pl->GetSession()->SendPacket(&data);	
-	    plTarget->GetSession()->SendPacket(&data);	
-	
-	}
+    }
+    else
+    {
+        data.Initialize(SMSG_PET_BROKEN | CMSG_LEARN_SPELL);
+        data << (uint64)0xbb8;
+        pl->GetSession()->SendPacket(&data);
+        plTarget->GetSession()->SendPacket(&data);
 
-	pl->m_isInDuel = true;
-	plTarget->m_isInDuel = true;
+    }
+
+    pl->m_isInDuel = true;
+    plTarget->m_isInDuel = true;
 
 }
+
+
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
 
-	sLog.outString(	"HandleDuelCancelledOpcode.\n" );
+    sLog.outString( "HandleDuelCancelledOpcode.\n" );
 
-	uint64 guid;
-	Player *pl;
-	Player *plTarget;
-	WorldPacket	data;
+    uint64 guid;
+    Player *pl;
+    Player *plTarget;
+    WorldPacket data;
 
-	recvPacket >> guid;   
+    recvPacket >> guid;
 
-	pl		 = GetPlayer();	//get player
-	plTarget = objmgr.GetPlayer(pl->m_duelGUID);
+    pl       = GetPlayer();                       //get player
+    plTarget = objmgr.GetPlayer(pl->m_duelGUID);
 
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-	data <<	(uint64)guid;		
-	pl->GetSession()->SendPacket(&data);
-	plTarget->GetSession()->SendPacket(&data);
+    data << (uint64)guid;
+    pl->GetSession()->SendPacket(&data);
+    plTarget->GetSession()->SendPacket(&data);
 
-	data.Initialize(SMSG_DESTROY_OBJECT);
-	data <<	(uint64)guid;		
-	pl->GetSession()->SendPacket(&data);
-	plTarget->GetSession()->SendPacket(&data);
+    data.Initialize(SMSG_DESTROY_OBJECT);
+    data << (uint64)guid;
+    pl->GetSession()->SendPacket(&data);
+    plTarget->GetSession()->SendPacket(&data);
 
-	data.Initialize(SMSG_DUEL_COMPLETE);
-	data <<	(uint8)0;		// Duel	Cancel
-	pl->GetSession()->SendPacket(&data);
-	plTarget->GetSession()->SendPacket(&data);
+    data.Initialize(SMSG_DUEL_COMPLETE);
+    data << (uint8)0;                             // Duel	Cancel
+    pl->GetSession()->SendPacket(&data);
+    plTarget->GetSession()->SendPacket(&data);
 
-	pl->m_isInDuel = false;
-	plTarget->m_isInDuel = false;
+    pl->m_isInDuel = false;
+    plTarget->m_isInDuel = false;
 
 }
-
-
-
-
-
-
-

@@ -54,11 +54,11 @@ class WorldSession
         void SetSocket(WorldSocket *sock);
         void SetPlayer(Player *plr) { _player = plr; }
 
-		bool isLogingOut()
-		{
-			if (_logoutTime) return true;
-			else return false;
-		}
+        bool isLogingOut()
+        {
+            if (_logoutTime) return true;
+            else return false;
+        }
         void LogoutRequest(time_t requestTime)
         {
             _logoutTime = requestTime;
@@ -117,7 +117,7 @@ class WorldSession
         // void HandleJoinChannelOpcode(WorldPacket& recvPacket);
         // void HandleLeaveChannelOpcode(WorldPacket& recvPacket);
         void HandleGameObjectUseOpcode(WorldPacket& recPacket);
-	void HandleMeetingStoneInfo(WorldPacket& recPacket);
+        void HandleMeetingStoneInfo(WorldPacket& recPacket);
 
         /// Opcode implemented in QueryHandler.cpp:
         void HandleNameQueryOpcode(WorldPacket& recvPacket);
@@ -136,10 +136,10 @@ class WorldSession
         void HandleMovementOpcodes(WorldPacket& recvPacket);
         void HandleFallOpcode( WorldPacket & recv_data );
         void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
-	void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
+        void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
-	/// Battlefield status
-	void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);
+        /// Battlefield status
+        void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);
 
         /// Opcodes implemented in GroupHandler.cpp:
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);
@@ -168,24 +168,24 @@ class WorldSession
         void HandleSpiritHealerActivateOpcode(WorldPacket& recvPacket);
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
-		
-		// Duel opcodes
-		void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
-		void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
+        
+        // Duel opcodes
+        void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
+        void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
-		//Trade opcodes (TradeHandler.cpp)
-		void ClearTrade();
-		void UpdateTrade();
-		void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
-		void HandleBeginTradeOpcode(WorldPacket& recvPacket);
-		void HandleBusyTradeOpcode(WorldPacket& recvPacket);
-		void HandleCancelTradeOpcode(WorldPacket& recvPacket);
-		void HandleClearTradeItemOpcode(WorldPacket& recvPacket);
-		void HandleIgnoreTradeOpcode(WorldPacket& recvPacket);
-		void HandleInitiateTradeOpcode(WorldPacket& recvPacket);
-		void HandleSetTradeGoldOpcode(WorldPacket& recvPacket);
-		void HandleSetTradeItemOpcode(WorldPacket& recvPacket);
-		void HandleUnacceptTradeOpcode(WorldPacket& recvPacket);
+        //Trade opcodes (TradeHandler.cpp)
+        void ClearTrade();
+        void UpdateTrade();
+        void HandleAcceptTradeOpcode(WorldPacket& recvPacket);
+        void HandleBeginTradeOpcode(WorldPacket& recvPacket);
+        void HandleBusyTradeOpcode(WorldPacket& recvPacket);
+        void HandleCancelTradeOpcode(WorldPacket& recvPacket);
+        void HandleClearTradeItemOpcode(WorldPacket& recvPacket);
+        void HandleIgnoreTradeOpcode(WorldPacket& recvPacket);
+        void HandleInitiateTradeOpcode(WorldPacket& recvPacket);
+        void HandleSetTradeGoldOpcode(WorldPacket& recvPacket);
+        void HandleSetTradeItemOpcode(WorldPacket& recvPacket);
+        void HandleUnacceptTradeOpcode(WorldPacket& recvPacket);
 
         // Auction House opcodes
         void HandleAuctionHelloOpcode(WorldPacket& recvPacket);
@@ -266,9 +266,9 @@ class WorldSession
         void HandleChannelAnnounce(WorldPacket& recvPacket);
         void HandleChannelModerate(WorldPacket& recvPacket);
 
-	/// cinema
+        /// cinema
         void HandleCompleteCinema(WorldPacket& recvPacket);
-	void HandleNextCinematicCamera(WorldPacket& recvPacket);
+        void HandleNextCinematicCamera(WorldPacket& recvPacket);
 
         /// Helper functions
         void SetNpcFlagsForTalkToQuest(const uint64& guid, const uint64& targetGuid);

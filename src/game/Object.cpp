@@ -164,7 +164,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 #ifndef ENABLE_GRID_SYSTEM
             Player *plyr = objmgr.GetObject<Player>(GetGUID());
 #else
-	    Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
+        Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
 #endif
             // if player exists and player and target is in group and player is dead
             if(plyr && plyr!=target && plyr->IsInGroup() && target->IsInGroup() && plyr->isDead())
@@ -263,7 +263,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 #ifndef ENABLE_GRID_SYSTEM
             Player *plyr = objmgr.GetObject<Player>(GetGUID());
 #else
-	    Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
+        Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
 #endif
             // if player and player is in group of target update
             if(plyr && plyr->IsGroupMember(target))
@@ -720,7 +720,7 @@ void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
 #ifndef ENABLE_GRID_SYSTEM
             m_mapMgr->ObjectUpdated(this);
 #else
-	    ObjectAccessor::Instance().AddUpdateObject(this);
+        ObjectAccessor::Instance().AddUpdateObject(this);
 #endif
             m_objectUpdated = true;
         }
@@ -745,7 +745,7 @@ void Object::SetUInt64Value( const uint16 &index, const uint64 &value )
 #ifndef ENABLE_GRID_SYSTEM
             m_mapMgr->ObjectUpdated(this);
 #else
-	    ObjectAccessor::Instance().AddUpdateObject(this);
+        ObjectAccessor::Instance().AddUpdateObject(this);
 #endif
             m_objectUpdated = true;
         }
@@ -768,7 +768,7 @@ void Object::SetFloatValue( const uint16 &index, const float &value )
 #ifndef ENABLE_GRID_SYSTEM
             m_mapMgr->ObjectUpdated(this);
 #else
-	    ObjectAccessor::Instance().AddUpdateObject(this);
+        ObjectAccessor::Instance().AddUpdateObject(this);
 #endif
             m_objectUpdated = true;
         }
@@ -790,7 +790,7 @@ void Object::SetFlag( const uint16 &index, uint32 newFlag )
 #ifndef ENABLE_GRID_SYSTEM
             m_mapMgr->ObjectUpdated(this);
 #else
-	    ObjectAccessor::Instance().AddUpdateObject(this);
+        ObjectAccessor::Instance().AddUpdateObject(this);
 #endif
             m_objectUpdated = true;
         }
@@ -812,7 +812,7 @@ void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
 #ifndef ENABLE_GRID_SYSTEM
             m_mapMgr->ObjectUpdated(this);
 #else
-	    ObjectAccessor::Instance().AddUpdateObject(this);
+        ObjectAccessor::Instance().AddUpdateObject(this);
 #endif
             m_objectUpdated = true;
         }

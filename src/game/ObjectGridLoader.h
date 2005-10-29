@@ -56,7 +56,7 @@ public:
 
     void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
     {
-	/* we don't load in dynamic objects.. we add it in dynamically */
+    /* we don't load in dynamic objects.. we add it in dynamically */
     }
 
 private:

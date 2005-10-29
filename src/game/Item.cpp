@@ -46,7 +46,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
     m_itemProto = objmgr.GetItemPrototype( itemid );
     ASSERT(m_itemProto);
 
-	//for(int i=5;i<m_valuesCount;i++)
+    //for(int i=5;i<m_valuesCount;i++)
     //     SetUInt32Value( i, 1 );
 
     SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
@@ -94,7 +94,7 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if(result==NULL)
         return;
-    //	ASSERT(result);
+    //ASSERT(result);
 
     Field *fields = result->Fetch();
 

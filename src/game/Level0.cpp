@@ -382,8 +382,8 @@ bool ChatHandler::HandleGMListCommand(const char* args)
     ObjectMgr::PlayerMap::const_iterator itr;
     for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
 #else
-	ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
-	for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
+    for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
 #endif
     {
         if(itr->second->GetSession()->GetSecurity())

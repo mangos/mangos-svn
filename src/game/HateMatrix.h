@@ -32,22 +32,22 @@ struct MANGOS_DLL_DECL HateMatrix
     // accessor
     inline uint32 operator[](Unit *unit) const
     {
-	HateMatrixMapType::const_iterator iter = i_hateValues.find(unit);
-	return (iter == i_hateValues.end() ? 0 : iter->second);
+    HateMatrixMapType::const_iterator iter = i_hateValues.find(unit);
+    return (iter == i_hateValues.end() ? 0 : iter->second);
     }
 
     // force the unit's hate values to exist in the matrix
     inline uint32& operator[](Unit *unit)
     {
-	HateMatrixMapType::iterator iter = i_hateValues.find(unit);
-	if( iter == i_hateValues.end() )
-	{
-	    std::pair<HateMatrixMapType::iterator, bool> p = i_hateValues.insert( HateMatrixMapType::value_type(unit, 0) );
-	    assert(p.second);
-	    iter = p.first;
-	}
+    HateMatrixMapType::iterator iter = i_hateValues.find(unit);
+    if( iter == i_hateValues.end() )
+    {
+        std::pair<HateMatrixMapType::iterator, bool> p = i_hateValues.insert( HateMatrixMapType::value_type(unit, 0) );
+        assert(p.second);
+        iter = p.first;
+    }
 
-	return iter->second;
+    return iter->second;
     }
 
 
@@ -57,14 +57,14 @@ struct MANGOS_DLL_DECL HateMatrix
     // remove a unit's hate value
     inline void RemoveValue(Unit *unit)
     {
-	HateMatrixMapType::iterator iter = i_hateValues.find(unit);
-	if( iter != i_hateValues.end() )
-	    i_hateValues.erase( iter );
+    HateMatrixMapType::iterator iter = i_hateValues.find(unit);
+    if( iter != i_hateValues.end() )
+        i_hateValues.erase( iter );
     }
 
     inline void AddValue(Unit *unit, uint32 val)
     {
-	(*this)[unit] += val;
+    (*this)[unit] += val;
     }
     
 private:

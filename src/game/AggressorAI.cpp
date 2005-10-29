@@ -20,28 +20,23 @@
 
 #include "AggressorAI.h"
 
-void 
-AggressorAI::MoveInLineOfSight(Unit *unit)
+void AggressorAI::MoveInLineOfSight( Unit *unit )
 {
 }
 
-void 
-AggressorAI::AttackStart(Unit *)
+void AggressorAI::AttackStart( Unit * )
 {
 }
 
-void
-AggressorAI::AttackStop(Unit *)
+void AggressorAI::AttackStop( Unit * )
 {
 }
 
-void
-AggressorAI::Update(uint32 t_diff, Unit *)
+void AggressorAI::Update( uint32 t_diff, Unit * )
 {
 }
 
-void
-AggressorAI::HealBy(Unit *healer, uint32 amount_healed)
+void AggressorAI::HealBy( Unit *healer, uint32 amount_healed )
 {
 }
 

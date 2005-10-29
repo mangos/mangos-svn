@@ -37,9 +37,9 @@
 void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-	UpdateData upd;
+    UpdateData upd;
     uint8 srcslot, dstslot;
-	//    uint32 srcslot, dstslot;
+    //uint32 srcslot, dstslot;
 
     recv_data >> srcslot >> dstslot;
 
@@ -49,19 +49,19 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     //if (dstslot >= INVENTORY_SLOT_BAG_1 && dstslot <= INVENTORY_SLOT_BAG_4)
     //    dstslot = srcslot;
 
-	// these are then bankbag slots...ignore them for now
+    // these are then bankbag slots...ignore them for now
     //if (dstslot >= 63 && dstslot <= 69)
     //    dstslot = srcslot;
 
     Item * dstitem = GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = GetPlayer()->GetItemBySlot(srcslot);
 
-	Log::getSingleton().outDetail(" #SKILL: %u", (uint32)srcitem->GetProto()->RequiredSkill );
+    Log::getSingleton().outDetail(" #SKILL: %u", (uint32)srcitem->GetProto()->RequiredSkill );
 
     // check to make sure items are not being put in wrong spots
-	if ( (srcslot >= INVENTORY_SLOT_BAG_START && srcslot < BANK_SLOT_BAG_END)&&
-	 (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
-	   )
+    if ( (srcslot >= INVENTORY_SLOT_BAG_START && srcslot < BANK_SLOT_BAG_END)&&
+     (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
+       )
     {
         uint8 error = GetPlayer()->CanEquipItemInSlot(dstslot, srcitem->GetProto());
         if (!srcitem || error)
@@ -73,20 +73,20 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
             data << (uint8)0;
 
             SendPacket( &data );
-			//Atualiza os slots
+            //Atualiza os slots
             GetPlayer()->UpdateSlot(srcslot);
-			GetPlayer()->UpdateSlot(dstslot);
-			return;
+            GetPlayer()->UpdateSlot(dstslot);
+            return;
         }
     }
-	//Se existir um item no destino é preciso saber se ele pode trocar de lugar com o item da fonte        
+    //Se existir um item no destino é preciso saber se ele pode trocar de lugar com o item da fonte        
     if(srcslot >= EQUIPMENT_SLOT_START && srcslot < EQUIPMENT_SLOT_END )
-	{
-	    if(dstitem)
+    {
+        if(dstitem)
         {
-	        uint8 error = GetPlayer()->CanEquipItemInSlot(srcslot, dstitem->GetProto());
+            uint8 error = GetPlayer()->CanEquipItemInSlot(srcslot, dstitem->GetProto());
             if (error)
-	    	{
+            {
                 data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
                 data << (uint8)error;
                 data << (uint64)dstitem->GetProto()->RequiredLevel;
@@ -95,10 +95,10 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 
                 SendPacket( &data );
                 //Atualiza os slots
-				GetPlayer()->UpdateSlot(srcslot);
-				GetPlayer()->UpdateSlot(dstslot);
+                GetPlayer()->UpdateSlot(srcslot);
+                GetPlayer()->UpdateSlot(dstslot);
                 return;
-	    	}
+            }
         }
     }
 
@@ -161,7 +161,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
     Item *item  = GetPlayer()->GetItemBySlot(dstslot);
 
-	//Se o item nao existe
+    //Se o item nao existe
     if(!item)
     {
         Log::getSingleton().outDetail("ITEM: tried to equip non-existant item");
@@ -177,7 +177,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-	//Se o nivel do item é compativel com o nivel do CHAR
+    //Se o nivel do item é compativel com o nivel do CHAR
     uint32 charLvl = GetPlayer()->getLevel();
     uint32 itemLvl = item->GetProto()->RequiredLevel;
 
@@ -196,7 +196,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-	//Acha um slot vazio
+    //Acha um slot vazio
     uint8 slot = GetPlayer()->FindFreeItemSlot(item->GetProto()->InventoryType);
     //Se o slot retornado nao for fora da BAG
     if (slot == INVENTORY_SLOT_ITEM_END)
@@ -208,13 +208,13 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         data << uint8(0);
         WPAssert(data.size() == 18);
         SendPacket( &data );
-		GetPlayer()->UpdateSlot(dstslot);
+        GetPlayer()->UpdateSlot(dstslot);
         return;
     }
 
     //Se o item da bag pode equipar o CHAR
-	uint8 error = GetPlayer()->CanEquipItemInSlot(slot, item->GetProto());  
-	
+    uint8 error = GetPlayer()->CanEquipItemInSlot(slot, item->GetProto());  
+    
     if ( error )
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
@@ -223,7 +223,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         data << (uint64)0;
         data << (uint8)0;
         SendPacket( &data );
-		GetPlayer()->UpdateSlot(dstslot);
+        GetPlayer()->UpdateSlot(dstslot);
         return;
     }
 
@@ -677,8 +677,8 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
         }
     }
 
-	if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
-		return; // Let's just skip it if we can't use the vendor.. (Default system)
+    if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
+        return; // Let's just skip it if we can't use the vendor.. (Default system)
 
     WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
     SendPacket( &data );
@@ -756,8 +756,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         }
     }
 
-	if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
-		return; // Let's just skip it if we can't use the vendor.. (Default system)
+    if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
+        return; // Let's just skip it if we can't use the vendor.. (Default system)
 
     WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
     SendPacket( &data );

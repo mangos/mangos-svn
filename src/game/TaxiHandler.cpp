@@ -49,7 +49,7 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode( WorldPacket & recv_data )
         GetPlayer( )->GetMapId( ) );
 
 
-	Log::getSingleton( ).outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
+    Log::getSingleton( ).outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
     field = (uint8)((curloc - 1) / 32);
     submask = 1<<((curloc-1)%32);
@@ -90,7 +90,7 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
 
-	Log::getSingleton( ).outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
+    Log::getSingleton( ).outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
     if ( curloc == 0 )
         return;
@@ -157,7 +157,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
 
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
-	objmgr.GetTaxiPathNodes( path, &pathnodes );
+    objmgr.GetTaxiPathNodes( path, &pathnodes );
     MountId = objmgr.GetTaxiMount(sourcenode);
 
     // MOUNTDISPLAYID
@@ -204,7 +204,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     // 36.7407
     uint32 traveltime = uint32(pathnodes.getTotalLength( ) * 32);
-	//uint32 traveltime = uint32(pathnodes.getTotalLength( ) * 16);
+    //uint32 traveltime = uint32(pathnodes.getTotalLength( ) * 16);
 
     GetPlayer()->setMountPos( pathnodes.getNodes( )[ pathnodes.getLength( ) - 1 ].x,
         pathnodes.getNodes( )[ pathnodes.getLength( ) - 1 ].y,

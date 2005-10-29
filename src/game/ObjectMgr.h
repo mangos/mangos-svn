@@ -136,7 +136,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
             return NULL;
 #else
-	    return ObjectAccessor::Instance().FindPlayerByName(name);
+        return ObjectAccessor::Instance().FindPlayerByName(name);
 #endif
         }
 
@@ -149,27 +149,27 @@ class ObjectMgr : public Singleton < ObjectMgr >
                 return itr->second;
             return NULL;
 #else
-	    return ObjectAccessor::Instance().FindPlayer(guid);
+        return ObjectAccessor::Instance().FindPlayer(guid);
 #endif
         }
 
 #ifndef ENABLE_GRID_SYSTEM
         Creature* GetCreature(uint64 guid)
         {
-	    return _getCreature(GUID_LOPART(guid));
+        return _getCreature(GUID_LOPART(guid));
         }
 #endif
 
     // GameObjects
     const char* GetGameObjectName(uint32 id) const
     {
-	return (GetGameObjectInfo(id))->name.c_str();
+    return (GetGameObjectInfo(id))->name.c_str();
     }
 
     const GameObjectInfo *GetGameObjectInfo(uint32 id) const
     {
-	GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
-	return (iter == mGameObjectInfo.end() ? &si_UnknownGameObjectInfo : iter->second);
+    GameObjectInfoMap::const_iterator iter = mGameObjectInfo.find(id);
+    return (iter == mGameObjectInfo.end() ? &si_UnknownGameObjectInfo : iter->second);
     }
 
         // Groups
@@ -306,13 +306,13 @@ class ObjectMgr : public Singleton < ObjectMgr >
             ASSERT( mTrainerspells.find(trainspell->Id) == mTrainerspells.end() );
             mTrainerspells[trainspell->Id] = trainspell;
 
-/*			Log::getSingleton( ).outDebug( "Trainerspell: mTrainerspells[%u] = %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, and %u."
-				, trainspell->Id
-				, trainspell->skilline1, trainspell->skilline2, trainspell->skilline3, trainspell->skilline4, trainspell->skilline5, trainspell->skilline6, trainspell->skilline7, trainspell->skilline8, trainspell->skilline9, trainspell->skilline10
-				, trainspell->skilline11, trainspell->skilline12, trainspell->skilline13, trainspell->skilline14, trainspell->skilline15, trainspell->skilline16, trainspell->skilline17, trainspell->skilline18, trainspell->skilline19, trainspell->skilline20);
+/*            Log::getSingleton( ).outDebug( "Trainerspell: mTrainerspells[%u] = %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, and %u."
+                , trainspell->Id
+                , trainspell->skilline1, trainspell->skilline2, trainspell->skilline3, trainspell->skilline4, trainspell->skilline5, trainspell->skilline6, trainspell->skilline7, trainspell->skilline8, trainspell->skilline9, trainspell->skilline10
+                , trainspell->skilline11, trainspell->skilline12, trainspell->skilline13, trainspell->skilline14, trainspell->skilline15, trainspell->skilline16, trainspell->skilline17, trainspell->skilline18, trainspell->skilline19, trainspell->skilline20);
 */
         }
-		// Function to get Player Info to database 
+        // Function to get Player Info to database 
         PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_); 
 
         // it's kind of db related, not sure where to put it
@@ -351,16 +351,16 @@ class ObjectMgr : public Singleton < ObjectMgr >
         //void AddGossip(GossipNpc *pGossip);
         GossipText *GetGossipText(uint32 ID);
         //GossipNpc *GetGossipByGuid(uint32 guid, uint32 mapid);
-		GossipNpc *GetGossipByGuid(uint32 guid);
-		GossipNpc *DefaultGossip(uint32 guid);
-		GossipNpc *DefaultVendorGossip();
+        GossipNpc *GetGossipByGuid(uint32 guid);
+        GossipNpc *DefaultGossip(uint32 guid);
+        GossipNpc *DefaultVendorGossip();
 
      //   GossipNpcMap::iterator GetGossipListBegin(uint32 mapid) { return mGossipNpc[mapid].begin(); }
       //  GossipNpcMap::iterator GetGossipListEnd(uint32 mapid) { return mGossipNpc[mapid].end(); }
 
         // Death stuff
        // void AddGraveyard(GraveyardTeleport *pgrave);
-		GraveyardTeleport *GetClosestGraveYard(float x, float y, float z, uint32 MapId);
+        GraveyardTeleport *GetClosestGraveYard(float x, float y, float z, uint32 MapId);
        // GraveyardMap::iterator GetGraveyardListBegin() { return mGraveyards.begin(); }
        // GraveyardMap::iterator GetGraveyardListEnd() { return mGraveyards.end(); }
 
@@ -378,8 +378,8 @@ class ObjectMgr : public Singleton < ObjectMgr >
             return NULL;
         }
 
-		// Areatrigger
-		AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger);
+        // Areatrigger
+        AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger);
 
         // Serialization
 #ifndef ENABLE_GRID_SYSTEM
@@ -496,10 +496,10 @@ private:
 #ifndef ENABLE_GRID_SYSTEM
     Creature* _getCreature(uint32 guid)
     {
-	CreatureMap::const_iterator itr = mCreatures.find(guid);
-	if (itr != mCreatures.end())
-	    return itr->second;
-	return NULL;
+    CreatureMap::const_iterator itr = mCreatures.find(guid);
+    if (itr != mCreatures.end())
+        return itr->second;
+    return NULL;
     }
 #endif
     static GameObjectInfo si_UnknownGameObjectInfo;

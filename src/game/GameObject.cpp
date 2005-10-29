@@ -60,10 +60,12 @@ void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
 void GameObject::Update(uint32 p_time)
 {
-	/*if (m_nextThinkTime > time(NULL))
-		return; // Think once every 5 secs only for GameObject updates...
+/*
+    if (m_nextThinkTime > time(NULL))
+        return; // Think once every 5 secs only for GameObject updates...
 
-	m_nextThinkTime = time(NULL) + 5;*/
+    m_nextThinkTime = time(NULL) + 5;
+*/
 
     WorldPacket data;
     // Respawn Timer
@@ -103,8 +105,7 @@ void GameObject::Despawn(uint32 time)
 }
 #endif
 
-void
-GameObject::_generateLoot(Player &player, std::vector<uint32> &item_id, std::vector<uint32> &item_count, std::vector<uint32> &display_ids, uint32 &gold) const
+void GameObject::_generateLoot(Player &player, std::vector<uint32> &item_id, std::vector<uint32> &item_count, std::vector<uint32> &display_ids, uint32 &gold) const
 {
 
     // this is not ready yet.. still need to solve the data first
@@ -120,20 +121,20 @@ GameObject::_generateLoot(Player &player, std::vector<uint32> &item_id, std::vec
     
     while (not_done)
     {
-	// generate the item you need to pick
-	int idx = rand()%indexes.size();
-	const LootItem &item(loot_list[indexes[idx]]);
-	indexes.erase(indexes.begin()+idx);
-	ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
-	
-	if( pCurItem != NULL && item.chance >= (rand()%100) )
-	{
-	    item_id.push_back(item.itemid);
-	    item_count.push_back(1);
-	    display_ids.push_back(pCurItem->DisplayInfoID);
-	}
-	
-	not_done = indexes.size();
+    // generate the item you need to pick
+    int idx = rand()%indexes.size();
+    const LootItem &item(loot_list[indexes[idx]]);
+    indexes.erase(indexes.begin()+idx);
+    ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
+    
+    if( pCurItem != NULL && item.chance >= (rand()%100) )
+    {
+        item_id.push_back(item.itemid);
+        item_count.push_back(1);
+        display_ids.push_back(pCurItem->DisplayInfoID);
+    }
+    
+    not_done = indexes.size();
     }
 }
 
@@ -144,22 +145,22 @@ bool GameObject::FillLoot(Player &player, WorldPacket *data)
 
     if( GetUInt32Value(GAMEOBJECT_FACTION) == 94 )
     {
-	_generateLoot(player, item_id, item_count, display_ids, gold);
-	*data << GUID_LOPART(this->GetGUID());
-	*data << uint8(0x01);
-	*data << uint32(gold);                  // Loot Money
-	*data << (uint8)item_id.size();        // item Count
-	
-	for(uint8 i = 0; i < item_id.size(); i++)
-	{
-	    *data << uint8(i+1);  // slot, must be greater than zero
-	    *data << (uint32)item_id[i];    // item id
-	    *data << uint32(item_count[i]); // quantity
-	    *data << uint32(display_ids[i]); // iconid
-	    *data << uint32(0) << uint32(0) << uint8(0);
-	}
-	
-	return true;
+    _generateLoot(player, item_id, item_count, display_ids, gold);
+    *data << GUID_LOPART(this->GetGUID());
+    *data << uint8(0x01);
+    *data << uint32(gold);                  // Loot Money
+    *data << (uint8)item_id.size();        // item Count
+    
+    for(uint8 i = 0; i < item_id.size(); i++)
+    {
+        *data << uint8(i+1);  // slot, must be greater than zero
+        *data << (uint32)item_id[i];    // item id
+        *data << uint32(item_count[i]); // quantity
+        *data << uint32(display_ids[i]); // iconid
+        *data << uint32(0) << uint32(0) << uint8(0);
+    }
+    
+    return true;
     }
 
     return false;
@@ -198,7 +199,7 @@ void GameObject::LoadFromDB(uint32 guid)
     std::auto_ptr<QueryResult> result(sDatabase.Query( ss.str().c_str() ));
 
     if( result.get() ==  NULL)
-	return;
+    return;
 
     Field *fields = result->Fetch();
     uint32 id= fields[0].GetUInt32();

@@ -101,70 +101,70 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
 #ifndef ENABLE_GRID_SYSTEM
-	Creature *unit = objmgr.GetObject<Creature>(guid);
+    Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
-	Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
 #endif
-		
-	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
+        
+    Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-	if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
-		unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+    if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
+        unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
 
     cnt = 0;
     if(strainer)
     {
 /*        Log::getSingleton().outString("loading trainer %u with skillines %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u, %u and %u"
-			,unit->GetNameID()//GUID_LOPART(guid)
-			,strainer->skilline1,strainer->skilline2,strainer->skilline3,strainer->skilline4,strainer->skilline5,strainer->skilline6,strainer->skilline7,strainer->skilline8,strainer->skilline9,strainer->skilline10
-			,strainer->skilline11,strainer->skilline12,strainer->skilline13,strainer->skilline14,strainer->skilline15,strainer->skilline16,strainer->skilline17,strainer->skilline18,strainer->skilline19,strainer->skilline20);
+            ,unit->GetNameID()//GUID_LOPART(guid)
+            ,strainer->skilline1,strainer->skilline2,strainer->skilline3,strainer->skilline4,strainer->skilline5,strainer->skilline6,strainer->skilline7,strainer->skilline8,strainer->skilline9,strainer->skilline10
+            ,strainer->skilline11,strainer->skilline12,strainer->skilline13,strainer->skilline14,strainer->skilline15,strainer->skilline16,strainer->skilline17,strainer->skilline18,strainer->skilline19,strainer->skilline20);
 */
         for (unsigned int t = 0;t < sSkillStore.GetNumRows();t++)
         {
             skilllinespell *skill = sSkillStore.LookupEntry(t);
             if ((skill->skilline == strainer->skilline1) || (skill->skilline == strainer->skilline2) || (skill->skilline == strainer->skilline3)
-				|| (skill->skilline == strainer->skilline4) || (skill->skilline == strainer->skilline5) || (skill->skilline == strainer->skilline6)
-				|| (skill->skilline == strainer->skilline7) || (skill->skilline == strainer->skilline8) || (skill->skilline == strainer->skilline9)
-				|| (skill->skilline == strainer->skilline10) || (skill->skilline == strainer->skilline11) || (skill->skilline == strainer->skilline12)
-				|| (skill->skilline == strainer->skilline13) || (skill->skilline == strainer->skilline14) || (skill->skilline == strainer->skilline15)
-				|| (skill->skilline == strainer->skilline16) || (skill->skilline == strainer->skilline17) || (skill->skilline == strainer->skilline18)
-				|| (skill->skilline == strainer->skilline19) || (skill->skilline == strainer->skilline20))
+                || (skill->skilline == strainer->skilline4) || (skill->skilline == strainer->skilline5) || (skill->skilline == strainer->skilline6)
+                || (skill->skilline == strainer->skilline7) || (skill->skilline == strainer->skilline8) || (skill->skilline == strainer->skilline9)
+                || (skill->skilline == strainer->skilline10) || (skill->skilline == strainer->skilline11) || (skill->skilline == strainer->skilline12)
+                || (skill->skilline == strainer->skilline13) || (skill->skilline == strainer->skilline14) || (skill->skilline == strainer->skilline15)
+                || (skill->skilline == strainer->skilline16) || (skill->skilline == strainer->skilline17) || (skill->skilline == strainer->skilline18)
+                || (skill->skilline == strainer->skilline19) || (skill->skilline == strainer->skilline20))
             {
                 Log::getSingleton().outString("skill %u with skillline %u matches",skill->spell,skill->skilline);
                 SpellEntry *proto = sSpellStore.LookupEntry(skill->spell);
                 if ((proto) /*&& (proto->spellLevel != 0)*/)
                 {
-					//if (GetPlayer()->HasSpell(skill->spell))
-					//	continue;
+                    //if (GetPlayer()->HasSpell(skill->spell))
+                    //    continue;
 
                     cnt++;
                 }
             }
         }
 
-		data.Initialize( SMSG_TRAINER_LIST );     //set packet size - count = number of spells
+        data.Initialize( SMSG_TRAINER_LIST );     //set packet size - count = number of spells
         data << guid;
         data << uint32(0) << uint32(cnt);
 
-		uint32 num_added = 0;
+        uint32 num_added = 0;
 
         //Log::getSingleton().outString("count = %u",cnt);
         for (unsigned int t = 0;t < sSkillStore.GetNumRows();t++)
         {
             skilllinespell *skill = sSkillStore.LookupEntry(t);
             if ((skill->skilline == strainer->skilline1) || (skill->skilline == strainer->skilline2) || (skill->skilline == strainer->skilline3)
-				|| (skill->skilline == strainer->skilline4) || (skill->skilline == strainer->skilline5) || (skill->skilline == strainer->skilline6)
-				|| (skill->skilline == strainer->skilline7) || (skill->skilline == strainer->skilline8) || (skill->skilline == strainer->skilline9)
-				|| (skill->skilline == strainer->skilline10) || (skill->skilline == strainer->skilline11) || (skill->skilline == strainer->skilline12)
-				|| (skill->skilline == strainer->skilline13) || (skill->skilline == strainer->skilline14) || (skill->skilline == strainer->skilline15)
-				|| (skill->skilline == strainer->skilline16) || (skill->skilline == strainer->skilline17) || (skill->skilline == strainer->skilline18)
-				|| (skill->skilline == strainer->skilline19) || (skill->skilline == strainer->skilline20))
+                || (skill->skilline == strainer->skilline4) || (skill->skilline == strainer->skilline5) || (skill->skilline == strainer->skilline6)
+                || (skill->skilline == strainer->skilline7) || (skill->skilline == strainer->skilline8) || (skill->skilline == strainer->skilline9)
+                || (skill->skilline == strainer->skilline10) || (skill->skilline == strainer->skilline11) || (skill->skilline == strainer->skilline12)
+                || (skill->skilline == strainer->skilline13) || (skill->skilline == strainer->skilline14) || (skill->skilline == strainer->skilline15)
+                || (skill->skilline == strainer->skilline16) || (skill->skilline == strainer->skilline17) || (skill->skilline == strainer->skilline18)
+                || (skill->skilline == strainer->skilline19) || (skill->skilline == strainer->skilline20))
             {
                 SpellEntry *proto = sSpellStore.LookupEntry(skill->spell);
                 if ((proto)/* && (proto->spellLevel != 0)*/)
                 {
-					//if (GetPlayer()->HasSpell(skill->spell))
-					//	continue;
+                    //if (GetPlayer()->HasSpell(skill->spell))
+                    //    continue;
 
                     //Log::getSingleton( ).outString( "WORLD: Grabbing trainer spell %u with skilline %u", skill->spell, skill->skilline);
                     data << uint32(skill->spell);
@@ -177,7 +177,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
                     else
                     {
                         if (((GetPlayer()->GetUInt32Value( UNIT_FIELD_LEVEL )) < (proto->spellLevel)) 
-							|| (GetPlayer()->GetUInt32Value( PLAYER_FIELD_COINAGE ) < sWorld.mPrices[proto->spellLevel]))
+                            || (GetPlayer()->GetUInt32Value( PLAYER_FIELD_COINAGE ) < sWorld.mPrices[proto->spellLevel]))
                         {
                             data << uint8(1);
                         }
@@ -187,20 +187,20 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
                         }
                     }
 
-					data << uint32(sWorld.mPrices[proto->spellLevel]) << uint32(0);
+                    data << uint32(sWorld.mPrices[proto->spellLevel]) << uint32(0);
                     data << uint32(0) << uint8(proto->spellLevel);
                     data << uint32(0);            // set type
                     data << uint32(0);            // set required level of a skill line
                     data << uint32(0);
                     data << uint32(0) << uint32(0);
-					//data << uint32(num_added);
-					num_added++;
+                    //data << uint32(num_added);
+                    num_added++;
                     // Log::getSingleton( ).outString( "WORLD: Grabbing trainer spell %u", itr->second->spell);
                 }
             }
         }
 
-		//Log::getSingleton().outString("added count = %u",num_added);
+        //Log::getSingleton().outString("added count = %u",num_added);
 
         data << "Hello! Ready for some training?";
         SendPacket( &data );
@@ -227,7 +227,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     price = sWorld.mPrices[proto->spellLevel];
 
     if( playerGold >= price 
-		&& ((GetPlayer()->GetUInt32Value( UNIT_FIELD_LEVEL )) >= (proto->spellLevel)))
+        && ((GetPlayer()->GetUInt32Value( UNIT_FIELD_LEVEL )) >= (proto->spellLevel)))
     {
         GetPlayer( )->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - price );
 
@@ -319,98 +319,98 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outString( "WORLD: Recieved CMSG_GOSSIP_HELLO" );
     WorldPacket data;
     uint64 guid;
-	uint32 option;
+    uint32 option;
     GossipNpc *pGossip;
 
     recv_data >> guid;
 
-	//pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
+    //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
 
 #ifndef ENABLE_GRID_SYSTEM
-	Creature *unit = objmgr.GetObject<Creature>(guid);
+    Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
-	Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
 #endif
 
-	pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
-	
-	if (!pGossip)
-		pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
+    pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
+    
+    if (!pGossip)
+        pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
-	if (!pGossip)
-		pGossip = objmgr.GetGossipByGuid(guid);
+    if (!pGossip)
+        pGossip = objmgr.GetGossipByGuid(guid);
 
-	if (!pGossip)
-		pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
+    if (!pGossip)
+        pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
 
-	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
+    Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-	if (!pGossip /*|| strainer*/)
-	{// UQ1: Add some defaults???
-		//Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
+    if (!pGossip /*|| strainer*/)
+    {// UQ1: Add some defaults???
+        //Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-		//Log::getSingleton( ).outDebug( "Trainerspell: GUID: %u. GUID_LOW: %u. NAMEID: %u.", guid, unit->GetGUIDLow(), unit->GetNameID() );
+        //Log::getSingleton( ).outDebug( "Trainerspell: GUID: %u. GUID_LOW: %u. NAMEID: %u.", guid, unit->GetGUIDLow(), unit->GetNameID() );
 
-		if (!unit)
-		{
-			return;
-		}
-		else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
-		{// If they have any items to sell, then default to vendor...
-			pGossip = objmgr.DefaultVendorGossip();
-			//Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+        if (!unit)
+        {
+            return;
+        }
+        else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
+        {// If they have any items to sell, then default to vendor...
+            pGossip = objmgr.DefaultVendorGossip();
+            //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
-			data << guid;
-			HandleListInventoryOpcode( data );
-			return;
-		}
-		//else if (sSkillStore.GetNumRows() > 0) 
-		else if (strainer)
-		{// No items, but has skills to teach.. Send trainer list...
-			pGossip = objmgr.DefaultVendorGossip();
-			//Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+            data << guid;
+            HandleListInventoryOpcode( data );
+            return;
+        }
+        //else if (sSkillStore.GetNumRows() > 0) 
+        else if (strainer)
+        {// No items, but has skills to teach.. Send trainer list...
+            pGossip = objmgr.DefaultVendorGossip();
+            //Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
-			data << guid;
-			HandleTrainerListOpcode( data );
-			return;
-		}
-		else
-		{
-			int choice = 999990+irand(3,9);
+            data << guid;
+            HandleTrainerListOpcode( data );
+            return;
+        }
+        else
+        {
+            int choice = 999990+irand(3,9);
 
-			data.Initialize( SMSG_GOSSIP_MESSAGE );
-			data << guid;
+            data.Initialize( SMSG_GOSSIP_MESSAGE );
+            data << guid;
 
-			data << uint32(choice);
-			data << uint32(0);
+            data << uint32(choice);
+            data << uint32(0);
 
-			// QUEST HANDLER
-			data << uint32(0);  //quest count
-			SendPacket(&data);
-		}
-	}
+            // QUEST HANDLER
+            data << uint32(0);  //quest count
+            SendPacket(&data);
+        }
+    }
 
-	if(pGossip)
-	{
+    if(pGossip)
+    {
 #ifndef ENABLE_GRID_SYSTEM
-		Creature * pCreature = objmgr.GetCreature(guid);
+        Creature * pCreature = objmgr.GetCreature(guid);
 #else
-		Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
 #endif
 
-		data.Initialize( SMSG_GOSSIP_MESSAGE );
-		data << guid;
-		data << pGossip->TextID;
-		data << pGossip->OptionCount;
+        data.Initialize( SMSG_GOSSIP_MESSAGE );
+        data << guid;
+        data << pGossip->TextID;
+        data << pGossip->OptionCount;
 
-		for(uint32 i=0; i < pGossip->OptionCount; i++)
-		{
-			data << i;
-			data << pGossip->pOptions[i].Icon;
-			data << pGossip->pOptions[i].OptionText;
-		}
+        for(uint32 i=0; i < pGossip->OptionCount; i++)
+        {
+            data << i;
+            data << pGossip->pOptions[i].Icon;
+            data << pGossip->pOptions[i].OptionText;
+        }
 
-		delete pGossip;
+        delete pGossip;
 
         // QUEST HANDLER
         data << uint32(0);  //quest count
@@ -424,146 +424,146 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 {
-	Log::getSingleton( ).outDetail("WORLD: CMSG_GOSSIP_SELECT_OPTION");
+    Log::getSingleton( ).outDetail("WORLD: CMSG_GOSSIP_SELECT_OPTION");
     WorldPacket data;
     uint32 option;
     uint64 guid;
-	
+    
     recv_data >> guid >> option;
 
     //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
-	
-//	GossipNpc *pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
+    
+//    GossipNpc *pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 #ifndef ENABLE_GRID_SYSTEM
-	Creature *unit = objmgr.GetObject<Creature>(guid);
+    Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
-	Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
 #endif
 
-	GossipNpc *pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
+    GossipNpc *pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-	if (!pGossip)
-		pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
+    if (!pGossip)
+        pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
-	if (!pGossip)
-		pGossip = objmgr.GetGossipByGuid(guid);
+    if (!pGossip)
+        pGossip = objmgr.GetGossipByGuid(guid);
 
-	if (!pGossip)
-		pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
+    if (!pGossip)
+        pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
 
 //#ifdef __DISABLED__
-	if (!pGossip)
-	{// UQ1: Add some defaults???
-		Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
+    if (!pGossip)
+    {// UQ1: Add some defaults???
+        Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-		if (!unit)
-		{
-			return;
-		}
-		else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
-		{// Has items, so they are a vendor...
-			pGossip = objmgr.DefaultVendorGossip();
-			//Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+        if (!unit)
+        {
+            return;
+        }
+        else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
+        {// Has items, so they are a vendor...
+            pGossip = objmgr.DefaultVendorGossip();
+            //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
-			data << guid;
-			HandleListInventoryOpcode( data );
-			return;
-		}
-		else if (strainer)
-		{// No items, but has skills to teach.. Send trainer list...
-			pGossip = objmgr.DefaultVendorGossip();
-			//Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+            data << guid;
+            HandleListInventoryOpcode( data );
+            return;
+        }
+        else if (strainer)
+        {// No items, but has skills to teach.. Send trainer list...
+            pGossip = objmgr.DefaultVendorGossip();
+            //Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
-			data << guid;
-			HandleTrainerListOpcode( data );
-			return;
-		}
-		else
-		{
-			int choice = 999990+irand(3,9);
+            data << guid;
+            HandleTrainerListOpcode( data );
+            return;
+        }
+        else
+        {
+            int choice = 999990+irand(3,9);
 
-			data.Initialize( SMSG_GOSSIP_MESSAGE );
-			data << guid;
+            data.Initialize( SMSG_GOSSIP_MESSAGE );
+            data << guid;
 
-			data << uint32(choice);
-			data << uint32(0);
+            data << uint32(choice);
+            data << uint32(0);
 
-			// QUEST HANDLER
-			data << uint32(0);  //quest count
-			SendPacket(&data);
-		}
-	}
+            // QUEST HANDLER
+            data << uint32(0);  //quest count
+            SendPacket(&data);
+        }
+    }
 //#endif //__DISABLED__
 
-	if(pGossip)
-	{
-		if(option == pGossip->OptionCount)
-		{
-			delete pGossip;
+    if(pGossip)
+    {
+        if(option == pGossip->OptionCount)
+        {
+            delete pGossip;
 
-			data << guid;
-			HandleGossipHelloOpcode( data );
+            data << guid;
+            HandleGossipHelloOpcode( data );
 
-		}
-		else if( option < pGossip->OptionCount)
-		{
-			switch(pGossip->pOptions[option].Special)
-			{
-				case GOSSIP_POI:
-				{
-					GossipText *pGossipText = objmgr.GetGossipText(pGossip->pOptions[option].NextTextID);
+        }
+        else if( option < pGossip->OptionCount)
+        {
+            switch(pGossip->pOptions[option].Special)
+            {
+                case GOSSIP_POI:
+                {
+                    GossipText *pGossipText = objmgr.GetGossipText(pGossip->pOptions[option].NextTextID);
 
-					if(pGossipText)
-					{
-						data.Initialize( SMSG_GOSSIP_MESSAGE );
-						data << guid;
-						data << pGossip->pOptions[option].NextTextID;
-						data << uint32(0); //option count 0
-						//Todo: Fix for recursive options(options embeded in options)
-						//data << pGossip->OptionCount;
+                    if(pGossipText)
+                    {
+                        data.Initialize( SMSG_GOSSIP_MESSAGE );
+                        data << guid;
+                        data << pGossip->pOptions[option].NextTextID;
+                        data << uint32(0); //option count 0
+                        //Todo: Fix for recursive options(options embeded in options)
+                        //data << pGossip->OptionCount;
 
-						//for(uint32 i=0; i < pGossip->OptionCount; i++)
-						//{
-						//	data << i;
-						//	data << pGossip->pOptions[i].Icon;
-						//	data << pGossip->pOptions[i].OptionText;
-						//}
+                        //for(uint32 i=0; i < pGossip->OptionCount; i++)
+                        //{
+                        //    data << i;
+                        //    data << pGossip->pOptions[i].Icon;
+                        //    data << pGossip->pOptions[i].OptionText;
+                        //}
 
-						data << uint32(0); //quest count
+                        data << uint32(0); //quest count
 
-						delete pGossipText;
+                        delete pGossipText;
 
-						SendPacket(&data);			
-					}
-				}
-				break;
-				case GOSSIP_SPIRIT_HEALER_ACTIVE:
-				{
-					data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
-					data << guid;
-					SendPacket( &data );
-					data.Initialize( SMSG_GOSSIP_COMPLETE );
-					SendPacket( &data );
+                        SendPacket(&data);            
+                    }
+                }
+                break;
+                case GOSSIP_SPIRIT_HEALER_ACTIVE:
+                {
+                    data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
+                    data << guid;
+                    SendPacket( &data );
+                    data.Initialize( SMSG_GOSSIP_COMPLETE );
+                    SendPacket( &data );
 
-				}
-				break;
-				case GOSSIP_VENDOR:
-				{
-					data << guid;
-					HandleListInventoryOpcode( data );
-				}
-				break;
-				case GOSSIP_TRAINER:
-				{
-					data << guid;
-					HandleTrainerListOpcode( data );
-				}
-				break;
-				default: break;
-			}
-			delete pGossip;
-		}
-	}
+                }
+                break;
+                case GOSSIP_VENDOR:
+                {
+                    data << guid;
+                    HandleListInventoryOpcode( data );
+                }
+                break;
+                case GOSSIP_TRAINER:
+                {
+                    data << guid;
+                    HandleTrainerListOpcode( data );
+                }
+                break;
+                default: break;
+            }
+            delete pGossip;
+        }
+    }
 }
 
 
@@ -624,7 +624,7 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
         data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
         data << pGossipText->Text.c_str();
         SendPacket( &data );
-		delete pGossipText;
+        delete pGossipText;
     }
 }
 

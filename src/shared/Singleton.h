@@ -39,9 +39,9 @@ template < class type > class Singleton
         /// Constructor
         Singleton( )
         {
-           	WPAssert( mSingleton == 0 );
-			mSingleton = static_cast<type *>(this);
-		}
+               WPAssert( mSingleton == 0 );
+            mSingleton = static_cast<type *>(this);
+        }
         /// Destructor
         ~Singleton( )
         {

@@ -86,8 +86,8 @@ class Object
         const uint32& GetGUIDLow() const { return m_uint32Values[0]; }
         const uint32& GetGUIDHigh() const { return m_uint32Values[1]; }
 
-		const uint32 GetNameID() const { return m_nameId; }
-		void SetNameId(uint32 nameId) { m_nameId = nameId; }
+        const uint32 GetNameID() const { return m_nameId; }
+        void SetNameId(uint32 nameId) { m_nameId = nameId; }
 
         // type
         const uint8& GetTypeId() const { return m_objectTypeId; }
@@ -114,10 +114,10 @@ class Object
 
     void Relocate(const float &x, const float &y, const float &z, const float &orientation)
     {
-	m_positionX = x;
-	m_positionY = y;
-	m_positionZ = z;
-	m_orientation = orientation;
+    m_positionX = x;
+    m_positionY = y;
+    m_positionZ = z;
+    m_orientation = orientation;
     }
 
         const float& GetPositionX( ) const { return m_positionX; }
@@ -237,12 +237,12 @@ class Object
 
         void _InitValues()
         {
-		m_uint32Values = new uint32[ m_valuesCount ];
-		WPAssert(m_uint32Values);
-		memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
-		
-		m_updateMask.SetCount(m_valuesCount);
-		ClearUpdateMask();
+        m_uint32Values = new uint32[ m_valuesCount ];
+        WPAssert(m_uint32Values);
+        memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
+        
+        m_updateMask.SetCount(m_valuesCount);
+        ClearUpdateMask();
         }
 
         void _Create (uint32 guidlow, uint32 guidhigh);
@@ -261,7 +261,7 @@ class Object
         //! Type id.
         uint8 m_objectTypeId;
 
-		uint32 m_nameId;
+        uint32 m_nameId;
 
         //! Zone id.
         uint32 m_zoneId;
