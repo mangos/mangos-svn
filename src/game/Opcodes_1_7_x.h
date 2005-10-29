@@ -1,4 +1,3 @@
-<<<<<<< .mine
 /* Opcodes.h
  *
  * Copyright (C) 2004 Wow Daemon
