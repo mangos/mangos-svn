@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _VERSION_1_7_0_
+#if !defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
 
 #include "Common.h"
 #include "Opcodes.h"
@@ -719,4 +719,4 @@ NameTableEntry g_worldOpcodeNames[] =
     { 0,                                            0 }
 };
 
-#endif //_VERSION_1_7_0_
+#endif //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )

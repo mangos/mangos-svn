@@ -122,7 +122,6 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 //    GetPlayer( )->SendMessageToSet( &data, false );
 }
 
-
 void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -254,7 +253,43 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->Class;
     data << itemProto->SubClass;
     data << itemProto->Name1.c_str();
-    data << uint8(0) << uint8(0) << uint8(0);     // name 2,3,4
+	//data << uint8(0);
+
+	if (stricmp(itemProto->Name2.c_str(), ""))
+	{
+		data << itemProto->Name2.c_str();
+	}
+	else
+	{
+		//data << std::string("");
+		data << uint8(0);
+	}
+	//data << uint8(0);
+
+	if (stricmp(itemProto->Name3.c_str(), ""))
+	{
+		data << itemProto->Name3.c_str();
+	}
+	else
+	{
+		//data << std::string("");
+		data << uint8(0);
+	}
+	//data << uint8(0);
+
+	if (stricmp(itemProto->Name4.c_str(), ""))
+	{
+		data << itemProto->Name4.c_str();
+	}
+	else
+	{
+		//data << std::string("");
+		data << uint8(0);
+	}
+	//data << uint8(0);
+
+    //data << uint8(0) << uint8(0) << uint8(0);     // name 2,3,4
+
     data << itemProto->DisplayInfoID;
     data << itemProto->Quality;
     data << itemProto->Flags;
@@ -272,18 +307,75 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->Field22;
     data << itemProto->Field23;
     data << itemProto->MaxCount;
-    data << itemProto->ContainerSlots;;
+    data << itemProto->ContainerSlots;
+
+	/*
+	if (this.strBonus != 0)
+	{
+		Converter.ToBytes(4, data, ref offset);
+		Converter.ToBytes(this.strBonus, data, ref offset);
+	}
+	if (this.iqBonus != 0)
+	{
+		Converter.ToBytes(6, data, ref offset);
+		Converter.ToBytes(this.iqBonus, data, ref offset);
+	}
+	if (this.staminaBonus != 0)
+	{
+		Converter.ToBytes(7, data, ref offset);
+		Converter.ToBytes(this.staminaBonus, data, ref offset);
+	}
+	if (this.spiritBonus != 0)
+	{
+		Converter.ToBytes(5, data, ref offset);
+		Converter.ToBytes(this.spiritBonus, data, ref offset);
+	}
+	if (this.agilityBonus != 0)
+	{
+		Converter.ToBytes(3, data, ref offset);
+		Converter.ToBytes(this.agilityBonus, data, ref offset);
+	}
+	if (this.manaBonus != 0)
+	{
+		Converter.ToBytes(0, data, ref offset);
+		Converter.ToBytes(this.manaBonus, data, ref offset);
+	}
+	if (this.healthBonus != 0)
+	{
+		Converter.ToBytes(1, data, ref offset);
+		Converter.ToBytes(this.healthBonus, data, ref offset);
+	}
+	*/
+
     for(i = 0; i < 10; i++)
     {
         data << itemProto->ItemStatType[i];
         data << itemProto->ItemStatValue[i];
     }
+	/*
+	for (int num4 = 0; num4 < 7; num4++)
+	{
+		if (this.itemDamages[num4] != null)
+		{
+			Converter.ToBytes(this.itemDamages[num4].MinDamage, data, ref offset);
+			Converter.ToBytes(this.itemDamages[num4].MaxDamage, data, ref offset);
+			Converter.ToBytes(num4, data, ref offset);
+		}
+	}
+	*/
+
     for(i = 0; i < 5; i++)
-    {
+    {// UQ1: Need to add a damage type here...
         data << itemProto->DamageMin[i];
         data << itemProto->DamageMax[i];
         data << itemProto->DamageType[i];
     }
+
+	// UQ1: Because there should be 6 types above...
+	data << float(0);
+	data << float(0);
+	data << uint32(0);
+	
     data << itemProto->Armor;
     data << itemProto->HolyRes;
     data << itemProto->FireRes;
@@ -292,7 +384,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ShadowRes;
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
-    data << itemProto->Field69;
+    data << itemProto->Field69; // Ammo Type
     for(i = 0; i < 5; i++)
     {
         data << itemProto->SpellId[i];
@@ -303,7 +395,16 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << itemProto->SpellCategoryCooldown[i];
     }
     data << itemProto->Bonding;
-    data << itemProto->Description.c_str();
+    //data << itemProto->Description.c_str();
+	if (stricmp(itemProto->Description.c_str(), ""))
+	{
+		data << itemProto->Description.c_str();
+	}
+	else
+	{
+		//data << std::string("Just your every-day item.");
+		data << uint8(0);
+	}
     data << itemProto->Field102;
     data << itemProto->Field103;
     data << itemProto->Field104;
@@ -316,7 +417,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->Field111;
     data << itemProto->MaxDurability;
 
-    WPAssert(data.size() == 433 + itemProto->Name1.length() + itemProto->Description.length());
+    //WPAssert(data.size() == 433 + itemProto->Name1.length() + itemProto->Description.length());
     SendPacket( &data );
 }
 
@@ -685,7 +786,6 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
 }
 
-/*
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_AUTO_STORE_BAG_ITEM" );
@@ -694,7 +794,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
-    Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
+
+/*
 #ifndef ENABLE_GRID_SYSTEM
     Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
@@ -762,5 +863,6 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
     SendPacket( &data );
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_AUTO_STORE_BAG_ITEM" );
+	*/
 }
-*/
+

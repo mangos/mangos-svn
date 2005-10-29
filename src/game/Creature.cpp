@@ -1045,7 +1045,7 @@ void Creature::AI_Update()
                 
                 
                 // UQ1: Add damage values...
-#ifndef _VERSION_1_7_0_
+#if !defined ( _VERSION_1_7_0_ ) && !defined ( _VERSION_1_8_0_ )
                 uint32 minDmg = (this->GetUInt32Value(UNIT_FIELD_MINDAMAGE));
                 uint32 maxDmg = (this->GetUInt32Value(UNIT_FIELD_MAXDAMAGE));
 #else //_VERSION_1_7_0_

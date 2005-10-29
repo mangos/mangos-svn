@@ -18,6 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef _VERSION_1_8_0_
+
+#include "UpdateFields_1_8_x.h"
+
+#else //!_VERSION_1_8_0_
+
 #ifdef _VERSION_1_7_0_
 
 #include "UpdateFields_1_7_x.h"
@@ -1327,4 +1333,6 @@
 #define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01  0x26
 #define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02  0x27
 
-#endif //_VERSION_1_7_0_
+#endif //!_VERSION_1_7_0_
+
+#endif //!_VERSION_1_8_0_

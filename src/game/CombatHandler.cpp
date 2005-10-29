@@ -29,7 +29,7 @@
 #include "ObjectAccessor.h"
 #endif
 
-void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
+/*void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;
@@ -55,6 +55,43 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
     pThis->inCombat = true;
     pThis->logoutDelay = LOGOUTDELAY;
+}*/
+void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
+{
+    //WorldPacket data;
+    uint64 guid;
+    recv_data >> guid;
+
+    // AttackSwing
+    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message" );
+
+#ifndef ENABLE_GRID_SYSTEM
+    Creature *pEnemy = objmgr.GetObject<Creature>(guid);
+	Player *pPVPEnemy = objmgr.GetObject<Player>(guid);
+#else
+    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
+	Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, guid);//objmgr.GetObject<Player>(guid);
+#endif
+	
+
+    if(pEnemy)
+	{
+		GetPlayer()->addStateFlag(UF_ATTACKING);
+		GetPlayer()->smsg_AttackStart(pEnemy);
+	}
+	else if(pPVPEnemy)
+	{
+		GetPlayer()->addStateFlag(UF_ATTACKING);
+		GetPlayer()->smsg_AttackStart(pPVPEnemy);
+	}
+	else
+	{
+        //Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",
+        //    GUID_LOPART(guid), GUID_HIPART(guid));
+		Log::getSingleton( ).outError( "WORLD: %u %.8X is not a player nor a creature",
+			GUID_LOPART(guid), GUID_HIPART(guid));
+        return; // we do not attack PCs for now...you're wrong! We do! Muhahaha!
+    }
 }
 
 
@@ -68,3 +105,4 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
     GetPlayer()->clearStateFlag(UF_ATTACKING);
     // GetPlayer()->removeCreatureFlag(0x00080000);
 }
+
