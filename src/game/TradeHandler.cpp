@@ -97,24 +97,26 @@ void WorldSession::UpdateTrade()
 {
 	WorldPacket data;
 	Player *pThis = GetPlayer();
-	Item *Item = NULL;
+	Item *item = NULL;
+
+	if( !pThis->pTrader ) return;
 
 	data.Initialize(SMSG_TRADE_STATUS_EXTENDED);
-	data << (uint32) 1;
+	data << (uint8 ) 1;
 	data << (uint32) 7; //I am not sure
 	data << (uint32) 0;
 	data << (uint32) GetPlayer()->tradeGold;
 	data << (uint32) 0;
 	for(int i=0; i<7; i++)
 	{
-		Item = pThis->GetItemBySlot( pThis->tradeItems[i] );
+		item = pThis->GetItemBySlot( (uint8) pThis->tradeItems[i] );
 
-		data << (uint32) i;
-		if(Item)
+		data << (uint8) i;
+		if(item)
 		{
-			data << (uint32) Item->GetProto()->ItemId; //maybe GUID
+			data << (uint32) item->GetProto()->ItemId;
 			data << (uint32) 0;
-			data << (uint32) Item->GetProto()->MaxCount;
+			data << (uint32) item->GetProto()->MaxCount;
 		}
 		else
 		{
@@ -140,6 +142,11 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
 	if ( GetPlayer()->pTrader->acceptTrade )
 	{
+		GetPlayer()->acceptTrade = false;
+		GetPlayer()->pTrader->acceptTrade = false;
+
+		//Conditions
+		
 		//Do trade
 
 		//Clear
@@ -342,7 +349,7 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 	recvPacket >> trash;
 	recvPacket >> bagSlot;
 
-	GetPlayer()->tradeItems[tradeSlot] = bagSlot;
+	GetPlayer()->tradeItems[tradeSlot] = (uint32) bagSlot;
 
 	UpdateTrade();
 }
@@ -352,12 +359,10 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 	Log::getSingleton( ).outDebug( "\nWORLD: Clear Trade Item %u", GetPlayer()->GetGUID());
 	recvPacket.print_storage();
 
-	WorldPacket data;
-	uint32 slot;
-
-	recvPacket >> slot;
-
-	GetPlayer()->tradeItems[slot] = 0;
+	//WorldPacket data;
+	//uint8 slot;
+	//recvPacket >> slot;
+	//GetPlayer()->tradeItems[slot] = 0;
 
 	UpdateTrade();
 }
