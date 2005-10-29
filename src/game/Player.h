@@ -332,11 +332,17 @@ public:
 			return m_faction;
 		};
 
+		void setGold(int gold)
+		{
+			uint32 moneyuser = GetUInt32Value(PLAYER_FIELD_COINAGE);
+			SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
+		}
+
         //this sets the faction horde, alliance or NoFaction in case of any bug
 		//Or sets a faction passed by parameter in case of race is < 0
 		void setFaction(uint8 race, uint32 faction)
 		{
-	         //Set faction
+			//Set faction
 			if(race > 0)
 			{
                  m_faction = NoFaction;
@@ -629,7 +635,7 @@ public:
 		
 		Player *pTrader;
 		bool acceptTrade;
-		uint32 tradeItems[7];
+		int tradeItems[7];
 		uint32 tradeGold;
 
 		//Player *DuelVsPlayer;
