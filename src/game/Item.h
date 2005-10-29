@@ -45,6 +45,8 @@ class Item : public Object
         void SetDurability(uint32 Value);
         void SetDurabilityToMax();
 
+		ItemPrototype *GetItemProto() { return m_itemProto; }
+
     protected:
         ItemPrototype *m_itemProto;
         Player *m_owner;                          // let's not bother the manager with unneeded requests

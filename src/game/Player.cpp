@@ -339,18 +339,6 @@ void Player::Update( uint32 p_time )
 
     CheckExploreSystem();
 
-//#ifndef ENABLE_GRID_SYSTEM
-    // UQ1: Update PlayerPositions Array...
-//    uint64 guid = this->GetGUID();
-    //Player *chr = GetSession()->GetPlayer();
-    
-    //Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, chr->GetPositionX(), chr->GetPositionY()));
-//    Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, GetPositionX()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/, GetPositionY()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/));
-
-//    PlayerPositions[guid][0] = GetPositionX();//objmgr.GetObject<Player>(guid)->GetPositionX();
-//    PlayerPositions[guid][1] = GetPositionY();//objmgr.GetObject<Player>(guid)->GetPositionY();
-//#endif //ENABLE_GRID_SYSTEM
-
     if (m_state & UF_ATTACKING)
     {
         inCombat = true;
@@ -384,9 +372,8 @@ void Player::Update( uint32 p_time )
                     data << uint8(2);
                     data << uint8(0x53);          // Target out of Range
                     GetSession()->SendPacket(&data);
-/*
                 }
-                else if(!isInFront(pVictim,10.00000f))
+/*              else if(!isInFront(pVictim,10.00000f))
                 {
                     setAttackTimer(uint32(1000));
                     data.Initialize(SMSG_CAST_RESULT);
@@ -394,12 +381,42 @@ void Player::Update( uint32 p_time )
                     data << uint8(2);
                     data << uint8(0x76);    // Target not in Front
                     GetSession()->SendPacket(&data);
-*/
-                }
+                }*/
                 else
                 {
                     setAttackTimer(0);
-                    AttackerStateUpdate(pVictim, 0);
+
+					uint32 dmg;
+
+					/*Item *weapon = GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
+					Item *weapon2 = GetItemBySlot(EQUIPMENT_SLOT_OFFHAND);
+					
+					if (weapon)
+					{
+						float dmgMin = 0, dmgMax = 0;
+						int i;
+
+						for (i = 0; i < 6; i++)
+						{// Add up damage values...
+							dmgMin += weapon->GetItemProto()->DamageMin[i];
+							dmgMax += weapon->GetItemProto()->DamageMax[i];
+							
+							if (weapon2)
+							{
+								dmgMin += weapon2->GetItemProto()->DamageMin[i];
+								dmgMax += weapon2->GetItemProto()->DamageMax[i];
+							}
+						}
+						
+						dmg = irand(dmgMin, dmgMax);
+					}
+					else
+					{
+						dmg = irand(0, GetUInt32Value(UNIT_FIELD_STR));
+					}*/
+					
+					dmg = CalculateDamage (this);
+					AttackerStateUpdate(pVictim, dmg);
                 }
             }
         }

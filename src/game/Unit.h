@@ -22,6 +22,9 @@
 #define __UNIT_H
 
 #include "Object.h"
+#ifdef ENABLE_GRID_SYSTEM
+#include "ObjectAccessor.h"
+#endif
 
 #define UF_TARGET_DIED  1
 #define UF_ATTACKING    2                         // this unit is attacking it's selection
@@ -129,7 +132,73 @@ class Unit : public Object
 
         //// Combat
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag);
-        void AttackerStateUpdate(Unit *pVictim, uint32 damage);
+		void DoAttackDamage(Unit *pVictim, uint32 damage, uint32 was_blocked, uint32 damageType, uint32 hitInfo, uint32 victimInfo);
+		void HandleEmoteCommand(uint32 anim_id);
+        void AttackerStateUpdate (Unit *pVictim, uint32 damage);
+		float GetUnitDodgeChance()
+		{ 
+#ifndef ENABLE_GRID_SYSTEM
+			Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+			Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+			if (pThis) // Players only???
+				return (float)m_uint32Values[ PLAYER_DODGE_PERCENTAGE ]; 
+			else
+				return (float)0;
+		};
+		float GetUnitParryChance()
+		{ 
+#ifndef ENABLE_GRID_SYSTEM
+			Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+			Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+			if (pThis) // Players only???
+				return (float)m_uint32Values[ PLAYER_PARRY_PERCENTAGE ]; 
+			else
+				return (float)0;
+		};
+		float GetUnitBlockChance() 
+		{ 
+#ifndef ENABLE_GRID_SYSTEM
+			Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+			Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+			if (pThis) // Players only???
+				return (float)m_uint32Values[ PLAYER_BLOCK_PERCENTAGE ]; 
+			else
+				return (float)0;
+		};
+		float GetUnitCriticalChance()
+		{ 
+#ifndef ENABLE_GRID_SYSTEM
+			Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+			Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+			if (pThis) // Players only???
+				return (float)m_uint32Values[ PLAYER_CRIT_PERCENTAGE ]; 
+			else
+				return (float)0;
+		};
+		uint32 GetUnitBlockValue() 
+		{ 
+			return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; 
+		};
+		uint32 GetUnitStrength() 
+		{ 
+			return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; 
+		};
+		uint32 GetUnitMeleeSkill()
+		{
+			return (uint32)m_uint32Values[ UNIT_FIELD_ATTACKPOWER ]; 
+		};
+		bool isStunned() 
+		{// UQ1: FIXME - Add stun...
+			return m_attackTimer == 0;
+		};
         void PeriodicAuraLog(Unit *pVictim, uint32 spellID, uint32 damage, uint32 damageType);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
         // void HandleProc(ProcTriggerSpell *pts, uint32 flag) {};
@@ -145,6 +214,34 @@ class Unit : public Object
     void smsg_AttackStart(Unit *pVictim, Player *p);
     void smsg_AttackStart(Unit* pVictim);
     void smsg_AttackStop(uint64 victimGuid);
+
+	bool isPlayer()
+	{
+#ifndef ENABLE_GRID_SYSTEM
+		Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+		Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+
+		if (pThis)
+			return true;
+		else
+			return false;
+	}
+
+	bool isUnit()
+	{
+#ifndef ENABLE_GRID_SYSTEM
+		Player* pThis = objmgr.GetObject<Player>(GetGUID());
+#else
+		Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
+#endif
+
+		if (pThis)
+			return false;
+		else
+			return true;
+	}
 
 #ifndef ENABLE_GRID_SYSTEM
         virtual void RemoveInRangeObject(Object* pObj)
