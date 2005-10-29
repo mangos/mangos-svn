@@ -51,7 +51,29 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
 
     SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
     SetUInt32Value( ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
-
+/*
+	ITEM_FIELD_OWNER                        =    6,  //  2  UINT64
+	ITEM_FIELD_CONTAINED                    =    8,  //  2  UINT64
+	ITEM_FIELD_CREATOR                      =   10,  //  2  UINT64
+	ITEM_FIELD_GIFTCREATOR                  =   12,  //  2  UINT64
+	ITEM_FIELD_STACK_COUNT                  =   14,  //  1  UINT32
+	ITEM_FIELD_DURATION                     =   15,  //  1  UINT32
+	ITEM_FIELD_SPELL_CHARGES                =   16,  //  5  SPELLCHARGES
+	ITEM_FIELD_FLAGS                        =   21,  //  1  UINT32
+	ITEM_FIELD_ENCHANTMENT                  =   22,  //  21 ENCHANTMENT
+	ITEM_FIELD_PROPERTY_SEED                =   43,  //  1  UINT32
+	ITEM_FIELD_RANDOM_PROPERTIES_ID         =   44,  //  1  UINT32
+	ITEM_FIELD_ITEM_TEXT_ID                 =   45,  //  1  UINT32
+	ITEM_FIELD_DURABILITY                   =   46,  //  1  UINT32
+	ITEM_FIELD_MAXDURABILITY                =   47,  //  1  UINT32
+*/
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES, m_itemProto->SpellCharges[0]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+1, m_itemProto->SpellCharges[1]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+2, m_itemProto->SpellCharges[2]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+3, m_itemProto->SpellCharges[3]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+4, m_itemProto->SpellCharges[4]);
+	SetUInt32Value( ITEM_FIELD_FLAGS, m_itemProto->Flags);
+	SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID, m_itemProto->DisplayInfoID);
     m_owner = owner;
 }
 

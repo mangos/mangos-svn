@@ -296,11 +296,48 @@ void ObjectMgr::AddCreatureName(uint32 id, const char* name, uint32 displayid)
     mCreatureNames[id] = cinfo;
 }
 
+/*
+struct CreatureInfo
+{
+    // ctor in case users forget to intialized
+    CreatureInfo() : Id(0), Type(0), DisplayID(0), unknown1(0), unknown2(0), unknown3(0), unknown4(0) {}
+    uint32 Id;
+	uint32 Type;
+	uint32 DisplayID;
+    uint32 unknown1;
+    uint32 unknown2;
+    uint32 unknown3;
+    uint32 unknown4;
+	uint32 maxhealth;
+	uint32 maxmana;
+	uint32 level;
+	uint32 faction;
+	uint32 flag;
+	float scale;
+	uint32 speed;
+	uint32 rank;
+	uint32 mindmg;
+	uint32 maxdmg;
+	uint32 baseattacktime;
+	uint32 rangeattacktime;
+	uint32 mount;
+	uint32 level_max;
+	uint32 flags1;
+	float size;
+	uint32 family;
+	float bounding_radius;
+	uint32 trainer_type;
+	uint32 classNum;
+    std::string Name;
+    std::string SubName;
+};
+*/
 
 void ObjectMgr::LoadCreatureNames()
 {
     CreatureInfo *cn;
-    QueryResult *result = sDatabase.Query( "SELECT entryid,name,IFNULL(subname,''),type,modelid FROM creaturetemplate" );
+    //QueryResult *result = sDatabase.Query( "SELECT entryid,name,IFNULL(subname,''),type,modelid FROM creaturetemplate" );
+	QueryResult *result = sDatabase.Query( "SELECT * FROM creaturetemplate" );
     if(result)
     {
         do
@@ -308,17 +345,96 @@ void ObjectMgr::LoadCreatureNames()
             Field *fields = result->Fetch();
 
             cn = new CreatureInfo;
-            cn->Id = fields[0].GetUInt32();
+			// UQ1: How about we actually load these right???
+            /*cn->Id = fields[0].GetUInt32();
             cn->Name = fields[1].GetString();
             cn->SubName = fields[2].GetString();
             cn->Type = fields[3].GetUInt32();
             cn->DisplayID = fields[4].GetUInt32();
-
+			
         // Adding unknowns here later
             cn->unknown1 = 0; 
             cn->unknown2 = 0; 
             cn->unknown3 = 0; 
-            cn->unknown4 = 0; 
+            cn->unknown4 = 0; */
+		
+			cn->Id = fields[0].GetUInt32();
+			cn->DisplayID = fields[1].GetUInt32();
+			cn->Name = fields[2].GetString();
+			if (fields[3].GetString())
+				cn->SubName = fields[3].GetString();
+			else
+				cn->SubName = "";
+
+			cn->maxhealth = fields[4].GetUInt32();
+			cn->maxmana = fields[5].GetUInt32();
+			cn->level = fields[6].GetUInt32();
+			cn->faction = fields[7].GetUInt32();
+			cn->flag = fields[7].GetUInt32();
+			cn->scale = fields[8].GetFloat();
+			cn->speed = fields[10].GetUInt32();
+			cn->rank = fields[11].GetUInt32();
+			cn->mindmg = fields[12].GetFloat();
+			cn->maxdmg = fields[13].GetFloat();
+			cn->baseattacktime = fields[14].GetUInt32();
+			cn->rangeattacktime = fields[15].GetUInt32();
+			cn->Type = fields[16].GetUInt32();
+			cn->mount = fields[17].GetUInt32();
+			cn->level_max = fields[18].GetUInt32();
+			cn->flags1 = fields[19].GetUInt32();
+			cn->size = fields[20].GetFloat();
+			cn->family = fields[11].GetUInt32();
+			cn->bounding_radius = fields[22].GetFloat();
+			cn->trainer_type = fields[23].GetUInt32();
+			cn->unknown1 = fields[24].GetUInt32();
+			cn->unknown2 = fields[25].GetUInt32();
+			cn->unknown3 = fields[26].GetUInt32();
+			cn->unknown4 = fields[27].GetUInt32();
+			cn->classNum = fields[28].GetUInt32();
+			cn->slot1model = fields[29].GetUInt32();
+			cn->slot1pos = fields[30].GetUInt32();
+			cn->slot2model = fields[31].GetUInt32();
+			cn->slot2pos = fields[32].GetUInt32();
+			cn->slot3model = fields[33].GetUInt32();
+			cn->slot3pos = fields[34].GetUInt32();
+			
+			
+/*
+  `modelid` int(11) default '0',
+  `name` varchar(100) NOT NULL default '0',
+  `subname` varchar(100) default NULL,
+  `maxhealth` int(5) default '0',
+  `maxmana` int(5) default '0',
+  `level` int(3) default '0',
+  `faction` int(4) default '0',
+  `flag` int(4) default '0',
+  `scale` float default '0',
+  `speed` float default '0',
+  `rank` int(1) default '0',
+  `mindmg` float default '0',
+  `maxdmg` float default '0',
+  `baseattacktime` int(4) default '0',
+  `rangeattacktime` int(4) default '0',
+  `type` int(2) default '0',
+  `mount` int(5) default '0',
+  `level_max` int(11) default '0',
+  `flags1` int(11) default '0',
+  `size` float default '0',
+  `family` int(11) default '0',
+  `bounding_radius` float default '0',
+  `trainer_type` int(11) default '0',
+  `unk1` int(11) default '0',
+  `unk2` int(11) default '0',
+  `unk3` int(11) default '0',
+  `unk4` int(11) default '0',
+  `class` int(11) unsigned default '0',
+  `slot1model` int(11) default NULL,
+  `slot1pos` int(11) default NULL,
+  `slot2model` int(11) default NULL,
+  `slot2pos` int(11) default NULL,
+  `slot3model` int(11) default NULL,
+  `slot3pos` int(11) default NULL,
+*/
 
             AddCreatureName( cn );
         } while( result->NextRow() );
@@ -578,7 +694,7 @@ void ObjectMgr::LoadItemPrototypes()
             pItemPrototype->ItemStatValue[i/2] = fields[27 + i].GetUInt32();
         }
         for(i = 0; i < 15; i+=3)
-        {
+        {// UQ1: FIXME: There are supposed to be 6 damage types... Not 5...
             // Stupid items.sql
             int *a=(int *)malloc(sizeof(int)); *a=fields[46 + i].GetUInt32();
             int *b=(int *)malloc(sizeof(int)); *b=fields[47 + i].GetUInt32();
@@ -591,6 +707,7 @@ void ObjectMgr::LoadItemPrototypes()
 
             free(a);free(b);
         }
+
         pItemPrototype->Armor = fields[61].GetUInt32();
         pItemPrototype->HolyRes = fields[62].GetUInt32();
         pItemPrototype->FireRes = fields[63].GetUInt32();
@@ -599,6 +716,9 @@ void ObjectMgr::LoadItemPrototypes()
         pItemPrototype->ShadowRes = fields[66].GetUInt32();
         pItemPrototype->ArcaneRes = fields[67].GetUInt32();
         pItemPrototype->Delay = fields[68].GetUInt32();
+		if (pItemPrototype->Delay <= 0)
+			pItemPrototype->Delay = 1000; // UQ1: Added default value here to allow for bad DBs.
+
         pItemPrototype->Field69 = fields[69].GetUInt32();
         for(i = 0; i < 30; i+=6)
         {

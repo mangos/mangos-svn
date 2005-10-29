@@ -18,6 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+
+#include "UpdateData_1_8_x.h"
+
+#else //!(defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ ))
+
 #ifndef __UPDATEDATA_H
 #define __UPDATEDATA_H
 
@@ -63,3 +69,5 @@ class UpdateData
         ByteBuffer m_data;
 };
 #endif
+
+#endif //!defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )

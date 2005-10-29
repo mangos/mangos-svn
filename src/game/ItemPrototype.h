@@ -121,9 +121,9 @@ struct ItemPrototype
     uint32 ContainerSlots;
     uint32 ItemStatType[10];
     uint32 ItemStatValue[10];
-    float DamageMin[5];
-    float DamageMax[5];
-    uint32 DamageType[5];
+    float DamageMin[6];
+    float DamageMax[6];
+    uint32 DamageType[6];
     uint32 Armor;
     uint32 HolyRes;
     uint32 FireRes;

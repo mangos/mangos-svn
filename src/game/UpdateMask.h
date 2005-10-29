@@ -18,6 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifdef _VERSION_1_8_0_
+
+#include "UpdateMask_1_8_x.h"
+
+#else //!_VERSION_1_8_0_
+
 #ifndef __UPDATEMASK_H
 #define __UPDATEMASK_H
 
@@ -130,3 +136,5 @@ class UpdateMask
         uint32 *mUpdateMask;
 };
 #endif
+
+#endif //_VERSION_1_8_0_

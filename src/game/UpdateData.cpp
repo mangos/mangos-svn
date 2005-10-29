@@ -18,6 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#if !defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
+
 // UpdateData.cpp
 //
 
@@ -108,3 +110,6 @@ void UpdateData::Clear()
     m_outOfRangeGUIDs.clear();
     m_blockCount = 0;
 }
+
+#endif //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
+
