@@ -137,9 +137,9 @@ bool Master::Run()
     {
         delete World::getSingletonPtr();
         _StopDB();
-	sLog.outString( "MaNGOS can not bind to that port" );
-	exit(1);
-///        return 0;
+        sLog.outString( "MaNGOS can not bind to that port" );
+        exit(1);
+        ///return 0;
     }
 
     h.Add(&worldListenSocket);
@@ -149,14 +149,13 @@ bool Master::Run()
 
     ZThread::Thread t(new WorldRunnable);
 
-	// UQ1: Httpd
+    // UQ1: Httpd
 #ifdef ENABLE_HTTPD_SYSTEM
-//	new Httpd;
-	sHttpd.SetInitialHttpdSettings();
+    // new Httpd;
+    sHttpd.SetInitialHttpdSettings();
 
-	ZThread::Thread td(new HttpdRunnable);
+    ZThread::Thread td(new HttpdRunnable);
 #endif
-
 
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
@@ -178,9 +177,9 @@ bool Master::Run()
     t.wait();
     delete World::getSingletonPtr();
 
-	// UQ1: Httpd
+    // UQ1: Httpd
 #ifdef ENABLE_HTTPD_SYSTEM
-	td.wait();
+    td.wait();
     delete Httpd::getSingletonPtr();
 #endif
 
@@ -200,7 +199,7 @@ bool Master::_StartDB()
     if(!sConfig.GetString("DatabaseInfo", &dbstring))
     {
         sLog.outError("Database not specified");
-		exit(1);
+        exit(1);
         //return false;
     }
 
@@ -209,15 +208,15 @@ bool Master::_StartDB()
     if(!sDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to database");
-		exit(1);
+        exit(1);
         //return false;
     }
 
-/// clean online table
-	std::stringstream query;
-        query << "UPDATE characters SET online=0";
-        QueryResult *result = sDatabase.Query( query.str().c_str() );
-	delete result;
+    /// clean online table
+    std::stringstream query;
+    query << "UPDATE characters SET online=0";
+    QueryResult *result = sDatabase.Query( query.str().c_str() );
+    delete result;
     return true;
 }
 

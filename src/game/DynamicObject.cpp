@@ -64,10 +64,12 @@ void DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, fl
 
 void DynamicObject::Update(uint32 p_time)
 {
-/*	if (m_nextThinkTime > time(NULL))
-		return; // Think once every 5 secs only for GameObject updates...
+/*
+    if (m_nextThinkTime > time(NULL))
+        return; // Think once every 5 secs only for GameObject updates...
 
-	m_nextThinkTime = time(NULL) + 5;*/
+    m_nextThinkTime = time(NULL) + 5;
+*/
 
     bool deleteThis = false;
     WorldPacket data;
@@ -97,10 +99,10 @@ void DynamicObject::Update(uint32 p_time)
         else
         {
             m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
-#ifndef ENABLE_GRID_SYSTEM	    
-	    DealDamage();
+#ifndef ENABLE_GRID_SYSTEM        
+        DealDamage();
 #else
-	    m_caster->DealWithSpellDamage(*this);
+        m_caster->DealWithSpellDamage(*this);
 #endif
         }
     }
@@ -115,7 +117,7 @@ void DynamicObject::Update(uint32 p_time)
         objmgr.RemoveObject(this);
         delete this;
 #else
-	MapManager::Instance().GetMap(m_mapId)->Remove(this, true);
+    MapManager::Instance().GetMap(m_mapId)->Remove(this, true);
 #endif
     }
 }
@@ -138,23 +140,21 @@ void DynamicObject::DealDamage()
     }
 }
 #else
-void
-DynamicObject::DealWithSpellDamage(Player &caster)
+void DynamicObject::DealWithSpellDamage(Player &caster)
 {
     for(Player::InRangeUnitsMapType::iterator iter = caster.InRangeUnitsBegin(); iter != caster.InRangeUnitsEnd(); ++iter)
     {
-	if( iter->second->isAlive() )
-	{
-	    if(_CalcDistance(GetPositionX(),GetPositionY(),GetPositionZ(),iter->second->GetPositionX(),iter->second->GetPositionY(),iter->second->GetPositionZ()) < m_PeriodicDamageRadius && iter->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-	    {
-		caster.PeriodicAuraLog(iter->second,m_spell->Id,m_PeriodicDamage,m_spell->School);
-	    }	    
-	}
+    if( iter->second->isAlive() )
+    {
+        if(_CalcDistance(GetPositionX(),GetPositionY(),GetPositionZ(),iter->second->GetPositionX(),iter->second->GetPositionY(),iter->second->GetPositionZ()) < m_PeriodicDamageRadius && iter->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+        {
+        caster.PeriodicAuraLog(iter->second,m_spell->Id,m_PeriodicDamage,m_spell->School);
+        }        
+    }
     }
 }
 
-void
-DynamicObject::DealWithSpellDamage(Unit &caster)
+void DynamicObject::DealWithSpellDamage(Unit &caster)
 {
 }
 #endif

@@ -39,7 +39,7 @@ MapManager::MapManager() : i_gridCleanUpDelay(1000*300)
 MapManager::~MapManager()
 {    
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-	delete iter->second;   
+    delete iter->second;   
 
     std::stringstream ss;
     ss << "DELETE from creatures_grid";
@@ -66,13 +66,13 @@ MapManager::GetMap(uint32 id)
     Map *m = NULL;
     if( ( m=_getMap(id) ) == NULL )
     {
-	Guard guard(*this);
-	if( (m = _getMap(id)) == NULL )
-	{
-	    m = new Map(id, i_gridCleanUpDelay);
-	    i_maps[id] = m;	    
-	}
-	// ok..other player has created.	
+    Guard guard(*this);
+    if( (m = _getMap(id)) == NULL )
+    {
+        m = new Map(id, i_gridCleanUpDelay);
+        i_maps[id] = m;        
+    }
+    // ok..other player has created.    
     }
 
     assert(m != NULL);
@@ -84,12 +84,12 @@ MapManager::Update(time_t diff)
 {
     i_timer.Update(diff);
     if( !i_timer.Passed() )
-	return;
+    return;
 
     i_timer.Reset();
     Guard guard(*this);
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-	iter->second->Update(diff);
+    iter->second->Update(diff);
 #ifdef ENABLE_GRID_SYSTEM
     ObjectAccessor::Instance().Update();
 #endif

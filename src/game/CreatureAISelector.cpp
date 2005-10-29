@@ -24,7 +24,7 @@ namespace CreatureAISelector
 {
     CreatureAI* select(Creature *)
     {
-	return (new NullCreatureAI);
+    return (new NullCreatureAI);
     }
 }
 

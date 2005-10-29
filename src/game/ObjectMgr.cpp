@@ -102,7 +102,7 @@ ObjectMgr::~ObjectMgr()
 
     for( GameObjectInfoMap::iterator iter = mGameObjectInfo.begin(); iter != mGameObjectInfo.end(); ++iter)
     {
-		delete iter->second;
+        delete iter->second;
     }
     mGameObjectInfo.clear();
 
@@ -155,7 +155,7 @@ CreatureInfo *ObjectMgr::GetCreatureName(uint32 id)
 
     // returning unknown creature if no data found
 
-	//Log::getSingleton( ).outDetail("Creature: %u is an Unknown Being!\n", id);
+    //Log::getSingleton( ).outDetail("Creature: %u is an Unknown Being!\n", id);
     CreatureInfo *ci=new CreatureInfo;
     ci->Name = "Unknown Being";
     ci->Id=id;
@@ -314,8 +314,8 @@ void ObjectMgr::LoadCreatureNames()
             cn->Type = fields[3].GetUInt32();
             cn->DisplayID = fields[4].GetUInt32();
 
-	    // Adding unknowns here later
-			cn->unknown1 = 0; 
+        // Adding unknowns here later
+            cn->unknown1 = 0; 
             cn->unknown2 = 0; 
             cn->unknown3 = 0; 
             cn->unknown4 = 0; 
@@ -337,26 +337,26 @@ void ObjectMgr::LoadCreatureNames()
 
 PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 {
-	uint32 createId;
+    uint32 createId;
 
-	QueryResult *player_result, *items_result, *spells_result, *skills_result,*actions_result ;
+    QueryResult *player_result, *items_result, *spells_result, *skills_result,*actions_result ;
     Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
-	PlayerCreateInfo *pPlayerCreateInfo;
+    PlayerCreateInfo *pPlayerCreateInfo;
 
-	std::stringstream player_query,item_query,spell_query,skill_query,action_query;
+    std::stringstream player_query,item_query,spell_query,skill_query,action_query;
 
-	player_query << "SELECT * FROM playercreateinfo WHERE race = " << race << " AND class = " << class_;
-	player_result = sDatabase.Query( player_query.str().c_str() );
+    player_query << "SELECT * FROM playercreateinfo WHERE race = " << race << " AND class = " << class_;
+    player_result = sDatabase.Query( player_query.str().c_str() );
     
-	if( !player_result ) 
-		return NULL;
+    if( !player_result ) 
+        return NULL;
 
     pPlayerCreateInfo = new PlayerCreateInfo;
 
-	player_fields = player_result->Fetch();
+    player_fields = player_result->Fetch();
 
     pPlayerCreateInfo->createId = player_fields[0].GetUInt8();
-	createId = (uint32)pPlayerCreateInfo->createId;
+    createId = (uint32)pPlayerCreateInfo->createId;
     pPlayerCreateInfo->race = player_fields[1].GetUInt8();
     pPlayerCreateInfo->class_ = player_fields[2].GetUInt8();
     pPlayerCreateInfo->mapId = player_fields[3].GetUInt32();
@@ -379,64 +379,64 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     pPlayerCreateInfo->mindmg = player_fields[20].GetFloat();
     pPlayerCreateInfo->maxdmg = player_fields[21].GetFloat();
 
-	delete player_result;
+    delete player_result;
 
 
-	item_query << "SELECT * FROM playercreateinfo_items WHERE createId = 0 OR createId = " << createId ;
-	items_result = sDatabase.Query( item_query.str().c_str() );
-	do 
+    item_query << "SELECT * FROM playercreateinfo_items WHERE createId = 0 OR createId = " << createId ;
+    items_result = sDatabase.Query( item_query.str().c_str() );
+    do 
     {
-		if(!items_result) break;
-		items_fields = items_result->Fetch();
-		pPlayerCreateInfo->item.push_back(items_fields[1].GetUInt32());
-		pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
+        if(!items_result) break;
+        items_fields = items_result->Fetch();
+        pPlayerCreateInfo->item.push_back(items_fields[1].GetUInt32());
+        pPlayerCreateInfo->item_slot.push_back(items_fields[2].GetUInt8());
 
     } while( items_result->NextRow() );
 
-	delete items_result;
-	
-	spell_query << "SELECT * FROM playercreateinfo_spells WHERE createId = 0 OR createId = " << createId ;
-	spells_result = sDatabase.Query( spell_query.str().c_str() );
-	do 
+    delete items_result;
+    
+    spell_query << "SELECT * FROM playercreateinfo_spells WHERE createId = 0 OR createId = " << createId ;
+    spells_result = sDatabase.Query( spell_query.str().c_str() );
+    do 
     {
-		if(!spells_result) break;
-		spells_fields = spells_result->Fetch();
-		pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
+        if(!spells_result) break;
+        spells_fields = spells_result->Fetch();
+        pPlayerCreateInfo->spell.push_back(spells_fields[1].GetUInt16());
 
     } while( spells_result->NextRow() );
 
-	delete spells_result;
-	
-	skill_query << "SELECT * FROM playercreateinfo_skills WHERE createId = 0 OR createId = " << createId ;
-	skills_result = sDatabase.Query( skill_query.str().c_str() );
+    delete spells_result;
+    
+    skill_query << "SELECT * FROM playercreateinfo_skills WHERE createId = 0 OR createId = " << createId ;
+    skills_result = sDatabase.Query( skill_query.str().c_str() );
     do 
     {
-		if(!skills_result) break;
-		skills_fields = skills_result->Fetch();
-		pPlayerCreateInfo->skill[0].push_back(skills_fields[1].GetUInt16());
-		pPlayerCreateInfo->skill[1].push_back(skills_fields[2].GetUInt16());
-		pPlayerCreateInfo->skill[2].push_back(skills_fields[3].GetUInt16());
+        if(!skills_result) break;
+        skills_fields = skills_result->Fetch();
+        pPlayerCreateInfo->skill[0].push_back(skills_fields[1].GetUInt16());
+        pPlayerCreateInfo->skill[1].push_back(skills_fields[2].GetUInt16());
+        pPlayerCreateInfo->skill[2].push_back(skills_fields[3].GetUInt16());
 
     } while( skills_result->NextRow() );
 
-	delete skills_result;
+    delete skills_result;
 
-	action_query << "SELECT * FROM playercreateinfo_actions WHERE createId = 0 OR createId = " << createId ;
-	actions_result = sDatabase.Query( action_query.str().c_str() );
+    action_query << "SELECT * FROM playercreateinfo_actions WHERE createId = 0 OR createId = " << createId ;
+    actions_result = sDatabase.Query( action_query.str().c_str() );
     do 
     {
-		if(!actions_result) break;
-		actions_fields = actions_result->Fetch();
-		pPlayerCreateInfo->action[0].push_back(actions_fields[1].GetUInt16());
-		pPlayerCreateInfo->action[1].push_back(actions_fields[2].GetUInt16());
-		pPlayerCreateInfo->action[2].push_back(actions_fields[3].GetUInt16());
-		pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
+        if(!actions_result) break;
+        actions_fields = actions_result->Fetch();
+        pPlayerCreateInfo->action[0].push_back(actions_fields[1].GetUInt16());
+        pPlayerCreateInfo->action[1].push_back(actions_fields[2].GetUInt16());
+        pPlayerCreateInfo->action[2].push_back(actions_fields[3].GetUInt16());
+        pPlayerCreateInfo->action[3].push_back(actions_fields[4].GetUInt16());
 
     } while( actions_result->NextRow() );
 
-	delete actions_result;
+    delete actions_result;
 
-	return pPlayerCreateInfo; 
+    return pPlayerCreateInfo; 
 }
 
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
@@ -518,7 +518,7 @@ void ObjectMgr::LoadItemPrototypes()
     ItemPrototype *pItemPrototype;
     int i;
 
-	memset(&item_proto_ids,-1,sizeof(item_proto_ids));
+    memset(&item_proto_ids,-1,sizeof(item_proto_ids));
 
     if( result->GetFieldCount() < 113 )
     {
@@ -543,10 +543,10 @@ void ObjectMgr::LoadItemPrototypes()
 
         pItemPrototype->ItemId = fields[0].GetUInt32();
 
-		// For random selection loots...
-		item_proto_ids[num_item_prototypes] = fields[0].GetUInt32();
-		//Log::getSingleton( ).outDebug( "Loot item ID: %u added.", item_proto_ids[num_item_prototypes]);
-		num_item_prototypes++;
+        // For random selection loots...
+        item_proto_ids[num_item_prototypes] = fields[0].GetUInt32();
+        //Log::getSingleton( ).outDebug( "Loot item ID: %u added.", item_proto_ids[num_item_prototypes]);
+        num_item_prototypes++;
 
         pItemPrototype->Class = fields[2].GetUInt32();
         pItemPrototype->SubClass = fields[3].GetUInt32();
@@ -654,22 +654,22 @@ void ObjectMgr::LoadTrainerSpells()
         TrainSpell->skilline1 = fields[1].GetUInt32();
         TrainSpell->skilline2 = fields[2].GetUInt32();
         TrainSpell->skilline3 = fields[3].GetUInt32();
-		TrainSpell->skilline4 = fields[4].GetUInt32();
+        TrainSpell->skilline4 = fields[4].GetUInt32();
         TrainSpell->skilline5 = fields[5].GetUInt32();
         TrainSpell->skilline6 = fields[6].GetUInt32();
-		TrainSpell->skilline7 = fields[7].GetUInt32();
+        TrainSpell->skilline7 = fields[7].GetUInt32();
         TrainSpell->skilline8 = fields[8].GetUInt32();
         TrainSpell->skilline9 = fields[9].GetUInt32();
-		TrainSpell->skilline10 = fields[10].GetUInt32();
+        TrainSpell->skilline10 = fields[10].GetUInt32();
         TrainSpell->skilline11 = fields[11].GetUInt32();
         TrainSpell->skilline12 = fields[12].GetUInt32();
-		TrainSpell->skilline13 = fields[13].GetUInt32();
+        TrainSpell->skilline13 = fields[13].GetUInt32();
         TrainSpell->skilline14 = fields[14].GetUInt32();
         TrainSpell->skilline15 = fields[15].GetUInt32();
-		TrainSpell->skilline16 = fields[16].GetUInt32();
+        TrainSpell->skilline16 = fields[16].GetUInt32();
         TrainSpell->skilline17 = fields[17].GetUInt32();
         TrainSpell->skilline18 = fields[18].GetUInt32();
-		TrainSpell->skilline19 = fields[19].GetUInt32();
+        TrainSpell->skilline19 = fields[19].GetUInt32();
         TrainSpell->skilline20 = fields[20].GetUInt32();
         TrainSpell->maxlvl = fields[21].GetUInt32();
         TrainSpell->charclass = fields[22].GetUInt32();
@@ -860,16 +860,16 @@ void ObjectMgr::LoadGameObjects()
         fields = result->Fetch();
 /// print bar step
         bar.step();
-	uint32 id = fields[0].GetUInt32();
-	GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(), 
-						  fields[4].GetUInt32(),
-						  fields[5].GetUInt32(),fields[6].GetUInt32(),fields[7].GetUInt32(),fields[8].GetUInt32(),
-						  fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
-						  fields[12].GetUInt32(),
-						  fields[13].GetUInt32(), fields[14].GetUInt32(),
+    uint32 id = fields[0].GetUInt32();
+    GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(), 
+                          fields[4].GetUInt32(),
+                          fields[5].GetUInt32(),fields[6].GetUInt32(),fields[7].GetUInt32(),fields[8].GetUInt32(),
+                          fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
+                          fields[12].GetUInt32(),
+                          fields[13].GetUInt32(), fields[14].GetUInt32(),
                                                   fields[15].GetFloat(),
-						  fields[16].GetString());
-	mGameObjectInfo[id] = info;
+                          fields[16].GetString());
+    mGameObjectInfo[id] = info;
     }
     while( result->NextRow() );
 
@@ -880,17 +880,17 @@ void ObjectMgr::LoadGameObjects()
 
     if( result )
     {
-	do
-	{
-	    fields = result->Fetch();
-	    GameObject *go = new GameObject();
-	    ASSERT(go);
-	    
-	    go->LoadFromDB(fields[0].GetUInt32());
-	    AddObject(go);
-	}while( result->NextRow() );
+    do
+    {
+        fields = result->Fetch();
+        GameObject *go = new GameObject();
+        ASSERT(go);
+        
+        go->LoadFromDB(fields[0].GetUInt32());
+        AddObject(go);
+    }while( result->NextRow() );
 
-	delete result;
+    delete result;
     }
 }
 // end of ENABLE_GRID_SYSTEM
@@ -1010,20 +1010,20 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
             }
         }
     }*/
-	std::stringstream query;
-	query << "SELECT taxipath.destination FROM taxipath WHERE taxipath.source = " << curloc << " ORDER BY destination LIMIT 1";
-	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+    std::stringstream query;
+    query << "SELECT taxipath.destination FROM taxipath WHERE taxipath.source = " << curloc << " ORDER BY destination LIMIT 1";
+    Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
-	if( result.get() == NULL )
-	{
+    if( result.get() == NULL )
+    {
         return 1;
-	}
-	Field *fields = result->Fetch();
-	uint8 destination = fields[0].GetUInt8();
-	uint8 field = (uint8)((destination - 1) / 32);
-	Mask[field] |= 1 << ( (destination - 1 ) % 32 );
+    }
+    Field *fields = result->Fetch();
+    uint8 destination = fields[0].GetUInt8();
+    uint8 field = (uint8)((destination - 1) / 32);
+    Mask[field] |= 1 << ( (destination - 1 ) % 32 );
 
     return 1;
 }
@@ -1031,27 +1031,27 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
-	/*uint32 nearest = 0;
-	float distance = -1;
-	float nx, ny, nz, nd;*/
+    /*uint32 nearest = 0;
+    float distance = -1;
+    float nx, ny, nz, nd;*/
 
-	std::stringstream query;
+    std::stringstream query;
 
-	query << "SELECT taxinodes.ID, SQRT(pow(taxinodes.x-(" << x << "),2)+pow(taxinodes.y-(" << y << "),2)+pow(taxinodes.z-(" << z << "),2)) as distance ";
-	query << "FROM taxinodes WHERE taxinodes.continent = " << mapid << " ORDER BY distance LIMIT 1";
+    query << "SELECT taxinodes.ID, SQRT(pow(taxinodes.x-(" << x << "),2)+pow(taxinodes.y-(" << y << "),2)+pow(taxinodes.z-(" << z << "),2)) as distance ";
+    query << "FROM taxinodes WHERE taxinodes.continent = " << mapid << " ORDER BY distance LIMIT 1";
 
-	//Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+    //Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
     if( result.get() == NULL )
-	{
+    {
         return 0;
-	}
-	Field *fields = result->Fetch();
-	return fields[0].GetUInt8();
+    }
+    Field *fields = result->Fetch();
+    return fields[0].GetUInt8();
 
-	/*TaxiNodesMap::const_iterator nodes_itr;
+    /*TaxiNodesMap::const_iterator nodes_itr;
     TaxiPathMap::const_iterator path_itr;
     TaxiPathNodesVec::iterator pathnodes_itr;
 
@@ -1108,43 +1108,43 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
         cost = itr->second->price;
     }*/
 
-	std::stringstream query;
+    std::stringstream query;
 
-	query << "SELECT taxipath.price, taxipath.ID FROM taxipath WHERE taxipath.source = " << source << " AND taxipath.destination = " << destination;
-	
-	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+    query << "SELECT taxipath.price, taxipath.ID FROM taxipath WHERE taxipath.source = " << source << " AND taxipath.destination = " << destination;
+    
+    Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
     if( result.get() == NULL )
-	{
-		path = 0;
-		cost = 0;
-		return;
-	}
-	Field *fields = result->Fetch();
-	cost = fields[0].GetUInt32();
-	path = fields[1].GetUInt16();
+    {
+        path = 0;
+        cost = 0;
+        return;
+    }
+    Field *fields = result->Fetch();
+    cost = fields[0].GetUInt32();
+    path = fields[1].GetUInt16();
 }
 
 
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
-	std::stringstream query;
+    std::stringstream query;
 
-	query << "SELECT taxinodes.mount FROM taxinodes WHERE taxinodes.ID = " << id;
-	
-	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+    query << "SELECT taxinodes.mount FROM taxinodes WHERE taxinodes.ID = " << id;
+    
+    Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
-	if( result.get() == NULL )
-	{
-		return 0;
-	}
+    if( result.get() == NULL )
+    {
+        return 0;
+    }
 
-	Field *fields = result->Fetch();
-	return fields[0].GetUInt16();
+    Field *fields = result->Fetch();
+    return fields[0].GetUInt16();
 
     /*TaxiNodesMap::const_iterator itr;
 
@@ -1160,35 +1160,35 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
 
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path *pathnodes )
 {
-	std::stringstream query;
+    std::stringstream query;
 
-	query << "SELECT taxipathnodes.X, taxipathnodes.Y, taxipathnodes.Z FROM taxipathnodes WHERE taxipathnodes.path = " << path;
-	
-	Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
+    query << "SELECT taxipathnodes.X, taxipathnodes.Y, taxipathnodes.Z FROM taxipathnodes WHERE taxipathnodes.path = " << path;
+    
+    Log::getSingleton( ).outDebug(" STRING %s ",query.str().c_str());
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
-	if( result.get() == NULL )
-	{
-		 pathnodes->setLength( 0 );
-	}
-	
-	uint16 count = result->GetRowCount();
+    if( result.get() == NULL )
+    {
+         pathnodes->setLength( 0 );
+    }
+    
+    uint16 count = result->GetRowCount();
 
-	Log::getSingleton( ).outDebug(" ROW COUNT %u ",count);
+    Log::getSingleton( ).outDebug(" ROW COUNT %u ",count);
 
-	pathnodes->setLength( count );
+    pathnodes->setLength( count );
 
-	uint16 i = 0;
+    uint16 i = 0;
 
-	do
-	{
-		Field *fields = result->Fetch();
-		pathnodes->getNodes( )[ i ].x = fields[0].GetFloat();
+    do
+    {
+        Field *fields = result->Fetch();
+        pathnodes->getNodes( )[ i ].x = fields[0].GetFloat();
         pathnodes->getNodes( )[ i ].y = fields[1].GetFloat();
         pathnodes->getNodes( )[ i ].z = fields[2].GetFloat();
         i++;
-	} while( result->NextRow() );
+    } while( result->NextRow() );
 
     /*uint16 i = 0;
 
@@ -1283,19 +1283,19 @@ GossipText *ObjectMgr::GetGossipText(uint32 ID)
     }
     return NULL;*/
 
-	std::stringstream query;
-	query << "SELECT * FROM npc_text WHERE ID = " << ID;
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::stringstream query;
+    query << "SELECT * FROM npc_text WHERE ID = " << ID;
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
     if( result.get() == NULL )
         return NULL;
 
-	Field *fields = result->Fetch();
+    Field *fields = result->Fetch();
     GossipText *pGText = new GossipText;
     pGText->ID = fields[0].GetUInt32();
     pGText->Text = fields[1].GetString();
-	
-	return pGText;
+    
+    return pGText;
 }
 
 /*
@@ -1314,7 +1314,7 @@ void ObjectMgr::LoadGossipText()
         pGText->ID = fields[0].GetUInt32();
         pGText->Text = fields[1].GetString();
         AddGossipText(pGText);
-	
+    
     }while( result->NextRow() );
 }*/
 
@@ -1324,10 +1324,10 @@ void ObjectMgr::AddGossip(GossipNpc *pGossip)
     Creature *cr =  _getCreature(pGossip->Guid);
     if( cr != NULL )
     {
-		const uint32 mapid = cr->GetMapId();;
-		ASSERT( pGossip->Guid );
-		ASSERT( mGossipNpc[mapid].find(pGossip->Guid) == mGossipNpc[mapid].end() );
-		mGossipNpc[mapid][pGossip->Guid] = pGossip;
+        const uint32 mapid = cr->GetMapId();;
+        ASSERT( pGossip->Guid );
+        ASSERT( mGossipNpc[mapid].find(pGossip->Guid) == mGossipNpc[mapid].end() );
+        mGossipNpc[mapid][pGossip->Guid] = pGossip;
     }
 }*/
 
@@ -1336,82 +1336,82 @@ void ObjectMgr::AddGossip(GossipNpc *pGossip)
     //GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
     //return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
 
-	GossipNpc *pGossip = new GossipNpc;
-	pGossip->Guid = 999999;
-	pGossip->TextID = 999999;
-	pGossip->OptionCount = 0;
+    GossipNpc *pGossip = new GossipNpc;
+    pGossip->Guid = 999999;
+    pGossip->TextID = 999999;
+    pGossip->OptionCount = 0;
 
-	std::stringstream query1;
-	query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << 999999;
-	std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
+    std::stringstream query1;
+    query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << 999999;
+    std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
 
-	if( result2.get() != NULL )
-	{
-		unsigned int count = 0;
-		pGossip->OptionCount = result2->GetRowCount();
-		pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-		do
-		{
-			Field *fields1 = result2->Fetch();
-			//pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-			pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-			pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
-			pGossip->pOptions[count].OptionText = fields1[3].GetString();
-			pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-			pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-			++count;
-		}
-		while ( result2->NextRow() );
-	}
-	return pGossip;
+    if( result2.get() != NULL )
+    {
+        unsigned int count = 0;
+        pGossip->OptionCount = result2->GetRowCount();
+        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+        do
+        {
+            Field *fields1 = result2->Fetch();
+            //pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+            pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
+            pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
+            pGossip->pOptions[count].OptionText = fields1[3].GetString();
+            pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+            pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+            ++count;
+        }
+        while ( result2->NextRow() );
+    }
+    return pGossip;
 }*/
 
 GossipNpc *ObjectMgr::DefaultGossip(uint32 guid)
 {
-	GossipNpc *pGossip = new GossipNpc;
-	pGossip->Guid = guid;
-	pGossip->TextID = 999999;
-	pGossip->OptionCount = 0;
+    GossipNpc *pGossip = new GossipNpc;
+    pGossip->Guid = guid;
+    pGossip->TextID = 999999;
+    pGossip->OptionCount = 0;
 
-	/*pGossip->OptionCount = 2;
-	pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-	pGossip->pOptions[0].Guid = 999999;
-	pGossip->pOptions[0].Icon = 1;
-	pGossip->pOptions[0].OptionText = "Goodbye.";
-	pGossip->pOptions[0].NextTextID = 999999;
-	pGossip->pOptions[0].Special = 0;
+    /*pGossip->OptionCount = 2;
+    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+    pGossip->pOptions[0].Guid = 999999;
+    pGossip->pOptions[0].Icon = 1;
+    pGossip->pOptions[0].OptionText = "Goodbye.";
+    pGossip->pOptions[0].NextTextID = 999999;
+    pGossip->pOptions[0].Special = 0;
 
-	pGossip->pOptions[1].Guid = 999999;
-	pGossip->pOptions[1].Icon = 1;
-	pGossip->pOptions[1].OptionText = "Goodbye.";
-	pGossip->pOptions[1].NextTextID = 999999;
-	pGossip->pOptions[1].Special = 0;*/
+    pGossip->pOptions[1].Guid = 999999;
+    pGossip->pOptions[1].Icon = 1;
+    pGossip->pOptions[1].OptionText = "Goodbye.";
+    pGossip->pOptions[1].NextTextID = 999999;
+    pGossip->pOptions[1].Special = 0;*/
 
-	return pGossip;
+    return pGossip;
 }
 
 GossipNpc *ObjectMgr::DefaultVendorGossip()
 {
-	GossipNpc *pGossip = new GossipNpc;
-	pGossip->Guid = 999999;
-	pGossip->TextID = 999999;
-	pGossip->OptionCount = 0;
+    GossipNpc *pGossip = new GossipNpc;
+    pGossip->Guid = 999999;
+    pGossip->TextID = 999999;
+    pGossip->OptionCount = 0;
 
-/*	pGossip->OptionCount = 1;
-	pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-	pGossip->pOptions[0].Guid = 999999;
-	pGossip->pOptions[0].Icon = 1;
-	pGossip->pOptions[0].OptionText = "Goodbye.";
-	pGossip->pOptions[0].NextTextID = 999999;
-	pGossip->pOptions[0].Special = 3;
+/*    pGossip->OptionCount = 1;
+    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+    pGossip->pOptions[0].Guid = 999999;
+    pGossip->pOptions[0].Icon = 1;
+    pGossip->pOptions[0].OptionText = "Goodbye.";
+    pGossip->pOptions[0].NextTextID = 999999;
+    pGossip->pOptions[0].Special = 3;
 
-	pGossip->pOptions[1].Guid = 999999;
-	pGossip->pOptions[1].Icon = 1;
-	pGossip->pOptions[1].OptionText = "Goodbye.";
-	pGossip->pOptions[1].NextTextID = 999999;
-	pGossip->pOptions[1].Special = 3;*/
+    pGossip->pOptions[1].Guid = 999999;
+    pGossip->pOptions[1].Icon = 1;
+    pGossip->pOptions[1].OptionText = "Goodbye.";
+    pGossip->pOptions[1].NextTextID = 999999;
+    pGossip->pOptions[1].Special = 3;*/
 
-	return pGossip;
+    return pGossip;
 }
 
 GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid/*, uint32 mapid*/)
@@ -1419,42 +1419,42 @@ GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid/*, uint32 mapid*/)
     //GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
     //return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
 
-	std::stringstream query;
-	query << "SELECT * FROM npc_gossip WHERE NPC_GUID = " << guid;
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::stringstream query;
+    query << "SELECT * FROM npc_gossip WHERE NPC_GUID = " << guid;
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
     if( result.get() == NULL )
         return NULL;
 
-	Field *fields = result->Fetch();
-	GossipNpc *pGossip = new GossipNpc;
-	pGossip->Guid = guid;
-	pGossip->TextID = fields[1].GetUInt32();
-	pGossip->OptionCount = 0;
+    Field *fields = result->Fetch();
+    GossipNpc *pGossip = new GossipNpc;
+    pGossip->Guid = guid;
+    pGossip->TextID = fields[1].GetUInt32();
+    pGossip->OptionCount = 0;
 
-	std::stringstream query1;
-	query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << guid;
-	std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
+    std::stringstream query1;
+    query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << guid;
+    std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
 
-	if( result2.get() != NULL )
-	{
-		unsigned int count = 0;
-		pGossip->OptionCount = result2->GetRowCount();
-		pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-		do
-		{
-			Field *fields1 = result2->Fetch();
-			//pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-			pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-			pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
-			pGossip->pOptions[count].OptionText = fields1[3].GetString();
-			pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-			pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-			++count;
-		}
-		while ( result2->NextRow() );
-	}
-	return pGossip;
+    if( result2.get() != NULL )
+    {
+        unsigned int count = 0;
+        pGossip->OptionCount = result2->GetRowCount();
+        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+        do
+        {
+            Field *fields1 = result2->Fetch();
+            //pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+            pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
+            pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
+            pGossip->pOptions[count].OptionText = fields1[3].GetString();
+            pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+            pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+            ++count;
+        }
+        while ( result2->NextRow() );
+    }
+    return pGossip;
 }
 
 /*
@@ -1468,43 +1468,43 @@ void ObjectMgr::LoadGossips()
     {
         Field *fields = result->Fetch();
         GossipNpc *pGossip = new GossipNpc;
-	   // pGossip->ID = fields[0].GetUInt32();
+       // pGossip->ID = fields[0].GetUInt32();
         pGossip->Guid = fields[0].GetUInt32();
         pGossip->TextID = fields[1].GetUInt32();
 //        pGossip->OptionCount = fields[4].GetUInt32();
-		pGossip->OptionCount = 0;
+        pGossip->OptionCount = 0;
 
-	//	if( pGossip->OptionCount > 0 )
-	//		pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+    //    if( pGossip->OptionCount > 0 )
+    //        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 
         std::stringstream query;
         query << "SELECT * FROM npc_options WHERE NPC_GUID =" << pGossip->Guid;
         std::auto_ptr<QueryResult> result2(sDatabase.Query( query.str().c_str() ));
         if( result2.get() != NULL )
         {
-			unsigned int count = 0;
-			pGossip->OptionCount = result2->GetRowCount();
-			pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
+            unsigned int count = 0;
+            pGossip->OptionCount = result2->GetRowCount();
+            pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
 
-		//	bool still_good = true;
-			do
-			{
-			//while( count < pGossip->OptionCount && still_good)
-			//{
-				Field *fields1 = result2->Fetch();
-				pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-				pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-				pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
-				pGossip->pOptions[count].OptionText = fields1[3].GetString();
-				pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-				pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-				++count;
-				//still_good = result2->NextRow();
-			//}
-			}
-			while ( result2->NextRow() );
-			// incase the count does not match the number of options there
-			//pGossip->OptionCount = count;
+        //    bool still_good = true;
+            do
+            {
+            //while( count < pGossip->OptionCount && still_good)
+            //{
+                Field *fields1 = result2->Fetch();
+                pGossip->pOptions[count].ID = fields1[0].GetUInt32();
+                pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
+                pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
+                pGossip->pOptions[count].OptionText = fields1[3].GetString();
+                pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
+                pGossip->pOptions[count].Special = fields1[5].GetUInt32();
+                ++count;
+                //still_good = result2->NextRow();
+            //}
+            }
+            while ( result2->NextRow() );
+            // incase the count does not match the number of options there
+            //pGossip->OptionCount = count;
         }
         AddGossip(pGossip);
     } while( result->NextRow() );
@@ -1545,61 +1545,61 @@ void ObjectMgr::LoadGraveyards()
 
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
-	std::stringstream query;
-	query << "SELECT SQRT(POW(" << x << "-X,2)+POW(" << y << "-Y,2)+POW(" << z << "-Z,2)) as distance,X,Y,Z,mapId from graveyards where mapId = " << MapId << " ORDER BY distance ASC LIMIT 1";
+    std::stringstream query;
+    query << "SELECT SQRT(POW(" << x << "-X,2)+POW(" << y << "-Y,2)+POW(" << z << "-Z,2)) as distance,X,Y,Z,mapId from graveyards where mapId = " << MapId << " ORDER BY distance ASC LIMIT 1";
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
+    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
 
     if( result.get() == NULL )
         return NULL;
-	
-	Field *fields = result->Fetch();
-	GraveyardTeleport *pgrave = new GraveyardTeleport;
-	//pgrave->ID = fields[1].GetUInt32();
-	pgrave->X = fields[1].GetFloat();
-	pgrave->Y = fields[2].GetFloat();
-	pgrave->Z = fields[3].GetFloat();
+    
+    Field *fields = result->Fetch();
+    GraveyardTeleport *pgrave = new GraveyardTeleport;
+    //pgrave->ID = fields[1].GetUInt32();
+    pgrave->X = fields[1].GetFloat();
+    pgrave->Y = fields[2].GetFloat();
+    pgrave->Z = fields[3].GetFloat();
     pgrave->MapId = fields[4].GetUInt32();
 
-	return pgrave;
+    return pgrave;
 }
 
 AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger)
 {
-	std::stringstream query;
+    std::stringstream query;
 
     query << "SELECT totrigger FROM areatriggers WHERE id = " << trigger;
 
-	std::auto_ptr<QueryResult> result(sDatabase.Query(query.str().c_str()));
+    std::auto_ptr<QueryResult> result(sDatabase.Query(query.str().c_str()));
 
     if (result.get() != NULL )
     {
-		Field *fields = result->Fetch();
-		uint32 totrigger = fields[0].GetUInt32();
-		if( totrigger != 0)
-		{
-			std::stringstream query1;
+        Field *fields = result->Fetch();
+        uint32 totrigger = fields[0].GetUInt32();
+        if( totrigger != 0)
+        {
+            std::stringstream query1;
 
-			query1 << "SELECT mapid,coord_x,coord_y,coord_z FROM areatriggers WHERE id = " << totrigger;
+            query1 << "SELECT mapid,coord_x,coord_y,coord_z FROM areatriggers WHERE id = " << totrigger;
 
-			std::auto_ptr<QueryResult> result1(sDatabase.Query(query1.str().c_str()));
+            std::auto_ptr<QueryResult> result1(sDatabase.Query(query1.str().c_str()));
 
-			if ( result1.get() != NULL )
-			{
-				Field *fields1 = result1->Fetch();
-				AreaTrigger *at = new AreaTrigger;
+            if ( result1.get() != NULL )
+            {
+                Field *fields1 = result1->Fetch();
+                AreaTrigger *at = new AreaTrigger;
 
-				at->mapId = fields1[0].GetUInt32();
+                at->mapId = fields1[0].GetUInt32();
 
-				at->X = fields1[1].GetFloat();
-				at->Y = fields1[2].GetFloat();
-				at->Z = fields1[3].GetFloat();
+                at->X = fields1[1].GetFloat();
+                at->Y = fields1[2].GetFloat();
+                at->Z = fields1[3].GetFloat();
 
-				return at;
-			}
-		}
+                return at;
+            }
+        }
     }
-	return NULL;
+    return NULL;
 }
 
 void ObjectMgr::LoadTeleportCoords()
@@ -1668,7 +1668,7 @@ void ObjectMgr::SetHighestGuids()
 
     // result = sDatabase.Query( "SELECT MAX(name_id) FROM creature_names" );
     //result = sDatabase.Query( "SELECT MAX(entryid) FROM creaturetemplate" );
-	result = sDatabase.Query( "SELECT MAX(modelid) FROM creaturetemplate" );
+    result = sDatabase.Query( "SELECT MAX(modelid) FROM creaturetemplate" );
     if( result )
     {
         m_hiNameGuid = (*result)[0].GetUInt32()+1;

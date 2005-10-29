@@ -30,14 +30,14 @@
 
 typedef enum
     {
-	DISTRICT_1 = 1,
-	DISTRICT_2 = 1 << 1,
-	DISTRICT_3 = 1 << 2,
-	DISTRICT_4 = 1 << 3,
-	DISTRICT_5 = 1 << 4,
-	DISTRICT_6 = 1 << 5,
-	DISTRICT_7 = 1 << 6,
-	DISTRICT_8 = 1 << 7
+    DISTRICT_1 = 1,
+    DISTRICT_2 = 1 << 1,
+    DISTRICT_3 = 1 << 2,
+    DISTRICT_4 = 1 << 3,
+    DISTRICT_5 = 1 << 4,
+    DISTRICT_6 = 1 << 5,
+    DISTRICT_7 = 1 << 6,
+    DISTRICT_8 = 1 << 7
     } district_t;
 
 
@@ -65,57 +65,57 @@ struct MANGOS_DLL_DECL RedZone
 {
     struct Coordinate
     {
-	float x;
-	float y;
+    float x;
+    float y;
     };
 
     void Initialize(const uint32 &x, const uint32 &y)
     {
-	const float x_top = x * SIZE_OF_GRIDS;
-	const float y_top = y * SIZE_OF_GRIDS;
-	i_upperLeft.x = x_top + CORNER_GRID_OFFSET;
-	i_upperLeft.y = y_top + CORNER_GRID_OFFSET;
-	i_upperRight.x = x_top + (3.0*CORNER_GRID_OFFSET);
-	i_upperRight.y = y_top + CORNER_GRID_OFFSET;
-	i_lowerLeft.x = x_top + CORNER_GRID_OFFSET;
-	i_lowerLeft.y = y_top + (3.0*CORNER_GRID_OFFSET);
-	i_lowerRight.x = x_top + (3.0*CORNER_GRID_OFFSET);
-	i_lowerRight.y = y_top + (3.0*CORNER_GRID_OFFSET);
+    const float x_top = x * SIZE_OF_GRIDS;
+    const float y_top = y * SIZE_OF_GRIDS;
+    i_upperLeft.x = x_top + CORNER_GRID_OFFSET;
+    i_upperLeft.y = y_top + CORNER_GRID_OFFSET;
+    i_upperRight.x = x_top + (3.0*CORNER_GRID_OFFSET);
+    i_upperRight.y = y_top + CORNER_GRID_OFFSET;
+    i_lowerLeft.x = x_top + CORNER_GRID_OFFSET;
+    i_lowerLeft.y = y_top + (3.0*CORNER_GRID_OFFSET);
+    i_lowerRight.x = x_top + (3.0*CORNER_GRID_OFFSET);
+    i_lowerRight.y = y_top + (3.0*CORNER_GRID_OFFSET);
     }
 
     uint8 Enter(const float &x, const float &y)
     {
-	if( x < i_upperLeft.x )
-	{
-	    // left strip
-	    if( y < i_upperLeft.y )
-		return RedZoneDistrict::si_UpperLeftCorner;
-	    else if( y < i_lowerLeft.y )
-		return RedZoneDistrict::si_LeftCenter;
-	    else
-		return RedZoneDistrict::si_LowerLeftCorner;
-	}
-	else if( x > i_upperRight.x )
-	{
-	    // right strip
-	    if( y < i_upperRight.y )
-		return RedZoneDistrict::si_UpperRightCorner;
-	    else if( y < i_lowerRight.y )
-		return RedZoneDistrict::si_RightCenter;
-	    else
-		return RedZoneDistrict::si_LowerRightCorner;
-	}
-	else if( y < i_upperLeft.y )
-	{
-	    // upper strip
-	    return RedZoneDistrict::si_UpperCenter;
-	}
-	else if( y > i_lowerLeft.y )
-	{
-	    return RedZoneDistrict::si_LowerCenter;
-	}
-	
-	return 0; // not in red zone
+    if( x < i_upperLeft.x )
+    {
+        // left strip
+        if( y < i_upperLeft.y )
+            return RedZoneDistrict::si_UpperLeftCorner;
+        else if( y < i_lowerLeft.y )
+            return RedZoneDistrict::si_LeftCenter;
+        else
+            return RedZoneDistrict::si_LowerLeftCorner;
+    }
+    else if( x > i_upperRight.x )
+    {
+        // right strip
+        if( y < i_upperRight.y )
+            return RedZoneDistrict::si_UpperRightCorner;
+        else if( y < i_lowerRight.y )
+            return RedZoneDistrict::si_RightCenter;
+        else
+            return RedZoneDistrict::si_LowerRightCorner;
+    }
+    else if( y < i_upperLeft.y )
+    {
+        // upper strip
+        return RedZoneDistrict::si_UpperCenter;
+    }
+    else if( y > i_lowerLeft.y )
+    {
+        return RedZoneDistrict::si_LowerCenter;
+    }
+    
+    return 0; // not in red zone
     }
 
     Coordinate i_upperLeft;

@@ -188,7 +188,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
         objmgr.AddObject(pCreature);
         pCreature->PlaceOnMap();
 #else
-	MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
+    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
 #endif
 
         pCreature->SaveToDB();
@@ -844,38 +844,38 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     if (!*args)
         return false;
 
-	if (!strcmp(args, "all"))
-	{// UQ1: .learn all command. Teach dm's some good default skills/spells...
-		int loop = 0;
+    if (!strcmp(args, "all"))
+    {// UQ1: .learn all command. Teach dm's some good default skills/spells...
+        int loop = 0;
 
-		FillSystemMessageData(&data, m_session, fmtstring("%s - Learning default GM spells/skills.", m_session->GetPlayer()->GetName()));
-		m_session->SendPacket(&data);
+        FillSystemMessageData(&data, m_session, fmtstring("%s - Learning default GM spells/skills.", m_session->GetPlayer()->GetName()));
+        m_session->SendPacket(&data);
 
-		while (strcmp(gmSpellList[loop], "0"))
-		{// While not at end of the list ("0"), add each spell from the list...
-			uint32 spell = atol((char*)gmSpellList[loop]);
+        while (strcmp(gmSpellList[loop], "0"))
+        {// While not at end of the list ("0"), add each spell from the list...
+            uint32 spell = atol((char*)gmSpellList[loop]);
 
-			//FillSystemMessageData(&data, m_session, fmtstring("Learning spell/skill %i.", spell));
-			//m_session->SendPacket(&data);
+            //FillSystemMessageData(&data, m_session, fmtstring("Learning spell/skill %i.", spell));
+            //m_session->SendPacket(&data);
 
-			if (m_session->GetPlayer()->HasSpell(spell))  // check to see if char already learned spell
-			{
-				//FillSystemMessageData(&data, m_session, "You already know that spell.");
-				//m_session->SendPacket(&data);
-				loop++;
-				continue;
-			}
+            if (m_session->GetPlayer()->HasSpell(spell))  // check to see if char already learned spell
+            {
+                //FillSystemMessageData(&data, m_session, "You already know that spell.");
+                //m_session->SendPacket(&data);
+                loop++;
+                continue;
+            }
 
-			data.Initialize( SMSG_LEARNED_SPELL );
-			data << (uint32)spell;
-			m_session->SendPacket( &data );
-			m_session->GetPlayer()->addSpell((uint16)spell);
+            data.Initialize( SMSG_LEARNED_SPELL );
+            data << (uint32)spell;
+            m_session->SendPacket( &data );
+            m_session->GetPlayer()->addSpell((uint16)spell);
 
-			loop++;
-		}
+            loop++;
+        }
 
-		return true;
-	}
+        return true;
+    }
 
     uint32 spell = atol((char*)args);
 
@@ -947,51 +947,51 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
 //add by vendy for add item to slot 2005/10/16 20:32
 bool ChatHandler::HandleAddItemCommand(const char* args)
 {
-	
+    
     WorldPacket data;
 
     if (!*args)  
         return false;
 
-	char* citemid = strtok((char*)args, " ");
+    char* citemid = strtok((char*)args, " ");
     char* cPos = strtok(NULL, " ");
     char* cVal = strtok(NULL, " ");
 
-	uint32 itemid=atol(citemid);
+    uint32 itemid=atol(citemid);
 
-	Player*	pl = m_session->GetPlayer();
-	bool   slotfree=false;
-	uint8  i,slot;
+    Player*    pl = m_session->GetPlayer();
+    bool   slotfree=false;
+    uint8  i,slot;
     uint32 Pos=5,Val=1;
-	
+    
 
-	for(i =	INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END;	i++)
-	{
-		if (pl->GetItemBySlot(i) == NULL)
-		{
-			slot = i;
-			slotfree=true;
-			break;
-		}
-	}
-	if (slotfree)
-	{
-		Item *item = new Item();	
-		item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),	itemid, pl);
-		
-		//添加物品属性
-		if ((cPos) && (cVal)){
-		    Pos=(uint32)atol(cPos);
+    for(i =    INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END;    i++)
+    {
+        if (pl->GetItemBySlot(i) == NULL)
+        {
+            slot = i;
+            slotfree=true;
+            break;
+        }
+    }
+    if (slotfree)
+    {
+        Item *item = new Item();    
+        item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),    itemid, pl);
+        
+        //添加物品属性
+        if ((cPos) && (cVal)){
+            Pos=(uint32)atol(cPos);
             Val=(uint32)atol(cVal);
-			//for(int j=Pos;j<Val;j++)
-			item->SetUInt32Value( Pos, Val );
-		}
+            //for(int j=Pos;j<Val;j++)
+            item->SetUInt32Value( Pos, Val );
+        }
 
-		pl->AddItemToSlot(	slot, item );
-	}else{
+        pl->AddItemToSlot(    slot, item );
+    }else{
         FillSystemMessageData(&data, m_session, "Bag is full.");
         m_session->SendPacket(&data);
-	}
+    }
 
     return true;
 }
@@ -1000,17 +1000,17 @@ float max_creature_distance = 160;
 
 bool ChatHandler::HandleCreatureDistanceCommand(const char* args)
 {
-	WorldPacket data;
+    WorldPacket data;
 
     if (!*args)
         return false;
 
-	max_creature_distance = (float)atof((char*)args);
+    max_creature_distance = (float)atof((char*)args);
 
-	FillSystemMessageData(&data, m_session, fmtstring("Creature max think distance set to %f (units from nearest player).", max_creature_distance));
+    FillSystemMessageData(&data, m_session, fmtstring("Creature max think distance set to %f (units from nearest player).", max_creature_distance));
     m_session->SendPacket(&data);
 
-	return true;
+    return true;
 }
 
 bool ChatHandler::HandleObjectCommand(const char* args)
@@ -1031,7 +1031,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float o = chr->GetOrientation();
 
     GameObject* pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o);	
+    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o);    
     pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
@@ -1043,7 +1043,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
 #endif
     
     if(strcmp(safe,"true") == 0)
-	pGameObj->SaveToDB();
+    pGameObj->SaveToDB();
     
     return true;
 }
@@ -1342,8 +1342,8 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
         << pGrave->O<< ", "
         << pGrave->ZoneId << ", "
         << pGrave->MapId << ")";*/
-	
-	 ss << "INSERT INTO graveyards ( X, Y, Z, mapId) VALUES ("
+    
+     ss << "INSERT INTO graveyards ( X, Y, Z, mapId) VALUES ("
         << m_session->GetPlayer()->GetPositionX() << ", "
         << m_session->GetPlayer()->GetPositionY() << ", "
         << m_session->GetPlayer()->GetPositionZ() << ", "

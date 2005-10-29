@@ -159,12 +159,12 @@ void World::SetInitialWorldSettings()
     new ChannelMgr;
 
 #ifndef ENABLE_GRID_SYSTEM
-	// Set up player positions array (for NPC movement speedup)...
-	Log::getSingleton( ).outString( "Setting up a player positions array...." );
-	memset(&ActivePlayers,-1,sizeof(ActivePlayers));
-	memset(&PlayerPositions,0,sizeof(PlayerPositions));
-	memset(&PlayerZones,0,sizeof(PlayerZones));
-	memset(&PlayerMaps,0,sizeof(PlayerMaps));
+    // Set up player positions array (for NPC movement speedup)...
+    Log::getSingleton( ).outString( "Setting up a player positions array...." );
+    memset(&ActivePlayers,-1,sizeof(ActivePlayers));
+    memset(&PlayerPositions,0,sizeof(PlayerPositions));
+    memset(&PlayerZones,0,sizeof(PlayerZones));
+    memset(&PlayerMaps,0,sizeof(PlayerMaps));
 #endif //ENABLE_GRID_SYSTEM
 
     // Load quests
@@ -195,46 +195,46 @@ void World::SetInitialWorldSettings()
    // objmgr.LoadGraveyards();
     Log::getSingleton( ).outString( "Loading Trainers..." );
     objmgr.LoadTrainerSpells();
-	//Load Teleport Coords
+    //Load Teleport Coords
     Log::getSingleton( ).outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
 
     //Log::getSingleton( ).outString( "" );
     objmgr.SetHighestGuids();
 
-	// Loading loot templates
-	Log::getSingleton().outString("Initialize loot tables...");
+    // Loading loot templates
+    Log::getSingleton().outString("Initialize loot tables...");
     LootMgr::getSingleton().LoadLootTables();
 
-	Log::getSingleton().outString("Initialize data stores...");
-	barGoLink bar( 11 );
-	bar.step();
+    Log::getSingleton().outString("Initialize data stores...");
+    barGoLink bar( 11 );
+    bar.step();
     new SkillStore("DBC/SkillLineAbility.dbc");
-	bar.step();
+    bar.step();
     new EmoteStore("DBC/EmotesText.dbc");
-	bar.step();
+    bar.step();
     new SpellStore("DBC/Spell.dbc");
-	bar.step();
+    bar.step();
     new RangeStore("DBC/SpellRange.dbc");
-	bar.step();
+    bar.step();
     new CastTimeStore("DBC/SpellCastTimes.dbc");
-	bar.step();
+    bar.step();
     new DurationStore("DBC/SpellDuration.dbc");
-	bar.step();
+    bar.step();
     new RadiusStore("DBC/SpellRadius.dbc");
-	bar.step();
+    bar.step();
     new TalentStore("DBC/Talent.dbc");
-	bar.step();
+    bar.step();
     //Made by Andre2k2
     new AreaTableStore("DBC/AreaTable.dbc");
-	bar.step();
-	new WorldMapAreaStore("DBC/WorldMapArea.dbc");
-	bar.step();
-	new WorldMapOverlayStore("DBC/WorldMapOverlay.dbc");
+    bar.step();
+    new WorldMapAreaStore("DBC/WorldMapArea.dbc");
+    bar.step();
+    new WorldMapOverlayStore("DBC/WorldMapOverlay.dbc");
     //end Made
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
 
-	Log::getSingleton( ).outString( "" );
+    Log::getSingleton( ).outString( "" );
 
     // set timers
     m_timers[WUPDATE_OBJECTS].SetInterval(100);
@@ -481,7 +481,7 @@ void World::Update(time_t diff)
     if (m_timers[WUPDATE_OBJECTS].Passed())
     {
         m_timers[WUPDATE_OBJECTS].Reset();
-	MapManager::Instance().Update(diff);
+    MapManager::Instance().Update(diff);
     }
 #endif
 }

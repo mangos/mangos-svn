@@ -45,22 +45,20 @@ uint8 RedZoneDistrict::si_UpperCenter = DISTRICT_2;
 uint8 RedZoneDistrict::si_LowerCenter = DISTRICT_7;
 
 
-void
-RedZone::Initialize()
+void RedZone::Initialize()
 {
     for(unsigned int x=0; x < MAX_NUMBER_OF_GRIDS; ++x)
-	for(unsigned y=0; y < MAX_NUMBER_OF_GRIDS; ++y)
-	    si_RedZones[x][y].Initialize(x, y);
+    for(unsigned y=0; y < MAX_NUMBER_OF_GRIDS; ++y)
+        si_RedZones[x][y].Initialize(x, y);
 }
 
 //=====================================//
 //     RedZoneDistrict                //
-void
-RedZoneDistrict::Enter(GridPair &p)
+void RedZoneDistrict::Enter(GridPair &p)
 {
     uint8 mask = RedZone::si_RedZones[p.x_coord][p.y_coord].Enter(i_player.GetPositionX(), i_player.GetPositionY());
     if( mask != 0 )
-	i_map.ZoneAlert(i_player, p, mask);
+    i_map.ZoneAlert(i_player, p, mask);
 }
 
 RedZone RedZone::si_RedZones[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];

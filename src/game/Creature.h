@@ -100,7 +100,7 @@ class Creature : public Unit
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run);
         void AI_ChangeState(CreatureState state) { m_creatureState = state; }
         void AI_MoveTo(float x, float y, float z, bool run);
-		void Creature::AI_SendCreaturePacket( uint32 guidlow );
+        void Creature::AI_SendCreaturePacket( uint32 guidlow );
 
         /// Movement
         bool addWaypoint(float x, float y, float z);
@@ -185,37 +185,37 @@ class Creature : public Unit
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
-		// UQ1: We desperately need this working... We can't keep having friendlys attacking us!!!
-/*		uint32 getFaction()
-		{
-			return m_faction;
-		};
+        // UQ1: We desperately need this working... We can't keep having friendlys attacking us!!!
+/*        uint32 getFaction()
+        {
+            return m_faction;
+        };
 
         //this sets the faction horde, alliance or NoFaction in case of any bug
-		//Or sets a faction passed by parameter in case of race is < 0
-		void setFaction(uint8 race)
-		{
-	         //Set faction
-			if(race > 0)
-			{
+        //Or sets a faction passed by parameter in case of race is < 0
+        void setFaction(uint8 race)
+        {
+             //Set faction
+            if(race > 0)
+            {
                  m_faction = NoFaction;
                  switch(race)
                  {
-			         case HUMAN:
+                     case HUMAN:
                      case DWARF:
-		             case NIGHTELF:
-	                 case GNOME: 
-			             m_faction = Alliance; break;
-		             case ORC:
-		             case UNDEAD_PLAYER:
-		             case TAUREN:
-		             case TROLL:
+                     case NIGHTELF:
+                     case GNOME: 
+                         m_faction = Alliance; break;
+                     case ORC:
+                     case UNDEAD_PLAYER:
+                     case TAUREN:
+                     case TROLL:
                          m_faction = Horde; break;
-	             }
-			} else m_faction = NoFaction;
+                 }
+            } else m_faction = NoFaction;
 
-			SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
-		};*/
+            SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
+        };*/
 
     protected:
         void _LoadGoods();
@@ -262,8 +262,8 @@ class Creature : public Unit
         float m_waypoints[MAX_CREATURE_WAYPOINTS][3];
         float m_moveSpeed;
 
-		// Faction IDs...
-		uint32 m_faction;
+        // Faction IDs...
+        uint32 m_faction;
 
         float m_destinationX;
         float m_destinationY;
@@ -272,13 +272,13 @@ class Creature : public Unit
         uint32 m_timeToMove;
         uint32 m_timeMoved;
 
-		time_t m_nextThinkTime;
+        time_t m_nextThinkTime;
 
         /// Misc
         uint8 m_emoteState;
         std::string m_name;
         
-		///	Check attack distance
+        ///    Check attack distance
         float GetAttackDistance(Unit *pl);
 
 };

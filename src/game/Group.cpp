@@ -56,7 +56,7 @@ void Group::ChangeLeader(const uint64 &guid)
 #ifndef ENABLE_GRID_SYSTEM
         player = objmgr.GetObject<Player>( m_members[i].guid );
 #else
-	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
+    player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
 #endif
         ASSERT( player );
 
@@ -81,7 +81,7 @@ void Group::Disband()
 #ifndef ENABLE_GRID_SYSTEM
         player = objmgr.GetObject<Player>( m_members[i].guid );
 #else
-	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
+    player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
 #endif
         ASSERT( player );
 
@@ -103,7 +103,7 @@ void Group::SendUpdate()
 #ifndef ENABLE_GRID_SYSTEM
         player = objmgr.GetObject<Player>( m_members[i].guid );
 #else
-	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
+    player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
 #endif
         ASSERT( player );
 
@@ -172,7 +172,7 @@ void Group::BroadcastToGroup(WorldSession *session, std::string msg)
 #ifndef ENABLE_GRID_SYSTEM
             Player *pl = objmgr.GetObject<Player>(m_members[i].guid);
 #else
-	    Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
+        Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
 #endif
             if (pl && pl->GetSession())
                 pl->GetSession()->SendPacket(&data);

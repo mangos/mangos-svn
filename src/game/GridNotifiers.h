@@ -36,163 +36,160 @@
 class Player;
 class Map;
 
-
 namespace MaNGOS
 {
-    /** PlayerNotifier class is responsible to inform all players in the grid
-	that's within range the existence of the player.  As well, inform
-	the player himself the existence of other players. It also grap
-	the objects within its visibility.
-     */
+/** PlayerNotifier class is responsible to inform all players in the grid
+    that's within range the existence of the player.  As well, inform
+    the player himself the existence of other players. It also grap
+    the objects within its visibility.
+ */
     struct MANGOS_DLL_DECL PlayerNotifier
     {
-	PlayerNotifier(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
-	void Visit(PlayerMapType &);
-	void Visit(GameObjectMapType &);
-	void Visit(CreatureMapType &);
-	void Visit(DynamicObjectMapType &);
-	void Visit(CorpseMapType &);
-	GridType &i_grid;
-	Player &i_player;
+        PlayerNotifier(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+        void Visit(PlayerMapType &);
+        void Visit(GameObjectMapType &);
+        void Visit(CreatureMapType &);
+        void Visit(DynamicObjectMapType &);
+        void Visit(CorpseMapType &);
+        GridType &i_grid;
+        Player &i_player;
     };
 
-    /** ExitNotifier notifies player's exit status...
-     */
+/** ExitNotifier notifies player's exit status...
+ */
     struct MANGOS_DLL_DECL ExitNotifier
     {
-	ExitNotifier(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
-	void Visit(PlayerMapType &);
-	GridType& i_grid;
-	Player &i_player;
+        ExitNotifier(GridType &grid, Player &pl) : i_grid(grid), i_player(pl) {}
+        void Visit(PlayerMapType &);
+        GridType& i_grid;
+        Player &i_player;
     };
 
-    /** InRangeRemove removes the objects in range of a player due to the
-     * object's lifetime is up
-     */
+/** InRangeRemove removes the objects in range of a player due to the
+ *  object's lifetime is up
+ */
     struct MANGOS_DLL_DECL InRangeRemover
     {
-	InRangeRemover(GridType& grid, Object &obj) : i_grid(grid), i_object(obj) {}
-	void Visit(PlayerMapType &);	
-	GridType &i_grid;
-	Object &i_object;
+        InRangeRemover(GridType& grid, Object &obj) : i_grid(grid), i_object(obj) {}
+        void Visit(PlayerMapType &);
+        GridType &i_grid;
+        Object &i_object;
     };
 
-
-    /** GridUpdater updates all object status only	
-     */
+/** GridUpdater updates all object status only
+ */
     struct MANGOS_DLL_DECL GridUpdater
     {
-	GridType &i_grid;
-	uint32 i_timeDiff;
-	GridUpdater(GridType &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
+        GridType &i_grid;
+        uint32 i_timeDiff;
+        GridUpdater(GridType &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
 
-	template<class T> void updateObjects(std::map<OBJECT_HANDLE, T *> &m)
-	{
-	    std::map<OBJECT_HANDLE, T *> tmp(m);
-	    for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
-		iter->second->Update(i_timeDiff);
-	}
+        template<class T> void updateObjects(std::map<OBJECT_HANDLE, T *> &m)
+        {
+            std::map<OBJECT_HANDLE, T *> tmp(m);
+            for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
+                iter->second->Update(i_timeDiff);
+        }
 
-	void Visit(PlayerMapType &m) { updateObjects<Player>(m); }
-	void Visit(CreatureMapType &m){ updateObjects<Creature>(m); }
-	void Visit(GameObjectMapType &m) { updateObjects<GameObject>(m); }
-	void Visit(DynamicObjectMapType &m) { updateObjects<DynamicObject>(m); }
-	void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
+        void Visit(PlayerMapType &m) { updateObjects<Player>(m); }
+        void Visit(CreatureMapType &m){ updateObjects<Creature>(m); }
+        void Visit(GameObjectMapType &m) { updateObjects<GameObject>(m); }
+        void Visit(DynamicObjectMapType &m) { updateObjects<DynamicObject>(m); }
+        void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
     };
 
-    /** PlayerUpdatePacket pretty much do what PlayerRelocation except for all players
-     */
+/** PlayerUpdatePacket pretty much do what PlayerRelocation except for all players
+ */
     struct MANGOS_DLL_DECL PlayerUpdatePacket
     {
-	GridType &i_grid;
-	PlayerUpdatePacket(GridType &grid) : i_grid(grid) {}
-	void Visit(PlayerMapType &);
+        GridType &i_grid;
+        PlayerUpdatePacket(GridType &grid) : i_grid(grid) {}
+        void Visit(PlayerMapType &);
     };
 
-    /** ObjectRemoverNotifer is responsible for update the grid status when an
-     * object is removed from the 
-     */
+/** ObjectRemoverNotifer is responsible for update the grid status when an
+ *  object is removed from the
+ */
     struct MANGOS_DLL_DECL ObjectRemoverNotifier
     {
-	Player &i_player;
-	ObjectRemoverNotifier(Player &pl) : i_player(pl) {}
-	void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-	void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
-	void Visit(std::map<OBJECT_HANDLE, Player *> &m);
-	void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
-	void Visit(std::map<OBJECT_HANDLE, Corpse *> &m);	
+        Player &i_player;
+        ObjectRemoverNotifier(Player &pl) : i_player(pl) {}
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Player *> &m);
+        void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
     };
 
-    /** MessageDeliverer delivers a certain incomming message to all players
-     */
+/** MessageDeliverer delivers a certain incomming message to all players
+ */
     struct MANGOS_DLL_DECL MessageDeliverer
     {
-	Player &i_player;
-	WorldPacket *i_message;
-	MessageDeliverer(Player &pl, WorldPacket *msg) : i_player(pl), i_message(msg) {}
-	void Visit(PlayerMapType &m);
+        Player &i_player;
+        WorldPacket *i_message;
+        MessageDeliverer(Player &pl, WorldPacket *msg) : i_player(pl), i_message(msg) {}
+        void Visit(PlayerMapType &m);
     };
 
-    /** ObjectMessageDeliverer is a message from unit or object (a non player to his in range 
-     * players
-     */
+/** ObjectMessageDeliverer is a message from unit or object (a non player to his in range
+ *  players
+ */
     struct MANGOS_DLL_DECL ObjectMessageDeliverer
     {
-	Object &i_object;
-	WorldPacket *i_message;
-	ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
-	void Visit(PlayerMapType &m);
+        Object &i_object;
+        WorldPacket *i_message;
+        ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
+        void Visit(PlayerMapType &m);
     };
-    
-    /** PlayerRelocationNotifier informs the map manager that certain object
-     * moved it position. Its up to the MapManager to ensure that the
-     * object is still within its zone.  Its up to the zone that the object is within its
-     * grid. etc..
-     */
+
+/** PlayerRelocationNotifier informs the map manager that certain object
+ *  moved it position. Its up to the MapManager to ensure that the
+ *  object is still within its zone.  Its up to the zone that the object is within its
+ *  grid. etc..
+ */
     struct MANGOS_DLL_DECL PlayerRelocationNotifier
     {
-	Player &i_player;
-	UpdateData i_data;
-	PlayerRelocationNotifier(Player& player) : i_player(player) {}
-	~PlayerRelocationNotifier();
-	void Visit(PlayerMapType &);
-	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);	
+        Player &i_player;
+        UpdateData i_data;
+        PlayerRelocationNotifier(Player& player) : i_player(player) {}
+        ~PlayerRelocationNotifier();
+        void Visit(PlayerMapType &);
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);
     };
 
-    /** ObjectRelocation is when an objects moves (should ships, elevators, creatures)
-     */
+/** ObjectRelocation is when an objects moves (should ships, elevators, creatures)
+ */
     template<class T>
-    struct MANGOS_DLL_DECL ObjectRelocationNotifier
+        struct MANGOS_DLL_DECL ObjectRelocationNotifier
     {
-	T& i_object;
-	ObjectRelocationNotifier(T& obj) : i_object(obj) {}
-	void Visit(PlayerMapType &);
+        T& i_object;
+        ObjectRelocationNotifier(T& obj) : i_object(obj) {}
+        void Visit(PlayerMapType &);
     };
 
-    /** ObjectEnterNotifer notifies the players an brand new object has arrived.
-     * put them in arange to the player if it is.  This likely due to spawn.
-     */
+/** ObjectEnterNotifer notifies the players an brand new object has arrived.
+ *  put them in arange to the player if it is.  This likely due to spawn.
+ */
     template<class T>
-    struct MANGOS_DLL_DECL ObjectEnterNotifier
+        struct MANGOS_DLL_DECL ObjectEnterNotifier
     {
-	T& i_object;
-	GridType &i_grid;
-	ObjectEnterNotifier(GridType &grid, T& obj) : i_grid(grid), i_object(obj) {}
-	void Visit(PlayerMapType &);
+        T& i_object;
+        GridType &i_grid;
+        ObjectEnterNotifier(GridType &grid, T& obj) : i_grid(grid), i_object(obj) {}
+        void Visit(PlayerMapType &);
     };
 
-    /** ValidateGridUnload is a grid validater to ensure that the following grid
-     * is safe to unload
-     */
+/** ValidateGridUnload is a grid validater to ensure that the following grid
+ *  is safe to unload
+ */
     struct MANGOS_DLL_DECL ValidateGridUnload
     {
-	ValidateGridUnload(ObjectAccessor::PlayerMapType &, Map &, const uint32 &, const uint32 &);
-	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);
-	bool IsOkToUnload(void) const { return i_isOk; }
-	bool i_isOk;
-	std::vector<Player *> i_players;
+        ValidateGridUnload(ObjectAccessor::PlayerMapType &, Map &, const uint32 &, const uint32 &);
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &);
+        bool IsOkToUnload(void) const { return i_isOk; }
+        bool i_isOk;
+        std::vector<Player *> i_players;
     };
 
 }
-
 #endif

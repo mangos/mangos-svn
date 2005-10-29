@@ -52,19 +52,19 @@ public:
 
     inline void SetGridCleanUpDelay(uint32 t) 
     { 
-	if( t < MIN_GRID_DELAY )
-	    i_gridCleanUpDelay = MIN_GRID_DELAY;
-	else
-	    i_gridCleanUpDelay = t; 
+    if( t < MIN_GRID_DELAY )
+        i_gridCleanUpDelay = MIN_GRID_DELAY;
+    else
+        i_gridCleanUpDelay = t; 
     }
     inline void SetMapUpdateInterval(uint32 t) 
     {
-	// minimum of 100 ms
-	if( t > 100 )
-	{
-	    i_timer.SetInterval(t);
-	    i_timer.Reset();
-	}
+    // minimum of 100 ms
+    if( t > 100 )
+    {
+        i_timer.SetInterval(t);
+        i_timer.Reset();
+    }
     }
 
 private:
@@ -77,8 +77,8 @@ private:
 
     inline Map* _getMap(uint32 id) 
     {
-	MapMapType::iterator iter = i_maps.find(id);
-	return (iter == i_maps.end() ? NULL : iter->second);
+    MapMapType::iterator iter = i_maps.find(id);
+    return (iter == i_maps.end() ? NULL : iter->second);
     }
 
     typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;    

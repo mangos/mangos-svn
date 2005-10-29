@@ -59,7 +59,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_QUESTGIVER_STATUS );
     data << guid << questStatus;
 #ifdef _VERSION_1_7_0_
-	data << uint32(0);
+    data << uint32(0);
 #endif //_VERSION_1_7_0_
     SendPacket( &data );
 
@@ -276,9 +276,9 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
 #else
     for(Player::InRangeUnitsMapType::iterator iter=_player->InRangeUnitsBegin(); iter != _player->InRangeUnitsEnd(); ++iter)
     {
-	pCreature = dynamic_cast<Creature *>(iter->second);
-	if( pCreature != NULL && pCreature->hasQuest(quest_id) )
-	    break;
+    pCreature = dynamic_cast<Creature *>(iter->second);
+    if( pCreature != NULL && pCreature->hasQuest(quest_id) )
+        break;
     }
 #endif
 

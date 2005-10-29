@@ -36,8 +36,8 @@ class DynamicObject : public Object
 #ifndef ENABLE_GRID_SYSTEM
         void DealDamage();
 #else
-    void DealWithSpellDamage(Player &);
-    void DealWithSpellDamage(Unit &);
+        void DealWithSpellDamage(Player &);
+        void DealWithSpellDamage(Unit &);
 #endif
         void PeriodicTriggerDamage(uint32 damage, uint32 tick, float radius)
         {
@@ -48,7 +48,6 @@ class DynamicObject : public Object
         }
 
     protected:
-
         float _CalcDistance(float sX, float sY, float sZ, float dX, float dY, float dZ)
         {
             return sqrt((dX-sX)*(dX-sX)+(dY-sY)*(dY-sY)+(dZ-sZ)*(dZ-sZ));
@@ -63,6 +62,6 @@ class DynamicObject : public Object
 
         uint32 m_aliveDuration;
 
-		time_t m_nextThinkTime;
+        time_t m_nextThinkTime;
 };
 #endif

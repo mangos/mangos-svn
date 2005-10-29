@@ -17,11 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #ifndef MANGOS_GRIDSTATES_H
 #define MANGOS_GRIDSTATES_H
 
-/** 
+/**
  * @page GridStates is a state manchine for the grid system. It implement using the
  * state pattern.  The grid has serveral states and each transitional state is done
  * by the state manchine.  At each state, each action result in different results.
@@ -34,39 +33,37 @@
  */
 class MANGOS_DLL_DECL GridState
 {
-public:
+    public:
 
-    /// Update grid state
-    virtual void Update(Map &, GridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &t_diff) const = 0;
+/// Update grid state
+        virtual void Update(Map &, GridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &t_diff) const = 0;
 };
 
 class MANGOS_DLL_DECL InvalidState : public GridState
 {
-public:
- 
-    void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+    public:
+
+        void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
 };
 
 class MANGOS_DLL_DECL ActiveState : public GridState
 {
-public:
- 
-    void Update(Map &, GridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+    public:
+
+        void Update(Map &, GridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
 };
 
 class MANGOS_DLL_DECL IdleState : public GridState
 {
-public:
- 
-    void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
-};
+    public:
 
+        void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+};
 
 class MANGOS_DLL_DECL RemovalState : public GridState
 {
-public:
- 
-    void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
-};
+    public:
 
+        void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+};
 #endif

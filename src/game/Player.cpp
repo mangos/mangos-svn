@@ -88,10 +88,10 @@ Player::Player ( ): Unit()
     m_isInvited = false;
 
     m_dontMove = false;
-	
-	logoutDelay = LOGOUTDELAY;
-	inCombat = false;
-	pTrader = NULL;
+    
+    logoutDelay = LOGOUTDELAY;
+    inCombat = false;
+    pTrader = NULL;
 }
 
 
@@ -174,8 +174,8 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     baseattacktime[0] = 2000;
     baseattacktime[1] = 2000;
 
-	m_race = race;
-	m_class = class_;
+    m_race = race;
+    m_class = class_;
 
     m_mapId = info->mapId;
     m_zoneId = info->zoneId;
@@ -214,16 +214,16 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     //SetUInt32Value(UNIT_FIELD_MAXPOWER5, 5 );
     SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
     
-	setFaction(m_race, 0); //this sets the faction horde, alliance or NoFaction in case of any bug
+    setFaction(m_race, 0); //this sets the faction horde, alliance or NoFaction in case of any bug
     //SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction ); 
     
-	SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
+    SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     
-	//This set blue color to player, GHOST MODE
-	//SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
-	SetUInt32Value(UNIT_FIELD_FLAGS , 0x00000000 );
+    //This set blue color to player, GHOST MODE
+    //SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
+    SetUInt32Value(UNIT_FIELD_FLAGS , 0x00000000 );
 
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
@@ -249,22 +249,22 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
     Item *item;
-	uint32 titem;
-	uint8 titem_slot;
-	uint16 tspell, tskill[3], taction[4];
-	std::list<uint32>::iterator item_itr;
-	std::list<uint8>::iterator item_slot_itr;
-	std::list<uint16>::iterator spell_itr, skill_itr[3], action_itr[4];
+    uint32 titem;
+    uint8 titem_slot;
+    uint16 tspell, tskill[3], taction[4];
+    std::list<uint32>::iterator item_itr;
+    std::list<uint8>::iterator item_slot_itr;
+    std::list<uint16>::iterator spell_itr, skill_itr[3], action_itr[4];
 
 
-	item_itr = info->item.begin();
-	item_slot_itr = info->item_slot.begin();
+    item_itr = info->item.begin();
+    item_slot_itr = info->item_slot.begin();
 
-	for (; item_itr!=info->item.end(); item_itr++,item_slot_itr++)
+    for (; item_itr!=info->item.end(); item_itr++,item_slot_itr++)
     {
         titem = (*item_itr);
-		titem_slot = (*item_slot_itr);
-		if ( (titem!=0) && (titem_slot!=0) )
+        titem_slot = (*item_slot_itr);
+        if ( (titem!=0) && (titem_slot!=0) )
         {
             item = new Item();
             item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), titem, this);
@@ -272,53 +272,53 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
         }
     }
 
-	spell_itr = info->spell.begin();
+    spell_itr = info->spell.begin();
 
-	for (; spell_itr!=info->spell.end(); spell_itr++)
+    for (; spell_itr!=info->spell.end(); spell_itr++)
     {
         tspell = (*spell_itr);
-		if ( (tspell!=0) )
+        if ( (tspell!=0) )
         {
             addSpell(tspell, 0);
         }
     }
-	
-	for( i=0; i<3;i++)
-		skill_itr[i] = info->skill[i].begin();
-	
-	for (; skill_itr[0]!=info->skill[0].end() && skill_itr[1]!=info->skill[1].end() && skill_itr[2]!=info->skill[2].end(); )
+    
+    for( i=0; i<3;i++)
+        skill_itr[i] = info->skill[i].begin();
+    
+    for (; skill_itr[0]!=info->skill[0].end() && skill_itr[1]!=info->skill[1].end() && skill_itr[2]!=info->skill[2].end(); )
     {
         for( i=0; i<3;i++)
-			tskill[i] = (*skill_itr[i]);
+            tskill[i] = (*skill_itr[i]);
 
-		if ( (tskill[0]!=0) && (tskill[1]!=0) && (tskill[2]!=0) )
+        if ( (tskill[0]!=0) && (tskill[1]!=0) && (tskill[2]!=0) )
         {
             AddSkillLine(tskill[0],tskill[1],tskill[2]);
         }
 
-		for( i=0; i<3;i++)
-			skill_itr[i]++;
+        for( i=0; i<3;i++)
+            skill_itr[i]++;
     }
 
-	for( i=0; i<4;i++)
-		action_itr[i] = info->action[i].begin();
-	
-	
-	for (; action_itr[0]!=info->action[0].end() && action_itr[1]!=info->action[1].end();)
+    for( i=0; i<4;i++)
+        action_itr[i] = info->action[i].begin();
+    
+    
+    for (; action_itr[0]!=info->action[0].end() && action_itr[1]!=info->action[1].end();)
     {
         for( i=0; i<4 ;i++)
-			taction[i] = (*action_itr[i]);
-		
+            taction[i] = (*action_itr[i]);
+        
 
-		if ( (taction[0]!=0) && (taction[1]!=0) )
+        if ( (taction[0]!=0) && (taction[1]!=0) )
         {
             addAction((uint8)taction[0], taction[1], (uint8)taction[2], (uint8)taction[3]);
         }
-		for( i=0; i<4 ;i++)
-			action_itr[i]++;
+        for( i=0; i<4 ;i++)
+            action_itr[i]++;
     }
 
-	delete info;
+    delete info;
 
     // Not worrying about this stuff for now
     m_guildId = 0;
@@ -333,28 +333,28 @@ void Player::Update( uint32 p_time )
     if(!IsInWorld())
         return;
     
-	WorldPacket data;
+    WorldPacket data;
 
     Unit::Update( p_time );
 
-	CheckExploreSystem();
+    CheckExploreSystem();
 
 //#ifndef ENABLE_GRID_SYSTEM
-	// UQ1: Update PlayerPositions Array...
-//	uint64 guid = this->GetGUID();
-	//Player *chr = GetSession()->GetPlayer();
-	
-	//Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, chr->GetPositionX(), chr->GetPositionY()));
-//	Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, GetPositionX()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/, GetPositionY()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/));
+    // UQ1: Update PlayerPositions Array...
+//    uint64 guid = this->GetGUID();
+    //Player *chr = GetSession()->GetPlayer();
+    
+    //Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, chr->GetPositionX(), chr->GetPositionY()));
+//    Log::getSingleton( ).outDetail(fmtstring("Player %s (%i) (at %f %f).", this->GetName(), guid, GetPositionX()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/, GetPositionY()/*objmgr.GetObject<Player>(guid)->GetPositionX()*/));
 
-//	PlayerPositions[guid][0] = GetPositionX();//objmgr.GetObject<Player>(guid)->GetPositionX();
-//	PlayerPositions[guid][1] = GetPositionY();//objmgr.GetObject<Player>(guid)->GetPositionY();
+//    PlayerPositions[guid][0] = GetPositionX();//objmgr.GetObject<Player>(guid)->GetPositionX();
+//    PlayerPositions[guid][1] = GetPositionY();//objmgr.GetObject<Player>(guid)->GetPositionY();
 //#endif //ENABLE_GRID_SYSTEM
 
     if (m_state & UF_ATTACKING)
     {
-		inCombat = true;
-		logoutDelay = LOGOUTDELAY;
+        inCombat = true;
+        logoutDelay = LOGOUTDELAY;
 
         // In combat!
         if (isAttackReady())
@@ -364,7 +364,7 @@ void Player::Update( uint32 p_time )
 #ifndef ENABLE_GRID_SYSTEM
             pVictim = objmgr.GetObject<Creature>(m_curSelection);
 #else
-			pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
+            pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
 #endif
 
             if (!pVictim)
@@ -404,12 +404,12 @@ void Player::Update( uint32 p_time )
             }
         }
     } else { //This is a time to be able the logout after a combat!
-		if( logoutDelay ) logoutDelay--;
-		else {
-		  logoutDelay = LOGOUTDELAY;
-		  inCombat = false;
-		}
-	}
+        if( logoutDelay ) logoutDelay--;
+        else {
+          logoutDelay = LOGOUTDELAY;
+          inCombat = false;
+        }
+    }
 
     // only regenerate if alive
     if (isAlive())
@@ -484,8 +484,8 @@ void Player::Update( uint32 p_time )
 */
 
 #ifndef __NO_PLAYERS_ARRAY__
-	//this->Update(p_time);
-	SetPlayerPositionArray();
+    //this->Update(p_time);
+    SetPlayerPositionArray();
 #endif //__NO_PLAYERS_ARRAY__
 
 }
@@ -1112,8 +1112,8 @@ bool Player::removeSpell(uint16 spell_id)
     {
         if (itr->spellId == spell_id)
         {
-			m_spells.erase(itr);
-			return true;
+            m_spells.erase(itr);
+            return true;
         }
     }
     return false;
@@ -1306,61 +1306,61 @@ extern char *fmtstring( char *format, ... );
 
 void Player::SetPlayerPositionArray()
 {
-	if (m_nextThinkTime > time(NULL))
-		return; // Think once every 3 secs only for players update...
+    if (m_nextThinkTime > time(NULL))
+        return; // Think once every 3 secs only for players update...
 
-	m_nextThinkTime = time(NULL) + 3;
+    m_nextThinkTime = time(NULL) + 3;
 
-	// UQ1: Update PlayerPositions Array...
-	std::stringstream ss;
-	std::stringstream ss2;
-	std::stringstream ss3;
-	std::stringstream ss4;
-	std::stringstream ss5;
-	std::stringstream ss6;
-	std::stringstream ss7;
+    // UQ1: Update PlayerPositions Array...
+    std::stringstream ss;
+    std::stringstream ss2;
+    std::stringstream ss3;
+    std::stringstream ss4;
+    std::stringstream ss5;
+    std::stringstream ss6;
+    std::stringstream ss7;
 
     ss.rdbuf()->str("");
-	ss << GetGUID();
-	long long int guid = atoi(ss.str().c_str());
-//	Log::getSingleton( ).outDetail("GUID: %s->%i.", ss.str().c_str(), guid);
+    ss << GetGUID();
+    long long int guid = atoi(ss.str().c_str());
+//    Log::getSingleton( ).outDetail("GUID: %s->%i.", ss.str().c_str(), guid);
 
-	ss2.rdbuf()->str("");
-	ss2 << GetMapId();//m_mapId;
-	long int mapId = atoi(ss2.str().c_str());
-//	Log::getSingleton( ).outDetail("mapId: %s->%i.", ss2.str().c_str(), mapId);
+    ss2.rdbuf()->str("");
+    ss2 << GetMapId();//m_mapId;
+    long int mapId = atoi(ss2.str().c_str());
+//    Log::getSingleton( ).outDetail("mapId: %s->%i.", ss2.str().c_str(), mapId);
 
-	ss3.rdbuf()->str("");
-	ss3 << GetZoneId();//m_zoneId;
-	long int zoneId = atoi(ss3.str().c_str());
-//	Log::getSingleton( ).outDetail("zoneId: %s->%i.", ss3.str().c_str(), zoneId);
+    ss3.rdbuf()->str("");
+    ss3 << GetZoneId();//m_zoneId;
+    long int zoneId = atoi(ss3.str().c_str());
+//    Log::getSingleton( ).outDetail("zoneId: %s->%i.", ss3.str().c_str(), zoneId);
 
-	ss4.rdbuf()->str("");
-	ss4 << GetPositionX();//m_positionX;
-	float x = (float)atof(ss4.str().c_str());
-//	Log::getSingleton( ).outDetail("x: %s->%f.", ss4.str().c_str(), x);
+    ss4.rdbuf()->str("");
+    ss4 << GetPositionX();//m_positionX;
+    float x = (float)atof(ss4.str().c_str());
+//    Log::getSingleton( ).outDetail("x: %s->%f.", ss4.str().c_str(), x);
 
-	ss5.rdbuf()->str("");
-	ss5 << GetPositionY();//m_positionY;
-	float y = (float)atof(ss5.str().c_str());
-//	Log::getSingleton( ).outDetail("y: %s->%f.", ss5.str().c_str(), y);
+    ss5.rdbuf()->str("");
+    ss5 << GetPositionY();//m_positionY;
+    float y = (float)atof(ss5.str().c_str());
+//    Log::getSingleton( ).outDetail("y: %s->%f.", ss5.str().c_str(), y);
 
-	ss6.rdbuf()->str("");
-	ss6 << GetPositionZ();//m_positionZ;
-	float z = (float)atof(ss6.str().c_str());
-//	Log::getSingleton( ).outDetail("z: %s->%f.", ss6.str().c_str(), z);
+    ss6.rdbuf()->str("");
+    ss6 << GetPositionZ();//m_positionZ;
+    float z = (float)atof(ss6.str().c_str());
+//    Log::getSingleton( ).outDetail("z: %s->%f.", ss6.str().c_str(), z);
 
-	if (PlayerZones[guid] != zoneId || PlayerMaps[guid] != mapId)
-	{
-		Log::getSingleton( ).outDetail("Update player %s (GUID: %i).", GetName(), guid);
-		Log::getSingleton( ).outDetail("at Zone %i of Map %i position %f %f %f.", zoneId, mapId, x, y, z);
-	}
+    if (PlayerZones[guid] != zoneId || PlayerMaps[guid] != mapId)
+    {
+        Log::getSingleton( ).outDetail("Update player %s (GUID: %i).", GetName(), guid);
+        Log::getSingleton( ).outDetail("at Zone %i of Map %i position %f %f %f.", zoneId, mapId, x, y, z);
+    }
 
-	PlayerMaps[guid] = mapId;
-	PlayerZones[guid] = zoneId;
-	PlayerPositions[guid][0] = x;
-	PlayerPositions[guid][1] = y;
-	PlayerPositions[guid][2] = z;
+    PlayerMaps[guid] = mapId;
+    PlayerZones[guid] = zoneId;
+    PlayerPositions[guid][0] = x;
+    PlayerPositions[guid][1] = y;
+    PlayerPositions[guid][2] = z;
 }
 #endif //__NO_PLAYERS_ARRAY__
 
@@ -1389,8 +1389,8 @@ void Player::SaveToDB()
         << GetGUIDLow() << ", "                   // TODO: use full guids
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
-		<< m_race << ", "
-		<< m_class << ", "
+        << m_race << ", "
+        << m_class << ", "
         << m_mapId << ", "
         << m_zoneId << ", "
         << m_positionX << ", "
@@ -1408,8 +1408,8 @@ void Player::SaveToDB()
         ss << m_taximask[i] << " ";
 
     ss << "', ";
-	inworld ? ss << 1 : ss << 0;
-	ss << " )";
+    inworld ? ss << 1 : ss << 0;
+    ss << " )";
 
     sDatabase.Execute( ss.str().c_str() );
 
@@ -1560,8 +1560,8 @@ void Player::LoadFromDB( uint32 guid )
 
     // TODO: check for overflow
     m_name = fields[3].GetString();
-	m_race = fields[4].GetUInt8();
-	m_class = fields[5].GetUInt8();
+    m_race = fields[4].GetUInt8();
+    m_class = fields[5].GetUInt8();
 
     m_positionX = fields[6].GetFloat();
     m_positionY = fields[7].GetFloat();
@@ -2204,11 +2204,11 @@ void Player::SwapItemSlots(uint8 srcslot, uint8 dstslot)
                     m_items[dstslot]->DestroyForPlayer( (Player*)*i );
             }
 #else
-	    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-	    {
-		if( iter->second->GetTypeId() == TYPEID_PLAYER )
-		    m_items[dstslot]->DestroyForPlayer((Player *)iter->second);
-	    }
+        for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+        {
+        if( iter->second->GetTypeId() == TYPEID_PLAYER )
+            m_items[dstslot]->DestroyForPlayer((Player *)iter->second);
+        }
 #endif
         }
         /* else if ( srcslot >= EQUIPMENT_SLOT_END && dstslot < EQUIPMENT_SLOT_END ) */
@@ -2229,16 +2229,16 @@ void Player::SwapItemSlots(uint8 srcslot, uint8 dstslot)
                 }
             }
 #else
-	    for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-	    {
-		if( iter->second->isType(TYPEID_PLAYER) )
-		{
-		    upd.Clear();
-		    m_items[dstslot]->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
-		    upd.BuildPacket(&packet);
-		    GetSession()->SendPacket(&packet);
-		}
-	    }
+        for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+        {
+        if( iter->second->isType(TYPEID_PLAYER) )
+        {
+            upd.Clear();
+            m_items[dstslot]->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
+            upd.BuildPacket(&packet);
+            GetSession()->SendPacket(&packet);
+        }
+        }
 #endif
         }
     }
@@ -2314,16 +2314,16 @@ void Player::AddItemToSlot(uint8 slot, Item *item)
                 }
             }
 #else
-	    for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-	    {
-		if( iter->second->isType(TYPEID_PLAYER) )
-		{
-		    upd.Clear();
-		    item->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
-		    upd.BuildPacket(&packet);
-		    GetSession()->SendPacket(&packet);
-		}
-	    }
+        for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+        {
+        if( iter->second->isType(TYPEID_PLAYER) )
+        {
+            upd.Clear();
+            item->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
+            upd.BuildPacket(&packet);
+            GetSession()->SendPacket(&packet);
+        }
+        }
 #endif
         }
 
@@ -2392,7 +2392,7 @@ Item* Player::RemoveItemFromSlot(uint8 slot)
 #ifndef ENABLE_GRID_SYSTEM
         item->RemoveFromMap();
 #else
-	item->RemoveFromWorld();
+    item->RemoveFromWorld();
 #endif
 
         // create for ourselves
@@ -2409,11 +2409,11 @@ Item* Player::RemoveItemFromSlot(uint8 slot)
                     item->DestroyForPlayer( (Player*)*i );
             }
 #else
-	    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-	    {
-		if( iter->second->isType(TYPEID_PLAYER) )
-		    item->DestroyForPlayer((Player *)iter->second);
-	    }
+        for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+        {
+        if( iter->second->isType(TYPEID_PLAYER) )
+            item->DestroyForPlayer((Player *)iter->second);
+        }
 #endif
         }
     }
@@ -2465,7 +2465,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
    if (proto->Armor)
         SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) +
         (apply ? proto->Armor : -(int32)proto->Armor));
-	if (proto->HolyRes)
+    if (proto->HolyRes)
         SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) +
         (apply ? proto->HolyRes : -(int32)proto->HolyRes));
     if (proto->FireRes)
@@ -2480,7 +2480,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if (proto->ShadowRes)
         SetUInt32Value(UNIT_FIELD_RESISTANCES_05, GetUInt32Value(UNIT_FIELD_RESISTANCES_05) +
         (apply ? proto->ShadowRes : -(int32)proto->ShadowRes));
-	 if (proto->ArcaneRes)
+     if (proto->ArcaneRes)
         SetUInt32Value(UNIT_FIELD_RESISTANCES_06, GetUInt32Value(UNIT_FIELD_RESISTANCES_06) +
         (apply ? proto->ArcaneRes : -(int32)proto->ArcaneRes));
 
@@ -2572,9 +2572,9 @@ void Player::SetMovement(uint8 pType)
         case MOVE_LAND_WALK:
         {
             data.Initialize(SMSG_MOVE_LAND_WALK);
-			//UQ1: Why ?
-			//data << GetUInt32Value( OBJECT_FIELD_GUID );
-			data << GetGUID();
+            //UQ1: Why ?
+            //data << GetUInt32Value( OBJECT_FIELD_GUID );
+            data << GetGUID();
             GetSession()->SendPacket( &data );
         }break;
         default:break;
@@ -2703,7 +2703,7 @@ void Player::ResurrectPlayer()
 {
     RemoveFlag(PLAYER_FLAGS, 0x10);
     //Remove ghost mode, the picture of player appears green again
-	RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
+    RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
 
     setDeathState(ALIVE);
     if(getRace() == NIGHTELF)                     // NEs to turn back from Wisp.
@@ -2806,7 +2806,7 @@ void Player::CreateCorpse()
 #ifndef ENABLE_GRID_SYSTEM
         objmgr.AddObject(pCorpse);
 #else
-	MapManager::Instance().GetMap(pCorpse->GetMapId())->Add(pCorpse);
+    MapManager::Instance().GetMap(pCorpse->GetMapId())->Add(pCorpse);
 #endif
     }
 #ifndef ENABLE_GRID_SYSTEM
@@ -2829,7 +2829,7 @@ void Player::SpawnCorpseBody()
 #else
     pCorpse = ObjectAccessor::Instance().GetCorpse(*this, GetGUID());
     if( pCorpse )
-	MapManager::Instance().GetMap(m_mapId)->Add(pCorpse);
+    MapManager::Instance().GetMap(m_mapId)->Add(pCorpse);
 #endif
     // Deadknight:hiding every creature except spirit healers
 #ifndef ENABLE_GRID_SYSTEM
@@ -2873,32 +2873,32 @@ void Player::SpawnCorpseBody()
 #else
     for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
     {
-	Player *player = dynamic_cast<Player *>(iter->second);
-	if( player == NULL )
-	{
-	    if ( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233 )
-		iter->second->DestroyForPlayer(this);
-	}
-	else if( player->isAlive() )
-	{
-	    if( !player->IsGroupMember(this) )
-	    {
-		player->DestroyForPlayer(this);
-		this->DestroyForPlayer(player);
-	    }
-	}
-	else if( player->isDead() )
-	{
-	    WorldPacket my_packet, player_packet;
-	    UpdateData my_data, player_data;
-	    player->BuildCreateUpdateBlockForPlayer(&player_data, this);
-	    player_data.BuildPacket(&player_packet);
-	    GetSession()->SendPacket(&player_packet);
+    Player *player = dynamic_cast<Player *>(iter->second);
+    if( player == NULL )
+    {
+        if ( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233 )
+        iter->second->DestroyForPlayer(this);
+    }
+    else if( player->isAlive() )
+    {
+        if( !player->IsGroupMember(this) )
+        {
+        player->DestroyForPlayer(this);
+        this->DestroyForPlayer(player);
+        }
+    }
+    else if( player->isDead() )
+    {
+        WorldPacket my_packet, player_packet;
+        UpdateData my_data, player_data;
+        player->BuildCreateUpdateBlockForPlayer(&player_data, this);
+        player_data.BuildPacket(&player_packet);
+        GetSession()->SendPacket(&player_packet);
 
-	    this->BuildCreateUpdateBlockForPlayer(&my_data, player);
-	    my_data.BuildPacket(&my_packet);
-	    player->GetSession()->SendPacket(&my_packet);
-	}
+        this->BuildCreateUpdateBlockForPlayer(&my_data, player);
+        my_data.BuildPacket(&my_packet);
+        player->GetSession()->SendPacket(&my_packet);
+    }
     }
 #endif
 
@@ -2974,30 +2974,30 @@ void Player::SpawnCorpseBones()
 #else
     for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
     {
-	Player *player = dynamic_cast<Player *>(iter->second);
-	if( player == NULL )
-	{
-	    if( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233)
-	    {
-		WorldPacket packet;
-		UpdateData data;
-		iter->second->BuildCreateUpdateBlockForPlayer(&data, this);
-		data.BuildPacket(&packet);
-		GetSession()->SendPacket(&packet);
-	    }
-	}
-	else if( player->isAlive() )
-	{
-	    WorldPacket packet, pl_packet;
-	    UpdateData data, pl_data;
-	    player->BuildCreateUpdateBlockForPlayer(&pl_data, this);
-	    pl_data.BuildPacket(&pl_packet);
-	    GetSession()->SendPacket(&pl_packet);
+    Player *player = dynamic_cast<Player *>(iter->second);
+    if( player == NULL )
+    {
+        if( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233)
+        {
+        WorldPacket packet;
+        UpdateData data;
+        iter->second->BuildCreateUpdateBlockForPlayer(&data, this);
+        data.BuildPacket(&packet);
+        GetSession()->SendPacket(&packet);
+        }
+    }
+    else if( player->isAlive() )
+    {
+        WorldPacket packet, pl_packet;
+        UpdateData data, pl_data;
+        player->BuildCreateUpdateBlockForPlayer(&pl_data, this);
+        pl_data.BuildPacket(&pl_packet);
+        GetSession()->SendPacket(&pl_packet);
 
-	    this->BuildCreateUpdateBlockForPlayer(&data, player);
-	    data.BuildPacket(&packet);
-	    player->GetSession()->SendPacket(&packet);
-	}
+        this->BuildCreateUpdateBlockForPlayer(&data, player);
+        data.BuildPacket(&packet);
+        player->GetSession()->SendPacket(&packet);
+    }
     }
 #endif
 }
@@ -3055,19 +3055,19 @@ void Player::RepopAtGraveyard()
         }
     }
 
-	Log::getSingleton( ).outDetail("position - X - %f - Y - %f - Z - %f", closestX, closestY, closestZ);*/
+    Log::getSingleton( ).outDetail("position - X - %f - Y - %f - Z - %f", closestX, closestY, closestZ);*/
 
-	GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId() );
+    GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId() );
 
-	if(ClosestGrave)
-	{
-		//Log::getSingleton( ).outDetail("position - X - %f - Y - %f - Z - %f", ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z);
-		closestX = ClosestGrave->X;
-		closestY = ClosestGrave->Y;
-		closestZ = ClosestGrave->Z;
-		delete ClosestGrave;
-	}
-	
+    if(ClosestGrave)
+    {
+        //Log::getSingleton( ).outDetail("position - X - %f - Y - %f - Z - %f", ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z);
+        closestX = ClosestGrave->X;
+        closestY = ClosestGrave->Y;
+        closestZ = ClosestGrave->Z;
+        delete ClosestGrave;
+    }
+    
 
     if(closestX != 0 && closestY != 0 && closestZ != 0)
     {
@@ -3107,14 +3107,14 @@ void Player::RepopAtGraveyard()
 #else
     for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
     {
-	if( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233 )
-	{
-	    WorldPacket packet;
-	    UpdateData data;
-	    iter->second->BuildCreateUpdateBlockForPlayer(&data, this);
-	    data.BuildPacket(&packet);
-	    this->GetSession()->SendPacket(&packet);
-	}
+    if( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233 )
+    {
+        WorldPacket packet;
+        UpdateData data;
+        iter->second->BuildCreateUpdateBlockForPlayer(&data, this);
+        data.BuildPacket(&packet);
+        this->GetSession()->SendPacket(&packet);
+    }
     }
 #endif
 }
@@ -3141,11 +3141,11 @@ void Player::CleanupChannels()
 
 void Player::BroadcastToFriends(std::string msg)
 {
-    	std::stringstream query;
-		QueryResult *result;
-    	Field *fields;
-		Player *pfriend;
-						
+        std::stringstream query;
+        QueryResult *result;
+        Field *fields;
+        Player *pfriend;
+                        
         query << "SELECT * FROM `social` where flags = 'FRIEND' AND guid='" << GetGUID() << "'";
         result = sDatabase.Query( query.str().c_str() );
 
@@ -3160,7 +3160,7 @@ void Player::BroadcastToFriends(std::string msg)
 #ifndef ENABLE_GRID_SYSTEM
             pfriend = objmgr.GetObject<Player>(fields[2].GetUInt64());
 #else
-	    	pfriend = ObjectAccessor::Instance().FindPlayer(fields[2].GetUInt64());
+            pfriend = ObjectAccessor::Instance().FindPlayer(fields[2].GetUInt64());
 #endif
             if (pfriend && pfriend->IsInWorld())
                 pfriend->GetSession()->SendPacket(&data);
@@ -3335,10 +3335,10 @@ Player::SetPosition(const float &x, const float &y, const float &z, const float 
     const float old_y = m_positionY;
 
     if( old_x != x || old_y != y )
-	m->PlayerRelocation(this, x, y, z, orientation);
-	
-	//Check new areas to discover
-	CheckExploreSystem();
+    m->PlayerRelocation(this, x, y, z, orientation);
+    
+    //Check new areas to discover
+    CheckExploreSystem();
 
     return true;
 }
@@ -3355,16 +3355,16 @@ Player::UpdateInRange(UpdateData &data)
 {
     // update units (either player or creature)
     for(InRangeUnitsMapType::iterator iter= i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-	if( !MaNGOS::Utilities::is_in_range(this, iter->second) )
-	{
-	    iter->second->BuildOutOfRangeUpdateBlock(&data);
-	    iter->second->MoveOutOfRange(*this); // tell the creature/player I am now out of your range...
-	}
+    if( !MaNGOS::Utilities::is_in_range(this, iter->second) )
+    {
+        iter->second->BuildOutOfRangeUpdateBlock(&data);
+        iter->second->MoveOutOfRange(*this); // tell the creature/player I am now out of your range...
+    }
 
     // update objects
     for(InRangeObjectsMapType::iterator iter=i_inRangeObjects.begin(); iter != i_inRangeObjects.end(); ++iter)
-	if( !MaNGOS::Utilities::is_in_range(this, iter->second) )
-	    iter->second->BuildOutOfRangeUpdateBlock(&data);
+    if( !MaNGOS::Utilities::is_in_range(this, iter->second) )
+        iter->second->BuildOutOfRangeUpdateBlock(&data);
 }
 
 void
@@ -3372,12 +3372,12 @@ Player::MoveOutOfRange(Player &player)
 {
     if( this != &player )
     {
-	UpdateData data;
-	WorldPacket packet;
-	player.BuildOutOfRangeUpdateBlock(&data);
-	data.BuildPacket(&packet);
-	this->GetSession()->SendPacket(&packet);
-	RemoveInRangeObject(&player);
+    UpdateData data;
+    WorldPacket packet;
+    player.BuildOutOfRangeUpdateBlock(&data);
+    data.BuildPacket(&packet);
+    this->GetSession()->SendPacket(&packet);
+    RemoveInRangeObject(&player);
     }
 }
 
@@ -3398,7 +3398,7 @@ void
 Player::DestroyInRange()
 {
     for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter !=i_inRangeUnits.end(); ++iter)
-	iter->second->MoveOutOfRange(*this);
+    iter->second->MoveOutOfRange(*this);
 
     i_inRangeUnits.clear();
     i_inRangeObjects.clear();
@@ -3410,82 +3410,82 @@ Player::DestroyInRange()
 
 void Player::CheckExploreSystem(void)
 {
-	WorldPacket data;
+    WorldPacket data;
 
-	for(std::list<Areas>::iterator itr = areas.begin(); itr != areas.end(); ++itr)
-	{
-		if( m_positionX <= itr->x1 && m_positionX >= itr->x2 && 
-			m_positionY <= itr->y1 && m_positionY >= itr->y2)
-		{
+    for(std::list<Areas>::iterator itr = areas.begin(); itr != areas.end(); ++itr)
+    {
+        if( m_positionX <= itr->x1 && m_positionX >= itr->x2 && 
+            m_positionY <= itr->y1 && m_positionY >= itr->y2)
+        {
             //Discover a new area!
-			int offset = itr->areaFlag / 32;
-			uint32 val = (uint32)(1 << (itr->areaFlag % 32));
-			uint32 currFields = GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
-			//If area was not disvovered
+            int offset = itr->areaFlag / 32;
+            uint32 val = (uint32)(1 << (itr->areaFlag % 32));
+            uint32 currFields = GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
+            //If area was not disvovered
             if( !(currFields & val) )
-			{
-				//Set the new area into the player's field
-				SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
-				//Get Player's level
-				uint16 XP = (uint16)(GetUInt32Value(UNIT_FIELD_LEVEL)*10);
-				//Set XP gain
-				GiveXP( (uint32)XP, GetGUID() );
+            {
+                //Set the new area into the player's field
+                SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
+                //Get Player's level
+                uint16 XP = (uint16)(GetUInt32Value(UNIT_FIELD_LEVEL)*10);
+                //Set XP gain
+                GiveXP( (uint32)XP, GetGUID() );
 
-				//Send a MSG to client
-				data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
-				data << (uint32)itr->areaID; //Area ID
-				data << (uint32)XP;          //XP
-				m_session->SendPacket(&data);
+                //Send a MSG to client
+                data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
+                data << (uint32)itr->areaID; //Area ID
+                data << (uint32)XP;          //XP
+                m_session->SendPacket(&data);
 
-				Log::getSingleton( ).outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), itr->areaID);
-			}
-			//Log::getSingleton( ).outDetail("Player %u are into area %u at zone %u.", GetGUID(), itr->areaFlag, itr->zone);
-		}
-	}
+                Log::getSingleton( ).outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), itr->areaID);
+            }
+            //Log::getSingleton( ).outDetail("Player %u are into area %u at zone %u.", GetGUID(), itr->areaFlag, itr->zone);
+        }
+    }
 
 }
 
 void Player::InitExploreSystem(void)
 {
-	Areas newArea;
-	areas.clear();
+    Areas newArea;
+    areas.clear();
 
-	Log::getSingleton( ).outDetail("PLAYER: InitExploreSystem");
+    Log::getSingleton( ).outDetail("PLAYER: InitExploreSystem");
 
-	for(unsigned int i = 0; i < sWorldMapOverlayStore.GetNumRows(); i++)
-	{
-		//Load data from WorldMapOverlay.dbc
-		WorldMapOverlayEntry *overlay = sWorldMapOverlayStore.LookupEntry(i);
+    for(unsigned int i = 0; i < sWorldMapOverlayStore.GetNumRows(); i++)
+    {
+        //Load data from WorldMapOverlay.dbc
+        WorldMapOverlayEntry *overlay = sWorldMapOverlayStore.LookupEntry(i);
 
-		if( overlay )
-		{
-			//Load data of the zone
-			WorldMapAreaEntry *zone = sWorldMapAreaStore.LookupEntry( overlay->worldMapAreaID );
-			if(!zone) continue;	
-			//Do not add an area out of zone
-			if(zone->areaTableID != GetZoneId()) continue;
-			//Load data of the area
-			AreaTableEntry *area = sAreaTableStore.LookupEntry( overlay->areaTableID );
-			if(!area) continue;	
+        if( overlay )
+        {
+            //Load data of the zone
+            WorldMapAreaEntry *zone = sWorldMapAreaStore.LookupEntry( overlay->worldMapAreaID );
+            if(!zone) continue;    
+            //Do not add an area out of zone
+            if(zone->areaTableID != GetZoneId()) continue;
+            //Load data of the area
+            AreaTableEntry *area = sAreaTableStore.LookupEntry( overlay->areaTableID );
+            if(!area) continue;    
 
-			//Insert a new area into the areas list
-			newArea.areaID = area->ID;
-			newArea.areaFlag = area->exploreFlag;
-			
-			//TODO: I am not sure about this formula, but is something near it.
-			float ry = abs((zone->areaVertexY2 - zone->areaVertexY1)/1024); //maybe 1000
-			float rx = abs((zone->areaVertexX2 - zone->areaVertexX1)/768);  //maybe 660
-			
-			newArea.x2 = zone->areaVertexX1 - (overlay->drawX * rx);
-			newArea.y2 = zone->areaVertexY1 - (overlay->drawY * ry);
-			newArea.x1 = newArea.x2 + ((overlay->areaH/2)*rx);
-			newArea.y1 = newArea.y2 + ((overlay->areaW/2)*ry);
-			
-			areas.push_back(newArea);
+            //Insert a new area into the areas list
+            newArea.areaID = area->ID;
+            newArea.areaFlag = area->exploreFlag;
+            
+            //TODO: I am not sure about this formula, but is something near it.
+            float ry = abs((zone->areaVertexY2 - zone->areaVertexY1)/1024); //maybe 1000
+            float rx = abs((zone->areaVertexX2 - zone->areaVertexX1)/768);  //maybe 660
+            
+            newArea.x2 = zone->areaVertexX1 - (overlay->drawX * rx);
+            newArea.y2 = zone->areaVertexY1 - (overlay->drawY * ry);
+            newArea.x1 = newArea.x2 + ((overlay->areaH/2)*rx);
+            newArea.y1 = newArea.y2 + ((overlay->areaW/2)*ry);
+            
+            areas.push_back(newArea);
 
-			Log::getSingleton( ).outDetail("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
-		}
-	}
+            Log::getSingleton( ).outDetail("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
+        }
+    }
 }
 
 //
@@ -3498,24 +3498,24 @@ void Player::InitExploreSystem(void)
 
 // Returns an integer min <= x <= max (ie inclusive)
 
-static unsigned long	holdrand = 0x89abcdef;
+static unsigned long    holdrand = 0x89abcdef;
 
 void Rand_Init(int seed)
 {
-	holdrand = seed;
+    holdrand = seed;
 }
 
 int irand(int min, int max)
 {
-	int		result;
+    int        result;
 
-	assert((max - min) < 32768);
+    assert((max - min) < 32768);
 
-	max++;
-	holdrand = (holdrand * 214013L) + 2531011L;
-	result = holdrand >> 17;
-	result = ((result * (max - min)) >> 15) + min;
-	return(result);
+    max++;
+    holdrand = (holdrand * 214013L) + 2531011L;
+    result = holdrand >> 17;
+    result = ((result * (max - min)) >> 15) + min;
+    return(result);
 }
 
 //

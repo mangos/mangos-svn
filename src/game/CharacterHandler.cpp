@@ -232,7 +232,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 }
 
 #ifndef __NO_PLAYERS_ARRAY__
-#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
+#define PLAYERS_MAX 64550                           // UQ1: What is the max GUID value???
 extern uint32 NumActivePlayers;
 extern long long ActivePlayers[PLAYERS_MAX];
 #endif //__NO_PLAYERS_ARRAY__
@@ -244,7 +244,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Log::getSingleton( ).outDebug( "WORLD: Recvd Player Logon Message" );
 
-    recv_data >> playerGuid;                      // this is the GUID selected by the player
+    recv_data >> playerGuid;                        // this is the GUID selected by the player
 
     Player* plr = new Player;
     ASSERT(plr);
@@ -377,7 +377,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     time_t hours = minutes / 60; minutes %= 60;
     time_t gameTime = minutes + ( hours << 6 );
     data << (uint32)gameTime;
-    data << (float)0.017f;                        // Normal Game Speed
+    data << (float)0.017f;                          // Normal Game Speed
     SendPacket( &data );
 
     // SMSG_UPDATE_AURA_DURATION -- if the player had an aura on when he logged out
@@ -388,12 +388,12 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // WantedMan fixed so it will only start if you are at starting loc
 
     data.Initialize( SMSG_TRIGGER_CINEMATIC );
-    uint8 theRace = GetPlayer()->getRace();       // get race
+    uint8 theRace = GetPlayer()->getRace();         // get race
 
     PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(theRace, 1);
     ASSERT(info);
 
-    if (theRace == HUMAN)                         // Human
+    if (theRace == HUMAN)                           // Human
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -404,7 +404,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                 }
     }
 
-    if (theRace == ORC)                           // Orc
+    if (theRace == ORC)                             // Orc
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -415,7 +415,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                 }
     }
 
-    if (theRace == DWARF)                         // Dwarf
+    if (theRace == DWARF)                           // Dwarf
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -425,7 +425,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == NIGHTELF)                      // Night Elves
+    if (theRace == NIGHTELF)                        // Night Elves
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -435,7 +435,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == UNDEAD_PLAYER)                 // Undead
+    if (theRace == UNDEAD_PLAYER)                   // Undead
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -445,7 +445,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == TAUREN)                        // Tauren
+    if (theRace == TAUREN)                          // Tauren
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -455,7 +455,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == GNOME)                        // Gnome
+    if (theRace == GNOME)                           // Gnome
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -465,7 +465,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
                     SendPacket( &data );
                 }
     }
-    if (theRace == TROLL)                        // Troll
+    if (theRace == TROLL)                           // Troll
     {
         if (GetPlayer()->m_positionX == info->positionX)
             if (GetPlayer()->m_positionY == info->positionY)
@@ -478,7 +478,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Player *pCurrChar = GetPlayer();
 
-	pCurrChar->InitExploreSystem();
+    pCurrChar->InitExploreSystem();
 
     // Now send all A9's
     // Add character to the ingame list
@@ -497,16 +497,16 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ss << "UPDATE characters SET online = 1 WHERE guid = " << pCurrChar->GetGUID();
 
 #ifndef __NO_PLAYERS_ARRAY__
-	// Set GUID for this player in the active players array...
-	std::stringstream ss2;
-	ss2.rdbuf()->str("");
-	ss2 << pCurrChar->GetGUID();
-	long long int guid = atoi(ss2.str().c_str());
+    // Set GUID for this player in the active players array...
+    std::stringstream ss2;
+    ss2.rdbuf()->str("");
+    ss2 << pCurrChar->GetGUID();
+    long long int guid = atoi(ss2.str().c_str());
 
-	ActivePlayers[NumActivePlayers] = guid;
-	Log::getSingleton( ).outDetail( "Active player %u set to player %s (GUID: %i).", NumActivePlayers, pCurrChar->GetName(), guid );
+    ActivePlayers[NumActivePlayers] = guid;
+    Log::getSingleton( ).outDetail( "Active player %u set to player %s (GUID: %i).", NumActivePlayers, pCurrChar->GetName(), guid );
 
-	NumActivePlayers++;
+    NumActivePlayers++;
 #endif //__NO_PLAYERS_ARRAY__
 
     sDatabase.Execute(ss.str().c_str());
@@ -527,19 +527,19 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     std::string outstring = pCurrChar->GetName();
     outstring.append( " has come online." );
-		pCurrChar->BroadcastToFriends(outstring);
+    pCurrChar->BroadcastToFriends(outstring);
 
 }
 
 void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data)
 {
-	Log::getSingleton( ).outString( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
-#ifndef _VERSION_1_7_0_ // UQ1: Don't know how to support this..
-	WorldPacket data;
-	data.Initialize( SMSG_MEETING_STONE_INFO );
-	data << uint32(0);
-	data << uint32(0);
-	data << uint32(0);
-	SendPacket(&data);
+    Log::getSingleton( ).outString( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
+#ifndef _VERSION_1_7_0_                             // UQ1: Don't know how to support this..
+    WorldPacket data;
+    data.Initialize( SMSG_MEETING_STONE_INFO );
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    SendPacket(&data);
 #endif //_VERSION_1_7_0_
 }

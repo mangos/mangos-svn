@@ -191,7 +191,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 #ifndef ENABLE_GRID_SYSTEM
                     Player *pGroupGuy = objmgr.GetObject<Player>(pGroup->GetMemberGUID(i));
 #else
-		    Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
+            Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
 #endif
                     pGroupGuy->GiveXP(xp, victimGuid);
 
@@ -384,7 +384,7 @@ void Unit::CalcRage( uint32 damage )
 void Unit::RegenerateAll()
 {
     /* Added so that every thing regenerates at the same time
-   instead of one regenerating till full then other starting	*/
+   instead of one regenerating till full then other starting    */
     /* check if it's time to regen health */
     if (m_regenTimer != 0)
         return;
@@ -470,7 +470,7 @@ void Unit::Regenerate(uint16 field_cur, uint16 field_max, bool switch_)
                    break;               }
                case 11: /* Druid = 11 */{
                     /* TODO: change this one, cause hp regen
-					   formula for druid was UNKNOWN */
+                       formula for druid was UNKNOWN */
                     addvalue = uint32(((Spirit+10) * HealthIncreaseRate));
                     break;              }
                default: /* Poor Creatures got left out */{
@@ -653,7 +653,7 @@ void Unit::smsg_AttackStop(uint64 victimGuid)
     data << victimGuid;
     data << uint32( 0 );
 #ifdef _VERSION_1_7_0_
-	data << uint32( 0 ); // UQ1: ??? crash in 1.7.x
+    data << uint32( 0 ); // UQ1: ??? crash in 1.7.x
 #endif //_VERSION_1_7_0_
     SendMessageToSet(&data, true);
     Log::getSingleton( ).outDetail("%u %X stopped attacking "I64FMT,
@@ -1182,11 +1182,11 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
                     index = UNIT_FIELD_RESISTANCES_05;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
                 }break;
-		        case 6:{
+                case 6:{
                     index = UNIT_FIELD_RESISTANCES_06;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
                 }
-				break;
+                break;
                 case -1:{
                     index = UNIT_FIELD_RESISTANCES_06;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
@@ -1304,13 +1304,13 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
                     index = UNIT_FIELD_RESISTANCES_05;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
                 }
-				case 6:{
+                case 6:{
                     index = UNIT_FIELD_RESISTANCES_06;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
                 }
-				break;
+                break;
                 case -1:{
-					// SHOULD BE ARCANE-- SHOULDN'T ?
+                    // SHOULD BE ARCANE-- SHOULDN'T ?
                     index = UNIT_FIELD_RESISTANCES_06;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
                     for(uint32 i=0;i<5;i++)
@@ -1395,7 +1395,7 @@ void Unit::ApplyModifier(const Modifier *mod, bool apply, Affect* parent)
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
                 }break;
                 case -1:{
-					// -1 strenght ?
+                    // -1 strenght ?
                     index = UNIT_FIELD_STR;
                     mod->GetMiscValue2() == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
                     for(uint32 i=0;i<5;i++)
@@ -1919,7 +1919,7 @@ void Unit::_UpdateAura()
 #ifndef ENABLE_GRID_SYSTEM
             pGroupGuy = objmgr.GetObject<Player>(pGroup->GetMemberGUID(i));
 #else
-	    pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
+        pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
 #endif
             if(!pGroupGuy)
                 continue;
@@ -1981,7 +1981,7 @@ void Unit::_UpdateSpells( uint32 time )
             if(!attacker)
                 attacker = (Unit*) objmgr.GetObject<Creature>(aff->GetCasterGUID());
 #else
-	    Unit *attacker = ObjectAccessor::Instance().FindPlayer(aff->GetCasterGUID());
+        Unit *attacker = ObjectAccessor::Instance().FindPlayer(aff->GetCasterGUID());
 #endif
 
             // FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
@@ -2019,7 +2019,7 @@ void Unit::_UpdateSpells( uint32 time )
             if(!attacker)
                 attacker = (Unit*) objmgr.GetObject<Creature>(aff->GetCasterGUID());
 #else
-	    Unit *attacker = ObjectAccessor::Instance().FindPlayer(aff->GetCasterGUID());
+        Unit *attacker = ObjectAccessor::Instance().FindPlayer(aff->GetCasterGUID());
 #endif
 
             // FIXME: we currently have a way to inflict damage w/o attacker, this should be changed
@@ -2288,7 +2288,7 @@ bool Unit::setInFront(Unit* target, float distance)
 #ifndef ENABLE_GRID_SYSTEM
             SetPosition(GetPositionX(), GetPositionY(), GetPositionZ(), orientation);
 #else
-	    m_orientation = orientation;
+        m_orientation = orientation;
 #endif
             break;
         }else

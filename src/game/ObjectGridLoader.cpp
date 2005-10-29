@@ -34,20 +34,20 @@ template<class T> void LoadHelper(const char* table, GridType &grid, uint32 map_
     unsigned int count = 0;
     if( result.get() != NULL )
     {
-	do
-	{
-	    Field *fields = result->Fetch();
-	    T *obj = new T;
-	    uint32 guid = fields[0].GetUInt32();
-	    obj->LoadFromDB(guid);
-	    m[guid] = obj;
+    do
+    {
+        Field *fields = result->Fetch();
+        T *obj = new T;
+        uint32 guid = fields[0].GetUInt32();
+        obj->LoadFromDB(guid);
+        m[guid] = obj;
 
-	    // spirit healer doesn't exist in the world ...
-	    if( !MaNGOS::Utilities::IsSpiritHealer(obj) )
-		obj->AddToWorld();
-	    ++count;
+        // spirit healer doesn't exist in the world ...
+        if( !MaNGOS::Utilities::IsSpiritHealer(obj) )
+        obj->AddToWorld();
+        ++count;
 
-	}while( result->NextRow() );
+    }while( result->NextRow() );
     }
 
     sLog.outDebug("%d objects loaded for grid %d from table %s", count, grid.GetGridId(), table);
@@ -91,7 +91,7 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     ObjectAccessor::Instance().RemoveUpdateObjects(m);
     for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-	delete iter->second;
+    delete iter->second;
     }
 #endif
     m.clear();

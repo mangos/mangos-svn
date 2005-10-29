@@ -142,7 +142,7 @@ class Spell
 
         inline uint32 getState() { return m_spellState; }
 
-        // Send Packet functions
+// Send Packet functions
         void SendCastResult(uint8 result);
         void SendSpellStart();
         void SendSpellGo();
@@ -151,7 +151,7 @@ class Spell
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
-		void SendDuelRequest(Player* caster, Player* target,uint64 ArbiterID);
+        void SendDuelRequest(Player* caster, Player* target,uint64 ArbiterID);
 
         void HandleAddAffect(uint64 guid);
         void writeSpellGoTargets( WorldPacket * data );

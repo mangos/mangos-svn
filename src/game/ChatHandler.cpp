@@ -85,7 +85,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
             player->GetSession()->SendPacket(&data);
             // Sent the to Users id as the channel, this should be fine as it's not used for wisper
-	    sChatHandler.FillMessageData(&data, this, CHAT_MSG_WHISPER_INFORM, LANG_UNIVERSAL, ((char *)(player->GetGUID())), msg.c_str() );
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_WHISPER_INFORM, LANG_UNIVERSAL, ((char *)(player->GetGUID())), msg.c_str() );
             SendPacket(&data);
         } break;
         case CHAT_MSG_YELL:
@@ -156,16 +156,16 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     Creature *pCreature = dynamic_cast<Creature *>(unit);
     if( pCreature != NULL )
     {
-	nam = pCreature->GetName();
-	namlen = strlen(nam) + 1;
+        nam = pCreature->GetName();
+        namlen = strlen(nam) + 1;
     }
     {
-	Player *pChar = dynamic_cast<Player *>(unit);
-	if( pChar != NULL )
-	{
-	    nam = pChar->GetName();
-	    namlen = strlen(nam) + 1;
-	}
+    Player *pChar = dynamic_cast<Player *>(unit);
+    if( pChar != NULL )
+    {
+        nam = pChar->GetName();
+        namlen = strlen(nam) + 1;
+    }
     }
 #endif
 

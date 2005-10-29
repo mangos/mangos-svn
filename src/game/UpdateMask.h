@@ -33,7 +33,7 @@ class UpdateMask
         {
             if(mUpdateMask)
                 delete [] mUpdateMask;
-	    mUpdateMask = NULL;
+        mUpdateMask = NULL;
         }
 
         void SetBit( const uint16 index )

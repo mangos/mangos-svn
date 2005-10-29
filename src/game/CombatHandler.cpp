@@ -46,15 +46,15 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     {
         Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",
             GUID_LOPART(guid), GUID_HIPART(guid));
-        return;                                   // we do not attack PCs for now
+        return;                                     // we do not attack PCs for now
     }
 
     Player *pThis = GetPlayer();
     pThis->addStateFlag(UF_ATTACKING);
     pThis->smsg_AttackStart(pEnemy, pThis);
 
-	pThis->inCombat = true;
-	pThis->logoutDelay = LOGOUTDELAY;
+    pThis->inCombat = true;
+    pThis->logoutDelay = LOGOUTDELAY;
 }
 
 

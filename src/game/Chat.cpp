@@ -111,7 +111,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "kick",        1, &ChatHandler::HandleNYICommand,           "",   NULL },
         { "learn",       3, &ChatHandler::HandleLearnCommand,         "",   NULL },
         { "unlearn",     3, &ChatHandler::HandleUnLearnCommand,       "",   NULL },//add by vendy
-		{ "modify",      1, NULL,                                     "",   modifyCommandTable },
+        { "modify",      1, NULL,                                     "",   modifyCommandTable },
         { "debug",       1, NULL,                                     "",   debugCommandTable },
         { "morph",       3, &ChatHandler::HandleMorphCommand,         "",   NULL },
         { "mount",       0, &ChatHandler::HandleMountCommand,         "",   NULL },
@@ -119,7 +119,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "name",        2, &ChatHandler::HandleNameCommand,          "",   NULL },
         { "subname",     2, &ChatHandler::HandleSubNameCommand,       "",   NULL },
         { "npcflag",     2, &ChatHandler::HandleNPCFlagCommand,       "",   NULL },
-		{ "cdist",		1, &ChatHandler::HandleCreatureDistanceCommand,       "",   NULL },
+        { "cdist",        1, &ChatHandler::HandleCreatureDistanceCommand,       "",   NULL },
         { "object",      3, &ChatHandler::HandleObjectCommand,        "",   NULL },
         { "gameobject",  3, &ChatHandler::HandleGameObjectCommand,    "",   NULL },
         { "prog",        2, &ChatHandler::HandleProgCommand,          "",   NULL },
@@ -146,7 +146,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "showarea",    3, &ChatHandler::HandleShowAreaCommand,      "",   NULL },
         { "hidearea",    3, &ChatHandler::HandleHideAreaCommand,      "",   NULL },
         { "addspw",      2, &ChatHandler::HandleAddSpwCommand,        "",   NULL },
-		{ "additem",     3, &ChatHandler::HandleAddItemCommand,       "",   NULL }, //add by vendy
+        { "additem",     3, &ChatHandler::HandleAddItemCommand,       "",   NULL }, //add by vendy
         { NULL,          0, NULL,                                     "",   NULL }
     };
 
@@ -321,7 +321,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     //uint32     language;
     //uint64     guid;
     //uint64     guid;
-    //uint32      len_of_text;
+    //uint32     len_of_text;
     //char       text[];         // not sure ? i think is null terminated .. not null terminated
     //uint8      afk_state;
 
@@ -479,31 +479,31 @@ Player * ChatHandler::getSelectedChar(WorldSession *client)
 //UQ1: Generic string formatting for output... CHECKME: May want this somewhere else???
 char *fmtstring( char *format, ... ) 
 {
-	va_list		argptr;
-	#define	MAX_FMT_STRING	32000
-	static char		temp_buffer[MAX_FMT_STRING];
-	static char		string[MAX_FMT_STRING];	// in case va is called by nested functions
-	static int		index = 0;
-	char	*buf;
-	int len;
+    va_list        argptr;
+    #define    MAX_FMT_STRING    32000
+    static char        temp_buffer[MAX_FMT_STRING];
+    static char        string[MAX_FMT_STRING];    // in case va is called by nested functions
+    static int        index = 0;
+    char    *buf;
+    int len;
 
-	va_start (argptr, format);
-	vsprintf (temp_buffer, format, argptr);
-	va_end (argptr);
+    va_start (argptr, format);
+    vsprintf (temp_buffer, format, argptr);
+    va_end (argptr);
 
-	if ((len = strlen(temp_buffer)) >= MAX_FMT_STRING) {
-		return "ERROR";
-	}
+    if ((len = strlen(temp_buffer)) >= MAX_FMT_STRING) {
+        return "ERROR";
+    }
 
-	if (len + index >= MAX_FMT_STRING-1) {
-		index = 0;
-	}
+    if (len + index >= MAX_FMT_STRING-1) {
+        index = 0;
+    }
 
-	buf = &string[index];
-	memcpy( buf, temp_buffer, len+1 );
+    buf = &string[index];
+    memcpy( buf, temp_buffer, len+1 );
 
-	index += len + 1;
+    index += len + 1;
 
-	return buf;
+    return buf;
 }
 

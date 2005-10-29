@@ -133,8 +133,8 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     uint8 i, tmpItemsCount = 0;
     ItemPrototype *tmpLootItem;
     WorldPacket data;
-	uint16 num_loot_items = 0;
-	uint32 loot_items_list[16];
+    uint16 num_loot_items = 0;
+    uint32 loot_items_list[16];
 
     recv_data >> guid;
 
@@ -163,123 +163,123 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     data << uint8(1);                             //loot Type
     data << uint32(pCreature->getLootMoney());
 
-	if (pCreature->getItemCount() > 0)
-	{
-	    data << uint8(tmpItemsCount);
-	    // for(i = 0; i < tmpItemsCount ; i++)
-		for(i = 0; i<pCreature->getItemCount() ; i++)
-		{
-			if (pCreature->getItemAmount((int)i) > 0)
-			{
-				data << uint8(i+1);                   //Item Slot, must be > 0
-				tmpLootItem = objmgr.GetItemPrototype(pCreature->getItemId((int)i));
-				//item ID
-				data << uint32(pCreature->getItemId((int)i));
-				//quantity
-				data << uint32(pCreature->getItemAmount((int)i));
-				//Display IconID
-				data << uint32(tmpLootItem->DisplayInfoID);
-				data << uint8(0) << uint32(0) << uint32(0);
-			}
-		}
-	}
-	else
-	{// UQ1: Generate some random loot items...
-		uint32 level = pCreature->getLevel();
-		int number_of_items = irand(0, 12);
-		int tries = 0;
+    if (pCreature->getItemCount() > 0)
+    {
+        data << uint8(tmpItemsCount);
+        // for(i = 0; i < tmpItemsCount ; i++)
+        for(i = 0; i<pCreature->getItemCount() ; i++)
+        {
+            if (pCreature->getItemAmount((int)i) > 0)
+            {
+                data << uint8(i+1);                   //Item Slot, must be > 0
+                tmpLootItem = objmgr.GetItemPrototype(pCreature->getItemId((int)i));
+                //item ID
+                data << uint32(pCreature->getItemId((int)i));
+                //quantity
+                data << uint32(pCreature->getItemAmount((int)i));
+                //Display IconID
+                data << uint32(tmpLootItem->DisplayInfoID);
+                data << uint8(0) << uint32(0) << uint32(0);
+            }
+        }
+    }
+    else
+    {// UQ1: Generate some random loot items...
+        uint32 level = pCreature->getLevel();
+        int number_of_items = irand(0, 12);
+        int tries = 0;
 
-		num_loot_items = 0;
+        num_loot_items = 0;
 
-		if (number_of_items > 4 && _player->getLevel() < 5)
-			number_of_items = irand(1, 4);
+        if (number_of_items > 4 && _player->getLevel() < 5)
+            number_of_items = irand(1, 4);
 
-		if (number_of_items > 6 && _player->getLevel() < 10)
-			number_of_items = irand(1, 6);
+        if (number_of_items > 6 && _player->getLevel() < 10)
+            number_of_items = irand(1, 6);
 
-		if (number_of_items > 8 && _player->getLevel() < 20)
-			number_of_items = irand(1, 8);
+        if (number_of_items > 8 && _player->getLevel() < 20)
+            number_of_items = irand(1, 8);
 
-		if (number_of_items > 10 && _player->getLevel() < 40)
-			number_of_items = irand(1, 10);
+        if (number_of_items > 10 && _player->getLevel() < 40)
+            number_of_items = irand(1, 10);
 
-		for(i = 0; i<number_of_items ; i++)
-		{
-			uint32 loot_item;
+        for(i = 0; i<number_of_items ; i++)
+        {
+            uint32 loot_item;
 
 
-			if (num_item_prototypes > 32768)
-				loot_item = irand(0, 32768) + irand(0, (num_item_prototypes-32768));
-			else
-				loot_item = irand(0, num_item_prototypes);
+            if (num_item_prototypes > 32768)
+                loot_item = irand(0, 32768) + irand(0, (num_item_prototypes-32768));
+            else
+                loot_item = irand(0, num_item_prototypes);
 
-			tmpLootItem = objmgr.GetItemPrototype(item_proto_ids[loot_item]);
+            tmpLootItem = objmgr.GetItemPrototype(item_proto_ids[loot_item]);
 
-			while (!(tmpLootItem && tmpLootItem->DisplayInfoID) 
-				|| tmpLootItem->ItemLevel > _player->getLevel()*1.5 
-				|| tmpLootItem->Field107 == -1) // Quest Item ???
-			{
-				/*if (!tmpLootItem)
-				{
-					Log::getSingleton( ).outDebug( "Loot item ID: %u does not exist.", item_proto_ids[loot_item]);   
-				}
-				else if (!tmpLootItem->DisplayInfoID)
-				{
-					Log::getSingleton( ).outDebug( "Loot item ID: %u has no display ID.", item_proto_ids[loot_item]);   
-				}
-				else if (tmpLootItem->ItemLevel > _player->getLevel()*1.5)
-				{
-					Log::getSingleton( ).outDebug( "Loot item ID: %u is too higher level for player (%u > %u).", item_proto_ids[loot_item], tmpLootItem->ItemLevel, _player->getLevel()*1.5);   
-				}*/
+            while (!(tmpLootItem && tmpLootItem->DisplayInfoID) 
+                || tmpLootItem->ItemLevel > _player->getLevel()*1.5 
+                || tmpLootItem->Field107 == -1) // Quest Item ???
+            {
+                /*if (!tmpLootItem)
+                {
+                    Log::getSingleton( ).outDebug( "Loot item ID: %u does not exist.", item_proto_ids[loot_item]);   
+                }
+                else if (!tmpLootItem->DisplayInfoID)
+                {
+                    Log::getSingleton( ).outDebug( "Loot item ID: %u has no display ID.", item_proto_ids[loot_item]);   
+                }
+                else if (tmpLootItem->ItemLevel > _player->getLevel()*1.5)
+                {
+                    Log::getSingleton( ).outDebug( "Loot item ID: %u is too higher level for player (%u > %u).", item_proto_ids[loot_item], tmpLootItem->ItemLevel, _player->getLevel()*1.5);   
+                }*/
 
-				if (num_item_prototypes > 32768)
-					loot_item = irand(0, 32768) + irand(0, (num_item_prototypes-32768));
-				else
-					loot_item = irand(0, (num_item_prototypes-32768));
+                if (num_item_prototypes > 32768)
+                    loot_item = irand(0, 32768) + irand(0, (num_item_prototypes-32768));
+                else
+                    loot_item = irand(0, (num_item_prototypes-32768));
 
-				tmpLootItem = objmgr.GetItemPrototype(item_proto_ids[loot_item]);
-				tries++;
+                tmpLootItem = objmgr.GetItemPrototype(item_proto_ids[loot_item]);
+                tries++;
 
-				if (tries >= 50)
-					break;
-			}
+                if (tries >= 50)
+                    break;
+            }
 
-			if (tries >= 50)
-				break;
+            if (tries >= 50)
+                break;
 
-			loot_items_list[num_loot_items] = item_proto_ids[loot_item];
+            loot_items_list[num_loot_items] = item_proto_ids[loot_item];
 
-			// Add item to the creature for the next loot...
-			pCreature->setItemId(pCreature->getItemCount(), item_proto_ids[loot_item]);
+            // Add item to the creature for the next loot...
+            pCreature->setItemId(pCreature->getItemCount(), item_proto_ids[loot_item]);
             pCreature->setItemAmount(pCreature->getItemCount(), 1);
-			pCreature->increaseItemCount();
+            pCreature->increaseItemCount();
 
-			num_loot_items++;
-			tmpItemsCount++;
+            num_loot_items++;
+            tmpItemsCount++;
         }
 
-		//tmpItemsCount--;
-		Log::getSingleton( ).outDebug( "Randomly generated %i loot items (from %i prototypes).", num_loot_items, num_item_prototypes);   
+        //tmpItemsCount--;
+        Log::getSingleton( ).outDebug( "Randomly generated %i loot items (from %i prototypes).", num_loot_items, num_item_prototypes);   
 
-		data << uint8(tmpItemsCount);
+        data << uint8(tmpItemsCount);
 
-		for(i = 0; i<num_loot_items ; i++)
-		{
-			tmpLootItem = objmgr.GetItemPrototype(loot_items_list[i]);
+        for(i = 0; i<num_loot_items ; i++)
+        {
+            tmpLootItem = objmgr.GetItemPrototype(loot_items_list[i]);
 
-			data << uint8(i+1);                   //Item Slot, must be > 0
-			//item ID
-			data << uint32(loot_items_list[i]);
-			//quantity
-			data << uint32(1);
-			//Display IconID
-			data << uint32(tmpLootItem->DisplayInfoID);
-			data << uint8(0) << uint32(0) << uint32(0);
-		}
+            data << uint8(i+1);                   //Item Slot, must be > 0
+            //item ID
+            data << uint32(loot_items_list[i]);
+            //quantity
+            data << uint32(1);
+            //Display IconID
+            data << uint32(tmpLootItem->DisplayInfoID);
+            data << uint8(0) << uint32(0) << uint32(0);
+        }
 
-		// For assertion below...
-		tmpDataLen = data.size();
-	}
+        // For assertion below...
+        tmpDataLen = data.size();
+    }
 
     WPAssert(data.size() == tmpDataLen);
     SendPacket( &data );
@@ -313,7 +313,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     ObjectMgr::PlayerMap::const_iterator itr;
     for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
 #else
-	ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
+    ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
     for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
 #endif
     {
@@ -331,7 +331,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
     for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
 #else
-	for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
 #endif
     {
         if ( itr->second->GetName() && (countcheck  < clientcount))
@@ -366,18 +366,18 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
       data << uint8(0); //Logout accepted
       SendPacket( &data );
       //Essa funcao coloca o tempo atual numa variavel chamada _logouttime (WorldSession.h)
-	  //Essa variavel eh verificada a cada WorldSession::Update atraves da funcao ShouldLogout()
-	  //Caso essa funcao retorne TRUE entao o logout sera efetuado!
+      //Essa variavel eh verificada a cada WorldSession::Update atraves da funcao ShouldLogout()
+      //Caso essa funcao retorne TRUE entao o logout sera efetuado!
       LogoutRequest(time(NULL));
     }
     else {
-	  data.Initialize( SMSG_LOGOUT_RESPONSE );
-	  data << (uint8)0xC; //Logout not accepted
-	  data << uint32(0);  //Filler
-	  data << uint8(0);
-	  SendPacket( &data );
+      data.Initialize( SMSG_LOGOUT_RESPONSE );
+      data << (uint8)0xC; //Logout not accepted
+      data << uint32(0);  //Filler
+      data << uint8(0);
+      SendPacket( &data );
 
-	  LogoutRequest(0);
+      LogoutRequest(0);
     }
 }
 
@@ -531,10 +531,10 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_FRIEND_LIST"  );
 
     unsigned char Counter=0, nrignore=0;
-		int i=0;
+        int i=0;
     uint64 guid;
     std::stringstream query,query2,query3,query4;
-		Field *fields;
+        Field *fields;
     Player* pObj;
     FriendStr friendstr[255];
 
@@ -558,7 +558,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
             pObj=objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
 #else
-	    pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
+        pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
 #endif
             if(pObj && pObj->IsInWorld())
             {
@@ -583,7 +583,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
                 pObj = objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
 #else
-		pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
+        pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
 #endif
                 if(pObj)
                 {
@@ -623,36 +623,36 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
 
-	// Sending Ignore List
+    // Sending Ignore List
 
-	query3 << "SELECT COUNT(*) FROM `social` where flags = 'IGNORE' AND guid='" << guid << "'";
+    query3 << "SELECT COUNT(*) FROM `social` where flags = 'IGNORE' AND guid='" << guid << "'";
   result = sDatabase.Query( query3.str().c_str() );
-	
-	if(!result) return;
-	
-	fields = result->Fetch();
+    
+    if(!result) return;
+    
+    fields = result->Fetch();
   nrignore=fields[0].GetUInt32();
 
 
-	dataI.Initialize( SMSG_IGNORE_LIST );
+    dataI.Initialize( SMSG_IGNORE_LIST );
   dataI << nrignore;
 
-	query4 << "SELECT * FROM `social` where flags = 'IGNORE' AND guid='" << guid << "'";
+    query4 << "SELECT * FROM `social` where flags = 'IGNORE' AND guid='" << guid << "'";
   result = sDatabase.Query( query4.str().c_str() );
   
-	if(!result) return;
-	
+    if(!result) return;
+    
   do
     {
-    	
-				fields = result->Fetch();
+        
+                fields = result->Fetch();
         dataI << fields[2].GetUInt64();
 
-   	}while( result->NextRow() );
+       }while( result->NextRow() );
 
 
   SendPacket( &dataI );
-	Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
+    Log::getSingleton( ).outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 
 
@@ -661,55 +661,55 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_ADD_FRIEND"  );
 
     std::string friendName = "UNKNOWN";
-	std::stringstream fquery;
-	unsigned char friendResult = FRIEND_NOT_FOUND;
-	Player *pfriend=NULL;
-	uint64 friendGuid = 0;
+    std::stringstream fquery;
+    unsigned char friendResult = FRIEND_NOT_FOUND;
+    Player *pfriend=NULL;
+    uint64 friendGuid = 0;
     uint32 friendArea = 0, friendLevel = 0, friendClass = 0;
-	WorldPacket data;
+    WorldPacket data;
 
     recv_data >> friendName;
 
     Log::getSingleton( ).outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
-	
+    
     
    
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
 #ifndef ENABLE_GRID_SYSTEM
-	pfriend = objmgr.GetObject<Player>(friendGuid);
+    pfriend = objmgr.GetObject<Player>(friendGuid);
 #else
-	pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
+    pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
 #endif
-	fquery << "SELECT * FROM social WHERE flags = 'FRIEND' AND friendid = " << friendGuid;
+    fquery << "SELECT * FROM social WHERE flags = 'FRIEND' AND friendid = " << friendGuid;
 
-	if(sDatabase.Query( fquery.str().c_str() )) friendResult = FRIEND_ALREADY;
-	if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
-	
-	// Send response.
+    if(sDatabase.Query( fquery.str().c_str() )) friendResult = FRIEND_ALREADY;
+    if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
+    
+    // Send response.
     data.Initialize( SMSG_FRIEND_STATUS );
 
     if (friendGuid > 0 && friendResult!=FRIEND_ALREADY && friendResult!=FRIEND_SELF)
     {
         if( pfriend != NULL && pfriend->IsInWorld())
-		{
+        {
             friendResult = FRIEND_ADDED_ONLINE;
-			friendArea = pfriend->GetZoneId();
-			friendLevel = pfriend->getLevel();
-			friendClass = pfriend->getClass();
-			
-			data << (uint8)friendResult << (uint64)friendGuid;
+            friendArea = pfriend->GetZoneId();
+            friendLevel = pfriend->getLevel();
+            friendClass = pfriend->getClass();
+            
+            data << (uint8)friendResult << (uint64)friendGuid;
             data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
-			
-			// Deadknight addon start add buffer to social table
-			std::stringstream query;
-			uint64 guid;
-			guid=GetPlayer()->GetGUID();
+            
+            // Deadknight addon start add buffer to social table
+            std::stringstream query;
+            uint64 guid;
+            guid=GetPlayer()->GetGUID();
 
-			query << "INSERT INTO `social` VALUES ('" << friendName << "', " << guid << ", " << friendGuid << ", 'FRIEND')" ;
-			sDatabase.Query( query.str().c_str() );	
+            query << "INSERT INTO `social` VALUES ('" << friendName << "', " << guid << ", " << friendGuid << ", 'FRIEND')" ;
+            sDatabase.Query( query.str().c_str() );    
 
-		}
+        }
         else
             friendResult = FRIEND_ADDED_OFFLINE;
 
@@ -717,21 +717,21 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             friendName.c_str(), friendGuid, friendArea, friendLevel, friendClass);
 
     }
-	else if(friendResult==FRIEND_ALREADY)
-	{
-		data << (uint8)friendResult << (uint64)friendGuid;
-		Log::getSingleton( ).outDetail( "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
-	}
-	else if(friendResult==FRIEND_SELF)
-	{
-		data << (uint8)friendResult << (uint64)friendGuid;
-		Log::getSingleton( ).outDetail( "WORLD: %s Guid can't add himself. ", friendName.c_str() );
-	}
-	else
-	{
-		data << (uint8)friendResult << (uint64)friendGuid;
+    else if(friendResult==FRIEND_ALREADY)
+    {
+        data << (uint8)friendResult << (uint64)friendGuid;
+        Log::getSingleton( ).outDetail( "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
+    }
+    else if(friendResult==FRIEND_SELF)
+    {
+        data << (uint8)friendResult << (uint64)friendGuid;
+        Log::getSingleton( ).outDetail( "WORLD: %s Guid can't add himself. ", friendName.c_str() );
+    }
+    else
+    {
+        data << (uint8)friendResult << (uint64)friendGuid;
         Log::getSingleton( ).outDetail( "WORLD: %s Guid not found. ", friendName.c_str() );
-	}
+    }
 
     // Finish
     SendPacket( &data );
@@ -779,63 +779,63 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_ADD_IGNORE"  );
 
     std::string IgnoreName = "UNKNOWN";
-	std::stringstream iquery;
-	unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
-	Player *pIgnore=NULL;
-	uint64 IgnoreGuid = 0;
+    std::stringstream iquery;
+    unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
+    Player *pIgnore=NULL;
+    uint64 IgnoreGuid = 0;
 
-	WorldPacket data;
+    WorldPacket data;
 
     recv_data >> IgnoreName;
 
     Log::getSingleton( ).outDetail( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
-	
+    
     
    
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
 #ifndef ENABLE_GRID_SYSTEM
-	pIgnore = objmgr.GetObject<Player>(IgnoreGuid);
+    pIgnore = objmgr.GetObject<Player>(IgnoreGuid);
 #else
-	pIgnore = ObjectAccessor::Instance().FindPlayer(IgnoreGuid);
+    pIgnore = ObjectAccessor::Instance().FindPlayer(IgnoreGuid);
 #endif
-	iquery << "SELECT * FROM social WHERE flags = 'IGNORE' AND friendid = " << IgnoreGuid;
+    iquery << "SELECT * FROM social WHERE flags = 'IGNORE' AND friendid = " << IgnoreGuid;
 
-	if(sDatabase.Query( iquery.str().c_str() )) ignoreResult = FRIEND_IGNORE_ALREADY;
-	if (!strcmp(GetPlayer()->GetName(),IgnoreName.c_str())) ignoreResult = FRIEND_IGNORE_SELF;
-	
-	// Send response.
+    if(sDatabase.Query( iquery.str().c_str() )) ignoreResult = FRIEND_IGNORE_ALREADY;
+    if (!strcmp(GetPlayer()->GetName(),IgnoreName.c_str())) ignoreResult = FRIEND_IGNORE_SELF;
+    
+    // Send response.
     data.Initialize( SMSG_FRIEND_STATUS );
 
     if (pIgnore && ignoreResult!=FRIEND_IGNORE_ALREADY && ignoreResult!=FRIEND_IGNORE_SELF)
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
-				
-		// Deadknight addon start add buffer to social table
-		std::stringstream query;
-		uint64 guid;
-		guid=GetPlayer()->GetGUID();
+                
+        // Deadknight addon start add buffer to social table
+        std::stringstream query;
+        uint64 guid;
+        guid=GetPlayer()->GetGUID();
 
-		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
 
-		query << "INSERT INTO `social` VALUES ('" << IgnoreName << "', " << guid << ", " << IgnoreGuid << ", 'IGNORE')" ;
-		sDatabase.Query( query.str().c_str() );	
+        query << "INSERT INTO `social` VALUES ('" << IgnoreName << "', " << guid << ", " << IgnoreGuid << ", 'IGNORE')" ;
+        sDatabase.Query( query.str().c_str() );    
     }
-	else if(ignoreResult==FRIEND_IGNORE_ALREADY)
-	{
-		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
-		Log::getSingleton( ).outDetail( "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
-	}
-	else if(ignoreResult==FRIEND_IGNORE_SELF)
-	{
-		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
-		Log::getSingleton( ).outDetail( "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
-	}
-	else
-	{
-		data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+    else if(ignoreResult==FRIEND_IGNORE_ALREADY)
+    {
+        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+        Log::getSingleton( ).outDetail( "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
+    }
+    else if(ignoreResult==FRIEND_IGNORE_SELF)
+    {
+        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+        Log::getSingleton( ).outDetail( "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
+    }
+    else
+    {
+        data << (uint8)ignoreResult << (uint64)IgnoreGuid;
         Log::getSingleton( ).outDetail( "WORLD: %s Guid not found. ", IgnoreName.c_str() );
-	}
+    }
 
     // Finish
     SendPacket( &data );
@@ -1006,39 +1006,39 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     uint32 id;
     WorldPacket data;
     recv_data >> id;
-	AreaTrigger * at = objmgr.GetAreaTrigger(id);
+    AreaTrigger * at = objmgr.GetAreaTrigger(id);
 
-	if(at)
-	{
-		if(at->mapId = GetPlayer()->GetMapId())
-		{
-			GetPlayer()->BuildTeleportAckMsg(&data, at->X, at->Y, at->Z, 0.0f);
-			SendPacket(&data);
-			GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
-			GetPlayer()->BuildHeartBeatMsg(&data);
-			GetPlayer()->SendMessageToSet(&data, true);
-		}
-		else
-		{
-			data.Initialize(SMSG_TRANSFER_PENDING);
-			data << uint32(0);
+    if(at)
+    {
+        if(at->mapId = GetPlayer()->GetMapId())
+        {
+            GetPlayer()->BuildTeleportAckMsg(&data, at->X, at->Y, at->Z, 0.0f);
+            SendPacket(&data);
+            GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
+            GetPlayer()->BuildHeartBeatMsg(&data);
+            GetPlayer()->SendMessageToSet(&data, true);
+        }
+        else
+        {
+            data.Initialize(SMSG_TRANSFER_PENDING);
+            data << uint32(0);
 
-			SendPacket(&data);
+            SendPacket(&data);
 #ifndef ENABLE_GRID_SYSTEM
-			GetPlayer()->RemoveFromMap();
+            GetPlayer()->RemoveFromMap();
 #else
-			MapManager::Instance().GetMap(GetPlayer()->GetMapId())->RemoveFromMap(GetPlayer());
+            MapManager::Instance().GetMap(GetPlayer()->GetMapId())->RemoveFromMap(GetPlayer());
 #endif
-			data.Initialize(SMSG_NEW_WORLD);
-			data << at->mapId << at->X << at->Y << at->Z << 0.0f;
-			SendPacket( &data );
+            data.Initialize(SMSG_NEW_WORLD);
+            data << at->mapId << at->X << at->Y << at->Z << 0.0f;
+            SendPacket( &data );
 
-			GetPlayer()->SetMapId(at->mapId);
-			GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
-		}
+            GetPlayer()->SetMapId(at->mapId);
+            GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
+        }
 
-		delete at;
-	}
+        delete at;
+    }
 }
 
 
@@ -1171,11 +1171,11 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     
     if( obj != NULL )
     {
-	data.Initialize( SMSG_LOOT_RESPONSE );
-	if( obj->FillLoot(*_player, &data) )
-	{
-	    _player->SetLootGUID(guid);
-	    SendPacket(&data);
-	}
+    data.Initialize( SMSG_LOOT_RESPONSE );
+    if( obj->FillLoot(*_player, &data) )
+    {
+        _player->SetLootGUID(guid);
+        SendPacket(&data);
+    }
     }
 }

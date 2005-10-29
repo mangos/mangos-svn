@@ -21,7 +21,8 @@
 #include "DBCStores.h"
 #include "DataStore.h"
 
-// You need a line like this for every DBC store. If you use createDBCStore (no Indexed), the lines will be ordered the way they are in the file
+// You need a line like this for every DBC store. If you use createDBCStore (no
+// Indexed), the lines will be ordered the way they are in the file
 // SpellEntry is the file struct entry (for Spell.dbc here).
 implementIndexedDBCStore(SpellStore,SpellEntry)
 implementIndexedDBCStore(DurationStore,SpellDuration)
@@ -39,6 +40,7 @@ implementDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry)
 
 implementDBCStore(SkillStore,skilllinespell)
 // When loading this DBC, just write new SpellStore("spell.dbc");
+
 float GetRadius(SpellRadius *radius)
 {
     return radius->Radius;

@@ -68,25 +68,25 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 #ifdef ENABLE_GRID_SYSTEM
 #ifdef __REVIVE_CHEAT__ // UQ1: Because with grid system we have no way to revive... Cheat for now!
-	if (GetPlayer()->isDead())
-	{
-		GetPlayer()->SetMovement(MOVE_LAND_WALK);
-		GetPlayer()->SetMovement(MOVE_UNROOT);
-		GetPlayer()->SetPlayerSpeed(RUN, (float)7.5, true);
-		GetPlayer()->SetPlayerSpeed(SWIM, (float)4.9, true);
+    if (GetPlayer()->isDead())
+    {
+        GetPlayer()->SetMovement(MOVE_LAND_WALK);
+        GetPlayer()->SetMovement(MOVE_UNROOT);
+        GetPlayer()->SetPlayerSpeed(RUN, (float)7.5, true);
+        GetPlayer()->SetPlayerSpeed(SWIM, (float)4.9, true);
 
-		GetPlayer()->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-		GetPlayer()->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-		GetPlayer()->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-		GetPlayer()->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-		GetPlayer()->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-		GetPlayer()->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
+        GetPlayer()->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
 
-		GetPlayer()->ResurrectPlayer();
-		GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
-		GetPlayer()->SpawnCorpseBones();
-		//return;
-	}
+        GetPlayer()->ResurrectPlayer();
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
+        GetPlayer()->SpawnCorpseBones();
+        //return;
+    }
 #endif //__REVIVE_CHEAT__
 #endif //ENABLE_GRID_SYSTEM
 
@@ -102,10 +102,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-		Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
-		WPAssert(spell);
+        Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
+        WPAssert(spell);
 
-		SpellCastTargets targets;
+        SpellCastTargets targets;
         targets.read(&recvPacket,GetPlayer()->GetGUID());
 
         spell->prepare(&targets);
