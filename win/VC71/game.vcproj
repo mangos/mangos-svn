@@ -228,6 +228,62 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="1_8_x Debug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D &quot;__REVIVE_CHEAT__&quot;"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM,_VERSION_1_8_0_"
+				StringPooling="FALSE"
+				MinimalRebuild="FALSE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				RuntimeTypeInfo="TRUE"
+				UsePrecompiledHeader="2"
+				PrecompiledHeaderFile=".\game___Win32_Debug/game.pch"
+				AssemblerListingLocation=".\game___Win32_Debug/"
+				ObjectFile=".\game___Win32_Debug/"
+				ProgramDataBaseFileName=".\game___Win32_Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="3"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\game___Win32_Debug\game.lib"
+				SuppressStartupBanner="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -371,6 +427,12 @@
 				RelativePath="..\..\src\game\UpdateData.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\UpdateData_1_8_x.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\UpdateData_1_8_x.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\World.cpp">
 			</File>
 			<File
@@ -480,7 +542,13 @@
 				RelativePath="..\..\src\game\UpdateFields_1_7_x.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\UpdateFields_1_8_x.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\UpdateMask.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\UpdateMask_1_8_x.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Utilities.h">
@@ -503,6 +571,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Opcodes_1_7_x.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Opcodes_1_8_x.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Opcodes_1_8_x.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\WorldSession.cpp">
