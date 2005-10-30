@@ -97,6 +97,11 @@ class WorldSession
         void HandleGMTicketGetTicketOpcode(WorldPacket& recvPacket);
         void HandleGMTicketCreateOpcode(WorldPacket& recvPacket);
         void HandleGMTicketSystemStatusOpcode(WorldPacket& recvPacket);
+
+        // new ticket handlers sani
+        void HandleGMTicketDeleteOpcode(WorldPacket& recvPacket);
+        void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
+
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
         void HandleSetTargetOpcode(WorldPacket& recvPacket);
         void HandleSetSelectionOpcode(WorldPacket& recvPacket);

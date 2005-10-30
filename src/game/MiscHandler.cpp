@@ -39,6 +39,18 @@
 #include "ObjectAccessor.h"
 #endif
 
+/// escape some shitty input from user
+void my_esc( char * r, const char * s )
+{
+          int n = strlen( s ), i, j;
+          for ( i = 0, j = 0; s[i]; i++ )
+          {
+            if ( s[i] == '"' || s[i] == '\\' || s[i] == '\'' ) r[j++] = '\\';
+            r[j++] = s[i];
+          }
+          r[j] = 0;
+}
+
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_REPOP_REQUEST Message" );
@@ -410,28 +422,112 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
+    uint64 guid;
+    std::stringstream query,query1;
+    Field *fields;
+    guid = GetPlayer()->GetGUID();
+    query << "SELECT COUNT(*) FROM `gmtickets` where guid='" << guid << "'";
+    QueryResult *result = sDatabase.Query( query.str().c_str() );
 
-    data.Initialize( SMSG_GMTICKET_GETTICKET );
-    data << uint32(6);
-    data << uint32(0xffbfbfbf);
-    data << uint8(0);
-    data << uint8(3);
+        if (result)
+        {
+        int cnt;
+        fields = result->Fetch();
+        cnt = fields[0].GetUInt32();
 
-    SendPacket( &data );
+        if ( cnt > 0 )
+        {
+        data.Initialize( SMSG_GMTICKET_GETTICKET );
+        query1 << "SELECT * FROM `gmtickets` where guid='" << guid << "'";
+        QueryResult *result = sDatabase.Query( query1.str().c_str() );
+        fields = result->Fetch();
+
+        printf( "query=%s\n", query1.str().c_str() );
+        char tickettext[255];
+        strcpy( tickettext,fields[2].GetString() );
+        data << uint32(6); // means we have open tickets
+        data.append((uint8 *)tickettext,strlen(tickettext)+1);
+        data << uint8(0); // ??
+        data << uint8(3); // ??
+        SendPacket( &data );
+        }
+        else {
+        data << uint32(1); // all !6 means we have no open tickets
+        data << uint32(0);
+        data << uint8(0);
+        data << uint8(0);
+        SendPacket( &data );
+        }
+
+        }
+        delete result;
+}
+
+
+void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
+{
+        WorldPacket data;
+        uint64 guid = GetPlayer()->GetGUID();
+        std::string ticketText = "";
+        char * p, p1[512];
+        uint8 buf[516];
+        memcpy( buf, recv_data.contents(), sizeof buf <recv_data.size() ? sizeof buf : recv_data.size() );
+        p = (char *)buf + 1;
+        my_esc( p1, (const char *)buf + 1 );
+        std::stringstream ss;
+        ticketText = p1;
+        ss << "UPDATE `gmtickets` set ticket_text = '" << ticketText << "' WHERE guid = '" << guid << "'";
+        sDatabase.Execute( ss.str( ).c_str( ) );
+}
+
+void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
+{
+        WorldPacket data;
+        uint64 guid = GetPlayer()->GetGUID();
+        std::stringstream ss;
+        ss << "DELETE FROM `gmtickets` where guid='" << guid << "' LIMIT 1";
+        sDatabase.Execute( ss.str( ).c_str( ) );
+        data.Initialize( SMSG_GMTICKET_GETTICKET );
+        data << uint32(1); // all !6 means we have no open tickets
+        data << uint32(0);
+        data << uint8(0);
+        data << uint8(0);
+        SendPacket( &data );
 }
 
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
+ /// Catergories are marked with int in database
+ /// Category 0 - Item
+ /// Category 1 - Behaviour/Harassment
+ /// Category 2 - Guild
+ /// Category 3 - Character
+ /// Category 4 - Non-Quest/Creep
+ /// Category 5 - Stuck
+ /// Category 6 - Environmental
+ /// Category 7 - Quest/Quest-NPC
+ /// Category 8 - Account/Billing
 
-    // TODO: Receive message sent and relay it to an online GM
-    data.Initialize( SMSG_GMTICKET_CREATE );
-    data << uint32(2);
-
-    SendPacket( &data );
+        WorldPacket data;
+        uint64 guid;
+        guid = GetPlayer()->GetGUID();
+        std::string ticketText = "";
+        char * p, p1[512];
+        uint8 buf[516];
+        int   cat[] = { 0,5,1,2,0,6,4,7,0,8,3 };
+        memcpy( buf, recv_data.contents(), sizeof buf < recv_data.size() ? sizeof buf : recv_data.size() );
+        buf[272] = 0;
+        p = (char *)buf + 17;
+        my_esc( p1, (const char *)buf + 17 );
+        std::stringstream ss;
+        ticketText = p1;
+        ss << "INSERT INTO `gmtickets` VALUES ('','" << guid << "', '" << ticketText << "', '" << cat[buf[0]] << "')";
+        sDatabase.Execute( ss.str( ).c_str( ) );
+        data.Initialize( SMSG_GMTICKET_CREATE );
+        data << uint32(2);
+        SendPacket( &data );
 }
-
 
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 {
