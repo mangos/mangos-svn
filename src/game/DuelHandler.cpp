@@ -39,8 +39,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
     sLog.outString( "HandleDuelAcceptedOpcode.\n" );
 
-    //if you want to  get this handle ,	learn spell	7266 first,
-    //I	don't how to do	,Please	FIX	ME
+    //if you want to  get this handle, learn spell 7266 first,
+    //I don't how to do, please FIX ME
     uint64 guid;
 
     recvPacket >> guid;

@@ -246,6 +246,7 @@ EXTRA_DIST = \
 	vendors.sql \
 	gmtickets.sql
 
+
 # SQL files for MaNGOS database to be installed to datadir
 pkgdata_DATA = \
 	accounts.sql \
