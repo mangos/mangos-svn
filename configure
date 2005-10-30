@@ -1040,8 +1040,8 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-httpd-integrated Turn on httpd integrated system
   --enable-grid-system Turn on grid system
-  --enable-17x Turn on 1.7.x support
   --enable-18x Turn on 1.8.x support
+  --enable-17x Turn on 1.7.x support
   --enable-new-framework Enable new framework
 
 Optional Packages:
@@ -23369,31 +23369,6 @@ fi;
 echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_GRID" >&5
 echo "${ECHO_T}$MANGOSD_ENABLE_GRID" >&6
 
-# check for 1.7.x protocol support
-echo "$as_me:$LINENO: checking whether 1.7.x support is enabled" >&5
-echo $ECHO_N "checking whether 1.7.x support is enabled... $ECHO_C" >&6
-MANGOSD_ENABLE_17X=yes
-# Check whether --enable-17x or --disable-17x was given.
-if test "${enable_17x+set}" = set; then
-  enableval="$enable_17x"
-
-    if test "$enableval" = "no" ; then
-	MANGOSD_ENABLE_17X=no
-    elif test "$withval" != "yes" ; then
-	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5
-echo "$as_me: error: Please choose yes or no" >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-
-fi;
-echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_17X" >&5
-echo "${ECHO_T}$MANGOSD_ENABLE_17X" >&6
-
-if test "$MANGOSD_ENABLE_17X" != "no"; then
-    CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
-    CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
-fi
-
 
 # check for 1.8.x protocol support
 echo "$as_me:$LINENO: checking whether 1.8.x support is enabled" >&5
@@ -23418,6 +23393,38 @@ echo "${ECHO_T}$MANGOSD_ENABLE_18X" >&6
 if test "$MANGOSD_ENABLE_18X" != "no"; then
     CFLAGS="-D_VERSION_1_8_0_ $CFLAGS"
     CXXFLAGS="-D_VERSION_1_8_0_ $CXXFLAGS"
+    MANGOSD_ENABLE_17X=no
+else
+    MANGOSD_ENABLE_17X=yes
+fi
+
+# check for 1.7.x protocol support
+echo "$as_me:$LINENO: checking whether 1.7.x support is enabled" >&5
+echo $ECHO_N "checking whether 1.7.x support is enabled... $ECHO_C" >&6
+# Check whether --enable-17x or --disable-17x was given.
+if test "${enable_17x+set}" = set; then
+  enableval="$enable_17x"
+
+    if test "$enableval" = "no" ; then
+	MANGOSD_ENABLE_17X=no
+    elif test "$withval" != "yes" ; then
+	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5
+echo "$as_me: error: Please choose yes or no" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+fi;
+echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_17X" >&5
+echo "${ECHO_T}$MANGOSD_ENABLE_17X" >&6
+
+#if 1.8 is enable, we don't allow 17x to be enable
+if test "$MANGOSD_ENABLE_17X" != "no"; then
+    if test "$MANGOSD_ENABLE_18X" != "no"; then
+        MANGOSD_ENABLE_17X=no
+    else
+        CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
+        CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
+    fi
 fi
 
 

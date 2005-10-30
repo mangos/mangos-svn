@@ -239,25 +239,6 @@ AC_ARG_ENABLE(grid-system,
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_GRID)
 
-# check for 1.7.x protocol support
-AC_MSG_CHECKING(whether 1.7.x support is enabled)
-MANGOSD_ENABLE_17X=yes
-AC_ARG_ENABLE(17x,
-[  --enable-17x Turn on 1.7.x support],
-[
-    if test "$enableval" = "no" ; then
-	MANGOSD_ENABLE_17X=no
-    elif test "$withval" != "yes" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_17X)
-
-if test "$MANGOSD_ENABLE_17X" != "no"; then
-    CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
-    CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
-fi
-
 
 # check for 1.8.x protocol support
 AC_MSG_CHECKING(whether 1.8.x support is enabled)
@@ -276,6 +257,32 @@ AC_MSG_RESULT($MANGOSD_ENABLE_18X)
 if test "$MANGOSD_ENABLE_18X" != "no"; then
     CFLAGS="-D_VERSION_1_8_0_ $CFLAGS"
     CXXFLAGS="-D_VERSION_1_8_0_ $CXXFLAGS"
+    MANGOSD_ENABLE_17X=no
+else
+    MANGOSD_ENABLE_17X=yes  
+fi
+
+# check for 1.7.x protocol support
+AC_MSG_CHECKING(whether 1.7.x support is enabled)
+AC_ARG_ENABLE(17x,
+[  --enable-17x Turn on 1.7.x support],
+[
+    if test "$enableval" = "no" ; then
+	MANGOSD_ENABLE_17X=no
+    elif test "$withval" != "yes" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_17X)
+
+#if 1.8 is enable, we don't allow 17x to be enable
+if test "$MANGOSD_ENABLE_17X" != "no"; then
+    if test "$MANGOSD_ENABLE_18X" != "no"; then
+        MANGOSD_ENABLE_17X=no
+    else
+        CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
+        CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
+    fi
 fi
 
 
