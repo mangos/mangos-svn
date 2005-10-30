@@ -1,24 +1,19 @@
-/*
-    Null httpd -- simple http server
-    Copyright (C) 2001-2002 Dan Cahill
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+/****************************************************************************\
+**                                                                          **
+** This code is the intellectual property of Dan Cahill, and is a modular   **
+** component of Something Greater(tm).                                      **
+**                                                                          **
+** This code is NOT free, or under any 'free' license such as BSD or GPL.   **
+** Possession or use of this source code without explicit permission from   **
+** the author (Dan Cahill) is strictly prohibited.                          **
+**                                                                          **
+** File: cgi.c                                                              **
+\****************************************************************************/
 #include "main.h"
 
 #define BUFF_SIZE 8192
+
+int RunAsCGI=0;
 
 void cgi_makeargs(int sid, char *args[])
 {
@@ -91,6 +86,8 @@ void cgi_makeenv(int sid, char *env[], char *args[])
 	snprintf(env[n++], 1023, "REMOTE_ADDR=%s", conn[sid].dat->in_RemoteAddr);
 	env[n]=calloc(1024, sizeof(char));
 	snprintf(env[n++], 1023, "REMOTE_PORT=%d", ntohs(conn[sid].ClientAddr.sin_port));
+//	env[n]=calloc(1024, sizeof(char));
+//	snprintf(env[n++], 1023, "REMOTE_USER=%s", conn[sid].dat->user_username);
 	env[n]=calloc(1024, sizeof(char));
 	snprintf(env[n++], 1023, "REQUEST_METHOD=%s", conn[sid].dat->in_RequestMethod);
 	env[n]=calloc(1024, sizeof(char));
@@ -189,12 +186,12 @@ int cgi_main()
 	if (args[1]==NULL) {
 		snprintf(Command, sizeof(Command)-1, "%s", cgifilename);
 	} else {
-		snprintf(Command, sizeof(Command)-1, "%s\\%s \"%s\"", config.server_cgi_bin_dir, cgi_types[i][1], cgifilename);
-		//snprintf(Command, sizeof(Command)-1, "%s \"%s\"", cgi_types[i][1], cgifilename); // UQ1: Added path to config file...
-#ifdef _DEBUG
-		logerror("CGI Command: [%s].\n", Command);
-#endif
+		//snprintf(Command, sizeof(Command)-1, "%s\\%s \"%s\"", config.server_cgi_bin_dir, cgi_types[i][1], cgifilename);
+		snprintf(Command, sizeof(Command)-1, "%s\\%s \"%s\" > file.html", config.server_cgi_bin_dir, cgi_types[i][1], cgifilename);
 	}
+
+	logerror("Process Command: %s", Command);
+
 	for (i=0, n=0;env[i]!=NULL;i++) {
 		if (n+strlen(env[i])>sizeof(Environ)) break;
 		n+=sprintf(&Environ[n], "%s", env[i]);
@@ -268,6 +265,7 @@ int cgi_main()
 		close(remote.out);
 	}
 #endif
+	sendfile(sid, "file.html");
 	if (conn[sid].dat->in_ContentLength>0) {
 #ifdef WIN32
 		WriteFile((HANDLE)local.out, conn[sid].PostData, conn[sid].dat->in_ContentLength, &nOutRead, NULL);
@@ -293,8 +291,14 @@ int cgi_main()
 #else
 		nOutRead=read(local.in, szBuffer, BUFF_SIZE-1);
 #endif
-		if (nOutRead>0) {
-			send(conn[sid].socket, szBuffer, nOutRead, 0);
+		if (nOutRead>0)
+		{
+			if (RunAsCGI) {
+				fwrite(szBuffer, sizeof(char), nOutRead, stdout);
+			} else {
+				fwrite(szBuffer, sizeof(char), nOutRead, stdout);
+				send(conn[sid].socket, szBuffer, nOutRead, 0);
+			}
 		};
 	} while (nOutRead>0);
 	flushbuffer(sid);
