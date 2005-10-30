@@ -1983,6 +1983,15 @@ uint8 Player::FindFreeItemSlot(uint32 type)
             }
             return INVENTORY_SLOT_ITEM_END;
         }
+		case INVTYPE_SLOT_ITEM:
+		{
+			for(uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+			{
+				if (GetItemBySlot(i) == NULL)
+					return i;
+			}
+			return INVENTORY_SLOT_ITEM_END;
+		}
         default:
             ASSERT(0);
             return INVENTORY_SLOT_ITEM_END;
@@ -1992,7 +2001,7 @@ uint8 Player::FindFreeItemSlot(uint32 type)
 int Player::CountFreeBagSlot()
 {
 	int count = 0;
-	for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+	for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
 	{
 		if (!GetItemBySlot(i)) count++; 		
 	}

@@ -62,7 +62,7 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 {
-    uint8 i, slot = 0;
+    uint8 slot = 0;
     uint32 itemid = 0;
     uint8 lootSlot = 0;
     WorldPacket data;
@@ -77,16 +77,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     recv_data >> lootSlot;
     lootSlot -=1;                                 //to prevent Slot 0 from been used "Still Rolling for item fix"
 
-    for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-    {
-        if (GetPlayer()->GetItemBySlot(i) == NULL)
-        {
-            slot = i;
-            break;
-        }
-    }
 
-    if (slot == 0)
+	slot = GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM);
+
+    if (slot == INVENTORY_SLOT_ITEM_END)
     {
         // Our User doesn't have a free Slot in there bag
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
