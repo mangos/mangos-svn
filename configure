@@ -23372,16 +23372,14 @@ echo "${ECHO_T}$MANGOSD_ENABLE_GRID" >&6
 # check for 1.7.x protocol support
 echo "$as_me:$LINENO: checking whether 1.7.x support is enabled" >&5
 echo $ECHO_N "checking whether 1.7.x support is enabled... $ECHO_C" >&6
-MANGOSD_ENABLE_17X=no
+MANGOSD_ENABLE_17X=yes
 # Check whether --enable-17x or --disable-17x was given.
 if test "${enable_17x+set}" = set; then
   enableval="$enable_17x"
 
-    if test "$enableval" = "yes" ; then
-	CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
-	CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
-	MANGOSD_ENABLE_17X=yes
-    elif test "$withval" != "no" ; then
+    if test "$enableval" = "no" ; then
+	MANGOSD_ENABLE_17X=no
+    elif test "$withval" != "yes" ; then
 	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5
 echo "$as_me: error: Please choose yes or no" >&2;}
    { (exit 1); exit 1; }; }
@@ -23391,19 +23389,23 @@ fi;
 echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_17X" >&5
 echo "${ECHO_T}$MANGOSD_ENABLE_17X" >&6
 
+if test "$MANGOSD_ENABLE_17X" != "no"; then
+    CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
+    CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
+fi
+
+
 # check for 1.8.x protocol support
 echo "$as_me:$LINENO: checking whether 1.8.x support is enabled" >&5
 echo $ECHO_N "checking whether 1.8.x support is enabled... $ECHO_C" >&6
-MANGOSD_ENABLE_18X=no
+MANGOSD_ENABLE_18X=yes
 # Check whether --enable-18x or --disable-18x was given.
 if test "${enable_18x+set}" = set; then
   enableval="$enable_18x"
 
-    if test "$enableval" = "yes" ; then
-	CFLAGS="-D_VERSION_1_8_0_ $CFLAGS"
-	CXXFLAGS="-D_VERSION_1_8_0_ $CXXFLAGS"
-	MANGOSD_ENABLE_18X=yes
-    elif test "$withval" != "no" ; then
+    if test "$enableval" = "no" ; then
+	MANGOSD_ENABLE_18X=no
+    elif test "$withval" != "yes" ; then
 	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5
 echo "$as_me: error: Please choose yes or no" >&2;}
    { (exit 1); exit 1; }; }
@@ -23412,6 +23414,12 @@ echo "$as_me: error: Please choose yes or no" >&2;}
 fi;
 echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_18X" >&5
 echo "${ECHO_T}$MANGOSD_ENABLE_18X" >&6
+
+if test "$MANGOSD_ENABLE_18X" != "no"; then
+    CFLAGS="-D_VERSION_1_8_0_ $CFLAGS"
+    CXXFLAGS="-D_VERSION_1_8_0_ $CXXFLAGS"
+fi
+
 
 # check for enable new framework
 echo "$as_me:$LINENO: checking whether new framework is enabled" >&5
