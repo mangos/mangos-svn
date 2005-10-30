@@ -386,37 +386,37 @@ void Player::Update( uint32 p_time )
                 {
                     setAttackTimer(0);
 
-					uint32 dmg;
+                    uint32 dmg;
 
-					/*Item *weapon = GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
-					Item *weapon2 = GetItemBySlot(EQUIPMENT_SLOT_OFFHAND);
-					
-					if (weapon)
-					{
-						float dmgMin = 0, dmgMax = 0;
-						int i;
+                    /*Item *weapon = GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
+                    Item *weapon2 = GetItemBySlot(EQUIPMENT_SLOT_OFFHAND);
+                    
+                    if (weapon)
+                    {
+                        float dmgMin = 0, dmgMax = 0;
+                        int i;
 
-						for (i = 0; i < 6; i++)
-						{// Add up damage values...
-							dmgMin += weapon->GetItemProto()->DamageMin[i];
-							dmgMax += weapon->GetItemProto()->DamageMax[i];
-							
-							if (weapon2)
-							{
-								dmgMin += weapon2->GetItemProto()->DamageMin[i];
-								dmgMax += weapon2->GetItemProto()->DamageMax[i];
-							}
-						}
-						
-						dmg = irand(dmgMin, dmgMax);
-					}
-					else
-					{
-						dmg = irand(0, GetUInt32Value(UNIT_FIELD_STR));
-					}*/
-					
-					dmg = CalculateDamage (this);
-					AttackerStateUpdate(pVictim, dmg);
+                        for (i = 0; i < 6; i++)
+                        {// Add up damage values...
+                            dmgMin += weapon->GetItemProto()->DamageMin[i];
+                            dmgMax += weapon->GetItemProto()->DamageMax[i];
+                            
+                            if (weapon2)
+                            {
+                                dmgMin += weapon2->GetItemProto()->DamageMin[i];
+                                dmgMax += weapon2->GetItemProto()->DamageMax[i];
+                            }
+                        }
+                        
+                        dmg = irand(dmgMin, dmgMax);
+                    }
+                    else
+                    {
+                        dmg = irand(0, GetUInt32Value(UNIT_FIELD_STR));
+                    }*/
+                    
+                    dmg = CalculateDamage (this);
+                    AttackerStateUpdate(pVictim, dmg);
                 }
             }
         }
@@ -437,11 +437,11 @@ void Player::Update( uint32 p_time )
     // Dead System
     if (m_deathState == JUST_DIED)
     {
-		if( m_isInDuel ){
+        if( m_isInDuel ){
             DuelComplete();
-		}else{
-			KillPlayer();
-		}
+        }else{
+            KillPlayer();
+        }
     }
 
     /* Auto-Dismount after Taxiride */
@@ -1987,15 +1987,15 @@ uint8 Player::FindFreeItemSlot(uint32 type)
             }
             return INVENTORY_SLOT_ITEM_END;
         }
-		case INVTYPE_SLOT_ITEM:
-		{
-			for(uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-			{
-				if (GetItemBySlot(i) == NULL)
-					return i;
-			}
-			return INVENTORY_SLOT_ITEM_END;
-		}
+        case INVTYPE_SLOT_ITEM:
+        {
+            for(uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+            {
+                if (GetItemBySlot(i) == NULL)
+                    return i;
+            }
+            return INVENTORY_SLOT_ITEM_END;
+        }
         default:
             ASSERT(0);
             return INVENTORY_SLOT_ITEM_END;
@@ -2004,12 +2004,12 @@ uint8 Player::FindFreeItemSlot(uint32 type)
 
 int Player::CountFreeBagSlot()
 {
-	int count = 0;
-	for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-	{
-		if (!GetItemBySlot(i)) count++; 		
-	}
-	return count;
+    int count = 0;
+    for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        if (!GetItemBySlot(i)) count++;         
+    }
+    return count;
 }
 
 uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
@@ -3528,15 +3528,15 @@ void Player::InitExploreSystem(void)
 }
 void Player::DuelComplete()
 {
-	WorldPacket data;
-	Player *plvs = objmgr.GetPlayer(m_duelGUID);
+    WorldPacket data;
+    Player *plvs = objmgr.GetPlayer(m_duelGUID);
 
-	data.Initialize(SMSG_DUEL_WINNER);
+    data.Initialize(SMSG_DUEL_WINNER);
     data << (uint8)0;
-	data << plvs->GetName();
+    data << plvs->GetName();
     data << (uint8)0;
-	data << GetName();
-	GetSession()->SendPacket(&data);
+    data << GetName();
+    GetSession()->SendPacket(&data);
     plvs->GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_DUEL_COMPLETE);
@@ -3557,9 +3557,9 @@ void Player::DuelComplete()
     m_isInDuel = false;
     plvs->m_isInDuel = false;
 
-	m_deathState = ALIVE;
+    m_deathState = ALIVE;
 
-	//---------FIX ME-----------------------------------
+    //---------FIX ME-----------------------------------
     setFaction(m_race, 0);
     plvs->setFaction(plvs->m_race, 0);
     //---------------------------------------------------
@@ -3579,7 +3579,7 @@ void Player::DuelComplete()
 #else
          MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
 #endif    
-	}
+    }
 }
 //
 // UQ!: CHECKME: Move this code somewhere else???

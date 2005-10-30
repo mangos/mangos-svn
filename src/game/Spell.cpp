@@ -761,8 +761,8 @@ void Spell::FillTargetMap()
                     void Spell::SendDuelRequest(Player* caster, Player* target,uint64 ArbiterID)
                     {
                         WorldPacket data;
-						static uint64 aGUID = 0x213632;
-						aGUID++;
+                        static uint64 aGUID = 0x213632;
+                        aGUID++;
                         data.Initialize(SMSG_DUEL_REQUESTED);
                         data << ArbiterID << caster->GetGUID();
 
@@ -777,8 +777,8 @@ void Spell::FillTargetMap()
 
                         caster->SetDuelSenderGUID(caster->GetGUID());
                         target->SetDuelSenderGUID(caster->GetGUID());
-						
-						caster->SetDuelFlagGUID(ArbiterID);
+                        
+                        caster->SetDuelFlagGUID(ArbiterID);
                         target->SetDuelFlagGUID(ArbiterID);
                     }
                     void Spell::TakePower()
@@ -1236,16 +1236,15 @@ m_CastItem = p_caster->GetItemBySlot(i);
                              // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
                              pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,playerCaster->GetMapId(), playerCaster->GetPositionX(), playerCaster->GetPositionY(), playerCaster->GetPositionZ(), playerCaster->GetOrientation());
                              pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
-		                     pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
-		                     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, 4 );
-		                     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
-		                     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, 57 );
+                             pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
+                             pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, 4 );
+                             pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
+                             pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, 57 );
 
                              Log::getSingleton( ).outError("AddObject at Spell.cpp 1247");
 #ifndef ENABLE_GRID_SYSTEM
                              objmgr.AddObject(pGameObj);
                              pGameObj->PlaceOnMap();
-		                     pGameObj->GetGUID();
 #else
                              MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 #endif
