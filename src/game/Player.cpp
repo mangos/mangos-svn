@@ -3569,7 +3569,7 @@ void Player::DuelComplete()
        obj = objmgr.GetObject<GameObject>(m_duelFlagGUID);
 #else
     if( this )
-       obj = ObjectAccessor::Instance().GetGameObject(this, m_duelFlagGUID);
+       obj = ObjectAccessor::Instance().GetGameObject(*this, m_duelFlagGUID);
 #endif
     if(obj)
     {

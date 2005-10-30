@@ -28,6 +28,11 @@
 #include "Spell.h"
 #include "UpdateData.h"
 #include "Chat.h"
+
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#endif
+
 /*
 void BuildDuelPacket(uint64 ObjID,uint64 Cast, uint64 Target)
 {
@@ -127,7 +132,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     obj = objmgr.GetObject<GameObject>(guid);
 #else
     if( pl )
-       obj = ObjectAccessor::Instance().GetGameObject(pl, guid);
+       obj = ObjectAccessor::Instance().GetGameObject(*pl, guid);
 #endif
     if(obj)
     {
