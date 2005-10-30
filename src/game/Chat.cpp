@@ -69,6 +69,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "bit",         1, &ChatHandler::HandleModifyBitCommand,     "",   NULL },
         { "bwalk",       1, &ChatHandler::HandleModifyBWalkCommand,   "",   NULL },
         { "aspeed",      1, &ChatHandler::HandleModifyASpedCommand,   "",   NULL },
+		{ "faction",     1, &ChatHandler::HandleModifyFactionCommand, "",   NULL },
         { NULL,          0, NULL,                                     "",   NULL }
     };
 

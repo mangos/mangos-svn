@@ -386,6 +386,7 @@ class Player : public Unit
         void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
         void SetInDuel(const bool &val) { m_isInDuel = val; }
         void SetDuelSenderGUID(const uint64 &guid) { m_duelSenderGUID = guid; }
+		void SetDuelFlagGUID(const uint64 &guid) { m_duelFlagGUID = guid; }
 
         // Deadknight isGroupMember(plyr)
         bool IsGroupMember(Player *plyr);
@@ -445,6 +446,7 @@ class Player : public Unit
         void BuildPlayerRepop();
         void DeathDurabilityLoss(double percent);
         void RepopAtGraveyard();
+		void DuelComplete();
 
         // Movement stuff
         void SetMovement(uint8 pType);
@@ -643,6 +645,7 @@ class Player : public Unit
         uint64 m_duelGUID;
         bool   m_isInDuel;
         uint64 m_duelSenderGUID;
+		uint64 m_duelFlagGUID;
 
 #ifdef ENABLE_GRID_SYSTEM
         InRangeObjectsMapType i_inRangeObjects;

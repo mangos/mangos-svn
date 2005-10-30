@@ -151,6 +151,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleModifyScaleCommand(const char* args);
         bool HandleModifyMountCommand(const char* args);
         bool HandleModifyBitCommand(const char* args);
+        bool HandleModifyFactionCommand(const char* args);
 
         // Debug Commands
         bool HandleDebugInArcCommand(const char* args);
