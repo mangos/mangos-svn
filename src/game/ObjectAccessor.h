@@ -85,6 +85,8 @@ private:
 
     void _buildUpdateObject(Object *, UpdateDataMapType &);
     void _buildPacket(Player *, Player *, UpdateDataMapType &);
+    void _buildForInRangePlayer(Object *, UpdateDataMapType &);
+
     std::set<Object *> i_objects;
 
 };

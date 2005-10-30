@@ -166,6 +166,10 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     assert( c != NULL );
     pl = c->GetOwner();
     }
+    else
+    {
+	_buildForInRangePlayer(obj, update_players);
+    }
 
     if( pl == NULL )
     return;
@@ -195,6 +199,32 @@ ObjectAccessor::_buildPacket(Player *pl, Player *bpl, UpdateDataMapType &update_
     
     bpl->BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
 
+}
+
+void
+ObjectAccessor::_buildForInRangePlayer(Object *obj, UpdateDataMapType &update_players)
+{
+#ifdef ENABLE_GRID_SYSTEM
+    UpdateDataMapType::iterator pl_iter;
+    for(PlayerMapType::iterator iter= i_players.begin(); iter != i_players.end(); ++ iter)
+    {
+	Unit *unit = dynamic_cast<Unit *>(obj);
+	bool is_inrange = (unit == NULL ? iter->second->isInRange(obj) : iter->second->isInRange(unit));
+	if( is_inrange )
+	{
+	    pl_iter = update_players.find(iter->second);
+	    if( pl_iter == update_players.end() )
+	    {
+		std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataValueType(iter->second, UpdateData()) );
+		assert( p.second );
+		pl_iter = p.first;
+	    }
+	    obj->BuildValuesUpdateBlockForPlayer(&pl_iter->second, pl_iter->first);	    
+	}
+    }
+
+    obj->ClearUpdateMask();
+#endif
 }
 
 
