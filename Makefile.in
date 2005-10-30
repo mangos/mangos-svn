@@ -324,7 +324,7 @@ EXTRA_DIST = reconf configure TODO win/mangosdVC71.sln \
 	dep/lib/debug/libeay32.dll dep/lib/debug/libeay32.lib \
 	dep/lib/release/libeay32.dll dep/lib/release/libeay32.lib \
 	dep/lib/debug/sqlite.lib dep/lib/release/sqlite.lib
-SUBDIRS = doc dep sql src
+SUBDIRS = doc dep src sql
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
