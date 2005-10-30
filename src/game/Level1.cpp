@@ -525,6 +525,42 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleModifyFactionCommand(const char* args)
+{
+
+    WorldPacket data;
+
+    if(!*args)
+        return false;
+
+    uint32 factionid = atoi((char*)args);
+
+    Player *chr = getSelectedChar(m_session);
+    if (chr == NULL)                              // Ignatich: what should NOT happen but just in case...
+    {
+        FillSystemMessageData(&data, m_session, "No character selected.");
+        m_session->SendPacket( &data );
+        return true;
+    }
+
+    char buf[256];
+
+    // send message to user
+    sprintf((char*)buf,"You change the Faction to %i of %s.", factionid, chr->GetName());
+    FillSystemMessageData(&data, m_session, buf);
+    m_session->SendPacket( &data );
+
+    // send message to player
+    sprintf((char*)buf,"%s changed your Faction to %i.", m_session->GetPlayer()->GetName(), factionid);
+    FillSystemMessageData(&data, m_session, buf);
+
+    chr->GetSession()->SendPacket(&data);
+
+    chr->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,factionid);
+	
+    return true;
+}
+
 
 bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 {

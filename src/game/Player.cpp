@@ -437,7 +437,11 @@ void Player::Update( uint32 p_time )
     // Dead System
     if (m_deathState == JUST_DIED)
     {
-        KillPlayer();
+		if( m_isInDuel ){
+            DuelComplete();
+		}else{
+			KillPlayer();
+		}
     }
 
     /* Auto-Dismount after Taxiride */
@@ -3522,7 +3526,61 @@ void Player::InitExploreSystem(void)
         }
     }
 }
+void Player::DuelComplete()
+{
+	WorldPacket data;
+	Player *plvs = objmgr.GetPlayer(m_duelGUID);
 
+	data.Initialize(SMSG_DUEL_WINNER);
+    data << (uint8)0;
+	data << plvs->GetName();
+    data << (uint8)0;
+	data << GetName();
+	GetSession()->SendPacket(&data);
+    plvs->GetSession()->SendPacket(&data);
+
+    data.Initialize(SMSG_DUEL_COMPLETE);
+    data << (uint8)1;                             // Duel Complete
+    GetSession()->SendPacket(&data);
+    plvs->GetSession()->SendPacket(&data);
+
+    data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
+    data << (uint64)m_duelFlagGUID;
+    GetSession()->SendPacket(&data);
+    plvs->GetSession()->SendPacket(&data);
+
+    data.Initialize(SMSG_DESTROY_OBJECT);
+    data << (uint64)m_duelFlagGUID;
+    GetSession()->SendPacket(&data);
+    plvs->GetSession()->SendPacket(&data);
+
+    m_isInDuel = false;
+    plvs->m_isInDuel = false;
+
+	m_deathState = ALIVE;
+
+	//---------FIX ME-----------------------------------
+    setFaction(m_race, 0);
+    plvs->setFaction(plvs->m_race, 0);
+    //---------------------------------------------------
+
+    GameObject* obj = NULL;
+#ifndef ENABLE_GRID_SYSTEM
+       obj = objmgr.GetObject<GameObject>(m_duelFlagGUID);
+#else
+    if( this )
+       obj = ObjectAccessor::Instance().GetGameObject(this, m_duelFlagGUID);
+#endif
+    if(obj)
+    {
+#ifndef ENABLE_GRID_SYSTEM
+         obj->RemoveFromMap();
+         objmgr.RemoveObject(obj);
+#else
+         MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
+#endif    
+	}
+}
 //
 // UQ!: CHECKME: Move this code somewhere else???
 //

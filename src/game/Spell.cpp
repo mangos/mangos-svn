@@ -761,12 +761,9 @@ void Spell::FillTargetMap()
                     void Spell::SendDuelRequest(Player* caster, Player* target,uint64 ArbiterID)
                     {
                         WorldPacket data;
+						static uint64 aGUID = 0x213632;
+						aGUID++;
                         data.Initialize(SMSG_DUEL_REQUESTED);
-                        //data << target->GetGUID() << caster->GetGUID();
-                        //uint64 ArbiterID = HIGHGUID_GAMEOBJECT;  //flag object ID
-                        //uint32 guidlow = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
-                        //ArbiterID = ArbiterID << 8 + guidlow;
-
                         data << ArbiterID << caster->GetGUID();
 
                         target->GetSession()->SendPacket(&data);
@@ -780,6 +777,9 @@ void Spell::FillTargetMap()
 
                         caster->SetDuelSenderGUID(caster->GetGUID());
                         target->SetDuelSenderGUID(caster->GetGUID());
+						
+						caster->SetDuelFlagGUID(ArbiterID);
+                        target->SetDuelFlagGUID(ArbiterID);
                     }
                     void Spell::TakePower()
                     {
@@ -1229,26 +1229,30 @@ m_CastItem = p_caster->GetItemBySlot(i);
                             }break;
                             case 83:              //Duel
                             {
-                                // spawn a new one
-                                GameObject* pGameObj = new GameObject();
-                                uint16 display_id = m_spellInfo->EffectMiscValue[i];
+                             GameObject* pGameObj = new GameObject();
 
-                                // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-                                pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation());
-                                pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i]);
-                                pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16);
-                                pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
-                                pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-                                Log::getSingleton( ).outError("AddObject at Spell.cpp 1100");
+                             uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];;
+
+                             // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
+                             pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,playerCaster->GetMapId(), playerCaster->GetPositionX(), playerCaster->GetPositionY(), playerCaster->GetPositionZ(), playerCaster->GetOrientation());
+                             pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
+		                     pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
+		                     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, 4 );
+		                     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
+		                     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, 57 );
+
+                             Log::getSingleton( ).outError("AddObject at Spell.cpp 1247");
 #ifndef ENABLE_GRID_SYSTEM
-                                objmgr.AddObject(pGameObj);
-                                pGameObj->PlaceOnMap();
+                             objmgr.AddObject(pGameObj);
+                             pGameObj->PlaceOnMap();
+		                     pGameObj->GetGUID();
 #else
-                                MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+                             MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 #endif
-                                SendDuelRequest(playerCaster, playerTarget , pGameObj->GetGUID());
 
-                            }
+                             SendDuelRequest(playerCaster, playerTarget , pGameObj->GetGUID());
+
+                            }break;
                             case 87:              // Summon Totem (slot 1)
                             case 88:              // Summon Totem (slot 2)
                             case 89:              // Summon Totem (slot 3)

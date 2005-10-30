@@ -27,6 +27,7 @@
 #include "Opcodes.h"
 #include "Spell.h"
 #include "UpdateData.h"
+#include "Chat.h"
 /*
 void BuildDuelPacket(uint64 ObjID,uint64 Cast, uint64 Target)
 {
@@ -49,6 +50,9 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     Player *plTarget;
     WorldPacket data;
 
+	char buf[256];
+	WorldPacket Msgdata;
+
     WorldPacket packet,packetR;
     UpdateData updata;
 
@@ -58,16 +62,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
     if(pl->m_duelSenderGUID == pl->GetGUID())
     {
-        pl->BuildCreateUpdateBlockForPlayer( &updata, plTarget );
-        updata.BuildPacket(&packet);
-        plTarget->GetSession()->SendPacket( &packet );
-
-        updata.Clear();
-
-        plTarget->BuildCreateUpdateBlockForPlayer( &updata, pl );
-        updata.BuildPacket(&packet);
-        pl->GetSession()->SendPacket( &packet );
-
+   
         data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
         data << (uint64)guid;
         pl->GetSession()->SendPacket(&data);
@@ -80,6 +75,11 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         data << (uint64)0xbb8;
         pl->GetSession()->SendPacket(&data);
         plTarget->GetSession()->SendPacket(&data);
+        
+//test ------------BUG Fix me,I don't know how to change duel player to red name----- 
+		pl->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Alliance );
+		plTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Horde );
+//-----------------------------------------------------------------------------------
 
     }
 
@@ -122,4 +122,20 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     pl->m_isInDuel = false;
     plTarget->m_isInDuel = false;
 
+    GameObject* obj = NULL;
+#ifndef ENABLE_GRID_SYSTEM
+    obj = objmgr.GetObject<GameObject>(guid);
+#else
+    if( pl )
+       obj = ObjectAccessor::Instance().GetGameObject(pl, guid);
+#endif
+    if(obj)
+    {
+#ifndef ENABLE_GRID_SYSTEM
+         obj->RemoveFromMap();
+         objmgr.RemoveObject(obj);
+#else
+         MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
+#endif    
+	}
 }
