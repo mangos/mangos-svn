@@ -1989,6 +1989,15 @@ uint8 Player::FindFreeItemSlot(uint32 type)
     }
 }
 
+int Player::CountFreeBagSlot()
+{
+	int count = 0;
+	for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+	{
+		if (!GetItemBySlot(i)) count++; 		
+	}
+	return count;
+}
 
 uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
 {

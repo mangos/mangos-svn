@@ -409,6 +409,7 @@ class Player : public Unit
         void AddItemToSlot(uint8 slot, Item *item);
         Item* RemoveItemFromSlot(uint8 slot);
         uint8 FindFreeItemSlot(uint32 type);
+		int CountFreeBagSlot();
         uint8 CanEquipItemInSlot(uint8 slot, ItemPrototype* item);
 
         // looting

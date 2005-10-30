@@ -56,8 +56,6 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     Item * dstitem = GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = GetPlayer()->GetItemBySlot(srcslot);
 
-    Log::getSingleton().outDetail(" #SKILL: %u", (uint32)srcitem->GetProto()->RequiredSkill );
-
     // check to make sure items are not being put in wrong spots
     if ( (srcslot >= INVENTORY_SLOT_BAG_START && srcslot < BANK_SLOT_BAG_END)&&
      (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)

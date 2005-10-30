@@ -133,10 +133,11 @@ void WorldSession::UpdateTrade()
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Accept Trade %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-
     WorldPacket data;
+	Item *myItems[6];
+	Item *hisItems[6];
+	int i, myCount = 0, hisCount = 0, myFreeSlots = 0, hisFreeSlots = 0;
+	
 
     if ( !GetPlayer()->pTrader ) return;
 
@@ -148,19 +149,70 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         data << (uint32)4;
         GetPlayer()->pTrader->GetSession()->SendPacket(&data);
         
-        //Conditions
-        
-        if(false)
+		//Count how many items
+		for(i=0; i<6; i++)
+		{
+			//Equipament slots can not enter in count, cause they do not free any bag slot
+			if( GetPlayer()->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) myCount++;
+			if( GetPlayer()->pTrader->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) hisCount++;
+		}
+		//Count how many free slots
+		myFreeSlots = GetPlayer()->CountFreeBagSlot();
+		hisFreeSlots = GetPlayer()->pTrader->CountFreeBagSlot();		
+
+        //CONDITIONS
+
+		//I do not have enough free slots
+        if( (myCount + myFreeSlots) < hisCount )
+        {	
+			sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "You do not have enough free slots");
+			GetPlayer( )->GetSession( )->SendPacket( &data );
+
+			sChatHandler.FillSystemMessageData(&data, GetPlayer()->pTrader->GetSession(), "Your partner do not have enough free bag slots");
+			GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
+
+			GetPlayer()->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+			GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+			return;
+        }
+		//He does not have enough free slots
+		if( (hisCount + hisFreeSlots) < myCount )
         {
+			sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "Your partner do not have enough free bag slots");
+			GetPlayer( )->GetSession( )->SendPacket( &data );
+
+			sChatHandler.FillSystemMessageData(&data, GetPlayer()->pTrader->GetSession(), "You do not have enough free slots");
+			GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
+
+			GetPlayer()->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+			GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
             return;
         }
+		//END OF CONDITIONS
 
-        //Do trade
+        //DO TRADE
             GetPlayer()->setGold( -((int) GetPlayer()->tradeGold) );            
             GetPlayer()->setGold( GetPlayer()->pTrader->tradeGold );
 
             GetPlayer()->pTrader->setGold( -((int) GetPlayer()->pTrader->tradeGold) );            
             GetPlayer()->pTrader->setGold( GetPlayer()->tradeGold );
+
+			//Delete items from bags
+			for(i=0; i<6; i++)
+			{
+				myItems[i] = GetPlayer()->RemoveItemFromSlot( GetPlayer()->tradeItems[i] );
+				hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot( GetPlayer()->pTrader->tradeItems[i] );
+			}
+			//Insert items into bags
+			for(i=0; i<6; i++)
+			{
+				if(hisItems[i])
+					GetPlayer()->AddItemToSlot( GetPlayer()->FindFreeItemSlot(INVTYPE_BAG), hisItems[i]);
+				if(myItems[i])
+					GetPlayer()->pTrader->AddItemToSlot( GetPlayer()->pTrader->FindFreeItemSlot(INVTYPE_BAG), myItems[i]);
+			}
+
+		//END
 
         //Clear
         ClearTrade();
@@ -190,9 +242,6 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Unaccept Trade %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-
     WorldPacket data;
 
     //Unaccept trade
@@ -206,9 +255,6 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Begin Trade %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-
     WorldPacket data;
 
     //Opens trade window to my partner
@@ -226,9 +272,6 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Cancel Trade %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-
     WorldPacket data;
 
     if( GetPlayer()->pTrader )
@@ -338,9 +381,6 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Gold %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-
     uint32 gold;
 
     recvPacket >> gold;
@@ -353,9 +393,6 @@ void WorldSession::HandleSetTradeGoldOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Set Trade Item %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-    
     uint8 tradeSlot;
     uint8 trash;
     uint8 bagSlot;
@@ -371,9 +408,6 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 {
-    Log::getSingleton( ).outDebug( "\nWORLD: Clear Trade Item %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
-
     uint8 slot;
     recvPacket >> slot;
     

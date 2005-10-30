@@ -85,7 +85,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
-				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;;WIN32;_DEBUG;_CONSOLE,ENABLE_GRID_SYSTEM"
+				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;;WIN32;_DEBUG;_CONSOLE"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
