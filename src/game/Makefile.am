@@ -47,7 +47,6 @@ libgame_a_SOURCES = \
 	Mail.cpp \
 	Map.cpp \
 	MapManager.cpp \
-	RedZoneDistrict.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
@@ -56,17 +55,20 @@ libgame_a_SOURCES = \
 	Object.cpp \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
-	Opcodes.cpp \
 	Opcodes_1_7_x.cpp \
+	Opcodes_1_8_x.cpp \
+	Opcodes.cpp \
 	Player.cpp \
 	QueryHandler.cpp \
 	QuestHandler.cpp \
+	RedZoneDistrict.cpp \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
 	TaxiHandler.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
+	UpdateData_1_8_x.cpp \
 	UpdateData.cpp \
 	World.cpp \
 	WorldSession.cpp \
@@ -95,8 +97,9 @@ libgame_a_SOURCES = \
 	ObjectGridLoader.h \
 	Object.h \
 	ObjectMgr.h \
-	Opcodes.h \
 	Opcodes_1_7_x.h \
+	Opcodes_1_8_x.h \
+	Opcodes.h \
 	Path.h \
 	Player.h \
 	Quest.h \
@@ -104,9 +107,12 @@ libgame_a_SOURCES = \
 	SpellPrototype.h \
 	Stats.h \
 	Unit.h \
+	UpdateData_1_8_x.h \
 	UpdateData.h \
-	UpdateFields.h \
 	UpdateFields_1_7_x.h \
+	UpdateFields_1_8_x.h \
+	UpdateFields.h \
+	UpdateMask_1_8_x.h \
 	UpdateMask.h \
 	World.h \
 	WorldSession.h \

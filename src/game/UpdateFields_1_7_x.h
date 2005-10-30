@@ -1640,6 +1640,4 @@ CORPSE_END
 };
 //#endif
 
-#endif
-
 #endif //_VERSION_1_7_0_

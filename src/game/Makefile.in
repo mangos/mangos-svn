@@ -80,18 +80,18 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
 	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
 	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
-	MapManager.$(OBJEXT) RedZoneDistrict.$(OBJEXT) \
-	MapMgr.$(OBJEXT) MiscHandler.$(OBJEXT) \
+	MapManager.$(OBJEXT) MapMgr.$(OBJEXT) MiscHandler.$(OBJEXT) \
 	MovementHandler.$(OBJEXT) NPCHandler.$(OBJEXT) \
 	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
-	Opcodes.$(OBJEXT) Opcodes_1_7_x.$(OBJEXT) Player.$(OBJEXT) \
-	QueryHandler.$(OBJEXT) QuestHandler.$(OBJEXT) \
+	Opcodes_1_7_x.$(OBJEXT) Opcodes_1_8_x.$(OBJEXT) \
+	Opcodes.$(OBJEXT) Player.$(OBJEXT) QueryHandler.$(OBJEXT) \
+	QuestHandler.$(OBJEXT) RedZoneDistrict.$(OBJEXT) \
 	SkillHandler.$(OBJEXT) Spell.$(OBJEXT) SpellHandler.$(OBJEXT) \
 	TaxiHandler.$(OBJEXT) TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
-	UpdateData.$(OBJEXT) World.$(OBJEXT) WorldSession.$(OBJEXT) \
-	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT) \
-	ZoneMapper.$(OBJEXT)
+	UpdateData_1_8_x.$(OBJEXT) UpdateData.$(OBJEXT) \
+	World.$(OBJEXT) WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
+	WorldSocketMgr.$(OBJEXT) ZoneMapper.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -264,7 +264,6 @@ libgame_a_SOURCES = \
 	Mail.cpp \
 	Map.cpp \
 	MapManager.cpp \
-	RedZoneDistrict.cpp \
 	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
@@ -273,17 +272,20 @@ libgame_a_SOURCES = \
 	Object.cpp \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
-	Opcodes.cpp \
 	Opcodes_1_7_x.cpp \
+	Opcodes_1_8_x.cpp \
+	Opcodes.cpp \
 	Player.cpp \
 	QueryHandler.cpp \
 	QuestHandler.cpp \
+	RedZoneDistrict.cpp \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
 	TaxiHandler.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
+	UpdateData_1_8_x.cpp \
 	UpdateData.cpp \
 	World.cpp \
 	WorldSession.cpp \
@@ -312,8 +314,9 @@ libgame_a_SOURCES = \
 	ObjectGridLoader.h \
 	Object.h \
 	ObjectMgr.h \
-	Opcodes.h \
 	Opcodes_1_7_x.h \
+	Opcodes_1_8_x.h \
+	Opcodes.h \
 	Path.h \
 	Player.h \
 	Quest.h \
@@ -321,9 +324,12 @@ libgame_a_SOURCES = \
 	SpellPrototype.h \
 	Stats.h \
 	Unit.h \
+	UpdateData_1_8_x.h \
 	UpdateData.h \
-	UpdateFields.h \
 	UpdateFields_1_7_x.h \
+	UpdateFields_1_8_x.h \
+	UpdateFields.h \
+	UpdateMask_1_8_x.h \
 	UpdateMask.h \
 	World.h \
 	WorldSession.h \
@@ -420,6 +426,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes_1_7_x.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes_1_8_x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueryHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestHandler.Po@am__quote@
@@ -431,6 +438,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TradeHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Unit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UpdateData.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UpdateData_1_8_x.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/World.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSession.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocket.Po@am__quote@

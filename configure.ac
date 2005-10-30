@@ -255,6 +255,22 @@ AC_ARG_ENABLE(17x,
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_17X)
 
+# check for 1.8.x protocol support
+AC_MSG_CHECKING(whether 1.8.x support is enabled)
+MANGOSD_ENABLE_18X=no
+AC_ARG_ENABLE(18x,
+[  --enable-18x Turn on 1.8.x support],
+[
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-D_VERSION_1_8_0_ $CFLAGS"
+	CXXFLAGS="-D_VERSION_1_8_0_ $CXXFLAGS"
+	MANGOSD_ENABLE_18X=yes
+    elif test "$withval" != "no" ; then
+	AC_MSG_ERROR(Please choose yes or no)
+    fi
+])
+AC_MSG_RESULT($MANGOSD_ENABLE_18X)
+
 # check for enable new framework
 AC_MSG_CHECKING(whether new framework is enabled)
 MANGOSD_ENABLE_NEW_FRAMEWORK=no
