@@ -557,7 +557,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     chr->GetSession()->SendPacket(&data);
 
     chr->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,factionid);
-	
+    
     return true;
 }
 

@@ -3,19 +3,19 @@
  * Copyright (C) 2004 Wow Daemon
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
- * This	program	is free	software; you can redistribute it and/or modify
- * it under	the	terms of the GNU General Public	License	as published by
- * the Free	Software Foundation; either	version	2 of the License, or
- * (at your	option)	any	later version.
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
  *
- * This	program	is distributed in the hope that	it will	be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A	PARTICULAR PURPOSE.	 See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
- * You should have received	a copy of the GNU General Public License
- * along with this program;	if not,	write to the Free Software
- * Foundation, Inc., 59	Temple Place, Suite	330, Boston, MA	 02111-1307	 USA
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
 #include "Common.h"
@@ -50,8 +50,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     Player *plTarget;
     WorldPacket data;
 
-	char buf[256];
-	WorldPacket Msgdata;
+    char buf[256];
+    WorldPacket Msgdata;
 
     WorldPacket packet,packetR;
     UpdateData updata;
@@ -77,8 +77,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         plTarget->GetSession()->SendPacket(&data);
         
 //test ------------BUG Fix me,I don't know how to change duel player to red name----- 
-		pl->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Alliance );
-		plTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Horde );
+        pl->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Alliance );
+        plTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Horde );
 //-----------------------------------------------------------------------------------
 
     }
@@ -115,7 +115,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     plTarget->GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_DUEL_COMPLETE);
-    data << (uint8)0;                             // Duel	Cancel
+    data << (uint8)0;                             // Duel   Cancel
     pl->GetSession()->SendPacket(&data);
     plTarget->GetSession()->SendPacket(&data);
 
@@ -137,5 +137,5 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 #else
          MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
 #endif    
-	}
+    }
 }
