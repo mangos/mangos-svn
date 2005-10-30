@@ -29,33 +29,8 @@
 #include "ObjectAccessor.h"
 #endif
 
-/*void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
-{
-    WorldPacket data;
-    uint64 guid;
-    recv_data >> guid;
+#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
 
-    // AttackSwing
-    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *pEnemy = objmgr.GetObject<Creature>(guid);
-#else
-    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
-#endif
-    if(!pEnemy)
-    {
-        Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",
-            GUID_LOPART(guid), GUID_HIPART(guid));
-        return;                                     // we do not attack PCs for now
-    }
-
-    Player *pThis = GetPlayer();
-    pThis->addStateFlag(UF_ATTACKING);
-    pThis->smsg_AttackStart(pEnemy, pThis);
-
-    pThis->inCombat = true;
-    pThis->logoutDelay = LOGOUTDELAY;
-}*/
 void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 {
     //WorldPacket data;
@@ -99,6 +74,38 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         return;
     }
 }
+
+#else //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
+
+void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
+{
+    WorldPacket data;
+    uint64 guid;
+    recv_data >> guid;
+
+    // AttackSwing
+    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
+#ifndef ENABLE_GRID_SYSTEM
+    Creature *pEnemy = objmgr.GetObject<Creature>(guid);
+#else
+    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
+    if(!pEnemy)
+    {
+        Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",
+            GUID_LOPART(guid), GUID_HIPART(guid));
+        return;                                     // we do not attack PCs for now
+    }
+
+    Player *pThis = GetPlayer();
+    pThis->addStateFlag(UF_ATTACKING);
+    pThis->smsg_AttackStart(pEnemy, pThis);
+
+    pThis->inCombat = true;
+    pThis->logoutDelay = LOGOUTDELAY;
+}
+
+#endif //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
 
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )

@@ -931,9 +931,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     data << (uint32)damage;				// damage amount - for screen display
     data << (uint32)0;					// absorbed ammount
 
-#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
 	data << (uint32)0;					// unknown field (in 1.7+)
-#endif //defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+
     data << (uint32)victimState;		// victim state
 
 	//data << (uint32)0;				// victim round duration
@@ -942,7 +941,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     data << (uint32)extraSpellID;		// spell damage id
     data << (uint32)blocked_amount;		// blocked ammount
 
-    WPAssert(data.size() == 61);
+    //WPAssert(data.size() == 61);
     SendMessageToSet(&data, true);
 
 	if (isPlayer())
