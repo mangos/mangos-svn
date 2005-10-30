@@ -134,8 +134,8 @@ void WorldSession::UpdateTrade()
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
-	Item *myItems[6];
-	Item *hisItems[6];
+	Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+	Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
 	int i, myCount = 0, hisCount = 0, myFreeSlots = 0, hisFreeSlots = 0;
 	
 
@@ -200,16 +200,18 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 			//Delete items from bags
 			for(i=0; i<6; i++)
 			{
-				myItems[i] = GetPlayer()->RemoveItemFromSlot( GetPlayer()->tradeItems[i] );
-				hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot( GetPlayer()->pTrader->tradeItems[i] );
+				if( GetPlayer()->tradeItems[i] >= 0 )
+					myItems[i] = GetPlayer()->RemoveItemFromSlot( (uint8) GetPlayer()->tradeItems[i] );
+				if( GetPlayer()->pTrader->tradeItems[i] >= 0)
+					hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot( (uint8) GetPlayer()->pTrader->tradeItems[i] );
 			}
 			//Insert items into bags
 			for(i=0; i<6; i++)
 			{
 				if(hisItems[i])
-					GetPlayer()->AddItemToSlot( GetPlayer()->FindFreeItemSlot(INVTYPE_BAG), hisItems[i]);
+					GetPlayer()->AddItemToSlot( GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM), hisItems[i]);
 				if(myItems[i])
-					GetPlayer()->pTrader->AddItemToSlot( GetPlayer()->pTrader->FindFreeItemSlot(INVTYPE_BAG), myItems[i]);
+					GetPlayer()->pTrader->AddItemToSlot( GetPlayer()->pTrader->FindFreeItemSlot(INVTYPE_SLOT_ITEM), myItems[i]);
 			}
 
 		//END
@@ -245,12 +247,11 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
     WorldPacket data;
 
     //Unaccept trade
-    data.Initialize(SMSG_TRADE_STATUS);
-    data << (uint32)7;
-    GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+	data.Initialize(SMSG_TRADE_STATUS);
+	data << (uint32)7;
+	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
 
-    GetPlayer()->acceptTrade = false;
-
+	GetPlayer()->acceptTrade = false;
 }
 
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
@@ -290,9 +291,6 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     WorldPacket data;
     uint64 ID;
     uint32 type;
-
-    Log::getSingleton( ).outDebug( "\nWORLD: Initiate Trade %u", GetPlayer()->GetGUID());
-    recvPacket.print_storage();
 
     if( !GetPlayer()->isAlive() )
     {
