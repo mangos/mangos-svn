@@ -66,7 +66,8 @@ EXTRA_DIST = \
 	taxipath.sql \
 	teleport_cords.sql \
 	trainer.sql \
-	vendors.sql
+	vendors.sql \
+	gmtickets.sql
 
 # SQL files for MaNGOS database to be installed to datadir
 pkgdata_DATA = \
@@ -117,7 +118,8 @@ pkgdata_DATA = \
 	taxipath.sql \
 	teleport_cords.sql \
 	trainer.sql \
-	vendors.sql
+	vendors.sql \
+	gmtickets.sql
 
 # directory defines
 pkgdatadir = @MANGOSD_DATA@/sql
