@@ -332,11 +332,21 @@ class Player : public Unit
             return m_faction;
         };
 
+		void SetPvP(bool b)
+		{
+			pvpOn = b;
+		};
+
+		bool GetPvP()
+		{
+			return pvpOn;
+		};
+
         void setGold(int gold)
         {
             uint32 moneyuser = GetUInt32Value(PLAYER_FIELD_COINAGE);
             SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
-        }
+        };
 
         //this sets the faction horde, alliance or NoFaction in case of any bug
         //Or sets a faction passed by parameter in case of race is < 0
@@ -640,6 +650,8 @@ class Player : public Unit
         bool acceptTrade;
         int tradeItems[7];
         uint32 tradeGold;
+
+		bool pvpOn;
 
         //duel
         uint64 m_duelGUID;

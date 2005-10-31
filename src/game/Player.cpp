@@ -221,9 +221,9 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     
-    //This set blue color to player, GHOST MODE
-    //SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
-    SetUInt32Value(UNIT_FIELD_FLAGS , 0x00000000 );
+    //Disable PVP
+    SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
+	SetPvP(false);
 
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
@@ -2741,8 +2741,9 @@ void Player::BuildPlayerRepop()
 void Player::ResurrectPlayer()
 {
     RemoveFlag(PLAYER_FLAGS, 0x10);
-    //Remove ghost mode, the picture of player appears green again
-    RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
+    //Disable
+	if( GetPvP() )
+		RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
 
     setDeathState(ALIVE);
     if(getRace() == NIGHTELF)                     // NEs to turn back from Wisp.

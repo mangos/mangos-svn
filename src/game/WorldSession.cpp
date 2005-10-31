@@ -255,8 +255,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GMTICKET_SYSTEMSTATUS,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    },
 
         /// new ticket handlers sani
-        { CMSG_GMTICKET_DELETETICKET,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode    },
-        { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode    },
+        { CMSG_GMTICKET_DELETETICKET,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode			 },
+        { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode		 },
+		
+		//PvP
+		{ CMSG_ENABLE_PVP,				 STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP					 },
 
         { CMSG_ZONEUPDATE,               STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode              },
         { CMSG_SET_TARGET,               STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               },
