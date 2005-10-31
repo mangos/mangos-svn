@@ -76,9 +76,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(!player)
             {
                 data.clear();
-                msg = "Player '";
+                msg = "Player ";
                 msg += to.c_str();
-                msg += "' is not online (Names are case sensitive)";
+                msg += " is not online (Names are case sensitive)";
                 sChatHandler.FillSystemMessageData( &data, this ,msg.c_str() );
                 SendPacket(&data);
                 break;
@@ -198,4 +198,20 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         SendPacket( &data );
         sWorld.SendGlobalMessage(&data, this);
     }
+}
+
+void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
+{
+	WorldPacket data;
+    uint64 iguid;
+	std::string msg = "";
+	Log::getSingleton().outDebug("WORLD: Recieved CMSG_CHAT_IGNORED");
+
+    recv_data >> iguid;	
+
+	Player *player = objmgr.GetPlayer(iguid);
+	objmgr.GetPlayerNameByGUID(GetPlayer()->GetGUID(),msg);
+	msg += " is ignoring you!";
+	sChatHandler.FillSystemMessageData( &data, player->GetSession() ,msg.c_str() );
+	player->GetSession()->SendPacket(&data);
 }
