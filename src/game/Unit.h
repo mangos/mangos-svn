@@ -132,8 +132,8 @@ class Unit : public Object
 
         //// Combat
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag);
-		void DoAttackDamage(Unit *pVictim, uint32 damage, uint32 was_blocked, uint32 damageType, uint32 hitInfo, uint32 victimInfo);
-		void HandleEmoteCommand(uint32 anim_id);
+        void DoAttackDamage(Unit *pVictim, uint32 damage, uint32 was_blocked, uint32 damageType, uint32 hitInfo, uint32 victimInfo);
+        void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, uint32 damage);
     float GetUnitDodgeChance();
     float GetUnitParryChance();
@@ -142,21 +142,21 @@ class Unit : public Object
 
     uint32 GetUnitBlockValue() 
     { 
-	return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; 
+    return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; 
     };
     uint32 GetUnitStrength() 
     { 
-	return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; 
+    return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; 
     };
-		uint32 GetUnitMeleeSkill()
+        uint32 GetUnitMeleeSkill()
     {
-	return (uint32)m_uint32Values[ UNIT_FIELD_ATTACKPOWER ]; 
+    return (uint32)m_uint32Values[ UNIT_FIELD_ATTACKPOWER ]; 
     };
 
     bool isStunned() 
     {// UQ1: FIXME - Add stun...
-	return m_attackTimer == 0;
-		};
+    return m_attackTimer == 0;
+        };
         void PeriodicAuraLog(Unit *pVictim, uint32 spellID, uint32 damage, uint32 damageType);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
         // void HandleProc(ProcTriggerSpell *pts, uint32 flag) {};

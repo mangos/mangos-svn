@@ -168,7 +168,7 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     }
     else
     {
-	_buildForInRangePlayer(obj, update_players);
+    _buildForInRangePlayer(obj, update_players);
     }
 
     if( pl == NULL )
@@ -208,19 +208,19 @@ ObjectAccessor::_buildForInRangePlayer(Object *obj, UpdateDataMapType &update_pl
     UpdateDataMapType::iterator pl_iter;
     for(PlayerMapType::iterator iter= i_players.begin(); iter != i_players.end(); ++ iter)
     {
-	Unit *unit = dynamic_cast<Unit *>(obj);
-	bool is_inrange = (unit == NULL ? iter->second->isInRange(obj) : iter->second->isInRange(unit));
-	if( is_inrange )
-	{
-	    pl_iter = update_players.find(iter->second);
-	    if( pl_iter == update_players.end() )
-	    {
-		std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataValueType(iter->second, UpdateData()) );
-		assert( p.second );
-		pl_iter = p.first;
-	    }
-	    obj->BuildValuesUpdateBlockForPlayer(&pl_iter->second, pl_iter->first);	    
-	}
+    Unit *unit = dynamic_cast<Unit *>(obj);
+    bool is_inrange = (unit == NULL ? iter->second->isInRange(obj) : iter->second->isInRange(unit));
+    if( is_inrange )
+    {
+        pl_iter = update_players.find(iter->second);
+        if( pl_iter == update_players.end() )
+        {
+        std::pair<UpdateDataMapType::iterator, bool> p = update_players.insert( UpdateDataValueType(iter->second, UpdateData()) );
+        assert( p.second );
+        pl_iter = p.first;
+        }
+        obj->BuildValuesUpdateBlockForPlayer(&pl_iter->second, pl_iter->first);        
+    }
     }
 
     obj->ClearUpdateMask();

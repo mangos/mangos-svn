@@ -102,8 +102,8 @@ class WorldSession
         void HandleGMTicketDeleteOpcode(WorldPacket& recvPacket);
         void HandleGMTicketUpdateTextOpcode(WorldPacket& recvPacket);
 
-		//PvP
-		void HandleEnablePvP(WorldPacket& recvPacket);
+        //PvP
+        void HandleEnablePvP(WorldPacket& recvPacket);
 
         void HandleZoneUpdateOpcode(WorldPacket& recvPacket);
         void HandleSetTargetOpcode(WorldPacket& recvPacket);

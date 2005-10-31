@@ -99,35 +99,35 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint32 entry;
     uint64 guid;
-	CreatureInfo *ci;
+    CreatureInfo *ci;
 
     recv_data >> entry;
     recv_data >> guid;
 
-	ci = objmgr.GetCreatureName(entry);
+    ci = objmgr.GetCreatureName(entry);
     Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s'", ci->Name.c_str());
 
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
     data << ci->Name.c_str();
     data << uint8(0) << uint8(0) << uint8(0);
-    data << ci->SubName.c_str();	// Subname
-    //data << (uint32)0;			// unknown 1 -- Is really flags1 (below)
-	data << (uint32)ci->flags1;		// Flags1
-	if ((ci->Type & 2) > 0)
-	{
-		data << uint32(7);
-	}
-	else
-	{
-		
-		data << uint32(0);
-	}
-    data << ci->Type;			// Creature Type
-    data << (uint32)ci->family;	// Family
-    data << (uint32)0;			// Elite;
-	data << (uint32)0;			// Unknown (move before or after unknowns 3 and 4) don't know where exactly
-    data << ci->DisplayID;		// DisplayID
+    data << ci->SubName.c_str();    // Subname
+    //data << (uint32)0;            // unknown 1 -- Is really flags1 (below)
+    data << (uint32)ci->flags1;        // Flags1
+    if ((ci->Type & 2) > 0)
+    {
+        data << uint32(7);
+    }
+    else
+    {
+        
+        data << uint32(0);
+    }
+    data << ci->Type;            // Creature Type
+    data << (uint32)ci->family;    // Family
+    data << (uint32)0;            // Elite;
+    data << (uint32)0;            // Unknown (move before or after unknowns 3 and 4) don't know where exactly
+    data << ci->DisplayID;        // DisplayID
 
     SendPacket( &data );
 }
@@ -190,33 +190,33 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
     if( info == NULL )
     {
-		Log::getSingleton( ).outDebug( "Missing game object info for entry %d", entryID);	
-		return; // no luck..
+        Log::getSingleton( ).outDebug( "Missing game object info for entry %d", entryID);    
+        return; // no luck..
     }
 
 /*
-	Converter.ToBytes(obj1.Id, this.tempBuff, ref num1);
-	Converter.ToBytes(obj1.ObjectType, this.tempBuff, ref num1);
-	Converter.ToBytes(obj1.Model, this.tempBuff, ref num1);
-	Converter.ToBytes(obj1.Name, this.tempBuff, ref num1);
-	Converter.ToBytes(0, this.tempBuff, ref num1);
-	for (int num2 = 0; num2 < obj1.Sound.Length; num2++)
-	{
-		Converter.ToBytes(obj1.Sound[num2], this.tempBuff, ref num1);
-	}
-	for (int num3 = obj1.Sound.Length; num3 < 0x10; num3++)
-	{
-		Converter.ToBytes(0, this.tempBuff, ref num1);
-	}
+    Converter.ToBytes(obj1.Id, this.tempBuff, ref num1);
+    Converter.ToBytes(obj1.ObjectType, this.tempBuff, ref num1);
+    Converter.ToBytes(obj1.Model, this.tempBuff, ref num1);
+    Converter.ToBytes(obj1.Name, this.tempBuff, ref num1);
+    Converter.ToBytes(0, this.tempBuff, ref num1);
+    for (int num2 = 0; num2 < obj1.Sound.Length; num2++)
+    {
+        Converter.ToBytes(obj1.Sound[num2], this.tempBuff, ref num1);
+    }
+    for (int num3 = obj1.Sound.Length; num3 < 0x10; num3++)
+    {
+        Converter.ToBytes(0, this.tempBuff, ref num1);
+    }
 */
    
     data << (uint32)(entryID);
     data << (uint32)info->type;
     data << (uint32)info->displayId;
-	data << info->name.c_str();
+    data << info->name.c_str();
     data << uint32(0);
     
-	data << uint32(info->sound0);
+    data << uint32(info->sound0);
     data << uint32(info->sound1);
     data << uint32(info->sound2);
     data << uint32(info->sound3);
@@ -226,7 +226,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     data << uint32(info->sound7);
     data << uint32(info->sound8);
     data << uint32(info->sound9);
-	data << uint32(0);
+    data << uint32(0);
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);

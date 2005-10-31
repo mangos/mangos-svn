@@ -682,8 +682,8 @@ NameTableEntry g_worldOpcodeNames[] =
     { CMSG_GROUP_ASSISTANT_LEADER,                  "CMSG_GROUP_ASSISTANT_LEADER" },
     { CMSG_BUYBACK_ITEM,                            "CMSG_BUYBACK_ITEM" },
     { SMSG_SERVER_MESSAGE,                          "SMSG_SERVER_MESSAGE" },
-	{ CMSG_MEETING_STONE_INFO,						"CMSG_MEETING_STONE_INFO"},
-	{ CMSG_GMTICKETSYSTEM_TOGGLE,                   "CMSG_GMTICKETSYSTEM_TOGGLE" },
+    { CMSG_MEETING_STONE_INFO,                        "CMSG_MEETING_STONE_INFO"},
+    { CMSG_GMTICKETSYSTEM_TOGGLE,                   "CMSG_GMTICKETSYSTEM_TOGGLE" },
     { CMSG_CANCEL_GROWTH_AURA,                      "CMSG_CANCEL_GROWTH_AURA" },
     { SMSG_CANCEL_AUTO_REPEAT,                      "SMSG_CANCEL_AUTO_REPEAT" },
     { SMSG_STANDSTATE_CHANGE_ACK,                   "SMSG_STANDSTATE_CHANGE_ACK" },
@@ -712,10 +712,10 @@ NameTableEntry g_worldOpcodeNames[] =
     { SMSG_FEIGN_DEATH_RESISTED,                    "SMSG_FEIGN_DEATH_RESISTED" },
     { CMSG_RUN_SCRIPT,                              "CMSG_RUN_SCRIPT" },
     { SMSG_SCRIPT_MESSAGE,                          "SMSG_SCRIPT_MESSAGE" },
-	{ CMSG_MOVE_TIME_SKIPPED,      					"CMSG_MOVE_TIME_SKIPPED" },
-	{ CMSG_BATTLEFIELD_STATUS,						"CMSG_BATTLEFIELD_STATUS" },
+    { CMSG_MOVE_TIME_SKIPPED,                       "CMSG_MOVE_TIME_SKIPPED" },
+    { CMSG_BATTLEFIELD_STATUS,                      "CMSG_BATTLEFIELD_STATUS" },
 //    { NUM_MSG_TYPES,                                "NUM_MSG_TYPES" },
-	{ SMSG_AUTH_RESPONSE2_UNKNOWN180,				"SMSG_AUTH_RESPONSE2_UNKNOWN180" },
+    { SMSG_AUTH_RESPONSE2_UNKNOWN180,               "SMSG_AUTH_RESPONSE2_UNKNOWN180" },
     { 0,                                            0 }
 };
 

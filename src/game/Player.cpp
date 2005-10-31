@@ -223,7 +223,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     
     //Disable PVP
     SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
-	SetPvP(false);
+    SetPvP(false);
 
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
@@ -2742,8 +2742,8 @@ void Player::ResurrectPlayer()
 {
     RemoveFlag(PLAYER_FLAGS, 0x10);
     //Disable
-	if( GetPvP() )
-		RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
+    if( GetPvP() )
+        RemoveFlag( UNIT_FIELD_FLAGS, 0x08 );  
 
     setDeathState(ALIVE);
     if(getRace() == NIGHTELF)                     // NEs to turn back from Wisp.

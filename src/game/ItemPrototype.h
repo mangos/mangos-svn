@@ -89,7 +89,7 @@ enum INVENTORY_TYPES
     INVTYPE_AMMO           = 0x18,
     INVTYPE_THROWN         = 0x19,
     INVTYPE_RANGEDRIGHT    = 0x1a,
-	INVTYPE_SLOT_ITEM      = 0x1b,
+    INVTYPE_SLOT_ITEM      = 0x1b,
     NUM_INVENTORY_TYPES    = 0x1c,
 };
 

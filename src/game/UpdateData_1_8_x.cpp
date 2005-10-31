@@ -50,53 +50,53 @@ void UpdateData::AddUpdateBlock(const ByteBuffer &block)
 // *dst_size=0 if error
 void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
 {
-	z_stream c_stream;
+    z_stream c_stream;
 
-	c_stream.zalloc = (alloc_func)0;
-	c_stream.zfree = (free_func)0;
-	c_stream.opaque = (voidpf)0;
+    c_stream.zalloc = (alloc_func)0;
+    c_stream.zfree = (free_func)0;
+    c_stream.opaque = (voidpf)0;
 
-	if (Z_OK != deflateInit(&c_stream, Z_BEST_SPEED))
-	{
-		Log::getSingleton().outError("Can't compress update packet (zlib: deflateInit).");
-		*dst_size = 0;
-		return;
-	}
+    if (Z_OK != deflateInit(&c_stream, Z_BEST_SPEED))
+    {
+        Log::getSingleton().outError("Can't compress update packet (zlib: deflateInit).");
+        *dst_size = 0;
+        return;
+    }
 
-	c_stream.next_out = (Bytef*)dst;
+    c_stream.next_out = (Bytef*)dst;
     c_stream.avail_out = *dst_size;
     c_stream.next_in = (Bytef*)src;
     c_stream.avail_in = (uInt)src_size;
     
-	if (Z_OK != deflate(&c_stream, Z_NO_FLUSH))
-	{
-		Log::getSingleton().outError("Can't compress update packet (zlib: deflate)");
-		*dst_size = 0;
-		return;
-	}
+    if (Z_OK != deflate(&c_stream, Z_NO_FLUSH))
+    {
+        Log::getSingleton().outError("Can't compress update packet (zlib: deflate)");
+        *dst_size = 0;
+        return;
+    }
 
     if (c_stream.avail_in != 0)
-	{
+    {
         Log::getSingleton().outError("Can't compress update packet (zlib: deflate not greedy)");
-		*dst_size = 0;
-		return;
+        *dst_size = 0;
+        return;
     }
 
     if (Z_STREAM_END != deflate(&c_stream, Z_FINISH))
-	{
+    {
         Log::getSingleton().outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END)");
-		*dst_size = 0;
-		return;
+        *dst_size = 0;
+        return;
     }
 
     if (Z_OK != deflateEnd(&c_stream))
-	{
+    {
         Log::getSingleton().outError("Can't compress update packet (zlib: deflateEnd)");
-		*dst_size = 0;
-		return;
+        *dst_size = 0;
+        return;
     }
 
-	*dst_size = c_stream.total_out;
+    *dst_size = c_stream.total_out;
 }
 
 
@@ -134,10 +134,10 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 
         // i know, it's evil
         Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
-					&destsize,
-					(void*)buf.contents(),
-					buf.size());
-		if (destsize == 0)
+                    &destsize,
+                    (void*)buf.contents(),
+                    buf.size());
+        if (destsize == 0)
             return false; // Loged by Compress()
 
         packet->resize( destsize + sizeof(uint32) );

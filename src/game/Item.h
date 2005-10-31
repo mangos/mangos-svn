@@ -45,7 +45,7 @@ class Item : public Object
         void SetDurability(uint32 Value);
         void SetDurabilityToMax();
 
-		ItemPrototype *GetItemProto() { return m_itemProto; }
+        ItemPrototype *GetItemProto() { return m_itemProto; }
 
     protected:
         ItemPrototype *m_itemProto;

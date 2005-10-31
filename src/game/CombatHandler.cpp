@@ -42,34 +42,34 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
 #ifndef ENABLE_GRID_SYSTEM
     Creature *pEnemy = objmgr.GetObject<Creature>(guid);
-	Player *pPVPEnemy = objmgr.GetObject<Player>(guid);
+    Player *pPVPEnemy = objmgr.GetObject<Player>(guid);
 #else
     Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
-	Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, guid);
+    Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, guid);
 #endif
-	
+    
     if(pEnemy)
-	{
-		Player *pThis = GetPlayer();
+    {
+        Player *pThis = GetPlayer();
 
-		pThis->addStateFlag(UF_ATTACKING);
-		pThis->smsg_AttackStart(pEnemy);
-		pThis->inCombat = true;
-		pThis->logoutDelay = LOGOUTDELAY;
-	}
-	else if(pPVPEnemy)
-	{
-		Player *pThis = GetPlayer();
+        pThis->addStateFlag(UF_ATTACKING);
+        pThis->smsg_AttackStart(pEnemy);
+        pThis->inCombat = true;
+        pThis->logoutDelay = LOGOUTDELAY;
+    }
+    else if(pPVPEnemy)
+    {
+        Player *pThis = GetPlayer();
 
-		pThis->addStateFlag(UF_ATTACKING);
-		pThis->smsg_AttackStart(pPVPEnemy);
-		pThis->inCombat = true;
-		pThis->logoutDelay = LOGOUTDELAY;
-	}
-	else
-	{
-		Log::getSingleton( ).outError( "WORLD: Enemy %u %.8X is not a player or a creature",
-			GUID_LOPART(guid), GUID_HIPART(guid));
+        pThis->addStateFlag(UF_ATTACKING);
+        pThis->smsg_AttackStart(pPVPEnemy);
+        pThis->inCombat = true;
+        pThis->logoutDelay = LOGOUTDELAY;
+    }
+    else
+    {
+        Log::getSingleton( ).outError( "WORLD: Enemy %u %.8X is not a player or a creature",
+            GUID_LOPART(guid), GUID_HIPART(guid));
 
         return;
     }

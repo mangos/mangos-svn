@@ -1,4 +1,3 @@
-# Copyright (C) 2004 Wow Daemon
 # Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -15,12 +14,20 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-INCLUDES += -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared -I$(srcdir)/../../game -I$(srcdir)/../../framework
+# Note: we yet do not care for multiple architectures, will have to change
+# pylibdir to pylibdir = ${prefix}/lib@MARK64@/python@WITH_PYTHON_VERSION@ when
+# we get x86_64 support done.
+pylibdir = ${prefix}/lib/python@WITH_PYTHON_VERSION@
+pyincdir = $(prefix)/include/python@WITH_PYTHON_VERSION@
 
-# noinst_LIBRARIES = libmangospython.a
+INCLUDES += -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../shared -I$(srcdir)/../../game -I$(srcdir)/../../framework -I$(pyincdir)
+
+#noinst_LIBRARIES = libmangospython.a
 
 #libmangospython_a_SOURCES = \
 #	AddSourcesHere.cpp
+
+#libmangospython_a_LDFLAGS = -L(pylibdir)
 
 #if NEWFRAMEWORK
 #libmangospython_a_LIBADD = \

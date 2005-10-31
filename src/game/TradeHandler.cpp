@@ -134,10 +134,10 @@ void WorldSession::UpdateTrade()
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
-	Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
-	Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
-	int i, myCount = 0, hisCount = 0, myFreeSlots = 0, hisFreeSlots = 0;
-	
+    Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+    Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+    int i, myCount = 0, hisCount = 0, myFreeSlots = 0, hisFreeSlots = 0;
+    
 
     if ( !GetPlayer()->pTrader ) return;
 
@@ -149,46 +149,46 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         data << (uint32)4;
         GetPlayer()->pTrader->GetSession()->SendPacket(&data);
         
-		//Count how many items
-		for(i=0; i<6; i++)
-		{
-			//Equipament slots can not enter in count, cause they do not free any bag slot
-			if( GetPlayer()->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) myCount++;
-			if( GetPlayer()->pTrader->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) hisCount++;
-		}
-		//Count how many free slots
-		myFreeSlots = GetPlayer()->CountFreeBagSlot();
-		hisFreeSlots = GetPlayer()->pTrader->CountFreeBagSlot();		
+        //Count how many items
+        for(i=0; i<6; i++)
+        {
+            //Equipament slots can not enter in count, cause they do not free any bag slot
+            if( GetPlayer()->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) myCount++;
+            if( GetPlayer()->pTrader->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) hisCount++;
+        }
+        //Count how many free slots
+        myFreeSlots = GetPlayer()->CountFreeBagSlot();
+        hisFreeSlots = GetPlayer()->pTrader->CountFreeBagSlot();        
 
         //CONDITIONS
 
-		//I do not have enough free slots
+        //I do not have enough free slots
         if( (myCount + myFreeSlots) < hisCount )
-        {	
-			sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "You do not have enough free slots");
-			GetPlayer( )->GetSession( )->SendPacket( &data );
+        {    
+            sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "You do not have enough free slots");
+            GetPlayer( )->GetSession( )->SendPacket( &data );
 
-			sChatHandler.FillSystemMessageData(&data, GetPlayer()->pTrader->GetSession(), "Your partner do not have enough free bag slots");
-			GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
+            sChatHandler.FillSystemMessageData(&data, GetPlayer()->pTrader->GetSession(), "Your partner do not have enough free bag slots");
+            GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
 
-			GetPlayer()->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
-			GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
-			return;
-        }
-		//He does not have enough free slots
-		if( (hisCount + hisFreeSlots) < myCount )
-        {
-			sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "Your partner do not have enough free bag slots");
-			GetPlayer( )->GetSession( )->SendPacket( &data );
-
-			sChatHandler.FillSystemMessageData(&data, GetPlayer()->pTrader->GetSession(), "You do not have enough free slots");
-			GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
-
-			GetPlayer()->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
-			GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+            GetPlayer()->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+            GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
             return;
         }
-		//END OF CONDITIONS
+        //He does not have enough free slots
+        if( (hisCount + hisFreeSlots) < myCount )
+        {
+            sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "Your partner do not have enough free bag slots");
+            GetPlayer( )->GetSession( )->SendPacket( &data );
+
+            sChatHandler.FillSystemMessageData(&data, GetPlayer()->pTrader->GetSession(), "You do not have enough free slots");
+            GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
+
+            GetPlayer()->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+            GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+            return;
+        }
+        //END OF CONDITIONS
 
         //DO TRADE
             GetPlayer()->setGold( -((int) GetPlayer()->tradeGold) );            
@@ -197,24 +197,24 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             GetPlayer()->pTrader->setGold( -((int) GetPlayer()->pTrader->tradeGold) );            
             GetPlayer()->pTrader->setGold( GetPlayer()->tradeGold );
 
-			//Delete items from bags
-			for(i=0; i<6; i++)
-			{
-				if( GetPlayer()->tradeItems[i] >= 0 )
-					myItems[i] = GetPlayer()->RemoveItemFromSlot( (uint8) GetPlayer()->tradeItems[i] );
-				if( GetPlayer()->pTrader->tradeItems[i] >= 0)
-					hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot( (uint8) GetPlayer()->pTrader->tradeItems[i] );
-			}
-			//Insert items into bags
-			for(i=0; i<6; i++)
-			{
-				if(hisItems[i])
-					GetPlayer()->AddItemToSlot( GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM), hisItems[i]);
-				if(myItems[i])
-					GetPlayer()->pTrader->AddItemToSlot( GetPlayer()->pTrader->FindFreeItemSlot(INVTYPE_SLOT_ITEM), myItems[i]);
-			}
+            //Delete items from bags
+            for(i=0; i<6; i++)
+            {
+                if( GetPlayer()->tradeItems[i] >= 0 )
+                    myItems[i] = GetPlayer()->RemoveItemFromSlot( (uint8) GetPlayer()->tradeItems[i] );
+                if( GetPlayer()->pTrader->tradeItems[i] >= 0)
+                    hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot( (uint8) GetPlayer()->pTrader->tradeItems[i] );
+            }
+            //Insert items into bags
+            for(i=0; i<6; i++)
+            {
+                if(hisItems[i])
+                    GetPlayer()->AddItemToSlot( GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM), hisItems[i]);
+                if(myItems[i])
+                    GetPlayer()->pTrader->AddItemToSlot( GetPlayer()->pTrader->FindFreeItemSlot(INVTYPE_SLOT_ITEM), myItems[i]);
+            }
 
-		//END
+        //END
 
         //Clear
         ClearTrade();
@@ -247,11 +247,11 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
     WorldPacket data;
 
     //Unaccept trade
-	data.Initialize(SMSG_TRADE_STATUS);
-	data << (uint32)7;
-	GetPlayer()->pTrader->GetSession()->SendPacket(&data);
+    data.Initialize(SMSG_TRADE_STATUS);
+    data << (uint32)7;
+    GetPlayer()->pTrader->GetSession()->SendPacket(&data);
 
-	GetPlayer()->acceptTrade = false;
+    GetPlayer()->acceptTrade = false;
 }
 
 void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)

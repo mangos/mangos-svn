@@ -14,7 +14,6 @@
 
 @SET_MAKE@
 
-# Copyright (C) 2004 Wow Daemon
 # Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -99,7 +98,7 @@ F77 = @F77@
 FFLAGS = @FFLAGS@
 INCLUDES = @INCLUDES@ -I$(srcdir) -I$(srcdir)/../../../dep/include \
 	-I$(srcdir)/../../shared -I$(srcdir)/../../game \
-	-I$(srcdir)/../../framework
+	-I$(srcdir)/../../framework -I$(pyincdir)
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -183,6 +182,12 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+
+# Note: we yet do not care for multiple architectures, will have to change
+# pylibdir to pylibdir = ${prefix}/lib@MARK64@/python@WITH_PYTHON_VERSION@ when
+# we get x86_64 support done.
+pylibdir = ${prefix}/lib/python@WITH_PYTHON_VERSION@
+pyincdir = $(prefix)/include/python@WITH_PYTHON_VERSION@
 all: all-am
 
 .SUFFIXES:
@@ -344,10 +349,12 @@ uninstall-am: uninstall-info-am
 	uninstall-info-am
 
 
-# noinst_LIBRARIES = libmangospython.a
+#noinst_LIBRARIES = libmangospython.a
 
 #libmangospython_a_SOURCES = \
 #	AddSourcesHere.cpp
+
+#libmangospython_a_LDFLAGS = -L(pylibdir)
 
 #if NEWFRAMEWORK
 #libmangospython_a_LIBADD = \

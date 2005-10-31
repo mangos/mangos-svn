@@ -302,32 +302,32 @@ struct CreatureInfo
     // ctor in case users forget to intialized
     CreatureInfo() : Id(0), Type(0), DisplayID(0), unknown1(0), unknown2(0), unknown3(0), unknown4(0) {}
     uint32 Id;
-	uint32 Type;
-	uint32 DisplayID;
+    uint32 Type;
+    uint32 DisplayID;
     uint32 unknown1;
     uint32 unknown2;
     uint32 unknown3;
     uint32 unknown4;
-	uint32 maxhealth;
-	uint32 maxmana;
-	uint32 level;
-	uint32 faction;
-	uint32 flag;
-	float scale;
-	uint32 speed;
-	uint32 rank;
-	uint32 mindmg;
-	uint32 maxdmg;
-	uint32 baseattacktime;
-	uint32 rangeattacktime;
-	uint32 mount;
-	uint32 level_max;
-	uint32 flags1;
-	float size;
-	uint32 family;
-	float bounding_radius;
-	uint32 trainer_type;
-	uint32 classNum;
+    uint32 maxhealth;
+    uint32 maxmana;
+    uint32 level;
+    uint32 faction;
+    uint32 flag;
+    float scale;
+    uint32 speed;
+    uint32 rank;
+    uint32 mindmg;
+    uint32 maxdmg;
+    uint32 baseattacktime;
+    uint32 rangeattacktime;
+    uint32 mount;
+    uint32 level_max;
+    uint32 flags1;
+    float size;
+    uint32 family;
+    float bounding_radius;
+    uint32 trainer_type;
+    uint32 classNum;
     std::string Name;
     std::string SubName;
 };
@@ -337,7 +337,7 @@ void ObjectMgr::LoadCreatureNames()
 {
     CreatureInfo *cn;
     //QueryResult *result = sDatabase.Query( "SELECT entryid,name,IFNULL(subname,''),type,modelid FROM creaturetemplate" );
-	QueryResult *result = sDatabase.Query( "SELECT * FROM creaturetemplate" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM creaturetemplate" );
     if(result)
     {
         do
@@ -345,60 +345,60 @@ void ObjectMgr::LoadCreatureNames()
             Field *fields = result->Fetch();
 
             cn = new CreatureInfo;
-			// UQ1: How about we actually load these right???
+            // UQ1: How about we actually load these right???
             /*cn->Id = fields[0].GetUInt32();
             cn->Name = fields[1].GetString();
             cn->SubName = fields[2].GetString();
             cn->Type = fields[3].GetUInt32();
             cn->DisplayID = fields[4].GetUInt32();
-			
+            
         // Adding unknowns here later
             cn->unknown1 = 0; 
             cn->unknown2 = 0; 
             cn->unknown3 = 0; 
             cn->unknown4 = 0; */
-		
-			cn->Id = fields[0].GetUInt32();
-			cn->DisplayID = fields[1].GetUInt32();
-			cn->Name = fields[2].GetString();
-			if (fields[3].GetString())
-				cn->SubName = fields[3].GetString();
-			else
-				cn->SubName = "";
+        
+            cn->Id = fields[0].GetUInt32();
+            cn->DisplayID = fields[1].GetUInt32();
+            cn->Name = fields[2].GetString();
+            if (fields[3].GetString())
+                cn->SubName = fields[3].GetString();
+            else
+                cn->SubName = "";
 
-			cn->maxhealth = fields[4].GetUInt32();
-			cn->maxmana = fields[5].GetUInt32();
-			cn->level = fields[6].GetUInt32();
-			cn->faction = fields[7].GetUInt32();
-			cn->flag = fields[7].GetUInt32();
-			cn->scale = fields[8].GetFloat();
-			cn->speed = fields[10].GetUInt32();
-			cn->rank = fields[11].GetUInt32();
-			cn->mindmg = fields[12].GetFloat();
-			cn->maxdmg = fields[13].GetFloat();
-			cn->baseattacktime = fields[14].GetUInt32();
-			cn->rangeattacktime = fields[15].GetUInt32();
-			cn->Type = fields[16].GetUInt32();
-			cn->mount = fields[17].GetUInt32();
-			cn->level_max = fields[18].GetUInt32();
-			cn->flags1 = fields[19].GetUInt32();
-			cn->size = fields[20].GetFloat();
-			cn->family = fields[11].GetUInt32();
-			cn->bounding_radius = fields[22].GetFloat();
-			cn->trainer_type = fields[23].GetUInt32();
-			cn->unknown1 = fields[24].GetUInt32();
-			cn->unknown2 = fields[25].GetUInt32();
-			cn->unknown3 = fields[26].GetUInt32();
-			cn->unknown4 = fields[27].GetUInt32();
-			cn->classNum = fields[28].GetUInt32();
-			cn->slot1model = fields[29].GetUInt32();
-			cn->slot1pos = fields[30].GetUInt32();
-			cn->slot2model = fields[31].GetUInt32();
-			cn->slot2pos = fields[32].GetUInt32();
-			cn->slot3model = fields[33].GetUInt32();
-			cn->slot3pos = fields[34].GetUInt32();
-			
-			
+            cn->maxhealth = fields[4].GetUInt32();
+            cn->maxmana = fields[5].GetUInt32();
+            cn->level = fields[6].GetUInt32();
+            cn->faction = fields[7].GetUInt32();
+            cn->flag = fields[7].GetUInt32();
+            cn->scale = fields[8].GetFloat();
+            cn->speed = fields[10].GetUInt32();
+            cn->rank = fields[11].GetUInt32();
+            cn->mindmg = fields[12].GetFloat();
+            cn->maxdmg = fields[13].GetFloat();
+            cn->baseattacktime = fields[14].GetUInt32();
+            cn->rangeattacktime = fields[15].GetUInt32();
+            cn->Type = fields[16].GetUInt32();
+            cn->mount = fields[17].GetUInt32();
+            cn->level_max = fields[18].GetUInt32();
+            cn->flags1 = fields[19].GetUInt32();
+            cn->size = fields[20].GetFloat();
+            cn->family = fields[11].GetUInt32();
+            cn->bounding_radius = fields[22].GetFloat();
+            cn->trainer_type = fields[23].GetUInt32();
+            cn->unknown1 = fields[24].GetUInt32();
+            cn->unknown2 = fields[25].GetUInt32();
+            cn->unknown3 = fields[26].GetUInt32();
+            cn->unknown4 = fields[27].GetUInt32();
+            cn->classNum = fields[28].GetUInt32();
+            cn->slot1model = fields[29].GetUInt32();
+            cn->slot1pos = fields[30].GetUInt32();
+            cn->slot2model = fields[31].GetUInt32();
+            cn->slot2pos = fields[32].GetUInt32();
+            cn->slot3model = fields[33].GetUInt32();
+            cn->slot3pos = fields[34].GetUInt32();
+            
+            
 /*
   `modelid` int(11) default '0',
   `name` varchar(100) NOT NULL default '0',
@@ -716,8 +716,8 @@ void ObjectMgr::LoadItemPrototypes()
         pItemPrototype->ShadowRes = fields[66].GetUInt32();
         pItemPrototype->ArcaneRes = fields[67].GetUInt32();
         pItemPrototype->Delay = fields[68].GetUInt32();
-		if (pItemPrototype->Delay <= 0)
-			pItemPrototype->Delay = 1000; // UQ1: Added default value here to allow for bad DBs.
+        if (pItemPrototype->Delay <= 0)
+            pItemPrototype->Delay = 1000; // UQ1: Added default value here to allow for bad DBs.
 
         pItemPrototype->Field69 = fields[69].GetUInt32();
         for(i = 0; i < 30; i+=6)
