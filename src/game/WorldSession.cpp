@@ -382,6 +382,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         /// Chat opcodes
         { CMSG_MESSAGECHAT,              STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             },
         { CMSG_TEXT_EMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               },
+        {	CMSG_CHAT_IGNORED,             STATUS_LOGGEDIN, &WorldSession::HandleChatIgnoredOpcode             },
         /// Corpse Opcodes
         { CMSG_RECLAIM_CORPSE,           STATUS_LOGGEDIN, &WorldSession::HandleCorpseReclaimOpcode           },
         { CMSG_RESURRECT_RESPONSE,       STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode       },
