@@ -620,9 +620,69 @@ void ObjectMgr::LoadAuctions()
 
 int num_item_prototypes = 0;
 uint32 item_proto_ids[64550];
+//ItemPrototype *pItemPrototypes[32768];
+
+// UQ1: Trying to cache items list for startup speed...
+/*bool ObjectMgr::LoadItemPrototypesCache()
+{
+	FILE *f = fopen("itemProtos.cache", "rb");
+	int num_ids = 0;
+	int idnum = 0;
+	
+	if(!f)
+	{
+		return false;
+	}
+
+	fread(&num_ids, sizeof(int), 1, f);
+
+	Log::getSingleton().outDebug("Load %i items to item cache.", num_ids);
+
+	for (idnum = 0; idnum < num_ids; idnum++)
+	{
+		ItemPrototype *pItemPrototype = new ItemPrototype;
+
+		fread(&pItemPrototype, sizeof(ItemPrototype), 1, f);
+		AddItemPrototype(pItemPrototype);
+		item_proto_ids[idnum] = pItemPrototype->ItemId;
+		num_item_prototypes++;
+	}
+
+	fclose(f);
+
+	return true;
+}
+
+bool ObjectMgr::SaveItemPrototypesCache()
+{
+	FILE *f = fopen("itemProtos.cache", "wb");
+	int idnum = 0;
+	
+	if(!f)
+	{
+		return false;
+	}
+
+	fwrite(&num_item_prototypes, sizeof(int), 1, f);
+
+	for (idnum = 0; idnum < num_item_prototypes; idnum++)
+	{
+		ItemPrototype *pItemPrototype = pItemPrototypes[idnum];
+		fwrite(&pItemPrototype, sizeof(ItemPrototype), 1, f);
+	}
+
+	fclose(f);
+
+	Log::getSingleton().outDebug("Saved %i items to item cache.", num_item_prototypes);
+
+	return true;
+}*/
 
 void ObjectMgr::LoadItemPrototypes()
 {
+	//if (LoadItemPrototypesCache())
+	//	return; // UQ1: Used cache...
+
     QueryResult *result = sDatabase.Query( "SELECT * FROM items" );
 
     if( !result )
@@ -662,7 +722,6 @@ void ObjectMgr::LoadItemPrototypes()
         // For random selection loots...
         item_proto_ids[num_item_prototypes] = fields[0].GetUInt32();
         //Log::getSingleton( ).outDebug( "Loot item ID: %u added.", item_proto_ids[num_item_prototypes]);
-        num_item_prototypes++;
 
         pItemPrototype->Class = fields[2].GetUInt32();
         pItemPrototype->SubClass = fields[3].GetUInt32();
@@ -743,10 +802,17 @@ void ObjectMgr::LoadItemPrototypes()
         pItemPrototype->Field111 = fields[111].GetUInt32();
         pItemPrototype->MaxDurability = fields[112].GetUInt32();
 
+		// UQ1: For cache save...
+		//pItemPrototypes[num_item_prototypes] = pItemPrototype;
+
         AddItemPrototype(pItemPrototype);
+
+		num_item_prototypes++;
     } while( result->NextRow() );
 
     delete result;
+
+//	SaveItemPrototypesCache();
 }
 
 

@@ -38,6 +38,9 @@
 #include "Mail.h"
 #include "Spell.h"
 
+extern int num_item_prototypes;
+extern uint32 item_proto_ids[64550];
+
 enum HIGHGUID
 {
     HIGHGUID_ITEM          = 0x40000000,
@@ -392,6 +395,10 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void LoadCreatureNames();
         void SaveCreatureNames();
         void LoadItemPrototypes();
+
+		// UQ1: Trying to cache items list for startup speed...
+		//bool ObjectMgr::LoadItemPrototypesCache();
+		//bool ObjectMgr::SaveItemPrototypesCache();
         void LoadTrainerSpells();
        // void LoadTaxiNodes();
        // void LoadTaxiPath();

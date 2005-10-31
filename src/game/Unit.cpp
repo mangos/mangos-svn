@@ -954,7 +954,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     DealDamage(pVictim, damage, 0);
 }
 
-
 void Unit::smsg_AttackStop(uint64 victimGuid)
 {
     WorldPacket data;
@@ -1038,7 +1037,9 @@ bool Unit::AddAffect(Affect *aff, bool uniq)
 
     if (i != m_affects.end())
     {
+#ifndef _VC80_UPGRADE // UQ1: VC 2005 doesnt like this...
         if(i != 0)
+#endif //_VC80_UPGRADE
             (*i)->SetDuration(0);
     }
 
