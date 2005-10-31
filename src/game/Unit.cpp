@@ -730,226 +730,226 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     data.Initialize( SMSG_EMOTE );
     data << anim_id << GetGUID();
     WPAssert(data.size() == 12);
-	
-	SendMessageToSet(&data, true);
+    
+    SendMessageToSet(&data, true);
 }
 
 void Unit::DoAttackDamage(Unit *pVictim, uint32 damage, uint32 blocked_amount, uint32 damageType, uint32 hitInfo, uint32 victimState)
 {
-	if (GetUnitCriticalChance() * 655.36f >= (uint16)irand(0, 512))
-	{
-		hitInfo = 0xEA;
-		damage *= 2;
-		damageType = 1;
+    if (GetUnitCriticalChance() * 655.36f >= (uint16)irand(0, 512))
+    {
+        hitInfo = 0xEA;
+        damage *= 2;
+        damageType = 1;
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
 
-	}
-	if (pVictim->GetUnitParryChance() * 655.36f >= (uint16)irand(0, 512))
-	{
-		//hitInfo = 0x20;
-		damage = 0;
-		victimState = 2;
+    }
+    if (pVictim->GetUnitParryChance() * 655.36f >= (uint16)irand(0, 512))
+    {
+        //hitInfo = 0x20;
+        damage = 0;
+        victimState = 2;
 
-		HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-	}
-	if (pVictim->GetUnitDodgeChance() * 655.36f >= (uint16)irand(0, 512))
-	{
-		//hitInfo = 0x20;
-		damage = 0;
-		victimState = 3;
+        HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+    }
+    if (pVictim->GetUnitDodgeChance() * 655.36f >= (uint16)irand(0, 512))
+    {
+        //hitInfo = 0x20;
+        damage = 0;
+        victimState = 3;
 
-		HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-	}
-	if (pVictim->GetUnitBlockChance() * 655.36f >= (uint16)irand(0, 512))
-	{
-		//hitInfo = 0x20;
-		blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 10));
-			
-		if (blocked_amount < damage) 
-		{
-			damage = damage - blocked_amount;
-		}
-		else 
-		{
-			damage = 0;
-		}
+        HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+    }
+    if (pVictim->GetUnitBlockChance() * 655.36f >= (uint16)irand(0, 512))
+    {
+        //hitInfo = 0x20;
+        blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 10));
+            
+        if (blocked_amount < damage) 
+        {
+            damage = damage - blocked_amount;
+        }
+        else 
+        {
+            damage = 0;
+        }
 
-		if (pVictim->isPlayer() && pVictim->GetUnitBlockValue())
-		{
-			HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
-		}
-		if (pVictim->isPlayer() && pVictim->GetUnitBlockValue() == 0)
-		{
-			HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-		}
+        if (pVictim->isPlayer() && pVictim->GetUnitBlockValue())
+        {
+            HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+        }
+        if (pVictim->isPlayer() && pVictim->GetUnitBlockValue() == 0)
+        {
+            HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+        }
 
-		victimState = 4;
-	}
+        victimState = 4;
+    }
 }
 
 void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
 {
-	WorldPacket data;
-    uint32	spell = 0;
-    uint32	hitInfo = 0x22;
-	uint32	damageType = 0;
-	uint32	extraSpellID = 0;
-	uint32	extraSpellDamge = 0;
-	uint32	blocked_amount = 0;
-	uint32	victimState = 1;
-	int32	attackerSkill = GetUnitMeleeSkill();
-	int32	victimSkill = pVictim->GetUnitMeleeSkill();
-	float	chanceToHit = 100.0f;
-	uint32	unknownValue = 0x0;
-	bool	hit;
-	uint32	victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
-	uint32	attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
+    WorldPacket data;
+    uint32    spell = 0;
+    uint32    hitInfo = 0x22;
+    uint32    damageType = 0;
+    uint32    extraSpellID = 0;
+    uint32    extraSpellDamge = 0;
+    uint32    blocked_amount = 0;
+    uint32    victimState = 1;
+    int32    attackerSkill = GetUnitMeleeSkill();
+    int32    victimSkill = pVictim->GetUnitMeleeSkill();
+    float    chanceToHit = 100.0f;
+    uint32    unknownValue = 0x0;
+    bool    hit;
+    uint32    victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
+    uint32    attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
 
-	// UQ1: I will base hit/miss on agility values...
-	if (victimAgility < attackerAgility)
-	{
-		if (irand(0,(int)attackerAgility-victimAgility) >= 5)
-			hit = true;
-		else
-			hit = false;
-	}
-	else if (victimAgility > attackerAgility)
-	{
-		if (irand(0,(int)victimAgility-attackerAgility) <= 5)
-			hit = true;
-		else
-			hit = false;
-	}
-	else
-	{
-		if (irand(0,5) >= 2)
-			hit = true;
-		else
-			hit = false;
-	}
+    // UQ1: I will base hit/miss on agility values...
+    if (victimAgility < attackerAgility)
+    {
+        if (irand(0,(int)attackerAgility-victimAgility) >= 5)
+            hit = true;
+        else
+            hit = false;
+    }
+    else if (victimAgility > attackerAgility)
+    {
+        if (irand(0,(int)victimAgility-attackerAgility) <= 5)
+            hit = true;
+        else
+            hit = false;
+    }
+    else
+    {
+        if (irand(0,5) >= 2)
+            hit = true;
+        else
+            hit = false;
+    }
 
-	if (pVictim->isDead())
-	{
-		smsg_AttackStop(pVictim->GetGUID());
-		return;
-	}
+    if (pVictim->isDead())
+    {
+        smsg_AttackStop(pVictim->GetGUID());
+        return;
+    }
 
-	if ((m_currentSpell != NULL) && !m_meleeSpell) 
-		return;
+    if ((m_currentSpell != NULL) && !m_meleeSpell) 
+        return;
 
-	if (isStunned()) 
-		return;
+    if (isStunned()) 
+        return;
 
     if(damage == 0) 
-		damage = CalculateDamage (this);
-	else 
-		damageType = 1;	
+        damage = CalculateDamage (this);
+    else 
+        damageType = 1;    
 
     if(hit) 
-		hitInfo = 0;
+        hitInfo = 0;
 
     if (m_meleeSpell == true)
     {// If we are casting some sort of melee spell, then we need to finish it...
         if(m_currentSpell != NULL && m_currentSpell->getState() == SPELL_STATE_IDLE)
-		{
+        {
             spell = m_currentSpell->m_spellInfo->Id;
             m_currentSpell->SendCastResult(0);
             m_currentSpell->SendSpellGo();
             
-			for(uint32 i=0;i<2;i++)
-			{// Add spell FX...
+            for(uint32 i=0;i<2;i++)
+            {// Add spell FX...
                 m_currentSpell->HandleEffects(m_currentSpell->m_targets.m_unitTarget,i);
-			}
+            }
 
             m_currentSpell->finish();
         }
     }
-	
-	if (isPlayer() && pVictim->isUnit())
-	{// When a player is attacking an NPC, adjust the chance we will hit to suit the level of the Player+NPC...
-		if (attackerSkill <= victimSkill - 24) 
-		{// They are too higher level for us!
-			chanceToHit = 0;
-		} 
-		else 
-		{
-			if (attackerSkill <= victimSkill)
-			{
-				chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
-			}
-		}
-		
-		if (chanceToHit < 15.0f) 
-			chanceToHit = 15.0f;
-	}
+    
+    if (isPlayer() && pVictim->isUnit())
+    {// When a player is attacking an NPC, adjust the chance we will hit to suit the level of the Player+NPC...
+        if (attackerSkill <= victimSkill - 24) 
+        {// They are too higher level for us!
+            chanceToHit = 0;
+        } 
+        else 
+        {
+            if (attackerSkill <= victimSkill)
+            {
+                chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
+            }
+        }
+        
+        if (chanceToHit < 15.0f) 
+            chanceToHit = 15.0f;
+    }
 
 
-	if (chanceToHit * 655.36f >= (uint16)irand(0, 32767))
-	{
-		if (isPlayer() && pVictim->isUnit())
-		{// When a player is attacking an NPC, adjust damage values to suit the level of the Player+NPC...
-			if (attackerSkill < victimSkill - 20) 
-			{
-				damage = (damage * 30) / 100;
-			}
-			else
-			{
-				if (attackerSkill < victimSkill - 10) 
-				{
-					damage = (damage * 60) / 100;
-				}
-			}
-		}
-	} 
-	else 
-	{
-		damage = 0;
-	}
+    if (chanceToHit * 655.36f >= (uint16)irand(0, 32767))
+    {
+        if (isPlayer() && pVictim->isUnit())
+        {// When a player is attacking an NPC, adjust damage values to suit the level of the Player+NPC...
+            if (attackerSkill < victimSkill - 20) 
+            {
+                damage = (damage * 30) / 100;
+            }
+            else
+            {
+                if (attackerSkill < victimSkill - 10) 
+                {
+                    damage = (damage * 60) / 100;
+                }
+            }
+        }
+    } 
+    else 
+    {
+        damage = 0;
+    }
 
 
-	if (damage)
-	{
-		DoAttackDamage(pVictim, damage, blocked_amount, damageType, hitInfo, victimState);
-	}
-	
-	if (extraSpellID && extraSpellDamge)
-	{
-		SpellNonMeleeDamageLog (pVictim, extraSpellID, extraSpellDamge);
-		return;
-	}
+    if (damage)
+    {
+        DoAttackDamage(pVictim, damage, blocked_amount, damageType, hitInfo, victimState);
+    }
+    
+    if (extraSpellID && extraSpellDamge)
+    {
+        SpellNonMeleeDamageLog (pVictim, extraSpellID, extraSpellDamge);
+        return;
+    }
 
     data.Initialize(SMSG_ATTACKERSTATEUPDATE);
-    data << (uint32)hitInfo;			// Attack flags
-    data << GetGUID();					// Guid of Attacker
-    data << pVictim->GetGUID();			// Guid of Victim
-    data << (uint32)damage;				// Damage amount
+    data << (uint32)hitInfo;            // Attack flags
+    data << GetGUID();                    // Guid of Attacker
+    data << pVictim->GetGUID();            // Guid of Victim
+    data << (uint32)damage;                // Damage amount
 
-    data << (uint8)1;					// Damage type counter
-    data << damageType;					// Damage type: 0 = white font, 1 = yellow font
-    data << (float)damage;				// damage amount - for accuracy
-    data << (uint32)damage;				// damage amount - for screen display
-    data << (uint32)0;					// absorbed ammount
+    data << (uint8)1;                    // Damage type counter
+    data << damageType;                    // Damage type: 0 = white font, 1 = yellow font
+    data << (float)damage;                // damage amount - for accuracy
+    data << (uint32)damage;                // damage amount - for screen display
+    data << (uint32)0;                    // absorbed ammount
 
-	data << (uint32)0;					// unknown field (in 1.7+)
+    data << (uint32)0;                    // unknown field (in 1.7+)
 
-    data << (uint32)victimState;		// victim state
+    data << (uint32)victimState;        // victim state
 
-	//data << (uint32)0;				// victim round duration
+    //data << (uint32)0;                // victim round duration
     
-	data << (uint32)extraSpellDamge;	// spell damage amount
-    data << (uint32)extraSpellID;		// spell damage id
-    data << (uint32)blocked_amount;		// blocked ammount
+    data << (uint32)extraSpellDamge;    // spell damage amount
+    data << (uint32)extraSpellID;        // spell damage id
+    data << (uint32)blocked_amount;        // blocked ammount
 
     //WPAssert(data.size() == 61);
     SendMessageToSet(&data, true);
 
-	if (isPlayer())
-		Log::getSingleton( ).outDebug("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg.",
-			GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
-	else
-		Log::getSingleton( ).outDebug("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg.",
-			GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
+    if (isPlayer())
+        Log::getSingleton( ).outDebug("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
+    else
+        Log::getSingleton( ).outDebug("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
 
     DealDamage(pVictim, damage, 0);
 }
@@ -963,7 +963,7 @@ void Unit::smsg_AttackStop(uint64 victimGuid)
     data << victimGuid;
     data << uint32( 0 );
 #if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
-	data << (uint32)0;					// unknown field (in 1.7+)
+    data << (uint32)0;                    // unknown field (in 1.7+)
 #endif //defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
     SendMessageToSet(&data, true);
     Log::getSingleton( ).outDetail("%u %X stopped attacking "I64FMT,
@@ -987,9 +987,9 @@ void Unit::smsg_AttackStart(Unit* pVictim, Player *pThis)
 
     // Prevent user from ignoring attack speed and stopping and start combat really really fast
     if(!isAttackReady())
-	{
+    {
         setAttackTimer(uint32(0));
-	}
+    }
     else if(!canReachWithAttack(pVictim))
     {
         setAttackTimer(uint32(500));
@@ -2626,9 +2626,9 @@ Unit::GetUnitDodgeChance()
     Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
 #endif
     if (pThis) // Players only???
-	return (float)m_uint32Values[ PLAYER_DODGE_PERCENTAGE ]; 
+    return (float)m_uint32Values[ PLAYER_DODGE_PERCENTAGE ]; 
     else
-	return (float)0;
+    return (float)0;
 }
 
 float 
@@ -2640,9 +2640,9 @@ Unit::GetUnitParryChance()
     Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
 #endif
     if (pThis) // Players only???
-	return (float)m_uint32Values[ PLAYER_PARRY_PERCENTAGE ]; 
+    return (float)m_uint32Values[ PLAYER_PARRY_PERCENTAGE ]; 
     else
-	return (float)0;
+    return (float)0;
 }
 
 float
@@ -2654,9 +2654,9 @@ Unit::GetUnitCriticalChance()
     Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
 #endif
     if (pThis) // Players only???
-	return (float)m_uint32Values[ PLAYER_CRIT_PERCENTAGE ]; 
+    return (float)m_uint32Values[ PLAYER_CRIT_PERCENTAGE ]; 
     else
-	return (float)0;
+    return (float)0;
 }
 
 
@@ -2669,9 +2669,9 @@ Unit::GetUnitBlockChance()
     Player *pThis = ObjectAccessor::Instance().FindPlayer(GetGUID());
 #endif
     if (pThis) // Players only???
-	return (float)m_uint32Values[ PLAYER_BLOCK_PERCENTAGE ]; 
+    return (float)m_uint32Values[ PLAYER_BLOCK_PERCENTAGE ]; 
     else
-	return (float)0;
+    return (float)0;
 }
 
 bool
@@ -2684,9 +2684,9 @@ Unit::isUnit()
 #endif
     
     if (pThis)
-	return false;
+    return false;
     else
-	return true;
+    return true;
 }
 
 
@@ -2700,9 +2700,9 @@ Unit::isPlayer()
 #endif
     
     if (pThis)
-	return true;
+    return true;
     else
-	return false;
+    return false;
 }
 
 

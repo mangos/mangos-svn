@@ -4,7 +4,7 @@ MaNGOS 0.0.2  (Oct 31, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/mi
  enhancements to the overall functionality of the daemon. A complete
  list of all updated items follows below:
  
- == Game Features ==
+ ==== Game Features ====
  * Added support for area exploration.
  * Added support for duels.
  * Added support for ticket system.
@@ -22,7 +22,7 @@ MaNGOS 0.0.2  (Oct 31, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/mi
  * Updated command descriptions to be more meaningful.
  * Updated default data for player creation. Actions, items, skills and spells moved to database.
 
- == Server Features ==
+ ==== Server Features ====
  * Added support for building with Intel C++ compiler on Windows.
  * Added support for building with debug info on Linux. Use --with-debug-info switch to include debug info.
  * Added support for building with 1.8.x protocol as default protocol. Use the 1.8.x build configurations in Visual Studio or --enable-18x switch on Linux.

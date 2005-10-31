@@ -255,11 +255,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GMTICKET_SYSTEMSTATUS,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    },
 
         /// new ticket handlers sani
-        { CMSG_GMTICKET_DELETETICKET,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode			 },
-        { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode		 },
-		
-		//PvP
-		{ CMSG_ENABLE_PVP,				 STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP					 },
+        { CMSG_GMTICKET_DELETETICKET,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode          },
+        { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      },
+        
+        //PvP
+        { CMSG_ENABLE_PVP,                 STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
 
         { CMSG_ZONEUPDATE,               STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode              },
         { CMSG_SET_TARGET,               STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               },
@@ -340,16 +340,16 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
 
         ///Trade Opcodes
-        { CMSG_ACCEPT_TRADE,                 STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode         },
-        { CMSG_BEGIN_TRADE,                     STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode       },
-        { CMSG_BUSY_TRADE,                     STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode         },
-        { CMSG_CANCEL_TRADE,                 STATUS_LOGGEDIN, &WorldSession::HandleCancelTradeOpcode         },
-        { CMSG_CLEAR_TRADE_ITEM,             STATUS_LOGGEDIN, &WorldSession::HandleClearTradeItemOpcode      },
-        { CMSG_IGNORE_TRADE,                 STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode         },
-        { CMSG_INITIATE_TRADE,                 STATUS_LOGGEDIN, &WorldSession::HandleInitiateTradeOpcode     },
-        { CMSG_SET_TRADE_GOLD,                 STATUS_LOGGEDIN, &WorldSession::HandleSetTradeGoldOpcode      },
-        { CMSG_SET_TRADE_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleSetTradeItemOpcode      },
-        { CMSG_UNACCEPT_TRADE,                 STATUS_LOGGEDIN, &WorldSession::HandleUnacceptTradeOpcode     },
+        { CMSG_ACCEPT_TRADE,             STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode             },
+        { CMSG_BEGIN_TRADE,              STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode              },
+        { CMSG_BUSY_TRADE,               STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode               },
+        { CMSG_CANCEL_TRADE,             STATUS_LOGGEDIN, &WorldSession::HandleCancelTradeOpcode             },
+        { CMSG_CLEAR_TRADE_ITEM,         STATUS_LOGGEDIN, &WorldSession::HandleClearTradeItemOpcode          },
+        { CMSG_IGNORE_TRADE,             STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode             },
+        { CMSG_INITIATE_TRADE,           STATUS_LOGGEDIN, &WorldSession::HandleInitiateTradeOpcode           },
+        { CMSG_SET_TRADE_GOLD,           STATUS_LOGGEDIN, &WorldSession::HandleSetTradeGoldOpcode            },
+        { CMSG_SET_TRADE_ITEM,           STATUS_LOGGEDIN, &WorldSession::HandleSetTradeItemOpcode            },
+        { CMSG_UNACCEPT_TRADE,           STATUS_LOGGEDIN, &WorldSession::HandleUnacceptTradeOpcode           },
 
         /// Item opcodes
         { CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
@@ -418,12 +418,12 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_MAIL_DELETE,              STATUS_LOGGEDIN, &WorldSession::HandleMailDelete                    },
         { CMSG_MAIL_CREATE_TEXT_ITEM,    STATUS_LOGGEDIN, &WorldSession::HandleMailCreateTextItem            },//add by vendy
         /// Cinema opcode
-        { CMSG_COMPLETE_CINEMATIC,     STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema                  },//add by sani
-        { CMSG_NEXT_CINEMATIC_CAMERA,     STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera          },//add by sani
+        { CMSG_COMPLETE_CINEMATIC,       STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema                },//add by sani
+        { CMSG_NEXT_CINEMATIC_CAMERA,    STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera           },//add by sani
         // Battlefield
-        { CMSG_BATTLEFIELD_STATUS,     STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode         },
-        // move time skipp 
-        { CMSG_MOVE_TIME_SKIPPED,     STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode            },
+        { CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
+        // move time skip
+        { CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
         /// End of table
         { 0,                             0,               NULL                                               }
     };

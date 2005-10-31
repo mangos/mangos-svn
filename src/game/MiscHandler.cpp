@@ -78,7 +78,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     lootSlot -=1;                                 //to prevent Slot 0 from been used "Still Rolling for item fix"
 
 
-	slot = GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM);
+    slot = GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM);
 
     if (slot == INVENTORY_SLOT_ITEM_END)
     {
@@ -425,33 +425,34 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 
         if (result)
         {
-        int cnt;
-        fields = result->Fetch();
-        cnt = fields[0].GetUInt32();
+            int cnt;
+            fields = result->Fetch();
+            cnt = fields[0].GetUInt32();
 
-        if ( cnt > 0 )
-        {
-        data.Initialize( SMSG_GMTICKET_GETTICKET );
-        query1 << "SELECT * FROM `gmtickets` where guid='" << guid << "'";
-        QueryResult *result = sDatabase.Query( query1.str().c_str() );
-        fields = result->Fetch();
+            if ( cnt > 0 )
+            {
+                data.Initialize( SMSG_GMTICKET_GETTICKET );
+                query1 << "SELECT * FROM `gmtickets` where guid='" << guid << "'";
+                QueryResult *result = sDatabase.Query( query1.str().c_str() );
+                fields = result->Fetch();
 
-        printf( "query=%s\n", query1.str().c_str() );
-        char tickettext[255];
-        strcpy( tickettext,fields[2].GetString() );
-        data << uint32(6); // means we have open tickets
-        data.append((uint8 *)tickettext,strlen(tickettext)+1);
-        data << uint8(0); // ??
-        data << uint8(3); // ??
-        SendPacket( &data );
-        }
-        else {
-        data << uint32(1); // all !6 means we have no open tickets
-        data << uint32(0);
-        data << uint8(0);
-        data << uint8(0);
-        SendPacket( &data );
-        }
+                printf( "query=%s\n", query1.str().c_str() );
+                char tickettext[255];
+                strcpy( tickettext,fields[2].GetString() );
+                data << uint32(6); // means we have open tickets
+                data.append((uint8 *)tickettext,strlen(tickettext)+1);
+                data << uint8(0); // ??
+                data << uint8(3); // ??
+                SendPacket( &data );
+            }
+            else
+            {
+                data << uint32(1); // all !6 means we have no open tickets
+                data << uint32(0);
+                data << uint8(0);
+                data << uint8(0);
+                SendPacket( &data );
+            }
 
         }
         delete result;
@@ -538,28 +539,28 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 {
-	WorldPacket data;
+    WorldPacket data;
 
-	if ( (!GetPlayer()->isAlive()) || GetPlayer()->inCombat ) 
-	{
-		data.Initialize(SMSG_CAST_RESULT);
+    if ( (!GetPlayer()->isAlive()) || GetPlayer()->inCombat ) 
+    {
+        data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);
         data << uint8(2);
         data << uint8(97);  
-		SendPacket(&data);
-		return;
-	}
+        SendPacket(&data);
+        return;
+    }
 
-	if( GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , 0x08) )
-	{
-		GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS , 0x08);
-		GetPlayer()->SetPvP(false);
-	}
-	else
-	{
-		GetPlayer()->SetFlag(UNIT_FIELD_FLAGS , 0x08);
-		GetPlayer()->SetPvP(true);
-	}
+    if( GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , 0x08) )
+    {
+        GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS , 0x08);
+        GetPlayer()->SetPvP(false);
+    }
+    else
+    {
+        GetPlayer()->SetFlag(UNIT_FIELD_FLAGS , 0x08);
+        GetPlayer()->SetPvP(true);
+    }
 }
 
 void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )

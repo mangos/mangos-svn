@@ -332,15 +332,15 @@ class Player : public Unit
             return m_faction;
         };
 
-		void SetPvP(bool b)
-		{
-			pvpOn = b;
-		};
+        void SetPvP(bool b)
+        {
+            pvpOn = b;
+        };
 
-		bool GetPvP()
-		{
-			return pvpOn;
-		};
+        bool GetPvP()
+        {
+            return pvpOn;
+        };
 
         void setGold(int gold)
         {
@@ -651,7 +651,7 @@ class Player : public Unit
         int tradeItems[7];
         uint32 tradeGold;
 
-		bool pvpOn;
+        bool pvpOn;
 
         //duel
         uint64 m_duelGUID;

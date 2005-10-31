@@ -13,7 +13,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT([MaNGOS],
-        [0.0.2-SVN],
+        [0.0.2],
         [https://opensvn.csie.org/traccgi/MaNGOS/],
         [mangos])
 AM_CONFIG_HEADER([config.h])
