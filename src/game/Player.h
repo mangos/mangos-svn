@@ -471,6 +471,7 @@ class Player : public Unit
         void BroadcastToFriends(std::string msg);
 
         // skilllines
+		uint32 GetSkillByProto( ItemPrototype *proto );
         bool HasSkillLine(uint32 id);
         void AddSkillLine(uint32 id, uint16 currVal, uint16 maxVal);
         void AddSkillLine(uint32 id, uint16 currVal, uint16 maxVal, bool sendUpdate);
