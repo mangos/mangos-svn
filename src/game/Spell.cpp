@@ -36,6 +36,7 @@
 #include "DynamicObject.h"
 #include "Affect.h"
 #include "Group.h"
+#include "UpdateData.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
@@ -609,9 +610,9 @@ void Spell::FillTargetMap()
 
                         data << (uint8)0;         // number of misses
 
-#ifdef _VERSION_1_7_0_
+#if defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
                         data << uint32(0) << uint32(0) << uint32(0);
-#endif                    //_VERSION_1_7_0_
+#endif // defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
 
                         m_targets.write( &data );
                         m_caster->SendMessageToSet(&data, true);
@@ -696,9 +697,9 @@ void Spell::FillTargetMap()
                         data.Initialize( MSG_CHANNEL_UPDATE );
                         data << time;
 
-#ifdef _VERSION_1_7_0_
+#if defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
                         data << uint32(0) << uint32(0) << uint32(0);
-#endif                    //_VERSION_1_7_0_
+#endif // defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
 
                         ((Player*)m_caster)->GetSession()->SendPacket( &data );
 
@@ -730,9 +731,9 @@ void Spell::FillTargetMap()
                             data << m_spellInfo->Id;
                             data << duration;
 
-#ifdef _VERSION_1_7_0_
-                            data << uint32(0) << uint32(0) << uint32(0);
-#endif                //_VERSION_1_7_0_
+#if defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
+                        data << uint32(0) << uint32(0) << uint32(0);
+#endif // defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
 
                             ((Player*)m_caster)->GetSession()->SendPacket( &data );
                         }
@@ -751,9 +752,9 @@ void Spell::FillTargetMap()
                         data << m_caster->GetGUID();
                         data << uint32(0) << uint8(0);
 
-#ifdef _VERSION_1_7_0_
+#if defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
                         data << uint32(0) << uint32(0) << uint32(0);
-#endif                    //_VERSION_1_7_0_
+#endif // defined ( _VERSION_1_7_0_ ) || defined ( _VERSION_1_7_0_ )
 
                         target->GetSession()->SendPacket(&data);
                         return;
@@ -1105,7 +1106,54 @@ newItem = NULL;
 
                             }break;
                             case 53:              // Enchant Item Permanent
-                            {
+                            {// UQ1: I'd like this working... So, ...
+								Player* p_caster = (Player*)m_caster;
+								uint32 add_slot = 0;
+								uint8 item_slot = 0;
+
+								uint32 field = 99;
+				                if(m_CastItem)
+				                    field = 1;
+				                else
+									field = 3;
+				                
+								if(!m_CastItem)
+								{
+				                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
+								    {
+										if(p_caster->GetItemBySlot(i) != 0)
+											if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
+											{
+												m_CastItem = p_caster->GetItemBySlot(i);
+												item_slot = i;
+											}
+									}
+								}
+
+								for(add_slot = 0; add_slot < 22; add_slot++)
+								{
+									if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
+										break;
+								}
+
+								if (add_slot < 32)
+								{
+									for(uint8 i=0;i<3;i++)
+									{
+										if (m_spellInfo->EffectMiscValue[i])
+											m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+									}
+
+									// Now actually set it up, and transmit info...
+									UpdateData upd;
+									WorldPacket packet;
+
+									p_caster->_ApplyItemMods( m_CastItem, item_slot, true );
+									upd.Clear();
+									m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
+									upd.BuildPacket(&packet);
+									p_caster->GetSession()->SendPacket(&packet);
+								}
 /*
                 Player* p_caster = (Player*)m_caster;
                 uint32 field = 99;
@@ -1493,6 +1541,19 @@ m_CastItem = p_caster->GetItemBySlot(i);
                     uint8 Spell::CanCast()
                     {
                         uint8 castResult = 0;
+
+						if (m_CastItem)
+						{// UQ1: Cast a spell on an item should always be OK! ???
+							castResult = CheckItems();
+
+							 if(castResult != 0)
+								SendCastResult(castResult);
+
+							 //uint8(0x54)
+
+							return castResult;
+						}
+
 #ifndef ENABLE_GRID_SYSTEM
                         Unit* target = objmgr.GetObject<Creature>(m_targets.m_unitTarget);
                         if(!target)
@@ -1503,7 +1564,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
                         if( pl != NULL )
                             target = ObjectAccessor::Instance().GetUnit(*pl, m_targets.m_unitTarget);
                         else
-                            ;                     // FIX ME PLEASE..
+							Log::getSingleton( ).outError("SPELL: (grid system) player invalid!!!");                      // FIX ME PLEASE..
 #endif
                         if(target)
                         {
