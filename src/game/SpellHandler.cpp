@@ -90,7 +90,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 #endif //__REVIVE_CHEAT__
 #endif //ENABLE_GRID_SYSTEM
 
-    Log::getSingleton( ).outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i\n",
+    Log::getSingleton( ).outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i",
         spellId, recvPacket.size());
 
     // check for spell id
