@@ -32,43 +32,12 @@
 # include <config.h>
 #endif
 
+#include "Utilities/HashMap.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include <errno.h>
-
-// current platform and compiler
-#define PLATFORM_WIN32 0
-#define PLATFORM_UNIX  1
-#define PLATFORM_APPLE 2
-
-#if defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )
-#  define PLATFORM PLATFORM_WIN32
-#elif defined( __APPLE_CC__ )
-#  define PLATFORM PLATFORM_APPLE
-#else
-#  define PLATFORM PLATFORM_UNIX
-#endif
-
-#define COMPILER_MICROSOFT 0
-#define COMPILER_GNU       1
-#define COMPILER_BORLAND   2
-
-#ifdef _MSC_VER
-#  define COMPILER COMPILER_MICROSOFT
-#elif defined( __BORLANDC__ )
-#  define COMPILER COMPILER_BORLAND
-#elif defined( __GNUC__ )
-#  define COMPILER COMPILER_GNU
-#else
-#  pragma error "FATAL ERROR: Unknown compiler."
-#endif
-
-#if COMPILER == COMPILER_MICROSOFT
-#  pragma warning( disable : 4267 )               // conversion from 'size_t' to 'int', possible loss of data
-#  pragma warning( disable : 4786 )               // identifier was truncated to '255' characters in the debug information
-#endif
 
 #if PLATFORM == PLATFORM_WIN32
 #define STRCASECMP stricmp
@@ -83,19 +52,8 @@
 #include <queue>
 #include <sstream>
 #include <algorithm>
-//#include <iostream>
-#if COMPILER == COMPILER_GNU && __GNUC__ >= 3
-#include <ext/hash_map>
 
-#if __GNUC__ >= 4
-#define __fastcall __attribute__((__fastcall__))
-#else
-#define __fastcall
-#endif
 
-#else
-#include <hash_map>
-#endif
 
 #include <zthread/FastMutex.h>
 #include <zthread/LockedQueue.h>
@@ -115,51 +73,9 @@
 #  include <netdb.h>
 #endif
 
-#ifdef _STLPORT_VERSION
-#define HM_NAMESPACE std
-// msvc71
-#elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1300
-#define HM_NAMESPACE stdext
-#elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
-#define HM_NAMESPACE __gnu_cxx
-
-namespace __gnu_cxx
-{
-    template<> struct hash<unsigned long long>
-    {
-        size_t operator()(const unsigned long long &__x) const { return (size_t)__x; }
-    };
-    template<typename T> struct hash<T *>
-    {
-        size_t operator()(T * const &__x) const { return (size_t)__x; }
-    };
-
-};
-
-#else
-#define HM_NAMESPACE std
-#endif
 
 #include "MemoryLeaks.h"
 
-#if COMPILER == COMPILER_MICROSOFT
-typedef __int64   int64;
-#else
-typedef long long int64;
-#endif
-typedef long        int32;
-typedef short       int16;
-typedef char        int8;
-
-#if COMPILER == COMPILER_MICROSOFT
-typedef unsigned __int64   uint64;
-#else
-typedef unsigned long long  uint64;
-typedef unsigned long      DWORD;
-#endif
-typedef unsigned long        uint32;
-typedef unsigned short       uint16;
-typedef unsigned char        uint8;
 
 #if COMPILER == COMPILER_MICROSOFT
 

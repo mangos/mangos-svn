@@ -19,24 +19,86 @@
  */
 
 #include "AggressorAI.h"
+#include "Errors.h"
+#include "Creature.h"
+#include "Player.h"
+#include "Utilities.h"
 
-void AggressorAI::MoveInLineOfSight( Unit *unit )
+int
+AggressorAI::Permissible(const Creature *creature)
+{
+    if( creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == Beast )
+	return 1;
+    return -1;
+}
+
+
+void 
+AggressorAI::MoveInLineOfSight(Creature *) 
 {
 }
 
-void AggressorAI::AttackStart( Unit * )
+void 
+AggressorAI::AttackStart(Creature *) 
 {
 }
 
-void AggressorAI::AttackStop( Unit * )
+void 
+AggressorAI::AttackStop(Creature *) 
 {
 }
 
-void AggressorAI::Update( uint32 t_diff, Unit * )
+void 
+AggressorAI::HealBy(Creature *healer, uint32 amount_healed) 
 {
 }
 
-void AggressorAI::HealBy( Unit *healer, uint32 amount_healed )
+void 
+AggressorAI::DamageInflict(Creature *healer, uint32 amount_healed) 
 {
 }
 
+bool
+AggressorAI::IsVisible(Creature *creature) const 
+{
+    return MaNGOS::Utilities::is_in_line_of_sight(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(),
+						  creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), 1.0);
+}
+
+
+void 
+AggressorAI::MoveInLineOfSight(Player *) 
+{
+}
+
+void 
+AggressorAI::AttackStart(Player *) 
+{
+}
+
+void 
+AggressorAI::AttackStop(Player *) 
+{
+}
+
+void 
+AggressorAI::HealBy(Player *healer, uint32 amount_healed) 
+{
+}
+
+void 
+AggressorAI::DamageInflict(Player *healer, uint32 amount_healed) 
+{
+}
+
+bool
+AggressorAI::IsVisible(Player *pl) const 
+{
+    return MaNGOS::Utilities::is_in_line_of_sight(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(),
+						 pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), 1.0);
+}
+
+void
+AggressorAI::UpdateAI(const uint32)
+{
+}

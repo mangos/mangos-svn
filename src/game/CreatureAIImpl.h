@@ -1,4 +1,4 @@
-/* NullCreatureAI.cpp
+/* CreatureAIImpl.cpp
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -17,6 +17,15 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "CreatureAI.h"
 
-#include "NullCreatureAI.h"
+/* Real factory implememtation
+ */
 
+template<class REAL_AI>
+inline CreatureAI*
+CreatureAIFactory<REAL_AI>::Create(void *data) const
+{
+    Creature* creature = reinterpret_cast<Creature *>(data);
+    return (new REAL_AI(creature));
+}

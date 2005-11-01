@@ -30,18 +30,32 @@
 template<class T>
 class MANGOS_DLL_DECL FactoryHolder 
 {
-    typedef MaNGOS::Singleton<FactoryHolder<T> > FactoryHolderRegistry;
 public:
+    typedef ObjectRegistry<FactoryHolder<T> > FactoryHolderRegistry;
+    typedef MaNGOS::Singleton<FactoryHolderRegistry > FactoryHolderRepository;
+
     FactoryHolder(const char*s) : i_name(s) {}
     inline const char* name(void) const { return i_name; }
 
-    T* Create(void * data = NULL) { return (new T(data)); }
-    void RegisterSelf(void) { FactoryHolderRegistry::Instance().InsertItem(i_name.c_str(), this); }
-    void DeregisterSelf(void) { FactoryHolderRegistry::Instance().RemoveItem(this, false); }
+    void RegisterSelf(void) { FactoryHolderRepository::Instance().InsertItem(this, i_name.c_str()); }
+    void DeregisterSelf(void) { FactoryHolderRepository::Instance().RemoveItem(this, false); }
 
+    /// Abstract Factory create method
+    virtual T* Create(void *data = NULL) const = 0;
 private:
     std::string i_name;
 };
 
+/** Permissible is a classic way of letting the object decide
+ * whether how good they handle things.  This is not retricted
+ * to factory selectors.
+ */
+template<class T>
+class Permissible
+{
+public:
+    virtual ~Permissible() {}
+    virtual int Permit(const T *) const = 0;
+};
 
 #endif

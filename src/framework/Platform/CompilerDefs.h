@@ -51,5 +51,11 @@
 #  pragma warning( disable : 4786 )               // identifier was truncated to '255' characters in the debug information
 #endif
 
+#if COMPILER == COMPILER_GNU && __GNUC__ >= 4
+#define __fastcall __attribute__((__fastcall__))
+#else
+#define __fastcall
+#endif
+
 
 #endif

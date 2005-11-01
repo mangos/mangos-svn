@@ -30,11 +30,22 @@ class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
 {
 public:
     
-    void MoveInLineOfSight(Unit *) {}
-    void AttackStart(Unit *) {}
-    void AttackStop(Unit *) {}
-    void Update(uint32, Unit *);
-    void HealBy(Unit *healer, uint32 amount_healed) {}
+    void MoveInLineOfSight(Creature *) {}
+    void AttackStart(Creature *) {}
+    void AttackStop(Creature *) {}
+    void HealBy(Creature *healer, uint32 amount_healed) {}
+    void DamageInflict(Creature *healer, uint32 amount_healed) {}
+    bool IsVisible(Creature *) const { return false; /* inactive creature don't care */ }
+
+    void MoveInLineOfSight(Player *) {}
+    void AttackStart(Player *) {}
+    void AttackStop(Player *) {}
+    void HealBy(Player *healer, uint32 amount_healed) {}
+    void DamageInflict(Player *done_by, uint32 amount) {}
+    bool IsVisible(Player *) const { return false; /* inactive creature don't care */ }
+    
+    void UpdateAI(const uint32) {}
+    static int Permissible(const Creature *) { return 0; /* that's the best I can do dude */ }
 };
 
 

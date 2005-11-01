@@ -15,10 +15,10 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include
+INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework
 
 ## we don't want to need this here
-INCLUDES += -I$(srcdir)/../game -I$(srcdir)/../realmlist
+INCLUDES += -I$(srcdir)/../game -I$(srcdir)/../realmlist 
 
 noinst_LIBRARIES = libshared.a libauth.a libconfig.a libdatabase.a libnetwork.a
 
