@@ -240,7 +240,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
     SetUInt32Value(UNIT_FIELD_ATTACKPOWER, info->attackpower );
     SetUInt32Value(PLAYER_BYTES, ((skin) | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
-    SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0xEE << 8) | (0x01 << 16) | (0x01 << 24)));
+    SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0xEE << 8) | (0x02 << 16) | (0x01 << 24)));
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
     SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEEE0000 );
 
@@ -2012,6 +2012,46 @@ int Player::CountFreeBagSlot()
     return count;
 }
 
+uint32 Player::GetSkillByProto( ItemPrototype *proto )
+{
+	switch(proto->Class)
+	{
+		case ITEM_CLASS_WEAPON:
+		{
+			switch(proto->SubClass)
+			{
+				case ITEM_SUBCLASS_WEAPON_AXE: return 44;
+				case ITEM_SUBCLASS_WEAPON_AXE2: return 172;
+				case ITEM_SUBCLASS_WEAPON_BOW: return 45;
+				case ITEM_SUBCLASS_WEAPON_GUN: return 46;
+				case ITEM_SUBCLASS_WEAPON_MACE: return 54;
+				case ITEM_SUBCLASS_WEAPON_MACE2: return 160;
+				case ITEM_SUBCLASS_WEAPON_POLEARM: return 229;
+				case ITEM_SUBCLASS_WEAPON_SWORD: return 43;
+				case ITEM_SUBCLASS_WEAPON_SWORD2: return 55;
+				case ITEM_SUBCLASS_WEAPON_STAFF: return 136;
+				case ITEM_SUBCLASS_WEAPON_DAGGER: return 173;
+				case ITEM_SUBCLASS_WEAPON_THROWN: return 176;
+				case ITEM_SUBCLASS_WEAPON_SPEAR: return 227;
+				case ITEM_SUBCLASS_WEAPON_CROSSBOW: return 226;
+				case ITEM_SUBCLASS_WEAPON_WAND: return 228;
+				default: return 0;
+			}
+		}
+		case ITEM_CLASS_ARMOR:
+		{
+			switch(proto->SubClass)
+			{
+				case ITEM_SUBCLASS_ARMOR_CLOTH: return 415;
+				case ITEM_SUBCLASS_ARMOR_LEATHER: return 414;
+				case ITEM_SUBCLASS_ARMOR_MAIL: return 413;
+				case ITEM_SUBCLASS_ARMOR_PLATE: return 293;
+				case ITEM_SUBCLASS_ARMOR_SHIELD: return 433;
+				default: return 0;
+			}
+		}
+	}
+}
 uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
 {
     uint32 type=proto->InventoryType;
@@ -2027,16 +2067,21 @@ uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
     // Check to see if we have the correct level.
     if(proto->RequiredLevel>GetUInt32Value(UNIT_FIELD_LEVEL))
         return 1;
-    // Check to see if we have the required skill level.
-    bool gotSkillz=false;
-    for(int i=1;(i<384)&&(!gotSkillz);i+=2)
+
+	
+	//Check to see if whe have the required skill
+	int32 skillid=0;
+	if(slot<19 && (skillid = GetSkillByProto(proto)) && !HasSkillLine(skillid))
+		return 2;
+
+    /*for(int i=1;(i<384)&&(!gotSkillz);i+=2)
         // I'm guessing this is the way to handle skillz
         if((proto->RequiredSkill==GetUInt32Value(PLAYER_SKILL_INFO_1_1+i))&&
         (proto->RequiredSkillRank==GetUInt32Value(PLAYER_SKILL_INFO_1_1+i+1)))
             gotSkillz=true;
 
     if(!gotSkillz)
-        return 2;
+        return 2;*/
 
     // You are dead !
     if(m_deathState == DEAD)
