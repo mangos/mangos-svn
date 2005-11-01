@@ -21,7 +21,7 @@
 #ifdef _VERSION_1_8_0_
 
 
-#pragma once
+
 // Copyright (C) 2004 WoWD Team
 
 #ifndef _OPCODES_H

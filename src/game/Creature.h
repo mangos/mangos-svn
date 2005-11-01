@@ -85,6 +85,7 @@ struct CreatureInfo
     uint32 slot3pos;
     std::string Name;
     std::string SubName;
+    std::string AIName;
 };
 
 enum UNIT_TYPE

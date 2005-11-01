@@ -29,6 +29,13 @@ libgame_a_SOURCES = \
 	CombatHandler.cpp \
 	Corpse.cpp \
 	Creature.cpp \
+        CreatureAI.cpp \
+        NullCreatureAI.cpp \
+        AggressorAI.cpp \
+        ReactorAI.cpp \
+        GuardAI.cpp \
+        CreatureAISelector.cpp \
+	CreatureAIRegistry.cpp \
 	debugcmds.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
@@ -120,10 +127,3 @@ libgame_a_SOURCES = \
 	WorldSocketMgr.h \
 	ZoneMapper.h
 
-if NEWFRAMEWORK
-libgame_a_LIBADD = \
-	AggressorAI.cpp \
-	CreatureAI.cpp \
-	CreatureAISelector.cpp \
-	NullCreatureAI.cpp
-endif

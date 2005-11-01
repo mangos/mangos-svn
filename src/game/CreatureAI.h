@@ -21,11 +21,15 @@
 #define MANGOS_CREATUREAI_H
 
 #include "Platform/Define.h"
+#include "Policies/Singleton.h"
+#include "Dynamic/ObjectRegistry.h"
+#include "Dynamic/FactoryHolder.h"
 
 /** This is an API for Creatures AI
  */
 
-class Unit;
+class Creature;
+class Player;
 
 class MANGOS_DLL_DECL CreatureAI 
 {
@@ -38,21 +42,70 @@ public:
      * The line of sight of the creature depends on the distance
      * of the target plus the angle the creature is looking.
      */
-    virtual void MoveInLineOfSight(Unit *) = 0;
+    virtual void MoveInLineOfSight(Creature *) = 0;
+    virtual void MoveInLineOfSight(Player *) = 0;
 
     /// Call when a player/Creature starts to attack the creature
-    virtual void AttackStart(Unit *) = 0;
+    virtual void AttackStart(Creature *) = 0;
+    virtual void AttackStart(Player *) = 0;
 
     /// Call when the creature/Player stop attacking
-    virtual void AttackStop(Unit *) = 0;
-
-    /// Call to update the status of the attacker.  Only call when the victim exist
-    virtual void Update(uint32, Unit *) = 0;
+    virtual void AttackStop(Creature *) = 0;
+    virtual void AttackStop(Player *) = 0;
 
     /// Call when the victim of the creature heals by another creature/player
-    virtual void HealBy(Unit *healer, uint32 amount_healed) = 0;
+    virtual void HealBy(Creature *healer, uint32 amount_healed) = 0;
+    virtual void HealBy(Player *healer, uint32 amount_healed) = 0;
+
+    /// Call when the attacker inflict damage on the binded victim
+    virtual void DamageInflict(Player *done_by, uint32 amount_damage) = 0;
+    virtual void DamageInflict(Creature *done_by, uint32 amount_damage) = 0;
+
+    /// Call when a unit is near... the AI figure if visible
+    virtual bool IsVisible(Creature *) const = 0; 
+    virtual bool IsVisible(Player *) const = 0; 
+
+    /// Updates the player attack
+    virtual void UpdateAI(const uint32 diff) = 0;
+
 };
 
 
+struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
+{
+    /*
+     * SelectableAI is a place holder that allows AI specific to implement
+     * a Permit method that indicates how good this AI handles the given
+     * creature.  One that score the highest has the best result.
+     */
+    SelectableAI(const char *id) : FactoryHolder<CreatureAI>(id) {}
+};
+
+/** CreatureAI Factor is a factory holder for creating real objects
+ */
+template<class REAL_AI>
+struct CreatureAIFactory : public SelectableAI
+{
+    CreatureAIFactory(const char *name) : SelectableAI(name) {}
+
+    // implement API for FactorHolder<T>
+    CreatureAI* Create(void *) const;
+
+    // implement API for Permissible<T>
+    int Permit(const Creature *c) const { return REAL_AI::Permissible(c); }
+};
+
+/* Permit defines
+ */
+#define NO_PERMIT  -1
+#define IDLE_PERMIT_BASE 1
+#define REACTIVE_PERMIT_BASE 100
+#define PROACTIVE_PERMIT_BASE 200
+#define FACTION_SPECIFIC_PERMIT_BASE 400
+#define SPEICAL_PERMIT_BASE 800
+
+typedef FactoryHolder<CreatureAI> CreatureAICreator;
+typedef FactoryHolder<CreatureAI>::FactoryHolderRegistry CreatureAIRegistry;
+typedef FactoryHolder<CreatureAI>::FactoryHolderRepository CreatureAIRepository;
 
 #endif

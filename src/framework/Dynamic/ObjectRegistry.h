@@ -24,12 +24,15 @@
 #include "Utilities/HashMap.h"
 #include "Policies/Singleton.h"
 
+#include <string>
+#include <map>
+
 /** ObjectRegistry holds all registry item of the same type
  */
 template<class T>
 class MANGOS_DLL_DECL ObjectRegistry
 {
-    typedef hash_map<std::string, T *> RegistryMapType;
+    typedef std::map<std::string, T *> RegistryMapType;
     RegistryMapType i_registeredObjects;
     friend class MaNGOS::OperatorNew<ObjectRegistry<T> >;
 
@@ -47,10 +50,8 @@ public:
     /// Returns a registry item
     const T* GetRegistryItem(const char *name) const
     {
-	for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
-	    if( iter->first == std::string(name) )
-		return iter->second;
-	return NULL;
+	typename RegistryMapType::const_iterator iter = i_registeredObjects.find(name);
+	return( iter == i_registeredObjects.end() ? NULL : iter->second );
     }
 
     /// Inserts a registry item
@@ -93,7 +94,7 @@ public:
 	unsigned int sz = l.size();
 	l.resize(sz + i_registeredObjects.size());
 	for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
-	    l[sz] = iter->frist;
+	    l[sz++] = iter->first;
 	return i_registeredObjects.size();
     }
 };

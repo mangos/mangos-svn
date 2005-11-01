@@ -22,6 +22,7 @@
 #define __WORLD_H
 
 #include "Timer.h"
+#include "Singleton.h"
 
 class Object;
 class WorldPacket;

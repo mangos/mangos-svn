@@ -44,9 +44,9 @@ namespace MaNGOS
     /** is_in_line_of_sight calculates where unit1 is in the line of sight of unit2.  Note the orientation
      * of unit 2 is no necessary cuz what unit1 facing determines he/she can see unit2
      */
-    inline bool is_in_line_of_sight(const Unit &unit1, const Unit &unit2, const float off_set)
+    inline bool is_in_line_of_sight(const float &x1, const float &y1, const float &z1, const float &x2, const float &y2, const float &z2, const float off_set)
     {
-        return( (calculate_distance_square(unit1.GetPositionX(), unit1.GetPositionY(), unit1.GetPositionZ(), unit2.GetPositionX(), unit2.GetPositionY(), unit2.GetPositionZ())*off_set) <= IN_LINE_OF_SIGHT );
+        return( (calculate_distance_square(x1, y1, z1, x2, y2, z2)*off_set) <= IN_LINE_OF_SIGHT );
     }
 
     // helpful functions determining if its a spirit healer

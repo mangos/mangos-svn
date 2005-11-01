@@ -17,14 +17,41 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "CreatureAIImpl.h"
 #include "CreatureAISelector.h"
 #include "NullCreatureAI.h"
+#include "ObjectMgr.h"
+#include "Policies/SingletonImp.h"
 
 namespace CreatureAISelector
 {
-    CreatureAI* select(Creature *)
+    CreatureAI* select(Creature *creature)
     {
-    return (new NullCreatureAI);
+	CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
+	CreatureInfo *info = objmgr.GetCreatureName(creature->GetGUID());
+	assert( info != NULL );
+	const CreatureAICreator *ai_factory = ai_registry.GetRegistryItem( info->AIName.c_str() );
+
+	if( ai_factory == NULL /* let's try the best effort mechanism */ )
+	{
+	    int best_val = -1;
+	    std::vector<std::string> l;
+	    ai_registry.GetRegisteredItems(l);
+	    for( std::vector<std::string>::iterator iter = l.begin(); iter != l.end(); ++iter)
+	    {
+		const CreatureAICreator *factory = ai_registry.GetRegistryItem((*iter).c_str());
+		const SelectableAI *p = dynamic_cast<const SelectableAI *>(factory);
+		assert( p != NULL );
+		int val = p->Permit(creature);
+		if( val > best_val )
+		{
+		    best_val = val;
+		    ai_factory = p;
+		}
+	    }	    
+	}
+
+	return ( ai_factory == NULL ? new NullCreatureAI : ai_factory->Create(creature) );
     }
 }
 

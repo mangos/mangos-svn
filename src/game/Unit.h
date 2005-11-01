@@ -26,6 +26,7 @@
 #include "ObjectAccessor.h"
 #endif
 
+#include <list>
 #define UF_TARGET_DIED  1
 #define UF_ATTACKING    2                         // this unit is attacking it's selection
 

@@ -11,11 +11,13 @@
 #endif
 
 #ifdef _STLPORT_VERSION
+#define HM_NAMESPACE std
 using std::hash_map;
 #elif COMPILER == COMPILER_MICROSOFT && _MSC_VER >= 1300
+#define HM_NAMESPACE stdext
 using stdext::hash_map;
 #elif COMPILER == COMPILER_GNU && __GNUC__ >= 3
-
+#define HM_NAMESPACE __gnu_cxx
 using __gnu_cxx::hash_map;
 
 namespace __gnu_cxx
@@ -32,6 +34,7 @@ namespace __gnu_cxx
 };
 
 #else
+#define HM_NAMESPACE std
 using std::hash_map;
 #endif
 

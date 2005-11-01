@@ -1,4 +1,4 @@
-/* NullCreatureAI.cpp
+/* CreatureAIRegistry.h
  *
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
@@ -17,6 +17,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef MANGOS_CREATUREAIREGISTRY_H
+#define MANGOS_CREATUREAIREGISTRY_H
 
-#include "NullCreatureAI.h"
+namespace AIRegistry
+{
+    static void Initialize(void);
+}
 
+#endif

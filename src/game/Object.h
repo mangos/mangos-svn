@@ -24,6 +24,8 @@
 #include "UpdateMask.h"
 #include "World.h"
 
+#include <set>
+
 // TODO: fix that type mess
 
 enum TYPE

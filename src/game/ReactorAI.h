@@ -1,4 +1,4 @@
-/* AggressorAI.h
+/* ReactorAI.h
  *
  * Copyright (C) 2004 Wow Daemon
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
@@ -18,26 +18,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_AGGRESSORAI_H
-#define MANGOS_AGGRESSORAI_H
+#ifndef MANGOS_REACTORAI_H
+#define MANGOS_REACTORAI_H
 
-/** AggressorAI is an extremely aggressive AI.. it attacks anything
- * within its range and chase after them.  Since its the most
- * aggressive, even after the victim when out of its range,
- * it will spend small period of time looking for the victim
- * using the PredictionWayPointGenerator.
+/** ReactorAI reacts to the attack.  Mostly use in 
+ * non aggressive animals.
  */
 
 #include "CreatureAI.h"
-#include "HateMatrix.h"
 
-class Creature;
+class Unit;
 
-class MANGOS_DLL_DECL AggressorAI : public CreatureAI
+class MANGOS_DLL_DECL ReactorAI : public CreatureAI
 {
 public:
     // bindind a creature to the AI.
-    AggressorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
+    ReactorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
 
     void MoveInLineOfSight(Creature *);
     void AttackStart(Creature *);
@@ -59,7 +55,6 @@ public:
 private:
     Creature &i_creature;
     Unit *i_pVictim;
-    HateMatrix i_hateMatrix;
 };
 
 #endif
