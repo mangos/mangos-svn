@@ -20,16 +20,12 @@
 
 #ifdef _VERSION_1_8_0_
 
-
-
-// Copyright (C) 2004 WoWD Team
-
 #ifndef _OPCODES_H
 #define _OPCODES_H
 
 // NOTE: All SERVER opcodes are now uint16's, as of patch 4 (3807/0.9.0)
 //       Client opcodes are still uint32 as far as we know.
-// Copyright (C) 2004 WoWD Team
+
 enum OpCodes
 {
     MSG_NULL_ACTION = 0,
