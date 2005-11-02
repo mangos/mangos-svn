@@ -64,7 +64,6 @@ MaNGOS 0.0.1  (Sept 13, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/m
  * Added contrib/ subdirectory for third-party tools.
  * Applied MaNGOS code indention schema.
  * Initial code checked into repository.
- * Fork from WoW Daemon 0.9.0 branch.
  * Fixed Bugs: #2, #3, #9, #10, #11
 
  The complete list of closed tickets can be found here:
