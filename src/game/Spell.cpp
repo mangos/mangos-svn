@@ -1282,7 +1282,11 @@ m_CastItem = p_caster->GetItemBySlot(i);
                              uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];;
 
                              // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-                             pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,playerCaster->GetMapId(), playerCaster->GetPositionX(), playerCaster->GetPositionY(), playerCaster->GetPositionZ(), playerCaster->GetOrientation());
+                             pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,playerCaster->GetMapId(), 
+                                 playerCaster->GetPositionX()+(playerTarget->GetPositionX()-playerCaster->GetPositionX())/2 , 
+                                 playerCaster->GetPositionY()+(playerTarget->GetPositionY()-playerCaster->GetPositionY())/2 , 
+                                 playerCaster->GetPositionZ(), 
+                                 playerCaster->GetOrientation());
                              pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
                              pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
                              pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, 4 );
