@@ -20,7 +20,6 @@
 
 #include "ReactorAI.h"
 #include "Errors.h"
-#include "Creature.h"
 
 int
 ReactorAI::Permissible(const Creature *creature)

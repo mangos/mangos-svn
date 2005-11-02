@@ -25,6 +25,13 @@
 
 #include "Utilities/HashMap.h"
 
+#ifdef ENABLE_GRID_SYSTEM
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+#endif
+
+
+
 // forward declaration
 class Unit;
 
