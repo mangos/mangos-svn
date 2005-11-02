@@ -543,6 +543,10 @@ class Player : public Unit
         void CheckExploreSystem(void);
         // Initialize the possible areas that player will discover.
         void InitExploreSystem(void);
+		void ApplyItemMods(Item *item,uint8 slot,bool apply)
+		{
+			_ApplyItemMods(item, slot, apply);
+		};
 
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
