@@ -1148,7 +1148,7 @@ newItem = NULL;
 									UpdateData upd;
 									WorldPacket packet;
 
-									p_caster->_ApplyItemMods( m_CastItem, item_slot, true );
+									p_caster->ApplyItemMods( m_CastItem, item_slot, true );
 									upd.Clear();
 									m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
 									upd.BuildPacket(&packet);
