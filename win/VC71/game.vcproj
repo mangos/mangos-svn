@@ -520,6 +520,21 @@
 				RelativePath="..\..\src\game\CreatureAI.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\CreatureAIImpl.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIRegistry.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIRegistry.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAISelector.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAISelector.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\DynamicObject.cpp">
 			</File>
 			<File
@@ -538,6 +553,15 @@
 				RelativePath="..\..\src\game\GridStates.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\GuardAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GuardAI.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\HateMatrix.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Item.cpp">
 			</File>
 			<File
@@ -551,6 +575,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\LootMgr.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\NullCreatureAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\NullCreatureAI.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Object.cpp">
@@ -575,6 +605,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Player.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ReactorAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ReactorAI.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.cpp">
