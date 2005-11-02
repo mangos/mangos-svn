@@ -412,6 +412,22 @@
 				RelativePath="..\..\src\framework\Utilities\TypeList.h">
 			</File>
 		</Filter>
+		<Filter
+			Name="Dynamic"
+			Filter="">
+			<File
+				RelativePath="..\..\src\framework\Dynamic\FactoryHolder.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\framework\Dynamic\FactoryHolder.h">
+			</File>
+			<File
+				RelativePath="..\..\src\framework\Dynamic\ObjectRegistry.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\framework\Dynamic\ObjectRegistry.h">
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
