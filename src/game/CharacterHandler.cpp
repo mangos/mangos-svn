@@ -129,7 +129,33 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     delete pNewChar;
 
     data.Initialize( SMSG_CHAR_CREATE );
-    data << (uint8)0x2D;                          // Error codes below
+    data << (uint8)0x2C;                          // Error codes below
+    data << uint8(0x2D);
+    SendPacket( &data );
+
+// send characters list
+    data.Initialize(SMSG_CHAR_ENUM);
+    ss << "SELECT guid FROM characters WHERE acct=" << GetAccountId();
+    QueryResult* result1 = sDatabase.Query( ss.str().c_str() );
+    uint8 num = 0;
+    data << num;
+    if( result1 )
+    {
+        Player *plr;
+        do
+        {
+            plr = new Player;
+            ASSERT(plr);
+            Log::getSingleton().outError("Loading char guid %d from account %d.",(*result1)[0].GetUInt32(),GetAccountId());
+            plr->LoadFromDB( (*result1)[0].GetUInt32() );
+            plr->BuildEnumData( &data );
+            delete plr;
+            num++;
+        }
+        while( result1->NextRow() );
+        delete result1;
+    }
+    data.put<uint8>(0, num);
     SendPacket( &data );
 }
 
