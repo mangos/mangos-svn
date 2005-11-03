@@ -324,7 +324,7 @@ struct WorldMapOverlayEntry
 struct FactionEntry
 {
 	uint32 ID;
-	uint32 reputationListID;
+	int	reputationListID;
 	uint32 unk1;
 	uint32 unk2;
 	uint32 unk3;
@@ -397,5 +397,6 @@ defineDBCStore(SkillStore,skilllinespell);
 #define sAreaTableStore AreaTableStore::getSingleton()
 #define sWorldMapAreaStore WorldMapAreaStore::getSingleton()
 #define sWorldMapOverlayStore WorldMapOverlayStore::getSingleton()
+#define sFactionStore FactionStore::getSingleton()
 //end Made
 #endif

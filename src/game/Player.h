@@ -362,19 +362,19 @@ class Player : public Unit
             //Set faction
             if(race > 0)
             {
-                m_faction = NoFaction;
+                m_faction = 0;
                 switch(race)
                 {
                     case HUMAN:
                     case DWARF:
                     case NIGHTELF:
                     case GNOME:
-                        m_faction = Alliance; break;
+                        m_faction = 469; break;
                     case ORC:
                     case UNDEAD_PLAYER:
                     case TAUREN:
                     case TROLL:
-                        m_faction = Horde; break;
+                        m_faction = 67; break;
                 }
             } else m_faction = faction;
 
@@ -554,6 +554,7 @@ class Player : public Unit
 		{
 			_ApplyItemMods(item, slot, apply);
 		};
+		void LoadReputationFromDBC(void);
 		void UpdateReputation(void);
 
     protected:
