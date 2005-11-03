@@ -207,7 +207,7 @@ void World::SetInitialWorldSettings()
     LootMgr::getSingleton().LoadLootTables();
 
     Log::getSingleton().outString("Initialize data stores...");
-    barGoLink bar( 11 );
+    barGoLink bar( 12 );
     bar.step();
     new SkillStore("DBC/SkillLineAbility.dbc");
     bar.step();
