@@ -321,6 +321,47 @@ struct WorldMapOverlayEntry
     uint32 drawY;                                 //in pixels
 };
 
+struct FactionEntry
+{
+	uint32 ID;
+	uint32 reputationListID;
+	uint32 unk1;
+	uint32 unk2;
+	uint32 unk3;
+	uint32 unk4;
+	uint32 unk5;
+	uint32 unk6;
+	uint32 unk7;
+	uint32 something1;//10
+	uint32 something2; 
+	uint32 something3;
+	uint32 something4;
+	uint32 something5;
+	uint32 something6;
+	uint32 something7;
+	uint32 something8;
+	uint32 something9;
+	uint32 faction;
+	uint32 name; //20
+	uint32 unk8; 
+	uint32 unk9;
+	uint32 unk10;
+	uint32 unk11;
+	uint32 unk12;
+	uint32 unk13;
+	uint32 unk14;
+	uint32 unk15;
+	uint32 unk16;
+	uint32 unk17; //30
+	uint32 unk18; 
+	uint32 unk19;
+	uint32 unk20;
+	uint32 unk21;
+	uint32 unk22;
+	uint32 unk23;
+	uint32 unk24;
+};
+
 float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
@@ -339,7 +380,9 @@ defineIndexedDBCStore(AreaTableStore,AreaTableEntry);
 defineIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry);
 
 defineDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
+defineDBCStore(FactionStore,FactionEntry);
 //end Made
+
 defineDBCStore(SkillStore,skilllinespell);
 
 #define sSpellStore SpellStore::getSingleton()
