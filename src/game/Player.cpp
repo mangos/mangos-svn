@@ -3572,6 +3572,30 @@ void Player::InitExploreSystem(void)
         }
     }
 }
+
+void Player::UpdateReputation(void)
+{
+	/*
+	SMSG_SET_FACTION_VISIBLE 
+	int Faction ID
+
+	SMSG_SET_FACTION_STANDING 
+	int Faction ID
+	int Standing
+	*/
+
+}
+
+void Player::_LoadReputation(void)
+{
+	std::list<Factions>::iterator *itr;
+
+}
+void Player::_SaveReputation(void)
+{
+
+}
+
 void Player::DuelComplete()
 {
     WorldPacket data;

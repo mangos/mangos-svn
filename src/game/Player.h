@@ -137,6 +137,13 @@ struct Areas
     float y2;
 };
 
+struct Factions
+{
+	uint32 ID;        //to lacate into dbc file
+	uint32 Flags;     //1 = Visible, 2 = AtWar
+	uint32 Standing;
+};
+
 enum PlayerMovementType
 {
     MOVE_ROOT       = 1,
@@ -547,6 +554,7 @@ class Player : public Unit
 		{
 			_ApplyItemMods(item, slot, apply);
 		};
+		void UpdateReputation(void);
 
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
@@ -568,12 +576,13 @@ class Player : public Unit
         void _LoadActions();
         void _LoadQuestStatus();
         void _LoadAffects();
+		
+		void _LoadReputation(void);
+		void _SaveReputation(void);
 
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
-
-        std::list<struct Areas> areas;
 
         uint64 m_lootGuid;
 
@@ -622,6 +631,12 @@ class Player : public Unit
         bool inCombat;
         //Time to logout after a combat
         int logoutDelay;
+
+		//Areas to descover
+        std::list<struct Areas> areas;
+
+		//Reputation system
+		std::list<struct Factions> factions;
 
         // items the player has bid on
         std::list<bidentry*> m_bids;

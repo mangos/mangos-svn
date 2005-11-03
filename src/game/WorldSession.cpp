@@ -259,7 +259,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      },
         
         //PvP
-        { CMSG_ENABLE_PVP,                 STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
+        { CMSG_ENABLE_PVP,               STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
+
+		//Reputation
+		{ CMSG_SET_FACTION_ATWAR,		 STATUS_LOGGEDIN, &WorldSession::HandleSetFactionAtWar				 },
+		{ CMSG_SET_FACTION_CHEAT,		 STATUS_LOGGEDIN, &WorldSession::HandleSetFactionCheat				 },
 
         { CMSG_ZONEUPDATE,               STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode              },
         { CMSG_SET_TARGET,               STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               },

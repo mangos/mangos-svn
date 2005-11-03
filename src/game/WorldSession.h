@@ -118,6 +118,9 @@ class WorldSession
         void HandleSetAmmoOpcode(WorldPacket& recvPacket);
 
         void HandleAreaTriggerOpcode(WorldPacket& recvPacket);
+		
+		void HandleSetFactionAtWar( WorldPacket & recv_data );
+		void HandleSetFactionCheat( WorldPacket & recv_data );
 
         void HandleUpdateAccountData(WorldPacket& recvPacket);
         void HandleRequestAccountData(WorldPacket& recvPacket);
