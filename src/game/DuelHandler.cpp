@@ -82,8 +82,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         plTarget->GetSession()->SendPacket(&data);
         
 //test ------------BUG Fix me,I don't know how to change duel player to red name----- 
-        pl->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Alliance );
-        plTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, Horde );
+        pl->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 469 );
+        plTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 67 );
 //-----------------------------------------------------------------------------------
 
     }
