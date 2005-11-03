@@ -231,6 +231,8 @@ void World::SetInitialWorldSettings()
     new WorldMapAreaStore("DBC/WorldMapArea.dbc");
     bar.step();
     new WorldMapOverlayStore("DBC/WorldMapOverlay.dbc");
+	bar.step();
+    new FactionStore("DBC/Faction.dbc");
     //end Made
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
 
