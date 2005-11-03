@@ -353,6 +353,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     */
 
     // SMSG_INITIALIZE_FACTIONS
+	data.Initialize(SMSG_INITIALIZE_FACTIONS);
+	data << (uint32)0x40;  //Count
+	data << (uint8)1; //Flags
+	data << (uint32)0; //Standing
+	SendPacket(&data);
 
     // Unknown (0x02C2)
     data.Initialize(0x02C2);
@@ -557,7 +562,19 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 }
 
-void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data)
+void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
+{
+	Log::getSingleton().outDebug("WORLD SESSION: HandleSetFactionAtWar");
+	recv_data.print_storage();
+}
+
+void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
+{
+	Log::getSingleton().outDebug("WORLD SESSION: HandleSetFactionCheat");
+	recv_data.print_storage();
+}
+
+void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outString( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
 #ifndef _VERSION_1_7_0_                             // UQ1: Don't know how to support this..

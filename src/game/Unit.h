@@ -35,7 +35,7 @@ class Modifier;
 class Spell;
 class DynamicObject;
 
-enum Factions
+enum Faction
 {
     // Fields
     Alliance = 0x73,
