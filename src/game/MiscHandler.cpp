@@ -416,6 +416,10 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
+    data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+    data << (uint32)20;
+    SendPacket( &data );
+
     uint64 guid;
     std::stringstream query,query1;
     Field *fields;
@@ -441,21 +445,17 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
                 strcpy( tickettext,fields[2].GetString() );
                 data << uint32(6); // means we have open tickets
                 data.append((uint8 *)tickettext,strlen(tickettext)+1);
-                data << uint8(0); // ??
-                data << uint8(3); // ??
                 SendPacket( &data );
             }
             else
             {
                 data << uint32(1); // all !6 means we have no open tickets
                 data << uint32(0);
-                data << uint8(0);
-                data << uint8(0);
                 SendPacket( &data );
             }
 
         }
-        delete result;
+    delete result;
 }
 
 
@@ -485,8 +485,6 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
         data.Initialize( SMSG_GMTICKET_GETTICKET );
         data << uint32(1); // all !6 means we have no open tickets
         data << uint32(0);
-        data << uint8(0);
-        data << uint8(0);
         SendPacket( &data );
 }
 
@@ -508,6 +506,8 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         uint64 guid;
         guid = GetPlayer()->GetGUID();
         std::string ticketText = "";
+    	std::stringstream query;
+	Field *fields;
         char * p, p1[512];
         uint8 buf[516];
         int   cat[] = { 0,5,1,2,0,6,4,7,0,8,3 };
@@ -517,11 +517,43 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         my_esc( p1, (const char *)buf + 17 );
         std::stringstream ss;
         ticketText = p1;
+
+    query << "SELECT COUNT(*) FROM `gmtickets` where guid='" << guid << "'";
+    QueryResult *result = sDatabase.Query( query.str().c_str() );
+
+        if (result)
+        {
+            int cnt;
+            fields = result->Fetch();
+            cnt = fields[0].GetUInt32();
+
+/// we have ticket already
+            if ( cnt > 0 )
+            {
+        data.Initialize( SMSG_GMTICKET_CREATE );
+        data << uint32(1);
+        SendPacket( &data );
+	    }
+	else {
         ss << "INSERT INTO `gmtickets` VALUES ('','" << guid << "', '" << ticketText << "', '" << cat[buf[0]] << "')";
         sDatabase.Execute( ss.str( ).c_str( ) );
+
+	data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+	data << (uint32)20;
+	SendPacket( &data );
+
         data.Initialize( SMSG_GMTICKET_CREATE );
         data << uint32(2);
         SendPacket( &data );
+	printf ("update the ticket stupid\n");
+	     }
+	}
+/// error codes
+/// 0x1 - You already have gmticket
+/// 0x3 - Error creating gmticket
+/// 0x5 - Error updating gmticket
+
+	delete result;
 }
 
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
