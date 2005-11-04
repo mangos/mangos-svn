@@ -6,5 +6,5 @@ CREATE TABLE `reputation` (
   `standing` int(32) NOT NULL default '0',
   `flags` int(32) NOT NULL default '0',
   PRIMARY KEY  (`ID`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+) ENGINE=MyISAM;
 
