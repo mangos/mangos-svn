@@ -351,8 +351,14 @@ void Player::Update( uint32 p_time )
 
 #ifndef ENABLE_GRID_SYSTEM
             pVictim = objmgr.GetObject<Creature>(m_curSelection);
+			
+			//if (!pVictim)
+			//	pVictim = objmgr.GetObject<Player>(m_curSelection);
 #else
             pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
+
+			//if (!pVictim)
+			//	pVictim = ObjectAccessor::Instance().GetPlayer(*this, m_curSelection);
 #endif
 
             if (!pVictim)
@@ -2374,8 +2380,13 @@ void Player::AddItemToSlot(uint8 slot, Item *item)
 {
     /* ASSERT(slot < INVENTORY_SLOT_ITEM_END); */
     Log::getSingleton().outError("AddItemtoSlot");
-    ASSERT(slot < BANK_SLOT_BAG_END);
-    ASSERT(m_items[slot] == NULL);
+    //ASSERT(slot < BANK_SLOT_BAG_END);
+    //ASSERT(m_items[slot] == NULL);
+	
+	if (slot >= BANK_SLOT_BAG_END)
+		return;
+	
+	m_items[slot] = NULL;
 
     if( IsInWorld() )
     {

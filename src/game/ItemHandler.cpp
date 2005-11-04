@@ -419,6 +419,186 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
+extern char *fmtstring( char *format, ... );
+
+void WorldSession::SendItemPageInfo( uint32 realID, uint32 itemid )
+{// UQ1: Generate item info page text for an item...
+    int i;
+	Player* pl = GetPlayer();
+	char *itemInfo;
+	bool resist_added = false;
+	bool names_added = false;
+	WorldPacket data;
+
+	if (realID < 0)
+	{
+        //Log::getSingleton( ).outError( "WORLD: Unknown item id 0x%.8X", realID );
+        return;
+    }
+
+    ItemPrototype *itemProto = objmgr.GetItemPrototype(realID);
+    
+	if(!itemProto)
+    {
+        //Log::getSingleton( ).outError( "WORLD: Unknown item id 0x%.8X", realID );
+        return;
+    }
+
+	Log::getSingleton( ).outDebug( "WORLD: Real item id is %u. Name %s.", realID, itemProto->Name1.c_str() );
+
+	data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+    data << itemid;
+
+	itemInfo = (fmtstring("Name: %s\n\n", itemProto->Name1.c_str()));
+
+    if (stricmp(itemProto->Name2.c_str(), ""))
+    {
+        itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name2.c_str()));
+		names_added = true;
+    }
+
+    if (stricmp(itemProto->Name3.c_str(), ""))
+    {
+        itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name3.c_str()));
+		names_added = true;
+    }
+
+    if (stricmp(itemProto->Name4.c_str(), ""))
+    {
+        itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name4.c_str()));
+		names_added = true;
+    }
+
+	if (names_added)
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+
+    if (stricmp(itemProto->Description.c_str(), ""))
+    {
+		itemInfo = (fmtstring("%sDescription: %s\n", itemInfo, itemProto->Description.c_str()));
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+    }
+
+	if (itemProto->Bonding)
+		itemInfo = (fmtstring("%sThis is a bonding item.\n", itemInfo));
+
+    itemInfo = (fmtstring("%sQuality: %u out of 5.\n", itemInfo, itemProto->Quality));
+	itemInfo = (fmtstring("%sMaximum Durability: %u.\n", itemInfo, itemProto->MaxDurability));
+
+	uint32 min_damage = 0, max_damage = 0;
+
+    for(i = 0; i < 5; i++)
+    {// UQ1: Need to add a damage type here...
+        min_damage += (uint32)itemProto->DamageMin[i];
+        max_damage += (uint32)itemProto->DamageMax[i];
+    }
+
+	if (min_damage > 0 || max_damage > 0)
+		itemInfo = (fmtstring("%sMinimum Damage: %u.\nMaximum Damage: %u.\n", itemInfo, min_damage, max_damage));
+
+    itemInfo = (fmtstring("%sSell Price: %u.\n", itemInfo, itemProto->SellPrice));
+	itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+
+    itemInfo = (fmtstring("%sLevel: %u.\n", itemInfo, itemProto->ItemLevel));
+	itemInfo = (fmtstring("%sRequired Character Level: %u.\n", itemInfo, itemProto->RequiredLevel));
+	itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+
+    if (itemProto->ContainerSlots)
+	{
+		itemInfo = (fmtstring("%sThis item is a container, and will hold %u items.\n", itemInfo, itemProto->ContainerSlots));
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+	}
+
+	//itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+    
+	if (itemProto->Armor > 0)
+	{
+		itemInfo = (fmtstring("%sArmor Bonus: %u.\n", itemInfo, itemProto->Armor));
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+	}
+
+	if (itemProto->HolyRes > 0)
+	{
+		itemInfo = (fmtstring("%sHoly Resistance Bonus: %u.\n", itemInfo, itemProto->HolyRes));
+		resist_added = true;
+	}
+
+	if (itemProto->FireRes > 0)
+	{
+		itemInfo = (fmtstring("%sFire Resistance Bonus: %u.\n", itemInfo, itemProto->FireRes));
+		resist_added = true;
+	}
+
+	if (itemProto->NatureRes > 0)
+	{
+		itemInfo = (fmtstring("%sNature Resistance Bonus: %u.\n", itemInfo, itemProto->NatureRes));
+		resist_added = true;
+	}
+
+	if (itemProto->FrostRes > 0)
+	{
+		itemInfo = (fmtstring("%sFrost Resistance Bonus: %u.\n", itemInfo, itemProto->FrostRes));
+		resist_added = true;
+	}
+
+	if (itemProto->ShadowRes > 0)
+	{
+		itemInfo = (fmtstring("%sShadow Resistance Bonus: %u.\n", itemInfo, itemProto->ShadowRes));
+		resist_added = true;
+	}
+
+	if (itemProto->ArcaneRes > 0)
+	{
+		itemInfo = (fmtstring("%sArcane Resistance Bonus: %u.\n", itemInfo, itemProto->ArcaneRes));
+		resist_added = true;
+	}
+
+	if (resist_added)
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+    
+	itemInfo = (fmtstring("%sAttack Delay: %u.\n", itemInfo, itemProto->Delay));
+
+	data << itemInfo;
+	data << uint32(0);
+    SendPacket(&data);  
+
+	//Log::getSingleton( ).outDebug( "Item %u info is:\n%s", realID, itemInfo );
+}
+
+void WorldSession::SendAllItemPageInfos( void )
+{// Send them all!
+	uint8 i = 0;
+	Item * srcitem;
+	Player* pl = GetPlayer();
+
+	for (i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+	{
+		srcitem = pl->GetItemBySlot(i);
+
+		if (srcitem)
+		{
+			SendItemPageInfo(srcitem->GetItemProto()->ItemId, srcitem->GetItemProto()->DisplayInfoID);
+		}
+	}
+}
+
+void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
+{
+	Log::getSingleton( ).outDetail( "WORLD: Recieved CMSG_PAGE_TEXT_QUERY" );
+
+    WorldPacket data;
+	uint32 itemid, guidlow, guidhigh;
+
+	recv_data >> itemid >> guidlow >> guidhigh;
+
+	Log::getSingleton( ).outDetail( "Packet Info: itemid: %u guidlow: %u guidhigh: %u", itemid, guidlow, guidhigh );
+	
+	//SMSG_GAMEOBJECT_PAGETEXT
+	//SMSG_PAGE_TEXT_QUERY_RESPONSE
+
+	//HandleItemTextQuery(recv_data);
+	if (itemid >= 415 && itemid <= 416) // UQ1: Hack - Seems to use these values for inv item lookups...
+		SendAllItemPageInfos();
+}
 
 void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 {

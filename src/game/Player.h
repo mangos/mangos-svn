@@ -557,6 +557,10 @@ class Player : public Unit
 		void LoadReputationFromDBC(void);
 		void UpdateReputation(void);
 
+		void _ApplyItemMods(Item *item,uint8 slot,bool apply);
+        void _RemoveAllItemMods();
+        void _ApplyAllItemMods();
+
     protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -581,9 +585,9 @@ class Player : public Unit
 		void _LoadReputation(void);
 		void _SaveReputation(void);
 
-        void _ApplyItemMods(Item *item,uint8 slot,bool apply);
+        /*void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
-        void _ApplyAllItemMods();
+        void _ApplyAllItemMods();*/
 
         uint64 m_lootGuid;
 

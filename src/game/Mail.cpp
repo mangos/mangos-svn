@@ -113,7 +113,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         std::stringstream ss;
         ss << "INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ( " <<
             mID << ", " << pl->GetGUIDLow() << ", " << GUID_LOPART(rc) << ",' " << subject.c_str() << "' ,' " <<
-        body.c_str() << "', " << GUID_LOPART(item) << ", " << etime << ", " << money << ", " << 0 << ", " << 0 << " )";
+        body.c_str() << "', " << GUID_LOPART(item) << ", " << (long)etime << ", " << money << ", " << 0 << ", " << 0 << " )";
         sDatabase.Execute( ss.str().c_str( ) );
     }
 }
@@ -196,7 +196,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     std::stringstream ss;
     ss << "INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ( " <<
         m->messageID << ", " << pl->GetGUIDLow() << ", " << m->reciever << ",' " << m->subject.c_str() << "' ,' " <<
-        m->body.c_str() << "', " << m->item << ", " << m->time << ", " << m->money << ", " << 0 << ", " << m->checked << " )";
+        m->body.c_str() << "', " << m->item << ", " << (long)m->time << ", " << m->money << ", " << 0 << ", " << m->checked << " )";
     sDatabase.Execute( ss.str().c_str( ) );
 
 }
@@ -307,6 +307,198 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     SendPacket(&data);
 }
 
+extern char *fmtstring( char *format, ... );
+
+uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
+{
+	// UQ1: I will extend this to actually look for the item in inventory.. In case we have an item that shares a 
+	// displayID with another item...
+
+	/*
+	QueryResult *result = sDatabase.Query( fmtstring("SELECT entry FROM items WHERE displayid='%u'", displayID) );
+
+    if( !result )
+        return -1;
+
+	uint32 id = (*result)[0].GetUInt32();
+	*/
+
+	uint8 i = 0;
+	Item * srcitem;
+
+	for (i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+	{
+		srcitem = pl->GetItemBySlot(i);
+
+		if (srcitem)
+		{
+			if (srcitem->GetItemProto()->DisplayInfoID == displayID)
+			{// We found the item... (I hope hehehe)
+				break;
+			}
+		}
+	}
+
+    if( i >= BANK_SLOT_BAG_END )
+	{// Didn't find it! Try a normal DB lookup...
+        QueryResult *result = sDatabase.Query( fmtstring("SELECT entry FROM items WHERE displayid='%u'", displayID) );
+
+		if( !result )
+		{// Big time failure! There is no item matching this!!!
+	        return -1;
+		}
+
+		uint32 id = (*result)[0].GetUInt32();
+		return id;
+	}
+
+	return srcitem->GetItemProto()->ItemId;
+}
+
+bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
+{// UQ1: Generate item info page text for an item...
+    int i;
+	Player* pl = GetPlayer();
+	uint32 realID = GetItemGuidFromDisplayID(itemid, pl);
+	char *itemInfo;
+	bool resist_added = false;
+	bool names_added = false;
+
+	if (realID < 0)
+	{
+        Log::getSingleton( ).outError( "WORLD: Unknown item id 0x%.8X", realID );
+        return false;
+    }
+
+    ItemPrototype *itemProto = objmgr.GetItemPrototype(realID);
+    
+	if(!itemProto)
+    {
+        Log::getSingleton( ).outError( "WORLD: Unknown item id 0x%.8X", realID );
+        return false;
+    }
+
+	Log::getSingleton( ).outDebug( "WORLD: Real item id is %u. Name %s.", realID, itemProto->Name1.c_str() );
+
+	data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+    data << itemid;
+
+	itemInfo = (fmtstring("Name: %s\n\n", itemProto->Name1.c_str()));
+
+    if (stricmp(itemProto->Name2.c_str(), ""))
+    {
+        itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name2.c_str()));
+		names_added = true;
+    }
+
+    if (stricmp(itemProto->Name3.c_str(), ""))
+    {
+        itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name3.c_str()));
+		names_added = true;
+    }
+
+    if (stricmp(itemProto->Name4.c_str(), ""))
+    {
+        itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name4.c_str()));
+		names_added = true;
+    }
+
+	if (names_added)
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+
+    if (stricmp(itemProto->Description.c_str(), ""))
+    {
+		itemInfo = (fmtstring("%sDescription: %s\n", itemInfo, itemProto->Description.c_str()));
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+    }
+
+	if (itemProto->Bonding)
+		itemInfo = (fmtstring("%sThis is a bonding item.\n", itemInfo));
+
+    itemInfo = (fmtstring("%sQuality: %u out of 5.\n", itemInfo, itemProto->Quality));
+	itemInfo = (fmtstring("%sMaximum Durability: %u.\n", itemInfo, itemProto->MaxDurability));
+
+	uint32 min_damage = 0, max_damage = 0;
+
+    for(i = 0; i < 5; i++)
+    {// UQ1: Need to add a damage type here...
+        min_damage += (uint32)itemProto->DamageMin[i];
+        max_damage += (uint32)itemProto->DamageMax[i];
+    }
+
+	if (min_damage > 0 || max_damage > 0)
+		itemInfo = (fmtstring("%sMinimum Damage: %u.\nMaximum Damage: %u.\n", itemInfo, min_damage, max_damage));
+
+    itemInfo = (fmtstring("%sSell Price: %u.\n", itemInfo, itemProto->SellPrice));
+	itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+
+    itemInfo = (fmtstring("%sLevel: %u.\n", itemInfo, itemProto->ItemLevel));
+	itemInfo = (fmtstring("%sRequired Character Level: %u.\n", itemInfo, itemProto->RequiredLevel));
+	itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+
+    if (itemProto->ContainerSlots)
+	{
+		itemInfo = (fmtstring("%sThis item is a container, and will hold %u items.\n", itemInfo, itemProto->ContainerSlots));
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+	}
+
+	//itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+    
+	if (itemProto->Armor > 0)
+	{
+		itemInfo = (fmtstring("%sArmor Bonus: %u.\n", itemInfo, itemProto->Armor));
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+	}
+
+	if (itemProto->HolyRes > 0)
+	{
+		itemInfo = (fmtstring("%sHoly Resistance Bonus: %u.\n", itemInfo, itemProto->HolyRes));
+		resist_added = true;
+	}
+
+	if (itemProto->FireRes > 0)
+	{
+		itemInfo = (fmtstring("%sFire Resistance Bonus: %u.\n", itemInfo, itemProto->FireRes));
+		resist_added = true;
+	}
+
+	if (itemProto->NatureRes > 0)
+	{
+		itemInfo = (fmtstring("%sNature Resistance Bonus: %u.\n", itemInfo, itemProto->NatureRes));
+		resist_added = true;
+	}
+
+	if (itemProto->FrostRes > 0)
+	{
+		itemInfo = (fmtstring("%sFrost Resistance Bonus: %u.\n", itemInfo, itemProto->FrostRes));
+		resist_added = true;
+	}
+
+	if (itemProto->ShadowRes > 0)
+	{
+		itemInfo = (fmtstring("%sShadow Resistance Bonus: %u.\n", itemInfo, itemProto->ShadowRes));
+		resist_added = true;
+	}
+
+	if (itemProto->ArcaneRes > 0)
+	{
+		itemInfo = (fmtstring("%sArcane Resistance Bonus: %u.\n", itemInfo, itemProto->ArcaneRes));
+		resist_added = true;
+	}
+
+	if (resist_added)
+		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
+    
+	itemInfo = (fmtstring("%sAttack Delay: %u.\n", itemInfo, itemProto->Delay));
+
+	data << itemInfo;
+	data << uint32(0);
+    SendPacket(&data);  
+
+	//Log::getSingleton( ).outDebug( "Item %u info is:\n%s", realID, itemInfo );
+
+	return true;
+}
 
 void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 {
@@ -315,7 +507,6 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     uint64 unk1;
 
     recv_data >> mailguid >> unk1;
-    Log::getSingleton().outDebug("We got mailguid: %d with unk: %d",mailguid,unk1);
 
     Player* pl = GetPlayer();
     // std::list<Mail*>::iterator itr;
@@ -324,19 +515,30 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     itr = pl->GetMail(mailguid);
     if(itr)   
     {
+		Log::getSingleton().outDebug("We got mailguid: %d with unk: %d", mailguid, unk1);
+
         data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
         data << mailguid;
         data << itr->body.c_str();
         data << uint32(0);
         SendPacket(&data);
     }
-    else{
-        Log::getSingleton().outError("We got mailguid: %d but there is no such mail.",mailguid);
-        data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-        data << mailguid;
-        data << "Hi,We got a mailguid,  but there is no such mail";
-        data << uint32(0);
-        SendPacket(&data);  
+    else
+	{// UQ1: This is an item info text page...
+        //Log::getSingleton().outError("We got mailguid: %d but there is no such mail.",mailguid);
+		//data << "Hi, We got a mailguid,  but there is no such mail";
+
+		// UQ1: Make a generic item info text page for the item instead...
+		if (!SendItemInfo( mailguid, data ))
+		{// If SendItemInfo failed, send a generic text...
+			data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+			data << mailguid;
+
+			data << "There is no info for this item.";
+
+			data << uint32(0);
+			SendPacket(&data);  
+		}
     }
 }
 //add by  vendy
