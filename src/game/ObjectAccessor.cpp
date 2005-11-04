@@ -32,7 +32,8 @@ ObjectAccessor::GetCorpse(Player &player, uint64 guid)
 Unit*
 ObjectAccessor::GetUnit(Player &player, uint64 guid)
 {
-    return player.GetInRangeUnit(guid);
+    //return player.GetInRangeUnit(guid);
+	return dynamic_cast<Unit *>(player.GetInRangeUnit(guid)); // UQ1: ???
 }
 
 Player*

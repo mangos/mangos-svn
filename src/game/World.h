@@ -104,6 +104,8 @@ class World : public Singleton<World>
         {
             if((index>=0)&&(index<MAX_RATES))
                 return regen_values[index];
+			else
+				return 0;
         }
 
         // map text emote to spell prices

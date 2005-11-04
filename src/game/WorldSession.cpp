@@ -429,6 +429,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
         // move time skip
         { CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
+		// Text Pages...
+		{ CMSG_PAGE_TEXT_QUERY,			 STATUS_LOGGEDIN, &WorldSession::HandlePageQuerySkippedOpcode         },
+		{ CMSG_QUESTGIVER_QUERY_QUEST,	 STATUS_LOGGEDIN, &WorldSession::HandlePageQuerySkippedOpcode         }, // UQ1: FIXME - Shared between quests and item query...
         /// End of table
         { 0,                             0,               NULL                                               }
     };

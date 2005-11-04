@@ -215,7 +215,12 @@ class WorldSession
         void HandleReturnToSender( WorldPacket & recv_data );
         void HandleMailDelete( WorldPacket & recv_data );
         void HandleItemTextQuery( WorldPacket & recv_data);
+		bool SendItemInfo( uint32 itemid, WorldPacket data );
         void HandleMailCreateTextItem(WorldPacket & recv_data );
+		
+		// Itemhandler.cpp
+		void SendItemPageInfo( uint32 realID, uint32 itemid );
+		void SendAllItemPageInfos( void );
 
         /// Item opcodes (ItemHandler.cpp)
         void HandleSwapInvItemOpcode(WorldPacket& recvPacket);
@@ -284,6 +289,9 @@ class WorldSession
 
         /// Helper functions
         void SetNpcFlagsForTalkToQuest(const uint64& guid, const uint64& targetGuid);
+
+		// Page Text Query...
+		void HandlePageQuerySkippedOpcode(WorldPacket& recvPacket);
 
         //! Returns handlers table
         OpcodeHandler* _GetOpcodeHandlerTable() const;
