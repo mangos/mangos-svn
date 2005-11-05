@@ -81,5 +81,24 @@ private:
     HateMatrixMapType i_hateValues;
 };
 
+/** HateBinder binds a creature to the hater..this avoids searching.
+ * The trick of rebinding uses the placement new.
+ */
+struct HateBinder
+{
+    static uint32 si_noHateValue;
+    uint32 &i_hateValue;
+    Unit *i_unit;
+    HateBinder(uint32 &val, Unit *u) : i_hateValue(val), i_unit(u) {}
+    HateBinder() : i_hateValue(si_noHateValue), i_unit(NULL) {}
+    HateBinder(const HateBinder &obj) : i_hateValue(obj.i_hateValue), i_unit(obj.i_unit) {}
+
+    HateBinder& operator=(const HateBinder &obj)
+    {
+	this->~HateBinder();
+	new (this) HateBinder(obj);
+	return *this;
+    }
+};
 
 #endif

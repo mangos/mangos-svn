@@ -18,8 +18,11 @@
  */
 
 #include "CreatureAI.h"
+#include "HateMatrix.h"
 
 CreatureAI::~CreatureAI()
 {
 }
+
+uint32 HateBinder::si_noHateValue=0;
 
