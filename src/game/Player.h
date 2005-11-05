@@ -365,16 +365,41 @@ class Player : public Unit
                 m_faction = 0;
                 switch(race)
                 {
-                    case HUMAN:
+					//Take a look at Faction.dbc file to find this values...
+                    //ALLIANCE
+					case HUMAN:
+						m_faction = 1;
+						m_team = 469;
+						break;
                     case DWARF:
+						m_faction = 3;
+						m_team = 469;
+						break;
                     case NIGHTELF:
+						m_faction = 4;
+						m_team = 469;
+						break;
                     case GNOME:
-                        m_faction = 469; break;
+						m_faction = 115;
+						m_team = 469;
+						break;
+					//HORDE
                     case ORC:
+						m_faction = 2;
+						m_team = 67;
+						break;
                     case UNDEAD_PLAYER:
+						m_faction = 5;
+						m_team = 67;
+						break;
                     case TAUREN:
+						m_faction = 6;
+						m_team = 67;
+						break;
                     case TROLL:
-                        m_faction = 67; break;
+						m_faction = 116;
+						m_team = 67;
+						break;
                 }
             } else m_faction = faction;
 
@@ -584,6 +609,7 @@ class Player : public Unit
 		
 		void _LoadReputation(void);
 		void _SaveReputation(void);
+		bool FactionIsInTheList(uint32 faction);
 
         /*void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
@@ -595,6 +621,7 @@ class Player : public Unit
         uint32 m_race;
         uint32 m_class;
         uint32 m_faction;
+		uint32 m_team; //Alliance, Horde or Steamwheedle Cartel
 
         uint8 m_outfitId;
 

@@ -362,6 +362,24 @@ struct FactionEntry
 	uint32 unk24;
 };
 
+struct FactionTemplateEntry
+{
+	uint32 ID;
+	uint32 faction;
+	uint32 unk1;
+	uint32 fightsupport;
+	uint32 friendly;
+	uint32 hostile;
+	uint32 unk2;
+	uint32 unk3;
+	uint32 unk4;
+	uint32 unk5;
+	uint32 unk6;
+	uint32 unk7;
+	uint32 unk8;
+	uint32 unk9;
+};
+
 float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
@@ -380,7 +398,9 @@ defineIndexedDBCStore(AreaTableStore,AreaTableEntry);
 defineIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry);
 
 defineDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
-defineDBCStore(FactionStore,FactionEntry);
+
+defineIndexedDBCStore(FactionStore,FactionEntry);
+defineDBCStore(FactionTemplateStore,FactionTemplateEntry);
 //end Made
 
 defineDBCStore(SkillStore,skilllinespell);
@@ -398,5 +418,6 @@ defineDBCStore(SkillStore,skilllinespell);
 #define sWorldMapAreaStore WorldMapAreaStore::getSingleton()
 #define sWorldMapOverlayStore WorldMapOverlayStore::getSingleton()
 #define sFactionStore FactionStore::getSingleton()
+#define sFactionTemplateStore FactionTemplateStore::getSingleton()
 //end Made
 #endif
