@@ -29,6 +29,7 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "WorldSocketMgr.h"
+#include "NameTables.h"
 
 #pragma pack(push, 1)
 struct ClientPktHeader
@@ -126,10 +127,11 @@ void WorldSocket::OnRead()
         {
             FILE *pFile = fopen("world.log", "a");
             fprintf(pFile,
-                "CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %.4X\nDATA:\n",
+                "CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
                 (uint32)GetSocket(),
                 _remaining,
-                _cmd);
+				LookupName(packet.GetOpcode(), g_worldOpcodeNames),
+				packet.GetOpcode());
 
             uint32 p = 0;
             while (p < packet.size())
@@ -349,10 +351,11 @@ void WorldSocket::Update(time_t diff)
         {
             FILE *pFile = fopen("world.log", "a");
             fprintf(pFile,
-                "SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %.4X\nDATA:\n",
+                "SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
                 (uint32)GetSocket(),
                 packet->size(),
-                packet->GetOpcode());
+				LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+				packet->GetOpcode());
 
             uint32 p = 0;
             while (p < packet->size())
