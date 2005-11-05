@@ -207,7 +207,7 @@ void World::SetInitialWorldSettings()
     LootMgr::getSingleton().LoadLootTables();
 
     Log::getSingleton().outString("Initialize data stores...");
-    barGoLink bar( 12 );
+    barGoLink bar( 13 );
     bar.step();
     new SkillStore("DBC/SkillLineAbility.dbc");
     bar.step();
@@ -233,6 +233,8 @@ void World::SetInitialWorldSettings()
     new WorldMapOverlayStore("DBC/WorldMapOverlay.dbc");
 	bar.step();
     new FactionStore("DBC/Faction.dbc");
+	bar.step();
+    new FactionTemplateStore("DBC/FactionTemplate.dbc");
     //end Made
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
 

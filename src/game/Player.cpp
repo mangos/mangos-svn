@@ -3599,31 +3599,57 @@ void Player::UpdateReputation(void)
 	int Faction ID
 	int Standing
 	*/
+	std::list<struct Factions>::iterator itr;
+
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	{
+		
+	}
+}
+
+bool Player::FactionIsInTheList(uint32 faction)
+{
+	std::list<struct Factions>::iterator itr;
+
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	{
+		if(itr->ID == faction) return true;
+	}
+	return false;
 }
 
 void Player::LoadReputationFromDBC(void)
 {
 	Factions newFaction;
 	FactionEntry *fac = NULL;
+	FactionTemplateEntry *fact = NULL;
 
 	factions.clear();
 
     Log::getSingleton( ).outDetail("PLAYER: LoadReputationFromDBC");
 
-    for(unsigned int i = 0; i < sFactionStore.GetNumRows(); i++)
+    for(unsigned int i = 0; i < sFactionTemplateStore.GetNumRows(); i++)
     {
-		fac = sFactionStore.LookupEntry(i);
-		if( fac->reputationListID >= 0 )
+		fact = sFactionTemplateStore.LookupEntry(i);
+		fac  = sFactionStore.LookupEntry( fact->faction );
+		if( (fac->reputationListID >= 0) && (!FactionIsInTheList(fac->ID)) )
 		{
 			newFaction.ID =	fac->ID;
 			newFaction.Standing = 0;
-			
-			newFaction.Flags = 1;	//Visible
-			
+
+			newFaction.Flags = 0;
+			//Set Visible
+			if( fac->something8 && (fac->faction == m_team) )			
+				newFaction.Flags += 1;	//Visible
+			//SetAtWar
+			if( ((m_team == 469) && !(fact->hostile & 4)) ||
+				((m_team ==  67) && !(fact->hostile & 2)) )			
+				newFaction.Flags += 2;	//AtWar
+
 			factions.push_back(newFaction);
+
 			Log::getSingleton( ).outDetail("FACTION ADDED: %u", fac->ID);
 		}
-		Log::getSingleton( ).outDetail("%u", i);
 	}
 
 }
@@ -3654,9 +3680,14 @@ void Player::_LoadReputation(void)
 
         delete result;
     }
+	else
+	{
+		LoadReputationFromDBC();
+	}
 
 	UpdateReputation();
 }
+
 void Player::_SaveReputation(void)
 {
 	std::list<Factions>::iterator itr;

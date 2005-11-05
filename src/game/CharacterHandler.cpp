@@ -355,7 +355,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // SMSG_INITIALIZE_FACTIONS
 	data.Initialize(SMSG_INITIALIZE_FACTIONS);
 	data << (uint32)0x40;  //Count
-	data << (uint8)1; //Flags
+	data << (uint8)3; //Flags
 	data << (uint32)0; //Standing
 	SendPacket(&data);
 
