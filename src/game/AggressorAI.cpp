@@ -27,8 +27,8 @@
 int
 AggressorAI::Permissible(const Creature *creature)
 {
-    if( creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == Beast )
-	return 1;
+    //    if( creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == Beast )
+    //	return 1;
     return -1;
 }
 
