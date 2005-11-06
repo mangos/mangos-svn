@@ -44,7 +44,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
     Creature *pCreature = objmgr.GetObject<Creature>(guid);
 #else
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
     if (!pCreature)
     {
@@ -79,7 +79,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
     pCreature = objmgr.GetObject<Creature>(guid);
 #else
-    pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    pCreature = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
     if(!pCreature)
     {

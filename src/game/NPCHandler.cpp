@@ -103,7 +103,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
     Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
         
     Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
@@ -329,7 +329,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
     Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
 
     pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
@@ -395,7 +395,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
         Creature * pCreature = objmgr.GetCreature(guid);
 #else
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
 
         data.Initialize( SMSG_GOSSIP_MESSAGE );
@@ -437,7 +437,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 #ifndef ENABLE_GRID_SYSTEM
     Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection());
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
 
     GossipNpc *pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
