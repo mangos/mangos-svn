@@ -355,9 +355,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // SMSG_INITIALIZE_FACTIONS
 	data.Initialize(SMSG_INITIALIZE_FACTIONS);
 	data << (uint32)0x40;  //Count
-	data << (uint8)3; //Flags
+	data << (uint8)0; //Flags
 	data << (uint32)0; //Standing
 	SendPacket(&data);
+
+	GetPlayer()->UpdateReputation();
 
     // Unknown (0x02C2)
     data.Initialize(0x02C2);
@@ -566,12 +568,51 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 {
 	Log::getSingleton().outDebug("WORLD SESSION: HandleSetFactionAtWar");
 	recv_data.print_storage();
+
+	uint32 FactionID;
+	uint8  Flag;
+
+	recv_data >> FactionID;
+	recv_data >> Flag;
+
+	std::list<struct Factions>::iterator itr;
+
+	for(itr = GetPlayer()->factions.begin(); itr != GetPlayer()->factions.end(); ++itr)
+	{
+		if(itr->ReputationListID == FactionID) 
+		{
+			if( Flag )
+				itr->Flags = (itr->Flags | 2);
+			else
+				if( itr->Flags >= 2) itr->Flags -= 2;
+			return;
+		}
+	}
+	GetPlayer()->UpdateReputation();
 }
 
 void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 {
 	Log::getSingleton().outDebug("WORLD SESSION: HandleSetFactionCheat");
 	recv_data.print_storage();
+
+	uint32 FactionID;
+	uint32 Standing;
+
+	recv_data >> FactionID;
+	recv_data >> Standing;
+
+	std::list<struct Factions>::iterator itr;
+
+	for(itr = GetPlayer()->factions.begin(); itr != GetPlayer()->factions.end(); ++itr)
+	{
+		if(itr->ReputationListID == FactionID) 
+		{
+			itr->Standing += Standing;
+			return;
+		}
+	}
+	GetPlayer()->UpdateReputation();
 }
 
 void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
