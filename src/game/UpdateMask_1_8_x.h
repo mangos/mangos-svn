@@ -34,7 +34,7 @@ public:
     ~UpdateMask( )
     {
         if(mUpdateMask)
-            delete mUpdateMask;
+            delete [] mUpdateMask;
     }
 
     inline void SetBit (uint32 index)
