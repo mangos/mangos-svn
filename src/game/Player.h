@@ -140,6 +140,7 @@ struct Areas
 struct Factions
 {
 	uint32 ID;        //to lacate into dbc file
+	uint32 ReputationListID;
 	uint32 Flags;     //1 = Visible, 2 = AtWar
 	uint32 Standing;
 };

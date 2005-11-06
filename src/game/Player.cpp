@@ -1812,6 +1812,10 @@ void Player::DeleteFromDB()
     ss.rdbuf()->str("");
     ss << "DELETE FROM char_actions WHERE charId = " << GetGUIDLow();
     sDatabase.Execute( ss.str( ).c_str( ) );
+
+	ss.rdbuf()->str("");
+	ss << "DELETE FROM reputation WHERE PlayerID = " << GetGUID();
+	sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
 
@@ -3599,11 +3603,16 @@ void Player::UpdateReputation(void)
 	int Faction ID
 	int Standing
 	*/
+	WorldPacket data;
 	std::list<struct Factions>::iterator itr;
-
+	int i=0;
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
-		
+		data.Initialize(SMSG_SET_FACTION_STANDING);
+		data << (uint32) (itr->Flags & 1); //is visible?
+		data << (uint32) itr->ReputationListID;
+		data << (uint32) itr->Standing;
+		GetSession()->SendPacket(&data);
 	}
 }
 
@@ -3613,7 +3622,7 @@ bool Player::FactionIsInTheList(uint32 faction)
 
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
-		if(itr->ID == faction) return true;
+		if(itr->ReputationListID == faction) return true;
 	}
 	return false;
 }
@@ -3626,32 +3635,30 @@ void Player::LoadReputationFromDBC(void)
 
 	factions.clear();
 
-    Log::getSingleton( ).outDetail("PLAYER: LoadReputationFromDBC");
+    Log::getSingleton().outDetail("PLAYER: LoadReputationFromDBC");
 
     for(unsigned int i = 0; i < sFactionTemplateStore.GetNumRows(); i++)
     {
 		fact = sFactionTemplateStore.LookupEntry(i);
 		fac  = sFactionStore.LookupEntry( fact->faction );
-		if( (fac->reputationListID >= 0) && (!FactionIsInTheList(fac->ID)) )
+		if( (fac->reputationListID >= 0) && (!FactionIsInTheList(fac->reputationListID)) )
 		{
-			newFaction.ID =	fac->ID;
+			newFaction.ID = fac->ID;
+			newFaction.ReputationListID = fac->reputationListID;
 			newFaction.Standing = 0;
 
-			newFaction.Flags = 0;
 			//Set Visible
-			if( fac->something8 && (fac->faction == m_team) )			
-				newFaction.Flags += 1;	//Visible
-			//SetAtWar
-			if( ((m_team == 469) && !(fact->hostile & 4)) ||
-				((m_team ==  67) && !(fact->hostile & 2)) )			
-				newFaction.Flags += 2;	//AtWar
-
+			if( (fac->something8) && (fac->faction == m_team) )
+			{
+				newFaction.Flags = 1;	//Visible
+			}
+			else
+			{
+				newFaction.Flags = 0;
+			}
 			factions.push_back(newFaction);
-
-			Log::getSingleton( ).outDetail("FACTION ADDED: %u", fac->ID);
 		}
 	}
-
 }
 
 void Player::_LoadReputation(void)
@@ -3661,7 +3668,7 @@ void Player::_LoadReputation(void)
 	factions.clear();
 
     std::stringstream query;
-    query << "SELECT factionID, standing, flags FROM reputation WHERE PlayerID=" << GetGUID();
+    query << "SELECT factionID, reputationID, standing, flags FROM reputation WHERE PlayerID=" << GetGUID();
 
     QueryResult *result = sDatabase.Query( query.str().c_str() );
     if(result)
@@ -3670,9 +3677,10 @@ void Player::_LoadReputation(void)
         {
             Field *fields = result->Fetch();
 
-			newFaction.ID		= fields[0].GetUInt32();
-			newFaction.Standing = fields[1].GetUInt32();
-			newFaction.Flags	= fields[2].GetUInt32();
+			newFaction.ID				= fields[0].GetUInt32();
+			newFaction.ReputationListID = fields[1].GetUInt32();
+			newFaction.Standing			= fields[2].GetUInt32();
+			newFaction.Flags			= fields[3].GetUInt32();
 
 			factions.push_back(newFaction);
         }
@@ -3684,30 +3692,76 @@ void Player::_LoadReputation(void)
 	{
 		LoadReputationFromDBC();
 	}
-
-	UpdateReputation();
 }
 
 void Player::_SaveReputation(void)
 {
 	std::list<Factions>::iterator itr;
-
+	
 	std::stringstream ss;
 	ss << "DELETE FROM reputation WHERE PlayerID = " << GetGUID();
 	sDatabase.Execute( ss.str( ).c_str( ) );
-
+	
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
 		ss.rdbuf()->str("");
-		ss << "INSERT INTO reputation (PlayerID, factionID, standing, flags) VALUES ( ";
+		ss << "INSERT INTO reputation (PlayerID, factionID, reputationID, standing, flags) VALUES ( ";
 		ss << (uint32)GetGUID() << ", ";
 		ss << itr->ID << ", ";
+		ss << itr->ReputationListID << ", ";
 		ss << itr->Standing << ", ";
 		ss << itr->Flags << " )";
-
+		
 		sDatabase.Execute( ss.str( ).c_str( ) );
 	}
 }
+
+//Use this function on places that you needs to change reputation 
+//of the player
+//These functions are just an ideia
+/*
+void Player::IncreaseStanding(uint32 faction, int standing)
+{
+    std::list<struct Factions>::iterator itr;
+
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	{
+		if(itr->ReputationListID == faction) 
+		{
+			itr->Standing += standing;
+		}
+	}	
+	UpdateReputation();
+}
+
+void Player::SetReputationFlag(uint32 flag)
+{
+    std::list<struct Factions>::iterator itr;
+
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	{
+		if(itr->ReputationListID == faction) 
+		{
+			itr->Flags = (itr->Flags | flag);
+		}
+	}	
+	UpdateReputation();
+}
+
+void Player::RemoveReputationFlag(uint32 flag)
+{
+    std::list<struct Factions>::iterator itr;
+
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	{
+		if(itr->ReputationListID == faction) 
+		{
+			itr->Flags = (itr->Flags & (255-flag));
+		}
+	}	
+	UpdateReputation();
+}
+*/
 
 void Player::DuelComplete()
 {
