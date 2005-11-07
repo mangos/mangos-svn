@@ -20,7 +20,7 @@ INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 Creature*
 ObjectAccessor::GetCreature(Player &player, uint64 guid)
 {
-    return dynamic_cast<Creature *>(player.GetInRangeUnit(guid));
+    return /*dynamic_cast<Creature *>*/(Creature *) (player.GetInRangeUnit(guid));
 }
 
 Corpse*

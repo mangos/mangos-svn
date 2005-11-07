@@ -609,7 +609,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     oldZone = GetPlayer( )->GetZoneId();
 
     // Setting new zone
-    GetPlayer()->SetZoneId((uint16)newZone);
+    GetPlayer()->SetZoneId((uint32/*uint16*/)newZone); //UQ1: Errr??? its a 16 bit value...
 }
 
 

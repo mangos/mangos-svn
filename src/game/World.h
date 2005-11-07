@@ -23,6 +23,7 @@
 
 #include "Timer.h"
 #include "Singleton.h"
+#include "SharedDefines.h" // UQ1: Generic Defines...
 
 class Object;
 class WorldPacket;

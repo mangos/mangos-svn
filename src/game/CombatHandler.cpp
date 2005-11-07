@@ -41,11 +41,14 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
 
 #ifndef ENABLE_GRID_SYSTEM
-    Creature *pEnemy = objmgr.GetObject<Creature>(guid);
+	Creature *pEnemy = objmgr.GetObject<Creature>(guid);
+	//Unit *pEnemy = objmgr.GetObject<Creature>(guid);
     Player *pPVPEnemy = objmgr.GetObject<Player>(guid);
 #else
-    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, guid);
+	Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection()/*guid*/);
+	//Unit *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection()/*guid*/);
+	//Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
+    Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, _player->GetSelection()/*guid*/);
 #endif
     
     if(pEnemy)
@@ -53,7 +56,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         Player *pThis = GetPlayer();
 
         pThis->addStateFlag(UF_ATTACKING);
-        pThis->smsg_AttackStart(pEnemy);
+        pThis->smsg_AttackStart(pEnemy, pThis);
         pThis->inCombat = true;
         pThis->logoutDelay = LOGOUTDELAY;
     }
@@ -62,7 +65,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         Player *pThis = GetPlayer();
 
         pThis->addStateFlag(UF_ATTACKING);
-        pThis->smsg_AttackStart(pPVPEnemy);
+        pThis->smsg_AttackStart(pPVPEnemy, pThis);
         pThis->inCombat = true;
         pThis->logoutDelay = LOGOUTDELAY;
     }
