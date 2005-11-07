@@ -61,6 +61,8 @@ enum ChatMsg
     CHAT_MSG_LOOT                                 = 0x19,
 };
 
+/*
+// UQ1: Now in SharedDefines.h
 enum Languages
 {
     LANG_UNIVERSAL                                = 0x00,
@@ -78,6 +80,7 @@ enum Languages
     LANG_TROLL                                    = 0x0E,
     NUM_LANGUAGES                                 = 0x0E
 };
+*/
 
 class ChatCommand
 {

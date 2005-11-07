@@ -383,21 +383,22 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
 	data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
     data << itemid;
 
+	//itemInfo = (fmtstring("<HTML>\n\r<BODY>\n\r<H1>Name: %s</H1>\n\n", itemProto->Name1.c_str()));
 	itemInfo = (fmtstring("Name: %s\n\n", itemProto->Name1.c_str()));
 
-    if (stricmp(itemProto->Name2.c_str(), ""))
+    if (stricmp(itemProto->Name2.c_str(), "") && stricmp(itemProto->Name2.c_str(), itemProto->Name1.c_str()))
     {
         itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name2.c_str()));
 		names_added = true;
     }
 
-    if (stricmp(itemProto->Name3.c_str(), ""))
+    if (stricmp(itemProto->Name3.c_str(), "") && stricmp(itemProto->Name3.c_str(), itemProto->Name2.c_str()))
     {
         itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name3.c_str()));
 		names_added = true;
     }
 
-    if (stricmp(itemProto->Name4.c_str(), ""))
+    if (stricmp(itemProto->Name4.c_str(), "") && stricmp(itemProto->Name4.c_str(), itemProto->Name3.c_str()))
     {
         itemInfo = (fmtstring("%s%s\n", itemInfo, itemProto->Name4.c_str()));
 		names_added = true;
@@ -491,6 +492,8 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
     
 	itemInfo = (fmtstring("%sAttack Delay: %u.\n", itemInfo, itemProto->Delay));
 
+	//itemInfo = (fmtstring("%s\n\r</BODY>\n\r</HTML>\n\r", itemInfo)); //New line..
+
 	data << itemInfo;
 	data << uint32(0);
     SendPacket(&data);  
@@ -527,7 +530,27 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 	{// UQ1: This is an item info text page...
         //Log::getSingleton().outError("We got mailguid: %d but there is no such mail.",mailguid);
 		//data << "Hi, We got a mailguid,  but there is no such mail";
+		QueryResult *result = sDatabase.Query( fmtstring("SELECT * FROM item_pages WHERE id='%u'", mailguid) );
 
+		if( result )
+		{// UQ1: We have a text page for this item in the DB... Use it!
+			data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+			data << mailguid;
+
+			uint32 nextpage = mailguid;
+
+			while (nextpage)
+			{
+				data << (*result)[1].GetString();
+				nextpage = (*result)[2].GetUInt32();
+				data << nextpage;
+			}
+
+			data << uint32(0);
+			SendPacket(&data); 
+	        return;
+		}
+		
 		// UQ1: Make a generic item info text page for the item instead...
 		if (!SendItemInfo( mailguid, data ))
 		{// If SendItemInfo failed, send a generic text...
