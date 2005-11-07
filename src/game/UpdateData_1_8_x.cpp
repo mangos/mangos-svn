@@ -124,8 +124,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
     packet->clear();
 
     // do not compress small packets
-    bool k = false;
-    if (m_data.size() > 50 && k)
+    if (m_data.size() > 50 )
     {
         // not sure about that, saw in qz code
         unsigned long destsize = buf.size() + buf.size()/10 + 16;
