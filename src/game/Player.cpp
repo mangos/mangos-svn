@@ -3593,6 +3593,54 @@ void Player::InitExploreSystem(void)
     }
 }
 
+void Player::setFaction(uint8 race, uint32 faction)
+{
+	//Set faction
+    if(race > 0)
+    {
+		m_faction = 0;
+        switch(race)
+        {
+			//Take a look at Faction.dbc file to find this values...
+            //ALLIANCE
+			case HUMAN:
+				m_faction = 1;
+				m_team = 469;
+				break;
+			case DWARF:
+				m_faction = 3;
+				m_team = 469;
+				break;
+			case NIGHTELF:
+				m_faction = 4;
+				m_team = 469;
+				break;
+			case GNOME:
+				m_faction = 115;
+				m_team = 469;
+				break;
+			//HORDE
+            case ORC:
+				m_faction = 2;
+				m_team = 67;
+				break;
+            case UNDEAD_PLAYER:
+				m_faction = 5;
+				m_team = 67;
+				break;
+            case TAUREN:
+				m_faction = 6;
+				m_team = 67;
+				break;
+            case TROLL:
+				m_faction = 116;
+				m_team = 67;
+				break;
+			}
+		} else m_faction = faction;
+	SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
+}
+
 void Player::UpdateReputation(void)
 {
 	/*
@@ -3609,7 +3657,7 @@ void Player::UpdateReputation(void)
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
 		data.Initialize(SMSG_SET_FACTION_STANDING);
-		data << (uint32) (itr->Flags & 1); //is visible?
+		data << (uint32) (itr->Flags & 1); //if is visible?
 		data << (uint32) itr->ReputationListID;
 		data << (uint32) itr->Standing;
 		GetSession()->SendPacket(&data);
@@ -3719,49 +3767,35 @@ void Player::_SaveReputation(void)
 //Use this function on places that you needs to change reputation 
 //of the player
 //These functions are just an ideia
-/*
-void Player::IncreaseStanding(uint32 faction, int standing)
+
+//Returns true if it can set standing and false if not.
+bool Player::SetStanding(uint32 FTemplate, int standing)
 {
+	FactionEntry *fac = NULL;
+	FactionTemplateEntry *fact = NULL;
     std::list<struct Factions>::iterator itr;
-
-	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	
+	for(unsigned int i = 0; i < sFactionTemplateStore.GetNumRows(); i++)
 	{
-		if(itr->ReputationListID == faction) 
+		fact = sFactionTemplateStore.LookupEntry(i);
+		if(fact->ID == FTemplate)
 		{
-			itr->Standing += standing;
+			fac  = sFactionStore.LookupEntry( fact->faction );
+			for(itr = factions.begin(); itr != factions.end(); ++itr)
+			{
+				if(itr->ReputationListID == fac->reputationListID) 
+				{
+					itr->Standing += standing;
+					itr->Flags = (itr->Flags | 1); //Sets visible to faction
+					UpdateReputation();
+					return true;
+				}
+			}	
+			break;
 		}
-	}	
-	UpdateReputation();
+	}
+	return false;
 }
-
-void Player::SetReputationFlag(uint32 flag)
-{
-    std::list<struct Factions>::iterator itr;
-
-	for(itr = factions.begin(); itr != factions.end(); ++itr)
-	{
-		if(itr->ReputationListID == faction) 
-		{
-			itr->Flags = (itr->Flags | flag);
-		}
-	}	
-	UpdateReputation();
-}
-
-void Player::RemoveReputationFlag(uint32 flag)
-{
-    std::list<struct Factions>::iterator itr;
-
-	for(itr = factions.begin(); itr != factions.end(); ++itr)
-	{
-		if(itr->ReputationListID == faction) 
-		{
-			itr->Flags = (itr->Flags & (255-flag));
-		}
-	}	
-	UpdateReputation();
-}
-*/
 
 void Player::DuelComplete()
 {
