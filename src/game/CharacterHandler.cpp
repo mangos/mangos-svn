@@ -609,6 +609,7 @@ void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 		if(itr->ReputationListID == FactionID) 
 		{
 			itr->Standing += Standing;
+			itr->Flags = (itr->Flags | 1); //Sets visible to faction
 			return;
 		}
 	}

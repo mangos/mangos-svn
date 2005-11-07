@@ -356,56 +356,7 @@ class Player : public Unit
             SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
         };
 
-        //this sets the faction horde, alliance or NoFaction in case of any bug
-        //Or sets a faction passed by parameter in case of race is < 0
-        void setFaction(uint8 race, uint32 faction)
-        {
-            //Set faction
-            if(race > 0)
-            {
-                m_faction = 0;
-                switch(race)
-                {
-					//Take a look at Faction.dbc file to find this values...
-                    //ALLIANCE
-					case HUMAN:
-						m_faction = 1;
-						m_team = 469;
-						break;
-                    case DWARF:
-						m_faction = 3;
-						m_team = 469;
-						break;
-                    case NIGHTELF:
-						m_faction = 4;
-						m_team = 469;
-						break;
-                    case GNOME:
-						m_faction = 115;
-						m_team = 469;
-						break;
-					//HORDE
-                    case ORC:
-						m_faction = 2;
-						m_team = 67;
-						break;
-                    case UNDEAD_PLAYER:
-						m_faction = 5;
-						m_team = 67;
-						break;
-                    case TAUREN:
-						m_faction = 6;
-						m_team = 67;
-						break;
-                    case TROLL:
-						m_faction = 116;
-						m_team = 67;
-						break;
-                }
-            } else m_faction = faction;
-
-            SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
-        };
+        void setFaction(uint8 race, uint32 faction);
 
         //action bar
         inline std::list<struct actions> getActionList() { return m_actions; };
@@ -576,12 +527,16 @@ class Player : public Unit
         void CheckExploreSystem(void);
         // Initialize the possible areas that player will discover.
         void InitExploreSystem(void);
+
+		//Reputation
+		bool SetStanding(uint32 FTemplate, int standing);
+		void LoadReputationFromDBC(void);
+		void UpdateReputation(void);
+
 		void ApplyItemMods(Item *item,uint8 slot,bool apply)
 		{
 			_ApplyItemMods(item, slot, apply);
 		};
-		void LoadReputationFromDBC(void);
-		void UpdateReputation(void);
 
 		void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
