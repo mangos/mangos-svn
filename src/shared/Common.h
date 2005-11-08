@@ -25,7 +25,9 @@
 
 #ifndef __SHOW_STUPID_WARNINGS__
 // UQ1: Remove variable conversion warnings...
+// UQ1: warning C4244: 'argument' : conversion from X to X, possible loss of data
 #pragma warning(disable:4244)
+// UQ1: warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
 #pragma warning(disable:4267)
 // UQ1: warning C4800: forcing value to bool 'true' or 'false' (performance warning)
 #pragma warning(disable:4800)
@@ -33,7 +35,7 @@
 #pragma warning(disable:4018)
 // UQ1: warning C4311: 'type cast' : pointer truncation
 #pragma warning(disable:4311)
-// UQ1: warning C4305: 'argument' : truncation from 'double' to 'const float'
+// UQ1: warning C4305: 'argument' : truncation from 'double' to 'float'
 #pragma warning(disable:4305)
 #endif //__SHOW_STUPID_WARNINGS__
 
