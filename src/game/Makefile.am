@@ -36,6 +36,11 @@ libgame_a_SOURCES = \
         GuardAI.cpp \
         CreatureAISelector.cpp \
 	CreatureAIRegistry.cpp \
+        MovementGenerator.cpp \
+        IdleMovementGenerator.cpp \
+        RandomMovementGenerator.cpp \
+        TargetedMovementGenerator.cpp \
+        MotionMaster.cpp \
 	debugcmds.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \

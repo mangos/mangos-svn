@@ -196,7 +196,7 @@ class Object
             m_objectUpdated = false;
         }
 
-        float GetDistanceSq(Object* obj) const
+        float GetDistanceSq(const Object* obj) const
         {
             ASSERT(obj->GetMapId() == m_mapId);
 

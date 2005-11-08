@@ -24,16 +24,8 @@
  */
 
 #include "Utilities/HashMap.h"
+#include "Errors.h"
 
-#ifdef ENABLE_GRID_SYSTEM
-#include "MapManager.h"
-#include "ObjectAccessor.h"
-#endif
-
-// UQ1: warning C4005: 'assert' : macro redefinition
-#pragma warning(disable:4005)
-
-#define assert(exp) ((void)0)
 
 // forward declaration
 class Unit;
@@ -56,7 +48,7 @@ struct MANGOS_DLL_DECL HateMatrix
 	if( iter == i_hateValues.end() )
 	{
 	    std::pair<HateMatrixMapType::iterator, bool> p = i_hateValues.insert( HateMatrixMapType::value_type(unit, 0) );
-	    assert(p.second);
+	    ASSERT(p.second);
 	    iter = p.first;
 	}
 	

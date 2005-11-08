@@ -139,6 +139,11 @@ libgame_a_SOURCES = \
         GuardAI.cpp \
         CreatureAISelector.cpp \
 	CreatureAIRegistry.cpp \
+        MovementGenerator.cpp \
+        IdleMovementGenerator.cpp \
+        RandomMovementGenerator.cpp \
+        TargetedMovementGenerator.cpp \
+        MotionMaster.cpp \
 	debugcmds.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
@@ -245,6 +250,9 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	NullCreatureAI.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	ReactorAI.$(OBJEXT) GuardAI.$(OBJEXT) \
 	CreatureAISelector.$(OBJEXT) CreatureAIRegistry.$(OBJEXT) \
+	MovementGenerator.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) \
+	RandomMovementGenerator.$(OBJEXT) \
+	TargetedMovementGenerator.$(OBJEXT) MotionMaster.$(OBJEXT) \
 	debugcmds.$(OBJEXT) DuelHandler.$(OBJEXT) \
 	DynamicObject.$(OBJEXT) GameObject.$(OBJEXT) \
 	GridNotifiers.$(OBJEXT) GridStates.$(OBJEXT) Group.$(OBJEXT) \
@@ -286,12 +294,15 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/GridNotifiers.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/GridStates.Po ./$(DEPDIR)/Group.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/GroupHandler.Po ./$(DEPDIR)/GuardAI.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/IdleMovementGenerator.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Item.Po ./$(DEPDIR)/ItemHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Level0.Po ./$(DEPDIR)/Level1.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Level2.Po ./$(DEPDIR)/Level3.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/LootMgr.Po ./$(DEPDIR)/Mail.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Map.Po ./$(DEPDIR)/MapManager.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/MapMgr.Po ./$(DEPDIR)/MiscHandler.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MotionMaster.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MovementGenerator.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/MovementHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/NPCHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/NullCreatureAI.Po ./$(DEPDIR)/Object.Po \
@@ -302,10 +313,12 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/Opcodes_1_8_x.Po ./$(DEPDIR)/Player.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/QueryHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/QuestHandler.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/RandomMovementGenerator.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/ReactorAI.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/RedZoneDistrict.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SkillHandler.Po ./$(DEPDIR)/Spell.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/SpellHandler.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/TargetedMovementGenerator.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/TaxiHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/TradeHandler.Po ./$(DEPDIR)/Unit.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/UpdateData.Po \
@@ -381,6 +394,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GroupHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuardAI.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IdleMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ItemHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level0.Po@am__quote@
@@ -393,6 +407,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MapManager.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MapMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MiscHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MotionMaster.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MovementHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NPCHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NullCreatureAI.Po@am__quote@
@@ -406,11 +422,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueryHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RandomMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ReactorAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RedZoneDistrict.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SkillHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Spell.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpellHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TargetedMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TaxiHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TradeHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Unit.Po@am__quote@
