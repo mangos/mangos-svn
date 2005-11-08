@@ -744,6 +744,12 @@
 				RelativePath="..\..\src\game\Player.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\RandomMovementGenerator.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\RandomMovementGenerator.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\ReactorAI.cpp">
 			</File>
 			<File
