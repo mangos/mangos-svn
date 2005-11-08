@@ -37,6 +37,8 @@
 #pragma warning(disable:4311)
 // UQ1: warning C4305: 'argument' : truncation from 'double' to 'float'
 #pragma warning(disable:4305)
+// UQ1: warning C4005: #define X macro redefinition
+#pragma warning(disable:4005)
 #endif //__SHOW_STUPID_WARNINGS__
 
 // Only clients with this version will be allowed to view the realmlist.

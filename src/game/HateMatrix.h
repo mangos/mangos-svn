@@ -30,6 +30,9 @@
 #include "ObjectAccessor.h"
 #endif
 
+// UQ1: warning C4005: 'assert' : macro redefinition
+#pragma warning(disable:4005)
+
 #define assert(exp) ((void)0)
 
 // forward declaration
