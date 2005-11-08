@@ -349,6 +349,29 @@ float HeightDistance(float from, float to)
 
 extern float max_creature_distance;
 
+time_t Creature::GetNextThink()
+{
+	return m_nextThinkTime;
+}
+
+bool Creature::isDisabled()
+{
+	if (m_enabled)
+		return false;
+
+	return true;
+}
+
+void Creature::SetEnabled()
+{
+	m_enabled = true;
+}
+
+void Creature::SetDisabled()
+{
+	m_enabled = false;
+}
+
 void Creature::Update( uint32 p_time )
 {
     //boolean isVendor = false;
@@ -356,41 +379,14 @@ void Creature::Update( uint32 p_time )
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
 
-    if (m_nextThinkTime > time(NULL))
-        return; // Think once every 10 secs only for creatures that are not near a player...
-
     if (NumActivePlayers == 0)
         return; // UQ1: If there's no players online, why think???
 
-    std::stringstream ss;
-    ss.rdbuf()->str("");
-    ss << GetMapId();//m_mapId;
-    long int mapId = atoi(ss.str().c_str());
-    //Log::getSingleton( ).outDetail("mapId: %s->%i.", ss.str().c_str(), mapId);
-
-    std::stringstream ss2;
-    ss2.rdbuf()->str("");
-    ss2 << GetZoneId();//m_zoneId;
-    long int zoneId = atoi(ss2.str().c_str());
-    //Log::getSingleton( ).outDetail("zoneId: %s->%i.", ss2.str().c_str(), zoneId);
-
-    std::stringstream ss3;
-    ss3.rdbuf()->str("");
-    ss3 << GetPositionX();//m_positionX;
-    float x = (float)atof(ss3.str().c_str());
-    //Log::getSingleton( ).outDetail("x: %s->%f.", ss3.str().c_str(), x);
-
-    std::stringstream ss4;
-    ss4.rdbuf()->str("");
-    ss4 << GetPositionY();//m_positionY;
-    float y = (float)atof(ss4.str().c_str());
-    //Log::getSingleton( ).outDetail("y: %s->%f.", ss4.str().c_str(), y);
-
-    std::stringstream ss5;
-    ss5.rdbuf()->str("");
-    ss5 << GetPositionZ();//m_positionZ;
-    float z = (float)atof(ss5.str().c_str());
-    //Log::getSingleton( ).outDetail("z: %s->%f.", ss5.str().c_str(), z);
+	float x = GetPositionX();
+	float y = GetPositionY();
+	float z = GetPositionZ();
+	long int mapId = GetMapId();
+	long int zoneId = GetZoneId();
 #endif //__NO_PLAYERS_ARRAY__
 
     //if (this->getItemCount() > 0 && this->getItemCount() < MAX_CREATURE_ITEMS)
@@ -511,7 +507,7 @@ void Creature::Update( uint32 p_time )
             m_creatureState = STOPPED;
         }
 
-        m_nextThinkTime = time(NULL) + 10;
+        //m_nextThinkTime = time(NULL) + 10;
         return;
     }
 #endif //__NO_PLAYERS_ARRAY__
@@ -532,7 +528,7 @@ void Creature::Update( uint32 p_time )
             //return;
         }
 
-        m_nextThinkTime = time(NULL) + 10;
+        //m_nextThinkTime = time(NULL) + 10;
         return;
     }
 
@@ -586,7 +582,7 @@ void Creature::Update( uint32 p_time )
     }
 #endif //__NO_PLAYERS_ARRAY__
 
-    m_nextThinkTime = time(NULL);
+    //m_nextThinkTime = time(NULL);
 
 #endif //ENABLE_GRID_SYSTEM
 

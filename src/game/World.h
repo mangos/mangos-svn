@@ -109,6 +109,9 @@ class World : public Singleton<World>
 				return 0;
         }
 
+		// UQ1: Speed up AI when grid system is OFF!
+		void CreaturesCheck();
+
         // map text emote to spell prices
         typedef std::map< uint32, uint32> SpellPricesMap;
         SpellPricesMap mPrices;

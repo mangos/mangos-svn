@@ -269,6 +269,46 @@ void World::SetInitialWorldSettings()
     Log::getSingleton( ).outString( "WORLD: SetInitialWorldSettings done" );
 }
 
+#ifndef ENABLE_GRID_SYSTEM
+
+time_t nextCreatureCheckTime = 0;
+extern float max_creature_distance;
+extern float DistanceNoHeight(float from1, float from2, float to1, float to2);
+
+void World::CreaturesCheck()
+{// UQ1: Check through creatures list to see which should be enabled/disabled...
+	ObjectMgr::CreatureMap::iterator iter;
+
+	nextCreatureCheckTime = time(NULL) + 10;
+
+	for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
+	{
+		int loop;
+		bool found = false;
+
+		float x = iter->second->GetPositionX();
+		float y = iter->second->GetPositionY();
+
+		for (loop = 0; loop < NumActivePlayers; loop++)
+		{
+	        if (PlayerMaps[ActivePlayers[loop]] != iter->second->GetMapId())
+		        continue;
+
+	        float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
+
+		    if(distance<=max_creature_distance)
+			{
+				iter->second->SetEnabled();
+				found = true;
+				break;
+			}
+		}
+
+		if (!found)
+			iter->second->SetDisabled();
+	}
+}
+#endif //ENABLE_GRID_SYSTEM
 
 void World::Update(time_t diff)
 {
@@ -459,6 +499,14 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_OBJECTS].Reset();
 
+#ifndef __NO_PLAYERS_ARRAY__
+		if (NumActivePlayers > 0)
+		{
+			if (nextCreatureCheckTime <= time(NULL))
+				CreaturesCheck();
+		}
+#endif //__NO_PLAYERS_ARRAY__
+
         ObjectMgr::PlayerMap::iterator chriter;
         ObjectMgr::CreatureMap::iterator iter;
         ObjectMgr::GameObjectMap::iterator giter;
@@ -467,8 +515,20 @@ void World::Update(time_t diff)
         for( chriter = objmgr.Begin<Player>(); chriter != objmgr.End<Player>( ); ++ chriter )
             chriter->second->Update( diff );
 
-        for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
-            iter->second->Update( diff );
+#ifndef __NO_PLAYERS_ARRAY__
+		if (NumActivePlayers > 0)
+#endif //__NO_PLAYERS_ARRAY__
+		{
+	        for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
+			{
+#ifndef __NO_PLAYERS_ARRAY__
+				if (iter->second->isDisabled())
+					continue;
+#endif //__NO_PLAYERS_ARRAY__
+			
+	            iter->second->Update( diff );
+			}
+		}
 
         for( giter = objmgr.Begin<GameObject>(); giter != objmgr.End<GameObject>( ); ++ giter )
             giter->second->Update( diff );
