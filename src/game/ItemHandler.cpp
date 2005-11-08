@@ -964,6 +964,82 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
 }
 
+void WorldSession::SendListInventory( uint64 guid )
+{
+    Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY" );
+
+    WorldPacket data;
+
+    Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
+#ifndef ENABLE_GRID_SYSTEM
+    Creature *unit = objmgr.GetObject<Creature>(guid);
+#else
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+#endif
+    if (unit == NULL)
+        return;
+
+    uint8 numitems = (uint8)unit->getItemCount();
+    uint8 actualnumitems = 0;
+    uint8 i = 0;
+
+    // get actual Item Count better then alot of spaces :D
+    for(i = 0; i < numitems; i ++ )
+    {
+        if(unit->getItemId(i) != 0) actualnumitems++;
+    }
+    uint32 guidlow = GUID_LOPART(guid);
+
+    data.Initialize( SMSG_LIST_INVENTORY );
+    data << guid;
+    data << uint8( actualnumitems );              // num items
+
+    // each item has seven uint32's
+
+    ItemPrototype * curItem;
+    for(i = 0; i < numitems; i++ )
+    {
+        if(unit->getItemId(i) != 0)
+        {
+            curItem = objmgr.GetItemPrototype(unit->getItemId(i));
+            if( !curItem )
+            {
+                Log::getSingleton( ).outError( "Unit %i has nonexistant item %i! the item will be removed next time", guid, unit->getItemId(i) );
+                for( int a = 0; a < 7; a ++ )
+                    data << uint32( 0 );
+
+                std::stringstream ss;
+                ss << "DELETE * FROM vendors WHERE vendorGuid=" << guidlow << " itemGuid=" << unit->getItemId(i) << '\0';
+                QueryResult *result = sDatabase.Query( ss.str().c_str() );
+
+                unit->setItemAmount(i,0);
+                unit->setItemId(i,0);
+            }
+            else
+            {
+                data << uint32( i + 1 );          // index ? doesn't seem to affect anything
+                // item id
+                data << uint32( unit->getItemId(i) );
+                // item icon
+                data << uint32( curItem->DisplayInfoID );
+                // number of items available, -1 works for infinity, although maybe just 'cause it's really big
+                data << uint32( unit->getItemAmount(i) );
+                // price
+                data << uint32( curItem->BuyPrice );
+                data << uint32( 0 );              // ?
+                data << uint32( 0 );              // ?
+            }
+        }
+    }
+
+    if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
+        return; // Let's just skip it if we can't use the vendor.. (Default system)
+
+    WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
+    SendPacket( &data );
+    Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
+}
+
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_AUTO_STORE_BAG_ITEM" );

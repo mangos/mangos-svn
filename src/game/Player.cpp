@@ -1338,46 +1338,6 @@ void Player::SetPlayerPositionArray()
 
     m_nextThinkTime = time(NULL) + 3;
 
-/*    // UQ1: Update PlayerPositions Array...
-    std::stringstream ss;
-    std::stringstream ss2;
-    std::stringstream ss3;
-    std::stringstream ss4;
-    std::stringstream ss5;
-    std::stringstream ss6;
-    std::stringstream ss7;
-
-    ss.rdbuf()->str("");
-    ss << GetGUID();
-    long long int guid = atoi(ss.str().c_str());
-//    Log::getSingleton( ).outDetail("GUID: %s->%i.", ss.str().c_str(), guid);
-
-    ss2.rdbuf()->str("");
-    ss2 << GetMapId();//m_mapId;
-    long int mapId = atoi(ss2.str().c_str());
-//    Log::getSingleton( ).outDetail("mapId: %s->%i.", ss2.str().c_str(), mapId);
-
-    ss3.rdbuf()->str("");
-    ss3 << GetZoneId();//m_zoneId;
-    long int zoneId = atoi(ss3.str().c_str());
-//    Log::getSingleton( ).outDetail("zoneId: %s->%i.", ss3.str().c_str(), zoneId);
-
-    ss4.rdbuf()->str("");
-    ss4 << GetPositionX();//m_positionX;
-    float x = (float)atof(ss4.str().c_str());
-//    Log::getSingleton( ).outDetail("x: %s->%f.", ss4.str().c_str(), x);
-
-    ss5.rdbuf()->str("");
-    ss5 << GetPositionY();//m_positionY;
-    float y = (float)atof(ss5.str().c_str());
-//    Log::getSingleton( ).outDetail("y: %s->%f.", ss5.str().c_str(), y);
-
-    ss6.rdbuf()->str("");
-    ss6 << GetPositionZ();//m_positionZ;
-    float z = (float)atof(ss6.str().c_str());
-//    Log::getSingleton( ).outDetail("z: %s->%f.", ss6.str().c_str(), z);
-*/
-
 	long long int guid = GetGUID();
 	long int mapId = GetMapId();
 	long int zoneId = GetZoneId();

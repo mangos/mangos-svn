@@ -94,6 +94,9 @@ void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 /// This function handles CMSG_CREATURE_QUERY:
 //////////////////////////////////////////////////////////////
+// UQ1: Defaults...
+extern uint32 default_trainer_guids[12];
+
 void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 {// UQ1: Think I have this correct now.. :)
     WorldPacket data;
@@ -107,12 +110,48 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     ci = objmgr.GetCreatureName(entry);
     Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s'", ci->Name.c_str());
 
+#ifndef ENABLE_GRID_SYSTEM
+    Creature *unit = objmgr.GetObject<Creature>(guid);
+#else
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
+#endif
+
+    Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID());
+
+	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
+	{// Use Defaults...
+		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
+	}
+
+	if (strainer)
+	{// If a trainer, add the flag if needed...
+		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ))
+			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+
+		if (!(ci->flags1 & UNIT_NPC_FLAG_TRAINER))
+			ci->flags1 |= UNIT_NPC_FLAG_TRAINER;
+
+		//if (!(ci->Type & UNIT_NPC_FLAG_TRAINER))
+		//	ci->Type |= UNIT_NPC_FLAG_TRAINER;
+	}
+	else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS)
+	{// If a vendor, add the flag if needed...
+		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ))
+			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR );
+
+		if (!(ci->flags1 & UNIT_NPC_FLAG_VENDOR))
+			ci->flags1 |= UNIT_NPC_FLAG_VENDOR;
+
+		//if (!(ci->Type & UNIT_NPC_FLAG_VENDOR))
+		//	ci->Type |= UNIT_NPC_FLAG_VENDOR;
+	}
+
+
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
     data << ci->Name.c_str();
     data << uint8(0) << uint8(0) << uint8(0);
-    data << ci->SubName.c_str();    // Subname
-    //data << (uint32)0;            // unknown 1 -- Is really flags1 (below)
+    data << ci->SubName.c_str();    // Subname (Guild Name)
     data << (uint32)ci->flags1;        // Flags1
     if ((ci->Type & 2) > 0)
     {

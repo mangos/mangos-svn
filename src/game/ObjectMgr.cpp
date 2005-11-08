@@ -815,6 +815,8 @@ void ObjectMgr::LoadItemPrototypes()
 //	SaveItemPrototypesCache();
 }
 
+// UQ1: Defaults...
+uint32 default_trainer_guids[12];
 
 void ObjectMgr::LoadTrainerSpells()
 {
@@ -859,7 +861,11 @@ void ObjectMgr::LoadTrainerSpells()
         TrainSpell->skilline20 = fields[20].GetUInt32();
         TrainSpell->maxlvl = fields[21].GetUInt32();
         TrainSpell->charclass = fields[22].GetUInt32();
-        AddTrainerspell(TrainSpell);
+
+		if (!default_trainer_guids[TrainSpell->charclass])
+			default_trainer_guids[TrainSpell->charclass] = TrainSpell->Id;
+        
+		AddTrainerspell(TrainSpell);
     } while (result->NextRow());
     delete result;
 
