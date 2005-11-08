@@ -224,19 +224,22 @@ AC_MSG_RESULT($MANGOSD_ENABLE_HTTPD)
 
 # check for grid system enable
 AC_MSG_CHECKING(whether grid system is enabled)
-MANGOSD_ENABLE_GRID=no
+MANGOSD_ENABLE_GRID=yes
 AC_ARG_ENABLE(grid-system,
 [  --enable-grid-system Turn on grid system],
 [
-    if test "$enableval" = "yes" ; then
-	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
-	CXXFLAGS="-DENABLE_GRID_SYSTEM $CXXFLAGS"
-	MANGOSD_ENABLE_GRID=yes
-    elif test "$withval" != "no" ; then
+    if test "$enableval" = "no" ; then
+        MANGOSD_ENABLE_GRID=no
+    elif test "$withval" != "yes" ; then
 	AC_MSG_ERROR(Please choose yes or no)
     fi
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_GRID)
+
+if test "$MANGOSD_ENABLE_GRID" != "no"; then
+	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
+	CXXFLAGS="-DENABLE_GRID_SYSTEM $CXXFLAGS"
+fi
 
 
 # check for 1.8.x protocol support

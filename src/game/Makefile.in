@@ -162,7 +162,6 @@ libgame_a_SOURCES = \
 	Mail.cpp \
 	Map.cpp \
 	MapManager.cpp \
-	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
@@ -189,7 +188,6 @@ libgame_a_SOURCES = \
 	WorldSession.cpp \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
-	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \
 	ChannelMgr.h \
@@ -204,7 +202,6 @@ libgame_a_SOURCES = \
 	ItemPrototype.h \
 	LootMgr.h \
 	Mail.h \
-	MapCell.h \
 	Map.h \
 	MapMgr.h \
 	NameTables.h \
@@ -232,8 +229,7 @@ libgame_a_SOURCES = \
 	World.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h \
-	ZoneMapper.h
+	WorldSocketMgr.h 
 
 subdir = src/game
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
@@ -259,7 +255,7 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	GroupHandler.$(OBJEXT) Item.$(OBJEXT) ItemHandler.$(OBJEXT) \
 	Level0.$(OBJEXT) Level1.$(OBJEXT) Level2.$(OBJEXT) \
 	Level3.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
-	MapManager.$(OBJEXT) MapMgr.$(OBJEXT) MiscHandler.$(OBJEXT) \
+	MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
 	MovementHandler.$(OBJEXT) NPCHandler.$(OBJEXT) \
 	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
@@ -270,7 +266,7 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	TaxiHandler.$(OBJEXT) TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
 	UpdateData_1_8_x.$(OBJEXT) UpdateData.$(OBJEXT) World.$(OBJEXT) \
 	WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
-	WorldSocketMgr.$(OBJEXT) ZoneMapper.$(OBJEXT)
+	WorldSocketMgr.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 
 DEFS = @DEFS@
@@ -300,7 +296,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/Level2.Po ./$(DEPDIR)/Level3.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/LootMgr.Po ./$(DEPDIR)/Mail.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/Map.Po ./$(DEPDIR)/MapManager.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/MapMgr.Po ./$(DEPDIR)/MiscHandler.Po \
+@AMDEP_TRUE@	./$(DEPDIR)/MiscHandler.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/MotionMaster.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/MovementGenerator.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/MovementHandler.Po \
@@ -326,7 +322,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/World.Po ./$(DEPDIR)/WorldSession.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/WorldSocket.Po \
 @AMDEP_TRUE@	./$(DEPDIR)/WorldSocketMgr.Po \
-@AMDEP_TRUE@	./$(DEPDIR)/ZoneMapper.Po ./$(DEPDIR)/debugcmds.Po
+@AMDEP_TRUE@	./$(DEPDIR)/debugcmds.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -405,7 +401,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mail.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Map.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MapManager.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MapMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MiscHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MotionMaster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MovementGenerator.Po@am__quote@
@@ -438,7 +433,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSession.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocketMgr.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ZoneMapper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debugcmds.Po@am__quote@
 
 distclean-depend:
