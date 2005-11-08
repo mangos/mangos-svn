@@ -18,6 +18,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/* Windows nightmare.. dependency resolution pain!!! Althgough
+* some of the files are NOT well define but hey, gcc resolves it.
+* Windows VC seems to be very painful so let's do this for now...
+* the right way.. make files like Creature.h and Player.h well define.
+*/
+#include "ByteBuffer.h" // yupe has nothing to do here but Windows nightmare
 #include "ReactorAI.h"
 #include "Errors.h"
 #include "Creature.h"
