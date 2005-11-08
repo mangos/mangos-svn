@@ -497,6 +497,12 @@
 				RelativePath="..\..\src\game\DuelHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\GossipDef.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GossipDef.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\GridNotifiers.cpp">
 			</File>
 			<File
@@ -563,7 +569,10 @@
 				RelativePath="..\..\src\game\QueryHandler.cpp">
 			</File>
 			<File
-				RelativePath="..\..\src\game\Quest.h">
+				RelativePath="..\..\src\game\QuestDef.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\QuestDef.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\QuestHandler.cpp">

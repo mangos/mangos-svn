@@ -26,7 +26,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "Quest.h"
+#include "QuestDef.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
@@ -34,7 +34,7 @@
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_STATUS_QUERY" );
+/*    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_STATUS_QUERY" );
 
     uint64 guid;
     WorldPacket data;
@@ -64,12 +64,13 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 
     Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS" );
+	*/
 }
 
 
 void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_HELLO" );
+/*    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_HELLO" );
 
     uint64 guid;
     Creature *pCreature;
@@ -206,13 +207,13 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
         WPAssert(data.size() == 8 + 4 + strlen(title)+1 + strlen(details)+1 + strlen(objectives)+1 + rewardSize);
         SendPacket( &data );
         Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS" );
-    }
+    }*/
 }
 
 
 void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_ACCEPT_QUEST" );
+ /*   Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUESTGIVER_ACCEPT_QUEST" );
 
     uint64 guid;
     uint32 quest_id;
@@ -245,13 +246,13 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         SetNpcFlagsForTalkToQuest(guid, pQuest->m_targetGuid);
     }
 
-    GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_INCOMPLETE);
+    GetPlayer()->setQuestStatus(quest_id, QUEST_STATUS_INCOMPLETE);*/
 }
 
 
 void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUEST_QUERY" );
+  /*  Log::getSingleton( ).outDebug( "WORLD: Recieved CMSG_QUEST_QUERY" );
 
     uint32 quest_id = 0;
     recv_data >> quest_id;
@@ -350,7 +351,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     // not sure
     WPAssert(data.size() == 140 + strlen(title)+1 + strlen(details)+1 + strlen(objectives)+1 + 69 + 4);
     SendPacket( &data );
-    Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE" );
+    Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE" );*/
 }
 
 

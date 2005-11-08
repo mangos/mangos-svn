@@ -179,11 +179,6 @@ class Creature : public Unit
         uint32 getQuestStatus(Player *pPlayer);
         uint32 getCurrentQuest(Player *pPlayer);
 
-        char* getQuestTitle(uint32 quest_id);
-        char* getQuestDetails(uint32 quest_id);
-        char* getQuestObjectives(uint32 quest_id);
-        char* getQuestCompleteText(uint32 quest_id);
-        char* getQuestIncompleteText(uint32 quest_id);
 
         bool hasQuest(uint32 quest_id);
         void addQuest(uint32 quest_id) { mQuestIds.push_back(quest_id); };
