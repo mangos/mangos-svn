@@ -265,7 +265,7 @@ class ByteBuffer
         void print_storage()
         {
             printf("STORAGE_SIZE: %u\n", size() );
-            for(int i = 0; i < size(); i++)
+            for(uint8/*int*/ i = 0; i < size(); i++)
                 printf("%u - ", read<uint8>(i) );
         }
 

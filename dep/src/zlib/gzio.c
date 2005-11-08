@@ -11,6 +11,9 @@
 
 #include "zutil.h"
 
+// UQ1: Disable warning C4267: '=' : conversion from 'size_t' to 'uInt', possible loss of data
+#pragma warning(disable:4267)
+
 #ifdef NO_DEFLATE       /* for compatiblity with old definition */
 #  define NO_GZCOMPRESS
 #endif

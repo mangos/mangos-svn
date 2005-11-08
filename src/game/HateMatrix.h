@@ -30,7 +30,7 @@
 #include "ObjectAccessor.h"
 #endif
 
-
+#define assert(exp) ((void)0)
 
 // forward declaration
 class Unit;

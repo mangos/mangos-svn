@@ -34,9 +34,9 @@
 ////////////////////////////////////////////////////////////////////////
 inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
 {
-    uint16 VictimLvl = pVictim->GetUInt32Value(UNIT_FIELD_LEVEL);
-    uint16 AttackerLvl = pAttacker->GetUInt32Value(UNIT_FIELD_LEVEL);
-    float xp = (VictimLvl*5+45)*(1+0.05*(VictimLvl-AttackerLvl));
+    uint32/*uint16*/ VictimLvl = pVictim->GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint32/*uint16*/ AttackerLvl = pAttacker->GetUInt32Value(UNIT_FIELD_LEVEL);
+    double/*float*/ xp = (VictimLvl*5+45)*(1+0.05*(VictimLvl-AttackerLvl));
     if( ( xp < 0 ) || ((VictimLvl<(AttackerLvl * 0.8)) && (AttackerLvl > 5)) )
         xp = 0;
     else
@@ -103,7 +103,7 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
         max_damage=5;
 
     float diff = max_damage - min_damage + 1;
-    float dmg = rand()%(uint32)diff + (uint32)min_damage;
+    float dmg = float (rand()%(uint32)diff + (uint32)min_damage);
     return (uint32)dmg;
 }
 
