@@ -1510,6 +1510,33 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
+{
+    uint64 guid = m_session->GetPlayer()->GetSelection();
+    uint32 entry = 0, testvalue = 0;
+
+#ifndef ENABLE_GRID_SYSTEM
+    Unit* target = objmgr.GetObject<Creature>(m_session->GetPlayer()->GetSelection());
+#else
+    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+#endif
+
+    if(!target || !args)
+    {
+        return true;
+    }
+
+	m_session->GetPlayer( )->SetUInt32Value(PLAYER_FLAGS, (uint32)8);
+
+	testvalue = uint32(atoi((char*)args));
+
+	entry = target->GetUInt32Value( OBJECT_FIELD_ENTRY );
+
+	m_session->SendTestCreatureQueryOpcode( entry, guid, testvalue );
+
+    return true;
+}
+
 
 bool ChatHandler::HandleExploreCheatCommand(const char* args)
 {

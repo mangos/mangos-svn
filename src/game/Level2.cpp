@@ -723,7 +723,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
         return true;
     }
 
-    pCreature->SetUInt32Value(UNIT_NPC_FLAGS , npcFlags);
+    pCreature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
 
     pCreature->SaveToDB();
 

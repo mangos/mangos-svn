@@ -248,6 +248,10 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
     SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
+	// UQ1: Testing
+	//SetUInt32Value(PLAYER_FLAGS, 8);
+	SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
+
     Item *item;
     uint32 titem;
     uint8 titem_slot;
@@ -1570,6 +1574,9 @@ void Player::LoadFromDB( uint32 guid )
 #ifndef ENABLE_GRID_SYSTEM
     ZoneIDMap.SetZoneBitOn(m_zoneId);
 #endif
+	if( HasFlag(PLAYER_FLAGS, 8) )
+		SetUInt32Value(PLAYER_FLAGS, 0);
+
     if( HasFlag(PLAYER_FLAGS, 0x10) )
         m_deathState = DEAD;
 
@@ -3632,6 +3639,8 @@ void Player::UpdateReputation(void)
 		data << (uint32) itr->ReputationListID;
 		data << (uint32) itr->Standing;
 		GetSession()->SendPacket(&data);
+
+		Log::getSingleton( ).outDebug( "WORLD: Player::UpdateReputation called and completed OK!" );
 	}
 }
 

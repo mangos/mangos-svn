@@ -203,6 +203,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleExploreCheatCommand(const char* args);
         bool HandleEmoteCommand(const char* args);
         bool HandleNpcInfoCommand(const char* args);
+		bool HandleNpcInfoSetCommand(const char* args);
         bool HandleHoverCommand(const char* args);
         bool HandleLevelUpCommand(const char* args);
         bool HandleShowAreaCommand(const char* args);

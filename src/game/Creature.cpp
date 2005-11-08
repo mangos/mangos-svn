@@ -1368,7 +1368,6 @@ void Creature::LoadFromDB(uint32 guid)
     _LoadMovement();
 }
 
-
 void Creature::_LoadGoods()
 {
     // remove items from vendor
@@ -1376,7 +1375,7 @@ void Creature::_LoadGoods()
 
     // load his goods
     std::stringstream query;
-    query << "SELECT * FROM vendors WHERE vendorGuid=" << GetGUIDLow();
+    query << "SELECT * FROM vendors WHERE vendorGuid=" << /*GetNameID();*/GetGUIDLow();
 
     QueryResult *result = sDatabase.Query( query.str().c_str() );
     if(result)
@@ -1389,7 +1388,7 @@ void Creature::_LoadGoods()
             {
                 // this should never happen unless someone has been fucking with the dbs
                 // complain and break :P
-                Log::getSingleton( ).outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetGUIDLow(), getItemCount(), MAX_CREATURE_ITEMS );
+                Log::getSingleton( ).outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetNameID()/*GetGUIDLow()*/, getItemCount(), MAX_CREATURE_ITEMS );
                 break;
             }
 

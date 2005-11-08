@@ -106,6 +106,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "help",        0, &ChatHandler::HandleHelpCommand,          "",   NULL },
         { "info",        0, &ChatHandler::HandleInfoCommand,          "",   NULL },
         { "npcinfo",     3, &ChatHandler::HandleNpcInfoCommand,       "",   NULL },
+		{ "npcinfoset",  3, &ChatHandler::HandleNpcInfoSetCommand,    "",   NULL },
         { "item",        2, &ChatHandler::HandleItemCommand,          "",   NULL },
         { "itemrmv",     2, &ChatHandler::HandleItemRemoveCommand,    "",   NULL },
         { "itemmove",    2, &ChatHandler::HandleItemMoveCommand,      "",   NULL },
