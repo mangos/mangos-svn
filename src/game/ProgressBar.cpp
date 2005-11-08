@@ -32,26 +32,47 @@ barGoLink::barGoLink( int row_count )
   indic_len = 50; // size of the progress bar (50 chars)
   num_rec   = row_count;
   empty     = " ";
+#ifdef _WIN32 // UQ1: This *MAY* work in *nix too?? Dunno...
+  full      = "\xDB";
+#else //!_WIN32
   full      = "*";
+#endif //_WIN32
+#ifdef _WIN32
+  printf( "\xB3" );
+#else //!_WIN32
   printf( "[" );
+#endif //_WIN32
   for ( int i = 0; i < indic_len; i++ ) printf( empty );
-  printf( "] 100%\r[" );
+#ifdef _WIN32
+  printf( "\xB3 0%%\r\xB3" );
+#else //!_WIN32
+  printf( "] 0%%\r[" );
+#endif //_WIN32
 }
 
 void barGoLink::step( void )
 {
-  int i, n, t;
+  int i, n;//, t;
 
   if ( num_rec == 0 ) return;  
   rec_no++;
   n = rec_no * indic_len / num_rec;
   if ( n != rec_pos )
   {
+#ifdef _WIN32
+    printf( "\r\xB3" );
+#else //!_WIN32
     printf( "\r[" );
+#endif //_WIN32
     for ( i = 0; i < n; i++ ) printf( full );
     for ( ; i < indic_len; i++ ) printf( empty );
-    printf( "\r" );
-    for ( i = 0; i < 3000000; i++ ) t = 100*200; // generate a short delay
+	float percent = (((float)n/(float)indic_len)*100);
+#ifdef _WIN32
+    printf( "\xB3 %i%%  \r\xB3", (int)percent);
+#else //!_WIN32
+	printf( "] %i%%  \r[", (int)percent);
+#endif //_WIN32
+    //for ( i = 0; i < 3000000; i++ ) t = 100*200; // generate a short delay -- UQ1: Removed.. No point waiting longer just for display...
     rec_pos = n;
   }
 }
