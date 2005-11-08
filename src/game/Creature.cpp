@@ -25,7 +25,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Creature.h"
-#include "Quest.h"
+#include "QuestDef.h"
 #include "Player.h"
 #include "Opcodes.h"
 #include "Stats.h"
@@ -684,7 +684,7 @@ void Creature::Create (uint32 guidlow, const char* name, uint32 mapid, float x, 
 /// Quests
 uint32 Creature::getQuestStatus(Player *pPlayer)
 {
-    for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
+  /*  for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
     {
         uint32 quest_id = *i;
         uint32 status = pPlayer->getQuestStatus(quest_id);
@@ -703,7 +703,7 @@ uint32 Creature::getQuestStatus(Player *pPlayer)
         if (status != QUEST_STATUS_COMPLETE)
             return status;
     }
-
+*/
     return 0;
 }
 
@@ -725,41 +725,6 @@ uint32 Creature::getCurrentQuest(Player *pPlayer)
     }
 
     return 0;
-}
-
-
-char* Creature::getQuestTitle(uint32 quest_id)
-{
-    Quest *pQuest = objmgr.GetQuest(quest_id);
-    return (char*)pQuest->m_title.c_str();
-}
-
-
-char* Creature::getQuestDetails(uint32 quest_id)
-{
-    Quest *pQuest = objmgr.GetQuest(quest_id);
-    return (char*)pQuest->m_details.c_str();
-}
-
-
-char* Creature::getQuestObjectives(uint32 quest_id)
-{
-    Quest *pQuest = objmgr.GetQuest(quest_id);
-    return (char*)pQuest->m_objectives.c_str();
-}
-
-
-char* Creature::getQuestCompleteText(uint32 quest_id)
-{
-    Quest *pQuest = objmgr.GetQuest(quest_id);
-    return (char*)pQuest->m_completedText.c_str();
-}
-
-
-char* Creature::getQuestIncompleteText(uint32 quest_id)
-{
-    Quest *pQuest = objmgr.GetQuest(quest_id);
-    return (char*)pQuest->m_incompleteText.c_str();
 }
 
 

@@ -914,7 +914,7 @@ void ObjectMgr::LoadMailedItems()
 
 void ObjectMgr::LoadQuests()
 {
-    QueryResult *result = sDatabase.Query( "SELECT * FROM quests" );
+/*    QueryResult *result = sDatabase.Query( "SELECT * FROM quests" );
 
     if( !result )
         return;
@@ -994,6 +994,7 @@ void ObjectMgr::LoadQuests()
     while( result->NextRow() );
 
     delete result;
+	*/
 }
 
 #ifndef ENABLE_GRID_SYSTEM

@@ -29,7 +29,7 @@
 #include "DynamicObject.h"
 #include "GameObject.h"
 #include "Corpse.h"
-#include "Quest.h"
+#include "QuestDef.h"
 #include "Path.h"
 #include "ItemPrototype.h"
 #include "NPCHandler.h"
@@ -184,8 +184,8 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void AddQuest(Quest* quest)
         {
             ASSERT( quest );
-            ASSERT( mQuests.find(quest->m_questId) == mQuests.end() );
-            mQuests[quest->m_questId] = quest;
+            ASSERT( mQuests.find(quest->m_qId) == mQuests.end() );
+            mQuests[quest->m_qId] = quest;
         }
         Quest* GetQuest(uint32 id) const
         {

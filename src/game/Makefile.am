@@ -45,6 +45,7 @@ libgame_a_SOURCES = \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
 	GameObject.cpp \
+	GossipDef.cpp \
 	GridNotifiers.cpp \
 	GridStates.cpp \
 	Group.cpp \
@@ -71,6 +72,7 @@ libgame_a_SOURCES = \
 	Opcodes.cpp \
 	Player.cpp \
 	QueryHandler.cpp \
+	QuestDef.cpp \
 	QuestHandler.cpp \
 	RedZoneDistrict.cpp \
 	SkillHandler.cpp \
@@ -93,6 +95,7 @@ libgame_a_SOURCES = \
 	Creature.h \
 	DynamicObject.h \
 	GameObject.h \
+	GossipDef.h \
 	GridNotifiers.h \
 	Group.h \
 	Item.h \
@@ -111,7 +114,7 @@ libgame_a_SOURCES = \
 	Opcodes.h \
 	Path.h \
 	Player.h \
-	Quest.h \
+	QuestDef.h \
 	Spell.h \
 	SpellPrototype.h \
 	Stats.h \
@@ -127,5 +130,3 @@ libgame_a_SOURCES = \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h 
-
-

@@ -28,7 +28,7 @@
 #include "WorldSession.h"
 #include "UpdateMask.h"
 #include "Player.h"
-#include "Quest.h"
+#include "QuestDef.h"
 #include "Spell.h"
 #include "Stats.h"
 #include "UpdateData.h"
@@ -665,7 +665,7 @@ void Player::setQuestLogBits(UpdateMask *updateMask)
 
 void Player::KilledMonster(uint32 entry, const uint64 &guid)
 {
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+  /*  for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
         if (i->second.status == 3)
         {
@@ -712,6 +712,7 @@ void Player::KilledMonster(uint32 entry, const uint64 &guid)
             }                                     // end for each mobId
         }                                         // end if status == 3
     }                                             // end for each quest
+	*/
 }
 
 
@@ -721,7 +722,7 @@ void Player::KilledMonster(uint32 entry, const uint64 &guid)
 //======================================================
 bool Player::checkQuestStatus(uint32 quest_id)
 {
-    assert( mQuestStatus.find( quest_id ) != mQuestStatus.end( ) );
+ /*   assert( mQuestStatus.find( quest_id ) != mQuestStatus.end( ) );
     quest_status qs = mQuestStatus[quest_id];
     Quest *pQuest = objmgr.GetQuest(quest_id);
 
@@ -737,7 +738,7 @@ bool Player::checkQuestStatus(uint32 quest_id)
         // Quest complete!
         return true;
     }
-
+*/
     return false;
 }
 

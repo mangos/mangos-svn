@@ -26,7 +26,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Unit.h"
-#include "Quest.h"
+#include "QuestDef.h"
 #include "Player.h"
 #include "Creature.h"
 #include "Spell.h"
