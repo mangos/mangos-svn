@@ -2066,7 +2066,10 @@ uint32 Player::GetSkillByProto( ItemPrototype *proto )
 			}
 		}
 	}
+
+	return 0;
 }
+
 uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
 {
     uint32 type=proto->InventoryType;

@@ -55,7 +55,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
     Player *plTarget;
     WorldPacket data;
 
-    char buf[256];
+//    char buf[256];
     WorldPacket Msgdata;
 
     WorldPacket packet,packetR;

@@ -290,7 +290,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
     uint64 ID;
-    uint32 type;
+//    uint32 type;
 
     if( !GetPlayer()->isAlive() )
     {

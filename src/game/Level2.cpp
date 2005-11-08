@@ -78,7 +78,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         return true;
     }
 
-    for (int i = 0; i < strlen(args); i++)
+    for (uint8/*int*/ i = 0; i < strlen(args); i++)
     {
         if(!isalpha(args[i]) && args[i]!=' ')
         {
@@ -136,7 +136,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
         return true;
     }
 
-    for (int i = 0; i < strlen(args); i++)
+    for (uint8/*int*/ i = 0; i < strlen(args); i++)
     {
         if(!isalpha(args[i]) && args[i]!=' ')
         {
@@ -252,7 +252,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     if (display_id==0)
         return false;
 
-    for (int i = 0; i < strlen(pName); i++)
+    for (uint8/*int*/ i = 0; i < strlen(pName); i++)
     {
         if(!isalpha(pName[i]) && pName[i]!=' ')
         {

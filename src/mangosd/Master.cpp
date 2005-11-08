@@ -43,6 +43,9 @@
 createFileSingleton( Httpd );
 #endif
 
+// UQ1: warning C4305: 'argument' : truncation from 'double' to 'const float'
+#pragma warning(disable:4305)
+
 createFileSingleton( Master );
 
 volatile bool Master::m_stopEvent = false;

@@ -23,6 +23,20 @@
 
 #pragma warning(disable:4996)
 
+#ifndef __SHOW_STUPID_WARNINGS__
+// UQ1: Remove variable conversion warnings...
+#pragma warning(disable:4244)
+#pragma warning(disable:4267)
+// UQ1: warning C4800: forcing value to bool 'true' or 'false' (performance warning)
+#pragma warning(disable:4800)
+// UQ1: warning C4018: '<' : signed/unsigned mismatch
+#pragma warning(disable:4018)
+// UQ1: warning C4311: 'type cast' : pointer truncation
+#pragma warning(disable:4311)
+// UQ1: warning C4305: 'argument' : truncation from 'double' to 'const float'
+#pragma warning(disable:4305)
+#endif //__SHOW_STUPID_WARNINGS__
+
 // Only clients with this version will be allowed to view the realmlist.
 // Higher versions will be rejected, lower versions will be patched if possible.
 

@@ -434,7 +434,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     Log::getSingleton( ).outString( "WORLD: Recieved CMSG_GOSSIP_HELLO" );
     WorldPacket data;
     uint64 guid;
-    uint32 option;
+//    uint32 option;
     GossipNpc *pGossip;
 
     recv_data >> guid;
