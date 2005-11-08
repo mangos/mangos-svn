@@ -17,6 +17,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/* Windows nightmare again.. just for windows build
+* need files to be self contained (Creature.h is bad)
+*/
+#include "ByteBuffer.h"
 #include "TargetedMovementGenerator.h"
 #include "Errors.h"
 #include "Creature.h"

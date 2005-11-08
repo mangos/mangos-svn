@@ -618,6 +618,9 @@
 			Name="Object"
 			Filter="">
 			<File
+				RelativePath="..\..\src\game\AnimalRandomMovementGenerator.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Corpse.cpp">
 			</File>
 			<File
@@ -678,6 +681,12 @@
 				RelativePath="..\..\src\game\HateMatrix.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\IdleMovementGenerator.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\IdleMovementGenerator.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Item.cpp">
 			</File>
 			<File
@@ -691,6 +700,18 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\LootMgr.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\MotionMaster.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\MotionMaster.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\MovementGenerator.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\MovementGenerator.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\NullCreatureAI.cpp">
@@ -733,6 +754,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\TargetedMovementGenerator.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\TargetedMovementGenerator.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Unit.cpp">

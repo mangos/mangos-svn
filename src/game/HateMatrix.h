@@ -24,7 +24,7 @@
  */
 
 #include "Utilities/HashMap.h"
-#include "Errors.h"
+#include <cassert>
 
 
 // forward declaration
@@ -48,7 +48,7 @@ struct MANGOS_DLL_DECL HateMatrix
 	if( iter == i_hateValues.end() )
 	{
 	    std::pair<HateMatrixMapType::iterator, bool> p = i_hateValues.insert( HateMatrixMapType::value_type(unit, 0) );
-	    ASSERT(p.second);
+	    assert(p.second);
 	    iter = p.first;
 	}
 	
