@@ -66,8 +66,7 @@ public:
     virtual bool IsVisible(Player *) const = 0; 
 
     /// Updates the player attack
-    virtual void UpdateAI(const uint32 diff) = 0;
-
+    virtual void UpdateAI(const uint32 diff) = 0;   
 };
 
 

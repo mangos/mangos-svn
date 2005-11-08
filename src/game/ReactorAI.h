@@ -53,6 +53,10 @@ public:
     static int Permissible(const Creature *);
 
 private:
+    // internal methods
+    bool needToStop(void) const;
+    void stopAttack(void);
+
     Creature &i_creature;
     Unit *i_pVictim;
 };

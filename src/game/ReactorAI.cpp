@@ -20,6 +20,10 @@
 
 #include "ReactorAI.h"
 #include "Errors.h"
+#include "Creature.h"
+#include "Player.h"
+
+#define MAX_RANGE_OF_SPELLS (30.0f*30.0f)
 
 int
 ReactorAI::Permissible(const Creature *creature)
@@ -34,13 +38,19 @@ ReactorAI::MoveInLineOfSight(Creature *)
 }
 
 void 
-ReactorAI::AttackStart(Creature *) 
+ReactorAI::AttackStart(Creature *c) 
 {
+    if( i_pVictim == NULL )
+    {
+	i_pVictim = c;
+	i_creature.AI_AttackReaction(c, 0);
+    }
 }
 
 void 
-ReactorAI::AttackStop(Creature *) 
+ReactorAI::AttackStop(Creature *c) 
 {
+    /* if he stops.. I shall continue until he outrun me */
 }
 
 void 
@@ -66,8 +76,13 @@ ReactorAI::MoveInLineOfSight(Player *)
 }
 
 void 
-ReactorAI::AttackStart(Player *) 
+ReactorAI::AttackStart(Player *p) 
 {
+    if( i_pVictim != NULL )
+    {
+	i_pVictim = p;
+	i_creature.AI_AttackReaction(p, 0);
+    }
 }
 
 void 
@@ -92,6 +107,32 @@ ReactorAI::IsVisible(Player *pl) const
 }
 
 void
-ReactorAI::UpdateAI(const uint32 )
+ReactorAI::UpdateAI(const uint32 time_diff)
 {
+    /* this is where I decide what to do */
+    if( i_pVictim != NULL )
+    {
+	if( needToStop() )
+	    stopAttack();
+    }
+}
+
+bool
+ReactorAI::needToStop() const
+{
+    if( !i_pVictim->isAlive() )
+	return true;
+
+    float length_square = i_creature.GetDistanceSq(i_pVictim);
+    if( length_square > MAX_RANGE_OF_SPELLS )
+	return true;
+    return false;
+}
+
+void
+ReactorAI::stopAttack()
+{
+    if( i_pVictim )
+	;
+	// not exist yet i_creature.AI_StopAttack();
 }
