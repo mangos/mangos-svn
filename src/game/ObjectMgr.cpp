@@ -358,83 +358,67 @@ void ObjectMgr::LoadCreatureNames()
             cn->unknown3 = 0; 
             cn->unknown4 = 0; */
         
-            cn->Id = fields[0].GetUInt32();
-            cn->DisplayID = fields[1].GetUInt32();
-            cn->Name = fields[2].GetString();
+            cn->Id =				fields[0].GetUInt32();
+            cn->DisplayID =			fields[1].GetUInt32();
+            cn->Name =				fields[2].GetString();
             if (fields[3].GetString())
-                cn->SubName = fields[3].GetString();
+                cn->SubName =		fields[3].GetString();
             else
                 cn->SubName = "";
 
-            cn->maxhealth = fields[4].GetUInt32();
-            cn->maxmana = fields[5].GetUInt32();
-            cn->level = fields[6].GetUInt32();
-            cn->faction = fields[7].GetUInt32();
-            cn->flag = fields[7].GetUInt32();
-            cn->scale = fields[8].GetFloat();
-            cn->speed = fields[10].GetUInt32();
-            cn->rank = fields[11].GetUInt32();
-            cn->mindmg = fields[12].GetFloat();
-            cn->maxdmg = fields[13].GetFloat();
-            cn->baseattacktime = fields[14].GetUInt32();
-            cn->rangeattacktime = fields[15].GetUInt32();
-            cn->Type = fields[16].GetUInt32();
-            cn->mount = fields[17].GetUInt32();
-            cn->level_max = fields[18].GetUInt32();
-            cn->flags1 = fields[19].GetUInt32();
-            cn->size = fields[20].GetFloat();
-            cn->family = fields[11].GetUInt32();
-            cn->bounding_radius = fields[22].GetFloat();
-            cn->trainer_type = fields[23].GetUInt32();
-            cn->unknown1 = fields[24].GetUInt32();
-            cn->unknown2 = fields[25].GetUInt32();
-            cn->unknown3 = fields[26].GetUInt32();
-            cn->unknown4 = fields[27].GetUInt32();
-            cn->classNum = fields[28].GetUInt32();
-            cn->slot1model = fields[29].GetUInt32();
-            cn->slot1pos = fields[30].GetUInt32();
-            cn->slot2model = fields[31].GetUInt32();
-            cn->slot2pos = fields[32].GetUInt32();
-            cn->slot3model = fields[33].GetUInt32();
-            cn->slot3pos = fields[34].GetUInt32();
-            
-            
-/*
-  `modelid` int(11) default '0',
-  `name` varchar(100) NOT NULL default '0',
-  `subname` varchar(100) default NULL,
-  `maxhealth` int(5) default '0',
-  `maxmana` int(5) default '0',
-  `level` int(3) default '0',
-  `faction` int(4) default '0',
-  `flag` int(4) default '0',
-  `scale` float default '0',
-  `speed` float default '0',
-  `rank` int(1) default '0',
-  `mindmg` float default '0',
-  `maxdmg` float default '0',
-  `baseattacktime` int(4) default '0',
-  `rangeattacktime` int(4) default '0',
-  `type` int(2) default '0',
-  `mount` int(5) default '0',
-  `level_max` int(11) default '0',
-  `flags1` int(11) default '0',
-  `size` float default '0',
-  `family` int(11) default '0',
-  `bounding_radius` float default '0',
-  `trainer_type` int(11) default '0',
-  `unk1` int(11) default '0',
-  `unk2` int(11) default '0',
-  `unk3` int(11) default '0',
-  `unk4` int(11) default '0',
-  `class` int(11) unsigned default '0',
-  `slot1model` int(11) default NULL,
-  `slot1pos` int(11) default NULL,
-  `slot2model` int(11) default NULL,
-  `slot2pos` int(11) default NULL,
-  `slot3model` int(11) default NULL,
-  `slot3pos` int(11) default NULL,
-*/
+            cn->maxhealth =			fields[4].GetUInt32();
+            cn->maxmana =			fields[5].GetUInt32();
+            cn->level =				fields[6].GetUInt32();
+            cn->faction =			fields[7].GetUInt32();
+            cn->flag =				fields[8].GetUInt32();
+			//Log::getSingleton( ).outDebug( "(%s) flag is %u.", fields[2].GetString(), cn->flag);
+			if (fields[8].GetUInt32() == uint32(17)) 
+			{
+				//Log::getSingleton( ).outDebug( "FLAG CONVERT: NPC: %s (%u to %u).", fields[2].GetString(), fields[8].GetUInt32(), uint32(18) );
+				cn->flag = uint32(18);
+			}
+			if (fields[8].GetUInt32() == uint32(5)) 
+			{
+				//Log::getSingleton( ).outDebug( "FLAG CONVERT: NPC: %s (%u to %u).", fields[2].GetString(), fields[8].GetUInt32(), uint32(4) );
+				cn->flag = uint32(4);
+			}
+			if (fields[8].GetUInt32() == uint32(12)) 
+			{
+				//Log::getSingleton( ).outDebug( "FLAG CONVERT: NPC: %s (%u to %u).", fields[2].GetString(), fields[8].GetUInt32(), uint32(4) );
+				cn->flag = uint32(4);
+			}
+			if (fields[8].GetUInt32() == uint32(16389)) 
+			{
+				//Log::getSingleton( ).outDebug( "FLAG CONVERT: NPC: %s (%u to %u).", fields[2].GetString(), fields[8].GetUInt32(), uint32(4) );
+				cn->flag = uint32(4);
+			}
+
+            cn->scale =				fields[9].GetFloat();
+            cn->speed =				fields[10].GetUInt32();
+            cn->rank =				fields[11].GetUInt32();
+            cn->mindmg =			fields[12].GetFloat();
+            cn->maxdmg =			fields[13].GetFloat();
+            cn->baseattacktime =	fields[14].GetUInt32();
+            cn->rangeattacktime =	fields[15].GetUInt32();
+            cn->Type =				fields[16].GetUInt32();
+            cn->mount =				fields[17].GetUInt32();
+            cn->level_max =			fields[18].GetUInt32();
+            cn->flags1 =			fields[19].GetUInt32();
+            cn->size =				fields[20].GetFloat();
+            cn->family =			fields[21].GetUInt32();
+            cn->bounding_radius =	fields[22].GetFloat();
+            cn->trainer_type =		fields[23].GetUInt32();
+            cn->unknown1 =			fields[24].GetUInt32();
+            cn->unknown2 =			fields[25].GetUInt32();
+            cn->unknown3 =			fields[26].GetUInt32();
+            cn->unknown4 =			fields[27].GetUInt32();
+            cn->classNum =			fields[28].GetUInt32();
+            cn->slot1model =		fields[29].GetUInt32();
+            cn->slot1pos =			fields[30].GetUInt32();
+            cn->slot2model =		fields[31].GetUInt32();
+            cn->slot2pos =			fields[32].GetUInt32();
+            cn->slot3model =		fields[33].GetUInt32();
+            cn->slot3pos =			fields[34].GetUInt32();
 
             AddCreatureName( cn );
         } while( result->NextRow() );
@@ -825,6 +809,13 @@ void ObjectMgr::LoadTrainerSpells()
     if( !result )
         return;
 
+	int loop;
+
+	for (loop = 0; loop < 12; loop++)
+	{
+		default_trainer_guids[loop] = 0;
+	}
+
     Trainerspell *TrainSpell;
 
 /// get number of rows for trainers
@@ -862,13 +853,22 @@ void ObjectMgr::LoadTrainerSpells()
         TrainSpell->maxlvl = fields[21].GetUInt32();
         TrainSpell->charclass = fields[22].GetUInt32();
 
-		if (!default_trainer_guids[TrainSpell->charclass])
+		if ( default_trainer_guids[TrainSpell->charclass] == 0 
+			&& TrainSpell->skilline1 && TrainSpell->skilline2 && TrainSpell->skilline3 )
 			default_trainer_guids[TrainSpell->charclass] = TrainSpell->Id;
         
 		AddTrainerspell(TrainSpell);
     } while (result->NextRow());
     delete result;
 
+#ifdef _DEBUG
+	Log::getSingleton( ).outDebug( "\nSetting Default Trainer Lists." );
+
+	for (loop = 0; loop < 12; loop++)
+	{
+		Log::getSingleton( ).outDebug( "* Set default trainer type [%i] to GUID [%u]", loop, default_trainer_guids[loop] );
+	}
+#endif //_DEBUG
 }
 
 

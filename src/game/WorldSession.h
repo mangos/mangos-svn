@@ -74,6 +74,9 @@ class WorldSession
         void QueuePacket(WorldPacket& packet);
         bool Update(uint32 diff);
 
+		// UQ1: For debugging display of NPC info...
+		void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
+
     protected:
 
         /// Login screen opcodes (PlayerHandler.cpp):
