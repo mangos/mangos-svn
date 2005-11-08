@@ -1338,7 +1338,7 @@ void Player::SetPlayerPositionArray()
 
     m_nextThinkTime = time(NULL) + 3;
 
-    // UQ1: Update PlayerPositions Array...
+/*    // UQ1: Update PlayerPositions Array...
     std::stringstream ss;
     std::stringstream ss2;
     std::stringstream ss3;
@@ -1376,6 +1376,14 @@ void Player::SetPlayerPositionArray()
     ss6 << GetPositionZ();//m_positionZ;
     float z = (float)atof(ss6.str().c_str());
 //    Log::getSingleton( ).outDetail("z: %s->%f.", ss6.str().c_str(), z);
+*/
+
+	long long int guid = GetGUID();
+	long int mapId = GetMapId();
+	long int zoneId = GetZoneId();
+	float x = GetPositionX();
+	float y = GetPositionY();
+	float z = GetPositionZ();
 
     if (PlayerZones[guid] != zoneId || PlayerMaps[guid] != mapId)
     {

@@ -121,6 +121,11 @@ class Creature : public Unit
         virtual void Update( uint32 time );
 
         /// AI
+		time_t GetNextThink();
+		void SetEnabled();
+		void SetDisabled();
+		bool isDisabled();
+
         void AI_ToggleAI(bool useAI) { m_useAI = useAI; }
         void AI_Update();
         void AI_AttackReaction(Unit *pAttacker, uint32 damage_dealt);
@@ -277,6 +282,8 @@ class Creature : public Unit
 
         /// AI data
         bool m_useAI;
+
+		bool m_enabled;
 
         /// Movement
         uint32 m_currentWaypoint;

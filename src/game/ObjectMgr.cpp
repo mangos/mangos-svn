@@ -1442,7 +1442,7 @@ void ObjectMgr::LoadCorpses()
         pCorpse->SetZoneId(fields[5].GetUInt32());
         pCorpse->SetMapId(fields[6].GetUInt32());
         pCorpse->LoadValues( fields[7].GetString());;
-        Log::getSingleton( ).outError("AddObject at ObjectMgr.cpp line 940");
+        //Log::getSingleton( ).outError("AddObject at ObjectMgr.cpp line 940");
         AddObject(pCorpse);
     } while( result->NextRow() );
 
