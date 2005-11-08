@@ -92,6 +92,8 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 /// This function handles CMSG_TRAINER_LIST
 //////////////////////////////////////////////////////////////
+extern uint32 default_trainer_guids[12];
+
 void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -108,8 +110,14 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
         
     Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-    if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
-        unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
+
+	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
+	{// Use Defaults...
+		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
+	}
+//    if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
+//        unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
 
     cnt = 0;
     if(strainer)
@@ -220,8 +228,17 @@ void WorldSession::SendTrainerList( uint64 guid )
         
     Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-    if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
-        unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
+
+	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
+	{// Use Defaults...
+		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
+	}
+
+//    if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
+//	{
+//        unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+//	}
 
     cnt = 0;
     if(strainer)
@@ -476,7 +493,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
             //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
             data << guid;
-            HandleListInventoryOpcode( data );
+            SendListInventory( guid );
             return;
         }
         //else if (sSkillStore.GetNumRows() > 0) 
@@ -486,7 +503,8 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
             //Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
             data << guid;
-            HandleTrainerListOpcode( data );
+            //HandleTrainerListOpcode( data );
+			SendTrainerList(guid);
             return;
         }
         else
@@ -576,21 +594,23 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
             return;
         }
         else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
-        {// Has items, so they are a vendor...
+        {// If they have any items to sell, then default to vendor...
             pGossip = objmgr.DefaultVendorGossip();
             //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
             data << guid;
-            HandleListInventoryOpcode( data );
+            SendListInventory( guid );
             return;
         }
+        //else if (sSkillStore.GetNumRows() > 0) 
         else if (strainer)
         {// No items, but has skills to teach.. Send trainer list...
             pGossip = objmgr.DefaultVendorGossip();
             //Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
             data << guid;
-            HandleTrainerListOpcode( data );
+            //HandleTrainerListOpcode( data );
+			SendTrainerList(guid);
             return;
         }
         else
