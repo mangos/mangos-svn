@@ -59,7 +59,6 @@ libgame_a_SOURCES = \
 	Mail.cpp \
 	Map.cpp \
 	MapManager.cpp \
-	MapMgr.cpp \
 	MiscHandler.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
@@ -86,7 +85,6 @@ libgame_a_SOURCES = \
 	WorldSession.cpp \
 	WorldSocket.cpp \
 	WorldSocketMgr.cpp \
-	ZoneMapper.cpp \
 	Affect.h \
 	Channel.h \
 	ChannelMgr.h \
@@ -101,7 +99,6 @@ libgame_a_SOURCES = \
 	ItemPrototype.h \
 	LootMgr.h \
 	Mail.h \
-	MapCell.h \
 	Map.h \
 	MapMgr.h \
 	NameTables.h \
@@ -129,6 +126,6 @@ libgame_a_SOURCES = \
 	World.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h \
-	ZoneMapper.h
+	WorldSocketMgr.h 
+
 

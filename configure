@@ -12403,16 +12403,14 @@ echo "${ECHO_T}$MANGOSD_ENABLE_HTTPD" >&6
 # check for grid system enable
 echo "$as_me:$LINENO: checking whether grid system is enabled" >&5
 echo $ECHO_N "checking whether grid system is enabled... $ECHO_C" >&6
-MANGOSD_ENABLE_GRID=no
+MANGOSD_ENABLE_GRID=yes
 # Check whether --enable-grid-system or --disable-grid-system was given.
 if test "${enable_grid_system+set}" = set; then
   enableval="$enable_grid_system"
 
-    if test "$enableval" = "yes" ; then
-	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
-	CXXFLAGS="-DENABLE_GRID_SYSTEM $CXXFLAGS"
-	MANGOSD_ENABLE_GRID=yes
-    elif test "$withval" != "no" ; then
+    if test "$enableval" = "no" ; then
+        MANGOSD_ENABLE_GRID=no
+    elif test "$withval" != "yes" ; then
 	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5
 echo "$as_me: error: Please choose yes or no" >&2;}
    { (exit 1); exit 1; }; }
@@ -12421,6 +12419,11 @@ echo "$as_me: error: Please choose yes or no" >&2;}
 fi;
 echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_GRID" >&5
 echo "${ECHO_T}$MANGOSD_ENABLE_GRID" >&6
+
+if test "$MANGOSD_ENABLE_GRID" != "no"; then
+	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
+	CXXFLAGS="-DENABLE_GRID_SYSTEM $CXXFLAGS"
+fi
 
 
 # check for 1.8.x protocol support
