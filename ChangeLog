@@ -29,7 +29,7 @@ MaNGOS 0.0.2  (Oct 31, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/mi
  * Added support for building with 1.7.x protocol. Use the 1.7.x build configurations in Visual Studio or --enable-17x switch on Linux.
  * Added support for internal httpd server added for those not running Apache. --enable-httpd-integrated will add it. Windows solution available.
  * Added support for displaying progress bars for daemon startup loading.
- * Added support for on demand Grid Loading/Unloading system. Disabled by default. Use --enable-grid-system to enable.
+ * Added support for on demand Grid Loading/Unloading system, which is disabled by default.
  * Added core application framework.
  * Added command line switch -c for pointing to a custom configuration file. By default file from _MANGOSD_CONFIG (defined in src/mangosd/Master.h.in) will be used.
  * Fixed ZThread build process.
