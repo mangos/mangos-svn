@@ -23,6 +23,7 @@ SUBDIRS = doc dep src sql
 # Win32 project workspace for Visual Studio .NET 2003
 EXTRA_DIST += \
 	win/mangosdVC71.sln \
+	win/VC71/framework.vcproj \
 	win/VC71/game.vcproj \
 	win/VC71/httpd.vcproj \
 	win/VC71/mangosd.vcproj \
@@ -35,6 +36,7 @@ EXTRA_DIST += \
 # Win32 project workspace for Visual Studio .NET 2005
 EXTRA_DIST += \
 	win/mangosdVC80.sln \
+	win/VC80/framework.vcproj \
 	win/VC80/game.vcproj \
 	win/VC80/httpd.vcproj \
 	win/VC80/mangosd.vcproj \
@@ -43,6 +45,24 @@ EXTRA_DIST += \
 	win/VC80/shared.vcproj \
 	win/VC80/zlib.vcproj \
 	win/VC80/zthread.vcproj
+
+# Win32 project workspace for Visual Studio .NET 2003 and Intel Compiler
+EXTRA_DIST += \
+	win_intel/mangosdVC71.sln \
+	win_intel/VC71/framework.vcproj \
+	win_intel/VC71/game.icproj \
+	win_intel/VC71/game.vcproj \
+	win_intel/VC71/httpd.vcproj \
+	win_intel/VC71/mangosd.icproj \
+	win_intel/VC71/mangosd.vcproj \
+	win_intel/VC71/realmlist.icproj \
+	win_intel/VC71/realmlist.vcproj \
+	win_intel/VC71/shared.icproj \
+	win_intel/VC71/shared.vcproj \
+	win_intel/VC71/zlib.icproj \
+	win_intel/VC71/zlib.vcproj \
+	win_intel/VC71/zthread.icproj \
+	win_intel/VC71/zthread.vcproj
 
 # MySQL headers
 EXTRA_DIST += \
