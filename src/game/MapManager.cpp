@@ -42,10 +42,10 @@ MapManager::~MapManager()
     delete iter->second;   
 
     std::stringstream ss;
-    ss << "DELETE from creatures_grid";
+    ss << "TRUNCATE table creatures_grid";
     sDatabase.Execute( ss.str().c_str() );
     ss.str("");
-    ss << "DELETE from gameobjects_grid";
+    ss << "TRUNCATE table gameobjects_grid";
     sDatabase.Execute( ss.str().c_str() );
 }
 
