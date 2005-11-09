@@ -1,6 +1,5 @@
 /* GossipDef.h
  *
- * Copyright (C) 2004 Wow Daemon
  * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,8 +29,8 @@
  */
 struct GossipMenuItem {
 	uint8		m_gIcon;
-	bool        m_gCoded;
-	char*       m_gMessage;
+	bool		m_gCoded;
+	char*		m_gMessage;
 };
 
 /*
@@ -43,7 +42,7 @@ struct QuestMenuItem {
 	uint32		m_qId;
 	uint8		m_qIcon;
 	bool		m_qAvailable;
-	char*       m_qTitle;
+	char*		m_qTitle;
 };
 
 /*
@@ -78,6 +77,42 @@ public:
 protected:
 	int m_qItemsCount;
 	QuestMenuItem m_qItems[GOSSIP_MAX_MENU_ITEMS];
+};
+
+/*
+ * Basic Class for PlayerMenu
+ *  -> Will contain all needed methods related to NPC to Player relations.
+ */
+class PlayerMenu
+{
+public:
+
+	//
+	// Basic methods, contructors and destructors
+	//
+
+	PlayerMenu()
+	{
+		pGossipMenu = new GossipMenu();
+		pQuestMenu  = new QuestMenu();
+	}
+
+	~PlayerMenu()
+	{
+		delete pGossipMenu;
+		delete pQuestMenu;
+	}
+
+	GossipMenu* GetGossipMenu() { return pGossipMenu; }
+	QuestMenu* GetQuestMenu() { return pQuestMenu; }
+
+	//
+	// Player communication methods
+	// TODO: Needs implementation
+
+protected:
+	GossipMenu* pGossipMenu;
+	QuestMenu* pQuestMenu;
 };
 
 #endif

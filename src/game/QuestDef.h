@@ -31,6 +31,8 @@
 #include <string>
 
 #define QUEST_OBJECTIVES_COUNT 4
+#define QUEST_REWARD_CHOICES_COUNT 6
+#define QUEST_REWARDS_COUNT 4
 #define QUEST_DEPLINK_COUNT 10
 
 enum __QuestStatus
@@ -140,12 +142,12 @@ public:
 	 */
 
     uint16 m_qRewChoicesCount;
-    uint32 m_qRewChoicesItemId[6];
-    uint32 m_qRewChoicesItemCount[6];
+    uint32 m_qRewChoicesItemId[ QUEST_REWARD_CHOICES_COUNT ];
+    uint32 m_qRewChoicesItemCount[ QUEST_REWARD_CHOICES_COUNT ];
 
     uint16 m_qRewCount;
-    uint32 m_qRewCountItemId[4];
-    uint32 m_qRewCountItemCount[4];
+    uint32 m_qRewItemId[ QUEST_REWARDS_COUNT ];
+    uint32 m_qRewItemCount[ QUEST_REWARDS_COUNT ];
 
     uint32 m_qRewMoney;
 	uint32 m_qRewSpell;
@@ -168,6 +170,18 @@ public:
 	// Returns the amount of XP a player _Player would
 	// get by completing this quest.
 	uint32 XPValue                 (Player* _Player);
+
+	//-----------------------------------------------
+	// Returns the number of Kill Objectives
+	uint32 GetKillObjectivesCount();
+
+	//-----------------------------------------------
+	// Returns the number of Kill Objectives
+	uint32 GetDeliverObjectivesCount();
+
+	//------------------------------------------------
+	// Send the Quest's details to _Player from senderGUID
+	void Quest::SendDetails(Player* _Player, uint64 SenderGUID, bool ActivateAccept);
 };
 
 
