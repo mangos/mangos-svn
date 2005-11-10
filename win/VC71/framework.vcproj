@@ -508,6 +508,9 @@
 				RelativePath="..\..\src\framework\Utilities\ByteConverter.h">
 			</File>
 			<File
+				RelativePath="..\..\src\framework\Utilities\HashMap.h">
+			</File>
+			<File
 				RelativePath="..\..\src\framework\Utilities\Reference.cpp">
 			</File>
 			<File

@@ -39,6 +39,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "framework", "VC71\framework
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "httpd", "VC71\httpd.vcproj", "{B9AA9651-0B57-4E45-B14F-834D807063D8}"
 	ProjectSection(ProjectDependencies) = postProject
+		{262199E8-EEDF-4700-A1D1-E9CC901CF480} = {262199E8-EEDF-4700-A1D1-E9CC901CF480}
 	EndProjectSection
 EndProject
 Global

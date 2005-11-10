@@ -286,7 +286,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\framework,..\..\src\game"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
