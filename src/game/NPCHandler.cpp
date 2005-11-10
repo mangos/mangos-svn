@@ -464,9 +464,14 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
 
-    pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
+	if (!unit)
+	{
+		return;
+	}
+
+    pGossip = objmgr.GetGossipByGuid(/*unit->GetNameID()*/GUID_LOPART(guid));
     
-    if (!pGossip)
+/*    if (!pGossip)
         pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
     if (!pGossip)
@@ -474,15 +479,16 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
     if (!pGossip)
         pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
+*/
 
 	CreatureInfo *ci = objmgr.GetCreatureName(guid);
 	
 	if (!ci)
-		ci = objmgr.GetCreatureName(GUID_LOPART(guid));
-
-	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID());
+		ci = objmgr.GetCreatureName(guid/*GUID_LOPART(guid)*//*unit->GetNameID()*/);
 	
-	if (!strainer)
+	Trainerspell *strainer = objmgr.GetTrainerspell(/*ci->Id*/unit->GetNameID());
+	
+/*	if (!strainer)
 		strainer = objmgr.GetTrainerspell(ci->DisplayID);
 
 	if (!strainer)
@@ -492,7 +498,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 		strainer = objmgr.GetTrainerspell(unit->GetGUID());
 
 	if (!strainer)
-		strainer = objmgr.GetTrainerspell(guid);
+		strainer = objmgr.GetTrainerspell(guid);*/
 
 	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
 	{// Use Defaults...
@@ -619,7 +625,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     GossipNpc *pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
-    if (!pGossip)
+/*    if (!pGossip)
         pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 
     if (!pGossip)
@@ -627,6 +633,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     if (!pGossip)
         pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
+*/
 
 //#ifdef __DISABLED__
     if (!pGossip)

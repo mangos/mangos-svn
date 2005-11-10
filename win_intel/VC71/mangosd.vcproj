@@ -277,7 +277,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd,..\..\src\framework"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,_DEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
@@ -350,9 +350,81 @@
 				WholeProgramOptimization="TRUE"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="TRUE"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\framework"
+				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
+				StringPooling="TRUE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
+				PrecompiledHeaderFile=".\Release/mangosd.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
+				CompileAs="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalOptions="/MACHINE:I386"
+				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				OutputFile=".\..\..\bin\release\mangosd.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="TRUE"
+				AdditionalLibraryDirectories="..\..\dep\lib\release"
+				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
+				SubSystem="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Release - No Grid|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			CharacterSet="2"
+			WholeProgramOptimization="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="2"
+				GlobalOptimizations="FALSE"
+				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				EnableFiberSafeOptimizations="TRUE"
+				WholeProgramOptimization="FALSE"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
 				StringPooling="TRUE"
+				MinimalRebuild="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
@@ -483,6 +555,14 @@
 			</FileConfiguration>
 			<FileConfiguration
 				Name="1.8.x Release|Win32">
+				<Tool
+					Name="VCCustomBuildTool"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h
+"
+					Outputs="Master.h"/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Release - No Grid|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h

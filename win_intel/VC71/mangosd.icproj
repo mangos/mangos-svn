@@ -275,7 +275,7 @@
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd,..\..\src\framework"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,_DEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
 				IgnoreStandardIncludePath="0"
 				BasicRuntimeChecks="3"
@@ -348,9 +348,85 @@
 				EnableFiberSafeOptimizations="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="1"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\framework"
+				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
+				StringPooling="1"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="1"
+				RuntimeTypeInfo="1"
+				PrecompiledHeaderFile=".\Release/mangosd.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
+				CompileAs="0"
+				OpenMP="1"
+				UseProcExt="4"
+				RequireProcExt="4"
+				Parallelization="1"
+				C99Support="1"/>
+			<Tool 
+				Name="LinkerTool"
+				DelayImpLib=""
+				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				OutputFile=".\..\..\bin\release\mangosd.exe"
+				LinkIncremental="1"
+				SuppressStartupBanner="1"
+				AdditionalLibraryDirectories="..\..\dep\lib\release"
+				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
+				SubSystem="1"
+				AdditionalOptions="/MACHINE:I386"/>
+			<Tool 
+				Name="LibrarianTool"/>
+			<Tool 
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool 
+				Name="MidlCmplrTool"
+				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
+			<Tool 
+				Name="BscMakeTool"/>
+			<Tool 
+				Name="PreBuildEventTool"/>
+			<Tool 
+				Name="PreLinkEventTool"/>
+			<Tool 
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
+		</Configuration>
+		<Configuration 
+			Name="Release - No Grid|Win32">
+			<Tool 
+				Name="GeneralTool"
+				OutputDirectory="$(ConfigurationName)"
+				IntermediateDirectory="$(ConfigurationName)"
+				ConfigurationType="1"
+				UseOfMFC="0"
+				ATLMinimizesCRunTimeLibraryUsage="0"
+				CharacterSet="2"
+				WholeProgramOptimization="0"/>
+			<Tool 
+				Name="DebugTool"/>
+			<Tool 
+				Name="CppCmplrTool"
+				Optimization="1000"
+				GlobalOptimizations="0"
+				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="1"
+				FavorSizeOrSpeed="1"
+				EnableFiberSafeOptimizations="1"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
 				StringPooling="1"
+				MinimalRebuild="1"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="1"
 				RuntimeTypeInfo="1"
@@ -466,6 +542,14 @@
 			</FileConfiguration>
 			<FileConfiguration 
 				Name="1.8.x Release|Win32">
+				<Tool 
+					Name="CustomTool"
+					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h
+"
+					Outputs="Master.h"/>
+			</FileConfiguration>
+			<FileConfiguration 
+				Name="Release - No Grid|Win32">
 				<Tool 
 					Name="CustomTool"
 					CommandLine="copy ..\..\src\mangosd\Master.h.in ..\..\src\mangosd\Master.h
