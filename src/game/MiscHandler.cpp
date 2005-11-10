@@ -1173,17 +1173,16 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             data << uint32(0);
 
             SendPacket(&data);
-#ifndef ENABLE_GRID_SYSTEM
-            GetPlayer()->RemoveFromMap();
-#else
-            MapManager::Instance().GetMap(GetPlayer()->GetMapId())->RemoveFromMap(GetPlayer());
-#endif
+            MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Remove(GetPlayer(), false);
+
             data.Initialize(SMSG_NEW_WORLD);
             data << at->mapId << at->X << at->Y << at->Z << 0.0f;
             SendPacket( &data );
 
             GetPlayer()->SetMapId(at->mapId);
-            GetPlayer()->SetPosition(at->X, at->Y, at->Z, 0.0f);
+            GetPlayer()->Relocate(at->X, at->Y, at->Z, 0.0f);
+	    // now he enters a new world
+            MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
         }
 
         delete at;

@@ -27,22 +27,11 @@
 
 #include "Platform/Define.h"
 #include "Policies/ThreadingModel.h"
-#include "ObjectGridLoader.h"
 #include "zthread/Lockable.h"
 #include "zthread/Mutex.h"
 #include "zthread/FairReadWriteLock.h"
-
-#define MAX_NUMBER_OF_GRIDS      64
-
-// the size of grids is
-#define SIZE_OF_GRIDS            533.33333
-#define CENTER_GRID_ID           32
-
-// this offset is computed base on SIZE_OF_GRIDS/2
-#define CENTER_GRID_OFFSET      266.66666
-
-// minimum time to delay is 60 seconds
-#define MIN_GRID_DELAY          60*1000
+#include "GridDefines.h"
+#include "Cell.h"
 
 // foward declaration
 namespace ZThread
@@ -50,6 +39,7 @@ namespace ZThread
     class Lockable;
     class ReadWriteLock;
 }
+
 
 typedef ZThread::FairReadWriteLock GridRWLock;
 
@@ -70,7 +60,7 @@ struct WGuard
 
 typedef RGuard<GridRWLock, ZThread::Lockable> GridReadGuard;
 typedef WGuard<GridRWLock, ZThread::Lockable> GridWriteGuard;
-
+typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
 
 struct GridInfo
 {
@@ -80,23 +70,6 @@ struct GridInfo
 };
 
 
-struct MANGOS_DLL_DECL GridPair
-{
-    GridPair(uint32 x=0, uint32 y=0) : x_coord(x), y_coord(y) {}
-    GridPair(const GridPair &obj) : x_coord(obj.x_coord), y_coord(obj.y_coord) {}
-    bool operator==(const GridPair &obj) const { return (obj.x_coord == x_coord && obj.y_coord == y_coord); }
-    bool operator!=(const GridPair &obj) const { return !operator==(obj); }
-    GridPair& operator=(const GridPair &obj) 
-    {
-    this->~GridPair();
-    new (this) GridPair(obj);
-    return *this;
-    }
-
-    uint32 x_coord;
-    uint32 y_coord;
-};
-
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {    
 public:
@@ -104,26 +77,11 @@ public:
     Map(uint32 id, time_t);
 
     void Add(Player *);
-    void Add(Creature *);
-    void Add(GameObject *);
-    void Add(DynamicObject *);
-    void Add(Corpse *);
-
     void Remove(Player *, bool);
-    void Remove(Creature *, bool);
-    void Remove(GameObject *, bool);
-    void Remove(DynamicObject *, bool);
-    void Remove(Corpse *, bool);
+    template<class T> void Add(T *);
+    template<class T> void Remove(T *, bool);
 
-    void RemoveFromMap(Player *);
-    void RemoveFromMap(Creature *obj) { Remove(obj, false); }
-    void RemoveFromMap(GameObject *obj) { Remove(obj, false); }
-    void RemoveFromMap(DynamicObject *obj) { Remove(obj, false); }
-    void RemoveFromMap(Corpse *obj) { Remove(obj, false); }
-
-    void Update(const uint32&);
-    
-    GridPair CalculateGrid(const float &x, const float &y) const;
+    void Update(const uint32&);    
     uint64 CalculateGridMask(const uint32 &y) const;
 
     /** MessageBoardcast is a player sending messages to all near by
@@ -142,42 +100,42 @@ public:
     /** Relocation of an object means an object moved such as
      * creatures running after you
      */
-    template<class T> void ObjectRelocation(T *obj, const float &x, const float &y, const float &, const float &);
+    void CreatureRelocation(Creature *creature, const float &x, const float &y, const float &, const float &);
+
+    /** Visit is a visitor visits a particular cell indicated my his cell mask
+     */
+    template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
     /** Sets the timer interval
      */
     void SetTimer(uint32 t) 
     { 
-    i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
+	i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
     }
 
     inline bool IsActiveGrid(Object *obj) const
     {
-    GridPair p = CalculateGrid(obj->GetPositionX(), obj->GetPositionY());
-    return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
+	GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
+	return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
     }
 
     /// Unloads the given grid
     bool UnloadGrid(const uint32 &x, const uint32 &y);
 
-    /// Signals a red zone alert
-    void ZoneAlert(Player &, const GridPair &, const uint8 &mask);
-
     void ResetGridExpiry(GridInfo &info) const
     {
-    info.i_timer.Reset(i_gridExpiry);
+	info.i_timer.Reset(i_gridExpiry);
     }
 
     time_t GetGridExpiry(void) const { return i_gridExpiry; }
     uint32 GetId(void) const { return i_id; }
 
-
     static void InitStateMachine(void);
 
 private:
     bool loaded(const GridPair &) const;
-    void EnsurePlayerInGrid(const GridPair&, Player*, bool add_player);
-    void NotifyPlayerInRange(const GridPair &, Player *);
+    void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
+    void NotifyPlayerVisibility(const Cell &, const CellPair &, Player *);
     uint64  EnsureGridCreated(const GridPair &);
 
     template<class T> void AddType(T *obj);
@@ -193,23 +151,11 @@ private:
     typedef GridReadGuard ReadGuard;
     typedef GridWriteGuard WriteGuard;
 
-    GridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+    NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     time_t i_gridExpiry;
 };
 
-inline
-GridPair
-Map::CalculateGrid(const float &x, const float &y) const
-{
-    float x_offset = (x - (float)CENTER_GRID_OFFSET)/(float)SIZE_OF_GRIDS;
-    float y_offset = (y - (float)CENTER_GRID_OFFSET)/(float)SIZE_OF_GRIDS;
-
-    // avoid round off errors
-    int x_val = int(x_offset+CENTER_GRID_ID + 0.5);
-    int y_val = int(y_offset+CENTER_GRID_ID + 0.5); 
-    return GridPair(x_val, y_val);
-}
 
 inline
 uint64
@@ -221,4 +167,18 @@ Map::CalculateGridMask(const uint32 &y) const
 }
 
 
+template<class LOCK_TYPE, class T, class CONTAINER> 
+inline void 
+Map::Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor)
+{
+    const uint32 x = cell->GridX();
+    const uint32 y = cell->GridY();
+    const uint32 cell_x = cell->CellX();
+    const uint32 cell_y = cell->CellY();
+    EnsureGridLoadedForPlayer(cell, NULL, false);
+    LOCK_TYPE guard(i_info[x][y]->i_lock);
+    i_grids[x][y]->Visit(cell_x, cell_y, visitor);
+}
+
 #endif
+

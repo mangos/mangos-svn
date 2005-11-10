@@ -22,16 +22,9 @@
 
 #include "Utilities/TypeList.h"
 #include "Platform/Define.h"
-#include "GameSystem/Grid.h"
 #include "GameSystem/GridLoader.h"
-#include "Player.h"
-#include "GameObject.h"
-#include "Creature.h"
-#include "DynamicObject.h"
-#include "Corpse.h"
-
-
-typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllObjectTypes;
+#include "GridDefines.h"
+#include "Cell.h"
 
 /*
  * @class ObjectGridLoader class implements a visitor pattern for the ContainerMapList
@@ -39,12 +32,10 @@ typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllObjectType
  * which is in the grid.
  */
 
-typedef Grid<Player, AllObjectTypes> GridType;
-
 class MANGOS_DLL_DECL ObjectGridLoader
 {
 public:
-    ObjectGridLoader(GridType &grid, Player &pl, uint32 id) : i_grid(grid), i_player(pl), i_mapId(id) {}
+    ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell) : i_grid(grid), i_mapId(id), i_cell(cell) {}
 
     void Load(GridType &grid);
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
@@ -59,10 +50,30 @@ public:
     /* we don't load in dynamic objects.. we add it in dynamically */
     }
 
+    void LoadN(void)
+    {
+	i_gameObjects = 0; i_creatures = 0;
+	i_cell.data.Part.cell_y = 0;
+	for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
+	{
+	    i_cell.data.Part.cell_x = x;
+	    for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
+	    {
+		i_cell.data.Part.cell_y = y;
+		GridLoader<Player, AllObjectTypes> loader;
+		loader.Load(i_grid(x, y), *this);
+	    }
+	}
+
+	sLog.outDebug("%d GameObjects and %d Creatures loaded for grid %d on map %d", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
+    }
+
 private:
-    GridType &i_grid;
-    Player &i_player;
+    Cell i_cell;
+    NGridType &i_grid;
     uint32 i_mapId;
+    uint32 i_gameObjects;
+    uint32 i_creatures;
 };
 
 /*
@@ -72,19 +83,26 @@ private:
 class MANGOS_DLL_DECL ObjectGridUnloader
 {
 public:
-    ObjectGridUnloader(GridType &grid) : i_grid(grid) {}
+    ObjectGridUnloader(NGridType &grid) : i_grid(grid) {}
+
+    void UnloadN(void)
+    {
+	for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
+	{
+	    for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
+	    {
+		GridLoader<Player, AllObjectTypes> loader;
+		loader.Unload(i_grid(x, y), *this);
+	    }
+	}
+    }
 
     void Unload(GridType &grid);
     template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
 private:
-    GridType &i_grid;
+    NGridType &i_grid;
 };
 
 typedef GridLoader<Player, AllObjectTypes> GridLoaderType;
-typedef std::map<OBJECT_HANDLE, Player* > PlayerMapType;
-typedef std::map<OBJECT_HANDLE, Creature* > CreatureMapType;
-typedef std::map<OBJECT_HANDLE, GameObject* > GameObjectMapType;
-typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
-typedef std::map<OBJECT_HANDLE, Corpse* > CorpseMapType;
 
 #endif

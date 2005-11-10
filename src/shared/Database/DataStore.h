@@ -73,7 +73,8 @@ class IndexedDataStore : public DataStore<T>
         virtual T *LookupEntry(const uint32 row)
         {
             if(!DataStore<T>::d.IsLoaded()) return NULL;
-            return (T*)DataStore<T>::d.GetRow(indexMap[row]);
+	    std::map<uint32, uint32>::iterator iter= indexMap.find(row);	    
+            return (iter == indexMap.end() ? NULL : (T*)DataStore<T>::d.GetRow(indexMap[row]));
         }
 };
 

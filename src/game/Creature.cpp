@@ -30,13 +30,10 @@
 #include "Opcodes.h"
 #include "Stats.h"
 #include "Log.h"
-#include "ZoneMapper.h"
 #include "LootMgr.h"
 #include "Chat.h" // UQ1: for string formatting...
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 Creature::Creature() : Unit()
 {
@@ -106,18 +103,11 @@ void Creature::UpdateMobMovement( uint32 p_time)
             if(m_timeMoved == m_timeToMove)
             {
                 m_creatureState = STOPPED;
+		
                 // wait before next move
                 m_moveTimer = rand() % (m_moveRun ? 5000 : 10000);
-
-#ifndef ENABLE_GRID_SYSTEM
-                m_positionX = m_destinationX;
-                m_positionY = m_destinationY;
-                m_positionZ = m_destinationZ;
-#else
                 assert( m_destinationX != 0 && m_destinationZ != 0 && m_destinationY != 0);
-                MapManager::Instance().GetMap(m_mapId)->ObjectRelocation<Creature>(this, m_destinationX, m_destinationY, m_destinationZ, m_orientation);        
-#endif
-
+                MapManager::Instance().GetMap(m_mapId)->CreatureRelocation(this, m_destinationX, m_destinationY, m_destinationZ, m_orientation);        
                 if(((uint32)m_positionX==respawn_cord[0])&&
                     ((uint32)m_positionY==respawn_cord[1])&&
                     ((uint32)m_positionZ==respawn_cord[2]))
@@ -127,36 +117,6 @@ void Creature::UpdateMobMovement( uint32 p_time)
                 m_timeMoved = 0;
                 m_timeToMove = 0;
             }
-            else
-            {
-#ifndef ENABLE_GRID_SYSTEM
-                float q = (float)m_timeMoved / (float)m_timeToMove;
-                m_positionX += (m_destinationX - m_positionX) * q;
-                m_positionY += (m_destinationY - m_positionY) * q;
-                m_positionZ += (m_destinationZ - m_positionZ) * q;
-
-                m_timeToMove -= m_timeMoved;
-                m_timeMoved = 0;
-
-                AI_SendMoveToPacket(m_destinationX, m_destinationY, m_destinationZ, m_timeToMove, m_moveSpeed == 7.0*0.001);
-
-                m_moveTimer = (UNIT_MOVEMENT_INTERPOLATE_INTERVAL < m_timeToMove) ? UNIT_MOVEMENT_INTERPOLATE_INTERVAL : m_timeToMove;
-#else
-                // Movement of creates should be updated first before sending the packet.. in case
-                // creature travel out of the grid.. for instances, chasing a player around to different
-                // location
-                float q = (float)m_timeMoved / (float)m_timeToMove;
-                float x = m_positionX + ((m_destinationX - m_positionX) * q);
-                float y = m_positionY + ((m_destinationY - m_positionY) * q);
-                float z = m_positionZ + ((m_destinationZ - m_positionZ) * q);
-
-                m_timeToMove -= m_timeMoved;
-                m_timeMoved = 0;
-
-                AI_SendMoveToPacket(x, y, z, m_timeToMove, m_moveSpeed == 7.0*0.001);
-                m_moveTimer = (UNIT_MOVEMENT_INTERPOLATE_INTERVAL < m_timeToMove) ? UNIT_MOVEMENT_INTERPOLATE_INTERVAL : m_timeToMove;
-#endif
-            }
         }                                           // still moving
     }
     // creature is stoped
@@ -165,7 +125,7 @@ void Creature::UpdateMobMovement( uint32 p_time)
         if(sWorld.getAllowMovement() == false)      //is creature movement enabled?
             return;
 
-    // if Spirit Healer don't move
+	// if Spirit Healer don't move
         if(GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
             return;
 
@@ -173,37 +133,6 @@ void Creature::UpdateMobMovement( uint32 p_time)
         // If creature has no waypoints just wander aimlessly around spawnpoint
         if(m_nWaypoints==0)                         //no waypoints
         {
-            // UQ1: Testing random movement...
-/*            m_moveRandom = true;
-
-            if(m_moveRandom)
-            {
-                //if((rand()%10)==0)
-                if (m_moveTimer < timeGetTime())
-                {
-                    float wanderDistance=rand()%4+2;
-                    float wanderX=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
-                    float wanderY=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
-                    float wanderZ=0;              // FIX ME ( i dont know how to get apropriate Z coord, maybe use client height map data)
-
-                    if(getdistance(m_positionX,m_positionY,respawn_cord[0],respawn_cord[1])>10)
-                    {
-                        //return home
-                        //Log::getSingleton( ).outDetail("Creature (return home) moving to %f %f %f (time %i)\n", respawn_cord[0],respawn_cord[1],respawn_cord[2], timeGetTime());
-                        //AI_MoveTo(respawn_cord[0],respawn_cord[1],respawn_cord[2],false);
-                        m_moveTimer = timeGetTime() + 1000;
-                        AI_SendMoveToPacket(respawn_cord[0],respawn_cord[1],respawn_cord[2], 1000, 0);
-                    }
-                    else
-                    {
-                        //Log::getSingleton( ).outDetail("Creature moving to %f %f %f (time %i)\n", m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ, timeGetTime());
-                        //AI_MoveTo(m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ,false);
-                        m_moveTimer = timeGetTime() + 1000;
-                        AI_SendMoveToPacket(m_positionX+wanderX,m_positionY+wanderY,m_positionZ+wanderZ, 1000, 0);
-                    }
-                }
-            }*/
-
             // UQ1: Try auto-generating waypoints...
             uint32 loop;
             float x, y, z;
@@ -374,7 +303,6 @@ void Creature::SetDisabled()
 
 void Creature::Update( uint32 p_time )
 {
-    //boolean isVendor = false;
 
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
@@ -404,134 +332,7 @@ void Creature::Update( uint32 p_time )
         || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
         || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
         return; // These guys shouldn't move...
-
-    /*if (isVendor
-        //|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
-        //|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER))
-        return; // These guys shouldn't move...*/
-
-#ifndef ENABLE_GRID_SYSTEM
-
-#ifdef __NO_PLAYERS_ARRAY__
-    if(ZoneIDMap.GetZoneBit(this->GetZoneId()) == false)
-    {
-        // Still Moving well then lets stop
-        if(m_creatureState == MOVING)
-        {
-            // Stop Moving
-            m_moveSpeed = 7.0f*0.001f;
-            AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
-            m_moveTimer = 0;
-            m_destinationX = m_destinationY = m_destinationZ = 0;
-            m_timeMoved = 0;
-            m_timeToMove = 0;
-            m_creatureState = STOPPED;
-        }
-        return;
-    } 
     
-#else //!__NO_PLAYERS_ARRAY__
-    //UQ1: This should be much faster (use less CPU time)...
-    bool do_full_think = false;
-
-    for (loop = 0; loop < NumActivePlayers; loop++)
-    {// Exit procedure here if no players are close...
-        bool sameFaction = false;
-
-        if (PlayerMaps[ActivePlayers[loop]] != mapId)
-            continue;
-
-        // UQ1: Some NPCs have wrong zoneIds ??? WTF???
-        //if (PlayerZones[ActivePlayers[loop]] != zoneId)
-        //    continue;
-
-        float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
-
-        if(distance<=max_creature_distance)
-        {
-            do_full_think = true;
-            m_nextThinkTime = time(NULL);
-
-//            if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == objmgr.GetObject<Player>(ActivePlayers[loop])->getFaction())
-//                sameFaction = true; // Same faction as us...
-
-            Unit *pVictim = (Unit*) objmgr.GetObject<Player>(ActivePlayers[loop]);
-            WPAssert(pVictim);
-
-            //if(distance<=50 && !sameFaction)
-            if(distance<=GetAttackDistance(pVictim) && !sameFaction)
-            {// If close enough, attack...
-                if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
-                    //|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
-                    || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
-                    continue;
-
-                if(m_attackers.empty())
-                {
-                    //Unit *pVictim = (Unit*) objmgr.GetObject<Player>(ActivePlayers[loop]);
-                    //WPAssert(pVictim);
-
-                    if (pVictim->isAlive())
-                    {
-                        m_attackers.insert(pVictim);
-                    }
-                }
-            }
-            break;
-        }
-    }
-
-    if (!do_full_think)
-    {
-        // Still Moving well then lets stop
-        if(m_creatureState == MOVING)
-        {
-            // Stop Moving
-            m_moveSpeed = 7.0f*0.001f;
-            AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 0, 1);
-            m_moveTimer = 0;
-            m_destinationX = m_destinationY = m_destinationZ = 0;
-            m_timeMoved = 0;
-            m_timeToMove = 0;
-            m_creatureState = STOPPED;
-        }
-
-        //m_nextThinkTime = time(NULL) + 10;
-        return;
-    }
-#endif //__NO_PLAYERS_ARRAY__
-
-#else //ENABLE_GRID_SYSTEM
-    
-    // if no player in the zone.. why bother updating me
-    if( !MapManager::Instance().GetMap(m_mapId)->IsActiveGrid(this) )
-    {
-        if( m_creatureState = MOVING )
-        {
-            m_moveSpeed = 7.0f*0.001f; // ???
-            m_moveTimer = 0;
-            m_destinationX = m_destinationY = m_destinationZ = 0;
-            m_timeMoved = 0;
-            m_timeToMove = 0;
-            m_creatureState = STOPPED;
-            //return;
-        }
-
-        //m_nextThinkTime = time(NULL) + 10;
-        return;
-    }
-
 #ifndef __NO_PLAYERS_ARRAY__
     /* UQ1: Attack checking */
     for (loop = 0; loop < NumActivePlayers; loop++)
@@ -582,10 +383,6 @@ void Creature::Update( uint32 p_time )
     }
 #endif //__NO_PLAYERS_ARRAY__
 
-    //m_nextThinkTime = time(NULL);
-
-#endif //ENABLE_GRID_SYSTEM
-
     if (m_deathState == JUST_DIED)
     {
         this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
@@ -607,13 +404,8 @@ void Creature::Update( uint32 p_time )
         {
             // time to respawn!
             Log::getSingleton( ).outDetail("Removing corpse...");
-#ifndef ENABLE_GRID_SYSTEM
-            RemoveFromMap();
-#else
-        // TheDeadManager::Instance().Dead(me);
-        // MapManager::Instance().GetMap(m_mapId)->Remove(this);
-        this->RemoveFromWorld();
-#endif
+	    this->RemoveFromWorld();
+
             m_respawnTimer = m_respawnDelay;
             setDeathState(DEAD);
 
@@ -636,12 +428,7 @@ void Creature::Update( uint32 p_time )
             // WorldPacket data;
             Log::getSingleton( ).outDetail("Respawning...");
             SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-#ifndef ENABLE_GRID_SYSTEM
-            PlaceOnMap();
-#else
-        this->AddToWorld(); // ?? not sure
-        // TheDeadManager::Instance().Revive(this);
-#endif
+	    this->AddToWorld(); // ?? not sure
             setDeathState(ALIVE);
             m_creatureState = STOPPED;            // after respawn monster can move
         }
@@ -1015,7 +802,7 @@ void Creature::AI_Update()
                 uint32 maxDmg = irand(minDmg, getLevel());
 
                 if (getLevel() < 20)
-                    maxDmg*=(getLevel()*0.3);
+                    maxDmg *= (getLevel()*0.3);
 #endif //_VERSION_1_7_0_
                 
                 // Fix for bad creature info...
@@ -1059,54 +846,8 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
     data << x << y << z;
     WPAssert( data.size() == 49 );
     SendMessageToSet( &data, false );
-#ifdef ENABLE_GRID_SYSTEM
-    MapManager::Instance().GetMap(m_mapId)->ObjectRelocation<Creature>(this, x, y, z, m_orientation);
-#endif
 }
 
-/*
-if (mobile1 != null)
-            {
-                int num1 = 4;
-                Converter.ToBytes(id, this.tempBuff, ref num1);
-                Converter.ToBytes(mobile1.Name, this.tempBuff, ref num1);
-                Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                if (mobile1.Name2 != null)
-                {
-                    Converter.ToBytes(mobile1.Name2, this.tempBuff, ref num1);
-                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                }
-                else
-                {
-                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                }
-                Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                if (mobile1.Guild != null)
-                {
-                    Converter.ToBytes(mobile1.Guild, this.tempBuff, ref num1);
-                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                }
-                else
-                {
-                    Converter.ToBytes((byte) 0, this.tempBuff, ref num1);
-                }
-                Converter.ToBytes(mobile1.Flags1, this.tempBuff, ref num1);
-                if ((mobile1.NpcType & 2) > 0)
-                {
-                    Converter.ToBytes(7, this.tempBuff, ref num1);
-                }
-                else
-                {
-                    Converter.ToBytes(0, this.tempBuff, ref num1);
-                }
-                Converter.ToBytes(mobile1.NpcType, this.tempBuff, ref num1);
-                Converter.ToBytes(mobile1.Unk4, this.tempBuff, ref num1);
-                Converter.ToBytes(0, this.tempBuff, ref num1);
-                Converter.ToBytes(0, this.tempBuff, ref num1);
-                this.Send(OpCodes.SMSG_CREATURE_QUERY_RESPONSE, this.tempBuff, num1);
-            }
-*/
 
 void Creature::AI_SendCreaturePacket( uint32 guidlow )
 {
@@ -1190,7 +931,6 @@ void Creature::AI_SendCreaturePacket( uint32 guidlow )
 
 void Creature::AI_MoveTo(float x, float y, float z, bool run)
 {
-#ifndef ENABLE_GRID_SYSTEM
     float dx = x - m_positionX;
     float dy = y - m_positionY;
     float dz = z - m_positionZ;
@@ -1218,34 +958,6 @@ void Creature::AI_MoveTo(float x, float y, float z, bool run)
 
     if(m_creatureState != MOVING)
         m_creatureState = MOVING;
-#else
-    float dx = x - m_positionX;
-    float dy = y - m_positionY;
-    float dz = z - m_positionZ;
-
-    m_destinationX = x;
-    m_destinationY = y;
-    m_destinationZ = z;
-
-    float distance = sqrt((dx*dx) + (dy*dy) + (dz*dz));
-    if(!distance)
-        return;
-
-    float speed=0;
-    if(!run)
-        m_moveSpeed = 2.5f*0.001f;
-    else
-        m_moveSpeed = 7.0f*0.001f;
-
-    uint32 moveTime = (uint32) (distance / m_moveSpeed);
-    AI_SendMoveToPacket(x, y, z, moveTime, run);
-    m_timeToMove = moveTime;
-    // update every 300 msecs
-    m_moveTimer =  UNIT_MOVEMENT_INTERPOLATE_INTERVAL;
-
-    if(m_creatureState != MOVING)
-        m_creatureState = MOVING;
-#endif
 }
 
 

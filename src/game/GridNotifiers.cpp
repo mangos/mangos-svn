@@ -24,53 +24,10 @@
 #include "UpdateData.h"
 #include "Item.h"
 #include "Utilities.h"
+#include "Map.h"
 
 using namespace MaNGOS;
 
-
-/* common methods used by all.  This method is simple,
- * for a given object and player, if the object is in range,
- * build an update package otherwise if the object is not in
- * range but was in range, pretty much means the object just
- * move out of sight, so build an out of range packet.  Note,
- * this builds the object's data for the player NOT player's
- * data for the object.
- */
-
-static void buildUnitData(Player &player, UpdateData &update_data, Unit *obj)
-{
-#ifdef ENABLE_GRID_SYSTEM
-    if( obj->IsInWorld() )
-    {
-    if( Utilities::is_in_range(&player, obj) )
-    {
-        //sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
-        obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
-        player.AddInRangeObject(obj);
-    }       
-    else if( player.RemoveInRangeObject(obj) )
-    {
-        obj->BuildOutOfRangeUpdateBlock(&update_data);
-    }
-    }
-#endif
-}
-
-static void buildObjectData(Player &player, UpdateData &update_data, Object *obj)
-{
-    if( Utilities::is_in_range(&player, obj) )
-    {
-        //sLog.outDetail("Creating object %d for player %d", obj->GetGUID(), player.GetGUID());
-        obj->BuildCreateUpdateBlockForPlayer(&update_data, &player);
-#ifdef ENABLE_GRID_SYSTEM
-        player.AddInRangeObject(obj);
-    }       
-    else if( player.RemoveInRangeObject(obj) )
-    {
-        obj->BuildOutOfRangeUpdateBlock(&update_data);
-#endif
-    }
-}
 
 //======================================//
 //         NotifyPlayer
@@ -81,355 +38,332 @@ static void buildObjectData(Player &player, UpdateData &update_data, Object *obj
  */
 void PlayerNotifier::Visit(PlayerMapType &m)
 {
-    WorldPacket my_packet;
-    UpdateData my_data;
-
+    Player *player = &i_player;
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    if( iter->second == &i_player )
-        continue; // this is me dude
+	if( iter->second == player )
+	    continue; // this is me dude
 
-    WorldPacket packet;
-    UpdateData player_data;
+	WorldPacket packet;
+	UpdateData update_data;
 
-    // build my data for the other player.. 
-    // and inform them
-    buildUnitData(*iter->second, player_data, &i_player);
-    player_data.BuildPacket(&packet);
-    iter->second->GetSession()->SendPacket(&packet);
-    
-    // collect data about other players to let myself know
-    buildUnitData(i_player, my_data, iter->second);
+	// build my data for the other player.. 
+	// and inform them
+	i_player.BuildCreateUpdateBlockForPlayer(&update_data, iter->second);
+	update_data.BuildPacket(&packet);
+	iter->second->GetSession()->SendPacket(&packet);
+	
+	// collect data about other players to let myself know
+	iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
     }
+    
+}
+
+
+
+void
+PlayerNotifier::Notify()
+{
+    WorldPacket packet;
 
     // send to myself about other player information and self
     sLog.outDetail("Creating player data for himself %d", i_player.GetGUID());
-    i_player.BuildCreateUpdateBlockForPlayer(&my_data, &i_player);
-    my_data.BuildPacket(&my_packet);
-    i_player.GetSession()->SendPacket(&my_packet);
+    i_player.BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+    i_data.BuildPacket(&packet);
+    i_player.GetSession()->SendPacket(&packet);
     i_player.AddToWorld();
 }
 
 
-// do we handle GameObjects differently than creatures (yes.. but not now)
-// after re-implement Creature and GameObject class.
-void PlayerNotifier::Visit(GameObjectMapType &m)
+
+//===============================================//
+//         VisibleNotifier
+void
+VisibleNotifier::Notify()
 {
-    UpdateData update_data;
     WorldPacket packet;
-    for(std::map<OBJECT_HANDLE, GameObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    buildObjectData(i_player, update_data, iter->second);
+
+    if( i_data.HasData() )
+    {
+	i_data.BuildPacket(&packet);
+	i_player.GetSession()->SendPacket(&packet);
+    }
+}
+
+ 
+template<>
+void
+VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    // maybe we can player the trick of setting spriti healer's as a death state unint
+    if( i_player.isAlive() )
+    {
+	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	    if( iter->second->isAlive() )
+		iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+    }
+    else
+    {
+	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	    if( iter->second->isDead() )
+		iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+    }
+}
+
+template<>
+void
+VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    Player *player = &i_player;
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	if( iter->second == player )
+	    continue;
+
+	if( (i_player.isAlive() && iter->second->isAlive()) ||
+	    (!i_player.isAlive() && !iter->second->isAlive()) )
+	{
+	    sLog.outDebug("Creating in range packet for both player %d and %d", i_player.GetGUID(), iter->second->GetGUID());
+	    iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+
+	    // build meself for this guy
+	    UpdateData his_data;
+	    WorldPacket his_pk;
+	    i_player.BuildCreateUpdateBlockForPlayer(&his_data, iter->second);
+	    his_data.BuildPacket(&his_pk);
+	    iter->second->GetSession()->SendPacket(&his_pk);
+	}
+    }
+}
+
+template<class T>
+void
+VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
+{
+    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+}
+
+
+
     
-    if( update_data.HasData() )
-    {
-    update_data.BuildPacket(&packet);
-    i_player.GetSession()->SendPacket(&packet);
-    }
-}
-
-
-void PlayerNotifier::Visit(CreatureMapType &m)
+//===============================================//
+//         NotVisibleNotifier
+void
+NotVisibleNotifier::Notify()
 {
-    UpdateData update_data;
     WorldPacket packet;
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    buildUnitData(i_player, update_data, iter->second);
-
-    if( update_data.HasData() )
+    if( i_data.HasData() )
     {
-    update_data.BuildPacket(&packet);
-    i_player.GetSession()->SendPacket(&packet);
+	i_data.BuildPacket(&packet);
+	i_player.GetSession()->SendPacket(&packet);
     }
+
 }
 
-void PlayerNotifier::Visit(DynamicObjectMapType &m)
+template<>
+void
+NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-    UpdateData update_data;
-    WorldPacket packet;
-    for(std::map<OBJECT_HANDLE, DynamicObject *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    buildObjectData(i_player, update_data, iter->second);
-
-    if( update_data.HasData() )
+    // maybe we can player the trick of setting spriti healer's as a death state unint
+    if( i_player.isAlive() )
     {
-    update_data.BuildPacket(&packet);
-    i_player.GetSession()->SendPacket(&packet);
+	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	    if( iter->second->isAlive() )
+		iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+    }
+    else
+    {
+	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	    if( iter->second->isDead() )
+		iter->second->BuildOutOfRangeUpdateBlock(&i_data);
     }
 }
 
-void PlayerNotifier::Visit(CorpseMapType &m)
+template<>
+void
+NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
-    UpdateData update_data;
-    WorldPacket packet;
-    for(CorpseMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    buildObjectData(i_player, update_data, iter->second);
-
-    if( update_data.HasData() )
+    Player *player = &i_player;
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    update_data.BuildPacket(&packet);
-    i_player.GetSession()->SendPacket(&packet);
+	if( iter->second == player )
+	    continue;
+	if( (i_player.isAlive() && iter->second->isAlive()) ||
+	    (!i_player.isAlive() && !iter->second->isAlive()) )
+	{
+	    // build for me
+	    iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+	    // build for him
+
+	    UpdateData his_data;
+	    WorldPacket his_pk;
+	    i_player.BuildOutOfRangeUpdateBlock(&his_data);
+	    his_data.BuildPacket(&his_pk);
+	    iter->second->GetSession()->SendPacket(&his_pk);
+	}
     }
 }
+
+template<class T>
+void
+NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
+{
+    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	iter->second->BuildOutOfRangeUpdateBlock(&i_data);
+}
+
+
+
+    
+//=====================================//
+//     ObjectVisibleNotifer
+void
+ObjectVisibleNotifier::Visit(PlayerMapType &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	UpdateData update_data;
+	WorldPacket packet;   
+	i_object.BuildCreateUpdateBlockForPlayer(&update_data, iter->second);
+	update_data.BuildPacket(&packet);
+	iter->second->GetSession()->SendPacket(&packet);
+    }    
+}    
+
+//=====================================//
+//     ObjectVisibleNotifer
+void
+ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
+{
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	UpdateData update_data;
+	WorldPacket packet;   
+	i_object.BuildOutOfRangeUpdateBlock(&update_data);
+	update_data.BuildPacket(&packet);
+	iter->second->GetSession()->SendPacket(&packet);
+    }    
+}    
 
 //=====================================//
 //         MessageDeliverer
-void MessageDeliverer::Visit(PlayerMapType &m)
+void
+MessageDeliverer::Visit(PlayerMapType &m)
 {
   Player *player = &i_player;
   for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
   {
       if( iter->second != player &&  Utilities::is_in_range(iter->second, player) )
       {
-      iter->second->GetSession()->SendPacket(i_message);
+	  iter->second->GetSession()->SendPacket(i_message);
       }
   }
 }
 
 //========================================//
 //        UnitMessageDeliverer
-void ObjectMessageDeliverer::Visit(PlayerMapType &m)
+void
+ObjectMessageDeliverer::Visit(PlayerMapType &m)
 {
-#ifdef ENABLE_GRID_SYSTEM
     uint64 guid = i_object.GetGUID();
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    if( iter->second->isInRangeUnit(guid) || iter->second->isInRangeObject(guid) )
-        iter->second->GetSession()->SendPacket(i_message);
+	iter->second->GetSession()->SendPacket(i_message);
     }
-#endif
 }
 
-//========================================//
-//       ExitNotifier
-void ExitNotifier::Visit(PlayerMapType &m)
+//=========================================//
+//  CreatureVisibleMovementNotifier
+void
+CreatureVisibleMovementNotifier::Visit(PlayerMapType &m)
 {
-#ifdef ENABLE_GRID_SYSTEM
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    if( i_player.RemoveInRangeObject(iter->second) )
-    {
-        WorldPacket packet;
-        UpdateData update_data;    
-        i_player.BuildOutOfRangeUpdateBlock(&update_data);
-        update_data.BuildPacket(&packet);
-        iter->second->GetSession()->SendPacket(&packet);
+	if( iter->second->isAlive() )
+	{
+	    UpdateData update_data;
+	    WorldPacket packet;   
+	    i_creature.BuildCreateUpdateBlockForPlayer(&update_data, iter->second);
+	    update_data.BuildPacket(&packet);
+	    iter->second->GetSession()->SendPacket(&packet);
+	}
     }
-    }
-#endif
 }
 
-//========================================//
-//       InRangeRemover
-void InRangeRemover::Visit(PlayerMapType &m)
+
+//=========================================//
+//  CreatureNotVisibleMovementNotifier
+void
+CreatureNotVisibleMovementNotifier::Visit(PlayerMapType &m)
 {
-#ifdef ENABLE_GRID_SYSTEM
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    iter->second->RemoveInRangeObject(&i_object);
-    i_object.DestroyForPlayer(iter->second);
+	if( iter->second->isAlive() )
+	{
+	    UpdateData update_data;
+	    WorldPacket packet;   
+	    i_creature.BuildOutOfRangeUpdateBlock(&update_data);
+	    update_data.BuildPacket(&packet);
+	    iter->second->GetSession()->SendPacket(&packet);
+	}
     }
-#endif    
 }
 
-//============================================//
-//       PlayerRelocation
-void PlayerRelocationNotifier::Visit(PlayerMapType  &m)
+//====================================//
+// BuildUpdateForPlayer
+void
+BuildUpdateForPlayer::Visit(PlayerMapType &m)
 {
-#ifdef ENABLE_GRID_SYSTEM
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    if( iter->second == &i_player )
-        continue; // its myself
+	if( iter->second == &i_player )
+	    continue;
 
-    // for each of my in range player if they are out of range.. 
-    // tell them I am out of range
-    if( i_player.isInRangeUnit(iter->second->GetGUID()) )
-    {
-        // let's check to see if he's still in my range after the relocation?
-        if( !MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
-        {
-        // ok.. we moved out of range
-        iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-        iter->second->MoveOutOfRange(i_player);
-        }
+	ObjectAccessor::UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
+	if( iter2 == i_updatePlayers.end() )
+	{
+	    std::pair<ObjectAccessor::UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
+	    assert(p.second);
+	    iter2 = p.first;
+	}
 
-        // else player still in range so...
+	// build myself for other player
+	i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
     }
-    else if( Utilities::is_in_range(iter->second, &i_player) )
-    {
-        // Ok.. this guys wasn't in my range before but now moved in my range
-        sLog.outDebug("Creating in range packet for both player %d and %d", i_player.GetGUID(), iter->second->GetGUID());
-
-        // build this guy for me
-        iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-        i_player.AddInRangeObject(iter->second);
-        iter->second->MoveInRange(i_player);
-    }
-    }
-#endif
 }
 
-
-template<class T>
-void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, T*> &m)
+//===================================//
+//        ObjectUpdater
+template<>
+void
+ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-#ifdef ENABLE_GRID_SYSTEM
+    std::map<OBJECT_HANDLE, Creature *> tmp(m);
+    for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
+	iter->second->Update(i_timeDiff);
+}
+
+template<class T> void 
+ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m) 
+{
     for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-    if( iter->second->IsInWorld() )
-    {
-        if( i_player.isInRange(iter->second) )
-        {
-        // let's check to see if the object moved out of my range after relocation.
-        if( !MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
-        {
-            // build out of range for this object
-            iter->second->BuildOutOfRangeUpdateBlock(&i_data);        
-            i_player.RemoveInRangeObject(iter->second);
-        }
-        }
-        else if( MaNGOS::Utilities::is_in_range(&i_player, iter->second) )
-        {
-        // new object moved in range... due to player movement
-        // build in range packet and put it in my pocket..
-        iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-        i_player.AddInRangeObject(iter->second);
-        }
-    }
-    }
-#endif
-}
-
-PlayerRelocationNotifier::~PlayerRelocationNotifier()
-{
-    if( i_data.HasData() )
-    {
-    WorldPacket packet;
-    i_data.BuildPacket(&packet);
-    i_player.GetSession()->SendPacket(&packet);
+	iter->second->Update(i_timeDiff);
     }
 }
-
-
-//===============================================//
-//        ObjectRelocationNotifier
-template<>
-void ObjectRelocationNotifier<Creature>::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    if( Utilities::is_in_range(iter->second, &i_object) )
-        iter->second->AddInRangeObject(&i_object);
-}
-
-template<class T>
-void ObjectRelocationNotifier<T>::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    if( Utilities::is_in_range(iter->second, &i_object) )
-        iter->second->AddInRangeObject(&i_object);
-}
-
-//====================================================//
-//           ObjectEnterNotifier
-template<class T>
-void ObjectEnterNotifier<T>::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-    UpdateData data;
-    buildObjectData(*iter->second, data, &i_object);
-    if( data.HasData() )
-    {
-        WorldPacket packet;
-        data.BuildPacket(&packet);
-        iter->second->GetSession()->SendPacket(&packet);
-    }
-    }
-}
-
-template<>
-void ObjectEnterNotifier<Creature>::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-    UpdateData data;
-    buildUnitData(*iter->second, data, &i_object);
-    if( data.HasData() )
-    {
-        WorldPacket packet;
-        data.BuildPacket(&packet);
-        iter->second->GetSession()->SendPacket(&packet);
-    }
-    }
-}
-
-
-//==========================================//
-//          PlayerUpdatePacket 
-void PlayerUpdatePacket::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-    MaNGOS::PlayerRelocationNotifier notifier(*iter->second);
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > player_update(notifier);
-    i_grid.VisitObjects(player_update);
-    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > object_update(notifier);
-    i_grid.VisitGridObjects(object_update);
-    }
-}
-
-#ifdef ENABLE_GRID_SYSTEM
-//====================================//
-//       ValidateGridUnload
-ValidateGridUnload::ValidateGridUnload(ObjectAccessor::PlayerMapType &players, Map &m, const uint32 &x, const uint32 &y) : i_isOk(true)
-{    
-    // we only check players in adjacent grids
-    i_players.reserve(players.size());
-    for(ObjectAccessor::PlayerMapType::const_iterator iter=players.begin(); iter != players.end(); ++iter)
-    {
-    GridPair p(m.CalculateGrid(iter->second->GetPositionX(), iter->second->GetPositionY()));
-    if( p.x_coord > (x + 1) || p.x_coord < (x - 1) || p.y_coord > (y + 1) || p.y_coord < (y - 1) )
-        continue;
-    i_players.push_back(iter->second); // only interested players in adjacent grids
-    }
-}
-
-template<class T>
-void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, T *> &m)
-{
-    if( !i_isOk )
-    return;
-
-    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-    for(std::vector<Player *>::iterator p=i_players.begin(); p != i_players.end(); ++p)
-    {
-        if( (*p)->isInRange(iter->second) )
-        {
-        i_isOk = false;
-        return;
-        }
-    }
-    }
-}
-
-template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, Creature *> &);
-template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, GameObject *> &);
-template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &);
-template void ValidateGridUnload::Visit(std::map<OBJECT_HANDLE, Corpse *> &);
-
-#endif
 
 // specialization....
-template void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
-template void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &);
-template void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &);
-template void PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &);
+template void VisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
+template void VisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
+template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 
-template void ObjectEnterNotifier<GameObject>::Visit(PlayerMapType &);
-template void ObjectEnterNotifier<Corpse>::Visit(PlayerMapType &);
-template void ObjectEnterNotifier<DynamicObject>::Visit(PlayerMapType &);
+template void NotVisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
+template void NotVisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
+template void NotVisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
 
-template void ObjectRelocationNotifier<GameObject>::Visit(PlayerMapType &);
-template void ObjectRelocationNotifier<Corpse>::Visit(PlayerMapType &);
-template void ObjectRelocationNotifier<DynamicObject>::Visit(PlayerMapType &);
+template void ObjectUpdater::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
+template void ObjectUpdater::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
+template void ObjectUpdater::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);
+
 

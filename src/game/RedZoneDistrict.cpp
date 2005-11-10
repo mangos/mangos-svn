@@ -18,7 +18,6 @@
  */
 
 
-
 #include "RedZoneDistrict.h"
 
 // static initialization
@@ -35,31 +34,26 @@
  * The marked X is the current active grid that the player's in..
  * Z1 to Z8 is the affected zones represented by the mask...
  */
-uint8 RedZoneDistrict::si_UpperLeftCorner = (DISTRICT_1 | DISTRICT_2 | DISTRICT_4);
-uint8 RedZoneDistrict::si_UpperRightCorner = (DISTRICT_2 | DISTRICT_3 | DISTRICT_5);
-uint8 RedZoneDistrict::si_LowerLeftCorner = (DISTRICT_4 | DISTRICT_6 | DISTRICT_7);
-uint8 RedZoneDistrict::si_LowerRightCorner = (DISTRICT_7 | DISTRICT_8 | DISTRICT_5);
-uint8 RedZoneDistrict::si_LeftCenter = DISTRICT_4;
-uint8 RedZoneDistrict::si_RightCenter = DISTRICT_5;
-uint8 RedZoneDistrict::si_UpperCenter = DISTRICT_2;
-uint8 RedZoneDistrict::si_LowerCenter = DISTRICT_7;
-
 
 void RedZone::Initialize()
 {
     for(unsigned int x=0; x < MAX_NUMBER_OF_GRIDS; ++x)
-    for(unsigned y=0; y < MAX_NUMBER_OF_GRIDS; ++y)
-        si_RedZones[x][y].Initialize(x, y);
+    {
+	for(unsigned y=0; y < MAX_NUMBER_OF_GRIDS; ++y)
+	{
+	    for(unsigned xoffset=0; xoffset < MAX_NUMBER_OF_CELLS; ++xoffset)
+	    {
+		for(unsigned yoffset=0; yoffset < MAX_NUMBER_OF_CELLS; ++yoffset)
+		{
+		    uint32 cell_x = (x*MAX_NUMBER_OF_CELLS) + xoffset;
+		    uint32 cell_y = (y*MAX_NUMBER_OF_CELLS) + yoffset;
+		    si_RedZones[cell_x][cell_y].initialize(x, y, xoffset, yoffset);
+		}
+	    }
+	}
+    }
 }
 
-//=====================================//
-//     RedZoneDistrict                //
-void RedZoneDistrict::Enter(GridPair &p)
-{
-    uint8 mask = RedZone::si_RedZones[p.x_coord][p.y_coord].Enter(i_player.GetPositionX(), i_player.GetPositionY());
-    if( mask != 0 )
-    i_map.ZoneAlert(i_player, p, mask);
-}
 
-RedZone RedZone::si_RedZones[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+RedZone RedZone::si_RedZones[MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS][MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS];
 

@@ -128,19 +128,12 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     plTarget->m_isInDuel = false;
 
     GameObject* obj = NULL;
-#ifndef ENABLE_GRID_SYSTEM
-    obj = objmgr.GetObject<GameObject>(guid);
-#else
     if( pl )
        obj = ObjectAccessor::Instance().GetGameObject(*pl, guid);
-#endif
+
     if(obj)
     {
-#ifndef ENABLE_GRID_SYSTEM
-         obj->RemoveFromMap();
-         objmgr.RemoveObject(obj);
-#else
-         MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
-#endif    
+	// Remove and DELTE object
+	MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj,true);
     }
 }

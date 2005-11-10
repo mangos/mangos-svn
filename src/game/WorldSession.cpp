@@ -189,22 +189,9 @@ void WorldSession::LogoutPlayer(bool Save)
         }
 
         // Remove us from world
-        if (_player->IsInWorld())
-        {
-            sLog.outDebug( "SESSION: removing player from world" );
-#ifndef ENABLE_GRID_SYSTEM
-            _player->RemoveFromMap();
-#else
-        MapManager::Instance().GetMap(_player->GetMapId())->RemoveFromMap(_player);
-        ObjectAccessor::Instance().RemovePlayer(_player);
-#endif
-        }
+	ObjectAccessor::Instance().RemovePlayer(_player);
+	MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);	
 
-#ifndef ENABLE_GRID_SYSTEM
-        objmgr.RemoveObject(_player);
-#else
-    MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);
-#endif
         if(Save)
         {
             // Save the player

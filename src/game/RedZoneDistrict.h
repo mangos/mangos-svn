@@ -20,111 +20,29 @@
 #ifndef MANGOS_REDZONEDISTRICT_H
 #define MANGOS_REDZONEDISTRICT_H
 
-/** The RedZoneDistrict is a series of smaller cell that
- * alerts the map when the user enters one of its red zones.
- * Once alerted, this will triggers the loading of the
- * affected grids due to player are approaching extremely close.
- */
+#include "GridDefines.h"
+#include "Cell.h"
 
-#include "Map.h"
-
-typedef enum
-    {
-    DISTRICT_1 = 1,
-    DISTRICT_2 = 1 << 1,
-    DISTRICT_3 = 1 << 2,
-    DISTRICT_4 = 1 << 3,
-    DISTRICT_5 = 1 << 4,
-    DISTRICT_6 = 1 << 5,
-    DISTRICT_7 = 1 << 6,
-    DISTRICT_8 = 1 << 7
-    } district_t;
-
-
-struct MANGOS_DLL_DECL RedZoneDistrict
-{    
-    Map &i_map;
-    Player &i_player;
-    RedZoneDistrict(Map &m, Player &player) : i_map(m), i_player(player) {}
-    void Enter(GridPair &);
-
-    static uint8 si_UpperLeftCorner;
-    static uint8 si_UpperRightCorner;
-    static uint8 si_LowerLeftCorner;
-    static uint8 si_LowerRightCorner;
-    static uint8 si_LeftCenter;
-    static uint8 si_RightCenter;
-    static uint8 si_UpperCenter;
-    static uint8 si_LowerCenter;
-};
-
-// SIZE_OF_GRIDS / 4
-#define CORNER_GRID_OFFSET 133.333333
 
 struct MANGOS_DLL_DECL RedZone
 {
-    struct Coordinate
+    void initialize(const uint32 &grid_x, const uint32 &grid_y, const uint32 &cell_x, const uint32 &cell_y)
     {
-    float x;
-    float y;
-    };
-
-    void Initialize(const uint32 &x, const uint32 &y)
-    {
-    const float x_top = x * SIZE_OF_GRIDS;
-    const float y_top = y * SIZE_OF_GRIDS;
-    i_upperLeft.x = x_top + CORNER_GRID_OFFSET;
-    i_upperLeft.y = y_top + CORNER_GRID_OFFSET;
-    i_upperRight.x = x_top + (3.0*CORNER_GRID_OFFSET);
-    i_upperRight.y = y_top + CORNER_GRID_OFFSET;
-    i_lowerLeft.x = x_top + CORNER_GRID_OFFSET;
-    i_lowerLeft.y = y_top + (3.0*CORNER_GRID_OFFSET);
-    i_lowerRight.x = x_top + (3.0*CORNER_GRID_OFFSET);
-    i_lowerRight.y = y_top + (3.0*CORNER_GRID_OFFSET);
+	i_cell.data.Part.grid_x = (unsigned)(grid_x);
+	i_cell.data.Part.grid_y = (unsigned)(grid_y);
+	i_cell.data.Part.cell_x = (unsigned)(cell_x);
+	i_cell.data.Part.cell_y = (unsigned)(cell_y);
+	i_cell.data.Part.reserved = 0;
     }
 
-    uint8 Enter(const float &x, const float &y)
-    {
-    if( x < i_upperLeft.x )
-    {
-        // left strip
-        if( y < i_upperLeft.y )
-            return RedZoneDistrict::si_UpperLeftCorner;
-        else if( y < i_lowerLeft.y )
-            return RedZoneDistrict::si_LeftCenter;
-        else
-            return RedZoneDistrict::si_LowerLeftCorner;
-    }
-    else if( x > i_upperRight.x )
-    {
-        // right strip
-        if( y < i_upperRight.y )
-            return RedZoneDistrict::si_UpperRightCorner;
-        else if( y < i_lowerRight.y )
-            return RedZoneDistrict::si_RightCenter;
-        else
-            return RedZoneDistrict::si_LowerRightCorner;
-    }
-    else if( y < i_upperLeft.y )
-    {
-        // upper strip
-        return RedZoneDistrict::si_UpperCenter;
-    }
-    else if( y > i_lowerLeft.y )
-    {
-        return RedZoneDistrict::si_LowerCenter;
-    }
+    operator const Cell &(void) const { return i_cell; }
+    operator Cell &(void) { return i_cell; }
+    Cell i_cell;
     
-    return 0; // not in red zone
-    }
-
-    Coordinate i_upperLeft;
-    Coordinate i_upperRight;
-    Coordinate i_lowerLeft;
-    Coordinate i_lowerRight;
-
+    static const Cell& GetZone(const CellPair &p) { return si_RedZones[p.x_coord][p.y_coord]; }
+    static RedZone si_RedZones[MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS][MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS];
     static void Initialize(void);
-    static RedZone si_RedZones[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };
+
 
 #endif

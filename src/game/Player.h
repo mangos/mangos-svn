@@ -319,11 +319,13 @@ class Player : public Unit
         bidentry* GetBid(uint32 id);
         std::list<bidentry*>::iterator GetBidBegin() { return m_bids.begin();};
         std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
+
         // spells
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
         bool removeSpell(uint16 spell_id);        //add by vendy 2005/10/9 22:43
+        void DealWithSpellDamage(DynamicObject &);
         inline std::list<struct spells> getSpellList() { return m_spells; };
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
@@ -420,6 +422,11 @@ class Player : public Unit
         // These functions build a specific type of A9 packet
         void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void DestroyForPlayer( Player *target ) const;
+        void SendDelayResponse(const uint32);
+
+        // Misc
+        bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
+        void SendMessageToSet(WorldPacket *data, bool self);
 
         // Serialize character to db
         void SaveToDB();
@@ -465,64 +472,6 @@ class Player : public Unit
         void SetDontMove(bool dontMove);
         bool GetDontMove() { return m_dontMove; }
 
-#ifdef ENABLE_GRID_SYSTEM
-        typedef HM_NAMESPACE::hash_map<uint32, Object *> InRangeObjectsMapType;
-        typedef HM_NAMESPACE::hash_map<uint32, Unit *> InRangeUnitsMapType;
-
-        Unit* GetInRangeUnit(uint64 guid)
-        {
-            InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(guid);
-            return(iter == i_inRangeUnits.end() ? NULL : iter->second);
-        }
-
-        Object* GetInRangeObject(uint64 guid)
-        {
-            InRangeObjectsMapType::iterator iter = i_inRangeObjects.find(guid);
-            return(iter == i_inRangeObjects.end() ? NULL : iter->second);
-        }
-
-        void SetCoordinate(const float &x, const float &y, const float &z, const float &orientation);
-        void AddInRangeObject(Object *obj) { i_inRangeObjects[obj->GetGUID()] = obj; }
-        bool RemoveInRangeObject(Object *obj)
-        {
-            InRangeObjectsMapType::iterator iter= i_inRangeObjects.find(obj->GetGUID());
-            if( iter != i_inRangeObjects.end() )
-            {
-                i_inRangeObjects.erase(iter);
-                return true;
-            }
-            return false;
-        }
-        void AddInRangeObject(Unit *obj) { i_inRangeUnits[obj->GetGUID()] = obj; }
-        bool RemoveInRangeObject(Unit *obj)
-        {
-            InRangeUnitsMapType::iterator iter = i_inRangeUnits.find(obj->GetGUID());
-            if( iter != i_inRangeUnits.end() )
-            {
-                i_inRangeUnits.erase(iter);
-                return true;
-            }
-            return false;
-        }
-
-        bool isInRange(Object *obj) const { return isInRangeObject(obj->GetGUID()); }
-        bool isInRange(Unit *obj) const { return isInRangeUnit(obj->GetGUID()); }
-        bool isInRangeObject(uint64 guid) const { return (i_inRangeObjects.find(guid) != i_inRangeObjects.end()); }
-        bool isInRangeUnit(uint64 guid) const { return (i_inRangeUnits.find(guid) != i_inRangeUnits.end()); }
-        InRangeObjectsMapType::iterator InRangeObjectsBegin(void) { return i_inRangeObjects.begin(); }
-        InRangeObjectsMapType::iterator InRangeObjectsEnd(void) { return i_inRangeObjects.end(); }
-        InRangeUnitsMapType::iterator InRangeUnitsBegin(void) { return i_inRangeUnits.begin(); }
-        InRangeUnitsMapType::iterator InRangeUnitsEnd(void) { return i_inRangeUnits.end(); }
-        void DealWithSpellDamage(DynamicObject &);
-        bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
-        void SendMessageToSet(WorldPacket *data, bool self);
-
-        // methods that the user updates his in range objects
-        void UpdateInRange(UpdateData &);
-        void MoveOutOfRange(Player &player);
-        void MoveInRange(Player &player);
-        void DestroyInRange(void);
-#endif
         //Explore Area System
         void CheckExploreSystem(void);
         // Initialize the possible areas that player will discover.
@@ -542,7 +491,7 @@ class Player : public Unit
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
 
-    protected:
+protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
@@ -666,11 +615,6 @@ class Player : public Unit
         bool   m_isInDuel;
         uint64 m_duelSenderGUID;
         uint64 m_duelFlagGUID;
-
-#ifdef ENABLE_GRID_SYSTEM
-        InRangeObjectsMapType i_inRangeObjects;
-        InRangeUnitsMapType i_inRangeUnits;
-#endif
 
         time_t m_nextThinkTime;
 

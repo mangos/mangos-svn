@@ -142,6 +142,7 @@ void DynamicObject::DealDamage()
 #else
 void DynamicObject::DealWithSpellDamage(Player &caster)
 {
+    /* TODO siuolly: cast on in the near by cell units
     for(Player::InRangeUnitsMapType::iterator iter = caster.InRangeUnitsBegin(); iter != caster.InRangeUnitsEnd(); ++iter)
     {
     if( iter->second->isAlive() )
@@ -152,6 +153,7 @@ void DynamicObject::DealWithSpellDamage(Player &caster)
         }        
     }
     }
+    */
 }
 
 void DynamicObject::DealWithSpellDamage(Unit &caster)
