@@ -286,8 +286,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\realmlist"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\realmlist"
+				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"

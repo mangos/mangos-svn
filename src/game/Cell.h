@@ -48,7 +48,7 @@ typedef enum
     } district_t;
 
 // forward declaration
-template<class T> class CellLock;
+template<class T> struct CellLock;
 
 /** Cell data structure is nothing but a 32 bit integer split into
  * different parts to hold information neccessary to identify each

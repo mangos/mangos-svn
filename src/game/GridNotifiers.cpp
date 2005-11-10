@@ -90,51 +90,6 @@ VisibleNotifier::Notify()
     }
 }
 
- 
-template<>
-void
-VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
-{
-    // maybe we can player the trick of setting spriti healer's as a death state unint
-    if( i_player.isAlive() )
-    {
-	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	    if( iter->second->isAlive() )
-		iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-    }
-    else
-    {
-	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	    if( iter->second->isDead() )
-		iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-    }
-}
-
-template<>
-void
-VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
-{
-    Player *player = &i_player;
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-	if( iter->second == player )
-	    continue;
-
-	if( (i_player.isAlive() && iter->second->isAlive()) ||
-	    (!i_player.isAlive() && !iter->second->isAlive()) )
-	{
-	    sLog.outDebug("Creating in range packet for both player %d and %d", i_player.GetGUID(), iter->second->GetGUID());
-	    iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-
-	    // build meself for this guy
-	    UpdateData his_data;
-	    WorldPacket his_pk;
-	    i_player.BuildCreateUpdateBlockForPlayer(&his_data, iter->second);
-	    his_data.BuildPacket(&his_pk);
-	    iter->second->GetSession()->SendPacket(&his_pk);
-	}
-    }
-}
 
 template<class T>
 void
@@ -161,49 +116,6 @@ NotVisibleNotifier::Notify()
 
 }
 
-template<>
-void
-NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
-{
-    // maybe we can player the trick of setting spriti healer's as a death state unint
-    if( i_player.isAlive() )
-    {
-	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	    if( iter->second->isAlive() )
-		iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-    }
-    else
-    {
-	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	    if( iter->second->isDead() )
-		iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-    }
-}
-
-template<>
-void
-NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
-{
-    Player *player = &i_player;
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-	if( iter->second == player )
-	    continue;
-	if( (i_player.isAlive() && iter->second->isAlive()) ||
-	    (!i_player.isAlive() && !iter->second->isAlive()) )
-	{
-	    // build for me
-	    iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-	    // build for him
-
-	    UpdateData his_data;
-	    WorldPacket his_pk;
-	    i_player.BuildOutOfRangeUpdateBlock(&his_data);
-	    his_data.BuildPacket(&his_pk);
-	    iter->second->GetSession()->SendPacket(&his_pk);
-	}
-    }
-}
 
 template<class T>
 void
@@ -310,40 +222,9 @@ CreatureNotVisibleMovementNotifier::Visit(PlayerMapType &m)
     }
 }
 
-//====================================//
-// BuildUpdateForPlayer
-void
-BuildUpdateForPlayer::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-	if( iter->second == &i_player )
-	    continue;
-
-	ObjectAccessor::UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
-	if( iter2 == i_updatePlayers.end() )
-	{
-	    std::pair<ObjectAccessor::UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
-	    assert(p.second);
-	    iter2 = p.first;
-	}
-
-	// build myself for other player
-	i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
-    }
-}
 
 //===================================//
 //        ObjectUpdater
-template<>
-void
-ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
-{
-    std::map<OBJECT_HANDLE, Creature *> tmp(m);
-    for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
-	iter->second->Update(i_timeDiff);
-}
-
 template<class T> void 
 ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m) 
 {

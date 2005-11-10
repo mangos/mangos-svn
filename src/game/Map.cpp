@@ -17,7 +17,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "Map.h"
 #include "Player.h"
 #include "GridNotifiers.h"
 #include "WorldSession.h"
@@ -25,6 +24,8 @@
 #include "GridStates.h"
 #include "RedZoneDistrict.h"
 #include "CellImpl.h"
+#include "Map.h"
+#include "GridNotifiersImpl.h"
 
 // 3 minutes
 #define DEFAULT_GRID_EXPIRY     300

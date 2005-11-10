@@ -29,6 +29,9 @@
 #include "Platform/Define.h"
 #include "TypeContainer.h"
 
+// forward declaration
+template<class T, class Y> class TypeContainerVisitor;
+
 // visitor helper
 template<class VISITOR, class TYPE_CONTAINER> void VisitorHelper(VISITOR &v, TYPE_CONTAINER &c)
 {

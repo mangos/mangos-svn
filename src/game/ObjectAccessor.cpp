@@ -14,6 +14,7 @@
 #include "GridNotifiers.h"
 #include "MapManager.h"
 #include "CellImpl.h"
+#include "GridNotifiersImpl.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
@@ -25,10 +26,10 @@ ObjectAccessor::GetCreature(Player &player, uint64 guid)
     CellPair p(MaNGOS::ComputeCellPair(player.GetPositionX(), player.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
-    Creature *obj=NULL;
+    Creature *obj=NULL; 
     MaNGOS::ObjectAccessorNotifier<Creature> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Creature>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
-    CellLock<GridReadGuard> cell_lock(cell, p);
+    CellLock<GridReadGuard> cell_lock(cell, p); 
     cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(player.GetMapId()));
     return obj;
 }
@@ -39,12 +40,12 @@ ObjectAccessor::GetCorpse(Player &player, uint64 guid)
     CellPair p(MaNGOS::ComputeCellPair(player.GetPositionX(), player.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
-    Corpse *obj=NULL;
+    Corpse *obj=NULL; 
     MaNGOS::ObjectAccessorNotifier<Corpse> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Corpse>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
-    CellLock<GridReadGuard> cell_lock(cell, p);
+    CellLock<GridReadGuard> cell_lock(cell, p); 
     cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(player.GetMapId()));
-    return obj;
+	return obj; 
 }
 
 Unit*
@@ -94,7 +95,7 @@ ObjectAccessor::GetDynamicObject(Player &player, uint64 guid)
 Player*
 ObjectAccessor::FindPlayer(uint64 guid)
 {
-    for(PlayerMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
+    for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
     if( iter->second->GetGUID() == guid )
         return iter->second;
     return NULL;
@@ -103,7 +104,7 @@ ObjectAccessor::FindPlayer(uint64 guid)
 Player*
 ObjectAccessor::FindPlayerByName(const char *name) 
 {
-    for(PlayerMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
+    for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
     if( ::strcmp(name, iter->second->GetName()) == 0 )
         return iter->second;
     return NULL;
@@ -119,7 +120,7 @@ void
 ObjectAccessor::RemovePlayer(Player *pl)
 {
     Guard guard(i_playerGuard);
-    PlayerMapType::iterator iter = i_players.find(pl->GetGUID());
+    PlayersMapType::iterator iter = i_players.find(pl->GetGUID());
     if( iter != i_players.end() )
     i_players.erase(iter);
 
@@ -164,24 +165,6 @@ ObjectAccessor::RemoveUpdateObject(Object *obj)
     std::set<Object *>::iterator iter = i_objects.find(obj);
     if( iter != i_objects.end() )
     i_objects.erase( iter );
-}
-
-// specialized for corpse.. we need to remove corpse from the list as well
-template<>
-void
-ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
-{
-    if( m.size() == 0 )
-	return;
-
-    Guard guard(i_updateGuard);
-    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-	std::set<Object *>::iterator obj = i_objects.find(iter->second);
-	if( obj != i_objects.end() )
-	    i_objects.erase( obj );
-	RemoveCorpse(iter->second->GetGUID());
-    }
 }
 
 
@@ -234,10 +217,10 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     CellPair p(MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
-    MaNGOS::BuildUpdateForPlayer notifier(*pl, update_players);
+    MaNGOS::BuildUpdateForPlayer notifier(*pl, update_players); 
     TypeContainerVisitor<MaNGOS::BuildUpdateForPlayer, ContainerMapList<Player> > player_update(notifier);
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_update, *MapManager::Instance().GetMap(pl->GetMapId()));    
+    CellLock<GridReadGuard> cell_lock(cell, p); 
+    cell_lock->Visit(cell_lock, player_update, *MapManager::Instance().GetMap(pl->GetMapId()));  
 }
 
 void
@@ -261,7 +244,7 @@ ObjectAccessor::GetCorpseForPlayer(Player &player)
 {
     Guard guard(i_corpseGuard);
     const uint64 guid(player.GetGUID());
-    for(CorpseMapType::iterator iter=i_corpse.begin(); iter != i_corpse.end(); ++iter)
+    for(CorpsesMapType::iterator iter=i_corpse.begin(); iter != i_corpse.end(); ++iter)
 	if(iter->second->GetUInt64Value(CORPSE_FIELD_OWNER) == guid)
 	    return iter->second;
     return NULL;
@@ -286,7 +269,7 @@ void
 ObjectAccessor::RemoveCorpse(uint64 guid)
 {
     Guard guard(i_corpseGuard);
-    CorpseMapType::iterator iter = i_corpse.find(guid);
+    CorpsesMapType::iterator iter = i_corpse.find(guid);
     if( iter != i_corpse.end() )
 	i_corpse.erase(iter);
 }
@@ -304,8 +287,8 @@ ObjectAccessor::Update(const uint32  &diff)
 {
     { // don't remove scope braces
 	Guard guard(i_playerGuard);
-	for(PlayerMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
-	{
+	for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
+	{    
 	    iter->second->Update(diff);
 	    CellPair p(MaNGOS::ComputeCellPair(iter->second->GetPositionX(), iter->second->GetPositionY()));
 	    Cell cell = RedZone::GetZone(p);
@@ -313,7 +296,7 @@ ObjectAccessor::Update(const uint32  &diff)
 	    MaNGOS::ObjectUpdater updater(diff);
 	    TypeContainerVisitor<MaNGOS::ObjectUpdater, TypeMapContainer<AllObjectTypes> > object_update(updater);	
 	    CellLock<NullGuard> cell_lock(cell, p);
-	    cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(iter->second->GetMapId()));
+	    cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(iter->second->GetMapId()));	
 	}
     }
 
@@ -331,7 +314,7 @@ ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &
     cell_max += 2;
 
     Guard guard(const_cast<ObjectAccessor *>(this)->i_playerGuard);
-    for(PlayerMapType::const_iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
+    for(PlayersMapType::const_iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
     {
 	if( m_id != iter->second->GetMapId() )
 	    continue;
@@ -363,10 +346,38 @@ ObjectAccessor::ObjectChangeAccumulator::Visit(std::map<OBJECT_HANDLE, Player *>
     }
 }
 
+namespace MaNGOS
+{
+	//====================================//
+	// BuildUpdateForPlayer
+	void
+	BuildUpdateForPlayer::Visit(PlayerMapType &m)
+	{
+		for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+		{
+		if( iter->second == &i_player )
+			continue;
+
+		ObjectAccessor::UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
+		if( iter2 == i_updatePlayers.end() )
+		{
+			std::pair<ObjectAccessor::UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
+			assert(p.second);
+			iter2 = p.first;
+		}
+
+		// build myself for other player
+		i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
+    }
+}
+}
+
 template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, GameObject *> &m);
 template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, DynamicObject *> &m);
-template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m);
 template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Creature *> &m);
+
+
+
 
 
 

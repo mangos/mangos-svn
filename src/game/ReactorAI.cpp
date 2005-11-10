@@ -139,6 +139,7 @@ void
 ReactorAI::stopAttack()
 {
     if( i_pVictim )
-	;
-	// not exist yet i_creature.AI_StopAttack();
+	{
+	    // not exist yet i_creature.AI_StopAttack();
+	}
 }

@@ -315,13 +315,9 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_WHO Message" );
-#ifndef ENABLE_GRID_SYSTEM
-    ObjectMgr::PlayerMap::const_iterator itr;
-    for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
-#else
-    ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
-    for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-#endif
+
+    ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
+    for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if ( itr->second->GetName() )
         {
@@ -334,11 +330,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     data.Initialize( SMSG_WHO );
     data << uint64( clientcount );
 
-#ifndef ENABLE_GRID_SYSTEM
-    for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
-#else
-    for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-#endif
+    for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if ( itr->second->GetName() && (countcheck  < clientcount))
         {

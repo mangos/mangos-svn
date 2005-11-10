@@ -22,6 +22,24 @@
 #include "ObjectAccessor.h"
 #include "Utilities.h"
 
+// specialized for corpse.. we need to remove corpse from the list as well
+template<>
+inline void
+ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
+{
+    if( m.size() == 0 )
+	return;
+
+    Guard guard(i_updateGuard);
+    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+	std::set<Object *>::iterator obj = i_objects.find(iter->second);
+	if( obj != i_objects.end() )
+	    i_objects.erase( obj );
+	RemoveCorpse(iter->second->GetGUID());
+    }
+}
+
 template<class T> void SetState(T *obj)
 {
     obj->AddToWorld();
