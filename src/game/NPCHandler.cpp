@@ -213,21 +213,32 @@ void WorldSession::SendTrainerList( uint64 guid )
 {
     WorldPacket data;
     uint32 cnt;
+	uint64 useGuid = guid;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);        
-    Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
+    //Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
+
+	if (unit == NULL)
+	{
+		Log::getSingleton( ).outDebug( "WORLD: SendTrainerList - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+		return;
+	}
 
 	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
 
+	if (!ci)
+	{
+		Log::getSingleton( ).outDebug( "WORLD: SendTrainerList - (%u) NO CREATUREINFO! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+		return;
+	}
+
+	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID());
+	
 	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
 	{// Use Defaults...
 		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
+		useGuid = default_trainer_guids[ci->classNum];
 	}
-
-//    if (!unit->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER))
-//	{
-//        unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
-//	}
 
     cnt = 0;
     if(strainer)
@@ -437,99 +448,54 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 //////////////////////////////////////////////////////////////
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outString( "WORLD: Recieved CMSG_GOSSIP_HELLO" );
+	Log::getSingleton( ).outString( "WORLD: Recieved CMSG_GOSSIP_HELLO" );
+
     WorldPacket data;
-    uint64 guid;
-//    uint32 option;
+    uint64 guid, useGuid;
     GossipNpc *pGossip;
 
     recv_data >> guid;
 
-    //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
+	useGuid = guid;
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
-	if (!unit)
+	if (unit == NULL)
 	{
+		Log::getSingleton( ).outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
 		return;
 	}
 
-    pGossip = objmgr.GetGossipByGuid(/*unit->GetNameID()*/GUID_LOPART(guid));
-    
-/*    if (!pGossip)
-        pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
+	pGossip = objmgr.GetGossipByGuid(guid);
 
-    if (!pGossip)
-        pGossip = objmgr.GetGossipByGuid(guid);
+	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
 
-    if (!pGossip)
-        pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
-*/
-
-	CreatureInfo *ci = objmgr.GetCreatureName(guid);
-	
 	if (!ci)
-		ci = objmgr.GetCreatureName(guid/*GUID_LOPART(guid)*//*unit->GetNameID()*/);
-	
-	Trainerspell *strainer = objmgr.GetTrainerspell(/*ci->Id*/unit->GetNameID());
-	
-/*	if (!strainer)
-		strainer = objmgr.GetTrainerspell(ci->DisplayID);
+	{
+		Log::getSingleton( ).outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO CREATUREINFO! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+		return;
+	}
 
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(GUID_LOPART(guid));
+	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID());
 	
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(unit->GetGUID());
-
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(guid);*/
-
 	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
 	{// Use Defaults...
 		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
+		useGuid = default_trainer_guids[ci->classNum];
 	}
 
-/*	if (strainer)
-	{// If a trainer, add the flag if needed...
-		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ))
-			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
-
-		if (!(ci->flags1 & UNIT_NPC_FLAG_TRAINER))
-			ci->flags1 |= UNIT_NPC_FLAG_TRAINER;
-
-		if (!(ci->Type & UNIT_NPC_FLAG_TRAINER))
-			ci->Type |= UNIT_NPC_FLAG_TRAINER;
-	}
-	else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS)
-	{// If a vendor, add the flag if needed...
-		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ))
-			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR );
-
-		if (!(ci->flags1 & UNIT_NPC_FLAG_VENDOR))
-			ci->flags1 |= UNIT_NPC_FLAG_VENDOR;
-
-		if (!(ci->Type & UNIT_NPC_FLAG_VENDOR))
-			ci->Type |= UNIT_NPC_FLAG_VENDOR;
-	}*/
-
-    if (!pGossip /*|| strainer*/)
+    if (!pGossip)
     {// UQ1: Add some defaults???
-        //Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
-
-        //Log::getSingleton( ).outDebug( "Trainerspell: GUID: %u. GUID_LOW: %u. NAMEID: %u.", guid, unit->GetGUIDLow(), unit->GetNameID() );
-
         if (!unit)
         {
             return;
         }
 		else if (strainer)
         {// No items, but has skills to teach.. Send trainer list...
-            pGossip = objmgr.DefaultVendorGossip();
-            //Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
+			pGossip = objmgr.DefaultVendorGossip();
+//            Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
             data << guid;
-            //HandleTrainerListOpcode( data );
-			SendTrainerList(/*unit->GetNameID()*/guid);
+			SendTrainerList(useGuid);
             return;
         }
         else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
@@ -538,7 +504,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
             //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
 
             data << guid;
-            SendListInventory( /*unit->GetNameID()*/guid );
+            SendListInventory( guid );
             return;
         }
         else
@@ -594,9 +560,6 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     
     recv_data >> guid >> option;
 
-    //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
-    
-//    GossipNpc *pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
 #ifndef ENABLE_GRID_SYSTEM
     Creature *unit = objmgr.GetObject<Creature>(guid);
 #else
@@ -604,62 +567,6 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 #endif
 
     GossipNpc *pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
-
-/*    if (!pGossip)
-        pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid));
-
-    if (!pGossip)
-        pGossip = objmgr.GetGossipByGuid(guid);
-
-    if (!pGossip)
-        pGossip = objmgr.GetGossipByGuid(unit->GetUInt32Value(UNIT_FIELD_DISPLAYID));
-*/
-
-//#ifdef __DISABLED__
-    if (!pGossip)
-    {// UQ1: Add some defaults???
-        Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
-
-        if (!unit)
-        {
-            return;
-        }
-        else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
-        {// If they have any items to sell, then default to vendor...
-            pGossip = objmgr.DefaultVendorGossip();
-            //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
-
-            data << guid;
-            SendListInventory( guid );
-            return;
-        }
-        //else if (sSkillStore.GetNumRows() > 0) 
-        else if (strainer)
-        {// No items, but has skills to teach.. Send trainer list...
-            pGossip = objmgr.DefaultVendorGossip();
-            //Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
-
-            data << guid;
-            //HandleTrainerListOpcode( data );
-			SendTrainerList(guid);
-            return;
-        }
-        else
-        {
-            int choice = 999990+irand(3,9);
-
-            data.Initialize( SMSG_GOSSIP_MESSAGE );
-            data << guid;
-
-            data << uint32(choice);
-            data << uint32(0);
-
-            // QUEST HANDLER
-            data << uint32(0);  //quest count
-            SendPacket(&data);
-        }
-    }
-//#endif //__DISABLED__
 
     if(pGossip)
     {

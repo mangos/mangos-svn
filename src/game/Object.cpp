@@ -230,8 +230,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
                 data->AddUpdateBlock(buf);
             }
         }
-/*
-        else                                      //is it needed
+
+        else                                      //is it needed -- UQ1: Yes think enchanting needs items updated...
         {
             ByteBuffer buf(500);
 
@@ -254,7 +254,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
             data->AddUpdateBlock(buf);
         }
-*/
+
     }
     if(target->isDead())
     {
