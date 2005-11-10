@@ -64,9 +64,11 @@ namespace MaNGOS
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
 	void Notify(void);
 
+#ifdef WIN32
 	// specialization
     template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
+#endif
     };
     
     
@@ -81,9 +83,12 @@ namespace MaNGOS
 	NotVisibleNotifier(Player &player) : i_player(player) {}
 	void Notify(void);
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+
+#ifdef WIN32
 	// speicalization
     template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
+#endif
     };
     
     /** ObjectVisibleNotifier notifies player that an object is freshly enters.
@@ -178,7 +183,9 @@ namespace MaNGOS
 	uint32 i_timeDiff;
 	ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);	
+#ifdef WIN32
     template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+#endif
     };
     
 
@@ -210,6 +217,15 @@ namespace MaNGOS
 
 	template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
+
+#ifndef WIN32
+    // specialization before use for the UNIX
+    template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+#endif
 }
 
 #endif
