@@ -378,13 +378,8 @@ bool ChatHandler::HandleGMListCommand(const char* args)
     WorldPacket data;
     bool first = true;
 
-#ifndef ENABLE_GRID_SYSTEM
-    ObjectMgr::PlayerMap::const_iterator itr;
-    for (itr = objmgr.Begin<Player>(); itr != objmgr.End<Player>(); itr++)
-#else
-    ObjectAccessor::PlayerMapType &m(ObjectAccessor::Instance().GetPlayers());
-    for(ObjectAccessor::PlayerMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
-#endif
+    ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
+    for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if(itr->second->GetSession()->GetSecurity())
         {

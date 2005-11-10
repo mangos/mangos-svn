@@ -276,7 +276,7 @@
 				AdditionalOptions="/Zl"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
+				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
@@ -443,6 +443,9 @@
 			</File>
 			<File
 				RelativePath="..\..\src\framework\GameSystem\GridLoaderP.h">
+			</File>
+			<File
+				RelativePath="..\..\src\framework\GameSystem\NGrid.h">
 			</File>
 			<File
 				RelativePath="..\..\src\framework\GameSystem\TypeContainer.cpp">

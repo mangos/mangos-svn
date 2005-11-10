@@ -27,7 +27,6 @@
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "zthread/FastMutex.h"
-//#include "Common.h"
 
 #include "ByteBuffer.h"
 #include "UpdateData.h"
@@ -40,9 +39,8 @@ class Corpse;
 class Unit;
 class GameObject;
 class DynamicObject;
-class Corpse;
 class Object;
-
+	    
 
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex> >
 {
@@ -54,8 +52,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
 public:
 
-    typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayerMapType;  
-    typedef HM_NAMESPACE::hash_map<uint64, Corpse* > CorpseMapType;  
+    typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;  
+    typedef HM_NAMESPACE::hash_map<uint64, Corpse* > CorpsesMapType;  
     typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;  
     typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;  
 
@@ -71,7 +69,7 @@ public:
     Player* FindPlayer(uint64);
     Player* FindPlayerByName(const char *name) ;
 
-    inline PlayerMapType& GetPlayers(void) { return i_players; }
+    inline PlayersMapType& GetPlayers(void) { return i_players; }
     void InsertPlayer(Player *);
     void RemovePlayer(Player *);
 
@@ -91,6 +89,9 @@ public:
     bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
     template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
+
+	// template specialization
+	template<> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
 private:
 
     struct ObjectChangeAccumulator
@@ -101,8 +102,8 @@ private:
 	void Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
 
-    PlayerMapType i_players;
-    CorpseMapType i_corpse;
+    PlayersMapType i_players;
+    CorpsesMapType i_corpse;
 
     typedef ZThread::FastMutex LockType;
     typedef MaNGOS::GeneralLock<LockType > Guard;
@@ -116,6 +117,20 @@ private:
     LockType i_updateGuard;
     LockType i_corpseGuard;
 };
+
+namespace MaNGOS
+{
+	/** BuildUpdateForPlayer is a update interval call
+     */
+    struct MANGOS_DLL_DECL BuildUpdateForPlayer
+    {
+		Player &i_player;
+		ObjectAccessor::UpdateDataMapType &i_updatePlayers;
+		BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
+		void Visit(std::map<OBJECT_HANDLE, Player *> &);
+    };
+}
+
 
 
 #endif

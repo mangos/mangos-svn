@@ -31,7 +31,6 @@
 #include "ObjectGridLoader.h"
 #include "ByteBuffer.h"
 #include "UpdateData.h"
-#include "ObjectAccessor.h"
 #include <iostream>
 class Player;
 class Map;
@@ -64,6 +63,10 @@ namespace MaNGOS
 	VisibleNotifier(Player &player) : i_player(player) {}
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
 	void Notify(void);
+
+	// specialization
+    template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
     
     
@@ -78,6 +81,9 @@ namespace MaNGOS
 	NotVisibleNotifier(Player &player) : i_player(player) {}
 	void Notify(void);
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+	// speicalization
+    template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
     
     /** ObjectVisibleNotifier notifies player that an object is freshly enters.
@@ -172,6 +178,7 @@ namespace MaNGOS
 	uint32 i_timeDiff;
 	ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);	
+    template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
     };
     
 
@@ -200,27 +207,9 @@ namespace MaNGOS
 		}
 	    }
 	}
-	
+
 	template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
-    
-    
-    /** BuildUpdateForPlayer is a update interval call
-     */
-    struct MANGOS_DLL_DECL BuildUpdateForPlayer
-    {
-	Player &i_player;
-	ObjectAccessor::UpdateDataMapType &i_updatePlayers;
-	BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
-	void Visit(PlayerMapType &);
-    };
-    
-    // specialization before use
-    template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-    template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
-    template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
 }
 
 #endif

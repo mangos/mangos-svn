@@ -321,12 +321,5 @@ class Object
 
         //! True if object was updated
         bool m_objectUpdated;
-
-#ifndef ENABLE_GRID_SYSTEM
-        //! Set of Objects in range.
-        //! TODO: that functionality should be moved into WorldServer.
-        std::set<Object*> m_objectsInRange;
-#endif
-
 };
 #endif

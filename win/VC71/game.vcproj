@@ -296,7 +296,7 @@
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_VERSION_1_8_0_"
+				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_VERSION_1_8_0_,ENABLE_GRID_SYSTEM"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
@@ -467,6 +467,12 @@
 				RelativePath="..\..\src\game\AuctionHouse.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\Cell.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\CellImpl.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Channel.cpp">
 			</File>
 			<File
@@ -503,10 +509,22 @@
 				RelativePath="..\..\src\game\GossipDef.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\GridDefines.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\GridNotifiers.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\GridNotifiers.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridNotifiersImpl.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridStates.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridStates.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Group.cpp">
@@ -533,19 +551,10 @@
 				RelativePath="..\..\src\game\Map.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\MapCell.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\MapManager.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\MapManager.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\MapMgr.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\MapMgr.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\MiscHandler.cpp">
@@ -616,12 +625,6 @@
 			<File
 				RelativePath="..\..\src\game\World.h">
 			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneMapper.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneMapper.h">
-			</File>
 		</Filter>
 		<Filter
 			Name="Object"
@@ -673,12 +676,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\GameObject.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\GridStates.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\GridStates.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\GuardAI.cpp">
