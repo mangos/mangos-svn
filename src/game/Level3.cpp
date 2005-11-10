@@ -1479,6 +1479,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     char buf[256];
     uint32 guid = m_session->GetPlayer()->GetSelection();
     uint32 factionid = 0, npcflags = 0, skinid = 0;
+
 #ifndef ENABLE_GRID_SYSTEM
     Unit* target = objmgr.GetObject<Creature>(m_session->GetPlayer()->GetSelection());
 #else
@@ -1503,7 +1504,17 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     Field *fields = result->Fetch();
 
-    sprintf(buf,"Player selected guid: %d. faction %d. flag %d. name_id %d. skin_id %d.",guid,factionid,npcflags,fields[8].GetUInt32(),skinid);
+	sprintf(buf,"Player selected NPC\nGUID: %d.\nFaction: %d.\nFlag: %d.\nNameID: %d.\nSkinID: %d.", guid, factionid, npcflags, fields[8].GetUInt32(), skinid);
+
+	if ((npcflags & UNIT_NPC_FLAG_VENDOR) > 0)
+    {
+		sprintf(buf,"%s\n*** Is a vendor!", buf);
+    }
+	else if ((npcflags & UNIT_NPC_FLAG_TRAINER) > 0)
+    {
+		sprintf(buf,"%s\n*** Is a trainer!", buf);
+    }
+
     sChatHandler.FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket(&data);
 

@@ -15,6 +15,7 @@
 #include "MapManager.h"
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
+#include "Opcodes.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);

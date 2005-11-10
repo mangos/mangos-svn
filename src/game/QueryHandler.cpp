@@ -107,69 +107,63 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> entry;
     recv_data >> guid;
 
-    ci = objmgr.GetCreatureName(entry);
+    //ci = objmgr.GetCreatureName(entry);
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
-
-	//Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u - GUID_LOPART: %u - NameID: %u.", ci->Name.c_str(), entry, guid, GUID_LOPART(guid), unit->GetNameID());
-	// UQ1: unit->GetNameID() seems to crash here???
-	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u - GUID_LOPART: %u.", ci->Name.c_str(), entry, guid, GUID_LOPART(guid));
-
-    Trainerspell *strainer = objmgr.GetTrainerspell(entry/*unit->GetNameID()*/);
-
-/*	if (!strainer)
-		strainer = objmgr.GetTrainerspell(ci->DisplayID);
-
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(unit->GetNameID());
-
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(guid);*/
-
-	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
-	{// Use Defaults...
-		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
+	if (unit == NULL)
+	{
+		Log::getSingleton( ).outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+		return;
 	}
 
-/*	if (strainer)
-	{// If a trainer, add the flag if needed...
-		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ))
-			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
+	ci = objmgr.GetCreatureName(unit->GetNameID());
 
-		if (!(ci->flags1 & UNIT_NPC_FLAG_TRAINER))
-			ci->flags1 |= UNIT_NPC_FLAG_TRAINER;
-
-		if (!(ci->Type & UNIT_NPC_FLAG_TRAINER))
-			ci->Type |= UNIT_NPC_FLAG_TRAINER;
+	if (!ci)
+	{
+		Log::getSingleton( ).outDebug( "WORLD: HandleCreatureQueryOpcode - (%u) NO CREATUREINFO! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+		return;
 	}
-	else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS)
-	{// If a vendor, add the flag if needed...
-		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ))
-			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR );
 
-		if (!(ci->flags1 & UNIT_NPC_FLAG_VENDOR))
-			ci->flags1 |= UNIT_NPC_FLAG_VENDOR;
+	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name.c_str(), entry, guid);
 
-		if (!(ci->Type & UNIT_NPC_FLAG_VENDOR))
-			ci->Type |= UNIT_NPC_FLAG_VENDOR;
-	}*/
+	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID());
 
+	uint32 npcflags = unit->GetUInt32Value(UNIT_NPC_FLAGS);
+
+	if ((npcflags & UNIT_NPC_FLAG_VENDOR) > 0)
+    {
+		Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY %s is a vendor.", ci->Name.c_str());
+        //data << uint32(UNIT_NPC_FLAG_VENDOR);       // Flags1
+		unit->SetUInt32Value(UNIT_NPC_FLAGS, npcflags);
+    }
+	else if ((npcflags & UNIT_NPC_FLAG_TRAINER) > 0)
+    {
+		Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY %s is a trainer.", ci->Name.c_str());
+        //data << uint32(UNIT_NPC_FLAG_TRAINER);       // Flags1
+		unit->SetUInt32Value(UNIT_NPC_FLAGS, npcflags);
+    }
+    else
+    {
+        //data << (uint32)npcflags;//ci->flags1;        // Flags1
+    }
 
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
     data << ci->Name.c_str();
     data << uint8(0) << uint8(0) << uint8(0);
     data << ci->SubName.c_str();    // Subname (Guild Name)
-    data << (uint32)ci->flags1;        // Flags1
+    
+	data << (uint32)ci->flags1;        // Flags1
 
     if ((ci->Type & 2) > 0)
     {
         data << uint32(7);
     }
-    else
+	else
     {
         data << uint32(0);
     }
+
     data << ci->Type;            // Creature Type
 
 	// UQ1: Set these values for elite field for:
@@ -219,44 +213,10 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
     Trainerspell *strainer = objmgr.GetTrainerspell(entry/*unit->GetNameID()*/);
 
-/*	if (!strainer)
-		strainer = objmgr.GetTrainerspell(ci->DisplayID);
-
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(unit->GetNameID());
-
-	if (!strainer)
-		strainer = objmgr.GetTrainerspell(guid);
-*/
-
 	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
 	{// Use Defaults...
 		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
 	}
-
-/*	if (strainer)
-	{// If a trainer, add the flag if needed...
-		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ))
-			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER );
-
-		if (!(ci->flags1 & UNIT_NPC_FLAG_TRAINER))
-			ci->flags1 |= UNIT_NPC_FLAG_TRAINER;
-
-		if (!(ci->Type & UNIT_NPC_FLAG_TRAINER))
-			ci->Type |= UNIT_NPC_FLAG_TRAINER;
-	}
-	else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS)
-	{// If a vendor, add the flag if needed...
-		if (!unit->HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ))
-			unit->SetFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR );
-
-		if (!(ci->flags1 & UNIT_NPC_FLAG_VENDOR))
-			ci->flags1 |= UNIT_NPC_FLAG_VENDOR;
-
-		if (!(ci->Type & UNIT_NPC_FLAG_VENDOR))
-			ci->Type |= UNIT_NPC_FLAG_VENDOR;
-	}*/
-
 
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
@@ -271,10 +231,11 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
     }
     else
     {
-        
         data << uint32(0);
     }
-    data << ci->Type;            // Creature Type
+
+    //data << ci->Type;            // Creature Type
+	data << (uint32)testvalue;
 
 	// UQ1: Set these values for elite field for:
 	// 1 + 2	= Elite
@@ -296,24 +257,15 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 	else
 		data << (uint32)0; // Standard
 
-	//data << (uint32)0; // UQ1: Seems to do nothing...
-	//data << (uint32)0; // UQ1: Seems to do nothing...
-
-	/*data << (uint32)testvalue;
-	data << (uint32)testvalue+1;
-	data << (uint32)testvalue+2;
-	data << (uint32)testvalue+3;
-	data << (uint32)testvalue+4;
-	data << (uint32)testvalue+5;
-	data << (uint32)testvalue+6;
-	data << (uint32)testvalue+7;
-	data << (uint32)testvalue+8;
-	data << (uint32)testvalue+9;*/
-
 	data << (uint32)ci->family;    // Family
 
-    data << (uint32)testvalue/*0*/;            // Unknown (move before or after unknowns 3 and 4) don't know where exactly
+    data << (uint32)0;            // Unknown (move before or after unknowns 3 and 4) don't know where exactly
     data << ci->DisplayID;        // DisplayID
+
+	data << (uint32)0;
+	data << (uint32)0;
+	data << (uint32)0;
+	data << (uint32)0;
 
     SendPacket( &data );
 }
