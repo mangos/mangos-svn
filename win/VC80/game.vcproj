@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="game"
 	ProjectGUID="{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
-	RootNamespace="game"
-	SignManifests="true"
 	>
 	<Platforms>
 		<Platform
@@ -20,7 +18,7 @@
 			OutputDirectory=".\game___Win32_Debug"
 			IntermediateDirectory=".\game___Win32_Debug"
 			ConfigurationType="4"
-			InheritedPropertySheets="UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -44,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				StringPooling="false"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -98,7 +96,7 @@
 			OutputDirectory=".\game___Win32_Release"
 			IntermediateDirectory=".\game___Win32_Release"
 			ConfigurationType="4"
-			InheritedPropertySheets="UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -174,7 +172,7 @@
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -253,7 +251,7 @@
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -325,87 +323,11 @@
 			/>
 		</Configuration>
 		<Configuration
-			Name="1.8.x Release|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			InheritedPropertySheets="UpgradeFromVC71.vsprops"
-			UseOfMFC="0"
-			ATLMinimizesCRunTimeLibraryUsage="false"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
-			<Tool
-				Name="VCCLCompilerTool"
-				InlineFunctionExpansion="2"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_VERSION_1_8_0_"
-				StringPooling="true"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="true"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\Release/game.pch"
-				AssemblerListingLocation=".\game___Win32_Release/"
-				ObjectFile=".\game___Win32_Release/"
-				ProgramDataBaseFileName=".\game___Win32_Release/"
-				WarningLevel="3"
-				SuppressStartupBanner="true"
-				Detect64BitPortabilityProblems="true"
-				CompileAs="0"
-			/>
-			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile=".\Release\game.lib"
-				SuppressStartupBanner="true"
-			/>
-			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCPostBuildEventTool"
-			/>
-		</Configuration>
-		<Configuration
 			Name="1_8_x Debug|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="4"
-			InheritedPropertySheets="UpgradeFromVC71.vsprops"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="false"
 			CharacterSet="2"
@@ -479,6 +401,241 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="1.8.x Release|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				InlineFunctionExpansion="1"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
+				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_VERSION_1_8_0_,ENABLE_GRID_SYSTEM"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\Release/game.pch"
+				AssemblerListingLocation=".\game___Win32_Release/"
+				ObjectFile=".\game___Win32_Release/"
+				ProgramDataBaseFileName=".\game___Win32_Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\Release\game.lib"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release (No Grid System)|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			WholeProgramOptimization="1"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="3"
+				InlineFunctionExpansion="2"
+				FavorSizeOrSpeed="1"
+				EnableFiberSafeOptimizations="true"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
+				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,_VERSION_1_8_0_"
+				StringPooling="true"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="true"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\Release/game.pch"
+				AssemblerListingLocation=".\game___Win32_Release/"
+				ObjectFile=".\game___Win32_Release/"
+				ProgramDataBaseFileName=".\game___Win32_Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\Release\game.lib"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Debug (No Grid)|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/D &quot;__REVIVE_CHEAT__&quot;"
+				Optimization="0"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,../../src/framework"
+				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,_VERSION_1_8_0_"
+				StringPooling="false"
+				MinimalRebuild="false"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				RuntimeTypeInfo="true"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\game___Win32_Debug/game.pch"
+				AssemblerListingLocation=".\game___Win32_Debug/"
+				ObjectFile=".\game___Win32_Debug/"
+				ProgramDataBaseFileName=".\game___Win32_Debug/"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\game___Win32_Debug\game.lib"
+				SuppressStartupBanner="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -492,6 +649,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\AuctionHouse.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Cell.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CellImpl.h"
 				>
 			</File>
 			<File
@@ -535,11 +700,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\GossipDef.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GossipDef.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridDefines.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\GridNotifiers.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\GridNotifiers.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridNotifiersImpl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridStates.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GridStates.h"
 				>
 			</File>
 			<File
@@ -575,23 +764,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\MapCell.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\MapManager.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\MapManager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\MapMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\MapMgr.h"
 				>
 			</File>
 			<File
@@ -623,7 +800,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Quest.h"
+				RelativePath="..\..\src\game\QuestDef.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\QuestDef.h"
 				>
 			</File>
 			<File
@@ -667,6 +848,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\UpdateData_1_8_x.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\UpdateData_1_8_x.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\World.cpp"
 				>
 			</File>
@@ -674,18 +863,14 @@
 				RelativePath="..\..\src\game\World.h"
 				>
 			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneMapper.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ZoneMapper.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Object"
 			>
+			<File
+				RelativePath="..\..\src\game\AnimalRandomMovementGenerator.h"
+				>
+			</File>
 			<File
 				RelativePath="..\..\src\game\Corpse.cpp"
 				>
@@ -711,6 +896,26 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\CreatureAIImpl.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIRegistry.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAIRegistry.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAISelector.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\CreatureAISelector.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\DynamicObject.cpp"
 				>
 			</File>
@@ -727,11 +932,23 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GridStates.cpp"
+				RelativePath="..\..\src\game\GuardAI.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GridStates.h"
+				RelativePath="..\..\src\game\GuardAI.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\HateMatrix.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\IdleMovementGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\IdleMovementGenerator.h"
 				>
 			</File>
 			<File
@@ -752,6 +969,30 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\LootMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MotionMaster.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MotionMaster.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MovementGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\MovementGenerator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\NullCreatureAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\NullCreatureAI.h"
 				>
 			</File>
 			<File
@@ -787,11 +1028,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\RandomMovementGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\RandomMovementGenerator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ReactorAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ReactorAI.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\TargetedMovementGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\TargetedMovementGenerator.h"
 				>
 			</File>
 			<File
@@ -811,7 +1076,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\UpdateFields_1_8_x.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\UpdateMask.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\UpdateMask_1_8_x.h"
 				>
 			</File>
 			<File
@@ -840,6 +1113,18 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Opcodes_1_7_x.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Opcodes_1_8_x.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Opcodes_1_8_x.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\SharedDefines.h"
 				>
 			</File>
 			<File
