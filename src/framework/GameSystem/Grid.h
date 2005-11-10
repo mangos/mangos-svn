@@ -36,14 +36,6 @@
 #include "TypeContainer.h"
 #include "TypeContainerVisitor.h"
 
-typedef enum
-    {        
-	GRID_STATE_INVALID = 0,
-	GRID_STATE_ACTIVE = 1,
-	GRID_STATE_IDLE = 2,
-	GRID_STATE_REMOVAL= 3,
-	MAX_GRID_STATE = 4
-    } grid_state_t;
 
 // forward declaration
 template<class T, class O> class GridLoader;
@@ -58,9 +50,7 @@ class MANGOS_DLL_DECL Grid
 {
     // allows the GridLoader to access its internals
     template<class T, class O> friend class GridLoader;
-public:
-    
-    explicit Grid(unsigned int id) : i_gridId(id), i_gridState(GRID_STATE_INVALID) {}
+public:   
     
     /** destructor to clean up its resources. This includes unloading the
 	grid if it has not been unload.
@@ -105,13 +95,7 @@ public:
     {
 	visitor.Visit(i_objects);
     }
-    
-    
-    /** Grid id accessor
-     */
-    const unsigned int GetGridId(void) const { return i_gridId; }
-   void SetGridId(unsigned int id) const { i_gridId = id; }
-    
+        
     /** Returns the number of object within the grid.
      */
     unsigned int ObjectsInGrid(void) const { return i_objects._element.size(); }
@@ -128,17 +112,12 @@ public:
     /** Removes a containter type object from the grid
      */
     template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl); }
-
-    inline grid_state_t GetGridState(void) const { return i_gridState; }
-    inline void SetGridState(grid_state_t s) { i_gridState = s; }
     
 private:
     
     typedef typename ThreadModel::Lock Guard;
     typedef typename ThreadModel::VolatileType VolatileType;
     
-    unsigned int i_gridId;
-    grid_state_t i_gridState;
     TypeMapContainer<OBJECT_TYPES> i_container;
     ContainerMapList<OBJECT> i_objects;
 };

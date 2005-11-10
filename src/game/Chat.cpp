@@ -416,11 +416,8 @@ void ChatHandler::smsg_NewWorld(WorldSession *session, uint32 mapid, float x, fl
     data << uint32(0);
 
     session->SendPacket(&data);
-#ifndef ENABLE_GRID_SYSTEM
-    session->GetPlayer()->RemoveFromMap();
-#else
-    MapManager::Instance().GetMap(session->GetPlayer()->GetMapId())->RemoveFromMap(session->GetPlayer());
-#endif
+    MapManager::Instance().GetMap(session->GetPlayer()->GetMapId())->Remove(session->GetPlayer(), false);
+
     // Build a NEW WORLD packet
     data.Initialize(SMSG_NEW_WORLD);
     data << (uint32)mapid << (float)x << (float)y << (float)z << (float)0.0f;
@@ -429,7 +426,8 @@ void ChatHandler::smsg_NewWorld(WorldSession *session, uint32 mapid, float x, fl
     // TODO: clear attack list
 
     session->GetPlayer()->SetMapId(mapid);
-    session->GetPlayer()->SetPosition(x, y, z, 0);
+    session->GetPlayer()->Relocate(x, y, z, 0); // sets the position without triggers any packet stuff
+    MapManager::Instance().GetMap(session->GetPlayer()->GetMapId())->Add(session->GetPlayer()); // he enters the new world
 }
 
 

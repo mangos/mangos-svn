@@ -37,11 +37,9 @@
 #include "Affect.h"
 #include "Group.h"
 #include "UpdateData.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
+
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
@@ -151,23 +149,15 @@ void Spell::FillTargetMap()
                 case 15:                          // All Enemies in Area of Effect (TEST)
                 case 16:                          // All Enemies in Area of Effect instant (e.g. Flamestrike)
                 {
-#ifndef ENABLE_GRID_SYSTEM
-                    std::set<Object*>::iterator itr;
-                    for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
-                    {
-                        if( (*itr)->GetTypeId() != TYPEID_UNIT && (*itr)->GetTypeId() != TYPEID_PLAYER )
-                            continue;
-                        if(_CalcDistance(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,(*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && (*itr)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                            tmpMap.push_back((*itr)->GetGUID());
-
-#else
-                        for(Player::InRangeUnitsMapType::iterator itr = p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-                        {
-                            if(_CalcDistance(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                tmpMap.push_back(itr->second->GetGUID());
-#endif
-
-                        }
+		    /* TODO siuolly: check on nearby cell uints for casting
+		      for(Player::InRangeUnitsMapType::iterator itr = p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
+		      {
+		      if(_CalcDistance(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+		      tmpMap.push_back(itr->second->GetGUID());
+		      
+		      
+		      }
+		    */
                     }break;
                     case 20:                      // All Party Members around the Caster
                     {
@@ -175,11 +165,7 @@ void Spell::FillTargetMap()
                         if(pGroup)
                             for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                         {
-#ifndef ENABLE_GRID_SYSTEM
-                            Unit* Target = objmgr.GetObject<Player>(pGroup->GetMemberGUID(p));
-#else
                             Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-#endif
                             if(!Target || Target->GetGUID() == m_caster->GetGUID())
                                 continue;
                             if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])))
@@ -194,48 +180,28 @@ void Spell::FillTargetMap()
                     }break;
                     case 22:                      // Enemy Targets around the Caster
                     {
-#ifndef ENABLE_GRID_SYSTEM
-                        std::set<Object*>::iterator itr;
-                        for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
-                        {
-                            if( (*itr)->GetTypeId() != TYPEID_UNIT && (*itr)->GetTypeId() != TYPEID_PLAYER )
-                                continue;
-                            if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),(*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && (*itr)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                tmpMap.push_back((*itr)->GetGUID());
-
-#else
-                            for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-                            {
-                                if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                    tmpMap.push_back(itr->second->GetGUID());
-#endif
-
-                            }
-                        }break;
+			/* TODO siuolly: check nearby cell
+			   for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
+			   {
+			   if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+			   tmpMap.push_back(itr->second->GetGUID());
+			*/
+			
+		    }break;
                         case 23:                  // Gameobject Target
                         {
                             tmpMap.push_back(m_targets.m_unitTarget);
                         }break;
                         case 24:                  // Targets in Front of the Caster
                         {
-#ifndef ENABLE_GRID_SYSTEM
-                            std::set<Object*>::iterator itr;
-                            for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
-                            {
-                                if( (*itr)->GetTypeId() != TYPEID_UNIT && (*itr)->GetTypeId() != TYPEID_PLAYER )
-                                    continue;
-                                if(m_caster->isInFront((Unit*)(*itr),GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]))) && (*itr)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                    tmpMap.push_back((*itr)->GetGUID());
-
-#else
+			    /* TODO siuolly: check nearby cell
                                 for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
                                 {
                                     if(m_caster->isInFront((Unit*)(itr->second),GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]))) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
                                         tmpMap.push_back(itr->second->GetGUID());
-#endif
+			    */
 
-                                }
-                            }break;
+			}break;
                             case 25:              //Target is duel vs player add by vendy
                             {
                                 tmpMap.push_back(m_targets.m_unitTarget);
@@ -249,19 +215,7 @@ void Spell::FillTargetMap()
                             }break;
                             case 28:              // All Enemies in Area of Effect(Blizzard/Rain of Fire/volley) channeled
                             {
-#ifndef ENABLE_GRID_SYSTEM
-                                std::set<Object*>::iterator itr;
-                                for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
-                                {
-                                    if( (*itr)->GetTypeId() != TYPEID_UNIT && (*itr)->GetTypeId() != TYPEID_PLAYER )
-                                        continue;
-                                    if(!((Unit*)(*itr))->isAlive())
-                                        continue;
-
-                                    if(_CalcDistance(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,(*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && (*itr)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                        tmpMap.push_back((*itr)->GetGUID());
-
-#else
+				/* TODO siuolly
                                     for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
                                     {
                                         if(!itr->second->isAlive())
@@ -272,6 +226,7 @@ void Spell::FillTargetMap()
 #endif
 
                                     }
+				*/
 
                                 }break;
                                 case 32:          // Minion Target
@@ -285,17 +240,11 @@ void Spell::FillTargetMap()
                                 {
                                     bool onlyParty = false;
                                     Unit* firstTarget;
-#ifndef ENABLE_GRID_SYSTEM
-                                    firstTarget = objmgr.GetObject<Player>(m_targets.m_unitTarget);
-#else
                                     firstTarget = ObjectAccessor::Instance().FindPlayer(m_targets.m_unitTarget);
-#endif
+
                                     if(!firstTarget)
-#ifndef ENABLE_GRID_SYSTEM
-                                        firstTarget = objmgr.GetObject<Creature>(m_targets.m_unitTarget);
-#else
-                                    firstTarget = ObjectAccessor::Instance().GetCreature(*p_caster, m_targets.m_unitTarget);
-#endif
+					firstTarget = ObjectAccessor::Instance().GetCreature(*p_caster, m_targets.m_unitTarget);
+
                                     if(!firstTarget)
                                         break;
                                     Group* pGroup = objmgr.GetGroupByLeader(p_caster->GetGroupLeader());
@@ -306,11 +255,8 @@ void Spell::FillTargetMap()
                                     }
                                     for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                                     {
-#ifndef ENABLE_GRID_SYSTEM
-                                        Unit* Target = objmgr.GetObject<Player>(pGroup->GetMemberGUID(p));
-#else
                                         Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-#endif
+
                                         if(!Target || Target->GetGUID() == m_caster->GetGUID())
                                             continue;
                                         if(_CalcDistance(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && Target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
@@ -319,29 +265,14 @@ void Spell::FillTargetMap()
                                 }break;
                                 case 53:          // Target Area by Players CurrentSelection()
                                 {
-#ifndef ENABLE_GRID_SYSTEM
-                                    std::set<Object*>::iterator itr;
-                                    Unit* Target = objmgr.GetObject<Creature>(p_caster->GetSelection());
-                                    if(!Target)
-                                        Target = objmgr.GetObject<Player>(p_caster->GetSelection());
-                                    if(!Target)
-                                        break;
-                                    for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
-                                    {
-                                        if( (*itr)->GetTypeId() != TYPEID_UNIT && (*itr)->GetTypeId() != TYPEID_PLAYER )
-                                            continue;
-                                        if(_CalcDistance(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),(*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && (*itr)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                            tmpMap.push_back((*itr)->GetGUID());
-
-#else
-                                        Unit* Target = ObjectAccessor::Instance().GetUnit(*p_caster, p_caster->GetSelection());
-                                        for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-                                        {
-                                            if(_CalcDistance(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                                tmpMap.push_back(itr->second->GetGUID());
-#endif
-                                        }
-                                    }break;
+				    /* TODO siuolly:
+				       Unit* Target = ObjectAccessor::Instance().GetUnit(*p_caster, p_caster->GetSelection());
+				       for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
+				       {
+				       if(_CalcDistance(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+				       tmpMap.push_back(itr->second->GetGUID());
+				    */
+				}break;
                                     default:
                                     {
                                     }break;
@@ -351,11 +282,7 @@ void Spell::FillTargetMap()
                                 {
                                     if(m_targets.m_unitTarget)
                                     {
-#ifndef ENABLE_GRID_SYSTEM
-                                        Unit* target = objmgr.GetObject<Creature>(m_targets.m_unitTarget);
-#else
                                         Unit* target = ObjectAccessor::Instance().GetCreature(*p_caster, m_targets.m_unitTarget);
-#endif
                                     }
                                 }
 
@@ -713,13 +640,9 @@ void Spell::FillTargetMap()
 
                     void Spell::SendChannelStart(uint32 duration)
                     {
-#ifndef ENABLE_GRID_SYSTEM
-                        Unit* target = objmgr.GetObject<Creature>(((Player*)m_caster)->GetSelection());
-                        if(!target)
-                            target = objmgr.GetObject<Player>(((Player*)m_caster)->GetSelection());
-#else
                         Unit* target = ObjectAccessor::Instance().GetCreature(*((Player *)m_caster), ((Player *)m_caster)->GetSelection());
-#endif
+                        if( !target )
+                           target = ObjectAccessor::Instance().GetCreature(*((Player *)m_caster), ((Player *)m_caster)->GetSelection());
 
                         if(!target)
                             return;
@@ -811,16 +734,6 @@ void Spell::FillTargetMap()
                         Player* playerTarget, *playerCaster;
                         WorldPacket data;
                         data.clear();
-#ifndef ENABLE_GRID_SYSTEM
-                        unitTarget = objmgr.GetObject<Creature>(guid);
-                        if(!unitTarget)
-                            unitTarget = objmgr.GetObject<Player>(guid);
-
-                        // itemTarget = objmgr.GetObject<Item>(guid);
-                        gameObjTarget = objmgr.GetObject<GameObject>(guid);
-                        playerTarget = objmgr.GetObject<Player>(guid);
-                        playerCaster = objmgr.GetObject<Player>(m_caster->GetGUID());
-#else
                         playerCaster = ObjectAccessor::Instance().FindPlayer(m_caster->GetGUID());
                         if( playerCaster != NULL )
                         {
@@ -828,7 +741,6 @@ void Spell::FillTargetMap()
                             gameObjTarget = ObjectAccessor::Instance().GetGameObject(*playerCaster, guid);
                             playerTarget = ObjectAccessor::Instance().GetPlayer(*playerCaster, guid);
                         }
-#endif
 
                         uint32 damage = 0;
                         damage = CalculateDamage((uint8)i);
@@ -1097,12 +1009,7 @@ newItem = NULL;
                                 spawnCreature->SetUInt32Value(OBJECT_FIELD_TYPE,ci->Type);
 
                                 Log::getSingleton( ).outError("AddObject at Spell.cpp");
-#ifndef ENABLE_GRID_SYSTEM
-                                objmgr.AddObject(spawnCreature);
-                                spawnCreature->PlaceOnMap();
-#else
                                 MapManager::Instance().GetMap(spawnCreature->GetMapId())->Add(spawnCreature);
-#endif
 
                             }break;
                             case 53:              // Enchant Item Permanent
@@ -1294,12 +1201,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
                              pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, 57 );
 
                              Log::getSingleton( ).outError("AddObject at Spell.cpp 1247");
-#ifndef ENABLE_GRID_SYSTEM
-                             objmgr.AddObject(pGameObj);
-                             pGameObj->PlaceOnMap();
-#else
                              MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-#endif
 
                              SendDuelRequest(playerCaster, playerTarget , pGameObj->GetGUID());
 
@@ -1334,21 +1236,18 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 if(guid != 0)
                                 {
                                     Creature* Totem = NULL;
-#ifndef ENABLE_GRID_SYSTEM
-                                    Totem = objmgr.GetObject<Creature>(guid);
-#endif
+				    
+				    // TODO siuolly figure out whether this is needed in GRID on
+                                    //Totem = objmgr.GetObject<Creature>(guid);
+
                                     if(Totem)
                                     {
-#ifndef ENABLE_GRID_SYSTEM
-                                        Totem->RemoveFromMap();
-                                        objmgr.RemoveObject(Totem);
-#else
-                                        MapManager::Instance().GetMap(Totem->GetMapId())->RemoveFromMap(Totem);
-#endif
+                                        MapManager::Instance().GetMap(Totem->GetMapId())->Remove(Totem, true);
+                                        Totem = NULL; // protect it.
                                     }
                                 }
 
-// spawn a new one
+				// spawn a new one
                                 Creature* pTotem = new Creature();
                                 CreatureInfo* ci = objmgr.GetCreatureName(m_spellInfo->EffectMiscValue[i]);
                                 if(!ci)
@@ -1364,12 +1263,8 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 pTotem->SetUInt32Value(UNIT_FIELD_DISPLAYID,ci->DisplayID);
                                 pTotem->SetUInt32Value(UNIT_FIELD_LEVEL,m_caster->getLevel());
                                 Log::getSingleton( ).outError("AddObject at Spell.cppl line 1040");
-#ifndef ENABLE_GRID_SYSTEM
-                                objmgr.AddObject(pTotem);
-                                pTotem->PlaceOnMap();
-#else
                                 MapManager::Instance().GetMap(pTotem->GetMapId())->Add(pTotem);
-#endif
+
 
                                 data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
                                 data << pTotem->GetGUID();
@@ -1423,20 +1318,14 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 if(guid != 0)
                                 {
                                     GameObject* obj = NULL;
-#ifndef ENABLE_GRID_SYSTEM
-                                    obj = objmgr.GetObject<GameObject>(guid);
-#else
                                     if( playerCaster )
                                         obj = ObjectAccessor::Instance().GetGameObject(*playerCaster, guid);
-#endif
+
                                     if(obj)
                                     {
-#ifndef ENABLE_GRID_SYSTEM
-                                        obj->RemoveFromMap();
-                                        objmgr.RemoveObject(obj);
-#else
-                                        MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
-#endif
+					// Remove and delete
+                                        MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
+					obj = NULL;
                                     }
                                 }
 
@@ -1451,12 +1340,8 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
                                 pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
                                 Log::getSingleton( ).outError("AddObject at Spell.cpp 1100");
-#ifndef ENABLE_GRID_SYSTEM
-                                objmgr.AddObject(pGameObj);
-                                pGameObj->PlaceOnMap();
-#else
+
                                 MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-#endif
                                 data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
                                 data << pGameObj->GetGUID();
                                 m_caster->SendMessageToSet(&data,true);
@@ -1494,15 +1379,6 @@ m_CastItem = p_caster->GetItemBySlot(i);
 
                     void Spell::HandleAddAffect(uint64 guid)
                     {
-#ifndef ENABLE_GRID_SYSTEM
-                        Unit* Target = objmgr.GetObject<Creature>(guid);
-                        if(!Target)
-                            Target = objmgr.GetObject<Player>(guid);
-                        if(!Target)
-                            return;
-                        if(!Target->isAlive())
-                            return;
-#else
                         Player *player = dynamic_cast<Player *>(m_caster);
                         Unit *Target = NULL;
                         if( player != NULL )
@@ -1513,7 +1389,6 @@ m_CastItem = p_caster->GetItemBySlot(i);
                         }
                         else
                             return;               // FIX ME
-#endif
 
                         if(Target->tmpAffect != 0)
                         {
@@ -1558,18 +1433,13 @@ m_CastItem = p_caster->GetItemBySlot(i);
 							return castResult;
 						}
 
-#ifndef ENABLE_GRID_SYSTEM
-                        Unit* target = objmgr.GetObject<Creature>(m_targets.m_unitTarget);
-                        if(!target)
-                            Unit* target = objmgr.GetObject<Player>(m_targets.m_unitTarget);
-#else
                         Unit *target = NULL;
                         Player *pl = dynamic_cast<Player *>(m_caster);
                         if( pl != NULL )
                             target = ObjectAccessor::Instance().GetUnit(*pl, m_targets.m_unitTarget);
                         else
-							Log::getSingleton( ).outError("SPELL: (grid system) player invalid!!!");                      // FIX ME PLEASE..
-#endif
+			    Log::getSingleton( ).outError("SPELL: (grid system) player invalid!!!");   // FIX ME PLEASE..
+
                         if(target)
                         {
                             if(!m_caster->isInFront(target,GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex))))
@@ -1725,11 +1595,8 @@ fclose(pFile);
                     void Spell::HandleTeleport(uint32 id, Unit* Target)
                     {
                         Player* pTarget=NULL;
-#ifndef ENABLE_GRID_SYSTEM
-                        pTarget = objmgr.GetObject<Player>(Target->GetGUID());
-#else
                         pTarget = ObjectAccessor::Instance().FindPlayer(Target->GetGUID());
-#endif
+
                         TeleportCoords* TC = new TeleportCoords();
                         WorldPacket data;
 
@@ -1748,11 +1615,8 @@ fclose(pFile);
                             pTarget->GetSession()->SendPacket(&data);
                         }
 
-#ifndef ENABLE_GRID_SYSTEM
-                        Target->RemoveFromMap();
-#else
-                        MapManager::Instance().GetMap(Target->GetMapId())->RemoveFromMap(pTarget);
-#endif
+                        MapManager::Instance().GetMap(Target->GetMapId())->Remove(pTarget, false);
+
 
                         // Build a NEW WORLD packet
                         data.Initialize(SMSG_NEW_WORLD);
@@ -1768,5 +1632,7 @@ fclose(pFile);
                         // TODO: clear attack list
 
                         pTarget->SetMapId(TC->mapId);
-                        pTarget->SetPosition(TC->x, TC->y, TC->z, 0);
+                        pTarget->Relocate(TC->x, TC->y, TC->z, 0);
+			// enters the new world
+                        MapManager::Instance().GetMap(Target->GetMapId())->Add(pTarget);
                     }

@@ -119,12 +119,13 @@ class Creature : public Unit
         /// Updates
         void UpdateMobMovement( uint32 p_time );
         virtual void Update( uint32 time );
+    inline CreatureState GetCreatureState(void) const { return m_creatureState; }
 
         /// AI
-		time_t GetNextThink();
-		void SetEnabled();
-		void SetDisabled();
-		bool isDisabled();
+    time_t GetNextThink();
+    void SetEnabled();
+    void SetDisabled();
+    bool isDisabled();
 
         void AI_ToggleAI(bool useAI) { m_useAI = useAI; }
         void AI_Update();

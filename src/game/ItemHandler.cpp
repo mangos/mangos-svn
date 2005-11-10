@@ -58,7 +58,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 
     // check to make sure items are not being put in wrong spots
     if ( (srcslot >= INVENTORY_SLOT_BAG_START && srcslot < BANK_SLOT_BAG_END)&&
-     (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
+         (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
        )
     {
         uint8 error = GetPlayer()->CanEquipItemInSlot(dstslot, srcitem->GetProto());

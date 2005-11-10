@@ -15,19 +15,19 @@ static void grid_compression(const char *src_tbl, const char *dest_tbl)
 {
     std::stringstream ss;
     ss.precision(8);
-    ss << "DROP TABLE IF EXISTS " << "`" << dest_tbl << "`"; 
+    ss << "DROP TABLE IF EXISTS " << "`" << dest_tbl << "`;"; 
     sDatabase.Execute( ss.str().c_str() );
 
     ss.str("");
-    ss << "CREATE TABLE IF NOT EXISTS `" << dest_tbl << "` (`guid` bigint(20) unsigned NOT NULL default '0', `x` int(11) NOT NULL default '0', `y` int(11) NOT NULL default '0', `grid_id` int(11) NOT NULL default '0', `mapId` int(11) NOT NULL default '0', KEY srch_grid(grid_id,mapId) ) TYPE=MyISAM;";
+    ss << "CREATE TABLE IF NOT EXISTS `" << dest_tbl << "` (`guid` bigint(20) unsigned NOT NULL default '0', `x` int(11) NOT NULL default '0', `y` int(11) NOT NULL default '0', `cell_x` int(11) NOT NULL default '0', `cell_y` int(11) NOT NULL default '0', `grid_id` int(11) NOT NULL default '0', `cell_id` int(11) NOT NULL default '0', `mapId` int(11) NOT NULL default '0', KEY srch_grid(grid_id, cell_id, mapId) ) TYPE=MyISAM;";
     sDatabase.Execute( ss.str().c_str() );
 
     ss.str("");
-    ss << "insert into " << dest_tbl << " (guid, mapId, x, y) select id,mapId, (( positionX-" << CENTER_GRID_OFFSET << ")/" << SIZE_OF_GRIDS << ")+" << CENTER_GRID_ID << "," << "((positionY-" << CENTER_GRID_OFFSET << ")/" << SIZE_OF_GRIDS << ")+" << CENTER_GRID_ID << "  from " << src_tbl << ";";
+    ss << "insert into " << dest_tbl << " (guid, mapId, x, y, cell_x, cell_y) select id,mapId, (( positionX-" << CENTER_GRID_OFFSET << ")/" << SIZE_OF_GRIDS << ")+" << CENTER_GRID_ID << "," << "((positionY-" << CENTER_GRID_OFFSET << ")/" << SIZE_OF_GRIDS << ")+" << CENTER_GRID_ID << "," << "((positionX-" << CENTER_GRID_CELL_OFFSET << ")/" << SIZE_OF_GRID_CELL << ")+" << CENTER_GRID_CELL_ID << "," << "((positionY-" << CENTER_GRID_CELL_OFFSET << ")/" << SIZE_OF_GRID_CELL << ")+" << CENTER_GRID_CELL_ID << "  from " << src_tbl << ";";
     sDatabase.Execute( ss.str().c_str() );
     
     ss.str("");
-    ss << "UPDATE " << dest_tbl << " set grid_id=(x*" << MAX_NUMBER_OF_GRIDS << ") + y;";
+    ss << "UPDATE " << dest_tbl << " set grid_id=(x*" << MAX_NUMBER_OF_GRIDS << ") + y, cell_id=((cell_y *" << TOTAL_NUMBER_OF_CELLS_PER_MAP << ") + cell_x);";
     sDatabase.Execute( ss.str().c_str() );
 }
 
@@ -84,15 +84,14 @@ MapManager::Update(time_t diff)
 {
     i_timer.Update(diff);
     if( !i_timer.Passed() )
-    return;
+	return;
 
     i_timer.Reset();
     Guard guard(*this);
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-    iter->second->Update(diff);
-#ifdef ENABLE_GRID_SYSTEM
-    ObjectAccessor::Instance().Update();
-#endif
+	iter->second->Update(diff);
+    
+    ObjectAccessor::Instance().Update(diff);
 }
 
 

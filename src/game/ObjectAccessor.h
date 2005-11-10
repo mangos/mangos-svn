@@ -27,7 +27,7 @@
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "zthread/FastMutex.h"
-#include "Common.h"
+//#include "Common.h"
 
 #include "ByteBuffer.h"
 #include "UpdateData.h"
@@ -55,6 +55,10 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 public:
 
     typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayerMapType;  
+    typedef HM_NAMESPACE::hash_map<uint64, Corpse* > CorpseMapType;  
+    typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;  
+    typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;  
+
 
     Creature* GetCreature(Player &, uint64);
     Corpse* GetCorpse(Player &, uint64);
@@ -73,22 +77,44 @@ public:
 
     void AddUpdateObject(Object *obj);
     void RemoveUpdateObject(Object *obj);
-    void Update(void);
+
+    /* This method updates the players and anything within its visibility
+     */
+    void Update(const uint32 &diff);
+
+    // retrieves a corpse for the player
+    Corpse* GetCorpseForPlayer(Player &);
+    void RemoveCorpse(uint64);
+    void AddCorpse(Corpse *corpse);
+
+    // Check to see if player is located in a range of cells
+    bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
     template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
 private:
+
+    struct ObjectChangeAccumulator
+    {
+	UpdateDataMapType &i_updateDatas;
+	Object &i_object;
+	ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d) : i_object(obj), i_updateDatas(d) {}
+	void Visit(std::map<OBJECT_HANDLE, Player *> &);
+    };
+
     PlayerMapType i_players;
+    CorpseMapType i_corpse;
 
-    typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;  
-    typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;  
-    typedef MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>::Lock Guard;
-
+    typedef ZThread::FastMutex LockType;
+    typedef MaNGOS::GeneralLock<LockType > Guard;
+    
+    void _buildChangeObjectForPlayer(Object *, UpdateDataMapType &);
     void _buildUpdateObject(Object *, UpdateDataMapType &);
     void _buildPacket(Player *, Player *, UpdateDataMapType &);
-    void _buildForInRangePlayer(Object *, UpdateDataMapType &);
-
+    void _update(void);
     std::set<Object *> i_objects;
-
+    LockType i_playerGuard;
+    LockType i_updateGuard;
+    LockType i_corpseGuard;
 };
 
 

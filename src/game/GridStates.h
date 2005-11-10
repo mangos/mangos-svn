@@ -35,35 +35,37 @@ class MANGOS_DLL_DECL GridState
 {
     public:
 
-/// Update grid state
-        virtual void Update(Map &, GridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &t_diff) const = 0;
+    /// Update grid state
+    virtual void Update(Map &, NGridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &t_diff) const = 0;
 };
 
 class MANGOS_DLL_DECL InvalidState : public GridState
 {
-    public:
-
-        void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+public:
+ 
+    void Update(Map &, NGridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
 };
 
 class MANGOS_DLL_DECL ActiveState : public GridState
 {
-    public:
-
-        void Update(Map &, GridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+public:
+ 
+    void Update(Map &, NGridType&, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
 };
 
 class MANGOS_DLL_DECL IdleState : public GridState
 {
-    public:
-
-        void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+public:
+ 
+    void Update(Map &, NGridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
 };
 
 class MANGOS_DLL_DECL RemovalState : public GridState
 {
-    public:
-
-        void Update(Map &, GridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
+public:
+ 
+    void Update(Map &, NGridType &, GridInfo &, const uint32 &x, const uint32 &y, const uint32 &) const;
 };
+
 #endif
+

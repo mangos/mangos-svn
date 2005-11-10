@@ -36,15 +36,16 @@
 #include "Chat.h"
 #include "ZoneMapper.h"
 #include "Chat.h"
+#include "MapManager.h"
+#include "ObjectAccessor.h"
+
+
+
 //Groupcheck
 #include "Group.h"
 
-#ifdef ENABLE_GRID_SYSTEM
-#include "MapManager.h"
-#include "ObjectAccessor.h"
-#include "Utilities.h"
-#include "RedZoneDistrict.h"
-#endif
+
+
 
 #include <cmath>
 
@@ -95,12 +96,8 @@ Player::Player ( ): Unit()
 }
 
 
-Player::~Player ( )
+Player::~Player ()
 {
-#ifndef ENABLE_GRID_SYSTEM
-    ASSERT(!IsInWorld());
-#endif
-    // for(int i = 0; i < INVENTORY_SLOT_ITEM_END; i++)
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
     {
         if(m_items[i])
@@ -352,18 +349,7 @@ void Player::Update( uint32 p_time )
         if (isAttackReady())
         {
             Unit *pVictim = NULL;
-
-#ifndef ENABLE_GRID_SYSTEM
-            pVictim = objmgr.GetObject<Creature>(m_curSelection);
-			
-			//if (!pVictim)
-			//	pVictim = objmgr.GetObject<Player>(m_curSelection);
-#else
             pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
-
-			//if (!pVictim)
-			//	pVictim = ObjectAccessor::Instance().GetPlayer(*this, m_curSelection);
-#endif
 
             if (!pVictim)
             {
@@ -1572,11 +1558,9 @@ void Player::LoadFromDB( uint32 guid )
     m_mapId = fields[9].GetUInt32();
     m_zoneId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
-#ifndef ENABLE_GRID_SYSTEM
-    ZoneIDMap.SetZoneBitOn(m_zoneId);
-#endif
-	if( HasFlag(PLAYER_FLAGS, 8) )
-		SetUInt32Value(PLAYER_FLAGS, 0);
+
+    if( HasFlag(PLAYER_FLAGS, 8) )
+	SetUInt32Value(PLAYER_FLAGS, 0);
 
     if( HasFlag(PLAYER_FLAGS, 0x10) )
         m_deathState = DEAD;
@@ -2274,50 +2258,32 @@ void Player::SwapItemSlots(uint8 srcslot, uint8 dstslot)
         // if ( srcslot < EQUIPMENT_SLOT_END && dstslot >= EQUIPMENT_SLOT_END )
         if ( srcslot < INVENTORY_SLOT_BAG_END && dstslot >= INVENTORY_SLOT_BAG_END )
         {
-#ifndef ENABLE_GRID_SYSTEM
-            for(Object::InRangeSet::iterator i = GetInRangeSetBegin();
-                i != GetInRangeSetEnd(); i++)
-            {
-                if((*i)->GetTypeId() == TYPEID_PLAYER)
-                    m_items[dstslot]->DestroyForPlayer( (Player*)*i );
-            }
-#else
-        for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-        {
-        if( iter->second->GetTypeId() == TYPEID_PLAYER )
-            m_items[dstslot]->DestroyForPlayer((Player *)iter->second);
-        }
-#endif
+	    /* TODO siuolly: send a destroy to players around in terms of the items destroyed
+	    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+	    {
+		if( iter->second->GetTypeId() == TYPEID_PLAYER )
+		    m_items[dstslot]->DestroyForPlayer((Player *)iter->second);
+	    }
+	    */
+
         }
         /* else if ( srcslot >= EQUIPMENT_SLOT_END && dstslot < EQUIPMENT_SLOT_END ) */
         else if ( srcslot >= INVENTORY_SLOT_BAG_END && dstslot < INVENTORY_SLOT_BAG_END )
         {
+	    /* TODO siuolly: send create to player near by cell so they can see my changes
             UpdateData upd;
             WorldPacket packet;
-#ifndef ENABLE_GRID_SYSTEM
-            for(Object::InRangeSet::iterator i = GetInRangeSetBegin();
-                i != GetInRangeSetEnd(); i++)
-            {
-                if((*i)->GetTypeId() == TYPEID_PLAYER)
-                {
-                    upd.Clear();
-                    m_items[dstslot]->BuildCreateUpdateBlockForPlayer( &upd, (Player*)*i );
-                    upd.BuildPacket( &packet );
-                    GetSession()->SendPacket( &packet );
-                }
-            }
-#else
-        for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-        {
-        if( iter->second->isType(TYPEID_PLAYER) )
-        {
-            upd.Clear();
-            m_items[dstslot]->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
-            upd.BuildPacket(&packet);
+	    for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+	    {
+		if( iter->second->isType(TYPEID_PLAYER) )
+		{
+		    upd.Clear();
+		    m_items[dstslot]->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
+		    upd.BuildPacket(&packet);
             GetSession()->SendPacket(&packet);
-        }
-        }
-#endif
+		}
+	    }
+	    */
         }
     }
 
@@ -2384,30 +2350,18 @@ void Player::AddItemToSlot(uint8 slot, Item *item)
         // if ( slot < EQUIPMENT_SLOT_END )
         if ( slot < INVENTORY_SLOT_BAG_END )
         {
-#ifndef ENABLE_GRID_SYSTEM
-            for(Object::InRangeSet::iterator i = GetInRangeSetBegin();
-                i != GetInRangeSetEnd(); i++)
-            {
-                if((*i)->GetTypeId() == TYPEID_PLAYER)
-                {
-                    upd.Clear();
-                    item->BuildCreateUpdateBlockForPlayer( &upd, (Player*)*i );
-                    upd.BuildPacket( &packet );
-                    GetSession()->SendPacket( &packet );
-                }
-            }
-#else
-        for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-        {
-        if( iter->second->isType(TYPEID_PLAYER) )
-        {
-            upd.Clear();
-            item->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
-            upd.BuildPacket(&packet);
-            GetSession()->SendPacket(&packet);
-        }
-        }
-#endif
+	    /* TODO siuolly: send a build to player nearby cell.
+	    for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+	    {
+		if( iter->second->isType(TYPEID_PLAYER) )
+		{
+		    upd.Clear();
+		    item->BuildCreateUpdateBlockForPlayer(&upd, (Player *)iter->second);
+		    upd.BuildPacket(&packet);
+		    GetSession()->SendPacket(&packet);
+		}
+	    }
+	    */
         }
 
     }
@@ -2416,9 +2370,6 @@ void Player::AddItemToSlot(uint8 slot, Item *item)
     SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD  + (slot*2)), m_items[slot] ? m_items[slot]->GetGUID() : 0 );
 
     item->SetOwner( this );
-#ifndef ENABLE_GRID_SYSTEM
-    item->PlaceOnMap();
-#endif
 
     if ( slot < EQUIPMENT_SLOT_END )
     {
@@ -2472,11 +2423,7 @@ Item* Player::RemoveItemFromSlot(uint8 slot)
 
     if ( IsInWorld() )
     {
-#ifndef ENABLE_GRID_SYSTEM
-        item->RemoveFromMap();
-#else
-    item->RemoveFromWorld();
-#endif
+	item->RemoveFromWorld();
 
         // create for ourselves
         item->DestroyForPlayer( this );
@@ -2484,20 +2431,13 @@ Item* Player::RemoveItemFromSlot(uint8 slot)
         // if ( slot < EQUIPMENT_SLOT_END )
         if ( slot < INVENTORY_SLOT_BAG_END )
         {
-#ifndef ENABLE_GRID_SYSTEM
-            for(Object::InRangeSet::iterator i = GetInRangeSetBegin();
-                i != GetInRangeSetEnd(); i++)
-            {
-                if((*i)->GetTypeId() == TYPEID_PLAYER)
-                    item->DestroyForPlayer( (Player*)*i );
-            }
-#else
-        for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-        {
-        if( iter->second->isType(TYPEID_PLAYER) )
-            item->DestroyForPlayer((Player *)iter->second);
-        }
-#endif
+	    /* TODO siuolly: send a destroy to player nearby cell
+	    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
+	    {
+		if( iter->second->isType(TYPEID_PLAYER) )
+		    item->DestroyForPlayer((Player *)iter->second);
+	    }
+	    */
         }
     }
     Log::getSingleton().outError("RemoveItemFromSlotEND");
@@ -2781,6 +2721,15 @@ void Player::BuildPlayerRepop()
     SpawnCorpseBody();
 }
 
+void
+Player::SendDelayResponse(const uint32 ml_seconds)
+{
+    WorldPacket data;
+    data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+    data << (uint32)ml_seconds;
+    GetSession()->SendPacket( &data ); 
+}
+
 
 void Player::ResurrectPlayer()
 {
@@ -2840,9 +2789,6 @@ void Player::CreateCorpse()
 {
     Corpse *pCorpse = NULL;
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
-#ifndef ENABLE_GRID_SYSTEM
-    pCorpse = objmgr.GetCorpseByOwner(this);
-#endif
 
     if(!pCorpse)
     {
@@ -2887,116 +2833,30 @@ void Player::CreateCorpse()
         // save corpse in db for future use
         pCorpse->SaveToDB();
         Log::getSingleton( ).outError("AddObject at Player.cpp");
-#ifndef ENABLE_GRID_SYSTEM
-        objmgr.AddObject(pCorpse);
-#else
-    MapManager::Instance().GetMap(pCorpse->GetMapId())->Add(pCorpse);
-#endif
+	MapManager::Instance().GetMap(pCorpse->GetMapId())->Add(pCorpse);
     }
-#ifndef ENABLE_GRID_SYSTEM
-    else                                          //Corpse already exist in world, update it
-    {
-        pCorpse->SetPosition(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-    }
-#endif
 }
 
 
 void Player::SpawnCorpseBody()
 {
     Corpse *pCorpse = NULL;
-
-#ifndef ENABLE_GRID_SYSTEM
-    pCorpse = objmgr.GetCorpseByOwner(this);
-    if(pCorpse && !pCorpse->IsInWorld())
-        pCorpse->PlaceOnMap();
-#else
     pCorpse = ObjectAccessor::Instance().GetCorpse(*this, GetGUID());
+    
     if( pCorpse )
-    MapManager::Instance().GetMap(m_mapId)->Add(pCorpse);
-#endif
-    // Deadknight:hiding every creature except spirit healers
-#ifndef ENABLE_GRID_SYSTEM
-    for (Object::InRangeSet::iterator iter = GetInRangeSetBegin();
-        iter != GetInRangeSetEnd(); iter++)
-    {
-        Creature *creat = objmgr.GetObject<Creature>((*iter)->GetGUID());
-        if (creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233)
-            creat->DestroyForPlayer(this);
-    }
+	MapManager::Instance().GetMap(m_mapId)->Add(pCorpse);
 
-
-    // Deadknight:hiding players except dead
-    for (Object::InRangeSet::iterator iter = GetInRangeSetBegin();
-        iter != GetInRangeSetEnd(); iter++)
-    {
-        Player *plyr = objmgr.GetObject<Player>((*iter)->GetGUID());
-        if (plyr && plyr->isAlive())
-        {
-            if(!plyr->IsGroupMember(this))
-            {
-                plyr->DestroyForPlayer(this);
-                this->DestroyForPlayer(plyr);
-            }
-        }
-        if (plyr && plyr->isDead())               //Deadknight:if removed before add dead people
-        {
-            WorldPacket packet,packetR;
-            UpdateData data,dataR;
-            Player *plyrR=plyr;
-
-            plyr->BuildCreateUpdateBlockForPlayer( &data, this );
-            data.BuildPacket(&packet);
-            GetSession()->SendPacket( &packet );
-
-            BuildCreateUpdateBlockForPlayer( &dataR, plyrR );
-            dataR.BuildPacket(&packetR);
-            plyrR->GetSession()->SendPacket( &packetR );
-        }
-    }
-#else
-    for(InRangeUnitsMapType::iterator iter = i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-    {
-    Player *player = dynamic_cast<Player *>(iter->second);
-    if( player == NULL )
-    {
-        if ( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233 )
-        iter->second->DestroyForPlayer(this);
-    }
-    else if( player->isAlive() )
-    {
-        if( !player->IsGroupMember(this) )
-        {
-        player->DestroyForPlayer(this);
-        this->DestroyForPlayer(player);
-        }
-    }
-    else if( player->isDead() )
-    {
-        WorldPacket my_packet, player_packet;
-        UpdateData my_data, player_data;
-        player->BuildCreateUpdateBlockForPlayer(&player_data, this);
-        player_data.BuildPacket(&player_packet);
-        GetSession()->SendPacket(&player_packet);
-
-        this->BuildCreateUpdateBlockForPlayer(&my_data, player);
-        my_data.BuildPacket(&my_packet);
-        player->GetSession()->SendPacket(&my_packet);
-    }
-    }
-#endif
-
+    /* TODO siuolly: hide everything round the player's cell except
+     * sprit healers
+     */
 }
 
 
 void Player::SpawnCorpseBones()
 {
     Corpse *pCorpse = NULL;
-#ifndef ENABLE_GRID_SYSTEM
-    pCorpse = objmgr.GetCorpseByOwner(this);
-#else
     pCorpse = ObjectAccessor::Instance().GetCorpse(*this, GetGUID());
-#endif
+
     if(pCorpse)
     {
         pCorpse->SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
@@ -3011,79 +2871,9 @@ void Player::SpawnCorpseBones()
         pCorpse->DeleteFromDB();
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    // Deadknight:Add creatures nearby
-    for (Object::InRangeSet::iterator iter = GetInRangeSetBegin();
-        iter != GetInRangeSetEnd(); iter++)
-    {
-        Creature *creat = objmgr.GetObject<Creature>((*iter)->GetGUID());
-        if (creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233)
-        {
-            WorldPacket packet;
-            UpdateData data;
 
-            creat->BuildCreateUpdateBlockForPlayer( &data, this );
-            data.BuildPacket(&packet);
-            GetSession()->SendPacket( &packet );
-        }
-    }
-    // Deadknight:Add players nearby
-    for (Object::InRangeSet::iterator iter = GetInRangeSetBegin();
-        iter != GetInRangeSetEnd(); iter++)
-    {
-        Player *plyr = objmgr.GetObject<Player>((*iter)->GetGUID());
-        if (plyr && plyr->isAlive())
-        {
-            WorldPacket packet, packetR;
-            UpdateData data, dataR;
-            Player *plyrR=plyr;
-
-            plyr->BuildCreateUpdateBlockForPlayer( &data, this );
-            data.BuildPacket(&packet);
-            GetSession()->SendPacket( &packet );
-
-            BuildCreateUpdateBlockForPlayer( &dataR, plyrR );
-            dataR.BuildPacket(&packetR);
-            plyrR->GetSession()->SendPacket( &packetR );
-        }
-        if(plyr && plyr->isDead())
-        {
-            if(!plyr->IsGroupMember(this))
-            {
-                plyr->DestroyForPlayer(this);
-                this->DestroyForPlayer(plyr);
-            }
-        }
-    }
-#else
-    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-    {
-    Player *player = dynamic_cast<Player *>(iter->second);
-    if( player == NULL )
-    {
-        if( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) != 5233)
-        {
-        WorldPacket packet;
-        UpdateData data;
-        iter->second->BuildCreateUpdateBlockForPlayer(&data, this);
-        data.BuildPacket(&packet);
-        GetSession()->SendPacket(&packet);
-        }
-    }
-    else if( player->isAlive() )
-    {
-        WorldPacket packet, pl_packet;
-        UpdateData data, pl_data;
-        player->BuildCreateUpdateBlockForPlayer(&pl_data, this);
-        pl_data.BuildPacket(&pl_packet);
-        GetSession()->SendPacket(&pl_packet);
-
-        this->BuildCreateUpdateBlockForPlayer(&data, player);
-        data.BuildPacket(&packet);
-        player->GetSession()->SendPacket(&packet);
-    }
-    }
-#endif
+    /* TODO siuolly: now notify player in the cells that this guys is revive again
+     */
 }
 
 
@@ -3173,34 +2963,9 @@ void Player::RepopAtGraveyard()
     }
 
     // check for nearby spirit healers, and send update
-#ifndef ENABLE_GRID_SYSTEM
-    for (Object::InRangeSet::iterator iter = GetInRangeSetBegin();
-        iter != GetInRangeSetEnd(); iter++)
-    {
-        Creature *creat = objmgr.GetObject<Creature>((*iter)->GetGUID());
-        if (creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
-        {
-            WorldPacket packet;
-            UpdateData data;
-
-            creat->BuildCreateUpdateBlockForPlayer( &data, this );
-            data.BuildPacket(&packet);
-            GetSession()->SendPacket( &packet );
-        }
-    }
-#else
-    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-    {
-    if( iter->second->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233 )
-    {
-        WorldPacket packet;
-        UpdateData data;
-        iter->second->BuildCreateUpdateBlockForPlayer(&data, this);
-        data.BuildPacket(&packet);
-        this->GetSession()->SendPacket(&packet);
-    }
-    }
-#endif
+    /* TODO siuolly: spirit healers update?  I think its already handle if the status
+     * of this guy is DEAD :)
+     */
 }
 
 
@@ -3241,11 +3006,8 @@ void Player::BroadcastToFriends(std::string msg)
             fields = result->Fetch();
             
             sChatHandler.FillSystemMessageData(&data, 0, msg.c_str());
-#ifndef ENABLE_GRID_SYSTEM
-            pfriend = objmgr.GetObject<Player>(fields[2].GetUInt64());
-#else
             pfriend = ObjectAccessor::Instance().FindPlayer(fields[2].GetUInt64());
-#endif
+
             if (pfriend && pfriend->IsInWorld())
                 pfriend->GetSession()->SendPacket(&data);
                 
@@ -3403,7 +3165,7 @@ bool Player::IsGroupMember(Player *plyr)
     return false;
 }
 
-#ifdef ENABLE_GRID_SYSTEM
+
 void
 Player::DealWithSpellDamage(DynamicObject &obj)
 {
@@ -3427,70 +3189,13 @@ Player::SetPosition(const float &x, const float &y, const float &z, const float 
     return true;
 }
 
-#ifdef ENABLE_GRID_SYSTEM
+
 void 
 Player::SendMessageToSet(WorldPacket *data, bool self)
 {
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self);
 }
 
-void
-Player::UpdateInRange(UpdateData &data)
-{
-    // update units (either player or creature)
-    for(InRangeUnitsMapType::iterator iter= i_inRangeUnits.begin(); iter != i_inRangeUnits.end(); ++iter)
-    if( !MaNGOS::Utilities::is_in_range(this, iter->second) )
-    {
-        iter->second->BuildOutOfRangeUpdateBlock(&data);
-        iter->second->MoveOutOfRange(*this); // tell the creature/player I am now out of your range...
-    }
-
-    // update objects
-    for(InRangeObjectsMapType::iterator iter=i_inRangeObjects.begin(); iter != i_inRangeObjects.end(); ++iter)
-    if( !MaNGOS::Utilities::is_in_range(this, iter->second) )
-        iter->second->BuildOutOfRangeUpdateBlock(&data);
-}
-
-void
-Player::MoveOutOfRange(Player &player)
-{
-    if( this != &player )
-    {
-    UpdateData data;
-    WorldPacket packet;
-    player.BuildOutOfRangeUpdateBlock(&data);
-    data.BuildPacket(&packet);
-    this->GetSession()->SendPacket(&packet);
-    RemoveInRangeObject(&player);
-    }
-}
-
-void
-Player::MoveInRange(Player &player)
-{
-    UpdateData data;
-    WorldPacket packet;
-
-    // this guy just move in my range
-    player.BuildCreateUpdateBlockForPlayer(&data, this);
-    data.BuildPacket(&packet);
-    this->GetSession()->SendPacket(&packet);
-    i_inRangeUnits[player.GetGUID()] = &player;
-}
-
-void
-Player::DestroyInRange()
-{
-    for(InRangeUnitsMapType::iterator iter=i_inRangeUnits.begin(); iter !=i_inRangeUnits.end(); ++iter)
-    iter->second->MoveOutOfRange(*this);
-
-    i_inRangeUnits.clear();
-    i_inRangeObjects.clear();
-}
-
-#endif
-
-#endif
 
 void Player::CheckExploreSystem(void)
 {
@@ -3670,6 +3375,7 @@ void Player::LoadReputationFromDBC(void)
     {
 		fact = sFactionTemplateStore.LookupEntry(i);
 		fac  = sFactionStore.LookupEntry( fact->faction );
+		assert( fac );
 		if( (fac->reputationListID >= 0) && (!FactionIsInTheList(fac->reputationListID)) )
 		{
 			newFaction.ID = fac->ID;
@@ -3817,20 +3523,12 @@ void Player::DuelComplete()
     //---------------------------------------------------
 
     GameObject* obj = NULL;
-#ifndef ENABLE_GRID_SYSTEM
-       obj = objmgr.GetObject<GameObject>(m_duelFlagGUID);
-#else
-    if( this )
-       obj = ObjectAccessor::Instance().GetGameObject(*this, m_duelFlagGUID);
-#endif
+    obj = ObjectAccessor::Instance().GetGameObject(*this, m_duelFlagGUID);
+
     if(obj)
     {
-#ifndef ENABLE_GRID_SYSTEM
-         obj->RemoveFromMap();
-         objmgr.RemoveObject(obj);
-#else
-         MapManager::Instance().GetMap(obj->GetMapId())->RemoveFromMap(obj);
-#endif    
+	// Remove object and DELETE it.
+	MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
     }
 }
 //
