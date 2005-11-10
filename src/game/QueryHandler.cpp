@@ -108,7 +108,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     ci = objmgr.GetCreatureName(entry);
-	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u - GUID_LOPART: %u.", ci->Name.c_str(), entry, guid, GUID_LOPART(guid));
 
 #ifndef ENABLE_GRID_SYSTEM
     Creature *unit = objmgr.GetObject<Creature>(guid);
@@ -116,16 +115,20 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
 #endif
 
+	//Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u - GUID_LOPART: %u - NameID: %u.", ci->Name.c_str(), entry, guid, GUID_LOPART(guid), unit->GetNameID());
+	// UQ1: unit->GetNameID() seems to crash here???
+	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u - GUID_LOPART: %u.", ci->Name.c_str(), entry, guid, GUID_LOPART(guid));
+
     Trainerspell *strainer = objmgr.GetTrainerspell(entry/*unit->GetNameID()*/);
 
-	if (!strainer)
+/*	if (!strainer)
 		strainer = objmgr.GetTrainerspell(ci->DisplayID);
 
 	if (!strainer)
 		strainer = objmgr.GetTrainerspell(unit->GetNameID());
 
 	if (!strainer)
-		strainer = objmgr.GetTrainerspell(guid);
+		strainer = objmgr.GetTrainerspell(guid);*/
 
 	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
 	{// Use Defaults...
@@ -199,11 +202,17 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data << (uint32)0;            // Unknown (move before or after unknowns 3 and 4) don't know where exactly
     data << ci->DisplayID;        // DisplayID
 
+	// UQ1: Add some padding data... I'm positive we can send more here!
+	data << (uint32)0;
+	data << (uint32)0;
+	data << (uint32)0;
+	data << (uint32)0;
+
     SendPacket( &data );
 }
 
 void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue )
-{// UQ1: Think I have this correct now.. :)
+{// UQ1: For testing values... use testvalue and ".npcinfoset <value>" ingame
     WorldPacket data;
     CreatureInfo *ci;
 
@@ -218,7 +227,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
     Trainerspell *strainer = objmgr.GetTrainerspell(entry/*unit->GetNameID()*/);
 
-	if (!strainer)
+/*	if (!strainer)
 		strainer = objmgr.GetTrainerspell(ci->DisplayID);
 
 	if (!strainer)
@@ -226,6 +235,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
 	if (!strainer)
 		strainer = objmgr.GetTrainerspell(guid);
+*/
 
 	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
 	{// Use Defaults...

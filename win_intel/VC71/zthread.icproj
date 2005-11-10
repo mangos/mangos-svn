@@ -293,6 +293,64 @@
 			<Tool 
 				Name="CustomNodeTool"/>
 		</Configuration>
+		<Configuration 
+			Name="Release - No Grid|Win32">
+			<Tool 
+				Name="GeneralTool"
+				OutputDirectory="$(ConfigurationName)"
+				IntermediateDirectory="$(ConfigurationName)"
+				ConfigurationType="4"
+				CharacterSet="2"
+				WholeProgramOptimization="1"/>
+			<Tool 
+				Name="DebugTool"/>
+			<Tool 
+				Name="CppCmplrTool"
+				Optimization="1000"
+				GlobalOptimizations="0"
+				EnableIntrinsicFunctions="1"
+				FavorSizeOrSpeed="1"
+				EnableFiberSafeOptimizations="1"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="1"
+				AdditionalIncludeDirectories="..\..\dep\include"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB,ENABLE_GRID_SYSTEM"
+				MinimalRebuild="1"
+				RuntimeLibrary="0"
+				RuntimeTypeInfo="1"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\zthread___Win32_Release/zthread.pch"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="1"
+				DebugInformationFormat="0"
+				OpenMP="1"
+				UseProcExt="4"
+				RequireProcExt="4"
+				Parallelization="1"
+				C99Support="1"/>
+			<Tool 
+				Name="LinkerTool"
+				DelayImpLib=""/>
+			<Tool 
+				Name="LibrarianTool"
+				OutputFile="$(OutDir)/zthread.lib"/>
+			<Tool 
+				Name="ResCmplrTool"/>
+			<Tool 
+				Name="MidlCmplrTool"/>
+			<Tool 
+				Name="BscMakeTool"/>
+			<Tool 
+				Name="PreBuildEventTool"/>
+			<Tool 
+				Name="PreLinkEventTool"/>
+			<Tool 
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
+		</Configuration>
 	</Configurations>
 	<Files>
 		<File 

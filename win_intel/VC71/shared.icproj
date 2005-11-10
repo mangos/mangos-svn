@@ -242,7 +242,7 @@
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\realmlist"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\realmlist,..\..\src\framework"
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -305,9 +305,79 @@
 				EnableFiberSafeOptimizations="1"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="1"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\realmlist,..\..\src\framework"
+				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
+				StringPooling="1"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="1"
+				RuntimeTypeInfo="1"
+				UsePrecompiledHeader="0"
+				PrecompiledHeaderFile=".\shared___Win32_Release/shared.pch"
+				AssemblerListingLocation=".\shared___Win32_Release/"
+				ObjectFile=".\shared___Win32_Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
+				DebugInformationFormat="0"
+				CompileAs="0"
+				OpenMP="1"
+				UseProcExt="4"
+				RequireProcExt="4"
+				Parallelization="1"
+				C99Support="1"/>
+			<Tool 
+				Name="LinkerTool"
+				DelayImpLib=""/>
+			<Tool 
+				Name="LibrarianTool"
+				OutputFile=".\Release\shared.lib"
+				SuppressStartupBanner="1"/>
+			<Tool 
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
+			<Tool 
+				Name="MidlCmplrTool"/>
+			<Tool 
+				Name="BscMakeTool"/>
+			<Tool 
+				Name="PreBuildEventTool"/>
+			<Tool 
+				Name="PreLinkEventTool"/>
+			<Tool 
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
+		</Configuration>
+		<Configuration 
+			Name="Release - No Grid|Win32">
+			<Tool 
+				Name="GeneralTool"
+				OutputDirectory="$(ConfigurationName)"
+				IntermediateDirectory="$(ConfigurationName)"
+				ConfigurationType="4"
+				UseOfMFC="0"
+				ATLMinimizesCRunTimeLibraryUsage="0"
+				CharacterSet="2"
+				WholeProgramOptimization="1"/>
+			<Tool 
+				Name="DebugTool"/>
+			<Tool 
+				Name="CppCmplrTool"
+				Optimization="1000"
+				GlobalOptimizations="0"
+				InlineFunctionExpansion="1"
+				EnableIntrinsicFunctions="1"
+				FavorSizeOrSpeed="1"
+				EnableFiberSafeOptimizations="1"
+				OptimizeForProcessor="3"
+				OptimizeForWindowsApplication="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\realmlist"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				StringPooling="1"
+				MinimalRebuild="1"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="1"
 				RuntimeTypeInfo="1"
