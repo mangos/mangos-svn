@@ -90,8 +90,10 @@ public:
 
     template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
 
+#ifdef WIN32
 	// template specialization
 	template<> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
+#endif
 private:
 
     struct ObjectChangeAccumulator
@@ -117,6 +119,10 @@ private:
     LockType i_updateGuard;
     LockType i_corpseGuard;
 };
+
+#ifndef WIN32
+template<> void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
+#endif
 
 namespace MaNGOS
 {
