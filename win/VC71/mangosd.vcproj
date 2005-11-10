@@ -631,12 +631,6 @@
 			</FileConfiguration>
 		</File>
 		<File
-			RelativePath="..\..\src\game\Opcodes.cpp">
-		</File>
-		<File
-			RelativePath="..\..\src\game\Opcodes_1_7_x.cpp">
-		</File>
-		<File
 			RelativePath="..\..\src\mangosd\WorldRunnable.cpp">
 		</File>
 		<File
