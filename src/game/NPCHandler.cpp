@@ -101,13 +101,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
     uint32 cnt;
 
     recv_data >> guid;
-
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
-        
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);        
     Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
 	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
@@ -220,12 +214,7 @@ void WorldSession::SendTrainerList( uint64 guid )
     WorldPacket data;
     uint32 cnt;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
-        
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);        
     Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID()/*GUID_LOPART(guid)*/);
 
 	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
@@ -457,12 +446,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     //pGossip = objmgr.GetGossipByGuid(GUID_LOPART(guid),GetPlayer()->GetMapId());
-
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
 	if (!unit)
 	{
@@ -575,11 +559,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
     if(pGossip)
     {
-#ifndef ENABLE_GRID_SYSTEM
-        Creature * pCreature = objmgr.GetCreature(guid);
-#else
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
         data.Initialize( SMSG_GOSSIP_MESSAGE );
         data << guid;

@@ -108,12 +108,8 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     ci = objmgr.GetCreatureName(entry);
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
 
 	//Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u - GUID_LOPART: %u - NameID: %u.", ci->Name.c_str(), entry, guid, GUID_LOPART(guid), unit->GetNameID());
 	// UQ1: unit->GetNameID() seems to crash here???
@@ -219,11 +215,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
     ci = objmgr.GetCreatureName(entry);
 	Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name.c_str(), entry, guid);
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     Trainerspell *strainer = objmgr.GetTrainerspell(entry/*unit->GetNameID()*/);
 
