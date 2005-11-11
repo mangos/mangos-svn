@@ -20,6 +20,7 @@ INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include  -I$(srcdir)/../shared -I$
 noinst_LIBRARIES = libgame.a
 
 libgame_a_SOURCES = \
+	AggressorAI.cpp \
 	AuctionHouse.cpp \
 	Channel.cpp \
 	ChannelHandler.cpp \
@@ -28,19 +29,10 @@ libgame_a_SOURCES = \
 	ChatHandler.cpp \
 	CombatHandler.cpp \
 	Corpse.cpp \
-	Creature.cpp \
-        CreatureAI.cpp \
-        NullCreatureAI.cpp \
-        AggressorAI.cpp \
-        ReactorAI.cpp \
-        GuardAI.cpp \
-        CreatureAISelector.cpp \
+	CreatureAI.cpp \
 	CreatureAIRegistry.cpp \
-        MovementGenerator.cpp \
-        IdleMovementGenerator.cpp \
-        RandomMovementGenerator.cpp \
-        TargetedMovementGenerator.cpp \
-        MotionMaster.cpp \
+	CreatureAISelector.cpp \
+	Creature.cpp \
 	debugcmds.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
@@ -50,6 +42,10 @@ libgame_a_SOURCES = \
 	GridStates.cpp \
 	Group.cpp \
 	GroupHandler.cpp \
+	GuardAI.cpp \
+	Guild.cpp \
+	GuildHandler.cpp \
+	IdleMovementGenerator.cpp \
 	Item.cpp \
 	ItemHandler.cpp \
 	Level0.cpp \
@@ -61,8 +57,11 @@ libgame_a_SOURCES = \
 	Map.cpp \
 	MapManager.cpp \
 	MiscHandler.cpp \
+	MotionMaster.cpp \
+	MovementGenerator.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
+	NullCreatureAI.cpp \
 	ObjectAccessor.cpp \
 	Object.cpp \
 	ObjectGridLoader.cpp \
@@ -74,10 +73,13 @@ libgame_a_SOURCES = \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestHandler.cpp \
+	RandomMovementGenerator.cpp \
+	ReactorAI.cpp \
 	RedZoneDistrict.cpp \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
+	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
@@ -98,6 +100,7 @@ libgame_a_SOURCES = \
 	GossipDef.h \
 	GridNotifiers.h \
 	Group.h \
+	Guild.h \
 	Item.h \
 	ItemPrototype.h \
 	LootMgr.h \
@@ -129,7 +132,4 @@ libgame_a_SOURCES = \
 	World.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h \
-	Guild.cpp \
-	Guild.h \
-	GuildHandler.cpp
+	WorldSocketMgr.h

@@ -68,36 +68,37 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libgame_a_AR = $(AR) $(ARFLAGS)
 libgame_a_LIBADD =
-am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
-	ChannelHandler.$(OBJEXT) CharacterHandler.$(OBJEXT) \
-	Chat.$(OBJEXT) ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
-	Corpse.$(OBJEXT) Creature.$(OBJEXT) CreatureAI.$(OBJEXT) \
-	NullCreatureAI.$(OBJEXT) AggressorAI.$(OBJEXT) \
-	ReactorAI.$(OBJEXT) GuardAI.$(OBJEXT) \
-	CreatureAISelector.$(OBJEXT) CreatureAIRegistry.$(OBJEXT) \
-	MovementGenerator.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) \
-	RandomMovementGenerator.$(OBJEXT) \
-	TargetedMovementGenerator.$(OBJEXT) MotionMaster.$(OBJEXT) \
+am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
+	Channel.$(OBJEXT) ChannelHandler.$(OBJEXT) \
+	CharacterHandler.$(OBJEXT) Chat.$(OBJEXT) \
+	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) Corpse.$(OBJEXT) \
+	CreatureAI.$(OBJEXT) CreatureAIRegistry.$(OBJEXT) \
+	CreatureAISelector.$(OBJEXT) Creature.$(OBJEXT) \
 	debugcmds.$(OBJEXT) DuelHandler.$(OBJEXT) \
 	DynamicObject.$(OBJEXT) GameObject.$(OBJEXT) \
 	GossipDef.$(OBJEXT) GridNotifiers.$(OBJEXT) \
 	GridStates.$(OBJEXT) Group.$(OBJEXT) GroupHandler.$(OBJEXT) \
-	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
-	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
-	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
-	MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
-	MovementHandler.$(OBJEXT) NPCHandler.$(OBJEXT) \
+	GuardAI.$(OBJEXT) Guild.$(OBJEXT) GuildHandler.$(OBJEXT) \
+	IdleMovementGenerator.$(OBJEXT) Item.$(OBJEXT) \
+	ItemHandler.$(OBJEXT) Level0.$(OBJEXT) Level1.$(OBJEXT) \
+	Level2.$(OBJEXT) Level3.$(OBJEXT) LootMgr.$(OBJEXT) \
+	Mail.$(OBJEXT) Map.$(OBJEXT) MapManager.$(OBJEXT) \
+	MiscHandler.$(OBJEXT) MotionMaster.$(OBJEXT) \
+	MovementGenerator.$(OBJEXT) MovementHandler.$(OBJEXT) \
+	NPCHandler.$(OBJEXT) NullCreatureAI.$(OBJEXT) \
 	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
 	Opcodes_1_7_x.$(OBJEXT) Opcodes_1_8_x.$(OBJEXT) \
 	Opcodes.$(OBJEXT) Player.$(OBJEXT) QueryHandler.$(OBJEXT) \
 	QuestDef.$(OBJEXT) QuestHandler.$(OBJEXT) \
+	RandomMovementGenerator.$(OBJEXT) ReactorAI.$(OBJEXT) \
 	RedZoneDistrict.$(OBJEXT) SkillHandler.$(OBJEXT) \
-	Spell.$(OBJEXT) SpellHandler.$(OBJEXT) TaxiHandler.$(OBJEXT) \
+	Spell.$(OBJEXT) SpellHandler.$(OBJEXT) \
+	TargetedMovementGenerator.$(OBJEXT) TaxiHandler.$(OBJEXT) \
 	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
 	UpdateData_1_8_x.$(OBJEXT) UpdateData.$(OBJEXT) \
 	World.$(OBJEXT) WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
-	WorldSocketMgr.$(OBJEXT) GuildHandler.$(OBJEXT) Guild.$(OBJEXT)
+	WorldSocketMgr.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -243,6 +244,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libgame.a
 libgame_a_SOURCES = \
+	AggressorAI.cpp \
 	AuctionHouse.cpp \
 	Channel.cpp \
 	ChannelHandler.cpp \
@@ -251,19 +253,10 @@ libgame_a_SOURCES = \
 	ChatHandler.cpp \
 	CombatHandler.cpp \
 	Corpse.cpp \
-	Creature.cpp \
-        CreatureAI.cpp \
-        NullCreatureAI.cpp \
-        AggressorAI.cpp \
-        ReactorAI.cpp \
-        GuardAI.cpp \
-        CreatureAISelector.cpp \
+	CreatureAI.cpp \
 	CreatureAIRegistry.cpp \
-        MovementGenerator.cpp \
-        IdleMovementGenerator.cpp \
-        RandomMovementGenerator.cpp \
-        TargetedMovementGenerator.cpp \
-        MotionMaster.cpp \
+	CreatureAISelector.cpp \
+	Creature.cpp \
 	debugcmds.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
@@ -273,6 +266,10 @@ libgame_a_SOURCES = \
 	GridStates.cpp \
 	Group.cpp \
 	GroupHandler.cpp \
+	GuardAI.cpp \
+	Guild.cpp \
+	GuildHandler.cpp \
+	IdleMovementGenerator.cpp \
 	Item.cpp \
 	ItemHandler.cpp \
 	Level0.cpp \
@@ -284,8 +281,11 @@ libgame_a_SOURCES = \
 	Map.cpp \
 	MapManager.cpp \
 	MiscHandler.cpp \
+	MotionMaster.cpp \
+	MovementGenerator.cpp \
 	MovementHandler.cpp \
 	NPCHandler.cpp \
+	NullCreatureAI.cpp \
 	ObjectAccessor.cpp \
 	Object.cpp \
 	ObjectGridLoader.cpp \
@@ -297,10 +297,13 @@ libgame_a_SOURCES = \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestHandler.cpp \
+	RandomMovementGenerator.cpp \
+	ReactorAI.cpp \
 	RedZoneDistrict.cpp \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
+	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
@@ -321,6 +324,7 @@ libgame_a_SOURCES = \
 	GossipDef.h \
 	GridNotifiers.h \
 	Group.h \
+	Guild.h \
 	Item.h \
 	ItemPrototype.h \
 	LootMgr.h \
@@ -352,10 +356,7 @@ libgame_a_SOURCES = \
 	World.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h \
-	GuildHandler.cpp \
-	Guild.cpp \
-	Guild.h
+	WorldSocketMgr.h
 
 all: all-am
 
@@ -426,6 +427,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Group.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GroupHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuardAI.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Guild.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuildHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/IdleMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Item.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ItemHandler.Po@am__quote@
@@ -471,8 +474,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocketMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debugcmds.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuildHandler.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Guild.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
