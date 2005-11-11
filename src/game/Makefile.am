@@ -129,4 +129,7 @@ libgame_a_SOURCES = \
 	World.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h 
+	WorldSocketMgr.h \
+	Guild.cpp \
+	Guild.h \
+	GuildHandler.cpp

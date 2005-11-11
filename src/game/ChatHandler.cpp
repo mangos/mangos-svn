@@ -29,6 +29,7 @@
 #include "Database/DatabaseEnv.h"
 #include "ChannelMgr.h"
 #include "Group.h"
+#include "Guild.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
@@ -115,6 +116,40 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                     group->BroadcastToGroup(this, msg);
             }
         }
+        case CHAT_MSG_GUILD:
+        {
+        	  std::string msg = "";
+            recv_data >> msg;
+
+            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            if (GetPlayer()->GetGuildId())
+            {
+                Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+                if (guild)
+                    guild->BroadcastToGuild(this, msg);
+            }
+        	
+        	break;
+        }
+        case CHAT_MSG_OFFICER:
+        {
+        	std::string msg = "";
+            recv_data >> msg;
+
+            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            if (GetPlayer()->GetGuildId())
+            {
+                Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+                if (guild)
+                    guild->BroadcastToOfficers(this, msg);
+            }
+        	break;
+        }
+        	
         default:
             Log::getSingleton().outError("CHAT: unknown msg type %u, lang: %u", type, lang);
     }

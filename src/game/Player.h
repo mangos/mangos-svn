@@ -378,6 +378,15 @@ class Player : public Unit
         void UnSetInvited() { m_isInvited = false; }
         void UnSetInGroup() { m_isInGroup = false; }
 
+				//Guild
+				void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
+				void UnSetGuildIdInvited() { m_GuildIdInvited = 0; }
+				void SetInGuild(uint32 GuildId) { m_GuildId = GuildId; }
+				void RemoveFromGuild() { m_GuildId = 0; }
+		
+				int GetGuildId() { return m_GuildId; }
+				int GetGuildIdInvited() { return m_GuildIdInvited; }
+		
         //duel
         void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
         void SetInDuel(const bool &val) { m_isInDuel = val; }
@@ -530,7 +539,7 @@ protected:
 
         uint8 m_outfitId;
 
-        uint16 m_guildId;
+        //uint16 m_guildId;
         uint16 m_petInfoId;                       // pet display info id
         uint16 m_petLevel;                        // pet experience level
         uint16 m_petFamilyId;                     // pet creature family id
@@ -563,6 +572,10 @@ protected:
         uint64 m_groupLeader;
         bool m_isInGroup;
         bool m_isInvited;
+
+				// Guild
+				uint32 m_GuildId;
+				uint32 m_GuildIdInvited; 
 
         //If Player is in combat
         bool inCombat;

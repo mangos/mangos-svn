@@ -279,6 +279,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         /// Movement opcodes
         { MSG_MOVE_HEARTBEAT,            STATUS_LOGGEDIN, &WorldSession::HandleMoveHeartbeatOpcode           },
         { MSG_MOVE_WORLDPORT_ACK,        STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
+	/// sani
         { MSG_MOVE_JUMP,                 STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_FORWARD,        STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_BACKWARD,       STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
@@ -310,7 +311,24 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GROUP_SET_LEADER,         STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          },
         { CMSG_GROUP_DISBAND,            STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            },
         { CMSG_LOOT_METHOD,              STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
-        /// Taxi opcodes
+        
+		// Guild Handler
+		{ CMSG_GUILD_QUERY,             STATUS_LOGGEDIN, &WorldSession::HandleGuildQueryOpcode               },
+		{ CMSG_GUILD_CREATE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode              },
+		{ CMSG_GUILD_INVITE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildInviteOpcode              },
+		{ CMSG_GUILD_ACCEPT,            STATUS_LOGGEDIN, &WorldSession::HandleGuildAcceptOpcode              },
+		{ CMSG_GUILD_DECLINE,           STATUS_LOGGEDIN, &WorldSession::HandleGuildDeclineOpcode             },
+		{ CMSG_GUILD_INFO,				STATUS_LOGGEDIN, &WorldSession::HandleGuildInfoOpcode                },
+		{ CMSG_GUILD_ROSTER,            STATUS_LOGGEDIN, &WorldSession::HandleGuildRosterOpcode              },
+		{ CMSG_GUILD_PROMOTE,           STATUS_LOGGEDIN, &WorldSession::HandleGuildPromoteOpcode             },
+		{ CMSG_GUILD_DEMOTE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildDemoteOpcode              },
+		{ CMSG_GUILD_LEAVE,             STATUS_LOGGEDIN, &WorldSession::HandleGuildLeaveOpcode               },
+		{ CMSG_GUILD_REMOVE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildRemoveOpcode              },
+		{ CMSG_GUILD_DISBAND,           STATUS_LOGGEDIN, &WorldSession::HandleGuildDisbandOpcode             },
+		{ CMSG_GUILD_LEADER,            STATUS_LOGGEDIN, &WorldSession::HandleGuildLeaderOpcode              },
+		{ CMSG_GUILD_MOTD,              STATUS_LOGGEDIN, &WorldSession::HandleGuildMOTDOpcode                },
+		
+		/// Taxi opcodes
         { CMSG_TAXINODE_STATUS_QUERY,    STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     },
         { CMSG_TAXIQUERYAVAILABLENODES,  STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAviableNodesOpcode   },
         { CMSG_ACTIVATETAXI,             STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiOpcode            },
@@ -373,7 +391,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         /// Chat opcodes
         { CMSG_MESSAGECHAT,              STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             },
         { CMSG_TEXT_EMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               },
-        {	CMSG_CHAT_IGNORED,             STATUS_LOGGEDIN, &WorldSession::HandleChatIgnoredOpcode             },
+        { CMSG_CHAT_IGNORED,             STATUS_LOGGEDIN, &WorldSession::HandleChatIgnoredOpcode             },
         /// Corpse Opcodes
         { CMSG_RECLAIM_CORPSE,           STATUS_LOGGEDIN, &WorldSession::HandleCorpseReclaimOpcode           },
         { CMSG_RESURRECT_RESPONSE,       STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode       },

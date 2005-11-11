@@ -97,7 +97,7 @@ am_libgame_a_OBJECTS = AuctionHouse.$(OBJEXT) Channel.$(OBJEXT) \
 	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
 	UpdateData_1_8_x.$(OBJEXT) UpdateData.$(OBJEXT) \
 	World.$(OBJEXT) WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
-	WorldSocketMgr.$(OBJEXT)
+	WorldSocketMgr.$(OBJEXT) GuildHandler.$(OBJEXT) Guild.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -352,7 +352,10 @@ libgame_a_SOURCES = \
 	World.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h 
+	WorldSocketMgr.h \
+	GuildHandler.cpp \
+	Guild.cpp \
+	Guild.h
 
 all: all-am
 
@@ -468,6 +471,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocketMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debugcmds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GuildHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Guild.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
