@@ -1,4 +1,3 @@
-# Copyright (C) 2004 Wow Daemon
 # Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
 #
 # This program is free software; you can redistribute it and/or modify
@@ -41,6 +40,8 @@ EXTRA_DIST = \
 	gameobjecttemplate.sql \
 	gameobj_loot.sql \
 	graveyards.sql \
+	guilds.sql \
+	guilds_members.sql \
 	inventory.sql \
 	ipbantable.sql \
 	item_instances.sql \
@@ -93,6 +94,8 @@ pkgdata_DATA = \
 	gameobjecttemplate.sql \
 	gameobj_loot.sql \
 	graveyards.sql \
+	guilds.sql \
+	guilds_members.sql \
 	inventory.sql \
 	ipbantable.sql \
 	item_instances.sql \
