@@ -1000,7 +1000,7 @@ newItem = NULL;
 
                                 uint32 level = m_caster->getLevel();
                                 Creature* spawnCreature = new Creature();
-								spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),ci->Name.c_str(),m_caster->GetMapId(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_caster->GetOrientation(), ci->Id/*ci->DisplayID*/);
+								spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),ci->Name.c_str(),m_caster->GetMapId(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_caster->GetOrientation(), ci->DisplayID);
                                 spawnCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, ci->DisplayID);
                                 spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
                                 spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
