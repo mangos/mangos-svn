@@ -137,7 +137,10 @@ bool DatabaseMysql::Execute(const char *sql)
     if (!mMysql)
         return false;
 
-    Log::getSingleton().outDetail( (std::string("SQL: ") + sql).c_str() );
+	// UQ1: Made this display in debug compiles only...
+#ifdef _DEBUG
+    Log::getSingleton().outDebug( (std::string("SQL: ") + sql).c_str() );
+#endif //_DEBUG
 
     if (mysql_query(mMysql, sql))
         return false;

@@ -536,6 +536,9 @@
 				RelativePath="..\..\src\game\GroupHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\GuildHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\httpd\src\http.h">
 			</File>
 			<File
@@ -682,6 +685,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\GuardAI.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Guild.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Guild.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\HateMatrix.h">
