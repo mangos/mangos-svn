@@ -200,7 +200,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
 
 	CreatureInfo *ci = NULL;
 
-	if (nameId >= 0)
+	if (nameId >= 0 && nameId < 999999)
 		ci = objmgr.GetCreatureName(nameId);
 
 	if (ci)
