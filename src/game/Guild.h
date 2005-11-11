@@ -67,7 +67,7 @@ class Guild
 		void LoadGuildFromDB(uint32 GuildId);
 		void LoadMembersFromDB(uint32 GuildId);
 		
-		void SaveGuild()
+		void SaveGuild();
 		
 		//broadcast menssage
 		void BroadcastToGuild(WorldSession *session, std::string msg);

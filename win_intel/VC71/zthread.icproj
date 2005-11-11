@@ -244,13 +244,13 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="4"
 				CharacterSet="2"
-				WholeProgramOptimization="1"/>
+				WholeProgramOptimization="0"/>
 			<Tool 
 				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="1000"
-				GlobalOptimizations="1"
+				GlobalOptimizations="0"
 				EnableIntrinsicFunctions="1"
 				FavorSizeOrSpeed="1"
 				EnableFiberSafeOptimizations="1"

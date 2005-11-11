@@ -284,16 +284,16 @@
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
 			CharacterSet="2"
-			WholeProgramOptimization="TRUE">
+			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				GlobalOptimizations="TRUE"
+				GlobalOptimizations="FALSE"
 				InlineFunctionExpansion="1"
 				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
 				EnableFiberSafeOptimizations="TRUE"
-				WholeProgramOptimization="TRUE"
+				WholeProgramOptimization="FALSE"
 				OptimizeForProcessor="3"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\framework"
