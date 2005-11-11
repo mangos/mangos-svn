@@ -45,7 +45,7 @@ void Corpse::Create( uint32 guidlow )
 
 void Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang )
 {
-    Object::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang);
+    Object::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang, -1);
 
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
     SetFloatValue( CORPSE_FIELD_POS_X, x );

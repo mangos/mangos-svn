@@ -255,7 +255,7 @@ class Object
         }
 
         void _Create (uint32 guidlow, uint32 guidhigh);
-        void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang);
+        void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
 
         //! Mark values that need updating for specified player.
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;

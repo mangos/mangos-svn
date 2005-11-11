@@ -155,6 +155,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     
 	data << (uint32)ci->flags1;        // Flags1
 
+	// UQ1: This is how wowwow does it.. Don't know what the "7" means...
     if ((ci->Type & 2) > 0)
     {
         data << uint32(7);
@@ -164,11 +165,26 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         data << uint32(0);
     }
 
+/*
+#define CREATURE_TYPE_BEAST				1
+#define CREATURE_TYPE_DRAGON			2
+#define CREATURE_TYPE_DEMON				3
+#define CREATURE_TYPE_ELEMENTAL			4
+#define CREATURE_TYPE_GIANT				5
+#define CREATURE_TYPE_UNDEAD			6
+#define CREATURE_TYPE_HUMANOID			7
+#define CREATURE_TYPE_CRITTER			8
+#define CREATURE_TYPE_MECHANICAL		9
+#define CREATURE_TYPE_UNKNOWN			10
+*/
+
     data << ci->Type;            // Creature Type
 
 	// UQ1: Set these values for elite field for:
-	// 1 + 2	= Elite
-	// 3		= Boss
+	// 1		= Elite
+	// 2		= Rare Elite
+	// 3		= World Boss
+	// 4		= Rare Boss (Not sure if this will show though)
 	// 5		= %d mana
 	// 6		= %d rage
 	// 7		= %d focus
@@ -179,17 +195,43 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 	// 13		= 100% energy
 	//data << (uint32)0; // Elite
 	if (ci->level >= 16 && ci->level < 32)
-		data << (uint32)1; // Elite
+		data << (uint32)CREATURE_ELITE_ELITE; // Elite
 	else if (ci->level >= 32 && ci->level < 48)
-		data << (uint32)2; // Elite
-	else if (ci->level >= 48 && ci->level < 64)
-		data << (uint32)3; // Boss
+		data << (uint32)CREATURE_ELITE_RAREELITE; // Elite
+	else if (ci->level >= 48 && ci->level < 59)
+		data << (uint32)CREATURE_ELITE_WORLDBOSS; // Boss
+	else if (ci->level >= 60)
+		data << (uint32)CREATURE_ELITE_RARE; // Boss
 	else
-		data << (uint32)0; // Standard
+		data << (uint32)CREATURE_ELITE_NORMAL; // Standard
 
+/*
+#define CREATURE_FAMILY_WOLF			1
+#define CREATURE_FAMILY_CAT				2
+#define CREATURE_FAMILY_SPIDER			3
+#define CREATURE_FAMILY_BEAR			4
+#define CREATURE_FAMILY_BOAR			5
+#define CREATURE_FAMILY_CROCILISK		6
+#define CREATURE_FAMILY_CARRION_BIRD	7
+#define CREATURE_FAMILY_CRAB			8
+#define CREATURE_FAMILY_GORILLA			9
+#define CREATURE_FAMILY_RAPTOR			11
+#define CREATURE_FAMILY_TALLSTRIDER		12
+#define CREATURE_FAMILY_FELHUNTER		15
+#define CREATURE_FAMILY_VOIDWALKER		16
+#define CREATURE_FAMILY_SUCCUBUS		17
+#define CREATURE_FAMILY_DOOMGUARD		19
+#define CREATURE_FAMILY_SCORPID			20
+#define CREATURE_FAMILY_TURTLE			21
+#define CREATURE_FAMILY_IMP				23
+#define CREATURE_FAMILY_BAT				24
+#define CREATURE_FAMILY_HYENA			25
+#define CREATURE_FAMILY_OWL				26
+#define CREATURE_FAMILY_WIND_SERPENT	27
+*/
 	data << (uint32)ci->family;    // Family
 
-    data << (uint32)0;            // Unknown (move before or after unknowns 3 and 4) don't know where exactly
+    data << (uint32)0;            // Unknown
     data << ci->DisplayID;        // DisplayID
 
 	// UQ1: Add some padding data... I'm positive we can send more here!
@@ -238,24 +280,29 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 	data << (uint32)testvalue;
 
 	// UQ1: Set these values for elite field for:
-	// 1 + 2	= Elite
-	// 3		= Boss
+	// 1		= Elite
+	// 2		= Rare Elite
+	// 3		= World Boss
+	// 4		= Rare Boss (Not sure if this will show though)
 	// 5		= %d mana
 	// 6		= %d rage
 	// 7		= %d focus
 	// 8		= %d energy
-	// 10		= uses 100% mana
-	// 11		= uses 100% rage
-	// 12		= uses 100% focus
-	// 13		= uses 100% energy
+	// 10		= 100% mana
+	// 11		= 100% rage
+	// 12		= 100% focus
+	// 13		= 100% energy
+	//data << (uint32)0; // Elite
 	if (ci->level >= 16 && ci->level < 32)
-		data << (uint32)1; // Elite
+		data << (uint32)CREATURE_ELITE_ELITE; // Elite
 	else if (ci->level >= 32 && ci->level < 48)
-		data << (uint32)2; // Elite
-	else if (ci->level >= 48 && ci->level < 64)
-		data << (uint32)3; // Boss
+		data << (uint32)CREATURE_ELITE_RAREELITE; // Elite
+	else if (ci->level >= 48 && ci->level < 59)
+		data << (uint32)CREATURE_ELITE_WORLDBOSS; // Boss
+	else if (ci->level >= 60)
+		data << (uint32)CREATURE_ELITE_RARE; // Boss
 	else
-		data << (uint32)0; // Standard
+		data << (uint32)CREATURE_ELITE_NORMAL; // Standard
 
 	data << (uint32)ci->family;    // Family
 

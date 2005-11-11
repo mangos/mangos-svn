@@ -238,6 +238,7 @@ void World::SetInitialWorldSettings()
 	bar.step();
     new FactionTemplateStore("DBC/FactionTemplate.dbc");
     //end Made
+	new ItemDisplayTemplateStore("DBC/ItemDisplayInfo.dbc");
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
 
     Log::getSingleton( ).outString( "" );

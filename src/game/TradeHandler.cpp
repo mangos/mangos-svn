@@ -209,9 +209,19 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             for(i=0; i<6; i++)
             {
                 if(hisItems[i])
+				{
+					// UQ1: Add his name as the gift giver of the item...
+					hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR, GetPlayer()->pTrader->GetGUID());
+
                     GetPlayer()->AddItemToSlot( GetPlayer()->FindFreeItemSlot(INVTYPE_SLOT_ITEM), hisItems[i]);
+				}
                 if(myItems[i])
+				{
+					// UQ1: Add his name as the gift giver of the item...
+					myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR, GetPlayer()->GetGUID());
+
                     GetPlayer()->pTrader->AddItemToSlot( GetPlayer()->pTrader->FindFreeItemSlot(INVTYPE_SLOT_ITEM), myItems[i]);
+				}
             }
 
         //END

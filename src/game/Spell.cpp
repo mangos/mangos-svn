@@ -1000,7 +1000,7 @@ newItem = NULL;
 
                                 uint32 level = m_caster->getLevel();
                                 Creature* spawnCreature = new Creature();
-                                spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),ci->Name.c_str(),m_caster->GetMapId(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_caster->GetOrientation());
+								spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),ci->Name.c_str(),m_caster->GetMapId(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_caster->GetOrientation(), ci->Id/*ci->DisplayID*/);
                                 spawnCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, ci->DisplayID);
                                 spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
                                 spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
@@ -1039,7 +1039,7 @@ newItem = NULL;
 
 								for(add_slot = 0; add_slot < 22; add_slot++)
 								{
-									if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
+									if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
 										break;
 								}
 
@@ -1258,7 +1258,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 char* name = (char*)ci->Name.c_str();
 
                                 // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-                                pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation() );
+								pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), ci->DisplayID );
                                 pTotem->SetUInt32Value(OBJECT_FIELD_TYPE,33);
                                 pTotem->SetUInt32Value(UNIT_FIELD_DISPLAYID,ci->DisplayID);
                                 pTotem->SetUInt32Value(UNIT_FIELD_LEVEL,m_caster->getLevel());

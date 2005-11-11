@@ -87,16 +87,161 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
+
+	// UQ1: Should also set these here???
+/*
+	OBJECT_FIELD_GUID                       =    0,
+    OBJECT_FIELD_TYPE                       =    2, // uint32 goods type [ stage prop /npc/ plays family ]
+    OBJECT_FIELD_ENTRY                      =    3,
+    OBJECT_FIELD_SCALE_X                    =    4,
+    OBJECT_FIELD_PADDING                    =    5, // may mount goods? Cotton material / gem 
+*/
 }
 
 
-void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang )
+void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
 {
     if(!m_uint32Values) _InitValues();
 
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
+
+	// UQ1: Should also set these here???
+	/*
+	UNIT_FIELD_CHARM                        =    6,
+    UNIT_FIELD_SUMMON                       =    8,
+    UNIT_FIELD_CHARMEDBY                    =   10,
+    UNIT_FIELD_SUMMONEDBY                   =   12,
+    UNIT_FIELD_CREATEDBY                    =   14,
+    UNIT_FIELD_TARGET                       =   16, // goal? (Chooses goal?)
+    UNIT_FIELD_PERSUADED                    =   18,
+    UNIT_FIELD_CHANNEL_OBJECT               =   20,
+    UNIT_FIELD_HEALTH                       =   22,
+    UNIT_FIELD_POWER1                       =   23,
+    UNIT_FIELD_POWER2                       =   24,
+    UNIT_FIELD_POWER3                       =   25,
+    UNIT_FIELD_POWER4                       =   26,
+    UNIT_FIELD_POWER5                       =   27,
+    UNIT_FIELD_MAXHEALTH                    =   28,
+    UNIT_FIELD_MAXPOWER1                    =   29,
+    UNIT_FIELD_MAXPOWER2                    =   30,
+    UNIT_FIELD_MAXPOWER3                    =   31,
+    UNIT_FIELD_MAXPOWER4                    =   32,
+    UNIT_FIELD_MAXPOWER5                    =   33,
+    UNIT_FIELD_LEVEL                        =   34,
+    UNIT_FIELD_FACTIONTEMPLATE              =   35,
+    UNIT_FIELD_BYTES_0                      =   36, // camp, race and sex 
+    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY          =   37,
+    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01       =   38,
+    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02       =   39,
+    UNIT_VIRTUAL_ITEM_INFO                  =   40,       //  6 of them
+    UNIT_FIELD_FLAGS                        =   46,
+    UNIT_FIELD_AURA                         =   47,       //  64 of them
+    UNIT_FIELD_AURAFLAGS                    =  111,       //  8 of them
+    UNIT_FIELD_AURALEVELS                   =  119,       //  8 of them
+    UNIT_FIELD_AURAAPPLICATIONS             =  127,       //  16 of them
+    UNIT_FIELD_AURASTATE                    =  143,
+    UNIT_FIELD_BASEATTACKTIME               =  144,
+    UNIT_FIELD_RANGEDATTACKTIME             =  146,
+    UNIT_FIELD_BOUNDINGRADIUS               =  147,
+    UNIT_FIELD_COMBATREACH                  =  148,
+    UNIT_FIELD_DISPLAYID                    =  149,
+    UNIT_FIELD_NATIVEDISPLAYID              =  150,
+    UNIT_FIELD_MOUNTDISPLAYID               =  151,
+    UNIT_FIELD_MINDAMAGE                    =  152,
+    UNIT_FIELD_MAXDAMAGE                    =  153,
+    UNIT_FIELD_MINOFFHANDDAMAGE             =  154,
+    UNIT_FIELD_MAXOFFHANDDAMAGE             =  155,
+    UNIT_FIELD_BYTES_1                      =  156,
+    UNIT_FIELD_PETNUMBER                    =  157,
+    UNIT_FIELD_PET_NAME_TIMESTAMP           =  158,
+    UNIT_FIELD_PETEXPERIENCE                =  159,
+    UNIT_FIELD_PETNEXTLEVELEXP              =  160,
+    UNIT_DYNAMIC_FLAGS                      =  161,
+    UNIT_CHANNEL_SPELL                      =  162,
+    UNIT_MOD_CAST_SPEED                     =  163,
+    UNIT_CREATED_BY_SPELL                   =  164,
+    UNIT_NPC_FLAGS                          =  165,
+    UNIT_NPC_EMOTESTATE                     =  166,
+    UNIT_TRAINING_POINTS                    =  167,
+    UNIT_FIELD_STAT0                        =  168,
+    UNIT_FIELD_STR = UNIT_FIELD_STAT0,
+    UNIT_FIELD_STAT1                        =  169,
+    UNIT_FIELD_AGILITY = UNIT_FIELD_STAT1,
+    UNIT_FIELD_STAT2                        =  170,
+    UNIT_FIELD_STAMINA = UNIT_FIELD_STAT2,
+    UNIT_FIELD_STAT3                        =  171,
+    UNIT_FIELD_SPIRIT = UNIT_FIELD_STAT3,
+    UNIT_FIELD_STAT4                        =  172,
+    UNIT_FIELD_IQ = UNIT_FIELD_STAT4,
+    UNIT_FIELD_ARMOR = UNIT_FIELD_STAT4,    // UQ1: I dont think this is correct! Was IQ +1 in old code...
+    UNIT_FIELD_RESISTANCES                  =  173,
+    UNIT_FIELD_RESISTANCES_01               =  174,
+    UNIT_FIELD_RESISTANCES_02               =  175,
+    UNIT_FIELD_RESISTANCES_03               =  176,
+    UNIT_FIELD_RESISTANCES_04               =  177,
+    UNIT_FIELD_RESISTANCES_05               =  178,
+    UNIT_FIELD_RESISTANCES_06               =  179,
+    UNIT_FIELD_ATTACKPOWER                  =  180,
+    UNIT_FIELD_BASE_MANA                    =  181,
+    UNIT_FIELD_BASE_HEALTH                  =  182,
+    UNIT_FIELD_ATTACK_POWER_MODS            =  183,
+    UNIT_FIELD_BYTES_2                      =  184, 
+    UNIT_FIELD_RANGEDATTACKPOWER            =  185,
+    UNIT_FIELD_RANGED_ATTACK_POWER_MODS     =  186,
+    UNIT_FIELD_MINRANGEDDAMAGE              =  187,
+    UNIT_FIELD_MAXRANGEDDAMAGE              =  188,
+    UNIT_FIELD_POWER_COST_MODIFIER          =  189,
+    UNIT_FIELD_POWER_COST_MULTIPLIER        =  190,
+    UNIT_FIELD_PADDING                      =  191,
+    UNIT_FIELD_UNKNOWN180                   =  192,      //  12 of them
+	*/
+
+	CreatureInfo *ci = NULL;
+
+	if (nameId >= 0)
+		ci = objmgr.GetCreatureName(nameId);
+
+	if (ci)
+	{// UQ1: Fill in creature info here...
+		SetUInt32Value( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
+		//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
+		SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
+		SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
+		SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
+		SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
+		SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
+
+		// UQ1: These 3 fields may be the wrong way around???
+		SetUInt32Value( UNIT_FIELD_FLAGS, ci->flag/*ci->flags1*/ );
+		SetUInt32Value( UNIT_NPC_FLAGS, ci->flags1/*ci->flag*/);
+		SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->Type);
+
+		SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
+		SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
+		SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
+		SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
+
+		SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
+		SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
+		SetUInt32Value( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
+		SetUInt32Value( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
+		SetUInt32Value( UNIT_FIELD_MINDAMAGE, ci->mindmg );
+		SetUInt32Value( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
+		
+		//ci->rank // UQ1: Guilds???
+
+		SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
+		//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
+			
+		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
+		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
+		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
+		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
+		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
+		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+3, ci->slot3pos);
+	}
 
     m_mapId = mapid;
     m_positionX = x;

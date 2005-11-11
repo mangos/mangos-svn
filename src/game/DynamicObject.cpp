@@ -44,7 +44,7 @@ DynamicObject::DynamicObject() : Object()
 
 void DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, float x, float y, float z, uint32 duration )
 {
-    Object::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0);
+    Object::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, -1);
     m_spell = spell;
     m_caster = caster;
 

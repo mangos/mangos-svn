@@ -454,9 +454,9 @@ void Creature::Update( uint32 p_time )
 }
 
 
-void Creature::Create (uint32 guidlow, const char* name, uint32 mapid, float x, float y, float z, float ang)
+void Creature::Create (uint32 guidlow, const char* name, uint32 mapid, float x, float y, float z, float ang, uint32 nameId)
 {
-    Object::_Create(guidlow, HIGHGUID_UNIT, mapid, x, y, z, ang);
+    Object::_Create(guidlow, HIGHGUID_UNIT, mapid, x, y, z, ang, nameId);
 
     respawn_cord[0] = x;
     respawn_cord[1] = y;
@@ -1019,7 +1019,7 @@ void Creature::LoadFromDB(uint32 guid)
     // _Create( guid, 0 );
 
     Create(fields[8].GetUInt32(), objmgr.GetCreatureName(fields[8].GetUInt32())->Name.c_str(), fields[6].GetUInt32(),
-        fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+        fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), fields[8].GetUInt32());
 
     m_zoneId = fields[5].GetUInt32();
 

@@ -380,6 +380,33 @@ struct FactionTemplateEntry
 	uint32 unk9;
 };
 
+struct ItemDisplayTemplateEntry
+{
+	uint32 ID;
+	char modelFile;//"Hammer_1H_War_B_01Holy.mdx"
+	uint32 unk1;
+	char imageFile;//,"Hammer_1H_War_B_01Holy"
+	uint32 unk2;
+	char invImageFile;//,"INV_Hammer_02"
+	uint32 unk3;
+	uint32 unk4;
+	uint32 unk5;
+	uint32 unk6;
+	uint32 unk7;
+	uint32 seed;//unk8; // UQ1: This is only a guess!!!
+	uint32 unk9;
+	uint32 unk10;
+	uint32 unk11;
+	uint32 unk12;
+	uint32 unk13;
+	uint32 unk14;
+	uint32 unk15;
+	uint32 unk16;
+	uint32 unk17;
+	uint32 unk18;
+	uint32 randomPropertyID; // UQ1: I think...
+};
+
 float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
@@ -402,6 +429,7 @@ defineDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
 defineIndexedDBCStore(FactionStore,FactionEntry);
 defineDBCStore(FactionTemplateStore,FactionTemplateEntry);
 //end Made
+defineDBCStore(ItemDisplayTemplateStore,ItemDisplayTemplateEntry);
 
 defineDBCStore(SkillStore,skilllinespell);
 
@@ -420,4 +448,5 @@ defineDBCStore(SkillStore,skilllinespell);
 #define sFactionStore FactionStore::getSingleton()
 #define sFactionTemplateStore FactionTemplateStore::getSingleton()
 //end Made
+#define sItemDisplayTemplateStore ItemDisplayTemplateStore::getSingleton()
 #endif
