@@ -26,6 +26,7 @@
 #include "World.h"
 #include "WorldSession.h"
 #include "Group.h"
+#include "Guild.h"
 #include "ProgressBar.cpp"
 
 createFileSingleton( ObjectMgr );
@@ -143,6 +144,22 @@ Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
     return NULL;
 }
 
+//
+// Guild
+//
+Guild * ObjectMgr::GetGuildById(const uint32 GuildId) const
+{
+    GuildSet::const_iterator itr;
+    for (itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
+    {
+        if ((*itr)->GetId() == GuildId)
+        {
+            return *itr;
+        }
+    }
+
+    return NULL;
+}
 
 //
 // Creature names
@@ -911,6 +928,31 @@ void ObjectMgr::LoadMailedItems()
     delete result;
 }
 
+void ObjectMgr::LoadGuilds()
+{
+	Guild *newguild;
+	QueryResult *result = sDatabase.Query( "SELECT guildId FROM guilds" );
+	
+	if( !result ) 
+		return;
+	
+	/// get number of rows for Guilds
+	barGoLink bar( result->GetRowCount() );
+	
+	do
+	{
+		Field *fields = result->Fetch();
+		
+		/// print bar step
+		bar.step();
+		
+		newguild = new Guild;
+		newguild->LoadGuildFromDB(fields[0].GetUInt32());
+		AddGuild(newguild);
+		
+	}while( result->NextRow() );
+
+}
 
 void ObjectMgr::LoadQuests()
 {

@@ -54,6 +54,7 @@ enum HIGHGUID
 
 class Group;
 class Path;
+class Guild;
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
@@ -75,6 +76,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // other objects
         typedef std::set< Group * > GroupSet;
+		typedef std::set< Guild * > GuildSet;
 
 #ifndef ENABLE_GRID_SYSTEM
 
@@ -179,6 +181,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
         Group * GetGroupByLeader(const uint64 &guid) const;
         void AddGroup(Group* group) { mGroupSet.insert( group ); }
         void RemoveGroup(Group* group) { mGroupSet.erase( group ); }
+
+		// Guild
+		Guild* GetGuildById(const uint32 GuildId) const;
+		void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
+        void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
         // Quests
         void AddQuest(Quest* quest)
@@ -390,7 +397,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         void LoadGameObjects();
         void LoadCorpses();
 #endif
-
+		void LoadGuilds();
         void LoadQuests();
         void LoadCreatureNames();
         void SaveCreatureNames();
@@ -456,6 +463,9 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // Group List
         GroupSet            mGroupSet;
+
+		// Guild List
+		GuildSet            mGuildSet;
 
         // Map of all item types in the game
         ItemMap             mItems;

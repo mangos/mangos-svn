@@ -189,7 +189,9 @@ void World::SetInitialWorldSettings()
     Log::getSingleton( ).outString( "Loading Corpses..." );
     objmgr.LoadCorpses();
 #endif
-
+		//Load Guilds
+		Log::getSingleton( ).outString( "Loading Guilds..." );
+		objmgr.LoadGuilds();
     //Load graveyards
    // Log::getSingleton( ).outString( "Loading Graveyards..." );
    // objmgr.LoadGraveyards();

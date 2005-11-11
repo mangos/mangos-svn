@@ -152,6 +152,9 @@ class WorldSession
         void HandleSetActiveMoverOpcode(WorldPacket &recv_data);
         void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
+	// sani
+        //void HandleJumpOpcode( WorldPacket & recv_data );
+
         /// Battlefield status
         void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);
 
@@ -165,6 +168,22 @@ class WorldSession
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
+
+		/// Guild opcodes (GuildHandler.cpp)
+		void HandleGuildQueryOpcode(WorldPacket& recvPacket);
+		void HandleGuildCreateOpcode(WorldPacket& recvPacket);
+		void HandleGuildInviteOpcode(WorldPacket& recvPacket);
+		void HandleGuildAcceptOpcode(WorldPacket& recvPacket);
+		void HandleGuildDeclineOpcode(WorldPacket& recvPacket);
+		void HandleGuildInfoOpcode(WorldPacket& recvPacket);
+		void HandleGuildRosterOpcode(WorldPacket& recvPacket);
+		void HandleGuildPromoteOpcode(WorldPacket& recvPacket);
+		void HandleGuildDemoteOpcode(WorldPacket& recvPacket);
+		void HandleGuildLeaveOpcode(WorldPacket& recvPacket);
+		void HandleGuildRemoveOpcode(WorldPacket& recvPacket);
+		void HandleGuildDisbandOpcode(WorldPacket& recvPacket);
+		void HandleGuildLeaderOpcode(WorldPacket& recvPacket);
+		void HandleGuildMOTDOpcode(WorldPacket& recvPacket);
 
         /// Taxi opcodes (TaxiHandler.cpp)
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
@@ -184,7 +203,7 @@ class WorldSession
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
         
-        // Duel opcodes
+        // Duel opcodes (DuelHandler.cpp)
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);
 
