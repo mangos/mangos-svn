@@ -41,6 +41,8 @@ implementIndexedDBCStore(FactionStore,FactionEntry)
 implementDBCStore(FactionTemplateStore,FactionTemplateEntry)
 //end Made
 
+implementDBCStore(ItemDisplayTemplateStore,ItemDisplayTemplateEntry)
+
 implementDBCStore(SkillStore,skilllinespell)
 // When loading this DBC, just write new SpellStore("spell.dbc");
 

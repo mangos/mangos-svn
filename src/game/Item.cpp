@@ -31,6 +31,33 @@ Item::Item( )
     m_valuesCount = ITEM_END;
 }
 
+uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
+{
+	ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+
+	return itemDisplayTemplateEntry->seed;
+}
+
+uint32 GetRandPropertiesIDfromDisplayInfoDBC(uint32 DisplayID)
+{
+	ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+
+	return itemDisplayTemplateEntry->randomPropertyID;
+}
+
+char GetImageFilefromDisplayInfoDBC(uint32 DisplayID)
+{
+	ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+
+	return itemDisplayTemplateEntry->imageFile;
+}
+
+char GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
+{
+	ItemDisplayTemplateEntry *itemDisplayTemplateEntry = sItemDisplayTemplateStore.LookupEntry( DisplayID );
+
+	return itemDisplayTemplateEntry->invImageFile;
+}
 
 void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
 {
@@ -51,6 +78,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
 
     SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
     SetUInt32Value( ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
+
 /*
     ITEM_FIELD_OWNER                        =    6,  //  2  UINT64
     ITEM_FIELD_CONTAINED                    =    8,  //  2  UINT64
@@ -63,7 +91,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
     ITEM_FIELD_ENCHANTMENT                  =   22,  //  21 ENCHANTMENT
     ITEM_FIELD_PROPERTY_SEED                =   43,  //  1  UINT32
     ITEM_FIELD_RANDOM_PROPERTIES_ID         =   44,  //  1  UINT32
-    ITEM_FIELD_ITEM_TEXT_ID                 =   45,  //  1  UINT32
+    ITEM_FIELD_ITEM_TEXT_ID                 =   45,  //  1  UINT32 // goods writing serial number 
     ITEM_FIELD_DURABILITY                   =   46,  //  1  UINT32
     ITEM_FIELD_MAXDURABILITY                =   47,  //  1  UINT32
 */
@@ -75,6 +103,66 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
     SetUInt32Value( ITEM_FIELD_FLAGS, m_itemProto->Flags);
     SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID, m_itemProto->DisplayInfoID);
     m_owner = owner;
+
+	// UQ1: FIXME: This one should be the GUID of the maker (NPC or Blacksmith...)
+	// SetUInt64Value( ITEM_FIELD_CREATOR, owner->GetGUID()); // UQ1: Should be only used for player-made items...
+	// UQ1: FIXME: This one should be the GUID of the gift's maker (NPC or Blacksmith...)
+    // SetUInt64Value( ITEM_FIELD_GIFTCREATOR, owner->GetGUID());
+	
+	// UQ1: I disabled this again.. Think it's a running count, not the max...
+	//SetUInt32Value( ITEM_FIELD_STACK_COUNT, m_itemProto->MaxCount);
+
+	SetUInt32Value( ITEM_FIELD_DURATION, m_itemProto->Delay);
+    // How we do this?? Need to save enchented items back to the DB per player ???
+	//SetUInt32Value( ITEM_FIELD_ENCHANTMENT, m_itemProto->);//                  =   22,  //  21 ENCHANTMENT
+    //SetUInt32Value( ITEM_FIELD_PROPERTY_SEED, GetRandPropertiesSeedfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
+	SetUInt32Value( ITEM_FIELD_PROPERTY_SEED, m_itemProto->DisplayInfoID);
+	SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
+
+	/*
+	CONTAINER_FIELD_NUM_SLOTS               =   48,
+    CONTAINER_ALIGN_PAD                     =   49,
+    CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
+	*/
+
+	if (m_itemProto->ContainerSlots > 0)
+	{
+		SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots );
+		//CONTAINER_ALIGN_PAD                     =   49,
+		//CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
+	}
+
+	// UQ1: Set these too??? I see theres no armor, or damage values above!
+	/*
+	UNIT_FIELD_ARMOR 
+	UNIT_FIELD_MAXDAMAGE
+	UNIT_FIELD_MINDAMAGE
+	UNIT_FIELD_MAXRANGEDDAMAGE
+	UNIT_FIELD_MINRANGEDDAMAGE
+    UNIT_FIELD_MAXHEALTH
+    UNIT_FIELD_MAXOFFHANDDAMAGE
+    UNIT_FIELD_MINOFFHANDDAMAGE
+	*/
+
+
+/*	SetUInt32Value( UNIT_FIELD_ARMOR, m_itemProto->Armor);
+
+	// UQ1: Calculate damage values...
+	float dmg_min = 0.0f, dmg_max = 0.0f;
+
+	for (int loop = 0; loop < 6; loop++)
+	{
+		dmg_max += m_itemProto->DamageMax[loop];
+		dmg_min += m_itemProto->DamageMin[loop];
+	}
+
+	SetFloatValue( UNIT_FIELD_MAXDAMAGE, dmg_max);
+	SetFloatValue( UNIT_FIELD_MINDAMAGE, dmg_min);
+*/
+
+	//SetUInt32Value( UNIT_FIELD_MAXRANGEDDAMAGE, m_itemProto->);
+	//SetUInt32Value( UNIT_FIELD_MINRANGEDDAMAGE, m_itemProto->Armor);
+
 }
 
 

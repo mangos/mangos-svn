@@ -392,6 +392,16 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << itemProto->SpellCategory[i];
         data << itemProto->SpellCategoryCooldown[i];
     }
+	
+	/*
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+	data << uint32(0);
+	*/
+
     data << itemProto->Bonding;
     //data << itemProto->Description.c_str();
     if (stricmp(itemProto->Description.c_str(), ""))
@@ -784,6 +794,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     Item *item = new Item();
     item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
 
+	// UQ1: Add the vendor's name as the maker...
+	//item->SetUInt64Value( ITEM_FIELD_CREATOR, unit->GetGUID()); // Don't know what GUID to use here...
+
     unit->setItemAmount( vendorslot, unit->getItemAmount(vendorslot)-amount );
     GetPlayer()->AddItemToSlot( slot, item );
 
@@ -874,6 +887,9 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 
     Item *item = new Item();
     item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
+
+	// UQ1: Add the vendor's name as the maker...
+	//item->SetUInt64Value( ITEM_FIELD_CREATOR, unit->GetGUID()); // Don't know what GUID to use here...
 
     GetPlayer()->AddItemToSlot( playerslot, item );
 

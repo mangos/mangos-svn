@@ -114,7 +114,7 @@ class Creature : public Unit
 
         /// Creation
         void Create (uint32 guidlow, const char* creature_name, uint32 mapid,
-            float x, float y, float z, float ang);
+            float x, float y, float z, float ang, uint32 nameId);
 
         /// Updates
         void UpdateMobMovement( uint32 p_time );

@@ -166,7 +166,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
         pCreature = new Creature();
 
         pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), objmgr.GetCreatureName(name)->Name.c_str(), fields[5].GetUInt16(),
-            fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat());
+            fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), name);
 
         pCreature->SetZoneId( fields[6].GetUInt16() );
         pCreature->SetUInt32Value( OBJECT_FIELD_ENTRY, name );
@@ -978,6 +978,9 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     {
         Item *item = new Item();    
         item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),    itemid, pl);
+
+		if (!item)
+			return true;
         
         //添加物品属性
         if ((cPos) && (cVal)){
@@ -1369,7 +1372,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
 
     Creature* pCreature = new Creature();
 
-    pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), "Spirit Healer", chr->GetMapId(), x, y, z, o);
+    pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), "Spirit Healer", chr->GetMapId(), x, y, z, o, objmgr.AddCreatureName(pCreature->GetName(), 5233));
     pCreature->SetZoneId(chr->GetZoneId());
     pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureName(pCreature->GetName(), 5233));
     pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
