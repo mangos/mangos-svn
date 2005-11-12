@@ -33,7 +33,7 @@
 #include "LootMgr.h"
 #include "Chat.h" // UQ1: for string formatting...
 #include "MapManager.h"
-
+#include "FactionTemplateResolver.h"
 
 Creature::Creature() : Unit()
 {
@@ -374,7 +374,13 @@ void Creature::Update( uint32 p_time )
 
                 if (pVictim->isAlive())
                 {
-                    m_attackers.insert(pVictim);
+		    // Now decided whether I should attack this guy.
+		    FactionTemplateEntry *creature_fact = sFactionTemplateStore.LookupEntry(GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+		    FactionTemplateEntry *target_fact = sFactionTemplateStore.LookupEntry(pVictim->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+		    FactionTemplateResolver fact_source(creature_fact);
+		    FactionTemplateResolver fact_target(target_fact);
+		    if( fact_source.IsHostileTo( fact_target ) )
+			m_attackers.insert(pVictim);
                 }
             }
 

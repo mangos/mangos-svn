@@ -21,6 +21,9 @@
 #ifndef __SPELL_H
 #define __SPELL_H
 
+#include "GridDefines.h"
+#include "Database/DBCStores.h"
+
 class WorldSession;
 class Unit;
 class DynamicObj;
@@ -55,9 +58,18 @@ struct TeleportCoords
     float y;
     float z;
 };
+
+// forward declaration
+namespace MaNGOS
+{
+    class SpellNotifierPlayer;
+    class SpellNotifierCreatureAndPlayer;
+}
+
 class SpellCastTargets
 {
-    public:
+
+public:
         void read ( WorldPacket * data,uint64 caster );
         void write ( WorldPacket * data);
 
@@ -122,6 +134,8 @@ enum ShapeshiftForm
 // Spell instance
 class Spell
 {
+    friend class MaNGOS::SpellNotifierPlayer;
+    friend class MaNGOS::SpellNotifierCreatureAndPlayer;
     public:
         Spell( Unit* Caster, SpellEntry *info, bool triggered, Affect* aff );
 
@@ -196,4 +210,61 @@ enum ReplenishType
     REPLENISH_MANA = 21,
     REPLENISH_RAGE = 22                           //don't know if rage is 22 or what, but will do for now
 };
+
+// notifiers
+namespace MaNGOS
+{
+    struct MANGOS_DLL_DECL SpellNotifierPlayer
+    {
+	std::list<uint64> &i_data;
+	Spell &i_spell;
+	const uint32& i_index;
+	SpellNotifierPlayer(Spell &spell, std::list<uint64> &data, const uint32 &i) : i_spell(spell), i_data(data), i_index(i) {}
+	inline void Visit(PlayerMapType &m)
+	{
+	    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+	    {
+		if( !itr->second->isAlive() )
+		    continue;
+		if( i_spell._CalcDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ,
+					  itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+		    i_data.push_back(itr->second->GetGUID());
+	    }
+	}
+    };
+
+    struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
+    {
+	std::list<uint64> &i_data;
+	Spell &i_spell;
+	const uint32& i_index;
+	SpellNotifierCreatureAndPlayer(Spell &spell, std::list<uint64> &data, const uint32 &i) : i_spell(spell), i_data(data), i_index(i) {}
+
+	template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
+	{
+	    for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+	    {
+		i_data.push_back(itr->second->GetGUID());
+		if(i_spell.m_caster->isInFront((Unit*)(itr->second),GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]))) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+		    i_data.push_back(itr->second->GetGUID());
+	    }
+	}
+
+	// specialization ..don't care about
+#ifdef WIN32
+	template<> inline void Visit(std::map<OBJECT_HANDLE, Corpse *> &m ) {}
+	template<> inline void Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
+	template<> inline void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
+#endif
+    };
+
+#ifndef WIN32
+	template<> inline void SpellNotifierCreatureAndPlayer::Visit(std::map<OBJECT_HANDLE, Corpse *> &m ) {}
+	template<> inline void SpellNotifierCreatureAndPlayer::Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
+	template<> inline void SpellNotifierCreatureAndPlayer::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
+#endif
+
+}
+
+
 #endif

@@ -427,7 +427,7 @@ defineIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry);
 defineDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry);
 
 defineIndexedDBCStore(FactionStore,FactionEntry);
-defineDBCStore(FactionTemplateStore,FactionTemplateEntry);
+defineIndexedDBCStore(FactionTemplateStore,FactionTemplateEntry);
 //end Made
 defineDBCStore(ItemDisplayTemplateStore,ItemDisplayTemplateEntry);
 

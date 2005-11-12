@@ -23312,8 +23312,8 @@ if test "${with_debug_info+set}" = set; then
   withval="$with_debug_info"
 
     if test "$withval" = "yes" ; then
-	CFLAGS="-g $CFLAGS"
-	CXXFLAGS="-g $CXXFLAGS"
+	CFLAGS="-g -DDEBUG $CFLAGS"
+	CXXFLAGS="-g -DDEBUG $CXXFLAGS"
 	MANGOSD_DEBUG_INFO=yes
     elif test "$withval" != "no" ; then
 	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5

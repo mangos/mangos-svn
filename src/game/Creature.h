@@ -34,8 +34,8 @@ class WorldSession;
 
 enum CreatureState
 {
-    STOPPED,
-    MOVING,
+    STOPPED, 
+    MOVING,  
     ATTACKING
 };
 

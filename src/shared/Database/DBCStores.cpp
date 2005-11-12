@@ -38,7 +38,7 @@ implementIndexedDBCStore(WorldMapAreaStore,WorldMapAreaEntry)
 implementDBCStore(WorldMapOverlayStore,WorldMapOverlayEntry)
 
 implementIndexedDBCStore(FactionStore,FactionEntry)
-implementDBCStore(FactionTemplateStore,FactionTemplateEntry)
+implementIndexedDBCStore(FactionTemplateStore,FactionTemplateEntry)
 //end Made
 
 implementDBCStore(ItemDisplayTemplateStore,ItemDisplayTemplateEntry)

@@ -23,13 +23,16 @@
 #include "Creature.h"
 #include "Player.h"
 #include "Utilities.h"
+#include "FactionTemplateResolver.h"
 
 int
 AggressorAI::Permissible(const Creature *creature)
 {
-    //    if( creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == Beast )
-    //	return 1;
-    return -1;
+    FactionTemplateEntry *fact = sFactionTemplateStore.LookupEntry(creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    FactionTemplateResolver fact_source(fact);
+    if( fact_source.IsHostileToAll() )
+	return PROACTIVE_PERMIT_BASE;
+    return NO_PERMIT;
 }
 
 
