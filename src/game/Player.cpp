@@ -2728,7 +2728,7 @@ void Player::BuildPlayerRepop()
 }
 
 void
-Player::SendDelayResponse(const uint32 ml_seconds)
+Player::SendDelayResponse(const uint32 ml_seconds) 
 {
     WorldPacket data;
     data.Initialize( SMSG_QUERY_TIME_RESPONSE );
@@ -3379,7 +3379,7 @@ void Player::LoadReputationFromDBC(void)
 
     for(unsigned int i = 0; i < sFactionTemplateStore.GetNumRows(); i++)
     {
-		fact = sFactionTemplateStore.LookupEntry(i);
+		fact = sFactionTemplateStore.DataStore::LookupEntry(i);
 		fac  = sFactionStore.LookupEntry( fact->faction );
 		assert( fac );
 		if( (fac->reputationListID >= 0) && (!FactionIsInTheList(fac->reputationListID)) )
@@ -3464,36 +3464,35 @@ void Player::_SaveReputation(void)
 //Returns true if it can set standing and false if not.
 bool Player::SetStanding(uint32 FTemplate, int standing)
 {
-	FactionEntry *fac = NULL;
-	FactionTemplateEntry *fact = NULL;
+    FactionEntry *fac = NULL;
+    FactionTemplateEntry *fact = NULL;
     std::list<struct Factions>::iterator itr;
-	
-	for(unsigned int i = 0; i < sFactionTemplateStore.GetNumRows(); i++)
+    fact = sFactionTemplateStore.LookupEntry(FTemplate);
+
+    if( fact != NULL )
+    {
+	assert( fact->ID == FTemplate );
+	fac  = sFactionStore.LookupEntry( fact->faction );
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
-		fact = sFactionTemplateStore.LookupEntry(i);
-		if(fact->ID == FTemplate)
-		{
-			fac  = sFactionStore.LookupEntry( fact->faction );
-			for(itr = factions.begin(); itr != factions.end(); ++itr)
-			{
-				if(itr->ReputationListID == fac->reputationListID) 
-				{
-					itr->Standing += standing;
-					itr->Flags = (itr->Flags | 1); //Sets visible to faction
-					UpdateReputation();
-					return true;
-				}
-			}	
-			break;
-		}
-	}
-	return false;
+	    if(itr->ReputationListID == fac->reputationListID) 
+	    {
+		itr->Standing += standing;
+		itr->Flags = (itr->Flags | 1); //Sets visible to faction
+		UpdateReputation();
+		return true;
+	    }
+	}	
+    }
+
+    return false;
 }
 
 void Player::DuelComplete()
 {
     WorldPacket data;
     Player *plvs = objmgr.GetPlayer(m_duelGUID);
+    assert( plvs != NULL );
 
     data.Initialize(SMSG_DUEL_WINNER);
     data << (uint8)0;

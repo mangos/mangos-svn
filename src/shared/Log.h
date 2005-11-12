@@ -39,4 +39,12 @@ class Log : public Singleton< Log >
 };
 
 #define sLog Log::getSingleton()
+
+// compile time decision
+#ifdef DEBUG
+#define DEBUG_LOG Log::getSingleton().outDebug
+#else
+#define DEBUG_LOG
+#endif
+
 #endif

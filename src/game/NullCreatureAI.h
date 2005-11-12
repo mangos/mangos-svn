@@ -45,7 +45,7 @@ public:
     bool IsVisible(Player *) const { return false; /* inactive creature don't care */ }
     
     void UpdateAI(const uint32) {}
-    static int Permissible(const Creature *) { return 0; /* that's the best I can do dude */ }
+    static int Permissible(const Creature *) { return IDLE_PERMIT_BASE; /* that's the best I can do dude */ }
 };
 
 

@@ -39,7 +39,8 @@
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-
+#include "RedZoneDistrict.h"
+#include "CellImpl.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
@@ -149,16 +150,14 @@ void Spell::FillTargetMap()
                 case 15:                          // All Enemies in Area of Effect (TEST)
                 case 16:                          // All Enemies in Area of Effect instant (e.g. Flamestrike)
                 {
-		    /* TODO siuolly: check on nearby cell uints for casting
-		      for(Player::InRangeUnitsMapType::iterator itr = p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-		      {
-		      if(_CalcDistance(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-		      tmpMap.push_back(itr->second->GetGUID());
-		      
-		      
-		      }
-		    */
-                    }break;
+		    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+		    Cell cell = RedZone::GetZone(p);
+		    cell.data.Part.reserved = ALL_DISTRICT;
+		    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+		    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+		    CellLock<GridReadGuard> cell_lock(cell, p);
+		    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+		}break;
                     case 20:                      // All Party Members around the Caster
                     {
                         Group* pGroup = objmgr.GetGroupByLeader(p_caster->GetGroupLeader());
@@ -180,13 +179,14 @@ void Spell::FillTargetMap()
                     }break;
                     case 22:                      // Enemy Targets around the Caster
                     {
-			/* TODO siuolly: check nearby cell
-			   for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-			   {
-			   if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-			   tmpMap.push_back(itr->second->GetGUID());
-			*/
-			
+			CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+			Cell cell = RedZone::GetZone(p);
+			cell.data.Part.reserved = ALL_DISTRICT;
+			MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+			TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+			CellLock<GridReadGuard> cell_lock(cell, p);
+			cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+
 		    }break;
                         case 23:                  // Gameobject Target
                         {
@@ -194,13 +194,15 @@ void Spell::FillTargetMap()
                         }break;
                         case 24:                  // Targets in Front of the Caster
                         {
-			    /* TODO siuolly: check nearby cell
-                                for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-                                {
-                                    if(m_caster->isInFront((Unit*)(itr->second),GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]))) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                        tmpMap.push_back(itr->second->GetGUID());
-			    */
-
+			    CellPair p(MaNGOS::ComputeCellPair(p_caster->GetPositionX(), p_caster->GetPositionY()));
+			    Cell cell = RedZone::GetZone(p);
+			    cell.data.Part.reserved = ALL_DISTRICT;
+			    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tmpMap, i);
+			    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
+			    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+			    CellLock<GridReadGuard> cell_lock(cell, p);
+			    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+			    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 			}break;
                             case 25:              //Target is duel vs player add by vendy
                             {
@@ -214,20 +216,14 @@ void Spell::FillTargetMap()
                                     tmpMap.push_back(m_targets.m_itemTarget);
                             }break;
                             case 28:              // All Enemies in Area of Effect(Blizzard/Rain of Fire/volley) channeled
-                            {
-				/* TODO siuolly
-                                    for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-                                    {
-                                        if(!itr->second->isAlive())
-                                            continue;
-
-                                        if(_CalcDistance(m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ,itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                                            tmpMap.push_back(itr->second->GetGUID());
-#endif
-
-                                    }
-				*/
-
+			    {
+				CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+				Cell cell = RedZone::GetZone(p);
+				cell.data.Part.reserved = ALL_DISTRICT;
+				MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+				TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+				CellLock<GridReadGuard> cell_lock(cell, p);
+				cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
                                 }break;
                                 case 32:          // Minion Target
                                 {
@@ -265,13 +261,13 @@ void Spell::FillTargetMap()
                                 }break;
                                 case 53:          // Target Area by Players CurrentSelection()
                                 {
-				    /* TODO siuolly:
-				       Unit* Target = ObjectAccessor::Instance().GetUnit(*p_caster, p_caster->GetSelection());
-				       for(Player::InRangeUnitsMapType::iterator itr=p_caster->InRangeUnitsBegin(); itr != p_caster->InRangeUnitsEnd(); ++itr)
-				       {
-				       if(_CalcDistance(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-				       tmpMap.push_back(itr->second->GetGUID());
-				    */
+				    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+				    Cell cell = RedZone::GetZone(p);
+				    cell.data.Part.reserved = ALL_DISTRICT;
+				    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+				    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+				    CellLock<GridReadGuard> cell_lock(cell, p);
+				    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 				}break;
                                     default:
                                     {
@@ -1236,9 +1232,9 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 if(guid != 0)
                                 {
                                     Creature* Totem = NULL;
-				    
-				    // TODO siuolly figure out whether this is needed in GRID on
-                                    //Totem = objmgr.GetObject<Creature>(guid);
+				    /* TODO siuolly: get the totem for the caster
+				    ObjectAccessor::Instance().GetCreature(m_caster, guid);				    
+				    */
 
                                     if(Totem)
                                     {

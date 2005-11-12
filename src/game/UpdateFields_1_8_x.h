@@ -20,7 +20,7 @@
 
 #ifdef _VERSION_1_8_0_
 
-#include "common.h"
+#include "Common.h"
 
 #ifndef _UPDATEFIELDS_AUTO_H
 #define _UPDATEFIELDS_AUTO_H

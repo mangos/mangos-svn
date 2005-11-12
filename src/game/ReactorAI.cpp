@@ -28,13 +28,18 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "Player.h"
+#include "FactionTemplateResolver.h"
 
 #define MAX_RANGE_OF_SPELLS (30.0f*30.0f)
 
 int
 ReactorAI::Permissible(const Creature *creature)
 {
-    return -1;
+    FactionTemplateEntry *fact = sFactionTemplateStore.LookupEntry(creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    FactionTemplateResolver fact_source(fact);
+    if( fact_source.IsNeutralToAll() )
+	return REACTIVE_PERMIT_BASE;
+    return NO_PERMIT;
 }
 
 

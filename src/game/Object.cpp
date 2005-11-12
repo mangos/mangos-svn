@@ -205,7 +205,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
 
 	if (ci)
 	{// UQ1: Fill in creature info here...
-		SetUInt32Value( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
+		SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
 		//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
 		SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
 		SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
@@ -225,10 +225,10 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
 
 		SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
 		SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
-		SetUInt32Value( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
-		SetUInt32Value( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
-		SetUInt32Value( UNIT_FIELD_MINDAMAGE, ci->mindmg );
-		SetUInt32Value( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
+		SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
+		SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
+		SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
+		SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
 		
 		//ci->rank // UQ1: Guilds???
 

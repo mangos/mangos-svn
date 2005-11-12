@@ -197,8 +197,8 @@ Debugging options:
   --with-debug-info       Include debug info in library],
 [
     if test "$withval" = "yes" ; then
-	CFLAGS="-g $CFLAGS"
-	CXXFLAGS="-g $CXXFLAGS"
+	CFLAGS="-g -DDEBUG $CFLAGS"
+	CXXFLAGS="-g -DDEBUG $CXXFLAGS"
 	MANGOSD_DEBUG_INFO=yes
     elif test "$withval" != "no" ; then
 	AC_MSG_ERROR(Please choose yes or no)
