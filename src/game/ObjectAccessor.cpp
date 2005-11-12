@@ -17,6 +17,9 @@
 #include "GridNotifiersImpl.h"
 #include "Opcodes.h"
 
+#include <cmath>
+#include <bitset>
+
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
@@ -287,18 +290,55 @@ void
 ObjectAccessor::Update(const uint32  &diff)
 {
     { // don't remove scope braces
+	typedef std::multimap<uint32, Player *> CreatureLocationHolderType;
+	CreatureLocationHolderType creature_locations;
 	Guard guard(i_playerGuard);
 	for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
 	{    
 	    iter->second->Update(diff);
-	    CellPair p(MaNGOS::ComputeCellPair(iter->second->GetPositionX(), iter->second->GetPositionY()));
-	    Cell cell = RedZone::GetZone(p);
-	    cell.data.Part.reserved = ALL_DISTRICT;
-	    MaNGOS::ObjectUpdater updater(diff);
-	    TypeContainerVisitor<MaNGOS::ObjectUpdater, TypeMapContainer<AllObjectTypes> > object_update(updater);	
-	    CellLock<NullGuard> cell_lock(cell, p);
-	    cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(iter->second->GetMapId()));	
+	    creature_locations.insert( CreatureLocationHolderType::value_type(iter->second->GetMapId(), iter->second) );
 	}
+	
+	/* now update the creatures near the player. Note,
+	 * we only update the creatures on and adjecent cells
+	 * to the player's standing.  Due to the size of the cell
+	 * division, any creature beyon that position will
+	 * not be visually visible on the player's monitor.
+	 */
+	uint32 map_id = 0;
+	MaNGOS::ObjectUpdater updater(diff);
+	TypeContainerVisitor<MaNGOS::ObjectUpdater, TypeMapContainer<AllObjectTypes> > object_update(updater);	
+	std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cell(0);
+	for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
+	{
+	    if( map_id != (*iter).first )
+	    {
+		map_id = (*iter).first;
+		marked_cell.reset(); // new map
+	    }
+
+	    Player *player = (*iter).second;
+	    CellPair standing_cell(MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()));
+	    CellPair update_cell(standing_cell);
+	    update_cell << 1;
+	    update_cell -= 1;
+	    for(; abs(standing_cell.x_coord - update_cell.x_coord) < 2; update_cell >> 1)
+	    {
+		for(CellPair cell_iter=update_cell; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter += 1)
+		{		    
+		    uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
+		    if( !marked_cell.test(cell_id) )
+		    {
+			marked_cell.set(cell_id);
+			Cell cell = RedZone::GetZone(cell_iter);
+			cell.data.Part.reserved = CENTER_DISTRICT;
+			CellLock<NullGuard> cell_lock(cell, cell_iter);
+			cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
+		    }
+		}
+	    }
+	}
+	
     }
 
     _update();

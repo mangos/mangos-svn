@@ -225,6 +225,11 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    }
 	    break;
 	}
+    case CENTER_DISTRICT:
+	{
+	    m.Visit(l, visitor);
+	    break;
+	}
     default:
 	{
 	    assert( false );
