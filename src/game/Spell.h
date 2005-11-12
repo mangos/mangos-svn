@@ -62,8 +62,8 @@ struct TeleportCoords
 // forward declaration
 namespace MaNGOS
 {
-    class SpellNotifierPlayer;
-    class SpellNotifierCreatureAndPlayer;
+    struct SpellNotifierPlayer;
+    struct SpellNotifierCreatureAndPlayer;
 }
 
 class SpellCastTargets
@@ -134,8 +134,8 @@ enum ShapeshiftForm
 // Spell instance
 class Spell
 {
-    friend class MaNGOS::SpellNotifierPlayer;
-    friend class MaNGOS::SpellNotifierCreatureAndPlayer;
+    friend struct MaNGOS::SpellNotifierPlayer;
+    friend struct MaNGOS::SpellNotifierCreatureAndPlayer;
     public:
         Spell( Unit* Caster, SpellEntry *info, bool triggered, Affect* aff );
 

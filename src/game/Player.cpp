@@ -3379,7 +3379,7 @@ void Player::LoadReputationFromDBC(void)
 
     for(unsigned int i = 0; i < sFactionTemplateStore.GetNumRows(); i++)
     {
-		fact = sFactionTemplateStore.DataStore::LookupEntry(i);
+		fact = sFactionTemplateStore.DataStore<FactionTemplateEntry>::LookupEntry(i);
 		fac  = sFactionStore.LookupEntry( fact->faction );
 		assert( fac );
 		if( (fac->reputationListID >= 0) && (!FactionIsInTheList(fac->reputationListID)) )
