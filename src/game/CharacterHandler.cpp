@@ -268,7 +268,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint64 playerGuid = 0;
 
-    Log::getSingleton( ).outDebug( "WORLD: Recvd Player Logon Message" );
+    DEBUG_LOG( "WORLD: Recvd Player Logon Message" );
 
     recv_data >> playerGuid;                        // this is the GUID selected by the player
 
@@ -321,7 +321,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     sChatHandler.FillSystemMessageData(&data, this, sWorld.GetMotd());
     SendPacket( &data );
 
-    Log::getSingleton( ).outDebug( "WORLD: Sent motd (SMSG_MESSAGECHAT)" );
+    DEBUG_LOG( "WORLD: Sent motd (SMSG_MESSAGECHAT)" );
 
     //data.Initialize(4, SMSG_SET_REST_START);
     //data << unsure;
@@ -332,7 +332,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     for(int i = 0; i < 32; i++)
         data << uint8(0xFF);
     SendPacket(&data);
-    Log::getSingleton( ).outDebug( "WORLD: Sent tutorial flags." );
+    DEBUG_LOG( "WORLD: Sent tutorial flags." );
 
     //Initial Spells
     GetPlayer()->smsg_InitialSpells();
@@ -618,7 +618,7 @@ void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 
 void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outString( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
+    DEBUG_LOG( "WORLD: Recieved CMSG_MEETING_STONE_INFO" );
 #ifndef _VERSION_1_7_0_                             // UQ1: Don't know how to support this..
     WorldPacket data;
     data.Initialize( SMSG_MEETING_STONE_INFO );

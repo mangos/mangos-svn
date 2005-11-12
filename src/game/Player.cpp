@@ -2334,7 +2334,7 @@ uint32 Player::GetSlotByItemGUID(uint64 guid)
 void Player::AddItemToSlot(uint8 slot, Item *item)
 {
     /* ASSERT(slot < INVENTORY_SLOT_ITEM_END); */
-    Log::getSingleton().outError("AddItemtoSlot");
+    DEBUG_LOG("AddItemtoSlot");
     //ASSERT(slot < BANK_SLOT_BAG_END);
     //ASSERT(m_items[slot] == NULL);
 	
@@ -2484,11 +2484,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     ItemPrototype *proto = item->GetProto();
     if (apply)
     {
-        Log::getSingleton().outString("applying mods for item %u ",item->GetGUIDLow());
+        DEBUG_LOG("applying mods for item %u ",item->GetGUIDLow());
     }
     else
     {
-        Log::getSingleton().outString("removing mods for item %u ",item->GetGUIDLow());
+        DEBUG_LOG("removing mods for item %u ",item->GetGUIDLow());
     }
     // FIXED: ? Was missing armor and holy resistance
    if (proto->Armor)
@@ -2522,11 +2522,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             (apply ? proto->DamageMin[0] : -proto->DamageMin[0]));
         if (apply)
         {
-            Log::getSingleton().outString("adding %f mindam ",proto->DamageMin[0]);
+            DEBUG_LOG("adding %f mindam ",proto->DamageMin[0]);
         }
         else
         {
-            Log::getSingleton().outString("removing %f mindamn ",proto->DamageMin[0]);
+            DEBUG_LOG("removing %f mindamn ",proto->DamageMin[0]);
         }
 
     }
@@ -2536,11 +2536,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             (apply ? proto->DamageMax[0] : -proto->DamageMax[0]));
         if (apply)
         {
-            Log::getSingleton().outString("adding %f maxdam ",proto->DamageMax[0]);
+            DEBUG_LOG("adding %f maxdam ",proto->DamageMax[0]);
         }
         else
         {
-            Log::getSingleton().outString("removing %f maxdam ",proto->DamageMax[0]);
+            DEBUG_LOG("removing %f maxdam ",proto->DamageMax[0]);
         }
     }
     if (proto->Delay)
@@ -3278,7 +3278,7 @@ void Player::InitExploreSystem(void)
             
             areas.push_back(newArea);
 
-            Log::getSingleton( ).outDetail("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
+            DEBUG_LOG("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
         }
     }
 }
@@ -3352,7 +3352,7 @@ void Player::UpdateReputation(void)
 		data << (uint32) itr->Standing;
 		GetSession()->SendPacket(&data);
 
-		Log::getSingleton( ).outDebug( "WORLD: Player::UpdateReputation called and completed OK!" );
+		DEBUG_LOG( "WORLD: Player::UpdateReputation called and completed OK!" );
 	}
 }
 

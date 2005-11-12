@@ -1272,19 +1272,19 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 /// cinema
 void WorldSession::HandleCompleteCinema( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Player is watching cinema" );
+    DEBUG_LOG( "WORLD: Player is watching cinema" );
 }
 
 void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: Which movie to play" );
+    DEBUG_LOG( "WORLD: Which movie to play" );
 }
 
 /// battlefield status 
 void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 {
     /// TODO need to be finished
-    Log::getSingleton( ).outDebug( "WORLD: Battleground status - not yet" );
+    DEBUG_LOG( "WORLD: Battleground status - not yet" );
 }
 
 
@@ -1293,7 +1293,7 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
     /// TODO need to be finished
-    Log::getSingleton( ).outDebug( "WORLD: Move time lag/synchronization fix - not yet" );
+    DEBUG_LOG( "WORLD: Move time lag/synchronization fix - not yet" );
 }
 
 void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
