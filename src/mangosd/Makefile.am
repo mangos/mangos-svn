@@ -27,7 +27,9 @@ mangosd_SOURCES = \
     WorldRunnable.cpp \
     WorldRunnable.h \
     HttpdRunnable.cpp \
-    HttpdRunnable.h
+    HttpdRunnable.h \
+    CliRunnable.cpp \
+    CliRunnable.h
 
 mangosd_LDADD = -lgame -ldatabase -lrealmlist -lconfig -lauth -lshared -lframework -lZThread -lzlib  -lnetwork
 

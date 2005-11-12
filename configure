@@ -1043,6 +1043,7 @@ Optional Features:
   --enable-18x Turn on 1.8.x support
   --enable-17x Turn on 1.7.x support
   --enable-new-framework Enable new framework
+  --enable-cli Turn on command console
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -23324,6 +23325,28 @@ echo "$as_me: error: Please choose yes or no" >&2;}
 fi;
 echo "$as_me:$LINENO: result: $MANGOSD_DEBUG_INFO" >&5
 echo "${ECHO_T}$MANGOSD_DEBUG_INFO" >&6
+
+# check for cli system enable
+echo "$as_me:$LINENO: checking whether cli system is enabled" >&5
+echo $ECHO_N "checking whether cli system is enabled... $ECHO_C" >&6
+MANGOSD_ENABLE_CLI=no
+# Check whether --enable-cli or --disable-cli was given.
+if test "${enable_cli+set}" = set; then
+  enableval="$enable_cli"
+
+    if test "$enableval" = "yes" ; then
+	CFLAGS="-DENABLE_CLI $CFLAGS"
+	CXXFLAGS="-DENABLE_CLI $CXXFLAGS"
+	MANGOSD_ENABLE_CLI=yes
+    elif test "$withval" != "no" ; then
+	{ { echo "$as_me:$LINENO: error: Please choose yes or no" >&5
+echo "$as_me: error: Please choose yes or no" >&2;}
+   { (exit 1); exit 1; }; }
+    fi
+
+fi;
+echo "$as_me:$LINENO: result: $MANGOSD_ENABLE_CLI" >&5
+echo "${ECHO_T}$MANGOSD_ENABLE_CLI" >&6
 
 # check for httpd system enable
 echo "$as_me:$LINENO: checking whether httpd system is enabled" >&5

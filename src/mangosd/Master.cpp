@@ -43,6 +43,12 @@
 createFileSingleton( Httpd );
 #endif
 
+#ifdef ENABLE_CLI
+#include "CliRunnable.h"
+
+createFileSingleton( CliRunnable );
+#endif
+
 // UQ1: warning C4305: 'argument' : truncation from 'double' to 'const float'
 #pragma warning(disable:4305)
 
@@ -158,6 +164,11 @@ bool Master::Run()
     sHttpd.SetInitialHttpdSettings();
 
     ZThread::Thread td(new HttpdRunnable);
+#endif
+
+#ifdef ENABLE_CLI
+//    sCli.SetInitialCliSettings();
+    ZThread::Thread td1(new CliRunnable);
 #endif
 
     uint32 realCurrTime, realPrevTime;
