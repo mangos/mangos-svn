@@ -49,8 +49,8 @@ struct MANGOS_DLL_DECL FactionTemplateResolver
 		struct
 		{
 		    unsigned All : 1;
-		    unsigned Alliance : 1;
-		    unsigned Horde : 1;
+		    unsigned Allia : 1;
+		    unsigned Hrd : 1;
 		    unsigned Monster : 1;
 		} friendly;
 		unsigned ALL : 4;
@@ -61,8 +61,8 @@ struct MANGOS_DLL_DECL FactionTemplateResolver
 		struct
 		{
 		    unsigned All : 1;
-		    unsigned Alliance : 1;
-		    unsigned Horde : 1;
+		    unsigned Allia : 1;
+		    unsigned Hrd : 1;
 		    unsigned Monster : 1;
 		} hostile;
 		unsigned ALL : 4;
