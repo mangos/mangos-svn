@@ -354,13 +354,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // SMSG_INITIALIZE_FACTIONS
 	data.Initialize(SMSG_INITIALIZE_FACTIONS);
-	data << (uint32)0x40;  //Count
-	data << (uint8)0; //Flags
-	data << (uint32)0; //Standing
+	data << (uint32) 0x40; //Count
+	data << (uint8 ) 3;	   //Flags
+	data << (uint32) 0;    //Standing
 	SendPacket(&data);
 
 	GetPlayer()->UpdateReputation();
 
+/*
     // Unknown (0x02C2)
     data.Initialize(0x02C2);
     data << uint64(0x0517000005180046LL);
@@ -400,7 +401,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     data << uint64(0x0515000105160001LL);
     data << uint16(0x0000);
     SendPacket( &data );
-
+*/
     // SMSG_EXPLORATION_EXPERIENCE
 
     // SMSG_CAST_RESULT -- Spell_id = 836 (LOGINEFFECT (24347)) From spells.dbc.csv
@@ -567,7 +568,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 {
 	Log::getSingleton().outDebug("WORLD SESSION: HandleSetFactionAtWar");
-	recv_data.print_storage();
 
 	uint32 FactionID;
 	uint8  Flag;
@@ -594,7 +594,6 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 {
 	Log::getSingleton().outDebug("WORLD SESSION: HandleSetFactionCheat");
-	recv_data.print_storage();
 
 	uint32 FactionID;
 	uint32 Standing;

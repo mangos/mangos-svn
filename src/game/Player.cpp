@@ -3343,17 +3343,27 @@ void Player::UpdateReputation(void)
 	*/
 	WorldPacket data;
 	std::list<struct Factions>::iterator itr;
-	int i=0;
+
+	Log::getSingleton( ).outDetail( "Player::UpdateReputation()" );
+
+	if( factions.empty() ) 
+	{
+		Log::getSingleton( ).outDetail( "FACTIONS LIST IS EMPTY" );
+		return;
+	}
+
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
-		data.Initialize(SMSG_SET_FACTION_STANDING);
-		data << (uint32) (itr->Flags & 1); //if is visible?
-		data << (uint32) itr->ReputationListID;
-		data << (uint32) itr->Standing;
-		GetSession()->SendPacket(&data);
-
-		DEBUG_LOG( "WORLD: Player::UpdateReputation called and completed OK!" );
+		if( itr->Flags & 1 )//is visible
+		{
+			data.Initialize(SMSG_SET_FACTION_STANDING);
+			data << (uint32) 1;
+			data << (uint32) itr->ReputationListID;
+			data << (uint32) itr->Standing;
+			GetSession()->SendPacket(&data);
+		}
 	}
+	
 }
 
 bool Player::FactionIsInTheList(uint32 faction)
@@ -3397,15 +3407,18 @@ void Player::LoadReputationFromDBC(void)
 			{
 				newFaction.Flags = 0;
 			}
+
+
 			factions.push_back(newFaction);
 		}
 	}
+	_SaveReputation();
 }
 
 void Player::_LoadReputation(void)
 {
 	Factions newFaction;
-	// Clear fctions list
+	// Clear factions list
 	factions.clear();
 
     std::stringstream query;
@@ -3429,10 +3442,6 @@ void Player::_LoadReputation(void)
 
         delete result;
     }
-	else
-	{
-		LoadReputationFromDBC();
-	}
 }
 
 void Player::_SaveReputation(void)
@@ -3471,20 +3480,19 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
     if( fact != NULL )
     {
-	assert( fact->ID == FTemplate );
-	fac  = sFactionStore.LookupEntry( fact->faction );
-	for(itr = factions.begin(); itr != factions.end(); ++itr)
-	{
-	    if(itr->ReputationListID == fac->reputationListID) 
-	    {
-		itr->Standing += standing;
-		itr->Flags = (itr->Flags | 1); //Sets visible to faction
-		UpdateReputation();
-		return true;
-	    }
-	}	
+		assert( fact->ID == FTemplate );
+		fac  = sFactionStore.LookupEntry( fact->faction );
+		for(itr = factions.begin(); itr != factions.end(); ++itr)
+		{
+			if(itr->ReputationListID == fac->reputationListID) 
+			{
+				itr->Standing += standing;
+				itr->Flags = (itr->Flags | 1); //Sets visible to faction
+				UpdateReputation();
+				return true;
+			}
+		}	
     }
-
     return false;
 }
 
