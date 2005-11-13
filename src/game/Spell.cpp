@@ -1053,6 +1053,7 @@ newItem = NULL;
 
 									p_caster->ApplyItemMods( m_CastItem, item_slot, true );
 									upd.Clear();
+									m_CastItem->UpdateStats();
 									m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
 									upd.BuildPacket(&packet);
 									p_caster->GetSession()->SendPacket(&packet);

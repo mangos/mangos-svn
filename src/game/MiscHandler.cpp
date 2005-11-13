@@ -103,6 +103,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
     GetPlayer()->AddItemToSlot(slot, item);
+	item->UpdateStats();
 
     data.Initialize( SMSG_LOOT_REMOVED );
     data << uint8(lootSlot+1);

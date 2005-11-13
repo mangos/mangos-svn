@@ -200,6 +200,7 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     {
 	Item *item = dynamic_cast<Item *>(obj);
 	assert( item != NULL );
+	item->UpdateStats();
 	pl = item->GetOwner();
     }
     else if( obj->isType(TYPE_CONTAINER) )

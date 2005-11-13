@@ -45,6 +45,9 @@ class Item : public Object
         void SetDurability(uint32 Value);
         void SetDurabilityToMax();
 
+		// UQ1: Added for real item info....
+		void UpdateStats();
+
         ItemPrototype *GetItemProto() { return m_itemProto; }
 
     protected:
