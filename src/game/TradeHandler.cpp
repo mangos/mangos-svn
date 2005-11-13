@@ -114,6 +114,8 @@ void WorldSession::UpdateTrade()
         data << (uint8) i;
         if(item)
         {
+			item->UpdateStats();
+
             data << (uint32) item->GetProto()->ItemId;
             data << (uint32) 0;
             data << (uint32) item->GetProto()->MaxCount;

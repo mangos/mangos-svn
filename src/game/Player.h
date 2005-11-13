@@ -635,4 +635,5 @@ protected:
 
 // UQ1: Defined in Player.cpp... CHECKME: Move somewhere else???
 int irand(int min, int max);
+uint32 urand(uint32 min, uint32 max);
 #endif

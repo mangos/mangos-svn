@@ -59,6 +59,56 @@ char GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
 	return itemDisplayTemplateEntry->invImageFile;
 }
 
+void Item::UpdateStats()
+{// UQ1: Set up all stats for the item in realtime... ***FIX ME IF WE WANT FULL ITEM INFO***
+	return;
+
+	//SetUInt32Value( OBJECT_FIELD_ENTRY, m_itemProto->DisplayInfoID);
+	SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
+	
+	// UQ1: FIXME: These values should be stored somewhere to update in realtime...
+	//SetUInt32Value( ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES, m_itemProto->SpellCharges[0]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+1, m_itemProto->SpellCharges[1]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+2, m_itemProto->SpellCharges[2]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+3, m_itemProto->SpellCharges[3]);
+	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+4, m_itemProto->SpellCharges[4]);
+
+    SetUInt32Value( ITEM_FIELD_FLAGS, m_itemProto->Flags);
+    SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID, m_itemProto->DisplayInfoID);
+	SetUInt32Value( ITEM_FIELD_DURATION, m_itemProto->Delay);
+	
+	// Should already be set...
+	//SetUInt32Value( ITEM_FIELD_ENCHANTMENT, m_itemProto->);//                  =   22,  //  21 ENCHANTMENT
+
+	SetUInt32Value( ITEM_FIELD_PROPERTY_SEED, m_itemProto->DisplayInfoID);
+	SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
+
+	if (m_itemProto->ContainerSlots > 0)
+	{
+		SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots );
+		//CONTAINER_ALIGN_PAD                     =   49,
+		//CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
+	}
+
+/*
+	ITEM_FIELD_OWNER
+    ITEM_FIELD_CONTAINED
+    ITEM_FIELD_CREATOR
+    ITEM_FIELD_GIFTCREATOR
+    ITEM_FIELD_STACK_COUNT
+    ITEM_FIELD_DURATION
+    ITEM_FIELD_SPELL_CHARGES                =   16,      //  5 of them
+    ITEM_FIELD_FLAGS
+    ITEM_FIELD_ENCHANTMENT                  =   22,      //  21 of them
+    ITEM_FIELD_PROPERTY_SEED
+    ITEM_FIELD_RANDOM_PROPERTIES_ID
+    ITEM_FIELD_ITEM_TEXT_ID
+    ITEM_FIELD_DURABILITY
+    ITEM_FIELD_MAXDURABILITY
+*/
+}
+
 void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
 {
     Object::_Create( guidlow, HIGHGUID_ITEM );

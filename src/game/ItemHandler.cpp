@@ -56,6 +56,9 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     Item * dstitem = GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = GetPlayer()->GetItemBySlot(srcslot);
 
+	dstitem->UpdateStats();
+	srcitem->UpdateStats();
+
     // check to make sure items are not being put in wrong spots
     if ( (srcslot >= INVENTORY_SLOT_BAG_START && srcslot < BANK_SLOT_BAG_END)&&
          (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
@@ -132,6 +135,8 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
     Item *item = GetPlayer()->GetItemBySlot(dstslot);
 
+	item->UpdateStats();
+
     if(!item)
     {
         Log::getSingleton().outDetail("ITEM: tried to destroy non-existant item");
@@ -173,6 +178,8 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
         return;
     }
+
+	item->UpdateStats();
 
     //Se o nivel do item é compativel com o nivel do CHAR
     uint32 charLvl = GetPlayer()->getLevel();
@@ -657,6 +664,8 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         item = GetPlayer()->GetItemBySlot(i);
         if (item != NULL)
         {
+			item->UpdateStats();
+
             if (item->GetGUID() == itemguid)
             {
                 slot = i;
@@ -797,6 +806,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 	// UQ1: Add the vendor's name as the maker...
 	//item->SetUInt64Value( ITEM_FIELD_CREATOR, unit->GetGUID()); // Don't know what GUID to use here...
 
+	item->UpdateStats();
+
     unit->setItemAmount( vendorslot, unit->getItemAmount(vendorslot)-amount );
     GetPlayer()->AddItemToSlot( slot, item );
 
@@ -806,6 +817,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     WPAssert(data.size() == 16);
     SendPacket( &data );
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_BUY_ITEM" );
+
+	item->UpdateStats();
 }
 
 
@@ -891,6 +904,8 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 	// UQ1: Add the vendor's name as the maker...
 	//item->SetUInt64Value( ITEM_FIELD_CREATOR, unit->GetGUID()); // Don't know what GUID to use here...
 
+	item->UpdateStats();
+
     GetPlayer()->AddItemToSlot( playerslot, item );
 
     data.Initialize( SMSG_BUY_ITEM );
@@ -899,6 +914,8 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     WPAssert(data.size() == 16);
     SendPacket( &data );
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_BUY_ITEM" );
+
+	item->UpdateStats();
 }
 
 
@@ -940,8 +957,19 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     for(i = 0; i < numitems; i++ )
     {
         if(unit->getItemId(i) != 0)
-        {
+        {// UQ1: FIXME: This should be based on the vendor's item, not the prototype!!! This will be why we don't see full info!!!
             curItem = objmgr.GetItemPrototype(unit->getItemId(i));
+
+			/*
+			Item *item;
+			// Search the slot...
+			for(uint8 i=0; i<39; i++)
+			{
+				item = unit->GetItemBySlot(i);
+				item->UpdateStats();
+			}
+			*/
+
             if( !curItem )
             {
                 Log::getSingleton( ).outError( "Unit %i has nonexistant item %i! the item will be removed next time", guid, unit->getItemId(i) );

@@ -198,6 +198,8 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
     UNIT_FIELD_UNKNOWN180                   =  192,      //  12 of them
 	*/
 
+	// UQ1: I'll do this in Creature::Update.. Didn't seem to work when done here...
+/*
 	CreatureInfo *ci = NULL;
 
 	if (nameId >= 0 && nameId < 999999)
@@ -214,8 +216,8 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
 		SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
 
 		// UQ1: These 3 fields may be the wrong way around???
-		SetUInt32Value( UNIT_FIELD_FLAGS, ci->flag/*ci->flags1*/ );
-		SetUInt32Value( UNIT_NPC_FLAGS, ci->flags1/*ci->flag*/);
+		SetUInt32Value( UNIT_FIELD_FLAGS, ci->flag );
+		SetUInt32Value( UNIT_NPC_FLAGS, ci->flags1);
 		SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->Type);
 
 		SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
@@ -241,7 +243,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
 		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
 		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
 		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+3, ci->slot3pos);
-	}
+	}*/
 
     m_mapId = mapid;
     m_positionX = x;

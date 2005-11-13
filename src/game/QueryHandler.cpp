@@ -156,7 +156,8 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 	data << (uint32)ci->flags1;        // Flags1
 
 	// UQ1: This is how wowwow does it.. Don't know what the "7" means...
-    if ((ci->Type & 2) > 0)
+    
+	if ((ci->Type & 2) > 0)
     {
         data << uint32(7);
     }

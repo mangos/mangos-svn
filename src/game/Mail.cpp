@@ -597,6 +597,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
         GetPlayer()->AddItemToSlot( slot, item );
+		item->UpdateStats();
 
         Data.Initialize(SMSG_SEND_MAIL_RESULT);
         Data << uint32(mailid);

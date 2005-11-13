@@ -15,59 +15,63 @@
 				IntermediateDirectory=".\Release"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"/>
-			<Tool 
-				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE"
-				StringPooling="1"
+				StringPooling="TRUE"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="1"
-				RuntimeTypeInfo="1"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Release/mangosd.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				CompileAs="0"/>
 			<Tool 
+				Name="CustomTool"/>
+			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Debug|Win32">
@@ -77,61 +81,65 @@
 				IntermediateDirectory=".\Debug"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"/>
-			<Tool 
-				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;;WIN32;_DEBUG;_CONSOLE,ENABLE_GRID_SYSTEM"
-				IgnoreStandardIncludePath="0"
+				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Debug/mangosd.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool 
+				Name="CustomTool"/>
+			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\Debug\mangosd.exe"
 				LinkIncremental="2"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
-				GenerateDebugInformation="1"
+				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1_7_x Debug|Win32">
@@ -141,62 +149,66 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"/>
 			<Tool 
-				Name="DebugTool"/>
-			<Tool 
 				Name="CppCmplrTool"
+				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,_DEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
-				IgnoreStandardIncludePath="0"
+				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Debug/mangosd.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
-				CompileAs="0"
-				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"/>
+				CompileAs="0"/>
+			<Tool 
+				Name="CustomTool"/>
 			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\Debug\mangosd.exe"
 				LinkIncremental="2"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
-				GenerateDebugInformation="1"
+				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1.7.x Release|Win32">
@@ -206,59 +218,63 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"/>
-			<Tool 
-				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE"
-				StringPooling="1"
+				StringPooling="TRUE"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="1"
-				RuntimeTypeInfo="1"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Release/mangosd.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				CompileAs="0"/>
 			<Tool 
+				Name="CustomTool"/>
+			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1_8_x Debug|Win32">
@@ -268,62 +284,66 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"/>
 			<Tool 
-				Name="DebugTool"/>
-			<Tool 
 				Name="CppCmplrTool"
+				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\realmlist,..\..\src\redirect,..\..\src\framework,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\httpd,..\..\src\framework"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,_DEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
-				IgnoreStandardIncludePath="0"
+				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Debug/mangosd.pch"
 				AssemblerListingLocation=".\Debug/"
 				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
-				CompileAs="0"
-				AdditionalOptions="/D ENABLE_HTTPD_SYSTEM"/>
+				CompileAs="0"/>
+			<Tool 
+				Name="CustomTool"/>
 			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\Debug\mangosd.exe"
 				LinkIncremental="2"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
-				GenerateDebugInformation="1"
+				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="_DEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1.8.x Release|Win32">
@@ -333,72 +353,77 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"
-				WholeProgramOptimization="0"/>
-			<Tool 
-				Name="DebugTool"/>
+				WholeProgramOptimization="FALSE"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="1000"
-				GlobalOptimizations="0"
+				GlobalOptimizations="FALSE"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="1"
+				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="1"
+				EnableFiberSafeOptimizations="TRUE"
+				WholeProgramOptimization="FALSE"
 				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="1"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd,..\..\src\framework"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
-				StringPooling="1"
+				StringPooling="TRUE"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="1"
-				RuntimeTypeInfo="1"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Release/mangosd.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				CompileAs="0"
-				OpenMP="1"
 				UseProcExt="4"
 				RequireProcExt="4"
 				Parallelization="1"
-				C99Support="1"/>
+				C99Support="1"
+				OpenMP="1"/>
+			<Tool 
+				Name="CustomTool"/>
 			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Release - No Grid|Win32">
@@ -408,96 +433,115 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="1"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="0"
+				ATLMinimizesCRunTimeLibraryUsage="FALSE"
 				CharacterSet="2"
-				WholeProgramOptimization="0"/>
-			<Tool 
-				Name="DebugTool"/>
+				WholeProgramOptimization="FALSE"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="1000"
-				GlobalOptimizations="0"
+				GlobalOptimizations="FALSE"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="1"
+				EnableIntrinsicFunctions="TRUE"
 				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="1"
+				EnableFiberSafeOptimizations="TRUE"
+				WholeProgramOptimization="FALSE"
 				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="1"
+				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\realmlist,..\..\src\redirect,..\..\src\game,..\..\src\shared,..\..\src\mangosd"
 				PreprocessorDefinitions="VERSION=&quot;0.0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE,ENABLE_GRID_SYSTEM"
-				StringPooling="1"
-				MinimalRebuild="1"
+				StringPooling="TRUE"
+				MinimalRebuild="TRUE"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="1"
-				RuntimeTypeInfo="1"
+				EnableFunctionLevelLinking="TRUE"
+				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\Release/mangosd.pch"
 				AssemblerListingLocation=".\Release/"
 				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="1"
-				Detect64BitPortabilityProblems="1"
+				SuppressStartupBanner="TRUE"
+				Detect64BitPortabilityProblems="TRUE"
 				CompileAs="0"
-				OpenMP="1"
 				UseProcExt="4"
 				RequireProcExt="4"
 				Parallelization="1"
-				C99Support="1"/>
+				C99Support="1"
+				OpenMP="1"/>
+			<Tool 
+				Name="CustomTool"/>
 			<Tool 
 				Name="LinkerTool"
-				DelayImpLib=""
+				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile=".\..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
-				SuppressStartupBanner="1"
+				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
-				SubSystem="1"
-				AdditionalOptions="/MACHINE:I386"/>
-			<Tool 
-				Name="LibrarianTool"/>
-			<Tool 
-				Name="ResCmplrTool"
-				PreprocessorDefinitions="NDEBUG"
-				Culture="1033"/>
+				SubSystem="1"/>
 			<Tool 
 				Name="MidlCmplrTool"
 				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"
+				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+				Name="ResCmplrTool"
+				PreprocessorDefinitions="NDEBUG"
+				Culture="1033"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCWebDeploymentTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 	</Configurations>
 	<Files>
+		<Filter 
+			Name="doc"
+			Filter="">
+			<File 
+				RelativePath="..\..\Authors">
+			</File>
+			<File 
+				RelativePath="..\..\ChangeLog">
+			</File>
+			<File 
+				RelativePath="..\..\News">
+			</File>
+			<File 
+				RelativePath="..\..\Readme">
+			</File>
+			<File 
+				RelativePath="..\..\Thanks">
+			</File>
+			<File 
+				RelativePath="..\..\Todo">
+			</File>
+		</Filter>
 		<File 
-			RelativePath="..\..\Authors"/>
+			RelativePath="..\..\src\mangosd\HttpdRunnable.cpp">
+		</File>
 		<File 
-			RelativePath="..\..\ChangeLog"/>
+			RelativePath="..\..\src\mangosd\HttpdRunnable.h">
+		</File>
 		<File 
-			RelativePath="..\..\News"/>
+			RelativePath="..\..\src\mangosd\Main.cpp">
+		</File>
 		<File 
-			RelativePath="..\..\Readme"/>
-		<File 
-			RelativePath="..\..\Thanks"/>
-		<File 
-			RelativePath="..\..\Todo"/>
-		<File 
-			RelativePath="..\..\src\mangosd\HttpdRunnable.cpp"/>
-		<File 
-			RelativePath="..\..\src\mangosd\HttpdRunnable.h"/>
-		<File 
-			RelativePath="..\..\src\mangosd\Main.cpp"/>
-		<File 
-			RelativePath="..\..\src\mangosd\Master.cpp"/>
+			RelativePath="..\..\src\mangosd\Master.cpp">
+		</File>
 		<File 
 			RelativePath="..\..\src\mangosd\Master.h">
 			<FileConfiguration 
@@ -558,13 +602,17 @@
 			</FileConfiguration>
 		</File>
 		<File 
-			RelativePath="..\..\src\game\Opcodes.cpp"/>
+			RelativePath="..\..\src\game\Opcodes.cpp">
+		</File>
 		<File 
-			RelativePath="..\..\src\game\Opcodes_1_7_x.cpp"/>
+			RelativePath="..\..\src\game\Opcodes_1_7_x.cpp">
+		</File>
 		<File 
-			RelativePath="..\..\src\mangosd\WorldRunnable.cpp"/>
+			RelativePath="..\..\src\mangosd\WorldRunnable.cpp">
+		</File>
 		<File 
-			RelativePath="..\..\src\mangosd\WorldRunnable.h"/>
+			RelativePath="..\..\src\mangosd\WorldRunnable.h">
+		</File>
 	</Files>
 </VisualStudioProject>
 
