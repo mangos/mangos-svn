@@ -3566,6 +3566,11 @@ int irand(int min, int max)
     return(result);
 }
 
+uint32 urand(uint32 min, uint32 max)
+{
+	uint32 result = irand(int(min), int(max));
+	return result;
+}
 //
 // End of random integer function...
 //
