@@ -24,7 +24,6 @@
 #include "Timer.h"
 #include "Singleton.h"
 
-
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
 
