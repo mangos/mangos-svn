@@ -2334,7 +2334,7 @@ uint32 Player::GetSlotByItemGUID(uint64 guid)
 void Player::AddItemToSlot(uint8 slot, Item *item)
 {
     /* ASSERT(slot < INVENTORY_SLOT_ITEM_END); */
-    DEBUG_LOG("AddItemtoSlot");
+    Log::getSingleton().outError("AddItemtoSlot");
     //ASSERT(slot < BANK_SLOT_BAG_END);
     //ASSERT(m_items[slot] == NULL);
 	
@@ -2484,11 +2484,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     ItemPrototype *proto = item->GetProto();
     if (apply)
     {
-        DEBUG_LOG("applying mods for item %u ",item->GetGUIDLow());
+        Log::getSingleton().outString("applying mods for item %u ",item->GetGUIDLow());
     }
     else
     {
-        DEBUG_LOG("removing mods for item %u ",item->GetGUIDLow());
+        Log::getSingleton().outString("removing mods for item %u ",item->GetGUIDLow());
     }
     // FIXED: ? Was missing armor and holy resistance
    if (proto->Armor)
@@ -2522,11 +2522,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             (apply ? proto->DamageMin[0] : -proto->DamageMin[0]));
         if (apply)
         {
-            DEBUG_LOG("adding %f mindam ",proto->DamageMin[0]);
+            Log::getSingleton().outString("adding %f mindam ",proto->DamageMin[0]);
         }
         else
         {
-            DEBUG_LOG("removing %f mindamn ",proto->DamageMin[0]);
+            Log::getSingleton().outString("removing %f mindamn ",proto->DamageMin[0]);
         }
 
     }
@@ -2536,11 +2536,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             (apply ? proto->DamageMax[0] : -proto->DamageMax[0]));
         if (apply)
         {
-            DEBUG_LOG("adding %f maxdam ",proto->DamageMax[0]);
+            Log::getSingleton().outString("adding %f maxdam ",proto->DamageMax[0]);
         }
         else
         {
-            DEBUG_LOG("removing %f maxdam ",proto->DamageMax[0]);
+            Log::getSingleton().outString("removing %f maxdam ",proto->DamageMax[0]);
         }
     }
     if (proto->Delay)
@@ -3278,7 +3278,7 @@ void Player::InitExploreSystem(void)
             
             areas.push_back(newArea);
 
-            DEBUG_LOG("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
+            Log::getSingleton( ).outDetail("PLAYER: Add new area %u (%f, %f) (%f, %f)", newArea.areaID, newArea.x1, newArea.y1, newArea.x2, newArea.y2);
         }
     }
 }
@@ -3343,27 +3343,17 @@ void Player::UpdateReputation(void)
 	*/
 	WorldPacket data;
 	std::list<struct Factions>::iterator itr;
-
-	Log::getSingleton( ).outDetail( "Player::UpdateReputation()" );
-
-	if( factions.empty() ) 
-	{
-		Log::getSingleton( ).outDetail( "FACTIONS LIST IS EMPTY" );
-		return;
-	}
-
+	int i=0;
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
-		if( itr->Flags & 1 )//is visible
-		{
-			data.Initialize(SMSG_SET_FACTION_STANDING);
-			data << (uint32) 1;
-			data << (uint32) itr->ReputationListID;
-			data << (uint32) itr->Standing;
-			GetSession()->SendPacket(&data);
-		}
+		data.Initialize(SMSG_SET_FACTION_STANDING);
+		data << (uint32) (itr->Flags & 1); //if is visible?
+		data << (uint32) itr->ReputationListID;
+		data << (uint32) itr->Standing;
+		GetSession()->SendPacket(&data);
+
+		Log::getSingleton( ).outDebug( "WORLD: Player::UpdateReputation called and completed OK!" );
 	}
-	
 }
 
 bool Player::FactionIsInTheList(uint32 faction)
@@ -3407,18 +3397,15 @@ void Player::LoadReputationFromDBC(void)
 			{
 				newFaction.Flags = 0;
 			}
-
-
 			factions.push_back(newFaction);
 		}
 	}
-	_SaveReputation();
 }
 
 void Player::_LoadReputation(void)
 {
 	Factions newFaction;
-	// Clear factions list
+	// Clear fctions list
 	factions.clear();
 
     std::stringstream query;
@@ -3442,6 +3429,10 @@ void Player::_LoadReputation(void)
 
         delete result;
     }
+	else
+	{
+		LoadReputationFromDBC();
+	}
 }
 
 void Player::_SaveReputation(void)
@@ -3480,19 +3471,20 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
     if( fact != NULL )
     {
-		assert( fact->ID == FTemplate );
-		fac  = sFactionStore.LookupEntry( fact->faction );
-		for(itr = factions.begin(); itr != factions.end(); ++itr)
-		{
-			if(itr->ReputationListID == fac->reputationListID) 
-			{
-				itr->Standing += standing;
-				itr->Flags = (itr->Flags | 1); //Sets visible to faction
-				UpdateReputation();
-				return true;
-			}
-		}	
+	assert( fact->ID == FTemplate );
+	fac  = sFactionStore.LookupEntry( fact->faction );
+	for(itr = factions.begin(); itr != factions.end(); ++itr)
+	{
+	    if(itr->ReputationListID == fac->reputationListID) 
+	    {
+		itr->Standing += standing;
+		itr->Flags = (itr->Flags | 1); //Sets visible to faction
+		UpdateReputation();
+		return true;
+	    }
+	}	
     }
+
     return false;
 }
 
