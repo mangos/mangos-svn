@@ -323,6 +323,7 @@ ObjectAccessor::Update(const uint32  &diff)
 	    CellPair update_cell(standing_cell);
 	    update_cell << 1;
 	    update_cell -= 1;
+	    for(; abs(standing_cell.x_coord - update_cell.x_coord) < 2; update_cell >> 1)
 	    {
 			for(CellPair cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
 		{		    
