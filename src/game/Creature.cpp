@@ -310,6 +310,7 @@ Creature::_RealtimeSetCreatureInfo()
     //
     
     CreatureInfo *ci = NULL;
+	bool need_save = false;
     
     if (GetNameID() >= 0 && GetNameID() < 999999)
 	ci = objmgr.GetCreatureName(GetNameID());
@@ -357,14 +358,44 @@ Creature::_RealtimeSetCreatureInfo()
 		if (this->GetUInt32Value(UNIT_FIELD_BASE_MANA) != ci->maxmana)
 			this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
 	
-		if (ci->baseattacktime <= 0)
-			ci->baseattacktime = urand(1000, 2000);
+		if (ci->baseattacktime <= 1000) 
+		{// Fix bad attack times in DB if needed...
+			if (ci->level > 48)
+				ci->baseattacktime = urand(1000, 1500);
+			else if (ci->level > 32)
+				ci->baseattacktime = urand(1000, 2000);
+			else if (ci->level > 24)
+				ci->baseattacktime = urand(1000, 3000);
+			else if (ci->level > 16)
+				ci->baseattacktime = urand(2000, 3000);
+			else if (ci->level > 8)
+				ci->baseattacktime = urand(2000, 4000);
+			else
+				ci->baseattacktime = urand(3000, 4000);
+
+			need_save = true;
+		}
 	
 		if (this->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME) != ci->baseattacktime)
 			this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
 	
-		if (ci->rangeattacktime <= 0)
-			ci->rangeattacktime = urand(1000, 2000);
+		if (ci->rangeattacktime <= 1000) // Fix bad attack times in DB if needed...
+		{// Fix bad attack times in DB if needed...
+			if (ci->level > 48)
+				ci->rangeattacktime = urand(1000, 1500);
+			else if (ci->level > 32)
+				ci->rangeattacktime = urand(1000, 2000);
+			else if (ci->level > 24)
+				ci->rangeattacktime = urand(1000, 3000);
+			else if (ci->level > 16)
+				ci->rangeattacktime = urand(2000, 3000);
+			else if (ci->level > 8)
+				ci->rangeattacktime = urand(2000, 4000);
+			else
+				ci->rangeattacktime = urand(3000, 4000);
+
+			need_save = true;
+		}
 	
 		if (this->GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME) != ci->rangeattacktime)
 			this->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
@@ -427,6 +458,16 @@ Creature::_RealtimeSetCreatureInfo()
 			if (ci->maxdmg <= 1)
 				ci->maxdmg = float(2);
 		}
+
+		if (ci->mindmg > ci->maxdmg)
+		{// For corrupt DB damage values...
+			uint32 max = ci->mindmg;
+
+			ci->mindmg = ci->maxdmg;
+			ci->maxdmg = max;
+
+			need_save = true;
+		}
 	
 		if (this->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) != ci->mindmg)
 			this->SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
@@ -465,6 +506,11 @@ Creature::_RealtimeSetCreatureInfo()
 			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
     }
     
+	if (need_save)
+	{// Save the fixed info back to the DB for next time...
+		this->SaveToDB();
+	}
+
     //
     // UQ1: End of UNIT_ updates...
     //
@@ -601,7 +647,8 @@ void Creature::Update( uint32 p_time )
 {
 	// UQ1: This has to be done each think.. There simply is no choice.. Later some of these values should be realtime info, 
 	// not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
-	_RealtimeSetCreatureInfo();
+	if (isAlive())
+		_RealtimeSetCreatureInfo();
 
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
