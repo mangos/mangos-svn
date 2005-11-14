@@ -301,138 +301,135 @@ void Creature::SetDisabled()
 	m_enabled = false;
 }
 
+void 
+Creature::_SetCreatureTemplate()
+{
+    //
+    // UQ1: Update UNIT_ stats here before transmission!!!
+    // This should also probebly do other units then creatures... They seem to be seperate???
+    //
+    
+    CreatureInfo *ci = NULL;
+    
+    if (GetNameID() >= 0 && GetNameID() < 999999)
+	ci = objmgr.GetCreatureName(GetNameID());
+    
+    if (ci)
+    {// UQ1: Fill in creature info here...
+	this->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
+	//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
+	
+	this->SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
+	this->SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
+	this->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
+	this->SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
+	this->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
+	
+	// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
+	this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
+	this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
+	this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
+	
+	this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
+	this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
+	this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
+	this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
+	
+	if (ci->baseattacktime <= 0)
+	    ci->baseattacktime = urand(1000, 2000);
+	
+	this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
+	
+	if (ci->rangeattacktime <= 0)
+	    ci->rangeattacktime = urand(1000, 2000);
+	
+	this->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
+	
+	// UQ1: Because damage values are floats, and the DB uses integers (and some seem to be wrong...)
+	if (((ci->mindmg > 1000 && ci->level < 48) || ci->mindmg <= 0)) 
+	{// UQ1: Add defaults...
+	    if (ci->level > 40)
+	    {
+		ci->mindmg = float(ci->level-urand(0, 5));
+	    }
+	    else if (ci->level > 30)
+	    {
+		ci->mindmg = float(ci->level-urand(0, 10));
+	    }
+	    else if (ci->level > 20)
+	    {
+		ci->mindmg = float(ci->level-urand(0, 15));
+	    }
+	    else if (ci->level > 10)
+	    {
+		ci->mindmg = float(ci->level-urand(0, 9));
+			}
+	    else if (ci->level > 5)
+	    {
+		ci->mindmg = float(ci->level-urand(0, 4));
+	    }
+	    else
+	    {
+		ci->mindmg = float(ci->level-1);
+	    }
+	    
+	    if (ci->mindmg <= 0)
+		ci->mindmg = float(1);
+	}
+	
+	if (((ci->maxdmg > 1000 && ci->level < 48) || ci->maxdmg <= 0)) 
+	{// UQ1: Add defaults...
+	    if (ci->level > 40)
+	    {
+		ci->maxdmg = float(ci->level+urand(1, 50));
+	    }
+	    else if (ci->level > 20)
+	    {
+		ci->maxdmg = float(ci->level+urand(1, 30));
+	    }
+	    else if (ci->level > 10)
+	    {
+		ci->maxdmg = float(ci->level+urand(1, 15));
+	    }
+	    else if (ci->level > 5)
+	    {
+		ci->maxdmg = float(ci->level+urand(1, 8));
+	    }
+	    else
+	    {
+		ci->maxdmg = float(ci->level+urand(1, 4));
+	    }
+	    
+	    if (ci->maxdmg <= 1)
+		ci->maxdmg = float(2);
+	}
+	
+	this->SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
+	this->SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
+	
+	this->SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
+	this->SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
+	
+	//ci->rank // UQ1: Guilds???
+	
+	this->SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
+	//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
+	
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
+    }
+    
+    //
+    // UQ1: End of UNIT_ updates...
+    //
+}
+
 void Creature::Update( uint32 p_time )
 {
-
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *creat = objmgr.GetObject<Creature>(GetGUID());
-#else    
-    const Creature *creat = dynamic_cast<const Creature *>(this);
-#endif
-
-	//
-	// UQ1: Update UNIT_ stats here before transmission!!!
-	// This should also probebly do other units then creatures... They seem to be seperate???
-	//
-
-	CreatureInfo *ci = NULL;
-
-	if (creat->GetNameID() >= 0 && creat->GetNameID() < 999999)
-		ci = objmgr.GetCreatureName(creat->GetNameID());
-
-	if (ci)
-	{// UQ1: Fill in creature info here...
-		this->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
-		//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
-
-		this->SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
-		this->SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
-		this->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
-		this->SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
-		this->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
-
-		// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
-		this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
-		this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
-		this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
-
-		this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
-		this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
-		this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
-		this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
-
-		if (ci->baseattacktime <= 0)
-			ci->baseattacktime = urand(1000, 2000);
-
-		this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
-
-		if (ci->rangeattacktime <= 0)
-			ci->rangeattacktime = urand(1000, 2000);
-
-		this->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
-
-		// UQ1: Because damage values are floats, and the DB uses integers (and some seem to be wrong...)
-		if (((ci->mindmg > 1000 && ci->level < 48) || ci->mindmg <= 0)) 
-		{// UQ1: Add defaults...
-			if (ci->level > 40)
-			{
-				ci->mindmg = float(ci->level-urand(0, 5));
-			}
-			else if (ci->level > 30)
-			{
-				ci->mindmg = float(ci->level-urand(0, 10));
-			}
-			else if (ci->level > 20)
-			{
-				ci->mindmg = float(ci->level-urand(0, 15));
-			}
-			else if (ci->level > 10)
-			{
-				ci->mindmg = float(ci->level-urand(0, 9));
-			}
-			else if (ci->level > 5)
-			{
-				ci->mindmg = float(ci->level-urand(0, 4));
-			}
-			else
-			{
-				ci->mindmg = float(ci->level-1);
-			}
-
-			if (ci->mindmg <= 0)
-				ci->mindmg = float(1);
-		}
-
-		if (((ci->maxdmg > 1000 && ci->level < 48) || ci->maxdmg <= 0)) 
-		{// UQ1: Add defaults...
-			if (ci->level > 40)
-			{
-				ci->maxdmg = float(ci->level+urand(1, 50));
-			}
-			else if (ci->level > 20)
-			{
-				ci->maxdmg = float(ci->level+urand(1, 30));
-			}
-			else if (ci->level > 10)
-			{
-				ci->maxdmg = float(ci->level+urand(1, 15));
-			}
-			else if (ci->level > 5)
-			{
-				ci->maxdmg = float(ci->level+urand(1, 8));
-			}
-			else
-			{
-				ci->maxdmg = float(ci->level+urand(1, 4));
-			}
-
-			if (ci->maxdmg <= 1)
-				ci->maxdmg = float(2);
-		}
-
-		this->SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
-		this->SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
-
-		this->SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
-		this->SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
-		
-		//ci->rank // UQ1: Guilds???
-
-		this->SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
-		//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
-			
-		this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
-		this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
-		this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
-		this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
-		this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
-		this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
-	}
-			
-	//
-	// UQ1: End of UNIT_ updates...
-	//
-
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
 
@@ -1162,13 +1159,10 @@ void Creature::LoadFromDB(uint32 guid)
     m_moveRun = fields[10].GetBool();
 
     LoadValues(fields[7].GetString());
-
+    _SetCreatureTemplate();
     
     // UQ1: Added nameID.
     SetNameId(fields[8].GetUInt32());
-    //m_nameId = fields[8].GetUInt32();
-    //Log::getSingleton( ).outDebug( "Added creature %u (%u) - %s.", m_nameId, GetNameID(), objmgr.GetCreatureName(fields[8].GetUInt32())->Name.c_str() );
-
     delete result;
 
     if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )
@@ -1178,6 +1172,7 @@ void Creature::LoadFromDB(uint32 guid)
         _LoadQuests();
 
     _LoadMovement();
+
 }
 
 void Creature::_LoadGoods()
