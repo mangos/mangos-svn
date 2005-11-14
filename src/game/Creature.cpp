@@ -529,10 +529,31 @@ Creature::_RealtimeSetCreatureInfo()
 		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot3pos)
 			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
     }
+
+	if (this->GetUInt32Value( UNIT_FIELD_MAXHEALTH ) <= 0 || this->GetUInt32Value( UNIT_FIELD_BASE_HEALTH ) <= 0)
+	{// Resolve dead NPCs... Bad DB again...
+		uint32 maxhealth;
+
+		if (ci->level >= 64)
+			maxhealth = urand(getLevel()*50, getLevel()*80);
+		else if (ci->level > 48)
+			maxhealth = urand(getLevel()*40, getLevel()*70);
+		else if (ci->level > 32)
+			maxhealth = urand(getLevel()*30, getLevel()*60);
+		else if (ci->level > 24)
+			maxhealth = urand(getLevel()*30, getLevel()*60);
+		else if (ci->level > 16)
+			maxhealth = urand(getLevel()*40, getLevel()*60);
+		else
+			maxhealth = urand(getLevel()*70, getLevel()*150);
+
+		this->SetUInt32Value( UNIT_FIELD_HEALTH, maxhealth );
+		this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, maxhealth );
+	}
 	
 	if (need_save)
 	{// Save the fixed info back to the DB for next time...
-		this->SaveToDB();
+		//this->SaveToDB(); .. Well that isn't going to work.. Saves to wrong table..
 	}
 
     //
@@ -569,6 +590,22 @@ Creature::_SetCreatureTemplate()
 	this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
 	this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
 	
+	if (ci->maxhealth <= 0)
+	{// Resolve dead NPCs... Bad DB again...
+		if (ci->level >= 64)
+			ci->maxhealth = urand(ci->level*50, ci->level*80);
+		else if (ci->level > 48)
+			ci->maxhealth = urand(ci->level*40, ci->level*70);
+		else if (ci->level > 32)
+			ci->maxhealth = urand(ci->level*30, ci->level*60);
+		else if (ci->level > 24)
+			ci->maxhealth = urand(ci->level*30, ci->level*60);
+		else if (ci->level > 16)
+			ci->maxhealth = urand(ci->level*40, ci->level*60);
+		else
+			ci->maxhealth = urand(ci->level*70, ci->level*150);
+	}
+
 	this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
 	this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
 	this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
@@ -663,6 +700,28 @@ Creature::_SetCreatureTemplate()
 	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
     }
 
+	if (this->GetUInt32Value( UNIT_FIELD_HEALTH ) <= 0)
+	{// Resolve dead NPCs... Bad DB again...
+		uint32 maxhealth;
+
+		if (ci->level >= 64)
+			maxhealth = urand(getLevel()*50, getLevel()*80);
+		else if (ci->level > 48)
+			maxhealth = urand(getLevel()*40, getLevel()*70);
+		else if (ci->level > 32)
+			maxhealth = urand(getLevel()*30, getLevel()*60);
+		else if (ci->level > 24)
+			maxhealth = urand(getLevel()*30, getLevel()*60);
+		else if (ci->level > 16)
+			maxhealth = urand(getLevel()*40, getLevel()*60);
+		else
+			maxhealth = urand(getLevel()*70, getLevel()*150);
+
+		this->SetUInt32Value( UNIT_FIELD_HEALTH, maxhealth );
+		this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, maxhealth );
+		this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, maxhealth );
+	}
+
     //
     // UQ1: End of UNIT_ updates...
     //
@@ -675,7 +734,7 @@ void Creature::Update( uint32 p_time )
 	if (isAlive())
 		_RealtimeSetCreatureInfo();
 
-	if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0)
+	if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0 || this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) <= 0)
 	{// Resolve dead NPCs... Bad DB again...
 		_RealtimeSetCreatureInfo();
 	}
@@ -1365,7 +1424,7 @@ void Creature::SaveToDB()
     sDatabase.Execute(ss.str().c_str());
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO creatures (id, mapId, zoneId, name_id, positionX, positionY, positionZ, orientation, data) VALUES ( "
+    ss << "INSERT INTO creatures (id, mapId, zoneId, name_id, mindmg, maxdmg, positionX, positionY, positionZ, orientation, data) VALUES ( "
         << GetGUIDLow() << ", "
         << GetMapId() << ", "
         << GetZoneId() << ", "
@@ -1409,10 +1468,13 @@ void Creature::LoadFromDB(uint32 guid)
     m_moveRun = fields[10].GetBool();
 
     LoadValues(fields[7].GetString());
-    _SetCreatureTemplate();
     
     // UQ1: Added nameID.
     SetNameId(fields[8].GetUInt32());
+
+//    _SetCreatureTemplate();
+	_RealtimeSetCreatureInfo();
+
     delete result;
 
     if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )

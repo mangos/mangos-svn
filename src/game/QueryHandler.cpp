@@ -130,6 +130,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 
 	uint32 npcflags = unit->GetUInt32Value(UNIT_NPC_FLAGS);
 
+/*
 	if ((npcflags & UNIT_NPC_FLAG_VENDOR) > 0)
     {
 		Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY %s is a vendor.", ci->Name.c_str());
@@ -146,6 +147,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     {
         //data << (uint32)npcflags;//ci->flags1;        // Flags1
     }
+*/
 
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
