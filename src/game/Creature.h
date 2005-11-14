@@ -250,6 +250,7 @@ class Creature : public Unit
         void _LoadQuests();
         void _LoadMovement();
         void _SetCreatureTemplate(void);
+		void _RealtimeSetCreatureInfo(void);
 
         /// Looting
         uint32 m_lootMoney;
