@@ -62,7 +62,7 @@ char GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
 void Item::UpdateStats()
 {// UQ1: Set up all stats for the item in realtime... ***FIX ME IF WE WANT FULL ITEM INFO***
 	//return;
-
+/*
 	if (!this)
 		return;
 
@@ -92,13 +92,8 @@ void Item::UpdateStats()
 	// UQ1: This isn't how to get the value... Don't know how...
 	//SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
 
-/*	if (m_itemProto->ContainerSlots > 0)
-	{
-		SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots );
-		//CONTAINER_ALIGN_PAD                     =   49,
-		//CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
-	}
 */
+
 /*
 	ITEM_FIELD_OWNER
     ITEM_FIELD_CONTAINED
