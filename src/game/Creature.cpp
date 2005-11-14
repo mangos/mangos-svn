@@ -345,11 +345,11 @@ Creature::_RealtimeSetCreatureInfo()
 		if (this->GetUInt32Value(UNIT_DYNAMIC_FLAGS) != ci->flags1)
 			this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
 	
-		if (this->GetUInt32Value(UNIT_FIELD_HEALTH) != ci->maxhealth)
-			this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
+		//if (this->GetUInt32Value(UNIT_FIELD_HEALTH) != ci->maxhealth)
+		//	this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
 	
-		//if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0)
-		//	this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
+		if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0)
+			this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
 
 		if (this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) != ci->maxhealth)
 			this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
