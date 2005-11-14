@@ -348,7 +348,7 @@ Creature::_RealtimeSetCreatureInfo()
 		//if (this->GetUInt32Value(UNIT_FIELD_HEALTH) != ci->maxhealth)
 		//	this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
 	
-		if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0)
+		if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) != ci->maxhealth)
 			this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
 
 		if (this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) != ci->maxhealth)
