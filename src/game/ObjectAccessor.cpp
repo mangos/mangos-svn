@@ -314,8 +314,8 @@ ObjectAccessor::Update(const uint32  &diff)
 	{
 	    if( map_id != (*iter).first )
 	    {
-		map_id = (*iter).first;
-		marked_cell.reset(); // new map
+			map_id = (*iter).first;
+			marked_cell.reset(); // new map
 	    }
 
 	    Player *player = (*iter).second;
@@ -323,20 +323,20 @@ ObjectAccessor::Update(const uint32  &diff)
 	    CellPair update_cell(standing_cell);
 	    update_cell << 1;
 	    update_cell -= 1;
-	    for(; abs(standing_cell.x_coord - update_cell.x_coord) < 2; update_cell >> 1)
+	    for(; abs(float(standing_cell.x_coord) - update_cell.x_coord) < 2; update_cell >> 1)
 	    {
 			for(CellPair cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-		{		    
-		    uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
-		    if( !marked_cell.test(cell_id) )
-		    {
-			marked_cell.set(cell_id);
-			Cell cell = RedZone::GetZone(cell_iter);
-			cell.data.Part.reserved = CENTER_DISTRICT;
-			CellLock<NullGuard> cell_lock(cell, cell_iter);
-			cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
-		    }
-		}
+			{		    
+				uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
+				if( !marked_cell.test(cell_id) )
+				{
+					marked_cell.set(cell_id);
+					Cell cell = RedZone::GetZone(cell_iter);
+					cell.data.Part.reserved = CENTER_DISTRICT;
+					CellLock<NullGuard> cell_lock(cell, cell_iter);
+					cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
+				}
+			}
 	    }
 	}
 	
