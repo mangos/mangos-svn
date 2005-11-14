@@ -61,13 +61,20 @@ char GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
 
 void Item::UpdateStats()
 {// UQ1: Set up all stats for the item in realtime... ***FIX ME IF WE WANT FULL ITEM INFO***
-	return;
+	//return;
+
+	if (!this)
+		return;
+
+	if (!m_itemProto)
+		return;
 
 	//SetUInt32Value( OBJECT_FIELD_ENTRY, m_itemProto->DisplayInfoID);
 	SetUInt32Value( ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
 	
 	// UQ1: FIXME: These values should be stored somewhere to update in realtime...
 	//SetUInt32Value( ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
+
 	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES, m_itemProto->SpellCharges[0]);
 	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+1, m_itemProto->SpellCharges[1]);
 	SetUInt32Value( ITEM_FIELD_SPELL_CHARGES+2, m_itemProto->SpellCharges[2]);
@@ -82,15 +89,16 @@ void Item::UpdateStats()
 	//SetUInt32Value( ITEM_FIELD_ENCHANTMENT, m_itemProto->);//                  =   22,  //  21 ENCHANTMENT
 
 	SetUInt32Value( ITEM_FIELD_PROPERTY_SEED, m_itemProto->DisplayInfoID);
-	SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
+	// UQ1: This isn't how to get the value... Don't know how...
+	//SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
 
-	if (m_itemProto->ContainerSlots > 0)
+/*	if (m_itemProto->ContainerSlots > 0)
 	{
 		SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots );
 		//CONTAINER_ALIGN_PAD                     =   49,
 		//CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
 	}
-
+*/
 /*
 	ITEM_FIELD_OWNER
     ITEM_FIELD_CONTAINED
@@ -167,7 +175,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
 	//SetUInt32Value( ITEM_FIELD_ENCHANTMENT, m_itemProto->);//                  =   22,  //  21 ENCHANTMENT
     //SetUInt32Value( ITEM_FIELD_PROPERTY_SEED, GetRandPropertiesSeedfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
 	SetUInt32Value( ITEM_FIELD_PROPERTY_SEED, m_itemProto->DisplayInfoID);
-	SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
+	//SetUInt32Value( ITEM_FIELD_RANDOM_PROPERTIES_ID, GetRandPropertiesIDfromDisplayInfoDBC(m_itemProto->DisplayInfoID));
 
 	/*
 	CONTAINER_FIELD_NUM_SLOTS               =   48,
@@ -175,12 +183,13 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner )
     CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
 	*/
 
-	if (m_itemProto->ContainerSlots > 0)
+	// UQ1: We can't do this!!!
+/*	if (m_itemProto->ContainerSlots > 0)
 	{
 		SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots );
 		//CONTAINER_ALIGN_PAD                     =   49,
 		//CONTAINER_FIELD_SLOT_1                  =   50,      //  40 of them
-	}
+	}*/
 
 	// UQ1: Set these too??? I see theres no armor, or damage values above!
 	/*
