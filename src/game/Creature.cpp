@@ -302,6 +302,175 @@ void Creature::SetDisabled()
 }
 
 void 
+Creature::_RealtimeSetCreatureInfo()
+{
+    //
+    // UQ1: Update UNIT_ stats here before transmission!!!
+    // This should also probebly do other units then creatures... They seem to be seperate???
+    //
+    
+    CreatureInfo *ci = NULL;
+    
+    if (GetNameID() >= 0 && GetNameID() < 999999)
+	ci = objmgr.GetCreatureName(GetNameID());
+    
+    if (ci)
+    {// UQ1: Fill in creature info here...
+		if (this->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS) != ci->bounding_radius)
+			this->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
+	//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
+	
+		if (this->GetUInt32Value(UNIT_FIELD_DISPLAYID) != ci->DisplayID)
+			this->SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
+
+		if (this->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID) != ci->DisplayID)
+			this->SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
+
+		if (this->GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID) != ci->mount)
+			this->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
+		
+		if (this->GetUInt32Value(UNIT_FIELD_LEVEL) != ci->level)
+			this->SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
+
+		if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != ci->faction)
+			this->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
+	
+		// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
+		if (this->GetUInt32Value(UNIT_FIELD_FLAGS) != ci->Type)
+			this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
+
+		if (this->GetUInt32Value(UNIT_NPC_FLAGS) != ci->flag)
+			this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
+
+		if (this->GetUInt32Value(UNIT_DYNAMIC_FLAGS) != ci->flags1)
+			this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
+	
+		if (this->GetUInt32Value(UNIT_FIELD_HEALTH) != ci->maxhealth)
+			this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
+	
+		//if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0)
+		//	this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
+
+		if (this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) != ci->maxhealth)
+			this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
+
+		if (this->GetUInt32Value(UNIT_FIELD_BASE_MANA) != ci->maxmana)
+			this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
+	
+		if (ci->baseattacktime <= 0)
+			ci->baseattacktime = urand(1000, 2000);
+	
+		if (this->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME) != ci->baseattacktime)
+			this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
+	
+		if (ci->rangeattacktime <= 0)
+			ci->rangeattacktime = urand(1000, 2000);
+	
+		if (this->GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME) != ci->rangeattacktime)
+			this->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
+	
+		// UQ1: Because damage values are floats, and the DB uses integers (and some seem to be wrong...)
+		if (((ci->mindmg > 1000 && ci->level < 48) || ci->mindmg <= 0)) 
+		{// UQ1: Add defaults...
+			if (ci->level > 40)
+			{
+				ci->mindmg = float(ci->level-urand(0, 5));
+			}
+			else if (ci->level > 30)
+			{
+				ci->mindmg = float(ci->level-urand(0, 10));
+			}
+			else if (ci->level > 20)
+			{
+				ci->mindmg = float(ci->level-urand(0, 15));
+			}
+			else if (ci->level > 10)
+			{
+				ci->mindmg = float(ci->level-urand(0, 9));
+			}
+			else if (ci->level > 5)
+			{
+			ci->mindmg = float(ci->level-urand(0, 4));
+			}
+			else
+			{
+				ci->mindmg = float(ci->level-1);
+			}
+	    
+			if (ci->mindmg <= 0)
+				ci->mindmg = float(1);
+		}
+	
+		if (((ci->maxdmg > 1000 && ci->level < 48) || ci->maxdmg <= 0)) 
+		{// UQ1: Add defaults...
+			if (ci->level > 40)
+			{
+				ci->maxdmg = float(ci->level+urand(1, 50));
+			}
+			else if (ci->level > 20)
+			{
+				ci->maxdmg = float(ci->level+urand(1, 30));
+			}
+			else if (ci->level > 10)
+			{
+			ci->maxdmg = float(ci->level+urand(1, 15));
+			}
+			else if (ci->level > 5)
+			{
+			ci->maxdmg = float(ci->level+urand(1, 8));
+			}
+			else
+			{
+				ci->maxdmg = float(ci->level+urand(1, 4));
+			}
+	    
+			if (ci->maxdmg <= 1)
+				ci->maxdmg = float(2);
+		}
+	
+		if (this->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) != ci->mindmg)
+			this->SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
+
+		if (this->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) != ci->maxdmg)
+			this->SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
+	
+		if (this->GetFloatValue(UNIT_FIELD_MINDAMAGE) != ci->mindmg)
+			this->SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
+
+		if (this->GetFloatValue(UNIT_FIELD_MAXDAMAGE) != ci->maxdmg)
+			this->SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
+	
+		//ci->rank // UQ1: Guilds???
+	
+		if (this->GetFloatValue(OBJECT_FIELD_SCALE_X) != ci->scale)
+			this->SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
+		//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
+	
+		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY) != ci->slot1model)
+			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
+
+		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot1pos)
+			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
+	
+		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01) != ci->slot2model)
+			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
+	
+		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot2pos)
+			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
+	
+		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02) != ci->slot3model)
+			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
+	
+		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot3pos)
+			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
+    }
+    
+    //
+    // UQ1: End of UNIT_ updates...
+    //
+}
+
+void 
 Creature::_SetCreatureTemplate()
 {
     //
@@ -432,7 +601,7 @@ void Creature::Update( uint32 p_time )
 {
 	// UQ1: This has to be done each think.. There simply is no choice.. Later some of these values should be realtime info, 
 	// not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
-	_SetCreatureTemplate();
+	_RealtimeSetCreatureInfo();
 
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
