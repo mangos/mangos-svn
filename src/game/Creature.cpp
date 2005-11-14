@@ -430,6 +430,10 @@ Creature::_SetCreatureTemplate()
 
 void Creature::Update( uint32 p_time )
 {
+	// UQ1: This has to be done each think.. There simply is no choice.. Later some of these values should be realtime info, 
+	// not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
+	_SetCreatureTemplate();
+
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
 
