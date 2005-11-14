@@ -1424,7 +1424,7 @@ void Creature::SaveToDB()
     sDatabase.Execute(ss.str().c_str());
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO creatures (id, mapId, zoneId, name_id, mindmg, maxdmg, positionX, positionY, positionZ, orientation, data) VALUES ( "
+    ss << "INSERT INTO creatures (id, mapId, zoneId, name_id, positionX, positionY, positionZ, orientation, data) VALUES ( "
         << GetGUIDLow() << ", "
         << GetMapId() << ", "
         << GetZoneId() << ", "
