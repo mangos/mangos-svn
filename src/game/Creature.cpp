@@ -303,17 +303,18 @@ void Creature::SetDisabled()
 
 void 
 Creature::_RealtimeSetCreatureInfo()
-{
-    //
+{// UQ1: Checked this procedure, dead NPCs are not happening here!!! I commented the whole thing out and they still die...
+    
+	//
     // UQ1: Update UNIT_ stats here before transmission!!!
     // This should also probebly do other units then creatures... They seem to be seperate???
     //
-    
+
     CreatureInfo *ci = NULL;
 	bool need_save = false;
     
     if (GetNameID() >= 0 && GetNameID() < 999999)
-	ci = objmgr.GetCreatureName(GetNameID());
+		ci = objmgr.GetCreatureName(GetNameID());
     
     if (ci)
     {// UQ1: Fill in creature info here...
@@ -345,15 +346,33 @@ Creature::_RealtimeSetCreatureInfo()
 
 		if (this->GetUInt32Value(UNIT_DYNAMIC_FLAGS) != ci->flags1)
 			this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
-	
-		//if (this->GetUInt32Value(UNIT_FIELD_HEALTH) != ci->maxhealth)
-		//	this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
-	
+
+		if (ci->maxhealth <= 0)
+		{// Resolve dead NPCs... Bad DB again...
+			if (ci->level >= 64)
+				ci->maxhealth = urand(ci->level*50, ci->level*80);
+			else if (ci->level > 48)
+				ci->maxhealth = urand(ci->level*40, ci->level*70);
+			else if (ci->level > 32)
+				ci->maxhealth = urand(ci->level*30, ci->level*60);
+			else if (ci->level > 24)
+				ci->maxhealth = urand(ci->level*30, ci->level*60);
+			else if (ci->level > 16)
+				ci->maxhealth = urand(ci->level*40, ci->level*60);
+			else
+				ci->maxhealth = urand(ci->level*70, ci->level*150);
+			
+			need_save = true;
+		}
+
 		if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) != ci->maxhealth)
 			this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
 
 		if (this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) != ci->maxhealth)
 			this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
+
+//		if (this->GetUInt32Value(UNIT_FIELD_HEALTH) <= 0)
+//			this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
 
 		if (this->GetUInt32Value(UNIT_FIELD_BASE_MANA) != ci->maxmana)
 			this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
@@ -421,7 +440,7 @@ Creature::_RealtimeSetCreatureInfo()
 			}
 			else if (ci->level > 5)
 			{
-			ci->mindmg = float(ci->level-urand(0, 4));
+				ci->mindmg = float(ci->level-urand(0, 4));
 			}
 			else
 			{
@@ -483,8 +502,13 @@ Creature::_RealtimeSetCreatureInfo()
 	
 		//ci->rank // UQ1: Guilds???
 	
+
+		if (ci->scale <= 0 || ci->scale > 2.0)
+			ci->scale = 1.0;
+
 		if (this->GetFloatValue(OBJECT_FIELD_SCALE_X) != ci->scale)
 			this->SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
+
 		//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
 	
 		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY) != ci->slot1model)
@@ -505,7 +529,7 @@ Creature::_RealtimeSetCreatureInfo()
 		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot3pos)
 			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
     }
-    
+	
 	if (need_save)
 	{// Save the fixed info back to the DB for next time...
 		this->SaveToDB();
@@ -518,7 +542,7 @@ Creature::_RealtimeSetCreatureInfo()
 
 void 
 Creature::_SetCreatureTemplate()
-{
+{// UQ1: Checked.. Procedure is fine... Dead NPCs not happening here either!!!
     //
     // UQ1: Update UNIT_ stats here before transmission!!!
     // This should also probebly do other units then creatures... They seem to be seperate???
@@ -549,7 +573,8 @@ Creature::_SetCreatureTemplate()
 	this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
 	this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
 	this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
-	
+
+
 	if (ci->baseattacktime <= 0)
 	    ci->baseattacktime = urand(1000, 2000);
 	
@@ -637,7 +662,7 @@ Creature::_SetCreatureTemplate()
 	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
 	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
     }
-    
+
     //
     // UQ1: End of UNIT_ updates...
     //
@@ -649,6 +674,11 @@ void Creature::Update( uint32 p_time )
 	// not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
 	if (isAlive())
 		_RealtimeSetCreatureInfo();
+
+	if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0)
+	{// Resolve dead NPCs... Bad DB again...
+		_RealtimeSetCreatureInfo();
+	}
 
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
