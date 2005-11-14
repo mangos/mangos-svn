@@ -435,9 +435,18 @@ void Player::Update( uint32 p_time )
     // Dead System
     if (m_deathState == JUST_DIED)
     {
-        if( m_isInDuel ){
+        if( m_isInDuel 
+			&& objmgr.GetPlayer(m_duelGUID)
+			// UQ1: Let's not enter the DuelComplete procedure when we die 
+			// and there's no valid dueler... Something wrong with duel code.. 
+			// Every time you die it thinks you were in a duel right now... WTF???
+			)
+		{
             DuelComplete();
         }else{
+			if( m_isInDuel ) // UQ1: Just in case... (above reason)
+				m_isInDuel = false;
+
             KillPlayer();
         }
     }
