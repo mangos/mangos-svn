@@ -307,13 +307,18 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->RequiredLevel;
     data << itemProto->RequiredSkill;
     data << itemProto->RequiredSkillRank;
-    data << itemProto->Field20;
-    data << itemProto->Field21;
-    data << itemProto->Field22;
-    data << itemProto->Field23;
-    data << itemProto->MaxCount;
-    data << itemProto->ContainerSlots;
+    data << uint32(0);//itemProto->Field20; // UQ1: Required Spell
+    data << uint32(0);//itemProto->Field21; // UQ1: Required NPC Type??? "Outlaw" is 2...
+    data << uint32(0);//itemProto->Field22; // UQ1: Required Item??? "Thane of Ironforge" is 3...
+    data << uint32(0);//itemProto->Field23; // UQ1: Required player type??? "PLAYER, Night Elf - Hostile" is 4...
+    data << uint32(10);//itemProto->MaxCount;
+	if (itemProto->MaxCount > 1)
+		data << itemProto->MaxCount; // UQ1: 16 makes Unique (16) -- Item rarety??? Number stackable???
+	else
+		data << uint32(0);
 
+	data << uint32(10); // UQ1: Unknown
+	data << itemProto->ContainerSlots;//uint32(20); // UQ1: Unknown
     /*
     if (this.strBonus != 0)
     {
@@ -354,8 +359,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
     for(i = 0; i < 10; i++)
     {
-        data << itemProto->ItemStatType[i];
-        data << itemProto->ItemStatValue[i];
+		data << itemProto->ItemStatType[i];
+		data << itemProto->ItemStatValue[i];
     }
     /*
     for (int num4 = 0; num4 < 7; num4++)
@@ -371,16 +376,88 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
     for(i = 0; i < 5; i++)
     {// UQ1: Need to add a damage type here...
-        data << itemProto->DamageMin[i];
-        data << itemProto->DamageMax[i];
-        data << itemProto->DamageType[i];
+		// UQ1: Fix bad DB entries first!
+		if ( itemProto->Class == ITEM_CLASS_WEAPON 
+			&& i == 0 
+			&& itemProto->ItemStatValue[i] <= 0 )
+		{// DB has no damage values???
+			float mindmg;
+			float maxdmg;
+
+			// Fix min damage...
+			if (itemProto->ItemLevel > 40)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 5));
+			}
+			else if (itemProto->ItemLevel > 30)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 10));
+			}
+			else if (itemProto->ItemLevel > 20)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 15));
+			}
+			else if (itemProto->ItemLevel > 10)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 9));
+			}
+			else if (itemProto->ItemLevel > 5)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 4));
+			}
+			else
+			{
+				mindmg = float(itemProto->ItemLevel-1);
+			}
+	    
+			if (mindmg <= 0)
+				mindmg = float(1);
+
+			// Fix max damage...
+			if (itemProto->ItemLevel > 40)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand( 1, (itemProto->ItemLevel+10) ));
+			}
+			else if (itemProto->ItemLevel > 20)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 30));
+			}
+			else if (itemProto->ItemLevel > 10)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 15));
+			}
+			else if (itemProto->ItemLevel > 5)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 8));
+			}
+			else
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 4));
+			}
+	    
+			if (maxdmg <= 1)
+				maxdmg = float(2);
+
+			if (mindmg > maxdmg)
+			{// For corrupt DB damage values...
+				float max = mindmg;
+
+				mindmg = maxdmg;
+				maxdmg = max;
+			}
+
+			itemProto->DamageMin[i] = mindmg;
+			itemProto->DamageMax[i] = maxdmg;
+
+			//itemProto->SaveToDB(); // *** FIXME *** Save new values to DB...
+		}
+
+		data << itemProto->DamageMin[i];
+		data << itemProto->DamageMax[i];
+        //data << itemProto->DamageType[i];
+		data << uint32(i);
     }
 
-    // UQ1: Because there should be 6 types above...
-    data << float(0);
-    data << float(0);
-    data << uint32(0);
-    
     data << itemProto->Armor;
     data << itemProto->HolyRes;
     data << itemProto->FireRes;
@@ -389,7 +466,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ShadowRes;
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
-    data << itemProto->Field69; // Ammo Type
+    data << itemProto->Field69; // UQ1: Ammo Type -- According to w*ww*w - I see no effect...
     for(i = 0; i < 5; i++)
     {
         data << itemProto->SpellId[i];
@@ -400,18 +477,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << itemProto->SpellCategoryCooldown[i];
     }
 	
-	/*
-	data << uint32(0);
-	data << uint32(0);
-	data << uint32(0);
-	data << uint32(0);
-	data << uint32(0);
-	data << uint32(0);
-	*/
-
     data << itemProto->Bonding;
-    //data << itemProto->Description.c_str();
-    if (stricmp(itemProto->Description.c_str(), ""))
+
+	if (stricmp(itemProto->Description.c_str(), ""))
     {
         data << itemProto->Description.c_str();
     }
@@ -420,17 +488,19 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         //data << std::string("Just your every-day item.");
         data << uint8(0);
     }
-    data << itemProto->Field102;
-    data << itemProto->Field103;
-    data << itemProto->Field104;
-    data << itemProto->Field105;
-    data << itemProto->Field106;
-    data << itemProto->Field107;
-    data << itemProto->Field108;
-    data << itemProto->Field109;
-    data << itemProto->Field110;
-    data << itemProto->Field111;
+    data << itemProto->Field102; // UQ1: Unknown
+    data << itemProto->Field103; // UQ1: Unknown
+    data << itemProto->Field104; // UQ1: Unknown
+    data << itemProto->Field105; // UQ1: Displays: "This item begins a quest"
+    data << itemProto->Field106; // UQ1: Displays: "Locked"
+    data << itemProto->Field107; // UQ1: Unknown
+    data << itemProto->Field108; // UQ1: Unknown
+    data << itemProto->Field109; // UQ1: Ammo Enchantment -- Maybe others too
+    data << itemProto->Field110; // UQ1: This is "Block" Value
+    data << itemProto->Field111; // UQ1: Unknown
     data << itemProto->MaxDurability;
+
+	data << uint32(0); // Name of a city/area... See AreaTable.dbc
 
     //WPAssert(data.size() == 433 + itemProto->Name1.length() + itemProto->Description.length());
     SendPacket( &data );
