@@ -413,11 +413,31 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
 		itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
     }
 
+	//itemInfo = (fmtstring("%sQuality: %u out of 5.\n", itemInfo, itemProto->Quality));
+	if (itemProto->Quality == ITEM_QUALITY_NORMAL)
+		itemInfo = (fmtstring("%sThis is a normal item.\n\n", itemInfo));
+	else if (itemProto->Quality == ITEM_QUALITY_UNCOMMON)
+		itemInfo = (fmtstring("%sThis is an uncommon item.\n\n", itemInfo));
+	else if (itemProto->Quality == ITEM_QUALITY_RARE)
+		itemInfo = (fmtstring("%sThis is a rare item.\n\n", itemInfo));
+	else if (itemProto->Quality == ITEM_QUALITY_EPIC)
+		itemInfo = (fmtstring("%sThis is an epic item.\n\n", itemInfo));
+	else if (itemProto->Quality == ITEM_QUALITY_LEGENDARY)
+		itemInfo = (fmtstring("%sThis is a legendary item.\n\n", itemInfo));
+
 	if (itemProto->Bonding)
 		itemInfo = (fmtstring("%sThis is a bonding item.\n", itemInfo));
 
-    itemInfo = (fmtstring("%sQuality: %u out of 5.\n", itemInfo, itemProto->Quality));
 	itemInfo = (fmtstring("%sMaximum Durability: %u.\n", itemInfo, itemProto->MaxDurability));
+
+/*
+	NORMAL_DAMAGE  = 0,
+    HOLY_DAMAGE    = 1,
+    FIRE_DAMAGE    = 2,
+    NATURE_DAMAGE  = 3,
+    FROST_DAMAGE   = 4,
+    SHADOW_DAMAGE  = 5,
+    ARCANE_DAMAGE  = 6,
 
 	uint32 min_damage = 0, max_damage = 0;
 
@@ -429,6 +449,40 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
 
 	if (min_damage > 0 || max_damage > 0)
 		itemInfo = (fmtstring("%sMinimum Damage: %u.\nMaximum Damage: %u.\n", itemInfo, min_damage, max_damage));
+*/
+	for(i = 0; i < 5; i++)
+	{
+		if ( (itemProto->DamageMax[i] <= 0 || itemProto->DamageMax[i] <= 0)
+			|| (itemProto->DamageMax[i] > 99999 || itemProto->DamageMax[i] > 99999) )
+			continue; // Allow for NULLs...
+		
+		switch (itemProto->DamageType[i])
+		{
+		case NORMAL_DAMAGE:
+			itemInfo = (fmtstring("%sDoes %u to %u of normal damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		case HOLY_DAMAGE:
+			itemInfo = (fmtstring("%sadds %u to %u Holy damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		case FIRE_DAMAGE:
+			itemInfo = (fmtstring("%sadds %u to %u Fire damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		case NATURE_DAMAGE:
+			itemInfo = (fmtstring("%sadds %u to %u Nature damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		case FROST_DAMAGE:
+			itemInfo = (fmtstring("%sadds %u to %u Frost damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		case SHADOW_DAMAGE:
+			itemInfo = (fmtstring("%sadds %u to %u Shadow damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		case ARCANE_DAMAGE:
+			itemInfo = (fmtstring("%sadds %u to %u Arcane damage.\n", itemInfo, (uint32)itemProto->DamageMin[i], (uint32)itemProto->DamageMax[i]));
+			break;
+		default: // Should never happen...
+			break;
+		}
+	}
 
     itemInfo = (fmtstring("%sSell Price: %u.\n", itemInfo, itemProto->SellPrice));
 	itemInfo = (fmtstring("%s\n", itemInfo)); //New line..
