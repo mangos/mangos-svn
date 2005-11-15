@@ -234,6 +234,8 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     GetPlayer()->SwapItemSlots(dstslot, slot);
 }
 
+extern void CheckItemDamageValues ( ItemPrototype *itemProto );
+
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -362,100 +364,15 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 		data << itemProto->ItemStatType[i];
 		data << itemProto->ItemStatValue[i];
     }
-    /*
-    for (int num4 = 0; num4 < 7; num4++)
-    {
-        if (this.itemDamages[num4] != null)
-        {
-            Converter.ToBytes(this.itemDamages[num4].MinDamage, data, ref offset);
-            Converter.ToBytes(this.itemDamages[num4].MaxDamage, data, ref offset);
-            Converter.ToBytes(num4, data, ref offset);
-        }
-    }
-    */
+
+	//CheckItemDamageValues( itemProto );
 
     for(i = 0; i < 5; i++)
     {// UQ1: Need to add a damage type here...
-		// UQ1: Fix bad DB entries first!
-		if ( itemProto->Class == ITEM_CLASS_WEAPON 
-			&& i == 0 
-			&& itemProto->ItemStatValue[i] <= 0 )
-		{// DB has no damage values???
-			float mindmg;
-			float maxdmg;
-
-			// Fix min damage...
-			if (itemProto->ItemLevel > 40)
-			{
-				mindmg = float(itemProto->ItemLevel-urand(0, 5));
-			}
-			else if (itemProto->ItemLevel > 30)
-			{
-				mindmg = float(itemProto->ItemLevel-urand(0, 10));
-			}
-			else if (itemProto->ItemLevel > 20)
-			{
-				mindmg = float(itemProto->ItemLevel-urand(0, 15));
-			}
-			else if (itemProto->ItemLevel > 10)
-			{
-				mindmg = float(itemProto->ItemLevel-urand(0, 9));
-			}
-			else if (itemProto->ItemLevel > 5)
-			{
-				mindmg = float(itemProto->ItemLevel-urand(0, 4));
-			}
-			else
-			{
-				mindmg = float(itemProto->ItemLevel-1);
-			}
-	    
-			if (mindmg <= 0)
-				mindmg = float(1);
-
-			// Fix max damage...
-			if (itemProto->ItemLevel > 40)
-			{
-				maxdmg = float(itemProto->ItemLevel+urand( 1, (itemProto->ItemLevel+10) ));
-			}
-			else if (itemProto->ItemLevel > 20)
-			{
-				maxdmg = float(itemProto->ItemLevel+urand(1, 30));
-			}
-			else if (itemProto->ItemLevel > 10)
-			{
-				maxdmg = float(itemProto->ItemLevel+urand(1, 15));
-			}
-			else if (itemProto->ItemLevel > 5)
-			{
-				maxdmg = float(itemProto->ItemLevel+urand(1, 8));
-			}
-			else
-			{
-				maxdmg = float(itemProto->ItemLevel+urand(1, 4));
-			}
-	    
-			if (maxdmg <= 1)
-				maxdmg = float(2);
-
-			if (mindmg > maxdmg)
-			{// For corrupt DB damage values...
-				float max = mindmg;
-
-				mindmg = maxdmg;
-				maxdmg = max;
-			}
-
-			itemProto->DamageMin[i] = mindmg;
-			itemProto->DamageMax[i] = maxdmg;
-
-			//itemProto->SaveToDB(); // *** FIXME *** Save new values to DB...
-		}
-
 		data << itemProto->DamageMin[i];
 		data << itemProto->DamageMax[i];
-        //data << itemProto->DamageType[i];
-		data << uint32(i);
+        data << itemProto->DamageType[i];
+		//data << uint32(i);
     }
 
     data << itemProto->Armor;
@@ -485,18 +402,35 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     }
     else
     {
+		if (itemProto->Quality == ITEM_QUALITY_NORMAL)
+			data << std::string("This is a normal item.");
+		else if (itemProto->Quality == ITEM_QUALITY_UNCOMMON)
+			data << std::string("This is an uncommon item.");
+		else if (itemProto->Quality == ITEM_QUALITY_RARE)
+			data << std::string("This is a rare item.");
+		else if (itemProto->Quality == ITEM_QUALITY_EPIC)
+			data << std::string("This is an epic item.");
+		else if (itemProto->Quality == ITEM_QUALITY_LEGENDARY)
+			data << std::string("This is a legendary item.");
+
         //data << std::string("Just your every-day item.");
-        data << uint8(0);
+        //data << uint8(0);
     }
     data << itemProto->Field102; // UQ1: Unknown
     data << itemProto->Field103; // UQ1: Unknown
     data << itemProto->Field104; // UQ1: Unknown
     data << itemProto->Field105; // UQ1: Displays: "This item begins a quest"
-    data << itemProto->Field106; // UQ1: Displays: "Locked"
+    //data << itemProto->Field106; // UQ1: Displays: "Locked"
+	
+	if (itemProto->Class == ITEM_CLASS_PERMANENT)
+		data << uint32(1); // "Locked"...
+	else
+		data << uint32(0);
+
     data << itemProto->Field107; // UQ1: Unknown
     data << itemProto->Field108; // UQ1: Unknown
     data << itemProto->Field109; // UQ1: Ammo Enchantment -- Maybe others too
-    data << itemProto->Field110; // UQ1: This is "Block" Value
+	data << itemProto->Block;//itemProto->Field110; // UQ1: This is "Block" Value
     data << itemProto->Field111; // UQ1: Unknown
     data << itemProto->MaxDurability;
 

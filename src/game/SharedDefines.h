@@ -48,6 +48,13 @@
 #define SPELL_SCHOOL_SHADOW					5
 #define SPELL_SCHOOL_ARCANE					6
 
+// item qualities -----------------------------------
+#define ITEM_QUALITY_NORMAL					0
+#define ITEM_QUALITY_UNCOMMON				1
+#define ITEM_QUALITY_RARE					2
+#define ITEM_QUALITY_EPIC					3
+#define ITEM_QUALITY_LEGENDARY				4
+
 // classes ------------------------------------------
 /*
 #define ITEM_CLASS_CONSUMABLE 				0
