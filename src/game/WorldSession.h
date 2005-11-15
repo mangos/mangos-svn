@@ -260,6 +260,7 @@ class WorldSession
         /// Combat opcodes (CombatHandler.cpp)
         void HandleAttackSwingOpcode(WorldPacket& recvPacket);
         void HandleAttackStopOpcode(WorldPacket& recvPacket);
+		void HandleSetSheathedOpcode(WorldPacket& recvPacket);
 
         /// Spell opcodes (SpellHandler.cpp)
         void HandleUseItemOpcode(WorldPacket& recvPacket);

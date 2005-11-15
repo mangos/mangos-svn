@@ -309,55 +309,19 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->RequiredLevel;
     data << itemProto->RequiredSkill;
     data << itemProto->RequiredSkillRank;
-    data << uint32(0);//itemProto->Field20; // UQ1: Required Spell
-    data << uint32(0);//itemProto->Field21; // UQ1: Required NPC Type??? "Outlaw" is 2...
-    data << uint32(0);//itemProto->Field22; // UQ1: Required Item??? "Thane of Ironforge" is 3...
-    data << uint32(0);//itemProto->Field23; // UQ1: Required player type??? "PLAYER, Night Elf - Hostile" is 4...
-    data << uint32(10);//itemProto->MaxCount;
+    data << uint32(0);// UQ1: Required Spell
+    data << uint32(0);// UQ1: Required Faction
+    data << uint32(0);// UQ1: Required Faction Level
+    data << uint32(0);// UQ1: Required PVP Rank
+    data << uint32(0);// UQ1: Unknown
+
 	if (itemProto->MaxCount > 1)
 		data << itemProto->MaxCount; // UQ1: 16 makes Unique (16) -- Item rarety??? Number stackable???
 	else
 		data << uint32(0);
 
-	data << uint32(10); // UQ1: Unknown
-	data << itemProto->ContainerSlots;//uint32(20); // UQ1: Unknown
-    /*
-    if (this.strBonus != 0)
-    {
-        Converter.ToBytes(4, data, ref offset);
-        Converter.ToBytes(this.strBonus, data, ref offset);
-    }
-    if (this.iqBonus != 0)
-    {
-        Converter.ToBytes(6, data, ref offset);
-        Converter.ToBytes(this.iqBonus, data, ref offset);
-    }
-    if (this.staminaBonus != 0)
-    {
-        Converter.ToBytes(7, data, ref offset);
-        Converter.ToBytes(this.staminaBonus, data, ref offset);
-    }
-    if (this.spiritBonus != 0)
-    {
-        Converter.ToBytes(5, data, ref offset);
-        Converter.ToBytes(this.spiritBonus, data, ref offset);
-    }
-    if (this.agilityBonus != 0)
-    {
-        Converter.ToBytes(3, data, ref offset);
-        Converter.ToBytes(this.agilityBonus, data, ref offset);
-    }
-    if (this.manaBonus != 0)
-    {
-        Converter.ToBytes(0, data, ref offset);
-        Converter.ToBytes(this.manaBonus, data, ref offset);
-    }
-    if (this.healthBonus != 0)
-    {
-        Converter.ToBytes(1, data, ref offset);
-        Converter.ToBytes(this.healthBonus, data, ref offset);
-    }
-    */
+	data << itemProto->MaxCount; // UQ1: Max Count
+	data << itemProto->ContainerSlots; // UQ1: Container Slots
 
     for(i = 0; i < 10; i++)
     {
@@ -372,7 +336,6 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 		data << itemProto->DamageMin[i];
 		data << itemProto->DamageMax[i];
         data << itemProto->DamageType[i];
-		//data << uint32(i);
     }
 
     data << itemProto->Armor;
@@ -416,22 +379,22 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         //data << std::string("Just your every-day item.");
         //data << uint8(0);
     }
-    data << itemProto->Field102; // UQ1: Unknown
-    data << itemProto->Field103; // UQ1: Unknown
-    data << itemProto->Field104; // UQ1: Unknown
+    data << itemProto->Field102; // UQ1: Page's Text ID
+    data << itemProto->Field103; // UQ1: Page's Language
+    data << itemProto->Field104; // UQ1: Page's Material
     data << itemProto->Field105; // UQ1: Displays: "This item begins a quest"
-    //data << itemProto->Field106; // UQ1: Displays: "Locked"
-	
+    
+	//data << itemProto->Field106; // UQ1: Displays: "Locked"
 	if (itemProto->Class == ITEM_CLASS_PERMANENT)
-		data << uint32(1); // "Locked"...
+		data << uint32(1);       // UQ1: "Locked"...
 	else
 		data << uint32(0);
 
-    data << itemProto->Field107; // UQ1: Unknown
-    data << itemProto->Field108; // UQ1: Unknown
-    data << itemProto->Field109; // UQ1: Ammo Enchantment -- Maybe others too
-	data << itemProto->Block;//itemProto->Field110; // UQ1: This is "Block" Value
-    data << itemProto->Field111; // UQ1: Unknown
+    data << itemProto->Field106; // UQ1: Lock Type
+    data << itemProto->Field107; // UQ1: Sheath
+    data << itemProto->Field108; // UQ1: Ammo Enchantment -- Maybe others too
+	data << itemProto->Block;    // UQ1: This is "Block" Value
+    data << itemProto->Field110; // UQ1: Unknown
     data << itemProto->MaxDurability;
 
 	data << uint32(0); // Name of a city/area... See AreaTable.dbc
@@ -1092,10 +1055,15 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_AUTO_STORE_BAG_ITEM" );
 
-    WorldPacket data;
-    uint64 guid;
+/*    WorldPacket data;
+    //uint64 guid;
+	uint32 value1;
 
-    recv_data >> guid;
+    //recv_data >> guid;
+	recv_data >> value1;
+
+	assert(0);
+*/
 
 /*
 #ifndef ENABLE_GRID_SYSTEM

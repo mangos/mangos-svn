@@ -110,7 +110,6 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
 #endif //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
 
-
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -120,5 +119,18 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 
     GetPlayer()->clearStateFlag(UF_ATTACKING);
     // GetPlayer()->removeCreatureFlag(0x00080000);
+}
+
+void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
+{
+    WorldPacket data;
+	uint64 guid = GetPlayer()->GetGUID();
+	uint32 sheathed;
+    recv_data >> sheathed;
+
+	// Sheathed weapon
+	Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
+
+	GetPlayer()->SetSheath(sheathed);
 }
 
