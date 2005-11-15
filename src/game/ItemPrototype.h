@@ -210,5 +210,8 @@ struct ItemPrototype
     uint32 Field110;
     uint32 Field111;
     uint32 MaxDurability;
+
+	// UQ1: Not currently in the DB!!! I will generate the values on load...
+	uint32 Block;
 };
 #endif

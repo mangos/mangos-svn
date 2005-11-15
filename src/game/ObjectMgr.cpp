@@ -679,6 +679,654 @@ bool ObjectMgr::SaveItemPrototypesCache()
 	return true;
 }*/
 
+void CheckItemDamageValues ( ItemPrototype *itemProto )
+{// UQ1: Make damage values for weapons...
+	uint8 add_damage_types[7]; // UQ1: There are 7 damage types, but only 5 can be actually used on a single item...
+	int num_damages_added = 0;
+
+	if ( itemProto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD && (itemProto->Block <= 0 || itemProto->Block > 999) )
+	{// Special case for shield's block value...
+		uint32 block;
+
+		// Fix min damage...
+		if (itemProto->ItemLevel > 40)
+		{
+			block = float(itemProto->ItemLevel+urand(0, 5));
+		}
+		else if (itemProto->ItemLevel > 30)
+		{
+			block = float(itemProto->ItemLevel+urand(0, 10));
+		}
+		else if (itemProto->ItemLevel > 20)
+		{
+			block = float(itemProto->ItemLevel+urand(0, 15));
+		}
+		else if (itemProto->ItemLevel > 10)
+		{
+			block = float(itemProto->ItemLevel+urand(0, 9));
+		}
+		else if (itemProto->ItemLevel > 5)
+		{
+			block = float(itemProto->ItemLevel+urand(0, 4));
+		}
+		else
+		{
+			block = float(itemProto->ItemLevel+1);
+		}
+
+		if (block <= 4)
+			block = urand(0, 5);
+
+		itemProto->Block = block;
+	}
+
+	if ( itemProto->Class != ITEM_CLASS_WEAPON 
+		&& itemProto->Class != ITEM_CLASS_PROJECTILE 
+		/*&& itemProto->SubClass != ITEM_SUBCLASS_WEAPON_WAND 
+		&& itemProto->SubClass != ITEM_SUBCLASS_WEAPON_THROWN 
+		&& itemProto->SubClass != ITEM_SUBCLASS_WEAPON_BOW 
+		&& itemProto->SubClass != ITEM_SUBCLASS_WEAPON_SPEAR 
+		&& itemProto->SubClass != ITEM_SUBCLASS_WEAPON_GUN*/ )
+		return; // Only check weapons here...
+
+	if (itemProto->ItemLevel > 255)
+		itemProto->ItemLevel = 0; // Weird... For null levels...
+
+//	if (! (itemProto->DamageMin[0] <= 0 || itemProto->DamageMax[0] <= 0 || (itemProto->DamageMin[0] > itemProto->DamageMax[0])) )
+//		return;
+
+	memset(&add_damage_types, 0, sizeof(add_damage_types));
+
+	for (int i = 0; i < 7; i++)
+    {// UQ1: Need to add a damage type here...
+		if (i == 0 // Run check on first incrument..
+			/*&& (itemProto->DamageMin[0] <= 0 || itemProto->DamageMax[0] <= 0 || (itemProto->DamageMin[0] > itemProto->DamageMax[0]))*/ )
+		{// Check to see if we should generate any additional damage...
+			
+			add_damage_types[NORMAL_DAMAGE] = 1; // Always add normal damage!
+
+			if (itemProto->AllowableClass & CLASS_WARRIOR)
+			{
+				if (itemProto->ItemLevel > 48)
+				{
+					if (irand(0, 10) < 7)
+					{// Warriors should have a chance of adding some fire damage...
+						add_damage_types[FIRE_DAMAGE] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 24)
+				{
+					if (irand(0, 10) < 3)
+					{// Warriors should have a chance of adding some fire damage...
+						add_damage_types[FIRE_DAMAGE] = 1;
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_PALADIN)
+			{
+				if (itemProto->ItemLevel > 48)
+				{
+					if (irand(0, 10) < 6)
+					{// Paladins should have a chance of adding some fire damage... ???
+						add_damage_types[FIRE_DAMAGE] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 24)
+				{
+					if (irand(0, 10) < 2)
+					{// Paladins should have a chance of adding some fire damage... ???
+						add_damage_types[FIRE_DAMAGE] = 1;
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_HUNTER)
+			{
+				if (itemProto->ItemLevel > 48)
+				{
+					if (irand(0, 10) < 6)
+					{// Hunters should have a chance of adding some nature damage... ???
+						add_damage_types[NATURE_DAMAGE] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 24)
+				{
+					if (irand(0, 10) < 2)
+					{// Hunters should have a chance of adding some nature damage... ???
+						add_damage_types[NATURE_DAMAGE] = 1;
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_ROGUE)
+			{
+				int choice = irand(0, 4);
+
+				// UQ1: Roques should mix up damages a little i guess???
+				if (choice == 0)
+				{// Add some Nature damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[NATURE_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[NATURE_DAMAGE] = 1;
+						}
+					}
+				}
+				else if (choice == 2)
+				{// Add some shadow damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+				}
+				else if (choice == 3)
+				{// Add some Frost damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FROST_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FROST_DAMAGE] = 1;
+						}
+					}
+				}
+				else
+				{// Default: Add some Fire damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_PRIEST)
+			{
+				int choice = irand(0, 3);
+
+				// UQ1: Priests should mix up damages a little i guess???
+				if (choice == 0)
+				{// Add some Shadow damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+				}
+				else
+				{// Default: Add some Holy damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 8) < 6)
+						{
+							add_damage_types[HOLY_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 9) < 2)
+						{
+							add_damage_types[HOLY_DAMAGE] = 1;
+						}
+					}					
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_SHAMAN)
+			{
+				int choice = irand(0, 2);
+
+				// UQ1: Shamen should mix up damages a little i guess???
+				if (choice == 0)
+				{// Add some Frost damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+				}
+				else if (choice == 1)
+				{// Default: Add some Frost damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FROST_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FROST_DAMAGE] = 1;
+						}
+					}
+				}
+				else
+				{// Default: Add some Fire damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_MAGE)
+			{
+				int choice = irand(0, 2);
+
+				// UQ1: Mages should mix up damages a little i guess???
+				if (choice == 0)
+				{// Add some Frost damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FROST_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FROST_DAMAGE] = 1;
+						}
+					}
+				}
+				else if (choice == 1)
+				{// Add some Arcane damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[ARCANE_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[ARCANE_DAMAGE] = 1;
+						}
+					}
+				}
+				else
+				{// Default: Add some Fire damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_WARLOCK)
+			{
+				int choice = irand(0, 1);
+
+				// UQ1: Warlocks should mix up damages a little i guess???
+				if (choice == 0)
+				{// Add some Frost damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[SHADOW_DAMAGE] = 1;
+						}
+					}
+				}
+				else
+				{// Default: Add some Fire damage...
+					if (itemProto->ItemLevel > 48)
+					{
+						if (irand(0, 10) < 6)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+					else if (itemProto->ItemLevel > 24)
+					{
+						if (irand(0, 10) < 2)
+						{
+							add_damage_types[FIRE_DAMAGE] = 1;
+						}
+					}
+				}
+			}
+			else if (itemProto->AllowableClass & CLASS_DRUID)
+			{
+				if (itemProto->ItemLevel > 48)
+				{
+					if (irand(0, 10) < 6)
+					{// Druids should have a chance of adding some nature damage... ???
+						add_damage_types[NATURE_DAMAGE] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 24)
+				{
+					if (irand(0, 10) < 2)
+					{// Druids should have a chance of adding some nature damage... ???
+						add_damage_types[NATURE_DAMAGE] = 1;
+					}
+				}
+			}
+			else
+			{// Default: Mix it up on higher level items???
+				uint8 damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+
+				if (itemProto->ItemLevel > 60)
+				{// Ultra-High level items should add a few extra damages...
+					if (irand(0, 8) < 6)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+
+					uint8 old_type = damage_type;
+
+					damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+					
+					while (old_type == damage_type)
+						damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+
+					if (irand(0, 10) < 6)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+
+					uint8 old_type2 = damage_type;
+
+					damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+
+					while (old_type == damage_type || old_type2 == damage_type)
+						damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+
+					if (irand(0, 10) < 6)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 54)
+				{// Very-High level items should add an extra...
+					if (irand(0, 8) < 6)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+
+					uint8 old_type = damage_type;
+
+					damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+					
+					while (old_type == damage_type)
+						damage_type = urand(NORMAL_DAMAGE, ARCANE_DAMAGE);
+
+					if (irand(0, 10) < 6)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 48)
+				{
+					if (irand(0, 10) < 6)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+				}
+				else if (itemProto->ItemLevel > 24)
+				{
+					if (irand(0, 10) < 3)
+					{
+						add_damage_types[damage_type] = 1;
+					}
+				}
+			}
+		}
+
+		if ( add_damage_types[i] >= 1 || i == 0 )
+		{// DB has no damage values???
+			float mindmg;
+			float maxdmg;
+
+			// Fix min damage...
+			if (itemProto->ItemLevel > 40)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 5));
+			}
+			else if (itemProto->ItemLevel > 30)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 10));
+			}
+			else if (itemProto->ItemLevel > 20)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 15));
+			}
+			else if (itemProto->ItemLevel > 10)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 9));
+			}
+			else if (itemProto->ItemLevel > 5)
+			{
+				mindmg = float(itemProto->ItemLevel-urand(0, 4));
+			}
+			else
+			{
+				mindmg = float(itemProto->ItemLevel-1);
+			}
+	    
+			if (i != 0)
+			{// When not calculating standard damage (extra damages) reduce the value according to level of the item..
+				if (itemProto->ItemLevel > 48)
+					mindmg *= 0.5;
+				else
+					mindmg *= 0.25;
+			}
+
+			if (mindmg <= 0)
+				mindmg = float(1);
+
+			// Fix max damage...
+			if (itemProto->ItemLevel > 40)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand( 1, (itemProto->ItemLevel+10) ));
+			}
+			else if (itemProto->ItemLevel > 20)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 30));
+			}
+			else if (itemProto->ItemLevel > 10)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 15));
+			}
+			else if (itemProto->ItemLevel > 5)
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 8));
+			}
+			else
+			{
+				maxdmg = float(itemProto->ItemLevel+urand(1, 4));
+			}
+	    
+			if (i != 0)
+			{// When not calculating standard damage (extra damages) reduce the value according to level of the item..
+				if (itemProto->ItemLevel > 48)
+					maxdmg *= 0.5;
+				else
+					maxdmg *= 0.25;
+			}
+
+			if (maxdmg <= 1)
+				maxdmg = float(2);
+
+			if (mindmg > maxdmg)
+			{// For corrupt DB damage values...
+				float max = mindmg;
+
+				mindmg = maxdmg;
+				maxdmg = max;
+			}
+
+			// Because we can only transmit up to 5 types of damage...
+			itemProto->DamageMin[num_damages_added] = float(mindmg);
+			itemProto->DamageMax[num_damages_added] = float(maxdmg);
+			itemProto->DamageType[num_damages_added] = i;
+			num_damages_added++;
+
+			if (num_damages_added > 5) // Because we can only transmit up to 5 types of damage...
+				break;
+
+			//itemProto->SaveToDB(); // *** FIXME *** Save new values to DB...
+		}
+    }
+
+	if (num_damages_added >= 1)
+		return;
+
+	if ( itemProto->DamageMin[0] <= 0 || itemProto->DamageMax[0] <= 0 || (itemProto->DamageMin[0] > itemProto->DamageMax[0]) )
+	{// Make sure there is always at least one damage type!!!
+		float mindmg;
+		float maxdmg;
+
+		// Fix min damage...
+		if (itemProto->ItemLevel > 40)
+		{
+			mindmg = float(itemProto->ItemLevel-urand(0, 5));
+		}
+		else if (itemProto->ItemLevel > 30)
+		{
+			mindmg = float(itemProto->ItemLevel-urand(0, 10));
+		}
+		else if (itemProto->ItemLevel > 20)
+		{
+			mindmg = float(itemProto->ItemLevel-urand(0, 15));
+		}
+		else if (itemProto->ItemLevel > 10)
+		{
+			mindmg = float(itemProto->ItemLevel-urand(0, 9));
+		}
+		else if (itemProto->ItemLevel > 5)
+		{
+			mindmg = float(itemProto->ItemLevel-urand(0, 4));
+		}
+		else
+		{
+			mindmg = float(itemProto->ItemLevel-1);
+		}
+	    
+		if (mindmg <= 0)
+			mindmg = float(1);
+
+		// Fix max damage...
+		if (itemProto->ItemLevel > 40)
+		{
+			maxdmg = float(itemProto->ItemLevel+urand( 1, (itemProto->ItemLevel+10) ));
+		}
+		else if (itemProto->ItemLevel > 20)
+		{
+			maxdmg = float(itemProto->ItemLevel+urand(1, 30));
+		}
+		else if (itemProto->ItemLevel > 10)
+		{
+			maxdmg = float(itemProto->ItemLevel+urand(1, 15));
+		}
+		else if (itemProto->ItemLevel > 5)
+		{
+			maxdmg = float(itemProto->ItemLevel+urand(1, 8));
+		}
+		else
+		{
+			maxdmg = float(itemProto->ItemLevel+urand(1, 4));
+		}
+	    
+		if (maxdmg <= 1)
+			maxdmg = float(2);
+
+		if (mindmg > maxdmg)
+		{// For corrupt DB damage values...
+			float max = mindmg;
+
+			mindmg = maxdmg;
+			maxdmg = max;
+		}
+
+		itemProto->DamageMin[0] = mindmg;
+		itemProto->DamageMax[0] = maxdmg;
+		itemProto->DamageType[0] = NORMAL_DAMAGE;
+
+		//itemProto->SaveToDB(); // *** FIXME *** Save new values to DB...
+	}
+
+}
+
 void ObjectMgr::LoadItemPrototypes()
 {
 	//if (LoadItemPrototypesCache())
@@ -802,6 +1450,9 @@ void ObjectMgr::LoadItemPrototypes()
         pItemPrototype->Field110 = fields[110].GetUInt32();
         pItemPrototype->Field111 = fields[111].GetUInt32();
         pItemPrototype->MaxDurability = fields[112].GetUInt32();
+
+		// UQ1: Check+Repair damage values for weapons...
+		CheckItemDamageValues( pItemPrototype );
 
 		// UQ1: For cache save...
 		//pItemPrototypes[num_item_prototypes] = pItemPrototype;
