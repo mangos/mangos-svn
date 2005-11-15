@@ -342,6 +342,14 @@ void Player::Update( uint32 p_time )
 
     CheckExploreSystem();
 
+	/*
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, -842150654 );
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, -842150654 );
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, -842150654 );
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+3, -842150654 );
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+4, -842150654 );
+	*/
+
     if (m_state & UF_ATTACKING)
     {
         inCombat = true;
@@ -1268,6 +1276,16 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
         // visual items for other players
         updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
     }
+
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_01);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_02);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_03);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_04);
+	updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_05);
 }
 
 
@@ -3545,6 +3563,78 @@ void Player::DuelComplete()
 	MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
     }
 }
+
+void Player::SetSheath (uint32 sheathed)
+{
+	if (sheathed) 
+	{
+		Item *item;
+
+		// Get the item from it's slot...
+		if (GetItemBySlot(EQUIPMENT_SLOT_MAINHAND))
+			item = GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
+
+		if (GetItemBySlot(EQUIPMENT_SLOT_OFFHAND))
+			item = GetItemBySlot(EQUIPMENT_SLOT_OFFHAND);
+
+		if (GetItemBySlot(EQUIPMENT_SLOT_RANGED))
+			item = GetItemBySlot(EQUIPMENT_SLOT_RANGED);
+
+		if (!item) // If it fails.. Return now!
+			return;
+
+		ItemPrototype *itemProto = item->GetProto();
+
+		// Get this sheath type...
+		uint32 itemSheathType = itemProto->Sheath;
+
+		// Depending on which hand, set the sheath from it's set type...
+		if (GetItemBySlot(EQUIPMENT_SLOT_MAINHAND))
+		{
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, item->GetGUIDLow());
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, itemSheathType);
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, itemProto->DisplayInfoID);
+		}
+		
+		if (GetItemBySlot(EQUIPMENT_SLOT_OFFHAND)) 
+		{
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, item->GetGUIDLow());
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, itemSheathType);
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, itemProto->DisplayInfoID);
+		}
+
+		if (GetItemBySlot(EQUIPMENT_SLOT_RANGED)) 
+		{
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, item->GetGUIDLow());
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, itemSheathType);
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, itemProto->DisplayInfoID);
+		}
+	}
+	else
+	{
+		if (GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 0)) 
+		{
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, uint32(0));
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, uint32(0));
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, uint32(0));
+		}
+
+		if (GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1)) 
+		{
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, uint32(0));
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, uint32(0));
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, uint32(0));
+		}
+
+		if (GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2)) 
+		{
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, uint32(0));
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, uint32(0));
+			this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, uint32(0));
+		}
+	}
+}
+
 //
 // UQ!: CHECKME: Move this code somewhere else???
 //

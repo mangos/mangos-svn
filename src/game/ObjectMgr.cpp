@@ -720,6 +720,58 @@ void CheckItemDamageValues ( ItemPrototype *itemProto )
 		itemProto->Block = block;
 	}
 
+	if ((itemProto->Class == ITEM_CLASS_WEAPON || itemProto->SubClass == ITEM_SUBCLASS_ARMOR_SHIELD)
+		&& (itemProto->Sheath <= 0 || itemProto->Sheath > 7) )
+	{// Set default sheathed values...
+/*
+    INVTYPE_WEAPON         = 0xd,
+    INVTYPE_SHIELD         = 0xe,
+    INVTYPE_RANGED         = 0xf,
+    INVTYPE_2HWEAPON       = 0x11,
+    INVTYPE_WEAPONMAINHAND = 0x15,
+    INVTYPE_WEAPONOFFHAND  = 0x16,
+    INVTYPE_HOLDABLE       = 0x17,
+    INVTYPE_RANGEDRIGHT    = 0x1a,
+*/
+		
+		if (itemProto->SubClass == ITEM_SUBCLASS_WEAPON_STAFF)
+		{
+			itemProto->Sheath = 1;
+		}
+		else if (itemProto->InventoryType == INVTYPE_2HWEAPON)
+		{
+			itemProto->Sheath = 1;
+		}
+		else if (itemProto->InventoryType == INVTYPE_SHIELD)
+		{
+			itemProto->Sheath = 4;
+		}
+		/*else if (itemProto->InventoryType == INVTYPE_RANGED)
+		{
+			itemProto->Sheath = 4;
+		}*/
+		else if (itemProto->InventoryType == INVTYPE_WEAPONMAINHAND)
+		{
+			itemProto->Sheath = 3;
+		}
+		else if (itemProto->InventoryType == INVTYPE_WEAPONOFFHAND)
+		{
+			itemProto->Sheath = 3;
+		}
+		else if (itemProto->InventoryType == INVTYPE_RANGEDRIGHT)
+		{
+			itemProto->Sheath = 3;
+		}
+		else if (itemProto->InventoryType == INVTYPE_WEAPON)
+		{
+			itemProto->Sheath = 3;
+		}
+		else
+		{
+			itemProto->Sheath = 7;
+		}
+	}
+
 	if ( itemProto->Class != ITEM_CLASS_WEAPON 
 		&& itemProto->Class != ITEM_CLASS_PROJECTILE 
 		/*&& itemProto->SubClass != ITEM_SUBCLASS_WEAPON_WAND 

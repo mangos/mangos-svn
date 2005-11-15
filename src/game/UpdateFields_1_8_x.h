@@ -91,6 +91,11 @@ enum EUnitFields
     UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01       =   38,
     UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02       =   39,
     UNIT_VIRTUAL_ITEM_INFO                  =   40,       //  6 of them
+	UNIT_VIRTUAL_ITEM_INFO_01               =   41,
+	UNIT_VIRTUAL_ITEM_INFO_02               =   42,
+	UNIT_VIRTUAL_ITEM_INFO_03               =   43,
+	UNIT_VIRTUAL_ITEM_INFO_04               =   44,
+	UNIT_VIRTUAL_ITEM_INFO_05               =   45,
     UNIT_FIELD_FLAGS                        =   46,
     UNIT_FIELD_AURA                         =   47,       //  64 of them
     UNIT_FIELD_AURAFLAGS                    =  111,       //  8 of them

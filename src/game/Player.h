@@ -436,6 +436,7 @@ class Player : public Unit
         // Misc
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
         void SendMessageToSet(WorldPacket *data, bool self);
+		void SetSheath (uint32 sheathed);
 
         // Serialize character to db
         void SaveToDB();
