@@ -44,7 +44,7 @@
 // Only clients with this version will be allowed to view the realmlist.
 // Higher versions will be rejected, lower versions will be patched if possible.
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {4544,4500,4565/*1.6.x*/,4671/*1.7.0*/,4735/*1.8.0*/, 4769/*1.8.1*/, 4784/*1.8.2*/}
+#define EXPECTED_MANGOS_CLIENT_BUILD        {4544,4500,4565/*1.6.x*/,4671/*1.7.0*/,4735/*1.8.0*/, 4769/*1.8.1*/, 4784/*1.8.2*/, 4807/*1.8.3*/}
 // 1.6.0 > 4500,4449,4442,4375,4364,4341,4284,4279,4222,4150,4125,4115,4062,4044,3989,3988,3925,3892,3810,3807,0
 #ifdef HAVE_CONFIG_H
 # include <config.h>
