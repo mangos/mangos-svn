@@ -221,11 +221,11 @@ class Creature : public Unit
         void DeleteFromDB();
 
         // UQ1: We desperately need this working... We can't keep having friendlys attacking us!!!
-/*        uint32 getFaction()
+        uint32 getFaction()
         {
             return m_faction;
         };
-
+/*
         //this sets the faction horde, alliance or NoFaction in case of any bug
         //Or sets a faction passed by parameter in case of race is < 0
         void setFaction(uint8 race)

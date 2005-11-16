@@ -449,6 +449,21 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 		return;
 	}
 
+	//Increase reputation's standing to player
+	int points = 0;
+	if( GetPlayer()->getLevel() < pQuest->m_qPlayerLevel + 6 )
+	{
+		points = 25;
+	}
+	else
+	{
+		int diff = GetPlayer()->getLevel() - pQuest->m_qPlayerLevel;
+		points = 25 - (5*(diff-5));
+		if(points < 5) points = 5; 
+	}
+	GetPlayer()->SetStanding(pCreature->getFaction(), points);
+	//*******************************************************
+
 	scriptCallQuestComplete( GetPlayer(), pCreature, pQuest );
 }
 

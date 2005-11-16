@@ -360,12 +360,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // SMSG_INITIALIZE_FACTIONS
 	data.Initialize(SMSG_INITIALIZE_FACTIONS);
-	data << (uint32) 0x40; //Count
-	data << (uint8 ) 3;	   //Flags
-	data << (uint32) 0;    //Standing
+	data << (uint32) 0x40;				//Count
+	data << (uint8 ) 3;  //should be 0  //Flags
+	data << (uint32) 0;					//Standing
 	SendPacket(&data);
-
-	GetPlayer()->UpdateReputation();
 
 /*
     // Unknown (0x02C2)
