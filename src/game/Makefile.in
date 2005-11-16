@@ -303,7 +303,7 @@ libgame_a_SOURCES = \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
-	SriptCalls.cpp \		
+	ScriptCalls.cpp \
 	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TradeHandler.cpp \
@@ -346,7 +346,7 @@ libgame_a_SOURCES = \
 	Spell.h \
 	SpellPrototype.h \
 	Stats.h \
-	SriptCalls.h \	
+	ScriptCalls.h \
 	Unit.h \
 	UpdateData_1_8_x.h \
 	UpdateData.h \

@@ -208,7 +208,6 @@ EXTRA_DIST = \
 	creatureloot.sql \
 	creature_names.sql \
 	creaturequestrelation.sql \
-	creatureinvolvedrelation.sql \
 	creatures_mov.sql \
 	creaturespells.sql \
 	creatures.sql \
@@ -224,7 +223,6 @@ EXTRA_DIST = \
 	ipbantable.sql \
 	item_instances.sql \
 	items.sql \
-	item_pages.sql \
 	mailed_items.sql \
 	mail.sql \
 	npc_text.sql \
@@ -243,8 +241,6 @@ EXTRA_DIST = \
 	taxipathnodes.sql \
 	taxipath.sql \
 	teleport_cords.sql \
-	triggerquestrelation.sql \
-	tutorials.sql \
 	trainer.sql \
 	vendors.sql \
 	gmtickets.sql
@@ -265,7 +261,6 @@ pkgdata_DATA = \
 	creatureloot.sql \
 	creature_names.sql \
 	creaturequestrelation.sql \
-	creatureinvolvedrelation.sql \
 	creatures_mov.sql \
 	creaturespells.sql \
 	creatures.sql \
@@ -280,7 +275,6 @@ pkgdata_DATA = \
 	inventory.sql \
 	ipbantable.sql \
 	item_instances.sql \
-	item_pages.sql \
 	items.sql \
 	mailed_items.sql \
 	mail.sql \
@@ -300,9 +294,7 @@ pkgdata_DATA = \
 	taxipathnodes.sql \
 	taxipath.sql \
 	teleport_cords.sql \
-	triggerquestrelation.sql \
 	trainer.sql \
-	tutorials.sql \	
 	vendors.sql \
 	gmtickets.sql
 
