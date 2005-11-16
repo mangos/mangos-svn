@@ -3750,15 +3750,24 @@ void Player::UpdateReputation(void)
 	*/
 	WorldPacket data;
 	std::list<struct Factions>::iterator itr;
-	int i=0;
+
+	// SMSG_INITIALIZE_FACTIONS
+	data.Initialize(SMSG_INITIALIZE_FACTIONS);
+	data << (uint32) 0x40; //Count
+	data << (uint8 ) 0;	   //Flags
+	data << (uint32) 0;    //Standing
+	GetSession()->SendPacket(&data);
+	
 	for(itr = factions.begin(); itr != factions.end(); ++itr)
 	{
-		data.Initialize(SMSG_SET_FACTION_STANDING);
-		data << (uint32) (itr->Flags & 1); //if is visible?
-		data << (uint32) itr->ReputationListID;
-		data << (uint32) itr->Standing;
-		GetSession()->SendPacket(&data);
-
+		if(itr->Flags & 1)
+		{
+			data.Initialize(SMSG_SET_FACTION_STANDING);
+			data << (uint32) 1; //if is visible?
+			data << (uint32) itr->ReputationListID;
+			data << (uint32) itr->Standing;
+			GetSession()->SendPacket(&data);
+		}
 		Log::getSingleton( ).outDebug( "WORLD: Player::UpdateReputation called and completed OK!" );
 	}
 }
@@ -3878,18 +3887,18 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
     if( fact != NULL )
     {
-	assert( fact->ID == FTemplate );
-	fac  = sFactionStore.LookupEntry( fact->faction );
-	for(itr = factions.begin(); itr != factions.end(); ++itr)
-	{
-	    if(itr->ReputationListID == fac->reputationListID) 
-	    {
-		itr->Standing += standing;
-		itr->Flags = (itr->Flags | 1); //Sets visible to faction
-		UpdateReputation();
-		return true;
-	    }
-	}	
+		assert( fact->ID == FTemplate );
+		fac  = sFactionStore.LookupEntry( fact->faction );
+		for(itr = factions.begin(); itr != factions.end(); ++itr)
+		{
+			if(itr->ReputationListID == fac->reputationListID) 
+			{
+				itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing : 0);
+				itr->Flags = (itr->Flags | 1); //Sets visible to faction
+				UpdateReputation();
+				return true;
+			}
+		}	
     }
 
     return false;
