@@ -384,13 +384,30 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         /// Skill opcodes
         //{ CMSG_SKILL_LEVELUP,          STATUS_LOGGEDIN, &WorldSession::HandleSkillLevelUpOpcode              },
         { CMSG_LEARN_TALENT,             STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
+
         /// Quest opcodes
         { CMSG_QUESTGIVER_STATUS_QUERY,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   },
         { CMSG_QUESTGIVER_HELLO,         STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverHelloOpcode         },
         { CMSG_QUESTGIVER_ACCEPT_QUEST,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverAcceptQuestOpcode   },
         { CMSG_QUESTGIVER_CHOOSE_REWARD, STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverChooseRewardOpcode  },
         { CMSG_QUESTGIVER_REQUEST_REWARD,STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverRequestRewardOpcode },
+        { CMSG_QUESTGIVER_QUERY_QUEST,   STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverQuestQueryOpcode    },
         { CMSG_QUEST_QUERY,              STATUS_LOGGEDIN, &WorldSession::HandleQuestQueryOpcode              },
+
+        { CMSG_QUEST_CONFIRM_ACCEPT,            STATUS_LOGGEDIN, &WorldSession::HandleQuestConfirmAccept     },
+        { CMSG_QUESTLOG_REMOVE_QUEST,           STATUS_LOGGEDIN, &WorldSession::HandleQuestLogRemoveQuest    },
+        { CMSG_QUESTLOG_SWAP_QUEST,             STATUS_LOGGEDIN, &WorldSession::HandleQuestLogSwapQuest      },
+        { CMSG_QUESTGIVER_CANCEL,               STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverCancel       },
+        { CMSG_QUESTGIVER_COMPLETE_QUEST,       STATUS_LOGGEDIN, &WorldSession::HandleQuestComplete          },
+        { CMSG_QUESTGIVER_QUEST_AUTOLAUNCH,     STATUS_LOGGEDIN, &WorldSession::HandleQuestAutoLaunch        },
+
+
+		// Tutorials ...
+
+		{ CMSG_TUTORIAL_FLAG,            STATUS_LOGGEDIN, &WorldSession::HandleTutorialFlag                  },
+		{ CMSG_TUTORIAL_CLEAR,           STATUS_LOGGEDIN, &WorldSession::HandleTutorialClear                 },
+		{ CMSG_TUTORIAL_RESET,           STATUS_LOGGEDIN, &WorldSession::HandleTutorialReset                 },
+
         /// Chat opcodes
         { CMSG_MESSAGECHAT,              STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             },
         { CMSG_TEXT_EMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               },
@@ -437,9 +454,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
         // move time skip
         { CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
+
 		// Text Pages...
-		{ CMSG_PAGE_TEXT_QUERY,			 STATUS_LOGGEDIN, &WorldSession::HandlePageQuerySkippedOpcode         },
-		{ CMSG_QUESTGIVER_QUERY_QUEST,	 STATUS_LOGGEDIN, &WorldSession::HandlePageQuerySkippedOpcode         }, // UQ1: FIXME - Shared between quests and item query...
+		{ CMSG_PAGE_TEXT_QUERY,			 STATUS_LOGGEDIN, &WorldSession::HandlePageQueryOpcode		         },
+	    { CMSG_READ_ITEM,                STATUS_LOGGEDIN, &WorldSession::HandleReadItem  	                 },
+
         /// End of table
         { 0,                             0,               NULL                                               }
     };

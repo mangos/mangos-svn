@@ -24,11 +24,14 @@
 #include "ItemPrototype.h"
 #include "Unit.h"
 #include "Database/DatabaseEnv.h"
+#include "NPCHandler.h"
+#include "QuestDef.h"
 
 struct Mail;
 class Channel;
 class DynamicObject;
 class Creature;
+class PlayerMenu;
 
 //====================================================================
 //  Inventory
@@ -59,19 +62,6 @@ enum Races
     TAUREN = 6,
     GNOME = 7,
     TROLL = 8,
-};
-
-struct quest_status
-{
-    quest_status()
-    {
-        memset(m_questItemCount, 0, 16);
-        memset(m_questMobCount, 0, 16);
-    }
-    uint32 quest_id;
-    uint32 status;
-    uint32 m_questItemCount[4];                   // number of items collected
-    uint32 m_questMobCount[4];                    // number of monsters slain
 };
 
 struct spells
@@ -276,7 +266,6 @@ class Player : public Unit
         const char* GetName() { return m_name.c_str(); };
 
         void Die();
-        void KilledMonster(uint32 entry, const uint64 &guid);
         void GiveXP(uint32 xp, const uint64 &guid);
 
         // Taxi
@@ -290,13 +279,50 @@ class Player : public Unit
         }
 
         // Quests
-        uint32 getQuestStatus(uint32 quest_id);
-        uint32 addNewQuest(uint32 quest_id, uint32 status=4);
-        void loadExistingQuest(struct quest_status qs);
-        void setQuestStatus(uint32 quest_id, uint32 new_status);
-        bool checkQuestStatus(uint32 quest_id);
-        uint16 getOpenQuestSlot();
-        uint16 getQuestSlot(uint32 quest_id);
+		uint32 getQuestStatus(uint32 quest_id);
+		  bool getQuestRewardStatus(uint32 quest_id);
+		uint32 addNewQuest(uint32 quest_id, uint32 status = QUEST_STATUS_AVAILABLE);
+		  void loadExistingQuest(struct quest_status qs);
+		  void setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded);
+		  bool checkQuestStatus(uint32 quest_id);
+  quest_status getQuestStatusStruct(uint32 quest_id);
+
+		bool isQuestComplete(uint32 quest_id, Creature *pCreature);
+		bool isQuestTakable(uint32 quest_id);
+		
+		void finishExplorationQuest( Quest *pQuest );
+		void sendPreparedGossip( uint32 textid, QEmote em, std::string QTitle, uint64 guid);
+
+		uint16 getOpenQuestSlot();
+		uint16 getQuestSlot(uint32 quest_id);
+		uint16 getQuestSlotById(uint32 slot_id);
+
+		void RemovedItemFromBackpack(uint32 entry);
+		void AddedItemToBackpack(uint32 entry, uint32 count);
+		void KilledMonster(uint32 entry, uint64 guid);
+
+		inline uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
+		inline void ModifyMoney (int32 d) { SetMoney (GetMoney() + d); }
+		void SetMoney (uint32 value) { SetUInt32Value (PLAYER_FIELD_COINAGE, value); }
+
+		uint32 GetTutorialInt(uint32 intId )
+		{
+			ASSERT( (intId < 8) );
+			return m_Tutorials[intId];
+		}
+
+		void SetTutorialInt(uint32 intId, uint32 value)
+		{
+			ASSERT( (intId < 8) );
+			m_Tutorials[intId] = value;
+		}
+		/* Support Functions */
+
+		bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
+		bool RemoveItemFromBackpack (uint32 itemId, uint32 count = 1) { return false; }
+		bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
+		bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
+
 
         void AddMail(Mail *m);
 
@@ -501,6 +527,8 @@ class Player : public Unit
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
 
+		PlayerMenu* PlayerTalkClass;
+
 protected:
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -511,6 +539,7 @@ protected:
         void _SaveInventory();
         void _SaveSpells();
         void _SaveActions();
+		void _SaveTutorials();
         void _SaveQuestStatus();
         void _SaveAffects();
         void _SaveBids();
@@ -521,6 +550,7 @@ protected:
         void _LoadActions();
         void _LoadQuestStatus();
         void _LoadAffects();
+		void _LoadTutorials();
 		
 		void _LoadReputation(void);
 		void _SaveReputation(void);
@@ -631,6 +661,8 @@ protected:
         uint64 m_duelFlagGUID;
 
         time_t m_nextThinkTime;
+		uint32 m_timedQuest;
+		uint32 m_Tutorials[8];
 
 };
 

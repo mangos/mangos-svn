@@ -47,115 +47,160 @@ uint32 Quest::XPValue(Player* _Player)
 // Returns the number of Kill Objectives
 uint32 Quest::GetKillObjectivesCount()
 {
-	uint32 i;
+	uint32 i, count = 0;
 
 	for (i=0; i < QUEST_OBJECTIVES_COUNT; i++) 
-		if (!m_qObjMobId[i]) return i;
+		if (m_qObjMobId[i]) count++;
 
-	return QUEST_OBJECTIVES_COUNT;
+	return count;
 }
 
 //-------------------------------------------------------------------
 // Returns the number of Kill Objectives
 uint32 Quest::GetDeliverObjectivesCount()
 {
-	uint32 i;
+	uint32 i, count = 0;
 
 	for (i=0; i < QUEST_OBJECTIVES_COUNT; i++) 
-		if (!m_qObjItemId[i]) return i;
+		if (m_qObjItemId[i]) count++;
 
-	return QUEST_OBJECTIVES_COUNT;
+	return count;
 }
 
-//--------------------------------------------------------------------
-// Send the Quest's details to _Player from senderGUID
-// Packet Structure:
-//   UINT64 <senderGUID>
-//   UINT32 <QuestID>
-//   TEXT   <QuestTitle>
-//   TEXT   <QuestObjectives>
-//   TEXT   <QuestDetails>
-//   UINT32 <ActivateAcceptButton> (Not sure if all 32 bits are for that)
-//   UINT32 <QuestChoiceRewardCount>
-//   |  UINT32 <ItemId>
-//   |  UINT32 <ItemCount>
-//   |  UINT32 <ItemModel>
-//   UINT32 <QuestRewardCount>
-//   |  UINT32 <ItemId>
-//   |  UINT32 <ItemCount>
-//   |  UINT32 <ItemModel>
-//   UINT32 <RewardGold>
-//   UINT32 <DeliverObjectiveCount>
-//   |  UINT32 <ItemId>
-//   |  UINT32 <ItemCount>
-//   UINT32 <KillObjectiveCount>
-//   |  UINT32 <MobId>
-//   |  UINT32 <MobCount>
-//   ----------------------------- END
-
-void Quest::SendDetails(Player* _Player, uint64 SenderGUID, bool ActivateAccept)
+//------------------------------------------------------------
+// Checks if a quest can be taken by player.
+// It checks for PreRequs, for reward, and for compatibility.
+bool Quest::CanBeTaken( Player *_Player )
 {
-	WorldPacket data;
-    data.Initialize(SMSG_QUESTGIVER_QUEST_DETAILS);
+	bool result = ( !RewardIsTaken( _Player ) && IsCompatible( _Player ) && 
+					 PreReqSatisfied( _Player ) );
 
-    data << SenderGUID;
-    data << m_qId << m_qTitle << m_qObjectives << m_qDetails << uint32( ActivateAccept );
+	return result;
+}
 
-	//
-	// Adding Rewards to the Packet
-	//
+//------------------------------------------------------------
+bool Quest::RewardIsTaken( Player *_Player )
+{
+	bool bResult = false;
+	if ( !HasFlag(QUEST_SPECIAL_FLAGS_REPEATABLE) ) 
+		bResult = ( _Player->getQuestRewardStatus( m_qId ) );
 
-	ItemPrototype* IProto;
-	int i;
+	return bResult;
+}
 
-	data << m_qRewChoicesCount;
-    for (i=0; i < m_qRewChoicesCount; i++)
-        {
-            data << uint32(m_qRewChoicesItemId[i]);
-			data << uint32(m_qRewChoicesItemCount[i]);
-			IProto = objmgr.GetItemPrototype(m_qRewChoicesItemId[i]);
-			if ( IProto ) data << uint32(IProto->DisplayInfoID); else
-						  data << uint32( 0x00 );  // Send NULL model.
-        }
+//------------------------------------------------------------
+// Check for class/race/... compatibility of a player and quest
+// 
+bool Quest::IsCompatible( Player *_Player )
+{
+	return ( ReputationSatisfied ( _Player ) &&
+		     RaceSatisfied       ( _Player ) &&
+			 ClassSatisfied      ( _Player ) &&
+			 TradeSkillSatisfied ( _Player ) );
+}
 
-	data << m_qRewCount;
-    for (i=0; i < m_qRewCount; i++)
-        {
-            data << m_qRewItemId[i];
-			data << m_qRewItemCount[i];
-			IProto = objmgr.GetItemPrototype(m_qRewItemId[i]);
-			if ( IProto ) data << IProto->DisplayInfoID; else
-						  data << uint32( 0x00 );  // Send NULL model.
-        }
+//------------------------------------------------------------
+// Checks for Reputation satisfaction.
+// 
+bool Quest::ReputationSatisfied( Player *_Player )
+{
+	return true;
+	// needs implementation
+}
 
-	data << m_qRewMoney;
+//------------------------------------------------------------
+// Player-Quest TradeSkill compatibilty
+// 
+bool Quest::TradeSkillSatisfied( Player *_Player )
+{
+	return true;
+	// needs core implementation
+}
 
+//------------------------------------------------------------
+// Player-Quest Race compatibilty
+// 
+bool Quest::RaceSatisfied( Player *_Player )
+{
+	if ( m_qRequiredRaces == QUEST_RACE_NONE ) return true;
+	return (((m_qRequiredRaces >> (_Player->getRace() - 1)) & 0x01) == 0x01);
+}
 
-	//
-	// Sending Deliver Objectives
-	//
+//------------------------------------------------------------
+// Player-Quest Class compatibilty
+// 
+bool Quest::ClassSatisfied( Player *_Player )
+{
+	if ( m_qRequiredClass == QUEST_CLASS_NONE ) return true;
+	return (m_qRequiredClass == _Player->getClass());
+}
 
-	uint32 Objs = GetDeliverObjectivesCount();
-	data << Objs;
+//------------------------------------------------------------
+// Player-Quest Lavel check.
+// 
+bool Quest::LevelSatisfied( Player *_Player )
+{
+	return ( _Player->getLevel() >= m_qPlayerLevel );
+}
 
-    for (i=0; i < QUEST_OBJECTIVES_COUNT; i++)
-        {
-			data << m_qObjItemId[i];
-			data << m_qObjItemCount[i];
+//------------------------------------------------------------
+// Checks if a NPC can show yellow [!]. Level dep.
+// 
+bool Quest::CanShowAvailable( Player *_Player )
+{
+	uint8 iPLevel;
+	iPLevel = _Player->getLevel();
+
+	if ( iPLevel < m_qPlayerLevel ) return false;
+	return ( (iPLevel - m_qPlayerLevel) <= 7 );
+}
+
+//------------------------------------------------------------
+// Checks if a NPC can show gray [!]. Level dep.
+// 
+bool Quest::CanShowUnsatified( Player *_Player )
+{
+	uint8 iPLevel;
+	iPLevel = _Player->getLevel();
+
+	if ( iPLevel > m_qPlayerLevel ) return false;
+	return ( (m_qPlayerLevel - iPLevel) <= 7 );
+}
+
+//------------------------------------------------------------
+// Checks for reqs. Note: it checks for Open, Require and Lock.
+// 
+bool Quest::PreReqSatisfied( Player *_Player )
+{
+	bool bResult = true;
+
+	if ( m_qRequiredQuestsCount > 0 )
+	{
+		bResult = false;
+		for (uint32 iI = 0; iI < m_qRequiredQuestsCount; iI++ )
+			bResult |= _Player->getQuestRewardStatus( m_qRequiredQuests[iI] );
+	}
+
+	if (!bResult) return false;
+
+	if ( m_qRequiredAbsQuestsCount > 0 )
+	{
+		for (uint32 iI = 0; iI < m_qRequiredAbsQuestsCount; iI++ )
+			bResult &= _Player->getQuestRewardStatus( m_qRequiredAbsQuests[iI] );
+	}
+
+	if (!bResult) return false;
+
+	if ( m_qLockerQuestsCount > 0 )
+	{
+		for (uint32 iI = 0; iI < m_qLockerQuestsCount; iI++ )
+		{
+			bResult &= (!_Player->getQuestRewardStatus( m_qLockerQuests[iI] ));
+			bResult &= ( _Player->getQuestStatus( m_qLockerQuests[iI] ) != QUEST_STATUS_COMPLETE);
+			bResult &= ( _Player->getQuestStatus( m_qLockerQuests[iI] ) != QUEST_STATUS_INCOMPLETE);
+			
 		}
+	}
 
-	//
-	// Sending Kill Objectives
-	//
-
-	Objs = GetKillObjectivesCount();
-	data << Objs;
-    for (i=0; i < QUEST_OBJECTIVES_COUNT; i++)
-        {
-			data << m_qObjMobId[i];
-			data << m_qObjMobCount[i];
-		}
-
-	_Player->GetSession()->SendPacket( &data ); 
-    Log::getSingleton( ).outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS" );
+	return bResult;
 }

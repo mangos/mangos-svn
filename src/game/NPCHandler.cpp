@@ -29,6 +29,7 @@
 #include "Player.h"
 #include "Affect.h"
 #include "UpdateMask.h"
+#include "ScriptCalls.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
@@ -451,12 +452,10 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 	Log::getSingleton( ).outString( "WORLD: Recieved CMSG_GOSSIP_HELLO" );
 
     WorldPacket data;
-    uint64 guid, useGuid;
-    GossipNpc *pGossip;
+    uint64 guid;
 
     recv_data >> guid;
 
-	useGuid = guid;
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
 	if (unit == NULL)
@@ -465,86 +464,9 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 		return;
 	}
 
-	pGossip = objmgr.GetGossipByGuid(guid);
+	GetPlayer()->PlayerTalkClass->ClearMenus();
 
-	CreatureInfo *ci = objmgr.GetCreatureName(unit->GetNameID());
-
-	if (!ci)
-	{
-		Log::getSingleton( ).outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO CREATUREINFO! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-		return;
-	}
-
-	Trainerspell *strainer = objmgr.GetTrainerspell(unit->GetNameID());
-	
-	if ((ci->flags1 & UNIT_NPC_FLAG_TRAINER) && !strainer)
-	{// Use Defaults...
-		strainer = objmgr.GetTrainerspell(default_trainer_guids[ci->classNum]);
-		useGuid = default_trainer_guids[ci->classNum];
-	}
-
-    if (!pGossip)
-    {// UQ1: Add some defaults???
-        if (!unit)
-        {
-            return;
-        }
-		else if (strainer)
-        {// No items, but has skills to teach.. Send trainer list...
-			pGossip = objmgr.DefaultVendorGossip();
-//            Log::getSingleton( ).outError( "DEFAULT GENERAL GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
-
-            data << guid;
-			SendTrainerList(useGuid);
-            return;
-        }
-        else if (unit->getItemCount() > 0 && unit->getItemCount() < MAX_CREATURE_ITEMS) 
-        {// If they have any items to sell, then default to vendor...
-            pGossip = objmgr.DefaultVendorGossip();
-            //Log::getSingleton( ).outError( "DEFAULT VENDOR GOSSIP: GUID: %u. OptionCount %u. TextID %u.", pGossip->Guid, pGossip->OptionCount, pGossip->TextID);
-
-            data << guid;
-            SendListInventory( guid );
-            return;
-        }
-        else
-        {
-            int choice = 999990+irand(3,9);
-
-            data.Initialize( SMSG_GOSSIP_MESSAGE );
-            data << guid;
-
-            data << uint32(choice);
-            data << uint32(0);
-
-            // QUEST HANDLER
-            data << uint32(0);  //quest count
-            SendPacket(&data);
-        }
-    }
-
-    if(pGossip)
-    {
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-        data.Initialize( SMSG_GOSSIP_MESSAGE );
-        data << guid;
-        data << pGossip->TextID;
-        data << pGossip->OptionCount;
-
-        for(uint32 i=0; i < pGossip->OptionCount; i++)
-        {
-            data << i;
-            data << pGossip->pOptions[i].Icon;
-            data << pGossip->pOptions[i].OptionText;
-        }
-
-        delete pGossip;
-
-        // QUEST HANDLER
-        data << uint32(0);  //quest count
-        SendPacket(&data);
-    }
+	scriptCallGossipHello( GetPlayer(), unit );
 }
 
 
@@ -559,84 +481,15 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     uint64 guid;
     
     recv_data >> guid >> option;
-
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-#endif
 
-    GossipNpc *pGossip = objmgr.GetGossipByGuid(unit->GetNameID()/*GUID_LOPART(guid)*/);
+	if (unit == NULL)
+	{
+		Log::getSingleton( ).outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+		return;
+	}
 
-    if(pGossip)
-    {
-        if(option == pGossip->OptionCount)
-        {
-            delete pGossip;
-
-            data << guid;
-            HandleGossipHelloOpcode( data );
-
-        }
-        else if( option < pGossip->OptionCount)
-        {
-            switch(pGossip->pOptions[option].Special)
-            {
-                case GOSSIP_POI:
-                {
-                    GossipText *pGossipText = objmgr.GetGossipText(pGossip->pOptions[option].NextTextID);
-
-                    if(pGossipText)
-                    {
-                        data.Initialize( SMSG_GOSSIP_MESSAGE );
-                        data << guid;
-                        data << pGossip->pOptions[option].NextTextID;
-                        data << uint32(0); //option count 0
-                        //Todo: Fix for recursive options(options embeded in options)
-                        //data << pGossip->OptionCount;
-
-                        //for(uint32 i=0; i < pGossip->OptionCount; i++)
-                        //{
-                        //    data << i;
-                        //    data << pGossip->pOptions[i].Icon;
-                        //    data << pGossip->pOptions[i].OptionText;
-                        //}
-
-                        data << uint32(0); //quest count
-
-                        delete pGossipText;
-
-                        SendPacket(&data);            
-                    }
-                }
-                break;
-                case GOSSIP_SPIRIT_HEALER_ACTIVE:
-                {
-                    data.Initialize( SMSG_SPIRIT_HEALER_CONFIRM );
-                    data << guid;
-                    SendPacket( &data );
-                    data.Initialize( SMSG_GOSSIP_COMPLETE );
-                    SendPacket( &data );
-
-                }
-                break;
-                case GOSSIP_VENDOR:
-                {
-                    data << guid;
-                    HandleListInventoryOpcode( data );
-                }
-                break;
-                case GOSSIP_TRAINER:
-                {
-                    data << guid;
-                    HandleTrainerListOpcode( data );
-                }
-                break;
-                default: break;
-            }
-            delete pGossip;
-        }
-    }
+	scriptCallGossipSelect( GetPlayer(), unit, option, GetPlayer()->PlayerTalkClass->GossipOption( option ) );
 }
 
 
@@ -669,36 +522,6 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
     GetPlayer( )->ResurrectPlayer();
     GetPlayer( )->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
     GetPlayer( )->SpawnCorpseBones();
-}
-
-
-//////////////////////////////////////////////////////////////
-/// This function handles CMSG_NPC_TEXT_QUERY:
-//////////////////////////////////////////////////////////////
-void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
-{
-    WorldPacket data;
-    uint32 textID;
-    uint32 uField0, uField1;
-
-    recv_data >> textID;
-    Log::getSingleton( ).outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID );
-
-    recv_data >> uField0 >> uField1;
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET, uField0);
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET + 1, uField1);
-
-    GossipText *pGossipText = objmgr.GetGossipText(textID);
-
-    if(pGossipText)
-    {
-        data.Initialize( SMSG_NPC_TEXT_UPDATE );
-        data << textID;
-        data << uint8(0x00) << uint8(0x00) << uint8(0x00) << uint8(0x00);
-        data << pGossipText->Text.c_str();
-        SendPacket( &data );
-        delete pGossipText;
-    }
 }
 
 

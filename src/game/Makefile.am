@@ -76,6 +76,7 @@ libgame_a_SOURCES = \
 	RandomMovementGenerator.cpp \
 	ReactorAI.cpp \
 	RedZoneDistrict.cpp \
+	ScriptCalls.cpp \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
@@ -118,6 +119,7 @@ libgame_a_SOURCES = \
 	Path.h \
 	Player.h \
 	QuestDef.h \
+	ScriptCalls.h \	
 	Spell.h \
 	SpellPrototype.h \
 	Stats.h \
