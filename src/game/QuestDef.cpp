@@ -24,6 +24,7 @@
 #include "WorldSession.h"
 #include "Opcodes.h"
 
+
 Quest::Quest()
 {
 	// No initialization required as

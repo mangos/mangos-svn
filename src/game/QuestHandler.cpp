@@ -29,6 +29,7 @@
 #include "QuestDef.h"
 #include "ObjectAccessor.h"
 #include "ScriptCalls.h"
+#include "ScriptCalls.cpp"
 
 
 /*
