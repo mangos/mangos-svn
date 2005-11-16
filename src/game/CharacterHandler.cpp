@@ -328,11 +328,17 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     //SendPacket(&data);
 
     //Tutorial Flags
+
+	//------------------------------------------
+	// SERVER --> SMSG_TUTORIAL_FLAGS
+	//------------------------------------------
     data.Initialize( SMSG_TUTORIAL_FLAGS );
-    for(int i = 0; i < 32; i++)
-        data << uint8(0xFF);
-    SendPacket(&data);
-    DEBUG_LOG( "WORLD: Sent tutorial flags." );
+    
+	for (int i = 0; i < 8; i++)
+		data << uint32( GetPlayer()->GetTutorialInt(i) );
+    
+	SendPacket(&data);
+    Log::getSingleton( ).outDebug( "WORLD: Sent tutorial flags." );
 
     //Initial Spells
     GetPlayer()->smsg_InitialSpells();
@@ -626,4 +632,36 @@ void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 #endif //_VERSION_1_7_0_
+}
+
+
+
+//-----------------------------------------------------------------------------
+void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
+{
+	uint32 iFlag;
+	recv_data >> iFlag;
+
+	uint32 wInt = (iFlag / 32);
+	uint32 rInt = (iFlag % 32);
+
+	uint32 tutflag = GetPlayer()->GetTutorialInt( wInt );
+	tutflag |= (1 << rInt);
+	GetPlayer()->SetTutorialInt( wInt, tutflag );
+
+	Log::getSingleton().outDebug("Received Tutorial Flag Set {%u}.", iFlag);
+}
+
+//-----------------------------------------------------------------------------
+void WorldSession::HandleTutorialClear( WorldPacket & recv_data )
+{
+	for ( uint32 iI = 0; iI < 8; iI++)
+		GetPlayer()->SetTutorialInt( iI, 0xFFFFFFFF );
+}
+
+//-----------------------------------------------------------------------------
+void WorldSession::HandleTutorialReset( WorldPacket & recv_data )
+{
+	for ( uint32 iI = 0; iI < 8; iI++)
+		GetPlayer()->SetTutorialInt( iI, 0x00000000 );
 }

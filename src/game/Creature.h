@@ -176,14 +176,21 @@ class Creature : public Unit
         int getItemAmount(int slot) { return item_list[slot].amount; }
         uint32 getItemId(int slot) { return item_list[slot].itemid; }
 
-        /// Quests
-        uint32 getQuestStatus(Player *pPlayer);
-        uint32 getCurrentQuest(Player *pPlayer);
 
+	//-------------------------------------------------
+    //  Quests
+	//-------------------------------------------------
+    uint32 getDialogStatus(Player *pPlayer, uint32 defstatus);
+	Quest *getNextAvailableQuest(Player *pPlayer, Quest *prevQuest);
 
-        bool hasQuest(uint32 quest_id);
-        void addQuest(uint32 quest_id) { mQuestIds.push_back(quest_id); };
-        void removeQuest(uint32 quest_id);
+    bool hasQuest(uint32 quest_id);
+    bool hasInvolvedQuest(uint32 quest_id);
+
+    void addQuest(uint32 quest_id) { mQuestIds.push_back(quest_id); };
+    void addInvolvedQuest(uint32 quest_id) { mInvolvedQuestIds.push_back(quest_id); };
+
+	void prepareQuestMenu( Player *pPlayer );
+
 
         /// Looting
         void generateLoot();
@@ -274,8 +281,9 @@ class Creature : public Unit
 
         /// Quest data
         std::list<uint32> mQuestIds;
+        std::list<uint32> mInvolvedQuestIds;
 
-        /// Respawn Coordenates
+        /// Respawn Coordinates
         float respawn_cord[3];
 
         /// AI data

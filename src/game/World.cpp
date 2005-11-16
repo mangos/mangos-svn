@@ -170,6 +170,15 @@ void World::SetInitialWorldSettings()
     // Load quests
     Log::getSingleton( ).outString( "Loading Quests..." );
     objmgr.LoadQuests();
+
+    // Load NPCText
+    Log::getSingleton( ).outString( "Loading NPC Texts..." );
+    objmgr.LoadGossipText();
+
+    // Load AreaTriggers
+    Log::getSingleton( ).outString( "Loading Quest Area Triggers..." );
+    objmgr.LoadAreaTriggerPoints();
+
     // Load items
     Log::getSingleton( ).outString( "Loading Items..." );
     objmgr.LoadItemPrototypes();

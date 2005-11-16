@@ -27,13 +27,80 @@
 #define MANGOSSERVER_QUEST_H
 
 #include "Platform/Define.h"
-#include "Player.h"
 #include <string>
+
+class Player;
 
 #define QUEST_OBJECTIVES_COUNT 4
 #define QUEST_REWARD_CHOICES_COUNT 6
 #define QUEST_REWARDS_COUNT 4
 #define QUEST_DEPLINK_COUNT 10
+
+enum {
+	FAILEDREASON_DUPE_ITEM_FOUND = 0x10,
+    FAILEDREASON_FAILED			 = 0,
+    FAILEDREASON_INV_FULL		 = 4,
+};
+
+enum
+{
+    INVALIDREASON_DONT_HAVE_REQ = 0,
+    INVALIDREASON_DONT_HAVE_REQ_ITEMS = 0x13,
+    INVALIDREASON_DONT_HAVE_REQ_MONEY = 0x15,
+    INVALIDREASON_DONT_HAVE_RACE = 6,
+    INVALIDREASON_DONT_HAVE_LEVEL = 1,
+    INVALIDREASON_HAVE_QUEST = 13,
+    INVALIDREASON_HAVE_TIMED_QUEST = 12,
+};
+
+
+enum __QuestClass
+{
+	QUEST_CLASS_NONE            = 0,
+	QUEST_CLASS_WARRIOR         = 1,
+	QUEST_CLASS_PALADIN         = 2,
+	QUEST_CLASS_HUNTER          = 3,
+	QUEST_CLASS_ROGUE           = 4,
+	QUEST_CLASS_PRIEST          = 5,
+	QUEST_CLASS_UNK0            = 6,
+	QUEST_CLASS_SHAMAN          = 7,
+	QUEST_CLASS_MAGE            = 8,
+	QUEST_CLASS_WARLOCK         = 9,
+	QUEST_CLASS_UNK1            = 10,
+	QUEST_CLASS_DRUID           = 11,
+};
+
+enum __QuestRase
+{
+	QUEST_RACE_NONE            = 0,
+	QUEST_RACE_HUMAN           = 1,
+	QUEST_RACE_ORC             = 2,
+	QUEST_RACE_DWARF           = 3,
+	QUEST_RACE_NIGHTELF        = 4,
+	QUEST_RACE_UNDEAD          = 5,
+	QUEST_RACE_TAUREN          = 6,
+	QUEST_RACE_GNOME           = 7,
+	QUEST_RACE_TROLL           = 8,
+};
+
+enum __QuestTradeSkill
+{
+	QUEST_TRSKILL_NONE           = 0,
+	QUEST_TRSKILL_ALCHEMY        = 1,
+	QUEST_TRSKILL_BLACKSMITHING  = 2,
+	QUEST_TRSKILL_COOKING        = 3,
+	QUEST_TRSKILL_ENCHANTING     = 4,
+	QUEST_TRSKILL_ENGINEERING    = 5,
+	QUEST_TRSKILL_FIRSTAID       = 6,
+	QUEST_TRSKILL_HERBALISM      = 7,
+	QUEST_TRSKILL_LEATHERWORKING = 8,
+	QUEST_TRSKILL_POISONS        = 9,
+	QUEST_TRSKILL_TAILORING      = 10,
+	QUEST_TRSKILL_MINING         = 11,
+	QUEST_TRSKILL_FISHING        = 12,
+	QUEST_TRSKILL_SKINNING       = 13,
+	QUEST_TRSKILL_JEWELCRAFTING  = 14,
+};
 
 enum __QuestStatus
 {
@@ -42,27 +109,52 @@ enum __QuestStatus
     QUEST_STATUS_UNAVAILABLE    = 2,   // Quest requirements not satisfied.
     QUEST_STATUS_INCOMPLETE     = 3,   // Quest is incomplete.
     QUEST_STATUS_AVAILABLE      = 4,   // Quest is available to be taken.
-	QUEST_STATUS_REWARDED		= 5,   // A reward was taken by player.
 };
 
 enum __QuestGiverStatus
 {
-    QUESTGIVER_STATUS_NONE				   = 0,   // Questgiver has nothing to tell you.
-    QUESTGIVER_STATUS_UNAVAILABLE		   = 1,   // Has quests, but you require a higher level.
-    QUESTGIVER_STATUS_CHAT				   = 2,   // Can chat with you.
-    QUESTGIVER_STATUS_INCOMPLETE		   = 3,   // You haven't completed the quest.
-    QUESTGIVER_STATUS_REPEATABLE_HASREWARD = 4,   // Has reward to give (repeatable).
-    QUESTGIVER_STATUS_AVAILABLE			   = 5,   // Has quests to give now.
-    QUESTGIVER_STATUS_HASREWARD			   = 6,   // Has reward to give.
+    DIALOG_STATUS_NONE					   = 0,   // Questgiver has nothing to tell you.
+    DIALOG_STATUS_UNAVAILABLE			   = 1,   // Has quests, but you require a higher level.
+    DIALOG_STATUS_CHAT					   = 2,   // Can chat with you.
+    DIALOG_STATUS_INCOMPLETE			   = 3,   // You haven't completed the quest.
+    DIALOG_STATUS_REWARD_REP			   = 4,   // Has reward to give (repeatable).
+    DIALOG_STATUS_AVAILABLE				   = 5,   // Has quests to give now.
+    DIALOG_STATUS_REWARD				   = 6,   // Has reward to give.
 };
+
 
 enum __QuestSpecialFlags
 {
-	QUEST_SPECIAL_FLAGS_NONE          = 0,   // Has no special flags
-	QUEST_SPECIAL_FLAGS_REPEATABLE    = 1,   // It's repeatable
-	QUEST_SPECIAL_FLAGS_EXPLORATION   = 2,   // It's an exploration quest.
+	QUEST_SPECIAL_FLAGS_NONE          = 0,   // Has no special flags.
+	QUEST_SPECIAL_FLAGS_DELIVER       = 1,   // Has Delivery objectives.
+	QUEST_SPECIAL_FLAGS_KILL          = 2,   // Has Kill Objectives.
+	QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,   // Has SpeakTo Objectives.
+
+	QUEST_SPECIAL_FLAGS_REPEATABLE    = 8,   // It's repeatable
+	QUEST_SPECIAL_FLAGS_EXPLORATION   = 16,  // It's an exploration quest.
+
+	QUEST_SPECIAL_FLAGS_TIMED         = 32,  // Timer quest.
+	QUEST_SPECIAL_FLAGS_REPUTATION    = 128, // Repuation Objectives.
 };
 
+struct quest_status{
+
+    quest_status(){
+        memset(m_questItemCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+        memset(m_questMobCount , 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+		m_timerrel = 0;
+    }
+
+    uint32 quest_id;
+    uint32 status;
+	bool rewarded;
+    uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ]; // number of items collected. Ignored
+    uint32 m_questMobCount [ QUEST_OBJECTIVES_COUNT ];  // number of monsters slain
+
+	uint32	m_timer;
+	uint32	m_timerrel;
+	bool	m_explored;
+};
 
 class Quest
 {
@@ -78,8 +170,8 @@ public:
 	uint32 m_qFlags;
 	uint32 m_qType;
 
-	uint32 m_qPointId;
-	 float m_qPointX, m_qPointY, m_qPointZ;
+	uint32 m_qPointId, m_qPointOpt;
+	 float m_qPointX, m_qPointY;
 
     std::string m_qTitle;
     std::string m_qDetails;
@@ -141,11 +233,11 @@ public:
 	 * Rewards.
 	 */
 
-    uint16 m_qRewChoicesCount;
+    uint32 m_qRewChoicesCount;
     uint32 m_qRewChoicesItemId[ QUEST_REWARD_CHOICES_COUNT ];
     uint32 m_qRewChoicesItemCount[ QUEST_REWARD_CHOICES_COUNT ];
 
-    uint16 m_qRewCount;
+    uint32 m_qRewCount;
     uint32 m_qRewItemId[ QUEST_REWARDS_COUNT ];
     uint32 m_qRewItemCount[ QUEST_REWARDS_COUNT ];
 
@@ -176,12 +268,25 @@ public:
 	uint32 GetKillObjectivesCount();
 
 	//-----------------------------------------------
-	// Returns the number of Kill Objectives
+	// Returns the number of Deliver Objectives
 	uint32 GetDeliverObjectivesCount();
 
 	//------------------------------------------------
-	// Send the Quest's details to _Player from senderGUID
-	void Quest::SendDetails(Player* _Player, uint64 SenderGUID, bool ActivateAccept);
+	// Helper Functions
+	bool CanBeTaken( Player *_Player );
+	bool IsCompatible( Player *_Player );
+	bool ReputationSatisfied( Player *_Player );
+	bool TradeSkillSatisfied( Player *_Player );
+	bool RaceSatisfied( Player *_Player );
+	bool ClassSatisfied( Player *_Player );
+	bool LevelSatisfied( Player *_Player );
+	bool CanShowAvailable( Player *_Player );
+	bool CanShowUnsatified( Player *_Player );
+	bool PreReqSatisfied( Player *_Player );
+	bool RewardIsTaken( Player *_Player );
+	bool HasFlag( uint32 Flag )  { return (( m_qSpecialFlags & Flag ) == Flag); }
+
+
 };
 
 

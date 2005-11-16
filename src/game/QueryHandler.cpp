@@ -28,6 +28,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "UpdateMask.h"
+#include "NPCHandler.h"
 
 #ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
@@ -458,3 +459,98 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
         SendPacket(&data);
     }
 }
+
+//////////////////////////////////////////////////////////////
+/// This function handles CMSG_NPC_TEXT_QUERY:
+//////////////////////////////////////////////////////////////
+void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
+{
+    WorldPacket data;
+    uint32 textID;
+    uint32 uField0, uField1;
+    GossipText *pGossip;
+	std::string GossipStr;
+
+    recv_data >> textID;
+    Log::getSingleton( ).outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID );
+
+    recv_data >> uField0 >> uField1;
+    GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET, uField0);
+    GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET + 1, uField1);
+
+	pGossip = objmgr.GetGossipText(textID);
+	
+    data.Initialize( SMSG_NPC_TEXT_UPDATE );
+    data << textID;
+
+	if (!pGossip)
+	{
+		data << uint32( 0 );
+		data << "Greetings $N";
+		data << "Greetings $N";
+	} else
+
+	for (int i=0; i<8; i++)
+	{
+		data << pGossip->Options[i].Probability;
+		data << pGossip->Options[i].Text_0;
+
+		if ( pGossip->Options[i].Text_1 == "" )
+			data << pGossip->Options[i].Text_0; else
+			data << pGossip->Options[i].Text_1;
+
+		data << pGossip->Options[i].Language;
+
+		data << pGossip->Options[i].Emotes[0]._Delay;
+		data << pGossip->Options[i].Emotes[0]._Emote;
+
+		data << pGossip->Options[i].Emotes[1]._Delay;
+		data << pGossip->Options[i].Emotes[1]._Emote;
+
+		data << pGossip->Options[i].Emotes[2]._Delay;
+		data << pGossip->Options[i].Emotes[2]._Emote;
+	}
+
+    SendPacket( &data );
+
+    Log::getSingleton( ).outString( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+}
+
+//////////////////////////////////////////////////////////////
+/// This function handles CMSG_PAGE_TEXT_QUERY:
+//////////////////////////////////////////////////////////////
+void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
+{
+    WorldPacket data;
+    uint32 pageID;
+
+    recv_data >> pageID;
+    Log::getSingleton( ).outDetail("WORLD: Received CMSG_PAGE_TEXT_QUERY for pageID '%u'", pageID);
+	
+	while (pageID)
+	{
+		ItemPage *pPage = objmgr.RetreiveItemPageText( pageID );
+		data.Initialize( SMSG_PAGE_TEXT_QUERY_RESPONSE );
+		data << pageID;
+
+		if (!pPage)
+		{
+			data << "The selected item page is missing!$b$bPlease report to Ludmilla Server Developers.";
+			data << uint32(0);
+
+			pageID = 0;
+		} else
+		{
+			data << pPage->PageText;
+			data << uint32(pPage->Next_Page);
+
+			pageID = pPage->Next_Page;
+		}
+
+		SendPacket( &data );
+
+		Log::getSingleton( ).outString( "WORLD: Sent SMSG_PAGE_TEXT_QUERY_RESPONSE " );
+	}
+}
+
+

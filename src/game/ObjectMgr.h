@@ -351,22 +351,20 @@ class ObjectMgr : public Singleton < ObjectMgr >
         uint16 GetTaxiMount( uint32 id );
         void GetTaxiPathNodes( uint32 path, Path *pathnodes );
 
+        void AddAreaTriggerPoint(AreaTriggerPoint *pArea);
+        AreaTriggerPoint *GetAreaTriggerQuestPoint(uint32 Trigger_ID);
+
+        ItemPage *RetreiveItemPageText(uint32 Page_ID);
+
+        void AddGossipText(GossipText *pGText);
+        GossipText *GetGossipText(uint32 Text_ID);
+
 #ifndef ENABLE_GRID_SYSTEM
         // Corpse Stuff
         Corpse *GetCorpseByOwner(Player *pOwner);
         void SaveCorpses();
 #endif
         // Gossip Stuff
-       // void AddGossipText(GossipText *pGText);
-        //void AddGossip(GossipNpc *pGossip);
-        GossipText *GetGossipText(uint32 ID);
-        //GossipNpc *GetGossipByGuid(uint32 guid, uint32 mapid);
-        GossipNpc *GetGossipByGuid(uint32 guid);
-        GossipNpc *DefaultGossip(uint32 guid);
-        GossipNpc *DefaultVendorGossip();
-
-     //   GossipNpcMap::iterator GetGossipListBegin(uint32 mapid) { return mGossipNpc[mapid].begin(); }
-      //  GossipNpcMap::iterator GetGossipListEnd(uint32 mapid) { return mGossipNpc[mapid].end(); }
 
         // Death stuff
        // void AddGraveyard(GraveyardTeleport *pgrave);
@@ -411,9 +409,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
        // void LoadTaxiPath();
        // void LoadTaxiPathNodes();
 
-       // void LoadGossipText();
-        //void LoadGossips();
         //void LoadGraveyards();
+
+        void LoadGossipText();
+        void LoadAreaTriggerPoints();
+
         void LoadTeleportCoords();
         void LoadAuctions();
         void LoadAuctionItems();
@@ -442,7 +442,8 @@ class ObjectMgr : public Singleton < ObjectMgr >
         // These tables are modified as creatures are created and destroyed in the world
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
-
+        typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
+        typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
 
 #ifndef ENABLE_GRID_SYSTEM
         // Map of active characters in the game
@@ -493,15 +494,15 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // Quest data
         QuestMap            mQuests;
+        AreaTriggerMap	    mAreaTriggerMap;
+
+        // Maps for Gossip and Pages stuff
+        GossipTextMap       mGossipText;
 
         // Maps containing the infos for taxi paths
         //TaxiNodesMap        mTaxiNodes;
        // TaxiPathMap         mTaxiPath;
        // TaxiPathNodesVec    vTaxiPathNodes;
-
-        // Maps for Gossip stuff
-       // GossipTextMap       mGossipText;
-        //GossipNpcMap        mGossipNpc[MAX_CONTINENTS];
 
         // Death Stuff
        // GraveyardMap        mGraveyards;

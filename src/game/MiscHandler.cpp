@@ -32,6 +32,7 @@
 #include "UpdateData.h"
 #include "LootMgr.h"
 #include "Chat.h"
+#include "ScriptCalls.h"
 #include <zlib/zlib.h>
 
 #ifdef ENABLE_GRID_SYSTEM
@@ -1150,6 +1151,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     recv_data >> id;
     AreaTrigger * at = objmgr.GetAreaTrigger(id);
 
+	AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( id );
+	Quest *pQuest;
+
+	if (pArea) pQuest = objmgr.GetQuest( pArea->Quest_ID ); else
+		pQuest = NULL;
+
+	scriptCallAreaTrigger( GetPlayer(), pQuest, id );
+
     if(at)
     {
         if(at->mapId = GetPlayer()->GetMapId())
@@ -1319,4 +1328,40 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         SendPacket(&data);
     }
     }
+}
+
+//-----------------------------------------------------------------------------------------
+void WorldSession::HandleReadItem( WorldPacket & recv_data )
+{
+	uint8 slot, uslot;
+
+	WorldPacket data;
+
+    recv_data >> uslot >> slot;
+
+	Log::getSingleton( ).outDebug( "WORLD: CMSG_READ_ITEM");
+	Item *pItem = GetPlayer()->GetItemBySlot( slot );
+	
+/*	********* REQUIRES NORMAL ITEM FIELDS ***********
+	if (pItem)
+		if (pItem->GetProto()->PageTextID)
+		{
+			if ( GetPlayer()->isInCombat() ||
+				 GetPlayer()->isDead() )
+			{
+				data.Initialize( SMSG_READ_ITEM_FAILED );
+				data << pItem->GetGUID();
+
+				SendPacket( &data );
+				Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_READ_ITEM_FAILED" );
+			} else
+			{
+				data.Initialize( SMSG_READ_ITEM_OK );
+				data << pItem->GetGUID();
+
+				SendPacket( &data );
+				Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_READ_ITEM_OK" );
+			}
+		}
+*/
 }

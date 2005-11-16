@@ -256,6 +256,7 @@ class WorldSession
         void HandleListInventoryOpcode(WorldPacket& recvPacket);
 		void SendListInventory( uint64 guid );
         void HandleAutoStoreBagItemOpcode(WorldPacket& recvPacket);
+        void HandleReadItem(WorldPacket& recvPacket);
 
         /// Combat opcodes (CombatHandler.cpp)
         void HandleAttackSwingOpcode(WorldPacket& recvPacket);
@@ -276,9 +277,16 @@ class WorldSession
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverHelloOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvPacket);
+        void HandleQuestgiverQuestQueryOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverChooseRewardOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverRequestRewardOpcode(WorldPacket& recvPacket);
         void HandleQuestQueryOpcode(WorldPacket& recvPacket);
+		void HandleQuestgiverCancel(WorldPacket& recv_data );
+		void HandleQuestLogSwapQuest(WorldPacket& recv_data );
+		void HandleQuestLogRemoveQuest(WorldPacket& recv_data);
+		void HandleQuestConfirmAccept(WorldPacket& recv_data);
+		void HandleQuestComplete(WorldPacket& recv_data);
+		void HandleQuestAutoLaunch(WorldPacket& recvPacket);
 
         /// Chat opcodes (Chat.cpp)
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
@@ -312,11 +320,14 @@ class WorldSession
         void HandleCompleteCinema(WorldPacket& recvPacket);
         void HandleNextCinematicCamera(WorldPacket& recvPacket);
 
-        /// Helper functions
-        void SetNpcFlagsForTalkToQuest(const uint64& guid, const uint64& targetGuid);
-
 		// Page Text Query...
 		void HandlePageQuerySkippedOpcode(WorldPacket& recvPacket);
+		void HandlePageQueryOpcode(WorldPacket& recvPacket);
+
+		// Tutorials ...
+		void HandleTutorialFlag ( WorldPacket & recv_data );
+		void HandleTutorialClear( WorldPacket & recv_data );
+		void HandleTutorialReset( WorldPacket & recv_data );
 
         //! Returns handlers table
         OpcodeHandler* _GetOpcodeHandlerTable() const;

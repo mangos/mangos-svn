@@ -699,6 +699,12 @@
 				RelativePath="..\..\src\game\QuestHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\ScriptCalls.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ScriptCalls.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\SkillHandler.cpp">
 			</File>
 			<File

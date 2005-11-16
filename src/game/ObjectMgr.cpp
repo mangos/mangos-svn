@@ -95,28 +95,23 @@ ObjectMgr::~ObjectMgr()
     }
     mTrainerspells.clear( );
 
-   /* for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
+    for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
     {
         delete i->second;
     }
-    mGossipText.clear( );*/
+    mGossipText.clear( );
+
+    for( AreaTriggerMap::iterator i = mAreaTriggerMap.begin( ); i != mAreaTriggerMap.end( ); ++ i )
+    {
+        delete i->second;
+    }
+    mAreaTriggerMap.clear( );
 
     for( GameObjectInfoMap::iterator iter = mGameObjectInfo.begin(); iter != mGameObjectInfo.end(); ++iter)
     {
         delete iter->second;
     }
     mGameObjectInfo.clear();
-
-  /*  GossipNpcMap::iterator iter, end;
-    for(int a=0; a < MAX_CONTINENTS; a++)
-    {
-        for( iter = GetGossipListBegin(a), end = GetGossipListEnd(a); iter != end; iter++ )
-        {
-            delete [] iter->second->pOptions;
-            delete iter->second;
-        }
-        mGossipNpc[a].clear( );
-    }*/
 
    /* for( GraveyardMap::iterator i = mGraveyards.begin( ); i != mGraveyards.end( ); ++ i )
     {
@@ -1659,87 +1654,108 @@ void ObjectMgr::LoadGuilds()
 
 void ObjectMgr::LoadQuests()
 {
-/*    QueryResult *result = sDatabase.Query( "SELECT * FROM quests" );
+	QueryResult *result = sDatabase.Query( "SELECT * FROM quests" );
 
-    if( !result )
-        return;
+    if( !result ) return;
 
     Quest *pQuest;
-/// get number of rows for quests
-    barGoLink bar( result->GetRowCount() );
+	uint32 count = 0;
+	int iCalc;
+	int CiC;
 
-    do
-    {
+    do {
         Field *fields = result->Fetch();
-/// print bar step
-        bar.step();
 
         pQuest = new Quest;
+		iCalc = 0;
 
-        pQuest->m_questId = fields[0].GetUInt32();
-        pQuest->m_zone = fields[1].GetUInt32();
-        pQuest->m_title = fields[2].GetString();
-        pQuest->m_details = fields[3].GetString();
-        pQuest->m_objectives = fields[4].GetString();
-        pQuest->m_completedText = fields[5].GetString();
-        pQuest->m_incompleteText = fields[6].GetString();
-        GUID_LOPART(pQuest->m_targetGuid) = fields[7].GetUInt32();
-        // HACK!
-        GUID_HIPART(pQuest->m_targetGuid) = 0xF0001000;
-        pQuest->m_questItemId[0] = fields[8].GetUInt32();
-        pQuest->m_questItemId[1] = fields[9].GetUInt32();
-        pQuest->m_questItemId[2] = fields[10].GetUInt32();
-        pQuest->m_questItemId[3] = fields[11].GetUInt32();
-        pQuest->m_questItemCount[0] = fields[12].GetUInt32();
-        pQuest->m_questItemCount[1] = fields[13].GetUInt32();
-        pQuest->m_questItemCount[2] = fields[14].GetUInt32();
-        pQuest->m_questItemCount[3] = fields[15].GetUInt32();
-        pQuest->m_questMobId[0] = fields[16].GetUInt32();
-        pQuest->m_questMobId[1] = fields[17].GetUInt32();
-        pQuest->m_questMobId[2] = fields[18].GetUInt32();
-        pQuest->m_questMobId[3] = fields[19].GetUInt32();
-        pQuest->m_questMobCount[0] = fields[20].GetUInt32();
-        pQuest->m_questMobCount[1] = fields[21].GetUInt32();
-        pQuest->m_questMobCount[2] = fields[22].GetUInt32();
-        pQuest->m_questMobCount[3] = fields[23].GetUInt32();
-        pQuest->m_choiceRewards = fields[24].GetUInt16();
-        pQuest->m_choiceItemId[0] = fields[25].GetUInt32();
-        pQuest->m_choiceItemId[1] = fields[26].GetUInt32();
-        pQuest->m_choiceItemId[2] = fields[27].GetUInt32();
-        pQuest->m_choiceItemId[3] = fields[28].GetUInt32();
-        pQuest->m_choiceItemId[4] = fields[29].GetUInt32();
-        pQuest->m_choiceItemCount[0] = fields[30].GetUInt32();
-        pQuest->m_choiceItemCount[1] = fields[31].GetUInt32();
-        pQuest->m_choiceItemCount[2] = fields[32].GetUInt32();
-        pQuest->m_choiceItemCount[3] = fields[33].GetUInt32();
-        pQuest->m_choiceItemCount[4] = fields[34].GetUInt32();
-        pQuest->m_itemRewards = fields[35].GetUInt16();
-        pQuest->m_rewardItemId[0] = fields[36].GetUInt32();
-        pQuest->m_rewardItemId[1] = fields[37].GetUInt32();
-        pQuest->m_rewardItemId[2] = fields[38].GetUInt32();
-        pQuest->m_rewardItemId[3] = fields[39].GetUInt32();
-        pQuest->m_rewardItemId[4] = fields[40].GetUInt32();
-        pQuest->m_rewardItemCount[0] = fields[41].GetUInt32();
-        pQuest->m_rewardItemCount[1] = fields[42].GetUInt32();
-        pQuest->m_rewardItemCount[2] = fields[43].GetUInt32();
-        pQuest->m_rewardItemCount[3] = fields[44].GetUInt32();
-        pQuest->m_rewardItemCount[4] = fields[45].GetUInt32();
-        pQuest->m_rewardGold = fields[46].GetUInt32();
-        pQuest->m_questXp = fields[47].GetUInt32();
-        pQuest->m_originalGuid = fields[48].GetUInt32();
-        GUID_LOPART(pQuest->m_originalGuid) = fields[48].GetUInt32();
-        // HACK!
-        GUID_HIPART(pQuest->m_originalGuid) = 0xF0001000;
-        pQuest->m_requiredLevel = fields[49].GetUInt32();
-        pQuest->m_previousQuest = fields[50].GetUInt32();
+		pQuest->m_qId        = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qCategory  = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qFlags     = fields[ iCalc++ ].GetUInt32();
 
+		pQuest->m_qTitle         = fields[ iCalc++ ].GetString();
+        pQuest->m_qDetails       = fields[ iCalc++ ].GetString();
+        pQuest->m_qObjectives    = fields[ iCalc++ ].GetString();
+
+		pQuest->m_qCompletionInfo  = fields[ iCalc++ ].GetString();
+		pQuest->m_qIncompleteInfo  = fields[ iCalc++ ].GetString();
+		pQuest->m_qEndInfo         = fields[ iCalc++ ].GetString();
+
+		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+			pQuest->m_qObjectiveInfo[CiC]    = fields[ iCalc++ ].GetString();
+
+		pQuest->m_qPlayerLevel      = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qComplexityLevel  = fields[ iCalc++ ].GetUInt32();
+
+		pQuest->m_qRequiredQuestsCount = fields[ iCalc++ ].GetUInt32();
+		for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
+		{ pQuest->m_qRequiredQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+        pQuest->m_qRequiredAbsQuestsCount = fields[ iCalc++ ].GetUInt32();
+		for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
+		{ pQuest->m_qRequiredAbsQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+		pQuest->m_qLockerQuestsCount = fields[ iCalc++ ].GetUInt32();
+		for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
+		{ pQuest->m_qLockerQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+			pQuest->m_qObjItemId[CiC]    = fields[ iCalc++ ].GetUInt32();
+
+		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+			pQuest->m_qObjItemCount[CiC]    = fields[ iCalc++ ].GetUInt32();
+
+		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+			pQuest->m_qObjMobId[CiC]    = fields[ iCalc++ ].GetUInt32();
+
+		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+			pQuest->m_qObjMobCount[CiC]    = fields[ iCalc++ ].GetUInt32();
+
+
+		pQuest->m_qRewChoicesCount = fields[ iCalc++ ].GetUInt32();
+		for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
+		{ pQuest->m_qRewChoicesItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+		for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
+		{ pQuest->m_qRewChoicesItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+		pQuest->m_qRewCount = fields[ iCalc++ ].GetUInt32();
+		for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
+		{ pQuest->m_qRewItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+		for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
+		{ pQuest->m_qRewItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
+
+
+		pQuest->m_qRewMoney         = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qObjRepFaction_1  = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qObjRepFaction_2  = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qObjRepValue_1    = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qObjRepValue_2    = fields[ iCalc++ ].GetUInt32();
+
+		pQuest->m_qQuestItem     = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qNextQuest     = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qRewSpell      = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qObjTime       = fields[ iCalc++ ].GetUInt32();
+
+		pQuest->m_qType          = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qRequiredRaces = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qRequiredClass = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qRequiredTradeskill   = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qSpecialFlags  = fields[ iCalc++ ].GetUInt32();
+
+		pQuest->m_qPointId		 = fields[ iCalc++ ].GetUInt32();
+		pQuest->m_qPointX    	 = fields[ iCalc++ ].GetFloat();
+		pQuest->m_qPointY		 = fields[ iCalc++ ].GetFloat();
+		pQuest->m_qPointOpt		 = fields[ iCalc++ ].GetUInt32();
+
+		count++;
         AddQuest(pQuest);
-
     }
     while( result->NextRow() );
 
     delete result;
-	*/
+	Log::getSingleton( ).outString( "    %d quest definitions", count );
 }
 
 #ifndef ENABLE_GRID_SYSTEM
@@ -1833,6 +1849,153 @@ void ObjectMgr::LoadGameObjects()
 }
 // end of ENABLE_GRID_SYSTEM
 #endif
+
+//-----------------------------------------------------------------------------
+void ObjectMgr::AddGossipText(GossipText *pGText)
+{
+	ASSERT( pGText->Text_ID );
+    ASSERT( mGossipText.find(pGText->Text_ID) == mGossipText.end() );
+    mGossipText[pGText->Text_ID] = pGText;
+}
+
+//-----------------------------------------------------------------------------
+GossipText *ObjectMgr::GetGossipText(uint32 Text_ID)
+{
+    GossipTextMap::const_iterator itr;
+    for (itr = mGossipText.begin(); itr != mGossipText.end(); itr++)
+    {
+        if(itr->second->Text_ID == Text_ID)
+            return itr->second;
+    }
+    return NULL;
+}
+
+//-----------------------------------------------------------------------------
+void ObjectMgr::LoadGossipText()
+{
+	GossipText *pGText;
+	QueryResult *result = sDatabase.Query( "SELECT * FROM npc_text" );
+
+	int count = 0;
+	if( !result ) return;
+	int cic;
+
+	do {
+		count++;
+		cic = 0;
+
+		Field *fields = result->Fetch();
+
+		pGText = new GossipText;
+		pGText->Text_ID    = fields[cic++].GetUInt32();
+
+		for (int i=0; i< 8; i++)
+		{
+			pGText->Options[i].Text_0           = fields[cic++].GetString();
+			pGText->Options[i].Text_1           = fields[cic++].GetString();
+
+			pGText->Options[i].Language         = fields[cic++].GetUInt32();
+			pGText->Options[i].Probability      = fields[cic++].GetFloat();
+
+			pGText->Options[i].Emotes[0]._Delay  = fields[cic++].GetUInt32();
+			pGText->Options[i].Emotes[0]._Emote  = fields[cic++].GetUInt32();
+
+			pGText->Options[i].Emotes[1]._Delay  = fields[cic++].GetUInt32();
+			pGText->Options[i].Emotes[1]._Emote  = fields[cic++].GetUInt32();
+
+			pGText->Options[i].Emotes[2]._Delay  = fields[cic++].GetUInt32();
+			pGText->Options[i].Emotes[2]._Emote  = fields[cic++].GetUInt32();
+		}
+        
+		if ( !pGText->Text_ID ) continue;
+		AddGossipText( pGText );
+
+	} while( result->NextRow() );
+
+	Log::getSingleton( ).outString( "    %d npc texts", count );
+	delete result;
+}
+
+//-----------------------------------------------------------------------------
+ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
+{
+	ItemPage *pIText;
+	std::stringstream Query;
+
+	Query << "SELECT * FROM item_pages WHERE pageid = " << Page_ID;
+	QueryResult *result = sDatabase.Query( Query.str().c_str() );
+
+	if( !result ) return NULL;
+	int cic, count = 0;
+	pIText = new ItemPage;
+
+	do {
+		count++;
+		cic = 0;
+
+		Field *fields = result->Fetch();
+
+
+		pIText->Page_ID    = fields[cic++].GetUInt32();
+
+		pIText->PageText   = fields[cic++].GetString();
+		pIText->Next_Page  = fields[cic++].GetUInt32();
+
+		if ( !pIText->Page_ID ) break;
+	} while( result->NextRow() );
+
+	delete result;
+	return pIText;
+}
+
+//-----------------------------------------------------------------------------
+void ObjectMgr::AddAreaTriggerPoint(AreaTriggerPoint *pArea)
+{
+	ASSERT( pArea->Trigger_ID );
+	ASSERT( mAreaTriggerMap.find(pArea->Trigger_ID) == mAreaTriggerMap.end() );
+
+	mAreaTriggerMap[pArea->Trigger_ID] = pArea;
+}
+
+//-----------------------------------------------------------------------------
+AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
+{
+    AreaTriggerMap::const_iterator itr;
+    for (itr = mAreaTriggerMap.begin(); itr != mAreaTriggerMap.end(); itr++)
+    {
+        if(itr->second->Trigger_ID == Trigger_ID)
+            return itr->second;
+    }
+    return NULL;
+}
+
+//-----------------------------------------------------------------------------
+void ObjectMgr::LoadAreaTriggerPoints()
+{
+	int count = 0;
+	QueryResult *result = sDatabase.Query( "SELECT * FROM triggerquestrelation" );
+	AreaTriggerPoint *pArea;
+
+	if( !result ) return;
+
+	do {
+		count++;
+
+		pArea = new AreaTriggerPoint;
+
+		Field *fields = result->Fetch();
+
+		pArea->Trigger_ID      = fields[1].GetUInt32();
+		pArea->Quest_ID        = fields[2].GetUInt32();
+
+		AddAreaTriggerPoint( pArea );
+
+	} while( result->NextRow() );
+
+	Log::getSingleton( ).outString( "    %d quest trigger points", count );
+	delete result;
+}
+
 
 /*
 void ObjectMgr::LoadTaxiNodes()
@@ -2201,252 +2364,6 @@ void ObjectMgr::LoadCorpses()
     delete result;
 }
 #endif
-
-/*
-void ObjectMgr::AddGossipText(GossipText *pGText)
-{
-    ASSERT( pGText->ID );
-    ASSERT( mGossipText.find(pGText->ID) == mGossipText.end() );
-    mGossipText[pGText->ID] = pGText;
-}*/
-
-
-GossipText *ObjectMgr::GetGossipText(uint32 ID)
-{
-    /*GossipTextMap::const_iterator itr;
-    for (itr = mGossipText.begin(); itr != mGossipText.end(); itr++)
-    {
-        if(itr->second->ID == ID)
-            return itr->second;
-    }
-    return NULL;*/
-
-    std::stringstream query;
-    query << "SELECT * FROM npc_text WHERE ID = " << ID;
-    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
-
-    if( result.get() == NULL )
-        return NULL;
-
-    Field *fields = result->Fetch();
-    GossipText *pGText = new GossipText;
-    pGText->ID = fields[0].GetUInt32();
-    pGText->Text = fields[1].GetString();
-    
-    return pGText;
-}
-
-/*
-void ObjectMgr::LoadGossipText()
-{
-    GossipText *pGText;
-
-    std::auto_ptr<QueryResult> result(sDatabase.Query( "SELECT * FROM npc_text" ));
-    if( result.get() == NULL )
-        return;
-    
-    do
-    {
-        Field *fields = result->Fetch();
-        pGText = new GossipText;
-        pGText->ID = fields[0].GetUInt32();
-        pGText->Text = fields[1].GetString();
-        AddGossipText(pGText);
-    
-    }while( result->NextRow() );
-}*/
-
-/*
-void ObjectMgr::AddGossip(GossipNpc *pGossip)
-{
-    Creature *cr =  _getCreature(pGossip->Guid);
-    if( cr != NULL )
-    {
-        const uint32 mapid = cr->GetMapId();;
-        ASSERT( pGossip->Guid );
-        ASSERT( mGossipNpc[mapid].find(pGossip->Guid) == mGossipNpc[mapid].end() );
-        mGossipNpc[mapid][pGossip->Guid] = pGossip;
-    }
-}*/
-
-/*GossipNpc *ObjectMgr::DefaultGossip()
-{
-    //GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
-    //return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
-
-    GossipNpc *pGossip = new GossipNpc;
-    pGossip->Guid = 999999;
-    pGossip->TextID = 999999;
-    pGossip->OptionCount = 0;
-
-    std::stringstream query1;
-    query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << 999999;
-    std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
-
-    if( result2.get() != NULL )
-    {
-        unsigned int count = 0;
-        pGossip->OptionCount = result2->GetRowCount();
-        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-        do
-        {
-            Field *fields1 = result2->Fetch();
-            //pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-            pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-            pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
-            pGossip->pOptions[count].OptionText = fields1[3].GetString();
-            pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-            pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-            ++count;
-        }
-        while ( result2->NextRow() );
-    }
-    return pGossip;
-}*/
-
-GossipNpc *ObjectMgr::DefaultGossip(uint32 guid)
-{
-    GossipNpc *pGossip = new GossipNpc;
-    pGossip->Guid = guid;
-    pGossip->TextID = 999999;
-    pGossip->OptionCount = 0;
-
-    /*pGossip->OptionCount = 2;
-    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-    pGossip->pOptions[0].Guid = 999999;
-    pGossip->pOptions[0].Icon = 1;
-    pGossip->pOptions[0].OptionText = "Goodbye.";
-    pGossip->pOptions[0].NextTextID = 999999;
-    pGossip->pOptions[0].Special = 0;
-
-    pGossip->pOptions[1].Guid = 999999;
-    pGossip->pOptions[1].Icon = 1;
-    pGossip->pOptions[1].OptionText = "Goodbye.";
-    pGossip->pOptions[1].NextTextID = 999999;
-    pGossip->pOptions[1].Special = 0;*/
-
-    return pGossip;
-}
-
-GossipNpc *ObjectMgr::DefaultVendorGossip()
-{
-    GossipNpc *pGossip = new GossipNpc;
-    pGossip->Guid = 999999;
-    pGossip->TextID = 999999;
-    pGossip->OptionCount = 0;
-
-/*    pGossip->OptionCount = 1;
-    pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-    pGossip->pOptions[0].Guid = 999999;
-    pGossip->pOptions[0].Icon = 1;
-    pGossip->pOptions[0].OptionText = "Goodbye.";
-    pGossip->pOptions[0].NextTextID = 999999;
-    pGossip->pOptions[0].Special = 3;
-
-    pGossip->pOptions[1].Guid = 999999;
-    pGossip->pOptions[1].Icon = 1;
-    pGossip->pOptions[1].OptionText = "Goodbye.";
-    pGossip->pOptions[1].NextTextID = 999999;
-    pGossip->pOptions[1].Special = 3;*/
-
-    return pGossip;
-}
-
-GossipNpc *ObjectMgr::GetGossipByGuid(uint32 guid/*, uint32 mapid*/)
-{
-    //GossipNpcMap::iterator iter = mGossipNpc[mapid].find(guid);
-    //return ( iter == mGossipNpc[mapid].end() ? NULL : iter->second);
-
-    std::stringstream query;
-    query << "SELECT * FROM npc_gossip WHERE NPC_GUID = " << guid;
-    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
-
-    if( result.get() == NULL )
-        return NULL;
-
-    Field *fields = result->Fetch();
-    GossipNpc *pGossip = new GossipNpc;
-    pGossip->Guid = guid;
-    pGossip->TextID = fields[1].GetUInt32();
-    pGossip->OptionCount = 0;
-
-    std::stringstream query1;
-    query1 << "SELECT * FROM npc_options WHERE NPC_GUID =" << guid;
-    std::auto_ptr<QueryResult> result2(sDatabase.Query( query1.str().c_str() ));
-
-    if( result2.get() != NULL )
-    {
-        unsigned int count = 0;
-        pGossip->OptionCount = result2->GetRowCount();
-        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-        do
-        {
-            Field *fields1 = result2->Fetch();
-            //pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-            pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-            pGossip->pOptions[count].Icon = fields1[2].GetUInt16();
-            pGossip->pOptions[count].OptionText = fields1[3].GetString();
-            pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-            pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-            ++count;
-        }
-        while ( result2->NextRow() );
-    }
-    return pGossip;
-}
-
-/*
-void ObjectMgr::LoadGossips()
-{
-    std::auto_ptr<QueryResult> result(sDatabase.Query( "SELECT * FROM npc_gossip" ));
-    if( result.get() == NULL )
-        return;
-
-    do
-    {
-        Field *fields = result->Fetch();
-        GossipNpc *pGossip = new GossipNpc;
-       // pGossip->ID = fields[0].GetUInt32();
-        pGossip->Guid = fields[0].GetUInt32();
-        pGossip->TextID = fields[1].GetUInt32();
-//        pGossip->OptionCount = fields[4].GetUInt32();
-        pGossip->OptionCount = 0;
-
-    //    if( pGossip->OptionCount > 0 )
-    //        pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-
-        std::stringstream query;
-        query << "SELECT * FROM npc_options WHERE NPC_GUID =" << pGossip->Guid;
-        std::auto_ptr<QueryResult> result2(sDatabase.Query( query.str().c_str() ));
-        if( result2.get() != NULL )
-        {
-            unsigned int count = 0;
-            pGossip->OptionCount = result2->GetRowCount();
-            pGossip->pOptions = new GossipOptions[pGossip->OptionCount];
-
-        //    bool still_good = true;
-            do
-            {
-            //while( count < pGossip->OptionCount && still_good)
-            //{
-                Field *fields1 = result2->Fetch();
-                pGossip->pOptions[count].ID = fields1[0].GetUInt32();
-                pGossip->pOptions[count].Guid = fields1[1].GetUInt32();
-                pGossip->pOptions[count].Icon = fields1[2].GetUInt32();
-                pGossip->pOptions[count].OptionText = fields1[3].GetString();
-                pGossip->pOptions[count].NextTextID = fields1[4].GetUInt32();
-                pGossip->pOptions[count].Special = fields1[5].GetUInt32();
-                ++count;
-                //still_good = result2->NextRow();
-            //}
-            }
-            while ( result2->NextRow() );
-            // incase the count does not match the number of options there
-            //pGossip->OptionCount = count;
-        }
-        AddGossip(pGossip);
-    } while( result->NextRow() );
-}*/
 
 /*
 void ObjectMgr::AddGraveyard(GraveyardTeleport *pgrave)
