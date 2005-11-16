@@ -560,7 +560,62 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     
     return true;
 }
+/*
+add by vendy
+type: .modify spell 2829 0 65535 
+will change all Mind Blast Spell CategoryRecoveryTime to 0,
+*/
+bool ChatHandler::HandleModifySpellCommand(const char* args)
+{
 
+    WorldPacket data;
+
+    char* pspellflatid = strtok((char*)args, " ");
+    if (!pspellflatid)
+        return false;
+
+    char* pval = strtok(NULL, " ");
+    if (!pval)
+        return false;
+
+    char* pmark = strtok(NULL, " ");
+    if (!pmark)
+        return false;
+
+    uint16 mark = atoi(pmark);
+	uint16 spellflatid = atoi(pspellflatid);
+    uint16 val = atoi(pval);
+	
+
+    Player *chr = getSelectedChar(m_session);
+    if (chr == NULL)                              // Ignatich: what should NOT happen but just in case...
+    {
+        FillSystemMessageData(&data, m_session, "No character selected.");
+        m_session->SendPacket( &data );
+        return true;
+    }
+
+    char buf[256];
+
+    // send message to user
+    sprintf((char*)buf,"You change the spellflatid=%i,val= %i ,mark =%i to %s.", spellflatid, val, mark, chr->GetName());
+    FillSystemMessageData(&data, m_session, buf);
+    m_session->SendPacket( &data );
+
+    // send message to player
+    sprintf((char*)buf,"%s changed your spellflatid=%i,val= %i ,mark =%i.", m_session->GetPlayer()->GetName(), spellflatid, val, mark);
+    FillSystemMessageData(&data, m_session, buf);
+
+    chr->GetSession()->SendPacket(&data);
+
+    data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
+    data << uint16(spellflatid);
+    data << uint16(val); 
+    data <<uint16(mark);
+    chr->GetSession()->SendPacket(&data);		
+    
+    return true;
+}
 
 bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 {

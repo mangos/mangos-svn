@@ -70,6 +70,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "bwalk",       1, &ChatHandler::HandleModifyBWalkCommand,   "",   NULL },
         { "aspeed",      1, &ChatHandler::HandleModifyASpedCommand,   "",   NULL },
         { "faction",     1, &ChatHandler::HandleModifyFactionCommand, "",   NULL },
+		{ "spell",       1, &ChatHandler::HandleModifySpellCommand,   "",   NULL },
         { NULL,          0, NULL,                                     "",   NULL }
     };
 
