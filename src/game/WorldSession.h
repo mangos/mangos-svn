@@ -324,7 +324,7 @@ class WorldSession
 		void HandlePageQuerySkippedOpcode(WorldPacket& recvPacket);
 		void HandlePageQueryOpcode(WorldPacket& recvPacket);
 
-		// Tutorials ...
+		// Tutorials ... In CharacterHandler.cpp
 		void HandleTutorialFlag ( WorldPacket & recv_data );
 		void HandleTutorialClear( WorldPacket & recv_data );
 		void HandleTutorialReset( WorldPacket & recv_data );

@@ -93,7 +93,7 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	QuestDef.$(OBJEXT) QuestHandler.$(OBJEXT) \
 	RandomMovementGenerator.$(OBJEXT) ReactorAI.$(OBJEXT) \
 	RedZoneDistrict.$(OBJEXT) SkillHandler.$(OBJEXT) \
-	Spell.$(OBJEXT) SpellHandler.$(OBJEXT) \
+	Spell.$(OBJEXT) SpellHandler.$(OBJEXT) ScriptCalls.$(OBJEXT) \
 	TargetedMovementGenerator.$(OBJEXT) TaxiHandler.$(OBJEXT) \
 	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
 	UpdateData_1_8_x.$(OBJEXT) UpdateData.$(OBJEXT) \
@@ -303,6 +303,7 @@ libgame_a_SOURCES = \
 	SkillHandler.cpp \
 	Spell.cpp \
 	SpellHandler.cpp \
+	SriptCalls.cpp \		
 	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TradeHandler.cpp \
@@ -345,6 +346,7 @@ libgame_a_SOURCES = \
 	Spell.h \
 	SpellPrototype.h \
 	Stats.h \
+	SriptCalls.h \	
 	Unit.h \
 	UpdateData_1_8_x.h \
 	UpdateData.h \
@@ -463,6 +465,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SkillHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Spell.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SpellHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ScriptCalls.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TargetedMovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TaxiHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TradeHandler.Po@am__quote@
