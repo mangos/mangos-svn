@@ -86,3 +86,20 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
         }
     }
 }
+
+/*0:02:15 - CLIENT >>> OpCode=0x251 CMSG_LEARN_TALENT, size=14
+
+      0- 1- 2- 3- 4- 5- 6- 7- | 8- 9- A- B- C- D- E- F- | 01234567 89ABCDEF
+0000: 00#0C#51#02#00#00 E1 01 | 00 00 00 00 00 00       | ..Q..... ......  
+
+
+0:02:15 - SERVER >>> OpCode=0x266 SMSG_SET_FLAT_SPELL_MODIFIER, size=10
+
+      0- 1- 2- 3- 4- 5- 6- 7- | 8- 9- A- B- C- D- E- F- | 01234567 89ABCDEF
+0000: 00#08#66#02 0D 0B 0C FE | FF FF                   | ..f..... ..      
+
+
+0:02:15 - SERVER >>> OpCode=0x12B SMSG_LEARNED_SPELL, size=8
+
+      0- 1- 2- 3- 4- 5- 6- 7- | 8- 9- A- B- C- D- E- F- | 01234567 89ABCDEF
+0000: 00#06#2B#01 A9 3B 00 00 |                         | ..+..;..   */      
