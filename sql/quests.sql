@@ -126,5 +126,5 @@ CREATE TABLE `quests` (
   `locationy` float NOT NULL default '0',
   `locationopt` bigint(20) NOT NULL default '0',
   PRIMARY KEY  (`questId`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM;
 

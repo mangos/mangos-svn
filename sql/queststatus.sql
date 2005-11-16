@@ -37,4 +37,4 @@ CREATE TABLE `queststatus` (
   `explored` bigint(20) unsigned NOT NULL default '0',
   `id` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM;

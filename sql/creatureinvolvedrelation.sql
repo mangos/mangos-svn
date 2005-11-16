@@ -25,4 +25,4 @@ CREATE TABLE `creatureinvolvedrelation` (
   `questId` bigint(20) unsigned NOT NULL default '0',
   `creatureId` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM;
