@@ -70,7 +70,8 @@ EXTRA_DIST = \
 	triggerquestrelation.sql \
 	tutorials.sql \
 	vendors.sql \
-	gmtickets.sql
+	gmtickets.sql \
+	npc_gossip.sql
 
 # SQL files for MaNGOS database to be installed to datadir
 pkgdata_DATA = \
@@ -126,7 +127,8 @@ pkgdata_DATA = \
 	triggerquestrelation.sql \
 	tutorials.sql \	
 	vendors.sql \
-	gmtickets.sql
+	gmtickets.sql \
+	npc_gossip.sql
 
 # directory defines
 pkgdatadir = @MANGOSD_DATA@/sql
