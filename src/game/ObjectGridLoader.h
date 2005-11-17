@@ -64,7 +64,6 @@ public:
 		loader.Load(i_grid(x, y), *this);
 	    }
 	}
-
 	sLog.outDebug("%d GameObjects and %d Creatures loaded for grid %d on map %d", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
     }
 

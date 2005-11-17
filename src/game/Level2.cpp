@@ -351,11 +351,8 @@ bool ChatHandler::HandleItemCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetCreature(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -414,11 +411,8 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetCreature(guid);
-#else
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -475,11 +469,8 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -552,11 +543,8 @@ bool ChatHandler::HandleRandomCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -602,11 +590,8 @@ bool ChatHandler::HandleRunCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -651,11 +636,8 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -690,11 +672,8 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -730,11 +709,8 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -767,11 +743,8 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");

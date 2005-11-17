@@ -24,10 +24,8 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
-#endif
+
 
 #if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
 
@@ -39,17 +37,8 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
     // AttackSwing
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-
-#ifndef ENABLE_GRID_SYSTEM
-	Creature *pEnemy = objmgr.GetObject<Creature>(guid);
-	//Unit *pEnemy = objmgr.GetObject<Creature>(guid);
-    Player *pPVPEnemy = objmgr.GetObject<Player>(guid);
-#else
-	Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection()/*guid*/);
-	//Unit *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection()/*guid*/);
-	//Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
+    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection()/*guid*/);
     Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, _player->GetSelection()/*guid*/);
-#endif
     
     if(pEnemy)
     {
@@ -88,11 +77,8 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
     // AttackSwing
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *pEnemy = objmgr.GetObject<Creature>(guid);
-#else
     Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
-#endif
+
     if(!pEnemy)
     {
         Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",

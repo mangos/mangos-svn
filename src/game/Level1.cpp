@@ -32,11 +32,9 @@
 #include "Opcodes.h"
 #include "Chat.h"
 #include "Log.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
+
 
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
@@ -80,11 +78,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid != 0)
     {
-#ifndef ENABLE_GRID_SYSTEM
-        if(!(obj = (Object*)objmgr.GetObject<Player>(guid)) && !(obj = (Object*)objmgr.GetObject<Creature>(guid)))
-#else
         if(!(obj = (Object*)ObjectAccessor::Instance().FindPlayer(guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
-#endif
         {
             FillSystemMessageData(&data, m_session, "You should select a character or a creature.");
             m_session->SendPacket( &data );

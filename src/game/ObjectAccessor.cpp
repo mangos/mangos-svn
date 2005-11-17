@@ -191,45 +191,35 @@ ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &m)
 void
 ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_players)
 {
+    bool build_for_all = true;
     Player *pl = NULL;
-    if( obj->isType(TYPE_PLAYER) )
+    if( obj->isType(TYPE_ITEM ))
     {
-	pl = dynamic_cast<Player *>(obj);
-    }
-    else if( obj->isType(TYPE_ITEM ))
-    {
-	Item *item = dynamic_cast<Item *>(obj);
-	assert( item != NULL );
+	Item *item = static_cast<Item *>(obj);
 	item->UpdateStats();
 	pl = item->GetOwner();
+	build_for_all = false;
     }
     else if( obj->isType(TYPE_CONTAINER) )
     {
-	Container *c = dynamic_cast<Container *>(obj);
+	Container *c = static_cast<Container *>(obj);
 	assert( c != NULL );
 	pl = c->GetOwner();
+	build_for_all = false;
     }
-    else
-    {
+
+    /* else then the object is either a creature or player.. now build for all
+     */
+    if( pl != NULL )
+	_buildPacket(pl, obj, update_players);
+
+    // build this object for its surrounding players
+    if( build_for_all )
 	_buildChangeObjectForPlayer(obj, update_players);
-    }
-
-    if( pl == NULL )
-	return;
-
-    _buildPacket(pl, pl, update_players); // bulid myself for myself
-
-    CellPair p(MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
-    cell.data.Part.reserved = ALL_DISTRICT;
-    MaNGOS::BuildUpdateForPlayer notifier(*pl, update_players); 
-    TypeContainerVisitor<MaNGOS::BuildUpdateForPlayer, ContainerMapList<Player> > player_update(notifier);
-    CellLock<GridReadGuard> cell_lock(cell, p); 
-    cell_lock->Visit(cell_lock, player_update, *MapManager::Instance().GetMap(pl->GetMapId()));  
 }
 
 void
-ObjectAccessor::_buildPacket(Player *pl, Player *bpl, UpdateDataMapType &update_players)
+ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_players)
 {
     UpdateDataMapType::iterator iter = update_players.find(pl);
 
@@ -240,7 +230,7 @@ ObjectAccessor::_buildPacket(Player *pl, Player *bpl, UpdateDataMapType &update_
 	iter = p.first;
     }
     
-    bpl->BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
+    obj->BuildValuesUpdateBlockForPlayer(&iter->second, iter->first);
 
 }
 
@@ -262,7 +252,8 @@ ObjectAccessor::_buildChangeObjectForPlayer(Object *obj, UpdateDataMapType &upda
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
-    ObjectChangeAccumulator notifier(*obj, update_players);
+    cell.SetNoCreate();
+    ObjectChangeAccumulator notifier(*obj, update_players, *this);
     TypeContainerVisitor<ObjectChangeAccumulator, ContainerMapList<Player> > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId()));
@@ -299,6 +290,7 @@ ObjectAccessor::Update(const uint32  &diff)
 	    iter->second->Update(diff);
 	    creature_locations.insert( CreatureLocationHolderType::value_type(iter->second->GetMapId(), iter->second) );
 	}
+
 	
 	/* now update the creatures near the player. Note,
 	 * we only update the creatures on and adjecent cells
@@ -314,8 +306,8 @@ ObjectAccessor::Update(const uint32  &diff)
 	{
 	    if( map_id != (*iter).first )
 	    {
-			map_id = (*iter).first;
-			marked_cell.reset(); // new map
+		map_id = (*iter).first;
+		marked_cell.reset(); // new map
 	    }
 
 	    Player *player = (*iter).second;
@@ -323,21 +315,23 @@ ObjectAccessor::Update(const uint32  &diff)
 	    CellPair update_cell(standing_cell);
 	    update_cell << 1;
 	    update_cell -= 1;
-	    for(; abs(float(standing_cell.x_coord) - update_cell.x_coord) < 2; update_cell >> 1)
+
+	    for(; abs(int(standing_cell.x_coord - update_cell.x_coord)) < 2; update_cell >> 1)
 	    {
-			for(CellPair cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-			{		    
-				uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
-				if( !marked_cell.test(cell_id) )
-				{
-					marked_cell.set(cell_id);
-					Cell cell = RedZone::GetZone(cell_iter);
-					cell.data.Part.reserved = CENTER_DISTRICT;
-					CellLock<NullGuard> cell_lock(cell, cell_iter);
-					cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
-				}
-			}
-	    }
+		for(CellPair cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+		{		    
+		    uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
+		    if( !marked_cell.test(cell_id) )
+		    {
+			marked_cell.set(cell_id);
+			Cell cell = RedZone::GetZone(cell_iter);
+			cell.data.Part.reserved = CENTER_DISTRICT;
+			cell.SetNoCreate();
+			CellLock<NullGuard> cell_lock(cell, cell_iter);
+			cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
+		    }
+		}
+	    }	    
 	}
 	
     }
@@ -375,43 +369,33 @@ void
 ObjectAccessor::ObjectChangeAccumulator::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter = m.begin(); iter != m.end(); ++iter)
-    {
-	UpdateDataMapType::iterator pl_iter = i_updateDatas.find(iter->second);
-	if( pl_iter == i_updateDatas.end() )
-	{
-	    std::pair<UpdateDataMapType::iterator, bool> p = i_updateDatas.insert( UpdateDataValueType(iter->second, UpdateData()) );
-	    assert( p.second );
-	    pl_iter = p.first;
-	}
-
-	i_object.BuildValuesUpdateBlockForPlayer(&pl_iter->second, pl_iter->first);
-    }
+	i_accessor._buildPacket(iter->second, &i_object, i_updateDatas);
 }
 
 namespace MaNGOS
 {
-	//====================================//
-	// BuildUpdateForPlayer
-	void
-	BuildUpdateForPlayer::Visit(PlayerMapType &m)
+    //====================================//
+    // BuildUpdateForPlayer
+    void
+    BuildUpdateForPlayer::Visit(PlayerMapType &m)
+    {
+	for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
 	{
-		for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-		{
-		if( iter->second == &i_player )
-			continue;
-
-		ObjectAccessor::UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
-		if( iter2 == i_updatePlayers.end() )
-		{
-			std::pair<ObjectAccessor::UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
-			assert(p.second);
-			iter2 = p.first;
-		}
-
-		// build myself for other player
-		i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
+	    if( iter->second == &i_player )
+		continue;
+	    
+	    ObjectAccessor::UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
+	    if( iter2 == i_updatePlayers.end() )
+	    {
+		std::pair<ObjectAccessor::UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
+		assert(p.second);
+		iter2 = p.first;
+	    }
+	    
+	    // build myself for other player
+	    i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
+	}
     }
-}
 }
 
 template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, GameObject *> &m);

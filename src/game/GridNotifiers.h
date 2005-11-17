@@ -140,7 +140,8 @@ namespace MaNGOS
     {
         Player &i_player;
         WorldPacket *i_message;
-        MessageDeliverer(Player &pl, WorldPacket *msg) : i_player(pl), i_message(msg) {}
+	bool i_toSelf;
+        MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
         void Visit(PlayerMapType &m);
     };
     

@@ -37,6 +37,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Mail.h"
 #include "Spell.h"
+#include "ObjectAccessor.h"
 
 extern int num_item_prototypes;
 extern uint32 item_proto_ids[64550];
@@ -56,10 +57,6 @@ class Group;
 class Path;
 class Guild;
 
-#ifdef ENABLE_GRID_SYSTEM
-#include "ObjectAccessor.h"
-#endif
-
 //#define MAX_CONTINENTS 500
 
 class ObjectMgr : public Singleton < ObjectMgr >
@@ -76,15 +73,8 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         // other objects
         typedef std::set< Group * > GroupSet;
-		typedef std::set< Guild * > GuildSet;
+        typedef std::set< Guild * > GuildSet;
 
-#ifndef ENABLE_GRID_SYSTEM
-
-        typedef HM_NAMESPACE::hash_map<uint32, Creature*> CreatureMap;
-        typedef HM_NAMESPACE::hash_map<uint32, DynamicObject*> DynamicObjectMap;
-        typedef HM_NAMESPACE::hash_map<uint32, GameObject*> GameObjectMap;
-        typedef HM_NAMESPACE::hash_map<uint32, Corpse*> CorpseMap;
-#endif
         typedef HM_NAMESPACE::hash_map<uint32, ItemPrototype*> ItemPrototypeMap;
         typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
         typedef HM_NAMESPACE::hash_map<uint32, Trainerspell*> TrainerspellMap;
@@ -131,39 +121,15 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         Player* GetPlayer(const char* name)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            PlayerMap::const_iterator itr;
-            for (itr = mPlayers.begin(); itr != mPlayers.end(); itr++)
-            {
-                if(strcmp(itr->second->GetName(), name) == 0)
-                    return itr->second;
-            }
-
-            return NULL;
-#else
-        return ObjectAccessor::Instance().FindPlayerByName(name);
-#endif
+	    return ObjectAccessor::Instance().FindPlayerByName(name);
         }
 
 
         Player* GetPlayer(uint64 guid)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            PlayerMap::const_iterator itr = mPlayers.find(GUID_LOPART(guid));
-            if (itr != mPlayers.end())
-                return itr->second;
-            return NULL;
-#else
-        return ObjectAccessor::Instance().FindPlayer(guid);
-#endif
+	    return ObjectAccessor::Instance().FindPlayer(guid);
         }
 
-#ifndef ENABLE_GRID_SYSTEM
-        Creature* GetCreature(uint64 guid)
-        {
-        return _getCreature(GUID_LOPART(guid));
-        }
-#endif
 
     // GameObjects
     const char* GetGameObjectName(uint32 id) const
@@ -353,17 +319,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
 
         void AddAreaTriggerPoint(AreaTriggerPoint *pArea);
         AreaTriggerPoint *GetAreaTriggerQuestPoint(uint32 Trigger_ID);
-
         ItemPage *RetreiveItemPageText(uint32 Page_ID);
 
         void AddGossipText(GossipText *pGText);
         GossipText *GetGossipText(uint32 Text_ID);
 
-#ifndef ENABLE_GRID_SYSTEM
-        // Corpse Stuff
-        Corpse *GetCorpseByOwner(Player *pOwner);
-        void SaveCorpses();
-#endif
         // Gossip Stuff
 
         // Death stuff
@@ -390,12 +350,7 @@ class ObjectMgr : public Singleton < ObjectMgr >
         AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 trigger);
 
         // Serialization
-#ifndef ENABLE_GRID_SYSTEM
-        void LoadCreatures();
-        void LoadGameObjects();
-        void LoadCorpses();
-#endif
-		void LoadGuilds();
+        void LoadGuilds();
         void LoadQuests();
         void LoadCreatureNames();
         void SaveCreatureNames();
@@ -445,28 +400,11 @@ class ObjectMgr : public Singleton < ObjectMgr >
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
 
-#ifndef ENABLE_GRID_SYSTEM
-        // Map of active characters in the game
-        PlayerMap           mPlayers;
-
-        // Map of active creatures in the game
-        CreatureMap         mCreatures;
-
-        // Map of dynamic objects
-        GameObjectMap       mGameObjects;
-
-        // Map of dynamic objects
-        DynamicObjectMap    mDynamicObjects;
-
-        // Map of corpse objects
-        CorpseMap           mCorpses;
-#endif
-
         // Group List
         GroupSet            mGroupSet;
-
-		// Guild List
-		GuildSet            mGuildSet;
+    
+        // Guild List
+        GuildSet            mGuildSet;
 
         // Map of all item types in the game
         ItemMap             mItems;
@@ -511,42 +449,10 @@ class ObjectMgr : public Singleton < ObjectMgr >
         TeleportMap         mTeleports;
 
 private:
-#ifndef ENABLE_GRID_SYSTEM
-    Creature* _getCreature(uint32 guid)
-    {
-    CreatureMap::const_iterator itr = mCreatures.find(guid);
-    if (itr != mCreatures.end())
-        return itr->second;
-    return NULL;
-    }
-#endif
     static GameObjectInfo si_UnknownGameObjectInfo;
 };
 
 // According to C++ standard explicit template declarations should be in scope where ObjectMgr is.
-#ifndef ENABLE_GRID_SYSTEM
-template<> inline HM_NAMESPACE::hash_map<uint32,DynamicObject*>& ObjectMgr::_GetContainer<DynamicObject>()
-{ return mDynamicObjects; }
-template<> inline HM_NAMESPACE::hash_map<uint32,Creature*>& ObjectMgr::_GetContainer<Creature>()
-{ return mCreatures; }
-template<> inline HM_NAMESPACE::hash_map<uint32,Player*>& ObjectMgr::_GetContainer<Player>()
-{ return mPlayers; }
-template<> inline HM_NAMESPACE::hash_map<uint32,GameObject*>& ObjectMgr::_GetContainer<GameObject>()
-{ return mGameObjects; }
-template<> inline HM_NAMESPACE::hash_map<uint32,Corpse*>& ObjectMgr::_GetContainer<Corpse>()
-{ return mCorpses; }
-
-template<> inline TYPEID ObjectMgr::_GetTypeId<DynamicObject>() const
-{ return TYPEID_DYNAMICOBJECT; }
-template<> inline TYPEID ObjectMgr::_GetTypeId<GameObject>() const
-{ return TYPEID_GAMEOBJECT; }
-template<> inline TYPEID ObjectMgr::_GetTypeId<Creature>() const
-{ return TYPEID_UNIT; }
-template<> inline TYPEID ObjectMgr::_GetTypeId<Player>() const
-{ return TYPEID_PLAYER; }
-template<> inline TYPEID ObjectMgr::_GetTypeId<Corpse>() const
-{ return TYPEID_CORPSE; }
-#endif
-
 #define objmgr ObjectMgr::getSingleton()
+
 #endif

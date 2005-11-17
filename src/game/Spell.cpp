@@ -153,6 +153,7 @@ void Spell::FillTargetMap()
 		    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
 		    Cell cell = RedZone::GetZone(p);
 		    cell.data.Part.reserved = ALL_DISTRICT;
+		    cell.SetNoCreate();
 		    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
 		    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
 		    CellLock<GridReadGuard> cell_lock(cell, p);
@@ -182,6 +183,7 @@ void Spell::FillTargetMap()
 			CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
 			Cell cell = RedZone::GetZone(p);
 			cell.data.Part.reserved = ALL_DISTRICT;
+			cell.SetNoCreate();
 			MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
 			TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
 			CellLock<GridReadGuard> cell_lock(cell, p);
@@ -197,6 +199,7 @@ void Spell::FillTargetMap()
 			    CellPair p(MaNGOS::ComputeCellPair(p_caster->GetPositionX(), p_caster->GetPositionY()));
 			    Cell cell = RedZone::GetZone(p);
 			    cell.data.Part.reserved = ALL_DISTRICT;
+			    cell.SetNoCreate();
 			    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tmpMap, i);
 			    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
 			    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
@@ -220,6 +223,7 @@ void Spell::FillTargetMap()
 				CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
 				Cell cell = RedZone::GetZone(p);
 				cell.data.Part.reserved = ALL_DISTRICT;
+				cell.SetNoCreate();
 				MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
 				TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
 				CellLock<GridReadGuard> cell_lock(cell, p);
@@ -264,6 +268,7 @@ void Spell::FillTargetMap()
 				    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
 				    Cell cell = RedZone::GetZone(p);
 				    cell.data.Part.reserved = ALL_DISTRICT;
+				    cell.SetNoCreate();
 				    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
 				    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
 				    CellLock<GridReadGuard> cell_lock(cell, p);

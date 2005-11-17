@@ -30,11 +30,9 @@
 #include "UpdateMask.h"
 #include "Chat.h"
 #include "Auth/md5.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
+
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
@@ -58,7 +56,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
         Player *plr;
         do
         {
-            plr = new Player;
+            plr = new Player(this);
             ASSERT(plr);
             // added to catch an assertion failure at Player::LoadFromDB function.
             Log::getSingleton().outError("Loading char guid %d from account %d.",(*result)[0].GetUInt32(),GetAccountId());
@@ -121,9 +119,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         delete result;
     }
 
-    Player * pNewChar = new Player;
+    Player * pNewChar = new Player(this);
     pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data );
-    pNewChar->SetSession(this);                   // we need account id
     pNewChar->SaveToDB();
 
     delete pNewChar;
@@ -144,7 +141,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         Player *plr;
         do
         {
-            plr = new Player;
+            plr = new Player(this);
             ASSERT(plr);
             Log::getSingleton().outError("Loading char guid %d from account %d.",(*result1)[0].GetUInt32(),GetAccountId());
             plr->LoadFromDB( (*result1)[0].GetUInt32() );
@@ -244,7 +241,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Player* plr = new Player;
+    Player* plr = new Player(this);
     ASSERT(plr);
 
     plr->LoadFromDB( GUID_LOPART(guid) );
@@ -272,7 +269,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     recv_data >> playerGuid;                        // this is the GUID selected by the player
 
-    Player* plr = new Player;
+    Player* plr = new Player(this);
     ASSERT(plr);
 
     plr->LoadFromDB(GUID_LOPART(playerGuid));
@@ -524,13 +521,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // Send a message to other clients that a new player has entered the world
     // And let this client know we're in game
     Log::getSingleton( ).outError("AddObject at CharacterHandler.cpp");
-#ifndef ENABLE_GRID_SYSTEM
-    objmgr.AddObject( pCurrChar );
-    pCurrChar->PlaceOnMap();
-#else
     MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
-#endif
+
     std::stringstream ss;
     ss << "UPDATE characters SET online = 1 WHERE guid = " << pCurrChar->GetGUID();
 

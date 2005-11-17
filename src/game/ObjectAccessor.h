@@ -100,10 +100,12 @@ private:
     {
 	UpdateDataMapType &i_updateDatas;
 	Object &i_object;
-	ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d) : i_object(obj), i_updateDatas(d) {}
+	ObjectAccessor &i_accessor;
+	ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_object(obj), i_updateDatas(d), i_accessor(a) {}
 	void Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
 
+    friend struct ObjectChangeAccumulator; // let's my internal deal with my internal :-)
     PlayersMapType i_players;
     CorpsesMapType i_corpse;
 
@@ -112,7 +114,7 @@ private:
     
     void _buildChangeObjectForPlayer(Object *, UpdateDataMapType &);
     void _buildUpdateObject(Object *, UpdateDataMapType &);
-    void _buildPacket(Player *, Player *, UpdateDataMapType &);
+    void _buildPacket(Player *, Object *, UpdateDataMapType &);
     void _update(void);
     std::set<Object *> i_objects;
     LockType i_playerGuard;

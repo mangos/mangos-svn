@@ -31,10 +31,8 @@
 #include "Log.h"
 #include "Timer.h"
 #include <signal.h>
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 #ifdef ENABLE_HTTPD_SYSTEM
 #include "HttpdRunnable.h"
@@ -122,7 +120,6 @@ bool Master::Run()
     sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
     sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
 
-#ifdef ENABLE_GRID_SYSTEM
     // default Grid unload will be 5 minutes after everyone moved out.
     // Note.. minium is 1 minute. (5*60=300)
     uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);    
@@ -134,7 +131,7 @@ bool Master::Run()
     uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
     sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
     MapManager::Instance().SetMapUpdateInterval(map_update_interval);
-#endif
+
 
     sRealmList.setServerPort(wsport);
     sRealmList.GetAndAddRealms ();

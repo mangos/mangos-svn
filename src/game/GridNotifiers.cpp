@@ -166,7 +166,7 @@ MessageDeliverer::Visit(PlayerMapType &m)
   Player *player = &i_player;
   for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
   {
-      if( iter->second != player &&  Utilities::is_in_range(iter->second, player) )
+      if( iter->second != player || i_toSelf )
       {
 	  iter->second->GetSession()->SendPacket(i_message);
       }

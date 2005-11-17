@@ -175,9 +175,13 @@ Map::Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &
     const uint32 y = cell->GridY();
     const uint32 cell_x = cell->CellX();
     const uint32 cell_y = cell->CellY();
-    EnsureGridLoadedForPlayer(cell, NULL, false);
-    LOCK_TYPE guard(i_info[x][y]->i_lock);
-    i_grids[x][y]->Visit(cell_x, cell_y, visitor);
+
+    if( !cell->NoCreate() || loaded(GridPair(x,y)) )
+    {
+	EnsureGridLoadedForPlayer(cell, NULL, false);
+	LOCK_TYPE guard(i_info[x][y]->i_lock);
+	i_grids[x][y]->Visit(cell_x, cell_y, visitor);
+    }
 }
 
 #endif

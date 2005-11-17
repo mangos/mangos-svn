@@ -27,10 +27,8 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 #include "Chat.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
-#endif
+
 
 void Group::ChangeLeader(const uint64 &guid)
 {
@@ -53,11 +51,7 @@ void Group::ChangeLeader(const uint64 &guid)
 
     for( i = 0; i < m_count; i++ )
     {
-#ifndef ENABLE_GRID_SYSTEM
-        player = objmgr.GetObject<Player>( m_members[i].guid );
-#else
-    player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
-#endif
+	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
 
         player->SetLeader(guid );
@@ -78,11 +72,7 @@ void Group::Disband()
 
     for( i = 0; i < m_count; i++ )
     {
-#ifndef ENABLE_GRID_SYSTEM
-        player = objmgr.GetObject<Player>( m_members[i].guid );
-#else
-    player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
-#endif
+	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
 
         player->UnSetInGroup();
@@ -100,11 +90,7 @@ void Group::SendUpdate()
 
     for( i = 0; i < m_count; i ++ )
     {
-#ifndef ENABLE_GRID_SYSTEM
-        player = objmgr.GetObject<Player>( m_members[i].guid );
-#else
-    player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
-#endif
+	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
 
         data.Initialize(SMSG_GROUP_LIST);
@@ -169,11 +155,7 @@ void Group::BroadcastToGroup(WorldSession *session, std::string msg)
         {
             WorldPacket data;
             sChatHandler.FillMessageData(&data, session, CHAT_MSG_PARTY, LANG_UNIVERSAL, NULL, msg.c_str());
-#ifndef ENABLE_GRID_SYSTEM
-            Player *pl = objmgr.GetObject<Player>(m_members[i].guid);
-#else
-        Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
-#endif
+	    Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
             if (pl && pl->GetSession())
                 pl->GetSession()->SendPacket(&data);
         }

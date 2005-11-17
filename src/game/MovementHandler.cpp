@@ -27,10 +27,8 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "UpdateMask.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 class MovementInfo
 {
@@ -126,11 +124,7 @@ void WorldSession::HandleMoveHeartbeatOpcode( WorldPacket & recv_data )
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
-#ifndef ENABLE_GRID_SYSTEM
-    GetPlayer()->PlaceOnMap();
-#else
     MapManager::Instance().GetMap(_player->GetMapId())->Add(_player);
-#endif
 }
 
 

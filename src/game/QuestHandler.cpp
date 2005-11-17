@@ -31,29 +31,25 @@
 #include "ScriptCalls.h"
 #include "ScriptCalls.cpp"
 
-
 /*
    World Definitions
    -----------------
 */
-
 void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
     Log::getSingleton( ).outDebug( "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY" );
     uint64 guid;
     recv_data >> guid;
 
-	Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if (!pCreature)
     {
         Log::getSingleton( ).outError( "WORLD: received incorrect guid in CMSG_QUESTGIVER_STATUS_QUERY" );
         return;
     }
 
-	uint32 questStatus = scriptCallNPCDialogStatus(GetPlayer(), pCreature );
-
-	GetPlayer()->PlayerTalkClass->SendQuestStatus(questStatus, guid);
+    uint32 questStatus = scriptCallNPCDialogStatus(GetPlayer(), pCreature );    
+    GetPlayer()->PlayerTalkClass->SendQuestStatus(questStatus, guid);
 }
 
 
@@ -63,16 +59,15 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
     uint64 guid;
     recv_data >> guid;
-  
-	Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
     if(!pCreature)
     {
         Log::getSingleton( ).outError( "WORLD: Received incorrect guid in CMSG_QUESTGIVER_HELLO" );
         return;
     }
-
-	scriptCallGossipHello( GetPlayer(), pCreature );
+    
+    scriptCallGossipHello( GetPlayer(), pCreature );
 }
 
 
@@ -202,11 +197,10 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     recv_data >> quest_id;
 
     Quest *pQuest = objmgr.GetQuest(quest_id);
-
-	if (!pQuest) return;
-
-	GetPlayer()->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+    if (!pQuest) return;
+    GetPlayer()->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
 }
+
 
 
 void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )

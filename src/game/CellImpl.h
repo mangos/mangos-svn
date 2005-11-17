@@ -23,206 +23,203 @@
 #include "Cell.h"
 #include "Map.h"
 #include "RedZoneDistrict.h"
-
-template<class LOCK_TYPE, class T, class CONTAINER>
-inline void 
-Cell::VisitX(const CellLock<LOCK_TYPE> & l, CellPair &cell_pair, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, int &num, const int direction) const
-{
-    if( cell_pair.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && num > 0 && cell_pair.x_coord >= 0 )
-    {
-	CellLock<LOCK_TYPE> lock(RedZone::GetZone(cell_pair), cell_pair);
-	m.Visit(lock, visitor);
-	cell_pair.x_coord += direction;
-	--num;
-	VisitX(l, cell_pair, visitor, m, num, direction);
-    }
-}
-
-template<class LOCK_TYPE, class T, class CONTAINER>
-inline void 
-Cell::VisitY(const CellLock<LOCK_TYPE> &l, CellPair &cell_pair, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, int &num, const int direction) const
-{
-    if( cell_pair.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP  && num > 0 && cell_pair.y_coord >= 0 )
-    {
-	CellLock<LOCK_TYPE> lock(RedZone::GetZone(cell_pair), cell_pair);
-	m.Visit(lock, visitor);
-	cell_pair.y_coord += direction;
-	--num;
-	VisitY(l, cell_pair, visitor, m, num, direction);
-    }
-}
+#include <cmath>
 
 
 template<class LOCK_TYPE,class T, class CONTAINER> 
 inline void 
 Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
 {
-    CellPair cell = (const CellPair &)l;
-    
+    CellPair standing_cell = (const CellPair &)l;
+    CellPair cell_iter;
+
     switch( (district_t)this->data.Part.reserved )
     {
     case ALL_DISTRICT:
 	{
-	    int num_x = 3;
-	    int num_y = 3;
-
-	    if( cell.x_coord > 0 ) 
-		--cell.x_coord;
-	    else
-		--num_x;
-	    
-	    if( cell.y_coord > 0 )
-		--cell.y_coord;
-	    else
-		--num_y;
-
-	    for(unsigned int idx=0; idx < MAX_NUMBER_OF_CELLS; ++idx)
+	    CellPair update_cell(standing_cell);
+	    update_cell << 1;
+	    update_cell -= 1;
+	    for(; abs(standing_cell.x_coord - update_cell.x_coord) < 2; update_cell >> 1)
 	    {
-		int tmp_x = num_x;
-		CellPair tmp_cell(cell);
-		if( cell.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP )
-		    VisitX(l, tmp_cell, visitor, m, tmp_x, 1);
-		++cell.y_coord;
+		for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+		{		    
+		    Cell r_zone = RedZone::GetZone(cell_iter);
+		    r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		    CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		    m.Visit(lock, visitor);
+		}
 	    }
 	    break;
 	}
     case UPPER_LEFT_DISTRICT:
 	{
-	    int num_x = 3;
-	    if( cell.x_coord > 0 ) 
-	    {		
-		--cell.x_coord;
-		uint32 tmp = cell.y_coord;
-		int num_y = 2;
-		VisitY(l, cell, visitor, m, num_y, 1);
-		cell.y_coord = tmp;
-	    }
-	    else
-		--num_x;
+	    CellPair update_cell(standing_cell);
+	    standing_cell << 1;
+	    standing_cell -= 1;
 
-	    if( cell.y_coord > 0 )
+	    // update the along the x coordinate
+	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
-		--cell.y_coord;
-		VisitX(l, cell, visitor, m, num_x, 1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
+	    }
+
+	    // update along the y coordinate
+	    for(cell_iter=update_cell, cell_iter += 1; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter += 1)
+	    {
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
 	    break;
 	}
     case UPPER_RIGHT_DISTRICT:
 	{
-	    int num_x = 3;
-	    if( cell.x_coord+1 < TOTAL_NUMBER_OF_CELLS_PER_MAP ) 
+	    CellPair update_cell(standing_cell);
+	    update_cell >> 1;
+	    update_cell -= 1;
+
+	    // update the along the x coordinate
+	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
 	    {
-		++cell.x_coord;
-		uint32 tmp = cell.y_coord;
-		int num_y = 2;
-		VisitY(l, cell, visitor, m, num_y, -1);
-		cell.y_coord = tmp;
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
-	    else
-		--num_x;
-	    
-	    if( cell.y_coord >  0 )
+
+	    // update along the y coordinate
+	    for(cell_iter=update_cell, cell_iter += 1; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter += 1)
 	    {
-		--cell.y_coord;
-		VisitX(l, cell, visitor, m, num_x, -1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
+
 	    break;
 	}
     case LOWER_LEFT_DISTRICT:
 	{
-	    int num_x = 3;
-	    if( cell.x_coord > 0 )
-	    {
-		--cell.x_coord;
-		uint32 tmp = cell.y_coord;
-		int num_y = 2;
-		VisitY(l, cell, visitor, m, num_y, -1);
-		cell.y_coord = tmp;
-	    }
-	    else
-		--num_x;
+	    CellPair update_cell(standing_cell);
+	    update_cell << 1;
+	    update_cell += 1;
 
-	    if( ++cell.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP )
+	    // update the along the x coordinate
+	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
-		VisitX(l, cell, visitor, m, num_x, 1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
+	    }
+
+	    // update along the y coordinate
+	    for(cell_iter=update_cell, cell_iter -= 1; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter -= 1)
+	    {
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
 
 	    break;
 	}
     case LOWER_RIGHT_DISTRICT:
 	{
-	    int num_x = 3;
-	    if( cell.x_coord+1 < TOTAL_NUMBER_OF_CELLS_PER_MAP )
-	    {
-		++cell.x_coord;
-		uint32 tmp = cell.y_coord;
-		int num_y = 2;
-		VisitY(l, cell, visitor, m, num_y, -1);
-		cell.y_coord = tmp;
-	    }
-	    else
-		--num_x;
+	    CellPair update_cell(standing_cell);
+	    update_cell >> 1;
+	    update_cell += 1;
 
-	    if( ++cell.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP )
+	    // update the along the x coordinate
+	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
 	    {
-		VisitX(l, cell, visitor, m, num_x, -1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
+
+	    // update along the y coordinate
+	    for(cell_iter=update_cell, cell_iter -= 1; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter -= 1)
+	    {
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
+	    }
+
 	    break;
 	}
     case LEFT_DISTRICT:
 	{
-	    if( cell.x_coord > 0 )
+	    CellPair update_cell(standing_cell);
+	    update_cell << 1;
+	    update_cell -= 1;
+
+	    // update along the y coordinate
+	    for(cell_iter=update_cell; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter += 1)
 	    {
-		--cell.x_coord;
-		int num_y = 3;
-		if( cell.y_coord > 0 )
-		{
-		    --cell.y_coord;
-		}
-		else
-		    --num_y;
-		VisitY(l, cell, visitor, m, num_y, 1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
+
 	    break;
 	}
     case RIGHT_DISTRICT:
 	{
-	    if( ++cell.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP )
+	    CellPair update_cell(standing_cell);
+	    update_cell >> 1;
+	    update_cell -= 1;
+
+	    // update along the y coordinate
+	    for(cell_iter=update_cell; abs(standing_cell.y_coord - cell_iter.y_coord) < 2; cell_iter += 1)
 	    {
-		int num_y = 3;
-		if( cell.y_coord > 0 )
-		    --cell.y_coord;
-		else
-		    --num_y;
-		VisitY(l, cell, visitor, m, num_y, 1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
 	    break;
 	}
     case UPPER_DISTRICT:
 	{
-	    if( cell.y_coord > 0 )
+	    CellPair update_cell(standing_cell);
+	    update_cell << 1;
+	    update_cell -= 1;
+
+	    // update the along the x coordinate
+	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
-		--cell.y_coord;
-		int num_x = 3;
-		if( cell.x_coord > 0 )
-		    --cell.x_coord;
-		else
-		    --num_x;
-		VisitX(l, cell, visitor, m, num_x, 1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
+
 	    break;
 	}
     case LOWER_DISTRICT:
 	{
-	    if( ++cell.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP )
+	    CellPair update_cell(standing_cell);
+	    update_cell << 1;
+	    update_cell += 1;
+
+	    // update the along the x coordinate
+	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
-		int num_x = 3;
-		if( cell.x_coord > 0 )
-		    --cell.x_coord;
-		else
-		    --num_x;
-		VisitX(l, cell, visitor, m, num_x, 1);
+		Cell r_zone = RedZone::GetZone(cell_iter);
+		r_zone.data.Part.nocreate = l->data.Part.nocreate;
+		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+		m.Visit(lock, visitor);
 	    }
+
 	    break;
 	}
     case CENTER_DISTRICT:

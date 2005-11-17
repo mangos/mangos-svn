@@ -129,6 +129,8 @@ struct MANGOS_DLL_DECL Cell
     inline uint32 CellY(void) const { return data.Part.cell_y; }
     inline uint32 GridX(void) const { return data.Part.grid_x; }
     inline uint32 GridY(void) const { return data.Part.grid_y; }
+    inline bool NoCreate(void) const { return data.Part.nocreate; }
+    inline void SetNoCreate(void) { data.Part.nocreate = 1; }
 
     Cell& operator=(const Cell &cell)
     {
@@ -148,7 +150,8 @@ struct MANGOS_DLL_DECL Cell
 	    unsigned grid_y : 6;
 	    unsigned cell_x : 4;
 	    unsigned cell_y : 4;
-	    unsigned reserved : 12;
+	    unsigned nocreate : 1;
+	    unsigned reserved : 11;
 	} Part;
 	uint32 All;
     } data;
@@ -157,12 +160,6 @@ struct MANGOS_DLL_DECL Cell
      * 
      */
     template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &) const;
-
-private:
-
-    // private class internal to the cell structure
-    template<class LOCK_TYPE, class T, class CONTAINER> void VisitX(const CellLock<LOCK_TYPE> &, CellPair &cell_pair, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, int &num, const int) const;
-    template<class LOCK_TYPE, class T, class CONTAINER> void VisitY(const CellLock<LOCK_TYPE> &, CellPair &cell_pair, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m, int &num, const int) const;
 
 };
 

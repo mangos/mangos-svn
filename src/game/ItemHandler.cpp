@@ -29,10 +29,7 @@
 #include "Chat.h"
 #include "Item.h"
 #include "UpdateData.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
-#endif
 
 void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 {
@@ -609,11 +606,8 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(vendorguid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-#endif
+
     // Check if Vendor exists
     if (unit == NULL)
     {
@@ -720,11 +714,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     recv_data >> slot;
     recv_data >> amount;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(srcguid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, srcguid);
-#endif
+
     if (unit == NULL)
         return;
 
@@ -805,11 +796,8 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     recv_data >> srcguid >> itemid;
     recv_data >> amount >> slot;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(srcguid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, srcguid);
-#endif
+
     if (unit == NULL)
         return;
 
@@ -895,11 +883,8 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
     Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-#endif
+
     if (unit == NULL)
         return;
 
@@ -982,11 +967,8 @@ void WorldSession::SendListInventory( uint64 guid )
     WorldPacket data;
 
     Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-#endif
+
     if (unit == NULL)
         return;
 
@@ -1066,11 +1048,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 */
 
 /*
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *unit = objmgr.GetObject<Creature>(guid);
-#else
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-#endif
     if (unit == NULL)
         return;
 

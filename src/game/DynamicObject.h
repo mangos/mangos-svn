@@ -33,12 +33,9 @@ class DynamicObject : public Object
 
         void Create( uint32 guidlow, Unit * caster, SpellEntry * spell, float x, float y, float z, uint32 duration );
         void Update(uint32 p_time);
-#ifndef ENABLE_GRID_SYSTEM
-        void DealDamage();
-#else
         void DealWithSpellDamage(Player &);
         void DealWithSpellDamage(Unit &);
-#endif
+
         void PeriodicTriggerDamage(uint32 damage, uint32 tick, float radius)
         {
             m_PeriodicDamage = damage;

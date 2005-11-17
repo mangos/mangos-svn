@@ -30,11 +30,9 @@
 #include "Group.h"
 #include "World.h"
 #include "NameTables.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
+
 
 WorldSession::WorldSession(uint32 id, WorldSocket *sock) : _accountId(id), _socket(sock),
 _security(0), _player(0), _logoutTime(0)

@@ -28,10 +28,8 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Spell.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 DynamicObject::DynamicObject() : Object()
 {
@@ -99,11 +97,7 @@ void DynamicObject::Update(uint32 p_time)
         else
         {
             m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
-#ifndef ENABLE_GRID_SYSTEM        
-        DealDamage();
-#else
-        m_caster->DealWithSpellDamage(*this);
-#endif
+	    m_caster->DealWithSpellDamage(*this);
         }
     }
 
@@ -111,35 +105,11 @@ void DynamicObject::Update(uint32 p_time)
     {
         m_PeriodicDamage = 0;
         m_PeriodicDamageTick = 0;
-        // RemoveFromMap();
         RemoveFromWorld();
-#ifndef ENABLE_GRID_SYSTEM
-        objmgr.RemoveObject(this);
-        delete this;
-#else
-    MapManager::Instance().GetMap(m_mapId)->Remove(this, true);
-#endif
+	MapManager::Instance().GetMap(m_mapId)->Remove(this, true);
     }
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-void DynamicObject::DealDamage()
-{
-    std::set<Object*>::iterator itr;
-    for( itr = m_caster->GetInRangeSetBegin(); itr != m_caster->GetInRangeSetEnd(); itr++ )
-    {
-        if( (*itr)->GetTypeId() != TYPEID_UNIT && (*itr)->GetTypeId() != TYPEID_PLAYER )
-            continue;
-        if(!((Unit*)(*itr))->isAlive())
-            continue;
-
-        if(_CalcDistance(GetPositionX(),GetPositionY(),GetPositionZ(),(*itr)->GetPositionX(),(*itr)->GetPositionY(),(*itr)->GetPositionZ()) < m_PeriodicDamageRadius && (*itr)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-        {
-            m_caster->PeriodicAuraLog((Unit*)(*itr),m_spell->Id,m_PeriodicDamage,m_spell->School);
-        }
-    }
-}
-#else
 void DynamicObject::DealWithSpellDamage(Player &caster)
 {
     /* TODO siuolly: cast on in the near by cell units
@@ -159,4 +129,4 @@ void DynamicObject::DealWithSpellDamage(Player &caster)
 void DynamicObject::DealWithSpellDamage(Unit &caster)
 {
 }
-#endif
+

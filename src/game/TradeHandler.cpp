@@ -322,11 +322,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     recvPacket >> ID;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Player* pOther = objmgr.GetObject<Player>( ID );
-#else
     Player* pOther = ObjectAccessor::Instance().FindPlayer( ID );
-#endif
 
     if(!pOther)
     {

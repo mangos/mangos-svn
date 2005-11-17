@@ -27,7 +27,6 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "World.h"
-#include "MapMgr.h"
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Group.h"
@@ -37,10 +36,8 @@
 #include "ChannelMgr.h"
 #include "LootMgr.h"
 #include "ProgressBar.hpp"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 initialiseSingleton( World );
 
@@ -158,15 +155,6 @@ void World::SetInitialWorldSettings()
 
     new ChannelMgr;
 
-#ifndef ENABLE_GRID_SYSTEM
-    // Set up player positions array (for NPC movement speedup)...
-    Log::getSingleton( ).outString( "Setting up a player positions array...." );
-    memset(&ActivePlayers,-1,sizeof(ActivePlayers));
-    memset(&PlayerPositions,0,sizeof(PlayerPositions));
-    memset(&PlayerZones,0,sizeof(PlayerZones));
-    memset(&PlayerMaps,0,sizeof(PlayerMaps));
-#endif //ENABLE_GRID_SYSTEM
-
     // Load quests
     Log::getSingleton( ).outString( "Loading Quests..." );
     objmgr.LoadQuests();
@@ -189,18 +177,10 @@ void World::SetInitialWorldSettings()
     Log::getSingleton( ).outString( "Loading Creatures..." );
     objmgr.LoadCreatureNames();
 
-#ifndef ENABLE_GRID_SYSTEM
-    objmgr.LoadCreatures();
-    // Load initial GameObjects
-    Log::getSingleton( ).outString( "Loading Gameobjects..." );
-    objmgr.LoadGameObjects();
-    // Load Corpses
-    Log::getSingleton( ).outString( "Loading Corpses..." );
-    objmgr.LoadCorpses();
-#endif
-		//Load Guilds
-		Log::getSingleton( ).outString( "Loading Guilds..." );
-		objmgr.LoadGuilds();
+    //Load Guilds
+    Log::getSingleton( ).outString( "Loading Guilds..." );
+    objmgr.LoadGuilds();
+
     //Load graveyards
    // Log::getSingleton( ).outString( "Loading Graveyards..." );
    // objmgr.LoadGraveyards();
@@ -257,70 +237,9 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_SESSIONS].SetInterval(100);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
 
-#ifndef ENABLE_GRID_SYSTEM
-  for(ObjectMgr::CreatureMap::const_iterator i = objmgr.Begin<Creature>();
-        i != objmgr.End<Creature>(); i++)
-    {
-        i->second->PlaceOnMap();
-    }
-
-    for(ObjectMgr::GameObjectMap::const_iterator i = objmgr.Begin<GameObject>();
-        i != objmgr.End<GameObject>(); i++)
-    {
-        i->second->PlaceOnMap();
-    }
-
-    for(ObjectMgr::CorpseMap::const_iterator i = objmgr.Begin<Corpse>();
-        i != objmgr.End<Corpse>(); i++)
-    {
-        i->second->PlaceOnMap();
-    }
-#else
     MapManager::Instance().Initialize();
-#endif
     Log::getSingleton( ).outString( "WORLD: SetInitialWorldSettings done" );
 }
-
-#ifndef ENABLE_GRID_SYSTEM
-
-time_t nextCreatureCheckTime = 0;
-extern float max_creature_distance;
-extern float DistanceNoHeight(float from1, float from2, float to1, float to2);
-
-void World::CreaturesCheck()
-{// UQ1: Check through creatures list to see which should be enabled/disabled...
-	ObjectMgr::CreatureMap::iterator iter;
-
-	nextCreatureCheckTime = time(NULL) + 10;
-
-	for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
-	{
-		int loop;
-		bool found = false;
-
-		float x = iter->second->GetPositionX();
-		float y = iter->second->GetPositionY();
-
-		for (loop = 0; loop < NumActivePlayers; loop++)
-		{
-	        if (PlayerMaps[ActivePlayers[loop]] != iter->second->GetMapId())
-		        continue;
-
-	        float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
-
-		    if(distance<=max_creature_distance)
-			{
-				iter->second->SetEnabled();
-				found = true;
-				break;
-			}
-		}
-
-		if (!found)
-			iter->second->SetDisabled();
-	}
-}
-#endif //ENABLE_GRID_SYSTEM
 
 void World::Update(time_t diff)
 {
@@ -505,61 +424,11 @@ void World::Update(time_t diff)
         }
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    // TODO: make sure that all objects get their updates, not just characters and creatures
     if (m_timers[WUPDATE_OBJECTS].Passed())
     {
         m_timers[WUPDATE_OBJECTS].Reset();
-
-#ifndef __NO_PLAYERS_ARRAY__
-		if (NumActivePlayers > 0)
-		{
-			if (nextCreatureCheckTime <= time(NULL))
-				CreaturesCheck();
-		}
-#endif //__NO_PLAYERS_ARRAY__
-
-        ObjectMgr::PlayerMap::iterator chriter;
-        ObjectMgr::CreatureMap::iterator iter;
-        ObjectMgr::GameObjectMap::iterator giter;
-        ObjectMgr::DynamicObjectMap::iterator diter;
-
-        for( chriter = objmgr.Begin<Player>(); chriter != objmgr.End<Player>( ); ++ chriter )
-            chriter->second->Update( diff );
-
-#ifndef __NO_PLAYERS_ARRAY__
-		if (NumActivePlayers > 0)
-#endif //__NO_PLAYERS_ARRAY__
-		{
-	        for( iter = objmgr.Begin<Creature>(); iter != objmgr.End<Creature>(); ++ iter )
-			{
-#ifndef __NO_PLAYERS_ARRAY__
-				if (iter->second->isDisabled())
-					continue;
-#endif //__NO_PLAYERS_ARRAY__
-			
-	            iter->second->Update( diff );
-			}
-		}
-
-        for( giter = objmgr.Begin<GameObject>(); giter != objmgr.End<GameObject>( ); ++ giter )
-            giter->second->Update( diff );
-
-        for( diter = objmgr.Begin<DynamicObject>(); diter != objmgr.End<DynamicObject>( ); ++ diter )
-            diter->second->Update( diff );
+	MapManager::Instance().Update(diff);
     }
-
-    for (MapMgrMap::iterator iter = m_maps.begin(); iter != m_maps.end(); iter++)
-    {
-        iter->second->Update(diff);
-    }
-#else
-    if (m_timers[WUPDATE_OBJECTS].Passed())
-    {
-        m_timers[WUPDATE_OBJECTS].Reset();
-    MapManager::Instance().Update(diff);
-    }
-#endif
 }
 
 
@@ -585,18 +454,3 @@ void World::SendWorldText(const char* text, WorldSession *self)
     SendGlobalMessage(&data, self);
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-MapMgr* World::GetMap(uint32 id)
-{
-    MapMgrMap::iterator iter = m_maps.find(id);
-    if (iter != m_maps.end())
-        return iter->second;
-
-    MapMgr *newMap = new MapMgr(id);
-    ASSERT(newMap);
-
-    m_maps[id] = newMap;
-
-    return newMap;
-}
-#endif
