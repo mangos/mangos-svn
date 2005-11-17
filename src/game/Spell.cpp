@@ -105,6 +105,13 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Affect* aff )
 {
     ASSERT( Caster != NULL && info != NULL );
 
+    int32 temptime;
+    SpellEntry *spellInfo;
+    Player* p_caster;
+    std::list<struct spells>::iterator itr;
+
+    std::list<struct spells> player_spells;
+
     m_spellInfo = info;
     m_caster = Caster;
 
@@ -117,6 +124,31 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Affect* aff )
     m_AreaAura = false;
 
     m_triggeredByAffect = aff;
+
+    temptime = GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex)); //add by vendy
+    // add by vendy for talent impact ,NEED OPTIMIZE FIX ME
+    if( Caster->isPlayer() && m_spellInfo )
+    {
+        p_caster = (Player*)m_caster;
+        player_spells = p_caster->getSpellList();
+        for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+        {
+            if (itr->spellId != m_spellInfo->Id)
+            {    
+                  spellInfo = sSpellStore.LookupEntry(itr->spellId);
+                  if(spellInfo)
+                  {
+                      if(spellInfo->SpellIconID == m_spellInfo->SpellIconID)
+                      {
+                          if(spellInfo->EffectMiscValue[0] ==10 )
+                              temptime=temptime+(spellInfo->EffectBasePoints[0]+1);
+                      }
+                  }
+            }
+        }    
+    }
+    
+    m_timer = temptime<0?0:temptime;
 }
 
 
@@ -150,15 +182,15 @@ void Spell::FillTargetMap()
                 case 15:                          // All Enemies in Area of Effect (TEST)
                 case 16:                          // All Enemies in Area of Effect instant (e.g. Flamestrike)
                 {
-		    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-		    Cell cell = RedZone::GetZone(p);
-		    cell.data.Part.reserved = ALL_DISTRICT;
-		    cell.SetNoCreate();
-		    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
-		    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
-		    CellLock<GridReadGuard> cell_lock(cell, p);
-		    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-		}break;
+            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+            Cell cell = RedZone::GetZone(p);
+            cell.data.Part.reserved = ALL_DISTRICT;
+            cell.SetNoCreate();
+            MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+            TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+            CellLock<GridReadGuard> cell_lock(cell, p);
+            cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+        }break;
                     case 20:                      // All Party Members around the Caster
                     {
                         Group* pGroup = objmgr.GetGroupByLeader(p_caster->GetGroupLeader());
@@ -180,33 +212,33 @@ void Spell::FillTargetMap()
                     }break;
                     case 22:                      // Enemy Targets around the Caster
                     {
-			CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-			Cell cell = RedZone::GetZone(p);
-			cell.data.Part.reserved = ALL_DISTRICT;
-			cell.SetNoCreate();
-			MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
-			TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
-			CellLock<GridReadGuard> cell_lock(cell, p);
-			cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+            Cell cell = RedZone::GetZone(p);
+            cell.data.Part.reserved = ALL_DISTRICT;
+            cell.SetNoCreate();
+            MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+            TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+            CellLock<GridReadGuard> cell_lock(cell, p);
+            cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
 
-		    }break;
+            }break;
                         case 23:                  // Gameobject Target
                         {
                             tmpMap.push_back(m_targets.m_unitTarget);
                         }break;
                         case 24:                  // Targets in Front of the Caster
                         {
-			    CellPair p(MaNGOS::ComputeCellPair(p_caster->GetPositionX(), p_caster->GetPositionY()));
-			    Cell cell = RedZone::GetZone(p);
-			    cell.data.Part.reserved = ALL_DISTRICT;
-			    cell.SetNoCreate();
-			    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tmpMap, i);
-			    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
-			    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-			    CellLock<GridReadGuard> cell_lock(cell, p);
-			    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-			    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-			}break;
+                CellPair p(MaNGOS::ComputeCellPair(p_caster->GetPositionX(), p_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tmpMap, i);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, ContainerMapList<Player> > player_notifier(notifier);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            }break;
                             case 25:              //Target is duel vs player add by vendy
                             {
                                 tmpMap.push_back(m_targets.m_unitTarget);
@@ -219,15 +251,15 @@ void Spell::FillTargetMap()
                                     tmpMap.push_back(m_targets.m_itemTarget);
                             }break;
                             case 28:              // All Enemies in Area of Effect(Blizzard/Rain of Fire/volley) channeled
-			    {
-				CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-				Cell cell = RedZone::GetZone(p);
-				cell.data.Part.reserved = ALL_DISTRICT;
-				cell.SetNoCreate();
-				MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
-				TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
-				CellLock<GridReadGuard> cell_lock(cell, p);
-				cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                {
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+                MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+                TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
                                 }break;
                                 case 32:          // Minion Target
                                 {
@@ -243,7 +275,7 @@ void Spell::FillTargetMap()
                                     firstTarget = ObjectAccessor::Instance().FindPlayer(m_targets.m_unitTarget);
 
                                     if(!firstTarget)
-					firstTarget = ObjectAccessor::Instance().GetCreature(*p_caster, m_targets.m_unitTarget);
+                    firstTarget = ObjectAccessor::Instance().GetCreature(*p_caster, m_targets.m_unitTarget);
 
                                     if(!firstTarget)
                                         break;
@@ -265,15 +297,15 @@ void Spell::FillTargetMap()
                                 }break;
                                 case 53:          // Target Area by Players CurrentSelection()
                                 {
-				    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-				    Cell cell = RedZone::GetZone(p);
-				    cell.data.Part.reserved = ALL_DISTRICT;
-				    cell.SetNoCreate();
-				    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
-				    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
-				    CellLock<GridReadGuard> cell_lock(cell, p);
-				    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
-				}break;
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell = RedZone::GetZone(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+                    MaNGOS::SpellNotifierPlayer notifier(*this, tmpMap, i);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, ContainerMapList<Player> > player_notifier(notifier);
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                }break;
                                     default:
                                     {
                                     }break;
@@ -308,7 +340,7 @@ void Spell::FillTargetMap()
 
                         SendSpellStart();
 
-                        m_timer = GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex));
+                        //m_timer = GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex)); //mark by vendy
                         m_spellState = SPELL_STATE_PREPARING;
 
                         m_castPositionX = m_caster->GetPositionX();
@@ -412,9 +444,12 @@ void Spell::FillTargetMap()
 
                     void Spell::update(uint32 difftime)
                     {
-                        if(m_castPositionX != m_caster->GetPositionX() ||
-                            m_castPositionY != m_caster->GetPositionY() ||
-                            m_castPositionZ != m_caster->GetPositionZ() )
+                        if( //( 
+                              m_castPositionX != m_caster->GetPositionX()  ||
+                              m_castPositionY != m_caster->GetPositionY()  ||
+                              m_castPositionZ != m_caster->GetPositionZ()//) && 
+                            //( m_timer != 0 ) // add by vendy
+                          )
                         {
                             SendInterrupted(0);
                             SendCastResult(0x20); // Interrupted
@@ -511,8 +546,9 @@ void Spell::FillTargetMap()
                         data << m_caster->GetGUID() << m_caster->GetGUID();
                         data << m_spellInfo->Id;
                         data << cast_flags;
-                        data << GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex));
-
+                        data << m_timer;
+                        //data << GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex)); //mark by vendy
+                        
                         m_targets.write( &data );
                         ((Player*)m_caster)->SendMessageToSet(&data, true);
 
@@ -1001,7 +1037,7 @@ newItem = NULL;
 
                                 uint32 level = m_caster->getLevel();
                                 Creature* spawnCreature = new Creature();
-								spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),ci->Name.c_str(),m_caster->GetMapId(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_caster->GetOrientation(), ci->DisplayID);
+                                spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),ci->Name.c_str(),m_caster->GetMapId(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_caster->GetOrientation(), ci->DisplayID);
                                 spawnCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, ci->DisplayID);
                                 spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
                                 spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
@@ -1015,54 +1051,54 @@ newItem = NULL;
                             }break;
                             case 53:              // Enchant Item Permanent
                             {// UQ1: I'd like this working... So, ...
-								Player* p_caster = (Player*)m_caster;
-								uint32 add_slot = 0;
-								uint8 item_slot = 0;
+                                Player* p_caster = (Player*)m_caster;
+                                uint32 add_slot = 0;
+                                uint8 item_slot = 0;
 
-								uint32 field = 99;
-				                if(m_CastItem)
-				                    field = 1;
-				                else
-									field = 3;
-				                
-								if(!m_CastItem)
-								{
-				                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
-								    {
-										if(p_caster->GetItemBySlot(i) != 0)
-											if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
-											{
-												m_CastItem = p_caster->GetItemBySlot(i);
-												item_slot = i;
-											}
-									}
-								}
+                                uint32 field = 99;
+                                if(m_CastItem)
+                                    field = 1;
+                                else
+                                    field = 3;
+                                
+                                if(!m_CastItem)
+                                {
+                                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
+                                    {
+                                        if(p_caster->GetItemBySlot(i) != 0)
+                                            if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
+                                            {
+                                                m_CastItem = p_caster->GetItemBySlot(i);
+                                                item_slot = i;
+                                            }
+                                    }
+                                }
 
-								for(add_slot = 0; add_slot < 22; add_slot++)
-								{
-									if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
-										break;
-								}
+                                for(add_slot = 0; add_slot < 22; add_slot++)
+                                {
+                                    if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
+                                        break;
+                                }
 
-								if (add_slot < 32)
-								{
-									for(uint8 i=0;i<3;i++)
-									{
-										if (m_spellInfo->EffectMiscValue[i])
-											m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
-									}
+                                if (add_slot < 32)
+                                {
+                                    for(uint8 i=0;i<3;i++)
+                                    {
+                                        if (m_spellInfo->EffectMiscValue[i])
+                                            m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+                                    }
 
-									// Now actually set it up, and transmit info...
-									UpdateData upd;
-									WorldPacket packet;
+                                    // Now actually set it up, and transmit info...
+                                    UpdateData upd;
+                                    WorldPacket packet;
 
-									p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-									upd.Clear();
-									m_CastItem->UpdateStats();
-									m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
-									upd.BuildPacket(&packet);
-									p_caster->GetSession()->SendPacket(&packet);
-								}
+                                    p_caster->ApplyItemMods( m_CastItem, item_slot, true );
+                                    upd.Clear();
+                                    m_CastItem->UpdateStats();
+                                    m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
+                                    upd.BuildPacket(&packet);
+                                    p_caster->GetSession()->SendPacket(&packet);
+                                }
 /*
                 Player* p_caster = (Player*)m_caster;
                 uint32 field = 99;
@@ -1238,9 +1274,9 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 if(guid != 0)
                                 {
                                     Creature* Totem = NULL;
-				    /* TODO siuolly: get the totem for the caster
-				    ObjectAccessor::Instance().GetCreature(m_caster, guid);				    
-				    */
+                    /* TODO siuolly: get the totem for the caster
+                    ObjectAccessor::Instance().GetCreature(m_caster, guid);                 
+                    */
 
                                     if(Totem)
                                     {
@@ -1249,7 +1285,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                     }
                                 }
 
-				// spawn a new one
+                // spawn a new one
                                 Creature* pTotem = new Creature();
                                 CreatureInfo* ci = objmgr.GetCreatureName(m_spellInfo->EffectMiscValue[i]);
                                 if(!ci)
@@ -1260,7 +1296,7 @@ m_CastItem = p_caster->GetItemBySlot(i);
                                 char* name = (char*)ci->Name.c_str();
 
                                 // uint32 guidlow, uint16 display_id, uint8 state, uint32 obj_field_entry, uint8 scale, uint16 type, uint16 faction,  float x, float y, float z, float ang
-								pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), ci->DisplayID );
+                                pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name, m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), ci->DisplayID );
                                 pTotem->SetUInt32Value(OBJECT_FIELD_TYPE,33);
                                 pTotem->SetUInt32Value(UNIT_FIELD_DISPLAYID,ci->DisplayID);
                                 pTotem->SetUInt32Value(UNIT_FIELD_LEVEL,m_caster->getLevel());
@@ -1325,9 +1361,9 @@ m_CastItem = p_caster->GetItemBySlot(i);
 
                                     if(obj)
                                     {
-					// Remove and delete
+                    // Remove and delete
                                         MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
-					obj = NULL;
+                    obj = NULL;
                                     }
                                 }
 
@@ -1423,24 +1459,24 @@ m_CastItem = p_caster->GetItemBySlot(i);
                     {
                         uint8 castResult = 0;
 
-						if (m_CastItem)
-						{// UQ1: Cast a spell on an item should always be OK! ???
-							castResult = CheckItems();
+                        if (m_CastItem)
+                        {// UQ1: Cast a spell on an item should always be OK! ???
+                            castResult = CheckItems();
 
-							 if(castResult != 0)
-								SendCastResult(castResult);
+                             if(castResult != 0)
+                                SendCastResult(castResult);
 
-							 //uint8(0x54)
+                             //uint8(0x54)
 
-							return castResult;
-						}
+                            return castResult;
+                        }
 
                         Unit *target = NULL;
                         Player *pl = dynamic_cast<Player *>(m_caster);
                         if( pl != NULL )
                             target = ObjectAccessor::Instance().GetUnit(*pl, m_targets.m_unitTarget);
                         else
-			    Log::getSingleton( ).outError("SPELL: (grid system) player invalid!!!");   // FIX ME PLEASE..
+                Log::getSingleton( ).outError("SPELL: (grid system) player invalid!!!");   // FIX ME PLEASE..
 
                         if(target)
                         {
@@ -1635,6 +1671,6 @@ fclose(pFile);
 
                         pTarget->SetMapId(TC->mapId);
                         pTarget->Relocate(TC->x, TC->y, TC->z, 0);
-			// enters the new world
+            // enters the new world
                         MapManager::Instance().GetMap(Target->GetMapId())->Add(pTarget);
                     }

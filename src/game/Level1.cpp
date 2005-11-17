@@ -556,7 +556,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 }
 /*
 add by vendy
-type: .modify spell 2829 0 65535 
+type: .modify spell 13 11 0 65535 
 will change all Mind Blast Spell CategoryRecoveryTime to 0,
 */
 bool ChatHandler::HandleModifySpellCommand(const char* args)
@@ -568,18 +568,25 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     if (!pspellflatid)
         return false;
 
+    char* pop = strtok(NULL, " ");
+    if (!pop)
+        return false;
+
     char* pval = strtok(NULL, " ");
     if (!pval)
         return false;
+    
+    uint16 mark;
 
     char* pmark = strtok(NULL, " ");
-    if (!pmark)
-        return false;
-
-    uint16 mark = atoi(pmark);
-	uint16 spellflatid = atoi(pspellflatid);
+   
+    uint8 spellflatid = atoi(pspellflatid);
+    uint8 op   = atoi(pop);
     uint16 val = atoi(pval);
-	
+    if(!pmark)
+        mark = 65535;
+    else
+        mark = atoi(pmark);
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)                              // Ignatich: what should NOT happen but just in case...
@@ -603,10 +610,11 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     chr->GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
-    data << uint16(spellflatid);
-    data << uint16(val); 
-    data <<uint16(mark);
-    chr->GetSession()->SendPacket(&data);		
+    data << uint8(spellflatid);
+    data << uint8(op);
+    data << uint16(val);
+    data << uint16(mark);
+    chr->GetSession()->SendPacket(&data);       
     
     return true;
 }

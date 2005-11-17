@@ -272,9 +272,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     Player* plr = new Player(this);
     ASSERT(plr);
 
+	plr->SetSession(this);  //Set Session all of first
     plr->LoadFromDB(GUID_LOPART(playerGuid));
     plr->_RemoveAllItemMods();
-    plr->SetSession(this);
+    
+
     SetPlayer(plr);
 
     // account data == UI config

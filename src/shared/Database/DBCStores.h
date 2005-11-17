@@ -94,7 +94,7 @@ struct skilllinespell
 };
 struct SpellEntry
 {
-    uint32 Id;                                    //0
+    uint32 Id;                                    //1
     uint32 School;
     uint32 Category;
     uint32 field4;
@@ -153,7 +153,7 @@ struct SpellEntry
     uint32 EffectTriggerSpell[3];                 //103-105
     float EffectPointsPerComboPoint[3];           //106-108
     uint32 SpellVisual;                           //109
-    uint32 field110;
+    uint32 field110;                       
     uint32 SpellIconID;
     uint32 activeIconID;
     uint32 spellPriority;
