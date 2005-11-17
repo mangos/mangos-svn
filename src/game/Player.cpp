@@ -1414,12 +1414,14 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     //talent impact  add by vendy
     // check for spell id
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
-    uint8 spellflatid;
     uint8 op;
     uint16 val=0;
     int16 tmpval=0;
     uint16 mark=0;
     WorldPacket data;
+    uint32 shiftdata=0x01;
+    uint8  FlatId=0;
+	uint32 EffectVal;
 
     if (slot_id == 0xffff)
     {
@@ -1435,31 +1437,41 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
 
     if(spellInfo && m_session)
     {
-
-    for(int i=0;i<3;i++){
-        if(spellInfo->EffectItemType[i]!=0){
-            spellflatid=GetSpellFlatID(spellInfo->EffectItemType[i]);
-            op=spellInfo->EffectMiscValue[i];
-            tmpval = spellInfo->EffectBasePoints[i];
-            if(tmpval != 0)
-            {
-                if(tmpval > 0){
-                    val =  tmpval+1;
-                    mark = 0x0;
-                }else{
-                    val  = 0xFFFF + (tmpval+2);
-                    mark = 0xFFFF;
+        for(int i=0;i<3;i++)
+	    {
+            if(spellInfo->EffectItemType[i]!=0)
+		    {
+                EffectVal=spellInfo->EffectItemType[i];
+  	            op=spellInfo->EffectMiscValue[i];
+                tmpval = spellInfo->EffectBasePoints[i];
+                if(tmpval != 0)
+                {
+                   if(tmpval > 0){
+                       val =  tmpval+1;
+                       mark = 0x0;
+                   }else{
+                       val  = 0xFFFF + (tmpval+2);
+                       mark = 0xFFFF;
+                   }
                 }
-            }
-            data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
-            data << uint8(spellflatid);
-            data << uint8(op);
-            data << uint16(val);
-            data << uint16(mark);
-            m_session->SendPacket(&data);    
-        }
-    }
 
+		        for(int i=0;i<32;i++)
+		        {
+                    if ( EffectVal&shiftdata )
+                    {
+                        FlatId=i;
+                  
+				        data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
+                        data << uint8(FlatId);
+                        data << uint8(op);
+                        data << uint16(val);
+                        data << uint16(mark);
+                        m_session->SendPacket(&data);    
+			        }
+                    shiftdata=shiftdata<<1;
+                }            
+		    }
+        }
     }
     newspell.slotId = slot_id;
     m_spells.push_back(newspell);
@@ -1486,22 +1498,6 @@ bool Player::removeSpell(uint16 spell_id)
     return false;
 }
 
-//Spell flat modify 
-uint8 Player::GetSpellFlatID(uint32 EffectVal)
-{
-    uint32 shiftdata=0x01;
-    uint8  FlatId=0;
-
-    for(int i=0;i<32;i++){
-        if(EffectVal&shiftdata)
-        {
-           FlatId=FlatId+i;
-        }
-        shiftdata=shiftdata<<1;
-    }
-
-    return FlatId;
-}
 
 Mail* Player::GetMail(uint32 id)
 {

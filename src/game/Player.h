@@ -664,9 +664,6 @@ protected:
 		uint32 m_timedQuest;
 		uint32 m_Tutorials[8];
 
-		//Spell flat modify 
-		uint8 GetSpellFlatID(uint32 EffectVal);
-
 };
 
 // UQ1: Defined in Player.cpp... CHECKME: Move somewhere else???
