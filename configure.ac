@@ -302,13 +302,17 @@ AM_CONDITIONAL(NEWFRAMEWORK, test x$MANGOS_ENABLE_NEW_FRAMEWORK = x$yes)
 
 
 MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
+MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
 if test $sysconfdir = '${prefix}/etc'; then
     MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"
+    MANGOSD_CONFIGDIR_TEMP="/etc/mangos"
 else
   if test $sysconfdir = '/'; then
 	MANGOSD_CONFIG_TEMP="/mangosd.conf"
+	MANGOSD_CONFIGDIR_TEMP="/"
   else
 	MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
+	MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
   fi
 fi
 
@@ -323,6 +327,7 @@ else
 fi
 
 eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
+eval "MANGOSD_CONFIGDIR=$MANGOSD_CONFIGDIR_TEMP"
 eval "MANGOSD_DATA=$MANGOSD_DATA_TEMP"
 
 dnl Configure the final compiler & linker options
@@ -339,6 +344,7 @@ AC_SUBST(EXTRA_COMPILER_OPTIONS)
 
 dnl Configured MaNGOS variables
 AC_SUBST(MANGOSD_CONFIG)
+AC_SUBST(MANGOSD_CONFIGDIR)
 AC_SUBST(MANGOSD_DATA)
 AC_SUBST(VERSION)
 AC_SUBST(LT_RELEASE)
