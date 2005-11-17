@@ -444,11 +444,11 @@ void Spell::FillTargetMap()
 
                     void Spell::update(uint32 difftime)
                     {
-                        if( //( 
+                        if( ( 
                               m_castPositionX != m_caster->GetPositionX()  ||
                               m_castPositionY != m_caster->GetPositionY()  ||
-                              m_castPositionZ != m_caster->GetPositionZ()//) && 
-                            //( m_timer != 0 ) // add by vendy
+                              m_castPositionZ != m_caster->GetPositionZ()) && 
+                            ( m_timer != 0 ) // add by vendy
                           )
                         {
                             SendInterrupted(0);
