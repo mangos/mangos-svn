@@ -40,5 +40,12 @@ mangosd_LDFLAGS = -L$(srcdir)/../shared \
                -L$(srcdir)/../../dep/src/zthread \
                -L$(srcdir)/../../dep/src/zlib
 
+# install mangosd.conf to $(sysconfdir)
+sysconf_DATA = \
+    mangosd.conf
+
+# use our configured sysconfdir
+sysconfdir = @MANGOSD_CONFIGDIR@
+
 CLEANFILES = \
     Master.h

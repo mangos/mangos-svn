@@ -28,10 +28,10 @@ EXTRA_DIST = \
 	char_spells.sql \
 	commands.sql \
 	corpses.sql \
+	creatureinvolvedrelation.sql \
 	creatureloot.sql \
 	creature_names.sql \
 	creaturequestrelation.sql \
-	creatureinvolvedrelation.sql \	
 	creatures_mov.sql \
 	creaturespells.sql \
 	creatures.sql \
@@ -40,14 +40,15 @@ EXTRA_DIST = \
 	gameobjects.sql \
 	gameobjecttemplate.sql \
 	gameobj_loot.sql \
+	gmtickets.sql \
 	graveyards.sql \
-	guilds.sql \
 	guilds_members.sql \
+	guilds.sql \
 	inventory.sql \
 	ipbantable.sql \
 	item_instances.sql \
+	item_pages.sql \
 	items.sql \
-	item_pages.sql \	
 	mailed_items.sql \
 	mail.sql \
 	npc_text.sql \
@@ -69,8 +70,7 @@ EXTRA_DIST = \
 	trainer.sql \
 	triggerquestrelation.sql \
 	tutorials.sql \
-	vendors.sql \
-	gmtickets.sql \
+	vendors.sql
 
 # SQL files for MaNGOS database to be installed to datadir
 pkgdata_DATA = \
@@ -84,10 +84,10 @@ pkgdata_DATA = \
 	char_spells.sql \
 	commands.sql \
 	corpses.sql \
+	creatureinvolvedrelation.sql \
 	creatureloot.sql \
 	creature_names.sql \
 	creaturequestrelation.sql \
-	creatureinvolvedrelation.sql \	
 	creatures_mov.sql \
 	creaturespells.sql \
 	creatures.sql \
@@ -96,14 +96,15 @@ pkgdata_DATA = \
 	gameobjects.sql \
 	gameobjecttemplate.sql \
 	gameobj_loot.sql \
+	gmtickets.sql \
 	graveyards.sql \
-	guilds.sql \
 	guilds_members.sql \
+	guilds.sql \
 	inventory.sql \
 	ipbantable.sql \
 	item_instances.sql \
+	item_pages.sql \
 	items.sql \
-	item_pages.sql \	
 	mailed_items.sql \
 	mail.sql \
 	npc_text.sql \
@@ -124,9 +125,8 @@ pkgdata_DATA = \
 	teleport_cords.sql \
 	trainer.sql \
 	triggerquestrelation.sql \
-	tutorials.sql \	
-	vendors.sql \
-	gmtickets.sql \
+	tutorials.sql \
+	vendors.sql
 
 # directory defines
 pkgdatadir = @MANGOSD_DATA@/sql
