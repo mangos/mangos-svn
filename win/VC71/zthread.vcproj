@@ -191,7 +191,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB,ENABLE_GRID_SYSTEM"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
 				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
