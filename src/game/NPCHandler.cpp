@@ -30,10 +30,8 @@
 #include "Affect.h"
 #include "UpdateMask.h"
 #include "ScriptCalls.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
-#endif
+
 
 //////////////////////////////////////////////////////////////
 /// This function handles MSG_TABARDVENDOR_ACTIVATE:
@@ -482,14 +480,13 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     
     recv_data >> guid >> option;
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, GUID_LOPART(guid));
-
-	if (unit == NULL)
-	{
-		Log::getSingleton( ).outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-		return;
-	}
-
-	scriptCallGossipSelect( GetPlayer(), unit, option, GetPlayer()->PlayerTalkClass->GossipOption( option ) );
+    if (unit == NULL)
+    {
+	Log::getSingleton( ).outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+	return;
+    }
+    
+    scriptCallGossipSelect( GetPlayer(), unit, option, GetPlayer()->PlayerTalkClass->GossipOption( option ) );
 }
 
 

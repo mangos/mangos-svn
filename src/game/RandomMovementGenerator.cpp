@@ -18,10 +18,10 @@
  */
 
 #include "RandomMovementGenerator.h"
-
+#include "Creature.h"
 
 void
-RandomMovementGenerator::Initialize(const Creature &)
+RandomMovementGenerator::Initialize(const Creature &creature)
 {
 }
 
@@ -31,7 +31,7 @@ RandomMovementGenerator::Reset(const Creature &)
 }
 
 bool
-RandomMovementGenerator(const Creature &, float &x, float &y, float &z, float &orientation)
+RandomMovementGenerator::GetNext(const Creature &, float &x, float &y, float &z, float &orientation)
 {
     return false; /* need implementation */
 }

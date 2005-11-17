@@ -51,32 +51,6 @@ ObjectMgr::~ObjectMgr()
     }
     mCreatureNames.clear();
 
-#ifndef ENABLE_GRID_SYSTEM
-    for( CreatureMap::iterator i = mCreatures.begin( ); i != mCreatures.end( ); ++ i )
-    {
-        delete i->second;
-    }
-    mCreatures.clear( );
-
-    for( GameObjectMap::iterator i = mGameObjects.begin( ); i != mGameObjects.end( ); ++ i )
-    {
-        delete i->second;
-    }
-    mGameObjects.clear( );
-
-    for( DynamicObjectMap::iterator i = mDynamicObjects.begin( ); i != mDynamicObjects.end( ); ++ i )
-    {
-        delete i->second;
-    }
-    mDynamicObjects.clear( );
-
-    for( CorpseMap::iterator i = mCorpses.begin( ); i != mCorpses.end( ); ++ i )
-    {
-        delete i->second;
-    }
-    mCorpses.clear( );
-#endif
-
     for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); ++ i )
     {
         delete i->second;
@@ -1758,97 +1732,6 @@ void ObjectMgr::LoadQuests()
 	Log::getSingleton( ).outString( "    %d quest definitions", count );
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-void ObjectMgr::LoadCreatures()
-{
-    QueryResult *result = sDatabase.Query( "SELECT id FROM creatures" );
-
-    if( !result )
-    {
-        // log no creatures error
-        return;
-    }
-
-    Creature* unit;
-    Field *fields;
-/// get number of rows for creatures
-    barGoLink bar( result->GetRowCount() );
-
-    do
-    {
-        fields = result->Fetch();
-
-/// print bar step
-        bar.step();
-
-        unit = new Creature;
-        ASSERT(unit);
-
-        unit->LoadFromDB(fields[0].GetUInt32());
-        AddObject(unit);
-    }
-    while( result->NextRow() );
-
-    delete result;
-}
-
-
-void ObjectMgr::LoadGameObjects()
-{
-
-    // load game object info...
-    QueryResult *result = sDatabase.Query( "SELECT id,type,displayId,faction,flags,sound0,sound1,sound2,sound3,sound4,sound5,sound6,sound7,sound8,sound9,size,name FROM gameobjecttemplate" );
-
-    if( !result )
-    {
-        // log no object error
-        return;
-    }
-
-    Field *fields;
-/// get number of rows for items
-    barGoLink bar( result->GetRowCount() );
-
-    do
-    {
-        fields = result->Fetch();
-/// print bar step
-        bar.step();
-    uint32 id = fields[0].GetUInt32();
-    GameObjectInfo *info = new GameObjectInfo(id, fields[1].GetUInt32(),fields[2].GetUInt32(),fields[3].GetUInt32(), 
-                          fields[4].GetUInt32(),
-                          fields[5].GetUInt32(),fields[6].GetUInt32(),fields[7].GetUInt32(),fields[8].GetUInt32(),
-                          fields[9].GetUInt32(),fields[10].GetUInt32(),fields[11].GetUInt32(),
-                          fields[12].GetUInt32(),
-                          fields[13].GetUInt32(), fields[14].GetUInt32(),
-                                                  fields[15].GetFloat(),
-                          fields[16].GetString());
-    mGameObjectInfo[id] = info;
-    }
-    while( result->NextRow() );
-
-    delete result;
-
-    // Load game objects
-    result = sDatabase.Query("SELECT id FROM gameobjects");
-
-    if( result )
-    {
-    do
-    {
-        fields = result->Fetch();
-        GameObject *go = new GameObject();
-        ASSERT(go);
-        
-        go->LoadFromDB(fields[0].GetUInt32());
-        AddObject(go);
-    }while( result->NextRow() );
-
-    delete result;
-    }
-}
-// end of ENABLE_GRID_SYSTEM
-#endif
 
 //-----------------------------------------------------------------------------
 void ObjectMgr::AddGossipText(GossipText *pGText)
@@ -2318,52 +2201,6 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path *pathnodes )
     }*/
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-Corpse *ObjectMgr::GetCorpseByOwner(Player *pOwner)
-{
-    CorpseMap::const_iterator itr;
-    for (itr = mCorpses.begin(); itr != mCorpses.end(); itr++)
-    {
-        if(!itr->second->GetUInt64Value(CORPSE_FIELD_OWNER))
-            continue;
-        if(itr->second->GetUInt64Value(CORPSE_FIELD_OWNER) == pOwner->GetGUID())
-            return itr->second;
-    }
-    return NULL;
-}
-
-
-void ObjectMgr::LoadCorpses()
-{
-    Corpse *pCorpse;
-
-    QueryResult *result = sDatabase.Query( "SELECT * FROM Corpses" );
-
-    if( !result )
-        return;
-
-/// get number of rows for items
-        barGoLink bar( result->GetRowCount() );
-
-    do
-    {
-        pCorpse = new Corpse;
-        Field *fields = result->Fetch();
-/// print bar step
-        bar.step();
-        pCorpse->Create(fields[0].GetUInt32());
-
-        pCorpse->SetPosition(fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
-        pCorpse->SetZoneId(fields[5].GetUInt32());
-        pCorpse->SetMapId(fields[6].GetUInt32());
-        pCorpse->LoadValues( fields[7].GetString());;
-        //Log::getSingleton( ).outError("AddObject at ObjectMgr.cpp line 940");
-        AddObject(pCorpse);
-    } while( result->NextRow() );
-
-    delete result;
-}
-#endif
 
 /*
 void ObjectMgr::AddGraveyard(GraveyardTeleport *pgrave)

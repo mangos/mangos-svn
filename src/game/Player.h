@@ -250,7 +250,7 @@ class Player : public Unit
 {
     friend class WorldSession;
     public:
-        Player ( );
+        Player (WorldSession *session);
         ~Player ( );
 
         void AddToWorld();

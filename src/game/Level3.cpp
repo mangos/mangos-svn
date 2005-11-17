@@ -33,11 +33,9 @@
 #include "GameObject.h"
 #include "Chat.h"
 #include "Log.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
 #include "MapManager.h"
-#endif
+
 
 bool ChatHandler::HandleSecurityCommand(const char* args)
 {
@@ -61,11 +59,8 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
 
     char buf[256];
 
-#ifndef ENABLE_GRID_SYSTEM
-    Player *chr = objmgr.GetPlayer(args);
-#else
     Player* chr = ObjectAccessor::Instance().FindPlayerByName(args);
-#endif
+
     if (chr)
     {
         // send message to user
@@ -184,13 +179,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
         pCreature->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME+1, 2000 );
         pCreature->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, 2.0f );
         Log::getSingleton( ).outError("AddObject at Level3.cpp line 172");
-#ifndef ENABLE_GRID_SYSTEM
-        objmgr.AddObject(pCreature);
-        pCreature->PlaceOnMap();
-#else
-    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
-#endif
-
+	MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
         pCreature->SaveToDB();
     }
     while( result->NextRow() );
@@ -1038,12 +1027,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
-#ifndef ENABLE_GRID_SYSTEM
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-#else
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-#endif
     
     if(strcmp(safe,"true") == 0)
     pGameObj->SaveToDB();
@@ -1067,11 +1051,8 @@ bool ChatHandler::HandleAddWeaponCommand(const char* args)
         return true;
     }
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature * pCreature = objmgr.GetCreature(guid);
-#else
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-#endif
+
     if(!pCreature)
     {
         FillSystemMessageData(&data, m_session, "You should select a creature.");
@@ -1169,12 +1150,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, typesid);
     pGameObj->SetZoneId(chr->GetZoneId());
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 252");
-#ifndef ENABLE_GRID_SYSTEM
-    objmgr.AddObject(pGameObj);
-    pGameObj->PlaceOnMap();
-#else
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-#endif
 
     //if(strcmp(safe,"true") == 0)
     pGameObj->SaveToDB();
@@ -1195,12 +1171,7 @@ bool ChatHandler::HandleAnimCommand(const char* args)
     data.Initialize( SMSG_EMOTE );
     data << anim_id << m_session->GetPlayer( )->GetGUID();
     WPAssert(data.size() == 12);
-#ifndef ENABLE_GRID_SYSTEM
-    m_session->GetPlayer()->SendMessageToSet(&data, true);
-#else
     MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId())->MessageBoardcast(m_session->GetPlayer(), &data, true);
-#endif
-
     return true;
 }
 
@@ -1394,12 +1365,8 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000);
     pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
     Log::getSingleton( ).outError("AddObject at Level3.cpp line 455");
-#ifndef ENABLE_GRID_SYSTEM
-    objmgr.AddObject(pCreature);
-    pCreature->PlaceOnMap();
-#else
     MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
-#endif
+
     pCreature->SaveToDB();
 
     std::stringstream ss,ss2,ss3;
@@ -1465,11 +1432,7 @@ bool ChatHandler::HandleEmoteCommand(const char* args)
     if(chr->GetSelection() == 0)
         return false;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Unit* target = objmgr.GetObject<Creature>(chr->GetSelection());
-#else
     Unit* target = ObjectAccessor::Instance().GetCreature(*chr, chr->GetSelection());
-#endif
     target->SetUInt32Value(UNIT_NPC_EMOTESTATE,emote);
 
     return true;
@@ -1483,11 +1446,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     uint32 guid = m_session->GetPlayer()->GetSelection();
     uint32 factionid = 0, npcflags = 0, skinid = 0;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Unit* target = objmgr.GetObject<Creature>(m_session->GetPlayer()->GetSelection());
-#else
     Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
-#endif
 
     if(!target)
     {
@@ -1529,11 +1488,7 @@ bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     uint32 entry = 0, testvalue = 0;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Unit* target = objmgr.GetObject<Creature>(m_session->GetPlayer()->GetSelection());
-#else
     Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
-#endif
 
     if(!target || !args)
     {

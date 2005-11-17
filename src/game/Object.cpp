@@ -28,14 +28,10 @@
 #include "ObjectMgr.h"
 #include "WorldSession.h"
 #include "UpdateData.h"
-#include "MapMgr.h"
-
 #include "Util.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
+
 
 using namespace std;
 
@@ -66,9 +62,6 @@ Object::Object( )
     (*((uint32*)&m_swimSpeed)) = 0x40971c72;
     m_backSwimSpeed = 4.5;
     (*((uint32*)&m_turnRate)) = 0x40490FDF;
-#ifndef ENABLE_GRID_SYSTEM
-    m_mapMgr = 0;
-#endif
     mSemaphoreTeleport = false;
 }
 
@@ -269,11 +262,8 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
 {
     //they can see ANYONE or ANYTHING in a 30f radius from their corpse//FIX ME
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *creat = objmgr.GetObject<Creature>(GetGUID());
-#else    
     const Creature *creat = dynamic_cast<const Creature *>(this);
-#endif
+
     if(target->isAlive())
     {
         //if creature exists and its spirit healer return
@@ -308,11 +298,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         }
         else if(!creat)                           //if there isnt any creature
         {
-#ifndef ENABLE_GRID_SYSTEM
-            Player *plyr = objmgr.GetObject<Player>(GetGUID());
-#else
-        Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
-#endif
+	    Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
+	
             // if player exists and player and target is in group and player is dead
             if(plyr && plyr!=target && plyr->IsInGroup() && target->IsInGroup() && plyr->isDead())
             {
@@ -407,11 +394,8 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     {
         if(!creat)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            Player *plyr = objmgr.GetObject<Player>(GetGUID());
-#else
-        Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
-#endif
+	    Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
+
             // if player and player is in group of target update
             if(plyr && plyr->IsGroupMember(target))
             {
@@ -701,58 +685,10 @@ void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, f
     *data << ang;
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-bool Object::SetPosition( float newX, float newY, float newZ, float newOrientation, bool allowPorting )
-{
-    m_orientation = newOrientation;
-    bool updateMap = false, result = true;
-
-    if (m_positionX != newX || m_positionY != newY)
-        updateMap = true;
-
-    m_positionX = newX;
-    m_positionY = newY;
-    m_positionZ = newZ;
-
-    if (!allowPorting && newZ < m_minZ)
-    {
-        m_positionZ = 500;
-        sLog.outError( "setPosition: fell through map; height ported" );
-
-        result = false;
-    }
-
-    if (IsInWorld() && updateMap)
-        m_mapMgr->ChangeObjectLocation(this);
-
-    return result;
-}
-#endif
 
 void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
 {
-#ifndef ENABLE_GRID_SYSTEM
-    if (bToSelf && GetTypeId() == TYPEID_PLAYER)
-    {
-        // has to be a player to send to self
-        ((Player*)this)->GetSession()->SendPacket(data);
-    }
-
-    std::set<Object*>::iterator itr;
-    for (itr = m_objectsInRange.begin(); itr != m_objectsInRange.end(); ++itr)
-    {
-        ASSERT(*itr);
-
-        if ((*itr)->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldSession *session = ((Player*)(*itr))->GetSession();
-            WPWarning( session, "Null client in message set!" );
-            session->SendPacket(data);
-        }
-    }
-#else
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
-#endif
 }
 
 
@@ -829,28 +765,6 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
     }
 }
 
-#ifndef ENABLE_GRID_SYSTEM
-void Object::PlaceOnMap()
-{
-    ASSERT(!IsInWorld() && !m_mapMgr);
-
-    MapMgr* mapMgr = sWorld.GetMap(m_mapId);
-    ASSERT(mapMgr);
-
-    mapMgr->AddObject(this);
-    m_mapMgr = mapMgr;
-    mSemaphoreTeleport = false;
-}
-
-
-void Object::RemoveFromMap()
-{
-    ASSERT(IsInWorld());
-    mSemaphoreTeleport = true;
-    m_mapMgr->RemoveObject(this);
-    m_mapMgr = 0;
-}
-#endif
 
 //! Set uint32 property
 void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
@@ -864,11 +778,7 @@ void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
 
         if(!m_objectUpdated)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            m_mapMgr->ObjectUpdated(this);
-#else
-        ObjectAccessor::Instance().AddUpdateObject(this);
-#endif
+	    ObjectAccessor::Instance().AddUpdateObject(this);
             m_objectUpdated = true;
         }
     }
@@ -889,11 +799,7 @@ void Object::SetUInt64Value( const uint16 &index, const uint64 &value )
 
         if(!m_objectUpdated)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            m_mapMgr->ObjectUpdated(this);
-#else
-        ObjectAccessor::Instance().AddUpdateObject(this);
-#endif
+	    ObjectAccessor::Instance().AddUpdateObject(this);
             m_objectUpdated = true;
         }
     }
@@ -912,11 +818,7 @@ void Object::SetFloatValue( const uint16 &index, const float &value )
 
         if(!m_objectUpdated)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            m_mapMgr->ObjectUpdated(this);
-#else
-        ObjectAccessor::Instance().AddUpdateObject(this);
-#endif
+	    ObjectAccessor::Instance().AddUpdateObject(this);
             m_objectUpdated = true;
         }
     }
@@ -934,11 +836,7 @@ void Object::SetFlag( const uint16 &index, uint32 newFlag )
 
         if(!m_objectUpdated)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            m_mapMgr->ObjectUpdated(this);
-#else
-        ObjectAccessor::Instance().AddUpdateObject(this);
-#endif
+	    ObjectAccessor::Instance().AddUpdateObject(this);
             m_objectUpdated = true;
         }
     }
@@ -956,11 +854,7 @@ void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
 
         if(!m_objectUpdated)
         {
-#ifndef ENABLE_GRID_SYSTEM
-            m_mapMgr->ObjectUpdated(this);
-#else
-        ObjectAccessor::Instance().AddUpdateObject(this);
-#endif
+	    ObjectAccessor::Instance().AddUpdateObject(this);
             m_objectUpdated = true;
         }
     }

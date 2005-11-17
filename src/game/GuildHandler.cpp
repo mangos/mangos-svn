@@ -29,10 +29,8 @@
 #include "UpdateData.h"
 #include "Chat.h"
 #include "Guild.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)

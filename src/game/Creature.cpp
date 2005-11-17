@@ -80,9 +80,6 @@ Creature::~Creature()
 void Creature::UpdateMobMovement( uint32 p_time)
 {
     uint32 timediff = 0;
-
-    //Log::getSingleton( ).outDetail("Creature::UpdateMobMovement called!");
-
     if(m_moveTimer > 0)
     {
         if(p_time >= m_moveTimer)
@@ -579,13 +576,13 @@ Creature::_SetCreatureTemplate()
     {// UQ1: Fill in creature info here...
 	this->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
 	//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
-	
+		
 	this->SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
 	this->SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
 	this->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
 	this->SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
 	this->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
-	
+		// here done	
 	// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
 	this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
 	this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
@@ -615,7 +612,7 @@ Creature::_SetCreatureTemplate()
 
 	if (ci->baseattacktime <= 0)
 	    ci->baseattacktime = urand(1000, 2000);
-	
+
 	this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
 	
 	if (ci->rangeattacktime <= 0)
@@ -698,10 +695,10 @@ Creature::_SetCreatureTemplate()
 	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
 	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
 	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
+	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos); 
     }
 
-	if (this->GetUInt32Value( UNIT_FIELD_HEALTH ) <= 0)
+    if (this->GetUInt32Value( UNIT_FIELD_HEALTH ) <= 0)
 	{// Resolve dead NPCs... Bad DB again...
 		uint32 maxhealth;
 
@@ -721,7 +718,7 @@ Creature::_SetCreatureTemplate()
 		this->SetUInt32Value( UNIT_FIELD_HEALTH, maxhealth );
 		this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, maxhealth );
 		this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, maxhealth );
-	}
+		} 
 
     //
     // UQ1: End of UNIT_ updates...
@@ -730,16 +727,16 @@ Creature::_SetCreatureTemplate()
 
 void Creature::Update( uint32 p_time )
 {
-	// UQ1: This has to be done each think.. There simply is no choice.. Later some of these values should be realtime info, 
-	// not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
-	if (isAlive())
-		_RealtimeSetCreatureInfo();
-
-	if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0 || this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) <= 0)
-	{// Resolve dead NPCs... Bad DB again...
-		_RealtimeSetCreatureInfo();
-	}
-
+    // UQ1: This has to be done each think.. There simply is no choice.. Later some of these values should be realtime info, 
+    // not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
+    if (isAlive())
+	_RealtimeSetCreatureInfo();
+    
+    if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0 || this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) <= 0)
+    {// Resolve dead NPCs... Bad DB again...
+	_RealtimeSetCreatureInfo();
+    }
+    
 #ifndef __NO_PLAYERS_ARRAY__
     uint32 loop;
 
@@ -1567,7 +1564,7 @@ void Creature::LoadFromDB(uint32 guid)
     SetNameId(fields[8].GetUInt32());
 
 //    _SetCreatureTemplate();
-	_RealtimeSetCreatureInfo();
+    _RealtimeSetCreatureInfo();
 
     delete result;
 

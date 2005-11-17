@@ -40,7 +40,7 @@
 // foward declaration
 class Creature;
 
-enum 
+typedef enum 
     {
 	MOTIONLESS_TYPE = 0,
 	RANDOM_MOTION_TYPE,
@@ -67,4 +67,39 @@ public:
     virtual void Update(Creature &, const uint32 &time_diff) = 0;
 };
 
+
+struct SelectableMovement : public FactoryHolder<MovementGenerator>, public Permissible<Creature>
+{
+    SelectableMovement(const char *id) : FactoryHolder<MovementGenerator>(id) {}
+};
+
+/** MovementGeneratorFactory responsible for creating a movement
+ * generator, also delicate the actual implementation of
+ * permit to is real class.
+ */
+template<class REAL_MOVEMENT>
+struct MovementGeneratorFactory : public SelectableMovement
+{
+    MovementGeneratorFactory(const char *name) : SelectableMovement(name) {}
+
+    // implement API for FactorHolder<T>
+    MovementGenerator* Create(void *) const;
+
+    // implement API for Permissible<T>
+    int Permit(const Creature *c) const { return REAL_MOVEMENT::Permissible(c); }
+};
+
+
+
+#define	    MOTIONLESS_TYPE      0
+#define     RANDOM_MOTION_TYPE   100
+#define     TARGETED_MOTION_TYPE 200
+#define     SPECIAL_MOTION_TYPE  400
+#define     CUSTOM_MOTION_TYPE   800
+
+typedef FactoryHolder<MovementGenerator> MovementGeneratorCreator;
+typedef FactoryHolder<MovementGenerator>::FactoryHolderRegistry MovementGeneratorRegistry;
+typedef FactoryHolder<MovementGenerator>::FactoryHolderRepository MovementGeneratorRepository;
+
 #endif
+

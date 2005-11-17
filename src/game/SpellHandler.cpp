@@ -66,7 +66,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> spellId;
 
-#ifdef ENABLE_GRID_SYSTEM
 #ifdef __REVIVE_CHEAT__ // UQ1: Because with grid system we have no way to revive... Cheat for now!
     if (GetPlayer()->isDead())
     {
@@ -88,7 +87,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         //return;
     }
 #endif //__REVIVE_CHEAT__
-#endif //ENABLE_GRID_SYSTEM
+
 
     Log::getSingleton( ).outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i",
         spellId, recvPacket.size());

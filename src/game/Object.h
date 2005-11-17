@@ -70,9 +70,6 @@ class MapCell;
 class Object
 {
     public:
-#ifndef ENABLE_GRID_SYSTEM
-        typedef std::set<Object*> InRangeSet;
-#endif
         virtual ~Object ( );
 
         virtual void Update ( float time ) { }
@@ -117,10 +114,6 @@ class Object
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
-#ifndef ENABLE_GRID_SYSTEM
-        bool SetPosition( float newX, float newY, float newZ, float newOrientation, bool allowPorting = false );
-#endif
-
     void Relocate(const float &x, const float &y, const float &z, const float &orientation)
     {
     m_positionX = x;
@@ -133,13 +126,6 @@ class Object
         const float& GetPositionY( ) const { return m_positionY; }
         const float& GetPositionZ( ) const { return m_positionZ; }
         const float& GetOrientation( ) const { return m_orientation; }
-
-#ifndef ENABLE_GRID_SYSTEM
-        //! Only for MapMgr use
-        MapCell* GetMapCell() const { return m_mapCell; }
-        //! Only for MapMgr use
-        void SetMapCell(MapCell* cell) { m_mapCell = cell; }
-#endif
 
         const uint32& GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
@@ -217,16 +203,6 @@ class Object
             return (dx*dx) + (dy*dy);
         }
 
-#ifndef ENABLE_GRID_SYSTEM
-        // In-range object management, not sure if we need it
-        bool IsInRangeSet(Object* pObj) { return !(m_objectsInRange.find(pObj) == m_objectsInRange.end()); }
-        virtual void AddInRangeObject(Object* pObj) { m_objectsInRange.insert(pObj); }
-        virtual void RemoveInRangeObject(Object* pObj) { m_objectsInRange.erase(pObj); }
-        void ClearInRangeSet() { m_objectsInRange.clear(); }
-
-        inline InRangeSet::iterator GetInRangeSetBegin() { return m_objectsInRange.begin(); }
-        inline InRangeSet::iterator GetInRangeSetEnd() { return m_objectsInRange.end(); }
-#endif
         void SendMessageToSet(WorldPacket *data, bool self);
 
         //! Fill values with data from a space seperated string of uint32s.
@@ -235,12 +211,6 @@ class Object
 
         uint16 GetValuesCount() const { return m_valuesCount; }
 
-#ifndef ENABLE_GRID_SYSTEM
-        //! Add object to map
-        void PlaceOnMap();
-        //! Remove object from map
-        void RemoveFromMap();
-#endif
     protected:
         Object ( );
 
@@ -276,12 +246,7 @@ class Object
         uint32 m_zoneId;
         //! Continent/map id.
         uint32 m_mapId;
-#ifndef ENABLE_GRID_SYSTEM
-        //! Map manager
-        MapMgr *m_mapMgr;
-        //! Current map cell
-        MapCell *m_mapCell;
-#endif
+
         // TODO: use vectors here
         float m_positionX;
         float m_positionY;

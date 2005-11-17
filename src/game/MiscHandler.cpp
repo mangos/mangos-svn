@@ -34,11 +34,9 @@
 #include "Chat.h"
 #include "ScriptCalls.h"
 #include <zlib/zlib.h>
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
+
 
 /// escape some shitty input from user
 void my_esc( char * r, const char * s )
@@ -67,11 +65,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     uint32 itemid = 0;
     uint8 lootSlot = 0;
     WorldPacket data;
-#ifndef ENABLE_GRID_SYSTEM
-    Creature* pCreature = objmgr.GetObject<Creature>(GetPlayer()->GetLootGUID());
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, _player->GetLootGUID());
-#endif
+
     if (!pCreature)
         return;
 
@@ -118,11 +113,8 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     uint32 newcoinage = 0;
-#ifndef ENABLE_GRID_SYSTEM
-    Creature* pCreature = objmgr.GetObject<Creature>(GetPlayer()->GetLootGUID());
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, _player->GetLootGUID());
-#endif
+
     if (!pCreature)
         return;
 
@@ -146,11 +138,8 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature* pCreature = objmgr.GetObject<Creature>(guid);
-#else
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-#endif
+
     if (!pCreature)
         return;
 
@@ -698,11 +687,8 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
         {
             fields = result->Fetch();
             friendstr[i].PlayerGUID = fields[2].GetUInt64();
-#ifndef ENABLE_GRID_SYSTEM
-            pObj=objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
-#else
-        pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
-#endif
+	    pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
+
             if(pObj && pObj->IsInWorld())
             {
                 friendstr[i].Status = 1;
@@ -723,11 +709,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
             while( result->NextRow() )
             {
                 friendstr[i].PlayerGUID = fields[2].GetUInt64();
-#ifndef ENABLE_GRID_SYSTEM
-                pObj = objmgr.GetObject<Player>(friendstr[i].PlayerGUID);
-#else
-        pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-#endif
+		pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
                 if(pObj)
                 {
                     friendstr[i].Status = 1;
@@ -819,11 +801,8 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     
    
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
-#ifndef ENABLE_GRID_SYSTEM
-    pfriend = objmgr.GetObject<Player>(friendGuid);
-#else
     pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
-#endif
+
     fquery << "SELECT * FROM social WHERE flags = 'FRIEND' AND friendid = " << friendGuid;
 
     if(sDatabase.Query( fquery.str().c_str() )) friendResult = FRIEND_ALREADY;
@@ -937,11 +916,8 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     
    
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
-#ifndef ENABLE_GRID_SYSTEM
-    pIgnore = objmgr.GetObject<Player>(IgnoreGuid);
-#else
     pIgnore = ObjectAccessor::Instance().FindPlayer(IgnoreGuid);
-#endif
+
     iquery << "SELECT * FROM social WHERE flags = 'IGNORE' AND friendid = " << IgnoreGuid;
 
     if(sDatabase.Query( iquery.str().c_str() )) ignoreResult = FRIEND_IGNORE_ALREADY;
@@ -1313,11 +1289,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%d]", guid);   
-#ifndef ENABLE_GRID_SYSTEM
-    GameObject *obj = objmgr.GetObject<GameObject>(guid);
-#else
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
-#endif
+
     
     if( obj != NULL )
     {

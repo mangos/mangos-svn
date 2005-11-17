@@ -138,7 +138,6 @@ void Map::Add(Player *player)
 
     Cell cell = RedZone::GetZone(p);
     EnsureGridLoadedForPlayer(cell, player, true);
-
     cell.data.Part.reserved = ALL_DISTRICT; // ensure handle all district
     NotifyPlayerVisibility(cell, p, player);
 }
@@ -175,9 +174,6 @@ Map::Add(T *obj)
 
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
 {
-    if( to_self )
-    player->GetSession()->SendPacket(msg);
-
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
 	    p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
@@ -188,7 +184,7 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
 	return; // dude.. how did I end up in a grid that's no loaded...   
 
-    MaNGOS::MessageDeliverer post_man(*player, msg);
+    MaNGOS::MessageDeliverer post_man(*player, msg, to_self);
     TypeContainerVisitor<MaNGOS::MessageDeliverer, ContainerMapList<Player> > message(post_man);
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, message, *this);
@@ -202,6 +198,7 @@ void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate(); // ensure the grid will not create if no player is nearby.
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
     return; // ignore the creature.. no one there to hear him
@@ -406,12 +403,15 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
 	}
 	
 	new_cell |= old_cell;
-	
+	new_cell.SetNoCreate();
+	old_cell.SetNoCreate();
+
 	// move in visibility.. the creature can chase all it wants to
 	CellLock<ReadGuard> cell_lock(new_cell, new_val);
 	if( new_cell == old_cell )
 	{
 	    new_cell.data.Part.reserved = ALL_DISTRICT;
+
 	    MaNGOS::CreatureVisibleMovementNotifier notifier(*creature);
 	    TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, ContainerMapList<Player> > player_notifier(notifier);
 	    cell_lock->Visit(cell_lock, player_notifier, *this);
@@ -429,6 +429,7 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
 	// minimum.. let other players know my movement
 	CellLock<ReadGuard> cell_lock(new_cell, new_val);
 	new_cell.data.Part.reserved = ALL_DISTRICT;
+	new_cell.SetNoCreate();
 	MaNGOS::CreatureVisibleMovementNotifier notifier(*creature);
 	TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, ContainerMapList<Player> > player_notifier(notifier);
 	cell_lock->Visit(cell_lock, player_notifier, *this);	

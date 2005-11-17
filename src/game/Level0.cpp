@@ -31,11 +31,8 @@
 #include "Player.h"
 #include "Opcodes.h"
 #include "Chat.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {

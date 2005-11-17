@@ -29,10 +29,8 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "NPCHandler.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
-#endif
+
 
 //////////////////////////////////////////////////////////////
 /// This function handles CMSG_NAME_QUERY:
@@ -47,11 +45,8 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
     uint32 race = 0, gender = 0, cl = 0;
     std::string name = "ERROR_NO_NAME_FOR_GUID";
 
-#ifndef ENABLE_GRID_SYSTEM
-    Player *pChar = objmgr.GetObject<Player>(guid);
-#else
     Player *pChar = ObjectAccessor::Instance().FindPlayer(guid);
-#endif
+
     if (pChar == NULL)
     {
         if (!objmgr.GetPlayerNameByGUID(guid, name))
@@ -442,11 +437,8 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 
     Corpse *pCorpse = NULL;
     WorldPacket data;
-#ifndef ENABLE_GRID_SYSTEM
-    pCorpse = objmgr.GetCorpseByOwner(GetPlayer());
-#else
     pCorpse = ObjectAccessor::Instance().GetCorpse(*GetPlayer(), GetPlayer()->GetGUID());
-#endif
+
     if(pCorpse)
     {
         data.Initialize(MSG_CORPSE_QUERY);

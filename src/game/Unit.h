@@ -22,9 +22,7 @@
 #define __UNIT_H
 
 #include "Object.h"
-#ifdef ENABLE_GRID_SYSTEM
 #include "ObjectAccessor.h"
-#endif
 
 #include <list>
 #define UF_TARGET_DIED  1

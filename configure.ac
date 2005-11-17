@@ -197,8 +197,8 @@ Debugging options:
   --with-debug-info       Include debug info in library],
 [
     if test "$withval" = "yes" ; then
-	CFLAGS="-g -DDEBUG $CFLAGS"
-	CXXFLAGS="-g -DDEBUG $CXXFLAGS"
+	CFLAGS="-g -DMANGOS_DEBUG $CFLAGS"
+	CXXFLAGS="-g -DMANGOS_DEBUG $CXXFLAGS"
 	MANGOSD_DEBUG_INFO=yes
     elif test "$withval" != "no" ; then
 	AC_MSG_ERROR(Please choose yes or no)
@@ -237,25 +237,6 @@ AC_ARG_ENABLE(httpd-integrated,
     fi
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_HTTPD)
-
-# check for grid system enable
-AC_MSG_CHECKING(whether grid system is enabled)
-MANGOSD_ENABLE_GRID=yes
-AC_ARG_ENABLE(grid-system,
-[  --enable-grid-system Turn on grid system],
-[
-    if test "$enableval" = "no" ; then
-        MANGOSD_ENABLE_GRID=no
-    elif test "$withval" != "yes" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_GRID)
-
-if test "$MANGOSD_ENABLE_GRID" != "no"; then
-	CFLAGS="-DENABLE_GRID_SYSTEM $CFLAGS"
-	CXXFLAGS="-DENABLE_GRID_SYSTEM $CXXFLAGS"
-fi
 
 
 # check for 1.8.x protocol support

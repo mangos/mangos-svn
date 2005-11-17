@@ -35,7 +35,6 @@
 #include "UpdateData.h"
 #include "Channel.h"
 #include "Chat.h"
-#include "ZoneMapper.h"
 #include "Chat.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
@@ -50,14 +49,14 @@
 
 #include <cmath>
 
-Player::Player ( ): Unit()
+Player::Player (WorldSession *session): Unit()
 {
     m_objectType |= TYPE_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
 
     m_valuesCount = PLAYER_END;
 
-    m_session = 0;
+    m_session = session;
 
     m_afk = 0;
     m_curTarget = 0;

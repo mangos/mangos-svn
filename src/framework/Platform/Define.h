@@ -43,6 +43,9 @@
 #ifndef DEBUG
 #define MANGOS_INLINE inline
 #else
+#ifndef MANGOS_DEBUG
+#define MANGOS_DEBUG
+#endif
 #define MANGOS_INLINE
 #endif
 

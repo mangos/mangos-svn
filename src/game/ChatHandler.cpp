@@ -30,11 +30,8 @@
 #include "ChannelMgr.h"
 #include "Group.h"
 #include "Guild.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#endif
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
@@ -169,23 +166,6 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     const char *nam = 0;
     uint32 namlen = 1;
 
-#ifndef ENABLE_GRID_SYSTEM
-    Creature *pCreature = objmgr.GetObject<Creature>( guid );
-    if(pCreature)
-    {
-        nam = pCreature->GetName();
-        namlen = strlen( nam ) + 1;
-    }
-    else
-    {
-        Player *pChar = objmgr.GetObject<Player>( guid );
-        if(pChar)
-        {
-            nam = pChar->GetName();
-            namlen = strlen(nam) + 1;
-        }
-    }
-#else
     // gets the name of either a unit or a player.. same thing
     Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid);
     Creature *pCreature = dynamic_cast<Creature *>(unit);
@@ -195,14 +175,14 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         namlen = strlen(nam) + 1;
     }
     {
-    Player *pChar = dynamic_cast<Player *>(unit);
-    if( pChar != NULL )
-    {
-        nam = pChar->GetName();
-        namlen = strlen(nam) + 1;
+	Player *pChar = dynamic_cast<Player *>(unit);
+	if( pChar != NULL )
+	{
+	    nam = pChar->GetName();
+	    namlen = strlen(nam) + 1;
+	}
     }
-    }
-#endif
+
 
     emoteentry *em = sEmoteStore.LookupEntry(text_emote);
     if (em)                                       // server crashes with some emotes, that arent in dbc

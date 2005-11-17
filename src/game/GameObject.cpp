@@ -28,10 +28,8 @@
 #include "World.h"
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
-
-#ifdef ENABLE_GRID_SYSTEM
 #include "MapManager.h"
-#endif
+
 
 GameObject::GameObject() : Object()
 {
@@ -75,13 +73,6 @@ void GameObject::Update(uint32 p_time)
             m_RespawnTimer -= p_time;
         else
         {
-            if(!this->IsInWorld())
-            {
-#ifndef ENABLE_GRID_SYSTEM
-                PlaceOnMap();
-#endif
-            }
-
             data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
             data << GetGUID();
             SendMessageToSet(&data,true);
@@ -91,7 +82,7 @@ void GameObject::Update(uint32 p_time)
     }
 }
 
-#ifndef ENABLE_GRID_SYSTEM
+/* I left this code in for us to know the old packet looks like
 void GameObject::Despawn(uint32 time)
 {
     WorldPacket data;
@@ -103,7 +94,7 @@ void GameObject::Despawn(uint32 time)
 
     m_RespawnTimer = time;
 }
-#endif
+*/
 
 void GameObject::_generateLoot(Player &player, std::vector<uint32> &item_id, std::vector<uint32> &item_count, std::vector<uint32> &display_ids, uint32 &gold) const
 {
