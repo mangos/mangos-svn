@@ -135,8 +135,9 @@ enum EUnitFields
     UNIT_FIELD_SPIRIT = UNIT_FIELD_STAT3,
     UNIT_FIELD_STAT4                        =  172,
     UNIT_FIELD_IQ = UNIT_FIELD_STAT4,
-    UNIT_FIELD_ARMOR = UNIT_FIELD_STAT4,    // UQ1: I dont think this is correct! Was IQ +1 in old code...
+    //UNIT_FIELD_ARMOR = UNIT_FIELD_STAT4,    // UQ1: I dont think this is correct! Was IQ +1 in old code...
     UNIT_FIELD_RESISTANCES                  =  173,
+	UNIT_FIELD_ARMOR = UNIT_FIELD_RESISTANCES,    // UQ1: I dont think this is correct! Was IQ +1 in old code...
     UNIT_FIELD_RESISTANCES_01               =  174,
     UNIT_FIELD_RESISTANCES_02               =  175,
     UNIT_FIELD_RESISTANCES_03               =  176,

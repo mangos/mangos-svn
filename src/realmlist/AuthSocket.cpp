@@ -215,6 +215,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
     if(!valid_version)
     {
+		DEBUG_LOG("[AuthChallenge] %u is not a valid client version!", ch->build);
         res = CE_WRONG_BUILDNUMBER;
         pkt << (uint8) AUTH_LOGON_CHALLENGE;
         pkt << (uint8) 0x00;
