@@ -32,7 +32,7 @@ CREATE TABLE `npc_text` (
   `em_del1_0` int(11) NOT NULL default '0',
   `em_em1_0` int(11) NOT NULL default '0',
   `em_del1_1` int(11) NOT NULL default '0',
-  `em_em1_2` int(11) NOT NULL default '0',
+  `em_em1_1` int(11) NOT NULL default '0',
   `em_del1_2` int(11) NOT NULL default '0',
   `em_em1_2` int(11) NOT NULL default '0',
 
