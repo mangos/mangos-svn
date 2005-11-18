@@ -1421,7 +1421,8 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     WorldPacket data;
     uint32 shiftdata=0x01;
     uint8  FlatId=0;
-	uint32 EffectVal;
+    uint32 EffectVal;
+    uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
     if (slot_id == 0xffff)
     {
@@ -1438,12 +1439,13 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     if(spellInfo && m_session)
     {
         for(int i=0;i<3;i++)
-	    {
+        {
             if(spellInfo->EffectItemType[i]!=0)
-		    {
+            {
                 EffectVal=spellInfo->EffectItemType[i];
-  	            op=spellInfo->EffectMiscValue[i];
+                op=spellInfo->EffectMiscValue[i];
                 tmpval = spellInfo->EffectBasePoints[i];
+
                 if(tmpval != 0)
                 {
                    if(tmpval > 0){
@@ -1455,22 +1457,32 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
                    }
                 }
 
-		        for(int i=0;i<32;i++)
-		        {
+                switch(spellInfo->EffectApplyAuraName[i])
+                {
+                case 107:
+                    Opcode=SMSG_SET_FLAT_SPELL_MODIFIER; // FLOAT
+                    break;
+                case 108:
+                    Opcode=SMSG_SET_PCT_SPELL_MODIFIER;  // PERCENT
+                    break;
+                }
+
+                for(int i=0;i<32;i++)
+                {
                     if ( EffectVal&shiftdata )
                     {
                         FlatId=i;
                   
-				        data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
+                        data.Initialize(Opcode);
                         data << uint8(FlatId);
                         data << uint8(op);
                         data << uint16(val);
                         data << uint16(mark);
                         m_session->SendPacket(&data);    
-			        }
+                    }
                     shiftdata=shiftdata<<1;
-                }            
-		    }
+                }
+            }
         }
     }
     newspell.slotId = slot_id;
