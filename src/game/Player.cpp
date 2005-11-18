@@ -3813,13 +3813,6 @@ void Player::UpdateReputation(void)
     */
     WorldPacket data;
     std::list<struct Factions>::iterator itr;
-
-    // SMSG_INITIALIZE_FACTIONS
-    data.Initialize(SMSG_INITIALIZE_FACTIONS);
-    data << (uint32) 0x40; //Count
-    data << (uint8 ) 0;    //Flags
-    data << (uint32) 0;    //Standing
-    GetSession()->SendPacket(&data);
     
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
