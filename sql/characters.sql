@@ -32,6 +32,5 @@ CREATE TABLE IF NOT EXISTS `characters` (
   `orientation` float NOT NULL default '0',
   `taximask` longtext NOT NULL,
   `online` tinyint(1) NOT NULL default '0',
-  `guildId` int(6) NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) TYPE=MyISAM;
