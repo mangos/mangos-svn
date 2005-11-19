@@ -33,6 +33,7 @@
 #include "GameObject.h"
 #include "Chat.h"
 #include "Log.h"
+#include "Guild.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 
@@ -986,6 +987,49 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     }
 
     return true;
+}
+
+bool ChatHandler::HandleCreateGuildCommand(const char* args)
+{
+	WorldPacket data;
+	Guild *guild;
+	Player * player;
+	std::string lname,gname;
+	
+	if (!*args)
+        return false;
+	
+	lname = strtok((char*)args, " ");
+	gname = strtok(NULL, " ");
+	if(!gname.c_str())
+	{
+		FillSystemMessageData(&data, m_session, fmtstring("You need to insert a Guild Name!"));
+		m_session->SendPacket(&data);
+		return true;
+	}
+
+	player = ObjectAccessor::Instance().FindPlayerByName(lname.c_str());
+
+	if(!player)
+	{
+		FillSystemMessageData(&data, m_session, fmtstring("Player not found!"));
+		m_session->SendPacket(&data);
+		return true;
+	}
+
+	if(!player->GetGuildId())
+	{
+		guild = new Guild;
+		guild->create(player->GetGUID(),gname);
+		objmgr.AddGuild(guild);
+	}
+	else
+	{
+		FillSystemMessageData(&data, m_session, fmtstring("Player already have a guild!"));
+		m_session->SendPacket(&data);
+	}
+	
+	return true;
 }
 
 float max_creature_distance = 160;

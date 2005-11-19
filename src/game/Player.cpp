@@ -62,7 +62,6 @@ Player::Player (WorldSession *session): Unit()
     m_curTarget = 0;
     m_curSelection = 0;
     m_lootGuid = 0;
-    m_GuildId = 0;
     m_petInfoId = 0;
     m_petLevel = 0;
     m_petFamilyId = 0;
@@ -84,8 +83,7 @@ Player::Player (WorldSession *session): Unit()
     // memset(m_items, 0, sizeof(Item*)*INVENTORY_SLOT_ITEM_END);
     memset(m_items, 0, sizeof(Item*)*BANK_SLOT_BAG_END);
 
-        m_GuildId = 0;
-        m_GuildIdInvited = 0;
+    m_GuildIdInvited = 0;
     m_groupLeader = 0;
     m_isInGroup = false;
     m_isInvited = false;
@@ -332,7 +330,6 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
     delete info;
 
     // Not worrying about this stuff for now
-    m_GuildId = 0;
     m_petInfoId = 0;
     m_petLevel = 0;
     m_petFamilyId = 0;
@@ -1755,7 +1752,7 @@ void Player::SaveToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO characters (guid, acct, name, race, class, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask, online, guildId) VALUES ("
+    ss << "INSERT INTO characters (guid, acct, name, race, class, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask, online) VALUES ("
         << GetGUIDLow() << ", "                   // TODO: use full guids
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -1779,8 +1776,6 @@ void Player::SaveToDB()
 
     ss << "', ";
     inworld ? ss << 1 : ss << 0;
-    ss << ", ";
-    ss << m_GuildId;
     ss << " )";
 
 
@@ -1978,13 +1973,11 @@ void Player::LoadFromDB( uint32 guid )
         m_deathState = DEAD;
 
     LoadTaxiMask( fields[12].GetString() );
-    m_GuildId = fields[14].GetUInt32();
 
     delete result;
 
 /*
     m_outfitId = atoi( row[ 11 ] );
-    m_guildId = atoi( row[ 17 ] );
     m_petInfoId = atoi( row[ 18 ] );
     m_petLevel = atoi( row[ 19 ] );
     m_petFamilyId = atoi( row[ 20 ] );

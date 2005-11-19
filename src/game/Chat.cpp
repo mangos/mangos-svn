@@ -147,6 +147,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "hidearea",    3, &ChatHandler::HandleHideAreaCommand,      "",   NULL },
         { "addspw",      2, &ChatHandler::HandleAddSpwCommand,        "",   NULL },
         { "additem",     3, &ChatHandler::HandleAddItemCommand,       "",   NULL }, //add by vendy
+		{ "createguild", 3, &ChatHandler::HandleCreateGuildCommand,   "",   NULL },
         { NULL,          0, NULL,                                     "",   NULL }
     };
 
