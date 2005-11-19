@@ -38,6 +38,7 @@ using namespace MaNGOS;
  */
 void PlayerNotifier::Visit(PlayerMapType &m)
 {
+    return;
     Player *player = &i_player;
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
