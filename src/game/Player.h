@@ -404,14 +404,14 @@ class Player : public Unit
         void UnSetInvited() { m_isInvited = false; }
         void UnSetInGroup() { m_isInGroup = false; }
 
-				//Guild
-				void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
-				void UnSetGuildIdInvited() { m_GuildIdInvited = 0; }
-				void SetInGuild(uint32 GuildId) { m_GuildId = GuildId; }
-				void RemoveFromGuild() { m_GuildId = 0; }
-		
-				int GetGuildId() { return m_GuildId; }
-				int GetGuildIdInvited() { return m_GuildIdInvited; }
+		//Guild
+		void SetGuildIdInvited(uint32 GuildId) { m_GuildIdInvited = GuildId; }
+		void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId);  }
+		void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); }
+
+		uint32 GetGuildId() { return GetUInt32Value(PLAYER_GUILDID);  }
+		uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
+		int GetGuildIdInvited() { return m_GuildIdInvited; }
 		
         //duel
         void SetDuelVsGUID(const uint64 &guid) { m_duelGUID = guid; }
@@ -604,9 +604,8 @@ protected:
         bool m_isInGroup;
         bool m_isInvited;
 
-				// Guild
-				uint32 m_GuildId;
-				uint32 m_GuildIdInvited; 
+		// Guild
+		uint32 m_GuildIdInvited; 
 
         //If Player is in combat
         bool inCombat;

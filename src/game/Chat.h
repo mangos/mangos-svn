@@ -210,6 +210,7 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleShowAreaCommand(const char* args);
         bool HandleHideAreaCommand(const char* args);
         bool HandleAddItemCommand(const char* args); //add by vendy
+		bool HandleCreateGuildCommand(const char* args);
 
         Player* getSelectedChar(WorldSession *client);
 

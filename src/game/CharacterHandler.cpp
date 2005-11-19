@@ -517,6 +517,18 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     pCurrChar->InitExploreSystem();
 
+	//guild
+	std::stringstream query;
+	query << "SELECT * FROM `guilds_members` where memguid= " << pCurrChar->GetGUID();
+	QueryResult *result = sDatabase.Query( query.str().c_str() );
+
+	if(result)
+	{
+		Field *fields = result->Fetch();
+		pCurrChar->SetInGuild(fields[0].GetUInt32());
+		pCurrChar->SetRank(fields[2].GetUInt32());
+	}
+
     // Now send all A9's
     // Add character to the ingame list
     // Build the in-range set
@@ -528,6 +540,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     std::stringstream ss;
     ss << "UPDATE characters SET online = 1 WHERE guid = " << pCurrChar->GetGUID();
+	sDatabase.Execute(ss.str().c_str());
 
 #ifndef __NO_PLAYERS_ARRAY__
     // Set GUID for this player in the active players array...
@@ -541,8 +554,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     NumActivePlayers++;
 #endif //__NO_PLAYERS_ARRAY__
-
-    sDatabase.Execute(ss.str().c_str());
 
     // add skilllines from db
     for (uint16 sl = PLAYER_SKILL_INFO_1_1; sl < PLAYER_SKILL_INFO_1_1_381; sl += 3)
