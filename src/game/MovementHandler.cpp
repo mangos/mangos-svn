@@ -117,7 +117,9 @@ void WorldSession::HandleMoveHeartbeatOpcode( WorldPacket & recv_data )
     data << flags << time;
     data << x << y << z << orientation;
 
-    GetPlayer( )->SendMessageToSet(&data, false);
+// TODO we should affect rest system here or whatever HEARTBEAT is connected to
+// for now that fixes double jump bug
+//    GetPlayer( )->SendMessageToSet(&data, false);
 }
 
 
