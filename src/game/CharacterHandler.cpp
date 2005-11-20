@@ -358,16 +358,15 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     */
 
-	int a;
-	std::list<struct Factions>::iterator itr;
 
-    // SMSG_INITIALIZE_FACTIONS
+	//SMSG_INITIALIZE_FACTIONS
 	data.Initialize(SMSG_INITIALIZE_FACTIONS);
 	data << uint32 (0x00000040); //Count
-	for(a=0; a<64; a++)
+	for(int a=0; a<64; a++)
 	{
 		if(GetPlayer()->FactionIsInTheList(a))
 		{
+			std::list<struct Factions>::iterator itr;
 			for(itr = GetPlayer()->factions.begin(); itr != GetPlayer()->factions.end(); ++itr)
 			{
 				if(itr->ReputationListID == a)
@@ -385,8 +384,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 		}
 	}
 	SendPacket(&data);
-
-	//GetPlayer()->UpdateReputation();
 
 /*
     // Unknown (0x02C2)
