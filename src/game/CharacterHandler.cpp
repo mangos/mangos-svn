@@ -62,6 +62,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
             Log::getSingleton().outError("Loading char guid %d from account %d.",(*result)[0].GetUInt32(),GetAccountId());
 
             plr->LoadFromDB( (*result)[0].GetUInt32() );
+
             plr->BuildEnumData( &data );
 
             delete plr;
@@ -146,6 +147,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             Log::getSingleton().outError("Loading char guid %d from account %d.",(*result1)[0].GetUInt32(),GetAccountId());
             plr->LoadFromDB( (*result1)[0].GetUInt32() );
             plr->BuildEnumData( &data );
+
             delete plr;
             num++;
         }
@@ -275,7 +277,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 	plr->SetSession(this);  //Set Session all of first
     plr->LoadFromDB(GUID_LOPART(playerGuid));
     plr->_RemoveAllItemMods();
-    
 
     SetPlayer(plr);
 
@@ -357,12 +358,35 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     */
 
+	int a;
+	std::list<struct Factions>::iterator itr;
+
     // SMSG_INITIALIZE_FACTIONS
 	data.Initialize(SMSG_INITIALIZE_FACTIONS);
-	data << (uint32) 0x40;				//Count
-	data << (uint8 ) 0;  //should be 0  //Flags
-	data << (uint32) 0;					//Standing
+	data << uint32 (0x00000040); //Count
+	for(a=0; a<64; a++)
+	{
+		if(GetPlayer()->FactionIsInTheList(a))
+		{
+			for(itr = GetPlayer()->factions.begin(); itr != GetPlayer()->factions.end(); ++itr)
+			{
+				if(itr->ReputationListID == a)
+				{
+					data << uint8  (itr->Flags);	//Flags
+					data << uint32 (itr->Standing); //Standing
+					break;
+				}
+			}
+		}
+		else
+		{
+			data << uint8  (0x00);		 //Flags
+			data << uint32 (0x00000000); //Standing
+		}
+	}
 	SendPacket(&data);
+
+	//GetPlayer()->UpdateReputation();
 
 /*
     // Unknown (0x02C2)
@@ -595,10 +619,9 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 				itr->Flags = (itr->Flags | 2);
 			else
 				if( itr->Flags >= 2) itr->Flags -= 2;
-			return;
+			break;
 		}
 	}
-	GetPlayer()->UpdateReputation();
 }
 
 void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
@@ -619,9 +642,10 @@ void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 		{
 			itr->Standing += Standing;
 			itr->Flags = (itr->Flags | 1); //Sets visible to faction
-			return;
+			break;
 		}
 	}
+
 	GetPlayer()->UpdateReputation();
 }
 

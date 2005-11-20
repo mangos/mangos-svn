@@ -257,11 +257,5 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg)
 // return a uint32 with the ranks compiled FIX-ME
 uint32 Guild::CompileRankRights(RankInfo rankinfo)
 {
-	
-	
-	
-	
-	
-	
-	
+	return 0;	
 }	

@@ -3806,18 +3806,19 @@ void Player::UpdateReputation(void)
     */
     WorldPacket data;
     std::list<struct Factions>::iterator itr;
-    
+
+	Log::getSingleton( ).outDebug( "WORLD: Player::UpdateReputation" );
+
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        if(itr->Flags & 1)
-        {
+        //if(itr->Flags & 1)
+        //{
             data.Initialize(SMSG_SET_FACTION_STANDING);
-            data << (uint32) 1; //if is visible?
+			data << (uint32) itr->Flags;//1; //if is visible?
             data << (uint32) itr->ReputationListID;
             data << (uint32) itr->Standing;
             GetSession()->SendPacket(&data);
-        }
-        Log::getSingleton( ).outDebug( "WORLD: Player::UpdateReputation called and completed OK!" );
+        //}
     }
 }
 
@@ -3862,6 +3863,12 @@ void Player::LoadReputationFromDBC(void)
             {
                 newFaction.Flags = 0;
             }
+			//Set AtWar
+			if(0) //Something to know if is hostile or not
+			{
+				newFaction.Flags = (newFaction.Flags | 2);
+			}
+
             factions.push_back(newFaction);
         }
     }
