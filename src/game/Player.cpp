@@ -3811,14 +3811,11 @@ void Player::UpdateReputation(void)
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        //if(itr->Flags & 1)
-        //{
-            data.Initialize(SMSG_SET_FACTION_STANDING);
-			data << (uint32) itr->Flags;//1; //if is visible?
-            data << (uint32) itr->ReputationListID;
-            data << (uint32) itr->Standing;
-            GetSession()->SendPacket(&data);
-        //}
+		data.Initialize(SMSG_SET_FACTION_STANDING);
+		data << (uint32) itr->Flags; //if is visible?
+        data << (uint32) itr->ReputationListID;
+        data << (uint32) itr->Standing;
+        GetSession()->SendPacket(&data);
     }
 }
 
@@ -3853,18 +3850,16 @@ void Player::LoadReputationFromDBC(void)
             newFaction.ID = fac->ID;
             newFaction.ReputationListID = fac->reputationListID;
             newFaction.Standing = 0;
-
+			newFaction.Flags = 0;
+			
             //Set Visible
             if( (fac->something8) && (fac->faction == m_team) )
             {
-                newFaction.Flags = 1;   //Visible
-            }
-            else
-            {
-                newFaction.Flags = 0;
+                newFaction.Flags = (newFaction.Flags | 1);
             }
 			//Set AtWar
-			if(0) //Something to know if is hostile or not
+			if( ( (m_team == 469)&&(fact->hostile & 3) ) || //If is hostile to the player or to ALL
+				( (m_team ==  67)&&(fact->hostile & 5) )   )
 			{
 				newFaction.Flags = (newFaction.Flags | 2);
 			}
@@ -3877,7 +3872,7 @@ void Player::LoadReputationFromDBC(void)
 void Player::_LoadReputation(void)
 {
     Factions newFaction;
-    // Clear fctions list
+    // Clear factions list
     factions.clear();
 
     std::stringstream query;
