@@ -206,21 +206,23 @@ Debugging options:
 ])
 AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
 
-# check for cli system enable
-AC_MSG_CHECKING(whether cli system is enabled)
+
+# check for cli console enable
+AC_MSG_CHECKING(whether cli console is enabled)
 MANGOSD_ENABLE_CLI=no
 AC_ARG_ENABLE(enable-cli,
-[  --enable-cli Turn on command console],
+[  --enable-cli Turn on command console system],
 [
     if test "$enableval" = "yes" ; then
-	CFLAGS="-DENABLE_CLI_ $CFLAGS"
-	CXXFLAGS="-DENABLE_CLI_ $CXXFLAGS"
+	CFLAGS="-DENABLE_CLI $CFLAGS"
+	CXXFLAGS="-DENABLE_CLI $CXXFLAGS"
 	MANGOSD_ENABLE_CLI=yes
     elif test "$withval" != "no" ; then
 	AC_MSG_ERROR(Please choose yes or no)
     fi
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_CLI)
+
 
 # check for httpd system enable
 AC_MSG_CHECKING(whether httpd system is enabled)
