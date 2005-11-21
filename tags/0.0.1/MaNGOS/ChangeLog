@@ -1,0 +1,28 @@
+MaNGOS 0.0.1  (Sept 13, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/milestone/0.0.1
+
+ MaNGOS 0.0.1 contains a great number of new features, improvements and
+ bug fixes. The following list contains all of them:
+
+ * NPC gossips now hash by Guid instead of ID. ID is meaningless and we should revisit its usage.
+ * Fixed client crash issue. GameObject still not interactive. Flags issues.
+ * Introduced new gameobjecttemplate table as well new map files.
+ * Added SCP-to-SQL converter to contrib/scp-to-sql/.
+ * MySQL 4.0 branch now is minimum requirement.
+ * Server causes client to core on unintialized memory. Also, remove some debug statement which causes problem when the DB is large
+ * Creature loot now reads from the creatureloot table. Use a new algorithm to select loot items that mimic the probabilities assigned in each item.
+ * Fixed configuration file, added proper settings for packet logging.
+ * Added default data for player creation and command help.
+ * Added GM command: .addspw #entry-id. Spawns a creature from creaturetemplate table by given #entry-id.
+ * Server randomly cores if DBC file failed to load. Fixes by intializing all DBC class internal variables.
+ * Daemon version and path to daemon configuration now set by build system on compile time.
+ * Allow connections from client release 4544
+ * Update solution and project files for latest Visual Studio .NET 2005 Beta 2 release.
+ * Fixed compiler error for gcc 4.0 or higher. Calling templated base class methods has to be explicit from 4.0 or higher on.
+ * Added contrib/ subdirectory for third-party tools.
+ * Applied MaNGOS code indention schema.
+ * Initial code checked into repository.
+ * Fork from WoW Daemon 0.9.0 branch.
+ * Fixed Bugs: #2, #3, #9, #10, #11
+
+ The complete list of closed tickets can be found here:
+   https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/query?status=closed&milestone=0.0.1

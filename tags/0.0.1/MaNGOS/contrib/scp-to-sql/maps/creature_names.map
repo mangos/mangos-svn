@@ -1,0 +1,11 @@
+TypeTable{guild=string,name=string}
+InfoTable{table=creature_names,outfile=creature_names.sql,fileName=creatures.scp}
+creature->name_id
+name->creature_name
+guild->Subname
+#X->unk1(0)
+#X->unk2(0)
+#X->unk3(0)
+#X->unk4(0)
+type->type
+model->displayid

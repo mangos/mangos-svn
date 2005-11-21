@@ -1,0 +1,5 @@
+InfoTable{id=race,fileName=classes.scp,outfile=playercreateinfo.sql,table=playercreateinfo}
+startmap->mapID(*)
+startzone->zoneID(*)
+startpos->positionX(*),positionY(*),positionZ(*)
+startstats->BaseStrength(*),BaseAgility(*),BaseStamina(*),BaseIntellect(*),BaseSpirity(*)
