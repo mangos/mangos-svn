@@ -23330,9 +23330,9 @@ echo "${ECHO_T}$MANGOSD_DEBUG_INFO" >&6
 echo "$as_me:$LINENO: checking whether cli console is enabled" >&5
 echo $ECHO_N "checking whether cli console is enabled... $ECHO_C" >&6
 MANGOSD_ENABLE_CLI=no
-# Check whether --enable-enable-cli or --disable-enable-cli was given.
-if test "${enable_enable_cli+set}" = set; then
-  enableval="$enable_enable_cli"
+# Check whether --enable-cli or --disable-cli was given.
+if test "${enable_cli+set}" = set; then
+  enableval="$enable_cli"
 
     if test "$enableval" = "yes" ; then
 	CFLAGS="-DENABLE_CLI $CFLAGS"
