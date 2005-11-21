@@ -322,13 +322,23 @@ struct CreatureInfo
 void ObjectMgr::LoadCreatureNames()
 {
     CreatureInfo *cn;
+	uint32 count = 0;
+
     //QueryResult *result = sDatabase.Query( "SELECT entryid,name,IFNULL(subname,''),type,modelid FROM creaturetemplate" );
     QueryResult *result = sDatabase.Query( "SELECT * FROM creaturetemplate" );
     if(result)
     {
+		/// get number of rows for trainers
+		barGoLink bar( result->GetRowCount() );
+
         do
         {
             Field *fields = result->Fetch();
+
+			/// print bar step
+			bar.step();
+
+			count++;
 
             cn = new CreatureInfo;
             // UQ1: How about we actually load these right???
@@ -419,6 +429,9 @@ void ObjectMgr::LoadCreatureNames()
 
         delete result;
     }
+
+	sLog.outString( ">> Loaded %d creature definitions", count );
+	sLog.outString( "" );
 }
 
 PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
@@ -1485,6 +1498,9 @@ void ObjectMgr::LoadItemPrototypes()
 
     delete result;
 
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d item prototypes", num_item_prototypes );
+
 //	SaveItemPrototypesCache();
 }
 
@@ -1499,6 +1515,7 @@ void ObjectMgr::LoadTrainerSpells()
         return;
 
 	int loop;
+	uint32 count = 0;
 
 	for (loop = 0; loop < 12; loop++)
 	{
@@ -1515,6 +1532,8 @@ void ObjectMgr::LoadTrainerSpells()
         Field *fields = result->Fetch();
 /// print bar step
         bar.step();
+
+		count++;
 
         TrainSpell = new Trainerspell;
 
@@ -1550,6 +1569,7 @@ void ObjectMgr::LoadTrainerSpells()
     } while (result->NextRow());
     delete result;
 
+/*
 #ifdef _DEBUG
 	Log::getSingleton( ).outDebug( "\nSetting Default Trainer Lists." );
 
@@ -1558,6 +1578,9 @@ void ObjectMgr::LoadTrainerSpells()
 		Log::getSingleton( ).outDebug( "* Set default trainer type [%i] to GUID [%u]", loop, default_trainer_guids[loop] );
 	}
 #endif //_DEBUG
+*/
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d trainer definitions", count );
 }
 
 
@@ -1604,9 +1627,19 @@ void ObjectMgr::LoadGuilds()
 {
 	Guild *newguild;
 	QueryResult *result = sDatabase.Query( "SELECT guildId FROM guilds" );
+	uint32 count = 0;
 	
 	if( !result ) 
+	{
+		/// get number of rows for Guilds
+		barGoLink bar( 1 );
+		/// print bar step
+		bar.step();
+
+		sLog.outString( "" );
+		sLog.outString( ">> Loaded %d guild definitions", count );
 		return;
+	}
 	
 	/// get number of rows for Guilds
 	barGoLink bar( result->GetRowCount() );
@@ -1617,6 +1650,7 @@ void ObjectMgr::LoadGuilds()
 		
 		/// print bar step
 		bar.step();
+		count++;
 		
 		newguild = new Guild;
 		newguild->LoadGuildFromDB(fields[0].GetUInt32());
@@ -1624,6 +1658,8 @@ void ObjectMgr::LoadGuilds()
 		
 	}while( result->NextRow() );
 
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d guild definitions", count );
 }
 
 void ObjectMgr::LoadQuests()
@@ -1632,6 +1668,9 @@ void ObjectMgr::LoadQuests()
 
     if( !result ) return;
 
+	/// get number of rows for Guilds
+	barGoLink bar( result->GetRowCount() );
+
     Quest *pQuest;
 	uint32 count = 0;
 	int iCalc;
@@ -1639,6 +1678,9 @@ void ObjectMgr::LoadQuests()
 
     do {
         Field *fields = result->Fetch();
+
+		/// print bar step
+		bar.step();
 
         pQuest = new Quest;
 		iCalc = 0;
@@ -1729,7 +1771,9 @@ void ObjectMgr::LoadQuests()
     while( result->NextRow() );
 
     delete result;
-	Log::getSingleton( ).outString( "    %d quest definitions", count );
+
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d quest definitions", count );
 }
 
 
@@ -1763,11 +1807,17 @@ void ObjectMgr::LoadGossipText()
 	if( !result ) return;
 	int cic;
 
+	/// get number of rows for Guilds
+	barGoLink bar( result->GetRowCount() );
+
 	do {
 		count++;
 		cic = 0;
 
 		Field *fields = result->Fetch();
+
+		/// print bar step
+		bar.step();
 
 		pGText = new GossipText;
 		pGText->Text_ID    = fields[cic++].GetUInt32();
@@ -1795,7 +1845,8 @@ void ObjectMgr::LoadGossipText()
 
 	} while( result->NextRow() );
 
-	Log::getSingleton( ).outString( "    %d npc texts", count );
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d npc texts", count );
 	delete result;
 }
 
@@ -1861,21 +1912,30 @@ void ObjectMgr::LoadAreaTriggerPoints()
 
 	if( !result ) return;
 
+	/// get number of rows for Guilds
+	barGoLink bar( result->GetRowCount() );
+
 	do {
 		count++;
+
+		/// print bar step
+		bar.step();
 
 		pArea = new AreaTriggerPoint;
 
 		Field *fields = result->Fetch();
 
-		pArea->Trigger_ID      = fields[1].GetUInt32();
-		pArea->Quest_ID        = fields[2].GetUInt32();
+		//pArea->Trigger_ID      = fields[1].GetUInt32();
+		//pArea->Quest_ID        = fields[2].GetUInt32();
+		pArea->Trigger_ID      = fields[0].GetUInt32();
+		pArea->Quest_ID        = fields[1].GetUInt32();
 
 		AddAreaTriggerPoint( pArea );
 
 	} while( result->NextRow() );
 
-	Log::getSingleton( ).outString( "    %d quest trigger points", count );
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d quest trigger points", count );
 	delete result;
 }
 
@@ -2302,6 +2362,8 @@ void ObjectMgr::LoadTeleportCoords()
     if( !result )
         return;
 
+	uint32 count = 0;
+
     TeleportCoords *pTC;
 
 /// get number of rows for teleport_coords
@@ -2312,6 +2374,8 @@ void ObjectMgr::LoadTeleportCoords()
         Field *fields = result->Fetch();
 /// print bar step
         bar.step();
+
+		count++;
 
         pTC = new TeleportCoords;
         pTC->id = fields[0].GetUInt32();
@@ -2325,6 +2389,9 @@ void ObjectMgr::LoadTeleportCoords()
     } while( result->NextRow() );
 
     delete result;
+
+	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d teleport definitions", count );
 }
 
 
