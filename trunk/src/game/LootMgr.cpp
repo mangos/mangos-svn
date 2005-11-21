@@ -30,8 +30,10 @@ LootMgr::LootMgr()
 }
 
 void LootMgr::LoadLootTables()
-{    
+{   
+	Log::getSingleton().outString("Initialize creature loot tables...");
     _populateLootTemplate("creatureloot", i_creaturesLoot);
+	Log::getSingleton().outString("Initialize game object loot tables...");
     _populateLootTemplate("gameobj_loot", i_gameObjectsLoot);
 }
 
@@ -94,7 +96,8 @@ void LootMgr::_populateLootTemplate(const char *loot_table_name, LootTable &loot
     } while( result->NextRow() );
     }
     
-    sLog.outDebug("Loaded %d loot templates for table %s", count, loot_table_name);
+    sLog.outString(">> Loaded %d loot templates for table %s", count, loot_table_name);
+	sLog.outString( "" );
 }
 
 LootMgr::LootList LootMgr::si_noLoot;

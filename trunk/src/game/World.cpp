@@ -194,11 +194,11 @@ void World::SetInitialWorldSettings()
     objmgr.SetHighestGuids();
 
     // Loading loot templates
-    Log::getSingleton().outString("Initialize loot tables...");
+    //Log::getSingleton().outString("Initialize loot tables..."); // UQ1: Moved into the procedure...
     LootMgr::getSingleton().LoadLootTables();
 
     Log::getSingleton().outString("Initialize data stores...");
-    barGoLink bar( 13 );
+    barGoLink bar( 15 );
     bar.step();
     new SkillStore("DBC/SkillLineAbility.dbc");
     bar.step();
@@ -226,10 +226,15 @@ void World::SetInitialWorldSettings()
     new FactionStore("DBC/Faction.dbc");
 	bar.step();
     new FactionTemplateStore("DBC/FactionTemplate.dbc");
+	bar.step();
     //end Made
 	new ItemDisplayTemplateStore("DBC/ItemDisplayInfo.dbc");
+	bar.step();
     // new AreaTriggerStore("DBC/AreaTrigger.dbc");
+	//bar.step();
 
+	Log::getSingleton( ).outString( "" );
+	Log::getSingleton( ).outString( ">> Loaded 15 data stores" );
     Log::getSingleton( ).outString( "" );
 
     // set timers
