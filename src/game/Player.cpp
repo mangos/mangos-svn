@@ -2501,25 +2501,35 @@ uint32 Player::GetSkillByProto( ItemPrototype *proto )
 
 uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
 {
-    uint32 type=proto->InventoryType;
+    uint32 type = proto->InventoryType;
 
     // Check to see if we have the correct race
-    if(!(proto->AllowableRace& (1<<getRace())))
+    //if(!(proto->AllowableRace& (1<<getRace())))
+	if( !( proto->AllowableRace & getRace() ) )
         return 10;
 
     // Check to see if we have the correct class
-    if(!(proto->AllowableClass& (1<<getClass())))
+    //if(!(proto->AllowableClass& (1<<getClass())))
+	if( !(proto->AllowableClass & getClass() ) )
         return 10;
 
     // Check to see if we have the correct level.
-    if(proto->RequiredLevel>GetUInt32Value(UNIT_FIELD_LEVEL))
+    if( proto->RequiredLevel > GetUInt32Value(UNIT_FIELD_LEVEL) )
         return 1;
-
     
     //Check to see if whe have the required skill
-    int32 skillid=0;
-    if(slot<19 && (skillid = GetSkillByProto(proto)) && !HasSkillLine(skillid))
-        return 2;
+    int32 skillid = 0;
+    
+	// UQ1: FIXME - This is not working in some cases... Don't know why!!! Not checking spells ???
+	/*
+	if( slot < 19 )
+	{
+		skillid = GetSkillByProto(proto);
+
+		if ( skillid > 0 && !HasSkillLine(skillid) )
+			return 2;
+	}
+	*/
 
     /*for(int i=1;(i<384)&&(!gotSkillz);i+=2)
         // I'm guessing this is the way to handle skillz
@@ -2699,6 +2709,142 @@ uint8 Player::CanEquipItemInSlot(uint8 slot, ItemPrototype *proto)
     }
 }
 
+bool Player::CanEquipItem (ItemPrototype * proto)
+{
+	uint8  error_code = EQUIP_ERR_OK;
+
+	// Check if Required Level is satisfied
+	if (getLevel() < proto->RequiredLevel)	
+		 {error_code = EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;}
+	else {error_code = EQUIP_ERR_OK;}
+	// -------------------------------------
+	
+	// Check of Skill Requirements to use Inventory Type
+	if (!error_code) {
+
+	// Error Code is set, we are trying to drop it to OK if any match found
+	error_code = EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+	switch (proto->InventoryType)
+	{
+	// 1-Hand Weapon
+	case INVTYPE_WEAPON:
+	case INVTYPE_WEAPONMAINHAND:
+		switch (proto->SubClass)
+		{
+		// 1-Hand Weapons
+		case ITEM_SUBCLASS_WEAPON_MACE:			if (HasSpell (198)   && HasSkillLine (SKILL_MACES)		 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_SWORD:			if (HasSpell (201)	 && HasSkillLine (SKILL_SWORDS)		 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_DAGGER:			if (HasSpell (1180)	 && HasSkillLine (SKILL_DAGGERS)	 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_AXE:				if (HasSpell (196)	 && HasSkillLine (SKILL_AXES)		 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_UNARMED:		if (HasSpell (15590) && HasSkillLine (SKILL_FIST_WEAPONS)) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_GENERIC:			error_code = EQUIP_ERR_OK; break;
+		default: error_code = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+		}
+		break;
+
+	// 2-Hand Weapon	
+	case INVTYPE_2HWEAPON:
+		switch (proto->SubClass)
+		{
+		// 2-Hand Weapons
+		case ITEM_SUBCLASS_WEAPON_SWORD2:	if (HasSpell (202) && HasSkillLine (SKILL_2H_SWORDS)) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_AXE2:		if (HasSpell (197) && HasSkillLine (SKILL_2H_AXES)	) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_POLEARM:			if (HasSpell (200) && HasSkillLine (SKILL_POLEARMS)			) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_MACE2:	if (HasSpell (199) && HasSkillLine (SKILL_2H_MACES)	) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_STAFF:			if (HasSpell (227) && HasSkillLine (SKILL_STAVES)			) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_FISHING_POLE:	if (HasSpell (7738) && HasSkillLine(SKILL_FISHING)			) error_code = EQUIP_ERR_OK; break;
+		default: error_code = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+		}
+		break;
+	
+	// Off Hand Weapon
+	case INVTYPE_WEAPONOFFHAND:
+		switch (proto->SubClass)
+		{
+		// 1-Hand Weapons
+		case ITEM_SUBCLASS_WEAPON_DAGGER:			if (HasSpell (1180)	 && HasSkillLine (SKILL_DAGGERS)	 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_SWORD:			if (HasSpell (201)	 && HasSkillLine (SKILL_SWORDS)		 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_AXE:				if (HasSpell (196)	 && HasSkillLine (SKILL_AXES)		 ) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_UNARMED:		if (HasSpell (15590) && HasSkillLine (SKILL_FIST_WEAPONS)) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_GENERIC:		error_code = EQUIP_ERR_OK;
+		default: error_code = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+		}
+		break;
+
+	// Ranged Weapon
+	case INVTYPE_RANGED:
+	case INVTYPE_RANGEDRIGHT:
+		switch (proto->SubClass)
+		{
+		// Ranged Weapons
+		case ITEM_SUBCLASS_WEAPON_BOW:				if (HasSpell (264)	&& HasSkillLine (SKILL_BOWS)		) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_CROSSBOW:		if (HasSpell (5011)	&& HasSkillLine (SKILL_CROSSBOWS)	) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_GUN:				if (HasSpell (266)	&& HasSkillLine (SKILL_GUNS)		) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_WAND:			if (HasSpell (5009)	&& HasSkillLine (SKILL_WANDS)		) error_code = EQUIP_ERR_OK; break;
+		case ITEM_SUBCLASS_WEAPON_THROWN:			if (HasSpell (2567)	&& HasSkillLine (SKILL_THROWN)		) error_code = EQUIP_ERR_OK; break;
+		default: error_code = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+		}
+		break;
+
+	// Armor
+	case INVTYPE_SHIELD:
+	case INVTYPE_HEAD:
+	case INVTYPE_SHOULDERS:
+	case INVTYPE_CHEST:
+	case INVTYPE_WAIST:
+	case INVTYPE_LEGS:
+	case INVTYPE_FEET:
+	case INVTYPE_WRISTS:
+	case INVTYPE_HANDS:
+		// Armor
+		switch (proto->SubClass)
+		{
+		case ITEM_SUBCLASS_ARMOR_CLOTH:			if (HasSkillLine (SKILL_CLOTH)		) error_code = EQUIP_ERR_OK;  break;
+		case ITEM_SUBCLASS_ARMOR_LEATHER:			if (HasSkillLine (SKILL_LEATHER)	) error_code = EQUIP_ERR_OK;  break;
+		case ITEM_SUBCLASS_ARMOR_MAIL:			if (HasSkillLine (SKILL_MAIL)		) error_code = EQUIP_ERR_OK;  break;
+		case ITEM_SUBCLASS_ARMOR_PLATE:		if (HasSkillLine (SKILL_PLATE_MAIL)	) error_code = EQUIP_ERR_OK;  break;
+		case ITEM_SUBCLASS_ARMOR_SHIELD:			if (HasSkillLine (SKILL_SHIELD)		) error_code = EQUIP_ERR_OK;  break;
+		case ITEM_SUBCLASS_ARMOR_GENERIC:			error_code = EQUIP_ERR_OK;  break;
+		default: error_code = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+		}
+		break;
+
+	case INVTYPE_HOLDABLE:
+		error_code = EQUIP_ERR_OK;
+		break;
+
+	case INVTYPE_BODY:
+	case INVTYPE_TABARD:
+	case INVTYPE_NECK:
+	case INVTYPE_FINGER:
+	case INVTYPE_TRINKET:
+	case INVTYPE_CLOAK:
+	case INVTYPE_ROBE:
+		error_code = EQUIP_ERR_OK;
+		break;
+	default: error_code = EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
+	}
+	}
+
+	// Issue Error Code to Player and give FALSE to function if Error Code is not ZERO
+	if (error_code > 0) {
+		WorldPacket	data;
+    	Item* pItem = new Item();
+		pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this);
+
+		data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
+
+		data << uint32(error_code);
+		data << (pItem ? pItem->GetGUID() : uint64(0));
+		data << (pItem ? pItem->GetGUID() : uint64(0));
+		data << uint8(0);
+
+		m_session->SendPacket(&data);
+		return true;
+	}
+	else return false;
+	// ------------------------------------
+}
 
 void Player::SwapItemSlots(uint8 srcslot, uint8 dstslot)
 {
@@ -2718,6 +2864,37 @@ void Player::SwapItemSlots(uint8 srcslot, uint8 dstslot)
 
     Item* Item1 = RemoveItemFromSlot(srcslot);
     Item* Item2 = RemoveItemFromSlot(dstslot);
+
+	if (Item2 != NULL)
+	{// UQ1: If there is an item here, check if we can stack the item... If we can, then stack it...
+		if (Item1->GetProto()->DisplayInfoID == Item2->GetProto()->DisplayInfoID 
+			&& Item2->GetProto()->MaxCount > 0 && Item2->GetCount() < Item2->GetProto()->MaxCount )
+		{// The same item is in this slot... So stack it...
+			uint32 free_slots = Item2->GetProto()->MaxCount - Item2->GetCount();
+			uint32 leftover_count = free_slots - Item1->GetCount();
+
+			if (leftover_count <= 0)
+			{// We can add them all to this slot...
+				Item2->SetCount(Item2->GetCount()+Item1->GetCount());
+				RemoveItemFromSlot(srcslot);
+				this->UpdateSlot(srcslot);
+				this->UpdateSlot(dstslot);
+				Item1->UpdateStats();
+				return;
+			}
+			else
+			{// Seems we can't add all of them to this slot.. Add what we can...
+				Item2->SetCount(Item2->GetProto()->MaxCount);
+				Item1->SetCount(leftover_count);
+				this->UpdateSlot(srcslot);
+				this->UpdateSlot(dstslot);
+				Item1->UpdateStats();
+				Item2->UpdateStats();
+				return;
+			}
+		}
+	}
+
     if (Item2 != NULL) AddItemToSlot(srcslot, Item2);
     if (Item1 != NULL) AddItemToSlot(dstslot, Item1);
     Log::getSingleton().outError("SwapItemSlotsMid");
@@ -2803,7 +2980,49 @@ void Player::AddItemToSlot(uint8 slot, Item *item)
     
     if (slot >= BANK_SLOT_BAG_END)
         return;
-    
+/*
+	if (m_items[slot] != NULL)
+	{// UQ1: If there is an item here, check if we can stack the item... If we can, then stack it...
+		if (item->GetProto()->DisplayInfoID == m_items[slot]->GetProto()->DisplayInfoID 
+			&& item->GetProto()->MaxCount > 0 && item->GetCount() < item->GetProto()->MaxCount )
+		{// The same item is in this slot... So stack it...
+			item->SetCount(item->GetCount()+1);
+			return;
+		}
+	}
+*/
+	if (m_items[slot] != NULL)
+	{// UQ1: If there is an item here, check if we can stack the item... If we can, then stack it...
+		if (item->GetProto()->DisplayInfoID == m_items[slot]->GetProto()->DisplayInfoID 
+			&& item->GetProto()->MaxCount > 0 && item->GetCount() < item->GetProto()->MaxCount )
+		{// The same item is in this slot... So stack it...
+			uint32 free_slots = m_items[slot]->GetProto()->MaxCount - m_items[slot]->GetCount();
+			uint32 leftover_count = free_slots - item->GetCount();
+
+			if (leftover_count <= 0)
+			{// We can add them all to this slot...
+				m_items[slot]->SetCount(m_items[slot]->GetCount()+item->GetCount());
+				//Item1->SetCount(uint32(0));
+				//RemoveItemFromSlot(srcslot);
+				//this->UpdateSlot(srcslot);
+				this->UpdateSlot(slot);
+				item->UpdateStats();
+				//Item2->UpdateStats();
+				return;
+			}
+			else
+			{// Seems we can't add all of them to this slot.. Add what we can... FIXME: Add leftovers to another slot...
+				m_items[slot]->SetCount(m_items[slot]->GetProto()->MaxCount);
+				//item->SetCount(leftover_count);
+				//this->UpdateSlot(srcslot);
+				this->UpdateSlot(slot);
+				item->UpdateStats();
+				m_items[slot]->UpdateStats();
+				return;
+			}
+		}
+	}
+
     m_items[slot] = NULL;
 
     if( IsInWorld() )
@@ -3486,6 +3705,9 @@ void Player::BroadcastToFriends(std::string msg)
 // skilllines
 bool Player::HasSkillLine(uint32 id)
 {
+	if (m_session->GetPlayer()->HasSpell(id))
+		return true;
+
     std::list<struct skilllines>::iterator itr;
     for (itr = m_skilllines.begin(); itr != m_skilllines.end(); ++itr)
     {
@@ -4073,6 +4295,66 @@ void Player::SetSheath (uint32 sheathed)
             this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, uint32(0));
         }
     }
+}
+
+bool Player::CanUseItem (ItemPrototype * proto)
+{
+	uint32 reqSpell		= 0;//proto->RequiredSpell;
+	uint32 reqSkill		= proto->RequiredSkill;
+	uint32 reqSkillRank = proto->RequiredSkillRank;
+	uint8  error_code	= EQUIP_ERR_OK;
+
+	// Check if Required Level is satisfied
+	if (getLevel() < proto->RequiredLevel) error_code = EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
+	// -------------------------------------
+
+	// Checking required Spells & Skills -- FIXME -- Mangos doesnt currently have a skill setup
+/*	if (reqSpell && reqSkill) {
+		if (HasSpell(reqSpell) && HasSkill(reqSkill))
+			if (GetSkill(reqSkill) < reqSkillRank) error_code = EQUIP_ITEM_RANK_NOT_ENOUGH;
+		else error_code = EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+	}
+	else if (reqSpell && !reqSkill) {
+
+		if (HasSpell(reqSpell)) error_code = EQUIP_ERR_OK;
+		else error_code = EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+	}
+	else if (!reqSpell && reqSkill) {
+		
+		if (HasSkill(reqSkill))
+			if (GetSkill(reqSkill) < reqSkillRank) error_code = EQUIP_ITEM_RANK_NOT_ENOUGH;
+		else error_code = EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
+	}*/
+
+	// ------------------------------------
+
+	// Issue Error Code and give FALSE
+	if (error_code) {
+		WorldPacket	data;
+		Item* pItem = new Item();
+		pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this);
+		//Make_INVENTORY_CHANGE_FAILURE (&data, error_code, pItem, 0);
+		data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
+
+		// We send Required Level for this Err Code
+		if (error_code == EQUIP_ERR_YOU_MUST_REACH_LEVEL_N) {
+			data << error_code;
+			data << uint64 (proto->RequiredLevel);
+			data << uint64(0);
+			data << uint8(0);
+		}
+
+		data << error_code;
+		data << (pItem ? pItem->GetGUID() : uint64(0));
+		data << uint64(0);
+		data << uint8(0);
+
+		GetSession()->SendPacket (&data);
+		delete pItem;
+		return false;
+	}
+	else return true;
+	// ------------------------------------
 }
 
 //
