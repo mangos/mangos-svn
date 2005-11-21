@@ -52,6 +52,49 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 
     Item * dstitem = GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = GetPlayer()->GetItemBySlot(srcslot);
+/*
+	if (dstitem != NULL)
+	{// UQ1: If there is an item here, check if we can stack the item... If we can, then stack it... FIXME: Allow for maxcount hit..
+		if (srcitem->GetProto()->DisplayInfoID == dstitem->GetProto()->DisplayInfoID 
+			&& dstitem->GetProto()->MaxCount > 0 && dstitem->GetCount() < dstitem->GetProto()->MaxCount )
+		{// The same item is in this slot... So stack it...
+			dstitem->SetCount(dstitem->GetCount()+1);
+			GetPlayer()->UpdateSlot(srcslot);
+			GetPlayer()->UpdateSlot(dstslot);
+			return;
+		}
+	}
+	*/
+	if (dstitem != NULL)
+	{// UQ1: If there is an item here, check if we can stack the item... If we can, then stack it...
+		if (srcitem->GetProto()->DisplayInfoID == dstitem->GetProto()->DisplayInfoID 
+			&& dstitem->GetProto()->MaxCount > 0 && dstitem->GetCount() < dstitem->GetProto()->MaxCount )
+		{// The same item is in this slot... So stack it...
+			uint32 free_slots = dstitem->GetProto()->MaxCount - dstitem->GetCount();
+			uint32 leftover_count = free_slots - srcitem->GetCount();
+
+			if (leftover_count <= 0)
+			{// We can add them all to this slot...
+				dstitem->SetCount(dstitem->GetCount()+srcitem->GetCount());
+				GetPlayer()->RemoveItemFromSlot(srcslot);
+				GetPlayer()->UpdateSlot(srcslot);
+				GetPlayer()->UpdateSlot(dstslot);
+				dstitem->UpdateStats();
+				srcitem->UpdateStats();
+				return;
+			}
+			else
+			{// Seems we can't add all of them to this slot.. Add what we can...
+				dstitem->SetCount(dstitem->GetProto()->MaxCount);
+				srcitem->SetCount(leftover_count);
+				GetPlayer()->UpdateSlot(srcslot);
+				GetPlayer()->UpdateSlot(dstslot);
+				dstitem->UpdateStats();
+				srcitem->UpdateStats();
+				return;
+			}
+		}
+	}
 
 	dstitem->UpdateStats();
 	srcitem->UpdateStats();
@@ -61,8 +104,16 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
          (dstslot >= EQUIPMENT_SLOT_START && dstslot < EQUIPMENT_SLOT_END)
        )
     {
-        uint8 error = GetPlayer()->CanEquipItemInSlot(dstslot, srcitem->GetProto());
-        if (!srcitem || error)
+		bool error = GetPlayer()->CanEquipItem(srcitem->GetProto());
+		if (error) 
+		{
+			GetPlayer()->UpdateSlot(srcslot);
+            GetPlayer()->UpdateSlot(dstslot);
+			return;
+		}
+        /*
+		uint8 error = GetPlayer()->CanEquipItemInSlot(dstslot, srcitem->GetProto());
+		if (!srcitem || error)
         {
             data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
             data << (uint8)error;
@@ -75,14 +126,22 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
             GetPlayer()->UpdateSlot(srcslot);
             GetPlayer()->UpdateSlot(dstslot);
             return;
-        }
+        }*/
     }
     //Se existir um item no destino é preciso saber se ele pode trocar de lugar com o item da fonte        
     if(srcslot >= EQUIPMENT_SLOT_START && srcslot < EQUIPMENT_SLOT_END )
     {
         if(dstitem)
         {
-            uint8 error = GetPlayer()->CanEquipItemInSlot(srcslot, dstitem->GetProto());
+			bool error = GetPlayer()->CanEquipItem(srcitem->GetProto());
+			{
+				GetPlayer()->UpdateSlot(srcslot);
+				GetPlayer()->UpdateSlot(dstslot);
+				return;
+			}
+
+            /*
+			uint8 error = GetPlayer()->CanEquipItemInSlot(srcslot, dstitem->GetProto());
             if (error)
             {
                 data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
@@ -97,6 +156,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
                 GetPlayer()->UpdateSlot(dstslot);
                 return;
             }
+			*/
         }
     }
 
@@ -104,7 +164,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     if (srcslot == dstslot)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(0x16); //item is not fount
+        data << uint8(0x16); //item is not found
         data << (dstitem ? dstitem->GetGUID() : uint64(0));
         data << (srcitem ? srcitem->GetGUID() : uint64(0));
         data << uint8(0);
@@ -214,7 +274,9 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     }
 
     //Se o item da bag pode equipar o CHAR
-    uint8 error = GetPlayer()->CanEquipItemInSlot(slot, item->GetProto());  
+    //uint8 error = GetPlayer()->CanEquipItemInSlot(slot, item->GetProto());  
+/*
+	uint8 error = GetPlayer()->CanEquipItem(item->GetProto());
     
     if ( error )
     {
@@ -227,6 +289,13 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         GetPlayer()->UpdateSlot(dstslot);
         return;
     }
+*/
+	bool error = GetPlayer()->CanEquipItem(item->GetProto());
+	if (error)
+	{
+        GetPlayer()->UpdateSlot(dstslot);
+		return;
+	}
 
     GetPlayer()->SwapItemSlots(dstslot, slot);
 }
@@ -343,7 +412,12 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ShadowRes;
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
-    data << itemProto->Field69; // UQ1: Ammo Type -- According to w*ww*w - I see no effect...
+	if (itemProto->Block)
+		data << itemProto->Block/*itemProto->Field69*/; // UQ1: Ammo Type -- According to w*ww*w - I see no effect...
+														// UQ1: Block according to lud... I dont think its block!
+	else
+		data << uint32(0);
+
     for(i = 0; i < 5; i++)
     {
         data << itemProto->SpellId[i];
@@ -358,7 +432,17 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
 	if (stricmp(itemProto->Description.c_str(), ""))
     {
-        data << itemProto->Description.c_str();
+        //data << itemProto->Description.c_str();
+		if (itemProto->Quality == ITEM_QUALITY_NORMAL)
+			data << std::string("%s\"\n\n\"This is a normal item.", itemProto->Description.c_str());
+		else if (itemProto->Quality == ITEM_QUALITY_UNCOMMON)
+			data << std::string("%s\"\n\n\"This is an uncommon item.", itemProto->Description.c_str());
+		else if (itemProto->Quality == ITEM_QUALITY_RARE)
+			data << std::string("%s\"\n\n\"This is a rare item.", itemProto->Description.c_str());
+		else if (itemProto->Quality == ITEM_QUALITY_EPIC)
+			data << std::string("%s\"\n\n\"This is an epic item.", itemProto->Description.c_str());
+		else if (itemProto->Quality == ITEM_QUALITY_LEGENDARY)
+			data << std::string("%s\"\n\n\"This is a legendary item.", itemProto->Description.c_str());
     }
     else
     {
@@ -388,7 +472,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 		data << uint32(0);
 
     data << itemProto->Field106; // UQ1: Lock Type
-    data << itemProto->Field107; // UQ1: Sheath
+	data << itemProto->Sheath;//Field107; // UQ1: Sheath
     data << itemProto->Field108; // UQ1: Ammo Enchantment -- Maybe others too
 	data << itemProto->Block;    // UQ1: This is "Block" Value
     data << itemProto->Field110; // UQ1: Unknown
@@ -725,6 +809,39 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
         return;
     if ((slot <= 22) && (slot >=19))
         return;                                   //these are the bags slots...i'm not sure exactly how to use them
+
+	// UQ1: First see if we can find a slot we can stack this item on...
+	for(uint8 i = 23; i <= 38; i++)
+    {
+		Item *item = new Item();
+		item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
+		
+		if (GetPlayer()->GetItemBySlot(i) != 0)
+        {// A free slot..
+            if (GetPlayer()->GetItemBySlot(i)->GetProto()->DisplayInfoID == item->GetProto()->DisplayInfoID
+				&& GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount > 0 && GetPlayer()->GetItemBySlot(i)->GetCount() < GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount )
+			{// If we find the item and can stack to it.. Do it and return...
+				if (GetPlayer()->GetItemBySlot(i)->GetCount()+amount <= GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount)
+				{// Can fit them all onto the stack...
+					GetPlayer()->GetItemBySlot(i)->SetCount(GetPlayer()->GetItemBySlot(i)->GetCount()+amount);
+					delete item;
+					return;
+				}
+				else 
+				{// Can only fit some onto the stack...
+					uint32 free_slot_count = GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount - GetPlayer()->GetItemBySlot(i)->GetCount();
+					uint32 max_add = amount - free_slot_count;
+
+					GetPlayer()->GetItemBySlot(i)->SetCount(GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount);
+					amount = (amount - max_add); // Reduce the add amount, and continue...
+					// UQ1: keep looping in case we have another of the item...
+				}
+			}
+        }
+
+		delete item;
+    }
+
     if (GetPlayer()->GetItemBySlot(slot) != 0)
         return;                                   //slot is not empty...
 
@@ -801,11 +918,43 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     if (unit == NULL)
         return;
 
+	// UQ1: First see if we can find a slot we can stack this item on...
+	for(uint8 i = 23; i <= 38; i++)
+    {
+		Item *item = new Item();
+		item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), itemid, GetPlayer());
+		
+		if (GetPlayer()->GetItemBySlot(i) != 0)
+        {// A free slot..
+            if (GetPlayer()->GetItemBySlot(i)->GetProto()->DisplayInfoID == item->GetProto()->DisplayInfoID
+				&& GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount > 0 && GetPlayer()->GetItemBySlot(i)->GetCount() < GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount )
+			{// If we find the item and can stack to it.. Do it and return...
+				if (GetPlayer()->GetItemBySlot(i)->GetCount()+amount <= GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount)
+				{// Can fit them all onto the stack...
+					GetPlayer()->GetItemBySlot(i)->SetCount(GetPlayer()->GetItemBySlot(i)->GetCount()+amount);
+					delete item;
+					return;
+				}
+				else 
+				{// Can only fit some onto the stack...
+					uint32 free_slot_count = GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount - GetPlayer()->GetItemBySlot(i)->GetCount();
+					uint32 max_add = amount - free_slot_count;
+
+					GetPlayer()->GetItemBySlot(i)->SetCount(GetPlayer()->GetItemBySlot(i)->GetProto()->MaxCount);
+					amount = (amount - max_add); // Reduce the add amount, and continue...
+					// UQ1: keep looping in case we have another of the item...
+				}
+			}
+        }
+
+		delete item;
+    }
+
     // Find free slot and break if inv full
     for(uint8 i = 23; i <= 38; i++)
     {
-        if (GetPlayer()->GetItemBySlot(i) == 0)
-        {
+		if (GetPlayer()->GetItemBySlot(i) == 0)
+        {// A free slot..
             playerslot = i;
             break;
         }
@@ -911,16 +1060,6 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
         if(unit->getItemId(i) != 0)
         {// UQ1: FIXME: This should be based on the vendor's item, not the prototype!!! This will be why we don't see full info!!!
             curItem = objmgr.GetItemPrototype(unit->getItemId(i));
-
-			/*
-			Item *item;
-			// Search the slot...
-			for(uint8 i=0; i<39; i++)
-			{
-				item = unit->GetItemBySlot(i);
-				item->UpdateStats();
-			}
-			*/
 
             if( !curItem )
             {
@@ -1035,9 +1174,9 @@ void WorldSession::SendListInventory( uint64 guid )
 
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_AUTO_STORE_BAG_ITEM" );
+/*    Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_AUTO_STORE_BAG_ITEM" );
 
-/*    WorldPacket data;
+    WorldPacket data;
     //uint64 guid;
 	uint32 value1;
 
@@ -1112,5 +1251,15 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     Log::getSingleton( ).outDetail( "WORLD: Sent SMSG_AUTO_STORE_BAG_ITEM" );
     */
+
+	Log::getSingleton( ).outDebug( "WORLD: CMSG_AUTOSTORE_BAG_ITEM");
+	
+	WorldPacket data;
+
+    uint8 unk1, srcslot, dstslot;
+
+    recv_data >> unk1 >> srcslot >> dstslot;
+
+	Log::getSingleton().outDetail("INVENTORY: AUTOSTORE ITEM: SLOTS -> SRC: %d DST: %d UNK: %d", srcslot, dstslot, unk1 );
 }
 

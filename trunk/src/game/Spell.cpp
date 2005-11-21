@@ -786,12 +786,36 @@ void Spell::FillTargetMap()
                         {
                             case 2:               // School Damage
                             {
+								/*
                                 if(!unitTarget)
                                     break;
                                 if(!unitTarget->isAlive())
                                     break;
 
                                 m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id, damage);
+								*/
+								if(!unitTarget) break;
+								if(!unitTarget->isAlive()) break;
+
+								uint32 baseDamage = m_spellInfo->EffectBasePoints[i];
+
+								/*
+								if (m_caster->GetPowerIndex() == POWER_TYPE_ENERGY && // Energy
+									AbilityRequiresComboPoints (m_spellInfo->Id) &&
+									m_caster->GetUInt64Value (PLAYER__FIELD_COMBO_TARGET) != 0)
+								{
+									baseDamage = int32 (m_spellInfo->Effectunknown2[i] * m_caster->GetComboPoints());
+			
+									m_caster->SetComboPoints(0);
+									m_caster->SetUInt64Value (PLAYER__FIELD_COMBO_TARGET, 0);
+								} 
+								//else break;
+								*/
+
+								uint32 randomDamage = rand()%m_spellInfo->EffectDieSides[i];
+								uint32 damage = baseDamage+randomDamage;
+
+								m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
                             }break;
                             case 3:               // Dummy
                             {
@@ -893,6 +917,65 @@ void Spell::FillTargetMap()
                             }break;
                             case 24:              // Create item      // NEEDS TO BE REDONE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                             {
+								Player* pUnit = (Player*)m_caster;
+								uint8 slot = 0;
+								for(uint8 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++){// check if there is a free slot for the item to conjure
+									if(pUnit->GetItemBySlot(i) == 0)
+										slot = i;
+								}
+								if(slot == 0){
+								SendCastResult(0x18);
+									return;
+								}
+
+								Item* pItem;
+								uint8 curSlot;
+								for(uint32 i=0;i<8;i++){
+									for(uint32 j=0;j<m_spellInfo->ReagentCount[i];j++){
+										if(j>10)// little protection to prevent loops in here
+											break;
+										if(m_spellInfo->Reagent[i] == 0)
+											continue;
+										curSlot = (uint8)pUnit->GetSlotByItemID(m_spellInfo->Reagent[i]);
+										if(curSlot == 0)
+											continue;
+										pItem = new Item;
+										pItem = pUnit->GetItemBySlot(curSlot);
+				
+										// if there are more then 1 in stack then just reduce it by 1
+										if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > 1){ 
+											pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)-1);
+										}else{// otherwise delete it from player and db
+											pUnit->RemoveItemFromSlot(curSlot);
+											pItem->DeleteFromDB();
+										}
+										pItem = NULL;
+										curSlot = 0;
+									}
+								}
+
+								pItem = NULL;
+								Item* newItem;
+								for(i=0;i<2;i++)
+								{// now create the Items
+									if(m_spellInfo->EffectItemType[i] == 0)
+										continue;
+
+									slot = 0;
+									// check if there is a free slot for the item to conjure
+									for (uint8 i = INVENTORY_SLOT_ITEM_START; i<INVENTORY_SLOT_ITEM_END;i++){
+										if(pUnit->GetItemBySlot(i) == 0)
+											slot = i;
+									}
+									if(slot == 0){
+										SendCastResult(0x18);
+										return;
+									}
+									newItem = new Item;
+									newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
+									pUnit->AddItemToSlot(slot,newItem);
+									newItem = NULL;
+								}
 /*
                 Player* pUnit = (Player*)m_caster;
                 uint8 slot = 0;
@@ -1120,6 +1203,54 @@ m_CastItem = p_caster->GetItemBySlot(i);
                             }break;
                             case 54:              // Enchant Item Temporary
                             {
+								Player* p_caster = (Player*)m_caster;
+                                uint32 add_slot = 0;
+                                uint8 item_slot = 0;
+
+                                uint32 field = 99;
+                                if(m_CastItem)
+                                    field = 1;
+                                else
+                                    field = 3;
+                                
+                                if(!m_CastItem)
+                                {
+                                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
+                                    {
+                                        if(p_caster->GetItemBySlot(i) != 0)
+                                            if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
+                                            {
+                                                m_CastItem = p_caster->GetItemBySlot(i);
+                                                item_slot = i;
+                                            }
+                                    }
+                                }
+
+                                for(add_slot = 0; add_slot < 22; add_slot++)
+                                {
+                                    if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
+                                        break;
+                                }
+
+                                if (add_slot < 32)
+                                {
+                                    for(uint8 i=0;i<3;i++)
+                                    {
+                                        if (m_spellInfo->EffectMiscValue[i])
+                                            m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+                                    }
+
+                                    // Now actually set it up, and transmit info...
+                                    UpdateData upd;
+                                    WorldPacket packet;
+
+                                    p_caster->ApplyItemMods( m_CastItem, item_slot, true );
+                                    upd.Clear();
+                                    m_CastItem->UpdateStats();
+                                    m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
+                                    upd.BuildPacket(&packet);
+                                    p_caster->GetSession()->SendPacket(&packet);
+                                }
 /*
                 Player* p_caster = (Player*)m_caster;
                 uint32 duration = GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex));
@@ -1319,7 +1450,54 @@ m_CastItem = p_caster->GetItemBySlot(i);
                             }break;
                             case 92:              // Enchant Held Item
                             {
+								Player* p_caster = (Player*)m_caster;
+                                uint32 add_slot = 0;
+                                uint8 item_slot = 0;
 
+                                uint32 field = 99;
+                                if(m_CastItem)
+                                    field = 1;
+                                else
+                                    field = 3;
+                                
+                                if(!m_CastItem)
+                                {
+                                    for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
+                                    {
+                                        if(p_caster->GetItemBySlot(i) != 0)
+                                            if(p_caster->GetItemBySlot(i)->GetProto()->ItemId == m_targets.m_itemTarget)
+                                            {
+                                                m_CastItem = p_caster->GetItemBySlot(i);
+                                                item_slot = i;
+                                            }
+                                    }
+                                }
+
+                                for(add_slot = 0; add_slot < 22; add_slot++)
+                                {
+                                    if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
+                                        break;
+                                }
+
+                                if (add_slot < 32)
+                                {
+                                    for(uint8 i=0;i<3;i++)
+                                    {
+                                        if (m_spellInfo->EffectMiscValue[i])
+                                            m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+                                    }
+
+                                    // Now actually set it up, and transmit info...
+                                    UpdateData upd;
+                                    WorldPacket packet;
+
+                                    p_caster->ApplyItemMods( m_CastItem, item_slot, true );
+                                    upd.Clear();
+                                    m_CastItem->UpdateStats();
+                                    m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
+                                    upd.BuildPacket(&packet);
+                                    p_caster->GetSession()->SendPacket(&packet);
+                                }
                             }break;
                             case 101:             // Feed Pet
                             {
@@ -1411,6 +1589,9 @@ m_CastItem = p_caster->GetItemBySlot(i);
                             {
                                 // PLAYER_TRACK_CREATURES 2^X
                                 // printf("unknown effect\n");
+								Log::getSingleton( ).outError("SPELL: unknown effect %d spell id %i\n",
+								m_spellInfo->Effect[i], m_spellInfo->Id);
+								break;
                             }break;
                         }
                     }

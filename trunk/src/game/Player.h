@@ -443,6 +443,8 @@ class Player : public Unit
         uint8 FindFreeItemSlot(uint32 type);
         int CountFreeBagSlot();
         uint8 CanEquipItemInSlot(uint8 slot, ItemPrototype* item);
+		bool CanEquipItem (ItemPrototype * proto);
+		bool CanUseItem (ItemPrototype* proto);
 
         // looting
         const uint64& GetLootGUID() const { return m_lootGuid; }

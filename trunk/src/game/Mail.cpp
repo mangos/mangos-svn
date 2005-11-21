@@ -582,6 +582,26 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     }
     else
 	{// UQ1: This is an item info text page...
+/*		uint32 realID = GetItemGuidFromDisplayID(mailguid, pl);
+
+		if (realID >= 0)
+		{// See if this item can be "used" first...
+			ItemPrototype *itemProto = objmgr.GetItemPrototype(realID);
+    
+			if(itemProto 
+				&& ( itemProto->Class == ITEM_CLASS_CONSUMABLE 
+				//|| itemProto->SubClass == ITEM_SUBCLASS_CONSUMABLE
+				) )
+			{// Can this item be used??? If so, use it instead of sending page text info...
+				SpellCastTargets targets;
+				targets.read(&recv_data, GetPlayer()->GetGUID());
+
+				//HandleUseItemOpcode(recv_data);			
+				UseItem(uint8 tmp1, uint8 slot, uint8 tmp3, targets);
+				return;
+			}
+		}*/
+
         //Log::getSingleton().outError("We got mailguid: %d but there is no such mail.",mailguid);
 		//data << "Hi, We got a mailguid,  but there is no such mail";
 		QueryResult *result = sDatabase.Query( fmtstring("SELECT * FROM item_pages WHERE id='%u'", mailguid) );

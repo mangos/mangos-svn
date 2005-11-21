@@ -29,7 +29,7 @@
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
-    Player* p_User = GetPlayer();
+/*    Player* p_User = GetPlayer();
     Log::getSingleton( ).outDetail("WORLD: got use Item packet, data length = %i\n",recvPacket.size());
     uint8 tmp1,slot,tmp3;
     uint32 spellId;
@@ -57,8 +57,109 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     targets.read(&recvPacket,GetPlayer()->GetGUID());
     spell->m_CastItem = tmpItem;
     spell->prepare(&targets);
-}
+	*/
 
+	Player* p_User = GetPlayer();
+    Log::getSingleton( ).outDetail("WORLD: got use Item packet, data length = %i\n",recvPacket.size());
+    uint8 tmp1,slot,tmp3;
+    uint32 spellId;
+
+    recvPacket >> tmp1 >> slot >> tmp3;
+
+    Item* tmpItem = new Item;
+    tmpItem = p_User->GetItemBySlot(slot);
+    ItemPrototype *itemProto = tmpItem->GetProto();
+    spellId = itemProto->SpellId[0];
+
+    // Check for Spell ID
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
+    if(!spellInfo)
+    {
+        Log::getSingleton( ).outError("WORLD: unknown spell id %i\n", spellId);
+        return;
+    }
+	
+	// FIXME: Check for Player's Stand State (activate if seated only)
+//	GetPlayer()->SetStandState (STANDSTATE_SIT);
+
+/*
+	switch (p_User->GetStandState())
+	{
+	case STANDSTATE_STAND:
+	case STANDSTATE_SLEEP:
+	case STANDSTATE_KNEEL:
+		// need to add normal Error Code
+		//SystemMessage("You must be seated when using this item !");
+		GetPlayer()->SetStandState (STANDSTATE_SIT);
+		break;
+		//return;
+	case STANDSTATE_DEAD:
+		WorldPacket data;
+		Make_INVENTORY_CHANGE_FAILURE (&data, EQUIP_ERR_YOU_ARE_DEAD, tmpItem, tmpItem);
+		SendPacket( &data );
+		return;
+	}
+*/
+	//------------------------------
+
+	// Check if Player is skilled enough to use Item
+	if (!p_User->CanUseItem(itemProto)) return;
+	//------------------------------
+
+	// Check if Player is in Combat
+	if (p_User->inCombat) {
+		// Check if used allowed Item class
+		if (itemProto->Class == ITEM_CLASS_CONSUMABLE	|| 
+			itemProto->Class == ITEM_CLASS_TRADE_GOODS	||
+			//itemProto->Class == ITEM_CLASS_RECIPE		||
+			itemProto->Class == ITEM_CLASS_KEY			||
+			itemProto->Class == ITEM_CLASS_JUNK			){
+
+			WorldPacket data;
+
+			data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
+
+			data << uint32(EQUIP_ERR_CANT_DO_IN_COMBAT);
+			data << (tmpItem ? tmpItem->GetGUID() : uint64(0));
+			data << (tmpItem ? tmpItem->GetGUID() : uint64(0));
+			data << uint8(0);
+
+			SendPacket( &data );
+			return;
+		}
+	}
+	//------------------------------
+
+	// Activate Spell
+    Spell *spell = new Spell(GetPlayer(), spellInfo,false, 0);
+    WPAssert(spell);
+
+	SpellCastTargets targets;
+    targets.read(&recvPacket,GetPlayer()->GetGUID());
+    spell->m_CastItem = tmpItem;
+    spell->prepare(&targets);
+	//------------------------------
+
+	// Decrease item count in Inventory or destroy item if Item count = 1 before use
+	uint32 ItemCount = tmpItem->GetCount();
+	uint32 ItemClass = itemProto->Class;
+	uint32 ItemId    = itemProto->ItemId;
+
+	if (ItemClass == ITEM_CLASS_CONSUMABLE) {
+		if (ItemCount > 1) {
+			tmpItem->SetCount(ItemCount-1);
+		}
+		else {
+			p_User->RemoveItemFromSlot(slot);
+			// We do not remove Action Button if consumable Item is ended (patch 1.7.1 >> )
+			//if (p_User->GetActionButtonID(ItemId) != 0) {
+			//	p_User->m_actionsButtons[p_User->GetActionButtonID(ItemId)] = 0;
+			//}
+		}
+	}
+	//------------------------------
+
+}
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
