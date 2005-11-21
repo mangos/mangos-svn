@@ -1038,7 +1038,7 @@ Optional Features:
   --enable-fast-install[=PKGS]
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
-  --enable-cli Turn on command console
+  --enable-cli Turn on command console system
   --enable-httpd-integrated Turn on httpd integrated system
   --enable-18x Turn on 1.8.x support
   --enable-17x Turn on 1.7.x support
@@ -23326,13 +23326,13 @@ echo "$as_me:$LINENO: result: $MANGOSD_DEBUG_INFO" >&5
 echo "${ECHO_T}$MANGOSD_DEBUG_INFO" >&6
 
 
-# check for cli system enable
+# check for cli console enable
 echo "$as_me:$LINENO: checking whether cli console is enabled" >&5
 echo $ECHO_N "checking whether cli console is enabled... $ECHO_C" >&6
 MANGOSD_ENABLE_CLI=no
-# Check whether --enable-cli or --disable-cli was given.
-if test "${enable_cli+set}" = set; then
-  enableval="$enable_cli"
+# Check whether --enable-enable-cli or --disable-enable-cli was given.
+if test "${enable_enable_cli+set}" = set; then
+  enableval="$enable_enable_cli"
 
     if test "$enableval" = "yes" ; then
 	CFLAGS="-DENABLE_CLI $CFLAGS"
