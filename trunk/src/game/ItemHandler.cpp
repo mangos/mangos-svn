@@ -310,15 +310,45 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     uint32 itemid, guidlow, guidhigh;
     recv_data >> itemid >> guidlow >> guidhigh;   // guid is the guid of the ITEM OWNER - NO ITS NOT
 
-    Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_ITEM_QUERY_SINGLE for item id 0x%.8X, guid 0x%.8X 0x%.8X",
-        itemid, guidlow, guidhigh );
-
     ItemPrototype *itemProto = objmgr.GetItemPrototype(itemid);
     if(!itemProto)
     {
-        Log::getSingleton( ).outError( "WORLD: Unknown item id 0x%.8X", itemid );
+        //Log::getSingleton( ).outError( "WORLD: Unknown item id 0x%.8X", itemid );
+		Log::getSingleton( ).outError( "WORLD: Unknown item id %u", itemid );
+		// Dummy data...
+		data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
+		data << itemid;
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32();
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		SendPacket( &data );
         return;
     }
+
+//	Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_ITEM_QUERY_SINGLE for item id 0x%.8X, guid 0x%.8X 0x%.8X",
+//        itemid, guidlow, guidhigh );
+
+	Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_ITEM_QUERY_SINGLE for item id %u, guidlow %u, guidhigh %u",
+        itemid, guidlow, guidhigh );
 
     data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
 
@@ -412,10 +442,10 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ShadowRes;
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
-	if (itemProto->Block)
-		data << itemProto->Block/*itemProto->Field69*/; // UQ1: Ammo Type -- According to w*ww*w - I see no effect...
+//	if (itemProto->Block)
+//		data << itemProto->Block/*itemProto->Field69*/; // UQ1: Ammo Type -- According to w*ww*w - I see no effect...
 														// UQ1: Block according to lud... I dont think its block!
-	else
+//	else
 		data << uint32(0);
 
     for(i = 0; i < 5; i++)
@@ -432,7 +462,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
 	if (stricmp(itemProto->Description.c_str(), ""))
     {
-        //data << itemProto->Description.c_str();
+        data << itemProto->Description.c_str();
+		/*
 		if (itemProto->Quality == ITEM_QUALITY_NORMAL)
 			data << std::string("%s\"\n\n\"This is a normal item.", itemProto->Description.c_str());
 		else if (itemProto->Quality == ITEM_QUALITY_UNCOMMON)
@@ -443,6 +474,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 			data << std::string("%s\"\n\n\"This is an epic item.", itemProto->Description.c_str());
 		else if (itemProto->Quality == ITEM_QUALITY_LEGENDARY)
 			data << std::string("%s\"\n\n\"This is a legendary item.", itemProto->Description.c_str());
+		*/
     }
     else
     {
