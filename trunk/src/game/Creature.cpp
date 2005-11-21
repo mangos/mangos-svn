@@ -1585,9 +1585,62 @@ void Creature::_LoadGoods()
 
     // load his goods
     std::stringstream query;
-    query << "SELECT * FROM vendors WHERE vendorGuid=" << /*GetNameID();*/GetGUIDLow();
+    query << "SELECT * FROM vendors WHERE vendorGuid=" << GetGUIDLow();
 
     QueryResult *result = sDatabase.Query( query.str().c_str() );
+
+	// UQ1: Allow for different DB vendor formats...
+	if(!result)
+	{
+		std::stringstream query7;
+		query7 << "SELECT * FROM vendors WHERE vendorGuid=" << GetNameID();
+
+		result = sDatabase.Query( query7.str().c_str() );
+
+		if (result)
+			Log::getSingleton( ).outError( "Vendor %u has items.", GetNameID() );
+	}
+
+	if(!result)
+	{
+		std::stringstream query2;
+		query2 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUIDLow()+1);
+
+		result = sDatabase.Query( query2.str().c_str() );
+	}
+
+	if(!result)
+	{
+		std::stringstream query5;
+		query5 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUIDLow()-10);
+
+		result = sDatabase.Query( query5.str().c_str() );
+	}
+
+	if(!result)
+	{
+		std::stringstream query3;
+		query3 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUID());
+
+		result = sDatabase.Query( query3.str().c_str() );
+	}
+
+	if(!result)
+	{
+		std::stringstream query4;
+		query4 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUID()+1);
+
+		result = sDatabase.Query( query4.str().c_str() );
+	}
+
+	if(!result)
+	{
+		std::stringstream query6;
+		query6 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUID()-10);
+
+		result = sDatabase.Query( query6.str().c_str() );
+	}
+
     if(result)
     {
         do
@@ -1598,7 +1651,7 @@ void Creature::_LoadGoods()
             {
                 // this should never happen unless someone has been fucking with the dbs
                 // complain and break :P
-                Log::getSingleton( ).outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetNameID()/*GetGUIDLow()*/, getItemCount(), MAX_CREATURE_ITEMS );
+                Log::getSingleton( ).outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetNameID(), getItemCount(), MAX_CREATURE_ITEMS );
                 break;
             }
 
