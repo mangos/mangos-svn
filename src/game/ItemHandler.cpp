@@ -1033,6 +1033,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     recv_data >> guid;
     Log::getSingleton( ).outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+	//WORLD: Recvd CMSG_LIST_INVENTORY 14957
 
     if (unit == NULL)
         return;
@@ -1058,7 +1059,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     for(i = 0; i < numitems; i++ )
     {
         if(unit->getItemId(i) != 0)
-        {// UQ1: FIXME: This should be based on the vendor's item, not the prototype!!! This will be why we don't see full info!!!
+        {
             curItem = objmgr.GetItemPrototype(unit->getItemId(i));
 
             if( !curItem )
