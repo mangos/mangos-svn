@@ -678,6 +678,9 @@
 				RelativePath="..\..\src\game\NPCHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\NPCHandler.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\ObjectGridLoader.cpp">
 			</File>
 			<File
