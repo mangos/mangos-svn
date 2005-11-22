@@ -151,7 +151,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     data << uint8(0) << uint8(0) << uint8(0);
     data << ci->SubName.c_str();    // Subname (Guild Name)
     
-	data << (uint32)ci->flags1;        // Flags1
+	data << (uint32)npcflags/*ci->flags1*/;        // Flags1
 
 	// UQ1: This is how wowwow does it.. Don't know what the "7" means...
     
