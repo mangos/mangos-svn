@@ -4177,6 +4177,53 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
     return false;
 }
 
+/*
+CREATE TABLE `kills` (
+  `ID` int(32) NOT NULL auto_increment,
+  `playerID` int(32) NOT NULL default '0',
+  `victimID` int(32) NOT NULL default '0',
+  `honorpts` int(32) NOT NULL default '0',
+  `date` int(32) NOT NULL default '0',
+  PRIMARY KEY  (`ID`)
+) ENGINE=MyISAM;
+*/
+
+//HONOR
+void Player::UpdateHonor(void)
+{
+	//Load all kills from DB
+
+	//Calculate the value of the variables related with honor system
+
+	//Set Values of the variables related with honor system to player data fields (appear to client)
+	//Medals
+	SetUInt32Value( PLAYER_FIELD_PVP_MEDALS, m_pvp_medals);
+	//Kills
+	SetUInt32Value( PLAYER_FIELD_SESSION_KILLS, m_session_kills);
+	SetUInt32Value( PLAYER_FIELD_YESTERDAY_KILLS, m_yesterday_kills);
+	SetUInt32Value( PLAYER_FIELD_LAST_WEEK_KILLS, m_last_week_kills);
+	SetUInt32Value( PLAYER_FIELD_THIS_WEEK_KILLS, m_this_week_kills);
+	//Contribution
+	SetUInt32Value( PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, m_this_week_contribution);
+	SetUInt32Value( PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, m_last_week_contribution);
+	SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, m_yesterday_contribution);
+	//Life time
+	SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, m_lifetime_honorbale_kills);
+	SetUInt32Value( PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS, m_lifetime_dishonorbale_kills);
+	//Rank
+	SetUInt32Value( PLAYER_FIELD_LAST_WEEK_RANK, m_last_week_rank);
+}
+
+void Player::CalculateHonor(Player *pVictim)
+{
+	//Calculate honor and save to DB
+}
+
+int  Player::GetHonorRank()
+{
+	return m_honor_points;
+}
+
 void Player::DuelComplete()
 {
     WorldPacket data;

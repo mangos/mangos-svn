@@ -520,6 +520,11 @@ class Player : public Unit
 		void LoadReputationFromDBC(void);
 		void UpdateReputation(void);
 
+		//Honor
+		void UpdateHonor(void);
+		void CalculateHonor(Player *pVictim);
+		int  GetHonorRank();
+
 		void ApplyItemMods(Item *item,uint8 slot,bool apply)
 		{
 			_ApplyItemMods(item, slot, apply);
@@ -605,6 +610,25 @@ protected:
         uint64 m_groupLeader;
         bool m_isInGroup;
         bool m_isInvited;
+
+		//HONOR SYSTEM
+		//Medals
+		int m_pvp_medals;
+		//Kills
+		int m_session_kills;
+		int m_yesterday_kills;
+		int m_last_week_kills;
+		int m_this_week_kills;
+		//Contribution
+		int m_this_week_contribution;
+		int m_last_week_contribution;
+		int m_yesterday_contribution;
+		//Life time
+		int m_lifetime_honorbale_kills;
+		int m_lifetime_dishonorbale_kills;
+		//Rank
+		int m_last_week_rank;
+		int m_honor_points;
 
 		// Guild
 		uint32 m_GuildIdInvited; 
