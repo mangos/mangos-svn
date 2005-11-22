@@ -423,7 +423,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
                 QueryResult *result = sDatabase.Query( query1.str().c_str() );
                 fields = result->Fetch();
 
-                printf( "query=%s\n", query1.str().c_str() );
+                DEBUG_LOG( "query=%s\n", query1.str().c_str() );
                 char tickettext[255];
                 strcpy( tickettext,fields[2].GetString() );
                 data << uint32(6); // means we have open tickets
@@ -528,7 +528,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         data.Initialize( SMSG_GMTICKET_CREATE );
         data << uint32(2);
         SendPacket( &data );
-	printf ("update the ticket stupid\n");
+	DEBUG_LOG("update the ticket\n");
 	     }
 	}
 /// error codes

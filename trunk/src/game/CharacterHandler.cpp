@@ -327,6 +327,24 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     //data << unsure;
     //SendPacket(&data);
 
+    // get and send  default starting locations
+    std::stringstream homeloc;
+    Field *fields;
+    int plrace = GetPlayer()->getRace();
+    int plclass = GetPlayer()->getClass();
+
+    homeloc << "SELECT mapID,zoneID,positionX,positionY,positionZ from playercreateinfo where race='" << plrace << "' AND class='" << plclass << "'";
+    QueryResult *homeresult = sDatabase.Query( homeloc.str().c_str() );
+    fields = homeresult->Fetch();
+    DEBUG_LOG("Setting player home position: mapID is: %d, zoneID is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+
+    data.Initialize (SMSG_BINDPOINTUPDATE);
+    data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat(); // starting x,y,z
+    data << fields[0].GetUInt32(); // starting mapid
+    data << fields[1].GetUInt32(); // starting zoneid
+    SendPacket (&data);
+    delete homeresult;
+
     //Tutorial Flags
 
 	//------------------------------------------
