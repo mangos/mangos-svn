@@ -1510,13 +1510,16 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     Field *fields = result->Fetch();
 
-	sprintf(buf,"Player selected NPC\nGUID: %d.\nFaction: %d.\nFlag: %d.\nNameID: %d.\nSkinID: %d.", guid, factionid, npcflags, fields[8].GetUInt32(), skinid);
+	sprintf(buf,"Player selected NPC\nGUID: %d.\nFaction: %d.\nnpcFlags: %d.\nNameID: %d.\nSkinID: %d.", guid, factionid, npcflags, fields[8].GetUInt32(), skinid);
+	sprintf(buf,"%s\nLevel: %u.", buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
+	sprintf(buf,"%s\nHealth (base): %u. (max): %u. (current): %u.", buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
+	sprintf(buf,"%s\nField Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u.", buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
 	if ((npcflags & UNIT_NPC_FLAG_VENDOR) > 0)
     {
 		sprintf(buf,"%s\n*** Is a vendor!", buf);
     }
-	else if ((npcflags & UNIT_NPC_FLAG_TRAINER) > 0)
+	if ((npcflags & UNIT_NPC_FLAG_TRAINER) > 0)
     {
 		sprintf(buf,"%s\n*** Is a trainer!", buf);
     }

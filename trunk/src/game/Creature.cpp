@@ -342,6 +342,12 @@ Creature::_RealtimeSetCreatureInfo()
 		if (this->GetUInt32Value(UNIT_NPC_FLAGS) != ci->flag)
 			this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
 
+		if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_DEAD))
+			ci->flags1 &= ~UNIT_DYNFLAG_DEAD;
+
+		if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_LOOTABLE))
+			ci->flags1 &= ~UNIT_DYNFLAG_LOOTABLE;
+
 		if (this->GetUInt32Value(UNIT_DYNAMIC_FLAGS) != ci->flags1)
 			this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
 
@@ -586,6 +592,31 @@ Creature::_SetCreatureTemplate()
 	// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
 	this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
 	this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
+
+/*
+//---------------------------------------------------------
+//  Dynamic flags for units
+//---------------------------------------------------------
+// Unit has blinking stars effect showing lootable
+#define UNIT_DYNFLAG_LOOTABLE			0x0001
+// Shows marked unit as small red dot on radar
+#define UNIT_DYNFLAG_TRACK_UNIT			0x0002
+// Gray mob title marks that mob is tagged by another player
+#define UNIT_DYNFLAG_OTHER_TAGGER		0x0004
+// Blocks player character from moving
+#define UNIT_DYNFLAG_ROOTED				0x0008
+// Shows infos like Damage and Health of the enemy
+#define UNIT_DYNFLAG_SPECIALINFO		0x0010
+// Unit falls on the ground and shows like dead
+#define UNIT_DYNFLAG_DEAD				0x0020
+*/
+
+	if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_DEAD))
+		ci->flags1 &= ~UNIT_DYNFLAG_DEAD;
+
+	if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_LOOTABLE))
+		ci->flags1 &= ~UNIT_DYNFLAG_LOOTABLE;
+
 	this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
 	
 	if (ci->maxhealth <= 0)
