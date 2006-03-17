@@ -1,6 +1,5 @@
-/* Cell.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,14 +24,10 @@
 #include "GridDefines.h"
 #include <cmath>
 
-// forward declaration
+
 class Map;
 
-/** The RedZoneDistrict is a series of smaller cell that
- * alerts the map when the user enters one of its red zones.
- * Once alerted, this will triggers the loading of the
- * affected grids due to player are approaching extremely close.
- */
+
 typedef enum
     {
 	UPPER_DISTRICT = 1,
@@ -47,29 +42,17 @@ typedef enum
 	ALL_DISTRICT = (UPPER_DISTRICT | LOWER_DISTRICT | LEFT_DISTRICT | RIGHT_DISTRICT | CENTER_DISTRICT)
     } district_t;
 
-// forward declaration
+
 template<class T> struct CellLock;
 
-/** Cell data structure is nothing but a 32 bit integer split into
- * different parts to hold information neccessary to identify each
- * grid-cell.
- */
+
 struct MANGOS_DLL_DECL Cell
 {
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
 
 
-    /** operator|= uses to compute the mask of the old cell
-     * versus the new cell location.  Any changes that
-     * is not the neighbourhood district causes total changes to any
-     * of the cell.  Combined both reserved mask will result
-     * in the intersection of the cell meaning those creatures
-     * within the intersection does not change.
-     * i.e A & B = constant
-     *     ~A = new comer
-     *     ~B = old and excluded
-     */
+    
     void operator|=(Cell &cell)
     {
 	data.Part.reserved = 0;
@@ -82,7 +65,7 @@ struct MANGOS_DLL_DECL Cell
 	{
 	    data.Part.reserved = ALL_DISTRICT;
 	    cell.data.Part.reserved = ALL_DISTRICT;
-	    return; // not neighbourhood masks.
+	    return; 
 	}
 
 	if( x < old_x )
@@ -156,16 +139,12 @@ struct MANGOS_DLL_DECL Cell
 	uint32 All;
     } data;
 
-    /** Visit is a cell visitor
-     * 
-     */
+    
     template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &) const;
 
 };
 
-/** CellLock is a wrapper.. locks a grid to a particular
- * cell.
- */
+
 template<class T>
 struct MANGOS_DLL_DECL CellLock
 {

@@ -1,7 +1,5 @@
-/* ReactorAI.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +19,7 @@
 #ifndef MANGOS_REACTORAI_H
 #define MANGOS_REACTORAI_H
 
-/** ReactorAI reacts to the attack.  Mostly use in 
- * non aggressive animals.
- */
+
 
 #include "CreatureAI.h"
 
@@ -32,28 +28,21 @@ class Unit;
 class MANGOS_DLL_DECL ReactorAI : public CreatureAI
 {
 public:
-    // bindind a creature to the AI.
+    
     ReactorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
 
-    void MoveInLineOfSight(Creature *);
-    void AttackStart(Creature *);
-    void AttackStop(Creature *);
-    void HealBy(Creature *healer, uint32 amount_healed);
-    void DamageInflict(Creature *healer, uint32 amount_healed);
-    bool IsVisible(Creature *) const;
-
-    void MoveInLineOfSight(Player *);
-    void AttackStart(Player *);
-    void AttackStop(Player *);
-    void HealBy(Player *healer, uint32 amount_healed);
-    void DamageInflict(Player *done_by, uint32 amount);
-    bool IsVisible(Player *) const;
+    void MoveInLineOfSight(Unit *);
+    void AttackStart(Unit *);
+    void AttackStop(Unit *);
+    void HealBy(Unit *healer, uint32 amount_healed);
+    void DamageInflict(Unit *healer, uint32 amount_healed);
+    bool IsVisible(Unit *) const;
 
     void UpdateAI(const uint32);
     static int Permissible(const Creature *);
 
 private:
-    // internal methods
+    
     bool needToStop(void) const;
     void stopAttack(void);
 

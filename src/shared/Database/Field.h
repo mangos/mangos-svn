@@ -1,7 +1,5 @@
-/* Field.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +22,7 @@
 class Field
 {
     public:
-//! Contains general datatypes that native datatypes can be converted into.
+
         enum DataTypes
         {
             DB_TYPE_UNKNOWN = 0x00,
@@ -32,7 +30,7 @@ class Field
             DB_TYPE_INTEGER = 0x02,
             DB_TYPE_FLOAT   = 0x03
         };
-// no DB_TYPE_BOOLEAN for now, it will be a 1/0 integer
+
 
         Field();
         Field(Field &f);

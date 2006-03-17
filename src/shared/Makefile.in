@@ -14,8 +14,7 @@
 
 @SET_MAKE@
 
-# Copyright (C) 2004 Wow Daemon
-# Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -56,14 +55,15 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 subdir = src/shared
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
+	$(srcdir)/SystemConfig.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = SystemConfig.h
 LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libauth_a_AR = $(AR) $(ARFLAGS)
@@ -78,8 +78,9 @@ am_libconfig_a_OBJECTS = Config.$(OBJEXT) dotconfpp.$(OBJEXT) \
 libconfig_a_OBJECTS = $(am_libconfig_a_OBJECTS)
 libdatabase_a_AR = $(AR) $(ARFLAGS)
 libdatabase_a_LIBADD =
-am_libdatabase_a_OBJECTS = DBC.$(OBJEXT) Database.$(OBJEXT) \
-	DatabaseSqlite.$(OBJEXT) QueryResultMysql.$(OBJEXT) \
+am_libdatabase_a_OBJECTS = DBCStores.$(OBJEXT) dbcfile.$(OBJEXT) \
+	Database.$(OBJEXT) DatabaseSqlite.$(OBJEXT) \
+	QueryResultMysql.$(OBJEXT) SQLStorage.$(OBJEXT) \
 	DBCStores.$(OBJEXT) Field.$(OBJEXT) \
 	QueryResultSqlite.$(OBJEXT) DatabaseMysql.$(OBJEXT)
 libdatabase_a_OBJECTS = $(am_libdatabase_a_OBJECTS)
@@ -160,7 +161,7 @@ F77 = @F77@
 FFLAGS = @FFLAGS@
 INCLUDES = @INCLUDES@ -I$(srcdir) -I$(srcdir)/../../dep/include \
 	-I$(srcdir)/../framework -I$(srcdir)/../game \
-	-I$(srcdir)/../realmlist
+	-I$(srcdir)/../realmd
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -172,6 +173,10 @@ LIBTOOL = @LIBTOOL@
 LINKER_OPTIONS = @LINKER_OPTIONS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LTMS_AGE = @LTMS_AGE@
+LTMS_CURRENT = @LTMS_CURRENT@
+LTMS_RELEASE = @LTMS_RELEASE@
+LTMS_REVISION = @LTMS_REVISION@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_RELEASE = @LT_RELEASE@
@@ -183,8 +188,8 @@ MAKEINFO = @MAKEINFO@
 MANGOSD_CONFIG = @MANGOSD_CONFIG@
 MANGOSD_CONFIGDIR = @MANGOSD_CONFIGDIR@
 MANGOSD_DATA = @MANGOSD_DATA@
-NEWFRAMEWORK_FALSE = @NEWFRAMEWORK_FALSE@
-NEWFRAMEWORK_TRUE = @NEWFRAMEWORK_TRUE@
+MANGOSD_ENABLE_CLI = @MANGOSD_ENABLE_CLI@
+MANGOSD_ENABLE_RA = @MANGOSD_ENABLE_RA@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -198,9 +203,12 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WITH_APIDOCS = @WITH_APIDOCS@
+WITH_APIDOCS_TARGET = @WITH_APIDOCS_TARGET@
 WITH_PYTHON_SUBDIR = @WITH_PYTHON_SUBDIR@
 WITH_PYTHON_SUBPACKAGE = @WITH_PYTHON_SUBPACKAGE@
 WITH_PYTHON_VERSION = @WITH_PYTHON_VERSION@
+__DOXYGEN = @__DOXYGEN@
 __PYTHON = @__PYTHON@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
@@ -243,7 +251,9 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
-sysconfdir = @sysconfdir@
+
+# use our configured sysconfdir
+sysconfdir = @MANGOSD_CONFIGDIR@
 target_alias = @target_alias@
 noinst_LIBRARIES = libshared.a libauth.a libconfig.a libdatabase.a libnetwork.a
 libshared_a_SOURCES = \
@@ -279,11 +289,12 @@ libconfig_a_SOURCES = \
     Config/dotconfpp
 
 libdatabase_a_SOURCES = \
-    Database/DBC.cpp \
+    Database/DBCStores.cpp \
+    Database/dbcfile.cpp \
     Database/Database.cpp \
     Database/DatabaseSqlite.cpp \
     Database/QueryResultMysql.cpp \
-    Database/DBC.h \
+    Database/SQLStorage.cpp \
     Database/Database.h \
     Database/DatabaseSqlite.h \
     Database/QueryResultMysql.h \
@@ -291,9 +302,13 @@ libdatabase_a_SOURCES = \
     Database/DatabaseEnv.h \
     Database/Field.cpp \
     Database/QueryResultSqlite.cpp \
+    Database/DBCStructure.h \
+    Database/DBCStores.h \
+    Database/dbcfile.h \
     Database/DBCStores.h \
     Database/DatabaseMysql.cpp \
     Database/Field.h \
+    Database/SQLStorage.h \
     Database/QueryResultSqlite.h \
     Database/DataStore.h \
     Database/DatabaseMysql.h \
@@ -333,6 +348,9 @@ libnetwork_a_SOURCES = \
     Network/Utility.cpp \
     Network/Utility.h
 
+CLEANFILES = \
+    SystemConfig.h
+
 all: all-am
 
 .SUFFIXES:
@@ -366,6 +384,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+SystemConfig.h: $(top_builddir)/config.status $(srcdir)/SystemConfig.h.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
@@ -401,7 +421,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BigNumber.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CircularBuffer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Config.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBC.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DBCStores.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Database.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DatabaseMysql.Po@am__quote@
@@ -415,6 +434,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueryResultSqlite.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ResolvServer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ResolvSocket.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SQLStorage.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Sha1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Socket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/SocketHandler.Po@am__quote@
@@ -425,6 +445,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UdpSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Utility.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dbcfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dotconfpp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mempool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/socket_include.Po@am__quote@
@@ -534,19 +555,33 @@ mempool.obj: Config/dotconfpp/mempool.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mempool.obj `if test -f 'Config/dotconfpp/mempool.cpp'; then $(CYGPATH_W) 'Config/dotconfpp/mempool.cpp'; else $(CYGPATH_W) '$(srcdir)/Config/dotconfpp/mempool.cpp'; fi`
 
-DBC.o: Database/DBC.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DBC.o -MD -MP -MF "$(DEPDIR)/DBC.Tpo" -c -o DBC.o `test -f 'Database/DBC.cpp' || echo '$(srcdir)/'`Database/DBC.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DBC.Tpo" "$(DEPDIR)/DBC.Po"; else rm -f "$(DEPDIR)/DBC.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/DBC.cpp' object='DBC.o' libtool=no @AMDEPBACKSLASH@
+DBCStores.o: Database/DBCStores.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DBCStores.o -MD -MP -MF "$(DEPDIR)/DBCStores.Tpo" -c -o DBCStores.o `test -f 'Database/DBCStores.cpp' || echo '$(srcdir)/'`Database/DBCStores.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DBCStores.Tpo" "$(DEPDIR)/DBCStores.Po"; else rm -f "$(DEPDIR)/DBCStores.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/DBCStores.cpp' object='DBCStores.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DBC.o `test -f 'Database/DBC.cpp' || echo '$(srcdir)/'`Database/DBC.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DBCStores.o `test -f 'Database/DBCStores.cpp' || echo '$(srcdir)/'`Database/DBCStores.cpp
 
-DBC.obj: Database/DBC.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DBC.obj -MD -MP -MF "$(DEPDIR)/DBC.Tpo" -c -o DBC.obj `if test -f 'Database/DBC.cpp'; then $(CYGPATH_W) 'Database/DBC.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/DBC.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DBC.Tpo" "$(DEPDIR)/DBC.Po"; else rm -f "$(DEPDIR)/DBC.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/DBC.cpp' object='DBC.obj' libtool=no @AMDEPBACKSLASH@
+DBCStores.obj: Database/DBCStores.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DBCStores.obj -MD -MP -MF "$(DEPDIR)/DBCStores.Tpo" -c -o DBCStores.obj `if test -f 'Database/DBCStores.cpp'; then $(CYGPATH_W) 'Database/DBCStores.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/DBCStores.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DBCStores.Tpo" "$(DEPDIR)/DBCStores.Po"; else rm -f "$(DEPDIR)/DBCStores.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/DBCStores.cpp' object='DBCStores.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DBC.obj `if test -f 'Database/DBC.cpp'; then $(CYGPATH_W) 'Database/DBC.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/DBC.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DBCStores.obj `if test -f 'Database/DBCStores.cpp'; then $(CYGPATH_W) 'Database/DBCStores.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/DBCStores.cpp'; fi`
+
+dbcfile.o: Database/dbcfile.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dbcfile.o -MD -MP -MF "$(DEPDIR)/dbcfile.Tpo" -c -o dbcfile.o `test -f 'Database/dbcfile.cpp' || echo '$(srcdir)/'`Database/dbcfile.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dbcfile.Tpo" "$(DEPDIR)/dbcfile.Po"; else rm -f "$(DEPDIR)/dbcfile.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/dbcfile.cpp' object='dbcfile.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dbcfile.o `test -f 'Database/dbcfile.cpp' || echo '$(srcdir)/'`Database/dbcfile.cpp
+
+dbcfile.obj: Database/dbcfile.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dbcfile.obj -MD -MP -MF "$(DEPDIR)/dbcfile.Tpo" -c -o dbcfile.obj `if test -f 'Database/dbcfile.cpp'; then $(CYGPATH_W) 'Database/dbcfile.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/dbcfile.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dbcfile.Tpo" "$(DEPDIR)/dbcfile.Po"; else rm -f "$(DEPDIR)/dbcfile.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/dbcfile.cpp' object='dbcfile.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dbcfile.obj `if test -f 'Database/dbcfile.cpp'; then $(CYGPATH_W) 'Database/dbcfile.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/dbcfile.cpp'; fi`
 
 Database.o: Database/Database.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Database.o -MD -MP -MF "$(DEPDIR)/Database.Tpo" -c -o Database.o `test -f 'Database/Database.cpp' || echo '$(srcdir)/'`Database/Database.cpp; \
@@ -590,19 +625,19 @@ QueryResultMysql.obj: Database/QueryResultMysql.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o QueryResultMysql.obj `if test -f 'Database/QueryResultMysql.cpp'; then $(CYGPATH_W) 'Database/QueryResultMysql.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/QueryResultMysql.cpp'; fi`
 
-DBCStores.o: Database/DBCStores.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DBCStores.o -MD -MP -MF "$(DEPDIR)/DBCStores.Tpo" -c -o DBCStores.o `test -f 'Database/DBCStores.cpp' || echo '$(srcdir)/'`Database/DBCStores.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DBCStores.Tpo" "$(DEPDIR)/DBCStores.Po"; else rm -f "$(DEPDIR)/DBCStores.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/DBCStores.cpp' object='DBCStores.o' libtool=no @AMDEPBACKSLASH@
+SQLStorage.o: Database/SQLStorage.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT SQLStorage.o -MD -MP -MF "$(DEPDIR)/SQLStorage.Tpo" -c -o SQLStorage.o `test -f 'Database/SQLStorage.cpp' || echo '$(srcdir)/'`Database/SQLStorage.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/SQLStorage.Tpo" "$(DEPDIR)/SQLStorage.Po"; else rm -f "$(DEPDIR)/SQLStorage.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/SQLStorage.cpp' object='SQLStorage.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DBCStores.o `test -f 'Database/DBCStores.cpp' || echo '$(srcdir)/'`Database/DBCStores.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o SQLStorage.o `test -f 'Database/SQLStorage.cpp' || echo '$(srcdir)/'`Database/SQLStorage.cpp
 
-DBCStores.obj: Database/DBCStores.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT DBCStores.obj -MD -MP -MF "$(DEPDIR)/DBCStores.Tpo" -c -o DBCStores.obj `if test -f 'Database/DBCStores.cpp'; then $(CYGPATH_W) 'Database/DBCStores.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/DBCStores.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/DBCStores.Tpo" "$(DEPDIR)/DBCStores.Po"; else rm -f "$(DEPDIR)/DBCStores.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/DBCStores.cpp' object='DBCStores.obj' libtool=no @AMDEPBACKSLASH@
+SQLStorage.obj: Database/SQLStorage.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT SQLStorage.obj -MD -MP -MF "$(DEPDIR)/SQLStorage.Tpo" -c -o SQLStorage.obj `if test -f 'Database/SQLStorage.cpp'; then $(CYGPATH_W) 'Database/SQLStorage.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/SQLStorage.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/SQLStorage.Tpo" "$(DEPDIR)/SQLStorage.Po"; else rm -f "$(DEPDIR)/SQLStorage.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Database/SQLStorage.cpp' object='SQLStorage.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o DBCStores.obj `if test -f 'Database/DBCStores.cpp'; then $(CYGPATH_W) 'Database/DBCStores.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/DBCStores.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o SQLStorage.obj `if test -f 'Database/SQLStorage.cpp'; then $(CYGPATH_W) 'Database/SQLStorage.cpp'; else $(CYGPATH_W) '$(srcdir)/Database/SQLStorage.cpp'; fi`
 
 Field.o: Database/Field.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Field.o -MD -MP -MF "$(DEPDIR)/Field.Tpo" -c -o Field.o `test -f 'Database/Field.cpp' || echo '$(srcdir)/'`Database/Field.cpp; \
@@ -962,6 +997,7 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
+	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

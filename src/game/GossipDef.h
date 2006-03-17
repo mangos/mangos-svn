@@ -1,6 +1,5 @@
-/* GossipDef.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,26 +26,16 @@ class WorldSession;
 
 #define GOSSIP_MAX_MENU_ITEMS 15
 
-/*
- * GossipMenuItem Structure defines an Item
- * that will be sent to the player by
- * sending the menu.
- */
-#define GDATA_SENDER(x) (*(((uint32*)&(x))+1))
-#define GDATA_ACTION(x) (*((uint32*)&(x)))
 
 struct GossipMenuItem {
 	uint8		m_gIcon;
 	bool		m_gCoded;
 	char*		m_gMessage;
-	uint64		m_gData;
+	uint32	m_gSender;
+	uint32  m_gAction;
 };
 
-/*
- * QuestMenuItem Structure defines an Item
- * that will be sent to the player by
- * sending the quest menu.
- */
+
 struct QuestMenuItem {
 	uint32		m_qId;
 	uint8		m_qIcon;
@@ -54,9 +43,7 @@ struct QuestMenuItem {
 	char*		m_qTitle;
 };
 
-/*
- * Basic class for the Gossip Menus
- */
+
 class GossipMenu
 {
 public:
@@ -76,7 +63,8 @@ public:
 		return m_gItems[ Id ];
 	}
 
-	uint64 MenuItemData( unsigned int ItemId );
+	uint32 MenuItemSender( unsigned int ItemId );
+	uint32 MenuItemAction( unsigned int ItemId );
 
 	void ClearMenu();
 
@@ -85,9 +73,7 @@ protected:
 	GossipMenuItem m_gItems[GOSSIP_MAX_MENU_ITEMS];
 };
 
-/*
- * Basic class for the Gossip Menus
- */
+
 class QuestMenu
 {
 public:
@@ -112,10 +98,7 @@ protected:
 	QuestMenuItem m_qItems[GOSSIP_MAX_MENU_ITEMS];
 };
 
-/*
- * Basic Class for PlayerMenu
- *  -> Will contain all needed methods related to NPC to Player relations.
- */
+
 class PlayerMenu
 {
 private:
@@ -125,10 +108,6 @@ private:
 
 public:
 
-	//
-	// Basic methods, contructors and destructors
-	//
-
 	PlayerMenu( WorldSession *Session );
 	~PlayerMenu();
 
@@ -136,11 +115,9 @@ public:
 	QuestMenu* GetQuestMenu() { return pQuestMenu; }
 
 	void ClearMenus();
-	uint64 GossipOption( unsigned int Selection );
-
-	//
-	// Player communication methods
-	// 
+	uint32 GossipOptionSender( unsigned int Selection );
+	uint32 GossipOptionAction( unsigned int Selection );
+	
 
 	void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
 	void SendQuestMenu ( QEmote eEmote, std::string Title, uint64 npcGUID );

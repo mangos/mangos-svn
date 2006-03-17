@@ -1,3 +1,3 @@
-# Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
 
 SUBDIRS = zthread zlib

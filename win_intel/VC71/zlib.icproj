@@ -16,43 +16,44 @@
 				ConfigurationType="4"
 				CharacterSet="2"/>
 			<Tool 
-				Name="DebugTool"/>
-			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB,ENABLE_GRID_SYSTEM"
-				MinimalRebuild="1"
+				PreprocessorDefinitions="WIN32;_DEBUG;_LIB"
+				MinimalRebuild="TRUE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\zlib___Win32_Debug/zlib.pch"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
 			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
+				Name="CustomTool"/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile="$(OutDir)/zlib.lib"/>
 			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
 				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"/>
+				Name="ResCmplrTool"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool 
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Release|Win32">
@@ -63,344 +64,123 @@
 				ConfigurationType="4"
 				CharacterSet="2"/>
 			<Tool 
-				Name="DebugTool"/>
-			<Tool 
 				Name="CppCmplrTool"
 				AdditionalIncludeDirectories="..\..\dep\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				RuntimeLibrary="0"
-				RuntimeTypeInfo="1"
+				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\zlib___Win32_Release/zlib.pch"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
+				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
 			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
+				Name="CustomTool"/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile="$(OutDir)/zlib.lib"/>
 			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
 				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="BscMakeTool"/>
+				Name="PostBuildEventTool"/>
 			<Tool 
 				Name="PreBuildEventTool"/>
 			<Tool 
 				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="PostBuildEventTool"/>
+				Name="ResCmplrTool"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="VCWebServiceProxyGeneratorTool"/>
 			<Tool 
-				Name="CustomNodeTool"/>
-		</Configuration>
-		<Configuration 
-			Name="1_7_x Debug|Win32">
+				Name="VCXMLDataGeneratorTool"/>
 			<Tool 
-				Name="GeneralTool"
-				OutputDirectory="$(ConfigurationName)"
-				IntermediateDirectory="$(ConfigurationName)"
-				ConfigurationType="4"
-				CharacterSet="2"/>
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool 
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="DebugTool"/>
-			<Tool 
-				Name="CppCmplrTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB,ENABLE_GRID_SYSTEM"
-				MinimalRebuild="1"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zlib___Win32_Debug/zlib.pch"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
-				DebugInformationFormat="3"/>
-			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
-			<Tool 
-				Name="LibrarianTool"
-				OutputFile="$(OutDir)/zlib.lib"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="BscMakeTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="CustomTool"/>
-			<Tool 
-				Name="CustomNodeTool"/>
-		</Configuration>
-		<Configuration 
-			Name="1.7.x Release|Win32">
-			<Tool 
-				Name="GeneralTool"
-				OutputDirectory="$(ConfigurationName)"
-				IntermediateDirectory="$(ConfigurationName)"
-				ConfigurationType="4"
-				CharacterSet="2"/>
-			<Tool 
-				Name="DebugTool"/>
-			<Tool 
-				Name="CppCmplrTool"
-				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
-				RuntimeLibrary="0"
-				RuntimeTypeInfo="1"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zlib___Win32_Release/zlib.pch"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
-				DebugInformationFormat="3"/>
-			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
-			<Tool 
-				Name="LibrarianTool"
-				OutputFile="$(OutDir)/zlib.lib"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="BscMakeTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="CustomTool"/>
-			<Tool 
-				Name="CustomNodeTool"/>
-		</Configuration>
-		<Configuration 
-			Name="1_8_x Debug|Win32">
-			<Tool 
-				Name="GeneralTool"
-				OutputDirectory="$(ConfigurationName)"
-				IntermediateDirectory="$(ConfigurationName)"
-				ConfigurationType="4"
-				CharacterSet="2"/>
-			<Tool 
-				Name="DebugTool"/>
-			<Tool 
-				Name="CppCmplrTool"
-				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB,ENABLE_GRID_SYSTEM"
-				MinimalRebuild="1"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="1"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zlib___Win32_Debug/zlib.pch"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
-				DebugInformationFormat="3"/>
-			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
-			<Tool 
-				Name="LibrarianTool"
-				OutputFile="$(OutDir)/zlib.lib"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="BscMakeTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="CustomTool"/>
-			<Tool 
-				Name="CustomNodeTool"/>
-		</Configuration>
-		<Configuration 
-			Name="1.8.x Release|Win32">
-			<Tool 
-				Name="GeneralTool"
-				OutputDirectory="$(ConfigurationName)"
-				IntermediateDirectory="$(ConfigurationName)"
-				ConfigurationType="4"
-				CharacterSet="2"
-				WholeProgramOptimization="0"/>
-			<Tool 
-				Name="DebugTool"/>
-			<Tool 
-				Name="CppCmplrTool"
-				Optimization="1000"
-				GlobalOptimizations="0"
-				InlineFunctionExpansion="0"
-				EnableIntrinsicFunctions="1"
-				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="1"
-				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="1"
-				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB,ENABLE_GRID_SYSTEM"
-				RuntimeLibrary="0"
-				RuntimeTypeInfo="1"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\zlib___Win32_Release/zlib.pch"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
-				DebugInformationFormat="0"
-				OpenMP="1"
-				UseProcExt="4"
-				RequireProcExt="4"
-				Parallelization="1"
-				C99Support="1"/>
-			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
-			<Tool 
-				Name="LibrarianTool"
-				OutputFile="$(OutDir)/zlib.lib"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="BscMakeTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="CustomTool"/>
-			<Tool 
-				Name="CustomNodeTool"/>
-		</Configuration>
-		<Configuration 
-			Name="Release - No Grid|Win32">
-			<Tool 
-				Name="GeneralTool"
-				OutputDirectory="$(ConfigurationName)"
-				IntermediateDirectory="$(ConfigurationName)"
-				ConfigurationType="4"
-				CharacterSet="2"
-				WholeProgramOptimization="1"/>
-			<Tool 
-				Name="DebugTool"/>
-			<Tool 
-				Name="CppCmplrTool"
-				Optimization="1000"
-				GlobalOptimizations="0"
-				InlineFunctionExpansion="0"
-				EnableIntrinsicFunctions="1"
-				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="1"
-				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="1"
-				AdditionalIncludeDirectories="..\..\dep\include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB,ENABLE_GRID_SYSTEM"
-				MinimalRebuild="1"
-				RuntimeLibrary="0"
-				RuntimeTypeInfo="1"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\zlib___Win32_Release/zlib.pch"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="1"
-				DebugInformationFormat="0"
-				OpenMP="1"
-				UseProcExt="4"
-				RequireProcExt="4"
-				Parallelization="1"
-				C99Support="1"/>
-			<Tool 
-				Name="LinkerTool"
-				DelayImpLib=""/>
-			<Tool 
-				Name="LibrarianTool"
-				OutputFile="$(OutDir)/zlib.lib"/>
-			<Tool 
-				Name="ResCmplrTool"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="BscMakeTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="CustomTool"/>
-			<Tool 
-				Name="CustomNodeTool"/>
 		</Configuration>
 	</Configurations>
 	<Files>
-		<File 
-			RelativePath="..\..\dep\src\zlib\adler32.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\compress.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\crc32.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\deflate.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\example.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\gzio.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\infback.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inffast.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inflate.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inftrees.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\trees.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\uncompr.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\zutil.c"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\crc32.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\deflate.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inffast.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inffixed.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inflate.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\inftrees.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\trees.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\zconf.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\zlib.h"/>
-		<File 
-			RelativePath="..\..\dep\src\zlib\zutil.h"/>
+		<Filter 
+			Name="Source Files"
+			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
+			<File 
+				RelativePath="..\..\dep\src\zlib\adler32.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\compress.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\crc32.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\deflate.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\example.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\gzio.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\infback.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inffast.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inflate.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inftrees.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\trees.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\uncompr.c">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\zutil.c">
+			</File>
+		</Filter>
+		<Filter 
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
+			<File 
+				RelativePath="..\..\dep\src\zlib\crc32.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\deflate.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inffast.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inffixed.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inflate.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\inftrees.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\trees.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\zconf.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\zlib.h">
+			</File>
+			<File 
+				RelativePath="..\..\dep\src\zlib\zutil.h">
+			</File>
+		</Filter>
 	</Files>
 </VisualStudioProject>
 

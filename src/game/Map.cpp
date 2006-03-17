@@ -1,6 +1,5 @@
-/* Map.cpp
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +26,59 @@
 #include "Map.h"
 #include "GridNotifiersImpl.h"
 
-// 3 minutes
+
 #define DEFAULT_GRID_EXPIRY     300
 
-// we give 50 milliseconds to load a grid
+
 #define MAX_GRID_LOAD_TIME      50 
 static GridState* si_GridStates[MAX_GRID_STATE];
 
-// static initialization
+inline
+bool FileExists(const char * fn)
+{
+    FILE *pf=fopen(fn,"rb");
+    if(!pf)return false;
+    fclose(pf);
+    return true;
+}
+
+
+GridMap * LoadMAP(int mapid,int x,int y)
+{
+    char tmp[32];
+    static bool showcheckmapInfo=false;
+    static int oldx=0,oldy=0;
+    sprintf(tmp,"maps/%03u%02u%02u.map",mapid,x,y);
+
+    if( (oldx!=x) || (oldy!=y) )
+    {
+	    sLog.outDetail("Loading map %s",tmp);
+        oldx =x;
+        oldy =y;
+	    showcheckmapInfo = true;
+    }
+
+    FILE *pf=fopen(tmp,"rb");
+
+    if(!pf)
+    {
+	    if( showcheckmapInfo )
+	    {
+            sLog.outDetail("Map file %s does not exist",tmp);
+	        showcheckmapInfo = false;
+	    }
+	    return NULL;
+    }
+//fseek(pf,0,2);
+//uint32 fs=ftell(pf);
+//fseek(pf,0,0);
+    GridMap * buf= new GridMap;
+    fread(buf,1,sizeof(GridMap),pf);
+    fclose(pf);
+
+    return buf;
+}
+
 void Map::InitStateMachine()
 {
     si_GridStates[GRID_STATE_INVALID] = new InvalidState;
@@ -46,12 +90,18 @@ void Map::InitStateMachine()
 
 Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 {
+//	char tmp[32];
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
     i_gridMask[idx] = 0;
     i_gridStatus[idx] = 0;
     for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
     {
+		//z code
+		GridMaps[idx][j] =NULL;
+		
+        //z code
+
         i_grids[idx][j] = NULL;
         i_info[idx][j] = NULL;
     }
@@ -61,17 +111,26 @@ Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 uint64
 Map::EnsureGridCreated(const GridPair &p)
 {
+	//char tmp[128];
     uint64 mask = CalculateGridMask(p.y_coord);
 
     if( !(i_gridMask[p.x_coord] & mask) )
     {
-	Guard guard(*this);
-	if( !(i_gridMask[p.x_coord] & mask) )
-	{
-	    i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
-	    i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry);
-	    i_gridMask[p.x_coord] |= mask; // sets the mask on
-	}	
+		Guard guard(*this);
+		if( !(i_gridMask[p.x_coord] & mask) )
+		{
+			i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
+			i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry);
+			i_gridMask[p.x_coord] |= mask; 
+			//z coord
+		
+			int gx=63-p.x_coord;
+			int gy=63-p.y_coord;
+
+			if(!GridMaps[gx][gy])
+				GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+				
+		}	
     }
 
     return mask;
@@ -123,7 +182,6 @@ Map::NotifyPlayerVisibility(const Cell &cell, const CellPair &cell_pair, Player 
     
     CellLock<ReadGuard> cell_lock(cell, cell_pair);
     cell_lock->Visit(cell_lock, player_notifier, *this);
-    pl_notifier.Notify(); // tell the dudes :-)
     cell_lock->Visit(cell_lock, object_notifier, *this);
     obj_notifier.Notify();
 }
@@ -138,8 +196,10 @@ void Map::Add(Player *player)
 
     Cell cell = RedZone::GetZone(p);
     EnsureGridLoadedForPlayer(cell, player, true);
-    cell.data.Part.reserved = ALL_DISTRICT; // ensure handle all district
+    cell.data.Part.reserved = ALL_DISTRICT; 
     NotifyPlayerVisibility(cell, p, player);
+
+    ObjectAccessor::Instance().BuildCreateForSameMapPlayer(player);
 }
 
 
@@ -161,10 +221,10 @@ Map::Add(T *obj)
 	(*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
     }
 
-    DEBUG_LOG("Object %d enters grid[%d,%d]", obj->GetGUID(), cell.GridX(), cell.GridY());
+    DEBUG_LOG("Object %lu enters grid[%d,%d]", (unsigned long)obj->GetGUID(), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
 
-    // now update things.. only required a read lock
+    
     MaNGOS::ObjectVisibleNotifier notifier(*static_cast<Object *>(obj));
     TypeContainerVisitor<MaNGOS::ObjectVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
     
@@ -182,7 +242,7 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
     cell.data.Part.reserved = ALL_DISTRICT;
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
-	return; // dude.. how did I end up in a grid that's no loaded...   
+	return; 
 
     MaNGOS::MessageDeliverer post_man(*player, msg, to_self);
     TypeContainerVisitor<MaNGOS::MessageDeliverer, ContainerMapList<Player> > message(post_man);
@@ -198,10 +258,10 @@ void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate(); // ensure the grid will not create if no player is nearby.
+    cell.SetNoCreate(); 
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
-    return; // ignore the creature.. no one there to hear him
+    return; 
 
     
     MaNGOS::ObjectMessageDeliverer post_man(*obj, msg);
@@ -216,7 +276,7 @@ bool Map::loaded(const GridPair &p) const
     return ( (i_gridMask[p.x_coord] & mask)  && (i_gridStatus[p.x_coord] & mask) );
 }
 
-// update map
+
 void Map::Update(const uint32 &t_diff)
 {
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
@@ -248,14 +308,14 @@ void Map::Remove(Player *player, bool remove)
     if( !(i_gridMask[cell.data.Part.grid_x] & mask) )
     {
 	assert( false );    
-	return; // hmm...  how can we end up here in an unloaded grid
+	return; 
     }
 
     DEBUG_LOG("Remove player %s from grid[%d,%d]", player->GetName(), cell.GridX(), cell.GridY());
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert(grid != NULL);
     
-    {  // do not remove the scope braces... fro performances
+    {  
 	WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
 	grid->RemoveObject(cell.CellX(), cell.CellY(), player, player->GetGUID());
 	player->RemoveFromWorld();
@@ -267,10 +327,12 @@ void Map::Remove(Player *player, bool remove)
     CellLock<ReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *this);
     notifier.Notify();
-
+    
     if( remove )
 	delete player;
 }
+
+
 
 template<class T>
 void
@@ -282,24 +344,24 @@ Map::Remove(T *obj, bool remove)
 
     Cell cell = RedZone::GetZone(p);
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
-	return; // doesn't make sense to remove a creature in a location where its nothing
+	return; 
 
-    DEBUG_LOG("Remove object % from grid[%d,%d]", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
+    DEBUG_LOG("Remove object %lu from grid[%d,%d]", (unsigned long)obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
 
-    {  // do not remove the scope braces... fro performances
+    {  
 	WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
 	(*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj, obj->GetGUID());
     }
 
-    // now notify the players this creature is gone..
+    
     {
 	Cell cell = RedZone::GetZone(p);
-	CellLock<ReadGuard> cell_lock(cell, p);
+	CellLock<ReadGuard> cell_lock(cell, p); 
 	MaNGOS::ObjectNotVisibleNotifier notifier(*obj);
 	TypeContainerVisitor<MaNGOS::ObjectNotVisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
-	cell_lock->Visit(cell_lock, player_notifier, *this);
+	
     }
     
     if( remove )
@@ -316,6 +378,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
     Cell old_cell = RedZone::GetZone(old_val);
     Cell new_cell = RedZone::GetZone(new_val);
     new_cell |= old_cell;
+    bool same_cell = (new_cell == old_cell);
     player->Relocate(x, y, z, orientation);
 
     if( old_cell.DiffGrid(new_cell) || old_cell.DiffCell(new_cell) )
@@ -328,7 +391,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 	    WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
 	    grid(old_cell.CellX(),old_cell.CellY()).RemoveObject(player, player->GetGUID());
 
-	    // NOTE, this will hold a write lock once..
+	    
 	    if( !old_cell.DiffGrid(new_cell) )
 		grid(new_cell.CellX(),new_cell.CellY()).AddObject(player, player->GetGUID());
 	}
@@ -337,28 +400,33 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 	    EnsureGridLoadedForPlayer(new_cell, player, true);
     }
 
-    // now inform all others in the grid of your activity
-    // (1) first within your visibility..
+    
+    
     CellLock<ReadGuard> cell_lock(new_cell, new_val);
 
-    if( old_cell == new_cell )
-    {
-	// even if we move a little.. gotta let other player see my update...
-	MaNGOS::VisibleNotifier notifier(*player);
-	TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
-	new_cell.data.Part.reserved = ALL_DISTRICT;
-	cell_lock->Visit(cell_lock, player_notifier, *this);
-	notifier.Notify();
-	return;
-    }
-
+    
     MaNGOS::VisibleNotifier notifier(*player);
     TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
     TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+
+    if( same_cell )
+	new_cell.data.Part.reserved = ALL_DISTRICT;
+
+    cell_lock->Visit(cell_lock, player_notifier, *this);
+
+    
+    MaNGOS::PlayerConfrontationNotifier confront(*player);
+    TypeContainerVisitor<MaNGOS::PlayerConfrontationNotifier, TypeMapContainer<AllObjectTypes> > player_confronted(confront);
+    new_cell.data.Part.reserved = ALL_DISTRICT;
+    cell_lock->Visit(cell_lock, player_confronted, *this);
+
+    if( same_cell )
+	return; 
+
     cell_lock->Visit(cell_lock, object_notifier, *this);
     notifier.Notify();
 
-    // (2) out of your visibility
+    
     MaNGOS::NotVisibleNotifier notifier2(*player);
     TypeContainerVisitor<MaNGOS::NotVisibleNotifier, ContainerMapList<Player> > player_notifier2(notifier2);
     TypeContainerVisitor<MaNGOS::NotVisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier2(notifier2);
@@ -380,7 +448,7 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
     Cell new_cell = RedZone::GetZone(new_val);
     creature->Relocate(x, y, z, ang);
 
-    if( creature->GetCreatureState() == ATTACKING /* TBD */ )
+    if( creature->TestState(CHASE | SEARCHING | FLEEING) )
     {
 	if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
 	{
@@ -400,39 +468,11 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
 		WriteGuard guard(i_info[new_cell.GridX()][new_cell.GridY()]->i_lock);
 		(*i_grids[new_cell.GridX()][new_cell.GridY()])(new_cell.CellX(), new_cell.CellY()).AddGridObject<Creature>(creature, creature->GetGUID());
 	    }
-	}
-	
-	new_cell |= old_cell;
-	new_cell.SetNoCreate();
-	old_cell.SetNoCreate();
-
-	// move in visibility.. the creature can chase all it wants to
-	CellLock<ReadGuard> cell_lock(new_cell, new_val);
-	if( new_cell == old_cell )
-	{
-	    new_cell.data.Part.reserved = ALL_DISTRICT;
-
-	    MaNGOS::CreatureVisibleMovementNotifier notifier(*creature);
-	    TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, ContainerMapList<Player> > player_notifier(notifier);
-	    cell_lock->Visit(cell_lock, player_notifier, *this);
-	    return;
-	}
-	
-	// move out of visibity
-	MaNGOS::CreatureNotVisibleMovementNotifier notifier2(*creature);
-	TypeContainerVisitor<MaNGOS::CreatureNotVisibleMovementNotifier, ContainerMapList<Player> > player_notifier2(notifier2);
-	cell_lock = CellLock<ReadGuard>(old_cell, old_val);
-	cell_lock->Visit(cell_lock, player_notifier2, *this);	
+	}	
     }
     else
     {
-	// minimum.. let other players know my movement
-	CellLock<ReadGuard> cell_lock(new_cell, new_val);
-	new_cell.data.Part.reserved = ALL_DISTRICT;
-	new_cell.SetNoCreate();
-	MaNGOS::CreatureVisibleMovementNotifier notifier(*creature);
-	TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, ContainerMapList<Player> > player_notifier(notifier);
-	cell_lock->Visit(cell_lock, player_notifier, *this);	
+	
     }
 }
 
@@ -443,28 +483,201 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     assert( grid != NULL && i_info[x][y] != NULL );
 
     {
-	
 	if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id) )
 	    return false;
 	
-	WriteGuard guard(i_info[x][y]->i_lock); // prevent ALL activities until this is done..
+	WriteGuard guard(i_info[x][y]->i_lock); 
 	DEBUG_LOG("Unloading grid[%d,%d] for map %d", x,y, i_id);
 	ObjectGridUnloader unloader(*grid);
 	uint64 mask = CalculateGridMask(y);
-	i_gridMask[x] &= ~mask; // clears the bit
+	i_gridMask[x] &= ~mask; 
 	i_gridStatus[x] &= ~mask;
 	unloader.UnloadN();
 	delete i_grids[x][y];
 	i_grids[x][y] = NULL;
-    }
     
+    }
     delete i_info[x][y];
     i_info[x][y] = NULL;
+	//z coordinate
+	
+	int gx=63-x;
+	int gy=63-y;
+	if(GridMaps[gx][gy])
+	{
+		delete (GridMaps[gx][gy]);
+		GridMaps[gx][gy]=NULL;
+	
+	}
+	
+	//z coordinate
     return true;
 }
 
+void Map::GetUnitList(const float &x, const float &y,std::list<Unit*> &unlist)
+{
 
-// explicit template instantiation
+    
+	CellPair p = MaNGOS::ComputeCellPair(x, y);
+	assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
+	    p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+
+    Cell cell = RedZone::GetZone(p);
+
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate(); 
+    MaNGOS::GridUnitListNotifier notifier(unlist);
+    TypeContainerVisitor<MaNGOS::GridUnitListNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, object_notifier, *this);
+}
+
+float Map::GetHeight(float x, float y )
+{
+	//local x,y coords
+	float lx,ly;
+	int gx,gy;
+	GridPair p = MaNGOS::ComputeGridPair(x, y); 
+	//Note: p.x_coord = 63-gx...
+/* method with no opt
+	x=32* SIZE_OF_GRIDS-x;
+	y=32* SIZE_OF_GRIDS-y;
+
+	gx=x/SIZE_OF_GRIDS ;//grid x
+	gy=y/SIZE_OF_GRIDS ;//grid y 
+
+    lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
+	ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
+*/
+
+// half opt method
+	gx=(int)(32-x/SIZE_OF_GRIDS) ;//grid x
+	gy=(int)(32-y/SIZE_OF_GRIDS);//grid y 
+
+
+    lx=MAP_RESOLUTION*(32 -x/SIZE_OF_GRIDS - gx);
+    ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
+	//DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
+
+	if(!GridMaps[gx][gy])//this map is not loaded
+	GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+	
+	if(GridMaps[gx][gy])
+	    return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+	else
+		return 0;
+}
+
+uint16 Map::GetAreaFlag(float x, float y )
+{
+//local x,y coords
+	float lx,ly;
+	int gx,gy;
+	GridPair p = MaNGOS::ComputeGridPair(x, y); 
+	//Note: p.x_coord = 63-gx...
+/* method with no opt
+	x=32* SIZE_OF_GRIDS-x;
+	y=32* SIZE_OF_GRIDS-y;
+
+	gx=x/SIZE_OF_GRIDS ;//grid x
+	gy=y/SIZE_OF_GRIDS ;//grid y 
+
+    lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
+	ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
+*/
+
+// half opt method
+	gx=(int)(32-x/SIZE_OF_GRIDS) ;//grid x
+	gy=(int)(32-y/SIZE_OF_GRIDS);//grid y 
+
+
+    lx=16*(32 -x/SIZE_OF_GRIDS - gx);
+    ly=16*(32 -y/SIZE_OF_GRIDS - gy);
+	//DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
+
+	if(!GridMaps[gx][gy])//this map is not loaded
+	GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+
+	if(GridMaps[gx][gy])
+	    return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
+	else
+		return 0;
+
+}
+
+uint8 Map::GetTerrainType(float x, float y )
+{
+//local x,y coords
+	float lx,ly;
+	int gx,gy;
+	//GridPair p = MaNGOS::ComputeGridPair(x, y); 
+	//Note: p.x_coord = 63-gx...
+/* method with no opt
+	x=32* SIZE_OF_GRIDS-x;
+	y=32* SIZE_OF_GRIDS-y;
+
+	gx=x/SIZE_OF_GRIDS ;//grid x
+	gy=y/SIZE_OF_GRIDS ;//grid y 
+
+    lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
+	ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
+*/
+
+// half opt method
+	gx=(int)(32-x/SIZE_OF_GRIDS) ;//grid x
+	gy=(int)(32-y/SIZE_OF_GRIDS);//grid y 
+
+
+    lx=16*(32 -x/SIZE_OF_GRIDS - gx);
+    ly=16*(32 -y/SIZE_OF_GRIDS - gy);
+
+	if(!GridMaps[gx][gy])//this map is not loaded
+	GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+
+	if(GridMaps[gx][gy])
+	    return GridMaps[gx][gy]->terrain_type[(int)(lx)][(int)(ly)];
+	else
+		return 0;
+
+}
+
+
+float Map::GetWaterLevel(float x, float y )
+{
+//local x,y coords
+	float lx,ly;
+	int gx,gy;
+	//GridPair p = MaNGOS::ComputeGridPair(x, y); 
+	//Note: p.x_coord = 63-gx...
+/* method with no opt
+	x=32* SIZE_OF_GRIDS-x;
+	y=32* SIZE_OF_GRIDS-y;
+
+	gx=x/SIZE_OF_GRIDS ;//grid x
+	gy=y/SIZE_OF_GRIDS ;//grid y 
+
+    lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
+	ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
+*/
+
+// half opt method
+	gx=(int)(32-x/SIZE_OF_GRIDS) ;//grid x
+	gy=(int)(32-y/SIZE_OF_GRIDS);//grid y 
+
+
+    lx=16*(32 -x/SIZE_OF_GRIDS - gx);
+    ly=16*(32 -y/SIZE_OF_GRIDS - gy);
+
+	if(!GridMaps[gx][gy])//this map is not loaded
+	GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+
+	if(GridMaps[gx][gy])
+	    return GridMaps[gx][gy]->liquid_level[(int)(lx)][(int)(ly)];
+	else
+		return 0;
+
+}
+
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
 template void Map::Add(DynamicObject *);
@@ -474,6 +687,5 @@ template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
 template void Map::Remove(Corpse *, bool);
-
 
 

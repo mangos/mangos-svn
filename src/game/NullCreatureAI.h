@@ -1,6 +1,5 @@
-/* NullCreatureAI.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +19,7 @@
 #ifndef MANGOS_NULLCREATUREAI_H
 #define MANGOS_NULLCREATUREAI_H
 
-/** NullCreatureAI are creatures that don't attack.  This is
- * a classic Null Object pattern.
- */
+
 
 #include "CreatureAI.h"
 
@@ -30,22 +27,18 @@ class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
 {
 public:
     
-    void MoveInLineOfSight(Creature *) {}
-    void AttackStart(Creature *) {}
-    void AttackStop(Creature *) {}
-    void HealBy(Creature *healer, uint32 amount_healed) {}
-    void DamageInflict(Creature *healer, uint32 amount_healed) {}
-    bool IsVisible(Creature *) const { return false; /* inactive creature don't care */ }
+    NullCreatureAI(Creature &) {}
+    NullCreatureAI() {}
 
-    void MoveInLineOfSight(Player *) {}
-    void AttackStart(Player *) {}
-    void AttackStop(Player *) {}
-    void HealBy(Player *healer, uint32 amount_healed) {}
-    void DamageInflict(Player *done_by, uint32 amount) {}
-    bool IsVisible(Player *) const { return false; /* inactive creature don't care */ }
-    
+    void MoveInLineOfSight(Unit *) {}
+    void AttackStart(Unit *) {}
+    void AttackStop(Unit *) {}
+    void HealBy(Unit *healer, uint32 amount_healed) {}
+    void DamageInflict(Unit *healer, uint32 amount_healed) {}
+    bool IsVisible(Unit *) const { return false;  }
+
     void UpdateAI(const uint32) {}
-    static int Permissible(const Creature *) { return IDLE_PERMIT_BASE; /* that's the best I can do dude */ }
+    static int Permissible(const Creature *) { return IDLE_PERMIT_BASE;  }
 };
 
 

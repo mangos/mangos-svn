@@ -1,6 +1,5 @@
-/* Grid.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +111,8 @@ public:
     /** Removes a containter type object from the grid
      */
     template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl); }
-    
+
+
 private:
     
     typedef typename ThreadModel::Lock Guard;

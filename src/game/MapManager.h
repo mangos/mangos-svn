@@ -1,6 +1,5 @@
-/* MapManager.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +20,7 @@
 #define MANGOS_MAPMANAGER_H
 
 
-/*
- * @class MapManager
- * MapMaanger manages the area in the game.  The world in MaNGOS is devided into
- * different maps (zones) and each map further divided into grids.  The
- * responsibility of a map manager is only manages the creation/destruction of maps,
- * nothing more nor less.
- */ 
+ 
 
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
@@ -38,8 +31,7 @@
 
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >
 {
-    /** Only allow the creation policy creates a singleton
-     */
+    
     friend class MaNGOS::OperatorNew<MapManager>;
     typedef HM_NAMESPACE::hash_map<uint32, Map*> MapMapType;
     typedef std::pair<HM_NAMESPACE::hash_map<uint32, Map*>::iterator, bool>  MapMapPair;
@@ -57,10 +49,11 @@ public:
     else
         i_gridCleanUpDelay = t; 
     }
+
     inline void SetMapUpdateInterval(uint32 t) 
     {
-    // minimum of 100 ms
-    if( t > 100 )
+    
+    if( t > 50 )
     {
         i_timer.SetInterval(t);
         i_timer.Reset();
@@ -71,7 +64,7 @@ private:
     MapManager();
     ~MapManager();
     
-    // prevent copy constructor and assignemnt operator on a singleton
+    
     MapManager(const MapManager &);
     MapManager& operator=(const MapManager &);
 

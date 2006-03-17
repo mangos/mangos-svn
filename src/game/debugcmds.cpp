@@ -1,7 +1,5 @@
-/* debugcmds.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-/////////////////////////////////////////////////
-//  Debug Chat Commands
-//
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
@@ -55,10 +49,10 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
         obj = (Object*)m_session->GetPlayer();
 
     char buf[256];
-    // sprintf((char*)buf, "%d", m_session->GetPlayer()->inarc( 3.000f,obj->GetPositionX() ,obj->GetPositionY(), 90, m_session->GetPlayer()->GetOrientation(), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY()));
+    
 
     FillSystemMessageData(&data, m_session, buf);
-    // m_session->SendPacket( &data );
+    
 
     return true;
 }

@@ -1,6 +1,5 @@
-/* Map.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +19,7 @@
 #ifndef MANGOS_MAP_H
 #define MANGOS_MAP_H
 
-/** Map identified a map in the world.  Each map is further divided into
- * grids (64 by 64) grids or a map can have no grids.  In the later
- * case, MaNGOS represent the map with 1 grid.
- */
+
 
 #include "Platform/Define.h"
 #include "Policies/ThreadingModel.h"
@@ -33,7 +29,7 @@
 #include "GridDefines.h"
 #include "Cell.h"
 
-// foward declaration
+
 namespace ZThread
 {
     class Lockable;
@@ -70,6 +66,16 @@ struct GridInfo
 };
 
 
+
+
+
+typedef struct{
+uint16 area_flag[16][16];
+uint8 terrain_type[16][16];
+float liquid_level[16][16];
+float Z[MAP_RESOLUTION][MAP_RESOLUTION];
+}GridMap;
+
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {    
 public:
@@ -84,30 +90,22 @@ public:
     void Update(const uint32&);    
     uint64 CalculateGridMask(const uint32 &y) const;
 
-    /** MessageBoardcast is a player sending messages to all near by
-     * players in his/her grid
-     */
+    
     void MessageBoardcast(Player *, WorldPacket *, bool to_self);
 
-    /** MessageBoardcast a message to all players within the range of the object
-     */
+    
     void MessageBoardcast(Object *, WorldPacket *);
 
-    /** Relocation of a player means a player has moved on the map
-     */
+    
     void PlayerRelocation(Player *, const float &x, const float &y, const float &z, const float &angl);
 
-    /** Relocation of an object means an object moved such as
-     * creatures running after you
-     */
+    
     void CreatureRelocation(Creature *creature, const float &x, const float &y, const float &, const float &);
 
-    /** Visit is a visitor visits a particular cell indicated my his cell mask
-     */
+    
     template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
-    /** Sets the timer interval
-     */
+    
     void SetTimer(uint32 t) 
     { 
 	i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
@@ -119,8 +117,10 @@ public:
 	return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
     }
 
-    /// Unloads the given grid
+    
     bool UnloadGrid(const uint32 &x, const uint32 &y);
+    
+	void GetUnitList(const float &x, const float &y, std::list<Unit*> &unlist);
 
     void ResetGridExpiry(GridInfo &info) const
     {
@@ -131,6 +131,10 @@ public:
     uint32 GetId(void) const { return i_id; }
 
     static void InitStateMachine(void);
+	float GetHeight(float x, float y);
+	uint16 GetAreaFlag(float x, float y );
+	uint8 GetTerrainType(float x, float y );
+	float GetWaterLevel(float x, float y );
 
 private:
     bool loaded(const GridPair &) const;
@@ -143,7 +147,7 @@ private:
 
     uint32 i_id;
 
-    // no register cache.. need to use it to sync stuff
+    GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     volatile uint64 i_gridMask[MAX_NUMBER_OF_GRIDS];
     volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
         
@@ -153,7 +157,9 @@ private:
 
     NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
     GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    time_t i_gridExpiry;
+    
+		
+		time_t i_gridExpiry;
 };
 
 

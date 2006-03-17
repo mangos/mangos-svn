@@ -1,7 +1,5 @@
-/* Object.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +44,6 @@ Object::Object( )
     m_orientation = 0.0f;
 
     m_mapId = 0;
-    m_zoneId = 0;
 
     m_uint32Values = 0;
 
@@ -81,14 +78,8 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
 
-	// UQ1: Should also set these here???
-/*
-	OBJECT_FIELD_GUID                       =    0,
-    OBJECT_FIELD_TYPE                       =    2, // uint32 goods type [ stage prop /npc/ plays family ]
-    OBJECT_FIELD_ENTRY                      =    3,
-    OBJECT_FIELD_SCALE_X                    =    4,
-    OBJECT_FIELD_PADDING                    =    5, // may mount goods? Cotton material / gem 
-*/
+	
+
 }
 
 
@@ -99,145 +90,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, fl
     SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
-
-	// UQ1: Should also set these here???
-	/*
-	UNIT_FIELD_CHARM                        =    6,
-    UNIT_FIELD_SUMMON                       =    8,
-    UNIT_FIELD_CHARMEDBY                    =   10,
-    UNIT_FIELD_SUMMONEDBY                   =   12,
-    UNIT_FIELD_CREATEDBY                    =   14,
-    UNIT_FIELD_TARGET                       =   16, // goal? (Chooses goal?)
-    UNIT_FIELD_PERSUADED                    =   18,
-    UNIT_FIELD_CHANNEL_OBJECT               =   20,
-    UNIT_FIELD_HEALTH                       =   22,
-    UNIT_FIELD_POWER1                       =   23,
-    UNIT_FIELD_POWER2                       =   24,
-    UNIT_FIELD_POWER3                       =   25,
-    UNIT_FIELD_POWER4                       =   26,
-    UNIT_FIELD_POWER5                       =   27,
-    UNIT_FIELD_MAXHEALTH                    =   28,
-    UNIT_FIELD_MAXPOWER1                    =   29,
-    UNIT_FIELD_MAXPOWER2                    =   30,
-    UNIT_FIELD_MAXPOWER3                    =   31,
-    UNIT_FIELD_MAXPOWER4                    =   32,
-    UNIT_FIELD_MAXPOWER5                    =   33,
-    UNIT_FIELD_LEVEL                        =   34,
-    UNIT_FIELD_FACTIONTEMPLATE              =   35,
-    UNIT_FIELD_BYTES_0                      =   36, // camp, race and sex 
-    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY          =   37,
-    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01       =   38,
-    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02       =   39,
-    UNIT_VIRTUAL_ITEM_INFO                  =   40,       //  6 of them
-    UNIT_FIELD_FLAGS                        =   46,
-    UNIT_FIELD_AURA                         =   47,       //  64 of them
-    UNIT_FIELD_AURAFLAGS                    =  111,       //  8 of them
-    UNIT_FIELD_AURALEVELS                   =  119,       //  8 of them
-    UNIT_FIELD_AURAAPPLICATIONS             =  127,       //  16 of them
-    UNIT_FIELD_AURASTATE                    =  143,
-    UNIT_FIELD_BASEATTACKTIME               =  144,
-    UNIT_FIELD_RANGEDATTACKTIME             =  146,
-    UNIT_FIELD_BOUNDINGRADIUS               =  147,
-    UNIT_FIELD_COMBATREACH                  =  148,
-    UNIT_FIELD_DISPLAYID                    =  149,
-    UNIT_FIELD_NATIVEDISPLAYID              =  150,
-    UNIT_FIELD_MOUNTDISPLAYID               =  151,
-    UNIT_FIELD_MINDAMAGE                    =  152,
-    UNIT_FIELD_MAXDAMAGE                    =  153,
-    UNIT_FIELD_MINOFFHANDDAMAGE             =  154,
-    UNIT_FIELD_MAXOFFHANDDAMAGE             =  155,
-    UNIT_FIELD_BYTES_1                      =  156,
-    UNIT_FIELD_PETNUMBER                    =  157,
-    UNIT_FIELD_PET_NAME_TIMESTAMP           =  158,
-    UNIT_FIELD_PETEXPERIENCE                =  159,
-    UNIT_FIELD_PETNEXTLEVELEXP              =  160,
-    UNIT_DYNAMIC_FLAGS                      =  161,
-    UNIT_CHANNEL_SPELL                      =  162,
-    UNIT_MOD_CAST_SPEED                     =  163,
-    UNIT_CREATED_BY_SPELL                   =  164,
-    UNIT_NPC_FLAGS                          =  165,
-    UNIT_NPC_EMOTESTATE                     =  166,
-    UNIT_TRAINING_POINTS                    =  167,
-    UNIT_FIELD_STAT0                        =  168,
-    UNIT_FIELD_STR = UNIT_FIELD_STAT0,
-    UNIT_FIELD_STAT1                        =  169,
-    UNIT_FIELD_AGILITY = UNIT_FIELD_STAT1,
-    UNIT_FIELD_STAT2                        =  170,
-    UNIT_FIELD_STAMINA = UNIT_FIELD_STAT2,
-    UNIT_FIELD_STAT3                        =  171,
-    UNIT_FIELD_SPIRIT = UNIT_FIELD_STAT3,
-    UNIT_FIELD_STAT4                        =  172,
-    UNIT_FIELD_IQ = UNIT_FIELD_STAT4,
-    UNIT_FIELD_ARMOR = UNIT_FIELD_STAT4,    // UQ1: I dont think this is correct! Was IQ +1 in old code...
-    UNIT_FIELD_RESISTANCES                  =  173,
-    UNIT_FIELD_RESISTANCES_01               =  174,
-    UNIT_FIELD_RESISTANCES_02               =  175,
-    UNIT_FIELD_RESISTANCES_03               =  176,
-    UNIT_FIELD_RESISTANCES_04               =  177,
-    UNIT_FIELD_RESISTANCES_05               =  178,
-    UNIT_FIELD_RESISTANCES_06               =  179,
-    UNIT_FIELD_ATTACKPOWER                  =  180,
-    UNIT_FIELD_BASE_MANA                    =  181,
-    UNIT_FIELD_BASE_HEALTH                  =  182,
-    UNIT_FIELD_ATTACK_POWER_MODS            =  183,
-    UNIT_FIELD_BYTES_2                      =  184, 
-    UNIT_FIELD_RANGEDATTACKPOWER            =  185,
-    UNIT_FIELD_RANGED_ATTACK_POWER_MODS     =  186,
-    UNIT_FIELD_MINRANGEDDAMAGE              =  187,
-    UNIT_FIELD_MAXRANGEDDAMAGE              =  188,
-    UNIT_FIELD_POWER_COST_MODIFIER          =  189,
-    UNIT_FIELD_POWER_COST_MULTIPLIER        =  190,
-    UNIT_FIELD_PADDING                      =  191,
-    UNIT_FIELD_UNKNOWN180                   =  192,      //  12 of them
-	*/
-
-	// UQ1: I'll do this in Creature::Update.. Didn't seem to work when done here...
-/*
-	CreatureInfo *ci = NULL;
-
-	if (nameId >= 0 && nameId < 999999)
-		ci = objmgr.GetCreatureName(nameId);
-
-	if (ci)
-	{// UQ1: Fill in creature info here...
-		SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
-		//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
-		SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
-		SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
-		SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
-		SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
-		SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
-
-		// UQ1: These 3 fields may be the wrong way around???
-		SetUInt32Value( UNIT_FIELD_FLAGS, ci->flag );
-		SetUInt32Value( UNIT_NPC_FLAGS, ci->flags1);
-		SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->Type);
-
-		SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
-		SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
-		SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
-		SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
-
-		SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
-		SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
-		SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
-		SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
-		SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
-		SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
-		
-		//ci->rank // UQ1: Guilds???
-
-		SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
-		//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
-			
-		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
-		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
-		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
-		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
-		SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
-		SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+3, ci->slot3pos);
-	}*/
-
+	SetUInt32Value(	OBJECT_FIELD_ENTRY,nameId);
     m_mapId = mapid;
     m_positionX = x;
     m_positionY = y;
@@ -250,8 +103,8 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
 {
     ByteBuffer buf(500);
 
-    buf << uint8( UPDATETYPE_MOVEMENT );          // update type
-    buf << GetGUID();                             // object GUID
+    buf << uint8( UPDATETYPE_MOVEMENT );          
+    buf << GetGUID();                             
 
     _BuildMovementUpdate(&buf, flags, 0x00000000);
 
@@ -261,253 +114,65 @@ void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
 
 void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const
 {
-    //they can see ANYONE or ANYTHING in a 30f radius from their corpse//FIX ME
-    const Creature *creat = dynamic_cast<const Creature *>(this);
+	if(!target) return;
 
-    if(target->isAlive())
-    {
-        //if creature exists and its spirit healer return
-        if (creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
-        {
-            return;
-        }
-        if (creat)                                //if creature exists and isnt spririt healer update
-        {
-            ByteBuffer buf(500);
+	ByteBuffer buf(500);
+	buf << uint8( UPDATETYPE_CREATE_OBJECT );
+	buf << uint8( 0xFF );
+	buf << GetGUID() ;                    
+	buf << m_objectTypeId; 
 
-            // update type == creation
-            buf << uint8( UPDATETYPE_CREATE_OBJECT );
-            buf << GetGUID() ;                    // object GUID
-            buf << GetTypeId();                   // object type
+	switch(m_objectTypeId)
+	{
+		case TYPEID_OBJECT: //do nothing
+			break;
+		case TYPEID_ITEM:
+		case TYPEID_CONTAINER: 
+			_BuildMovementUpdate( &buf, 0x10, 0x0 ); 
+			break;
+		case TYPEID_UNIT:
+			_BuildMovementUpdate( &buf, 0x70, 0x800000 );
+			break;
+		case TYPEID_PLAYER:
+		{
+			if( target == this ) //build for self
+			{
+				buf.clear();
+				buf << uint8( UPDATETYPE_CREATE_OBJECT2 );
+				buf << uint8( 0xFF );
+				buf << GetGUID() ;                    
+				buf << m_objectTypeId; 
+				_BuildMovementUpdate( &buf, 0x71, 0x2000 );
+			}
+			//build for other player
+			else
+			{ 
+				_BuildMovementUpdate( &buf, 0x70, 0x0 );
+			} 
+		}break;
+		case TYPEID_CORPSE:
+		case TYPEID_GAMEOBJECT:
+		case TYPEID_DYNAMICOBJECT:
+		{
+			if(GUID_HIPART(GetGUID())==HIGHGUID_PLAYER_CORPSE) 
+				_BuildMovementUpdate( &buf, 0x52, 0x0 );
+			else
+				_BuildMovementUpdate( &buf, 0x50, 0x0 );
+		}break;
+		//case TYPEID_AIGROUP:
+		//case TYPEID_AREATRIGGER:
+		//break;
+		default://know type
+			sLog.outDetail("Unknow Object Type %d Create Update Block.\n", m_objectTypeId);
+			break;
+	}
 
-            // build and add the movement update portion of the packet
-            _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
+	UpdateMask updateMask;
+	updateMask.SetCount( m_valuesCount );
+	_SetCreateBits( &updateMask, target );
+	_BuildValuesUpdate( &buf, &updateMask );
+	data->AddUpdateBlock(buf);
 
-            // 4 byte flags, 1 == active player
-            buf << uint32( target == this ? 1 : 0 );
-            buf << uint32( 0 );                   // uint32 attack cycle
-            buf << uint32( 0 );                   // uint32 timer id
-            buf << uint64( 0 );                   // GUID victim
-
-            UpdateMask updateMask;
-            updateMask.SetCount( m_valuesCount );
-             _SetCreateBits( &updateMask, target );
-            _BuildValuesUpdate( &buf, &updateMask );
-
-            data->AddUpdateBlock(buf);
-        }
-        else if(!creat)                           //if there isnt any creature
-        {
-	    Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
-	
-            // if player exists and player and target is in group and player is dead
-            if(plyr && plyr!=target && plyr->IsInGroup() && target->IsInGroup() && plyr->isDead())
-            {
-                if(plyr->IsGroupMember(target))   //if its group member of target update
-                {
-                    ByteBuffer buf(500);
-
-                    // update type == creation
-                    buf << uint8( UPDATETYPE_CREATE_OBJECT );
-                    buf << GetGUID() ;            // object GUID
-                    buf << GetTypeId();           // object type
-
-                    // build and add the movement update portion of the packet
-                    _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-                    // 4 byte flags, 1 == active player
-                    buf << uint32( target == this ? 1 : 0 );
-                    buf << uint32( 0 );           // uint32 attack cycle
-                    buf << uint32( 0 );           // uint32 timer id
-                    buf << uint64( 0 );           // GUID victim
-
-                    UpdateMask updateMask;
-                    updateMask.SetCount( m_valuesCount );
-                    _SetCreateBits( &updateMask, target );
-                    _BuildValuesUpdate( &buf, &updateMask );
-
-                    data->AddUpdateBlock(buf);
-                }
-                else                              //if isnt party member and dead return
-                {
-                    return;
-                }
-            }
-            else if(plyr && plyr->isDead())       //if player isnt in a group and dead return
-            {
-                return;
-            }
-            // player end
-            else                                  //self update
-            {
-                ByteBuffer buf(500);
-
-                // update type == creation
-                buf << uint8( UPDATETYPE_CREATE_OBJECT );
-                buf << GetGUID() ;                // object GUID
-                buf << GetTypeId();               // object type
-
-                // build and add the movement update portion of the packet
-                _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-                // 4 byte flags, 1 == active player
-                buf << uint32( target == this ? 1 : 0 );
-                buf << uint32( 0 );               // uint32 attack cycle
-                buf << uint32( 0 );               // uint32 timer id
-                buf << uint64( 0 );               // GUID victim
-
-                UpdateMask updateMask;
-                updateMask.SetCount( m_valuesCount );
-                _SetCreateBits( &updateMask, target );
-                _BuildValuesUpdate( &buf, &updateMask );
-
-                data->AddUpdateBlock(buf);
-            }
-        }
-
-        else                                      //is it needed -- UQ1: Yes think enchanting needs items updated...
-        {
-            ByteBuffer buf(500);
-
-            buf << uint8( UPDATETYPE_CREATE_OBJECT );// update type == creation
-            buf << GetGUID() ;                       // object GUID
-            buf << GetTypeId();                      // object type
-
-            // build and add the movement update portion of the packet
-            _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-            buf << uint32( target == this ? 1 : 0 ); // 4 byte flags, 1 == active player
-            buf << uint32( 0 );                      // uint32 attack cycle
-            buf << uint32( 0 );                      // uint32 timer id
-            buf << uint64( 0 );                      // GUID victim
-
-            UpdateMask updateMask;
-            updateMask.SetCount( m_valuesCount );
-            _SetCreateBits( &updateMask, target );
-            _BuildValuesUpdate( &buf, &updateMask );
-
-            data->AddUpdateBlock(buf);
-        }
-
-    }
-    if(target->isDead())
-    {
-        if(!creat)
-        {
-	    Player *plyr = ObjectAccessor::Instance().FindPlayer(GetGUID());
-
-            // if player and player is in group of target update
-            if(plyr && plyr->IsGroupMember(target))
-            {
-                ByteBuffer buf(500);
-
-                // update type == creation
-                buf << uint8( UPDATETYPE_CREATE_OBJECT );
-                buf << GetGUID() ;                // object GUID
-                buf << GetTypeId();               // object type
-
-                // build and add the movement update portion of the packet
-                _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-                // 4 byte flags, 1 == active player
-                buf << uint32( target == this ? 1 : 0 );
-                buf << uint32( 0 );               // uint32 attack cycle
-                buf << uint32( 0 );               // uint32 timer id
-                buf << uint64( 0 );               // GUID victim
-
-                UpdateMask updateMask;
-                updateMask.SetCount( m_valuesCount );
-                _SetCreateBits( &updateMask, target );
-                _BuildValuesUpdate( &buf, &updateMask );
-
-                data->AddUpdateBlock(buf);
-            }
-            else if(plyr && plyr->isAlive())      //if player is alive and they are in different groups return
-            {
-                return;
-            }
-            else                                  //if player and target is dead update or self update
-            {
-                ByteBuffer buf(500);
-
-                // update type == creation
-                buf << uint8( UPDATETYPE_CREATE_OBJECT );
-                buf << GetGUID() ;                // object GUID
-                buf << GetTypeId();               // object type
-
-                // build and add the movement update portion of the packet
-                _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-                // 4 byte flags, 1 == active player
-                buf << uint32( target == this ? 1 : 0 );
-                buf << uint32( 0 );               // uint32 attack cycle
-                buf << uint32( 0 );               // uint32 timer id
-                buf << uint64( 0 );               // GUID victim
-
-                UpdateMask updateMask;
-                updateMask.SetCount( m_valuesCount );
-                _SetCreateBits( &updateMask, target );
-                _BuildValuesUpdate( &buf, &updateMask );
-
-                data->AddUpdateBlock(buf);
-            }
-        }
-        // if creature exists and its spirit healer update
-        else if(creat && creat->GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
-        {
-            ByteBuffer buf(500);
-
-            // update type == creation
-            buf << uint8( UPDATETYPE_CREATE_OBJECT );
-            buf << GetGUID() ;                    // object GUID
-            buf << GetTypeId();                   // object type
-
-            // build and add the movement update portion of the packet
-            _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-            // 4 byte flags, 1 == active player
-            buf << uint32( target == this ? 1 : 0 );
-            buf << uint32( 0 );                   // uint32 attack cycle
-            buf << uint32( 0 );                   // uint32 timer id
-            buf << uint64( 0 );                   // GUID victim
-
-            UpdateMask updateMask;
-            updateMask.SetCount( m_valuesCount );
-            _SetCreateBits( &updateMask, target );
-            _BuildValuesUpdate( &buf, &updateMask );
-
-            data->AddUpdateBlock(buf);
-        }
-        else if(creat)                            //if creature exists and its not spirit healer reaturn
-        {
-            return;
-        }
-        else                                      //Does it needed?Want to know test it then.
-        {
-            ByteBuffer buf(500);
-
-            // update type == creation
-            buf << uint8( UPDATETYPE_CREATE_OBJECT );
-            buf << GetGUID() ;                    // object GUID
-            buf << GetTypeId();                   // object type
-
-            // build and add the movement update portion of the packet
-            _BuildMovementUpdate( &buf, 0x00000000, 0x00000000 );
-
-            // 4 byte flags, 1 == active player
-            buf << uint32( target == this ? 1 : 0 );
-            buf << uint32( 0 );                   // uint32 attack cycle
-            buf << uint32( 0 );                   // uint32 timer id
-            buf << uint64( 0 );                   // GUID victim
-
-            UpdateMask updateMask;
-            updateMask.SetCount( m_valuesCount );
-            _SetCreateBits( &updateMask, target );
-            _BuildValuesUpdate( &buf, &updateMask );
-
-            data->AddUpdateBlock(buf);
-        }
-    }
 }
 
 
@@ -515,8 +180,9 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
 {
     ByteBuffer buf(500);
 
-    buf << (uint8) UPDATETYPE_VALUES;             // update type == creation
-    buf << GetGUID() ;                            // object GUID
+    buf << (uint8) UPDATETYPE_VALUES; 
+	buf << (uint8) 0xFF;
+    buf << GetGUID();                            
 
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );
@@ -528,10 +194,9 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
 
 void Object::BuildOutOfRangeUpdateBlock(UpdateData * data) const
-{
+{ 
     data->AddOutOfRangeGUID(GetGUID());
 }
-
 
 void Object::DestroyForPlayer(Player *target) const
 {
@@ -545,96 +210,81 @@ void Object::DestroyForPlayer(Player *target) const
 }
 
 
-///////////////////////////////////////////////////////////////
-/// Build the Movement Data portion of the update packet
-/// Fills the data with this object's movement/speed info
-/// TODO: rewrite this stuff, document unknown fields and flags
-void Object::_BuildMovementUpdate(ByteBuffer * data, uint32 flags, uint32 flags2 ) const
+
+
+
+void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const
 {
-    int spline_count = 0;
+	*data << (uint8)flags;
+	if( m_objectTypeId==TYPEID_PLAYER )
+	{
+		*data << (uint32)flags2;
+		*data << (uint32)0xB74D85D1;
+		*data << (float)m_positionX;
+		*data << (float)m_positionY;
+		*data << (float)m_positionZ;
+		*data << (float)m_orientation;
+		*data << (float)0;
+		if(flags2 == 0x2000) //update self
+		{
+			*data << (float)0;
+			*data << (float)1.0;
+			*data << (float)0;
+			*data << (float)0;
+		}
+		*data << m_walkSpeed;                        
+		*data << m_runSpeed;                
+		*data << m_backSwimSpeed;        
+		*data << m_swimSpeed;          
+		*data << m_backWalkSpeed;                      
+		*data << m_turnRate;  
+	}
+	if( m_objectTypeId==TYPEID_UNIT )
+	{
+		*data << (uint32)flags2;
+		*data << (uint32)0xB5771D7F;
+		*data << (float)m_positionX;
+		*data << (float)m_positionY;
+		*data << (float)m_positionZ;
+		*data << (float)m_orientation;
+		*data << (float)0;
+		*data << m_walkSpeed;                        
+		*data << m_runSpeed;                
+		*data << m_backSwimSpeed;        
+		*data << m_swimSpeed;          
+		*data << m_backWalkSpeed;                      
+		*data << m_turnRate;  
+		uint8 PosCount=0;
+		if(flags2 & 0x400000)
+		{
+			*data << (uint32)0x0;
+			*data << (uint32)0x659;
+			*data << (uint32)0xB7B;
+			*data << (uint32)0xFDA0B4;
+			*data << (uint32)PosCount;
+			for(int i=0;i<PosCount+1;i++)
+			{
+				*data << (float)0; //x
+				*data << (float)0; //y
+				*data << (float)0; //z
+			}
+		}
+	}
+	if( (m_objectTypeId==TYPEID_CORPSE) || (m_objectTypeId==TYPEID_GAMEOBJECT) || (m_objectTypeId==TYPEID_DYNAMICOBJECT))
+	{
+		*data << (float)m_positionX;
+		*data << (float)m_positionY;
+		*data << (float)m_positionZ;
+		*data << (float)m_orientation;
+	}
+	
+	*data << (uint32)0x6297848C;          
 
-    *data << (uint32)flags;
-    *data << (uint32)0;
-
-    *data << (float)m_positionX;
-    *data << (float)m_positionY;
-    *data << (float)m_positionZ;
-    *data << (float)m_orientation;
-    *data << (float)0;
-
-    if (flags & 0x20000000)
-    {
-        *data << (uint32)0;                       // uint64 Transport GUID
-        *data << (uint32)0;
-        *data << (float)0;                        // Float32 TransportX
-        *data << (float)0;                        // Float32 TransportY
-        *data << (float)0;                        // Float32 TransportZ
-        *data << (float)0;                        // Float32 Transport Facing
-    }
-
-    if (flags & 0x1000000)
-    {
-        *data << (float)0;                        // Float32
-    }
-
-    if (flags & 0x4000)
-    {
-        *data << (uint16)0;                       // uint16
-        *data << (float)0;                        // Float32 X
-        *data << (float)0;                        // Float32 Y
-        *data << (float)0;                        // Float32 Z
-        *data << (float)0;                        // Float32 Facing
-    }
-
-    *data << m_walkSpeed;                         // walk speed
-    *data << m_runSpeed;                          // run speed
-    *data << m_backWalkSpeed;                     // backwards walk speed
-    *data << m_swimSpeed;                         // swim speed
-    *data << m_backSwimSpeed;                     // backwards swim speed
-    *data << m_turnRate;                          // turn rate
-
-    if ((flags & 0x00200000) != 0)
-    {
-        *data << (uint32)flags2;
-
-        if (flags2 & 0x10000)
-        {
-            *data << (float)0;                    // Float32
-        }
-
-        if (flags2 & 0x20000)
-        {
-            *data << (uint32)0;                   // uint64
-            *data << (uint32)0;
-        }
-
-        if (flags2 & 0x40000)
-        {
-            *data << (float)0;                    // Float32
-        }
-
-        *data << (uint16)0;                       // int16?
-        *data << (uint32)0;                       // int32
-
-        *data << (uint16)spline_count;            // uint16 Spline Count!?
-
-        if (spline_count > 0)
-        {
-            for (int i = 0; i < spline_count; i++)
-            {
-                // 6 (wtf it's 8 :\) bytes per spline point
-                *data << uint32(0);               // uint64
-                *data << uint32(0);
-            }
-        }
-    }                                             // end if flags2
+	if(  GUID_HIPART(GetGUID()) == HIGHGUID_PLAYER_CORPSE)
+		*data << (uint32)0xBD38BA14;//fix me
 }
 
 
-//=======================================================================================
-//  Creates an update block with the values of this object as
-//  determined by the updateMask.
-//=======================================================================================
 void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
 {
     WPAssert(updateMask && updateMask->GetCount() == m_valuesCount);
@@ -656,8 +306,8 @@ void Object::BuildHeartBeatMsg(WorldPacket *data) const
 
     *data << GetGUID();
 
-    *data << uint32(0);                           // flags
-    *data << uint32(0);                           // mysterious value #1
+    *data << uint32(0);                           
+    *data << uint32(0);                           
 
     *data << m_positionX;
     *data << m_positionY;
@@ -669,20 +319,17 @@ void Object::BuildHeartBeatMsg(WorldPacket *data) const
 
 void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
-    ///////////////////////////////////////
-    //Update player on the client with TELEPORT_ACK
-    data->Initialize(MSG_MOVE_TELEPORT_ACK);
-
-    *data << GetGUID();
-
-    //First 4 bytes = no idea what it is
-    *data << uint32(0);                           // flags
-    *data << uint32(0);                           // mysterious value #1
-
-    *data << x;
-    *data << y;
-    *data << z;
-    *data << ang;
+	data->Initialize(MSG_MOVE_TELEPORT_ACK);
+	*data << uint8(0xFF);
+	*data << GetGUID();
+	*data << uint32(0x800000); 
+	*data << uint16(0x67EE);
+	*data << uint16(0xD1EB);
+	*data<< x;
+	*data<< y;
+	*data<< z; 
+	*data<< ang;
+	*data<< uint32(0x0);
 }
 
 
@@ -691,33 +338,6 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
 }
 
-
-/*
-void Object::SendPacketListToSet(WorldSession::MessageList & msglist, bool bToSelf)
-{
-    if (bToSelf && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->GetSession()->SendPacketList( msglist ); // has to be a player to send to self
-
-    std::set<Object*>::iterator itr;
-    for (itr = m_objectsInRange.begin(); itr != m_objectsInRange.end(); ++itr)
-    {
-        WPWarning((*itr), "Warning:  NULL Iterator in Set, skipping.");
-        if (!(*itr))
-            continue;
-
-        if ((*itr)->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldSession *session = ((Player*)(*itr))->GetSession();
-            WPWarning( session, "Null client in message set!" );
-            if (session && session->IsInWorld() && session->GetPlayer())
-                session->SendPacketList( msglist );
-        }
-    }
-}
-*/
-
-////////////////////////////////////////////////////////////////////////////
-/// Fill the object's Update Values from a space deliminated list of values.
 void Object::LoadValues(const char* data)
 {
     if(!m_uint32Values) _InitValues();
@@ -766,7 +386,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
 }
 
 
-//! Set uint32 property
+
 void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
 {
     ASSERT( index < m_valuesCount );
@@ -785,7 +405,7 @@ void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
 }
 
 
-//! Set uint64 property
+
 void Object::SetUInt64Value( const uint16 &index, const uint64 &value )
 {
     ASSERT( index + 1 < m_valuesCount );
@@ -806,7 +426,7 @@ void Object::SetUInt64Value( const uint16 &index, const uint64 &value )
 }
 
 
-//! Set float property
+
 void Object::SetFloatValue( const uint16 &index, const float &value )
 {
     ASSERT( index < m_valuesCount );
@@ -858,4 +478,8 @@ void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
             m_objectUpdated = true;
         }
     }
+}
+uint32 Object::GetZoneId( )
+{
+	return sAreaStore.LookupEntry(MapManager::Instance().GetMap(m_mapId)->GetAreaFlag(m_positionX,m_positionY))->zone;
 }

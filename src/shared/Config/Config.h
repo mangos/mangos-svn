@@ -1,7 +1,5 @@
-/* Config.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +19,9 @@
 #if !defined (CONFIG_H)
 #define CONFIG_H
 
-class Config : public Singleton<Config>
+#include <Policies/Singleton.h>
+
+class Config 
 {
     public:
         Config();
@@ -45,5 +45,5 @@ class Config : public Singleton<Config>
         DOTCONFDocument *mConf;
 };
 
-#define sConfig Config::getSingleton()
+#define sConfig MaNGOS::Singleton<Config>::Instance()
 #endif

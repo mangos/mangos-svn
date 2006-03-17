@@ -1,7 +1,5 @@
-/* Level2.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
-///////////////////////////////////////////////
-//  Admin Movement Commands
-//
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
@@ -61,14 +55,14 @@ bool ChatHandler::HandleGUIDCommand(const char* args)
 
 bool ChatHandler::HandleNameCommand(const char* args)
 {
-    WorldPacket data;
-
+/*    WorldPacket data;
+Temp. disabled
     if(!*args)
         return false;
 
     if(strlen((char*)args)>75)
     {
-        // send message to user
+        
         char buf[256];
         sprintf((char*)buf,"The name was too long by %i", strlen((char*)args)-75);
         FillSystemMessageData(&data, m_session, buf);
@@ -76,7 +70,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         return true;
     }
 
-    for (uint8/*int*/ i = 0; i < strlen(args); i++)
+    for (uint8 i = 0; i < strlen(args); i++)
     {
         if(!isalpha(args[i]) && args[i]!=' ')
         {
@@ -105,10 +99,11 @@ bool ChatHandler::HandleNameCommand(const char* args)
     }
 
     pCreature->SetName(args);
-    uint32 idname = objmgr.AddCreatureName(pCreature->GetName());
+    uint32 idname = objmgr.AddCreatureTemplate(pCreature->GetName());
     pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
 
     pCreature->SaveToDB();
+*/
 
     return true;
 }
@@ -116,6 +111,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
 
 bool ChatHandler::HandleSubNameCommand(const char* args)
 {
+	/* Temp. disabled
     WorldPacket data;
 
     if(!*args)
@@ -123,7 +119,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
 
     if(strlen((char*)args)>75)
     {
-        // send message to user
+        
         char buf[256];
         sprintf((char*)buf,"The subname was too long by %i", strlen((char*)args)-75);
         FillSystemMessageData(&data, m_session, buf);
@@ -131,7 +127,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
         return true;
     }
 
-    for (uint8/*int*/ i = 0; i < strlen(args); i++)
+    for (uint8 i = 0; i < strlen(args); i++)
     {
         if(!isalpha(args[i]) && args[i]!=' ')
         {
@@ -162,14 +158,14 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
 
     pCreature->SaveToDB();
-
+*/
     return true;
 }
 
 
 bool ChatHandler::HandleProgCommand(const char* args)
 {
-    smsg_NewWorld(m_session, 451, 16391.80f, 16341.20f, 69.44f);
+    m_session->GetPlayer()->smsg_NewWorld(451, 16391.80f, 16341.20f, 69.44f,0.0f);
 
     return true;
 }
@@ -193,17 +189,13 @@ bool ChatHandler::HandleItemMoveCommand(const char* args)
     Item * dstitem = m_session->GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = m_session->GetPlayer()->GetItemBySlot(srcslot);
 
-    m_session->GetPlayer()->SwapItemSlots(srcslot, dstslot);
+//    m_session->GetPlayer()->SwapItemSlots(srcslot, dstslot);
 
     return true;
 }
 
 
-/*
-#define isalpha(c)  {isupper(c) || islower(c))
-#define isupper(c)  (c >=  'A' && c <= 'Z')
-#define islower(c)  (c >=  'a' && c <= 'z')
-*/
+
 
 bool ChatHandler::HandleSpawnCommand(const char* args)
 {
@@ -213,13 +205,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     if (!pEntry)
         return false;
 
-/* Ignatich: not safe
-    if (pEntry[1]=='x') {
-        FillSystemMessageData(&data, m_session, "Please use decimal.");
-        m_session->SendPacket( &data );
-        return;
-    }
-*/
+
     char* pFlags = strtok(NULL, " ");
     if (!pFlags)
         return false;
@@ -244,7 +230,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     if (display_id==0)
         return false;
 
-    for (uint8/*int*/ i = 0; i < strlen(pName); i++)
+    for (uint8 i = 0; i < strlen(pName); i++)
     {
         if(!isalpha(pName[i]) && pName[i]!=' ')
         {
@@ -260,7 +246,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
 
 bool ChatHandler::HandleAddSpwCommand(const char* args)
 {
-    // Added: Chance TODO: Posibility to add npc after name as well.
+    
     WorldPacket data;
     char* charID = strtok((char*)args, " ");
     if (!charID)
@@ -268,24 +254,18 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     uint32 id  = atoi(charID);
 
-    /*if (!isdigit(id)) {
-        FillSystemMessageData(&data, m_session, "ID has to be a numeric value.");
-        m_session->SendPacket( &data );
-        return false;
-    }*/
-    
-    std::stringstream ss;
-    ss << "select modelid, flag, faction, level, name from creaturetemplate where entryid = " << id << '\0';
-    QueryResult *result;
-    result = sDatabase.Query( ss.str().c_str() );
+    QueryResult *result = sDatabase.PQuery("SELECT modelid, flag, faction, level, name from creaturetemplate where entryid = '%d';", id);
+
     if(result)
     {
         Field *fields = result->Fetch();
-        // pName, display_id, npcFlags, faction_id, level
+        
         SpawnCreature(m_session, fields[4].GetString(), fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32(), fields[3].GetUInt32());
+	delete result;
         return true;
     }
     else
+	delete result;
         return false;
 }
 
@@ -312,7 +292,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
     unit->DeleteFromDB();
 
-    // remove and delete it 
+    
     MapManager::Instance().GetMap(unit->GetMapId())->Remove(unit, true);
     return true;
 }
@@ -320,20 +300,13 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
 bool ChatHandler::HandleDeMorphCommand(const char* args)
 {
-    Log::getSingleton().outError("Demorphed %s",m_session->GetPlayer()->GetName());
+    sLog.outError("Demorphed %s",m_session->GetPlayer()->GetName());
     m_session->GetPlayer()->DeMorph();
     return true;
 }
 
 
-/*
-bool ChatHandler::HandleSpawnTaxiCommand(const char* args)
-{
-    SpawnCreature(m_session, "Taxi", 20, 8, 1 , 1);
 
-    return true;
-}
-*/
 
 bool ChatHandler::HandleItemCommand(const char* args)
 {
@@ -372,9 +345,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
     std::stringstream sstext;
     if(tmpItem)
     {
-        std::stringstream ss;
-        ss << "INSERT INTO vendors VALUES ('" << GUID_LOPART(guid) << "', '" << item << "', '" << amount << "')" << '\0';
-        QueryResult *result = sDatabase.Query( ss.str().c_str() );
+	QueryResult *result = sDatabase.PQuery("INSERT INTO vendors VALUES('%u','%u','%d');",GUID_LOPART(guid), item, amount);
 
         uint8 itemscount = (uint8)pCreature->getItemCount();
         pCreature->setItemId(itemscount , item);
@@ -382,6 +353,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
         pCreature->increaseItemCount();
 
         sstext << "Item '" << item << "' '" << tmpItem->Name1 << "' Added to list" << '\0';
+	delete result;
     }
     else
     {
@@ -390,7 +362,6 @@ bool ChatHandler::HandleItemCommand(const char* args)
 
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
     m_session->SendPacket( &data );
-
     return true;
 }
 
@@ -428,9 +399,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     {
         uint32 guidlow = GUID_LOPART(guid);
 
-        std::stringstream ss;
-        ss << "DELETE FROM vendors WHERE vendorGuid = " << guidlow << " AND itemGuid = " << itemguid << '\0';
-        QueryResult *delresult = sDatabase.Query( ss.str().c_str() );
+	sDatabase.PExecute("DELETE FROM vendors WHERE vendorGuid = '%u' AND itemGuid = '%u'",guidlow,itemguid);
 
         pCreature->setItemId(slot , 0);
         pCreature->setItemAmount(slot , 0);
@@ -478,42 +447,13 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         return true;
     }
 
-    char sql[512];
-
-    if(!pCreature->hasWaypoints())
-    {
-        sprintf(sql, "INSERT INTO creatures_mov (creatureId,X,Y,Z) VALUES ('%u', '%f', '%f', '%f')",
-            GUID_LOPART(guid),
-            pCreature->GetPositionX(),
-            pCreature->GetPositionY(),
-            pCreature->GetPositionZ());
-
-        sDatabase.Execute(sql);
-
-        pCreature->addWaypoint(pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
-    }
-
-    if (!pCreature->addWaypoint(m_session->GetPlayer()->GetPositionX(),
-        m_session->GetPlayer()->GetPositionY(),
-        m_session->GetPlayer()->GetPositionZ()))
-    {
-        FillSystemMessageData(&data, m_session, "You have allready set all points.");
-        m_session->SendPacket( &data );
-
-        return true;
-    }
-
-    sprintf(sql, "INSERT INTO creatures_mov (creatureId,X,Y,Z) VALUES ('%u', '%f', '%f', '%f')",
-        GUID_LOPART(guid),
-        m_session->GetPlayer()->GetPositionX(),
-        m_session->GetPlayer()->GetPositionY(),
-        m_session->GetPlayer()->GetPositionZ());
-
-    sDatabase.Execute( sql );
+    sDatabase.PExecute("INSERT INTO creatures_mov (creatureId,X,Y,Z) VALUES ('%u', '%f', '%f', '%f');", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
 
     FillSystemMessageData(&data, m_session, "Waypoint added.");
     m_session->SendPacket( &data );
 
+    
+    
     return true;
 }
 
@@ -552,9 +492,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
         return true;
     }
 
-    char sql[512];
-    sprintf(sql, "UPDATE creatures SET moverandom = '%i' WHERE id = '%u'", option, GUID_LOPART(guid));
-    sDatabase.Execute( sql );
+    sDatabase.PExecute("UPDATE creatures SET moverandom = '%i' WHERE id = '%u';", option, GUID_LOPART(guid));
 
     pCreature->setMoveRandomFlag(option > 0);
 
@@ -599,10 +537,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
         return true;
     }
 
-    char sql[512];
-
-    sprintf(sql, "UPDATE creatures SET running = '%i' WHERE id = '%u'", option, GUID_LOPART(guid));
-    sDatabase.Execute( sql );
+    sDatabase.PExecute("UPDATE creatures SET running = '%i' WHERE id = '%u';", option, GUID_LOPART(guid));
 
     pCreature->setMoveRunFlag(option > 0);
 
@@ -687,6 +622,10 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     FillSystemMessageData(&data, m_session, "Value saved, you may need to rejoin or clean your client cache.");
     m_session->SendPacket( &data );
+
+	
+	uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
+	m_session->SendCreatureQuery( entry, guid );
 
     return true;
 }

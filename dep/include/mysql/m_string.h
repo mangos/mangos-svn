@@ -31,6 +31,9 @@
 #include <string.h>
 #endif
 
+/* need by my_vsnprintf */
+#include <stdarg.h> 
+
 /* Correct some things for UNIXWARE7 */
 #ifdef HAVE_UNIXWARE7_THREADS
 #undef HAVE_STRINGS_H
@@ -71,14 +74,14 @@
 /* Unixware 7 */
 #if !defined(HAVE_BFILL)
 # define bfill(A,B,C)           memset((A),(C),(B))
-# define bmove_allign(A,B,C)    memcpy((A),(B),(C))
+# define bmove_align(A,B,C)    memcpy((A),(B),(C))
 #endif
 
 #if !defined(HAVE_BCMP)
 # define bcopy(s, d, n)		memcpy((d), (s), (n))
 # define bcmp(A,B,C)		memcmp((A),(B),(C))
 # define bzero(A,B)		memset((A),0,(B))
-# define bmove_allign(A,B,C)    memcpy((A),(B),(C))
+# define bmove_align(A,B,C)    memcpy((A),(B),(C))
 #endif
 
 #if defined(__cplusplus) && !defined(OS2)
@@ -92,7 +95,9 @@ extern char *stpcpy(char *, const char *);	/* For AIX with gcc 2.95.3 */
 #endif
 #endif
 
-extern char NEAR _dig_vec[];		/* Declared in int2str() */
+/* Declared in int2str() */
+extern char NEAR _dig_vec_upper[];
+extern char NEAR _dig_vec_lower[];
 
 #ifdef BAD_STRING_COMPILER
 #define strmov(A,B)  (memccpy(A,B,0,INT_MAX)-1)
@@ -108,26 +113,14 @@ extern char NEAR _dig_vec[];		/* Declared in int2str() */
 #endif
 
 #ifdef MSDOS
-#undef bmove_allign
-#define bmove512(A,B,C) bmove_allign(A,B,C)
-#define my_itoa(A,B,C) itoa(A,B,C)
-#define my_ltoa(A,B,C) ltoa(A,B,C)
-extern	void bmove_allign(gptr dst,const gptr src,uint len);
+#undef bmove_align
+#define bmove512(A,B,C) bmove_align(A,B,C)
+extern	void bmove_align(gptr dst,const gptr src,uint len);
 #endif
 
 #if (!defined(USE_BMOVE512) || defined(HAVE_purify)) && !defined(bmove512)
 #define bmove512(A,B,C) memcpy(A,B,C)
 #endif
-
-#ifdef HAVE_purify
-#include <assert.h>
-#define memcpy_overlap(A,B,C) \
-DBUG_ASSERT((A) == (B) || ((A)+(C)) <= (B) || ((B)+(C)) <= (A)); \
-bmove((byte*) key,(byte*) from,(size_t) length);
-#else
-#define memcpy_overlap(A,B,C) memcpy((A), (B), (C))
-#endif /* HAVE_purify */
-
 
 	/* Prototypes for string functions */
 
@@ -198,7 +191,7 @@ extern int strcmp(const char *, const char *);
 extern size_t strlen(const char *);
 #endif
 #endif
-#ifndef HAVE_STRNLEN 
+#ifndef HAVE_STRNLEN
 extern uint strnlen(const char *s, uint n);
 #endif
 
@@ -212,12 +205,9 @@ extern char *strstr(const char *, const char *);
 #endif
 extern int is_prefix(const char *, const char *);
 
-/* Conversion rutins */
-
-#ifdef USE_MY_ITOA
-extern char *my_itoa(int val,char *dst,int radix);
-extern char *my_ltoa(long val,char *dst,int radix);
-#endif
+/* Conversion routines */
+double my_strtod(const char *str, char **end, int *error);
+double my_atof(const char *nptr);
 
 extern char *llstr(longlong value,char *buff);
 #ifndef HAVE_STRTOUL
@@ -225,17 +215,22 @@ extern long strtol(const char *str, char **ptr, int base);
 extern ulong strtoul(const char *str, char **ptr, int base);
 #endif
 
-extern char *int2str(long val,char *dst,int radix);
+extern char *int2str(long val, char *dst, int radix, int upcase);
 extern char *int10_to_str(long val,char *dst,int radix);
 extern char *str2int(const char *src,int radix,long lower,long upper,
 			 long *val);
+longlong my_strtoll10(const char *nptr, char **endptr, int *error);
 #if SIZEOF_LONG == SIZEOF_LONG_LONG
-#define longlong2str(A,B,C) int2str((A),(B),(C))
+#define longlong2str(A,B,C) int2str((A),(B),(C),1)
 #define longlong10_to_str(A,B,C) int10_to_str((A),(B),(C))
+#undef strtoll
 #define strtoll(A,B,C) strtol((A),(B),(C))
 #define strtoull(A,B,C) strtoul((A),(B),(C))
 #ifndef HAVE_STRTOULL
 #define HAVE_STRTOULL
+#endif
+#ifndef HAVE_STRTOLL
+#define HAVE_STRTOLL
 #endif
 #else
 #ifdef HAVE_LONG_LONG
@@ -248,9 +243,13 @@ extern ulonglong strtoull(const char *str, char **ptr, int base);
 #endif
 #endif
 
+/* my_vsnprintf.c */
+
+extern int my_vsnprintf( char *str, size_t n,
+                                const char *format, va_list ap );
+extern int my_snprintf(char* to, size_t n, const char* fmt, ...);
+
 #if defined(__cplusplus) && !defined(OS2)
 }
 #endif
 #endif
-
-

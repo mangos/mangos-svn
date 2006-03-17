@@ -15,54 +15,52 @@
 				IntermediateDirectory=".\realmlist___Win32_Release"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
+				StringPooling="1"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
+				EnableFunctionLevelLinking="1"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\realmlist___Win32_Release/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Release/"
 				ObjectFile=".\realmlist___Win32_Release/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				CompileAs="0"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\Release\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Debug|Win32">
@@ -72,8 +70,10 @@
 				IntermediateDirectory=".\realmlist___Win32_Debug"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
@@ -81,45 +81,41 @@
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB,ENABLE_GRID_SYSTEM"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\realmlist___Win32_Debug/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Debug/"
 				ObjectFile=".\realmlist___Win32_Debug/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\realmlist___Win32_Debug\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1_7_x Debug|Win32">
@@ -129,8 +125,10 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
@@ -138,45 +136,41 @@
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\realmlist___Win32_Debug/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Debug/"
 				ObjectFile=".\realmlist___Win32_Debug/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\realmlist___Win32_Debug\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1.7.x Release|Win32">
@@ -186,54 +180,52 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
+				StringPooling="1"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
+				EnableFunctionLevelLinking="1"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\realmlist___Win32_Release/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Release/"
 				ObjectFile=".\realmlist___Win32_Release/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				CompileAs="0"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\Release\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1_8_x Debug|Win32">
@@ -243,8 +235,10 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="0"
@@ -252,45 +246,41 @@
 				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\realmlist___Win32_Debug/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Debug/"
 				ObjectFile=".\realmlist___Win32_Debug/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Debug/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\realmlist___Win32_Debug\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="_DEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 		<Configuration 
 			Name="1.8.x Release|Win32">
@@ -300,68 +290,67 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"
-				WholeProgramOptimization="FALSE"/>
+				WholeProgramOptimization="0"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="1000"
-				GlobalOptimizations="FALSE"
+				GlobalOptimizations="0"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="1"
 				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="TRUE"
-				WholeProgramOptimization="FALSE"
+				EnableFiberSafeOptimizations="1"
 				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="TRUE"
+				OptimizeForWindowsApplication="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game,..\..\src\framework"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
-				StringPooling="TRUE"
+				StringPooling="1"
+				MinimalRebuild="1"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
+				EnableFunctionLevelLinking="1"
+				EnableEnhancedInstructionSet="2"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\realmlist___Win32_Release/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Release/"
 				ObjectFile=".\realmlist___Win32_Release/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				CompileAs="0"
+				OpenMP="1"
 				UseProcExt="4"
 				RequireProcExt="4"
 				Parallelization="1"
-				C99Support="1"
-				OpenMP="1"/>
+				C99Support="1"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\Release\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Release - No Grid|Win32">
@@ -371,84 +360,77 @@
 				IntermediateDirectory="$(ConfigurationName)"
 				ConfigurationType="4"
 				UseOfMFC="0"
-				ATLMinimizesCRunTimeLibraryUsage="FALSE"
+				ATLMinimizesCRunTimeLibraryUsage="0"
 				CharacterSet="2"
-				WholeProgramOptimization="TRUE"/>
+				WholeProgramOptimization="1"/>
+			<Tool 
+				Name="DebugTool"/>
 			<Tool 
 				Name="CppCmplrTool"
 				Optimization="1000"
-				GlobalOptimizations="FALSE"
+				GlobalOptimizations="0"
 				InlineFunctionExpansion="1"
-				EnableIntrinsicFunctions="TRUE"
+				EnableIntrinsicFunctions="1"
 				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="TRUE"
-				WholeProgramOptimization="TRUE"
+				EnableFiberSafeOptimizations="1"
 				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="TRUE"
+				OptimizeForWindowsApplication="1"
 				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\shared,..\..\src\game"
 				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
-				StringPooling="TRUE"
-				MinimalRebuild="TRUE"
+				StringPooling="1"
+				MinimalRebuild="1"
 				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
+				EnableFunctionLevelLinking="1"
+				RuntimeTypeInfo="1"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\realmlist___Win32_Release/realmlist.pch"
 				AssemblerListingLocation=".\realmlist___Win32_Release/"
 				ObjectFile=".\realmlist___Win32_Release/"
-				ProgramDataBaseFileName=".\realmlist___Win32_Release/"
 				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
+				SuppressStartupBanner="1"
+				Detect64BitPortabilityProblems="1"
 				CompileAs="0"
+				OpenMP="1"
 				UseProcExt="4"
 				RequireProcExt="4"
 				Parallelization="1"
-				C99Support="1"
-				OpenMP="1"/>
+				C99Support="1"/>
 			<Tool 
-				Name="CustomTool"/>
+				Name="LinkerTool"
+				DelayImpLib=""/>
 			<Tool 
 				Name="LibrarianTool"
 				OutputFile=".\Release\realmlist.lib"
-				SuppressStartupBanner="TRUE"/>
-			<Tool 
-				Name="MidlCmplrTool"/>
-			<Tool 
-				Name="PostBuildEventTool"/>
-			<Tool 
-				Name="PreBuildEventTool"/>
-			<Tool 
-				Name="PreLinkEventTool"/>
+				SuppressStartupBanner="1"/>
 			<Tool 
 				Name="ResCmplrTool"
 				PreprocessorDefinitions="NDEBUG"
 				Culture="1033"/>
 			<Tool 
-				Name="VCWebServiceProxyGeneratorTool"/>
+				Name="MidlCmplrTool"/>
 			<Tool 
-				Name="VCXMLDataGeneratorTool"/>
+				Name="BscMakeTool"/>
 			<Tool 
-				Name="VCManagedWrapperGeneratorTool"/>
+				Name="PreBuildEventTool"/>
 			<Tool 
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+				Name="PreLinkEventTool"/>
 			<Tool 
-				Name="DebugTool"/>
+				Name="PostBuildEventTool"/>
+			<Tool 
+				Name="CustomTool"/>
+			<Tool 
+				Name="CustomNodeTool"/>
 		</Configuration>
 	</Configurations>
 	<Files>
 		<File 
-			RelativePath="..\..\src\realmlist\AuthSocket.cpp">
-		</File>
+			RelativePath="..\..\src\realmlist\AuthSocket.cpp"/>
 		<File 
-			RelativePath="..\..\src\realmlist\AuthSocket.h">
-		</File>
+			RelativePath="..\..\src\realmlist\AuthSocket.h"/>
 		<File 
-			RelativePath="..\..\src\realmlist\RealmList.cpp">
-		</File>
+			RelativePath="..\..\src\realmlist\RealmList.cpp"/>
 		<File 
-			RelativePath="..\..\src\realmlist\RealmList.h">
-		</File>
+			RelativePath="..\..\src\realmlist\RealmList.h"/>
 	</Files>
 </VisualStudioProject>
 

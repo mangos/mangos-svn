@@ -1,5 +1,3 @@
-# Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
-
 INCLUDES += -I$(srcdir)/../../include -I$(srcdir)/../../include/zlib
 
 noinst_LIBRARIES = libzlib.a

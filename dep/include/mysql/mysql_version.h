@@ -9,23 +9,21 @@
 #include <custom_conf.h>
 #else
 #define PROTOCOL_VERSION		10
-#define MYSQL_SERVER_VERSION		"4.0.18"
-#define MYSQL_BASE_VERSION		"mysqld-4.0"
-#ifndef MYSQL_SERVER_SUFFIX
-#define MYSQL_SERVER_SUFFIX		""
-#endif
+#define MYSQL_SERVER_VERSION		"4.1.16"
+#define MYSQL_BASE_VERSION		"mysqld-4.1"
+#define MYSQL_SERVER_SUFFIX_DEF	""
 #define FRM_VER				6
-#define MYSQL_VERSION_ID		40018
+#define MYSQL_VERSION_ID		40116
 #define MYSQL_PORT			3306
 #define MYSQL_UNIX_ADDR			"/tmp/mysql.sock"
 #define MYSQL_CONFIG_NAME		"my"
-#define MYSQL_COMPILATION_COMMENT	"Source distribution"
+#define MYSQL_COMPILATION_COMMENT	"Official MySQL binary"
 
 /* mysqld compile time options */
-#ifndef MYSQL_CHARSET
-#define MYSQL_CHARSET			"latin1"
-#endif /* MYSQL_CHARSET */
 #endif /* _CUSTOMCONFIG_ */
+
+#ifndef LICENSE
+#define LICENSE				GPL
+#endif /* LICENSE */
+
 #endif /* _mysql_version_h */
-
-

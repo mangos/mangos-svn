@@ -1,7 +1,5 @@
-/* MemoryLeaks.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +20,7 @@
 #define MANGOSSERVER_MEMORY_H
 
 #include "Common.h"
-#include "Singleton.h"
+#include "Policies/Singleton.h"
 
 #if COMPILER == COMPILER_MICROSOFT
 #  define _CRTDBG_MAP_ALLOC
@@ -30,8 +28,9 @@
 #  include <crtdbg.h>
 #endif
 
-struct MemoryManager : public Singleton < MemoryManager >
+struct MemoryManager : public MaNGOS::Singleton < MemoryManager >
 {
     MemoryManager();
 };
+
 #endif

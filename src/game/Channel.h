@@ -1,7 +1,5 @@
-/* Channel.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +39,7 @@ class Channel
     Player *owner;
     string password;
     private:
-        /*Packets! Woohoo!*/
+        
         WorldPacket *MakeNotifyPacket(WorldPacket *data, uint8 code)
         {
             data->Initialize(SMSG_CHANNEL_NOTIFY);
@@ -50,7 +48,7 @@ class Channel
         }
         void MakeJoined(WorldPacket *data, Player *joined) { *MakeNotifyPacket(data,0x00) << joined->GetGUID(); }
         void MakeLeft(WorldPacket *data, Player *left) { *MakeNotifyPacket(data,0x01) << left->GetGUID(); }
-        void MakeYouJoined(WorldPacket *data) { *MakeNotifyPacket(data,0x02) << (uint32)(players.size() > 1 ? 0x01 : 0x00); }
+        void MakeYouJoined(WorldPacket *data, Player *p ) { *MakeNotifyPacket(data,0x02) << p->GetGUID(); }
         void MakeYouLeft(WorldPacket *data) { MakeNotifyPacket(data,0x03); }
         void MakeWrongPass(WorldPacket *data) { MakeNotifyPacket(data,0x04); }
         void MakeNotOn(WorldPacket *data) { MakeNotifyPacket(data,0x05); }
@@ -60,7 +58,7 @@ class Channel
         void MakeNotOn(WorldPacket *data, const char *who) { *MakeNotifyPacket(data,0x09) << who; }
         void MakeNotOwner(WorldPacket *data) { MakeNotifyPacket(data,0x0A); }
         void MakeWhoOwner(WorldPacket *data) { *MakeNotifyPacket(data,0x0B) << ((constant || owner == NULL) ? "Nobody" : owner->GetName()); }
-        // 0 - no change, 1 - lost, 2 - got
+        
         void MakeModeChange(WorldPacket *data, Player *who, char moderator, char voice)
         {
             MakeNotifyPacket(data,0x0C);
@@ -84,11 +82,11 @@ class Channel
         void MakeYouAreBanned(WorldPacket *data) { MakeNotifyPacket(data,0x13); }
         void MakeBanned(WorldPacket *data, Player *good, Player *bad) { *MakeNotifyPacket(data,0x14) << bad->GetGUID() << good->GetGUID(); }
         void MakeUnbanned(WorldPacket *data, Player *good, Player *bad) { *MakeNotifyPacket(data,0x15) << bad->GetGUID() << good->GetGUID(); }
-        // 16 unk
+        
         void MakeAlreadyOn(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x17) << who->GetGUID(); }
         void MakeInvited(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x18) << who->GetGUID(); }
         void MakeWrongAlliance(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x19) << who->GetGUID(); }
-        // ....
+        
         void MakeYouInvited(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x1D) << who->GetName(); }
 
         void SendToAll(WorldPacket *data)

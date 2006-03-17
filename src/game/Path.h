@@ -1,7 +1,5 @@
-/* Path.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,64 +19,44 @@
 #ifndef MANGOSSERVER_PATH_H
 #define MANGOSSERVER_PATH_H
 
-/*struct TaxiNodes
-{
-    uint8 id;
-    // std::string name;
-    float x,y,z;
-    uint8 continent;
-    // uint8 flags;
-    uint16 mount;
-};
-struct TaxiPath
-{
-    uint16 id;
-    uint8 source;
-    uint8 destination;
-    uint32 price;
-};
-struct TaxiPathNodes
-{
-    uint16 id;
-    uint16 path;
-    uint8 index;
-    uint8 continent;
-    float x,y,z;
-    // uint32 unkown1;
-    // uint32 unkown2;
-};*/
+
+#include <vector>
 
 class Path
 {
-    public:
-        struct PathNode
-        {
-            float x,y,z;
-        };
-        Path( ): mNodes( 0 ), mLength( 0 ) { }
-        inline void setLength( const uint16 & length )
-        {
-            Clear( );
-            mLength = length; mNodes = new PathNode[ length ];
-        }
-        inline const uint16 & getLength( ) const { return mLength; };
-        inline PathNode * getNodes( ) { return mNodes; }
-        inline void Clear( ) { if( mNodes ) delete [ ] mNodes; mNodes = 0; }
-        float getTotalLength( )
-        {
-            float len = 0, xd, yd, zd;
-            for( uint32 a = 1; a < mLength; a ++ )
-            {
-                xd = mNodes[ a ].x - mNodes[ a-1 ].x;
-                yd = mNodes[ a ].y - mNodes[ a-1 ].y;
-                zd = mNodes[ a ].z - mNodes[ a-1 ].z;
-                len += (float)sqrt( xd * xd + yd*yd + zd*zd );
-            }
-            return len;
-        }
-        ~Path( ) { Clear( ); }
-    protected:
-        PathNode * mNodes;
-        uint16 mLength;
+public:
+    struct PathNode
+    {
+	float x,y,z;
+    };
+    
+    inline void SetLength(const unsigned int sz)
+    {
+	i_nodes.resize( sz );
+    }
+
+    inline unsigned int Size(void) const { return i_nodes.size(); }
+    inline void Resize(unsigned int sz) { i_nodes.resize(sz); }
+    inline void Clear(void) { i_nodes.clear(); }
+    inline PathNode* GetNodes(void) { return static_cast<PathNode *>(&i_nodes[0]); }
+    float GetTotalLength(void)
+    {
+	float len = 0, xd, yd, zd;
+	for(unsigned int idx=1; idx < i_nodes.size(); ++idx)
+	{
+	    xd = i_nodes[ idx ].x - i_nodes[ idx-1 ].x;
+	    yd = i_nodes[ idx ].y - i_nodes[ idx-1 ].y;
+	    zd = i_nodes[ idx ].z - i_nodes[ idx-1 ].z;
+	    len += (float)sqrt( xd * xd + yd*yd + zd*zd );
+	}
+	return len;
+    }
+
+
+    PathNode& operator[](const unsigned int idx) { return i_nodes[idx]; }
+    const PathNode& operator()(const unsigned int idx) const { return i_nodes[idx]; }
+
+protected:
+    std::vector<PathNode> i_nodes;
 };
 #endif

@@ -1,7 +1,5 @@
-/* Database.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,35 +19,41 @@
 #if !defined(DATABASE_H)
 #define DATABASE_H
 
-class Database : public Singleton<Database>
+
+class Database 
 {
     protected:
         Database() {}
 
     public:
-        //! Frees resources used by Database.
+        
         virtual ~Database() {}
 
-        //! Initialize db, infoString is very implementation-dependant.
+        
         virtual bool Initialize(const char *infoString) = 0;
 
-        //! Query the database with a SQL command.
-        /*
-        This is where all the transaction with the database takes place.
-        Any result data is held in memory and can be iterated through with NextRow().
-        @param sql SQL command to query the database with. Should be supported by all database modules being used.
-        @return Returns QueryResult if the query succeded and there are results and NULL otherwise */
+        
+        
         virtual QueryResult* Query(const char *sql) = 0;
-
-        //! Execute SQL command.
-        /*
-        @param sql SQL command to query the database with. Should be supported by all database modules being used.
-        @return Returns true if query succeded */
+		virtual QueryResult* PQuery(const char *format,...) = 0;
+   
+        
+        
         virtual bool Execute(const char *sql) = 0;
+		virtual bool PExecute(const char *format,...) = 0;
 
-        //! Returns the status of the database, and should be used to ensure the database was opened successfully.
-        virtual operator bool () const = 0;
+		virtual operator bool () const = 0;
 };
 
-#define sDatabase Database::getSingleton()
+class DatabaseRegistry
+{
+    static Database* si_database;
+public:
+
+    static Database& GetDatabase(void) { return *si_database; }    
+    static void RegisterDatabase(Database *d) { si_database = d; }
+};
+
+#define sDatabase DatabaseRegistry::GetDatabase()
+
 #endif

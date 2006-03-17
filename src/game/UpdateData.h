@@ -1,7 +1,5 @@
-/* UpdateData.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,56 +16,47 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
-
-#include "UpdateData_1_8_x.h"
-
-#else //!(defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ ))
 
 #ifndef __UPDATEDATA_H
 #define __UPDATEDATA_H
 
 class WorldPacket;
 
-enum OBJECT_UPDATE_TYPE
-{
+enum OBJECT_UPDATE_TYPE {
     UPDATETYPE_VALUES = 0,
-    //  8 bytes - GUID
-    //  Goto Update Block
+
+
     UPDATETYPE_MOVEMENT = 1,
-    //  8 bytes - GUID
-    //  Goto Position Update
+
+
     UPDATETYPE_CREATE_OBJECT = 2,
-    //  8 bytes - GUID
-    //  1 byte - Object Type (*)
-    //  Goto Position Update
-    //  Goto Update Block
-    UPDATETYPE_OUT_OF_RANGE_OBJECTS = 3,
-    //  4 bytes - Count
-    //  Loop Count Times:
-    //  8 bytes - GUID
-    UPDATETYPE_NEAR_OBJECTS = 4                   // looks like 3 & 4 do the same thing
-    //  4 bytes - Count
-    //  Loop Count Times:
-    //  8 bytes - GUID
+
+
+    UPDATETYPE_CREATE_OBJECT2 = 3,
+    UPDATETYPE_OUT_OF_RANGE_OBJECTS = 4,
+    UPDATETYPE_NEAR_OBJECTS = 5
+
 };
 
 class UpdateData
 {
-    public:
-        UpdateData();
+public:
+    UpdateData();
 
-        void AddOutOfRangeGUID(const uint64 &guid);
-        void AddUpdateBlock(const ByteBuffer &block);
-        bool BuildPacket(WorldPacket *packet);
-        bool HasData() { return m_blockCount > 0 || m_outOfRangeGUIDs.size() > 0; }
-        void Clear();
+    void AddOutOfRangeGUID(const uint64 &guid);
+    void AddUpdateBlock(const ByteBuffer &block);
+    bool BuildPacket(WorldPacket *packet);
+    bool HasData() { return m_blockCount > 0 || m_outOfRangeGUIDs.size() > 0; }
+    void Clear();
 
-    protected:
-        uint32 m_blockCount;
-        std::set<uint64> m_outOfRangeGUIDs;
-        ByteBuffer m_data;
+protected:
+    uint32 m_blockCount;
+    std::set<uint64> m_outOfRangeGUIDs;
+    ByteBuffer m_data;
+
+    void Compress(void* dst, uint32 *dst_size, void* src, int src_size);
 };
-#endif
 
-#endif //!defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+
+#endif 
+

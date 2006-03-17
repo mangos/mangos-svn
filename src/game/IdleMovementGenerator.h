@@ -1,6 +1,5 @@
-/* IdleMovement.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,8 +19,7 @@
 #ifndef MANGOS_IDLEMOVEMENTGENERATOR_H
 #define MANGOS_IDLEMOVEMENTGENERATOR_H
 
-/** IdleMovementGenerator uses by creatures that don't move.
- */
+
 
 #include "MovementGenerator.h"
 
@@ -29,10 +27,9 @@ class MANGOS_DLL_DECL IdleMovementGenerator : public MovementGenerator
 {
 public:
     
-    // overide API
-    void Initialize(const Creature &) { /* don't need to implement */ }
-    void Reset(const Creature &) {}
-    bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation) { return false; }
+    
+    void Initialize(Creature &) {  }
+    void Reset(Creature &);
     void Update(Creature &, const uint32 &) {}
 };
 

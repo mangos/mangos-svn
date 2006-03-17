@@ -1,7 +1,5 @@
-/* GroupHandler.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +28,9 @@
 #include "Group.h"
 #include "ObjectAccessor.h"
 
-//////////////////////////////////////////////////////////////
-/// This function handles CMSG_GROUP_INVITE
-//////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -113,18 +111,18 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 }
 
 
-///////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_CANCEL:
-///////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleGroupCancelOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: got CMSG_GROUP_CANCEL." );
+    sLog.outDebug( "WORLD: got CMSG_GROUP_CANCEL." );
 }
 
 
-////////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_ACCEPT:
-////////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -159,13 +157,13 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
         GetPlayer()->SetInGroup();
         GetPlayer()->SetLeader( player->GetGUID() );
 
-        // creating group
+        
         Group * group = new Group;
         ASSERT(group);
 
         group->Create(player->GetGUID(), player->GetName());
 
-        // adding our client
+        
         group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName());
         objmgr.AddGroup(group);
 
@@ -174,9 +172,9 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 }
 
 
-///////////////////////////////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_DECLINE:
-//////////////////////////////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -196,9 +194,9 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_UNINVITE:
-//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -206,15 +204,19 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
     Group *group;
     Player * player;
 
-    recv_data >> membername;
+	sLog.outDebug("WORLD: UNINVITE");
+
+	recv_data >> membername;
 
     player = objmgr.GetPlayer(membername.c_str());
-    if ( player == NULL )
+	if ( player == NULL )
     {
         data.Initialize( SMSG_PARTY_COMMAND_RESULT );
         data << uint32( 0x0 );
         data << membername;
         data << uint32( 0x00000001 );
+	
+		sLog.outDebug("WORLD: UNINVITE: No player");
 
         SendPacket( &data );
         return;
@@ -255,36 +257,36 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (group->RemoveMember(player->GetGUID()) < 1)
+	if (group->RemoveMember(player->GetGUID()) <= 1)
     {
         GetPlayer()->UnSetInGroup();
+		       
+		group->Disband();
         objmgr.RemoveGroup(group);
 
         data.Initialize( SMSG_GROUP_DESTROYED );
         SendPacket( &data );
 
-        delete group;
-    }
+        group->SendUpdate();
+		player->UnSetInGroup();
+		data.Initialize( SMSG_GROUP_UNINVITE );
+		player->GetSession()->SendPacket( &data );
+		delete group;
+		return;
+	}
 
-    group->SendUpdate();
+	group->SendUpdate();
     player->UnSetInGroup();
     data.Initialize( SMSG_GROUP_UNINVITE );
     player->GetSession()->SendPacket( &data );
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_UNINVITE_GUID:
-//////////////////////////////////////////////////////////////////////////////////////////
 void WorldSession::HandleGroupUninviteGuildOpcode( WorldPacket & recv_data )
 {
-    Log::getSingleton( ).outDebug( "WORLD: got CMSG_GROUP_UNINVITE_GUID." );
+    sLog.outDebug( "WORLD: got CMSG_GROUP_UNINVITE_GUID." );
 }
 
-
-//////////////////////////////////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_SET_LEADER:
-//////////////////////////////////////////////////////////////////////////////////////////
 void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -307,12 +309,12 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // error player is not leader
+    
     if (!GetPlayer()->IsInGroup() ||
         (GetPlayer()->GetGroupLeader() != GetPlayer()->GetGUID()))
         return;
 
-    // error player not in group
+    
     if (!player->IsInGroup() || (player->GetGroupLeader() != GetPlayer()->GetGUID()))
         return;
 
@@ -323,14 +325,14 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-///This function handles CMSG_GROUP_DISBAND:
-//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-
-    // error he's not in a group
+	sLog.outDebug("WORLD: GROUPDISBAND");
+    
     if (!GetPlayer()->IsInGroup())
         return;
 
@@ -338,6 +340,8 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 
     Group *group;
     group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
+
+	sLog.outDebug( "GROUP: is in group?:%d",GetPlayer()->m_isInGroup);
 
     if(group==NULL)
     {
@@ -357,14 +361,14 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
         delete group;
     }
 
-    data.Initialize( SMSG_GROUP_UNINVITE );
+	data.Initialize( SMSG_GROUP_UNINVITE );
     SendPacket( &data );
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////////////
-///This function handles CMSG_LOOT_METHOD:
-//////////////////////////////////////////////////////////////////////////////////////////
+
+
+
 void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -378,7 +382,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 
     group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
     if (group == NULL)
-        return;                                   // shouldn't get here
+        return;                                   
 
     group->SetLootMethod( lootMethod );
     group->SetLooterGuid( lootMaster );

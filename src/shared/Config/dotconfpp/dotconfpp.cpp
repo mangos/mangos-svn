@@ -1,19 +1,4 @@
-/*  Copyright (C) 2003 Aleksey Krivoshey <krivoshey@users.sourceforge.net>
-*
-*   This program is free software; you can redistribute it and/or modify
-*   it under the terms of the GNU General Public License as published by
-*   the Free Software Foundation; either version 2 of the License, or
-*   (at your option) any later version.
-*
-*   This program is distributed in the hope that it will be useful,
-*   but WITHOUT ANY WARRANTY; without even the implied warranty of
-*   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*   GNU General Public License for more details.
-*
-*   You should have received a copy of the GNU General Public License
-*   along with this program; if not, write to the Free Software
-*   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+
 
 #include "dotconfpp.h"
 
@@ -97,7 +82,7 @@ int DOTCONFDocument::cleanupLine(char * line)
         if((*line == '#' || *line == ';') && !quoted){
             *bg = 0;
             if(strlen(start)){
-                //printf("2start='%s'\n", start);
+                
                 if(concat){
                     word = (char*)mempool->alloc(strlen(words.back())+strlen(start)+1);
                     strcpy(word, words.back());
@@ -111,7 +96,7 @@ int DOTCONFDocument::cleanupLine(char * line)
             }
             break;
         }
-        if(*line == '=' && !quoted){ // 'parameter = value' is the same as 'parameter value' but do not replace with ' ' when used in quoted value
+        if(*line == '=' && !quoted){ 
             *line = ' ';continue;
         }
         if(*line == '\\' && (*(line+1) == '"' || *(line+1) == '\'')){
@@ -126,10 +111,10 @@ int DOTCONFDocument::cleanupLine(char * line)
             *bg++ = '\r';
             line+=2; continue;
         }
-        if(*line == '\\' && (*(line+1) == '\n' || *(line+1) == '\r')){ //multiline
+        if(*line == '\\' && (*(line+1) == '\n' || *(line+1) == '\r')){ 
             *bg = 0;
             if(strlen(start)){
-                //printf("3start='%s'\n", start);
+                
                 if(concat){
                     word = (char*)mempool->alloc(strlen(words.back())+strlen(start)+1);
                     strcpy(word, words.back());
@@ -144,14 +129,14 @@ int DOTCONFDocument::cleanupLine(char * line)
             multiline = true;
             break;
         }
-        if(*line == '"' || *line == '\''){ //need to handle quotes because of spaces or = that may be between
+        if(*line == '"' || *line == '\''){ 
             quoted = !quoted;
             line++; continue;
         }
         if(isspace(*line) && !quoted){
             *bg++ = 0;
             if(strlen(start)){
-                //printf("start='%s'\n", start);
+                
                 if(concat){
                     word = (char*)mempool->alloc(strlen(words.back())+strlen(start)+1);
                     strcpy(word, words.back());
@@ -207,12 +192,12 @@ int DOTCONFDocument::parseLine()
 
         if(nodeName == NULL){
             nodeName = word;
-            bool closed = true; //if this not <> node then it is closed by default
+            bool closed = true; 
             if(*nodeName == '<'){
-                if(*(nodeName+1) != '/'){ //opening tag
+                if(*(nodeName+1) != '/'){ 
                     nodeName++;
                     closed = false;
-                } else { //closing tag
+                } else { 
                     nodeName+=2;
                     std::list<DOTCONFDocumentNode*>::reverse_iterator i=nodeTree.rbegin();
                     for(; i!=nodeTree.rend(); i++){
@@ -313,7 +298,7 @@ int DOTCONFDocument::checkConfig(const std::list<DOTCONFDocumentNode*>::iterator
         }
         vi = 0;
         while( vi < tagNode->valuesCount ){
-            //if((tagNode->values[vi])[0] == '$' && (tagNode->values[vi])[1] == '{' && strchr(tagNode->values[vi], '}') ){
+            
             if(strstr(tagNode->values[vi], "${") && strchr(tagNode->values[vi], '}') ){
                 ret = macroSubstitute(tagNode, vi );
                 mempool->free();
@@ -395,22 +380,10 @@ int DOTCONFDocument::setContent(const char * _fileName)
                         error(tagNode->lineNum, fileName, "failed to open file '%s': %s", tagNode->values[vi], strerror(errno));
                         return -1;
                     }
-                    //free(fileName);
+                    
                     fileName = strdup(realpathBuf);
                     from = nodeTree.end(); from--;
-                    /*
-                    if(tagNode->parentNode){
-                        DOTCONFDocumentNode * nd = tagNode->parentNode->childNode;
-                        while(nd){
-                            if(!nd->nextNode)
-                                break;
-                            nd = nd->nextNode;
-                        }
-
-                        curPrev = nd;
-                    }
-                    ret = parseFile(tagNode->parentNode);
-                    */
+                    
                     ret = parseFile();
                     (void) fclose(file);
                     if(ret == -1)
@@ -422,11 +395,7 @@ int DOTCONFDocument::setContent(const char * _fileName)
                 }
             }
         }
-        /*
-        if( (ret = checkConfig(nodeTree.begin())) == -1){
-            return -1;
-        }
-        */
+        
 
         if(!requiredOptions.empty())
             ret = checkRequiredOptions();
@@ -573,7 +542,7 @@ const DOTCONFDocumentNode * DOTCONFDocument::getFirstNode() const
 
 const DOTCONFDocumentNode * DOTCONFDocument::findNode(const char * nodeName, const DOTCONFDocumentNode * parentNode, const DOTCONFDocumentNode * startNode) const
 {
-    //printf("nodeName=%s, cont=%s, start=%s\n", nodeName, containingNode!=NULL?containingNode->name:"NULL", startNode!=NULL?startNode->name:"NULL");
+    
 
     std::list<DOTCONFDocumentNode*>::const_iterator i = nodeTree.begin();
 
@@ -588,7 +557,7 @@ const DOTCONFDocumentNode * DOTCONFDocument::findNode(const char * nodeName, con
     }
 
     for(; i!=nodeTree.end(); i++){
-        //if(parentNode != NULL && (*i)->parentNode != parentNode){
+        
     if((*i)->parentNode != parentNode){
             continue;
         }

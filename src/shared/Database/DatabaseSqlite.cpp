@@ -1,7 +1,5 @@
-/* DatabaseSqlite.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,8 +38,8 @@ bool DatabaseSqlite::Initialize(const char *infoString)
 
     if (!mSqlite)
     {
-        // sLog.Log(L_CRITICAL, "Sqlite initialization failed: %s\n",
-        //     errmsg ? errmsg : "<no error message>");
+        
+        
         if (errmsg)
             sqlite_freemem(errmsg);
         return false;
@@ -65,12 +63,12 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
     sqlite_get_table(mSqlite, sql, &tableData, &rowCount, &fieldCount, &errmsg);
 
     if (!rowCount)
-        return 0;                                 // no result
+        return 0;                                 
 
     if (!tableData)
     {
-        // sLog.Log(L_ERROR, "Query \"%s\" failed: %s\n",
-        //     sql, errmsg ? errmsg : "<no error message>");
+        
+        
         if (errmsg)
             sqlite_freemem(errmsg);
         return 0;
@@ -79,7 +77,7 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
     QueryResultSqlite *queryResult = new QueryResultSqlite(tableData, rowCount, fieldCount);
     if(!queryResult)
     {
-        // sLog.Log(L_ERROR, "Out of memory on query result allocation in query \"%s\"\n", sql);
+        
         return 0;
     }
 

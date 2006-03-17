@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="./framework__Win32_debug"
-			IntermediateDirectory="./framework__Win32_debug"
+			OutputDirectory="./framework__Win32_Debug"
+			IntermediateDirectory="./framework__Win32_Debug"
 			ConfigurationType="4"
 			CharacterSet="2"
 			ManagedExtensions="FALSE">
@@ -64,8 +64,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="./framework__Win32_release"
-			IntermediateDirectory="./framework_Win32_release"
+			OutputDirectory="./framework__Win32_Release"
+			IntermediateDirectory="./framework__Win32_Release"
 			ConfigurationType="4"
 			CharacterSet="2"
 			ManagedExtensions="FALSE">
@@ -74,68 +74,18 @@
 				AdditionalOptions="/Zl"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
+				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./Release/framework.pch"
+				PrecompiledHeaderFile="./framework__Win32_Release/framework.pch"
 				AssemblerListingLocation="./framework__Win32_Release/"
 				ObjectFile="./framework__Win32_Release/"
 				ProgramDataBaseFileName="./framework__Win32_Release/"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="1_7_x Debug|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				Optimization="0"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
-				MinimalRebuild="FALSE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Debug/"
-				ObjectFile="./framework__Win32_Debug/"
-				ProgramDataBaseFileName="./framework__Win32_Debug/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
 				CompileAs="0"/>
@@ -143,367 +93,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Debug/framework.lib"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="1.7.x Release|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
-				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./Release/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Release/"
-				ObjectFile="./framework__Win32_Release/"
-				ProgramDataBaseFileName="./framework__Win32_Release/"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="1_8_x Debug|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				Optimization="0"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
-				MinimalRebuild="FALSE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Debug/"
-				ObjectFile="./framework__Win32_Debug/"
-				ProgramDataBaseFileName="./framework__Win32_Debug/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Debug/framework.lib"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="1.8.x Release|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
-				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./Release/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Release/"
-				ObjectFile="./framework__Win32_Release/"
-				ProgramDataBaseFileName="./framework__Win32_Release/"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Release (No Grid System)|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE"
-			WholeProgramOptimization="TRUE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				Optimization="3"
-				GlobalOptimizations="TRUE"
-				InlineFunctionExpansion="2"
-				FavorSizeOrSpeed="1"
-				EnableFiberSafeOptimizations="TRUE"
-				OptimizeForProcessor="3"
-				OptimizeForWindowsApplication="TRUE"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB"
-				StringPooling="TRUE"
-				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="./Release/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Release/"
-				ObjectFile="./framework__Win32_Release/"
-				ProgramDataBaseFileName="./framework__Win32_Release/"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="0"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Debug (No Grid)|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				Optimization="0"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB"
-				MinimalRebuild="FALSE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Debug/"
-				ObjectFile="./framework__Win32_Debug/"
-				ProgramDataBaseFileName="./framework__Win32_Debug/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Debug/framework.lib"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Debug (Console Enabled)|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				Optimization="0"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,_DEBUG,_LIB,ENABLE_GRID_SYSTEM"
-				MinimalRebuild="FALSE"
-				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Debug/"
-				ObjectFile="./framework__Win32_Debug/"
-				ProgramDataBaseFileName="./framework__Win32_Debug/"
-				WarningLevel="3"
-				SuppressStartupBanner="TRUE"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Debug/framework.lib"/>
-			<Tool
-				Name="VCMIDLTool"/>
-			<Tool
-				Name="VCPostBuildEventTool"/>
-			<Tool
-				Name="VCPreBuildEventTool"/>
-			<Tool
-				Name="VCPreLinkEventTool"/>
-			<Tool
-				Name="VCResourceCompilerTool"/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"/>
-			<Tool
-				Name="VCManagedWrapperGeneratorTool"/>
-			<Tool
-				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-		</Configuration>
-		<Configuration
-			Name="Release (Console Enabled)|Win32"
-			OutputDirectory="$(ConfigurationName)"
-			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="4"
-			CharacterSet="2"
-			ManagedExtensions="FALSE">
-			<Tool
-				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
-				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="../../src/framework"
-				PreprocessorDefinitions="WIN32,NDEBUG,_LIB,ENABLE_GRID_SYSTEM"
-				StringPooling="TRUE"
-				MinimalRebuild="FALSE"
-				RuntimeLibrary="0"
-				EnableFunctionLevelLinking="TRUE"
-				RuntimeTypeInfo="TRUE"
-				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./Release/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Release/"
-				ObjectFile="./framework__Win32_Release/"
-				ProgramDataBaseFileName="./framework__Win32_Release/"
-				WarningLevel="3"
-				Detect64BitPortabilityProblems="TRUE"
-				DebugInformationFormat="3"
-				CompileAs="0"/>
-			<Tool
-				Name="VCCustomBuildTool"/>
-			<Tool
-				Name="VCLibrarianTool"/>
+				OutputFile="./framework__Win32_Release/framework.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -567,6 +157,9 @@
 		<Filter
 			Name="Platform"
 			Filter="">
+			<File
+				RelativePath="..\..\src\framework\Platform\CompilerDefs.h">
+			</File>
 			<File
 				RelativePath="..\..\src\framework\Platform\Define.h">
 			</File>
@@ -641,6 +234,13 @@
 			</File>
 			<File
 				RelativePath="..\..\src\framework\Dynamic\ObjectRegistry.h">
+			</File>
+		</Filter>
+		<Filter
+			Name="Network"
+			Filter="">
+			<File
+				RelativePath="..\..\src\framework\Network\SocketDefines.h">
 			</File>
 		</Filter>
 	</Files>

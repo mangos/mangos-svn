@@ -1,6 +1,5 @@
-/* GridNotifiers.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,13 +19,7 @@
 #ifndef MANGOS_GRIDNOTIFIERS_H
 #define MANGOS_GRIDNOTIFIERS_H
 
-/** @page Grid System Overview
-    The Grid System (TGS) in MaNGOS uses mainly the visitor mixture with
-    template pattern.  It allows object of interested to keep track of nearby
-    objects (not necessary of the same types).  An object moving into or
-    out of the grid has to be notify the grid (the grid itself does
-    not keep track of the object movements.. only the objects themself do.
- */
+
 
 #include "ObjectGridLoader.h"
 #include "ByteBuffer.h"
@@ -37,25 +30,16 @@ class Map;
 
 namespace MaNGOS
 {
-    /** PlayerNotifier class is responsible to inform all players in the grid
-	that's within range the existence of the player.  As well, inform
-	the player himself the existence of other players. It also grap
-	the objects within its visibility. This is only use when player enters
-	during login..
-    */
+    
     struct MANGOS_DLL_DECL PlayerNotifier
     {
 	PlayerNotifier(Player &pl) : i_player(pl) {}
 	void Visit(PlayerMapType &);
-	void Notify(void);
+	void BuildForMySelf(void);
 	Player &i_player;
-	UpdateData i_data;
     };
     
-    /** VisibleNotifier notifies the client a series of
-     * objects that's visible to the player. Usually
-     * use when player relocate
-     */
+    
     struct MANGOS_DLL_DECL VisibleNotifier
     {
 	Player &i_player;
@@ -65,17 +49,14 @@ namespace MaNGOS
 	void Notify(void);
 
 #ifdef WIN32
-	// specialization
+	
     template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
 #endif
     };
     
     
-    /** NotVisibleNotifier noties the client a series
-     * of objects is no longer visible to the player
-     * use when player relocate
-     */
+    
     struct MANGOS_DLL_DECL NotVisibleNotifier
     {
 	Player &i_player;
@@ -85,15 +66,13 @@ namespace MaNGOS
 	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
 
 #ifdef WIN32
-	// speicalization
+	
     template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &);
 #endif
     };
     
-    /** ObjectVisibleNotifier notifies player that an object is freshly enters.
-     * Use when creature relocate.
-     */
+    
     struct MANGOS_DLL_DECL ObjectVisibleNotifier
     {
 	Object &i_object;
@@ -102,8 +81,7 @@ namespace MaNGOS
     };
     
     
-    /** ObjectNotVisibleNotifier notifies the player the object is gone.
-     */
+    
     struct MANGOS_DLL_DECL ObjectNotVisibleNotifier
     {
 	Object &i_object;
@@ -112,8 +90,7 @@ namespace MaNGOS
     };
     
     
-    /** GridUpdater updates all object status only	
-     */
+    
     struct MANGOS_DLL_DECL GridUpdater
     {
         GridType &i_grid;
@@ -134,8 +111,7 @@ namespace MaNGOS
         void Visit(CorpseMapType &m) { updateObjects<Corpse>(m); }
     };
     
-    /** MessageDeliverer delivers a certain incomming message to all players
-     */
+    
     struct MANGOS_DLL_DECL MessageDeliverer
     {
         Player &i_player;
@@ -145,9 +121,7 @@ namespace MaNGOS
         void Visit(PlayerMapType &m);
     };
     
-    /** ObjectMessageDeliverer is a message from unit or object (a non player to his in range
-     *  players
-     */
+    
     struct MANGOS_DLL_DECL ObjectMessageDeliverer
     {
         Object &i_object;
@@ -157,9 +131,7 @@ namespace MaNGOS
     };
     
     
-    /** CreatureVisibleMovementNotifier again informs the player in certain
-     * cell that a creature has moved into its visiblility
-     */
+    
     struct MANGOS_DLL_DECL CreatureVisibleMovementNotifier
     {
 	Creature &i_creature;
@@ -167,9 +139,7 @@ namespace MaNGOS
 	void Visit(PlayerMapType &m);
     };
     
-    /** CreatureNotVisibleMovementNotifier informs the player in certain
-     * cell that a creature has moved out of its visiblility
-     */
+    
     struct MANGOS_DLL_DECL CreatureNotVisibleMovementNotifier
     {
 	Creature &i_creature;
@@ -177,8 +147,7 @@ namespace MaNGOS
 	void Visit(PlayerMapType &m);
     };
     
-    /** ObjectUpdate
-     */
+    
     struct MANGOS_DLL_DECL ObjectUpdater
     {
 	uint32 i_timeDiff;
@@ -190,9 +159,7 @@ namespace MaNGOS
     };
     
 
-    /** This uses to grap the object/creature that the player intested within
-     * the user's visibility
-     */
+    
     template<class T>
     struct MANGOS_DLL_DECL ObjectAccessorNotifier
     {
@@ -219,13 +186,49 @@ namespace MaNGOS
 	template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
     };
 
+    
+    struct MANGOS_DLL_DECL GridUnitListNotifier
+    {
+	std::list<Unit*> &i_data;
+	GridUnitListNotifier(std::list<Unit*> &data) : i_data(data) {}
+
+	template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
+	{
+		for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+	    {
+                i_data.push_back(itr->second);
+	    }
+	}
+
+#ifdef WIN32
+	template<> inline void Visit(std::map<OBJECT_HANDLE, Corpse *> &m ) {}
+	template<> inline void Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
+	template<> inline void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
+#endif
+    };
+
+    
+    struct MANGOS_DLL_DECL PlayerConfrontationNotifier
+    {
+	Player &i_player;
+	PlayerConfrontationNotifier(Player &pl) : i_player(pl) {}
+	template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+#ifdef WIN32
+	template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+#endif
+    };
+
 #ifndef WIN32
-    // specialization before use for the UNIX
+    
     template<> void VisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void VisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void PlayerConfrontationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m ) {}
+    template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
+    template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
 #endif
 }
 

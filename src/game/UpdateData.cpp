@@ -1,7 +1,5 @@
-/* UpdateData.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
-
-// UpdateData.cpp
-//
 
 #include "Common.h"
 #include "ByteBuffer.h"
@@ -49,12 +43,66 @@ void UpdateData::AddUpdateBlock(const ByteBuffer &block)
 }
 
 
+
+
+void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
+{
+    z_stream c_stream;
+
+    c_stream.zalloc = (alloc_func)0;
+    c_stream.zfree = (free_func)0;
+    c_stream.opaque = (voidpf)0;
+
+    if (Z_OK != deflateInit(&c_stream, Z_BEST_SPEED))
+    {
+        sLog.outError("Can't compress update packet (zlib: deflateInit).");
+        *dst_size = 0;
+        return;
+    }
+
+    c_stream.next_out = (Bytef*)dst;
+    c_stream.avail_out = *dst_size;
+    c_stream.next_in = (Bytef*)src;
+    c_stream.avail_in = (uInt)src_size;
+    
+    if (Z_OK != deflate(&c_stream, Z_NO_FLUSH))
+    {
+        sLog.outError("Can't compress update packet (zlib: deflate)");
+        *dst_size = 0;
+        return;
+    }
+
+    if (c_stream.avail_in != 0)
+    {
+        sLog.outError("Can't compress update packet (zlib: deflate not greedy)");
+        *dst_size = 0;
+        return;
+    }
+
+    if (Z_STREAM_END != deflate(&c_stream, Z_FINISH))
+    {
+        sLog.outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END)");
+        *dst_size = 0;
+        return;
+    }
+
+    if (Z_OK != deflateEnd(&c_stream))
+    {
+        sLog.outError("Can't compress update packet (zlib: deflateEnd)");
+        *dst_size = 0;
+        return;
+    }
+
+    *dst_size = c_stream.total_out;
+}
+
+
 bool UpdateData::BuildPacket(WorldPacket *packet)
 {
     ByteBuffer buf(m_data.size() + 10 + m_outOfRangeGUIDs.size()*8);
 
     buf << (uint32) (m_outOfRangeGUIDs.size() > 0 ? m_blockCount + 1 : m_blockCount);
-    buf << (uint8) 0;                             // unknown
+    buf << (uint8) 0; 
 
     if(m_outOfRangeGUIDs.size())
     {
@@ -64,6 +112,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
         for(std::set<uint64>::const_iterator i = m_outOfRangeGUIDs.begin();
             i != m_outOfRangeGUIDs.end(); i++)
         {
+            buf << (uint8)0xFF;
             buf << (uint64) *i;
         }
     }
@@ -72,24 +121,22 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 
     packet->clear();
 
-    // do not compress small packets
-    if (m_data.size() > 50)
+    
+    if (m_data.size() > 50 )
     {
-        // not sure about that, saw in qz code
+        
         unsigned long destsize = buf.size() + buf.size()/10 + 16;
         packet->resize( destsize );
 
         packet->put(0, (uint32)buf.size());
 
-        int err;
-
-        // i know, it's evil
-        if ((err = compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
-            &destsize, buf.contents(), buf.size())) != Z_OK)
-        {
-            Log::getSingleton().outError("Can't compress update packet\n");
-            return false;
-        }
+        
+        Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
+                    &destsize,
+                    (void*)buf.contents(),
+                    buf.size());
+        if (destsize == 0)
+            return false; 
 
         packet->resize( destsize + sizeof(uint32) );
         packet->SetOpcode( SMSG_COMPRESSED_UPDATE_OBJECT );
@@ -111,5 +158,5 @@ void UpdateData::Clear()
     m_blockCount = 0;
 }
 
-#endif //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
+
 

@@ -1,0 +1,290 @@
+/*  
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
+#include "Common.h"
+#include "Bag.h"
+#include "ObjectMgr.h"
+#include "Database/DatabaseEnv.h"
+#include "Log.h"
+#include "WorldPacket.h"
+#include "UpdateData.h"
+#include "WorldSession.h"
+
+Bag::Bag( ): Item() {
+	m_objectType |= TYPE_CONTAINER;
+	m_objectTypeId = TYPEID_CONTAINER;
+
+	m_valuesCount = CONTAINER_END;
+
+	memset(m_bagslot, 0, sizeof(Item *) * (20)); // Maximum 20 Slots
+}
+
+Bag::~Bag() {
+	for(int i = 0; i<20; i++) {
+		if(m_bagslot[i])	delete m_bagslot[i];
+	}
+}
+
+void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner) {
+	ItemPrototype *m_itemProto = objmgr.GetItemPrototype(itemid);
+    
+	ASSERT(m_itemProto);
+	ASSERT(m_itemProto->ContainerSlots <= 20);
+	
+	Object::_Create( guidlow, HIGHGUID_CONTAINER );
+
+	SetUInt32Value(OBJECT_FIELD_ENTRY, itemid);
+	SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+
+	SetUInt64Value(ITEM_FIELD_OWNER, owner->GetGUID());
+	SetUInt64Value(ITEM_FIELD_CONTAINED, owner->GetGUID());
+
+	SetUInt32Value(ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
+	SetUInt32Value(ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
+	SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
+	SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
+
+	// Setting the number of Slots the Container has
+	SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
+
+	// Cleanning 20 slots
+	for (uint8 i = 0; i < 20; i++) {
+		SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
+		m_bagslot[i] = NULL;
+	}
+
+	m_owner = owner;
+}
+
+void Bag::SaveToDB() {
+	Item::SaveToDB();
+    
+	sDatabase.PExecute("DELETE FROM bag WHERE bag_guid = '%u';", GetGUIDLow());
+    
+	for (int i = 0; i < 20; i++) {
+		if (m_bagslot[i]) {
+			m_bagslot[i]->SaveToDB();
+			sDatabase.PExecute("INSERT INTO bag VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+		}
+	}
+
+}
+
+void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck) {
+	Item::LoadFromDB(guid, auctioncheck);
+
+	for (uint8 i = 0; i < 20; i++) {
+		SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
+		if (m_bagslot[i]) {
+			delete m_bagslot[i];
+			m_bagslot[i] = NULL;
+		}
+	}
+
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM bag WHERE bag_guid = '%u';", GetGUIDLow());
+
+	if (result) {
+		uint8 slot;
+		uint32 item_guid, item_id;
+		Item* item;
+		ItemPrototype* proto;
+
+		do {
+			Field *fields = result->Fetch();
+
+			slot = fields[1].GetUInt8();
+			item_guid = fields[2].GetUInt32();
+			item_id = fields[3].GetUInt32();
+
+			proto = objmgr.GetItemPrototype(item_id);
+
+			if (proto->InventoryType == INVTYPE_BAG) {
+				item = new Bag;
+			} else {
+				item = new Item;			
+			}
+			item->SetOwner(this->GetOwner());
+			item->LoadFromDB(item_guid, 1);
+			AddItemToBag(slot, item);
+		} while (result->NextRow());
+
+		delete result;
+	}
+}
+
+void Bag::DeleteFromDB() {
+	for (int i = 0; i < 20; i++) {
+		if (m_bagslot[i]) {
+			m_bagslot[i]->DeleteFromDB();
+		}
+	}
+
+	sDatabase.PExecute("DELETE FROM bag WHERE bag_guid = '%u';", GetGUIDLow());
+
+	Item::DeleteFromDB();
+}
+
+int8 Bag::FindFreeBagSlot() 
+{
+	uint32 ContainerSlots=GetProto()->ContainerSlots;
+	for (uint8 i=0; i <ContainerSlots; i++)
+		if (!m_bagslot[i]) 
+			return i;
+	
+	return -1;
+}
+
+Item* Bag::RemoveItemFromBag(uint8 slot) {
+	Item *pItem = m_bagslot[slot];
+	if(m_bagslot[slot])
+		m_bagslot[slot] = NULL;
+
+	SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
+
+	return pItem;
+}
+
+void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const {
+	Item::BuildCreateUpdateBlockForPlayer( data, target );
+
+	for (int i = 0; i < 20; i++) {
+		if(m_bagslot[i])
+			m_bagslot[i]->BuildCreateUpdateBlockForPlayer( data, target );
+	}
+}
+
+// If the bag is empty returns true
+bool Bag::IsEmpty() 
+{
+	uint32 ContainerSlots=GetProto()->ContainerSlots;
+	for(uint32 i=0; i < ContainerSlots; i++) 
+		if (m_bagslot[i]) return false;
+	
+	return true;
+}
+
+int8 Bag::GetSlotByItemGUID(uint64 guid) 
+{
+	uint32 ContainerSlots=GetProto()->ContainerSlots;
+
+	for(uint32 i=0;i<ContainerSlots;i++)
+	{
+		if(m_bagslot[i] != 0)
+			if(m_bagslot[i]->GetGUID() == guid)
+				return i;
+	}
+	return -1;
+}
+
+// Adds an item to a bag slot
+// - slot can be NULL_SLOT, in that case function searchs for a free slot
+// - Return values: 0 - item not added
+//                  1 - item added to a free slot (and perhaps to a stack)
+//                  2 - item added to a stack (item should be deleted)
+uint8 Bag::AddItemToBag(uint8 slot, Item *item) {
+	if (!item) { return false; }
+
+	UpdateData upd;
+	WorldPacket packet;
+	Item *pItem = 0;
+	int stack = (item->GetProto()->Stackable)?(item->GetProto()->Stackable):1;
+	int count = item->GetCount();
+	uint8 addtoslot = NULL_SLOT;
+	int freespace = 0;
+	int freeslots = 0;
+
+	if (slot != NULL_SLOT) {
+		if (slot >= GetProto()->ContainerSlots) { 
+			return 0;
+		}
+		pItem = m_bagslot[slot];
+		if (pItem) {
+			printf("item exists\n");
+			if (pItem->GetEntry() != item->GetEntry()) { return 0; } 
+			else {
+				if ((stack - pItem->GetCount()) >= count) {
+					pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
+					pItem->SaveToDB();
+					if (m_owner->IsInWorld()) {
+						upd.Clear();
+						pItem->BuildCreateUpdateBlockForPlayer(&upd, m_owner);
+						upd.BuildPacket(&packet);
+						m_owner->GetSession()->SendPacket(&packet);
+					}
+					return 2;
+				} else { 
+					return 0; 
+				}
+			}
+		} else {
+			addtoslot = slot; 
+		}
+	} else {
+		// If slot is not specified, check for free slots (and stacks, if allowstack = true)
+		// cycle 0 - searching for stack space
+		// cycle 1 - searching for free slots
+		// cycle 2 - adding to stacks
+		// cycle 3 - adding to free slots
+		for (int cycle=0; cycle <= 3; cycle++) {
+			if ((cycle > 1) && (freespace < count) && (!freeslots)) { return 0; }
+			for (uint8 slot2=0; slot2 < GetProto()->ContainerSlots; slot2++) {
+				pItem = GetItemFromBag(slot2);
+				if (!pItem) {
+					if (cycle == 1) {
+						freeslots++;
+					} else if (cycle == 3) {
+						if (addtoslot == NULL_SLOT) { addtoslot = slot2; }
+					}
+				} else {
+					if ((pItem->GetEntry() == item->GetEntry()) && ((pItem->GetCount() < stack) && (count))) {
+						if (cycle == 0) {
+							freespace += (stack - pItem->GetCount());
+						} else if (cycle == 2) {
+							int plus = count;
+							if ((pItem->GetCount() + count) > stack) { plus = stack - pItem->GetCount(); }
+							count -= plus;
+							pItem->SetCount(pItem->GetCount() + plus);
+							pItem->SaveToDB();
+							if (m_owner->IsInWorld()) {
+								upd.Clear();
+								pItem->BuildCreateUpdateBlockForPlayer(&upd, m_owner);
+								upd.BuildPacket(&packet);
+								m_owner->GetSession()->SendPacket(&packet);
+							}
+							if (!count) { return 2; }
+						}
+					}
+				}
+			}
+		}
+	}
+
+	item->SetCount(count);
+	m_bagslot[addtoslot] = item;
+	SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (addtoslot * 2), item->GetGUID());
+	item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
+
+	if (m_owner->IsInWorld()) {
+		upd.Clear();
+		item->BuildCreateUpdateBlockForPlayer(&upd, m_owner);
+		upd.BuildPacket(&packet);
+	  	m_owner->GetSession()->SendPacket(&packet);
+	}
+
+	return 1;
+}

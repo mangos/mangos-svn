@@ -1,6 +1,5 @@
-/* ScriptCalls.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,20 +22,49 @@
 #include "GossipDef.h"
 #include "Player.h"
 
-  void scriptCallGossipHello      ( Player *_Player, Creature *_Creature );
-  void scriptCallQuestAccept      ( Player *_Player, Creature *_Creature, Quest *_Quest );
-  void scriptCallGossipSelect     ( Player *_Player, Creature *_Creature, uint32 opt, uint64 data );
-  void scriptCallGossipSelectWithCode     
-	                              ( Player *_Player, Creature *_Creature, uint32 opt, uint64 data, char* sCode );
-  void scriptCallQuestSelect      ( Player *_Player, Creature *_Creature, Quest *_Quest );
-  void scriptCallQuestComplete    ( Player *_Player, Creature *_Creature, Quest *_Quest );
-uint32 scriptCallNPCDialogStatus  ( Player *pPlayer, Creature *_Creature );
-  void scriptCallChooseReward     ( Player *_Player, Creature *_Creature, Quest *_Quest, uint32 opt );
-  void scriptCallItemHello        ( Player *_Player, Item *_Item, Quest *_Quest );
-  void scriptCallGOHello          ( Player *_Player, GameObject *_GO );
-  void scriptCallAreaTrigger      ( Player *_Player, Quest *_Quest, uint32 triggerID );
-  void scriptCallItemQuestAccept  ( Player *_Player, Item *_Item, Quest *_Quest );
-  void scriptCallGOQuestAccept    ( Player *_Player, GameObject *_GO, Quest *_Quest );
-  void scriptCallGOChooseReward   ( Player *_Player, GameObject *_GameObject, Quest *_Quest, uint32 opt );
+typedef void(MANGOS_IMPORT * scriptCallScriptsInit) ();
+
+typedef void(MANGOS_IMPORT * scriptCallGossipHello) (Player *player, Creature *_Creature );
+typedef void(MANGOS_IMPORT * scriptCallQuestAccept) (Player *player, Creature *_Creature, Quest *);
+typedef void(MANGOS_IMPORT * scriptCallGossipSelect)(Player *player, Creature *_Creature, uint32 sender
+																 , uint32 action);
+typedef void(MANGOS_IMPORT * scriptCallGossipSelectWithCode)( Player *player, Creature *_Creature,
+													uint32 sender, uint64 action, char* sCode );
+typedef void(MANGOS_IMPORT * scriptCallQuestSelect)( Player *player, Creature *_Creature, Quest * );
+typedef void(MANGOS_IMPORT * scriptCallQuestComplete)(Player *player, Creature *_Creature, Quest *);
+typedef uint32(MANGOS_IMPORT * scriptCallNPCDialogStatus)( Player *player, Creature *_Creature);
+typedef void(MANGOS_IMPORT * scriptCallChooseReward)( Player *player, Creature *_Creature, Quest *, 
+																uint32 opt );
+typedef void(MANGOS_IMPORT * scriptCallItemHello)( Player *player, Item *, Quest *);
+typedef void(MANGOS_IMPORT * scriptCallGOHello)( Player *player, GameObject * );
+typedef void(MANGOS_IMPORT * scriptCallAreaTrigger)( Player *player, Quest *, uint32 triggerID );
+
+typedef void(MANGOS_IMPORT * scriptCallItemQuestAccept)(Player *player, Item *, Quest *);
+typedef void(MANGOS_IMPORT * scriptCallGOQuestAccept)(Player *player, GameObject *, Quest *);
+typedef void(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *,
+																uint32 opt );
+
+
+typedef struct{
+scriptCallScriptsInit ScriptsInit;
+scriptCallGossipHello GossipHello;
+scriptCallGOChooseReward GOChooseReward;
+scriptCallQuestAccept QuestAccept;
+scriptCallGossipSelect GossipSelect;
+scriptCallGossipSelectWithCode GossipSelectWithCode;
+scriptCallQuestSelect QuestSelect;
+scriptCallQuestComplete QuestComplete;
+scriptCallNPCDialogStatus NPCDialogStatus;
+scriptCallChooseReward ChooseReward;
+scriptCallItemHello ItemHello;
+scriptCallGOHello GOHello;
+scriptCallAreaTrigger scriptAreaTrigger;
+scriptCallItemQuestAccept ItemQuestAccept;
+scriptCallGOQuestAccept GOQuestAccept;
+MANGOS_LIBRARY_HANDLE hScriptsLib;
+}_ScriptSet,*ScriptsSet;
+
+
+extern ScriptsSet Script;
 
 #endif

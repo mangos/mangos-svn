@@ -1,6 +1,5 @@
-/* NGrid.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,7 +67,6 @@ public:
 	i_cells[x][y].RemoveObject(obj, hdl);
     }
 
-
     template<class T> void Visit(TypeContainerVisitor<T, TypeMapContainer<OBJECT_TYPES> > &visitor)
     {
 	for(unsigned int x=0; x < N; ++x)
@@ -121,6 +119,7 @@ public:
     { 
 	return i_cells[x][y].template remove<SPECIFIC_OBJECT>(obj, hdl); 
     }
+
 
 private:
 

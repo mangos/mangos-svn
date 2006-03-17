@@ -32,9 +32,6 @@ C_MODE_END
 #endif
 #if defined(USE_RAID)
 
-#ifdef __GNUC__
-#pragma interface			/* gcc class implementation */
-#endif
 #include "my_dir.h"
 
 /* Trap all occurences of my_...() in source and use our wrapper around this function */
@@ -91,6 +88,10 @@ extern "C" {
 
 #ifdef __cplusplus
 }
+
+#ifdef USE_PRAGMA_INTERFACE
+#pragma interface			/* gcc class implementation */
+#endif
 
 class RaidName {
   public:
@@ -156,5 +157,3 @@ class RaidFd {
 
 #endif /* __cplusplus */
 #endif /* USE_RAID */
-
-

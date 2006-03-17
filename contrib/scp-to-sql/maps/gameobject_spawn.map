@@ -5,7 +5,7 @@ GUID->id(*)
 Link_XYZ->positionX(*),positionY(*),positionZ(*),orientation(*)
 ZONE->zoneId(*)
 MAP->mapId(0)
-ENTRY->entryid(*)
+ENTRY->name_id(*)
 OBJECT_TYPE->type(33)
 
 #this is used to filter out game objects only

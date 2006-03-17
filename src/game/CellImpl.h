@@ -1,6 +1,5 @@
-/* CellImpl.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +57,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    standing_cell << 1;
 	    standing_cell -= 1;
 
-	    // update the along the x coordinate
+	    
 	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -67,7 +66,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 		m.Visit(lock, visitor);
 	    }
 
-	    // update along the y coordinate
+	    
 	    for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -83,7 +82,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell >> 1;
 	    update_cell -= 1;
 
-	    // update the along the x coordinate
+	    
 	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -92,7 +91,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 		m.Visit(lock, visitor);
 	    }
 
-	    // update along the y coordinate
+	    
 	    for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -109,7 +108,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell << 1;
 	    update_cell += 1;
 
-	    // update the along the x coordinate
+	    
 	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -118,7 +117,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 		m.Visit(lock, visitor);
 	    }
 
-	    // update along the y coordinate
+	    
 	    for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -135,7 +134,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell >> 1;
 	    update_cell += 1;
 
-	    // update the along the x coordinate
+	    
 	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -144,7 +143,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 		m.Visit(lock, visitor);
 	    }
 
-	    // update along the y coordinate
+	    
 	    for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -161,7 +160,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell << 1;
 	    update_cell -= 1;
 
-	    // update along the y coordinate
+	    
 	    for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -178,7 +177,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell >> 1;
 	    update_cell -= 1;
 
-	    // update along the y coordinate
+	    
 	    for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -194,7 +193,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell << 1;
 	    update_cell -= 1;
 
-	    // update the along the x coordinate
+	    
 	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);
@@ -211,7 +210,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 	    update_cell << 1;
 	    update_cell += 1;
 
-	    // update the along the x coordinate
+	    
 	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
 	    {
 		Cell r_zone = RedZone::GetZone(cell_iter);

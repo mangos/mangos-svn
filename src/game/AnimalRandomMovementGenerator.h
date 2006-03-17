@@ -1,6 +1,5 @@
-/* AnimalRandomMovementGenerator.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +19,6 @@
 #ifndef MANGOS_ANIMAL_RANDOMMOVEMENTGENERATOR_H
 #define MANGOS_ANIMAL_RANDOMMOVEMENTGENERATOR_H
 
-/** AnimalRandomMovementGenerator follows the research
- * on Qunatifying scale-dependent effects of animal movement
- * with simple perlocation models (R.H Gardner, R.V O'Neil,
- * M.G. Turner and V.H. Dale.).  It is specifically
- * used on animals
- */
+
 
 #endif

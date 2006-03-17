@@ -1,5 +1,5 @@
 TypeTable{GUID=hex}
-InfoTable{table=creatures_spawn,id=GUID,outfile=creatures_spawn.sql,apply-preprocessor=creatures.scp,fileName=world.save}
+InfoTable{table=creatures,id=GUID,outfile=creatures_spawn.sql,apply-preprocessor=creatures.scp,fileName=world.save}
 
 # Table column required
 # id, positionX, positionY, positionZ, orientation, zoneid, mapid, maxpowers[1-5], mountid, type

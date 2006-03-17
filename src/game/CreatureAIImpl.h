@@ -1,6 +1,5 @@
-/* CreatureAIImpl.cpp
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +18,12 @@
 
 #include "CreatureAI.h"
 
-/* Real factory implememtation
- */
+
 
 template<class REAL_AI>
 inline CreatureAI*
 CreatureAIFactory<REAL_AI>::Create(void *data) const
 {
     Creature* creature = reinterpret_cast<Creature *>(data);
-    return (new REAL_AI(creature));
+    return (new REAL_AI(*creature));
 }

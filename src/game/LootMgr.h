@@ -1,6 +1,5 @@
-/* LootMgr.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,63 +23,49 @@
 #include <string>
 #include <vector>
 #include "Common.h"
-#include "Singleton.h"
-#include "Common.h"
+#include "Policies/Singleton.h"
+#include "ItemPrototype.h"
 
-struct LootItem
+typedef struct
 {
-  LootItem(uint32 item = 0, float c = 0) : itemid(item), chance(c) {}
- 
-    uint32 itemid;
-    float chance;
-};
+	uint32 itemid;
+	uint32 displayid;
+}_LootItem;
 
-// use to generate a sequence of number
-// given a start index (defaulted to be 0 - that's
-// the first number generated.. SequenceGen will
-// generate a sequence of number every time the
-// operator() is call.
-struct SequenceGen
+typedef struct
 {
-    SequenceGen(short start_idx = -1) : i_current(start_idx) {}
-    short operator()(void) { return ++i_current; }
-    short i_current;
-};
+	_LootItem item;
+	bool	isLooted;
+}__LootItem;
 
 
-///////////////
-/// LootMgr
-class LootMgr : public Singleton< LootMgr >
+typedef struct
 {
+	float chance;
+	_LootItem item;
+	
+}StoreLootItem;
 
-public:
-  typedef std::vector<LootItem> LootList;
-  typedef HM_NAMESPACE::hash_map<uint32, LootList* > LootTable;  
 
-    // ctor
-  LootMgr();
-  ~LootMgr();
-  void LoadLootTables(void);
-  inline const LootList& getCreaturesLootList(int id) const      
-  {
-    LootTable::const_iterator iter = i_creaturesLoot.find(id);
-    return (iter == i_creaturesLoot.end() ? si_noLoot : *iter->second);
-  }
+typedef struct 
+{
+	uint32 count;
+	StoreLootItem*items;
+}StoreLootList;
 
-  inline const LootList& getGameObjectsLootList(int id) const      
-  {
-    LootTable::const_iterator iter = i_gameObjectsLoot.find(id);
-    return (iter == i_gameObjectsLoot.end() ? si_noLoot : *iter->second);
-  }
+typedef struct
+{
+	std::vector<__LootItem> items;
+	uint32 gold;
+}Loot;
 
-private:
+void FillLoot(Loot * loot,uint32 loot_id);
+void LoadCreaturesLootTables();
+//////////////////////////////////////////////////////////////////////////////////////////
 
-  void _populateLootTemplate(const char *, LootTable &);
-  LootTable i_creaturesLoot;
-  LootTable i_gameObjectsLoot;
-  static LootList si_noLoot;
-};
 
-#define lootmgr LootMgr::getSingleton()
+typedef HM_NAMESPACE::hash_map<uint32, StoreLootList > LootStore;  
+
+
 
 #endif

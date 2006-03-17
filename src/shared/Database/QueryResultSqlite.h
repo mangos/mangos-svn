@@ -1,7 +1,5 @@
-/* QueryResultSqlite.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +19,7 @@
 #if !defined(QUERYRESULTSQLITE_H)
 #define QUERYRESULTSQLITE_H
 
-// Required for SQLite DBM
+
 #include <sqlite/sqlite.h>
 
 class QueryResultSqlite : public QueryResult
@@ -29,14 +27,11 @@ class QueryResultSqlite : public QueryResult
     public:
         QueryResultSqlite(char **tableData, uint32 rowCount, uint32 fieldCount);
 
-        //! Frees resources used by QueryResult.
+        
         ~QueryResultSqlite();
 
-        //! Selects the next row in the result of the current query.
-        /*
-        This will update any references to fields of the previous row, so use Field's copy constructor to keep a persistant field.
-        @return 1 if the next row was successfully selected, else 0.
-        */
+        
+        
         bool NextRow();
 
     private:

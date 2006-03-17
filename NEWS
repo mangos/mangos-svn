@@ -1,11 +1,20 @@
 MaNGOS -- History of visible changes.
 
-Copyright (c) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+Copyright (c) 2005 MaNGOS <http://www.mangosproject.org/>
 
 See the COPYING file for copying conditions.
 
 Please submit bug reports at:
-https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/
+http://www.mangosproject.org/forum/
+
+Version 0.1
+ * AI system
+ * Grid system
+ * Lots a game features working.
+ * Lovely optimizations for the beloved server.
+
+Version 0.0.3
+ * Interim release, not gone public.
 
 Version 0.0.2
  * Most data conversions working.

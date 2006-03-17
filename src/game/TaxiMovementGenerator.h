@@ -1,6 +1,5 @@
-/* TaxiMovementGenerator.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +19,7 @@
 #ifndef MANGOS_TAXIMOVEMENTGENERATOR_H
 #define MANGOS_TAXIMOVEMENTGENERATOR_H
 
-/** @page TaxiMovementGenerator is a special class that its not only
- * inherited from MovementGenerator but is the only MovementGenerator
- * family of object that can be use by the player.  The sole purpose
- * of this class is to generate movement (like the client side) during
- * a taxi ride so that the server updates its surrounding grid cells which
- * gives activities on the ground during a taxi ride. During a taxi ride,
- * when a player exits, this class can use to handle the position of the
- * player when he re-enters which indeed still in his taxi ride (except
- * that the surrounding environment might be a little different than
- * that when he exits (if during taxi ride allows the player to exit).
- * When use on creatures, this gives identical results except that the subscribers
- * of the messages is only the players surrounding the grid cell, not
- * the creature itself.
- */
+
 
 #include "MovementGenerator.h"
 

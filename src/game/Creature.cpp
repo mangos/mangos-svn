@@ -1,7 +1,5 @@
-/* Creature.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,914 +30,173 @@
 #include "Stats.h"
 #include "Log.h"
 #include "LootMgr.h"
-#include "Chat.h" // UQ1: for string formatting...
+#include "Chat.h" 
 #include "MapManager.h"
 #include "FactionTemplateResolver.h"
+#include "CreatureAI.h"
+#include "CreatureAISelector.h"
 
-Creature::Creature() : Unit()
+// apply implementation of the singletons
+#include "Policies/SingletonImp.h" 
+
+
+Creature::Creature() : Unit(), i_AI(NULL)
 {
-    mQuestIds.clear();
-
     m_corpseDelay = 45000;
     m_respawnDelay = 25000;
 
     m_respawnTimer = 0;
     m_deathTimer = 0;
-    m_moveTimer = 0;
+    
+	m_valuesCount = UNIT_END;
 
-    m_valuesCount = UNIT_END;
-
-    // FIXME: use constant
+    
     itemcount = 0;
-    memset(item_list, 0, 8*128);
-
-    m_nWaypoints = 0;
-    m_currentWaypoint = 0;
+    memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
+    
     m_moveBackward = false;
     m_moveRandom = false;
     m_moveRun = false;
-    m_creatureState = STOPPED;
-
-    m_regenTimer=0;
-    m_destinationX = m_destinationY = m_destinationZ = 0;
-    m_moveSpeed = 0;
-    m_timeToMove = 0;
-    m_timeMoved = 0;
-    m_useAI = true;
-    m_moveSpeed = 7.0f;
-    m_canMove = true;
+    i_creatureState = STOPPED; 
+    m_moveSpeed = 1.0f;
+	m_respawnradius=0;
 }
 
 
 Creature::~Creature()
 {
-    mQuestIds.clear( );
+    mQuests.clear( );
+    for( SpellsList::iterator i = m_tspells.begin( ); i != m_tspells.end( ); i++ ) 
+    	 delete (*i);
+    		
+    m_tspells.clear(); 
+   
+    delete i_AI;
+    i_AI = NULL;
 }
 
-
-void Creature::UpdateMobMovement( uint32 p_time)
+void Creature::CreateTrainerSpells()
 {
-    uint32 timediff = 0;
-    if(m_moveTimer > 0)
+	TrainerSpell *tspell;
+	Field *fields;
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM trainers WHERE guid=%d",GetCreatureInfo()->Entry);  
+	
+	if(!result) return;
+	
+	SpellEntry * spellinfo;
+	
+	do
+	{
+    fields = result->Fetch();
+    
+    spellinfo = sSpellStore.LookupEntry(fields[2].GetUInt32());
+    
+    if(!spellinfo) continue;
+    
+    tspell = new TrainerSpell;
+    tspell->spell = spellinfo;
+    tspell->spellcost = fields[3].GetUInt32();
+    tspell->reqspell = fields[4].GetUInt32();
+    
+    m_tspells.push_back(tspell);
+    
+  } while( result->NextRow() );
+     
+}
+
+//---------------------------------------------------------------//
+/* with compiler optimzation, switch statement differs
+ * from if statement.  Going to a switch statement can
+ * be perform in order(1) where as an if statement has
+ * an order(N) performances.
+ */
+void Creature::AIM_Update(const uint32 &diff)
+{
+    switch( m_deathState )
     {
-        if(p_time >= m_moveTimer)
-        {
-            timediff = p_time - m_moveTimer;
-            m_moveTimer = 0;
-        }
-        else
-            m_moveTimer -= p_time;
-    }
-
-    if(m_timeToMove > 0)
-        m_timeMoved = m_timeToMove <= p_time + m_timeMoved ? m_timeToMove : p_time + m_timeMoved;
-
-    if(m_creatureState == MOVING)
-    {
-        if(!m_moveTimer)
-        {
-            if(m_timeMoved == m_timeToMove)
-            {
-                m_creatureState = STOPPED;
-		
-                // wait before next move
-                m_moveTimer = rand() % (m_moveRun ? 5000 : 10000);
-                assert( m_destinationX != 0 && m_destinationZ != 0 && m_destinationY != 0);
-                MapManager::Instance().GetMap(m_mapId)->CreatureRelocation(this, m_destinationX, m_destinationY, m_destinationZ, m_orientation);        
-                if(((uint32)m_positionX==respawn_cord[0])&&
-                    ((uint32)m_positionY==respawn_cord[1])&&
-                    ((uint32)m_positionZ==respawn_cord[2]))
-                    SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-
-                m_destinationX = m_destinationY = m_destinationZ = 0;
-                m_timeMoved = 0;
-                m_timeToMove = 0;
-            }
-        }                                           // still moving
-    }
-    // creature is stoped
-    else if(m_creatureState == STOPPED && !m_moveTimer && !m_timeMoved)
-    {
-        if(sWorld.getAllowMovement() == false)      //is creature movement enabled?
-            return;
-
-	// if Spirit Healer don't move
-        if(GetUInt32Value(UNIT_FIELD_DISPLAYID) == 5233)
-            return;
-
-        int destpoint;
-        // If creature has no waypoints just wander aimlessly around spawnpoint
-        if(m_nWaypoints==0)                         //no waypoints
-        {
-            // UQ1: Try auto-generating waypoints...
-            uint32 loop;
-            float x, y, z;
-
-#define MAX_RAND_WAYPOINTS 8
-
-            //Log::getSingleton( ).outDetail(fmtstring("Creature %s (at %f %f %f) generating random waypoints.\n", GetName(), respawn_cord[0], respawn_cord[1], respawn_cord[2]));
-
-            if (!respawn_cord || !respawn_cord[0] || !respawn_cord[1] || !respawn_cord[2])
-                return;
-
-            for (loop = 0; loop < MAX_RAND_WAYPOINTS; loop++)
-            {
-                //float wanderDistance=rand()%4+2;
-                float wanderDistance=16;
-                float wanderX=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
-                float wanderY=((wanderDistance*rand())/RAND_MAX)-wanderDistance/2;
-                float wanderZ=0;              // FIX ME ( i dont know how to get apropriate Z coord, maybe use client height map data)
-
-                if (m_nWaypoints == 0)
-                {// First waypoint, start from the respawn point...
-                    x = respawn_cord[0]+wanderX;
-                    y = respawn_cord[1]+wanderY;
-                    z = respawn_cord[2]+wanderZ;
-                }
-                else
-                {// In route waypoint, start from the last added point...
-                    x = m_waypoints[m_nWaypoints-1][0]+wanderX;
-                    y = m_waypoints[m_nWaypoints-1][1]+wanderY;
-                    z = m_waypoints[m_nWaypoints-1][2]+wanderZ;
-                }
-
-                m_waypoints[m_nWaypoints][0] = x;
-                m_waypoints[m_nWaypoints][1] = y;
-                m_waypoints[m_nWaypoints][2] = z;
-                m_nWaypoints++;
-            }
-            m_nWaypoints--;
-            m_canMove = true;
-            return;
-        }
-        else                                        //we do have waypoints
-        {
-            if(m_moveRandom)                        //is random move on if so move to a random waypoint
-            {
-                // if(m_nWaypoints > 1)
-                destpoint = rand() % m_nWaypoints;
-            }
-            else                                    //random move is not on lets follow the path
-            {
-                //Log::getSingleton( ).outDetail("Creature (%s) following waypoints.\n", GetName());
-
-                // Are we on the last waypoint? if so walk back
-                if (m_currentWaypoint == (m_nWaypoints-1))
-                    m_moveBackward = true;
-                if (m_currentWaypoint == 0)         // Are we on the first waypoint? if so lets goto the second waypoint
-                    m_moveBackward = false;
-                if (!m_moveBackward)                // going 0..n
-                    destpoint = ++m_currentWaypoint;
-                else                                // going (n-1)..0
-                    destpoint = --m_currentWaypoint;
-            }
-            if(m_canMove)
-                AI_MoveTo(m_waypoints[destpoint][0], m_waypoints[destpoint][1], m_waypoints[destpoint][2], m_moveRun);
-        }
-    }
-}
-
-#ifndef __NO_PLAYERS_ARRAY__
-#define PLAYERS_MAX 64550 // UQ1: What is the max GUID value???
-extern uint32 NumActivePlayers;
-extern long long ActivePlayers[PLAYERS_MAX];
-extern float PlayerPositions[PLAYERS_MAX][2]; // UQ1: Defined in World.cpp...
-extern long int PlayerZones[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
-extern long int PlayerMaps[PLAYERS_MAX]; // UQ1: Defined in World.cpp...
-
-//#define VectorSubtract(a,b,c) ((c)[0]=(a)[0]-(b)[0],(c)[1]=(a)[1]-(b)[1],(c)[2]=(a)[2]-(b)[2])
-#define VectorSubtract(a,b,c) c[0]=(a[0])-(b[0]); c[1]=(a[1])-(b[1]); c[2]=(a[2])-(b[2])
-
-float VectorLength(float v[3])
-{
-    int        i;
-    double    length;
-    
-    length = 0;
-    for (i=0 ; i < 3 ; i++)
-        length += v[i]*v[i];
-    length = sqrt (length);        // FIXME
-    return (float)length;
-}
-
-float Distance(float from1, float from2, float from3, float to1, float to2, float to3)
-{
-    float vec[3];
-    float v1a[3];
-    float v2a[3];
-
-    v1a[0] = from1;
-    v1a[1] = from2;
-    v1a[2] = from3;
-    v2a[0] = to1;
-    v2a[1] = to2;
-    v2a[2] = to3;
-
-    VectorSubtract(v2a, v1a, vec);
-    return (float)VectorLength(vec);
-}
-
-float DistanceNoHeight(float from1, float from2, float to1, float to2)
-{
-    float vec[3];
-    float v1a[3];
-    float v2a[3];
-
-    v1a[0] = from1;
-    v1a[1] = from2;
-    v1a[2] = 0;
-    v2a[0] = to1;
-    v2a[1] = to2;
-    v2a[2] = 0;
-
-    VectorSubtract(v2a, v1a, vec); 
-    return (float)VectorLength(vec);
-}
-
-float HeightDistance(float from, float to)
-{
-    float vec[3];
-    float v1a[3];
-    float v2a[3];
-
-    v1a[0] = 0;
-    v1a[1] = 0;
-    v1a[2] = from;
-    v2a[0] = 0;
-    v2a[1] = 0;
-    v2a[2] = to;
-
-    VectorSubtract(v2a, v1a, vec);
-    return VectorLength(vec);
-}
-#endif //__NO_PLAYERS_ARRAY__
-
-extern float max_creature_distance;
-
-time_t Creature::GetNextThink()
-{
-	return m_nextThinkTime;
-}
-
-bool Creature::isDisabled()
-{
-	if (m_enabled)
-		return false;
-
-	return true;
-}
-
-void Creature::SetEnabled()
-{
-	m_enabled = true;
-}
-
-void Creature::SetDisabled()
-{
-	m_enabled = false;
-}
-
-void 
-Creature::_RealtimeSetCreatureInfo()
-{// UQ1: Checked this procedure, dead NPCs are not happening here!!! I commented the whole thing out and they still die...
-    
-	//
-    // UQ1: Update UNIT_ stats here before transmission!!!
-    // This should also probebly do other units then creatures... They seem to be seperate???
-    //
-
-    CreatureInfo *ci = NULL;
-	bool need_save = false;
-    
-    if (GetNameID() >= 0 && GetNameID() < 999999)
-		ci = objmgr.GetCreatureName(GetNameID());
-    
-    if (ci)
-    {// UQ1: Fill in creature info here...
-		if (this->GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS) != ci->bounding_radius)
-			this->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
-	//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
-	
-		if (this->GetUInt32Value(UNIT_FIELD_DISPLAYID) != ci->DisplayID)
-			this->SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
-
-		if (this->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID) != ci->DisplayID)
-			this->SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
-
-		if (this->GetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID) != ci->mount)
-			this->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
-		
-		if (this->GetUInt32Value(UNIT_FIELD_LEVEL) != ci->level)
-			this->SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
-
-		if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != ci->faction)
-			this->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
-	
-		// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
-		if (this->GetUInt32Value(UNIT_FIELD_FLAGS) != ci->Type)
-			this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
-
-		if (this->GetUInt32Value(UNIT_NPC_FLAGS) != ci->flag)
-			this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
-
-		if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_DEAD))
-			ci->flags1 &= ~UNIT_DYNFLAG_DEAD;
-
-		if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_LOOTABLE))
-			ci->flags1 &= ~UNIT_DYNFLAG_LOOTABLE;
-
-		if (this->GetUInt32Value(UNIT_DYNAMIC_FLAGS) != ci->flags1)
-			this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
-
-		if (ci->maxhealth <= 0)
-		{// Resolve dead NPCs... Bad DB again...
-			if (ci->level >= 64)
-				ci->maxhealth = urand(ci->level*50, ci->level*80);
-			else if (ci->level > 48)
-				ci->maxhealth = urand(ci->level*40, ci->level*70);
-			else if (ci->level > 32)
-				ci->maxhealth = urand(ci->level*30, ci->level*60);
-			else if (ci->level > 24)
-				ci->maxhealth = urand(ci->level*30, ci->level*60);
-			else if (ci->level > 16)
-				ci->maxhealth = urand(ci->level*40, ci->level*60);
-			else
-				ci->maxhealth = urand(ci->level*70, ci->level*150);
-			
-			need_save = true;
-		}
-
-		if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) != ci->maxhealth)
-			this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
-
-		if (this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) != ci->maxhealth)
-			this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
-
-//		if (this->GetUInt32Value(UNIT_FIELD_HEALTH) <= 0)
-//			this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
-
-		if (this->GetUInt32Value(UNIT_FIELD_BASE_MANA) != ci->maxmana)
-			this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
-	
-		if (ci->baseattacktime <= 1000) 
-		{// Fix bad attack times in DB if needed...
-			if (ci->level > 48)
-				ci->baseattacktime = urand(1000, 1500);
-			else if (ci->level > 32)
-				ci->baseattacktime = urand(1000, 2000);
-			else if (ci->level > 24)
-				ci->baseattacktime = urand(1000, 3000);
-			else if (ci->level > 16)
-				ci->baseattacktime = urand(2000, 3000);
-			else if (ci->level > 8)
-				ci->baseattacktime = urand(2000, 4000);
-			else
-				ci->baseattacktime = urand(3000, 4000);
-
-			need_save = true;
-		}
-	
-		if (this->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME) != ci->baseattacktime)
-			this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
-	
-		if (ci->rangeattacktime <= 1000) // Fix bad attack times in DB if needed...
-		{// Fix bad attack times in DB if needed...
-			if (ci->level > 48)
-				ci->rangeattacktime = urand(1000, 1500);
-			else if (ci->level > 32)
-				ci->rangeattacktime = urand(1000, 2000);
-			else if (ci->level > 24)
-				ci->rangeattacktime = urand(1000, 3000);
-			else if (ci->level > 16)
-				ci->rangeattacktime = urand(2000, 3000);
-			else if (ci->level > 8)
-				ci->rangeattacktime = urand(2000, 4000);
-			else
-				ci->rangeattacktime = urand(3000, 4000);
-
-			need_save = true;
-		}
-	
-		if (this->GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME) != ci->rangeattacktime)
-			this->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
-	
-		// UQ1: Because damage values are floats, and the DB uses integers (and some seem to be wrong...)
-		if (((ci->mindmg > 1000 && ci->level < 48) || ci->mindmg <= 0)) 
-		{// UQ1: Add defaults...
-			if (ci->level > 40)
-			{
-				ci->mindmg = float(ci->level-urand(0, 5));
-			}
-			else if (ci->level > 30)
-			{
-				ci->mindmg = float(ci->level-urand(0, 10));
-			}
-			else if (ci->level > 20)
-			{
-				ci->mindmg = float(ci->level-urand(0, 15));
-			}
-			else if (ci->level > 10)
-			{
-				ci->mindmg = float(ci->level-urand(0, 9));
-			}
-			else if (ci->level > 5)
-			{
-				ci->mindmg = float(ci->level-urand(0, 4));
-			}
-			else
-			{
-				ci->mindmg = float(ci->level-1);
-			}
+    case JUST_DIED:
+	{
+	    SetUInt32Value(UNIT_NPC_FLAGS, 0);
+	    m_deathState = CORPSE;
 	    
-			if (ci->mindmg <= 0)
-				ci->mindmg = float(1);
-		}
-	
-		if (((ci->maxdmg > 1000 && ci->level < 48) || ci->maxdmg <= 0)) 
-		{// UQ1: Add defaults...
-			if (ci->level > 40)
-			{
-				ci->maxdmg = float(ci->level+urand(1, 50));
-			}
-			else if (ci->level > 20)
-			{
-				ci->maxdmg = float(ci->level+urand(1, 30));
-			}
-			else if (ci->level > 10)
-			{
-			ci->maxdmg = float(ci->level+urand(1, 15));
-			}
-			else if (ci->level > 5)
-			{
-			ci->maxdmg = float(ci->level+urand(1, 8));
-			}
-			else
-			{
-				ci->maxdmg = float(ci->level+urand(1, 4));
-			}
-	    
-			if (ci->maxdmg <= 1)
-				ci->maxdmg = float(2);
-		}
-
-		if (ci->mindmg > ci->maxdmg)
-		{// For corrupt DB damage values...
-			uint32 max = ci->mindmg;
-
-			ci->mindmg = ci->maxdmg;
-			ci->maxdmg = max;
-
-			need_save = true;
-		}
-	
-		if (this->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) != ci->mindmg)
-			this->SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
-
-		if (this->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) != ci->maxdmg)
-			this->SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
-	
-		if (this->GetFloatValue(UNIT_FIELD_MINDAMAGE) != ci->mindmg)
-			this->SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
-
-		if (this->GetFloatValue(UNIT_FIELD_MAXDAMAGE) != ci->maxdmg)
-			this->SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
-	
-		//ci->rank // UQ1: Guilds???
-	
-
-		if (ci->scale <= 0 || ci->scale > 2.0)
-			ci->scale = 1.0;
-
-		if (this->GetFloatValue(OBJECT_FIELD_SCALE_X) != ci->scale)
-			this->SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
-
-		//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
-	
-		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY) != ci->slot1model)
-			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
-
-		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot1pos)
-			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
-	
-		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01) != ci->slot2model)
-			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
-	
-		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot2pos)
-			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
-	
-		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02) != ci->slot3model)
-			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
-	
-		if (this->GetUInt32Value(UNIT_VIRTUAL_ITEM_INFO) != ci->slot3pos)
-			this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos);
-    }
-
-	if (this->GetUInt32Value( UNIT_FIELD_MAXHEALTH ) <= 0 || this->GetUInt32Value( UNIT_FIELD_BASE_HEALTH ) <= 0)
-	{// Resolve dead NPCs... Bad DB again...
-		uint32 maxhealth;
-
-		if (ci->level >= 64)
-			maxhealth = urand(getLevel()*50, getLevel()*80);
-		else if (ci->level > 48)
-			maxhealth = urand(getLevel()*40, getLevel()*70);
-		else if (ci->level > 32)
-			maxhealth = urand(getLevel()*30, getLevel()*60);
-		else if (ci->level > 24)
-			maxhealth = urand(getLevel()*30, getLevel()*60);
-		else if (ci->level > 16)
-			maxhealth = urand(getLevel()*40, getLevel()*60);
-		else
-			maxhealth = urand(getLevel()*70, getLevel()*150);
-
-		this->SetUInt32Value( UNIT_FIELD_HEALTH, maxhealth );
-		this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, maxhealth );
+	    i_AI->UpdateAI(diff); 
+	    break;
 	}
-	
-	if (need_save)
-	{// Save the fixed info back to the DB for next time...
-		//this->SaveToDB(); .. Well that isn't going to work.. Saves to wrong table..
-	}
-
-    //
-    // UQ1: End of UNIT_ updates...
-    //
-}
-
-void 
-Creature::_SetCreatureTemplate()
-{// UQ1: Checked.. Procedure is fine... Dead NPCs not happening here either!!!
-    //
-    // UQ1: Update UNIT_ stats here before transmission!!!
-    // This should also probebly do other units then creatures... They seem to be seperate???
-    //
-    
-    CreatureInfo *ci = NULL;
-    
-    if (GetNameID() >= 0 && GetNameID() < 999999)
-	ci = objmgr.GetCreatureName(GetNameID());
-    
-    if (ci)
-    {// UQ1: Fill in creature info here...
-	this->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, ci->bounding_radius);
-	//SetUInt32Value( UNIT_FIELD_COMBATREACH, ci->
-		
-	this->SetUInt32Value( UNIT_FIELD_DISPLAYID, ci->DisplayID );
-	this->SetUInt32Value( UNIT_FIELD_NATIVEDISPLAYID, ci->DisplayID );
-	this->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, ci->mount );
-	this->SetUInt32Value( UNIT_FIELD_LEVEL, ci->level );
-	this->SetUInt32Value( UNIT_FIELD_FACTIONTEMPLATE, ci->faction );
-		// here done	
-	// UQ1: These 3 fields may be the wrong way around??? -- UQ1: Think this is right now...
-	this->SetUInt32Value( UNIT_FIELD_FLAGS, ci->Type );
-	this->SetUInt32Value( UNIT_NPC_FLAGS, ci->flag);
-
-/*
-//---------------------------------------------------------
-//  Dynamic flags for units
-//---------------------------------------------------------
-// Unit has blinking stars effect showing lootable
-#define UNIT_DYNFLAG_LOOTABLE			0x0001
-// Shows marked unit as small red dot on radar
-#define UNIT_DYNFLAG_TRACK_UNIT			0x0002
-// Gray mob title marks that mob is tagged by another player
-#define UNIT_DYNFLAG_OTHER_TAGGER		0x0004
-// Blocks player character from moving
-#define UNIT_DYNFLAG_ROOTED				0x0008
-// Shows infos like Damage and Health of the enemy
-#define UNIT_DYNFLAG_SPECIALINFO		0x0010
-// Unit falls on the ground and shows like dead
-#define UNIT_DYNFLAG_DEAD				0x0020
-*/
-
-	if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_DEAD))
-		ci->flags1 &= ~UNIT_DYNFLAG_DEAD;
-
-	if (ci->maxhealth > 0 && (ci->flags1 & UNIT_DYNFLAG_LOOTABLE))
-		ci->flags1 &= ~UNIT_DYNFLAG_LOOTABLE;
-
-	this->SetUInt32Value( UNIT_DYNAMIC_FLAGS, ci->flags1);
-	
-	if (ci->maxhealth <= 0)
-	{// Resolve dead NPCs... Bad DB again...
-		if (ci->level >= 64)
-			ci->maxhealth = urand(ci->level*50, ci->level*80);
-		else if (ci->level > 48)
-			ci->maxhealth = urand(ci->level*40, ci->level*70);
-		else if (ci->level > 32)
-			ci->maxhealth = urand(ci->level*30, ci->level*60);
-		else if (ci->level > 24)
-			ci->maxhealth = urand(ci->level*30, ci->level*60);
-		else if (ci->level > 16)
-			ci->maxhealth = urand(ci->level*40, ci->level*60);
-		else
-			ci->maxhealth = urand(ci->level*70, ci->level*150);
-	}
-
-	this->SetUInt32Value( UNIT_FIELD_HEALTH, ci->maxhealth );
-	this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, ci->maxhealth );
-	this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, ci->maxhealth );
-	this->SetUInt32Value( UNIT_FIELD_BASE_MANA, ci->maxmana);
-
-
-	if (ci->baseattacktime <= 0)
-	    ci->baseattacktime = urand(1000, 2000);
-
-	this->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, ci->baseattacktime);
-	
-	if (ci->rangeattacktime <= 0)
-	    ci->rangeattacktime = urand(1000, 2000);
-	
-	this->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, ci->rangeattacktime);
-	
-	// UQ1: Because damage values are floats, and the DB uses integers (and some seem to be wrong...)
-	if (((ci->mindmg > 1000 && ci->level < 48) || ci->mindmg <= 0)) 
-	{// UQ1: Add defaults...
-	    if (ci->level > 40)
+    case DEAD:
+	{
+	    if( m_respawnTimer <= diff )
 	    {
-		ci->mindmg = float(ci->level-urand(0, 5));
-	    }
-	    else if (ci->level > 30)
-	    {
-		ci->mindmg = float(ci->level-urand(0, 10));
-	    }
-	    else if (ci->level > 20)
-	    {
-		ci->mindmg = float(ci->level-urand(0, 15));
-	    }
-	    else if (ci->level > 10)
-	    {
-		ci->mindmg = float(ci->level-urand(0, 9));
-			}
-	    else if (ci->level > 5)
-	    {
-		ci->mindmg = float(ci->level-urand(0, 4));
+		DEBUG_LOG("Respawning...");		
+
+		RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);	
+		SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+		m_deathState = ALIVE;
+		ClearState(ALL_STATE);
+		i_motionMaster.Clear(); 
+		MapManager::Instance().GetMap(GetMapId())->Add(this); 
 	    }
 	    else
-	    {
-		ci->mindmg = float(ci->level-1);
-	    }
-	    
-	    if (ci->mindmg <= 0)
-		ci->mindmg = float(1);
+		m_respawnTimer -= diff;
+	    break;
 	}
-	
-	if (((ci->maxdmg > 1000 && ci->level < 48) || ci->maxdmg <= 0)) 
-	{// UQ1: Add defaults...
-	    if (ci->level > 40)
+    case CORPSE:
+	{
+	    if( m_deathTimer <= diff )
 	    {
-		ci->maxdmg = float(ci->level+urand(1, 50));
-	    }
-	    else if (ci->level > 20)
-	    {
-		ci->maxdmg = float(ci->level+urand(1, 30));
-	    }
-	    else if (ci->level > 10)
-	    {
-		ci->maxdmg = float(ci->level+urand(1, 15));
-	    }
-	    else if (ci->level > 5)
-	    {
-		ci->maxdmg = float(ci->level+urand(1, 8));
+		DEBUG_LOG("Removing corpse...");
+		ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
+		setDeathState(DEAD);
+		m_respawnTimer = m_respawnDelay;
+		GetRespawnCoord(m_positionX, m_positionY, m_positionZ);
 	    }
 	    else
-	    {
-		ci->maxdmg = float(ci->level+urand(1, 4));
-	    }
-	    
-	    if (ci->maxdmg <= 1)
-		ci->maxdmg = float(2);
+		m_deathTimer -= diff;
+	    break;
 	}
-	
-	this->SetFloatValue( UNIT_FIELD_MINRANGEDDAMAGE, ci->mindmg );
-	this->SetFloatValue( UNIT_FIELD_MAXRANGEDDAMAGE, ci->maxdmg );
-	
-	this->SetFloatValue( UNIT_FIELD_MINDAMAGE, ci->mindmg );
-	this->SetFloatValue( UNIT_FIELD_MAXDAMAGE, ci->maxdmg );
-	
-	//ci->rank // UQ1: Guilds???
-	
-	this->SetFloatValue( OBJECT_FIELD_SCALE_X, ci->scale );
-	//SetFloatValue( OBJECT_FIELD_SCALE_X, ci->size );
-	
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, ci->slot1model);
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO, ci->slot1pos);
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, ci->slot2model);
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+1, ci->slot2pos);
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, ci->slot3model);
-	this->SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO+2, ci->slot3pos); 
+    case ALIVE:
+	{
+	    Unit::Update( diff );	    
+	    i_AI->UpdateAI(diff);
+	    i_motionMaster.UpdateMotion(diff);
+	    break;
+	}
+    default:
+	break;
     }
-
-    if (this->GetUInt32Value( UNIT_FIELD_HEALTH ) <= 0)
-	{// Resolve dead NPCs... Bad DB again...
-		uint32 maxhealth;
-
-		if (ci->level >= 64)
-			maxhealth = urand(getLevel()*50, getLevel()*80);
-		else if (ci->level > 48)
-			maxhealth = urand(getLevel()*40, getLevel()*70);
-		else if (ci->level > 32)
-			maxhealth = urand(getLevel()*30, getLevel()*60);
-		else if (ci->level > 24)
-			maxhealth = urand(getLevel()*30, getLevel()*60);
-		else if (ci->level > 16)
-			maxhealth = urand(getLevel()*40, getLevel()*60);
-		else
-			maxhealth = urand(getLevel()*70, getLevel()*150);
-
-		this->SetUInt32Value( UNIT_FIELD_HEALTH, maxhealth );
-		this->SetUInt32Value( UNIT_FIELD_MAXHEALTH, maxhealth );
-		this->SetUInt32Value( UNIT_FIELD_BASE_HEALTH, maxhealth );
-		} 
-
-    //
-    // UQ1: End of UNIT_ updates...
-    //
 }
+
+void Creature::AIM_Initialize()
+{
+    i_motionMaster.Initialize(this);
+    i_AI = FactorySelector::selectAI(this);
+}
+
 
 void Creature::Update( uint32 p_time )
 {
-    // UQ1: This has to be done each think.. There simply is no choice.. Later some of these values should be realtime info, 
-    // not just copied from the template.. But as it is now, simply setting these on creation just doesnt work...
-    if (isAlive())
-	_RealtimeSetCreatureInfo();
-    
-    if (this->GetUInt32Value(UNIT_FIELD_MAXHEALTH) <= 0 || this->GetUInt32Value(UNIT_FIELD_BASE_HEALTH) <= 0)
-    {// Resolve dead NPCs... Bad DB again...
-	_RealtimeSetCreatureInfo();
-    }
-    
-#ifndef __NO_PLAYERS_ARRAY__
-    uint32 loop;
-
-    if (NumActivePlayers == 0)
-        return; // UQ1: If there's no players online, why think???
-
-	float x = GetPositionX();
-	float y = GetPositionY();
-	float z = GetPositionZ();
-	long int mapId = GetMapId();
-	long int zoneId = GetZoneId();
-#endif //__NO_PLAYERS_ARRAY__
-
-    //if (this->getItemCount() > 0 && this->getItemCount() < MAX_CREATURE_ITEMS)
-    //    isVendor = true;
-
-    Unit::Update( p_time );
-
-    if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
-        || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
-        return; // These guys shouldn't move...
-    
-#ifndef __NO_PLAYERS_ARRAY__
-    /* UQ1: Attack checking */
-    for (loop = 0; loop < NumActivePlayers; loop++)
-    {// Exit procedure here if no players are close...
-        bool sameFaction = false;
-
-        if (PlayerMaps[ActivePlayers[loop]] != mapId)
-            continue;
-
-        //if (PlayerZones[ActivePlayers[loop]] != zoneId)
-        //    continue;
-
-//        if (this->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == objmgr.GetObject<Player>(ActivePlayers[loop])->getFaction())
-//            sameFaction = true; // Same faction as us...
-
-        float distance = DistanceNoHeight(PlayerPositions[ActivePlayers[loop]][0], PlayerPositions[ActivePlayers[loop]][1], x, y);
-
-        Unit *pVictim = (Unit*) ObjectAccessor::Instance().FindPlayer(ActivePlayers[loop]);
-        WPAssert(pVictim);
-
-        //if(distance<=50 && !sameFaction)
-        if(distance<=GetAttackDistance(pVictim) && !sameFaction)
-        {// If close enough, attack...
-            if (HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
-                //|| HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
-                || HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR))
-                continue;
-
-            if(m_attackers.empty())
-            {
-                //Unit *pVictim = (Unit*) ObjectAccessor::Instance().FindPlayer(ActivePlayers[loop]);
-                //WPAssert(pVictim);
-
-                if (pVictim->isAlive())
-                {
-		    // Now decided whether I should attack this guy.
-		    FactionTemplateEntry *creature_fact = sFactionTemplateStore.LookupEntry(GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-		    FactionTemplateEntry *target_fact = sFactionTemplateStore.LookupEntry(pVictim->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-		    FactionTemplateResolver fact_source(creature_fact);
-		    FactionTemplateResolver fact_target(target_fact);
-		    if( fact_source.IsHostileTo( fact_target ) )
-			m_attackers.insert(pVictim);
-                }
-            }
-
-            break; // We found an enemy to attack... Exit the loop...
-        }
-    }
-#endif //__NO_PLAYERS_ARRAY__
-
-    if (m_deathState == JUST_DIED)
-    {
-        this->SetUInt32Value(UNIT_NPC_FLAGS , uint32(0));
-        // UpdateObject();
-
-        // remove me as an attacker from the AttackMap
-        m_attackers.clear();
-        m_deathState = CORPSE;
-    }
-
-    if(m_deathTimer > 0)
-    {
-        if(p_time >= m_deathTimer)
-            m_deathTimer = 0;
-        else
-            m_deathTimer -= p_time;
-
-        if (m_deathTimer <= 0)
-        {
-            // time to respawn!
-            Log::getSingleton( ).outDetail("Removing corpse...");
-	    this->RemoveFromWorld();
-
-            m_respawnTimer = m_respawnDelay;
-            setDeathState(DEAD);
-
-            m_positionX = respawn_cord[0];
-            m_positionY = respawn_cord[1];
-            m_positionZ = respawn_cord[2];
-
-            return;
-        }
-    }
-    else if (m_respawnTimer > 0)
-    {
-        if(p_time >= m_respawnTimer)
-            m_respawnTimer = 0;
-        else
-            m_respawnTimer -= p_time;
-
-        if(m_respawnTimer <= 0)
-        {
-            // WorldPacket data;
-            Log::getSingleton( ).outDetail("Respawning...");
-            SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-	    this->AddToWorld(); // ?? not sure
-            setDeathState(ALIVE);
-            m_creatureState = STOPPED;            // after respawn monster can move
-        }
-    }
-
-    // FIXME
-    if (isAlive())
-    {
-        if(m_attackers.empty())
-        {
-            RegenerateAll();
-        }
-
-        if (GetTypeId() != TYPEID_CORPSE)
-            UpdateMobMovement( p_time );
-
-        AI_Update();
-
-        // Clear the NPC flags bit so it doesn't get auto- updated each frame. NPC flags are set per player and this would ruin is
-        // unsetUpdateMaskBit(UNIT_NPC_FLAGS);
-        // UpdateObject();
-    }
+    AIM_Update( p_time );
 }
 
 
-void Creature::Create (uint32 guidlow, const char* name, uint32 mapid, float x, float y, float z, float ang, uint32 nameId)
+bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry)
 {
-    Object::_Create(guidlow, HIGHGUID_UNIT, mapid, x, y, z, ang, nameId);
-
     respawn_cord[0] = x;
     respawn_cord[1] = y;
     respawn_cord[2] = z;
+	m_mapId =mapid;
+	m_positionX =x;
+	m_positionY=y;
+	m_positionZ=z;
+	m_orientation=ang;
 
-    m_name = name;
+return	CreateFromProto(guidlow, Entry);
 
-    AI_SendCreaturePacket( guidlow );
+
 }
 
 
-//-----------------------------------------------------------------------------
-/// Quests
+
+
 uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 {
 	bool wasReward  = false;
@@ -955,11 +212,10 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     uint32 status;
     Quest *pQuest;
 
-	for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
+	for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
-        quest_id = *i;
-        status = pPlayer->getQuestStatus(quest_id);
-        pQuest = objmgr.GetQuest(quest_id);
+        pQuest = *i;
+		status = pPlayer->getQuestStatus(pQuest->m_qId);
 
 		if ( pQuest == NULL ) continue;
 
@@ -994,14 +250,14 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         {
 			if (!pQuest->LevelSatisfied( pPlayer ))
 			{
-                pPlayer->addNewQuest(quest_id, QUEST_STATUS_UNAVAILABLE );
+                pPlayer->addNewQuest(pQuest, QUEST_STATUS_UNAVAILABLE );
 				if ( pQuest->CanShowUnsatified( pPlayer ) ) wasUnavailShow = true;
 
 				wasAnavail = true;
 			}
             else
 			{
-                pPlayer->addNewQuest(quest_id, QUEST_STATUS_AVAILABLE );
+                pPlayer->addNewQuest(pQuest, QUEST_STATUS_AVAILABLE );
 				if ( pQuest->CanShowAvailable( pPlayer ) ) wasAvailShow = true;
 
 				wasAvail = true;
@@ -1009,13 +265,12 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         }
     }
 
-   // Involvers
+   
 
-	for( std::list<uint32>::iterator i = mInvolvedQuestIds.begin( ); i != mInvolvedQuestIds.end( ); ++ i )
+	for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
-        quest_id = *i;
-        status = pPlayer->getQuestStatus(quest_id);
-        pQuest = objmgr.GetQuest(quest_id);
+        pQuest = *i;
+		status = pPlayer->getQuestStatus(pQuest->m_qId);
 
 		if ( status == QUEST_STATUS_INCOMPLETE )
 		{
@@ -1050,28 +305,18 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 }
 
 
-// ----------------------------------------------------------------------------
+
 Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
 {
-    Quest *pQuest;
 
-	if ( prevQuest->m_qNextQuest != 0 )
-	{
-		pQuest = objmgr.GetQuest( prevQuest->m_qNextQuest );
+	if(prevQuest->m_qNextQuest && prevQuest->m_qNextQuest->CanBeTaken(pPlayer))
+		return prevQuest->m_qNextQuest;
 
-		if (pQuest)
-		{
-			if ( pQuest->CanBeTaken(pPlayer) )
-				return pQuest;
-		}
-	}
-
-	return NULL;		 
+	return NULL;
 }
 
 
 
-// ---------------------------------------------------------------------------------
 
 void Creature::prepareQuestMenu( Player *pPlayer )
 {
@@ -1079,42 +324,38 @@ void Creature::prepareQuestMenu( Player *pPlayer )
     uint32 status;
     Quest *pQuest;
 
-	for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
+	for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
-        quest_id = *i;
-        status = pPlayer->getQuestStatus(quest_id);
-        pQuest = objmgr.GetQuest(quest_id);
-
-		// Adding uncompleted quests.
+        pQuest = *i;
+		status = pPlayer->getQuestStatus(pQuest->m_qId);
+        
 		if ( status == QUEST_STATUS_INCOMPLETE )
-			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
+			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( pQuest->m_qId, DIALOG_STATUS_INCOMPLETE, false );
 
-		// Adding available quests
+		
 		if ( ( status == QUEST_STATUS_AVAILABLE ) && ( pQuest->CanBeTaken(pPlayer) ) )
-			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
+			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( pQuest->m_qId, DIALOG_STATUS_AVAILABLE, true );
 	}
 
-	for( std::list<uint32>::iterator i = mInvolvedQuestIds.begin( ); i != mInvolvedQuestIds.end( ); ++ i )
+	for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
-        quest_id = *i;
-        status = pPlayer->getQuestStatus(quest_id);
-        pQuest = objmgr.GetQuest(quest_id);
-
-		// Adding uncompleted quests.
+        pQuest = *i;
+		status = pPlayer->getQuestStatus(pQuest->m_qId);
+        
 		if ( status == QUEST_STATUS_INCOMPLETE )
-			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
+			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( pQuest->m_qId, DIALOG_STATUS_INCOMPLETE, false );
 
-		// Adding uncompleted quests.
-		if ( status == QUEST_STATUS_INCOMPLETE )
-			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( quest_id, DIALOG_STATUS_REWARD, false );
+		
+		if ( ( status == QUEST_STATUS_AVAILABLE ) && ( pQuest->CanBeTaken(pPlayer) ) )
+			pPlayer->PlayerTalkClass->GetQuestMenu()->QuestItem( pQuest->m_qId, DIALOG_STATUS_AVAILABLE, true );
 	}
 }
 
 bool Creature::hasQuest(uint32 quest_id)
 {
-    for( std::list<uint32>::iterator i = mQuestIds.begin( ); i != mQuestIds.end( ); ++ i )
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
-        if (*i == quest_id)
+        if ((*i)->m_qId == quest_id)
             return true;
     }
 
@@ -1123,481 +364,218 @@ bool Creature::hasQuest(uint32 quest_id)
 
 bool Creature::hasInvolvedQuest(uint32 quest_id)
 {
-    for( std::list<uint32>::iterator i = mInvolvedQuestIds.begin( ); i != mInvolvedQuestIds.end( ); ++ i )
+    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
-        if (*i == quest_id)
+        if ((*i)->m_qId == quest_id)
             return true;
     }
 
     return false;
 }
 
-
-///////////
-/// Looting
-
 void Creature::generateLoot()
 {
-    memset(item_list, 0, 8*128);
-    itemcount = 0; //set Total Unit Item count to 0
-    int LootValue = 0, MaxLootValue = 0;
-    
-    // max items to give for this creature
-    int itemsToGet = 0;
-    int creature_level = getLevel();
-    if(creature_level < 10)
-    {
-        itemsToGet = rand()%2; // 0 or 1 items
-    }
-    else if(creature_level < 25)
-    {
-        itemsToGet = rand()%3; // 0 to 2 items
-    }
-    else if(creature_level < 40)
-    {
-        itemsToGet = rand()%4; // 0 to 3 items
-    }
-    else if(creature_level < 60)
-    {
-        itemsToGet = rand()%5; // 0 to 4 items
-    }
-    else if(creature_level < 80)
-    {
-        itemsToGet = rand()%6; // 0 to 5 items
-    }
-    else 
-    {
-        itemsToGet = rand()%7; // 0 to 6 items
-    }
-    
-    m_lootMoney = (uint32)(creature_level * (rand()%5 + 1)*sWorld.getRate(RATE_DROP)); //generate copper    
-    
-    if( itemsToGet == 0 )
-    return; // sorry dude.. nothing for you
+	//DO NOT GENERATE LOOT IF IT'S NOT SPECIFIED!
+	//ESPECIALLY USING RND, IT'S COMPLETELY WRONG
+	//Looit is used as goods id for vendors
+	//they have no loot but have items to trade
 
-    // Generate max value
-    MaxLootValue = (int)(((creature_level * (rand()%40+50))/5)*sWorld.getRate(RATE_DROP)+rand()%5+5);
 
-    /*
-      We need an algorithm that mimic the randomless given the probabilities of each items.
-      The algorithm must not affected by the order the items in the list and only
-      by the probability they assigned to.  Note, this is important due to the fact
-      that there's a max loot item.
-      Algorithm:
-         Given N items, randomly draw an item form the list (and remove it)
-     Generate the probability and compare against the item's assigned probability
-     If max items has not been achieved, repeat the whole process with N-1
-     recursively repeat until either all items has been drawn or itemsToGet fulfilled.
-     */
+	uint32 lootid=GetCreatureInfo()->lootid;
+	if(!HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR))
+	{
+		if(lootid)
+		FillLoot(&loot,lootid);
+	}
+	uint32 level=getLevel();
 
-    const LootMgr::LootList &loot_list(LootMgr::getSingleton().getCreaturesLootList(GetUInt32Value(OBJECT_FIELD_ENTRY)));
-    bool not_done = (loot_list.size()  && itemsToGet);
-    std::vector<short> indexes(loot_list.size());
-    std::generate(indexes.begin(), indexes.end(), SequenceGen());
-    sLog.outDebug("Number of items to get %d", itemsToGet);
-    
-    while (not_done)
-    {
-    // generate the item you need to pick
-    int idx = rand()%indexes.size();
-    const LootItem &item(loot_list[indexes[idx]]);
-    indexes.erase(indexes.begin()+idx);
-    ItemPrototype *pCurItem = objmgr.GetItemPrototype(item.itemid);
-    
-    if( pCurItem != NULL && item.chance >= (rand()%100) )
-    {
-        if( !(LootValue > MaxLootValue) )
-        {
-        LootValue += pCurItem->BuyPrice;
-        addItem(item.itemid, 1);        
-        --itemsToGet;
-        }
-    }
-    
-    not_done = (itemsToGet && indexes.size() && !(LootValue > MaxLootValue));
-    }
+	loot.gold=rand()%(level*level*5);
+
 }
 
-
-
-
-///////////////
-/// Creature AI
-
-// This Creature has just been attacked by someone
-// Reaction: Add this Creature to the list of current attackers
-void Creature::AI_AttackReaction(Unit *pAttacker, uint32 damage_dealt)
-{
-    if(!m_useAI)
-        return;
-
-    WPAssert(pAttacker);
-
-    AttackerSet::iterator itr;
-    for (itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
-    {
-        if (*itr == pAttacker)
-            return;                               // Attacker already in list
-    }
-
-    if(m_canMove)
-    {
-        //move to attacker when attacked
-        m_moveSpeed = 7.0f*0.001f;
-        AI_SendMoveToPacket(m_positionX, m_positionY, m_positionZ, 100, 1);
-        m_moveTimer = 0;
-        m_destinationX = m_destinationY = m_destinationZ = 0;
-        m_timeMoved = 0;
-        m_timeToMove = 0;
-        // m_creatureState = MOVING; //makes them fall through the ground
-
-        // m_creatureState = STOPPED;
-        // AI_MoveTo(m_positionX, m_positionY, m_positionZ, true);
-    }
-
-    m_attackers.insert(pAttacker);
-}
-
-
-void Creature::AI_Update()
-{
-    if(!m_useAI)
-        return;
-
-    Unit *closestTarget = NULL;
-    float targetDistanceSq = 10000.0f;
-
-    // Cycle through attackers
-    // If one is out of range, remove from the map
-    AttackerSet::iterator itr;
-    if(m_attackers.empty() && m_creatureState == ATTACKING)
-    {
-        m_creatureState = STOPPED;                // after killing all attackers they can start moving again
-    }
-
-    for (itr = m_attackers.begin(); itr != m_attackers.end(); )
-    {
-        Unit *pVictim = *itr;
-        WPAssert(pVictim);
-
-        if (!pVictim->isAlive())
-        {
-            m_attackers.erase(itr++);
-            continue;
-        }
-
-        float lengthSq = GetDistanceSq(pVictim);
-
-        if (lengthSq > 30.0f*30.0f)               // must be greater than the max range of spells
-        {
-            // stop attacking because the target is too far
-            m_attackers.erase(itr++);
-            continue;
-        }
-
-        if (lengthSq < targetDistanceSq)
-        {
-            closestTarget = *itr;
-            targetDistanceSq = lengthSq;
-        }
-
-        ++itr;
-    }
-
-    if(m_creatureState==MOVING)
-        return;
-
-    if(getdistance(m_positionX,m_positionY,respawn_cord[0],respawn_cord[1])>50)
-    {
-        m_attackers.clear();
-        AI_MoveTo(respawn_cord[0],respawn_cord[1],respawn_cord[2],true);
-    }
-    else  if( closestTarget )
-    {
-        float targetDistance = sqrt(targetDistanceSq);
-        float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
-        float radius = GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
-        if (targetDistance > (reach + radius))
-        {
-            float q = (targetDistance - radius)/targetDistance;
-            float x = (m_positionX + closestTarget->GetPositionX()*q)/(1+q);
-            float y = (m_positionY + closestTarget->GetPositionY()*q)/(1+q);
-            float z = (m_positionZ + closestTarget->GetPositionZ()*q)/(1+q);
-            m_destinationX = x;
-            m_destinationY = y;
-            m_destinationZ = z;
-
-            if(m_canMove)
-            {
-                m_creatureState = STOPPED;
-                AI_MoveTo(x, y, z, true);
-            }
-        }
-        else
-        {
-            AI_ChangeState(ATTACKING);
-            if (isAttackReady())
-            {
-/*
-                if(!isInFront(closestTarget,10.00000f))
-                {
-                    if(setInFront(closestTarget, 10.00000f))
-                    {
-                        setAttackTimer(0);
-                        AttackerStateUpdate(closestTarget, 0);
-                    }
-                    else
-                        setAttackTimer(uint32(500));
-                }
-                else
-                {
-*/
-                //CreatureInfo* ci = objmgr.GetCreatureName(GetGUID());
-                
-                
-                // UQ1: Add damage values...
-#if !defined ( _VERSION_1_7_0_ ) && !defined ( _VERSION_1_8_0_ )
-                uint32 minDmg = (this->GetUInt32Value(UNIT_FIELD_MINDAMAGE));
-                uint32 maxDmg = (this->GetUInt32Value(UNIT_FIELD_MAXDAMAGE));
-#else //_VERSION_1_7_0_
-                // Damage values in the new DB are too high... All over 1000... So..
-                uint32 minDmg = irand(0, getLevel());
-                uint32 maxDmg = irand(minDmg, getLevel());
-
-                if (getLevel() < 20)
-                    maxDmg *= (getLevel()*0.3);
-#endif //_VERSION_1_7_0_
-                
-                // Fix for bad creature info...
-                if (maxDmg > 32768)
-                {
-                    if (minDmg > 32768)
-                        maxDmg = irand(0, getLevel());
-                    else
-                        maxDmg = irand(minDmg, getLevel());
-                    //maxDmg = 32767; // For integer random function... 32767 should be plenty anyway.. Think its just a db error.
-                }
-
-                if (minDmg > 32768)
-                {
-                    minDmg = irand(minDmg, getLevel());
-                    //maxDmg = 32767; // For integer random function... 32767 should be plenty anyway.. Think its just a db error.
-                }
-
-                uint32 damge = irand(minDmg, maxDmg);
-
-                setAttackTimer(0);
-                AttackerStateUpdate(closestTarget, damge);
-                // }
-
-            }
-        }
-    }
-}
 
 
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run)
 {
     WorldPacket data;
     data.Initialize( SMSG_MONSTER_MOVE );
+	data << uint8(0xFF);
     data << GetGUID();
-    data << GetPositionX() << GetPositionY() << GetPositionZ() << GetOrientation();
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    data << (uint32)getMSTime();
     data << uint8(0);
     data << uint32(run ? 0x00000100 : 0x00000000);
     data << time;
     data << uint32(1);
     data << x << y << z;
-    WPAssert( data.size() == 49 );
+    //WPAssert( data.size() == 49 );
     SendMessageToSet( &data, false );
 }
 
-
-void Creature::AI_SendCreaturePacket( uint32 guidlow )
+void Creature::setItemId(int slot, uint32 tempitemid) { item_list[slot].ItemId=tempitemid; }
+void Creature::setItemAmount(int slot, int tempamount) { item_list[slot].amount = tempamount; }
+	
+void Creature::setItemAmountById(uint32 tempitemid, int tempamount)
 {
-/*    WorldPacket data;
-    uint32 entry = guidlow;
-    uint64 guid = GetGUID();
-    CreatureInfo *ci;
-
-    guid = GetGUID();
-
-    ci = objmgr.GetCreatureName(entry);
-    Log::getSingleton( ).outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - entry: %u guid: %u", ci->Name.c_str());
-
-    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
-    data << (uint32)GetGUID();//entry;
-    
-    
-    data << ci->Name.c_str();
-    //data << uint8(0) << uint8(0) << uint8(0);
-    data << uint32(0);
-    if (stricmp(ci->SubName.c_str(), ""))
-        data << ci->SubName.c_str();                  // Subname
-
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-
-    //if (mobile1.Guild != null)
-    //    data << uint32(0);
-
-    data << uint32(0);
-
-    data << uint32(0); //flags
-
-    if ((ci->Type & 2) > 0)
-    {
-        data << uint32(7);
-    }
-    else
-    {
-        data << uint32(0);
-    }
-    data << uint32(ci->Type);
-
-    data << ci->unknown4;                         // unknown 5
-    data << uint32(0);
-    data << uint32(0);
-
-//    data << ci->DisplayID;                        // DisplayID
-*/    
-
-    //UQ1: WowwoW Style...
-/*    data << ci->SubName.c_str();
-    data << ci->Name.c_str();
-    
-    data << uint8(0);
-    data << uint8(0);
-    // UQ1: This one is actually for guild id..
-    //if (mobile1.Guild != null)
-    //    data << uint32(0); // guild id, if it has one??...
-    data << uint8(0); //
-    data << uint32(0); // Flags
-
-    if ((ci->Type & 2) > 0)
-    {
-        data << uint8(7);
-    }
-    else
-    {
-        data << uint32(0);
-    }
-
-    data << ci->Type;                             // Creature Type
-    data << ci->unknown4;                         // unknown 4
-    data << uint32(0);
-    data << ci->DisplayID;                        // DisplayID*/
-
-    //SendPacket( &data );
-//    SendMessageToSet( &data, false );
+	int i;
+	for(i=0;i<itemcount;i++)
+	{
+		if(item_list[i].ItemId == tempitemid)
+		item_list[i].amount = tempamount;
+	}
 }
 
-void Creature::AI_MoveTo(float x, float y, float z, bool run)
+void Creature::addItem(uint32 itemid, uint32 amount)
 {
-    float dx = x - m_positionX;
-    float dy = y - m_positionY;
-    float dz = z - m_positionZ;
+	item_list[itemcount].ItemId = itemid;
+	item_list[itemcount++].amount = amount;
 
-    float distance = sqrt((dx*dx) + (dy*dy) + (dz*dz));
-    if(!distance)
-        return;
-
-    m_destinationX = x;
-    m_destinationY = y;
-    m_destinationZ = z;
-
-    float speed=0;
-    if(!run)
-        m_moveSpeed = 2.5f*0.001f;
-    else
-        m_moveSpeed = 7.0f*0.001f;
-
-    uint32 moveTime = (uint32) (distance / m_moveSpeed);
-    AI_SendMoveToPacket(x, y, z, moveTime, run);
-
-    m_timeToMove = moveTime;
-    // update every 300 msecs
-    m_moveTimer =  UNIT_MOVEMENT_INTERPOLATE_INTERVAL;
-
-    if(m_creatureState != MOVING)
-        m_creatureState = MOVING;
 }
 
-
-bool Creature::addWaypoint(float x, float y, float z)
+int Creature::getItemSlotById(uint32 itemid)
 {
-    if(m_nWaypoints+1 >= MAX_CREATURE_WAYPOINTS)
-        return false;
-
-    m_waypoints[m_nWaypoints][0] = x;
-    m_waypoints[m_nWaypoints][1] = y;
-    m_waypoints[m_nWaypoints][2] = z;
-
-    m_nWaypoints++;
-
-    return true;
+	int i;
+	for(i=0;i<itemcount;i++)
+	{
+		if(item_list[i].ItemId == itemid)
+		return i;
+	}
+	return -1;
 }
-
 
 void Creature::SaveToDB()
 {
     std::stringstream ss;
-    ss << "DELETE FROM creatures WHERE id=" << GetGUIDLow();
-    sDatabase.Execute(ss.str().c_str());
+    sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'",GetGUIDLow());
+	
+	ss << "INSERT INTO creatures VALUES (";
 
-    ss.rdbuf()->str("");
-    ss << "INSERT INTO creatures (id, mapId, zoneId, name_id, positionX, positionY, positionZ, orientation, data) VALUES ( "
-        << GetGUIDLow() << ", "
-        << GetMapId() << ", "
-        << GetZoneId() << ", "
-        << GetUInt32Value(OBJECT_FIELD_ENTRY) << ", "
-        << m_positionX << ", "
-        << m_positionY << ", "
-        << m_positionZ << ", "
-        << m_orientation << ", '";
+	ss << GetGUIDLow () << ","
+		<< GetEntry() << ","
+		<< m_mapId <<","
+		<< m_positionX << ","
+		<< m_positionY << ","
+		<< m_positionZ << ","
+		<< m_orientation << ","
+		<< m_respawnDelay << "," //fix me: store x-y delay but not 1
+		<< m_respawnDelay << ","
+		<< (float) 0  << ","
+		<< (uint32) (0) << ","
+		<< respawn_cord[0] << ","
+		<< respawn_cord[1] << ","
+		<< respawn_cord[2] << ","
+		<< (float)(0) << ","
+		<< GetUInt32Value(UNIT_FIELD_HEALTH) << ","
+		<< (uint32)(0) << ","
+		<< m_respawnTimer << ","
+		<< (uint32)(m_deathState) << ","
+		<< GetUInt32Value(UNIT_NPC_FLAGS) << ","
+		<< GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) << ","
+		<< "'')";
 
-    for( uint16 index = 0; index < m_valuesCount; index ++ )
-        ss << GetUInt32Value(index) << " ";
 
-    ss << "' )";
+
+
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 
-    // TODO: save vendor items etc?
+    
 }
 
+bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
+{
+	Object::_Create(guidlow, HIGHGUID_UNIT);
+    SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
+	CreatureInfo *cinfo = objmgr.GetCreatureTemplate(Entry);
+	if(!cinfo) {
+		printf("Error: creature entry %u does not exist.\n",Entry);
+		return false;
+	}
+	SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID );
+    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,cinfo->DisplayID );
 
-// TODO: use full guids
+    SetUInt32Value(UNIT_FIELD_MAXHEALTH,cinfo->maxhealth );
+	SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
+
+	SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana); 
+	//fix me : max mana
+	SetUInt32Value(UNIT_FIELD_LEVEL,cinfo->level);
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+    SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
+	
+	SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,cinfo->baseattacktime);
+
+	SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME,cinfo->rangeattacktime);
+	SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
+	SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
+	
+	SetUInt32Value(UNIT_FIELD_ARMOR,cinfo->armor);
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_01,cinfo->resistance1);
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_02,cinfo->resistance2);
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_03,cinfo->resistance3);
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_04,cinfo->resistance4);
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_05,cinfo->resistance5);
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_06,cinfo->resistance6);
+	
+	//this is probably wrong
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, cinfo->equipmodel[0]);
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO , cinfo->equipinfo[0]);
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO  + 1, cinfo->equipslot[0]);
+	
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, cinfo->equipmodel[1]);
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, cinfo->equipinfo[1]);
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, cinfo->equipslot[1]);
+	
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+2, cinfo->equipmodel[2]);
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4, cinfo->equipinfo[2]);
+	SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4 + 1, cinfo->equipslot[2]);
+	
+	SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->size);
+
+	SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
+	SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
+
+	SetFloatValue(UNIT_FIELD_MINDAMAGE,cinfo->mindmg);
+	SetFloatValue(UNIT_FIELD_MAXDAMAGE,cinfo->maxdmg);
+
+	SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg );
+	SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg);
+
+	m_moveSpeed=cinfo->speed ;
+	return true;
+}
+
 void Creature::LoadFromDB(uint32 guid)
 {
-
-    std::stringstream ss;
-    ss << "SELECT * FROM creatures WHERE id=" << guid;
-
-    QueryResult *result = sDatabase.Query( ss.str().c_str() );
+	
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM creatures WHERE guid = '%u';", guid);
     ASSERT(result);
 
     Field *fields = result->Fetch();
+	
+	Create(guid,fields[2].GetUInt32(),fields[3].GetFloat(),fields[4].GetFloat(),
+	fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32());
+	
+	SetUInt32Value(UNIT_FIELD_HEALTH,fields[15].GetUInt32());
+	//fix me current mana
+	
+	SetUInt32Value(UNIT_NPC_FLAGS,fields[19].GetUInt32());
+	SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[20].GetUInt32());
+	
+    respawn_cord[0] = fields[11].GetFloat();
+    respawn_cord[1] = fields[12].GetFloat();
+    respawn_cord[2] = fields[13].GetFloat();
+	
+	m_respawnDelay =(fields[7].GetUInt32()+fields[8].GetUInt32())*1000/2;
+	m_respawnTimer=fields[17].GetUInt32();
+	m_deathState=(DeathState)fields[18].GetUInt32();
+	
+	
+	delete result;
 
-    // _Create( guid, 0 );
 
-    Create(fields[8].GetUInt32(), objmgr.GetCreatureName(fields[8].GetUInt32())->Name.c_str(), fields[6].GetUInt32(),
-        fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat(), fields[8].GetUInt32());
-
-    m_zoneId = fields[5].GetUInt32();
-
-    m_moveRandom = fields[9].GetBool();
-    m_moveRun = fields[10].GetBool();
-
-    LoadValues(fields[7].GetString());
-    
-    // UQ1: Added nameID.
-    SetNameId(fields[8].GetUInt32());
-
-//    _SetCreatureTemplate();
-    _RealtimeSetCreatureInfo();
-
-    delete result;
+	if (HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ) )
+   			CreateTrainerSpells();
 
     if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )
         _LoadGoods();
@@ -1605,190 +583,104 @@ void Creature::LoadFromDB(uint32 guid)
     if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ) )
         _LoadQuests();
 
-    _LoadMovement();
-
+    
+    AIM_Initialize();
 }
 
 void Creature::_LoadGoods()
 {
-    // remove items from vendor
+    
     itemcount = 0;
+	//this needs fix, it's wrong to save goods by vendor GUID, as it may change del-spawn op
+	//it should be stored by 'entry' field id (c) Phantomas
+	return;
+	/*
+	
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM vendors WHERE vendorGuid = '%u';", GetUInt32Value(OBJECT_FIELD_ENTRY));
 
-    // load his goods
-    std::stringstream query;
-    query << "SELECT * FROM vendors WHERE vendorGuid=" << GetGUIDLow();
 
-    QueryResult *result = sDatabase.Query( query.str().c_str() );
-
-	// UQ1: Allow for different DB vendor formats...
-	if(!result)
+    if(!result) return;
+    
+	do
 	{
-		std::stringstream query7;
-		query7 << "SELECT * FROM vendors WHERE vendorGuid=" << GetNameID();
+		Field *fields = result->Fetch();
 
-		result = sDatabase.Query( query7.str().c_str() );
+		if (getItemCount() >= MAX_CREATURE_ITEMS)
+		{
+		    sLog.outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetNameID(), getItemCount(), MAX_CREATURE_ITEMS );
+			break;
+		}
 
-		if (result)
-			Log::getSingleton( ).outError( "Vendor %u has items.", GetNameID() );
+		setItemId(getItemCount() , fields[1].GetUInt32());
+		setItemAmount(getItemCount() , fields[2].GetUInt32());
+		increaseItemCount();
 	}
+	while( result->NextRow() );
 
-	if(!result)
-	{
-		std::stringstream query2;
-		query2 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUIDLow()+1);
-
-		result = sDatabase.Query( query2.str().c_str() );
-	}
-
-	if(!result)
-	{
-		std::stringstream query5;
-		query5 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUIDLow()-10);
-
-		result = sDatabase.Query( query5.str().c_str() );
-	}
-
-	if(!result)
-	{
-		std::stringstream query3;
-		query3 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUID());
-
-		result = sDatabase.Query( query3.str().c_str() );
-	}
-
-	if(!result)
-	{
-		std::stringstream query4;
-		query4 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUID()+1);
-
-		result = sDatabase.Query( query4.str().c_str() );
-	}
-
-	if(!result)
-	{
-		std::stringstream query6;
-		query6 << "SELECT * FROM vendors WHERE vendorGuid=" << uint64(GetGUID()-10);
-
-		result = sDatabase.Query( query6.str().c_str() );
-	}
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            if (getItemCount() >= MAX_CREATURE_ITEMS)
-            {
-                // this should never happen unless someone has been fucking with the dbs
-                // complain and break :P
-                Log::getSingleton( ).outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetNameID(), getItemCount(), MAX_CREATURE_ITEMS );
-                break;
-            }
-
-            setItemId(getItemCount() , fields[1].GetUInt32());
-            setItemAmount(getItemCount() , fields[2].GetUInt32());
-            increaseItemCount();
-
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
+	delete result;
+*/
 }
 
 
-//-----------------------------------------------------------------------------
+
 void Creature::_LoadQuests()
 {
-    // clean quests
+    mQuests.clear();
+	mInvolvedQuests.clear();
 
-    mQuestIds.clear();
-	mInvolvedQuestIds.clear();
+	Field *fields;
+	Quest *pQuest;
 
-    std::stringstream query;
-    query << "SELECT * FROM creaturequestrelation WHERE creatureId=" << GetUInt32Value(OBJECT_FIELD_ENTRY) << " ORDER BY questId";
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM creaturequestrelation WHERE creatureId = '%u' ORDER BY questId;", GetEntry ());
 
-    QueryResult *result = sDatabase.Query( query.str().c_str() );
     if(result)
     {
         do
         {
-            Field *fields = result->Fetch();
-            addQuest(fields[1].GetUInt32());
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-
-	// -------------------- Involved quests
-
-    std::stringstream query1;					    
-	query1 << "SELECT * FROM creatureinvolvedrelation WHERE creatureId=" << GetUInt32Value (OBJECT_FIELD_ENTRY) << " ORDER BY questId";
-
-    result = sDatabase.Query( query1.str().c_str() );
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-			uint32 inv = fields[1].GetUInt32();
-
-			Quest *pQuest = objmgr.GetQuest( inv );
+            fields = result->Fetch();
+			pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
 			if (!pQuest) continue;
 
-            addInvolvedQuest(inv);
+            addQuest(pQuest);
         }
         while( result->NextRow() );
 
         delete result;
     }
-}
 
+	
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM creatureinvolvedrelation WHERE creatureId = '%u' ORDER BY questId;", GetUInt32Value (OBJECT_FIELD_ENTRY));
 
-void Creature::_LoadMovement()
-{
-    // clean waypoint list
-    m_nWaypoints = 0;
-    m_currentWaypoint = 0;
+    if(!result1) return;
 
-    std::stringstream query;
-    query << "SELECT X,Y,Z FROM creatures_mov WHERE creatureId=" << GetGUIDLow();
-
-    std::auto_ptr<QueryResult> result(sDatabase.Query( query.str().c_str() ));
-    if(result.get() != NULL)
+    do
     {
-        do
-        {
-            Field *fields = result->Fetch();
+      fields = result1->Fetch();
+	  pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+	  if (!pQuest) continue;
 
-            addWaypoint( fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat());
-        }
-        while( result->NextRow() );
+      addInvolvedQuest(pQuest);
     }
+    while( result1->NextRow() );
+
+    delete result1;
 }
 
 
 void Creature::DeleteFromDB()
 {
-    char sql[256];
-
-    sprintf(sql, "DELETE FROM creatures WHERE id=%u", GetGUIDLow());
-    sDatabase.Execute(sql);
-    sprintf(sql, "DELETE FROM vendors WHERE vendorGuid=%u", GetGUIDLow());
-    sDatabase.Execute(sql);
-    sprintf(sql, "DELETE FROM trainers WHERE trainerGuid=%u", GetGUIDLow());
-    sDatabase.Execute(sql);
-    sprintf(sql, "DELETE FROM creaturequestrelation WHERE creatureId=%u", GetGUIDLow());
-    sDatabase.Execute(sql);
+	   
+	sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM vendors WHERE vendorGuid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM trainers WHERE trainerGuid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM creaturequestrelation WHERE creatureId = '%u'", GetGUIDLow());
 }
 
-//add by vendy Check Attack distance  
+
 float Creature::GetAttackDistance(Unit *pl)
 {
     uint16 playlevel     = (uint16)pl->GetUInt32Value(UNIT_FIELD_LEVEL);
-    uint16 creaturelevel = (uint16)this->GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint16 creaturelevel = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
     int16 leveldif      = playlevel - creaturelevel;
 
     float RetDistance=10.0;
@@ -1808,4 +700,12 @@ float Creature::GetAttackDistance(Unit *pl)
     }
 
     return RetDistance;
+}
+
+ItemPrototype *Creature::getProtoByslot(uint32 slot)
+{ return objmgr.GetItemPrototype(item_list[slot].ItemId); }
+				
+CreatureInfo *Creature::GetCreatureInfo()
+{
+	return objmgr.GetCreatureTemplate(GetEntry());
 }

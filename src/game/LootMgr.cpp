@@ -1,6 +1,5 @@
-/* LootMgr.cpp
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,82 +21,110 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.hpp"
+#include "Policies/SingletonImp.h"
+#include <stdlib.h>
 
-createFileSingleton( LootMgr );
-
-LootMgr::LootMgr()
+bool Rand(float chance)
 {
-}
-
-void LootMgr::LoadLootTables()
-{   
-	Log::getSingleton().outString("Initialize creature loot tables...");
-    _populateLootTemplate("creatureloot", i_creaturesLoot);
-	Log::getSingleton().outString("Initialize game object loot tables...");
-    _populateLootTemplate("gameobj_loot", i_gameObjectsLoot);
-}
-
-LootMgr::~LootMgr()
-{
-  for(LootTable::iterator iter=i_creaturesLoot.begin(); iter != i_creaturesLoot.end(); ++iter)
-    delete iter->second;
-
-  for(LootTable::iterator iter=i_gameObjectsLoot.begin(); iter != i_gameObjectsLoot.end(); ++iter)
-    delete iter->second;
-
-  i_creaturesLoot.clear();
-  i_gameObjectsLoot.clear();
+	uint32 val=rand()%100000;//in %	
+	uint32 p = uint32(chance*1000);
+	return p > val;
 }
 
 
-void LootMgr::_populateLootTemplate(const char *loot_table_name, LootTable &loot_table)
+
+LootStore CreatureLoot;
+
+
+
+void UnloadLoot()
 {
-  // Note the item should be entryid,itemid,percentchance..
-    std::stringstream id_query;
-    unsigned int count = 0;
-    id_query << "SELECT * FROM " << loot_table_name;
-    std::auto_ptr<QueryResult> result( sDatabase.Query(id_query.str().c_str()) );
+
+  for(LootStore::iterator iter=CreatureLoot.begin(); iter != CreatureLoot.end(); ++iter)
+  delete [] iter->second.items;
+
+  CreatureLoot.clear();
+
+}
+
+
+void LoadCreaturesLootTables()
+{
+
+	uint32 curId=0;
+	LootStore::iterator tab;
+	uint32 ind;
+	QueryResult *result = sDatabase.Query("SELECT * FROM `loottemplate`;");
     
-    if( result.get() != NULL )
+    if( result )
     {      
-    int curId = -1;
-    LootList *table = NULL;
-    barGoLink bar( result->GetRowCount() );
-    do 
-    {     
-        bar.step();
-        Field *fields = result->Fetch();
-        int entry_id = fields[0].GetUInt32(); 
-        
-        if( entry_id != curId )
-        {
-        LootTable::iterator next_table = loot_table.find(entry_id);
-        curId = entry_id;
-
-        // Note, doing this is faster than each select by a where clause
-        // or order the selection.  The penalty is one hash search per 
-        // key change which is faster than searching or
-        // a where clause in each key.  I'll make the loading faster
-        // by indexing
-        if( next_table == loot_table.end() )
-        {
-            ++count;
-            table = new LootList;
-            loot_table[curId] = table; // next table
-        }
-        else
-        {
-            table = next_table->second;
-        }
-        }
-        
-        table->push_back(LootItem(fields[1].GetUInt32(), fields[2].GetFloat()*100));
-        
-    } while( result->NextRow() );
-    }
     
-    sLog.outString(">> Loaded %d loot templates for table %s", count, loot_table_name);
-	sLog.outString( "" );
+		do 
+		{     
+			Field *fields = result->Fetch();
+			
+			uint32 entry_id=fields[0].GetUInt32();
+		
+			
+			if( entry_id != curId )
+			{
+				curId = entry_id;
+				ind=0;
+				//new	
+				
+				
+				QueryResult *result1 = 
+				sDatabase.PQuery("SELECT COUNT(*) FROM loottemplate where entry = '%u';",entry_id);
+				
+				if(!result1) continue;
+				
+				Field *fields1 = result1->Fetch();
+
+				CreatureLoot[entry_id].count=fields1[0].GetUInt32();
+				
+				
+				CreatureLoot[entry_id].items=new StoreLootItem[CreatureLoot[entry_id].count];
+				
+				delete result1;
+			}
+		
+			CreatureLoot[entry_id].items[ind].item.itemid=fields[1].GetUInt32();
+			ItemPrototype*proto=objmgr.GetItemPrototype(fields[1].GetUInt32());
+		
+			if(proto)
+			{
+				CreatureLoot[entry_id].items[ind].item.displayid=proto->DisplayInfoID;
+
+			}
+				CreatureLoot[entry_id].items[ind].chance=fields[2].GetFloat();
+
+			ind++;
+
+		} while( result->NextRow() );
+		delete result;
+    }
+
 }
 
-LootMgr::LootList LootMgr::si_noLoot;
+
+void FillLoot(Loot * loot,uint32 loot_id)
+{
+	loot->items.clear ();
+	loot->gold =0;
+	
+	LootStore::iterator tab =CreatureLoot.find(loot_id);
+	if( CreatureLoot.end()==tab)return;
+
+	for(uint32 x =0; x<tab->second.count;x++)
+	if(Rand(tab->second.items[x].chance))
+	{
+		__LootItem itm;
+		itm.item =tab->second.items[x].item;
+		itm.isLooted =false;
+		loot->items.push_back(itm);
+						
+	}
+}
+
+
+

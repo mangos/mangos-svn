@@ -1,6 +1,5 @@
-/* FactionTemplateResolver.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +24,7 @@
 
 
 
-/** FactionTemplateResolver is nothing but a glorius 8 bit
- * data structure.
- */
+
 struct MANGOS_DLL_DECL FactionTemplateResolver
 {
     FactionTemplateResolver(FactionTemplateEntry *entry)
@@ -73,26 +70,26 @@ struct MANGOS_DLL_DECL FactionTemplateResolver
     } data;
 
 
-    /// Returns true if this template is hostile to ALL
+    
     bool IsHostileToAll(void) const 
     {
 	return ( data.Faction.hostile_mask.hostile.All );
     }
 
-    /// Returns true if this template is neutral to all
+    
     bool IsNeutralToAll(void) const
     {
-	// neither friendly to anyone nor hostile
+	
 	return ( data.Faction.hostile_mask.ALL == 0 && data.Faction.friendly_mask.ALL == 0);
     }
 
-    /// Returns true if this template is hostile to the input template
+    
     bool IsHostileTo(const FactionTemplateResolver &holder) const
     {
 	return( IsHostileToAll() || (data.Faction.hostile_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
     }
 
-    /// Returns true if this template is friendly to the input template
+    
     bool IsFriendlyTo(const FactionTemplateResolver &holder) const
     {
 	return( !IsHostileToAll() && (data.Faction.friendly_mask.ALL & holder.data.Faction.friendly_mask.ALL) );

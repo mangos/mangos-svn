@@ -1,4 +1,4 @@
-# Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -12,8 +12,8 @@
 
 AC_PREREQ(2.59)
 AC_INIT([MaNGOS],
-        [0.0.2],
-        [https://opensvn.csie.org/traccgi/MaNGOS/],
+        [0.2-SVN],
+        [http://www.mangosproject.org/],
         [mangos])
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_SRCDIR(src/mangosd/Main.cpp)
@@ -56,6 +56,15 @@ LT_CURRENT=$LIBZTHREAD_MAJOR_VERSION
 LT_REVISION=$LIBZTHREAD_MINOR_VERSION
 LT_AGE=$LIBZTHREAD_MICRO_VERSION
 
+dnl Set up Scripting build.
+LIBMANGOSSCRIPT_MAJOR_VERSION=0
+LIBMANGOSSCRIPT_MINOR_VERSION=2
+LIBMANGOSSCRIPT_MICRO_VERSION=0
+LTMS_RELEASE=$LIBMANGOSSCRIPT_MAJOR_VERSION.$LIBMANGOSSCRIPT_MINOR_VERSION.$LIBMANGOSSCRIPT_MICRO_VERSION
+LTMS_CURRENT=$LIBMANGOSSCRIPT_MAJOR_VERSION
+LTMS_REVISION=$LIBMANGOSSCRIPT_MINOR_VERSION
+LTMS_AGE=$LIBMANGOSSCRIPT_MICRO_VERSION
+
 COMPILER_OPTIONS=""
 LINKER_OPTIONS=""
 
@@ -63,6 +72,43 @@ INCLUDES="-I/usr/include/mysql -I/usr/local/include/mysql -I/usr/include/openssl
 AC_SUBST(INCLUDES)
 LDFLAGS="-L/usr/lib/mysql -L/usr/local/lib/mysql"
 AC_SUBST(LDFLAGS)
+
+# check for openssl path given
+AC_MSG_CHECKING(whether openssl path was given)
+MANGOSD_WITH_OPENSSL=
+AC_ARG_ENABLE(with-openssl,
+[  --with-openssl Specify openssl path],
+[
+    if test "$enableval" != "" ; then
+        INCLUDES="-I$enableval/include/openssl -I/usr/include/mysql -I/usr/local/include/mysql"
+	AC_SUBST(INCLUDES)
+    elif test "$enableval" = "" ; then
+        AC_MSG_ERROR(Please choose openssl path)
+    fi
+
+])
+AC_MSG_RESULT($MANGOSD_WITH_OPENSSL)
+
+
+# check for mysql path given
+AC_MSG_CHECKING(whether mysql path was given)
+MANGOSD_WITH_MYSQL=
+AC_ARG_ENABLE(with-mysql,
+[  --with-mysql Specify mysql path],
+[
+    if test "$enableval" != "" ; then
+        INCLUDES="-I$enableval/include/mysql -I/usr/include/openssl -I/usr/local/include/openssl"
+	AC_SUBST(INCLUDES)
+        LDFLAGS="-L$enableval/lib/mysql"
+	AC_SUBST(LDFLAGS)
+    elif test "$enableval" = "" ; then
+        AC_MSG_ERROR(Please choose mysql path)
+    fi
+
+])
+AC_MSG_RESULT($MANGOSD_WITH_MYSQL)
+
+
 
 dnl Checks for libraries.
 
@@ -87,7 +133,7 @@ AC_HEADER_STDBOOL
 AC_HEADER_TIME
 AC_CHECK_HEADERS(                                             \
    limits.h sys/ioctl.h unistd.h fcntl.h float.h mysql.h      \
-   malloc.h netdb.h netinet/in.h stddef.h sys/socket.h        \
+   netdb.h netinet/in.h stddef.h sys/socket.h                 \
    sys/time.h sys/timeb.h opensslv.h                          \
  ,[],[AC_MSG_ERROR([Missing required header])])
 
@@ -188,6 +234,28 @@ AC_SUBST(WITH_PYTHON_SUBDIR)
 AC_SUBST(WITH_PYTHON_SUBPACKAGE)
 AC_SUBST(WITH_PYTHON_VERSION)
 
+AC_PATH_PROG(__DOXYGEN, doxygen, no, $PATH)
+dnl
+dnl Auto-detect whether doxygen generated API docs should be included.
+dnl
+withval=auto
+AC_ARG_WITH(apidocs, [  --with-apidocs          build MaNGOS API docs ])
+
+if test $withval = auto -a $__DOXYGEN != no ; then
+    withval=yes
+elif test $withval = yes -a $__DOXYGEN = no ; then
+    AC_MSG_ERROR(--> MaNGOS API docs needs doxygen in PATH)
+fi
+    
+if test $withval = yes; then
+    WITH_APIDOCS_TARGET=apidocs
+    WITH_APIDOCS=1
+else
+    WITH_APIDOCS=0
+fi
+AC_SUBST(WITH_APIDOCS_TARGET)
+AC_SUBST(WITH_APIDOCS)
+      
 AC_MSG_CHECKING(whether to include debug info in library)
 MANGOSD_DEBUG_INFO=no
 AC_ARG_WITH(debug-info,
@@ -210,7 +278,7 @@ AC_MSG_RESULT($MANGOSD_DEBUG_INFO)
 # check for cli console enable
 AC_MSG_CHECKING(whether cli console is enabled)
 MANGOSD_ENABLE_CLI=no
-AC_ARG_ENABLE(enable-cli,
+AC_ARG_ENABLE(cli,
 [  --enable-cli Turn on command console system],
 [
     if test "$enableval" = "yes" ; then
@@ -223,91 +291,28 @@ AC_ARG_ENABLE(enable-cli,
 ])
 AC_MSG_RESULT($MANGOSD_ENABLE_CLI)
 
-
-# check for httpd system enable
-AC_MSG_CHECKING(whether httpd system is enabled)
-MANGOSD_ENABLE_HTTPD=no
-AC_ARG_ENABLE(httpd-integrated,
-[  --enable-httpd-integrated Turn on httpd integrated system],
+# check for remote console enable
+AC_MSG_CHECKING(whether remote console is enabled)
+MANGOSD_ENABLE_RA=no
+AC_ARG_ENABLE(ra,
+[  --enable-ra Turn on remote console system],
 [
     if test "$enableval" = "yes" ; then
-	CFLAGS="-DENABLE_HTTPD_SYSTEM $CFLAGS"
-	CXXFLAGS="-DENABLE_HTTPD_SYSTEM $CXXFLAGS"
-	MANGOSD_ENABLE_HTTPD=yes
+	CFLAGS="-DENABLE_RA $CFLAGS"
+	CXXFLAGS="-DENABLE_RA $CXXFLAGS"
+	MANGOSD_ENABLE_RA=yes
     elif test "$withval" != "no" ; then
 	AC_MSG_ERROR(Please choose yes or no)
     fi
 ])
-AC_MSG_RESULT($MANGOSD_ENABLE_HTTPD)
-
-
-# check for 1.8.x protocol support
-AC_MSG_CHECKING(whether 1.8.x support is enabled)
-MANGOSD_ENABLE_18X=yes
-AC_ARG_ENABLE(18x,
-[  --enable-18x Turn on 1.8.x support],
-[
-    if test "$enableval" = "no" ; then
-	MANGOSD_ENABLE_18X=no
-    elif test "$withval" != "yes" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_18X)
-
-if test "$MANGOSD_ENABLE_18X" != "no"; then
-    CFLAGS="-D_VERSION_1_8_0_ $CFLAGS"
-    CXXFLAGS="-D_VERSION_1_8_0_ $CXXFLAGS"
-    MANGOSD_ENABLE_17X=no
-else
-    MANGOSD_ENABLE_17X=yes  
-fi
-
-# check for 1.7.x protocol support
-AC_MSG_CHECKING(whether 1.7.x support is enabled)
-AC_ARG_ENABLE(17x,
-[  --enable-17x Turn on 1.7.x support],
-[
-    if test "$enableval" = "no" ; then
-	MANGOSD_ENABLE_17X=no
-    elif test "$withval" != "yes" ; then
-	AC_MSG_ERROR(Please choose yes or no)
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_17X)
-
-#if 1.8 is enable, we don't allow 17x to be enable
-if test "$MANGOSD_ENABLE_17X" != "no"; then
-    if test "$MANGOSD_ENABLE_18X" != "no"; then
-        MANGOSD_ENABLE_17X=no
-    else
-        CFLAGS="-D_VERSION_1_7_0_ $CFLAGS"
-        CXXFLAGS="-D_VERSION_1_7_0_ $CXXFLAGS"
-    fi
-fi
-
-
-# check for enable new framework
-AC_MSG_CHECKING(whether new framework is enabled)
-MANGOSD_ENABLE_NEW_FRAMEWORK=no
-AC_ARG_ENABLE(new-framework,
-[  --enable-new-framework Enable new framework],
-[
-    if test "$enableval" = "yes" ; then
-	MANGOSD_ENABLE_NEW_FRAMEWORK=yes
-    elif test "$withval" != "no" ; then
-	AC_MSG_ERROR(Please choose yes or no)          
-    fi
-])
-AC_MSG_RESULT($MANGOSD_ENABLE_NEW_FRAMEWORK)
-AM_CONDITIONAL(NEWFRAMEWORK, test x$MANGOS_ENABLE_NEW_FRAMEWORK = x$yes)
+AC_MSG_RESULT($MANGOSD_ENABLE_RA)
 
 
 MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
 if test $sysconfdir = '${prefix}/etc'; then
-    MANGOSD_CONFIG_TEMP="/etc/mangos/mangosd.conf"
-    MANGOSD_CONFIGDIR_TEMP="/etc/mangos"
+    MANGOSD_CONFIG_TEMP="${prefix}/mangos/mangosd.conf"
+    MANGOSD_CONFIGDIR_TEMP="${prefix}/mangos"
 else
   if test $sysconfdir = '/'; then
 	MANGOSD_CONFIG_TEMP="/mangosd.conf"
@@ -319,7 +324,7 @@ else
 fi
 
 if test $datadir = '${prefix}/share'; then
-    MANGOSD_DATA_TEMP="$prefix/share/mangos"
+    MANGOSD_DATA_TEMP="${prefix}/share/mangos"
 else
    if test $datadir = '/'; then
    	MANGOSD_DATA_TEMP="/mangos"
@@ -348,25 +353,33 @@ dnl Configured MaNGOS variables
 AC_SUBST(MANGOSD_CONFIG)
 AC_SUBST(MANGOSD_CONFIGDIR)
 AC_SUBST(MANGOSD_DATA)
+AC_SUBST(MANGOSD_ENABLE_CLI)
+AC_SUBST(MANGOSD_ENABLE_RA)
 AC_SUBST(VERSION)
 AC_SUBST(LT_RELEASE)
 AC_SUBST(LT_CURRENT)
 AC_SUBST(LT_AGE)
 AC_SUBST(LT_REVISION)
+AC_SUBST(LTMS_RELEASE)
+AC_SUBST(LTMS_CURRENT)
+AC_SUBST(LTMS_AGE)
+AC_SUBST(LTMS_REVISION)
 
 AC_CONFIG_FILES([
    ./Makefile
+   doc/Doxyfile
    doc/Makefile
    sql/Makefile
    src/Makefile
    src/shared/Makefile
-   src/realmlist/Makefile
-   src/mangosd/Master.h
-   src/mangosd/Makefile
+   src/shared/SystemConfig.h
+   src/realmd/Makefile
    src/framework/Makefile
    src/game/Makefile
    src/bindings/Makefile
    src/bindings/python/Makefile
+   src/bindings/universal/Makefile
+   src/mangosd/Makefile
    dep/Makefile
    dep/src/Makefile
    dep/src/zlib/Makefile

@@ -1,7 +1,5 @@
-/* Main.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/*  
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,12 +59,12 @@ int main(int argc, char **argv)
     ++c;
     }
 
-     //setting up configuration
-    if (!Config::getSingleton().SetSource(cfg_file.c_str()) )
+     
+    if (!sConfig.SetSource(cfg_file.c_str()) )
     {
         sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
     }
 
-    Master::getSingleton().Run();
+    sMaster.Run();
     return 0;
 }

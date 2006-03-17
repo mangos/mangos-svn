@@ -1,7 +1,5 @@
-/* GameObject.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,18 +20,18 @@
 #define MANGOSSERVER_GAMEOBJECT_H
 
 #include "Object.h"
+#include "LootMgr.h"
 
 struct GameObjectInfo
 {
-    GameObjectInfo(uint32 i=0, uint32 t=0, uint32 dis_id=0, uint32 f = 0, uint32 fl = 0, uint32 s0=0, uint32 s1=0, uint32 s2=0, uint32 s3 =0, uint32 s4=0,
-           uint32 s5 = 0, uint32 s6 = 0, uint32 s7 = 0, 
-           uint32 s8 = 0, uint32 s9 = 0, float sz = 1.0, const char *n = NULL) : id(i), type(t),displayId(dis_id), faction(f), flags(fl), sound0(s0), sound1(s1), sound2(s2), sound3(s3), sound4(s4), sound5(s5), sound6(s6), sound7(s7), sound8(s8), sound9(s9), size(sz), name(n == NULL ? "Unknown Object" : n) {}
     uint32 id;
     uint32 type;
     uint32 displayId;
+	char* name;
     uint32 faction;
     uint32 flags;
-    uint32 sound0;
+    float size;
+	uint32 sound0;
     uint32 sound1;
     uint32 sound2;
     uint32 sound3;
@@ -43,29 +41,30 @@ struct GameObjectInfo
     uint32 sound7;
     uint32 sound8;
     uint32 sound9;
-    float size;
-    std::string name;
+   	char* ScriptName;
 };
 
 class GameObject : public Object
 {
 public:
     GameObject( );
+   
     
-    void Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang);
+    void Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3);
     void Update(uint32 p_time);    
-    bool FillLoot(Player &, WorldPacket *data);
-        
-    // Serialization
+    GameObjectInfo *GetGOInfo();
+    
     void SaveToDB();
     void LoadFromDB(uint32 guid);
     void DeleteFromDB();
-    
+	void generateLoot(); 
+
+	Loot loot;
+	uint32 lootid;
 protected:
-    void _generateLoot(Player &, std::vector<uint32> &, std::vector<uint32>&, std::vector<uint32> &, uint32 &) const;    
+	
     uint32 m_RespawnTimer;
 
-    time_t m_nextThinkTime;
 };
 
 #endif

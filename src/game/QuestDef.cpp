@@ -1,6 +1,5 @@
-/* QuestDef.cpp
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,25 +26,25 @@
 
 Quest::Quest()
 {
-	// No initialization required as
-	// all the quests will be read from the DB anyway.
+	
+	
 
 	m_qId = 0;
 }
 
-//--------------------------------------------------------------------
-// Returns the amount of XP a player _Player would get by completing this quest.
+
+
 uint32 Quest::XPValue(Player* _Player)
 {
-	//
-	// TODO: Add a nice formula for this function.
-	//
+	
+	
+	
 
 	return 100;
 }
 
-//------------------------------------------------------------------
-// Returns the number of Kill Objectives
+
+
 uint32 Quest::GetKillObjectivesCount()
 {
 	uint32 i, count = 0;
@@ -56,8 +55,8 @@ uint32 Quest::GetKillObjectivesCount()
 	return count;
 }
 
-//-------------------------------------------------------------------
-// Returns the number of Kill Objectives
+
+
 uint32 Quest::GetDeliverObjectivesCount()
 {
 	uint32 i, count = 0;
@@ -68,9 +67,9 @@ uint32 Quest::GetDeliverObjectivesCount()
 	return count;
 }
 
-//------------------------------------------------------------
-// Checks if a quest can be taken by player.
-// It checks for PreRequs, for reward, and for compatibility.
+
+
+
 bool Quest::CanBeTaken( Player *_Player )
 {
 	bool result = ( !RewardIsTaken( _Player ) && IsCompatible( _Player ) && 
@@ -79,7 +78,7 @@ bool Quest::CanBeTaken( Player *_Player )
 	return result;
 }
 
-//------------------------------------------------------------
+
 bool Quest::RewardIsTaken( Player *_Player )
 {
 	bool bResult = false;
@@ -89,9 +88,9 @@ bool Quest::RewardIsTaken( Player *_Player )
 	return bResult;
 }
 
-//------------------------------------------------------------
-// Check for class/race/... compatibility of a player and quest
-// 
+
+
+
 bool Quest::IsCompatible( Player *_Player )
 {
 	return ( ReputationSatisfied ( _Player ) &&
@@ -100,53 +99,53 @@ bool Quest::IsCompatible( Player *_Player )
 			 TradeSkillSatisfied ( _Player ) );
 }
 
-//------------------------------------------------------------
-// Checks for Reputation satisfaction.
-// 
+
+
+
 bool Quest::ReputationSatisfied( Player *_Player )
 {
 	return true;
-	// needs implementation
+	
 }
 
-//------------------------------------------------------------
-// Player-Quest TradeSkill compatibilty
-// 
+
+
+
 bool Quest::TradeSkillSatisfied( Player *_Player )
 {
 	return true;
-	// needs core implementation
+	
 }
 
-//------------------------------------------------------------
-// Player-Quest Race compatibilty
-// 
+
+
+
 bool Quest::RaceSatisfied( Player *_Player )
 {
 	if ( m_qRequiredRaces == QUEST_RACE_NONE ) return true;
 	return (((m_qRequiredRaces >> (_Player->getRace() - 1)) & 0x01) == 0x01);
 }
 
-//------------------------------------------------------------
-// Player-Quest Class compatibilty
-// 
+
+
+
 bool Quest::ClassSatisfied( Player *_Player )
 {
 	if ( m_qRequiredClass == QUEST_CLASS_NONE ) return true;
 	return (m_qRequiredClass == _Player->getClass());
 }
 
-//------------------------------------------------------------
-// Player-Quest Lavel check.
-// 
+
+
+
 bool Quest::LevelSatisfied( Player *_Player )
 {
 	return ( _Player->getLevel() >= m_qPlayerLevel );
 }
 
-//------------------------------------------------------------
-// Checks if a NPC can show yellow [!]. Level dep.
-// 
+
+
+
 bool Quest::CanShowAvailable( Player *_Player )
 {
 	uint8 iPLevel;
@@ -156,9 +155,9 @@ bool Quest::CanShowAvailable( Player *_Player )
 	return ( (iPLevel - m_qPlayerLevel) <= 7 );
 }
 
-//------------------------------------------------------------
-// Checks if a NPC can show gray [!]. Level dep.
-// 
+
+
+
 bool Quest::CanShowUnsatified( Player *_Player )
 {
 	uint8 iPLevel;
@@ -168,9 +167,9 @@ bool Quest::CanShowUnsatified( Player *_Player )
 	return ( (m_qPlayerLevel - iPLevel) <= 7 );
 }
 
-//------------------------------------------------------------
-// Checks for reqs. Note: it checks for Open, Require and Lock.
-// 
+
+
+
 bool Quest::PreReqSatisfied( Player *_Player )
 {
 	bool bResult = true;

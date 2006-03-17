@@ -1,6 +1,5 @@
-/* TargetedMovementGenerator.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,29 +19,37 @@
 #ifndef MANGOS_TARGETEDMOVEMENTGENERATOR_H
 #define MANGOS_TARGETEDMOVEMENTGENERATOR_H
 
-/** TargetedMovementGenerator follows the target ensure
- * the source is close to the target
- */
+
 
 #include "MovementGenerator.h"
+#include "DestinationHolder.h"
+#include "Traveller.h"
 
-// foward declaration
+
 class Unit;
 
 class MANGOS_DLL_DECL TargetedMovementGenerator : public MovementGenerator
 {
 public:
 
-    TargetedMovementGenerator(Unit &target) : i_target(target) {}
+    TargetedMovementGenerator(Unit &target) : i_target(target), i_targetedHome(false), i_attackRadius(0) {}
 
-    // API implementation
-    void Initialize(const Creature &);
-    void Reset(const Creature &);
-    bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation);
+    
+    void Initialize(Creature &);
+    void Reset(Creature &);
     void Update(Creature &, const uint32 &);
 
+    
+    void TargetedHome(Creature &);
+
 private:
+
+    void _setAttackRadius(Creature &);
+    void _setTargetLocation(Creature &);
     Unit &i_target;
+    float i_attackRadius;
+    bool i_targetedHome; 
+    DestinationHolder<Traveller<Creature> > i_destinationHolder;
 };
 
 #endif

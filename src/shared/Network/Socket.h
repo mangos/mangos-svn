@@ -30,6 +30,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "socket_include.h"
 #include <time.h>
 
+#ifndef _WIN32
+#include <netinet/tcp.h>
+#else
+#define TCP_NODELAY 0x0001
+#endif
+
 class SocketHandler;
 class SocketThread;
 

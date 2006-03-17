@@ -1,6 +1,5 @@
-/* ObjectGridLoader.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +25,7 @@
 #include "GridDefines.h"
 #include "Cell.h"
 
-/*
- * @class ObjectGridLoader class implements a visitor pattern for the ContainerMapList
- * because that's the container used for storing both GameObjects and Creatures
- * which is in the grid.
- */
+
 
 class MANGOS_DLL_DECL ObjectGridLoader
 {
@@ -47,7 +42,7 @@ public:
 
     void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
     {
-    /* we don't load in dynamic objects.. we add it in dynamically */
+    
     }
 
     void LoadN(void)
@@ -75,10 +70,7 @@ private:
     uint32 i_creatures;
 };
 
-/*
- * @class ObjectGridUnloader also implements the visitor pattern
- * for unloading the grid.
- */
+
 class MANGOS_DLL_DECL ObjectGridUnloader
 {
 public:

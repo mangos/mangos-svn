@@ -1,7 +1,5 @@
-/* Chat.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +28,9 @@
 #include "UpdateMask.h"
 #include "Chat.h"
 #include "MapManager.h"
+#include "Policies/SingletonImp.h"
 
-createFileSingleton( ChatHandler );
+INSTANTIATE_SINGLETON_1( ChatHandler );
 
 ChatHandler::ChatHandler()
 {
@@ -45,9 +44,8 @@ ChatHandler::~ChatHandler()
 }
 
 
-ChatCommand * ChatHandler::getCommandTable()
-{
-    // TODO: change default security levels?
+ChatCommand * ChatHandler::getCommandTable() {
+    
 
     static bool first_call = true;
 
@@ -62,7 +60,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "speed",       1, &ChatHandler::HandleModifySpeedCommand,   "",   NULL },
         { "swim",        1, &ChatHandler::HandleModifySwimCommand,    "",   NULL },
         { "scale",       1, &ChatHandler::HandleModifyScaleCommand,   "",   NULL },
-        { "mount",       1, &ChatHandler::HandleModifyMountCommand,   "",   NULL },
         { "bit",         1, &ChatHandler::HandleModifyBitCommand,     "",   NULL },
         { "bwalk",       1, &ChatHandler::HandleModifyBWalkCommand,   "",   NULL },
         { "aspeed",      1, &ChatHandler::HandleModifyASpedCommand,   "",   NULL },
@@ -77,7 +74,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,          0, NULL,                                     "",   NULL }
     };
 
-    // in alphabetical order
+    
     static ChatCommand commandTable[] =
     {
         { "acct",        0, &ChatHandler::HandleAcctCommand,          "",   NULL },
@@ -85,8 +82,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "addspirit",   3, &ChatHandler::HandleAddSpiritCommand,     "",   NULL },
         { "anim",        3, &ChatHandler::HandleAnimCommand,          "",   NULL },
         { "announce",    1, &ChatHandler::HandleAnnounceCommand,      "",   NULL },
-        { "appear",      1, &ChatHandler::HandleAppearCommand,        "",   NULL },
-		{ "goname",      1, &ChatHandler::HandleAppearCommand,        "",   NULL },
+        { "go",          3, &ChatHandler::HandleGoCommand,          "",   NULL },
+		{ "goname",      1, &ChatHandler::HandleGonameCommand,        "",   NULL },
+        { "namego",      1, &ChatHandler::HandleNamegoCommand,        "",   NULL },
         { "aura",        3, &ChatHandler::HandleAuraCommand,          "",   NULL },
         { "changelevel", 2, &ChatHandler::HandleChangeLevelCommand,   "",   NULL },
         { "commands",    0, &ChatHandler::HandleCommandsCommand,      "",   NULL },
@@ -111,18 +109,19 @@ ChatCommand * ChatHandler::getCommandTable()
         { "itemmove",    2, &ChatHandler::HandleItemMoveCommand,      "",   NULL },
         { "kick",        1, &ChatHandler::HandleNYICommand,           "",   NULL },
         { "learn",       3, &ChatHandler::HandleLearnCommand,         "",   NULL },
-        { "unlearn",     3, &ChatHandler::HandleUnLearnCommand,       "",   NULL },//add by vendy
+        { "unlearn",     3, &ChatHandler::HandleUnLearnCommand,       "",   NULL },
+        { "learnsk",     3, &ChatHandler::HandleLearnSkillCommand,    "",   NULL },
+        { "unlearnsk",   3, &ChatHandler::HandleUnLearnSkillCommand,    "",   NULL },
         { "modify",      1, NULL,                                     "",   modifyCommandTable },
         { "debug",       1, NULL,                                     "",   debugCommandTable },
         { "morph",       3, &ChatHandler::HandleMorphCommand,         "",   NULL },
-        { "mount",       0, &ChatHandler::HandleMountCommand,         "",   NULL },
-        { "go",          3, &ChatHandler::HandleMoveCommand,          "",   NULL },
         { "name",        2, &ChatHandler::HandleNameCommand,          "",   NULL },
         { "subname",     2, &ChatHandler::HandleSubNameCommand,       "",   NULL },
         { "npcflag",     2, &ChatHandler::HandleNPCFlagCommand,       "",   NULL },
         { "cdist",        1, &ChatHandler::HandleCreatureDistanceCommand,       "",   NULL },
         { "object",      3, &ChatHandler::HandleObjectCommand,        "",   NULL },
         { "gameobject",  3, &ChatHandler::HandleGameObjectCommand,    "",   NULL },
+		{ "addgo",	     3, &ChatHandler::HandleGameObjectCommand,    "",   NULL },
         { "prog",        2, &ChatHandler::HandleProgCommand,          "",   NULL },
         { "random",      2, &ChatHandler::HandleRandomCommand,        "",   NULL },
         { "recall",      1, &ChatHandler::HandleRecallCommand,        "",   NULL },
@@ -132,8 +131,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "AddSpawn",    2, &ChatHandler::HandleSpawnCommand,         "",   NULL },
         { "standstate",  3, &ChatHandler::HandleStandStateCommand,    "",   NULL },
         { "start",       0, &ChatHandler::HandleStartCommand,         "",   NULL },
-        { "summon",      1, &ChatHandler::HandleSummonCommand,        "",   NULL },
-		{ "namego",      1, &ChatHandler::HandleSummonCommand,        "",   NULL },
         { "taxicheat",   1, &ChatHandler::HandleTaxiCheatCommand,     "",   NULL },
         { "worldport",   3, &ChatHandler::HandleWorldPortCommand,     "",   NULL },
         { "addweapon",   3, &ChatHandler::HandleAddWeaponCommand,     "",   NULL },
@@ -148,19 +145,29 @@ ChatCommand * ChatHandler::getCommandTable()
         { "showarea",    3, &ChatHandler::HandleShowAreaCommand,      "",   NULL },
         { "hidearea",    3, &ChatHandler::HandleHideAreaCommand,      "",   NULL },
         { "addspw",      2, &ChatHandler::HandleAddSpwCommand,        "",   NULL },
-        { "additem",     3, &ChatHandler::HandleAddItemCommand,       "",   NULL }, //add by vendy
+        { "additem",     3, &ChatHandler::HandleAddItemCommand,       "",   NULL }, 
 		{ "createguild", 3, &ChatHandler::HandleCreateGuildCommand,   "",   NULL },
-        { NULL,          0, NULL,                                     "",   NULL }
+        { "showhonor",   0, &ChatHandler::HandleShowHonor,            "",   NULL },
+		{ "update",      3, &ChatHandler::HandleUpdate,               "",   NULL },
+		{ "bank",		 3, &ChatHandler::HandleBankCommand,          "",   NULL },
+		{ "wchange",     3, &ChatHandler::HandleChangeWeather,        "",   NULL },
+		{ "reload",      3, &ChatHandler::HandleReloadCommand,        "",   NULL },
+		//! Development Commands
+		{ "set32value",  3, &ChatHandler::HandleSet32Value,           "",   NULL },
+		{ "Set32Bit",	 3, &ChatHandler::HandleSet32Value,           "",   NULL },
+		{ "Mod32Value",	 3, &ChatHandler::HandleMod32Value,           "",   NULL },
+		
+				
+		{ NULL,          0, NULL,                                     "",   NULL }
     };
 
     if(first_call)
     {
-        std::stringstream s;
         for(uint32 i = 0; commandTable[i].Name != NULL; i++)
         {
-            s.rdbuf()->str("");
-            s << "SELECT security, help FROM commands WHERE name = '" << commandTable[i].Name  << "'";
-            QueryResult* result = sDatabase.Query(s.str().c_str());
+	    QueryResult *result = sDatabase.PQuery("SELECT security, help FROM commands WHERE name = '%s';", commandTable[i].Name);
+
+
             if (result)
             {
                 commandTable[i].SecurityLevel = (uint16)(*result)[1].GetUInt16();
@@ -172,11 +179,8 @@ ChatCommand * ChatHandler::getCommandTable()
                 ChatCommand *ptable = commandTable[i].ChildCommands;
                 for(uint32 j = 0; ptable[j].Name != NULL; j++)
                 {
-                    s.rdbuf()->str("");
-                    s << "SELECT security, help FROM commands WHERE name = '" << commandTable[i].Name << " "
-                        << ptable[j].Name << "'";
+		    QueryResult *result = sDatabase.PQuery("SELECT security, help FROM commands WHERE name = '%s %s';", commandTable[i].Name, ptable[j].Name);
 
-                    QueryResult* result = sDatabase.Query(s.str().c_str());
                     if (result)
                     {
                         ptable[i].SecurityLevel = (uint16)(*result)[1].GetUInt16();
@@ -236,14 +240,14 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
 {
     std::string cmd = "";
 
-    // skip command
+    
     while (*text != ' ' && *text != '\0')
     {
         cmd += *text;
         text++;
     }
 
-    while (*text == ' ') text++;                  // skip whitespace
+    while (*text == ' ') text++;                  
 
     if(!cmd.length())
         return false;
@@ -302,7 +306,7 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     if(m_session->GetSecurity() == 0)
         return 0;
 
-    if(text[0] != '!' && text[0] != '.')          // let's not confuse users
+    if(text[0] != '!' && text[0] != '.')          
         return 0;
 
     text++;
@@ -319,17 +323,11 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
 
 void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint32 type, uint32 language, const char *channelName, const char *message ) const
 {
-    //Packet structure
-    //uint8      type;
-    //uint32     language;
-    //uint64     guid;
-    //uint64     guid;
-    //uint32     len_of_text;
-    //char       text[];         // not sure ? i think is null terminated .. not null terminated
-    //uint8      afk_state;
+    
 
     uint32 messageLength = strlen((char*)message) + 1;
     uint8 afk = 0;
+    uint64 guid = 0;
 
     data->Initialize(SMSG_MESSAGECHAT);
     *data << (uint8)type;
@@ -341,20 +339,22 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         *data << channelName;
     }
 
-    uint64 guid = 0;
-    if (type == CHAT_MSG_SAY || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
+
+    if (type == CHAT_MSG_SAY  || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER || 
+    		type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY   || type == CHAT_MSG_GUILD   ||
+    		type == CHAT_MSG_OFFICER)
     {
         guid = session ? session->GetPlayer()->GetGUID() : 0;
     }
     else if (type == CHAT_MSG_WHISPER_INFORM)
     {
-        // Convert ChannelName back to the to Players GUID
-        guid = uint32(channelName);               //session ? session->GetPlayer()->GetGUID() : 0; // FIXME: may be receiver?
+        
+        guid = uint32(channelName);               
     }
 
     *data << guid;
 
-    // crashfix
+    
     if (type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
         *data << guid;
 
@@ -370,9 +370,11 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
 void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level)
 {
-    WorldPacket data;
+/*
+Temp. disabled (c) Phantomas
+	WorldPacket data;
 
-    // Create the requested monster
+    
     Player *chr = session->GetPlayer();
     float x = chr->GetPositionX();
     float y = chr->GetPositionY();
@@ -381,9 +383,9 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
 
     Creature* pCreature = new Creature();
 
-    pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), name, chr->GetMapId(), x, y, z, o, objmgr.AddCreatureName(pCreature->GetName(), displayId));
+    pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), name, chr->GetMapId(), x, y, z, o, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId));
     pCreature->SetZoneId(chr->GetZoneId());
-    pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureName(pCreature->GetName(), displayId));
+    pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId));
     pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
     pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS , npcFlags);
@@ -398,62 +400,12 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
     pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, 1900);
     pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000);
     pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
-    Log::getSingleton( ).outError("AddObject at Chat.cpp");
+    pCreature->AIM_Initialize();
+    sLog.outError("AddObject at Chat.cpp");
 
     MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
     pCreature->SaveToDB();
-}
-
-
-void ChatHandler::smsg_NewWorld(WorldSession *session, uint32 mapid, float x, float y, float z)
-{
-    WorldPacket data;
-    data.Initialize(SMSG_TRANSFER_PENDING);
-    data << uint32(0);
-
-    session->SendPacket(&data);
-    MapManager::Instance().GetMap(session->GetPlayer()->GetMapId())->Remove(session->GetPlayer(), false);
-
-    // Build a NEW WORLD packet
-    data.Initialize(SMSG_NEW_WORLD);
-    data << (uint32)mapid << (float)x << (float)y << (float)z << (float)0.0f;
-    session->SendPacket( &data );
-
-    // TODO: clear attack list
-
-    session->GetPlayer()->SetMapId(mapid);
-    session->GetPlayer()->Relocate(x, y, z, 0); // sets the position without triggers any packet stuff
-    MapManager::Instance().GetMap(session->GetPlayer()->GetMapId())->Add(session->GetPlayer()); // he enters the new world
-}
-
-
-void ChatHandler::MovePlayer(WorldSession *session, float x, float y, float z)
-{
-    WorldPacket data;
-
-    // Output new position to the console
-    Log::getSingleton( ).outDetail( "WORLD: Moved player to (%f, %f, %f)", x, y, z );
-
-    ////////////////////////////////////////
-    // Set the new position of the character
-    Player *chr = session->GetPlayer();
-
-    // Send new position to client via MSG_MOVE_TELEPORT_ACK
-    chr->BuildTeleportAckMsg(&data, x, y, z, 0);
-    session->SendPacket(&data);
-
-    // Set actual position and update in-range lists
-    chr->SetPosition(x, y, z, 0);
-
-    //////////////////////////////////
-    // Now send new position of this player to clients using MSG_MOVE_HEARTBEAT
-    chr->BuildHeartBeatMsg(&data);
-    chr->SendMessageToSet(&data, true);
-
-    char txtBuffer[256];
-    sprintf(txtBuffer,"You have been moved to (%f, %f, %f)",x,y,z );
-    FillSystemMessageData(&data, session, txtBuffer);
-    session->SendPacket( &data );
+*/
 }
 
 
@@ -464,21 +416,21 @@ Player * ChatHandler::getSelectedChar(WorldSession *client)
 
     guid = client->GetPlayer()->GetSelection();
     if (guid == 0)
-        chr = client->GetPlayer();                // autoselect
+        chr = client->GetPlayer();                
     else
         chr = objmgr.GetPlayer(guid);
-        // chr = objmgr.GetObject<Player>(guid);
+        
 
     return chr;
 }
 
-//UQ1: Generic string formatting for output... CHECKME: May want this somewhere else???
+
 char *fmtstring( char *format, ... ) 
 {
     va_list        argptr;
     #define    MAX_FMT_STRING    32000
     static char        temp_buffer[MAX_FMT_STRING];
-    static char        string[MAX_FMT_STRING];    // in case va is called by nested functions
+    static char        string[MAX_FMT_STRING];    
     static int        index = 0;
     char    *buf;
     int len;

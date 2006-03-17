@@ -1,7 +1,5 @@
-/* Timer.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +19,16 @@
 #ifndef MANGOS_TIMER_H
 #define MANGOS_TIMER_H
 
+#include "Platform/CompilerDefs.h"
+
 #if PLATFORM == PLATFORM_WIN32
 #   include <windows.h>
 #   include <mmsystem.h>
+#   include <time.h>
 #else
+# ifdef __FreeBSD__
+#   include <time.h>
+# endif
 #   include <sys/timeb.h>
 #endif
 
@@ -64,15 +68,10 @@ class IntervalTimer
 };
 
 
-/** TimeTracker is a new IntervalTimer class that uses only
- * one time_t to track the time that's expired  This is
- * important when we want to save mem and have alot of
- * timers around.  Its master keeps the original interval
- * which is only one copy.
- */
+
 struct TimeTracker
 {
-    // always expired until you give it an interval
+    
     TimeTracker(time_t expiry) : i_expiryTime(expiry) {}
     void Update(time_t diff) { i_expiryTime -= diff; }
     bool Passed(void) const { return (i_expiryTime <= 0); }

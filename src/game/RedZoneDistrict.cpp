@@ -1,6 +1,5 @@
-/* RedZoneDistrict.cpp
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,23 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include "RedZoneDistrict.h"
 
-// static initialization
-/*   | Z2|   |
- * Z1|   | Z3|
- *-----------
- *   | X |   |
- * Z4|   |Z5 |
- *-----------
- *   | Z7|   |
- * Z6|   | Z8|
- *-----------
- *
- * The marked X is the current active grid that the player's in..
- * Z1 to Z8 is the affected zones represented by the mask...
- */
+
+
 
 void RedZone::Initialize()
 {

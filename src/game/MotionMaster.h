@@ -1,6 +1,5 @@
-/* MotionMaster.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +19,7 @@
 #ifndef MANGOS_MOTIONMASTER_H
 #define MANGOS_MOTIONMASTER_H
 
-/** MotionMaster controls the movement of the creatures.
- * It also allows the creature to mutate its state
- */
+
 
 #include "IdleMovementGenerator.h"
 #include <stack>
@@ -32,43 +29,41 @@ class MANGOS_DLL_DECL MotionMaster : public std::stack<MovementGenerator *>
     static IdleMovementGenerator si_idleMovement;
 public:
     
-    MotionMaster() : i_lastMotionTime(0) 
-    {
-	push(&si_idleMovement);
-    }
+    MotionMaster() : i_owner(NULL) {}
 
-    // operator override.
+    
+    void Initialize(Creature *creature);
+
+    
     MovementGenerator* operator->(void) { return top(); }
 
-    /// Update the creatures motion
+    
     void UpdateMotion(const uint32 &diff);
     
-    /// Clear the motion queue
+    
     void Clear(void);
 
-    /// Current movement is overdue
-    void MovementOverDue(void);
+    
+    void MovementExpired(void);
 
-    /// Sets the movement to idle
+    
     void Idle(void)
     {
 	if( !isStatic( top() ) )
 	    push( &si_idleMovement );
     }
 
-    /// Mutate to a new movement generator due to changes in behaviour
-    template<class NEW_MOVEMENT> void Mutate(void) 
+    
+    void Mutate(MovementGenerator *m) 
     {
-	NEW_MOVEMENT *m = new NEW_MOVEMENT;
-	m->Reset(*i_owner);
+	m->Initialize(*i_owner);
 	push(m);
     }
 
 private:
 
     inline bool isStatic(MovementGenerator *mv) const { return (mv == & si_idleMovement); }
-    uint32 i_lastMotionTime;    // Timer creature moves    
-    Creature *i_owner; // this is be resolve.. but for now just for compilation
+    Creature *i_owner; 
 };
 
 #endif

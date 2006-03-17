@@ -1,8 +1,5 @@
-/* ByteBuffer.h
- *
- * Copyright (C) 2004 quetzal
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +20,7 @@
 #define _BYTEBUFFER_H
 
 #include "Common.h"
+#include "Errors.h"
 
 class ByteBuffer
 {
@@ -49,9 +47,9 @@ class ByteBuffer
             _rpos = _wpos = 0;
         }
 
-        // template <typename T> void insert(size_t pos, T value) {
-        //     insert(pos, (uint8 *)&value, sizeof(value));
-        // }
+        
+        
+        
 
         template <typename T> void append(T value)
         {
@@ -62,7 +60,7 @@ class ByteBuffer
             put(pos,(uint8 *)&value,sizeof(value));
         }
 
-        // stream like operators for storing data
+        
         ByteBuffer &operator<<(bool value)
         {
             append<char>((char)value);
@@ -111,7 +109,7 @@ class ByteBuffer
             return *this;
         }
 
-        // stream like operators for reading data
+        
         ByteBuffer &operator>>(bool &value)
         {
             value = read<char>() > 0 ? true : false;
@@ -215,7 +213,7 @@ class ByteBuffer
         const uint8 *contents() const { return &_storage[0]; };
 
         inline size_t size() const { return _storage.size(); };
-        // one should never use resize probably
+        
         void resize(size_t newsize)
         {
             _storage.resize(newsize);
@@ -227,7 +225,7 @@ class ByteBuffer
             if (ressize > size()) _storage.reserve(ressize);
         };
 
-        // appending to the end of buffer
+        
         void append(const std::string& str)
         {
             append((uint8 *)str.c_str(),str.size() + 1);
@@ -240,11 +238,11 @@ class ByteBuffer
         {
             if (!cnt) return;
 
-            // noone should even need uint8buffer longer than 10mb
-            // if you DO need, think about it
-            // then think some more
-            // then use something else
-            // -- qz
+            
+            
+            
+            
+            
             ASSERT(size() < 10000000);
 
             if (_storage.size() < _wpos + cnt)
@@ -265,24 +263,74 @@ class ByteBuffer
         void print_storage()
         {
             printf("STORAGE_SIZE: %u\n", size() );
-            for(uint8/*int*/ i = 0; i < size(); i++)
+            for(uint8 i = 0; i < size(); i++)
                 printf("%u - ", read<uint8>(i) );
         }
 
+		void hexlike()
+		{
+			uint32 j = 1, k = 1;
+			printf("STORAGE_SIZE: %u\n", size() );
+			for(uint32 i = 0; i < size(); i++)
+			{
+				if ((i == (j*8)) && ((i != (k*16))))
+				{
+					if (read<uint8>(i) < 0x0F)
+					{
+						printf("| 0%X ", read<uint8>(i) );
+					}
+					else
+					{
+						printf("| %X ", read<uint8>(i) );
+					}
 
-        // void insert(size_t pos, const uint8 *src, size_t cnt) {
-        //     std::copy(src, src + cnt, inserter(_storage, _storage.begin() + pos));
-        // }
+					j++;
+				}
+				else if (i == (k*16))
+				{
+					if (read<uint8>(i) < 0x0F)
+					{
+						printf("\n0%X ", read<uint8>(i) );
+					}
+					else
+					{
+						printf("\n%X ", read<uint8>(i) );
+					}
+
+					k++;
+					j++;
+				}
+				else
+				{
+					if (read<uint8>(i) < 0x0F)
+					{
+						printf("0%X ", read<uint8>(i) );
+					}
+					else
+					{
+						printf("%X ", read<uint8>(i) );
+					}
+				}
+			}
+			printf("\n");
+
+		}
+
+
+
+        
+        
+        
 
     protected:
-        // read and write positions
+        
         size_t _rpos, _wpos;
         std::vector<uint8> _storage;
 };
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
+
+
+
 
 template <typename T> ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 {

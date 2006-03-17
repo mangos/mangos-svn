@@ -1,6 +1,5 @@
-/* RandomMovementGenerator.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,25 +19,30 @@
 #ifndef MANGOS_RANDOMMOTIONGENERATOR_H
 #define MANGOS_RANDOMMOTIONGENERATOR_H
 
-/** RandomMotionGenerator generates a series of way points
- * randomly.
- */
+
 
 #include "MovementGenerator.h"
+#include "DestinationHolder.h"
+#include "Traveller.h"
+
 #define MAX_RAND_WAYPOINTS 8
 
 class MANGOS_DLL_DECL RandomMovementGenerator : public MovementGenerator
 {
 public:
+    RandomMovementGenerator(const Creature &) : i_nextMoveTime(0) {}
+
     
-    // API implementation
-    void Initialize(const Creature &);
-    void Reset(const Creature &);
-    bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation);
+    void Initialize(Creature &);
+    void Reset(Creature &);
     void Update(Creature &, const uint32 &);
 
+    static int Permissible(const Creature *);
 private:
-    float i_waypoints[MAX_RAND_WAYPOINTS][3];
+    TimeTracker i_nextMoveTime;
+    float i_waypoints[MAX_RAND_WAYPOINTS+1][3];
+    DestinationHolder<CreatureTraveller> i_destinationHolder;
+    uint32 i_nextMove;
 };
 
 #endif

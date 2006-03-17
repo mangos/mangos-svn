@@ -1,7 +1,5 @@
-/* QuestDef.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
- /*
-   Basic Quest Type. Fields include standard Quest info as the
-   modifiers needed by the server to manage the quests properly.
  */
 
 #ifndef MANGOSSERVER_QUEST_H
@@ -104,56 +97,37 @@ enum __QuestTradeSkill
 
 enum __QuestStatus
 {
-    QUEST_STATUS_NONE           = 0,   // Player has no status for this quest.
-    QUEST_STATUS_COMPLETE       = 1,   // Quest is complete ( rewarded or not ).
-    QUEST_STATUS_UNAVAILABLE    = 2,   // Quest requirements not satisfied.
-    QUEST_STATUS_INCOMPLETE     = 3,   // Quest is incomplete.
-    QUEST_STATUS_AVAILABLE      = 4,   // Quest is available to be taken.
+    QUEST_STATUS_NONE           = 0,   
+    QUEST_STATUS_COMPLETE       = 1,   
+    QUEST_STATUS_UNAVAILABLE    = 2,   
+    QUEST_STATUS_INCOMPLETE     = 3,   
+    QUEST_STATUS_AVAILABLE      = 4,   
 };
 
 enum __QuestGiverStatus
 {
-    DIALOG_STATUS_NONE					   = 0,   // Questgiver has nothing to tell you.
-    DIALOG_STATUS_UNAVAILABLE			   = 1,   // Has quests, but you require a higher level.
-    DIALOG_STATUS_CHAT					   = 2,   // Can chat with you.
-    DIALOG_STATUS_INCOMPLETE			   = 3,   // You haven't completed the quest.
-    DIALOG_STATUS_REWARD_REP			   = 4,   // Has reward to give (repeatable).
-    DIALOG_STATUS_AVAILABLE				   = 5,   // Has quests to give now.
-    DIALOG_STATUS_REWARD				   = 6,   // Has reward to give.
+    DIALOG_STATUS_NONE					   = 0,   
+    DIALOG_STATUS_UNAVAILABLE			   = 1,   
+    DIALOG_STATUS_CHAT					   = 2,   
+    DIALOG_STATUS_INCOMPLETE			   = 3,   
+    DIALOG_STATUS_REWARD_REP			   = 4,   
+    DIALOG_STATUS_AVAILABLE				   = 5,   
+    DIALOG_STATUS_REWARD				   = 6,   
 };
 
 
 enum __QuestSpecialFlags
 {
-	QUEST_SPECIAL_FLAGS_NONE          = 0,   // Has no special flags.
-	QUEST_SPECIAL_FLAGS_DELIVER       = 1,   // Has Delivery objectives.
-	QUEST_SPECIAL_FLAGS_KILL          = 2,   // Has Kill Objectives.
-	QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,   // Has SpeakTo Objectives.
+	QUEST_SPECIAL_FLAGS_NONE          = 0,   
+	QUEST_SPECIAL_FLAGS_DELIVER       = 1,   
+	QUEST_SPECIAL_FLAGS_KILL          = 2,   
+	QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,   
 
-	QUEST_SPECIAL_FLAGS_REPEATABLE    = 8,   // It's repeatable
-	QUEST_SPECIAL_FLAGS_EXPLORATION   = 16,  // It's an exploration quest.
+	QUEST_SPECIAL_FLAGS_REPEATABLE    = 8,   
+	QUEST_SPECIAL_FLAGS_EXPLORATION   = 16,  
 
-	QUEST_SPECIAL_FLAGS_TIMED         = 32,  // Timer quest.
-	QUEST_SPECIAL_FLAGS_REPUTATION    = 128, // Repuation Objectives.
-};
-
-struct quest_status{
-
-    quest_status(){
-        memset(m_questItemCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
-        memset(m_questMobCount , 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
-		m_timerrel = 0;
-    }
-
-    uint32 quest_id;
-    uint32 status;
-	bool rewarded;
-    uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ]; // number of items collected. Ignored
-    uint32 m_questMobCount [ QUEST_OBJECTIVES_COUNT ];  // number of monsters slain
-
-	uint32	m_timer;
-	uint32	m_timerrel;
-	bool	m_explored;
+	QUEST_SPECIAL_FLAGS_TIMED         = 32,  
+	QUEST_SPECIAL_FLAGS_REPUTATION    = 128, 
 };
 
 class Quest
@@ -161,9 +135,7 @@ class Quest
 public:
 	Quest();
 
-	/*
-     *  Basic data sent to the client. It is not used internally.
-	 */
+	
 
     uint32 m_qId;
     uint32 m_qCategory;
@@ -179,24 +151,18 @@ public:
 	std::string m_qEndInfo;
     std::string m_qObjectiveInfo[ QUEST_OBJECTIVES_COUNT ];
 	
-	/*
-     *  Internal and client used data.
-	 */
+	
 
     std::string m_qCompletionInfo;
     std::string m_qIncompleteInfo;
 	uint32 m_qComplexityLevel;
 
-	/*
-     *  Quest Pre-requirements.
-	 */
+	
 
     uint32 m_qPlayerLevel;
 
 
-	/*
-	 * LudMilla Defined Fields. Could be done otherwise.
-	 */
+	
 
     uint32 m_qRequiredQuestsCount;
     uint32 m_qRequiredQuests[ QUEST_DEPLINK_COUNT ];
@@ -211,9 +177,7 @@ public:
 	uint32 m_qRequiredClass;
 	uint32 m_qRequiredTradeskill;
 
-	/*
-	 * Objective Fields.
-	 */
+	
 
     uint32 m_qObjItemId[ QUEST_OBJECTIVES_COUNT ];
     uint32 m_qObjItemCount[ QUEST_OBJECTIVES_COUNT ];
@@ -229,9 +193,7 @@ public:
 
 	uint32 m_qObjTime;
 
-	/*
-	 * Rewards.
-	 */
+	
 
     uint32 m_qRewChoicesCount;
     uint32 m_qRewChoicesItemId[ QUEST_REWARD_CHOICES_COUNT ];
@@ -244,35 +206,32 @@ public:
     uint32 m_qRewMoney;
 	uint32 m_qRewSpell;
 
-	/*
-	 * Other fields.
-	 */
+	
 
 
     uint32 m_qQuestItem;
-    uint32 m_qNextQuest;
+    uint32 m_qNextQuestId;
+	Quest* m_qNextQuest;
 
 	uint32  m_qSpecialFlags;
 
-	/*
-	 * Functions to be used by external modules.
-	 */
+	
 
-	//-----------------------------------------------
-	// Returns the amount of XP a player _Player would
-	// get by completing this quest.
+	
+	
+	
 	uint32 XPValue                 (Player* _Player);
 
-	//-----------------------------------------------
-	// Returns the number of Kill Objectives
+	
+	
 	uint32 GetKillObjectivesCount();
 
-	//-----------------------------------------------
-	// Returns the number of Deliver Objectives
+	
+	
 	uint32 GetDeliverObjectivesCount();
 
-	//------------------------------------------------
-	// Helper Functions
+	
+	
 	bool CanBeTaken( Player *_Player );
 	bool IsCompatible( Player *_Player );
 	bool ReputationSatisfied( Player *_Player );
@@ -287,6 +246,25 @@ public:
 	bool HasFlag( uint32 Flag )  { return (( m_qSpecialFlags & Flag ) == Flag); }
 
 
+};
+
+struct quest_status{
+
+    quest_status(){
+        memset(m_questItemCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+        memset(m_questMobCount , 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+		m_timerrel = 0;
+    }
+
+    Quest *m_quest;
+    uint32 status;
+	bool rewarded;
+    uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ]; 
+    uint32 m_questMobCount [ QUEST_OBJECTIVES_COUNT ];  
+
+	uint32	m_timer;
+	uint32	m_timerrel;
+	bool	m_explored;
 };
 
 

@@ -1,7 +1,5 @@
-/* AggressorAI.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,45 +19,47 @@
 #ifndef MANGOS_AGGRESSORAI_H
 #define MANGOS_AGGRESSORAI_H
 
-/** AggressorAI is an extremely aggressive AI.. it attacks anything
- * within its range and chase after them.  Since its the most
- * aggressive, even after the victim when out of its range,
- * it will spend small period of time looking for the victim
- * using the PredictionWayPointGenerator.
- */
+
 
 #include "CreatureAI.h"
-#include "HateMatrix.h"
+#include "FactionTemplateResolver.h"
+#include "Timer.h"
 
 class Creature;
 
 class MANGOS_DLL_DECL AggressorAI : public CreatureAI
 {
+    enum AggressorState
+	{
+	    STATE_NORMAL = 1,
+	    STATE_LOOK_AT_VICTIM = 2
+	};
+
 public:
-    // bindind a creature to the AI.
-    AggressorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
+    
+    AggressorAI(Creature &c);
 
-    void MoveInLineOfSight(Creature *);
-    void AttackStart(Creature *);
-    void AttackStop(Creature *);
-    void HealBy(Creature *healer, uint32 amount_healed);
-    void DamageInflict(Creature *healer, uint32 amount_healed);
-    bool IsVisible(Creature *) const;
-
-    void MoveInLineOfSight(Player *);
-    void AttackStart(Player *);
-    void AttackStop(Player *);
-    void HealBy(Player *healer, uint32 amount_healed);
-    void DamageInflict(Player *done_by, uint32 amount);
-    bool IsVisible(Player *) const;
+    void MoveInLineOfSight(Unit *);
+    void AttackStart(Unit *);
+    void AttackStop(Unit *);
+    void HealBy(Unit *healer, uint32 amount_healed);
+    void DamageInflict(Unit *healer, uint32 amount_healed);
+    bool IsVisible(Unit *) const;
 
     void UpdateAI(const uint32);
     static int Permissible(const Creature *);
 
 private:
+    bool _isVisible(Unit *) const;
+    void _taggedToKill(Unit *);
+    bool _needToStop(void) const;
+    void _stopAttack(void);
+
     Creature &i_creature;
+    FactionTemplateResolver i_myFaction;
     Unit *i_pVictim;
-    HateMatrix i_hateMatrix;
+    AggressorState i_state;
+    TimeTracker i_tracker;
 };
 
 #endif
