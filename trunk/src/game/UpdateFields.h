@@ -1,7 +1,5 @@
-/* UpdateFields.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,1321 +16,388 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifdef _VERSION_1_8_0_
 
-#include "UpdateFields_1_8_x.h"
+#include "Common.h"
 
-#else //!_VERSION_1_8_0_
+#ifndef _UPDATEFIELDS_AUTO_H
+#define _UPDATEFIELDS_AUTO_H
 
-#ifdef _VERSION_1_7_0_
+enum EObjectFields {
+    OBJECT_FIELD_GUID                       = 0,
+    OBJECT_FIELD_TYPE                       = 2,
+    OBJECT_FIELD_ENTRY                      = 3,
+    OBJECT_FIELD_SCALE_X                    = 4,
+    OBJECT_FIELD_PADDING                    = 5,
+    OBJECT_END                              = 6,
+};
 
-#include "UpdateFields_1_7_x.h"
+enum EItemFields {
+    ITEM_FIELD_OWNER                        = 6,
+    ITEM_FIELD_CONTAINED                    = 8,
+    ITEM_FIELD_CREATOR                      = 10,
+    ITEM_FIELD_GIFTCREATOR                  = 12,
+    ITEM_FIELD_STACK_COUNT                  = 14,
+    ITEM_FIELD_DURATION                     = 15,
+    ITEM_FIELD_SPELL_CHARGES                = 16,      
+    ITEM_FIELD_FLAGS                        = 21,
+    ITEM_FIELD_ENCHANTMENT                  = 22,      
+    ITEM_FIELD_PROPERTY_SEED                = 43,
+    ITEM_FIELD_RANDOM_PROPERTIES_ID         = 44,
+    ITEM_FIELD_ITEM_TEXT_ID                 = 45,
+    ITEM_FIELD_DURABILITY                   = 46,
+    ITEM_FIELD_MAXDURABILITY                = 47,
+    ITEM_END                                = 48,
+};
 
-#else //!_VERSION_1_7_0_
+enum EContainerFields {
+    CONTAINER_FIELD_NUM_SLOTS               = 48,
+    CONTAINER_ALIGN_PAD                     = 49,
+    CONTAINER_FIELD_SLOT_1                  = 50,      
+    CONTAINER_END                           = 90,
+};
 
-#define      CONTAINER_ALIGN_PAD                0x31
-#define      CONTAINER_END                      90
-#define      CONTAINER_FIELD_NUM_SLOTS          0x30
-#define      CONTAINER_FIELD_SLOT_1             50
-#define      CONTAINER_FIELD_SLOT_1_01          0x33
-#define      CONTAINER_FIELD_SLOT_1_02          0x34
-#define      CONTAINER_FIELD_SLOT_1_03          0x35
-#define      CONTAINER_FIELD_SLOT_1_04          0x36
-#define      CONTAINER_FIELD_SLOT_1_05          0x37
-#define      CONTAINER_FIELD_SLOT_1_06          0x38
-#define      CONTAINER_FIELD_SLOT_1_07          0x39
-#define      CONTAINER_FIELD_SLOT_1_08          0x3a
-#define      CONTAINER_FIELD_SLOT_1_09          0x3b
-#define      CONTAINER_FIELD_SLOT_1_10          60
-#define      CONTAINER_FIELD_SLOT_1_11          0x3d
-#define      CONTAINER_FIELD_SLOT_1_12          0x3e
-#define      CONTAINER_FIELD_SLOT_1_13          0x3f
-#define      CONTAINER_FIELD_SLOT_1_14          0x40
-#define      CONTAINER_FIELD_SLOT_1_15          0x41
-#define      CONTAINER_FIELD_SLOT_1_16          0x42
-#define      CONTAINER_FIELD_SLOT_1_17          0x43
-#define      CONTAINER_FIELD_SLOT_1_18          0x44
-#define      CONTAINER_FIELD_SLOT_1_19          0x45
-#define      CONTAINER_FIELD_SLOT_1_20          70
-#define      CONTAINER_FIELD_SLOT_1_21          0x47
-#define      CONTAINER_FIELD_SLOT_1_22          0x48
-#define      CONTAINER_FIELD_SLOT_1_23          0x49
-#define      CONTAINER_FIELD_SLOT_1_24          0x4a
-#define      CONTAINER_FIELD_SLOT_1_25          0x4b
-#define      CONTAINER_FIELD_SLOT_1_26          0x4c
-#define      CONTAINER_FIELD_SLOT_1_27          0x4d
-#define      CONTAINER_FIELD_SLOT_1_28          0x4e
-#define      CONTAINER_FIELD_SLOT_1_29          0x4f
-#define      CONTAINER_FIELD_SLOT_1_30          80
-#define      CONTAINER_FIELD_SLOT_1_31          0x51
-#define      CONTAINER_FIELD_SLOT_1_32          0x52
-#define      CONTAINER_FIELD_SLOT_1_33          0x53
-#define      CONTAINER_FIELD_SLOT_1_34          0x54
-#define      CONTAINER_FIELD_SLOT_1_35          0x55
-#define      CONTAINER_FIELD_SLOT_1_36          0x56
-#define      CONTAINER_FIELD_SLOT_1_37          0x57
-#define      CONTAINER_FIELD_SLOT_1_38          0x58
-#define      CONTAINER_FIELD_SLOT_1_39          0x59
-#define      CORPSE_END                         0x26
-#define      CORPSE_FIELD_BYTES_1               0x20
-#define      CORPSE_FIELD_BYTES_2               0x21
-#define      CORPSE_FIELD_DISPLAY_ID            12
-#define      CORPSE_FIELD_DYNAMIC_FLAGS         0x24
-#define      CORPSE_FIELD_FACING                8
-#define      CORPSE_FIELD_FLAGS                 0x23
-#define      CORPSE_FIELD_GUILD                 0x22
-#define      CORPSE_FIELD_ITEM                  13
-#define      CORPSE_FIELD_ITEM_01               14
-#define      CORPSE_FIELD_ITEM_02               15
-#define      CORPSE_FIELD_ITEM_03               0x10
-#define      CORPSE_FIELD_ITEM_04               0x11
-#define      CORPSE_FIELD_ITEM_05               0x12
-#define      CORPSE_FIELD_ITEM_06               0x13
-#define      CORPSE_FIELD_ITEM_07               20
-#define      CORPSE_FIELD_ITEM_08               0x15
-#define      CORPSE_FIELD_ITEM_09               0x16
-#define      CORPSE_FIELD_ITEM_10               0x17
-#define      CORPSE_FIELD_ITEM_11               0x18
-#define      CORPSE_FIELD_ITEM_12               0x19
-#define      CORPSE_FIELD_ITEM_13               0x1a
-#define      CORPSE_FIELD_ITEM_14               0x1b
-#define      CORPSE_FIELD_ITEM_15               0x1c
-#define      CORPSE_FIELD_ITEM_16               0x1d
-#define      CORPSE_FIELD_ITEM_17               30
-#define      CORPSE_FIELD_ITEM_18               0x1f
-#define      CORPSE_FIELD_OWNER                 6
-#define      CORPSE_FIELD_OWNER_01              7
-#define      CORPSE_FIELD_PAD                   0x25
-#define      CORPSE_FIELD_POS_X                 9
-#define      CORPSE_FIELD_POS_Y                 10
-#define      CORPSE_FIELD_POS_Z                 11
-#define      DYNAMICOBJECT_BYTES                8
-#define      DYNAMICOBJECT_CASTER               6
-#define      DYNAMICOBJECT_CASTER_01            7
-#define      DYNAMICOBJECT_END                  0x10
-#define      DYNAMICOBJECT_FACING               14
-#define      DYNAMICOBJECT_PAD                  15
-#define      DYNAMICOBJECT_POS_X                11
-#define      DYNAMICOBJECT_POS_Y                12
-#define      DYNAMICOBJECT_POS_Z                13
-#define      DYNAMICOBJECT_RADIUS               10
-#define      DYNAMICOBJECT_SPELLID              9
-#define      GAMEOBJECT_DISPLAYID               8
-#define      GAMEOBJECT_DYN_FLAGS               20
-#define      GAMEOBJECT_END                     0x18
-#define      GAMEOBJECT_FACING                  0x13
-#define      GAMEOBJECT_FACTION                 0x15
-#define      GAMEOBJECT_FLAGS                   9
-#define      GAMEOBJECT_LEVEL                   0x17
-#define      GAMEOBJECT_POS_X                   0x10
-#define      GAMEOBJECT_POS_Y                   0x11
-#define      GAMEOBJECT_POS_Z                   0x12
-#define      GAMEOBJECT_ROTATION                10
-#define      GAMEOBJECT_ROTATION_01             11
-#define      GAMEOBJECT_ROTATION_02             12
-#define      GAMEOBJECT_ROTATION_03             13
-#define      GAMEOBJECT_STATE                   14
-#define      GAMEOBJECT_TIMESTAMP               15
-#define      GAMEOBJECT_TYPE_ID                 0x16
-#define      ITEM_END                           0x30
-#define      ITEM_FIELD_CONTAINED               8
-#define      ITEM_FIELD_CONTAINED_01            9
-#define      ITEM_FIELD_CREATOR                 10
-#define      ITEM_FIELD_CREATOR_01              11
-#define      ITEM_FIELD_DURABILITY              0x2e
-#define      ITEM_FIELD_DURATION                15
-#define      ITEM_FIELD_ENCHANTMENT             0x16
-#define      ITEM_FIELD_ENCHANTMENT_01          0x17
-#define      ITEM_FIELD_ENCHANTMENT_02          0x18
-#define      ITEM_FIELD_ENCHANTMENT_03          0x19
-#define      ITEM_FIELD_ENCHANTMENT_04          0x1a
-#define      ITEM_FIELD_ENCHANTMENT_05          0x1b
-#define      ITEM_FIELD_ENCHANTMENT_06          0x1c
-#define      ITEM_FIELD_ENCHANTMENT_07          0x1d
-#define      ITEM_FIELD_ENCHANTMENT_08          30
-#define      ITEM_FIELD_ENCHANTMENT_09          0x1f
-#define      ITEM_FIELD_ENCHANTMENT_10          0x20
-#define      ITEM_FIELD_ENCHANTMENT_11          0x21
-#define      ITEM_FIELD_ENCHANTMENT_12          0x22
-#define      ITEM_FIELD_ENCHANTMENT_13          0x23
-#define      ITEM_FIELD_ENCHANTMENT_14          0x24
-#define      ITEM_FIELD_ENCHANTMENT_15          0x25
-#define      ITEM_FIELD_ENCHANTMENT_16          0x26
-#define      ITEM_FIELD_ENCHANTMENT_17          0x27
-#define      ITEM_FIELD_ENCHANTMENT_18          40
-#define      ITEM_FIELD_ENCHANTMENT_19          0x29
-#define      ITEM_FIELD_ENCHANTMENT_20          0x2a
-#define      ITEM_FIELD_FLAGS                   0x15
-#define      ITEM_FIELD_GIFTCREATOR             12
-#define      ITEM_FIELD_GIFTCREATOR_01          13
-#define      ITEM_FIELD_ITEM_TEXT_ID            0x2d
-#define      ITEM_FIELD_MAXDURABILITY           0x2f
-#define      ITEM_FIELD_OWNER                   6
-#define      ITEM_FIELD_OWNER_01                7
-#define      ITEM_FIELD_PROPERTY_SEED           0x2b
-#define      ITEM_FIELD_RANDOM_PROPERTIES_ID    0x2c
-#define      ITEM_FIELD_SPELL_CHARGES           0x10
-#define      ITEM_FIELD_SPELL_CHARGES_01        0x11
-#define      ITEM_FIELD_SPELL_CHARGES_02        0x12
-#define      ITEM_FIELD_SPELL_CHARGES_03        0x13
-#define      ITEM_FIELD_SPELL_CHARGES_04        20
-#define      ITEM_FIELD_STACK_COUNT             14
-#define      OBJECT_END                         6
-#define      OBJECT_FIELD_CREATED_BY            6
-#define      OBJECT_FIELD_CREATED_BY_01         7
-#define      OBJECT_FIELD_ENTRY                 3
-#define      OBJECT_FIELD_GUID                  0
-#define      OBJECT_FIELD_GUID_01               1
-#define      OBJECT_FIELD_PADDING               5
-#define      OBJECT_FIELD_SCALE_X               4
-#define      OBJECT_FIELD_TYPE                  2
-#define      PLAYER__FIELD_COMBO_TARGET         0x26a
-#define      PLAYER__FIELD_COMBO_TARGET_01      0x26b
-#define      PLAYER_AMMO_ID                     0x469
-#define      PLAYER_BLOCK_PERCENTAGE            0x3f4
-#define      PLAYER_BYTES                       0xb7
-#define      PLAYER_BYTES_2                     0xb8
-#define      PLAYER_BYTES_3                     0xb9
-#define      PLAYER_CHARACTER_POINTS1           0x3f0
-#define      PLAYER_CHARACTER_POINTS2           0x3f1
-#define      PLAYER_CRIT_PERCENTAGE             0x3f7
-#define      PLAYER_DODGE_PERCENTAGE            0x3f5
-#define      PLAYER_DUEL_ARBITER                0xb2
-#define      PLAYER_DUEL_ARBITER_01             0xb3
-#define      PLAYER_DUEL_TEAM                   0xba
-#define      PLAYER_END                         0x47e
-#define      PLAYER_EXPLORED_ZONES_1            0x3f9
-#define      PLAYER_EXPLORED_ZONES_1_01         0x3fa
-#define      PLAYER_EXPLORED_ZONES_1_02         0x3fb
-#define      PLAYER_EXPLORED_ZONES_1_03         0x3fc
-#define      PLAYER_EXPLORED_ZONES_1_04         0x3fd
-#define      PLAYER_EXPLORED_ZONES_1_05         0x3fe
-#define      PLAYER_EXPLORED_ZONES_1_06         0x3ff
-#define      PLAYER_EXPLORED_ZONES_1_07         0x400
-#define      PLAYER_EXPLORED_ZONES_1_08         0x401
-#define      PLAYER_EXPLORED_ZONES_1_09         0x402
-#define      PLAYER_EXPLORED_ZONES_1_10         0x403
-#define      PLAYER_EXPLORED_ZONES_1_11         0x404
-#define      PLAYER_EXPLORED_ZONES_1_12         0x405
-#define      PLAYER_EXPLORED_ZONES_1_13         0x406
-#define      PLAYER_EXPLORED_ZONES_1_14         0x407
-#define      PLAYER_EXPLORED_ZONES_1_15         0x408
-#define      PLAYER_EXPLORED_ZONES_1_16         0x409
-#define      PLAYER_EXPLORED_ZONES_1_17         0x40a
-#define      PLAYER_EXPLORED_ZONES_1_18         0x40b
-#define      PLAYER_EXPLORED_ZONES_1_19         0x40c
-#define      PLAYER_EXPLORED_ZONES_1_20         0x40d
-#define      PLAYER_EXPLORED_ZONES_1_21         0x40e
-#define      PLAYER_EXPLORED_ZONES_1_22         0x40f
-#define      PLAYER_EXPLORED_ZONES_1_23         0x410
-#define      PLAYER_EXPLORED_ZONES_1_24         0x411
-#define      PLAYER_EXPLORED_ZONES_1_25         0x412
-#define      PLAYER_EXPLORED_ZONES_1_26         0x413
-#define      PLAYER_EXPLORED_ZONES_1_27         0x414
-#define      PLAYER_EXPLORED_ZONES_1_28         0x415
-#define      PLAYER_EXPLORED_ZONES_1_29         0x416
-#define      PLAYER_EXPLORED_ZONES_1_30         0x417
-#define      PLAYER_EXPLORED_ZONES_1_31         0x418
-#define      PLAYER_EXPLORED_ZONES_1_32         0x419
-#define      PLAYER_EXPLORED_ZONES_1_33         0x41a
-#define      PLAYER_EXPLORED_ZONES_1_34         0x41b
-#define      PLAYER_EXPLORED_ZONES_1_35         0x41c
-#define      PLAYER_EXPLORED_ZONES_1_36         0x41d
-#define      PLAYER_EXPLORED_ZONES_1_37         0x41e
-#define      PLAYER_EXPLORED_ZONES_1_38         0x41f
-#define      PLAYER_EXPLORED_ZONES_1_39         0x420
-#define      PLAYER_EXPLORED_ZONES_1_40         0x421
-#define      PLAYER_EXPLORED_ZONES_1_41         0x422
-#define      PLAYER_EXPLORED_ZONES_1_42         0x423
-#define      PLAYER_EXPLORED_ZONES_1_43         0x424
-#define      PLAYER_EXPLORED_ZONES_1_44         0x425
-#define      PLAYER_EXPLORED_ZONES_1_45         0x426
-#define      PLAYER_EXPLORED_ZONES_1_46         0x427
-#define      PLAYER_EXPLORED_ZONES_1_47         0x428
-#define      PLAYER_EXPLORED_ZONES_1_48         0x429
-#define      PLAYER_EXPLORED_ZONES_1_49         0x42a
-#define      PLAYER_EXPLORED_ZONES_1_50         0x42b
-#define      PLAYER_EXPLORED_ZONES_1_51         0x42c
-#define      PLAYER_EXPLORED_ZONES_1_52         0x42d
-#define      PLAYER_EXPLORED_ZONES_1_53         0x42e
-#define      PLAYER_EXPLORED_ZONES_1_54         0x42f
-#define      PLAYER_EXPLORED_ZONES_1_55         0x430
-#define      PLAYER_EXPLORED_ZONES_1_56         0x431
-#define      PLAYER_EXPLORED_ZONES_1_57         0x432
-#define      PLAYER_EXPLORED_ZONES_1_58         0x433
-#define      PLAYER_EXPLORED_ZONES_1_59         0x434
-#define      PLAYER_EXPLORED_ZONES_1_60         0x435
-#define      PLAYER_EXPLORED_ZONES_1_61         0x436
-#define      PLAYER_EXPLORED_ZONES_1_62         0x437
-#define      PLAYER_EXPLORED_ZONES_1_63         0x438
-#define      PLAYER_FARSIGHT                    0x268
-#define      PLAYER_FARSIGHT_01                 0x269
-#define      PLAYER_FIELD_BANK_SLOT_1           0x22a
-#define      PLAYER_FIELD_BANK_SLOT_1_01        0x22b
-#define      PLAYER_FIELD_BANK_SLOT_1_02        0x22c
-#define      PLAYER_FIELD_BANK_SLOT_1_03        0x22d
-#define      PLAYER_FIELD_BANK_SLOT_1_04        0x22e
-#define      PLAYER_FIELD_BANK_SLOT_1_05        0x22f
-#define      PLAYER_FIELD_BANK_SLOT_1_06        560
-#define      PLAYER_FIELD_BANK_SLOT_1_07        0x231
-#define      PLAYER_FIELD_BANK_SLOT_1_08        0x232
-#define      PLAYER_FIELD_BANK_SLOT_1_09        0x233
-#define      PLAYER_FIELD_BANK_SLOT_1_10        0x234
-#define      PLAYER_FIELD_BANK_SLOT_1_11        0x235
-#define      PLAYER_FIELD_BANK_SLOT_1_12        0x236
-#define      PLAYER_FIELD_BANK_SLOT_1_13        0x237
-#define      PLAYER_FIELD_BANK_SLOT_1_14        0x238
-#define      PLAYER_FIELD_BANK_SLOT_1_15        0x239
-#define      PLAYER_FIELD_BANK_SLOT_1_16        570
-#define      PLAYER_FIELD_BANK_SLOT_1_17        0x23b
-#define      PLAYER_FIELD_BANK_SLOT_1_18        0x23c
-#define      PLAYER_FIELD_BANK_SLOT_1_19        0x23d
-#define      PLAYER_FIELD_BANK_SLOT_1_20        0x23e
-#define      PLAYER_FIELD_BANK_SLOT_1_21        0x23f
-#define      PLAYER_FIELD_BANK_SLOT_1_22        0x240
-#define      PLAYER_FIELD_BANK_SLOT_1_23        0x241
-#define      PLAYER_FIELD_BANK_SLOT_1_24        0x242
-#define      PLAYER_FIELD_BANK_SLOT_1_25        0x243
-#define      PLAYER_FIELD_BANK_SLOT_1_26        580
-#define      PLAYER_FIELD_BANK_SLOT_1_27        0x245
-#define      PLAYER_FIELD_BANK_SLOT_1_28        0x246
-#define      PLAYER_FIELD_BANK_SLOT_1_29        0x247
-#define      PLAYER_FIELD_BANK_SLOT_1_30        0x248
-#define      PLAYER_FIELD_BANK_SLOT_1_31        0x249
-#define      PLAYER_FIELD_BANK_SLOT_1_32        0x24a
-#define      PLAYER_FIELD_BANK_SLOT_1_33        0x24b
-#define      PLAYER_FIELD_BANK_SLOT_1_34        0x24c
-#define      PLAYER_FIELD_BANK_SLOT_1_35        0x24d
-#define      PLAYER_FIELD_BANK_SLOT_1_36        590
-#define      PLAYER_FIELD_BANK_SLOT_1_37        0x24f
-#define      PLAYER_FIELD_BANK_SLOT_1_38        0x250
-#define      PLAYER_FIELD_BANK_SLOT_1_39        0x251
-#define      PLAYER_FIELD_BANK_SLOT_1_40        0x252
-#define      PLAYER_FIELD_BANK_SLOT_1_41        0x253
-#define      PLAYER_FIELD_BANK_SLOT_1_42        0x254
-#define      PLAYER_FIELD_BANK_SLOT_1_43        0x255
-#define      PLAYER_FIELD_BANK_SLOT_1_44        0x256
-#define      PLAYER_FIELD_BANK_SLOT_1_45        0x257
-#define      PLAYER_FIELD_BANK_SLOT_1_46        600
-#define      PLAYER_FIELD_BANK_SLOT_1_47        0x259
-#define      PLAYER_FIELD_BANKBAG_SLOT_1        0x25a
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_01     0x25b
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_02     0x25c
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_03     0x25d
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_04     0x25e
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_05     0x25f
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_06     0x260
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_07     0x261
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_08     610
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_09     0x263
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_10     0x264
-#define      PLAYER_FIELD_BANKBAG_SLOT_1_11     0x265
-#define      PLAYER_FIELD_BUYBACK_COUNT         0x471
-#define      PLAYER_FIELD_BUYBACK_DURABILITY    0x470
-#define      PLAYER_FIELD_BUYBACK_ITEM_ID       0x46c
-#define      PLAYER_FIELD_BUYBACK_NPC           620
-#define      PLAYER_FIELD_BUYBACK_NPC_01        0x26d
-#define      PLAYER_FIELD_BUYBACK_PRICE         0x46f
-#define      PLAYER_FIELD_BUYBACK_RANDOM_PROPERTIES_ID  0x46d
-#define      PLAYER_FIELD_BUYBACK_SEED          0x46e
-#define      PLAYER_FIELD_BYTES                 0x468
-#define      PLAYER_FIELD_BYTES2                0x47c
-#define      PLAYER_FIELD_COINAGE               0x43a
-#define      PLAYER_FIELD_INV_SLOT_HEAD         0x1dc
-#define      PLAYER_FIELD_INV_SLOT_HEAD_01      0x1dd
-#define      PLAYER_FIELD_INV_SLOT_HEAD_02      0x1de
-#define      PLAYER_FIELD_INV_SLOT_HEAD_03      0x1df
-#define      PLAYER_FIELD_INV_SLOT_HEAD_04      480
-#define      PLAYER_FIELD_INV_SLOT_HEAD_05      0x1e1
-#define      PLAYER_FIELD_INV_SLOT_HEAD_06      0x1e2
-#define      PLAYER_FIELD_INV_SLOT_HEAD_07      0x1e3
-#define      PLAYER_FIELD_INV_SLOT_HEAD_08      0x1e4
-#define      PLAYER_FIELD_INV_SLOT_HEAD_09      0x1e5
-#define      PLAYER_FIELD_INV_SLOT_HEAD_10      0x1e6
-#define      PLAYER_FIELD_INV_SLOT_HEAD_11      0x1e7
-#define      PLAYER_FIELD_INV_SLOT_HEAD_12      0x1e8
-#define      PLAYER_FIELD_INV_SLOT_HEAD_13      0x1e9
-#define      PLAYER_FIELD_INV_SLOT_HEAD_14      490
-#define      PLAYER_FIELD_INV_SLOT_HEAD_15      0x1eb
-#define      PLAYER_FIELD_INV_SLOT_HEAD_16      0x1ec
-#define      PLAYER_FIELD_INV_SLOT_HEAD_17      0x1ed
-#define      PLAYER_FIELD_INV_SLOT_HEAD_18      0x1ee
-#define      PLAYER_FIELD_INV_SLOT_HEAD_19      0x1ef
-#define      PLAYER_FIELD_INV_SLOT_HEAD_20      0x1f0
-#define      PLAYER_FIELD_INV_SLOT_HEAD_21      0x1f1
-#define      PLAYER_FIELD_INV_SLOT_HEAD_22      0x1f2
-#define      PLAYER_FIELD_INV_SLOT_HEAD_23      0x1f3
-#define      PLAYER_FIELD_INV_SLOT_HEAD_24      500
-#define      PLAYER_FIELD_INV_SLOT_HEAD_25      0x1f5
-#define      PLAYER_FIELD_INV_SLOT_HEAD_26      0x1f6
-#define      PLAYER_FIELD_INV_SLOT_HEAD_27      0x1f7
-#define      PLAYER_FIELD_INV_SLOT_HEAD_28      0x1f8
-#define      PLAYER_FIELD_INV_SLOT_HEAD_29      0x1f9
-#define      PLAYER_FIELD_INV_SLOT_HEAD_30      0x1fa
-#define      PLAYER_FIELD_INV_SLOT_HEAD_31      0x1fb
-#define      PLAYER_FIELD_INV_SLOT_HEAD_32      0x1fc
-#define      PLAYER_FIELD_INV_SLOT_HEAD_33      0x1fd
-#define      PLAYER_FIELD_INV_SLOT_HEAD_34      510
-#define      PLAYER_FIELD_INV_SLOT_HEAD_35      0x1ff
-#define      PLAYER_FIELD_INV_SLOT_HEAD_36      0x200
-#define      PLAYER_FIELD_INV_SLOT_HEAD_37      0x201
-#define      PLAYER_FIELD_INV_SLOT_HEAD_38      0x202
-#define      PLAYER_FIELD_INV_SLOT_HEAD_39      0x203
-#define      PLAYER_FIELD_INV_SLOT_HEAD_40      0x204
-#define      PLAYER_FIELD_INV_SLOT_HEAD_41      0x205
-#define      PLAYER_FIELD_INV_SLOT_HEAD_42      0x206
-#define      PLAYER_FIELD_INV_SLOT_HEAD_43      0x207
-#define      PLAYER_FIELD_INV_SLOT_HEAD_44      520
-#define      PLAYER_FIELD_INV_SLOT_HEAD_45      0x209
-#define      PLAYER_FIELD_LAST_WEEK_CONTRIBUTION    0x47a
-#define      PLAYER_FIELD_LAST_WEEK_KILLS       0x474
-#define      PLAYER_FIELD_LAST_WEEK_RANK        0x47b
-#define      PLAYER_FIELD_LIFETIME_DISHONORBALE_KILLS   0x478
-#define      PLAYER_FIELD_LIFETIME_HONORBALE_KILLS      0x477
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG       0x45a
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG_01  0x45b
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG_02  0x45c
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG_03  0x45d
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG_04  0x45e
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG_05  0x45f
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_NEG_06  0x460
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT  0x461
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT_01  0x462
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT_02  0x463
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT_03  0x464
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT_04  0x465
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT_05  0x466
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_PCT_06  0x467
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS  0x453
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS_01  0x454
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS_02  0x455
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS_03  0x456
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS_04  0x457
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS_05  0x458
-#define      PLAYER_FIELD_MOD_DAMAGE_DONE_POS_06  0x459
-#define      PLAYER_FIELD_NEGSTAT0  0x440
-#define      PLAYER_FIELD_NEGSTAT1  0x441
-#define      PLAYER_FIELD_NEGSTAT2  0x442
-#define      PLAYER_FIELD_NEGSTAT3  0x443
-#define      PLAYER_FIELD_NEGSTAT4  0x444
-#define      PLAYER_FIELD_PACK_SLOT_1  0x20a
-#define      PLAYER_FIELD_PACK_SLOT_1_01  0x20b
-#define      PLAYER_FIELD_PACK_SLOT_1_02  0x20c
-#define      PLAYER_FIELD_PACK_SLOT_1_03  0x20d
-#define      PLAYER_FIELD_PACK_SLOT_1_04  0x20e
-#define      PLAYER_FIELD_PACK_SLOT_1_05  0x20f
-#define      PLAYER_FIELD_PACK_SLOT_1_06  0x210
-#define      PLAYER_FIELD_PACK_SLOT_1_07  0x211
-#define      PLAYER_FIELD_PACK_SLOT_1_08  530
-#define      PLAYER_FIELD_PACK_SLOT_1_09  0x213
-#define      PLAYER_FIELD_PACK_SLOT_1_10  0x214
-#define      PLAYER_FIELD_PACK_SLOT_1_11  0x215
-#define      PLAYER_FIELD_PACK_SLOT_1_12  0x216
-#define      PLAYER_FIELD_PACK_SLOT_1_13  0x217
-#define      PLAYER_FIELD_PACK_SLOT_1_14  0x218
-#define      PLAYER_FIELD_PACK_SLOT_1_15  0x219
-#define      PLAYER_FIELD_PACK_SLOT_1_16  0x21a
-#define      PLAYER_FIELD_PACK_SLOT_1_17  0x21b
-#define      PLAYER_FIELD_PACK_SLOT_1_18  540
-#define      PLAYER_FIELD_PACK_SLOT_1_19  0x21d
-#define      PLAYER_FIELD_PACK_SLOT_1_20  0x21e
-#define      PLAYER_FIELD_PACK_SLOT_1_21  0x21f
-#define      PLAYER_FIELD_PACK_SLOT_1_22  0x220
-#define      PLAYER_FIELD_PACK_SLOT_1_23  0x221
-#define      PLAYER_FIELD_PACK_SLOT_1_24  0x222
-#define      PLAYER_FIELD_PACK_SLOT_1_25  0x223
-#define      PLAYER_FIELD_PACK_SLOT_1_26  0x224
-#define      PLAYER_FIELD_PACK_SLOT_1_27  0x225
-#define      PLAYER_FIELD_PACK_SLOT_1_28  550
-#define      PLAYER_FIELD_PACK_SLOT_1_29  0x227
-#define      PLAYER_FIELD_PACK_SLOT_1_30  0x228
-#define      PLAYER_FIELD_PACK_SLOT_1_31  0x229
-#define      PLAYER_FIELD_PADDING  0x47d
-#define      PLAYER_FIELD_POSSTAT0  0x43b
-#define      PLAYER_FIELD_POSSTAT1  0x43c
-#define      PLAYER_FIELD_POSSTAT2  0x43d
-#define      PLAYER_FIELD_POSSTAT3  0x43e
-#define      PLAYER_FIELD_POSSTAT4  0x43f
-#define      PLAYER_FIELD_PVP_MEDALS  0x46b
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE  0x44c
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01  0x44d
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02  0x44e
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03  0x44f
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04  0x450
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05  0x451
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06  0x452
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE  0x445
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01  0x446
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02  0x447
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03  0x448
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04  0x449
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05  0x44a
-#define      PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06  0x44b
-#define      PLAYER_FIELD_SESSION_KILLS  0x472
-#define      PLAYER_FIELD_THIS_WEEK_CONTRIBUTION  0x476
-#define      PLAYER_FIELD_THIS_WEEK_KILLS  0x475
-#define      PLAYER_FIELD_VENDORBUYBACK_SLOT  0x266
-#define      PLAYER_FIELD_VENDORBUYBACK_SLOT_01  0x267
-#define      PLAYER_FIELD_YESTERDAY_CONTRIBUTION  0x479
-#define      PLAYER_FIELD_YESTERDAY_KILLS  0x473
-#define      PLAYER_FLAGS  180
-#define      PLAYER_GUILD_TIMESTAMP  0xbb
-#define      PLAYER_GUILDID  0xb5
-#define      PLAYER_GUILDRANK  0xb6
-#define      PLAYER_NEXT_LEVEL_XP  0x26f
-#define      PLAYER_PARRY_PERCENTAGE  0x3f6
-#define      PLAYER_QUEST_LOG_1_1  0xbc
-#define      PLAYER_QUEST_LOG_1_2  0xbd
-#define      PLAYER_QUEST_LOG_1_2_01  190
-#define      PLAYER_QUEST_LOG_10_1  0xd7
-#define      PLAYER_QUEST_LOG_10_2  0xd8
-#define      PLAYER_QUEST_LOG_10_2_01  0xd9
-#define      PLAYER_QUEST_LOG_11_1  0xda
-#define      PLAYER_QUEST_LOG_11_2  0xdb
-#define      PLAYER_QUEST_LOG_11_2_01  220
-#define      PLAYER_QUEST_LOG_12_1  0xdd
-#define      PLAYER_QUEST_LOG_12_2  0xde
-#define      PLAYER_QUEST_LOG_12_2_01  0xdf
-#define      PLAYER_QUEST_LOG_13_1  0xe0
-#define      PLAYER_QUEST_LOG_13_2  0xe1
-#define      PLAYER_QUEST_LOG_13_2_01  0xe2
-#define      PLAYER_QUEST_LOG_14_1  0xe3
-#define      PLAYER_QUEST_LOG_14_2  0xe4
-#define      PLAYER_QUEST_LOG_14_2_01  0xe5
-#define      PLAYER_QUEST_LOG_15_1  230
-#define      PLAYER_QUEST_LOG_15_2  0xe7
-#define      PLAYER_QUEST_LOG_15_2_01  0xe8
-#define      PLAYER_QUEST_LOG_16_1  0xe9
-#define      PLAYER_QUEST_LOG_16_2  0xea
-#define      PLAYER_QUEST_LOG_16_2_01  0xeb
-#define      PLAYER_QUEST_LOG_17_1  0xec
-#define      PLAYER_QUEST_LOG_17_2  0xed
-#define      PLAYER_QUEST_LOG_17_2_01  0xee
-#define      PLAYER_QUEST_LOG_18_1  0xef
-#define      PLAYER_QUEST_LOG_18_2  240
-#define      PLAYER_QUEST_LOG_18_2_01  0xf1
-#define      PLAYER_QUEST_LOG_19_1  0xf2
-#define      PLAYER_QUEST_LOG_19_2  0xf3
-#define      PLAYER_QUEST_LOG_19_2_01  0xf4
-#define      PLAYER_QUEST_LOG_2_1  0xbf
-#define      PLAYER_QUEST_LOG_2_2  0xc0
-#define      PLAYER_QUEST_LOG_2_2_01  0xc1
-#define      PLAYER_QUEST_LOG_20_1  0xf5
-#define      PLAYER_QUEST_LOG_20_2  0xf6
-#define      PLAYER_QUEST_LOG_20_2_01  0xf7
-#define      PLAYER_QUEST_LOG_3_1  0xc2
-#define      PLAYER_QUEST_LOG_3_2  0xc3
-#define      PLAYER_QUEST_LOG_3_2_01  0xc4
-#define      PLAYER_QUEST_LOG_4_1  0xc5
-#define      PLAYER_QUEST_LOG_4_2  0xc6
-#define      PLAYER_QUEST_LOG_4_2_01  0xc7
-#define      PLAYER_QUEST_LOG_5_1  200
-#define      PLAYER_QUEST_LOG_5_2  0xc9
-#define      PLAYER_QUEST_LOG_5_2_01  0xca
-#define      PLAYER_QUEST_LOG_6_1  0xcb
-#define      PLAYER_QUEST_LOG_6_2  0xcc
-#define      PLAYER_QUEST_LOG_6_2_01  0xcd
-#define      PLAYER_QUEST_LOG_7_1  0xce
-#define      PLAYER_QUEST_LOG_7_2  0xcf
-#define      PLAYER_QUEST_LOG_7_2_01  0xd0
-#define      PLAYER_QUEST_LOG_8_1  0xd1
-#define      PLAYER_QUEST_LOG_8_2  210
-#define      PLAYER_QUEST_LOG_8_2_01  0xd3
-#define      PLAYER_QUEST_LOG_9_1  0xd4
-#define      PLAYER_QUEST_LOG_9_2  0xd5
-#define      PLAYER_QUEST_LOG_9_2_01  0xd6
-#define      PLAYER_RANGED_CRIT_PERCENTAGE  0x3f8
-#define      PLAYER_REST_STATE_EXPERIENCE  0x439
-#define      PLAYER_SELECTION  0xb0
-#define      PLAYER_SELECTION_01  0xb1
-#define      PLAYER_SELF_RES_SPELL  0x46a
-#define      PLAYER_SKILL_INFO_1_1  0x270
-#define      PLAYER_SKILL_INFO_1_1_01  0x271
-#define      PLAYER_SKILL_INFO_1_1_02  0x272
-#define      PLAYER_SKILL_INFO_1_1_03  0x273
-#define      PLAYER_SKILL_INFO_1_1_04  0x274
-#define      PLAYER_SKILL_INFO_1_1_05  0x275
-#define      PLAYER_SKILL_INFO_1_1_06  630
-#define      PLAYER_SKILL_INFO_1_1_07  0x277
-#define      PLAYER_SKILL_INFO_1_1_08  0x278
-#define      PLAYER_SKILL_INFO_1_1_09  0x279
-#define      PLAYER_SKILL_INFO_1_1_10  0x27a
-#define      PLAYER_SKILL_INFO_1_1_100  0x2d4
-#define      PLAYER_SKILL_INFO_1_1_101  0x2d5
-#define      PLAYER_SKILL_INFO_1_1_102  0x2d6
-#define      PLAYER_SKILL_INFO_1_1_103  0x2d7
-#define      PLAYER_SKILL_INFO_1_1_104  0x2d8
-#define      PLAYER_SKILL_INFO_1_1_105  0x2d9
-#define      PLAYER_SKILL_INFO_1_1_106  730
-#define      PLAYER_SKILL_INFO_1_1_107  0x2db
-#define      PLAYER_SKILL_INFO_1_1_108  0x2dc
-#define      PLAYER_SKILL_INFO_1_1_109  0x2dd
-#define      PLAYER_SKILL_INFO_1_1_11  0x27b
-#define      PLAYER_SKILL_INFO_1_1_110  0x2de
-#define      PLAYER_SKILL_INFO_1_1_111  0x2df
-#define      PLAYER_SKILL_INFO_1_1_112  0x2e0
-#define      PLAYER_SKILL_INFO_1_1_113  0x2e1
-#define      PLAYER_SKILL_INFO_1_1_114  0x2e2
-#define      PLAYER_SKILL_INFO_1_1_115  0x2e3
-#define      PLAYER_SKILL_INFO_1_1_116  740
-#define      PLAYER_SKILL_INFO_1_1_117  0x2e5
-#define      PLAYER_SKILL_INFO_1_1_118  0x2e6
-#define      PLAYER_SKILL_INFO_1_1_119  0x2e7
-#define      PLAYER_SKILL_INFO_1_1_12  0x27c
-#define      PLAYER_SKILL_INFO_1_1_120  0x2e8
-#define      PLAYER_SKILL_INFO_1_1_121  0x2e9
-#define      PLAYER_SKILL_INFO_1_1_122  0x2ea
-#define      PLAYER_SKILL_INFO_1_1_123  0x2eb
-#define      PLAYER_SKILL_INFO_1_1_124  0x2ec
-#define      PLAYER_SKILL_INFO_1_1_125  0x2ed
-#define      PLAYER_SKILL_INFO_1_1_126  750
-#define      PLAYER_SKILL_INFO_1_1_127  0x2ef
-#define      PLAYER_SKILL_INFO_1_1_128  0x2f0
-#define      PLAYER_SKILL_INFO_1_1_129  0x2f1
-#define      PLAYER_SKILL_INFO_1_1_13  0x27d
-#define      PLAYER_SKILL_INFO_1_1_130  0x2f2
-#define      PLAYER_SKILL_INFO_1_1_131  0x2f3
-#define      PLAYER_SKILL_INFO_1_1_132  0x2f4
-#define      PLAYER_SKILL_INFO_1_1_133  0x2f5
-#define      PLAYER_SKILL_INFO_1_1_134  0x2f6
-#define      PLAYER_SKILL_INFO_1_1_135  0x2f7
-#define      PLAYER_SKILL_INFO_1_1_136  760
-#define      PLAYER_SKILL_INFO_1_1_137  0x2f9
-#define      PLAYER_SKILL_INFO_1_1_138  0x2fa
-#define      PLAYER_SKILL_INFO_1_1_139  0x2fb
-#define      PLAYER_SKILL_INFO_1_1_14  0x27e
-#define      PLAYER_SKILL_INFO_1_1_140  0x2fc
-#define      PLAYER_SKILL_INFO_1_1_141  0x2fd
-#define      PLAYER_SKILL_INFO_1_1_142  0x2fe
-#define      PLAYER_SKILL_INFO_1_1_143  0x2ff
-#define      PLAYER_SKILL_INFO_1_1_144  0x300
-#define      PLAYER_SKILL_INFO_1_1_145  0x301
-#define      PLAYER_SKILL_INFO_1_1_146  770
-#define      PLAYER_SKILL_INFO_1_1_147  0x303
-#define      PLAYER_SKILL_INFO_1_1_148  0x304
-#define      PLAYER_SKILL_INFO_1_1_149  0x305
-#define      PLAYER_SKILL_INFO_1_1_15  0x27f
-#define      PLAYER_SKILL_INFO_1_1_150  0x306
-#define      PLAYER_SKILL_INFO_1_1_151  0x307
-#define      PLAYER_SKILL_INFO_1_1_152  0x308
-#define      PLAYER_SKILL_INFO_1_1_153  0x309
-#define      PLAYER_SKILL_INFO_1_1_154  0x30a
-#define      PLAYER_SKILL_INFO_1_1_155  0x30b
-#define      PLAYER_SKILL_INFO_1_1_156  780
-#define      PLAYER_SKILL_INFO_1_1_157  0x30d
-#define      PLAYER_SKILL_INFO_1_1_158  0x30e
-#define      PLAYER_SKILL_INFO_1_1_159  0x30f
-#define      PLAYER_SKILL_INFO_1_1_16  640
-#define      PLAYER_SKILL_INFO_1_1_160  0x310
-#define      PLAYER_SKILL_INFO_1_1_161  0x311
-#define      PLAYER_SKILL_INFO_1_1_162  0x312
-#define      PLAYER_SKILL_INFO_1_1_163  0x313
-#define      PLAYER_SKILL_INFO_1_1_164  0x314
-#define      PLAYER_SKILL_INFO_1_1_165  0x315
-#define      PLAYER_SKILL_INFO_1_1_166  790
-#define      PLAYER_SKILL_INFO_1_1_167  0x317
-#define      PLAYER_SKILL_INFO_1_1_168  0x318
-#define      PLAYER_SKILL_INFO_1_1_169  0x319
-#define      PLAYER_SKILL_INFO_1_1_17  0x281
-#define      PLAYER_SKILL_INFO_1_1_170  0x31a
-#define      PLAYER_SKILL_INFO_1_1_171  0x31b
-#define      PLAYER_SKILL_INFO_1_1_172  0x31c
-#define      PLAYER_SKILL_INFO_1_1_173  0x31d
-#define      PLAYER_SKILL_INFO_1_1_174  0x31e
-#define      PLAYER_SKILL_INFO_1_1_175  0x31f
-#define      PLAYER_SKILL_INFO_1_1_176  800
-#define      PLAYER_SKILL_INFO_1_1_177  0x321
-#define      PLAYER_SKILL_INFO_1_1_178  0x322
-#define      PLAYER_SKILL_INFO_1_1_179  0x323
-#define      PLAYER_SKILL_INFO_1_1_18  0x282
-#define      PLAYER_SKILL_INFO_1_1_180  0x324
-#define      PLAYER_SKILL_INFO_1_1_181  0x325
-#define      PLAYER_SKILL_INFO_1_1_182  0x326
-#define      PLAYER_SKILL_INFO_1_1_183  0x327
-#define      PLAYER_SKILL_INFO_1_1_184  0x328
-#define      PLAYER_SKILL_INFO_1_1_185  0x329
-#define      PLAYER_SKILL_INFO_1_1_186  810
-#define      PLAYER_SKILL_INFO_1_1_187  0x32b
-#define      PLAYER_SKILL_INFO_1_1_188  0x32c
-#define      PLAYER_SKILL_INFO_1_1_189  0x32d
-#define      PLAYER_SKILL_INFO_1_1_19  0x283
-#define      PLAYER_SKILL_INFO_1_1_190  0x32e
-#define      PLAYER_SKILL_INFO_1_1_191  0x32f
-#define      PLAYER_SKILL_INFO_1_1_192  0x330
-#define      PLAYER_SKILL_INFO_1_1_193  0x331
-#define      PLAYER_SKILL_INFO_1_1_194  0x332
-#define      PLAYER_SKILL_INFO_1_1_195  0x333
-#define      PLAYER_SKILL_INFO_1_1_196  820
-#define      PLAYER_SKILL_INFO_1_1_197  0x335
-#define      PLAYER_SKILL_INFO_1_1_198  0x336
-#define      PLAYER_SKILL_INFO_1_1_199  0x337
-#define      PLAYER_SKILL_INFO_1_1_20  0x284
-#define      PLAYER_SKILL_INFO_1_1_200  0x338
-#define      PLAYER_SKILL_INFO_1_1_201  0x339
-#define      PLAYER_SKILL_INFO_1_1_202  0x33a
-#define      PLAYER_SKILL_INFO_1_1_203  0x33b
-#define      PLAYER_SKILL_INFO_1_1_204  0x33c
-#define      PLAYER_SKILL_INFO_1_1_205  0x33d
-#define      PLAYER_SKILL_INFO_1_1_206  830
-#define      PLAYER_SKILL_INFO_1_1_207  0x33f
-#define      PLAYER_SKILL_INFO_1_1_208  0x340
-#define      PLAYER_SKILL_INFO_1_1_209  0x341
-#define      PLAYER_SKILL_INFO_1_1_21  0x285
-#define      PLAYER_SKILL_INFO_1_1_210  0x342
-#define      PLAYER_SKILL_INFO_1_1_211  0x343
-#define      PLAYER_SKILL_INFO_1_1_212  0x344
-#define      PLAYER_SKILL_INFO_1_1_213  0x345
-#define      PLAYER_SKILL_INFO_1_1_214  0x346
-#define      PLAYER_SKILL_INFO_1_1_215  0x347
-#define      PLAYER_SKILL_INFO_1_1_216  840
-#define      PLAYER_SKILL_INFO_1_1_217  0x349
-#define      PLAYER_SKILL_INFO_1_1_218  0x34a
-#define      PLAYER_SKILL_INFO_1_1_219  0x34b
-#define      PLAYER_SKILL_INFO_1_1_22  0x286
-#define      PLAYER_SKILL_INFO_1_1_220  0x34c
-#define      PLAYER_SKILL_INFO_1_1_221  0x34d
-#define      PLAYER_SKILL_INFO_1_1_222  0x34e
-#define      PLAYER_SKILL_INFO_1_1_223  0x34f
-#define      PLAYER_SKILL_INFO_1_1_224  0x350
-#define      PLAYER_SKILL_INFO_1_1_225  0x351
-#define      PLAYER_SKILL_INFO_1_1_226  850
-#define      PLAYER_SKILL_INFO_1_1_227  0x353
-#define      PLAYER_SKILL_INFO_1_1_228  0x354
-#define      PLAYER_SKILL_INFO_1_1_229  0x355
-#define      PLAYER_SKILL_INFO_1_1_23  0x287
-#define      PLAYER_SKILL_INFO_1_1_230  0x356
-#define      PLAYER_SKILL_INFO_1_1_231  0x357
-#define      PLAYER_SKILL_INFO_1_1_232  0x358
-#define      PLAYER_SKILL_INFO_1_1_233  0x359
-#define      PLAYER_SKILL_INFO_1_1_234  0x35a
-#define      PLAYER_SKILL_INFO_1_1_235  0x35b
-#define      PLAYER_SKILL_INFO_1_1_236  860
-#define      PLAYER_SKILL_INFO_1_1_237  0x35d
-#define      PLAYER_SKILL_INFO_1_1_238  0x35e
-#define      PLAYER_SKILL_INFO_1_1_239  0x35f
-#define      PLAYER_SKILL_INFO_1_1_24  0x288
-#define      PLAYER_SKILL_INFO_1_1_240  0x360
-#define      PLAYER_SKILL_INFO_1_1_241  0x361
-#define      PLAYER_SKILL_INFO_1_1_242  0x362
-#define      PLAYER_SKILL_INFO_1_1_243  0x363
-#define      PLAYER_SKILL_INFO_1_1_244  0x364
-#define      PLAYER_SKILL_INFO_1_1_245  0x365
-#define      PLAYER_SKILL_INFO_1_1_246  870
-#define      PLAYER_SKILL_INFO_1_1_247  0x367
-#define      PLAYER_SKILL_INFO_1_1_248  0x368
-#define      PLAYER_SKILL_INFO_1_1_249  0x369
-#define      PLAYER_SKILL_INFO_1_1_25  0x289
-#define      PLAYER_SKILL_INFO_1_1_250  0x36a
-#define      PLAYER_SKILL_INFO_1_1_251  0x36b
-#define      PLAYER_SKILL_INFO_1_1_252  0x36c
-#define      PLAYER_SKILL_INFO_1_1_253  0x36d
-#define      PLAYER_SKILL_INFO_1_1_254  0x36e
-#define      PLAYER_SKILL_INFO_1_1_255  0x36f
-#define      PLAYER_SKILL_INFO_1_1_256  880
-#define      PLAYER_SKILL_INFO_1_1_257  0x371
-#define      PLAYER_SKILL_INFO_1_1_258  0x372
-#define      PLAYER_SKILL_INFO_1_1_259  0x373
-#define      PLAYER_SKILL_INFO_1_1_26  650
-#define      PLAYER_SKILL_INFO_1_1_260  0x374
-#define      PLAYER_SKILL_INFO_1_1_261  0x375
-#define      PLAYER_SKILL_INFO_1_1_262  0x376
-#define      PLAYER_SKILL_INFO_1_1_263  0x377
-#define      PLAYER_SKILL_INFO_1_1_264  0x378
-#define      PLAYER_SKILL_INFO_1_1_265  0x379
-#define      PLAYER_SKILL_INFO_1_1_266  890
-#define      PLAYER_SKILL_INFO_1_1_267  0x37b
-#define      PLAYER_SKILL_INFO_1_1_268  0x37c
-#define      PLAYER_SKILL_INFO_1_1_269  0x37d
-#define      PLAYER_SKILL_INFO_1_1_27  0x28b
-#define      PLAYER_SKILL_INFO_1_1_270  0x37e
-#define      PLAYER_SKILL_INFO_1_1_271  0x37f
-#define      PLAYER_SKILL_INFO_1_1_272  0x380
-#define      PLAYER_SKILL_INFO_1_1_273  0x381
-#define      PLAYER_SKILL_INFO_1_1_274  0x382
-#define      PLAYER_SKILL_INFO_1_1_275  0x383
-#define      PLAYER_SKILL_INFO_1_1_276  900
-#define      PLAYER_SKILL_INFO_1_1_277  0x385
-#define      PLAYER_SKILL_INFO_1_1_278  0x386
-#define      PLAYER_SKILL_INFO_1_1_279  0x387
-#define      PLAYER_SKILL_INFO_1_1_28  0x28c
-#define      PLAYER_SKILL_INFO_1_1_280  0x388
-#define      PLAYER_SKILL_INFO_1_1_281  0x389
-#define      PLAYER_SKILL_INFO_1_1_282  0x38a
-#define      PLAYER_SKILL_INFO_1_1_283  0x38b
-#define      PLAYER_SKILL_INFO_1_1_284  0x38c
-#define      PLAYER_SKILL_INFO_1_1_285  0x38d
-#define      PLAYER_SKILL_INFO_1_1_286  910
-#define      PLAYER_SKILL_INFO_1_1_287  0x38f
-#define      PLAYER_SKILL_INFO_1_1_288  0x390
-#define      PLAYER_SKILL_INFO_1_1_289  0x391
-#define      PLAYER_SKILL_INFO_1_1_29  0x28d
-#define      PLAYER_SKILL_INFO_1_1_290  0x392
-#define      PLAYER_SKILL_INFO_1_1_291  0x393
-#define      PLAYER_SKILL_INFO_1_1_292  0x394
-#define      PLAYER_SKILL_INFO_1_1_293  0x395
-#define      PLAYER_SKILL_INFO_1_1_294  0x396
-#define      PLAYER_SKILL_INFO_1_1_295  0x397
-#define      PLAYER_SKILL_INFO_1_1_296  920
-#define      PLAYER_SKILL_INFO_1_1_297  0x399
-#define      PLAYER_SKILL_INFO_1_1_298  0x39a
-#define      PLAYER_SKILL_INFO_1_1_299  0x39b
-#define      PLAYER_SKILL_INFO_1_1_30  0x28e
-#define      PLAYER_SKILL_INFO_1_1_300  0x39c
-#define      PLAYER_SKILL_INFO_1_1_301  0x39d
-#define      PLAYER_SKILL_INFO_1_1_302  0x39e
-#define      PLAYER_SKILL_INFO_1_1_303  0x39f
-#define      PLAYER_SKILL_INFO_1_1_304  0x3a0
-#define      PLAYER_SKILL_INFO_1_1_305  0x3a1
-#define      PLAYER_SKILL_INFO_1_1_306  930
-#define      PLAYER_SKILL_INFO_1_1_307  0x3a3
-#define      PLAYER_SKILL_INFO_1_1_308  0x3a4
-#define      PLAYER_SKILL_INFO_1_1_309  0x3a5
-#define      PLAYER_SKILL_INFO_1_1_31  0x28f
-#define      PLAYER_SKILL_INFO_1_1_310  0x3a6
-#define      PLAYER_SKILL_INFO_1_1_311  0x3a7
-#define      PLAYER_SKILL_INFO_1_1_312  0x3a8
-#define      PLAYER_SKILL_INFO_1_1_313  0x3a9
-#define      PLAYER_SKILL_INFO_1_1_314  0x3aa
-#define      PLAYER_SKILL_INFO_1_1_315  0x3ab
-#define      PLAYER_SKILL_INFO_1_1_316  940
-#define      PLAYER_SKILL_INFO_1_1_317  0x3ad
-#define      PLAYER_SKILL_INFO_1_1_318  0x3ae
-#define      PLAYER_SKILL_INFO_1_1_319  0x3af
-#define      PLAYER_SKILL_INFO_1_1_32  0x290
-#define      PLAYER_SKILL_INFO_1_1_320  0x3b0
-#define      PLAYER_SKILL_INFO_1_1_321  0x3b1
-#define      PLAYER_SKILL_INFO_1_1_322  0x3b2
-#define      PLAYER_SKILL_INFO_1_1_323  0x3b3
-#define      PLAYER_SKILL_INFO_1_1_324  0x3b4
-#define      PLAYER_SKILL_INFO_1_1_325  0x3b5
-#define      PLAYER_SKILL_INFO_1_1_326  950
-#define      PLAYER_SKILL_INFO_1_1_327  0x3b7
-#define      PLAYER_SKILL_INFO_1_1_328  0x3b8
-#define      PLAYER_SKILL_INFO_1_1_329  0x3b9
-#define      PLAYER_SKILL_INFO_1_1_33  0x291
-#define      PLAYER_SKILL_INFO_1_1_330  0x3ba
-#define      PLAYER_SKILL_INFO_1_1_331  0x3bb
-#define      PLAYER_SKILL_INFO_1_1_332  0x3bc
-#define      PLAYER_SKILL_INFO_1_1_333  0x3bd
-#define      PLAYER_SKILL_INFO_1_1_334  0x3be
-#define      PLAYER_SKILL_INFO_1_1_335  0x3bf
-#define      PLAYER_SKILL_INFO_1_1_336  960
-#define      PLAYER_SKILL_INFO_1_1_337  0x3c1
-#define      PLAYER_SKILL_INFO_1_1_338  0x3c2
-#define      PLAYER_SKILL_INFO_1_1_339  0x3c3
-#define      PLAYER_SKILL_INFO_1_1_34  0x292
-#define      PLAYER_SKILL_INFO_1_1_340  0x3c4
-#define      PLAYER_SKILL_INFO_1_1_341  0x3c5
-#define      PLAYER_SKILL_INFO_1_1_342  0x3c6
-#define      PLAYER_SKILL_INFO_1_1_343  0x3c7
-#define      PLAYER_SKILL_INFO_1_1_344  0x3c8
-#define      PLAYER_SKILL_INFO_1_1_345  0x3c9
-#define      PLAYER_SKILL_INFO_1_1_346  970
-#define      PLAYER_SKILL_INFO_1_1_347  0x3cb
-#define      PLAYER_SKILL_INFO_1_1_348  0x3cc
-#define      PLAYER_SKILL_INFO_1_1_349  0x3cd
-#define      PLAYER_SKILL_INFO_1_1_35  0x293
-#define      PLAYER_SKILL_INFO_1_1_350  0x3ce
-#define      PLAYER_SKILL_INFO_1_1_351  0x3cf
-#define      PLAYER_SKILL_INFO_1_1_352  0x3d0
-#define      PLAYER_SKILL_INFO_1_1_353  0x3d1
-#define      PLAYER_SKILL_INFO_1_1_354  0x3d2
-#define      PLAYER_SKILL_INFO_1_1_355  0x3d3
-#define      PLAYER_SKILL_INFO_1_1_356  980
-#define      PLAYER_SKILL_INFO_1_1_357  0x3d5
-#define      PLAYER_SKILL_INFO_1_1_358  0x3d6
-#define      PLAYER_SKILL_INFO_1_1_359  0x3d7
-#define      PLAYER_SKILL_INFO_1_1_36  660
-#define      PLAYER_SKILL_INFO_1_1_360  0x3d8
-#define      PLAYER_SKILL_INFO_1_1_361  0x3d9
-#define      PLAYER_SKILL_INFO_1_1_362  0x3da
-#define      PLAYER_SKILL_INFO_1_1_363  0x3db
-#define      PLAYER_SKILL_INFO_1_1_364  0x3dc
-#define      PLAYER_SKILL_INFO_1_1_365  0x3dd
-#define      PLAYER_SKILL_INFO_1_1_366  990
-#define      PLAYER_SKILL_INFO_1_1_367  0x3df
-#define      PLAYER_SKILL_INFO_1_1_368  0x3e0
-#define      PLAYER_SKILL_INFO_1_1_369  0x3e1
-#define      PLAYER_SKILL_INFO_1_1_37  0x295
-#define      PLAYER_SKILL_INFO_1_1_370  0x3e2
-#define      PLAYER_SKILL_INFO_1_1_371  0x3e3
-#define      PLAYER_SKILL_INFO_1_1_372  0x3e4
-#define      PLAYER_SKILL_INFO_1_1_373  0x3e5
-#define      PLAYER_SKILL_INFO_1_1_374  0x3e6
-#define      PLAYER_SKILL_INFO_1_1_375  0x3e7
-#define      PLAYER_SKILL_INFO_1_1_376  0x3e8
-#define      PLAYER_SKILL_INFO_1_1_377  0x3e9
-#define      PLAYER_SKILL_INFO_1_1_378  0x3ea
-#define      PLAYER_SKILL_INFO_1_1_379  0x3eb
-#define      PLAYER_SKILL_INFO_1_1_38  0x296
-#define      PLAYER_SKILL_INFO_1_1_380  0x3ec
-#define      PLAYER_SKILL_INFO_1_1_381  0x3ed
-#define      PLAYER_SKILL_INFO_1_1_382  0x3ee
-#define      PLAYER_SKILL_INFO_1_1_383  0x3ef
-#define      PLAYER_SKILL_INFO_1_1_39  0x297
-#define      PLAYER_SKILL_INFO_1_1_40  0x298
-#define      PLAYER_SKILL_INFO_1_1_41  0x299
-#define      PLAYER_SKILL_INFO_1_1_42  0x29a
-#define      PLAYER_SKILL_INFO_1_1_43  0x29b
-#define      PLAYER_SKILL_INFO_1_1_44  0x29c
-#define      PLAYER_SKILL_INFO_1_1_45  0x29d
-#define      PLAYER_SKILL_INFO_1_1_46  670
-#define      PLAYER_SKILL_INFO_1_1_47  0x29f
-#define      PLAYER_SKILL_INFO_1_1_48  0x2a0
-#define      PLAYER_SKILL_INFO_1_1_49  0x2a1
-#define      PLAYER_SKILL_INFO_1_1_50  0x2a2
-#define      PLAYER_SKILL_INFO_1_1_51  0x2a3
-#define      PLAYER_SKILL_INFO_1_1_52  0x2a4
-#define      PLAYER_SKILL_INFO_1_1_53  0x2a5
-#define      PLAYER_SKILL_INFO_1_1_54  0x2a6
-#define      PLAYER_SKILL_INFO_1_1_55  0x2a7
-#define      PLAYER_SKILL_INFO_1_1_56  680
-#define      PLAYER_SKILL_INFO_1_1_57  0x2a9
-#define      PLAYER_SKILL_INFO_1_1_58  0x2aa
-#define      PLAYER_SKILL_INFO_1_1_59  0x2ab
-#define      PLAYER_SKILL_INFO_1_1_60  0x2ac
-#define      PLAYER_SKILL_INFO_1_1_61  0x2ad
-#define      PLAYER_SKILL_INFO_1_1_62  0x2ae
-#define      PLAYER_SKILL_INFO_1_1_63  0x2af
-#define      PLAYER_SKILL_INFO_1_1_64  0x2b0
-#define      PLAYER_SKILL_INFO_1_1_65  0x2b1
-#define      PLAYER_SKILL_INFO_1_1_66  690
-#define      PLAYER_SKILL_INFO_1_1_67  0x2b3
-#define      PLAYER_SKILL_INFO_1_1_68  0x2b4
-#define      PLAYER_SKILL_INFO_1_1_69  0x2b5
-#define      PLAYER_SKILL_INFO_1_1_70  0x2b6
-#define      PLAYER_SKILL_INFO_1_1_71  0x2b7
-#define      PLAYER_SKILL_INFO_1_1_72  0x2b8
-#define      PLAYER_SKILL_INFO_1_1_73  0x2b9
-#define      PLAYER_SKILL_INFO_1_1_74  0x2ba
-#define      PLAYER_SKILL_INFO_1_1_75  0x2bb
-#define      PLAYER_SKILL_INFO_1_1_76  700
-#define      PLAYER_SKILL_INFO_1_1_77  0x2bd
-#define      PLAYER_SKILL_INFO_1_1_78  0x2be
-#define      PLAYER_SKILL_INFO_1_1_79  0x2bf
-#define      PLAYER_SKILL_INFO_1_1_80  0x2c0
-#define      PLAYER_SKILL_INFO_1_1_81  0x2c1
-#define      PLAYER_SKILL_INFO_1_1_82  0x2c2
-#define      PLAYER_SKILL_INFO_1_1_83  0x2c3
-#define      PLAYER_SKILL_INFO_1_1_84  0x2c4
-#define      PLAYER_SKILL_INFO_1_1_85  0x2c5
-#define      PLAYER_SKILL_INFO_1_1_86  710
-#define      PLAYER_SKILL_INFO_1_1_87  0x2c7
-#define      PLAYER_SKILL_INFO_1_1_88  0x2c8
-#define      PLAYER_SKILL_INFO_1_1_89  0x2c9
-#define      PLAYER_SKILL_INFO_1_1_90  0x2ca
-#define      PLAYER_SKILL_INFO_1_1_91  0x2cb
-#define      PLAYER_SKILL_INFO_1_1_92  0x2cc
-#define      PLAYER_SKILL_INFO_1_1_93  0x2cd
-#define      PLAYER_SKILL_INFO_1_1_94  0x2ce
-#define      PLAYER_SKILL_INFO_1_1_95  0x2cf
-#define      PLAYER_SKILL_INFO_1_1_96  720
-#define      PLAYER_SKILL_INFO_1_1_97  0x2d1
-#define      PLAYER_SKILL_INFO_1_1_98  0x2d2
-#define      PLAYER_SKILL_INFO_1_1_99  0x2d3
-#define      PLAYER_TRACK_CREATURES  0x3f2
-#define      PLAYER_TRACK_RESOURCES  0x3f3
-#define      PLAYER_VISIBLE_ITEM_1_0  250
-#define      PLAYER_VISIBLE_ITEM_1_0_01  0xfb
-#define      PLAYER_VISIBLE_ITEM_1_0_02  0xfc
-#define      PLAYER_VISIBLE_ITEM_1_0_03  0xfd
-#define      PLAYER_VISIBLE_ITEM_1_0_04  0xfe
-#define      PLAYER_VISIBLE_ITEM_1_0_05  0xff
-#define      PLAYER_VISIBLE_ITEM_1_0_06  0x100
-#define      PLAYER_VISIBLE_ITEM_1_0_07  0x101
-#define      PLAYER_VISIBLE_ITEM_1_CREATOR  0xf8
-#define      PLAYER_VISIBLE_ITEM_1_CREATOR_01  0xf9
-#define      PLAYER_VISIBLE_ITEM_1_PAD  0x103
-#define      PLAYER_VISIBLE_ITEM_1_PROPERTIES  0x102
-#define      PLAYER_VISIBLE_ITEM_10_0  0x166
-#define      PLAYER_VISIBLE_ITEM_10_0_01  0x167
-#define      PLAYER_VISIBLE_ITEM_10_0_02  360
-#define      PLAYER_VISIBLE_ITEM_10_0_03  0x169
-#define      PLAYER_VISIBLE_ITEM_10_0_04  0x16a
-#define      PLAYER_VISIBLE_ITEM_10_0_05  0x16b
-#define      PLAYER_VISIBLE_ITEM_10_0_06  0x16c
-#define      PLAYER_VISIBLE_ITEM_10_0_07  0x16d
-#define      PLAYER_VISIBLE_ITEM_10_CREATOR  0x164
-#define      PLAYER_VISIBLE_ITEM_10_CREATOR_01  0x165
-#define      PLAYER_VISIBLE_ITEM_10_PAD  0x16f
-#define      PLAYER_VISIBLE_ITEM_10_PROPERTIES  0x16e
-#define      PLAYER_VISIBLE_ITEM_11_0  370
-#define      PLAYER_VISIBLE_ITEM_11_0_01  0x173
-#define      PLAYER_VISIBLE_ITEM_11_0_02  0x174
-#define      PLAYER_VISIBLE_ITEM_11_0_03  0x175
-#define      PLAYER_VISIBLE_ITEM_11_0_04  0x176
-#define      PLAYER_VISIBLE_ITEM_11_0_05  0x177
-#define      PLAYER_VISIBLE_ITEM_11_0_06  0x178
-#define      PLAYER_VISIBLE_ITEM_11_0_07  0x179
-#define      PLAYER_VISIBLE_ITEM_11_CREATOR  0x170
-#define      PLAYER_VISIBLE_ITEM_11_CREATOR_01  0x171
-#define      PLAYER_VISIBLE_ITEM_11_PAD  0x17b
-#define      PLAYER_VISIBLE_ITEM_11_PROPERTIES  0x17a
-#define      PLAYER_VISIBLE_ITEM_12_0  0x17e
-#define      PLAYER_VISIBLE_ITEM_12_0_01  0x17f
-#define      PLAYER_VISIBLE_ITEM_12_0_02  0x180
-#define      PLAYER_VISIBLE_ITEM_12_0_03  0x181
-#define      PLAYER_VISIBLE_ITEM_12_0_04  0x182
-#define      PLAYER_VISIBLE_ITEM_12_0_05  0x183
-#define      PLAYER_VISIBLE_ITEM_12_0_06  0x184
-#define      PLAYER_VISIBLE_ITEM_12_0_07  0x185
-#define      PLAYER_VISIBLE_ITEM_12_CREATOR  380
-#define      PLAYER_VISIBLE_ITEM_12_CREATOR_01  0x17d
-#define      PLAYER_VISIBLE_ITEM_12_PAD  0x187
-#define      PLAYER_VISIBLE_ITEM_12_PROPERTIES  390
-#define      PLAYER_VISIBLE_ITEM_13_0  0x18a
-#define      PLAYER_VISIBLE_ITEM_13_0_01  0x18b
-#define      PLAYER_VISIBLE_ITEM_13_0_02  0x18c
-#define      PLAYER_VISIBLE_ITEM_13_0_03  0x18d
-#define      PLAYER_VISIBLE_ITEM_13_0_04  0x18e
-#define      PLAYER_VISIBLE_ITEM_13_0_05  0x18f
-#define      PLAYER_VISIBLE_ITEM_13_0_06  400
-#define      PLAYER_VISIBLE_ITEM_13_0_07  0x191
-#define      PLAYER_VISIBLE_ITEM_13_CREATOR  0x188
-#define      PLAYER_VISIBLE_ITEM_13_CREATOR_01  0x189
-#define      PLAYER_VISIBLE_ITEM_13_PAD  0x193
-#define      PLAYER_VISIBLE_ITEM_13_PROPERTIES  0x192
-#define      PLAYER_VISIBLE_ITEM_14_0  0x196
-#define      PLAYER_VISIBLE_ITEM_14_0_01  0x197
-#define      PLAYER_VISIBLE_ITEM_14_0_02  0x198
-#define      PLAYER_VISIBLE_ITEM_14_0_03  0x199
-#define      PLAYER_VISIBLE_ITEM_14_0_04  410
-#define      PLAYER_VISIBLE_ITEM_14_0_05  0x19b
-#define      PLAYER_VISIBLE_ITEM_14_0_06  0x19c
-#define      PLAYER_VISIBLE_ITEM_14_0_07  0x19d
-#define      PLAYER_VISIBLE_ITEM_14_CREATOR  0x194
-#define      PLAYER_VISIBLE_ITEM_14_CREATOR_01  0x195
-#define      PLAYER_VISIBLE_ITEM_14_PAD  0x19f
-#define      PLAYER_VISIBLE_ITEM_14_PROPERTIES  0x19e
-#define      PLAYER_VISIBLE_ITEM_15_0  0x1a2
-#define      PLAYER_VISIBLE_ITEM_15_0_01  0x1a3
-#define      PLAYER_VISIBLE_ITEM_15_0_02  420
-#define      PLAYER_VISIBLE_ITEM_15_0_03  0x1a5
-#define      PLAYER_VISIBLE_ITEM_15_0_04  0x1a6
-#define      PLAYER_VISIBLE_ITEM_15_0_05  0x1a7
-#define      PLAYER_VISIBLE_ITEM_15_0_06  0x1a8
-#define      PLAYER_VISIBLE_ITEM_15_0_07  0x1a9
-#define      PLAYER_VISIBLE_ITEM_15_CREATOR  0x1a0
-#define      PLAYER_VISIBLE_ITEM_15_CREATOR_01  0x1a1
-#define      PLAYER_VISIBLE_ITEM_15_PAD  0x1ab
-#define      PLAYER_VISIBLE_ITEM_15_PROPERTIES  0x1aa
-#define      PLAYER_VISIBLE_ITEM_16_0  430
-#define      PLAYER_VISIBLE_ITEM_16_0_01  0x1af
-#define      PLAYER_VISIBLE_ITEM_16_0_02  0x1b0
-#define      PLAYER_VISIBLE_ITEM_16_0_03  0x1b1
-#define      PLAYER_VISIBLE_ITEM_16_0_04  0x1b2
-#define      PLAYER_VISIBLE_ITEM_16_0_05  0x1b3
-#define      PLAYER_VISIBLE_ITEM_16_0_06  0x1b4
-#define      PLAYER_VISIBLE_ITEM_16_0_07  0x1b5
-#define      PLAYER_VISIBLE_ITEM_16_CREATOR  0x1ac
-#define      PLAYER_VISIBLE_ITEM_16_CREATOR_01  0x1ad
-#define      PLAYER_VISIBLE_ITEM_16_PAD  0x1b7
-#define      PLAYER_VISIBLE_ITEM_16_PROPERTIES  0x1b6
-#define      PLAYER_VISIBLE_ITEM_17_0  0x1ba
-#define      PLAYER_VISIBLE_ITEM_17_0_01  0x1bb
-#define      PLAYER_VISIBLE_ITEM_17_0_02  0x1bc
-#define      PLAYER_VISIBLE_ITEM_17_0_03  0x1bd
-#define      PLAYER_VISIBLE_ITEM_17_0_04  0x1be
-#define      PLAYER_VISIBLE_ITEM_17_0_05  0x1bf
-#define      PLAYER_VISIBLE_ITEM_17_0_06  0x1c0
-#define      PLAYER_VISIBLE_ITEM_17_0_07  0x1c1
-#define      PLAYER_VISIBLE_ITEM_17_CREATOR  440
-#define      PLAYER_VISIBLE_ITEM_17_CREATOR_01  0x1b9
-#define      PLAYER_VISIBLE_ITEM_17_PAD  0x1c3
-#define      PLAYER_VISIBLE_ITEM_17_PROPERTIES  450
-#define      PLAYER_VISIBLE_ITEM_18_0  0x1c6
-#define      PLAYER_VISIBLE_ITEM_18_0_01  0x1c7
-#define      PLAYER_VISIBLE_ITEM_18_0_02  0x1c8
-#define      PLAYER_VISIBLE_ITEM_18_0_03  0x1c9
-#define      PLAYER_VISIBLE_ITEM_18_0_04  0x1ca
-#define      PLAYER_VISIBLE_ITEM_18_0_05  0x1cb
-#define      PLAYER_VISIBLE_ITEM_18_0_06  460
-#define      PLAYER_VISIBLE_ITEM_18_0_07  0x1cd
-#define      PLAYER_VISIBLE_ITEM_18_CREATOR  0x1c4
-#define      PLAYER_VISIBLE_ITEM_18_CREATOR_01  0x1c5
-#define      PLAYER_VISIBLE_ITEM_18_PAD  0x1cf
-#define      PLAYER_VISIBLE_ITEM_18_PROPERTIES  0x1ce
-#define      PLAYER_VISIBLE_ITEM_19_0  0x1d2
-#define      PLAYER_VISIBLE_ITEM_19_0_01  0x1d3
-#define      PLAYER_VISIBLE_ITEM_19_0_02  0x1d4
-#define      PLAYER_VISIBLE_ITEM_19_0_03  0x1d5
-#define      PLAYER_VISIBLE_ITEM_19_0_04  470
-#define      PLAYER_VISIBLE_ITEM_19_0_05  0x1d7
-#define      PLAYER_VISIBLE_ITEM_19_0_06  0x1d8
-#define      PLAYER_VISIBLE_ITEM_19_0_07  0x1d9
-#define      PLAYER_VISIBLE_ITEM_19_CREATOR  0x1d0
-#define      PLAYER_VISIBLE_ITEM_19_CREATOR_01  0x1d1
-#define      PLAYER_VISIBLE_ITEM_19_PAD  0x1db
-#define      PLAYER_VISIBLE_ITEM_19_PROPERTIES  0x1da
-#define      PLAYER_VISIBLE_ITEM_2_0  0x106
-#define      PLAYER_VISIBLE_ITEM_2_0_01  0x107
-#define      PLAYER_VISIBLE_ITEM_2_0_02  0x108
-#define      PLAYER_VISIBLE_ITEM_2_0_03  0x109
-#define      PLAYER_VISIBLE_ITEM_2_0_04  0x10a
-#define      PLAYER_VISIBLE_ITEM_2_0_05  0x10b
-#define      PLAYER_VISIBLE_ITEM_2_0_06  0x10c
-#define      PLAYER_VISIBLE_ITEM_2_0_07  0x10d
-#define      PLAYER_VISIBLE_ITEM_2_CREATOR  260
-#define      PLAYER_VISIBLE_ITEM_2_CREATOR_01  0x105
-#define      PLAYER_VISIBLE_ITEM_2_PAD  0x10f
-#define      PLAYER_VISIBLE_ITEM_2_PROPERTIES  270
-#define      PLAYER_VISIBLE_ITEM_3_0  0x112
-#define      PLAYER_VISIBLE_ITEM_3_0_01  0x113
-#define      PLAYER_VISIBLE_ITEM_3_0_02  0x114
-#define      PLAYER_VISIBLE_ITEM_3_0_03  0x115
-#define      PLAYER_VISIBLE_ITEM_3_0_04  0x116
-#define      PLAYER_VISIBLE_ITEM_3_0_05  0x117
-#define      PLAYER_VISIBLE_ITEM_3_0_06  280
-#define      PLAYER_VISIBLE_ITEM_3_0_07  0x119
-#define      PLAYER_VISIBLE_ITEM_3_CREATOR  0x110
-#define      PLAYER_VISIBLE_ITEM_3_CREATOR_01  0x111
-#define      PLAYER_VISIBLE_ITEM_3_PAD  0x11b
-#define      PLAYER_VISIBLE_ITEM_3_PROPERTIES  0x11a
-#define      PLAYER_VISIBLE_ITEM_4_0  0x11e
-#define      PLAYER_VISIBLE_ITEM_4_0_01  0x11f
-#define      PLAYER_VISIBLE_ITEM_4_0_02  0x120
-#define      PLAYER_VISIBLE_ITEM_4_0_03  0x121
-#define      PLAYER_VISIBLE_ITEM_4_0_04  290
-#define      PLAYER_VISIBLE_ITEM_4_0_05  0x123
-#define      PLAYER_VISIBLE_ITEM_4_0_06  0x124
-#define      PLAYER_VISIBLE_ITEM_4_0_07  0x125
-#define      PLAYER_VISIBLE_ITEM_4_CREATOR  0x11c
-#define      PLAYER_VISIBLE_ITEM_4_CREATOR_01  0x11d
-#define      PLAYER_VISIBLE_ITEM_4_PAD  0x127
-#define      PLAYER_VISIBLE_ITEM_4_PROPERTIES  0x126
-#define      PLAYER_VISIBLE_ITEM_5_0  0x12a
-#define      PLAYER_VISIBLE_ITEM_5_0_01  0x12b
-#define      PLAYER_VISIBLE_ITEM_5_0_02  300
-#define      PLAYER_VISIBLE_ITEM_5_0_03  0x12d
-#define      PLAYER_VISIBLE_ITEM_5_0_04  0x12e
-#define      PLAYER_VISIBLE_ITEM_5_0_05  0x12f
-#define      PLAYER_VISIBLE_ITEM_5_0_06  0x130
-#define      PLAYER_VISIBLE_ITEM_5_0_07  0x131
-#define      PLAYER_VISIBLE_ITEM_5_CREATOR  0x128
-#define      PLAYER_VISIBLE_ITEM_5_CREATOR_01  0x129
-#define      PLAYER_VISIBLE_ITEM_5_PAD  0x133
-#define      PLAYER_VISIBLE_ITEM_5_PROPERTIES  0x132
-#define      PLAYER_VISIBLE_ITEM_6_0  310
-#define      PLAYER_VISIBLE_ITEM_6_0_01  0x137
-#define      PLAYER_VISIBLE_ITEM_6_0_02  0x138
-#define      PLAYER_VISIBLE_ITEM_6_0_03  0x139
-#define      PLAYER_VISIBLE_ITEM_6_0_04  0x13a
-#define      PLAYER_VISIBLE_ITEM_6_0_05  0x13b
-#define      PLAYER_VISIBLE_ITEM_6_0_06  0x13c
-#define      PLAYER_VISIBLE_ITEM_6_0_07  0x13d
-#define      PLAYER_VISIBLE_ITEM_6_CREATOR  0x134
-#define      PLAYER_VISIBLE_ITEM_6_CREATOR_01  0x135
-#define      PLAYER_VISIBLE_ITEM_6_PAD  0x13f
-#define      PLAYER_VISIBLE_ITEM_6_PROPERTIES  0x13e
-#define      PLAYER_VISIBLE_ITEM_7_0  0x142
-#define      PLAYER_VISIBLE_ITEM_7_0_01  0x143
-#define      PLAYER_VISIBLE_ITEM_7_0_02  0x144
-#define      PLAYER_VISIBLE_ITEM_7_0_03  0x145
-#define      PLAYER_VISIBLE_ITEM_7_0_04  0x146
-#define      PLAYER_VISIBLE_ITEM_7_0_05  0x147
-#define      PLAYER_VISIBLE_ITEM_7_0_06  0x148
-#define      PLAYER_VISIBLE_ITEM_7_0_07  0x149
-#define      PLAYER_VISIBLE_ITEM_7_CREATOR  320
-#define      PLAYER_VISIBLE_ITEM_7_CREATOR_01  0x141
-#define      PLAYER_VISIBLE_ITEM_7_PAD  0x14b
-#define      PLAYER_VISIBLE_ITEM_7_PROPERTIES  330
-#define      PLAYER_VISIBLE_ITEM_8_0  0x14e
-#define      PLAYER_VISIBLE_ITEM_8_0_01  0x14f
-#define      PLAYER_VISIBLE_ITEM_8_0_02  0x150
-#define      PLAYER_VISIBLE_ITEM_8_0_03  0x151
-#define      PLAYER_VISIBLE_ITEM_8_0_04  0x152
-#define      PLAYER_VISIBLE_ITEM_8_0_05  0x153
-#define      PLAYER_VISIBLE_ITEM_8_0_06  340
-#define      PLAYER_VISIBLE_ITEM_8_0_07  0x155
-#define      PLAYER_VISIBLE_ITEM_8_CREATOR  0x14c
-#define      PLAYER_VISIBLE_ITEM_8_CREATOR_01  0x14d
-#define      PLAYER_VISIBLE_ITEM_8_PAD  0x157
-#define      PLAYER_VISIBLE_ITEM_8_PROPERTIES  0x156
-#define      PLAYER_VISIBLE_ITEM_9_0  0x15a
-#define      PLAYER_VISIBLE_ITEM_9_0_01  0x15b
-#define      PLAYER_VISIBLE_ITEM_9_0_02  0x15c
-#define      PLAYER_VISIBLE_ITEM_9_0_03  0x15d
-#define      PLAYER_VISIBLE_ITEM_9_0_04  350
-#define      PLAYER_VISIBLE_ITEM_9_0_05  0x15f
-#define      PLAYER_VISIBLE_ITEM_9_0_06  0x160
-#define      PLAYER_VISIBLE_ITEM_9_0_07  0x161
-#define      PLAYER_VISIBLE_ITEM_9_CREATOR  0x158
-#define      PLAYER_VISIBLE_ITEM_9_CREATOR_01  0x159
-#define      PLAYER_VISIBLE_ITEM_9_PAD  0x163
-#define      PLAYER_VISIBLE_ITEM_9_PROPERTIES  0x162
-#define      PLAYER_XP  0x26e
-#define      UNIT_CHANNEL_SPELL  0x95
-#define      UNIT_CREATED_BY_SPELL  0x97
-#define      UNIT_DYNAMIC_FLAGS  0x94
-#define      UNIT_END  0xb0
-#define      UNIT_FIELD_AGILITY  0x9c
-#define      UNIT_FIELD_ARMOR  160
-#define      UNIT_FIELD_ATTACK_POWER_MODS  0xa9
-#define      UNIT_FIELD_ATTACKPOWER  0xa7
-#define      UNIT_FIELD_AURA  0x2f
-#define      UNIT_FIELD_AURA_01  0x30
-#define      UNIT_FIELD_AURA_02  0x31
-#define      UNIT_FIELD_AURA_03  50
-#define      UNIT_FIELD_AURA_04  0x33
-#define      UNIT_FIELD_AURA_05  0x34
-#define      UNIT_FIELD_AURA_06  0x35
-#define      UNIT_FIELD_AURA_07  0x36
-#define      UNIT_FIELD_AURA_08  0x37
-#define      UNIT_FIELD_AURA_09  0x38
-#define      UNIT_FIELD_AURA_10  0x39
-#define      UNIT_FIELD_AURA_11  0x3a
-#define      UNIT_FIELD_AURA_12  0x3b
-#define      UNIT_FIELD_AURA_13  60
-#define      UNIT_FIELD_AURA_14  0x3d
-#define      UNIT_FIELD_AURA_15  0x3e
-#define      UNIT_FIELD_AURA_16  0x3f
-#define      UNIT_FIELD_AURA_17  0x40
-#define      UNIT_FIELD_AURA_18  0x41
-#define      UNIT_FIELD_AURA_19  0x42
-#define      UNIT_FIELD_AURA_20  0x43
-#define      UNIT_FIELD_AURA_21  0x44
-#define      UNIT_FIELD_AURA_22  0x45
-#define      UNIT_FIELD_AURA_23  70
-#define      UNIT_FIELD_AURA_24  0x47
-#define      UNIT_FIELD_AURA_25  0x48
-#define      UNIT_FIELD_AURA_26  0x49
-#define      UNIT_FIELD_AURA_27  0x4a
-#define      UNIT_FIELD_AURA_28  0x4b
-#define      UNIT_FIELD_AURA_29  0x4c
-#define      UNIT_FIELD_AURA_30  0x4d
-#define      UNIT_FIELD_AURA_31  0x4e
-#define      UNIT_FIELD_AURA_32  0x4f
-#define      UNIT_FIELD_AURA_33  80
-#define      UNIT_FIELD_AURA_34  0x51
-#define      UNIT_FIELD_AURA_35  0x52
-#define      UNIT_FIELD_AURA_36  0x53
-#define      UNIT_FIELD_AURA_37  0x54
-#define      UNIT_FIELD_AURA_38  0x55
-#define      UNIT_FIELD_AURA_39  0x56
-#define      UNIT_FIELD_AURA_40  0x57
-#define      UNIT_FIELD_AURA_41  0x58
-#define      UNIT_FIELD_AURA_42  0x59
-#define      UNIT_FIELD_AURA_43  90
-#define      UNIT_FIELD_AURA_44  0x5b
-#define      UNIT_FIELD_AURA_45  0x5c
-#define      UNIT_FIELD_AURA_46  0x5d
-#define      UNIT_FIELD_AURA_47  0x5e
-#define      UNIT_FIELD_AURA_48  0x5f
-#define      UNIT_FIELD_AURA_49  0x60
-#define      UNIT_FIELD_AURA_50  0x61
-#define      UNIT_FIELD_AURA_51  0x62
-#define      UNIT_FIELD_AURA_52  0x63
-#define      UNIT_FIELD_AURA_53  100
-#define      UNIT_FIELD_AURA_54  0x65
-#define      UNIT_FIELD_AURA_55  0x66
-#define      UNIT_FIELD_AURAAPPLICATIONS  0x71
-#define      UNIT_FIELD_AURAAPPLICATIONS_01  0x72
-#define      UNIT_FIELD_AURAAPPLICATIONS_02  0x73
-#define      UNIT_FIELD_AURAAPPLICATIONS_03  0x74
-#define      UNIT_FIELD_AURAAPPLICATIONS_04  0x75
-#define      UNIT_FIELD_AURAAPPLICATIONS_05  0x76
-#define      UNIT_FIELD_AURAAPPLICATIONS_06  0x77
-#define      UNIT_FIELD_AURAAPPLICATIONS_07  120
-#define      UNIT_FIELD_AURAAPPLICATIONS_08  0x79
-#define      UNIT_FIELD_AURAAPPLICATIONS_09  0x7a
-#define      UNIT_FIELD_AURAFLAGS  0x7b
-#define      UNIT_FIELD_AURAFLAGS_01  0x7c
-#define      UNIT_FIELD_AURAFLAGS_02  0x7d
-#define      UNIT_FIELD_AURAFLAGS_03  0x7e
-#define      UNIT_FIELD_AURAFLAGS_04  0x7f
-#define      UNIT_FIELD_AURAFLAGS_05  0x80
-#define      UNIT_FIELD_AURAFLAGS_06  0x81
-#define      UNIT_FIELD_AURALEVELS  0x67
-#define      UNIT_FIELD_AURALEVELS_01  0x68
-#define      UNIT_FIELD_AURALEVELS_02  0x69
-#define      UNIT_FIELD_AURALEVELS_03  0x6a
-#define      UNIT_FIELD_AURALEVELS_04  0x6b
-#define      UNIT_FIELD_AURALEVELS_05  0x6c
-#define      UNIT_FIELD_AURALEVELS_06  0x6d
-#define      UNIT_FIELD_AURALEVELS_07  110
-#define      UNIT_FIELD_AURALEVELS_08  0x6f
-#define      UNIT_FIELD_AURALEVELS_09  0x70
-#define      UNIT_FIELD_AURASTATE  130
-#define      UNIT_FIELD_BASE_MANA  0xa8
-#define      UNIT_FIELD_BASEATTACKTIME  0x83
-#define      UNIT_FIELD_BASEATTACKTIME_01  0x84
-#define      UNIT_FIELD_BOUNDINGRADIUS  0x86
-#define      UNIT_FIELD_BYTES_0  0x24
-#define      UNIT_FIELD_BYTES_1  0x8f
-#define      UNIT_FIELD_BYTES_2  170
-#define      UNIT_FIELD_CHANNEL_OBJECT  20
-#define      UNIT_FIELD_CHANNEL_OBJECT_01  0x15
-#define      UNIT_FIELD_CHARM  6
-#define      UNIT_FIELD_CHARM_01  7
-#define      UNIT_FIELD_CHARMEDBY  10
-#define      UNIT_FIELD_CHARMEDBY_01  11
-#define      UNIT_FIELD_COMBATREACH  0x87
-#define      UNIT_FIELD_CREATEDBY  14
-#define      UNIT_FIELD_CREATEDBY_01  15
-#define      UNIT_FIELD_DISPLAYID  0x88
-#define      UNIT_FIELD_FACTIONTEMPLATE  0x23
-#define      UNIT_FIELD_FLAGS  0x2e
-#define      UNIT_FIELD_HEALTH  0x16
-#define      UNIT_FIELD_IQ  0x9e
-#define      UNIT_FIELD_LEVEL  0x22
-#define      UNIT_FIELD_MAXDAMAGE  140
-#define      UNIT_FIELD_MAXHEALTH  0x1c
-#define      UNIT_FIELD_MAXOFFHANDDAMAGE  0x8e
-#define      UNIT_FIELD_MAXPOWER1  0x1d
-#define      UNIT_FIELD_MAXPOWER2  30
-#define      UNIT_FIELD_MAXPOWER3  0x1f
-#define      UNIT_FIELD_MAXPOWER4  0x20
-#define      UNIT_FIELD_MAXPOWER5  0x21
-#define      UNIT_FIELD_MAXRANGEDDAMAGE  0xae
-#define      UNIT_FIELD_MINDAMAGE  0x8b
-#define      UNIT_FIELD_MINOFFHANDDAMAGE  0x8d
-#define      UNIT_FIELD_MINRANGEDDAMAGE  0xad
-#define      UNIT_FIELD_MOUNTDISPLAYID  0x8a
-#define      UNIT_FIELD_NATIVEDISPLAYID  0x89
-#define      UNIT_FIELD_PADDING  0xaf
-#define      UNIT_FIELD_PERSUADED  0x12
-#define      UNIT_FIELD_PERSUADED_01  0x13
-#define      UNIT_FIELD_PET_NAME_TIMESTAMP  0x91
-#define      UNIT_FIELD_PETEXPERIENCE  0x92
-#define      UNIT_FIELD_PETNEXTLEVELEXP  0x93
-#define      UNIT_FIELD_PETNUMBER  0x90
-#define      UNIT_FIELD_POWER1  0x17
-#define      UNIT_FIELD_POWER2  0x18
-#define      UNIT_FIELD_POWER3  0x19
-#define      UNIT_FIELD_POWER4  0x1a
-#define      UNIT_FIELD_POWER5  0x1b
-#define      UNIT_FIELD_RANGED_ATTACK_POWER_MODS  0xac
-#define      UNIT_FIELD_RANGEDATTACKPOWER  0xab
-#define      UNIT_FIELD_RANGEDATTACKTIME  0x85
-#define      UNIT_FIELD_RESISTANCES_01  0xa1
-#define      UNIT_FIELD_RESISTANCES_02  0xa2
-#define      UNIT_FIELD_RESISTANCES_03  0xa3
-#define      UNIT_FIELD_RESISTANCES_04  0xa4
-#define      UNIT_FIELD_RESISTANCES_05  0xa5
-#define      UNIT_FIELD_RESISTANCES_06  0xa6
-#define      UNIT_FIELD_SPIRIT  0x9f
-#define      UNIT_FIELD_STAMINA  0x9d
-#define      UNIT_FIELD_STR  0x9b
-#define      UNIT_FIELD_SUMMON  8
-#define      UNIT_FIELD_SUMMON_01  9
-#define      UNIT_FIELD_SUMMONEDBY  12
-#define      UNIT_FIELD_SUMMONEDBY_01  13
-#define      UNIT_FIELD_TARGET  0x10
-#define      UNIT_FIELD_TARGET_01  0x11
-#define      UNIT_MOD_CAST_SPEED  150
-#define      UNIT_NPC_EMOTESTATE  0x99
-#define      UNIT_NPC_FLAGS  0x98
-#define      UNIT_TRAINING_POINTS  0x9a
-#define      UNIT_VIRTUAL_ITEM_INFO  40
-#define      UNIT_VIRTUAL_ITEM_INFO_01  0x29
-#define      UNIT_VIRTUAL_ITEM_INFO_02  0x2a
-#define      UNIT_VIRTUAL_ITEM_INFO_03  0x2b
-#define      UNIT_VIRTUAL_ITEM_INFO_04  0x2c
-#define      UNIT_VIRTUAL_ITEM_INFO_05  0x2d
-#define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY  0x25
-#define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01  0x26
-#define      UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02  0x27
+enum EUnitFields
+{
+    UNIT_FIELD_CHARM                        =    6,
+    UNIT_FIELD_SUMMON                       =    8,
+    UNIT_FIELD_CHARMEDBY                    =   10,
+    UNIT_FIELD_SUMMONEDBY                   =   12,
+    UNIT_FIELD_CREATEDBY                    =   14,
+    UNIT_FIELD_TARGET                       =   16,
+    UNIT_FIELD_PERSUADED                    =   18,
+    UNIT_FIELD_CHANNEL_OBJECT               =   20,
+    UNIT_FIELD_HEALTH                       =   22,
+    UNIT_FIELD_POWER1                       =   23,
+    UNIT_FIELD_POWER2                       =   24,
+    UNIT_FIELD_POWER3                       =   25,
+    UNIT_FIELD_POWER4                       =   26,
+    UNIT_FIELD_POWER5                       =   27,
+    UNIT_FIELD_MAXHEALTH                    =   28,
+    UNIT_FIELD_MAXPOWER1                    =   29,
+    UNIT_FIELD_MAXPOWER2                    =   30,
+    UNIT_FIELD_MAXPOWER3                    =   31,
+    UNIT_FIELD_MAXPOWER4                    =   32,
+    UNIT_FIELD_MAXPOWER5                    =   33,
+    UNIT_FIELD_LEVEL                        =   34,
+    UNIT_FIELD_FACTIONTEMPLATE              =   35,
+    UNIT_FIELD_BYTES_0                      =   36,
+    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY          =   37,
+    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01       =   38,
+    UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02       =   39,
+    UNIT_VIRTUAL_ITEM_INFO                  =   40,       
+    UNIT_VIRTUAL_ITEM_INFO_01               =   41,
+    UNIT_VIRTUAL_ITEM_INFO_02               =   42,
+    UNIT_VIRTUAL_ITEM_INFO_03               =   43,
+    UNIT_VIRTUAL_ITEM_INFO_04               =   44,
+    UNIT_VIRTUAL_ITEM_INFO_05               =   45,
+    UNIT_FIELD_FLAGS                        =   46,
+    UNIT_FIELD_AURA                         =   47,       
+    UNIT_FIELD_AURAFLAGS                    =  111,       
+    UNIT_FIELD_AURALEVELS                   =  119,       
+    UNIT_FIELD_AURAAPPLICATIONS             =  127,       
+    UNIT_FIELD_AURASTATE                    =  143,
+    UNIT_FIELD_BASEATTACKTIME               =  144,
+    UNIT_FIELD_RANGEDATTACKTIME             =  146,
+    UNIT_FIELD_BOUNDINGRADIUS               =  147,
+    UNIT_FIELD_COMBATREACH                  =  148,
+    UNIT_FIELD_DISPLAYID                    =  149,
+    UNIT_FIELD_NATIVEDISPLAYID              =  150,
+    UNIT_FIELD_MOUNTDISPLAYID               =  151,
+    UNIT_FIELD_MINDAMAGE                    =  152,
+    UNIT_FIELD_MAXDAMAGE                    =  153,
+    UNIT_FIELD_MINOFFHANDDAMAGE             =  154,
+    UNIT_FIELD_MAXOFFHANDDAMAGE             =  155,
+    UNIT_FIELD_BYTES_1                      =  156,
+    UNIT_FIELD_PETNUMBER                    =  157,
+    UNIT_FIELD_PET_NAME_TIMESTAMP           =  158,
+    UNIT_FIELD_PETEXPERIENCE                =  159,
+    UNIT_FIELD_PETNEXTLEVELEXP              =  160,
+    UNIT_DYNAMIC_FLAGS                      =  161,
+    UNIT_CHANNEL_SPELL                      =  162,
+    UNIT_MOD_CAST_SPEED                     =  163,
+    UNIT_CREATED_BY_SPELL                   =  164,
+    UNIT_NPC_FLAGS                          =  165,
+    UNIT_NPC_EMOTESTATE                     =  166,
+    UNIT_TRAINING_POINTS                    =  167,
+    UNIT_FIELD_STAT0                        =  168,
+    UNIT_FIELD_STR = UNIT_FIELD_STAT0,
+    UNIT_FIELD_STAT1                        =  169,
+    UNIT_FIELD_AGILITY = UNIT_FIELD_STAT1,
+    UNIT_FIELD_STAT2                        =  170,
+    UNIT_FIELD_STAMINA = UNIT_FIELD_STAT2,
+    UNIT_FIELD_STAT3                        =  171,
+    UNIT_FIELD_IQ = UNIT_FIELD_STAT3,
+    UNIT_FIELD_STAT4                        =  172,
+    UNIT_FIELD_SPIRIT = UNIT_FIELD_STAT4,
+  
+    UNIT_FIELD_RESISTANCES                  =  173,
+    UNIT_FIELD_ARMOR = UNIT_FIELD_RESISTANCES,    
+    UNIT_FIELD_RESISTANCES_01               =  174,
+    UNIT_FIELD_RESISTANCES_02               =  175,
+    UNIT_FIELD_RESISTANCES_03               =  176,
+    UNIT_FIELD_RESISTANCES_04               =  177,
+    UNIT_FIELD_RESISTANCES_05               =  178,
+    UNIT_FIELD_RESISTANCES_06               =  179,
+    UNIT_FIELD_BASE_MANA                    =  180,//=  181,
+    UNIT_FIELD_BASE_HEALTH                  =  181,//=  182,
+    UNIT_FIELD_V190_182                     =  182,
+    UNIT_FIELD_ATTACKPOWER                  =  183,//=  180,
+    UNIT_FIELD_ATTACK_POWER_MODS            =  184,//=  183,
+    UNIT_FIELD_BYTES_2                      =  185,
+    UNIT_FIELD_RANGEDATTACKPOWER            =  186,
+    UNIT_FIELD_RANGED_ATTACK_POWER_MODS     =  187,
+    UNIT_FIELD_MINRANGEDDAMAGE              =  188,
+    UNIT_FIELD_MAXRANGEDDAMAGE              =  189,
+    UNIT_FIELD_POWER_COST_MODIFIER          =  190,
+    UNIT_FIELD_POWER_COST_MULTIPLIER        =  191,
+    UNIT_FIELD_PADDING                      =  192,
+    UNIT_FIELD_UNKNOWN180                   =  193,      
+    UNIT_END                                =  206,
+};
 
-#endif //!_VERSION_1_7_0_
+enum EPlayerFields
+{
+    PLAYER_SELECTION                        =  206,
+    PLAYER_SELECTION_HIG                    =  207,
+    PLAYER_DUEL_ARBITER                     =  208,
+    PLAYER_FLAGS                            =  210,
+    PLAYER_GUILDID                          =  211,
+    PLAYER_GUILDRANK                        =  212,
+    PLAYER_BYTES                            =  213,
+    PLAYER_BYTES_2                          =  214,
+    PLAYER_BYTES_3                          =  215,
+    PLAYER_DUEL_TEAM                        =  216,
+    PLAYER_GUILD_TIMESTAMP                  =  217,
+    PLAYER_QUEST_LOG_1_1                    =  218,
+    PLAYER_QUEST_LOG_1_2                    =  219,
+    PLAYER_QUEST_LOG_2_1                    =  221,
+    PLAYER_QUEST_LOG_2_2                    =  222,
+    PLAYER_QUEST_LOG_3_1                    =  224,
+    PLAYER_QUEST_LOG_3_2                    =  225,
+    PLAYER_QUEST_LOG_4_1                    =  227,
+    PLAYER_QUEST_LOG_4_2                    =  228,
+    PLAYER_QUEST_LOG_5_1                    =  230,
+    PLAYER_QUEST_LOG_5_2                    =  231,
+    PLAYER_QUEST_LOG_6_1                    =  233,
+    PLAYER_QUEST_LOG_6_2                    =  234,
+    PLAYER_QUEST_LOG_7_1                    =  236,
+    PLAYER_QUEST_LOG_7_2                    =  237,
+    PLAYER_QUEST_LOG_8_1                    =  239,
+    PLAYER_QUEST_LOG_8_2                    =  240,
+    PLAYER_QUEST_LOG_9_1                    =  242,
+    PLAYER_QUEST_LOG_9_2                    =  243,
+    PLAYER_QUEST_LOG_10_1                   =  245,
+    PLAYER_QUEST_LOG_10_2                   =  246,
+    PLAYER_QUEST_LOG_11_1                   =  248,
+    PLAYER_QUEST_LOG_11_2                   =  249,
+    PLAYER_QUEST_LOG_12_1                   =  251,
+    PLAYER_QUEST_LOG_12_2                   =  252,
+    PLAYER_QUEST_LOG_13_1                   =  254,
+    PLAYER_QUEST_LOG_13_2                   =  255,
+    PLAYER_QUEST_LOG_14_1                   =  257,
+    PLAYER_QUEST_LOG_14_2                   =  258,
+    PLAYER_QUEST_LOG_15_1                   =  261,
+    PLAYER_QUEST_LOG_15_2                   =  261,
+    PLAYER_QUEST_LOG_16_1                   =  263,
+    PLAYER_QUEST_LOG_16_2                   =  264,
+    PLAYER_QUEST_LOG_17_1                   =  266,
+    PLAYER_QUEST_LOG_17_2                   =  267,
+    PLAYER_QUEST_LOG_18_1                   =  269,
+    PLAYER_QUEST_LOG_18_2                   =  270,
+    PLAYER_QUEST_LOG_19_1                   =  272,
+    PLAYER_QUEST_LOG_19_2                   =  273,
+    PLAYER_QUEST_LOG_20_1                   =  275,
+    PLAYER_QUEST_LOG_20_2                   =  276,
+    PLAYER_VISIBLE_ITEM_1_CREATOR           =  278,
+    PLAYER_VISIBLE_ITEM_1_0                 =  280,      
+    PLAYER_VISIBLE_ITEM_1_PROPERTIES        =  288,
+    PLAYER_VISIBLE_ITEM_1_PAD               =  289,
+    PLAYER_VISIBLE_ITEM_2_CREATOR           =  290,
+    PLAYER_VISIBLE_ITEM_2_0                 =  292,      
+    PLAYER_VISIBLE_ITEM_2_PROPERTIES        =  300,
+    PLAYER_VISIBLE_ITEM_2_PAD               =  301,
+    PLAYER_VISIBLE_ITEM_3_CREATOR           =  302,
+    PLAYER_VISIBLE_ITEM_3_0                 =  304,      
+    PLAYER_VISIBLE_ITEM_3_PROPERTIES        =  312,
+    PLAYER_VISIBLE_ITEM_3_PAD               =  313,
+    PLAYER_VISIBLE_ITEM_4_CREATOR           =  314,
+    PLAYER_VISIBLE_ITEM_4_0                 =  316,      
+    PLAYER_VISIBLE_ITEM_4_PROPERTIES        =  324,
+    PLAYER_VISIBLE_ITEM_4_PAD               =  325,
+    PLAYER_VISIBLE_ITEM_5_CREATOR           =  326,
+    PLAYER_VISIBLE_ITEM_5_0                 =  328,      
+    PLAYER_VISIBLE_ITEM_5_PROPERTIES        =  336,
+    PLAYER_VISIBLE_ITEM_5_PAD               =  337,
+    PLAYER_VISIBLE_ITEM_6_CREATOR           =  338,
+    PLAYER_VISIBLE_ITEM_6_0                 =  340,      
+    PLAYER_VISIBLE_ITEM_6_PROPERTIES        =  348,
+    PLAYER_VISIBLE_ITEM_6_PAD               =  349,
+    PLAYER_VISIBLE_ITEM_7_CREATOR           =  350,
+    PLAYER_VISIBLE_ITEM_7_0                 =  352,      
+    PLAYER_VISIBLE_ITEM_7_PROPERTIES        =  360,
+    PLAYER_VISIBLE_ITEM_7_PAD               =  361,
+    PLAYER_VISIBLE_ITEM_8_CREATOR           =  362,
+    PLAYER_VISIBLE_ITEM_8_0                 =  364,      
+    PLAYER_VISIBLE_ITEM_8_PROPERTIES        =  372,
+    PLAYER_VISIBLE_ITEM_8_PAD               =  373,
+    PLAYER_VISIBLE_ITEM_9_CREATOR           =  374,
+    PLAYER_VISIBLE_ITEM_9_0                 =  376,      
+    PLAYER_VISIBLE_ITEM_9_PROPERTIES        =  384,
+    PLAYER_VISIBLE_ITEM_9_PAD               =  385,
+    PLAYER_VISIBLE_ITEM_10_CREATOR          =  386,
+    PLAYER_VISIBLE_ITEM_10_0                =  388,      
+    PLAYER_VISIBLE_ITEM_10_PROPERTIES       =  396,
+    PLAYER_VISIBLE_ITEM_10_PAD              =  397,
+    PLAYER_VISIBLE_ITEM_11_CREATOR          =  398,
+    PLAYER_VISIBLE_ITEM_11_0                =  340,      
+    PLAYER_VISIBLE_ITEM_11_PROPERTIES       =  408,
+    PLAYER_VISIBLE_ITEM_11_PAD              =  409,
+    PLAYER_VISIBLE_ITEM_12_CREATOR          =  410,
+    PLAYER_VISIBLE_ITEM_12_0                =  412,      
+    PLAYER_VISIBLE_ITEM_12_PROPERTIES       =  420,
+    PLAYER_VISIBLE_ITEM_12_PAD              =  421,
+    PLAYER_VISIBLE_ITEM_13_CREATOR          =  422,
+    PLAYER_VISIBLE_ITEM_13_0                =  424,      
+    PLAYER_VISIBLE_ITEM_13_PROPERTIES       =  432,
+    PLAYER_VISIBLE_ITEM_13_PAD              =  433,
+    PLAYER_VISIBLE_ITEM_14_CREATOR          =  434,
+    PLAYER_VISIBLE_ITEM_14_0                =  436,      
+    PLAYER_VISIBLE_ITEM_14_PROPERTIES       =  444,
+    PLAYER_VISIBLE_ITEM_14_PAD              =  445,
+    PLAYER_VISIBLE_ITEM_15_CREATOR          =  446,
+    PLAYER_VISIBLE_ITEM_15_0                =  448,      
+    PLAYER_VISIBLE_ITEM_15_PROPERTIES       =  456,
+    PLAYER_VISIBLE_ITEM_15_PAD              =  457,
+    PLAYER_VISIBLE_ITEM_16_CREATOR          =  458,
+    PLAYER_VISIBLE_ITEM_16_0                =  460,      
+    PLAYER_VISIBLE_ITEM_16_PROPERTIES       =  468,
+    PLAYER_VISIBLE_ITEM_16_PAD              =  469,
+    PLAYER_VISIBLE_ITEM_17_CREATOR          =  471,
+    PLAYER_VISIBLE_ITEM_17_0                =  472,      
+    PLAYER_VISIBLE_ITEM_17_PROPERTIES       =  480,
+    PLAYER_VISIBLE_ITEM_17_PAD              =  481,
+    PLAYER_VISIBLE_ITEM_18_CREATOR          =  482,
+    PLAYER_VISIBLE_ITEM_18_0                =  484,      
+    PLAYER_VISIBLE_ITEM_18_PROPERTIES       =  492,
+    PLAYER_VISIBLE_ITEM_18_PAD              =  493,
+    PLAYER_VISIBLE_ITEM_19_CREATOR          =  494,
+    PLAYER_VISIBLE_ITEM_19_0                =  496,      
+    PLAYER_VISIBLE_ITEM_19_PROPERTIES       =  504,
+    PLAYER_VISIBLE_ITEM_19_PAD              =  505,
+    PLAYER_FIELD_INV_SLOT_HEAD              =  506,      
+    PLAYER_FIELD_PACK_SLOT_1                =  552,      
+    PLAYER_FIELD_BANK_SLOT_1                =  584,      
+    PLAYER_FIELD_BANKBAG_SLOT_1             =  632,      
+    PLAYER_FIELD_VENDORBUYBACK_SLOT_1       =  644,      
+    PLAYER_FARSIGHT                         =  668,
+    PLAYER__FIELD_COMBO_TARGET              =  670,
+    PLAYER_XP                               =  672,
+    PLAYER_NEXT_LEVEL_XP                    =  673,
+    PLAYER_SKILL_INFO_START                 =  674,
 
-#endif //!_VERSION_1_8_0_
+    PLAYER_CHARACTER_POINTS1                = 1056+2,
+    PLAYER_CHARACTER_POINTS2                = 1057+2,  
+    PLAYER_TRACK_CREATURES                  = 1058+2,
+    PLAYER_TRACK_RESOURCES                  = 1059+2,
+    PLAYER_BLOCK_PERCENTAGE                 = 1060+2,
+    PLAYER_DODGE_PERCENTAGE                 = 1061+2,
+    PLAYER_PARRY_PERCENTAGE                 = 1062+2,
+    PLAYER_CRIT_PERCENTAGE                  = 1063+2,
+    PLAYER_RANGED_CRIT_PERCENTAGE           = 1064+2,
+    PLAYER_EXPLORED_ZONES_1                 = 1065+2,
+
+    PLAYER_REST_STATE_EXPERIENCE            = 1129+2,
+    PLAYER_FIELD_COINAGE                    = 1130+2,
+    PLAYER_FIELD_POSSTAT0                   = 1131+2,
+    PLAYER_FIELD_POSSTAT1                   = 1132+2,
+    PLAYER_FIELD_POSSTAT2                   = 1133+2,
+    PLAYER_FIELD_POSSTAT3                   = 1134+2,
+    PLAYER_FIELD_POSSTAT4                   = 1135+2,
+    PLAYER_FIELD_NEGSTAT0                   = 1136+2,
+    PLAYER_FIELD_NEGSTAT1                   = 1137+2,
+    PLAYER_FIELD_NEGSTAT2                   = 1138+2,
+    PLAYER_FIELD_NEGSTAT3                   = 1139+2,
+    PLAYER_FIELD_NEGSTAT4                   = 1140+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE = 1141+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 = 1142+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 = 1143+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 = 1144+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 = 1145+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 = 1146+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 = 1147+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE = 1148+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 = 1149+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02 = 1150+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03 = 1151+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04 = 1152+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05 = 1153+2,
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 = 1154+2,
+    PLAYER_FIELD_MOD_DAMAGE_DONE_POS        = 1155+2,
+    PLAYER_FIELD_MOD_DAMAGE_DONE_NEG        = 1162+2,
+    PLAYER_FIELD_MOD_DAMAGE_DONE_PCT        = 1169+2,
+    PLAYER_FIELD_BYTES                      = 1176+2,
+    PLAYER_AMMO_ID                          = 1177+2,
+    PLAYER_SELF_RES_SPELL                   = 1178+2,
+    PLAYER_FIELD_PVP_MEDALS                 = 1179+2,
+    PLAYER_FIELD_BUYBACK_PRICE_1            = 1180+2,
+	PLAYER_FIELD_BUYBACK_TIMESTAMP_1        = 1192+2,
+
+	PLAYER_FIELD_HONOR_RANK                 =  215,
+	PLAYER_FIELD_HONOR_HIGHEST_RANK         = 1178,	PLAYER_FIELD_TODAY_KILLS                = 1206,	PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS  = 1205+2,	PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS  = 1206+2,	PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS  = 1207+2,	PLAYER_FIELD_THIS_WEEK_HONOR		    = 1208+2,	PLAYER_FIELD_LIFETIME_HONORABLE_KILLS   = 1209+2,	PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS= 1210+2,	PLAYER_FIELD_YESTERDAY_HONOR            = 1211+2,	PLAYER_FIELD_LAST_WEEK_HONOR            = 1212+2,	PLAYER_FIELD_LAST_WEEK_STANDING         = 1213+2,	PLAYER_FIELD_LIFETIME_HONOR             = 1214+2,	PLAYER_FIELD_SESSION_KILLS              = 1215+2,
+
+    PLAYER_END                              = 1248,
+};
+
+enum EGameObjectFields
+{
+    OBJECT_FIELD_CREATED_BY                 =    6,
+    GAMEOBJECT_DISPLAYID                    =    8,
+    GAMEOBJECT_FLAGS                        =    9,
+    GAMEOBJECT_ROTATION                     =   10,      
+    GAMEOBJECT_STATE                        =   14,
+    GAMEOBJECT_TIMESTAMP                    =   15,
+    GAMEOBJECT_POS_X                        =   16,
+    GAMEOBJECT_POS_Y                        =   17,
+    GAMEOBJECT_POS_Z                        =   18,
+    GAMEOBJECT_FACING                       =   19,
+    GAMEOBJECT_DYN_FLAGS                    =   20,
+    GAMEOBJECT_FACTION                      =   21,
+    GAMEOBJECT_TYPE_ID                      =   22,
+    GAMEOBJECT_LEVEL                        =   23,
+    GAMEOBJECT_END                          =   24,
+};
+
+enum EDynamicObjectFields
+{
+    DYNAMICOBJECT_CASTER                    =    6,
+    DYNAMICOBJECT_BYTES                     =    8,
+    DYNAMICOBJECT_SPELLID                   =    9,
+    DYNAMICOBJECT_RADIUS                    =   10,
+    DYNAMICOBJECT_POS_X                     =   11,
+    DYNAMICOBJECT_POS_Y                     =   12,
+    DYNAMICOBJECT_POS_Z                     =   13,
+    DYNAMICOBJECT_FACING                    =   14,
+    DYNAMICOBJECT_PAD                       =   15,
+    DYNAMICOBJECT_END                       =   16,
+};
+
+enum ECorpseFields
+{
+    CORPSE_FIELD_OWNER                      =    6,
+    CORPSE_FIELD_FACING                     =    8,
+    CORPSE_FIELD_POS_X                      =    9,
+    CORPSE_FIELD_POS_Y                      =   10,
+    CORPSE_FIELD_POS_Z                      =   11,
+    CORPSE_FIELD_DISPLAY_ID                 =   12,
+    CORPSE_FIELD_ITEM                       =   13,      
+    CORPSE_FIELD_BYTES_1                    =   32,
+    CORPSE_FIELD_BYTES_2                    =   33,
+    CORPSE_FIELD_GUILD                      =   34,
+    CORPSE_FIELD_FLAGS                      =   35,
+    CORPSE_FIELD_DYNAMIC_FLAGS              =   36,
+    CORPSE_FIELD_PAD                        =   37,
+    CORPSE_END                              =   38,
+};
+
+#endif 
+

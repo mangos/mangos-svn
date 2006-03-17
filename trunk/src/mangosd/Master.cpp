@@ -1,7 +1,5 @@
-/* Master.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,35 +20,30 @@
 #include "Network/SocketHandler.h"
 #include "Network/ListenSocket.h"
 #include "Network/TcpSocket.h"
-#include "AuthSocket.h"
+//#include "AuthSocket.h"
 #include "WorldSocket.h"
+#include "RASocket.h"
 #include "WorldSocketMgr.h"
 #include "WorldRunnable.h"
 #include "World.h"
-#include "RealmList.h"
+//#include "RealmList.h"
 #include "Log.h"
 #include "Timer.h"
 #include <signal.h>
 #include "MapManager.h"
+#include "Policies/SingletonImp.h"
 
-
-#ifdef ENABLE_HTTPD_SYSTEM
-#include "HttpdRunnable.h"
-#include "../httpd/src/http.h"
-
-createFileSingleton( Httpd );
-#endif
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
 
-createFileSingleton( CliRunnable );
+INSTANTIATE_SINGLETON_1( CliRunnable );
 #endif
 
-// UQ1: warning C4305: 'argument' : truncation from 'double' to 'const float'
+
 #pragma warning(disable:4305)
 
-createFileSingleton( Master );
+INSTANTIATE_SINGLETON_1( Master );
 
 volatile bool Master::m_stopEvent = false;
 
@@ -87,92 +80,102 @@ Master::~Master()
 {
 }
 
-#include "../shared/Database/DataStore.h"
+bool Master::Run() {
+	sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
+	sLog.outString( "<Ctrl-C> to stop.\n\n" );
+	
+	sLog.outString( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
+	sLog.outString( "MM   MM         MM   MM MMM MMM MM  MM MMM MMM");
+	sLog.outString( "MMM MMM         MMM  MM MMM MMM MM  MM MMM");
+	sLog.outString( "MM M MM         MMMM MM MMM     MM  MM  MMM");
+	sLog.outString( "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM");
+	sLog.outString( "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM");
+	sLog.outString( "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM");
+	sLog.outString( "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM");
+	sLog.outString( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
+	sLog.outString( "        MM  MMM http://www.mangosproject.org");
+	sLog.outString( "        MMMMMM\n\n");
 
-bool Master::Run()
-{
-    sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
-    sLog.outString( "<Ctrl-C> to stop.\n" );
+	_StartDB();
 
-    _StartDB();
+	loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
-    loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
+	std::string host;
+	host = sConfig.GetStringDefault( "Host", DEFAULT_HOST );
+	sLog.outString( "Server: %s\n", host.c_str() );
 
-    std::string host;
-    host = sConfig.GetStringDefault( "Host", DEFAULT_HOST );
-    sLog.outString( "Server: %s\n", host.c_str() );
+	sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
+	sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
+	sWorld.SetInitialWorldSettings();
 
-    new World;
+	port_t wsport, rmport;
+	rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+	wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );    
 
-    sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
-    sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
-    sWorld.SetInitialWorldSettings();
+	uint32 socketSelecttime;
+	socketSelecttime=sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME ); 
+    
+	sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
+	sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
+	sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
+	sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
+	sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
+	sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
+    
+	uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);    
+	sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
+	grid_clean_up_delay *= 1000;
+	MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
+    
+	uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
+	sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
+	MapManager::Instance().SetMapUpdateInterval(map_update_interval);
 
-    port_t wsport, rmport;
-    rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );    
+	//    sRealmList.setServerPort(wsport);
+	//    sRealmList.GetAndAddRealms ();
+	SocketHandler h;
+	ListenSocket<WorldSocket> worldListenSocket(h);
+	//    ListenSocket<AuthSocket> authListenSocket(h);
 
-    // load regeneration rates.
-    sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
-    sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
+	if (worldListenSocket.Bind(wsport)) {
+		_StopDB();
+		sLog.outString( "MaNGOS can not bind to that port" );
+		exit(1);
+	}
 
-    // default Grid unload will be 5 minutes after everyone moved out.
-    // Note.. minium is 1 minute. (5*60=300)
-    uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);    
-    sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
-    grid_clean_up_delay *= 1000;
-    MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
+	h.Add(&worldListenSocket);
+	//    h.Add(&authListenSocket);
 
-    // default update is 100 milli seconds
-    uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
-    sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
-    MapManager::Instance().SetMapUpdateInterval(map_update_interval);
+	_HookSignals();
 
+	ZThread::Thread t(new WorldRunnable);
 
-    sRealmList.setServerPort(wsport);
-    sRealmList.GetAndAddRealms ();
-    SocketHandler h;
-    ListenSocket<WorldSocket> worldListenSocket(h);
-    ListenSocket<AuthSocket> authListenSocket(h);
+//#ifndef WIN32
+	t.setPriority ((ZThread::Priority )2);
+//#endif
+    
+#ifdef ENABLE_CLI
+	ZThread::Thread td1(new CliRunnable);
+#endif
 
-    if (worldListenSocket.Bind(wsport) || authListenSocket.Bind(rmport))
-    {
-        delete World::getSingletonPtr();
-        _StopDB();
+#ifdef ENABLE_RA
+
+	ListenSocket<RASocket> RAListenSocket(h);
+
+	if (RAListenSocket.Bind(sConfig.GetIntDefault( "RA.Port", 3443 ))) {
+      
         sLog.outString( "MaNGOS can not bind to that port" );
-        exit(1);
-        ///return 0;
+       // exit(1); go on with no RA
+        
     }
 
-    h.Add(&worldListenSocket);
-    h.Add(&authListenSocket);
-
-    _HookSignals();
-
-    ZThread::Thread t(new WorldRunnable);
-
-    // UQ1: Httpd
-#ifdef ENABLE_HTTPD_SYSTEM
-    // new Httpd;
-    sHttpd.SetInitialHttpdSettings();
-
-    ZThread::Thread td(new HttpdRunnable);
+    h.Add(&RAListenSocket);
 #endif
-
-#ifdef ENABLE_CLI
-//    sCli.SetInitialCliSettings();
-    ZThread::Thread td1(new CliRunnable);
-#endif
-
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
     while (!Master::m_stopEvent)
     {
-        // uint32 exceeded
+        
         if (realPrevTime > realCurrTime)
             realPrevTime = 0;
 
@@ -180,20 +183,15 @@ bool Master::Run()
         sWorldSocketMgr.Update( realCurrTime - realPrevTime );
         realPrevTime = realCurrTime;
 
-        h.Select(0, 100000);                      // 100 ms
+        //h.Select(0, 100000);
+		h.Select(0, socketSelecttime);
     }
 
     _UnhookSignals();
 
     t.wait();
-    delete World::getSingletonPtr();
 
-    // UQ1: Httpd
-#ifdef ENABLE_HTTPD_SYSTEM
-    td.wait();
-    delete Httpd::getSingletonPtr();
-#endif
-
+    
     _StopDB();
 
     sLog.outString( "Halting process..." );
@@ -203,38 +201,29 @@ bool Master::Run()
 
 bool Master::_StartDB()
 {
-    ASSERT(new DatabaseMysql);
-
     std::string dbstring;
-
     if(!sConfig.GetString("DatabaseInfo", &dbstring))
     {
         sLog.outError("Database not specified");
         exit(1);
-        //return false;
+        
     }
 
     sLog.outString("Database: %s", dbstring.c_str() );
-
-    if(!sDatabase.Initialize(dbstring.c_str()))
+    if(!sMySqlDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to database");
         exit(1);
-        //return false;
+        
     }
 
-    /// clean online table
-    std::stringstream query;
-    query << "UPDATE characters SET online=0";
-    QueryResult *result = sDatabase.Query( query.str().c_str() );
-    delete result;
+    sDatabase.PExecute("UPDATE characters SET online=0;");
     return true;
 }
 
 
 void Master::_StopDB()
 {
-    delete Database::getSingletonPtr();
 }
 
 

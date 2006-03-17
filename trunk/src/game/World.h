@@ -1,7 +1,5 @@
-/* World.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +20,8 @@
 #define __WORLD_H
 
 #include "Timer.h"
-#include "Singleton.h"
-#include "SharedDefines.h" // UQ1: Generic Defines...
+#include "Policies/Singleton.h"
+#include "SharedDefines.h" 
 
 class Object;
 class WorldPacket;
@@ -58,7 +56,7 @@ enum EnviromentalDamage
     DAMAGE_FIRE = 5
 };
 
-class World : public Singleton<World>
+class World 
 {
     public:
         World();
@@ -85,7 +83,7 @@ class World : public Singleton<World>
         void SendWorldText(const char *text, WorldSession *self = 0);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
 
-        // update the world server every frame
+        
         void Update(time_t diff);
 
         void setRate(int index,float value)
@@ -101,19 +99,14 @@ class World : public Singleton<World>
 			else
 				return 0;
         }
-
-		// UQ1: Speed up AI when grid system is OFF!
-		void CreaturesCheck();
-
-        // map text emote to spell prices
-        typedef std::map< uint32, uint32> SpellPricesMap;
-        SpellPricesMap mPrices;
+		
+      
 
     protected:
-        // update Stuff, FIXME: use diff
+       
         time_t _UpdateGameTime()
         {
-            // Update Server time
+            
             time_t thisTime = time(NULL);
             m_gameTime += thisTime - m_lastTick;
             m_lastTick = thisTime;
@@ -122,7 +115,7 @@ class World : public Singleton<World>
         }
 
     private:
-        //! Timers
+        
         IntervalTimer m_timers[WUPDATE_COUNT];
 
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
@@ -138,5 +131,5 @@ class World : public Singleton<World>
         time_t m_nextThinkTime;
 };
 
-#define sWorld World::getSingleton()
+#define sWorld MaNGOS::Singleton<World>::Instance()
 #endif

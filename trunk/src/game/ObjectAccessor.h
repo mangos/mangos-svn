@@ -1,6 +1,5 @@
-/* ObjectAccessor.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +19,7 @@
 #ifndef MANGOS_OBJECTACCESSOR_H
 #define MANGOS_OBJECTACCESSOR_H
 
-/** ObjectAccessor is a singleton that helps to access either player or 
- * objects or units in the line-of-sight of the player
- */
+
 
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
@@ -58,16 +55,17 @@ public:
     typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;  
 
 
-    Creature* GetCreature(Player &, uint64);
-    Corpse* GetCorpse(Player &, uint64);
-    Unit* GetUnit(Player &, uint64);
-    Player* GetPlayer(Player &, uint64);
-    GameObject* GetGameObject(Player &, uint64);
-    DynamicObject* GetDynamicObject(Player &, uint64);
+    Creature* GetCreature(Unit &, uint64);
+    Corpse* GetCorpse(Unit &, uint64);
+    Unit* GetUnit(Unit &, uint64);
+    Player* GetPlayer(Unit &, uint64);
+    GameObject* GetGameObject(Unit &, uint64);
+    DynamicObject* GetDynamicObject(Unit &, uint64);
 
-    // find functions are expensive
+    
     Player* FindPlayer(uint64);
     Player* FindPlayerByName(const char *name) ;
+    void BuildCreateForSameMapPlayer(Player *pl);
 
     inline PlayersMapType& GetPlayers(void) { return i_players; }
     void InsertPlayer(Player *);
@@ -75,23 +73,23 @@ public:
 
     void AddUpdateObject(Object *obj);
     void RemoveUpdateObject(Object *obj);
+    void RemoveCreatureCorpseFromPlayerView(Creature *);
 
-    /* This method updates the players and anything within its visibility
-     */
+    
     void Update(const uint32 &diff);
 
-    // retrieves a corpse for the player
+    
     Corpse* GetCorpseForPlayer(Player &);
     void RemoveCorpse(uint64);
     void AddCorpse(Corpse *corpse);
 
-    // Check to see if player is located in a range of cells
+    
     bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
     template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
 
 #ifdef WIN32
-	// template specialization
+	
 	template<> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
 #endif
 private:
@@ -105,7 +103,7 @@ private:
 	void Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
 
-    friend struct ObjectChangeAccumulator; // let's my internal deal with my internal :-)
+    friend struct ObjectChangeAccumulator; 
     PlayersMapType i_players;
     CorpsesMapType i_corpse;
 
@@ -128,14 +126,21 @@ template<> void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corp
 
 namespace MaNGOS
 {
-	/** BuildUpdateForPlayer is a update interval call
-     */
+    
     struct MANGOS_DLL_DECL BuildUpdateForPlayer
     {
 		Player &i_player;
 		ObjectAccessor::UpdateDataMapType &i_updatePlayers;
 		BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
 		void Visit(std::map<OBJECT_HANDLE, Player *> &);
+    };
+
+    
+    struct MANGOS_DLL_DECL CreatureCorpseViewRemover
+    {
+	Creature &i_creature;
+	CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
+	void Visit(std::map<OBJECT_HANDLE, Player *>  &);
     };
 }
 

@@ -1,7 +1,5 @@
-/* Container.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +30,8 @@ class Container : public Object
 
         void Create( uint32 guidlow, uint32 itemid, Player* owner );
 
-        ItemPrototype* GetProto() const { return m_itemProto; }
+        ItemPrototype* GetProto();
+
         void AddItem(uint8 slot, Item *item);
         Item *GetItem(uint8 slot) { return m_Slot[slot]; }
         uint8 FindFreeSlot();
@@ -43,7 +42,7 @@ class Container : public Object
         void SetOwner(Player *owner) { m_owner = owner; }
 
     protected:
-        ItemPrototype *m_itemProto;
+        
         Player *m_owner;
         Item **m_Slot;
 };

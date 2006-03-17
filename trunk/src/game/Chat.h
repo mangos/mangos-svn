@@ -1,7 +1,5 @@
-/* Chat.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,13 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-//////////////////////////////////////////////////////////////////////
-//  Chat
-//
-//  Receives all messages with a chat-related opcode.
-//////////////////////////////////////////////////////////////////////
 #ifndef MANGOSSERVER_CHAT_H
 #define MANGOSSERVER_CHAT_H
+
+#include "Policies/Singleton.h"
 
 class ChatHandler;
 class WorldSession;
@@ -35,7 +30,7 @@ enum ChatMsg
 {
     CHAT_MSG_SAY                                  = 0x00,
     CHAT_MSG_PARTY                                = 0x01,
-    // unknown                                       = 0x02,
+    
     CHAT_MSG_GUILD                                = 0x03,
     CHAT_MSG_OFFICER                              = 0x04,
     CHAT_MSG_YELL                                 = 0x05,
@@ -61,26 +56,7 @@ enum ChatMsg
     CHAT_MSG_LOOT                                 = 0x19,
 };
 
-/*
-// UQ1: Now in SharedDefines.h
-enum Languages
-{
-    LANG_UNIVERSAL                                = 0x00,
-    LANG_ORCISH                                   = 0x01,
-    LANG_DARNASSIAN                               = 0x02,
-    LANG_TAURAHE                                  = 0x03,
-    LANG_DWARVISH                                 = 0x06,
-    LANG_COMMON                                   = 0x07,
-    LANG_DEMONIC                                  = 0x08,
-    LANG_TITAN                                    = 0x09,
-    LANG_THELASSIAN                               = 0x0A,
-    LANG_DRACONIC                                 = 0x0B,
-    LANG_KALIMAG                                  = 0x0C,
-    LANG_GNOMISH                                  = 0x0D,
-    LANG_TROLL                                    = 0x0E,
-    NUM_LANGUAGES                                 = 0x0E
-};
-*/
+
 
 class ChatCommand
 {
@@ -92,7 +68,7 @@ class ChatCommand
         ChatCommand *      ChildCommands;
 };
 
-class ChatHandler : public Singleton<ChatHandler>
+class ChatHandler 
 {
     public:
         ChatHandler();
@@ -108,9 +84,7 @@ class ChatHandler : public Singleton<ChatHandler>
 
     protected:
         void SpawnCreature(WorldSession *session, const char* pName, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level);
-        void smsg_NewWorld(WorldSession *session, uint32 mapid, float x, float y, float z);
-        void MovePlayer(WorldSession *session, float x, float y, float z);
-
+        
         bool hasStringAbbr(const char* s1, const char* s2);
         void SendMultilineMessage(const char *str);
 
@@ -119,21 +93,20 @@ class ChatHandler : public Singleton<ChatHandler>
 
         ChatCommand* getCommandTable();
 
-        // Level 0 commands
+        
         bool HandleHelpCommand(const char* args);
         bool HandleCommandsCommand(const char* args);
         bool HandleNYICommand(const char* args);
         bool HandleAcctCommand(const char* args);
         bool HandleStartCommand(const char* args);
         bool HandleInfoCommand(const char* args);
-        bool HandleMountCommand(const char* args);
         bool HandleDismountCommand(const char* args);
         bool HandleSaveCommand(const char* args);
         bool HandleGMListCommand(const char* args);
 
-        // Level 1 commands
-        bool HandleSummonCommand(const char* args);
-        bool HandleAppearCommand(const char* args);
+        
+        bool HandleNamegoCommand(const char* args);
+        bool HandleGonameCommand(const char* args);
         bool HandleRecallCommand(const char* args);
         bool HandleAnnounceCommand(const char* args);
         bool HandleGMOnCommand(const char* args);
@@ -156,11 +129,11 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleModifyBitCommand(const char* args);
         bool HandleModifyFactionCommand(const char* args);
         bool HandleModifySpellCommand(const char* args);
-
-        // Debug Commands
+		bool HandleReloadCommand(const char* args);
+        
         bool HandleDebugInArcCommand(const char* args);
 
-        // Level 2 commands
+        
         bool HandleGUIDCommand(const char* args);
         bool HandleNameCommand(const char* args);
         bool HandleSubNameCommand(const char* args);
@@ -180,15 +153,17 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleFactionIdCommand(const char* args);
         bool HandleAddSpwCommand(const char* args);
 
-        // Level 3 commands
+        
         bool HandleSecurityCommand(const char* args);
         bool HandleWorldPortCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);
         bool HandleAllowMovementCommand(const char* args);
         bool HandleAddSpiritCommand(const char* args);
-        bool HandleMoveCommand(const char* args);
+        bool HandleGoCommand(const char* args);
         bool HandleLearnCommand(const char* args);
-        bool HandleUnLearnCommand(const char* args); //add by vendy 2005/10/9 22:49
+        bool HandleUnLearnCommand(const char* args); 
+	bool HandleLearnSkillCommand(const char* args);
+	bool HandleUnLearnSkillCommand(const char* args);
         bool HandleObjectCommand(const char* args);
         bool HandleCreatureDistanceCommand(const char* args);
         bool HandleGameObjectCommand(const char* args);
@@ -209,17 +184,26 @@ class ChatHandler : public Singleton<ChatHandler>
         bool HandleLevelUpCommand(const char* args);
         bool HandleShowAreaCommand(const char* args);
         bool HandleHideAreaCommand(const char* args);
-        bool HandleAddItemCommand(const char* args); //add by vendy
+        bool HandleAddItemCommand(const char* args); 
 		bool HandleCreateGuildCommand(const char* args);
-
-        Player* getSelectedChar(WorldSession *client);
+		bool HandleShowHonor(const char* args);
+		bool HandleUpdate(const char* args);
+		bool HandleBankCommand(const char* args);
+		bool HandleChangeWeather(const char* args);
+		
+		
+		//! Development Commands
+		bool HandleSet32Value(const char* args);
+		bool HandleSet32Bit(const char* args);
+		bool HandleMod32Value(const char* args);
+		
+		Player* getSelectedChar(WorldSession *client);
 
         WorldSession *m_session;
 };
 
-#define sChatHandler ChatHandler::getSingleton()
+#define sChatHandler MaNGOS::Singleton<ChatHandler>::Instance()
 #endif
 
-//UQ1: Generic string formatting for output... CHECKME: May want this somewhere else??? Located in Chat.cpp
 char *fmtstring( char *format, ... );
 

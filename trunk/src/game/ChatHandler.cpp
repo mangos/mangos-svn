@@ -1,7 +1,5 @@
-/* ChatHandler.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,7 +35,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-    Log::getSingleton().outDebug("CHAT: packet received");
+    sLog.outDebug("CHAT: packet received");
 
     uint32 type;
     uint32 lang;
@@ -82,8 +80,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
             }
             player->GetSession()->SendPacket(&data);
-            // Sent the to Users id as the channel, this should be fine as it's not used for wisper
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_WHISPER_INFORM, LANG_UNIVERSAL, ((char *)(player->GetGUID())), msg.c_str() );
+		sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,(( char *)((uint32)player->GetGUID() )),msg.c_str() );
             SendPacket(&data);
         } break;
         case CHAT_MSG_YELL:
@@ -148,7 +145,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         }
         	
         default:
-            Log::getSingleton().outError("CHAT: unknown msg type %u, lang: %u", type, lang);
+            sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
     }
 }
 
@@ -166,12 +163,12 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     const char *nam = 0;
     uint32 namlen = 1;
 
-    // gets the name of either a unit or a player.. same thing
+    
     Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid);
     Creature *pCreature = dynamic_cast<Creature *>(unit);
     if( pCreature != NULL )
     {
-        nam = pCreature->GetName();
+        nam = pCreature->GetCreatureInfo()->Name;
         namlen = strlen(nam) + 1;
     }
     {
@@ -185,7 +182,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 
     emoteentry *em = sEmoteStore.LookupEntry(text_emote);
-    if (em)                                       // server crashes with some emotes, that arent in dbc
+    if (em)                                       
     {
         uint32 emote_anim = em->textid;
 
@@ -198,7 +195,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         data.Initialize(SMSG_TEXT_EMOTE);
         data << GetPlayer()->GetGUID();
         data << (uint32)text_emote;
-        data << (uint32)0xFF;                     // dunno whats that- send by server when using emote w/o target
+        data << (uint32)0xFF;                     
         data << (uint32)namlen;
         if( namlen > 1 )
         {
@@ -220,7 +217,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 	WorldPacket data;
     uint64 iguid;
 	std::string msg = "";
-	Log::getSingleton().outDebug("WORLD: Recieved CMSG_CHAT_IGNORED");
+	sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
 
     recv_data >> iguid;	
 

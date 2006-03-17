@@ -1,6 +1,5 @@
-/* GridNotifiers.cpp
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include "GridNotifiers.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -29,56 +27,64 @@
 using namespace MaNGOS;
 
 
-//======================================//
-//         NotifyPlayer
-/*
- * couple of things happend here
- * (1) in inform every player of my existence (if they are still in range)
- * (2) inform myself of every player that's within range
- */
+
+
+
 void PlayerNotifier::Visit(PlayerMapType &m)
 {
-    return;
+    
+    BuildForMySelf();
+
+    UpdateData my_data;
     Player *player = &i_player;
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
 	if( iter->second == player )
-	    continue; // this is me dude
+	    continue; 
 
 	WorldPacket packet;
 	UpdateData update_data;
 
-	// build my data for the other player.. 
-	// and inform them
+	
+	
 	i_player.BuildCreateUpdateBlockForPlayer(&update_data, iter->second);
 	update_data.BuildPacket(&packet);
 	iter->second->GetSession()->SendPacket(&packet);
 	
-	// collect data about other players to let myself know
-	iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+	
+	iter->second->BuildCreateUpdateBlockForPlayer(&my_data, &i_player);
     }
+
+    if( my_data.HasData() )
+    {
+	WorldPacket my_packet;
+	my_data.BuildPacket(&my_packet);
+	i_player.GetSession()->SendPacket(&my_packet);
+    }
+    
     
 }
 
-
-
 void
-PlayerNotifier::Notify()
+PlayerNotifier::BuildForMySelf()
 {
     WorldPacket packet;
+    UpdateData data;
 
-    // send to myself about other player information and self
-    sLog.outDetail("Creating player data for himself %d", i_player.GetGUID());
-    i_player.BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-    i_data.BuildPacket(&packet);
-    i_player.GetSession()->SendPacket(&packet);
-    i_player.AddToWorld();
+	if( !i_player.IsInWorld() )  
+	{
+        sLog.outDetail("Creating player data for himself %d", i_player.GetGUID());
+        i_player.BuildCreateUpdateBlockForPlayer(&data, &i_player);
+        data.BuildPacket(&packet);
+        i_player.GetSession()->SendPacket(&packet);
+        i_player.AddToWorld();
+	}
 }
 
 
 
-//===============================================//
-//         VisibleNotifier
+
+
 void
 VisibleNotifier::Notify()
 {
@@ -103,8 +109,8 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 
 
     
-//===============================================//
-//         NotVisibleNotifier
+
+
 void
 NotVisibleNotifier::Notify()
 {
@@ -114,7 +120,6 @@ NotVisibleNotifier::Notify()
 	i_data.BuildPacket(&packet);
 	i_player.GetSession()->SendPacket(&packet);
     }
-
 }
 
 
@@ -129,8 +134,8 @@ NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 
 
     
-//=====================================//
-//     ObjectVisibleNotifer
+
+
 void
 ObjectVisibleNotifier::Visit(PlayerMapType &m)
 {
@@ -144,8 +149,8 @@ ObjectVisibleNotifier::Visit(PlayerMapType &m)
     }    
 }    
 
-//=====================================//
-//     ObjectVisibleNotifer
+
+
 void
 ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
 {
@@ -159,8 +164,8 @@ ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
     }    
 }    
 
-//=====================================//
-//         MessageDeliverer
+
+
 void
 MessageDeliverer::Visit(PlayerMapType &m)
 {
@@ -174,8 +179,8 @@ MessageDeliverer::Visit(PlayerMapType &m)
   }
 }
 
-//========================================//
-//        UnitMessageDeliverer
+
+
 void
 ObjectMessageDeliverer::Visit(PlayerMapType &m)
 {
@@ -186,8 +191,8 @@ ObjectMessageDeliverer::Visit(PlayerMapType &m)
     }
 }
 
-//=========================================//
-//  CreatureVisibleMovementNotifier
+
+
 void
 CreatureVisibleMovementNotifier::Visit(PlayerMapType &m)
 {
@@ -205,8 +210,8 @@ CreatureVisibleMovementNotifier::Visit(PlayerMapType &m)
 }
 
 
-//=========================================//
-//  CreatureNotVisibleMovementNotifier
+
+
 void
 CreatureNotVisibleMovementNotifier::Visit(PlayerMapType &m)
 {
@@ -224,8 +229,8 @@ CreatureNotVisibleMovementNotifier::Visit(PlayerMapType &m)
 }
 
 
-//===================================//
-//        ObjectUpdater
+
+
 template<class T> void 
 ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m) 
 {
@@ -235,7 +240,7 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
-// specialization....
+
 template void VisibleNotifier::Visit<GameObject>(std::map<OBJECT_HANDLE, GameObject *> &);
 template void VisibleNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
 template void VisibleNotifier::Visit<DynamicObject>(std::map<OBJECT_HANDLE, DynamicObject *> &);

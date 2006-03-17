@@ -1,7 +1,5 @@
-/* DatabaseMysql.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +19,8 @@
 #ifndef _DATABASEMYSQL_H
 #define _DATABASEMYSQL_H
 
+#include "Policies/Singleton.h"
+
 #ifdef WIN32
 #include <winsock2.h>
 #include <mysql/mysql.h>
@@ -30,20 +30,27 @@
 
 class DatabaseMysql : public Database
 {
-    public:
-        DatabaseMysql();
-        ~DatabaseMysql();
+    friend class MaNGOS::OperatorNew<DatabaseMysql>;
+    DatabaseMysql();
+    ~DatabaseMysql();
 
-        //! Initializes Mysql and connects to a server.
-        /*! infoString should be formated like hostname;username;password;database. */
-        bool Initialize(const char *infoString);
-
-        QueryResult* Query(const char *sql);
-        bool Execute(const char *sql);
+public:
+        
+        
+    //! Initializes Mysql and connects to a server.
+    /*! infoString should be formated like hostname;username;password;database. */
+    bool Initialize(const char *infoString);
+    QueryResult* PQuery(const char *format,...);
+    QueryResult* Query(const char *sql);
+    bool Execute(const char *sql);
+	bool PExecute(const char *format,...);
 
         operator bool () const { return mMysql != NULL; }
 
     private:
         MYSQL *mMysql;
 };
+
+#define sMySqlDatabase MaNGOS::Singleton<DatabaseMysql>::Instance()
+
 #endif

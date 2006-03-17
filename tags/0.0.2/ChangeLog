@@ -1,0 +1,71 @@
+MaNGOS 0.0.2  (Oct 31, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/milestone/0.0.2
+
+ MaNGOS 0.0.2 adds another bunch of improvements, bug fixes and major
+ enhancements to the overall functionality of the daemon. A complete
+ list of all updated items follows below:
+ 
+ ==== Game Features ====
+ * Added support for area exploration.
+ * Added support for duels.
+ * Added support for ticket system.
+ * Added support for trading.
+ * Added support for NPC movement when there are no waypoints defined.
+ * Added support for NPC gossip, now handling options, and providing default options.
+ * Added attack code for creatures.
+ * Added default data for realm list.
+ * Fixed character logout. Players can only log out when not in combat.
+ * Fixed friends and ignore lists.
+ * Fixed game objects to have proper sizes.
+ * Fixed item swapping.
+ * Fixed player factions.
+ * Fixed vendors. They now work without requiring gossip texts defined, as long as they have objects to sell.
+ * Updated command descriptions to be more meaningful.
+ * Updated default data for player creation. Actions, items, skills and spells moved to database.
+
+ ==== Server Features ====
+ * Added support for building with Intel C++ compiler on Windows.
+ * Added support for building with debug info on Linux. Use --with-debug-info switch to include debug info.
+ * Added support for building with 1.8.x protocol as default protocol. Use the 1.8.x build configurations in Visual Studio or --enable-18x switch on Linux.
+ * Added support for building with 1.7.x protocol. Use the 1.7.x build configurations in Visual Studio or --enable-17x switch on Linux.
+ * Added support for internal httpd server added for those not running Apache. --enable-httpd-integrated will add it. Windows solution available.
+ * Added support for displaying progress bars for daemon startup loading.
+ * Added support for on demand Grid Loading/Unloading system. Disabled by default. Use --enable-grid-system to enable.
+ * Added core application framework.
+ * Added command line switch -c for pointing to a custom configuration file. By default file from _MANGOSD_CONFIG (defined in src/mangosd/Master.h.in) will be used.
+ * Fixed ZThread build process.
+ * Fixed segmentation fault on zone map test due to access of array out of bound. Also, change m_ZoneIDmap to use bitset instead of the 4 bytes bool.
+ * Fixed memory leak problems. The creation of new TYPE[] must delete with [] for correctness otherwise n-1 members are leaked.
+ * Fixed Bugs: #12, #13, #18, #19, #20
+
+ The complete list of closed tickets can be found here:
+   https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/query?status=closed&milestone=0.0.2
+  
+
+MaNGOS 0.0.1  (Sept 13, 2005) https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/milestone/0.0.1
+
+ MaNGOS 0.0.1 contains a great number of new features, improvements and
+ bug fixes. The following list contains all of them:
+
+ * NPC gossips now hash by Guid instead of ID. ID is meaningless and we should revisit its usage.
+ * Fixed client crash issue. GameObject still not interactive. Flags issues.
+ * Introduced new gameobjecttemplate table as well new map files.
+ * Added SCP-to-SQL converter to contrib/scp-to-sql/.
+ * MySQL 4.0 branch now is minimum requirement.
+ * Server causes client to core on unintialized memory. Also, remove some debug statement which causes problem when the DB is large
+ * Creature loot now reads from the creatureloot table. Use a new algorithm to select loot items that mimic the probabilities assigned in each item.
+ * Fixed configuration file, added proper settings for packet logging.
+ * Added default data for player creation and command help.
+ * Added GM command: .addspw #entry-id. Spawns a creature from creaturetemplate table by given #entry-id.
+ * Server randomly cores if DBC file failed to load. Fixes by intializing all DBC class internal variables.
+ * Daemon version and path to daemon configuration now set by build system on compile time.
+ * Allow connections from client release 4544
+ * Update solution and project files for latest Visual Studio .NET 2005 Beta 2 release.
+ * Fixed compiler error for gcc 4.0 or higher. Calling templated base class methods has to be explicit from 4.0 or higher on.
+ * Added contrib/ subdirectory for third-party tools.
+ * Applied MaNGOS code indention schema.
+ * Initial code checked into repository.
+ * Fork from WoW Daemon 0.9.0 branch.
+ * Fixed Bugs: #2, #3, #9, #10, #11
+
+ The complete list of closed tickets can be found here:
+   https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/query?status=closed&milestone=0.0.1

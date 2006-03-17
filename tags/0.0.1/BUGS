@@ -1,0 +1,34 @@
+//// BUGS FROM TEST SERVER
+
+- Battle stance not working.
+- Defensive stance not working.
+- Usage restrictions for weapons do not work.
+- Walking on fire, you should get fire damage.
+- When you swim a breath bar should appear, when you are under water and
+  refill and disappear when you leave water.
+- If you jump from high height you should get damage.
+- When you die you should not see others players, NPCs, and mobs, only the
+  Spirit Healer, all corpses, and NPCs, mobs and players surrounding your
+  corpse.
+- When you die, you should walk on water.
+- If you create items with Tailoring or Leatherworking, etc., the item should
+  display a line in the tooltip showing the create like <Made by <nick>>.
+- When a mob has less than 10 percent life left, it should try to flee and
+  call for help. Only humanoids and beasts call for help.
+- Add support for item drops, which will start Quests and can only be looted
+  once.
+- Make critical damage, defense, parry, and dodge work.
+- Make fishing work.
+
+//// SMALL BUGS:
+
+- Monster do not face you when u attack them.
+- The damage done to mobs should be apearing also on the mobs icon.
+- Action bar is not saved.
+
+--------------------------------------------------------------------------------
+Known bugs:
+
+ * Monsters slow down when you cast spells on them.
+ * Corpses can end up in the air sometimes.
+ * Run animation is buggy.

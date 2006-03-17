@@ -1,7 +1,5 @@
-/* MemoryLeaks.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,20 +17,22 @@
  */
 
 #include "MemoryLeaks.h"
+#include "Policies/SingletonImp.h"
 
 #if COMPILER == MICROSOFT
 
-createFileSingleton( MemoryManager ) ;
+INSTANTIATE_SINGLETON_1( MemoryManager ) ;
 
-/// Catch memory leaks
+
 MemoryManager::MemoryManager( )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-//_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_CRT_DF);
-//_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_CRT_DF | _CRTDBG_CHECK_ALWAYS_DF);
-//_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF | _CRTDBG_CHECK_ALWAYS_DF);
 
-/// set the parameter to this to the allocation number to break at to find a memory leak
-//_CrtSetBreakAlloc( 1012 );
+
+
+
+
+
 }
+
 #endif

@@ -1,7 +1,5 @@
-/* ReactorAI.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,19 +16,16 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/* Windows nightmare.. dependency resolution pain!!! Althgough
-* some of the files are NOT well define but hey, gcc resolves it.
-* Windows VC seems to be very painful so let's do this for now...
-* the right way.. make files like Creature.h and Player.h well define.
-*/
-#include "ByteBuffer.h" // yupe has nothing to do here but Windows nightmare
+#include "ByteBuffer.h" 
 #include "ReactorAI.h"
 #include "Errors.h"
 #include "Creature.h"
-#include "Player.h"
+#include "TargetedMovementGenerator.h"
 #include "FactionTemplateResolver.h"
+#include "Log.h"
 
-#define MAX_RANGE_OF_SPELLS (30.0f*30.0f)
+
+#define REACTOR_VISIBLE_RANGE (700.0f)   
 
 int
 ReactorAI::Permissible(const Creature *creature)
@@ -39,103 +34,83 @@ ReactorAI::Permissible(const Creature *creature)
     FactionTemplateResolver fact_source(fact);
     if( fact_source.IsNeutralToAll() )
 	return REACTIVE_PERMIT_BASE;
+
     return NO_PERMIT;
 }
 
 
 void 
-ReactorAI::MoveInLineOfSight(Creature *) 
+ReactorAI::MoveInLineOfSight(Unit *) 
 {
 }
 
 void 
-ReactorAI::AttackStart(Creature *c) 
+ReactorAI::AttackStart(Unit *p) 
 {
     if( i_pVictim == NULL )
     {
-	i_pVictim = c;
-	i_creature.AI_AttackReaction(c, 0);
+	DEBUG_LOG("Tag unit LowGUID(%d) HighGUID(%d) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
+	i_creature.SetState(ATTACKING);
+	i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
+	i_creature->Mutate(new TargetedMovementGenerator(*p));
+	i_pVictim = p; 
     }
 }
 
 void 
-ReactorAI::AttackStop(Creature *c) 
+ReactorAI::AttackStop(Unit *) 
 {
-    /* if he stops.. I shall continue until he outrun me */
+    
 }
 
 void 
-ReactorAI::HealBy(Creature *healer, uint32 amount_healed) 
+ReactorAI::HealBy(Unit *healer, uint32 amount_healed) 
 {
 }
 
 void 
-ReactorAI::DamageInflict(Creature *healer, uint32 amount_healed) 
+ReactorAI::DamageInflict(Unit *healer, uint32 amount_healed) 
 {
 }
 
 bool
-ReactorAI::IsVisible(Creature *creature) const 
+ReactorAI::IsVisible(Unit *pl) const 
 {
-    return false; /* reactor is not proactive, so we don't care if he sees it or not */
-}
-
-
-void 
-ReactorAI::MoveInLineOfSight(Player *) 
-{
-}
-
-void 
-ReactorAI::AttackStart(Player *p) 
-{
-    if( i_pVictim != NULL )
-    {
-	i_pVictim = p;
-	i_creature.AI_AttackReaction(p, 0);
-    }
-}
-
-void 
-ReactorAI::AttackStop(Player *) 
-{
-}
-
-void 
-ReactorAI::HealBy(Player *healer, uint32 amount_healed) 
-{
-}
-
-void 
-ReactorAI::DamageInflict(Player *healer, uint32 amount_healed) 
-{
-}
-
-bool
-ReactorAI::IsVisible(Player *pl) const 
-{
-    return false; /* reactor is not proactive, so we don't care he sees it or not */
+    return false; 
 }
 
 void
 ReactorAI::UpdateAI(const uint32 time_diff)
 {
-    /* this is where I decide what to do */
+    
     if( i_pVictim != NULL )
     {
 	if( needToStop() )
+	{
+	    DEBUG_LOG("Creature %d stopped attacking.", i_creature.GetGUIDLow());
 	    stopAttack();
+	}
+	else if( i_creature.IsStopped() )
+	{
+	    if( i_creature.isAttackReady() )
+	    {
+		i_creature.AttackerStateUpdate(i_pVictim, 0);
+		i_creature.setAttackTimer(0); 
+		if( !i_creature.isAlive() || !i_pVictim->isAlive() )
+		    stopAttack();
+	    }
+	}
     }
 }
 
 bool
 ReactorAI::needToStop() const
 {
-    if( !i_pVictim->isAlive() )
+    if( !i_pVictim->isAlive() || !i_creature.isAlive()  || i_pVictim->m_stealth)
 	return true;
 
     float length_square = i_creature.GetDistanceSq(i_pVictim);
-    if( length_square > MAX_RANGE_OF_SPELLS )
+    if( length_square > REACTOR_VISIBLE_RANGE )
 	return true;
     return false;
 }
@@ -143,8 +118,28 @@ ReactorAI::needToStop() const
 void
 ReactorAI::stopAttack()
 {
-    if( i_pVictim )
+    if( i_pVictim != NULL )
+    {
+	i_creature.ClearState(ATTACKING);
+	i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
+
+	if( !i_creature.isAlive() )
 	{
-	    // not exist yet i_creature.AI_StopAttack();
+	    DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%d]", i_creature.GetGUIDLow());
+	    i_creature->Idle();
 	}
+	else if( i_pVictim->m_stealth )
+  {
+	DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%d]", i_creature.GetGUIDLow());
+	i_pVictim = NULL;
+	static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature); 
+  }
+	else 
+	{
+	    DEBUG_LOG("Creature stopped attacking due to target %s [guid=%d]", i_pVictim->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
+	    static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature); 
+	}
+
+	i_pVictim = NULL;
+    }
 }

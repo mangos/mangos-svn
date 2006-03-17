@@ -1,7 +1,5 @@
-/* DuelHandler.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,65 +27,51 @@
 #include "UpdateData.h"
 #include "Chat.h"
 #include "MapManager.h"
+#include "FactionTemplateResolver.h"
+#include "EventSystem.h"
 
-
-/*
-void BuildDuelPacket(uint64 ObjID,uint64 Cast, uint64 Target)
-{
-
-}
-*/
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
 
-    sLog.outString( "HandleDuelAcceptedOpcode.\n" );
-
-    //if you want to  get this handle, learn spell 7266 first,
-    //I don't how to do, please FIX ME
     uint64 guid;
 
     recvPacket >> guid;
 
     Player *pl;
     Player *plTarget;
-    WorldPacket data;
+    
+    pl     = GetPlayer();
+    plTarget = pl->m_pDuel;
 
-//    char buf[256];
-    WorldPacket Msgdata;
+	if(pl->GetGUID() != plTarget->GetGUID())
+	{
 
-    WorldPacket packet,packetR;
-    UpdateData updata;
+	    sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
+	    DEBUG_LOG("Player 1 is: %lu", (unsigned long)pl->GetGUID());
+	    DEBUG_LOG("Player 2 is: %lu", (unsigned long)plTarget->GetGUID());
+      
+	    pl->SetUInt32Value(PLAYER_DUEL_TEAM,1);
+	    plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,2);
 
-    pl     = GetPlayer();                         // get duel sender
-    plTarget = objmgr.GetPlayer(pl->m_duelGUID);
-    //pl->build
+	    pl->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
+	    pl->SetPvP(true);
 
-    if(pl->m_duelSenderGUID == pl->GetGUID())
-    {
-   
-        data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-        data << (uint64)guid;
-        pl->GetSession()->SendPacket(&data);
-        plTarget->GetSession()->SendPacket(&data);
+	    plTarget->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
+	    plTarget->SetPvP(true);
 
-    }
-    else
-    {
-        data.Initialize(SMSG_PET_BROKEN | CMSG_LEARN_SPELL);
-        data << (uint64)0xbb8;
-        pl->GetSession()->SendPacket(&data);
-        plTarget->GetSession()->SendPacket(&data);
-        
-//test ------------BUG Fix me,I don't know how to change duel player to red name----- 
-        pl->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 469 );
-        plTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, 67 );
-//-----------------------------------------------------------------------------------
+	    pl->m_isInDuel = true;
+	    plTarget->m_isInDuel = true;
 
-    }
+	    WorldPacket data;
 
-    pl->m_isInDuel = true;
-    plTarget->m_isInDuel = true;
+	    data.Initialize(SMSG_DUEL_COUNTDOWN);
+	    data << (uint64)0xbb8; // 3 seconds
+	    pl->GetSession()->SendPacket(&data);
+	    plTarget->GetSession()->SendPacket(&data);
+
+	}
+
 
 }
 
@@ -95,7 +79,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
 
-    sLog.outString( "HandleDuelCancelledOpcode.\n" );
+    sLog.outDebug( "WORLD: received CMSG_DUEL_CANCELLED" );
 
     uint64 guid;
     Player *pl;
@@ -104,8 +88,8 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 
     recvPacket >> guid;
 
-    pl       = GetPlayer();                       //get player
-    plTarget = objmgr.GetPlayer(pl->m_duelGUID);
+    pl       = GetPlayer();                       
+    plTarget = pl->m_pDuel;
 
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
     data << (uint64)guid;
@@ -118,7 +102,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     plTarget->GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_DUEL_COMPLETE);
-    data << (uint8)0;                             // Duel   Cancel
+    data << (uint8)0;                             
     pl->GetSession()->SendPacket(&data);
     plTarget->GetSession()->SendPacket(&data);
 
@@ -130,8 +114,13 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
        obj = ObjectAccessor::Instance().GetGameObject(*pl, guid);
 
     if(obj)
-    {
-	// Remove and DELTE object
-	MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj,true);
-    }
+			MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj,true);
+		
+		pl->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
+   	plTarget->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
+   	pl->SetUInt32Value(PLAYER_DUEL_TEAM,0);
+    plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,0);
+   	
 }
+
+

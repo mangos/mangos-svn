@@ -1,7 +1,5 @@
-/* PacketLog.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,20 +19,21 @@
 #include "Common.h"
 #include "PacketLog.h"
 #include "Config/ConfigEnv.h"
+#include "Policies/SingletonImpl.h"
 
 #include <ctype.h>
 
-createFileSingleton( PacketLog );
+INSTANTIATE_SINGLETON_1( PacketLog );
 
 PacketLog::PacketLog()
 {
-    // clear realm logfile
+    
     if (sConfig.GetBoolDefault("LogRealm", false))
     {
         FILE *pFile = fopen("realm.log", "w+");
         fclose(pFile);
     }
-    // clear world logfile
+    
     if (sConfig.GetBoolDefault("LogWorld", false))
     {
         FILE *pFile = fopen("world.log", "w+");
@@ -153,7 +152,7 @@ void PacketLog::WorldHexDump(WorldPacket* data, uint32 socket, bool direction)
     FILE *pFile;
     pFile = fopen("world.log", "a");
 
-    uint16 len = data->size();                    // + 4;
+    uint16 len = data->size();                    
     uint16 opcode = data->GetOpcode();
     if (direction)
         fprintf(pFile, "SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %.4X\nDATA:\n", socket, len, opcode);

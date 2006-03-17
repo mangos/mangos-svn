@@ -99,6 +99,8 @@ int pthread_attr_setstacksize(pthread_attr_t *connect_att,DWORD stack);
 int pthread_attr_setprio(pthread_attr_t *connect_att,int priority);
 int pthread_attr_destroy(pthread_attr_t *connect_att);
 struct tm *localtime_r(const time_t *timep,struct tm *tmp);
+struct tm *gmtime_r(const time_t *timep,struct tm *tmp);
+
 
 void pthread_exit(void *a);	 /* was #define pthread_exit(A) ExitThread(A)*/
 
@@ -232,7 +234,6 @@ extern int my_sigwait(const sigset_t *set,int *sig);
 #include <signal.h>
 #undef sigwait
 #endif
-#undef _REENTRANT			/* Fix if _REENTRANT is in pthread.h */
 #include <pthread.h>
 #ifndef _REENTRANT
 #define _REENTRANT
@@ -278,6 +279,8 @@ extern int my_pthread_create_detached;
 #define USE_ALARM_THREAD
 #undef	HAVE_LOCALTIME_R
 #define HAVE_LOCALTIME_R
+#undef	HAVE_GMTIME_R
+#define HAVE_GMTIME_R
 #undef	HAVE_PTHREAD_ATTR_SETSCOPE
 #define HAVE_PTHREAD_ATTR_SETSCOPE
 #undef HAVE_GETHOSTBYNAME_R_GLIBC2_STYLE	/* If we are running linux */
@@ -286,18 +289,11 @@ extern int my_pthread_create_detached;
 #undef HAVE_PTHREAD_RWLOCK_RDLOCK
 #undef HAVE_SNPRINTF
 
-#define sigset(A,B) pthread_signal((A),(void (*)(int)) (B))
-#define signal(A,B) pthread_signal((A),(void (*)(int)) (B))
 #define my_pthread_attr_setprio(A,B)
 #endif /* defined(PTHREAD_SCOPE_GLOBAL) && !defined(PTHREAD_SCOPE_SYSTEM) */
 
 #if defined(_BSDI_VERSION) && _BSDI_VERSION < 199910
 int sigwait(sigset_t *set, int *sig);
-#endif
-
-#if defined(HAVE_UNIXWARE7_POSIX)
-#undef HAVE_NONPOSIX_SIGWAIT
-#define HAVE_NONPOSIX_SIGWAIT	/* sigwait takes only 1 argument */
 #endif
 
 #ifndef HAVE_NONPOSIX_SIGWAIT
@@ -324,14 +320,26 @@ extern int my_pthread_cond_init(pthread_cond_t *mp,
 #if !defined(HAVE_SIGWAIT) && !defined(HAVE_mit_thread) && !defined(HAVE_rts_threads) && !defined(sigwait) && !defined(alpha_linux_port) && !defined(HAVE_NONPOSIX_SIGWAIT) && !defined(HAVE_DEC_3_2_THREADS) && !defined(_AIX)
 int sigwait(sigset_t *setp, int *sigp);		/* Use our implemention */
 #endif
-#if !defined(HAVE_SIGSET) && !defined(HAVE_mit_thread) && !defined(sigset)
-#define sigset(A,B) do { struct sigaction s; sigset_t set;              \
-                         sigemptyset(&set);                             \
-                         s.sa_handler = (B);                            \
-                         s.sa_mask    = set;                            \
-                         s.sa_flags   = 0;                              \
-                         sigaction((A), &s, (struct sigaction *) NULL); \
-                       } while (0)
+
+
+/*
+  We define my_sigset() and use that instead of the system sigset() so that
+  we can favor an implementation based on sigaction(). On some systems, such
+  as Mac OS X, sigset() results in flags such as SA_RESTART being set, and
+  we want to make sure that no such flags are set.
+*/
+#if defined(HAVE_SIGACTION) && !defined(my_sigset)
+#define my_sigset(A,B) do { struct sigaction s; sigset_t set;              \
+                            sigemptyset(&set);                             \
+                            s.sa_handler = (B);                            \
+                            s.sa_mask    = set;                            \
+                            s.sa_flags   = 0;                              \
+                            sigaction((A), &s, (struct sigaction *) NULL); \
+                          } while (0)
+#elif defined(HAVE_SIGSET) && !defined(my_sigset)
+#define my_sigset(A,B) sigset((A),(B))
+#elif !defined(my_sigset)
+#define my_sigset(A,B) signal((A),(B))
 #endif
 
 #ifndef my_pthread_setprio
@@ -378,6 +386,10 @@ void *my_pthread_getspecific_imp(pthread_key_t key);
 struct tm *localtime_r(const time_t *clock, struct tm *res);
 #endif
 
+#ifndef HAVE_GMTIME_R
+struct tm *gmtime_r(const time_t *clock, struct tm *res);
+#endif
+
 #ifdef HAVE_PTHREAD_CONDATTR_CREATE
 /* DCE threads on HPUX 10.20 */
 #define pthread_condattr_init pthread_condattr_create
@@ -407,16 +419,13 @@ struct tm *localtime_r(const time_t *clock, struct tm *res);
 #define pthread_detach_this_thread() { pthread_t tmp=pthread_self() ; pthread_detach(&tmp); }
 #endif
 
-#ifdef HAVE_DARWIN_THREADS
+#ifdef HAVE_DARWIN5_THREADS
 #define pthread_sigmask(A,B,C) sigprocmask((A),(B),(C))
 #define pthread_kill(A,B) pthread_dummy(0)
 #define pthread_condattr_init(A) pthread_dummy(0)
 #define pthread_condattr_destroy(A) pthread_dummy(0)
-#define pthread_signal(A,B) pthread_dummy(0)
 #undef	pthread_detach_this_thread
 #define pthread_detach_this_thread() { pthread_t tmp=pthread_self() ; pthread_detach(tmp); }
-#undef sigset
-#define sigset(A,B) pthread_signal((A),(void (*)(int)) (B))
 #endif
 
 #if ((defined(HAVE_PTHREAD_ATTR_CREATE) && !defined(HAVE_SIGWAIT)) || defined(HAVE_DEC_3_2_THREADS)) && !defined(HAVE_CTHREADS_WRAPPER)
@@ -468,7 +477,7 @@ int my_pthread_mutex_trylock(pthread_mutex_t *mutex);
 typedef struct st_safe_mutex_t
 {
   pthread_mutex_t global,mutex;
-  char *file;
+  const char *file;
   uint line,count;
   pthread_t thread;
 #ifdef SAFE_MUTEX_DETECT_DESTROY
@@ -487,7 +496,7 @@ typedef struct st_safe_mutex_info_t
 {
   struct st_safe_mutex_info_t *next;
   struct st_safe_mutex_info_t *prev;
-  char *init_file;
+  const char *init_file;
   uint32 init_line;
 } safe_mutex_info_t;
 #endif /* SAFE_MUTEX_DETECT_DESTROY */
@@ -597,19 +606,19 @@ extern int my_rw_trywrlock(my_rw_lock_t *);
 #define pthread_attr_setstacksize(A,B) pthread_dummy(0)
 #endif
 
-/* Define mutex types */
+/* Define mutex types, see my_thr_init.c */
 #define MY_MUTEX_INIT_SLOW   NULL
-#define MY_MUTEX_INIT_FAST   NULL
-#define MY_MUTEX_INIT_ERRCHK NULL
 #ifdef PTHREAD_ADAPTIVE_MUTEX_INITIALIZER_NP
 extern pthread_mutexattr_t my_fast_mutexattr;
-#undef  MY_MUTEX_INIT_FAST
 #define MY_MUTEX_INIT_FAST &my_fast_mutexattr
+#else
+#define MY_MUTEX_INIT_FAST   NULL
 #endif
 #ifdef PTHREAD_ERRORCHECK_MUTEX_INITIALIZER_NP
-extern pthread_mutexattr_t my_errchk_mutexattr;
-#undef MY_INIT_MUTEX_ERRCHK
-#define MY_INIT_MUTEX_ERRCHK &my_errchk_mutexattr
+extern pthread_mutexattr_t my_errorcheck_mutexattr;
+#define MY_MUTEX_INIT_ERRCHK &my_errorcheck_mutexattr
+#else
+#define MY_MUTEX_INIT_ERRCHK   NULL
 #endif
 
 extern my_bool my_thread_global_init(void);
@@ -624,14 +633,16 @@ extern int pthread_dummy(int);
 /* All thread specific variables are in the following struct */
 
 #define THREAD_NAME_SIZE 10
+#ifndef DEFAULT_THREAD_STACK
 #if defined(__ia64__)
 /*
   MySQL can survive with 32K, but some glibc libraries require > 128K stack
   To resolve hostnames
 */
-#define DEFAULT_THREAD_STACK	(192*1024L)
+#define DEFAULT_THREAD_STACK	(256*1024L)
 #else
-#define DEFAULT_THREAD_STACK	(192*1024L)
+#define DEFAULT_THREAD_STACK	(192*1024)
+#endif
 #endif
 
 struct st_my_thread_var
@@ -646,6 +657,8 @@ struct st_my_thread_var
   int cmp_length;
   int volatile abort;
   my_bool init;
+  struct st_my_thread_var *next,**prev;
+  void *opt_info;
 #ifndef DBUG_OFF
   gptr dbug;
   char name[THREAD_NAME_SIZE+1];
@@ -668,8 +681,6 @@ extern pthread_t shutdown_th, main_th, signal_th;
 #define thread_safe_increment(V,L) atomic_add(1,(atomic_t*) &V);
 #define thread_safe_add(V,C,L)     atomic_add((C),(atomic_t*) &V);
 #define thread_safe_sub(V,C,L)     atomic_sub((C),(atomic_t*) &V);
-#define statistic_increment(V,L)   thread_safe_increment((V),(L))
-#define statistic_add(V,C,L)       thread_safe_add((V),(C),(L))
 #else
 #define thread_safe_increment(V,L) \
 	pthread_mutex_lock((L)); (V)++; pthread_mutex_unlock((L));
@@ -677,6 +688,7 @@ extern pthread_t shutdown_th, main_th, signal_th;
 	pthread_mutex_lock((L)); (V)+=(C); pthread_mutex_unlock((L));
 #define thread_safe_sub(V,C,L) \
 	pthread_mutex_lock((L)); (V)-=(C); pthread_mutex_unlock((L));
+#endif /* HAVE_ATOMIC_ADD */
 #ifdef SAFE_STATISTICS
 #define statistic_increment(V,L)   thread_safe_increment((V),(L))
 #define statistic_add(V,C,L)       thread_safe_add((V),(C),(L))
@@ -684,12 +696,9 @@ extern pthread_t shutdown_th, main_th, signal_th;
 #define statistic_increment(V,L) (V)++
 #define statistic_add(V,C,L)     (V)+=(C)
 #endif /* SAFE_STATISTICS */
-#endif /* HAVE_ATOMIC_ADD */
 #endif /* thread_safe_increment */
 
 #ifdef  __cplusplus
 }
 #endif
 #endif /* _my_ptread_h */
-
-

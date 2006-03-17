@@ -1,7 +1,5 @@
-/* ProgressBar.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,30 +27,30 @@ barGoLink::barGoLink( int row_count )
 {
   rec_no    = 0;
   rec_pos   = 0;
-  indic_len = 50; // size of the progress bar (50 chars)
+  indic_len = 50; 
   num_rec   = row_count;
   empty     = " ";
-#ifdef _WIN32 // UQ1: This *MAY* work in *nix too?? Dunno...
-  full      = "\xDB";
-#else //!_WIN32
+#ifdef _WIN32 
+  full      = "\x3D";
+#else 
   full      = "*";
-#endif //_WIN32
+#endif 
 #ifdef _WIN32
-  printf( "\xB3" );
-#else //!_WIN32
+  printf( "\x3D" );
+#else 
   printf( "[" );
-#endif //_WIN32
+#endif 
   for ( int i = 0; i < indic_len; i++ ) printf( empty );
 #ifdef _WIN32
-  printf( "\xB3 0%%\r\xB3" );
-#else //!_WIN32
+  printf( "\x3D 0%%\r\x3D" );
+#else 
   printf( "] 0%%\r[" );
-#endif //_WIN32
+#endif 
 }
 
 void barGoLink::step( void )
 {
-  int i, n;//, t;
+  int i, n;
 
   if ( num_rec == 0 ) return;  
   rec_no++;
@@ -60,19 +58,19 @@ void barGoLink::step( void )
   if ( n != rec_pos )
   {
 #ifdef _WIN32
-    printf( "\r\xB3" );
-#else //!_WIN32
+    printf( "\r\x3D" );
+#else 
     printf( "\r[" );
-#endif //_WIN32
+#endif 
     for ( i = 0; i < n; i++ ) printf( full );
     for ( ; i < indic_len; i++ ) printf( empty );
 	float percent = (((float)n/(float)indic_len)*100);
 #ifdef _WIN32
-    printf( "\xB3 %i%%  \r\xB3", (int)percent);
-#else //!_WIN32
+    printf( "\x3D %i%%  \r\x3D", (int)percent);
+#else 
 	printf( "] %i%%  \r[", (int)percent);
-#endif //_WIN32
-    //for ( i = 0; i < 3000000; i++ ) t = 100*200; // generate a short delay -- UQ1: Removed.. No point waiting longer just for display...
+#endif 
+    
     rec_pos = n;
   }
 }

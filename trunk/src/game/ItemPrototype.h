@@ -1,7 +1,5 @@
-/* ItemPrototype.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,19 +21,18 @@
 
 #include "Common.h"
 
-enum ITEM_STAT_TYPE
-{
-    HEALTH     = 1,
-    UNKNOWN    = 2,
-    AGILITY    = 3,
-    STRENGHT   = 4,
-    INTELLECT  = 5,
-    SPIRIT     = 6,
-    STAMINA    = 7,
+enum ITEM_STAT_TYPE {
+	POWER      = 0,
+	HEALTH     = 1,
+	UNKNOWN    = 2,
+	AGILITY    = 3,
+	STRENGHT   = 4,
+	INTELLECT  = 5,
+	SPIRIT     = 6,
+	STAMINA    = 7,
 };
 
-enum ITEM_DAMAGE_TYPE
-{
+enum ITEM_DAMAGE_TYPE {
     NORMAL_DAMAGE  = 0,
     HOLY_DAMAGE    = 1,
     FIRE_DAMAGE    = 2,
@@ -45,23 +42,20 @@ enum ITEM_DAMAGE_TYPE
     ARCANE_DAMAGE  = 6,
 };
 
-enum ITEM_SPELLTRIGGER_TYPE
-{
+enum ITEM_SPELLTRIGGER_TYPE {
     USE           = 0,
     ON_EQUIP      = 1,
     CHANCE_ON_HIT = 2,
     SOULSTONE     = 4,
 };
 
-enum ITEM_BONDING_TYPE
-{
-    NO_BIND             = 0,
-    BIND_WHEN_PICKED_UP = 1,
-    BIND_WHEN_EQUIPED   = 2,
+enum ITEM_BONDING_TYPE {
+    NO_BIND              = 0,
+    BIND_WHEN_PICKED_UP  = 1,
+    BIND_WHEN_EQUIPED    = 2,
 };
 
-enum INVENTORY_TYPES
-{
+enum INVENTORY_TYPES {
     INVTYPE_NON_EQUIP      = 0x0,
     INVTYPE_HEAD           = 0x1,
     INVTYPE_NECK           = 0x2,
@@ -93,72 +87,102 @@ enum INVENTORY_TYPES
     NUM_INVENTORY_TYPES    = 0x1c,
 };
 
-enum INVENTORY_CLASS
+enum INVENTORY_CLASS {
+	ITEM_CLASS_CONSUMABLE    = 0,
+	ITEM_CLASS_CONTAINER     = 1,
+	ITEM_CLASS_WEAPON        = 2,
+	ITEM_CLASS_JEWELRY       = 3, 
+	ITEM_CLASS_ARMOR         = 4,
+	ITEM_CLASS_REAGENT       = 5,
+	ITEM_CLASS_PROJECTILE    = 6,
+	ITEM_CLASS_TRADE_GOODS   = 7,
+	ITEM_CLASS_GENERIC       = 8,
+	ITEM_CLASS_BOOK          = 9,
+	ITEM_CLASS_MONEY         = 10, 
+	ITEM_CLASS_QUIVER        = 11,
+	ITEM_CLASS_QUEST         = 12,
+	ITEM_CLASS_KEY           = 13,
+	ITEM_CLASS_PERMANENT     = 14,
+	ITEM_CLASS_JUNK          = 15,
+};
+
+enum INVENTORY_SUBCLASS_WEAPON {
+	ITEM_SUBCLASS_WEAPON_AXE           = 0,
+	ITEM_SUBCLASS_WEAPON_AXE2          = 1,
+	ITEM_SUBCLASS_WEAPON_BOW           = 2,
+	ITEM_SUBCLASS_WEAPON_GUN           = 3,
+	ITEM_SUBCLASS_WEAPON_MACE          = 4,
+	ITEM_SUBCLASS_WEAPON_MACE2         = 5,
+	ITEM_SUBCLASS_WEAPON_POLEARM       = 6,
+	ITEM_SUBCLASS_WEAPON_SWORD         = 7,
+	ITEM_SUBCLASS_WEAPON_SWORD2        = 8,
+	ITEM_SUBCLASS_WEAPON_obsolete      = 9,
+	ITEM_SUBCLASS_WEAPON_STAFF         = 10,
+	ITEM_SUBCLASS_WEAPON_EXOTIC        = 11,
+	ITEM_SUBCLASS_WEAPON_EXOTIC2       = 12,
+	ITEM_SUBCLASS_WEAPON_UNARMED       = 13,
+	ITEM_SUBCLASS_WEAPON_GENERIC       = 14,
+	ITEM_SUBCLASS_WEAPON_DAGGER        = 15,
+	ITEM_SUBCLASS_WEAPON_THROWN        = 16,
+	ITEM_SUBCLASS_WEAPON_SPEAR         = 17,
+	ITEM_SUBCLASS_WEAPON_CROSSBOW      = 18,
+	ITEM_SUBCLASS_WEAPON_WAND          = 19,
+	ITEM_SUBCLASS_WEAPON_FISHING_POLE  = 20,
+};
+
+enum ITEM_SUBCLASS_ARMOR {
+	ITEM_SUBCLASS_ARMOR_GENERIC     = 0,
+	ITEM_SUBCLASS_ARMOR_CLOTH       = 1,
+	ITEM_SUBCLASS_ARMOR_LEATHER     = 2,
+	ITEM_SUBCLASS_ARMOR_MAIL        = 3,
+	ITEM_SUBCLASS_ARMOR_PLATE       = 4,
+	ITEM_SUBCLASS_ARMOR_BUCKLER     = 5,
+	ITEM_SUBCLASS_ARMOR_SHIELD      = 6,
+};
+
+enum ITEM_SUBCLASS_QUIVERS {
+	ITEM_SUBCLASS_QUIVER            = 2,
+	ITEM_SUBCLASS_AMMO_POUCH        = 3,
+};
+
+enum ITEM_SUBCLASS_PROJECTILE {
+	ITEM_SUBCLASS_ARROW             = 2,
+	ITEM_SUBCLASS_BULLET            = 3,
+};
+
+struct _Damage
 {
-	ITEM_CLASS_CONSUMABLE = 0,
-	ITEM_CLASS_CONTAINER = 1,
-	ITEM_CLASS_WEAPON = 2,
-	ITEM_CLASS_JEWELRY = 3, // obsolete
-	ITEM_CLASS_ARMOR = 4,
-	ITEM_CLASS_REAGENT = 5,
-	ITEM_CLASS_PROJECTILE = 6,
-	ITEM_CLASS_TRADE_GOODS = 7,
-	ITEM_CLASS_GENERIC = 8,
-	ITEM_CLASS_BOOK = 9,
-	ITEM_CLASS_MONEY = 10, // obsolete
-	ITEM_CLASS_QUIVER = 11,
-	ITEM_CLASS_QUEST = 12,
-	ITEM_CLASS_KEY = 13,
-	ITEM_CLASS_PERMANENT = 14,
-	ITEM_CLASS_JUNK = 15,
+	float DamageMin;
+    float DamageMax;
+    uint32 DamageType;
+
 };
 
-enum INVENTORY_SUBCLASS_WEAPON
+struct _ItemStat
 {
-	ITEM_SUBCLASS_WEAPON_AXE		  =	0,
-	ITEM_SUBCLASS_WEAPON_AXE2		  =	1,
-	ITEM_SUBCLASS_WEAPON_BOW		  =	2,
-	ITEM_SUBCLASS_WEAPON_GUN		  =	3,
-	ITEM_SUBCLASS_WEAPON_MACE		  =	4,
-	ITEM_SUBCLASS_WEAPON_MACE2		  =	5,
-	ITEM_SUBCLASS_WEAPON_POLEARM	  =	6,
-	ITEM_SUBCLASS_WEAPON_SWORD		  =	7,
-	ITEM_SUBCLASS_WEAPON_SWORD2		  =	8,
-	ITEM_SUBCLASS_WEAPON_obsolete	  =	9,
-	ITEM_SUBCLASS_WEAPON_STAFF		  =	10,
-	ITEM_SUBCLASS_WEAPON_EXOTIC		  =	11,
-	ITEM_SUBCLASS_WEAPON_EXOTIC2	  =	12,
-	ITEM_SUBCLASS_WEAPON_UNARMED	  =	13,
-	ITEM_SUBCLASS_WEAPON_GENERIC	  =	14,
-	ITEM_SUBCLASS_WEAPON_DAGGER		  =	15,
-	ITEM_SUBCLASS_WEAPON_THROWN		  =	16,
-	ITEM_SUBCLASS_WEAPON_SPEAR		  =	17,
-	ITEM_SUBCLASS_WEAPON_CROSSBOW     = 18,
-	ITEM_SUBCLASS_WEAPON_WAND		  = 19,
-	ITEM_SUBCLASS_WEAPON_FISHING_POLE =	20,
+	uint32 ItemStatType;
+    uint32 ItemStatValue;
+
 };
+struct _Spell
+{
+	uint32 SpellId;
+    uint32 SpellTrigger;
+    uint32 SpellCharges;
+    uint32 SpellCooldown;
+    uint32 SpellCategory;
+    uint32 SpellCategoryCooldown;
 
-enum ITEM_SUBCLASS_ARMOR
-{	
-	ITEM_SUBCLASS_ARMOR_GENERIC		  =	0,
-	ITEM_SUBCLASS_ARMOR_CLOTH		  =	1,
-	ITEM_SUBCLASS_ARMOR_LEATHER		  =	2,
-	ITEM_SUBCLASS_ARMOR_MAIL		  =	3,
-	ITEM_SUBCLASS_ARMOR_PLATE		  =	4,
-	ITEM_SUBCLASS_ARMOR_BUCKLER		  =	5,
-	ITEM_SUBCLASS_ARMOR_SHIELD		  =	6,
 };
-
-
 struct ItemPrototype
 {
     uint32 ItemId;
     uint32 Class;
     uint32 SubClass;
-    std::string Name1;
-    std::string Name2;
-    std::string Name3;
-    std::string Name4;
+    char* Name1;
+    char* Name2;
+    char* Name3;
+	char* Name4;
     uint32 DisplayInfoID;
     uint32 Quality;
     uint32 Flags;
@@ -171,17 +195,16 @@ struct ItemPrototype
     uint32 RequiredLevel;
     uint32 RequiredSkill;
     uint32 RequiredSkillRank;
-    uint32 Field20;
-    uint32 Field21;
-    uint32 Field22;
-    uint32 Field23;
+    uint32 RequiredSpell;
+    uint32 RequiredHonorRank;
+    uint32 RequiredCityRank; 
+    uint32 RequiredReputationFaction; 
+    uint32 RequiredRaputationRank;
     uint32 MaxCount;
+    uint32 Stackable;
     uint32 ContainerSlots;
-    uint32 ItemStatType[10];
-    uint32 ItemStatValue[10];
-    float DamageMin[6];
-    float DamageMax[6];
-    uint32 DamageType[6];
+	_ItemStat ItemStat[10];
+	_Damage Damage[5];
     uint32 Armor;
     uint32 HolyRes;
     uint32 FireRes;
@@ -190,29 +213,22 @@ struct ItemPrototype
     uint32 ShadowRes;
     uint32 ArcaneRes;
     uint32 Delay;
-    uint32 Field69;
-    uint32 SpellId[5];
-    uint32 SpellTrigger[5];
-    uint32 SpellCharges[5];
-    uint32 SpellCooldown[5];
-    uint32 SpellCategory[5];
-    uint32 SpellCategoryCooldown[5];
+    uint32 Ammo_type;
+    _Spell Spells[5];
     uint32 Bonding;
-    std::string Description;
-    uint32 Field102;
-    uint32 Field103;
-    uint32 Field104;
-    uint32 Field105;
-    uint32 Field106;
-    uint32 Field107;
-    uint32 Field108;
-    uint32 Field109;
-    uint32 Field110;
-    uint32 Field111;
+    char* Description;
+    uint32 PageText;
+    uint32 LanguageID;
+    uint32 PageMaterial;
+    uint32 StartQuest;
+    uint32 LockID;
+    uint32 Material;
+    uint32 Sheath;
+    uint32 Extra;
+    uint32 Block;
+    uint32 ItemSet;
     uint32 MaxDurability;
-	uint32 Sheath;
-
-	// UQ1: Not currently in the DB!!! I will generate the values on load...
-	uint32 Block;
+    uint32 Area;
+    char* ScriptName;
 };
 #endif

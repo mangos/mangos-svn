@@ -245,6 +245,8 @@ SOCKET Socket::CreateSocket4(int type, const std::string& protocol)
             closesocket(s);
             return INVALID_SOCKET;
         }
+	    optval = 1;
+	    setsockopt(s, 0x06, TCP_NODELAY, (char *)&optval,sizeof(optval));
     }
 
     return s;

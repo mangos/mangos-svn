@@ -56,7 +56,8 @@ std::string TcpSocket::m_password;
 #endif
 TcpSocket::TcpSocket(SocketHandler& h) : Socket(h)
 ,ibuf(*this, TCP_BUFSIZE_READ)
-,obuf(*this, 32768)
+//,obuf(*this, 32768)
+,obuf(*this, 131070)
 ,m_line("")
 ,m_socks4_state(0)
 ,m_resolver_id(0)
@@ -355,7 +356,7 @@ void TcpSocket::OnRead()
         return;
 #endif                                    // HAVE_OPENSSL
     }
-    DEB(printf("TcpSocket::OnRead()\n");)
+//    DEB(printf("TcpSocket::OnRead()\n");)
         int n = (int)ibuf.Space();
     char buf[TCP_BUFSIZE_READ];
 //	if (!n)

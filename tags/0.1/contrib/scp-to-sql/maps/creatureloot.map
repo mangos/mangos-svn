@@ -1,0 +1,3 @@
+InfoTable{table=creatureloot,outfile=creatureloot.sql,fileName=loottemplates.scp}
+loottemplate->entryid(*)
+loot[UNIQUE(loottemplate)]->itemid(*),percentchance(0.05)

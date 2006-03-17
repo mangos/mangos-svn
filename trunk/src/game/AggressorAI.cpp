@@ -1,7 +1,5 @@
-/* AggressorAI.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +22,13 @@
 #include "Player.h"
 #include "Utilities.h"
 #include "FactionTemplateResolver.h"
+#include "TargetedMovementGenerator.h"
+#include "Database/DBCStores.h"
+
+
+#define TIME_INTERVAL_LOOK   5000
+
+using MaNGOS::Utilities::is_in_line_of_sight;
 
 int
 AggressorAI::Permissible(const Creature *creature)
@@ -32,76 +37,178 @@ AggressorAI::Permissible(const Creature *creature)
     FactionTemplateResolver fact_source(fact);
     if( fact_source.IsHostileToAll() )
 	return PROACTIVE_PERMIT_BASE;
+
     return NO_PERMIT;
 }
 
 
-void 
-AggressorAI::MoveInLineOfSight(Creature *) 
+AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFaction(sFactionTemplateStore.LookupEntry(c.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
 {
 }
 
 void 
-AggressorAI::AttackStart(Creature *) 
+AggressorAI::MoveInLineOfSight(Unit *u) 
+{
+    if( i_pVictim == NULL && !u->m_stealth)
+    {
+	FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+	if( i_myFaction.IsHostileTo( your_faction ) )
+	    _taggedToKill(u);
+    }
+}
+
+void 
+AggressorAI::AttackStart(Unit *u) 
+{
+    if( i_pVictim == NULL )
+	_taggedToKill(u);
+}
+
+void 
+AggressorAI::AttackStop(Unit *) 
+{
+    
+}
+
+void 
+AggressorAI::HealBy(Unit *healer, uint32 amount_healed) 
 {
 }
 
 void 
-AggressorAI::AttackStop(Creature *) 
-{
-}
-
-void 
-AggressorAI::HealBy(Creature *healer, uint32 amount_healed) 
-{
-}
-
-void 
-AggressorAI::DamageInflict(Creature *healer, uint32 amount_healed) 
+AggressorAI::DamageInflict(Unit *healer, uint32 amount_healed) 
 {
 }
 
 bool
-AggressorAI::IsVisible(Creature *creature) const 
+AggressorAI::IsVisible(Unit *pl) const 
 {
-    return MaNGOS::Utilities::is_in_line_of_sight(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(),
-						  creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), 1.0);
-}
-
-
-void 
-AggressorAI::MoveInLineOfSight(Player *) 
-{
-}
-
-void 
-AggressorAI::AttackStart(Player *) 
-{
-}
-
-void 
-AggressorAI::AttackStop(Player *) 
-{
-}
-
-void 
-AggressorAI::HealBy(Player *healer, uint32 amount_healed) 
-{
-}
-
-void 
-AggressorAI::DamageInflict(Player *healer, uint32 amount_healed) 
-{
+    return _isVisible(pl);
 }
 
 bool
-AggressorAI::IsVisible(Player *pl) const 
+AggressorAI::_needToStop() const
 {
-    return MaNGOS::Utilities::is_in_line_of_sight(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(),
-						 pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), 1.0);
+    if( !i_pVictim->isAlive() || !i_creature.isAlive() || i_pVictim->m_stealth)
+	return true;
+    return !(_isVisible(i_pVictim));
 }
 
 void
-AggressorAI::UpdateAI(const uint32)
+AggressorAI::_stopAttack()
 {
+    assert( i_pVictim != NULL );
+    i_creature.ClearState(ATTACKING);
+    i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
+
+    if( !i_creature.isAlive() )
+    {
+	DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%d]", i_creature.GetGUIDLow());
+	i_creature.StopMoving();
+	i_creature->Idle();
+	i_pVictim = NULL;
+    }
+    else if( !i_pVictim->isAlive() )
+    {
+	DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%d]", i_creature.GetGUIDLow());
+	i_pVictim = NULL;
+	static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature); 
+    }
+    else if( i_pVictim->m_stealth )
+    {
+	DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%d]", i_creature.GetGUIDLow());
+	i_pVictim = NULL;
+	static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature); 
+    }
+    else 
+    {
+	DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%d]", i_creature.GetGUIDLow());
+	i_creature.StopMoving();
+	i_creature->Idle();
+	i_state = STATE_LOOK_AT_VICTIM;
+	i_tracker.Reset(TIME_INTERVAL_LOOK);
+    }    
+}
+
+
+void
+AggressorAI::UpdateAI(const uint32 diff)
+{
+    if( i_pVictim != NULL )
+    {
+	switch( i_state )
+	{
+	case STATE_LOOK_AT_VICTIM:
+	    {
+		if( _isVisible(i_pVictim) )
+		{
+		    DEBUG_LOG("Victim %d re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
+		    i_state = STATE_NORMAL;
+		    i_creature->MovementExpired();
+		    break; // move on
+		    // back to the cat and mice game if you move back in range
+		}
+
+		i_tracker.Update(diff);
+		if( i_tracker.Passed() )
+		{
+		    i_creature->MovementExpired();
+		    DEBUG_LOG("Creature running back home [guid=%d]", i_creature.GetGUIDLow());
+		    static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature); 
+		    i_state = STATE_NORMAL;
+		    i_pVictim = NULL;
+		}
+		else
+		{
+		    
+		    float dx = i_pVictim->GetPositionX() - i_creature.GetPositionX();
+		    float dy = i_pVictim->GetPositionY() - i_creature.GetPositionY();
+		    float orientation = (float)atan2((double)dy, (double)dx);
+		    i_creature.Relocate(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(), orientation);
+		}
+
+		break;
+	    }
+	case STATE_NORMAL:
+	    {
+		if( _needToStop() )
+		{
+		    DEBUG_LOG("Aggressor AI stoped attacking [guid=%d]", i_creature.GetGUIDLow());
+		    _stopAttack();
+		}
+		else if( i_creature.IsStopped() )
+		{
+		    if( i_creature.isAttackReady() )
+		    {
+			i_creature.AttackerStateUpdate(i_pVictim, 0);
+			i_creature.setAttackTimer(0); 
+
+			if( !i_creature.isAlive() || !i_pVictim->isAlive() )
+			    _stopAttack();
+		    }
+		}
+		break;
+	    }
+	default:
+	    break;
+	} 
+    } 
+}
+
+bool
+AggressorAI::_isVisible(Unit *u) const
+{
+    return is_in_line_of_sight(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(),
+			       u->GetPositionX(), u->GetPositionY(), u->GetPositionZ(), 1.0);
+}
+
+void
+AggressorAI::_taggedToKill(Unit *u)
+{
+    assert( i_pVictim == NULL );
+//    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%d]", i_creature.GetName(), u->GetGUIDLow());
+    i_creature.SetState(ATTACKING);
+    i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
+    i_creature->Mutate(new TargetedMovementGenerator(*u));
+    i_pVictim = u;
 }

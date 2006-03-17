@@ -1,0 +1,12 @@
+# This file contains system settings for Null httpd.
+
+SERVER_BASE_DIR = "/usr/local/httpd"
+SERVER_BIN_DIR  = "/usr/local/httpd/bin"
+SERVER_CGI_DIR  = "/usr/local/httpd/cgi-bin"
+SERVER_ETC_DIR  = "/usr/local/httpd/etc"
+SERVER_HTTP_DIR = "/usr/local/httpd/htdocs"
+SERVER_LOGLEVEL = "1"
+SERVER_HOSTNAME = "any"
+SERVER_PORT     = "80"
+SERVER_MAXCONN  = "50"
+SERVER_MAXIDLE  = "120"

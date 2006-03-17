@@ -1,6 +1,5 @@
-/* GridDefines.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,22 +29,29 @@
 
 #define MAX_NUMBER_OF_GRIDS      64
 
-// the size of grids is
+
 #define SIZE_OF_GRIDS            533.33333
-#define CENTER_GRID_ID           32
+#define CENTER_GRID_ID           (MAX_NUMBER_OF_GRIDS/2)
 
-// this offset is computed base on SIZE_OF_GRIDS/2
-#define CENTER_GRID_OFFSET      266.66666
 
-// minimum time to delay is 60 seconds
+#define CENTER_GRID_OFFSET      (SIZE_OF_GRIDS/2)
+
+
+
 #define MIN_GRID_DELAY          60*1000
 
-// GridCell related define
+
 #define MAX_NUMBER_OF_CELLS     4
-#define SIZE_OF_GRID_CELL       133.3333325
+#define SIZE_OF_GRID_CELL       (SIZE_OF_GRIDS/MAX_NUMBER_OF_CELLS)
+
 #define CENTER_GRID_CELL_ID     128
-#define CENTER_GRID_CELL_OFFSET 66.66666625
+#define CENTER_GRID_CELL_OFFSET (SIZE_OF_GRID_CELL/2)
+
 #define TOTAL_NUMBER_OF_CELLS_PER_MAP    (MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS)
+
+#define MAP_RESOLUTION 256
+
+
 
 typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllObjectTypes;
 typedef Grid<Player, AllObjectTypes> GridType;
@@ -56,7 +62,7 @@ typedef std::map<OBJECT_HANDLE, DynamicObject* > DynamicObjectMapType;
 typedef std::map<OBJECT_HANDLE, Corpse* > CorpseMapType;
 
 
-// MaNGOS uses a 4X4 Grids
+
 typedef NGrid<4, Player, AllObjectTypes> NGridType;
 
 template<const unsigned int LIMIT>
@@ -73,7 +79,7 @@ struct MANGOS_DLL_DECL CoordPair
 	return *this;
     }
     
-    // move along the x axis
+    
     void operator<<(const uint32 val) 
     {
 	if( x_coord >= val )
@@ -86,7 +92,7 @@ struct MANGOS_DLL_DECL CoordPair
 	    x_coord += val;
     }
     
-    // move along the y axis
+    
     void operator-=(const uint32 val)
     {
 	if( y_coord >= val )
@@ -114,7 +120,7 @@ namespace MaNGOS
 	float x_offset = (x - center_offset)/size;
 	float y_offset = (y - center_offset)/size;
 	
-	// avoid round off errors
+	
 	int x_val = int(x_offset+CENTER_VAL + 0.5);
 	int y_val = int(y_offset+CENTER_VAL + 0.5); 
 	return RET_TYPE(x_val, y_val);	

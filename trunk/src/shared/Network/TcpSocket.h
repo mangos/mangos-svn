@@ -35,7 +35,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #endif
 
-#define TCP_BUFSIZE_READ 16400
+#define TCP_BUFSIZE_READ 131070
 
 class TcpSocket : public Socket
 {

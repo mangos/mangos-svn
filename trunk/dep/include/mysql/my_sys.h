@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 MySQL AB
+/* Copyright (C) 2000-2003 MySQL AB
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -37,6 +37,7 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #endif
 
 #include <stdarg.h>
+#include <typelib.h>
 
 #define MYSYS_PROGRAM_USES_CURSES()  { error_handler_hook = my_message_curses;	mysys_uses_curses=1; }
 #define MYSYS_PROGRAM_DONT_USE_CURSES()  { error_handler_hook = my_message_no_curses; mysys_uses_curses=0;}
@@ -106,26 +107,21 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_SEEK_CUR	1
 #define MY_SEEK_END	2
 
-        /* My charsets_list flags */
-#define MY_NO_SETS       0
-#define MY_COMPILED_SETS 1      /* show compiled-in sets */
-#define MY_CONFIG_SETS   2      /* sets that have a *.conf file */
-#define MY_INDEX_SETS    4      /* all sets listed in the Index file */
-#define MY_LOADED_SETS    8      /* the sets that are currently loaded */
-
 	/* Some constants */
 #define MY_WAIT_FOR_USER_TO_FIX_PANIC	60	/* in seconds */
 #define MY_WAIT_GIVE_USER_A_MESSAGE	10	/* Every 10 times of prev */
 #define MIN_COMPRESS_LENGTH		50	/* Don't compress small bl. */
-#define DEFAULT_KEYCACHE_BLOCK_SIZE	1024
-#define MAX_KEYCACHE_BLOCK_SIZE		16384
+#define DFLT_INIT_HITS  3
 
 	/* root_alloc flags */
 #define MY_KEEP_PREALLOC	1
 #define MY_MARK_BLOCKS_FREE     2  /* move used to free list and reuse them */
 
-	/* defines when allocating data */
+	/* Internal error numbers (for assembler functions) */
+#define MY_ERRNO_EDOM		33
+#define MY_ERRNO_ERANGE		34
 
+	/* defines when allocating data */
 #ifdef SAFEMALLOC
 #define my_malloc(SZ,FLAG) _mymalloc((SZ), __FILE__, __LINE__, FLAG )
 #define my_malloc_ci(SZ,FLAG) _mymalloc((SZ), sFile, uLine, FLAG )
@@ -164,9 +160,13 @@ extern char *my_strdup_with_length(const byte *from, uint length,
 #endif
 
 #ifdef HAVE_ALLOCA
-#if defined(_AIX) && !defined(__GNUC__)
+#if defined(_AIX) && !defined(__GNUC__) && !defined(_AIX43)
 #pragma alloca
 #endif /* _AIX */
+#if defined(__MWERKS__)
+#undef alloca
+#define alloca _alloca
+#endif /* __MWERKS__ */
 #if defined(__GNUC__) && !defined(HAVE_ALLOCA_H) && ! defined(alloca)
 #define alloca __builtin_alloca
 #endif /* GNUC */
@@ -193,11 +193,13 @@ void   __CDECL hfree(void *ptr);
 #endif
 #endif /* MSDOS */
 
+#ifndef errno				/* did we already get it? */
 #ifdef HAVE_ERRNO_AS_DEFINE
 #include <errno.h>			/* errno is a define */
 #else
 extern int errno;			/* declare errno */
 #endif
+#endif					/* #ifndef errno */
 extern const char ** NEAR my_errmsg[];
 extern char NEAR errbuff[NRERRBUFFS][ERRMSGSIZE];
 extern char *home_dir;			/* Home directory for user */
@@ -206,26 +208,17 @@ extern char NEAR curr_dir[];		/* Current directory for user */
 extern int (*error_handler_hook)(uint my_err, const char *str,myf MyFlags);
 extern int (*fatal_error_handler_hook)(uint my_err, const char *str,
 				       myf MyFlags);
+extern uint my_file_limit;
 
 /* charsets */
-extern uint get_charset_number(const char *cs_name);
-extern const char *get_charset_name(uint cs_number);
-extern CHARSET_INFO *get_charset(uint cs_number, myf flags);
-extern my_bool set_default_charset(uint cs, myf flags);
-extern CHARSET_INFO *get_charset_by_name(const char *cs_name, myf flags);
-extern my_bool set_default_charset_by_name(const char *cs_name, myf flags);
-extern void free_charsets(void);
-extern char *list_charsets(myf want_flags); /* my_free() this string... */
-extern char *get_charsets_dir(char *buf);
-
+extern CHARSET_INFO *default_charset_info;
+extern CHARSET_INFO *all_charsets[256];
+extern CHARSET_INFO compiled_charsets[];
 
 /* statistics */
-extern ulong	_my_cache_w_requests,_my_cache_write,_my_cache_r_requests,
-		_my_cache_read;
-extern ulong	_my_blocks_used,_my_blocks_changed;
-extern uint	key_cache_block_size;
 extern ulong	my_file_opened,my_stream_opened, my_tmp_file_created;
-extern my_bool	key_cache_inited, my_init_done;
+extern uint	mysys_usage_id;
+extern my_bool	my_init_done;
 
 					/* Point to current my_message() */
 extern void (*my_sigtstp_cleanup)(void),
@@ -255,11 +248,11 @@ typedef struct wild_file_pack	/* Struct to hold info when selecting files */
   my_string	*wild;		/* Pointer to wildcards */
 } WF_PACK;
 
-typedef struct st_typelib {	/* Different types saved here */
-  uint count;			/* How many types */
-  const char *name;		/* Name of typelib */
-  const char **type_names;
-} TYPELIB;
+enum loglevel {
+   ERROR_LEVEL,
+   WARNING_LEVEL,
+   INFORMATION_LEVEL
+};
 
 enum cache_type
 {
@@ -292,15 +285,25 @@ enum file_type
   FILE_BY_MKSTEMP, FILE_BY_DUP
 };
 
-extern struct my_file_info
+struct st_my_file_info
 {
   my_string		name;
   enum file_type	type;
 #if defined(THREAD) && !defined(HAVE_PREAD)
   pthread_mutex_t	mutex;
 #endif
-} my_file_info[MY_NFILE];
+};
 
+extern struct st_my_file_info *my_file_info;
+
+typedef struct st_my_tmpdir
+{
+  char **list;
+  uint cur, max;
+#ifdef THREAD
+  pthread_mutex_t mutex;
+#endif
+} MY_TMPDIR;
 
 typedef struct st_dynamic_array
 {
@@ -419,6 +422,11 @@ typedef struct st_io_cache		/* Used when cacheing files */
   IO_CACHE_CALLBACK pre_read;
   IO_CACHE_CALLBACK post_read;
   IO_CACHE_CALLBACK pre_close;
+  /*
+    Counts the number of times, when we were forced to use disk. We use it to
+    increase the binlog_cache_disk_use status variable.
+  */
+  ulong disk_writes;
   void* arg;				/* for use by pre/post_read */
   char *file_name;			/* if used with 'open_cached_file' */
   char *dir,*prefix;
@@ -498,6 +506,8 @@ my_off_t my_b_append_tell(IO_CACHE* info);
 #define my_b_bytes_in_cache(info) (uint) (*(info)->current_end - \
 					  *(info)->current_pos)
 
+typedef uint32 ha_checksum;
+
 #include <my_alloc.h>
 
 	/* Prototypes for mysys and my_func functions */
@@ -510,6 +520,8 @@ extern int my_setwd(const char *dir,myf MyFlags);
 extern int my_lock(File fd,int op,my_off_t start, my_off_t length,myf MyFlags);
 extern gptr my_once_alloc(uint Size,myf MyFlags);
 extern void my_once_free(void);
+extern char *my_once_strdup(const char *src,myf myflags);
+extern char *my_once_memdup(const char *src, uint len, myf myflags);
 extern my_string my_tempnam(const char *dir,const char *pfx,myf MyFlags);
 extern File my_open(const char *FileName,int Flags,myf MyFlags);
 extern File my_register_filename(File fd, const char *FileName,
@@ -558,6 +570,13 @@ extern char *_my_strdup_with_length(const byte *from, uint length,
 				    const char *sFile, uint uLine,
 				    myf MyFlag);
 
+#ifdef __WIN__
+extern int my_access(const char *path, int amode);
+#else
+#define my_access access
+#endif
+extern int check_if_legal_filename(const char *path);
+
 #ifndef TERMINATE
 extern void TERMINATE(FILE *file);
 #endif
@@ -571,9 +590,6 @@ extern int my_error _VARARGS((int nr,myf MyFlags, ...));
 extern int my_printf_error _VARARGS((uint my_err, const char *format,
 				     myf MyFlags, ...)
 				    __attribute__ ((format (printf, 2, 4))));
-extern int my_vsnprintf( char *str, size_t n,
-                                const char *format, va_list ap );
-extern int my_snprintf(char* to, size_t n, const char* fmt, ...);
 extern int my_message(uint my_err, const char *str,myf MyFlags);
 extern int my_message_no_curses(uint my_err, const char *str,myf MyFlags);
 extern int my_message_curses(uint my_err, const char *str,myf MyFlags);
@@ -591,16 +607,16 @@ extern void allow_break(void);
 #define allow_break()
 #endif
 
+extern my_bool init_tmpdir(MY_TMPDIR *tmpdir, const char *pathlist);
+extern char *my_tmpdir(MY_TMPDIR *tmpdir);
+extern void free_tmpdir(MY_TMPDIR *tmpdir);
+
 extern void my_remember_signal(int signal_number,sig_handler (*func)(int));
-extern void caseup(my_string str,uint length);
-extern void casedn(my_string str,uint length);
-extern void caseup_str(my_string str);
-extern void casedn_str(my_string str);
-extern void case_sort(my_string str,uint length);
 extern uint dirname_part(my_string to,const char *name);
 extern uint dirname_length(const char *name);
 #define base_name(A) (A+dirname_length(A))
 extern int test_if_hard_path(const char *dir_name);
+extern my_bool has_path(const char *name);
 extern char *convert_dirname(char *to, const char *from, const char *from_end);
 extern void to_unix_path(my_string name);
 extern my_string fn_ext(const char *name);
@@ -612,7 +628,7 @@ extern void pack_dirname(my_string to,const char *from);
 extern uint unpack_dirname(my_string to,const char *from);
 extern uint cleanup_dirname(my_string to,const char *from);
 extern uint system_filename(my_string to,const char *from);
-extern my_string unpack_filename(my_string to,const char *from);
+extern uint unpack_filename(my_string to,const char *from);
 extern my_string intern_filename(my_string to,const char *from);
 extern my_string directory_file_name(my_string dst, const char *src);
 extern int pack_filename(my_string to, const char *name, size_s max_length);
@@ -620,19 +636,13 @@ extern my_string my_path(my_string to,const char *progname,
 			 const char *own_pathname_part);
 extern my_string my_load_path(my_string to, const char *path,
 			      const char *own_path_prefix);
-extern int wild_compare(const char *str,const char *wildstr);
-extern my_string my_strcasestr(const char *src,const char *suffix);
-extern int my_strcasecmp(const char *s,const char *t);
-extern int my_strsortcmp(const char *s,const char *t);
-extern int my_casecmp(const char *s,const char *t,uint length);
-extern int my_sortcmp(const char *s,const char *t,uint length);
-extern int my_sortncmp(const char *s,uint s_len, const char *t,uint t_len);
+extern int wild_compare(const char *str,const char *wildstr,pbool str_is_pattern);
 extern WF_PACK *wf_comp(my_string str);
 extern int wf_test(struct wild_file_pack *wf_pack,const char *name);
 extern void wf_end(struct wild_file_pack *buffer);
 extern size_s strip_sp(my_string str);
 extern void get_date(my_string to,int timeflag,time_t use_time);
-extern void soundex(my_string out_pntr, my_string in_pntr,pbool remove_garbage);
+extern void soundex(CHARSET_INFO *, my_string out_pntr, my_string in_pntr,pbool remove_garbage);
 extern int init_record_cache(RECORD_CACHE *info,uint cachesize,File file,
 			     uint reclength,enum cache_type type,
 			     pbool use_async_io);
@@ -644,14 +654,7 @@ extern int flush_write_cache(RECORD_CACHE *info);
 extern long my_clock(void);
 extern sig_handler sigtstp_handler(int signal_number);
 extern void handle_recived_signals(void);
-extern int init_key_cache(ulong use_mem);
-extern int resize_key_cache(ulong use_mem);
-extern byte *key_cache_read(File file,my_off_t filepos,byte* buff,uint length,
-			    uint block_length,int return_buffer);
-extern int key_cache_write(File file,my_off_t filepos,byte* buff,uint length,
-			   uint block_length,int force_write);
-extern int flush_key_blocks(int file, enum flush_type type);
-extern void end_key_cache(void);
+
 extern sig_handler my_set_alarm_variable(int signo);
 extern void my_string_ptr_sort(void *base,uint items,size_s size);
 extern void radixsort_for_str_ptr(uchar* base[], uint number_of_elements,
@@ -665,6 +668,7 @@ extern int init_io_cache(IO_CACHE *info,File file,uint cachesize,
 extern my_bool reinit_io_cache(IO_CACHE *info,enum cache_type type,
 			       my_off_t seek_offset,pbool use_async_io,
 			       pbool clear_cache);
+extern void setup_io_cache(IO_CACHE* info);
 extern int _my_b_read(IO_CACHE *info,byte *Buffer,uint Count);
 #ifdef THREAD
 extern int _my_b_read_r(IO_CACHE *info,byte *Buffer,uint Count);
@@ -682,9 +686,9 @@ extern int my_b_safe_write(IO_CACHE *info,const byte *Buffer,uint Count);
 
 extern int my_block_write(IO_CACHE *info, const byte *Buffer,
 			  uint Count, my_off_t pos);
-extern int _flush_io_cache(IO_CACHE *info, int need_append_buffer_lock);
+extern int my_b_flush_io_cache(IO_CACHE *info, int need_append_buffer_lock);
 
-#define flush_io_cache(info) _flush_io_cache((info),1)
+#define flush_io_cache(info) my_b_flush_io_cache((info),1)
 
 extern int end_io_cache(IO_CACHE *info);
 extern uint my_b_fill(IO_CACHE *info);
@@ -715,10 +719,8 @@ extern void freeze_size(DYNAMIC_ARRAY *array);
 #define dynamic_array_ptr(array,array_index) ((array)->buffer+(array_index)*(array)->size_of_element)
 #define dynamic_element(array,array_index,type) ((type)((array)->buffer) +(array_index))
 #define push_dynamic(A,B) insert_dynamic(A,B)
+#define reset_dynamic(array) ((array)->elements= 0)
 
-extern int find_type(my_string x,TYPELIB *typelib,uint full_name);
-extern void make_type(my_string to,uint nr,TYPELIB *typelib);
-extern const char *get_type(TYPELIB *typelib,uint nr);
 extern my_bool init_dynamic_string(DYNAMIC_STRING *str, const char *init_str,
 				   uint init_alloc,uint alloc_increment);
 extern my_bool dynstr_append(DYNAMIC_STRING *str, const char *append);
@@ -735,6 +737,8 @@ extern void my_free_lock(byte *ptr,myf flags);
 #define my_free_lock(A,B) my_free((A),(B))
 #endif
 #define alloc_root_inited(A) ((A)->min_malloc != 0)
+#define ALLOC_ROOT_MIN_BLOCK_SIZE (MALLOC_OVERHEAD + sizeof(USED_MEM) + 8)
+#define clear_alloc_root(A) do { (A)->free= (A)->used= (A)->pre_alloc= 0; (A)->min_malloc=0;} while(0)
 extern void init_alloc_root(MEM_ROOT *mem_root, uint block_size,
 			    uint pre_alloc_size);
 extern gptr alloc_root(MEM_ROOT *mem_root,unsigned int Size);
@@ -745,6 +749,8 @@ extern void reset_root_defaults(MEM_ROOT *mem_root, uint block_size,
 extern char *strdup_root(MEM_ROOT *root,const char *str);
 extern char *strmake_root(MEM_ROOT *root,const char *str,uint len);
 extern char *memdup_root(MEM_ROOT *root,const char *str,uint len);
+extern void get_defaults_files(int argc, char **argv,
+                               char **defaults, char **extra_defaults);
 extern int load_defaults(const char *conf_file, const char **groups,
 			 int *argc, char ***argv);
 extern void free_defaults(char **argv);
@@ -752,13 +758,52 @@ extern void print_defaults(const char *conf_file, const char **groups);
 extern my_bool my_compress(byte *, ulong *, ulong *);
 extern my_bool my_uncompress(byte *, ulong *, ulong *);
 extern byte *my_compress_alloc(const byte *packet, ulong *len, ulong *complen);
-extern ulong checksum(const byte *mem, uint count);
+extern ha_checksum my_checksum(ha_checksum crc, const byte *mem, uint count);
 extern uint my_bit_log2(ulong value);
-uint my_count_bits(ulonglong v);
+extern uint my_count_bits(ulonglong v);
 extern void my_sleep(ulong m_seconds);
+extern ulong crc32(ulong crc, const uchar *buf, uint len);
+extern uint my_set_max_open_files(uint files);
+void my_free_open_file_info(void);
+
+ulonglong my_getsystime(void);
+my_bool my_gethwaddr(uchar *to);
+
+/* character sets */
+extern uint get_charset_number(const char *cs_name, uint cs_flags);
+extern uint get_collation_number(const char *name);
+extern const char *get_charset_name(uint cs_number);
+
+extern CHARSET_INFO *get_charset(uint cs_number, myf flags);
+extern CHARSET_INFO *get_charset_by_name(const char *cs_name, myf flags);
+extern CHARSET_INFO *get_charset_by_csname(const char *cs_name,
+					   uint cs_flags, myf my_flags);
+extern void free_charsets(void);
+extern char *get_charsets_dir(char *buf);
+extern my_bool my_charset_same(CHARSET_INFO *cs1, CHARSET_INFO *cs2);
+extern my_bool init_compiled_charsets(myf flags);
+extern void add_compiled_collation(CHARSET_INFO *cs);
+extern ulong escape_string_for_mysql(CHARSET_INFO *charset_info, char *to,
+                                     const char *from, ulong length);
+#ifdef __WIN__
+#define BACKSLASH_MBTAIL
+/* File system character set */
+extern CHARSET_INFO *fs_character_set(void);
+#endif
 
 #ifdef __WIN__
 extern my_bool have_tcpip;		/* Is set if tcpip is used */
+
+/* implemented in my_windac.c */
+
+int my_security_attr_create(SECURITY_ATTRIBUTES **psa, const char **perror,
+                            DWORD owner_rights, DWORD everybody_rights);
+
+void my_security_attr_free(SECURITY_ATTRIBUTES *sa);
+
+/* implemented in my_conio.c */
+char* my_cgets(char *string, unsigned long clen, unsigned long* plen);
+
 #endif
 #ifdef __NETWARE__
 void netware_reg_user(const char *ip, const char *user,
@@ -768,5 +813,3 @@ void netware_reg_user(const char *ip, const char *user,
 C_MODE_END
 #include "raid.h"
 #endif /* _my_sys_h */
-
-

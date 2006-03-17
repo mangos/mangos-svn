@@ -14,8 +14,7 @@
 
 @SET_MAKE@
 
-# Copyright (C) 2004 Wow Daemon
-# Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -58,21 +57,20 @@ build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = mangosd$(EXEEXT)
 subdir = src/mangosd
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/Master.h.in
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/config.h
-CONFIG_CLEAN_FILES = Master.h
+CONFIG_CLEAN_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(sysconfdir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_mangosd_OBJECTS = Main.$(OBJEXT) Master.$(OBJEXT) \
-	WorldRunnable.$(OBJEXT) HttpdRunnable.$(OBJEXT) \
-	CliRunnable.$(OBJEXT)
+	WorldRunnable.$(OBJEXT) CliRunnable.$(OBJEXT) \
+	RASocket.$(OBJEXT)
 mangosd_OBJECTS = $(am_mangosd_OBJECTS)
 mangosd_DEPENDENCIES =
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
@@ -141,7 +139,7 @@ EXTRA_LINKER_OPTIONS = @EXTRA_LINKER_OPTIONS@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 INCLUDES = @INCLUDES@ -I$(srcdir) -I$(srcdir)/../../dep/include \
-	-I$(srcdir)/../shared -I$(srcdir)/../realmlist \
+	-I$(top_builddir)/src/shared -I$(srcdir)/../shared \
 	-I$(srcdir)/../game -I$(srcdir)/../framework
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -154,6 +152,10 @@ LIBTOOL = @LIBTOOL@
 LINKER_OPTIONS = @LINKER_OPTIONS@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
+LTMS_AGE = @LTMS_AGE@
+LTMS_CURRENT = @LTMS_CURRENT@
+LTMS_RELEASE = @LTMS_RELEASE@
+LTMS_REVISION = @LTMS_REVISION@
 LT_AGE = @LT_AGE@
 LT_CURRENT = @LT_CURRENT@
 LT_RELEASE = @LT_RELEASE@
@@ -165,8 +167,8 @@ MAKEINFO = @MAKEINFO@
 MANGOSD_CONFIG = @MANGOSD_CONFIG@
 MANGOSD_CONFIGDIR = @MANGOSD_CONFIGDIR@
 MANGOSD_DATA = @MANGOSD_DATA@
-NEWFRAMEWORK_FALSE = @NEWFRAMEWORK_FALSE@
-NEWFRAMEWORK_TRUE = @NEWFRAMEWORK_TRUE@
+MANGOSD_ENABLE_CLI = @MANGOSD_ENABLE_CLI@
+MANGOSD_ENABLE_RA = @MANGOSD_ENABLE_RA@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -180,9 +182,12 @@ SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
 VERSION = @VERSION@
+WITH_APIDOCS = @WITH_APIDOCS@
+WITH_APIDOCS_TARGET = @WITH_APIDOCS_TARGET@
 WITH_PYTHON_SUBDIR = @WITH_PYTHON_SUBDIR@
 WITH_PYTHON_SUBPACKAGE = @WITH_PYTHON_SUBPACKAGE@
 WITH_PYTHON_VERSION = @WITH_PYTHON_VERSION@
+__DOXYGEN = @__DOXYGEN@
 __PYTHON = @__PYTHON@
 ac_ct_AR = @ac_ct_AR@
 ac_ct_CC = @ac_ct_CC@
@@ -225,9 +230,7 @@ prefix = @prefix@
 program_transform_name = @program_transform_name@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
-
-# use our configured sysconfdir
-sysconfdir = @MANGOSD_CONFIGDIR@
+sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 mangosd_SOURCES = \
     Main.cpp \
@@ -235,26 +238,23 @@ mangosd_SOURCES = \
     Master.h \
     WorldRunnable.cpp \
     WorldRunnable.h \
-    HttpdRunnable.cpp \
-    HttpdRunnable.h \
     CliRunnable.cpp \
-    CliRunnable.h
+    CliRunnable.h \
+    RASocket.cpp \
+    RASocket.h
 
-mangosd_LDADD = -lgame -ldatabase -lrealmlist -lconfig -lauth -lshared -lframework -lZThread -lzlib  -lnetwork
-mangosd_LDFLAGS = -L$(srcdir)/../shared \
-               -L$(srcdir)/../framework \
-               -L$(srcdir)/../realmlist \
-               -L$(srcdir)/../game \
-               -L$(srcdir)/../../dep/src/zthread \
-               -L$(srcdir)/../../dep/src/zlib
+mangosd_LDADD = -lgame -ldatabase -lconfig -lauth -lshared -lframework -lZThread -lzlib  -lnetwork -lMaNGOSScript
+mangosd_LDFLAGS = -L$(top_builddir)/src/shared \
+               -L$(top_builddir)/src/framework \
+               -L$(top_builddir)/src/game \
+               -L$(top_builddir)/dep/src/zthread \
+               -L$(top_builddir)/dep/src/zlib \
+	       -L$(top_builddir)/src/bindings/universal
 
 
 # install mangosd.conf to $(sysconfdir)
 sysconf_DATA = \
     mangosd.conf
-
-CLEANFILES = \
-    Master.h
 
 all: all-am
 
@@ -289,8 +289,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-Master.h: $(top_builddir)/config.status $(srcdir)/Master.h.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(mkdir_p) "$(DESTDIR)$(bindir)"
@@ -330,9 +328,9 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CliRunnable.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/HttpdRunnable.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Master.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/RASocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldRunnable.Po@am__quote@
 
 .cpp.o:
@@ -482,7 +480,6 @@ install-strip:
 mostlyclean-generic:
 
 clean-generic:
-	-test -z "$(CLEANFILES)" || rm -f $(CLEANFILES)
 
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)

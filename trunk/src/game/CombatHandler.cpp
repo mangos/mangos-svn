@@ -1,7 +1,5 @@
-/* CombatHandler.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,76 +23,30 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "ObjectAccessor.h"
-
-
-#if defined( _VERSION_1_7_0_ ) || defined( _VERSION_1_8_0_ )
+#include "CreatureAI.h"
+#include "ObjectDefines.h"
 
 void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 {
-    //WorldPacket data;
-    uint64 guid;
-    recv_data >> guid;
+   
+	uint64 guid;
+	recv_data >> guid;
 
-    // AttackSwing
-    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, _player->GetSelection()/*guid*/);
-    Player *pPVPEnemy = ObjectAccessor::Instance().GetPlayer(*_player, _player->GetSelection()/*guid*/);
     
-    if(pEnemy)
-    {
-        Player *pThis = GetPlayer();
+	DEBUG_LOG( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
+    
+	Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
+	if(pEnemy)
+	{
+	    _player->addStateFlag(UF_ATTACKING);
+	    _player->smsg_AttackStart(pEnemy);
+	    _player->inCombat = true;
+	    _player->logoutDelay = LOGOUTDELAY;
+	    return;
+	}
 
-        pThis->addStateFlag(UF_ATTACKING);
-        pThis->smsg_AttackStart(pEnemy, pThis);
-        pThis->inCombat = true;
-        pThis->logoutDelay = LOGOUTDELAY;
-    }
-    else if(pPVPEnemy)
-    {
-        Player *pThis = GetPlayer();
-
-        pThis->addStateFlag(UF_ATTACKING);
-        pThis->smsg_AttackStart(pPVPEnemy, pThis);
-        pThis->inCombat = true;
-        pThis->logoutDelay = LOGOUTDELAY;
-    }
-    else
-    {
-        Log::getSingleton( ).outError( "WORLD: Enemy %u %.8X is not a player or a creature",
-            GUID_LOPART(guid), GUID_HIPART(guid));
-
-        return;
-    }
+	sLog.outError( "WORLD: Enemy %u %.8X is not a player or a creature",GUID_LOPART(guid), GUID_HIPART(guid));	
 }
-
-#else //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
-
-void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
-{
-    WorldPacket data;
-    uint64 guid;
-    recv_data >> guid;
-
-    // AttackSwing
-    Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-    Creature *pEnemy = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if(!pEnemy)
-    {
-        Log::getSingleton( ).outError( "WORLD: %u %.8X is not a creature",
-            GUID_LOPART(guid), GUID_HIPART(guid));
-        return;                                     // we do not attack PCs for now
-    }
-
-    Player *pThis = GetPlayer();
-    pThis->addStateFlag(UF_ATTACKING);
-    pThis->smsg_AttackStart(pEnemy, pThis);
-
-    pThis->inCombat = true;
-    pThis->logoutDelay = LOGOUTDELAY;
-}
-
-#endif //!defined( _VERSION_1_7_0_ ) && !defined( _VERSION_1_8_0_ )
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 {
@@ -102,9 +54,7 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
     uint64 guid = GetPlayer()->GetSelection();
 
     GetPlayer()->smsg_AttackStop(guid);
-
     GetPlayer()->clearStateFlag(UF_ATTACKING);
-    // GetPlayer()->removeCreatureFlag(0x00080000);
 }
 
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
@@ -114,9 +64,9 @@ void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
 	uint32 sheathed;
     recv_data >> sheathed;
 
-	// Sheathed weapon
-	Log::getSingleton( ).outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
+	
+	sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
 
-	GetPlayer()->SetSheath(sheathed);
+	GetPlayer()->SetSheath(~sheathed);
 }
 

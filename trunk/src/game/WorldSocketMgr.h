@@ -1,7 +1,5 @@
-/* WordSocketMgr.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +19,11 @@
 #ifndef __WORLDSOCKETMGR_H
 #define __WORLDSOCKETMGR_H
 
+#include "Policies/Singleton.h"
+
 class WorldSocket;
 
-class WorldSocketMgr : public Singleton<WorldSocketMgr>
+class WorldSocketMgr 
 {
     public:
         WorldSocketMgr();
@@ -37,5 +37,5 @@ class WorldSocketMgr : public Singleton<WorldSocketMgr>
         SocketSet m_sockets;
 };
 
-#define sWorldSocketMgr WorldSocketMgr::getSingleton()
+#define sWorldSocketMgr MaNGOS::Singleton<WorldSocketMgr>::Instance()
 #endif

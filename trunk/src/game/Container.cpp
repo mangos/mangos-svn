@@ -1,7 +1,5 @@
-/* Container.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+
 
 #include "Common.h"
 #include "ObjectMgr.h"
@@ -36,18 +35,19 @@ void Container::Create( uint32 guidlow, uint32 itemid, Player *owner )
 {
     Object::_Create( guidlow, HIGHGUID_CONTAINER );
 
-    m_itemProto = objmgr.GetItemPrototype( itemid );
+    ItemPrototype *m_itemProto = objmgr.GetItemPrototype( itemid );
     ASSERT(m_itemProto);
+	uint32 ContainerSlots =m_itemProto->ContainerSlots;
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, itemid );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1.0f );
     SetUInt64Value( ITEM_FIELD_OWNER, owner->GetGUID() );
     SetUInt64Value( ITEM_FIELD_CONTAINED, owner->GetGUID() );
     SetUInt32Value( ITEM_FIELD_STACK_COUNT, 1 );
-    SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
+    SetUInt32Value( CONTAINER_FIELD_NUM_SLOTS,ContainerSlots);
 
-    m_Slot = new Item*[m_itemProto->ContainerSlots];
-    memset(m_Slot, 0, sizeof(Item*)*(m_itemProto->ContainerSlots));
+    m_Slot = new Item*[ContainerSlots];
+    memset(m_Slot, 0, sizeof(Item*)*ContainerSlots);
 
     m_owner = owner;
 }
@@ -66,7 +66,7 @@ uint8 Container::FindFreeSlot()
         {
         }
     }
-    return -1;
+    return (uint8)-1;
 }
 
 
@@ -76,4 +76,9 @@ void Container::AddItem(uint8 slot, Item *item)
 
     m_Slot[slot] = item;
     SetUInt64Value( (uint16)(CONTAINER_FIELD_SLOT_1  + (slot*2)), item->GetGUID() );
+}
+
+ItemPrototype* Container:: GetProto() 
+{ 
+	return  objmgr.GetItemPrototype(GetUInt32Value( OBJECT_FIELD_ENTRY ));
 }

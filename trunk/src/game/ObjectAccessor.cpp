@@ -1,3 +1,20 @@
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include "ObjectAccessor.h"
 #include "Policies/SingletonImp.h"
@@ -16,6 +33,7 @@
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 #include "Opcodes.h"
+#include "ObjectDefines.h"
 
 #include <cmath>
 #include <bitset>
@@ -25,74 +43,76 @@ INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
 Creature*
-ObjectAccessor::GetCreature(Player &player, uint64 guid)
+ObjectAccessor::GetCreature(Unit &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(player.GetPositionX(), player.GetPositionY()));
+    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     Creature *obj=NULL; 
     MaNGOS::ObjectAccessorNotifier<Creature> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Creature>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
     CellLock<GridReadGuard> cell_lock(cell, p); 
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(player.GetMapId()));
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
     return obj;
 }
 
 Corpse*
-ObjectAccessor::GetCorpse(Player &player, uint64 guid)
+ObjectAccessor::GetCorpse(Unit &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(player.GetPositionX(), player.GetPositionY()));
+    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     Corpse *obj=NULL; 
     MaNGOS::ObjectAccessorNotifier<Corpse> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Corpse>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
     CellLock<GridReadGuard> cell_lock(cell, p); 
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(player.GetMapId()));
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
 	return obj; 
 }
 
 Unit*
-ObjectAccessor::GetUnit(Player &player, uint64 guid)
+ObjectAccessor::GetUnit(Unit &u, uint64 guid)
 {
-    Unit *unit = FindPlayer(guid);
-    if( unit != NULL )
-	return unit;
+	Unit *unit = NULL;
+	
+	unit = FindPlayer(guid);
+	if(!unit)	
+		return GetCreature(u, guid);
 
-    return GetCreature(player, guid);
+	return unit;
 }
 
 Player*
-ObjectAccessor::GetPlayer(Player &player, uint64 guid)
+ObjectAccessor::GetPlayer(Unit &u, uint64 guid)
 {
     return FindPlayer(guid);
 }
 
 GameObject*
-ObjectAccessor::GetGameObject(Player &player, uint64 guid)
+ObjectAccessor::GetGameObject(Unit &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(player.GetPositionX(), player.GetPositionY()));
+    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     GameObject *obj=NULL;
     MaNGOS::ObjectAccessorNotifier<GameObject> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<GameObject>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(player.GetMapId()));
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
     return obj;
 }
 
 DynamicObject*
-ObjectAccessor::GetDynamicObject(Player &player, uint64 guid)
+ObjectAccessor::GetDynamicObject(Unit &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(player.GetPositionX(), player.GetPositionY()));
+    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     DynamicObject *obj=NULL;
     MaNGOS::ObjectAccessorNotifier<DynamicObject> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<DynamicObject>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(player.GetMapId()));
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
     return obj;
 }
 
@@ -103,6 +123,29 @@ ObjectAccessor::FindPlayer(uint64 guid)
     if( iter->second->GetGUID() == guid )
         return iter->second;
     return NULL;
+}
+
+void 
+ObjectAccessor::BuildCreateForSameMapPlayer(Player *pl)
+{
+   if(!pl) return;
+   for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter){
+	   if( (iter->second->GetMapId()==pl->GetMapId()) && (iter->second->GetGUID()!=pl->GetGUID()) )
+	   {
+		   sLog.outDebug("Creating same map for both player %d and %d", pl->GetGUIDLow(), iter->second->GetGUIDLow());
+	       UpdateData my_data;
+	       WorldPacket my_packet;
+	       iter->second->BuildCreateUpdateBlockForPlayer(&my_data, pl);
+	       my_data.BuildPacket(&my_packet);
+	       pl->GetSession()->SendPacket(&my_packet);
+
+	       UpdateData his_data;
+	       WorldPacket his_pk;
+	       pl->BuildCreateUpdateBlockForPlayer(&his_data, iter->second);
+	       his_data.BuildPacket(&his_pk);
+	       iter->second->GetSession()->SendPacket(&his_pk);
+	   }
+   }    
 }
 
 Player*
@@ -196,7 +239,6 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     if( obj->isType(TYPE_ITEM ))
     {
 	Item *item = static_cast<Item *>(obj);
-	item->UpdateStats();
 	pl = item->GetOwner();
 	build_for_all = false;
     }
@@ -208,12 +250,11 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
 	build_for_all = false;
     }
 
-    /* else then the object is either a creature or player.. now build for all
-     */
+    
     if( pl != NULL )
 	_buildPacket(pl, obj, update_players);
 
-    // build this object for its surrounding players
+    
     if( build_for_all )
 	_buildChangeObjectForPlayer(obj, update_players);
 }
@@ -281,7 +322,7 @@ ObjectAccessor::AddCorpse(Corpse *corpse)
 void
 ObjectAccessor::Update(const uint32  &diff)
 {
-    { // don't remove scope braces
+    { 
 	typedef std::multimap<uint32, Player *> CreatureLocationHolderType;
 	CreatureLocationHolderType creature_locations;
 	Guard guard(i_playerGuard);
@@ -292,12 +333,7 @@ ObjectAccessor::Update(const uint32  &diff)
 	}
 
 	
-	/* now update the creatures near the player. Note,
-	 * we only update the creatures on and adjecent cells
-	 * to the player's standing.  Due to the size of the cell
-	 * division, any creature beyon that position will
-	 * not be visually visible on the player's monitor.
-	 */
+	
 	uint32 map_id = 0;
 	MaNGOS::ObjectUpdater updater(diff);
 	TypeContainerVisitor<MaNGOS::ObjectUpdater, TypeMapContainer<AllObjectTypes> > object_update(updater);	
@@ -307,7 +343,7 @@ ObjectAccessor::Update(const uint32  &diff)
 	    if( map_id != (*iter).first )
 	    {
 		map_id = (*iter).first;
-		marked_cell.reset(); // new map
+		marked_cell.reset(); 
 	    }
 
 	    Player *player = (*iter).second;
@@ -364,7 +400,7 @@ ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &
     return false;
 }
 
-// last the notifier
+
 void
 ObjectAccessor::ObjectChangeAccumulator::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
@@ -372,10 +408,24 @@ ObjectAccessor::ObjectChangeAccumulator::Visit(std::map<OBJECT_HANDLE, Player *>
 	i_accessor._buildPacket(iter->second, &i_object, i_updateDatas);
 }
 
+void
+ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
+{
+    MaNGOS::CreatureCorpseViewRemover remover(*c);
+    TypeContainerVisitor<MaNGOS::CreatureCorpseViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    CellPair p = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
+    Cell cell = RedZone::GetZone(p);
+    cell.SetNoCreate();
+    cell.data.Part.reserved = ALL_DISTRICT;
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId()));
+}
+
+
 namespace MaNGOS
 {
-    //====================================//
-    // BuildUpdateForPlayer
+    
+    
     void
     BuildUpdateForPlayer::Visit(PlayerMapType &m)
     {
@@ -392,10 +442,16 @@ namespace MaNGOS
 		iter2 = p.first;
 	    }
 	    
-	    // build myself for other player
+	    
 	    i_player.BuildValuesUpdateBlockForPlayer(&iter2->second, iter2->first);
 	}
     }
+
+    void CreatureCorpseViewRemover::Visit(PlayerMapType &m)
+    {
+	for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+	    i_creature.DestroyForPlayer(iter->second);
+    }    
 }
 
 template void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, GameObject *> &m);

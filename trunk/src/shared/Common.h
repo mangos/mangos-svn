@@ -1,7 +1,5 @@
-/* Common.h
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,28 +22,32 @@
 #pragma warning(disable:4996)
 
 #ifndef __SHOW_STUPID_WARNINGS__
-// UQ1: Remove variable conversion warnings...
-// UQ1: warning C4244: 'argument' : conversion from X to X, possible loss of data
+
+
 #pragma warning(disable:4244)
-// UQ1: warning C4267: '=' : conversion from 'size_t' to 'int', possible loss of data
+
 #pragma warning(disable:4267)
-// UQ1: warning C4800: forcing value to bool 'true' or 'false' (performance warning)
+
 #pragma warning(disable:4800)
-// UQ1: warning C4018: '<' : signed/unsigned mismatch
+
 #pragma warning(disable:4018)
-// UQ1: warning C4311: 'type cast' : pointer truncation
+
 #pragma warning(disable:4311)
-// UQ1: warning C4305: 'argument' : truncation from 'double' to 'float'
+
 #pragma warning(disable:4305)
-// UQ1: warning C4005: #define X macro redefinition
+
 #pragma warning(disable:4005)
-#endif //__SHOW_STUPID_WARNINGS__
+#endif 
 
-// Only clients with this version will be allowed to view the realmlist.
-// Higher versions will be rejected, lower versions will be patched if possible.
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {4544,4500,4565/*1.6.x*/,4671/*1.7.0*/,4735/*1.8.0*/, 4769/*1.8.1*/, 4784/*1.8.2*/, 4807/*1.8.3*/}
-// 1.6.0 > 4500,4449,4442,4375,4364,4341,4284,4279,4222,4150,4125,4115,4062,4044,3989,3988,3925,3892,3810,3807,0
+
+
+// we need to stick to 1 version or half of the stuff will work for someone
+// others will not and opposite
+// like crashing on 1.8.0, reputation on 1.8.4 ...
+
+#define EXPECTED_MANGOS_CLIENT_BUILD        {4996,5059,5086,0}
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -112,16 +114,18 @@
 #define SI64FMTD "%lld"
 #endif
 
-#define GUID_HIPART(x) (*(((uint32*)&(x))+1))
-#define GUID_LOPART(x) (*((uint32*)&(x)))
+#define GUID_HIPART(x)   (*(((uint32*)&(x))+1))
+#define GUID_LOPART(x)   (*((uint32*)&(x)))
+#define MAKE_GUID(l, h)  uint64((uint32(l)) | ((uint64(uint32(h))) << 32))
 
 #define atol(a) strtoul( a, NULL, 10)
 
 #define STRINGIZE(a) #a
 
-// fix buggy MSVC's for variable scoping to be reliable =S
+
 #define for if(true) for
 
-#define LOGOUTDELAY 600 // ~ 1 min
+
+#define LOGOUTDELAY   60  
 
 #endif

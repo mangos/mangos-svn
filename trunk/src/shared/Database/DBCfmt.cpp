@@ -1,0 +1,12 @@
+const char ItemSetEntryfmt[]="dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
+const char TalentEntryfmt[]="nixxiiiiixxxxxxxxxxxx";
+const char emoteentryfmt[]="nxixxxxxxxxxxxxxxxx";
+const char SpellEntryfmt[]="nixxixiixxxiiixiiiiiiiiiiiiiiiiiiiifixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifffixiiixxxxxxxxxiiiiiiiiixxxxxxxxxxxxxxxxxiiiixxixxxxxxxxxxx";
+const char SpellCastTimefmt[]="nixx";
+const char SpellRadiusfmt[]="nfxf";
+const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
+const char SpellDurationfmt[]="niii";
+const char AreaTableEntryfmt[]="ixinxxxxxxixxxxxxxxxx";
+const char FactionEntryfmt[]="nixxxxxxxiiiiiiiiiixxxxxxxxxxxxxxxxxx";
+const char FactionTemplateEntryfmt[]="nixiiixxxxxxxx";
+const char ItemDisplayTemplateEntryfmt[]="ixxxxxxxxxxixxxxxxxxxxi";

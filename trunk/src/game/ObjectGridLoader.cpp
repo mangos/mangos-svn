@@ -1,6 +1,5 @@
-/* ObjectGridLoader.h
- *
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +21,7 @@
 #include "ObjectAccessor.h"
 #include "Utilities.h"
 
-// specialized for corpse.. we need to remove corpse from the list as well
+
 template<>
 inline void
 ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
@@ -51,14 +50,15 @@ template<> void SetState(Creature *obj)
 	obj->setDeathState(DEAD);
 }
 
-// common method
+
 template<class T> void LoadHelper(const char* table, const uint32 &grid_id, const uint32 map_id, const CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count)
 {
     uint32 cell_id = (cell.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell.x_coord;
-    std::stringstream query;
-    query << "SELECT guid from " << table << " WHERE grid_id=" << grid_id << " and mapId=" << map_id << " and cell_id=" << cell_id;
-    std::auto_ptr<QueryResult> result(sDatabase.Query(query.str().c_str()));
-    if( result.get() != NULL )
+
+    QueryResult *result = sDatabase.PQuery("SELECT guid from %s WHERE grid_id=%d and mapId=%d and cell_id=%d", table,grid_id,map_id,cell_id);
+
+    if( result )
+
     {
 	do
 	{
@@ -68,7 +68,7 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
 	    obj->LoadFromDB(guid);
 	    m[obj->GetGUID()] = obj;
 	    
-	    // spirit healer doesn't exist in the world ...
+	    
 	    SetState(obj);
 	    obj->AddToWorld();
 	    ++count; 
@@ -103,8 +103,8 @@ ObjectGridLoader::Load(GridType &grid)
     grid.VisitGridObjects(loader);
 }
 
-//==============================================//
-//      ObjectGridUnloader
+
+
 void 
 ObjectGridUnloader::Unload(GridType &grid)
 {

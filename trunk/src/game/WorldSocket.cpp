@@ -1,7 +1,5 @@
-/* WorldSocket.cpp
- *
- * Copyright (C) 2004 Wow Daemon
- * Copyright (C) 2005 MaNGOS <https://opensvn.csie.org/traccgi/MaNGOS/trac.cgi/>
+/* 
+ * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +28,16 @@
 #include "World.h"
 #include "WorldSocketMgr.h"
 #include "NameTables.h"
+#include "Policies/SingletonImp.h"
+#include "WorldLog.h"
 
-#pragma pack(push, 1)
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if __GNUC__ && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct ClientPktHeader
 {
     uint16 size;
@@ -43,7 +49,13 @@ struct ServerPktHeader
     uint16 size;
     uint16 cmd;
 };
+
+// Only GCC 4.1.0 and later support #pragma pack(pop) syntax
+#if __GNUC__ && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
 #pragma pack(pop)
+#endif
 
 WorldSocket::WorldSocket(SocketHandler &sh): TcpSocket(sh), _remaining(0), _session(0), _cmd(0)
 {
@@ -74,7 +86,7 @@ void WorldSocket::SendPacket(WorldPacket* packet)
     WorldPacket *pck = new WorldPacket(*packet);
     ASSERT(pck);
 
-    // guard
+    
     _sendQueue.add(pck);
 }
 
@@ -101,18 +113,18 @@ void WorldSocket::OnRead()
         if (!_remaining)
         {
             if (ibuf.GetLength() < 6)
-                break;                            // no header
+                break;                            
 
             ClientPktHeader hdr;
 
             ibuf.Read((char *)&hdr, 6);
             _crypt.DecryptRecv((uint8 *)&hdr, 6);
 
-            _remaining = ntohs(hdr.size) - 4;     // we've already read cmd
+            _remaining = ntohs(hdr.size) - 4;     
             _cmd = hdr.cmd;
         }
 
-        // wait until there's full packet
+        
         if (ibuf.GetLength() < _remaining)
             break;
 
@@ -122,33 +134,30 @@ void WorldSocket::OnRead()
         packet.SetOpcode((uint16)_cmd);
         ibuf.Read((char*)packet.contents(), _remaining);
 
-        // World Logger
-        if (sConfig.GetBoolDefault("LogWorld", false))
-        {
-            FILE *pFile = fopen("world.log", "a");
-            fprintf(pFile,
-                "CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
-                (uint32)GetSocket(),
-                _remaining,
-				LookupName(packet.GetOpcode(), g_worldOpcodeNames),
-				packet.GetOpcode());
+        
+	if( sWorldLog.LogWorld() )
+	{
+	    sWorldLog.Log("CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
+			  (uint32)GetSocket(),
+			  _remaining,
+			  LookupName(packet.GetOpcode(), g_worldOpcodeNames),
+			  packet.GetOpcode());
 
             uint32 p = 0;
             while (p < packet.size())
             {
                 for (uint32 j = 0; j < 16 && p < packet.size(); j++)
-                    fprintf(pFile, "%.2X ", packet[p++]);
+                    sWorldLog.Log("%.2X ", packet[p++]);
 
-                fprintf(pFile, "\n");
+                sWorldLog.Log("\n");
             }
 
-            fprintf(pFile, "\n\n");
-            fclose(pFile);
+            sWorldLog.Log("\n\n");
         }
 
         _remaining = 0;
 
-        // packets that we handle ourself
+        
         switch (_cmd)
         {
             case CMSG_PING:
@@ -166,7 +175,7 @@ void WorldSocket::OnRead()
                 if (_session)
                     _session->QueuePacket(packet);
                 else
-                    Log::getSingleton( ).outDetail("Received out of place packet with cmdid 0x%.4X", _cmd);
+                    sLog.outDetail("Received out of place packet with cmdid 0x%.4X", _cmd);
             }
         }
     }
@@ -205,24 +214,21 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
     catch(ByteBuffer::error &)
     {
-        Log::getSingleton( ).outDetail("Incomplete packet");
+        sLog.outDetail("Incomplete packet");
         return;
     }
 
-    std::stringstream ss;
-    ss << "SELECT acct, gm, sessionkey FROM accounts WHERE login='" << account << "'";
+    QueryResult *result = sDatabase.PQuery("SELECT acct, gm, sessionkey FROM accounts WHERE login = '%s';", account.c_str());
 
-    QueryResult *result = sDatabase.Query(ss.str().c_str());
-
-    // Checking if account exists
+    
     if ( !result )
     {
-        // Send Bad Account
+        
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 21 );                    // TODO: use enums
+        packet << uint8( 21 );                    
         SendPacket( &packet );
 
-        Log::getSingleton( ).outDetail( "SOCKET: Sent Auth Response (unknown account)." );
+        sLog.outDetail( "SOCKET: Sent Auth Response (unknown account)." );
         return;
     }
 
@@ -232,34 +238,34 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     delete result;
 
-    // TODO: check if server is full
+    
     uint32 num = sWorld.GetSessionCount();
     if (sWorld.GetPlayerLimit() > 0 && num > sWorld.GetPlayerLimit() && security == 0)
     {
-        // Should Send Server Full Error Code
+        
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 21 );                    // TODO: use enums
+        packet << uint8( 21 );                    
         SendPacket( &packet );
 
-        Log::getSingleton( ).outBasic( "SOCKET: Sent Auth Response (server full)." );
+        sLog.outBasic( "SOCKET: Sent Auth Response (server full)." );
         return;
     }
 
-    // checking if player is already connected
+    
     WorldSession *session = sWorld.FindSession( id );
     if( session )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 13 );                    // TODO: use enums
+        packet << uint8( 13 );                    
         SendPacket( &packet );
 
-        Log::getSingleton( ).outDetail( "SOCKET: Sent Auth Response (already connected)." );
+        sLog.outDetail( "SOCKET: Sent Auth Response (already connected)." );
 
         session->LogoutPlayer(false);
-        // session->SetSocket(0);
-        // session = 0;
-        // sWorldSocketMgr.RemoveSocket(this);
-        // sWorld.RemoveSession(id);
+        
+        
+        
+        
         return;
     }
 
@@ -277,12 +283,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     if (memcmp(sha.GetDigest(), digest, 20))
     {
-        // Sending Authentification Failed
+        
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 21 );                    // TODO: use enums
+        packet << uint8( 21 );                    
         SendPacket( &packet );
 
-        Log::getSingleton( ).outDetail( "SOCKET: Sent Auth Response (authentification failed)." );
+        sLog.outDetail( "SOCKET: Sent Auth Response (authentification failed)." );
         return;
     }
 
@@ -290,22 +296,31 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     _crypt.Init();
 
     packet.Initialize( SMSG_AUTH_RESPONSE );
-    packet << uint8( 0x0C );                      // auth succesfull, TODO: use enums
-    packet << uint8( 0xcf );                      // sometime of counter.. increased by 1 at every auth
-    packet << uint8( 0xD2 );                      // always d2
-    packet << uint8( 0x07 );                      // always 07
-    packet << uint8( 0x00 );                      // always 00
-    packet << uint8( 0x00 );                      // always 00
+    packet << uint8( 0x0C );                      
+    packet << uint8( 0xcf );                      
+    packet << uint8( 0xD2 );                      
+    packet << uint8( 0x07 );                      
+    packet << uint8( 0x00 );                      
+    packet << uint8( 0x00 );                      
 
     SendPacket(&packet);
 
-    // FIXME: allocating memory in one thread and transferring ownership  to another.
+	//! Enable ADDON's Thanks to Burlex
+	packet.Initialize( SMSG_ADDON_INFO );
+    packet << uint8( 0x0A );			//10
+    for (uint8 i = 0; i < 0x0C; i++)	//10
+	{
+		packet << uint8( 0x02 ) << uint8( 0x01 ) << uint32(0) << uint16(0);                      
+	}
+    SendPacket(&packet);
+
+
     _session = new WorldSession(id, this);
     ASSERT(_session);
     _session->SetSecurity(security);
     sWorld.AddSession(_session);
 
-    Log::getSingleton( ).outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
+    sLog.outBasic( "SOCKET: Client '%s' authed successfully.", account.c_str() );
 
     return;
 }
@@ -322,7 +337,7 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
     }
     catch(ByteBuffer::error &)
     {
-        Log::getSingleton( ).outDetail("Incomplete packet");
+        sLog.outDetail("Incomplete packet");
         return;
     }
 
@@ -346,28 +361,25 @@ void WorldSocket::Update(time_t diff)
         hdr.size = ntohs((uint16)packet->size() + 2);
         hdr.cmd = packet->GetOpcode();
 
-        // World Logger
-        if (sConfig.GetBoolDefault("LogWorld", false))
-        {
-            FILE *pFile = fopen("world.log", "a");
-            fprintf(pFile,
-                "SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
-                (uint32)GetSocket(),
-                packet->size(),
-				LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-				packet->GetOpcode());
+        
+	if( sWorldLog.LogWorld() )
+        {         
+	    sWorldLog.Log("SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
+			  (uint32)GetSocket(),
+			  packet->size(),
+			  LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+			  packet->GetOpcode());
 
             uint32 p = 0;
             while (p < packet->size())
             {
                 for (uint32 j = 0; j < 16 && p < packet->size(); j++)
-                    fprintf(pFile, "%.2X ", (*packet)[p++]);
+                    sWorldLog.Log("%.2X ", (*packet)[p++]);
 
-                fprintf(pFile, "\n");
+                sWorldLog.Log("\n");
             }
 
-            fprintf(pFile, "\n\n");
-            fclose(pFile);
+            sWorldLog.Log("\n\n");
         }
 
         _crypt.EncryptSend((uint8*)&hdr, 4);
