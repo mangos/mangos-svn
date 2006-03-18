@@ -378,9 +378,25 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data ) {
 		}
 		uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
 		if (durability != 0) {
-			pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
-			// TODO extract money formula or dbc
+
+		// some simple repair formula depending on durability lost
+		uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
+		uint32 costs = durability - curdur;
+
+		if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+		{
+		    uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
+		    GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+		    // repair item
+		    pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
 		}
+                else {
+                    DEBUG_LOG("You do not have enough money");
+                }
+
+
+		}
+
 	} else {
 		sLog.outDetail("ITEM: Repair all items, npcGUID = %d", GUID_LOPART(npcGUID));
 
@@ -389,10 +405,25 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data ) {
 			if (pItem) {
 				uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
 				if (durability != 0) {
-					pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
-//					GetPlayer()->_ApplyItemMods(srcitem,i, false);
-//					DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);
-					// TODO extract money formula or dbc
+
+		// some simple repair formula depending on durability lost
+		uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
+		uint32 costs = durability - curdur;
+
+		if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+		{
+		    uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
+		    GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+		    // repair item
+		    pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
+		    // DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);
+		    // GetPlayer()->_ApplyItemMods(srcitem,i, false);
+
+		}
+		else {
+		    DEBUG_LOG("You do not have enough money");
+		}
+
 				}
 			}
 		}
