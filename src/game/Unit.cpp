@@ -136,7 +136,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 	 	((Creature*)pVictim)->AI().AttackStart((Player*)this);
 	}
 	
-  // not loot,xp,health if type 8 /critters/
+  // no loot,xp,health if type 8 /critters/
   if ( crtype == 8)
 	 ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
 
@@ -249,7 +249,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 		// random durability for items (HIT)
                 if (pVictim->GetTypeId() == TYPEID_PLAYER)
                 {
-			int randdurability = urand(0, 20);
+			int randdurability = urand(0, 30);
 			if (randdurability == 10)
 			{
 			DEBUG_LOG("HIT: We decrease durability with 5 percent");
@@ -448,7 +448,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
 	// random durability loss for items on absorb (ABSORB)
 	if (pVictim->GetTypeId() == TYPEID_PLAYER)
 	{
-		int randdurability = urand(0, 25);
+		int randdurability = urand(0, 30);
 		if (randdurability == 10)
 		{
 			DEBUG_LOG("BLOCK: We decrease durability with 5 percent");

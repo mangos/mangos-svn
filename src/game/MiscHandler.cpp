@@ -468,15 +468,15 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
-//    if ( (!GetPlayer()->isAlive()) || GetPlayer()->inCombat ) 
-//    {
+    if ( (!GetPlayer()->isAlive()) || GetPlayer()->inCombat ) 
+    {
         data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);
         data << uint8(2);
         data << uint8(97);  
         SendPacket(&data);
         return;
-//    }
+    }
 
     if( GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , 0x08) )
     {
