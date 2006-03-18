@@ -952,7 +952,7 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
         default                     : ASSERT(0);
     }
 
-	return NULL;    
+	return 0;    
 }
 
 

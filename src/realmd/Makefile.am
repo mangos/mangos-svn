@@ -27,12 +27,11 @@ realmd_SOURCES = \
     RealmList.cpp \
     RealmList.h
 
-realmd_LDADD = -ldatabase -lconfig -lauth -lshared -lframework -lZThread -lzlib  -lnetwork
+realmd_LDADD = -ldatabase -lconfig -lauth -lshared -lframework -lZThread -lnetwork
 
 realmd_LDFLAGS = -L$(top_builddir)/src/shared \
                -L$(top_builddir)/src/framework \
                -L$(top_builddir)/dep/src/zthread \
-               -L$(top_builddir)/dep/src/zlib
 
 # use our configured sysconfdir
 sysconfdir = @MANGOSD_CONFIGDIR@
