@@ -1923,7 +1923,7 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
 void Player::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
 {
     
-    for(int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    for(int i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         if(m_items[i] == NULL)
             continue;
