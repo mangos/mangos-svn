@@ -147,7 +147,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 			//build for other player
 			else
 			{ 
-				//_BuildMovementUpdate( &buf, 0x70, 0x0 );
+				_BuildMovementUpdate( &buf, 0x70, 0x0 );
 			} 
 		}break;
 		case TYPEID_CORPSE:
