@@ -566,6 +566,8 @@ class Player : public Unit {
 		void UpdateReputation(void);
 		void UpdateMaxSkills();
 		void ModifySkillBonus(uint32 skillid,int32 val);
+		
+		//Honor System
 		void UpdateHonor(void);
 		void CalculateHonor(Player *pVictim);
 		int  CalculateHonorRank(int honor);
@@ -573,8 +575,7 @@ class Player : public Unit {
 		int  GetTotalHonor(void) { return m_total_honor_points; };
 		int  GetHonorHighestRank(void) { return m_highest_rank; };
 		int  GetHonorLastWeekRank(void) { return m_last_week_rank; };
-/*temp*/void SetHonorRankName(void);
-/*temp*/const char *GetHonorRankName(void) { return m_rank_name.c_str(); };
+		//End of Honor System
 
 		void ApplyItemMods(Item *item,uint8 slot,bool apply) {
 			_ApplyItemMods(item, slot, apply);

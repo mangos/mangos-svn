@@ -3522,34 +3522,6 @@ void Player::UpdateHonor(void)
 
 	//Store Total Honor points...
 	m_total_honor_points = total_honor;
-
-	//TEMPORARY
-		//Calcule and set rank name
-		SetHonorRankName();
-	//TEMPORARY
-}
-
-
-//TEMPORARY
-void Player::SetHonorRankName(void)
-{
-	string alliance_ranks[] = {"", "Private ", "Corporal ", "Sergeant ", "Master Sergeant ", "Sergeant Major ", "Knight ", "Knight-Lieutenant ", "Knight-Captain ", "Knight-Champion ", "Lieutenant Commander ", "Commander ", "Marshal ", "Field Marshal ", "Grand Marshal ", "Game Master "};
-	string horde_ranks[] = {"", "Scout ", "Grunt ", "Sergeant ", "Senior Sergeant ", "First Sergeant ", "Stone Guard ", "Blood Guard ", "Legionnare ", "Centurion ", "Champion ", "Lieutenant General ", "General ", "Warlord ", "High Warlord ", "Game Master "};
-
-	
-	if ( m_team == ALLIANCE ) 
-	{
-		m_rank_name = alliance_ranks[ CalculateHonorRank( GetTotalHonor() ) ];
-	}
-	else 
-	if ( m_team == HORDE ) 
-	{
-		m_rank_name = horde_ranks[ CalculateHonorRank( GetTotalHonor() ) ];
-	}
-	else
-	{
-		m_rank_name = "[No Team]";
-	}
 }
 
 
