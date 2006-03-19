@@ -161,6 +161,8 @@ void
 ObjectAccessor::InsertPlayer(Player *pl)
 {
     i_players[pl->GetGUID()] = pl;
+	_update();
+	
 }
 
 void
@@ -192,9 +194,9 @@ ObjectAccessor::_update()
     
     for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
-	WorldPacket packet;
-	iter->second.BuildPacket(&packet);
-	iter->first->GetSession()->SendPacket(&packet);
+		WorldPacket packet;
+		iter->second.BuildPacket(&packet);
+		iter->first->GetSession()->SendPacket(&packet);
     }
 }
 

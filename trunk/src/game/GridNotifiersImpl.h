@@ -90,7 +90,7 @@ template<>
 inline void
 MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
-/*
+
     Player *player = &i_player;
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
@@ -100,6 +100,7 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 	if( (i_player.isAlive() && iter->second->isAlive()) ||
 	    (!i_player.isAlive() && !iter->second->isAlive()) )
 	{
+		
 	    sLog.outDebug("Creating in range packet for both player %d and %d", i_player.GetGUID(), iter->second->GetGUID());
 	    UpdateData my_data;
 	    WorldPacket my_packet;
@@ -114,8 +115,7 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 	    his_data.BuildPacket(&his_pk);
 	    iter->second->GetSession()->SendPacket(&his_pk);
 	}
-    }
-*/
+	}
 }
 
 template<>
