@@ -56,9 +56,9 @@ Object::Object( )
     m_walkSpeed			= 2.5f;
     m_runSpeed			= 7.0f;
     m_backWalkSpeed		= 2.5f;
-    m_swimSpeed))		= 4.722222f;
+    m_swimSpeed			= 4.722222f;
     m_backSwimSpeed		= 4.5f;
-    m_turnRate))		= 3.141594f;
+    m_turnRate			= 3.141594f;
     mSemaphoreTeleport	= false;
 }
 
@@ -147,7 +147,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 			//build for other player
 			else
 			{ 
-				_BuildMovementUpdate( &buf, 0x70, 0x0 );
+				//_BuildMovementUpdate( &buf, 0x70, 0x0 );
 			} 
 		}break;
 		case TYPEID_CORPSE:
