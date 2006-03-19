@@ -1994,11 +1994,10 @@ void Player::SaveToDB() {
 	std::stringstream ss;
 
 	sDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",GetGUIDLow());
-	uint32 zoneId=sAreaStore.LookupEntry(MapManager::Instance ().GetMap(m_mapId)->GetAreaFlag(m_positionX,m_positionY))->zone;
 
 
 	ss.rdbuf()->str("");
-	ss << "INSERT INTO characters (guid, acct, name, race, class, mapId, zoneId, positionX, positionY, positionZ, orientation, data, taximask, online, highest_rank, last_week_rank) VALUES ("
+	ss << "INSERT INTO characters (guid, acct, name, race, class, mapId, positionX, positionY, positionZ, orientation, data, taximask, online, highest_rank, last_week_rank) VALUES ("
         << GetGUIDLow() << ", "                   
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -2006,7 +2005,7 @@ void Player::SaveToDB() {
         << m_class << ", "
 	
         << m_mapId << ", "
-        << zoneId << ", "
+   
         << m_positionX << ", "
         << m_positionY << ", "
         << m_positionZ << ", "
