@@ -243,28 +243,46 @@ bool ChatHandler::HandleShowHonor(const char* args)
 	uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR);
 	uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING);
 	
+	std::string alliance_ranks[] = {"", "Private ", "Corporal ", "Sergeant ", "Master Sergeant ", "Sergeant Major ", "Knight ", "Knight-Lieutenant ", "Knight-Captain ", "Knight-Champion ", "Lieutenant Commander ", "Commander ", "Marshal ", "Field Marshal ", "Grand Marshal ", "Game Master "};
+	std::string horde_ranks[] = {"", "Scout ", "Grunt ", "Sergeant ", "Senior Sergeant ", "First Sergeant ", "Stone Guard ", "Blood Guard ", "Legionnare ", "Centurion ", "Champion ", "Lieutenant General ", "General ", "Warlord ", "High Warlord ", "Game Master "};
+	std::string rank_name;
+	
+	if ( m_session->GetPlayer()->GetTeam() == ALLIANCE ) 
+	{
+		rank_name = alliance_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
+	}
+	else 
+	if ( m_session->GetPlayer()->GetTeam() == HORDE ) 
+	{
+		rank_name = horde_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
+	}
+	else
+	{
+		rank_name = "No Rank ";
+	}
+
 	char msg[256];
-	sprintf(msg, "%s%s (Rank %u)", m_session->GetPlayer()->GetHonorRankName(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
+	sprintf(msg, "%s%s (Rank %u)", rank_name, m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Life Time: [Honorable Kills: %u] [Dishonorable Kills: %u] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
+	sprintf(msg, "Today: [Honorable Kills: |c00ff0000%u|r] [Dishonorable Kills: |cffff6060%u|r]", today_honorable_kills, today_dishonorable_kills);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Today: [Honorable Kills: %u] [Dishonorable Kills: %u]", today_honorable_kills, today_dishonorable_kills);
+	sprintf(msg, "Yestarday: [Kills: |c00ff0000%u|r] [Honor: %u]", yestarday_kills, yestarday_honor);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Yestarday: [Kills: %u] [Honor: %u]", yestarday_kills, yestarday_honor);
+	sprintf(msg, "This Week: [Kills: |c00ff0000%u|r] [Honor: %u]", this_week_kills, this_week_honor);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "This Week: [Kills: %u] [Honor: %u]", this_week_kills, this_week_honor);
+	sprintf(msg, "Last Week: [Kills: |c00ff0000%u|r] [Honor: %u] [Standing: %u]", last_week_kills, last_week_honor, last_week_standing);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Last Week: [Kills: %u] [Honor: %u] [Rank: %u]", last_week_kills, last_week_honor, last_week_standing);
+	sprintf(msg, "Life Time: [Honorable Kills: |c00ff0000%u|r] [Dishonorable Kills: |cffff6060%u|r] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
