@@ -24,7 +24,6 @@
 
 
 
-
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
