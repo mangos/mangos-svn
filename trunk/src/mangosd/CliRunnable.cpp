@@ -406,11 +406,9 @@ void CliCreate(char *command,pPrintf zprintf)
 		}
 	    else 
 		{
-			sDatabase.PExecute(
-			"INSERT into `accounts` (acct,login,password,s,v,gm,sessionkey,email,joindate,banned,last_ip,failed_logins) values('','%s','%s','','','0','','',NOW(),'0','0','0')",szAcc,&ptr[x]) ;
+			sDatabase.PExecute("INSERT into `accounts` (acct,login,password,gm,sessionkey,email,joindate,banned,last_ip,failed_logins,locked) values('','%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]) ;
 			zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
 	    }
-		
 }
 
 void ParseCommand( pPrintf zprintf, char*command)
