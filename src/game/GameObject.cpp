@@ -43,6 +43,18 @@ void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 	GameObjectInfo*  goinfo = objmgr.GetGameObjectInfo(name_id);
     if(!goinfo)return;
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
+
+	//
+	m_positionX = x;
+	m_positionY = y;
+	m_positionZ = z;
+	m_orientation = ang;
+
+	m_mapId = mapid;
+	
+
+
+
     SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
     SetFloatValue(GAMEOBJECT_POS_Y, y);
