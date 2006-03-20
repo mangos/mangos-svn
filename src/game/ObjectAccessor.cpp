@@ -130,10 +130,20 @@ ObjectAccessor::BuildCreateForSameMapPlayer(Player *pl)
 {
    if(!pl) return;
    for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter){
-	   if( (iter->second->GetMapId()==pl->GetMapId()) && (iter->second->GetGUID()!=pl->GetGUID()) )
+//	   if( (iter->second->GetMapId()==pl->GetMapId()) && (iter->second->GetGUID()!=pl->GetGUID()) )
+
+// fix 2-3 players bug/player updates for death
+// need to be tested
+	if(
+		(iter->second->GetMapId() == pl->GetMapId()) &&
+		(iter->second->GetGUID()!=pl->GetGUID()) &&
+		((pl->isAlive() && iter->second->isAlive()) || 
+		(!pl->isAlive() && !iter->second->isAlive()) 
+		))
+
 	   {
-		   sLog.outDebug("Creating same map for both player %d and %d", pl->GetGUIDLow(), iter->second->GetGUIDLow());
-	       UpdateData my_data;
+		sLog.outDebug("Creating same map for both player %d and %d", pl->GetGUIDLow(), iter->second->GetGUIDLow());
+		UpdateData my_data;
 	       WorldPacket my_packet;
 	       iter->second->BuildCreateUpdateBlockForPlayer(&my_data, pl);
 	       my_data.BuildPacket(&my_packet);
