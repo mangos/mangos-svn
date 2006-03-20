@@ -11,7 +11,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -189,7 +189,7 @@ typedef struct	krb5_authorization_st
 
 DECLARE_STACK_OF(KRB5_AUTHDATA)
 
-
+			
 /*	-- Unencrypted authenticator
 **	Authenticator ::=    [APPLICATION 2] SEQUENCE    {
 **		authenticator-vno[0]          INTEGER,
@@ -225,7 +225,7 @@ DECLARE_STACK_OF(KRB5_AUTHENTBODY)
 **	void name##_free(type *a);
 **	DECLARE_ASN1_ENCODE_FUNCTIONS(type, name, name) =
 **	 DECLARE_ASN1_ENCODE_FUNCTIONS(type, itname, name) =
-**	  type *d2i_##name(type **a, unsigned char **in, long len);
+**	  type *d2i_##name(type **a, const unsigned char **in, long len);
 **	  int i2d_##name(type *a, unsigned char **out);
 **	  DECLARE_ASN1_ITEM(itname) = OPENSSL_EXTERN const ASN1_ITEM itname##_it
 */
@@ -254,4 +254,4 @@ DECLARE_ASN1_FUNCTIONS(KRB5_AUTHENT)
 #endif
 #endif
 
-
+
