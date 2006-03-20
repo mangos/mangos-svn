@@ -262,7 +262,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
 	}
 
 	char msg[256];
-	sprintf(msg, "%s%s (Rank %u)", rank_name, m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
+    sprintf(msg, "%s%s (Rank %u)", rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
