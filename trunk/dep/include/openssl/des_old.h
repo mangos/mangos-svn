@@ -42,7 +42,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -91,6 +91,8 @@
 #ifndef HEADER_DES_H
 #define HEADER_DES_H
 
+#include <openssl/e_os2.h>	/* OPENSSL_EXTERN, OPENSSL_NO_DES, DES_LONG */
+
 #ifdef OPENSSL_NO_DES
 #error DES is disabled.
 #endif
@@ -103,8 +105,6 @@
 #error <openssl/des_old.h> replaces <kerberos/des.h>.
 #endif
 
-#include <openssl/opensslconf.h> /* DES_LONG */
-#include <openssl/e_os2.h>	/* OPENSSL_EXTERN */
 #include <openssl/symhacks.h>
 
 #ifdef OPENSSL_BUILD_SHLIBCRYPTO
@@ -114,6 +114,10 @@
 
 #ifdef  __cplusplus
 extern "C" {
+#endif
+
+#ifdef _
+#undef _
 #endif
 
 typedef unsigned char _ossl_old_des_cblock[8];
@@ -171,9 +175,9 @@ typedef struct _ossl_old_des_ks_struct
 	DES_enc_write((f),(b),(l),&(k),(iv))
 #define des_fcrypt(b,s,r)\
 	DES_fcrypt((b),(s),(r))
+#if 0
 #define des_crypt(b,s)\
 	DES_crypt((b),(s))
-#if 0
 #if !defined(PERL5) && !defined(__FreeBSD__) && !defined(NeXT) && !defined(__OpenBSD__)
 #define crypt(b,s)\
 	DES_crypt((b),(s))
@@ -215,7 +219,7 @@ typedef struct _ossl_old_des_ks_struct
 	DES_cfb64_encrypt((i),(o),(l),&(ks),(iv),(n),(e))
 #define des_ofb64_encrypt(i,o,l,ks,iv,n)\
 	DES_ofb64_encrypt((i),(o),(l),&(ks),(iv),(n))
-
+		
 
 #define des_ecb2_encrypt(i,o,k1,k2,e) \
 	des_ecb3_encrypt((i),(o),(k1),(k2),(k1),(e))
@@ -310,7 +314,7 @@ typedef struct _ossl_old_des_ks_struct
 	_ossl_old_des_cfb64_encrypt((i),(o),(l),(ks),(iv),(n),(e))
 #define des_ofb64_encrypt(i,o,l,ks,iv,n)\
 	_ossl_old_des_ofb64_encrypt((i),(o),(l),(ks),(iv),(n))
-
+		
 
 #define des_ecb2_encrypt(i,o,k1,k2,e) \
 	des_ecb3_encrypt((i),(o),(k1),(k2),(k1),(e))
@@ -351,8 +355,8 @@ void _ossl_old_des_encrypt3(DES_LONG *data, _ossl_old_des_key_schedule ks1,
 	_ossl_old_des_key_schedule ks2, _ossl_old_des_key_schedule ks3);
 void _ossl_old_des_decrypt3(DES_LONG *data, _ossl_old_des_key_schedule ks1,
 	_ossl_old_des_key_schedule ks2, _ossl_old_des_key_schedule ks3);
-void _ossl_old_des_ede3_cbc_encrypt(_ossl_old_des_cblock *input, _ossl_old_des_cblock *output,
-	long length, _ossl_old_des_key_schedule ks1, _ossl_old_des_key_schedule ks2,
+void _ossl_old_des_ede3_cbc_encrypt(_ossl_old_des_cblock *input, _ossl_old_des_cblock *output, 
+	long length, _ossl_old_des_key_schedule ks1, _ossl_old_des_key_schedule ks2, 
 	_ossl_old_des_key_schedule ks3, _ossl_old_des_cblock *ivec, int enc);
 void _ossl_old_des_ede3_cfb64_encrypt(unsigned char *in, unsigned char *out,
 	long length, _ossl_old_des_key_schedule ks1, _ossl_old_des_key_schedule ks2,
@@ -439,4 +443,4 @@ void _ossl_096_des_random_seed(des_cblock *key);
 #include <openssl/ui_compat.h>
 
 #endif
-
+

@@ -5,21 +5,21 @@
  * This package is an SSL implementation written
  * by Eric Young (eay@cryptsoft.com).
  * The implementation was written so as to conform with Netscapes SSL.
- *
+ * 
  * This library is free for commercial and non-commercial use as long as
  * the following conditions are aheared to.  The following conditions
  * apply to all code found in this distribution, be it the RC4, RSA,
  * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
  * included with this distribution is covered by the same copyright terms
  * except that the holder is Tim Hudson (tjh@cryptsoft.com).
- *
+ * 
  * Copyright remains Eric Young's, and as such any Copyright notices in
  * the code are not to be removed.
  * If this package is used in a product, Eric Young should be given attribution
  * as the author of the parts of the library used.
  * This can be in the form of a textual message at program startup or
  * in documentation (online or textual) provided with the package.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -34,10 +34,10 @@
  *     Eric Young (eay@cryptsoft.com)"
  *    The word 'cryptographic' can be left out if the rouines from the library
  *    being used are not cryptographic related :-).
- * 4. If you include any Windows specific code (or a derivative thereof) from
+ * 4. If you include any Windows specific code (or a derivative thereof) from 
  *    the apps directory (application code) you must include an acknowledgement:
  *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
+ * 
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
@@ -63,6 +63,7 @@
 #ifndef HEADER_LHASH_H
 #define HEADER_LHASH_H
 
+#include <openssl/e_os2.h>
 #ifndef OPENSSL_NO_FP_API
 #include <stdio.h>
 #endif
@@ -77,7 +78,7 @@ extern "C" {
 
 typedef struct lhash_node_st
 	{
-	const void *data;
+	void *data;
 	struct lhash_node_st *next;
 #ifndef OPENSSL_NO_HASH_COMP
 	unsigned long hash;
@@ -86,8 +87,8 @@ typedef struct lhash_node_st
 
 typedef int (*LHASH_COMP_FN_TYPE)(const void *, const void *);
 typedef unsigned long (*LHASH_HASH_FN_TYPE)(const void *);
-typedef void (*LHASH_DOALL_FN_TYPE)(const void *);
-typedef void (*LHASH_DOALL_ARG_FN_TYPE)(const void *, void *);
+typedef void (*LHASH_DOALL_FN_TYPE)(void *);
+typedef void (*LHASH_DOALL_ARG_FN_TYPE)(void *, void *);
 
 /* Macros for declaring and implementing type-safe wrappers for LHASH callbacks.
  * This way, callbacks can be provided to LHASH structures without function
@@ -117,18 +118,18 @@ typedef void (*LHASH_DOALL_ARG_FN_TYPE)(const void *, void *);
 
 /* Third: "doall" functions */
 #define DECLARE_LHASH_DOALL_FN(f_name,o_type) \
-	void f_name##_LHASH_DOALL(const void *);
+	void f_name##_LHASH_DOALL(void *);
 #define IMPLEMENT_LHASH_DOALL_FN(f_name,o_type) \
-	void f_name##_LHASH_DOALL(const void *arg) { \
+	void f_name##_LHASH_DOALL(void *arg) { \
 		o_type a = (o_type)arg; \
 		f_name(a); }
 #define LHASH_DOALL_FN(f_name) f_name##_LHASH_DOALL
 
 /* Fourth: "doall_arg" functions */
 #define DECLARE_LHASH_DOALL_ARG_FN(f_name,o_type,a_type) \
-	void f_name##_LHASH_DOALL_ARG(const void *, void *);
+	void f_name##_LHASH_DOALL_ARG(void *, void *);
 #define IMPLEMENT_LHASH_DOALL_ARG_FN(f_name,o_type,a_type) \
-	void f_name##_LHASH_DOALL_ARG(const void *arg1, void *arg2) { \
+	void f_name##_LHASH_DOALL_ARG(void *arg1, void *arg2) { \
 		o_type a = (o_type)arg1; \
 		a_type b = (a_type)arg2; \
 		f_name(a,b); }
@@ -172,7 +173,7 @@ typedef struct lhash_st
 
 LHASH *lh_new(LHASH_HASH_FN_TYPE h, LHASH_COMP_FN_TYPE c);
 void lh_free(LHASH *lh);
-void *lh_insert(LHASH *lh, const void *data);
+void *lh_insert(LHASH *lh, void *data);
 void *lh_delete(LHASH *lh, const void *data);
 void *lh_retrieve(LHASH *lh, const void *data);
 void lh_doall(LHASH *lh, LHASH_DOALL_FN_TYPE func);
@@ -197,4 +198,4 @@ void lh_node_usage_stats_bio(const LHASH *lh, BIO *out);
 
 #endif
 
-
+

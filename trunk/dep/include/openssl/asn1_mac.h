@@ -5,21 +5,21 @@
  * This package is an SSL implementation written
  * by Eric Young (eay@cryptsoft.com).
  * The implementation was written so as to conform with Netscapes SSL.
- *
+ * 
  * This library is free for commercial and non-commercial use as long as
  * the following conditions are aheared to.  The following conditions
  * apply to all code found in this distribution, be it the RC4, RSA,
  * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
  * included with this distribution is covered by the same copyright terms
  * except that the holder is Tim Hudson (tjh@cryptsoft.com).
- *
+ * 
  * Copyright remains Eric Young's, and as such any Copyright notices in
  * the code are not to be removed.
  * If this package is used in a product, Eric Young should be given attribution
  * as the author of the parts of the library used.
  * This can be in the form of a textual message at program startup or
  * in documentation (online or textual) provided with the package.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -34,10 +34,10 @@
  *     Eric Young (eay@cryptsoft.com)"
  *    The word 'cryptographic' can be left out if the rouines from the library
  *    being used are not cryptographic related :-).
- * 4. If you include any Windows specific code (or a derivative thereof) from
+ * 4. If you include any Windows specific code (or a derivative thereof) from 
  *    the apps directory (application code) you must include an acknowledgement:
  *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
+ * 
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
@@ -67,17 +67,17 @@ extern "C" {
 
 #ifndef ASN1_MAC_ERR_LIB
 #define ASN1_MAC_ERR_LIB	ERR_LIB_ASN1
-#endif
+#endif 
 
 #define ASN1_MAC_H_err(f,r,line) \
 	ERR_PUT_error(ASN1_MAC_ERR_LIB,(f),(r),__FILE__,(line))
 
 #define M_ASN1_D2I_vars(a,type,func) \
-	ASN1_CTX c; \
+	ASN1_const_CTX c; \
 	type ret=NULL; \
 	\
-	c.pp=(unsigned char **)pp; \
-	c.q= *(unsigned char **)pp; \
+	c.pp=(const unsigned char **)pp; \
+	c.q= *(const unsigned char **)pp; \
 	c.error=ERR_R_NESTED_ASN1_ERROR; \
 	if ((a == NULL) || ((*a) == NULL)) \
 		{ if ((ret=(type)func()) == NULL) \
@@ -85,13 +85,13 @@ extern "C" {
 	else	ret=(*a);
 
 #define M_ASN1_D2I_Init() \
-	c.p= *(unsigned char **)pp; \
+	c.p= *(const unsigned char **)pp; \
 	c.max=(length == 0)?0:(c.p+length);
 
 #define M_ASN1_D2I_Finish_2(a) \
-	if (!asn1_Finish(&c)) \
+	if (!asn1_const_Finish(&c)) \
 		{ c.line=__LINE__; goto err; } \
-	*(unsigned char **)pp=c.p; \
+	*(const unsigned char **)pp=c.p; \
 	if (a != NULL) (*a)=ret; \
 	return(ret);
 
@@ -99,7 +99,7 @@ extern "C" {
 	M_ASN1_D2I_Finish_2(a); \
 err:\
 	ASN1_MAC_H_err((e),c.error,c.line); \
-	asn1_add_error(*(unsigned char **)pp,(int)(c.q- *pp)); \
+	asn1_add_error(*(const unsigned char **)pp,(int)(c.q- *pp)); \
 	if ((ret != NULL) && ((a == NULL) || (*a != ret))) func(ret); \
 	return(NULL)
 
@@ -123,12 +123,19 @@ err:\
 
 #define M_ASN1_D2I_end_sequence() \
 	(((c.inf&1) == 0)?(c.slen <= 0): \
-		(c.eos=ASN1_check_infinite_end(&c.p,c.slen)))
+		(c.eos=ASN1_const_check_infinite_end(&c.p,c.slen)))
 
 /* Don't use this with d2i_ASN1_BOOLEAN() */
-#define M_ASN1_D2I_get(b,func) \
+#define M_ASN1_D2I_get(b, func) \
 	c.q=c.p; \
 	if (func(&(b),&c.p,c.slen) == NULL) \
+		{c.line=__LINE__; goto err; } \
+	c.slen-=(c.p-c.q);
+
+/* Don't use this with d2i_ASN1_BOOLEAN() */
+#define M_ASN1_D2I_get_x(type,b,func) \
+	c.q=c.p; \
+	if (((D2I_OF(type))func)(&(b),&c.p,c.slen) == NULL) \
 		{c.line=__LINE__; goto err; } \
 	c.slen-=(c.p-c.q);
 
@@ -278,7 +285,7 @@ err:\
 			{ c.line=__LINE__; goto err; } \
 		if (Tinf == (V_ASN1_CONSTRUCTED+1)) { \
 			Tlen = c.slen - (c.p - c.q); \
-			if(!ASN1_check_infinite_end(&c.p, Tlen)) \
+			if(!ASN1_const_check_infinite_end(&c.p, Tlen)) \
 				{ c.error=ERR_R_MISSING_ASN1_EOS; \
 				c.line=__LINE__; goto err; } \
 		}\
@@ -353,8 +360,12 @@ err:\
 		return(NULL)
 
 
-#define M_ASN1_next		(*c.p)
-#define M_ASN1_next_prev	(*c.q)
+/* BIG UGLY WARNING!  This is so damn ugly I wanna puke.  Unfortunately,
+   some macros that use ASN1_const_CTX still insist on writing in the input
+   stream.  ARGH!  ARGH!  ARGH!  Let's get rid of this macro package.
+   Please?						-- Richard Levitte */
+#define M_ASN1_next		(*((unsigned char *)(c.p)))
+#define M_ASN1_next_prev	(*((unsigned char *)(c.q)))
 
 /*************************************************/
 
@@ -551,11 +562,11 @@ err:\
 #define M_ASN1_I2D_finish()	*pp=p; \
 				return(r);
 
-int asn1_GetSequence(ASN1_CTX *c, long *length);
-void asn1_add_error(unsigned char *address,int offset);
+int asn1_GetSequence(ASN1_const_CTX *c, long *length);
+void asn1_add_error(const unsigned char *address,int offset);
 #ifdef  __cplusplus
 }
 #endif
 
 #endif
-
+

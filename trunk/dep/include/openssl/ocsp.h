@@ -15,7 +15,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -345,17 +345,13 @@ typedef struct ocsp_service_locator_st
 	X509_NAME* issuer;
 	STACK_OF(ACCESS_DESCRIPTION) *locator;
         } OCSP_SERVICELOC;
-
+ 
 #define PEM_STRING_OCSP_REQUEST	"OCSP REQUEST"
 #define PEM_STRING_OCSP_RESPONSE "OCSP RESPONSE"
 
-#define d2i_OCSP_REQUEST_bio(bp,p) (OCSP_REQUEST*)ASN1_d2i_bio((char*(*)()) \
-		OCSP_REQUEST_new,(char *(*)())d2i_OCSP_REQUEST, (bp),\
-		(unsigned char **)(p))
+#define d2i_OCSP_REQUEST_bio(bp,p) ASN1_d2i_bio_of(OCSP_REQUEST,OCSP_REQUEST_new,d2i_OCSP_REQUEST,bp,p)
 
-#define d2i_OCSP_RESPONSE_bio(bp,p) (OCSP_RESPONSE*)ASN1_d2i_bio((char*(*)())\
-		OCSP_REQUEST_new,(char *(*)())d2i_OCSP_RESPONSE, (bp),\
-		(unsigned char **)(p))
+#define d2i_OCSP_RESPONSE_bio(bp,p) ASN1_d2i_bio_of(OCSP_RESPONSE,OCSP_RESPONSE_new,d2i_OCSP_RESPONSE,bp,p)
 
 #define	PEM_read_bio_OCSP_REQUEST(bp,x,cb) (OCSP_REQUEST *)PEM_ASN1_read_bio( \
      (char *(*)())d2i_OCSP_REQUEST,PEM_STRING_OCSP_REQUEST,bp,(char **)x,cb,NULL)
@@ -371,11 +367,9 @@ typedef struct ocsp_service_locator_st
     PEM_ASN1_write_bio((int (*)())i2d_OCSP_RESPONSE,PEM_STRING_OCSP_RESPONSE,\
 			bp,(char *)o, NULL,NULL,0,NULL,NULL)
 
-#define i2d_OCSP_RESPONSE_bio(bp,o) ASN1_i2d_bio(i2d_OCSP_RESPONSE,bp,\
-		(unsigned char *)o)
+#define i2d_OCSP_RESPONSE_bio(bp,o) ASN1_i2d_bio_of(OCSP_RESPONSE,i2d_OCSP_RESPONSE,bp,o)
 
-#define i2d_OCSP_REQUEST_bio(bp,o) ASN1_i2d_bio(i2d_OCSP_REQUEST,bp,\
-		(unsigned char *)o)
+#define i2d_OCSP_REQUEST_bio(bp,o) ASN1_i2d_bio_of(OCSP_REQUEST,i2d_OCSP_REQUEST,bp,o)
 
 #define OCSP_REQUEST_sign(o,pkey,md) \
 	ASN1_item_sign(ASN1_ITEM_rptr(OCSP_REQINFO),\
@@ -396,8 +390,7 @@ typedef struct ocsp_service_locator_st
 #define ASN1_BIT_STRING_digest(data,type,md,len) \
 	ASN1_item_digest(ASN1_ITEM_rptr(ASN1_BIT_STRING),type,data,md,len)
 
-#define OCSP_CERTID_dup(cid) (OCSP_CERTID*)ASN1_dup((int(*)())i2d_OCSP_CERTID,\
-		(char *(*)())d2i_OCSP_CERTID,(char *)(cid))
+#define OCSP_CERTID_dup(cid) ASN1_dup_of(OCSP_CERTID,i2d_OCSP_CERTID,d2i_OCSP_CERTID,cid)
 
 #define OCSP_CERTSTATUS_dup(cs)\
                 (OCSP_CERTSTATUS*)ASN1_dup((int(*)())i2d_OCSP_CERTSTATUS,\
@@ -407,9 +400,9 @@ OCSP_RESPONSE *OCSP_sendreq_bio(BIO *b, char *path, OCSP_REQUEST *req);
 
 OCSP_CERTID *OCSP_cert_to_id(const EVP_MD *dgst, X509 *subject, X509 *issuer);
 
-OCSP_CERTID *OCSP_cert_id_new(const EVP_MD *dgst,
-			      X509_NAME *issuerName,
-			      ASN1_BIT_STRING* issuerKey,
+OCSP_CERTID *OCSP_cert_id_new(const EVP_MD *dgst, 
+			      X509_NAME *issuerName, 
+			      ASN1_BIT_STRING* issuerKey, 
 			      ASN1_INTEGER *serialNumber);
 
 OCSP_ONEREQ *OCSP_request_add0_id(OCSP_REQUEST *req, OCSP_CERTID *cid);
@@ -469,12 +462,14 @@ OCSP_SINGLERESP *OCSP_basic_add1_status(OCSP_BASICRESP *rsp,
 						ASN1_TIME *revtime,
 					ASN1_TIME *thisupd, ASN1_TIME *nextupd);
 int OCSP_basic_add1_cert(OCSP_BASICRESP *resp, X509 *cert);
-int OCSP_basic_sign(OCSP_BASICRESP *brsp,
+int OCSP_basic_sign(OCSP_BASICRESP *brsp, 
 			X509 *signer, EVP_PKEY *key, const EVP_MD *dgst,
 			STACK_OF(X509) *certs, unsigned long flags);
 
-ASN1_STRING *ASN1_STRING_encode(ASN1_STRING *s, int (*i2d)(),
-				char *data, STACK_OF(ASN1_OBJECT) *sk);
+ASN1_STRING *ASN1_STRING_encode(ASN1_STRING *s, i2d_of_void *i2d,
+				void *data, STACK_OF(ASN1_OBJECT) *sk);
+#define ASN1_STRING_encode_of(type,s,i2d,data,sk) \
+((ASN1_STRING *(*)(ASN1_STRING *,I2D_OF(type),type *,STACK_OF(ASN1_OBJECT) *))openssl_fcast(ASN1_STRING_encode))(s,i2d,data,sk)
 
 X509_EXTENSION *OCSP_crlID_new(char *url, long *n, char *tim);
 
@@ -564,11 +559,11 @@ void ERR_load_OCSP_strings(void);
 
 /* Function codes. */
 #define OCSP_F_ASN1_STRING_ENCODE			 100
-#define OCSP_F_CERT_ID_NEW				 101
 #define OCSP_F_D2I_OCSP_NONCE				 102
 #define OCSP_F_OCSP_BASIC_ADD1_STATUS			 103
 #define OCSP_F_OCSP_BASIC_SIGN				 104
 #define OCSP_F_OCSP_BASIC_VERIFY			 105
+#define OCSP_F_OCSP_CERT_ID_NEW				 101
 #define OCSP_F_OCSP_CHECK_DELEGATED			 106
 #define OCSP_F_OCSP_CHECK_IDS				 107
 #define OCSP_F_OCSP_CHECK_ISSUER			 108
@@ -617,4 +612,4 @@ void ERR_load_OCSP_strings(void);
 }
 #endif
 #endif
-
+

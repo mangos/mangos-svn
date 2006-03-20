@@ -10,7 +10,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -82,6 +82,12 @@ extern "C" {
 #ifdef KRB5_HEIMDAL
 typedef unsigned char krb5_octet;
 #define FAR
+#else
+
+#ifndef FAR
+#define FAR
+#endif
+
 #endif
 
 /*	Uncomment this to debug kssl problems or
@@ -171,4 +177,4 @@ unsigned char	*kssl_skip_confound(krb5_enctype enctype, unsigned char *authn);
 #endif
 #endif	/* OPENSSL_NO_KRB5	*/
 #endif	/* KSSL_H 	*/
-
+

@@ -5,21 +5,21 @@
  * This package is an SSL implementation written
  * by Eric Young (eay@cryptsoft.com).
  * The implementation was written so as to conform with Netscapes SSL.
- *
+ * 
  * This library is free for commercial and non-commercial use as long as
  * the following conditions are aheared to.  The following conditions
  * apply to all code found in this distribution, be it the RC4, RSA,
  * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
  * included with this distribution is covered by the same copyright terms
  * except that the holder is Tim Hudson (tjh@cryptsoft.com).
- *
+ * 
  * Copyright remains Eric Young's, and as such any Copyright notices in
  * the code are not to be removed.
  * If this package is used in a product, Eric Young should be given attribution
  * as the author of the parts of the library used.
  * This can be in the form of a textual message at program startup or
  * in documentation (online or textual) provided with the package.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -34,10 +34,10 @@
  *     Eric Young (eay@cryptsoft.com)"
  *    The word 'cryptographic' can be left out if the rouines from the library
  *    being used are not cryptographic related :-).
- * 4. If you include any Windows specific code (or a derivative thereof) from
+ * 4. If you include any Windows specific code (or a derivative thereof) from 
  *    the apps directory (application code) you must include an acknowledgement:
  *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,7 +49,7 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
+ * 
  * The licence and distribution terms for any publically available version or
  * derivative of this code cannot be changed.  i.e. this code cannot simply be
  * copied and put under another distribution licence
@@ -63,7 +63,7 @@
  * are met:
  *
  * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
+ *    notice, this list of conditions and the following disclaimer. 
  *
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in
@@ -108,9 +108,14 @@
  * Hudson (tjh@cryptsoft.com).
  *
  */
+/* ====================================================================
+ * Copyright 2002 Sun Microsystems, Inc. ALL RIGHTS RESERVED.
+ * ECC cipher suite support in OpenSSL originally developed by 
+ * SUN MICROSYSTEMS, INC., and contributed to the OpenSSL project.
+ */
 
-#ifndef HEADER_SSL3_H
-#define HEADER_SSL3_H
+#ifndef HEADER_SSL3_H 
+#define HEADER_SSL3_H 
 
 #ifndef OPENSSL_NO_COMP
 #include <openssl/comp.h>
@@ -118,6 +123,7 @@
 #include <openssl/buffer.h>
 #include <openssl/evp.h>
 #include <openssl/ssl.h>
+#include <openssl/pq_compat.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -248,7 +254,11 @@ extern "C" {
 #endif
 
 #define SSL3_RT_MAX_PLAIN_LENGTH		16384
+#ifdef OPENSSL_NO_COMP
+#define SSL3_RT_MAX_COMPRESSED_LENGTH	SSL3_RT_MAX_PLAIN_LENGTH
+#else
 #define SSL3_RT_MAX_COMPRESSED_LENGTH	(1024+SSL3_RT_MAX_PLAIN_LENGTH)
+#endif
 #define SSL3_RT_MAX_ENCRYPTED_LENGTH	(1024+SSL3_RT_MAX_COMPRESSED_LENGTH)
 #define SSL3_RT_MAX_PACKET_SIZE		(SSL3_RT_MAX_ENCRYPTED_LENGTH+SSL3_RT_HEADER_LENGTH)
 #define SSL3_RT_MAX_DATA_SIZE			(1024*1024)
@@ -289,6 +299,8 @@ typedef struct ssl3_record_st
 /*rw*/	unsigned char *data;    /* pointer to the record data */
 /*rw*/	unsigned char *input;   /* where the decode bytes are */
 /*r */	unsigned char *comp;    /* only used with decompression - malloc()ed */
+/*r */  unsigned long epoch;    /* epoch number, needed by DTLS1 */
+/*r */  PQ_64BIT seq_num;       /* sequence number, needed by DTLS1 */
 	} SSL3_RECORD;
 
 typedef struct ssl3_buffer_st
@@ -307,7 +319,12 @@ typedef struct ssl3_buffer_st
 #define SSL3_CT_RSA_EPHEMERAL_DH		5
 #define SSL3_CT_DSS_EPHEMERAL_DH		6
 #define SSL3_CT_FORTEZZA_DMS			20
-#define SSL3_CT_NUMBER				7
+/* SSL3_CT_NUMBER is used to size arrays and it must be large
+ * enough to contain all of the cert types defined either for
+ * SSLv3 and TLSv1.
+ */
+#define SSL3_CT_NUMBER			7
+
 
 #define SSL3_FLAGS_NO_RENEGOTIATE_CIPHERS	0x0001
 #define SSL3_FLAGS_DELAY_CLIENT_FINISHED	0x0002
@@ -383,7 +400,7 @@ typedef struct ssl3_state_st
 		int finish_md_len;
 		unsigned char peer_finish_md[EVP_MAX_MD_SIZE*2];
 		int peer_finish_md_len;
-
+		
 		unsigned long message_size;
 		int message_type;
 
@@ -392,8 +409,13 @@ typedef struct ssl3_state_st
 #ifndef OPENSSL_NO_DH
 		DH *dh;
 #endif
+
+#ifndef OPENSSL_NO_ECDH
+		EC_KEY *ecdh; /* holds short lived ECDH key */
+#endif
+
 		/* used when SSL_ST_FLUSH_DATA is entered */
-		int next_state;
+		int next_state;			
 
 		int reuse_message;
 
@@ -420,6 +442,7 @@ typedef struct ssl3_state_st
 
 	} SSL3_STATE;
 
+
 /* SSLv3 */
 /*client */
 /* extra state */
@@ -430,6 +453,8 @@ typedef struct ssl3_state_st
 /* read from server */
 #define SSL3_ST_CR_SRVR_HELLO_A		(0x120|SSL_ST_CONNECT)
 #define SSL3_ST_CR_SRVR_HELLO_B		(0x121|SSL_ST_CONNECT)
+#define DTLS1_ST_CR_HELLO_VERIFY_REQUEST_A (0x126|SSL_ST_CONNECT)
+#define DTLS1_ST_CR_HELLO_VERIFY_REQUEST_B (0x127|SSL_ST_CONNECT)
 #define SSL3_ST_CR_CERT_A		(0x130|SSL_ST_CONNECT)
 #define SSL3_ST_CR_CERT_B		(0x131|SSL_ST_CONNECT)
 #define SSL3_ST_CR_KEY_EXCH_A		(0x140|SSL_ST_CONNECT)
@@ -466,6 +491,8 @@ typedef struct ssl3_state_st
 #define SSL3_ST_SR_CLNT_HELLO_B		(0x111|SSL_ST_ACCEPT)
 #define SSL3_ST_SR_CLNT_HELLO_C		(0x112|SSL_ST_ACCEPT)
 /* write to client */
+#define DTLS1_ST_SW_HELLO_VERIFY_REQUEST_A (0x113|SSL_ST_ACCEPT)
+#define DTLS1_ST_SW_HELLO_VERIFY_REQUEST_B (0x114|SSL_ST_ACCEPT)
 #define SSL3_ST_SW_HELLO_REQ_A		(0x120|SSL_ST_ACCEPT)
 #define SSL3_ST_SW_HELLO_REQ_B		(0x121|SSL_ST_ACCEPT)
 #define SSL3_ST_SW_HELLO_REQ_C		(0x122|SSL_ST_ACCEPT)
@@ -506,6 +533,8 @@ typedef struct ssl3_state_st
 #define SSL3_MT_CERTIFICATE_VERIFY		15
 #define SSL3_MT_CLIENT_KEY_EXCHANGE		16
 #define SSL3_MT_FINISHED			20
+#define DTLS1_MT_HELLO_VERIFY_REQUEST    3
+
 
 #define SSL3_MT_CCS				1
 
@@ -514,7 +543,7 @@ typedef struct ssl3_state_st
 #define SSL3_CC_WRITE		0x02
 #define SSL3_CC_CLIENT		0x10
 #define SSL3_CC_SERVER		0x20
-#define SSL3_CHANGE_CIPHER_CLIENT_WRITE	(SSL3_CC_CLIENT|SSL3_CC_WRITE)
+#define SSL3_CHANGE_CIPHER_CLIENT_WRITE	(SSL3_CC_CLIENT|SSL3_CC_WRITE)	
 #define SSL3_CHANGE_CIPHER_SERVER_READ	(SSL3_CC_SERVER|SSL3_CC_READ)
 #define SSL3_CHANGE_CIPHER_CLIENT_READ	(SSL3_CC_CLIENT|SSL3_CC_READ)
 #define SSL3_CHANGE_CIPHER_SERVER_WRITE	(SSL3_CC_SERVER|SSL3_CC_WRITE)
@@ -524,4 +553,4 @@ typedef struct ssl3_state_st
 #endif
 #endif
 
-
+
