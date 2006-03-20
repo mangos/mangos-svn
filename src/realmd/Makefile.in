@@ -234,7 +234,7 @@ realmd_SOURCES = \
 realmd_LDADD = -ldatabase -lconfig -lauth -lshared -lframework -lZThread -lnetwork
 realmd_LDFLAGS = -L$(top_builddir)/src/shared \
                -L$(top_builddir)/src/framework \
-               -L$(top_builddir)/dep/src/zthread \
+               -L$(top_builddir)/dep/src/zthread
 
 all: all-am
 

@@ -31,8 +31,7 @@ realmd_LDADD = -ldatabase -lconfig -lauth -lshared -lframework -lZThread -lnetwo
 
 realmd_LDFLAGS = -L$(top_builddir)/src/shared \
                -L$(top_builddir)/src/framework \
-               -L$(top_builddir)/dep/src/zthread \
+               -L$(top_builddir)/dep/src/zthread
 
 # use our configured sysconfdir
 sysconfdir = @MANGOSD_CONFIGDIR@
-
