@@ -569,7 +569,7 @@ class Player : public Unit {
 		
 		//Honor System
 		void UpdateHonor(void);
-		void CalculateHonor(Player *pVictim);
+		void CalculateHonor(Unit *pVictim);
 		int  CalculateHonorRank(int honor);
 		int  CalculateTotalKills(Player *pVictim);
 		int  GetTotalHonor(void) { return m_total_honor_points; };

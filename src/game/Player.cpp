@@ -3160,7 +3160,7 @@ void Player::setFaction(uint8 race, uint32 faction)
                 m_team = (uint32)ALLIANCE;
                 break;
             case GNOME:
-                m_faction = 8;
+                m_faction = 115;
                 m_team = (uint32)ALLIANCE;
                 break;
             
@@ -3177,7 +3177,7 @@ void Player::setFaction(uint8 race, uint32 faction)
                 m_team = (uint32)HORDE;
                 break;
             case TROLL:
-                m_faction = 9;
+                m_faction = 116;
                 m_team = (uint32)HORDE;
                 break;
             }
@@ -3448,7 +3448,7 @@ void Player::UpdateHonor(void)
 			else
 			if(fields[0].GetUInt32() == DISHONORABLE_KILL) lifetime_dishonorableKills++;
 			
-			total_honor += fields[1].GetUInt32();
+			total_honor += (int)fields[1].GetUInt32();
 
 			date = fields[2].GetUInt32();
 
@@ -3564,59 +3564,62 @@ int Player::CalculateTotalKills(Player *pVictim)
 }
 
 
-void Player::CalculateHonor(Player *pVictim)
+void Player::CalculateHonor(Unit *uVictim)
 {
 	int parcial_honor_points = 0;
-	
 	int kill_type = 0;
+	bool savekill = false;
 
 	sLog.outDetail("PLAYER: CalculateHonor");
 	
+	if( !uVictim ) return;
 	
-
-	
-	if ( ( pVictim )&&( GetTeam() != pVictim->GetTeam() ) )
-	{	
-		uint16 honorableKills = (uint16) GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
-		uint16 unhonorableKills = (uint16)((GetUInt32Value(PLAYER_FIELD_SESSION_KILLS) - honorableKills) / 65536);
-	
-		
-		int total_kills = CalculateTotalKills(pVictim);
-
-		int k_rank = CalculateHonorRank(GetTotalHonor());
-		int v_rank = pVictim->CalculateHonorRank( pVictim->GetTotalHonor() );
-		int k_level = GetLevel();
-		int v_level = pVictim->GetLevel();
-		int diff_honor = (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1;
-		int diff_level = (uint8)(v_level*(1.0/(k_level)));
-
-		if ((GetLevel() - pVictim->GetLevel() ) >= 5 )
+	if( uVictim->GetTypeId() == TYPEID_UNIT )
+	{
+		Creature *cVictim = (Creature *)uVictim;
+		if( cVictim->isCivilian() )
 		{
 			kill_type = DISHONORABLE_KILL;
-			parcial_honor_points = 0;
+			parcial_honor_points = -400;
+			savekill = true;
 		}
-		else
+	}
+	else
+	if( uVictim->GetTypeId() == TYPEID_PLAYER )
+	{
+		Player *pVictim = (Player *)uVictim;
+		
+		if( GetTeam() == pVictim->GetTeam() ) return;
+
+		if( GetLevel() < (pVictim->GetLevel()+5) )
 		{
-			kill_type = HONORABLE_KILL;
-			
+			int total_kills = CalculateTotalKills(pVictim);
+			int k_rank = CalculateHonorRank(GetTotalHonor());
+			int v_rank = pVictim->CalculateHonorRank( pVictim->GetTotalHonor() );
+			int k_level = GetLevel();
+			int v_level = pVictim->GetLevel();
+			int diff_honor = (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1;
+			int diff_level = (uint8)(v_level*(1.0/(k_level)));
+
+			kill_type = HONORABLE_KILL;		
 			int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
 			parcial_honor_points = (int)((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level));
-			
 			parcial_honor_points = (parcial_honor_points <= 400) ? parcial_honor_points : 400;
-		}
 
-		
+			savekill = true;
+		}
+	}
+
+	if (savekill)
+	{
 		time_t rawtime;
 		struct tm * now;
 		uint32 today = 0;
 		time( &rawtime );
 		now = localtime( &rawtime );
-		
 		today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
-		
-		sDatabase.PExecute("INSERT INTO kills (killerID, victimID, honor_pts, date, type) VALUES (%d, %d, %d, %d, %u);", (uint32)GetGUID(), (uint32)pVictim->GetGUID(), (uint32)parcial_honor_points, (uint32)today, (uint8)kill_type);
-
-		printf("INSERT KILL: (%d, %d, %d, %d, %u)", (uint32)GetGUID(), (uint32)pVictim->GetGUID(), (uint32)parcial_honor_points, (uint32)today, (uint8)kill_type);
+	
+		sDatabase.PExecute("INSERT INTO kills (killerID, victimID, honor_pts, date, type) VALUES (%d, %d, %d, %d, %u);", (uint32)GetGUID(), (uint32)uVictim->GetGUID(), (uint32)parcial_honor_points, (uint32)today, (uint8)kill_type);
 
 		UpdateHonor();
 	}
