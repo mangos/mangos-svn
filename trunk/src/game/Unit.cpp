@@ -148,11 +148,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 		DEBUG_LOG("DealDamage: victim just died");
 		if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
 			((Creature*)pVictim)->generateLoot();
-					
-		if ((this->GetTypeId() == TYPEID_PLAYER) && (pVictim->GetTypeId() == TYPEID_PLAYER))
-		{
-			((Player*)this)->CalculateHonor((Player*)pVictim);
-		}
+		
+		//If a player kill some one call honor calcules
+		((Player*)this)->CalculateHonor(pVictim);
+
 		DEBUG_LOG("DealDamageAura");
 		pVictim->RemoveAllAuras();
 

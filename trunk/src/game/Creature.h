@@ -159,10 +159,11 @@ class Creature : public Unit
 				inline void SetState(unsigned mask) { i_creatureState |= mask; }
 				inline void ClearState(unsigned mask) { i_creatureState &= ~mask; }
 				bool isPet() { return m_isPet; }
+				bool isCivilian() {	return (bool)GetCreatureInfo()->civilian; }
+
 				void SetisPet(bool val) { m_isPet=val; }
 		
-		
-		    
+				    
 				void AIM_Update(const uint32 &);
 				void AIM_Initialize(void);
 				MotionMaster* operator->(void) { return &i_motionMaster; }
