@@ -93,7 +93,7 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
 	    Traveller<Creature> traveller(creature);
 	    i_destinationHolder.UpdateTraveller(traveller, diff, true);
 	    creature.StopMoving();
-	    creature.setMoveRunFlag(rand() % 3); 
+	    creature.setMoveRunFlag(!urand(0,10));
 
 	    if( creature.getMoveRandomFlag() )
 	    {
