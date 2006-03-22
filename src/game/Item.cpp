@@ -429,7 +429,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner) {
 
 void Item::SaveToDB() {
     std::stringstream ss;
-    sDatabase.PExecute("DELETE FROM item_instances WHERE guid = '%u'",GetGUIDLow());
+    DeleteFromDB();
 
     ss.rdbuf()->str("");
     ss << "INSERT INTO item_instances (guid, data) VALUES ("
