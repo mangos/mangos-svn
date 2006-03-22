@@ -83,7 +83,7 @@ public:
 	void QuestItem( uint32 QuestId, uint8 Icon , bool Available);
 	void ClearMenu();
 
-	uint8 QuestMenu::QuestsInMenu()
+	uint8 QuestsInMenu()
 	{
 		return m_qItemsCount;
 	}
