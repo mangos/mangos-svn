@@ -3418,10 +3418,10 @@ void Player::UpdateHonor(void)
 	uint32 thisWeekKills = 0;
 	uint32 lastWeekKills = 0;
 
-	int total_honor = 0;
-	int yestardayHonor = 0;
-	int thisWeekHonor = 0;
-	int lastWeekHonor = 0;
+	float total_honor = 0;
+	float yestardayHonor = 0;
+	float thisWeekHonor = 0;
+	float lastWeekHonor = 0;
 
 	
 	time( &rawtime );
@@ -3448,7 +3448,7 @@ void Player::UpdateHonor(void)
 			else
 			if(fields[0].GetUInt32() == DISHONORABLE_KILL) lifetime_dishonorableKills++;
 			
-			total_honor += (int)fields[1].GetUInt32();
+			total_honor += fields[1].GetFloat();
 
 			date = fields[2].GetUInt32();
 
@@ -3460,28 +3460,23 @@ void Player::UpdateHonor(void)
 				if(fields[0].GetUInt32() == DISHONORABLE_KILL)
 					today_dishonorableKills++;
 			}
-			if(	date == Yestarday)
+			//if is a honorable kill
+			if(fields[0].GetUInt32() == HONORABLE_KILL)
 			{
-				if(fields[0].GetUInt32() == HONORABLE_KILL)
+				if(	date == Yestarday)
 				{
 					yestardayKills++;
-					yestardayHonor += fields[1].GetUInt32();
+					yestardayHonor += fields[1].GetFloat();
 				}
-			}
-			if( (date >= ThisWeekBegin) && (date < ThisWeekEnd) )
-			{
-				if(fields[0].GetUInt32() == HONORABLE_KILL)
+				if( (date >= ThisWeekBegin) && (date < ThisWeekEnd) )
 				{
 					thisWeekKills++;
-					thisWeekHonor += fields[1].GetUInt32();
+					thisWeekHonor += fields[1].GetFloat();
 				}
-			}
-			if( (date >= LastWeekBegin) && (date < LastWeekEnd) )
-			{
-				if(fields[0].GetUInt32() == HONORABLE_KILL)
+				if( (date >= LastWeekBegin) && (date < LastWeekEnd) )
 				{
 					lastWeekKills++;
-					lastWeekHonor += fields[1].GetUInt32();
+					lastWeekHonor += fields[1].GetFloat();
 				}
 			}
 
@@ -3503,17 +3498,18 @@ void Player::UpdateHonor(void)
 	SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
 	//YESTERDAY
 	SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, yestardayKills);
-	SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, yestardayHonor);
+	SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, (uint32)yestardayHonor);
 	//THIS WEEK
 	SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, thisWeekKills);
-	SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, thisWeekHonor);
+	SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, (uint32)thisWeekHonor);
 	//LAST WEEK
 	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, lastWeekKills);
-	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, lastWeekHonor);
+	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, (uint32)lastWeekHonor);
 	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, GetHonorLastWeekRank());
 
 	//RANK BAR //Total honor points
-	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, total_honor );
+	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, ( total_honor < 0 ? 0 : (uint32)total_honor ) );
+	sLog.outDetail("PLAYER: TOTAL HONOR F%f U%u", total_honor, (uint32)total_honor );
 	if( CalculateHonorRank(total_honor) )
 		SetUInt32Value(PLAYER_FIELD_HONOR_RANK, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) );
 	else
@@ -3524,25 +3520,25 @@ void Player::UpdateHonor(void)
 }
 
 
-int Player::CalculateHonorRank(int honor_points)
+int Player::CalculateHonorRank(float honor_points)
 {
 	int rank = 0;
 
-	if(honor_points <=    0) rank =  0; else
-	if(honor_points <   999) rank =  1;	else
-	if(honor_points <  4999) rank =  2;	else
-	if(honor_points <  9999) rank =  3;	else
-	if(honor_points < 14999) rank =  4;	else
-	if(honor_points < 19999) rank =  5;	else
-	if(honor_points < 24999) rank =  6;	else
-	if(honor_points < 29999) rank =  7;	else
-	if(honor_points < 34999) rank =  8;	else
-	if(honor_points < 39999) rank =  9;	else
-	if(honor_points < 44999) rank = 10;	else
-	if(honor_points < 49999) rank = 11;	else
-	if(honor_points < 54999) rank = 12;	else
-	if(honor_points < 59999) rank = 13;	else
-	if(honor_points < 65000) rank = 14; else
+	if(honor_points <=    0.00) rank =  0; else
+	if(honor_points <   999.99) rank =  1;	else
+	if(honor_points <  4999.99) rank =  2;	else
+	if(honor_points <  9999.99) rank =  3;	else
+	if(honor_points < 14999.99) rank =  4;	else
+	if(honor_points < 19999.99) rank =  5;	else
+	if(honor_points < 24999.99) rank =  6;	else
+	if(honor_points < 29999.99) rank =  7;	else
+	if(honor_points < 34999.99) rank =  8;	else
+	if(honor_points < 39999.99) rank =  9;	else
+	if(honor_points < 44999.99) rank = 10;	else
+	if(honor_points < 49999.99) rank = 11;	else
+	if(honor_points < 54999.99) rank = 12;	else
+	if(honor_points < 59999.99) rank = 13;	else
+	if(honor_points < 65000.00) rank = 14;  else
 		rank = 15;
 
 	return rank;
@@ -3566,7 +3562,7 @@ int Player::CalculateTotalKills(Player *pVictim)
 
 void Player::CalculateHonor(Unit *uVictim)
 {
-	int parcial_honor_points = 0;
+	float parcial_honor_points = 0;
 	int kill_type = 0;
 	bool savekill = false;
 
@@ -3580,7 +3576,7 @@ void Player::CalculateHonor(Unit *uVictim)
 		if( cVictim->isCivilian() )
 		{
 			kill_type = DISHONORABLE_KILL;
-			parcial_honor_points = -400;
+			parcial_honor_points = (float)-400;
 			savekill = true;
 		}
 	}
@@ -3598,12 +3594,12 @@ void Player::CalculateHonor(Unit *uVictim)
 			int v_rank = pVictim->CalculateHonorRank( pVictim->GetTotalHonor() );
 			int k_level = GetLevel();
 			int v_level = pVictim->GetLevel();
-			int diff_honor = (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1;
-			int diff_level = (uint8)(v_level*(1.0/(k_level)));
+			float diff_honor = (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1;
+			float diff_level = (v_level*(1.0/(k_level)));
 
 			kill_type = HONORABLE_KILL;		
 			int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
-			parcial_honor_points = (int)((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level));
+			parcial_honor_points = ((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level));
 			parcial_honor_points = (parcial_honor_points <= 400) ? parcial_honor_points : 400;
 
 			savekill = true;
@@ -3619,7 +3615,7 @@ void Player::CalculateHonor(Unit *uVictim)
 		now = localtime( &rawtime );
 		today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
 	
-		sDatabase.PExecute("INSERT INTO kills (killerID, victimID, honor_pts, date, type) VALUES (%d, %d, %d, %d, %u);", (uint32)GetGUID(), (uint32)uVictim->GetGUID(), (uint32)parcial_honor_points, (uint32)today, (uint8)kill_type);
+		sDatabase.PExecute("INSERT INTO kills (killerID, victimID, honor_pts, date, type) VALUES (%d, %d, %f, %d, %u);", (uint32)GetGUID(), (uint32)uVictim->GetGUID(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
 
 		UpdateHonor();
 	}

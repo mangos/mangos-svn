@@ -570,9 +570,9 @@ class Player : public Unit {
 		//Honor System
 		void UpdateHonor(void);
 		void CalculateHonor(Unit *pVictim);
-		int  CalculateHonorRank(int honor);
+		int  CalculateHonorRank(float honor);
 		int  CalculateTotalKills(Player *pVictim);
-		int  GetTotalHonor(void) { return m_total_honor_points; };
+		float GetTotalHonor(void) { return m_total_honor_points; };
 		int  GetHonorHighestRank(void) { return m_highest_rank; };
 		int  GetHonorLastWeekRank(void) { return m_last_week_rank; };
 		//End of Honor System
@@ -690,7 +690,7 @@ class Player : public Unit {
 
 		bool m_dontMove;
 
-		int m_total_honor_points;
+		float m_total_honor_points;
 		int m_highest_rank;
 		int m_last_week_rank;
 		//int m_rank;

@@ -233,8 +233,8 @@ bool ChatHandler::HandleShowHonor(const char* args)
 	uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);		
 	uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
 	uint32 highest_rank             = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK);
-	uint32 today_honorable_kills    = m_session->GetPlayer()->GetUInt32Value((uint16)PLAYER_FIELD_TODAY_KILLS);
-	uint32 today_dishonorable_kills = m_session->GetPlayer()->GetUInt32Value((uint16)PLAYER_FIELD_TODAY_KILLS >> 16);
+	uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_TODAY_KILLS);
+	uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_TODAY_KILLS)>>16);
 	uint32 yestarday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS);
 	uint32 yestarday_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR);
 	uint32 this_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS);
@@ -266,23 +266,23 @@ bool ChatHandler::HandleShowHonor(const char* args)
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Today: [Honorable Kills: |c00ff0000%u|r] [Dishonorable Kills: |cffff6060%u|r]", today_honorable_kills, today_dishonorable_kills);
+	sprintf(msg, "Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r]", today_honorable_kills, today_dishonorable_kills);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Yestarday: [Kills: |c00ff0000%u|r] [Honor: %u]", yestarday_kills, yestarday_honor);
+	sprintf(msg, "Yestarday: [Kills: |c0000ff00%u|r] [Honor: %u]", yestarday_kills, yestarday_honor);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "This Week: [Kills: |c00ff0000%u|r] [Honor: %u]", this_week_kills, this_week_honor);
+	sprintf(msg, "This Week: [Kills: |c0000ff00%u|r] [Honor: %u]", this_week_kills, this_week_honor);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Last Week: [Kills: |c00ff0000%u|r] [Honor: %u] [Standing: %u]", last_week_kills, last_week_honor, last_week_standing);
+	sprintf(msg, "Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]", last_week_kills, last_week_honor, last_week_standing);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 
-	sprintf(msg, "Life Time: [Honorable Kills: |c00ff0000%u|r] [Dishonorable Kills: |cffff6060%u|r] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
+	sprintf(msg, "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data ); 
 

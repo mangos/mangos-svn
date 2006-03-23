@@ -683,7 +683,7 @@ DROP TABLE IF EXISTS `kills`;
 CREATE TABLE `kills` (
   `killerID` int(32) NOT NULL default '0',
   `victimID` int(32) NOT NULL default '0',
-  `honor_pts` int(32) NOT NULL default '0',
+  `honor_pts` float NOT NULL default '0',
   `date` int(32) NOT NULL default '0',
   `type` smallint(5) unsigned NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
