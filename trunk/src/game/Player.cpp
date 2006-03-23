@@ -3444,11 +3444,17 @@ void Player::UpdateHonor(void)
         do
         {
             Field *fields = result->Fetch();
-            if(fields[0].GetUInt32() == HONORABLE_KILL) lifetime_honorableKills++;
-			else
-			if(fields[0].GetUInt32() == DISHONORABLE_KILL) lifetime_dishonorableKills++;
+            if(fields[0].GetUInt32() == HONORABLE_KILL)
+			{
+				lifetime_honorableKills++;
+				total_honor += fields[1].GetFloat();
+			}
+			else if(fields[0].GetUInt32() == DISHONORABLE_KILL)
+			{
+				lifetime_dishonorableKills++;
+				total_honor -= fields[1].GetFloat();
+			}
 			
-			total_honor += fields[1].GetFloat();
 
 			date = fields[2].GetUInt32();
 
@@ -3486,14 +3492,7 @@ void Player::UpdateHonor(void)
         delete result;
     }
 	
-	//LIFE TIME
-	SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
-	SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);		
-	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
-	if ( GetHonorHighestRank() )
-		SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
-	else
-		SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);
+
 	//TODAY
 	SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
 	//YESTERDAY
@@ -3508,12 +3507,26 @@ void Player::UpdateHonor(void)
 	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, GetHonorLastWeekRank());
 
 	//RANK BAR //Total honor points
-	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, ( total_honor < 0 ? 0 : (uint32)total_honor ) );
-	sLog.outDetail("PLAYER: TOTAL HONOR F%f U%u", total_honor, (uint32)total_honor );
+	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, (uint32)( (total_honor < 0) ? 0 : total_honor) );
+	
 	if( CalculateHonorRank(total_honor) )
 		SetUInt32Value(PLAYER_FIELD_HONOR_RANK, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) );
 	else
 		SetUInt32Value(PLAYER_FIELD_HONOR_RANK, 0);
+
+	//LIFE TIME
+	SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
+	SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);		
+	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
+	
+	//If the new rank is major then the old one, then highest rank is updated
+	if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
+		m_highest_rank = CalculateHonorRank(total_honor);
+
+	if ( GetHonorHighestRank() )
+		SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
+	else
+		SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);
 
 	//Store Total Honor points...
 	m_total_honor_points = total_honor;
@@ -3524,22 +3537,28 @@ int Player::CalculateHonorRank(float honor_points)
 {
 	int rank = 0;
 
-	if(honor_points <=    0.00) rank =  0; else
-	if(honor_points <   999.99) rank =  1;	else
-	if(honor_points <  4999.99) rank =  2;	else
-	if(honor_points <  9999.99) rank =  3;	else
-	if(honor_points < 14999.99) rank =  4;	else
-	if(honor_points < 19999.99) rank =  5;	else
-	if(honor_points < 24999.99) rank =  6;	else
-	if(honor_points < 29999.99) rank =  7;	else
-	if(honor_points < 34999.99) rank =  8;	else
-	if(honor_points < 39999.99) rank =  9;	else
-	if(honor_points < 44999.99) rank = 10;	else
-	if(honor_points < 49999.99) rank = 11;	else
-	if(honor_points < 54999.99) rank = 12;	else
-	if(honor_points < 59999.99) rank = 13;	else
-	if(honor_points < 65000.00) rank = 14;  else
-		rank = 15;
+//	int HK = GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS);
+
+	//Player need to kill 25 times in a week to begins rank count...
+//	if( HK >= 25 || honor_points >= 2000.00 )
+//	{
+		if(honor_points <=    0.00) rank =  0; else
+		if(honor_points <  2000.00) rank =  1;	else
+		if(honor_points <  5000.00) rank =  2;	else
+		if(honor_points < 10000.00) rank =  3;	else
+		if(honor_points < 15000.00) rank =  4;	else
+		if(honor_points < 20000.00) rank =  5;	else
+		if(honor_points < 25000.00) rank =  6;	else
+		if(honor_points < 30000.00) rank =  7;	else
+		if(honor_points < 35000.00) rank =  8;	else
+		if(honor_points < 40000.00) rank =  9;	else
+		if(honor_points < 45000.00) rank = 10;	else
+		if(honor_points < 50000.00) rank = 11;	else
+		if(honor_points < 55000.00) rank = 12;	else
+		if(honor_points < 60000.00) rank = 13;	else
+		if(honor_points < 65000.00) rank = 14;  else
+			rank = 15;
+//	}
 
 	return rank;
 }
@@ -3575,8 +3594,8 @@ void Player::CalculateHonor(Unit *uVictim)
 		Creature *cVictim = (Creature *)uVictim;
 		if( cVictim->isCivilian() )
 		{
+			parcial_honor_points = MaNGOS::Honor::DishonorableKillPoints( GetLevel() );
 			kill_type = DISHONORABLE_KILL;
-			parcial_honor_points = (float)-400;
 			savekill = true;
 		}
 	}
@@ -3589,19 +3608,9 @@ void Player::CalculateHonor(Unit *uVictim)
 
 		if( GetLevel() < (pVictim->GetLevel()+5) )
 		{
-			int total_kills = CalculateTotalKills(pVictim);
-			int k_rank = CalculateHonorRank(GetTotalHonor());
-			int v_rank = pVictim->CalculateHonorRank( pVictim->GetTotalHonor() );
-			int k_level = GetLevel();
-			int v_level = pVictim->GetLevel();
-			float diff_honor = (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1;
-			float diff_level = (v_level*(1.0/(k_level)));
+			parcial_honor_points = MaNGOS::Honor::HonorableKillPoints(CalculateTotalKills(pVictim), CalculateHonorRank( GetTotalHonor() ), pVictim->CalculateHonorRank( pVictim->GetTotalHonor() ), GetLevel(), pVictim->GetLevel(), (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1, (pVictim->GetLevel()*(1.0/( GetLevel() )))  );
 
-			kill_type = HONORABLE_KILL;		
-			int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
-			parcial_honor_points = ((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level));
-			parcial_honor_points = (parcial_honor_points <= 400) ? parcial_honor_points : 400;
-
+			kill_type = HONORABLE_KILL;				
 			savekill = true;
 		}
 	}
