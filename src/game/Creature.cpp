@@ -606,7 +606,7 @@ void Creature::_LoadGoods()
 
 		if (getItemCount() >= MAX_CREATURE_ITEMS)
 		{
-		    sLog.outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetNameID(), getItemCount(), MAX_CREATURE_ITEMS );
+		    sLog.outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetUInt32Value(OBJECT_FIELD_ENTRY), getItemCount(), MAX_CREATURE_ITEMS );
 			break;
 		}
 
