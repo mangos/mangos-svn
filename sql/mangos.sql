@@ -1308,12 +1308,12 @@ CREATE TABLE `tutorials` (
 
 DROP TABLE IF EXISTS `vendors`;
 CREATE TABLE `vendors` (
-  `vendorGuid` bigint(20) unsigned NOT NULL default '0',
+  `entry` bigint(20) unsigned NOT NULL default '0',
   `itemGuid` bigint(20) unsigned NOT NULL default '0',
   `amount` bigint(20) NOT NULL default '5',
   `index_id` bigint(20) NOT NULL auto_increment,
   PRIMARY KEY  (`index_id`),
   UNIQUE KEY `index_id` (`index_id`),
-  KEY `vendor_id` (`vendorGuid`)
+  KEY `vendor_id` (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='InnoDB free: 18432 kB';
 

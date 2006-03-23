@@ -593,8 +593,7 @@ void Creature::_LoadGoods()
     itemcount = 0;
 	//this needs fix, it's wrong to save goods by vendor GUID, as it may change del-spawn op
 	//it should be stored by 'entry' field id (c) Phantomas
-	return;
-	/*
+	//Use entry instead of GUID, fixed by Ant009 need more test
 	
 	QueryResult *result = sDatabase.PQuery("SELECT * FROM vendors WHERE vendorGuid = '%u';", GetUInt32Value(OBJECT_FIELD_ENTRY));
 
@@ -618,7 +617,7 @@ void Creature::_LoadGoods()
 	while( result->NextRow() );
 
 	delete result;
-*/
+
 }
 
 
