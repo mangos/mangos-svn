@@ -554,7 +554,7 @@ CREATE TABLE `item_pages` (
 --
 
 DROP TABLE IF EXISTS `itemstemplate`;
-CREATE TABLE `items` (
+CREATE TABLE `itemstemplate` (
   `entry` int(255) UNSIGNED NOT NULL default '0',
   `class` int(30) UNSIGNED NOT NULL default '0',
   `subclass` int(30) UNSIGNED NOT NULL default '0',
