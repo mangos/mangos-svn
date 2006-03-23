@@ -551,7 +551,7 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data ) {
                     data << uint32( 0 );
 
 		// That should be OR or AND ?
-		sDatabase.PExecute("DELETE * FROM vendors WHERE vendorGuid = '%u' AND itemGuid = '%u'", guidlow,unit->getItemId(i));
+		sDatabase.PExecute("DELETE * FROM vendors WHERE entry = '%u' AND itemGuid = '%u'", unit->GetEntry(),unit->getItemId(i));
 
                 unit->setItemAmount(i,0);
                 unit->setItemId(i,0);
@@ -619,7 +619,7 @@ void WorldSession::SendListInventory( uint64 guid ) {
                 for( int a = 0; a < 7; a ++ )
                     data << uint32( 0 );
 
-		sDatabase.PExecute("DELETE * FROM vendors WHERE vendorGuid = '%u' AND itemGuid = '%u'", guidlow,unit->getItemId(i));
+		sDatabase.PExecute("DELETE * FROM vendors WHERE entry = '%u' AND itemGuid = '%u'", unit->GetEntry(),unit->getItemId(i));
 
                 unit->setItemAmount(i,0);
                 unit->setItemId(i,0);
