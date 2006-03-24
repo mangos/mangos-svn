@@ -14,4 +14,4 @@
 -- Dumping data for table `realms`
 -- 
 
-INSERT INTO `realms` VALUES (1, 'Man''Gos', '127.0.0.1:8129', 1, 0, 1);
+INSERT INTO `realms` VALUES (1, 'MaNGOS', '127.0.0.1:8129', 1, 0, 1);

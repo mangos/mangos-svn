@@ -197,4 +197,3 @@ INSERT INTO playercreateinfo
   (createId, race, class, mapID, zoneID, positionX, positionY, positionZ, displayID, BaseStrength, BaseAgility, BaseStamina, BaseIntellect, BaseSpirit, BaseHealth, BaseMana, BaseRage, BaseFocus, BaseEnergy, attackpower, mindmg, maxdmg)
 VALUES
   (43, 6, 11, 1, 215, -2917.58, -257.98, 52.9968, 59, 26, 15, 22, 17, 24, 74, 67, 0, 0, 0, 30, 4, 4);
-
