@@ -429,7 +429,7 @@ void Spell::cast()
 	if(castResult == 0)
 	{
 		TakePower();
-		RemoveItems();
+		//RemoveItems();
 		FillTargetMap();
 		SendCastResult(castResult);
 		SendSpellGo();

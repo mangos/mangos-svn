@@ -685,7 +685,7 @@ void Spell::EffectLearnSkill(uint32 i)
 {
 	uint32 skillid =  m_spellInfo->EffectMiscValue[i];
 	uint16 skillval = ((Player*)unitTarget)->GetSkillValue(skillid);
-	((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,(damage+1)*75);
+	((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
 }
 
 void Spell::EffectEnchantItemPerm(uint32 i) 
@@ -1336,7 +1336,7 @@ void Spell::EffectSkinning(uint32 i)
 	assert(m_caster);
 	
     
-	if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= unitTarget->getLevel()*5)
+	if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= (unitTarget->getLevel()-1)*5)
 	{
 		((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
 	}else
