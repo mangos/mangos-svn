@@ -349,7 +349,7 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
 
     if( i >= BANK_SLOT_BAG_END )
 	{
-        QueryResult *result = sDatabase.PQuery( "SELECT entry FROM items WHERE displayid='%u'", displayID );
+        QueryResult *result = sDatabase.PQuery( "SELECT entry FROM itemstemplate WHERE displayid='%u'", displayID );
 
 		if( !result )
 		{
