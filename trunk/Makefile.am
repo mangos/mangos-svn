@@ -16,7 +16,7 @@
 
 ## Process this file with automake to produce Makefile.in
 
-EXTRA_DIST = reconf configure TODO
+EXTRA_DIST = reconf configure
 SUBDIRS = doc dep src sql
 
 # Win32 project workspace for Visual Studio .NET 2003
