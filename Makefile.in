@@ -237,7 +237,7 @@ target_alias = @target_alias@
 # OpenSSL shared library (Win32)
 
 # SQLite shared library (Win32)
-EXTRA_DIST = reconf configure TODO win/mangosdVC71.sln \
+EXTRA_DIST = reconf configure win/mangosdVC71.sln \
 	win/VC71/framework.vcproj win/VC71/game.vcproj \
 	win/VC71/mangosd.vcproj win/VC71/realmd.vcproj \
 	win/VC71/shared.vcproj win/VC71/zlib.vcproj \
@@ -541,7 +541,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/dep/include/mysql $(distdir)/dep/include/openssl $(distdir)/dep/include/sqlite $(distdir)/dep/include/zlib $(distdir)/dep/include/zthread $(distdir)/dep/lib $(distdir)/dep/lib/debug $(distdir)/dep/lib/release $(distdir)/doc $(distdir)/src/shared $(distdir)/win $(distdir)/win/VC71 $(distdir)/win/VC80 $(distdir)/win_intel $(distdir)/win_intel/VC71
+	$(mkdir_p) $(distdir)/dep/include/mysql $(distdir)/dep/include/openssl $(distdir)/dep/include/sqlite $(distdir)/dep/include/zlib $(distdir)/dep/include/zthread $(distdir)/dep/lib $(distdir)/dep/lib/debug $(distdir)/dep/lib/release $(distdir)/doc $(distdir)/src/mangosd $(distdir)/src/shared $(distdir)/win $(distdir)/win/VC71 $(distdir)/win/VC80 $(distdir)/win_intel $(distdir)/win_intel/VC71
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
