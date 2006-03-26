@@ -25,7 +25,7 @@
 #include "CellImpl.h"
 #include "Map.h"
 #include "GridNotifiersImpl.h"
-
+#include "Config/ConfigEnv.h"
 
 #define DEFAULT_GRID_EXPIRY     300
 
@@ -48,7 +48,18 @@ GridMap * LoadMAP(int mapid,int x,int y)
     char tmp[32];
     static bool showcheckmapInfo=false;
     static int oldx=0,oldy=0;
-    sprintf(tmp,"maps/%03u%02u%02u.map",mapid,x,y);
+
+    std::string dataPath="./";
+    
+    if(!sConfig.GetString("DataDir",&dataPath))
+	dataPath="./";
+    else
+    {
+	if(dataPath.at(dataPath.length()-1)!='/')
+	    dataPath.append("/");
+    }
+    
+    sprintf(tmp,(char *)(dataPath+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
 
     if( (oldx!=x) || (oldy!=y) )
     {

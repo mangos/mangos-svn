@@ -383,6 +383,7 @@ AC_CONFIG_FILES([
    src/bindings/python/Makefile
    src/bindings/universal/Makefile
    src/mangosd/Makefile
+   src/mangosd/mangosd.conf
    dep/Makefile
    dep/src/Makefile
    dep/src/zlib/Makefile

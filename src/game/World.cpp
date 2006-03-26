@@ -89,6 +89,9 @@ void World::AddSession(WorldSession* s)
 
 void World::SetInitialWorldSettings()
 {
+    std::string dataPath="./";
+    std::string tmpPath="";
+
     srand((unsigned int)time(NULL));
     m_lastTick = time(NULL);
     
@@ -103,41 +106,86 @@ void World::SetInitialWorldSettings()
     strftime( minute, 3, "%M", tmPtr );
     strftime( second, 3, "%S", tmPtr );
     
-    m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
+    if(!sConfig.GetString("DataDir",&dataPath))
+	dataPath="./";
+    else
+    {
+	if(dataPath.at(dataPath.length()-1)!='/')
+	    dataPath.append("/");
+    }
 
+    sLog.outString("Using DataDir %s ...",dataPath.c_str());
+
+    m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
     
     sDatabase.PExecute("UPDATE characters set online=0;");
     
     new ChannelMgr;
 
 
-	sLog.outString("Initialize data stores...");
+    sLog.outString("Initialize data stores...");
     barGoLink bar( 12 );
     bar.step();
-    sEmoteStore.Load("dbc/EmotesText.dbc");
+    
+    tmpPath=dataPath;
+    tmpPath.append("dbc/EmotesText.dbc");
+    sEmoteStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sSpellStore.Load("dbc/Spell.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Spell.dbc");
+    sSpellStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sSpellRange.Load("dbc/SpellRange.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellRange.dbc");
+    sSpellRange.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sCastTime.Load("dbc/SpellCastTimes.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellCastTimes.dbc");
+    sCastTime.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sSpellDuration.Load("dbc/SpellDuration.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellDuration.dbc");
+    sSpellDuration.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sSpellRadius.Load("dbc/SpellRadius.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellRadius.dbc");
+    sSpellRadius.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sTalentStore.Load("dbc/Talent.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Talent.dbc");
+    sTalentStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sFactionStore.Load("dbc/Faction.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Faction.dbc");
+    sFactionStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sFactionTemplateStore.Load("dbc/FactionTemplate.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/FactionTemplate.dbc");
+    sFactionTemplateStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-    sItemDisplayTemplateStore.Load("dbc/ItemDisplayInfo.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/ItemDisplayInfo.dbc");
+    sItemDisplayTemplateStore.Load((char *)(tmpPath.c_str()));
     bar.step();
 	
-	sItemSetStore.Load("dbc/ItemSet.dbc");
+    tmpPath=dataPath;
+    tmpPath.append("dbc/ItemSet.dbc");
+    sItemSetStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-	sAreaStore.Load("dbc/AreaTable.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/AreaTable.dbc");
+    sAreaStore.Load((char *)(tmpPath.c_str()));
+
     sLog.outString( "" );
     sLog.outString( ">> Loaded 12 data stores" );
     sLog.outString( "" );

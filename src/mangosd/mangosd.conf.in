@@ -1,5 +1,8 @@
 # MaNGOS Configuration file
 
+# Data directory setting.
+DataDir = @MANGOSD_DATA@
+
 # Database connection settings.
 # Default: localhost,mangos,mangos,mangos
 DatabaseInfo = "127.0.0.1;mangos;mangos;mangos"
