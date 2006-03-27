@@ -127,6 +127,7 @@ Player::~Player ()
     }
     CleanupChannels();
 
+	delete info;
     delete PlayerTalkClass;
 }
 
@@ -182,16 +183,15 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
                                          
     
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-    
-    SetUInt32Value(UNIT_FIELD_STR, info->strength );
+	SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
     SetUInt32Value(UNIT_FIELD_STAMINA, info->stamina );
     SetUInt32Value(UNIT_FIELD_IQ, info->intellect );
     SetUInt32Value(UNIT_FIELD_SPIRIT, info->spirit );
 	SetUInt32Value(UNIT_FIELD_ARMOR, info->basearmor );
 	SetUInt32Value(UNIT_FIELD_ATTACKPOWER, info->attackpower );
-    
-    SetUInt32Value(UNIT_FIELD_HEALTH, info->health);
+
+	SetUInt32Value(UNIT_FIELD_HEALTH, info->health);
 	SetUInt32Value(UNIT_FIELD_MAXHEALTH, info->health);
 
     SetUInt32Value(UNIT_FIELD_POWER1, info->mana );
@@ -236,6 +236,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+
 /*  
 	SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
     SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
@@ -321,22 +322,19 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 			action_itr[i]++;
 	}
 
-	delete info;
-
 	m_petInfoId = 0;
 	m_petLevel = 0;
 	m_petFamilyId = 0;
 
 	m_highest_rank = 0;
 	m_last_week_rank = 0;
-
 }
 
 void Player::StartMirrorTimer(uint8 Type, uint32 MaxValue)
 {
 	//TYPE: 0 = fartigua 1 = breath 2 = fire?
 	WorldPacket data;
-	uint32 BreathRegen = (uint8)-1;
+	uint32 BreathRegen = -1;
 	data.Initialize(SMSG_START_MIRROR_TIMER);
 	data << (uint32)Type;	
 	data << MaxValue;
@@ -1283,7 +1281,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 		uint32 xpunrested = xp/2;
 		data << uint32(xpunrested); // unrested given experience
 		data << uint8(0) << uint8(0) << uint8(0x80) << uint8(0x3f); // unknown (static.. it was same at 4 different killed creatures!)
-		GetSession()->SendPacket(&data);
+        GetSession()->SendPacket(&data);
 	}
 
 	uint32 curXP = GetUInt32Value(PLAYER_XP);
@@ -1338,7 +1336,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 		
 		SetUInt32Value(UNIT_FIELD_HEALTH, newHP);
 		SetUInt32Value(UNIT_FIELD_MAXHEALTH, newHP);
-		
+				
 		SetUInt32Value(UNIT_FIELD_STR, newSTR);
 		SetUInt32Value(UNIT_FIELD_STAMINA, newSTA);
 		SetUInt32Value(UNIT_FIELD_AGILITY, newAGI);
@@ -1903,10 +1901,14 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
      
         updateMask->SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2) + 1));
         
-        
-        
-        updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
+        //updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
+		
     }
+	//Players visible items are not inventory stuff
+	for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
+    {
+		updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
+	}
 
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01);
@@ -1917,6 +1919,7 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_03);
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_04);
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_INFO_05);
+
 }
 
 
@@ -1983,7 +1986,7 @@ void Player::SaveToDB() {
 	RemoveFlag( UNIT_FIELD_FLAGS, 0x40000 );
 
     
-	_RemoveStatsMods();  
+	_RemoveStatsMods();
 	_RemoveAllItemMods();
 	_RemoveAllAuraMods();
 
@@ -2003,9 +2006,7 @@ void Player::SaveToDB() {
         << m_name << "', "
         << m_race << ", "
         << m_class << ", "
-	
-        << m_mapId << ", "
-   
+	    << m_mapId << ", "
         << m_positionX << ", "
         << m_positionY << ", "
         << m_positionZ << ", "
@@ -2013,7 +2014,9 @@ void Player::SaveToDB() {
 
 	uint16 i;
 	for( i = 0; i < m_valuesCount; i++ )
+	{
         ss << GetUInt32Value(i) << " ";
+	}
 
 	ss << "', '";
 
@@ -2049,7 +2052,8 @@ void Player::SaveToDB() {
 		
 	_ApplyAllAuraMods();
 	_ApplyAllItemMods();
-	_ApplyStatsMods();
+	//_ApplyStatsMods();
+	//_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
 
 	if (inworld)
     AddToWorld();
