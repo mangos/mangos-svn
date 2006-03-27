@@ -744,6 +744,8 @@ unsigned long net_safe_read(MYSQL* mysql);
 #pragma pack(pop)
 #endif
 
+#endif
+
 #ifdef	__cplusplus
 }
 #endif
