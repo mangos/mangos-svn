@@ -64,6 +64,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
     if(iter != tokens.end())
         database = *iter++;
 
+    mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
     mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
         password.c_str(), database.c_str(), 0, 0, 0);
 
