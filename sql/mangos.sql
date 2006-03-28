@@ -250,7 +250,7 @@ CREATE TABLE `creatures` (
   `faction` int(10) unsigned NOT NULL default '0',
   `auras` longtext NOT NULL,
   UNIQUE KEY `guid` (`guid`),
-  KEY `map` (`map`)
+  KEY `mapId` (`mapId`)
 ) TYPE=MyISAM; 
 --
 -- Table structure for table `creatures_grid`
