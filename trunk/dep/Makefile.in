@@ -14,7 +14,7 @@
 
 @SET_MAKE@
 
-# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 VPATH = @srcdir@

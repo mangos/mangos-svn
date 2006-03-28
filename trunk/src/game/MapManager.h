@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,11 @@
 #ifndef MANGOS_MAPMANAGER_H
 #define MANGOS_MAPMANAGER_H
 
-
- 
-
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "zthread/Mutex.h"
 #include "Common.h"
 #include "Map.h"
-
 
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >
 {

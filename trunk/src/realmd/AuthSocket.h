@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,9 +23,10 @@
 #include "Auth/BigNumber.h"
 #include "Auth/Sha1.h"
 #include "Network/TcpSocket.h"
-#include "../../dep/include/openssl/md5.h"
+#include <openssl/md5.h>
 #include "Config/ConfigEnv.h" 
 #include "SystemConfig.h"
+
 class SocketHandler;
 class AuthSocket;
 #define ChunkSize 2048

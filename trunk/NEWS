@@ -1,11 +1,17 @@
 MaNGOS -- History of visible changes.
 
-Copyright (c) 2005 MaNGOS <http://www.mangosproject.org/>
+Copyright (c) 2005,2006 MaNGOS <http://www.mangosproject.org/>
 
 See the COPYING file for copying conditions.
 
 Please submit bug reports at:
-http://www.mangosproject.org/forum/
+httsp://svn.mangosproject.org/trac/MaNGOS/
+
+Visit our forums for support:
+http://www.mangosproject.org/
+
+Version 0.5
+ * Under discussion
 
 Version 0.1
  * AI system
