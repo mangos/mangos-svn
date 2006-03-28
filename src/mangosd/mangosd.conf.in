@@ -4,7 +4,7 @@
 DataDir = @MANGOSD_DATA@
 
 # Database connection settings.
-# Default: localhost,mangos,mangos,mangos
+# Default: hostname,username,password,database
 DatabaseInfo = "127.0.0.1;mangos;mangos;mangos"
 
 # IP or DNS of the server (both realm and world).
