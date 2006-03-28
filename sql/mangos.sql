@@ -229,7 +229,7 @@ DROP TABLE IF EXISTS `creatures`;
 CREATE TABLE `creatures` (
   `guid` int(10) unsigned NOT NULL default '0',
   `entry` int(10) unsigned NOT NULL default '0',
-  `map` int(10) unsigned NOT NULL default '0',
+  `mapId` int(10) unsigned NOT NULL default '0',
   `positionX` float NOT NULL default '0',
   `positionY` float NOT NULL default '0',
   `positionZ` float NOT NULL default '0',
