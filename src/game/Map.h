@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@
 #ifndef MANGOS_MAP_H
 #define MANGOS_MAP_H
 
-
-
 #include "Platform/Define.h"
 #include "Policies/ThreadingModel.h"
 #include "zthread/Lockable.h"
@@ -28,7 +26,6 @@
 #include "zthread/FairReadWriteLock.h"
 #include "GridDefines.h"
 #include "Cell.h"
-
 
 namespace ZThread
 {

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@
 
 #if !defined(QUERYRESULTSQLITE_H)
 #define QUERYRESULTSQLITE_H
-
 
 #include <sqlite/sqlite.h>
 

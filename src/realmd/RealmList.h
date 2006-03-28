@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@
 
 #ifndef _REALMLIST_H
 #define _REALMLIST_H
-
-
 
 #include "Network/socket_include.h"
 #include "Policies/Singleton.h"

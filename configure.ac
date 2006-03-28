@@ -1,4 +1,4 @@
-# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without
@@ -12,7 +12,7 @@
 
 AC_PREREQ(2.59)
 AC_INIT([MaNGOS],
-        [0.2-SVN],
+        [0.5-SVN],
         [http://www.mangosproject.org/],
         [mangos])
 AM_CONFIG_HEADER([config.h])

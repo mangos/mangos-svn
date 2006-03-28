@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 #define RACE_HUMAN							1
 #define RACE_ORC							2
 #define RACE_DWARF							3
-#define RACE_NIGHT_ELF							4
+#define RACE_NIGHT_ELF						4
 #define RACE_UNDEAD							5
 #define RACE_TAUREN							6
 #define RACE_GNOME							7

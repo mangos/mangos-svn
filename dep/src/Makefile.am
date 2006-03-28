@@ -1,3 +1,3 @@
-# Copyright (C) 2005 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
 
 SUBDIRS = zthread zlib

@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,13 +17,12 @@
  */
 
 #if !defined(CONFIGENVIRONMENT_H)
+
 #define CONFIGENVIRONMENT_H
 
-
 #include "Common.h"
-
-
 #include "dotconfpp/dotconfpp.h"
 #include "Config.h"
 #include "Log.h"
+
 #endif

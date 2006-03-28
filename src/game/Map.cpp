@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,9 +28,8 @@
 #include "Config/ConfigEnv.h"
 
 #define DEFAULT_GRID_EXPIRY     300
-
-
 #define MAX_GRID_LOAD_TIME      50 
+
 static GridState* si_GridStates[MAX_GRID_STATE];
 
 inline

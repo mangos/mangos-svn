@@ -1,5 +1,5 @@
 /* 
- * Copyright (C) 2005 MaNGOS <http://www.magosproject.org/>
+ * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,18 +19,11 @@
 #ifndef MANGOS_UTILITIES_H
 #define MANGOS_UTILITIES_H
 
-
-
 #include "Object.h"
 #include "Map.h"
 
-
-
-
-
 #define VISIBILITY_RANGE    10000
 #define SPIRIT_HEALER       5233
-
 
 #define IN_LINE_OF_SIGHT         900
 
