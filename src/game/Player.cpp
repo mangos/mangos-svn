@@ -3541,28 +3541,10 @@ int Player::CalculateHonorRank(float honor_points)
 {
 	int rank = 0;
 
-//	int HK = GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS);
-
-	//Player need to kill 25 times in a week to begins rank count...
-//	if( HK >= 25 || honor_points >= 2000.00 )
-//	{
-		if(honor_points <=    0.00) rank =  0; else
-		if(honor_points <  2000.00) rank =  1;	else
-		if(honor_points <  5000.00) rank =  2;	else
-		if(honor_points < 10000.00) rank =  3;	else
-		if(honor_points < 15000.00) rank =  4;	else
-		if(honor_points < 20000.00) rank =  5;	else
-		if(honor_points < 25000.00) rank =  6;	else
-		if(honor_points < 30000.00) rank =  7;	else
-		if(honor_points < 35000.00) rank =  8;	else
-		if(honor_points < 40000.00) rank =  9;	else
-		if(honor_points < 45000.00) rank = 10;	else
-		if(honor_points < 50000.00) rank = 11;	else
-		if(honor_points < 55000.00) rank = 12;	else
-		if(honor_points < 60000.00) rank = 13;	else
-		if(honor_points < 65000.00) rank = 14;  else
-			rank = 15;
-//	}
+		if(honor_points <=    0.00) rank = 0; else
+		if(honor_points <  2000.00) rank = 1; else
+		if(honor_points <  5000.00)
+			rank = ( (int)(honor_points / 5000) + 1);
 
 	return rank;
 }
