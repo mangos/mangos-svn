@@ -369,7 +369,7 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
     chr->SetUInt32Value( UNIT_FIELD_MAXPOWER4, manam );
     chr->SetUInt32Value( UNIT_FIELD_POWER4, mana );
 
-    sLog.outString("current energy: %u\n",chr->GetUInt32Value( UNIT_FIELD_MAXPOWER4));
+    sLog.outString("current energy: %u",chr->GetUInt32Value( UNIT_FIELD_MAXPOWER4));
 
     return true;
 }

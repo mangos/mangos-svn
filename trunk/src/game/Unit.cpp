@@ -525,7 +525,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
 	if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
 	{
-		sLog.outString("Spell Delayed!\n");
+		sLog.outString("Spell Delayed!");
 		pVictim->m_currentSpell->Delayed((int32)(0.25f * pVictim->m_currentSpell->casttime));
 	}
 }

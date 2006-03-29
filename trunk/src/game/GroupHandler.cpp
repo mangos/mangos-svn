@@ -342,7 +342,7 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 
     if(group==NULL)
     {
-        sLog.outString("Not in a group\n");
+        sLog.outString("Not in a group");
         return;
     }
 
