@@ -2423,9 +2423,9 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM queststatus WHERE playerId = '%u'",guid);    
     sDatabase.PExecute("DELETE FROM char_actions WHERE charId = '%d'",guid);    
     sDatabase.PExecute("DELETE FROM reputation WHERE playerID = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM honor WHERE guid = '%d'",guid);
     sDatabase.PExecute("DELETE FROM homebind WHERE guid = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM honor WHERE guid = '%d'",guid);
+    // Honor table does not exist anymore.
+    // sDatabase.PExecute("DELETE FROM honor WHERE guid = '%d'",guid);
     sDatabase.PExecute("DELETE FROM kills WHERE killerID = '%d'",guid);
 }
 
