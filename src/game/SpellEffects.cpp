@@ -552,7 +552,7 @@ void Spell::EffectOpenLock(uint32 i)
 			break;
 			default:
 				requiredskill=1;
-				sLog.outString("Unknown herb %u\n",displayid);
+				sLog.outString("Unknown herb %u",displayid);
 			break;
 		}
 		if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM)<requiredskill)
@@ -595,7 +595,7 @@ void Spell::EffectOpenLock(uint32 i)
 			
 			default:
 				requiredskill=1;
-				sLog.outString("Unknown vein %u\n",id);
+				sLog.outString("Unknown vein %u",id);
 			break;
 		}
 		if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) < requiredskill)

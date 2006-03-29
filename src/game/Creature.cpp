@@ -488,7 +488,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
 	CreatureInfo *cinfo = objmgr.GetCreatureTemplate(Entry);
 	if(!cinfo) {
-		sLog.outString("Error: creature entry %u does not exist.\n",Entry);
+		sLog.outString("Error: creature entry %u does not exist.",Entry);
 		return false;
 	}
 	SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID );
