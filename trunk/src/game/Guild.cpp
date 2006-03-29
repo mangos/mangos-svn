@@ -304,7 +304,7 @@ void Guild::SaveMemberToDB(MemberSlot *memslot)
 {
 	if(!memslot) return;
 	
-	sDatabase.PExecute("DELETE FROM guilds_members WHERE memguid = '%u';",memslot->guid);
+	sDatabase.PExecute("DELETE FROM guilds_members WHERE guid = '%u';",memslot->guid);
 	sDatabase.PExecute("INSERT INTO guilds_members VALUES ('%u', '%u', '%u', '%s', '%s');", Id, memslot->guid, memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
 }
 
@@ -326,7 +326,7 @@ void Guild::DelGuildMembersFromDB()
 
 void Guild::DelMemberFromDB(uint64 guid)
 {	
-	sDatabase.PExecute("DELETE FROM guilds_members WHERE memguid = '%d';",guid);
+	sDatabase.PExecute("DELETE FROM guilds_members WHERE guid = '%d';",guid);
 }
 
 void Guild::BroadcastToGuild(WorldSession *session, std::string msg)

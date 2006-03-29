@@ -1576,7 +1576,7 @@ void Player::_SaveAuctions()
 
 	    sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%u'",it->GetGUIDLow());
             
-            sDatabase.PExecute("INSERT INTO auctionhouse (auctioneerguid, itemguid,itemowner,buyoutprice,time,buyguid,lastbid,Id) VALUES ('%d', '%d', '%d', '%d', '%u', '%d', '%d', '%d');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+            sDatabase.PExecute("INSERT INTO auctionhouse (auctioneerguid, itemguid, itemowner, buyoutprice, time, buyguid, lastbid, id) VALUES ('%d', '%d', '%d', '%d', '%u', '%d', '%d', '%d');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
 
             std::stringstream ss;
             ss << "INSERT INTO auctioned_items (guid, data) VALUES ("
@@ -1602,7 +1602,7 @@ void Player::_SaveMail()
     {
         Mail *m = (*itr);
 
-        QueryResult *result = sDatabase.PQuery("INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
+        QueryResult *result = sDatabase.PQuery("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
         delete result;
     }
 }
@@ -1618,7 +1618,7 @@ void Player::_SaveBids()
         AuctionEntry *a = objmgr.GetAuction((*itr)->AuctionID);
         if (a)
         {
-            sDatabase.PExecute("INSERT INTO bids (bidder, Id, amt) VALUES ('%d', '%d', '%d');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
+            sDatabase.PExecute("INSERT INTO bids (bidder, id, amt) VALUES ('%d', '%d', '%d');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
         }
     }
 
@@ -1663,7 +1663,7 @@ void Player::_LoadBids()
     
     m_bids.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT Id,amt FROM bids WHERE bidder = '%d';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT id, amt FROM bids WHERE bidder = '%d';",GetGUIDLow());
 
     if(result)
     {

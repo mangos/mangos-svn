@@ -344,7 +344,7 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 	SendPacket( &data );	
 
 	// update sql homebind
-	sDatabase.PExecute("UPDATE `homebind` SET mapID = '%d', zoneID = '%d', positionX = '%f', positionY = '%f', positionZ = '%f' WHERE guid = '%lu';", GetPlayer( )->GetMapId(), GetPlayer( )->GetZoneId(), GetPlayer( )->GetPositionX(), GetPlayer( )->GetPositionY(), GetPlayer( )->GetPositionZ(), (unsigned long)GetPlayer( )->GetGUID());
+	sDatabase.PExecute("UPDATE `homebind` SET mapid = '%d', zoneid = '%d', positionx = '%f', positiony = '%f', positionz = '%f' WHERE guid = '%lu';", GetPlayer( )->GetMapId(), GetPlayer( )->GetZoneId(), GetPlayer( )->GetPositionX(), GetPlayer( )->GetPositionY(), GetPlayer( )->GetPositionZ(), (unsigned long)GetPlayer( )->GetGUID());
 
 	// send spell for bind 3286 bind magic
 	data.Initialize(SMSG_SPELL_START );

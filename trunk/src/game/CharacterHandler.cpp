@@ -203,29 +203,29 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
             if ( cnt > 0 )
             {
-                QueryResult *result4 = sDatabase.PQuery("SELECT mapID,zoneID,positionX,positionY,positionZ from homebind where guid = '%d';", playerGuid);
+                QueryResult *result4 = sDatabase.PQuery("SELECT mapid, zoneid, positionx, positiony, positionz from homebind where guid = '%d';", playerGuid);
                 fields = result4->Fetch();
                 data.Initialize (SMSG_BINDPOINTUPDATE);
                 data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
                 data << fields[0].GetUInt32();
                 data << fields[1].GetUInt32();
                 SendPacket (&data);
-                DEBUG_LOG("Setting player home position: mapID is: %d, zoneID is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+                DEBUG_LOG("Setting player home position: mapid is: %d, zoneid is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
                 delete result4;
             }
             else {
                 int plrace = GetPlayer()->getRace();
                 int plclass = GetPlayer()->getClass();
-                QueryResult *result5 = sDatabase.PQuery("SELECT mapID,zoneID,positionX,positionY,positionZ from playercreateinfo where race = '%u' AND class = '%u';", plrace, plclass);
+                QueryResult *result5 = sDatabase.PQuery("SELECT mapid, zoneid, positionx, positiony, positionz from playercreateinfo where race = '%u' AND class = '%u';", plrace, plclass);
                 fields = result5->Fetch();
                 // store and send homebind for player
-                sDatabase.PExecute("INSERT INTO `homebind` (guid, mapID, zoneID, positionX, positionY, positionZ) VALUES ('%lu', '%d', '%d', '%f', '%f', '%f');", (unsigned long)playerGuid, fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+                sDatabase.PExecute("INSERT INTO `homebind` (guid, mapid, zoneid, positionx, positiony, positionz) VALUES ('%lu', '%d', '%d', '%f', '%f', '%f');", (unsigned long)playerGuid, fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
                 data.Initialize (SMSG_BINDPOINTUPDATE);
                 data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
                 data << fields[0].GetUInt32();
                 data << fields[1].GetUInt32();
                 SendPacket (&data);
-                DEBUG_LOG("Setting player home position: mapID is: %d, zoneID is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+                DEBUG_LOG("Setting player home position: mapid is: %d, zoneid is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
                 delete result5;
                 }
         delete result7;
@@ -502,7 +502,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
 
 
-	QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds_members` WHERE memguid = '%d';",pCurrChar->GetGUID());
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds_members` WHERE guid = '%d';",pCurrChar->GetGUID());
 
 	if(result)
 	{

@@ -290,9 +290,9 @@ void World::Update(time_t diff)
                     ss << "' )";
                     sDatabase.Execute( ss.str().c_str() );
 
-		    sDatabase.PExecute("DELETE FROM mail WHERE mailID = '%d'",m->messageID);
+		    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
 
-                    sDatabase.PExecute("INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
+                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
 
                     uint64 rcpl = m->reciever;
                     std::string pname;
@@ -304,7 +304,7 @@ void World::Update(time_t diff)
                     }
 		    sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",m->reciever);
 		    sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%d'",m->item);
-		    sDatabase.PExecute("DELETE FROM bids WHERE Id = '%d'",itr->second->Id);
+		    sDatabase.PExecute("DELETE FROM bids WHERE id = '%d'",itr->second->Id);
 
                     objmgr.RemoveAuction(itr->second->Id);
                 }
@@ -322,9 +322,9 @@ void World::Update(time_t diff)
                     m->subject = "Your item sold!";
                     m->item = 0;
                    
-		    sDatabase.PExecute("DELETE FROM mail WHERE mailID = '%d'",m->messageID);
+		    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
 
-                    sDatabase.PExecute("INSERT INTO mail (mailId,sender,reciever, subject,body,item,time,money,COD,checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
+                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
 
                     uint64 rcpl = m->reciever;
                     std::string pname;
@@ -359,9 +359,9 @@ void World::Update(time_t diff)
                     ss << "' )";
                     sDatabase.Execute( ss.str().c_str() );
 
-		    sDatabase.PExecute("DELETE FROM mail WHERE mailID = '%d'", mn->messageID);
+		    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'", mn->messageID);
 
-                    sDatabase.PExecute("INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->reciever, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
+                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->reciever, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
 
                     uint64 rcpl1 = mn->reciever;
                     std::string pname1;

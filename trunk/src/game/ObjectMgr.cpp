@@ -889,7 +889,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query("SELECT MAX(Id) FROM auctionhouse;" );
+    result = sDatabase.Query("SELECT MAX(id) FROM auctionhouse;" );
     if( result )
     {
         m_auctionid = (*result)[0].GetUInt32()+1;
@@ -900,7 +900,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_auctionid = 0;
     }
-    result = sDatabase.PQuery( "SELECT MAX(mailId) FROM mail;" );
+    result = sDatabase.PQuery( "SELECT MAX(mailid) FROM mail;" );
     if( result )
     {
         m_mailid = (*result)[0].GetUInt32()+1;
