@@ -55,6 +55,7 @@ public:
 	    va_start(args, fmt);
 	    vfprintf(i_file, fmt, args);
 	    va_end(args);
+	    fflush(i_file);
 	}
     }
 

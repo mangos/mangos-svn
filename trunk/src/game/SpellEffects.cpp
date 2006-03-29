@@ -552,7 +552,7 @@ void Spell::EffectOpenLock(uint32 i)
 			break;
 			default:
 				requiredskill=1;
-				printf("Unknown herb %u\n",displayid);
+				sLog.outString("Unknown herb %u\n",displayid);
 			break;
 		}
 		if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM)<requiredskill)
@@ -595,7 +595,7 @@ void Spell::EffectOpenLock(uint32 i)
 			
 			default:
 				requiredskill=1;
-				printf("Unknown vein %u\n",id);
+				sLog.outString("Unknown vein %u\n",id);
 			break;
 		}
 		if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) < requiredskill)
@@ -667,7 +667,7 @@ void Spell::EffectSummonWild(uint32 i)
 		m_caster->GetPositionZ(),m_caster->GetOrientation(),
 		m_spellInfo->EffectMiscValue[i]))
 	{
-		printf("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+		sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
 		return;
 	}
 	

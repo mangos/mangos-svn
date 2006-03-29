@@ -214,7 +214,7 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item) {
 		}
 		pItem = m_bagslot[slot];
 		if (pItem) {
-			printf("item exists\n");
+			sLog.outString("item exists\n");
 			if (pItem->GetEntry() != item->GetEntry()) { return 0; } 
 			else {
 				if ((stack - pItem->GetCount()) >= count) {

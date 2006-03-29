@@ -32,6 +32,7 @@ void Log::outString( const char * str, ... )
     vprintf( str, ap );
     printf( "\n" );
     va_end(ap);
+    fflush(0);
 }
 
 
@@ -43,6 +44,7 @@ void Log::outError( const char * err, ... )
     vfprintf( stderr, err, ap );
     fprintf( stderr, "\n" );
     va_end(ap);
+    fflush(stderr);
 }
 
 
@@ -56,6 +58,7 @@ void Log::outBasic( const char * str, ... )
         vprintf( str, ap );
         printf( "\n" );
         va_end(ap);
+        fflush(0);
     }
 }
 
@@ -70,6 +73,7 @@ void Log::outDetail( const char * str, ... )
         vprintf( str, ap );
         printf( "\n" );
         va_end(ap);
+        fflush(0);
     }
 }
 
@@ -84,6 +88,7 @@ void Log::outDebug( const char * str, ... )
         vprintf( str, ap );
         printf( "\n" );
         va_end(ap);
+        fflush(0);
     }
 }
 
@@ -95,4 +100,5 @@ void Log::outMenu( const char * str, ... )
     va_start(ap, str);
     vprintf( str, ap );
     va_end(ap);
+    fflush(0);
 }
