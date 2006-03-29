@@ -399,7 +399,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     {
         uint32 guidlow = GUID_LOPART(guid);
 
-	sDatabase.PExecute("DELETE FROM vendors WHERE vendorGuid = '%u' AND itemGuid = '%u'",guidlow,itemguid);
+	sDatabase.PExecute("DELETE FROM vendors WHERE guid = '%u' AND itemGuid = '%u'",guidlow,itemguid);
 
         pCreature->setItemId(slot , 0);
         pCreature->setItemAmount(slot , 0);
@@ -492,7 +492,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
         return true;
     }
 
-    sDatabase.PExecute("UPDATE creatures SET moverandom = '%i' WHERE id = '%u';", option, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE creatures SET moverandom = '%i' WHERE guid = '%u';", option, GUID_LOPART(guid));
 
     pCreature->setMoveRandomFlag(option > 0);
 
@@ -537,7 +537,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
         return true;
     }
 
-    sDatabase.PExecute("UPDATE creatures SET running = '%i' WHERE id = '%u';", option, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE creatures SET running = '%i' WHERE guid = '%u';", option, GUID_LOPART(guid));
 
     pCreature->setMoveRunFlag(option > 0);
 

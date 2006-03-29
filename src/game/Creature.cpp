@@ -671,7 +671,7 @@ void Creature::DeleteFromDB()
 	   
     sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM trainers WHERE trainerGuid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM trainers WHERE guid = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM creaturequestrelation WHERE creatureId = '%u'", GetGUIDLow());
 }
 
