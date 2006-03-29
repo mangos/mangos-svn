@@ -16,13 +16,13 @@
 
 DROP TABLE IF EXISTS `accounts`;
 CREATE TABLE `accounts` (
-  `acct` bigint(20) NOT NULL,
-  `login` varchar(255) NOT NULL,
-  `password` varchar(28) NOT NULL,
+  `acct` bigint(20) NOT NULL auto_increment,
+  `login` varchar(255) NOT NULL default '',
+  `password` varchar(28) NOT NULL default '',
   `gm` tinyint(1) NOT NULL default '0',
   `sessionkey` longtext NOT NULL,
-  `email` varchar(50) NOT NULL,
-  `joindate` timestamp NOT NULL,
+  `email` varchar(50) NOT NULL default '',
+  `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
   `banned` tinyint(1) NOT NULL default '0',
   `last_ip` varchar(30) NOT NULL default '0',
   `failed_logins` int(6) default '0',
@@ -30,7 +30,7 @@ CREATE TABLE `accounts` (
   PRIMARY KEY  (`acct`),
   UNIQUE KEY `acct` (`acct`),
   KEY `accounts` (`gm`,`banned`)
-) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `accounts`
@@ -48,7 +48,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `areatrigger`;
 CREATE TABLE `areatrigger` (
-  `triggerID` int(20) NOT NULL,
+  `triggerID` int(20) NOT NULL auto_increment,
   `TargetPosX` float NOT NULL default '0',
   `TargetPosY` float NOT NULL default '0',
   `TargetPosZ` float NOT NULL default '0',
@@ -57,7 +57,7 @@ CREATE TABLE `areatrigger` (
   `Triggername` text,
   PRIMARY KEY  (`triggerID`),
   KEY `areatrigger_index` (`TargetMapID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `areatrigger`
@@ -78,7 +78,7 @@ CREATE TABLE `auctioned_items` (
   `guid` bigint(20) NOT NULL default '0',
   `data` longtext NOT NULL,
   PRIMARY KEY  (`guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `auctioned_items`
@@ -104,7 +104,7 @@ CREATE TABLE `auctionhouse` (
   `buyguid` int(32) NOT NULL default '0',
   `lastbid` int(32) NOT NULL default '0',
   `id` int(32) NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `auctionhouse`
@@ -127,7 +127,7 @@ CREATE TABLE `bag` (
   `item_guid` bigint(20) NOT NULL default '0',
   `item_id` int(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`item_guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `bag`
@@ -148,7 +148,7 @@ CREATE TABLE `bids` (
   `bidder` int(32) NOT NULL default '0',
   `id` int(32) NOT NULL default '0',
   `amt` int(32) NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `bids`
@@ -166,11 +166,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `bugreport`;
 CREATE TABLE `bugreport` (
-  `bug_id` int(11) NOT NULL,
+  `bug_id` int(11) NOT NULL auto_increment,
   `rep_type` varchar(255) NOT NULL default '',
   `rep_content` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`bug_id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `bugreport`
@@ -193,7 +193,7 @@ CREATE TABLE `char_actions` (
   `action` int(6) unsigned NOT NULL default '0',
   `type` int(3) unsigned NOT NULL default '0',
   `misc` int(3) NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `char_actions`
@@ -211,12 +211,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `char_spells`;
 CREATE TABLE `char_spells` (
-  `id` bigint(20) unsigned zerofill NOT NULL,
+  `id` bigint(20) unsigned zerofill NOT NULL auto_increment,
   `charId` bigint(20) unsigned NOT NULL default '0',
   `spellId` int(20) unsigned NOT NULL default '0',
   `slotId` int(11) unsigned default NULL,
   PRIMARY KEY  (`id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `char_spells`
@@ -250,7 +250,7 @@ CREATE TABLE `characters` (
   `highest_rank` int(11) NOT NULL default '0',
   `last_week_rank` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `characters`
@@ -271,7 +271,7 @@ CREATE TABLE `commands` (
   `name` varchar(100) NOT NULL default '',
   `security` int(11) NOT NULL default '0',
   `help` longtext NOT NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `commands`
@@ -300,7 +300,7 @@ CREATE TABLE `corpses` (
   `mapid` int(11) NOT NULL default '0',
   `data` longtext NOT NULL,
   PRIMARY KEY  (`guid`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `corpses`
@@ -318,11 +318,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creatureinvolvedrelation`;
 CREATE TABLE `creatureinvolvedrelation` (
-  `Id` int(6) unsigned NOT NULL,
+  `Id` int(6) unsigned NOT NULL auto_increment,
   `questId` bigint(20) unsigned NOT NULL default '0',
   `creatureId` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `creatureinvolvedrelation`
@@ -340,11 +340,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creaturequestrelation`;
 CREATE TABLE `creaturequestrelation` (
-  `Id` int(6) unsigned NOT NULL,
+  `Id` int(6) unsigned NOT NULL auto_increment,
   `questId` bigint(20) unsigned NOT NULL default '0',
   `creatureId` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `creaturequestrelation`
@@ -386,7 +386,7 @@ CREATE TABLE `creatures` (
   `auras` longtext NOT NULL,
   UNIQUE KEY `guid` (`guid`),
   KEY `map` (`mapId`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `creatures`
@@ -413,7 +413,7 @@ CREATE TABLE `creatures_grid` (
   `cell_id` int(11) NOT NULL default '0',
   `mapId` int(11) NOT NULL default '0',
   KEY `srch_grid` (`grid_id`,`cell_id`,`mapId`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `creatures_grid`
@@ -431,7 +431,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creatures_mov`;
 CREATE TABLE `creatures_mov` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL auto_increment,
   `creatureId` int(11) NOT NULL default '0',
   `X` float NOT NULL default '0',
   `Y` float NOT NULL default '0',
@@ -440,7 +440,7 @@ CREATE TABLE `creatures_mov` (
   `WaitTime2` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `i_creatures_mov_cid` (`creatureId`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `creatures_mov`
@@ -512,7 +512,7 @@ CREATE TABLE `creaturetemplate` (
   `MoveName` varchar(128) NOT NULL default '',
   `ScriptName` varchar(128) NOT NULL default '',
   UNIQUE KEY `entry` (`entry`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `creaturetemplate`
@@ -544,7 +544,7 @@ CREATE TABLE `gameobjects` (
   `lootid` int(11) unsigned NOT NULL default '0',
   `respawntimer` int(10) unsigned NOT NULL default '0',
   UNIQUE KEY `guid` (`guid`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `gameobjects`
@@ -571,7 +571,7 @@ CREATE TABLE `gameobjects_grid` (
   `cell_id` int(11) NOT NULL default '0',
   `mapId` int(11) NOT NULL default '0',
   KEY `srch_grid` (`grid_id`,`cell_id`,`mapId`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `gameobjects_grid`
@@ -608,7 +608,7 @@ CREATE TABLE `gameobjecttemplate` (
   `sound9` int(11) unsigned NOT NULL default '0',
   `ScriptName` varchar(100) NOT NULL default '',
   UNIQUE KEY `id` (`entry`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `gameobjecttemplate`
@@ -626,12 +626,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gmtickets`;
 CREATE TABLE `gmtickets` (
-  `ticket_id` int(11) NOT NULL,
+  `ticket_id` int(11) NOT NULL auto_increment,
   `guid` int(6) unsigned NOT NULL default '0',
   `ticket_text` varchar(255) NOT NULL default '',
   `ticket_category` int(1) NOT NULL default '0',
   PRIMARY KEY  (`ticket_id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `gmtickets`
@@ -649,7 +649,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `graveyards`;
 CREATE TABLE `graveyards` (
-  `ID` int(60) NOT NULL,
+  `ID` int(60) NOT NULL auto_increment,
   `X` float default NULL,
   `Y` float default NULL,
   `Z` float default NULL,
@@ -658,7 +658,7 @@ CREATE TABLE `graveyards` (
   `mapId` int(16) default NULL,
   `faction_id` int(32) unsigned default NULL,
   PRIMARY KEY  (`ID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `graveyards`
@@ -687,7 +687,7 @@ CREATE TABLE `guilds` (
   `MOTD` varchar(255) NOT NULL default '',
   `createdate` datetime default NULL,
   PRIMARY KEY  (`guildId`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `guilds`
@@ -710,7 +710,7 @@ CREATE TABLE `guilds_members` (
   `rank` tinyint(2) unsigned NOT NULL default '0',
   `Pnote` varchar(255) NOT NULL default '',
   `OFFnote` varchar(255) NOT NULL default ''
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `guilds_members`
@@ -731,7 +731,7 @@ CREATE TABLE `guilds_ranks` (
   `guildId` int(6) unsigned NOT NULL default '0',
   `rname` varchar(255) NOT NULL default '',
   `rights` int(3) unsigned NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `guilds_ranks`
@@ -749,7 +749,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `homebind`;
 CREATE TABLE `homebind` (
-  `id` int(255) NOT NULL,
+  `id` int(255) NOT NULL auto_increment,
   `guid` int(6) unsigned NOT NULL default '0',
   `mapid` int(11) NOT NULL default '0',
   `zoneid` int(11) NOT NULL default '0',
@@ -757,7 +757,7 @@ CREATE TABLE `homebind` (
   `positiony` float NOT NULL default '0',
   `positionz` float NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `homebind`
@@ -780,7 +780,7 @@ CREATE TABLE `inventory` (
   `item_guid` bigint(20) NOT NULL default '0',
   `item_id` int(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`item_guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `inventory`
@@ -801,7 +801,7 @@ CREATE TABLE `ipbantable` (
   `ip` varchar(32) NOT NULL default '',
   PRIMARY KEY  (`ip`),
   UNIQUE KEY `ip` (`ip`)
-) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `ipbantable`
@@ -822,7 +822,7 @@ CREATE TABLE `item_instances` (
   `guid` bigint(20) NOT NULL default '0',
   `data` longtext NOT NULL,
   PRIMARY KEY  (`guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `item_instances`
@@ -845,7 +845,7 @@ CREATE TABLE `item_pages` (
   `next_page` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ID`),
   KEY `item_pages_index` (`ID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `item_pages`
@@ -981,7 +981,7 @@ CREATE TABLE `itemstemplate` (
   `ScriptName` varchar(100) NOT NULL default '',
   PRIMARY KEY  (`entry`),
   KEY `items_index` (`class`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `itemstemplate`
@@ -1004,7 +1004,7 @@ CREATE TABLE `kills` (
   `honor_pts` float NOT NULL default '0',
   `date` int(32) NOT NULL default '0',
   `type` smallint(5) unsigned NOT NULL default '0'
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `kills`
@@ -1027,7 +1027,7 @@ CREATE TABLE `loottemplate` (
   `percentchance` float NOT NULL default '100',
   KEY `i_creature_loot_creatureid` (`entry`),
   KEY `creatureloot_index` (`itemid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `loottemplate`
@@ -1056,7 +1056,7 @@ CREATE TABLE `mail` (
   `COD` bigint(20) unsigned NOT NULL default '0',
   `checked` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`mailid`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `mail`
@@ -1077,7 +1077,7 @@ CREATE TABLE `mailed_items` (
   `guid` bigint(20) NOT NULL default '0',
   `data` longtext NOT NULL,
   PRIMARY KEY  (`guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `mailed_items`
@@ -1101,7 +1101,7 @@ CREATE TABLE `npc_gossip` (
   `TEXTID` int(30) NOT NULL default '0',
   `OPTION_COUNT` int(30) default NULL,
   PRIMARY KEY  (`ID`,`NPC_GUID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `npc_gossip`
@@ -1126,7 +1126,7 @@ CREATE TABLE `npc_options` (
   `NPC_TEXT_NEXTID` int(11) default '0',
   `SPECIAL` int(11) default NULL,
   PRIMARY KEY  (`ID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `npc_options`
@@ -1226,7 +1226,7 @@ CREATE TABLE `npc_text` (
   `em7_4` bigint(20) unsigned NOT NULL default '0',
   `em7_5` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `npc_text`
@@ -1244,11 +1244,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `objectinvolvedrelation`;
 CREATE TABLE `objectinvolvedrelation` (
-  `Id` int(6) unsigned NOT NULL,
+  `Id` int(6) unsigned NOT NULL auto_increment,
   `questId` bigint(20) unsigned NOT NULL default '0',
   `objectId` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `objectinvolvedrelation`
@@ -1266,11 +1266,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `objectquestrelation`;
 CREATE TABLE `objectquestrelation` (
-  `Id` int(6) unsigned NOT NULL,
+  `Id` int(6) unsigned NOT NULL auto_increment,
   `questId` bigint(20) unsigned NOT NULL default '0',
   `objectId` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `objectquestrelation`
@@ -1288,7 +1288,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `playercreateinfo`;
 CREATE TABLE `playercreateinfo` (
-  `createId` tinyint(3) unsigned NOT NULL,
+  `createId` tinyint(3) unsigned NOT NULL auto_increment,
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
   `mapid` mediumint(8) unsigned NOT NULL default '0',
@@ -1315,7 +1315,7 @@ CREATE TABLE `playercreateinfo` (
   `ranmaxdmg` float NOT NULL default '0',
   PRIMARY KEY  (`createId`),
   KEY `playercreateinfo_index` (`race`,`class`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `playercreateinfo`
@@ -1339,7 +1339,7 @@ CREATE TABLE `playercreateinfo_actions` (
   `type` smallint(3) unsigned NOT NULL default '0',
   `misc` smallint(3) unsigned NOT NULL default '0',
   KEY `playercreateinfo_actions_index` (`button`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `playercreateinfo_actions`
@@ -1363,7 +1363,7 @@ CREATE TABLE `playercreateinfo_items` (
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `amount` tinyint(8) unsigned NOT NULL default '1',
   KEY `playercreateinfo_items_index` (`itemId`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `playercreateinfo_items`
@@ -1386,7 +1386,7 @@ CREATE TABLE `playercreateinfo_reputation` (
   `faction` smallint(6) unsigned NOT NULL default '0',
   `reputation` smallint(3) unsigned NOT NULL default '0',
   KEY `playercreateinfo_reputation_index` (`faction`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `playercreateinfo_reputation`
@@ -1409,7 +1409,7 @@ CREATE TABLE `playercreateinfo_skills` (
   `SkillMin` smallint(5) unsigned NOT NULL default '0',
   `SkillMax` smallint(5) unsigned NOT NULL default '0',
   `Note` varchar(255) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `playercreateinfo_skills`
@@ -1430,7 +1430,7 @@ CREATE TABLE `playercreateinfo_spells` (
   `createId` smallint(5) unsigned NOT NULL default '0',
   `Spell` bigint(20) unsigned NOT NULL default '0',
   `Note` varchar(255) default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `playercreateinfo_spells`
@@ -1553,7 +1553,7 @@ CREATE TABLE `quests` (
   `locationy` float NOT NULL default '0',
   `locationz` float NOT NULL default '0',
   PRIMARY KEY  (`questId`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `quests`
@@ -1585,9 +1585,9 @@ CREATE TABLE `queststatus` (
   `questItemCount4` bigint(20) unsigned NOT NULL default '0',
   `timer` bigint(20) unsigned NOT NULL default '0',
   `explored` bigint(20) unsigned NOT NULL default '0',
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `queststatus`
@@ -1605,7 +1605,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `realms`;
 CREATE TABLE `realms` (
-  `id` bigint(20) NOT NULL,
+  `id` bigint(20) NOT NULL auto_increment,
   `name` varchar(32) NOT NULL default '',
   `address` varchar(32) NOT NULL default '',
   `icon` int(10) default '0',
@@ -1613,7 +1613,7 @@ CREATE TABLE `realms` (
   `timezone` int(10) default '0',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `id` (`id`)
-) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `realms`
@@ -1632,14 +1632,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `reputation`;
 CREATE TABLE `reputation` (
-  `ID` int(32) NOT NULL,
+  `ID` int(32) NOT NULL auto_increment,
   `playerID` int(32) NOT NULL default '0',
   `factionID` int(32) NOT NULL default '0',
   `reputationID` int(32) NOT NULL default '0',
   `standing` int(32) NOT NULL default '0',
   `flags` int(32) NOT NULL default '0',
   PRIMARY KEY  (`ID`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `reputation`
@@ -1661,7 +1661,7 @@ CREATE TABLE `social` (
   `guid` int(6) NOT NULL default '0',
   `friendid` int(6) NOT NULL default '0',
   `flags` varchar(21) NOT NULL default ''
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `social`
@@ -1679,7 +1679,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spells`;
 CREATE TABLE `spells` (
-  `Id` int(11) NOT NULL,
+  `Id` int(11) NOT NULL auto_increment,
   `learn` int(11) unsigned NOT NULL default '0',
   `trigger_spell` int(11) unsigned NOT NULL default '0',
   `create_item` int(11) unsigned NOT NULL default '0',
@@ -1689,7 +1689,7 @@ CREATE TABLE `spells` (
   `description` char(255) default NULL,
   PRIMARY KEY  (`Id`),
   KEY `spell_index` (`name`,`rank`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `spells`
@@ -1715,7 +1715,7 @@ CREATE TABLE `spirithealers` (
   `zoneId` int(16) default NULL,
   `mapId` int(16) default NULL,
   `faction_id` int(32) unsigned default NULL
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `spirithealers`
@@ -1733,7 +1733,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `talents`;
 CREATE TABLE `talents` (
-  `id` int(10) NOT NULL,
+  `id` int(10) NOT NULL auto_increment,
   `t_id` int(10) NOT NULL default '0',
   `maxrank` int(7) NOT NULL default '0',
   `class` int(10) NOT NULL default '0',
@@ -1744,7 +1744,7 @@ CREATE TABLE `talents` (
   `rank5` longtext NOT NULL,
   PRIMARY KEY  (`id`),
   KEY `talents_index` (`t_id`,`maxrank`,`class`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `talents`
@@ -1762,11 +1762,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tavern`;
 CREATE TABLE `tavern` (
-  `triggerID` int(20) NOT NULL,
+  `triggerID` int(20) NOT NULL auto_increment,
   `Triggername` text NOT NULL,
   PRIMARY KEY  (`triggerID`),
   UNIQUE KEY `acct` (`triggerID`)
-) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `tavern`
@@ -1784,7 +1784,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `taxinodes`;
 CREATE TABLE `taxinodes` (
-  `ID` tinyint(3) unsigned NOT NULL,
+  `ID` tinyint(3) unsigned NOT NULL auto_increment,
   `continent` tinyint(3) unsigned NOT NULL default '0',
   `x` float default NULL,
   `y` float default NULL,
@@ -1794,7 +1794,7 @@ CREATE TABLE `taxinodes` (
   `mount` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ID`),
   KEY `taxinodes_index` (`continent`,`name`)
-) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `taxinodes`
@@ -1818,7 +1818,7 @@ CREATE TABLE `taxipath` (
   `price` mediumint(8) unsigned default NULL,
   PRIMARY KEY  (`ID`),
   KEY `taxipath_index` (`source`,`destination`)
-) TYPE=MyISAM COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `taxipath`
@@ -1846,7 +1846,7 @@ CREATE TABLE `taxipathnodes` (
   `unknown1` mediumint(8) unsigned default NULL,
   `unknown2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `taxipathnodes`
@@ -1870,7 +1870,7 @@ CREATE TABLE `trainers` (
   `spellcost` int(11) default '0',
   `reqspell` int(11) default '0',
   PRIMARY KEY  (`guid`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `trainers`
@@ -1888,11 +1888,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `triggerquestrelation`;
 CREATE TABLE `triggerquestrelation` (
-  `Id` int(6) unsigned NOT NULL,
+  `Id` int(6) unsigned NOT NULL auto_increment,
   `triggerID` bigint(20) unsigned NOT NULL default '0',
   `questID` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`Id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `triggerquestrelation`
@@ -1919,9 +1919,9 @@ CREATE TABLE `tutorials` (
   `tut5` bigint(20) unsigned NOT NULL default '0',
   `tut6` bigint(20) unsigned NOT NULL default '0',
   `tut7` bigint(20) unsigned NOT NULL default '0',
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) TYPE=MyISAM;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `tutorials`
@@ -1942,11 +1942,11 @@ CREATE TABLE `vendors` (
   `entry` bigint(20) unsigned NOT NULL default '0',
   `itemGuid` bigint(20) unsigned NOT NULL default '0',
   `amount` bigint(20) NOT NULL default '5',
-  `index_id` bigint(20) NOT NULL,
+  `index_id` bigint(20) NOT NULL auto_increment,
   PRIMARY KEY  (`index_id`),
   UNIQUE KEY `index_id` (`index_id`),
   KEY `vendor_id` (`entry`)
-) TYPE=MyISAM COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
 -- Dumping data for table `vendors`
