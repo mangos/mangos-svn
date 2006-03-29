@@ -345,7 +345,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
     std::stringstream sstext;
     if(tmpItem)
     {
-	QueryResult *result = sDatabase.PQuery("INSERT INTO vendors VALUES('%u','%u','%d');",GUID_LOPART(guid), item, amount);
+	QueryResult *result = sDatabase.PQuery("INSERT INTO vendors VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
 
         uint8 itemscount = (uint8)pCreature->getItemCount();
         pCreature->setItemId(itemscount , item);
@@ -399,7 +399,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     {
         uint32 guidlow = GUID_LOPART(guid);
 
-	sDatabase.PExecute("DELETE FROM vendors WHERE guid = '%u' AND itemGuid = '%u'",guidlow,itemguid);
+	sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u' AND itemGuid = '%u'",pCreature->GetEntry(),itemguid);
 
         pCreature->setItemId(slot , 0);
         pCreature->setItemAmount(slot , 0);
