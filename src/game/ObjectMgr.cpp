@@ -963,7 +963,7 @@ GameObjectInfo *ObjectMgr::GetGameObjectInfo(uint32 id)
 	//debug
 	if(sGOStorage.iNumRecords<=id)
 	{
-		printf("ERROR: There is no GO with proto %u id the DB\n",id);
+		sLog.outString("ERROR: There is no GO with proto %u id the DB\n",id);
 		return NULL;
 	}
 

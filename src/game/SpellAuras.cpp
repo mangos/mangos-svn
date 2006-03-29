@@ -470,7 +470,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
                     return;
                 }break;
                 default:{
-                    printf("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
+                    sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
                     return;
                 }break;
             }
@@ -578,7 +578,7 @@ void Aura::HandleAuraModResistance(bool apply)
 			return;
 		}break;
 		default:
-			printf("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
+			sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
 			return;
 			break;
 	}
@@ -656,7 +656,7 @@ void Aura::HandleAuraModStat(bool apply)
 			return;
 		}break;
 		default:
-			printf("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
+			sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid\n");
 			return;
 			break;
 	}
@@ -784,7 +784,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
 			spellId = 3025;
 			break;
 		default:
-			printf("Unknown Shapeshift Type\n");
+			sLog.outString("Unknown Shapeshift Type\n");
 			break;
 	}
             

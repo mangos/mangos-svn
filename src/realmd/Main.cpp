@@ -39,7 +39,7 @@ uint8 loglevel = DEFAULT_LOG_LEVEL;
 bool stopEvent = false;
 int usage(const char *prog)
 {
-	printf("Usage: \n %s -c config_file [%s]",prog,_MANGOSD_CONFIG);
+	sLog.outString("Usage: \n %s -c config_file [%s]",prog,_MANGOSD_CONFIG);
     exit(1);
 }
 
