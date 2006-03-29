@@ -110,14 +110,18 @@ void CliDelete(char*command,pPrintf zprintf)
 			Field *fields;
                         QueryResult *result = sDatabase.PQuery(
                                 "SELECT acct FROM accounts WHERE login = '%s';",del );
-                        if (result)
+
+                        if (!result)
                         {
+		    		zprintf("User %s not exists\x0d\x0a",del);
+                        	return;
+                        }
+			
 			fields = result->Fetch();
 			int guid = fields[0].GetUInt32();
 			sDatabase.PExecute("DELETE FROM `characters` WHERE acct = '%d'",guid);
 			sDatabase.PExecute("DELETE FROM `accounts` WHERE login = '%s'",del);
                         delete result;
-                        }
 
 			zprintf("We deleted : %s\x0d\x0a",del);
 }
