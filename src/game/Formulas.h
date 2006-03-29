@@ -64,9 +64,9 @@ namespace MaNGOS
 		}
 
 		inline float HonorableKillPoints(int total_kills, int k_rank, int v_rank, int k_level, int v_level, float diff_honor, float diff_level)
-		{			
+		{					
 			int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
-			int honor_points = ((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level));
+			int honor_points = int(((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level)));
 			return (honor_points <= 400 ? honor_points : 400);
 		}
 

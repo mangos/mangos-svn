@@ -334,7 +334,7 @@ void Player::StartMirrorTimer(uint8 Type, uint32 MaxValue)
 {
 	//TYPE: 0 = fartigua 1 = breath 2 = fire?
 	WorldPacket data;
-	uint32 BreathRegen = -1;
+	uint32 BreathRegen = (uint32)-1;
 	data.Initialize(SMSG_START_MIRROR_TIMER);
 	data << (uint32)Type;	
 	data << MaxValue;
