@@ -120,8 +120,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 	        recieve->GetSession()->SendPacket(&data);
             }
 
-	    sDatabase.PExecute("DELETE FROM mail WHERE mailID = '%u'",mID);
-            sDatabase.PExecute("INSERT INTO mail (mailId,sender,reciever,subject,body, item,time,money,COD,checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
+	    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",mID);
+            sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
 
         }     
 		else
@@ -204,8 +204,8 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
         recieve->AddMail(m);
     }
 
-    sDatabase.PExecute("DELETE FROM mail WHERE mailID = '%u'",m->messageID);
-    sDatabase.PExecute("INSERT INTO mail (mailId,sender,reciever,subject,body,item,time,money,COD,checked) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->reciever, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
+    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",m->messageID);
+    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->reciever, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
 
 }
 
