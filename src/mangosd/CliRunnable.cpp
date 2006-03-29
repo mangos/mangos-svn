@@ -453,6 +453,7 @@ void CliRunnable::run()
     {
   
 	printf("mangos>");
+	fflush(0);
 	char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
 	for(int x=0;true;x++)
 	if(command[x]==0xd||command[x]==0xa)
