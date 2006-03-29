@@ -139,7 +139,7 @@ zprintf("%s - %s.\x0d\x0a",Commands[x].cmd ,Commands[x].discription);
 void CliExit(char*,pPrintf zprintf)
 {
 zprintf( "Exiting daemon...\n" );
-exit(1);
+Master::m_stopEvent = true;
 }
 
 void CliInfo(char*,pPrintf zprintf)
