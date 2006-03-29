@@ -595,7 +595,7 @@ void Creature::_LoadGoods()
 	//it should be stored by 'entry' field id (c) Phantomas
 	//Use entry instead of GUID, fixed by Ant009 need more test
 	
-	QueryResult *result = sDatabase.PQuery("SELECT * FROM vendors WHERE entry = '%u';", GetUInt32Value(OBJECT_FIELD_ENTRY));
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM vendors WHERE entry = '%u';", GetEntry());
 
 
     if(!result) return;
