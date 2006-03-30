@@ -129,9 +129,8 @@ void ObjectMgr::LoadCreatureTemplates()
 
 	sCreatureStorage.Load();
 
-  sLog.outString( "" );
-//	sLog.outString( ">> Loaded %d creature definitions", count );
-//	sLog.outString( "" );
+	sLog.outString( ">> Loaded %d creature definitions", sCreatureStorage.RecordCount );
+	sLog.outString( "" );
 }
 
 PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
@@ -303,7 +302,8 @@ void ObjectMgr::LoadAuctions()
 void ObjectMgr::LoadItemPrototypes()
 {
 	sItemStorage.Load ();
- 	sLog.outString( ">> Loaded %u item prototypes", sItemStorage.iNumRecords);
+ 	sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount);
+	sLog.outString("");
 }
 
 void ObjectMgr::LoadAuctionItems()
@@ -975,7 +975,7 @@ void ObjectMgr::LoadGameobjectInfo()
 {
 	sGOStorage.Load();
 
-	sLog.outString( ">> Loaded %d game object templates", sGOStorage.iNumRecords );
+	sLog.outString( ">> Loaded %d game object templates", sGOStorage.RecordCount );
 	
 }
 

@@ -36,6 +36,7 @@ public:
 	}
 
 	char** pIndex;
+	uint32 RecordCount;
 	uint32 iNumRecords;
 	uint32 iNumFields;
 	void Load();
