@@ -3397,7 +3397,7 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
 
 
-
+//Update honor fields
 void Player::UpdateHonor(void)
 {
 	WorldPacket data;
@@ -3523,7 +3523,7 @@ void Player::UpdateHonor(void)
 	SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);		
 	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
 	
-	//If the new rank is major then the old one, then highest rank is updated
+	//If the new rank is highest then the old one, then m_highest_rank is updated
 	if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
 		m_highest_rank = CalculateHonorRank(total_honor);
 
@@ -3536,7 +3536,7 @@ void Player::UpdateHonor(void)
 	m_total_honor_points = total_honor;
 }
 
-
+//What is Player's rank... private, scout...
 int Player::CalculateHonorRank(float honor_points)
 {
 	int rank = 0;
@@ -3549,7 +3549,7 @@ int Player::CalculateHonorRank(float honor_points)
 	return rank;
 }
 
-
+//How many times Player kill pVictim...
 int Player::CalculateTotalKills(Player *pVictim)
 {
 	int total_kills = 0;
@@ -3564,7 +3564,7 @@ int Player::CalculateTotalKills(Player *pVictim)
 	return total_kills;
 }
 
-
+//How much honor Player gains/loses killing uVictim
 void Player::CalculateHonor(Unit *uVictim)
 {
 	float parcial_honor_points = 0;
@@ -3615,6 +3615,7 @@ void Player::CalculateHonor(Unit *uVictim)
 		UpdateHonor();
 	}
 }
+
 
 void Player::DuelComplete()
 {  
