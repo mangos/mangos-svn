@@ -18,6 +18,7 @@
 
 #include "SQLStorage.h" 
 #include "../game/EventSystem.h"
+#include "../game/ProgressBar.hpp"
 
 const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiis";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
@@ -70,7 +71,7 @@ void SQLStorage::Load ()
 	result = sDatabase.PQuery("SELECT COUNT(*) FROM %s;",table);	
 
 	fields = result->Fetch();
-	uint32 recordcount=fields[0].GetUInt32(); 
+	RecordCount=fields[0].GetUInt32(); 
 	delete result;
 
 	result = sDatabase.PQuery("SELECT * from %s;",table);	
@@ -108,11 +109,13 @@ void SQLStorage::Load ()
 	char** newIndex=new char*[maxi];
 	memset(newIndex,0,maxi*sizeof(char*));
 	
-	char * _data= new char[recordcount *recordsize];
+	char * _data= new char[RecordCount *recordsize];
 	uint32 count=0;
+	barGoLink bar( RecordCount );
 	do
 	{
 		fields = result->Fetch();
+		bar.step();
 		char *p=(char*)&_data[recordsize*count];
 		newIndex[fields[0].GetUInt32()]=p;
 
@@ -161,10 +164,3 @@ void SQLStorage::Load ()
 	data=_data;
 
 }
-
-
-
-
-
-
-

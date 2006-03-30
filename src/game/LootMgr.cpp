@@ -54,14 +54,17 @@ void LoadCreaturesLootTables()
 	uint32 curId=0;
 	LootStore::iterator tab;
 	uint32 ind;
+	uint32 count = 0;
 	QueryResult *result = sDatabase.Query("SELECT * FROM `loottemplate`;");
     
     if( result )
-    {      
+    { 
+		barGoLink bar( result->GetRowCount() );
     
 		do 
 		{     
 			Field *fields = result->Fetch();
+			bar.step();
 			
 			uint32 entry_id=fields[0].GetUInt32();
 		
@@ -99,9 +102,11 @@ void LoadCreaturesLootTables()
 				CreatureLoot[entry_id].items[ind].chance=fields[2].GetFloat();
 
 			ind++;
-
+            count++;
 		} while( result->NextRow() );
 		delete result;
+		sLog.outString( "" );
+		sLog.outString( ">> Loaded %d loot definitions", count );
     }
 
 }
