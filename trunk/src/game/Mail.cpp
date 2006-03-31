@@ -428,7 +428,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data ) {
     }
 
 	else {
-		QueryResult *result = sDatabase.PQuery( "SELECT * FROM item_pages WHERE id='%u'", mailguid );
+		QueryResult *result = sDatabase.PQuery( "SELECT * FROM item_pages WHERE id = '%u'", mailguid );
 
 		if( result )
 		{

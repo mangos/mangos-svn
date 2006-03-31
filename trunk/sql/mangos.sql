@@ -318,10 +318,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creatureinvolvedrelation`;
 CREATE TABLE `creatureinvolvedrelation` (
-  `Id` int(6) unsigned NOT NULL auto_increment,
-  `questId` bigint(20) unsigned NOT NULL default '0',
-  `creatureId` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`Id`)
+  `id` int(6) unsigned NOT NULL auto_increment,
+  `questid` bigint(20) unsigned NOT NULL default '0',
+  `creatureid` bigint(20) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -340,10 +340,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creaturequestrelation`;
 CREATE TABLE `creaturequestrelation` (
-  `Id` int(6) unsigned NOT NULL auto_increment,
-  `questId` bigint(20) unsigned NOT NULL default '0',
-  `creatureId` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`Id`)
+  `id` int(6) unsigned NOT NULL auto_increment,
+  `questid` bigint(20) unsigned NOT NULL default '0',
+  `creatureid` bigint(20) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -411,8 +411,8 @@ CREATE TABLE `creatures_grid` (
   `cell_y` int(11) NOT NULL default '0',
   `grid_id` int(11) NOT NULL default '0',
   `cell_id` int(11) NOT NULL default '0',
-  `mapId` int(11) NOT NULL default '0',
-  KEY `srch_grid` (`grid_id`,`cell_id`,`mapId`)
+  `mapid` int(11) NOT NULL default '0',
+  KEY `srch_grid` (`grid_id`,`cell_id`,`mapid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -432,14 +432,14 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creatures_mov`;
 CREATE TABLE `creatures_mov` (
   `id` int(11) NOT NULL auto_increment,
-  `creatureId` int(11) NOT NULL default '0',
-  `X` float NOT NULL default '0',
-  `Y` float NOT NULL default '0',
-  `Z` float NOT NULL default '0',
+  `creatureid` int(11) NOT NULL default '0',
+  `positionx` float NOT NULL default '0',
+  `positiony` float NOT NULL default '0',
+  `positionz` float NOT NULL default '0',
   `WaitTime1` tinyint(3) unsigned NOT NULL default '0',
   `WaitTime2` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
-  KEY `i_creatures_mov_cid` (`creatureId`)
+  KEY `i_creatures_mov_cid` (`creatureid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -569,8 +569,8 @@ CREATE TABLE `gameobjects_grid` (
   `cell_y` int(11) NOT NULL default '0',
   `grid_id` int(11) NOT NULL default '0',
   `cell_id` int(11) NOT NULL default '0',
-  `mapId` int(11) NOT NULL default '0',
-  KEY `srch_grid` (`grid_id`,`cell_id`,`mapId`)
+  `mapid` int(11) NOT NULL default '0',
+  KEY `srch_grid` (`grid_id`,`cell_id`,`mapid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -649,15 +649,15 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `graveyards`;
 CREATE TABLE `graveyards` (
-  `ID` int(60) NOT NULL auto_increment,
-  `X` float default NULL,
-  `Y` float default NULL,
-  `Z` float default NULL,
-  `O` float default NULL,
-  `zoneId` int(16) default NULL,
-  `mapId` int(16) default NULL,
-  `faction_id` int(32) unsigned default NULL,
-  PRIMARY KEY  (`ID`)
+  `id` int(60) NOT NULL auto_increment,
+  `positionx` float default NULL,
+  `positiony` float default NULL,
+  `positionz` float default NULL,
+  `orientation` float default NULL,
+  `zoneid` int(16) default NULL,
+  `mapid` int(16) default NULL,
+  `faction` int(32) unsigned default NULL,
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -676,7 +676,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `guilds`;
 CREATE TABLE `guilds` (
-  `guildId` int(6) unsigned NOT NULL default '0',
+  `guildid` int(6) unsigned NOT NULL default '0',
   `name` varchar(255) NOT NULL default '',
   `leaderguid` int(6) unsigned NOT NULL default '0',
   `EmblemStyle` int(5) unsigned NOT NULL default '0',
@@ -686,7 +686,7 @@ CREATE TABLE `guilds` (
   `BackgroundColor` int(5) unsigned NOT NULL default '0',
   `MOTD` varchar(255) NOT NULL default '',
   `createdate` datetime default NULL,
-  PRIMARY KEY  (`guildId`)
+  PRIMARY KEY  (`guildid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
 --
@@ -705,7 +705,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `guilds_members`;
 CREATE TABLE `guilds_members` (
-  `guildId` int(6) unsigned NOT NULL default '0',
+  `guildid` int(6) unsigned NOT NULL default '0',
   `guid` int(6) NOT NULL default '0',
   `rank` tinyint(2) unsigned NOT NULL default '0',
   `Pnote` varchar(255) NOT NULL default '',
@@ -728,7 +728,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `guilds_ranks`;
 CREATE TABLE `guilds_ranks` (
-  `guildId` int(6) unsigned NOT NULL default '0',
+  `guildid` int(6) unsigned NOT NULL default '0',
   `rname` varchar(255) NOT NULL default '',
   `rights` int(3) unsigned NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -840,11 +840,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `item_pages`;
 CREATE TABLE `item_pages` (
-  `ID` int(11) NOT NULL default '0',
+  `id` int(11) NOT NULL default '0',
   `text` longtext NOT NULL,
   `next_page` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`ID`),
-  KEY `item_pages_index` (`ID`)
+  PRIMARY KEY  (`id`),
+  KEY `item_pages_index` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1333,7 +1333,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `playercreateinfo_actions`;
 CREATE TABLE `playercreateinfo_actions` (
-  `createId` tinyint(3) unsigned NOT NULL default '0',
+  `createid` tinyint(3) unsigned NOT NULL default '0',
   `button` smallint(2) unsigned NOT NULL default '0',
   `action` smallint(6) unsigned NOT NULL default '0',
   `type` smallint(3) unsigned NOT NULL default '0',
@@ -1357,12 +1357,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `playercreateinfo_items`;
 CREATE TABLE `playercreateinfo_items` (
-  `createId` tinyint(3) unsigned NOT NULL default '0',
-  `itemId` mediumint(8) unsigned NOT NULL default '0',
+  `createid` tinyint(3) unsigned NOT NULL default '0',
+  `itemid` mediumint(8) unsigned NOT NULL default '0',
   `bagIndex` tinyint(3) unsigned NOT NULL default '255',
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `amount` tinyint(8) unsigned NOT NULL default '1',
-  KEY `playercreateinfo_items_index` (`itemId`)
+  KEY `playercreateinfo_items_index` (`itemid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1381,7 +1381,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `playercreateinfo_reputation`;
 CREATE TABLE `playercreateinfo_reputation` (
-  `createId` tinyint(3) unsigned NOT NULL default '0',
+  `createid` tinyint(3) unsigned NOT NULL default '0',
   `slot` smallint(2) unsigned NOT NULL default '0',
   `faction` smallint(6) unsigned NOT NULL default '0',
   `reputation` smallint(3) unsigned NOT NULL default '0',
@@ -1404,7 +1404,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `playercreateinfo_skills`;
 CREATE TABLE `playercreateinfo_skills` (
-  `createId` smallint(5) unsigned NOT NULL default '0',
+  `createid` smallint(5) unsigned NOT NULL default '0',
   `Skill` mediumint(8) unsigned NOT NULL default '0',
   `SkillMin` smallint(5) unsigned NOT NULL default '0',
   `SkillMax` smallint(5) unsigned NOT NULL default '0',
@@ -1427,7 +1427,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `playercreateinfo_spells`;
 CREATE TABLE `playercreateinfo_spells` (
-  `createId` smallint(5) unsigned NOT NULL default '0',
+  `createid` smallint(5) unsigned NOT NULL default '0',
   `Spell` bigint(20) unsigned NOT NULL default '0',
   `Note` varchar(255) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1762,10 +1762,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tavern`;
 CREATE TABLE `tavern` (
-  `triggerID` int(20) NOT NULL auto_increment,
+  `triggerid` int(20) NOT NULL auto_increment,
   `Triggername` text NOT NULL,
-  PRIMARY KEY  (`triggerID`),
-  UNIQUE KEY `acct` (`triggerID`)
+  PRIMARY KEY  (`triggerid`),
+  UNIQUE KEY `acct` (`triggerid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
@@ -1940,7 +1940,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `vendors`;
 CREATE TABLE `vendors` (
   `entry` bigint(20) unsigned NOT NULL default '0',
-  `itemGuid` bigint(20) unsigned NOT NULL default '0',
+  `itemguid` bigint(20) unsigned NOT NULL default '0',
   `amount` bigint(20) NOT NULL default '5',
   `index_id` bigint(20) NOT NULL auto_increment,
   PRIMARY KEY  (`index_id`),

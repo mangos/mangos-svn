@@ -344,6 +344,8 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 	SendPacket( &data );	
 
 	// update sql homebind
+    // fix me : is 'id' even used in 'homebind' table?
+    // https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/homebind
 	sDatabase.PExecute("UPDATE `homebind` SET mapid = '%d', zoneid = '%d', positionx = '%f', positiony = '%f', positionz = '%f' WHERE guid = '%lu';", GetPlayer( )->GetMapId(), GetPlayer( )->GetZoneId(), GetPlayer( )->GetPositionX(), GetPlayer( )->GetPositionY(), GetPlayer( )->GetPositionZ(), (unsigned long)GetPlayer( )->GetGUID());
 
 	// send spell for bind 3286 bind magic

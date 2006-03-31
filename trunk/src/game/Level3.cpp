@@ -1406,7 +1406,11 @@ bool ChatHandler::HandleAuraCommand(const char* args)
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
    
-    sDatabase.PExecute("INSERT INTO graveyards ( X, Y, Z, mapId) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
+    // changed 'mapId' to lowercase
+    // changed 'zoneId' to lowercase
+    // 'X', 'Y', 'Z', and 'O' renamed to 'positionx', 'positiony', 'positionz', and 'orientation'
+    // 'faction_id' renamed to 'faction'
+    sDatabase.PExecute("INSERT INTO graveyards ( positionx, positiony, positionz, mapid) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
     
     return true;
 }
@@ -1532,7 +1536,8 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     skinid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
 
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM creatures WHERE id = '%u';", target->GetGUIDLow());
+    // 'id' changed to 'guid'
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM creatures WHERE guid = '%u';", target->GetGUIDLow());
 
     Field *fields = result->Fetch();
 

@@ -79,7 +79,7 @@ void Creature::CreateTrainerSpells()
 {
 	TrainerSpell *tspell;
 	Field *fields;
-	QueryResult *result = sDatabase.PQuery("SELECT * FROM trainers WHERE guid=%d",GetCreatureInfo()->Entry);  
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM trainers WHERE guid = %d", GetCreatureInfo()->Entry);
 	
 	if(!result) return;
 	
@@ -446,7 +446,7 @@ int Creature::getItemSlotById(uint32 itemid)
 void Creature::SaveToDB()
 {
     std::stringstream ss;
-    sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'", GetGUIDLow());
 	
 	ss << "INSERT INTO creatures VALUES (";
 
@@ -630,7 +630,7 @@ void Creature::_LoadQuests()
 	Field *fields;
 	Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM creaturequestrelation WHERE creatureId = '%u' ORDER BY questId;", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM creaturequestrelation WHERE creatureid = '%u' ORDER BY questid;", GetEntry ());
 
     if(result)
     {
@@ -648,7 +648,7 @@ void Creature::_LoadQuests()
     }
 
 	
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM creatureinvolvedrelation WHERE creatureId = '%u' ORDER BY questId;", GetUInt32Value (OBJECT_FIELD_ENTRY));
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM creatureinvolvedrelation WHERE creatureid = '%u' ORDER BY questid;", GetUInt32Value (OBJECT_FIELD_ENTRY));
 
     if(!result1) return;
 
@@ -672,7 +672,7 @@ void Creature::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u'", GetEntry());
     sDatabase.PExecute("DELETE FROM trainers WHERE guid = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM creaturequestrelation WHERE creatureId = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM creaturequestrelation WHERE creatureid = '%u'", GetGUIDLow());
 }
 
 
