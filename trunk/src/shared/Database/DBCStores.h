@@ -74,8 +74,10 @@ public:
 	{
 		
 		dbc = new DBCFile; 
-		dbc->Load(fn);
-		data=(T **) dbc->AutoProduceData(fmt,&nCount);
+        // Check if load was sucessful, only then continue
+        if (dbc->Load(fn)) {
+            data=(T **) dbc->AutoProduceData(fmt,&nCount);
+        }
 		delete dbc;
 	}
 
