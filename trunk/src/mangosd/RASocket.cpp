@@ -222,7 +222,7 @@ int RASocket::zprintf( const char * szText, ... )
 	Encrypt(megabuffer,sz);
 	#endif
 
-	send(r,megabuffer,sz,NULL);
+	send(r,megabuffer,sz,0);
 	delete [] megabuffer;
 	va_end(ap);
 	return 0;

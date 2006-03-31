@@ -20,6 +20,7 @@
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
+#include "Chat.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -371,7 +372,7 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data ) {
 //    int i;
 	Player* pl = GetPlayer();
 	uint32 realID = GetItemGuidFromDisplayID(itemid, pl);
-	char *itemInfo;
+	char const *itemInfo;
 	bool resist_added = false;
 	bool names_added = false;
 
@@ -394,9 +395,9 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data ) {
 	data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
     data << itemid;
 
-	itemInfo = (fmtstring("<HTML>\n<BODY>\n"));
+	itemInfo = fmtstring("<HTML>\n<BODY>\n");
 
-	itemInfo = (fmtstring("%s</P></BODY>\n</HTML>\n", itemInfo));
+	itemInfo = fmtstring("%s</P></BODY>\n</HTML>\n", itemInfo);
 
 	data << itemInfo;
 	data << uint32(0);

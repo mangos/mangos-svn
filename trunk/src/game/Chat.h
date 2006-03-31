@@ -19,6 +19,7 @@
 #ifndef MANGOSSERVER_CHAT_H
 #define MANGOSSERVER_CHAT_H
 
+#include "SharedDefines.h"
 #include "Policies/Singleton.h"
 
 class ChatHandler;
@@ -205,5 +206,5 @@ class ChatHandler
 #define sChatHandler MaNGOS::Singleton<ChatHandler>::Instance()
 #endif
 
-char *fmtstring( char *format, ... );
+char const *fmtstring( char const *format, ... );
 

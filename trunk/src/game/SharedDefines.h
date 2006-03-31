@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef MANGOS_SHAREDDEFINES_H
+#define MANGOS_SHAREDDEFINES_H
+
+
 #define GENDER_MALE							0
 #define GENDER_FEMALE						1
 #define GENDER_NONE							2
@@ -976,3 +980,4 @@
 #define UNIT_FLAG_ANIMATION_FROZEN		0x0400
 #define UNIT_FLAG_WAR_PLAYER			0x1000
 
+#endif

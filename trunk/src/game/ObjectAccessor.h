@@ -97,7 +97,7 @@ private:
 	UpdateDataMapType &i_updateDatas;
 	Object &i_object;
 	ObjectAccessor &i_accessor;
-	ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_object(obj), i_updateDatas(d), i_accessor(a) {}
+	ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_updateDatas(d), i_object(obj), i_accessor(a) {}
 	void Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
 

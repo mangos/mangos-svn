@@ -451,7 +451,7 @@ namespace MaNGOS
 	std::list<Unit*> &i_data;
 	Spell &i_spell;
 	const uint32& i_index;
-	SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_spell(spell), i_data(data), i_index(i) {}
+	SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_data(data), i_spell(spell), i_index(i) {}
 	inline void Visit(PlayerMapType &m)
 	{
 	    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)

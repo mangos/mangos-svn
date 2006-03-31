@@ -29,10 +29,10 @@ typedef int(* pPrintf)(const char*,...);
 typedef void(* pCliFunc)(char *,pPrintf);
 
 typedef struct {
-	char * cmd;
+	char const * cmd;
 	uint8 cmdlength;//including ' ' if you want
 	pCliFunc Func;
-	char * discription;
+	char const * discription;
 }CliCommand;
  
 char prompt[64];

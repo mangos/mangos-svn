@@ -163,7 +163,7 @@ class Channel
         }
 
     public:
-        Channel() : name(""), constant(false), password(""), announce(true), owner(NULL), moderate(false)
+        Channel() : name(""), announce(true), constant(false), moderate(false), password(""), owner(NULL)
         {
         }
         void SetName(string newname) { name = newname; }

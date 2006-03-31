@@ -18,13 +18,13 @@
 
 class barGoLink
 {
-  char * empty,
-       * full; 
+  char const * empty;
+  char const * full;
 
-  int rec_no,
-      rec_pos,
-      num_rec,
-      indic_len;
+  int rec_no;
+  int rec_pos;
+  int num_rec;
+  int indic_len;
 
   public:
 
