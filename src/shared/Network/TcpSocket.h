@@ -72,7 +72,7 @@ class TcpSocket : public Socket
         int Close();
 
         void Send(const std::string &);
-        void Sendf(char *format, ...);
+        void Sendf(char const *format, ...);
 
         virtual void SendBuf(const char *,size_t);
         virtual void OnRawData(const char *,size_t) {}

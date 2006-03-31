@@ -425,7 +425,7 @@ Player * ChatHandler::getSelectedChar(WorldSession *client)
 }
 
 
-char *fmtstring( char *format, ... ) 
+char const *fmtstring( char const *format, ... ) 
 {
     va_list        argptr;
     #define    MAX_FMT_STRING    32000

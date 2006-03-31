@@ -44,7 +44,7 @@ class MANGOS_DLL_DECL WorldLog : public MaNGOS::Singleton<WorldLog, MaNGOS::Clas
 public:
     void Initialize();
     inline bool LogWorld(void) const { return (i_file != NULL); }
-    inline void Log(char *fmt, ...) 
+    inline void Log(char const *fmt, ...) 
     {
 	if( LogWorld() )
 	{

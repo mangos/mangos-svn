@@ -734,7 +734,7 @@ bool TcpSocket::OnSocks4Read()
 }
 
 
-void TcpSocket::Sendf(char *format, ...)
+void TcpSocket::Sendf(char const *format, ...)
 {
     va_list ap;
     va_start(ap, format);
