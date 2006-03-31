@@ -3542,8 +3542,8 @@ int Player::CalculateHonorRank(float honor_points)
 	int rank = 0;
 
 		if(honor_points <=    0.00) rank = 0; else
-		if(honor_points <  2000.00) rank = 1; else
-		if(honor_points <  5000.00)
+		if(honor_points <  2000.00) rank = 1;
+		else
 			rank = ( (int)(honor_points / 5000) + 1);
 
 	return rank;
