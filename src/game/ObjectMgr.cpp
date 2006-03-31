@@ -178,7 +178,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete player_result;
 
-    QueryResult *items_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_items WHERE createId = '0' OR createId = '%u';", createId);
+    QueryResult *items_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_items WHERE createid = '0' OR createid = '%u';", createId);
 
     do {
 		 if(!items_result) break;
@@ -191,7 +191,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete items_result;
     
-    QueryResult *spells_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_spells WHERE createId = '0' OR createId = '%u';", createId);
+    QueryResult *spells_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_spells WHERE createid = '0' OR createid = '%u';", createId);
 
     do 
     {
@@ -203,7 +203,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete spells_result;
     
-    QueryResult *skills_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_skills WHERE createId = '0' OR createId = '%u';", createId);
+    QueryResult *skills_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_skills WHERE createid = '0' OR createid = '%u';", createId);
 
     do 
     {
@@ -217,7 +217,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete skills_result;
 
-    QueryResult *actions_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_actions WHERE createId = '0' OR createId = '%u';", createId);
+    QueryResult *actions_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_actions WHERE createid = '0' OR createid = '%u';", createId);
 
     do 
     {
@@ -348,7 +348,7 @@ void ObjectMgr::LoadMailedItems()
 void ObjectMgr::LoadGuilds()
 {
 	Guild *newguild;
-	QueryResult *result = sDatabase.PQuery( "SELECT guildId FROM guilds;" );
+	QueryResult *result = sDatabase.PQuery( "SELECT guildid FROM guilds;" );
 	uint32 count = 0;
 	
 	if( !result ) 
@@ -583,7 +583,7 @@ void ObjectMgr::LoadGossipText()
 ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
 {
 	ItemPage *pIText;
-	QueryResult *result = sDatabase.PQuery("SELECT * FROM item_pages WHERE ID = '%d';", Page_ID);
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM item_pages WHERE id = '%d';", Page_ID);
 
 	if( !result ) return NULL;
 	int cic, count = 0;
@@ -763,7 +763,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-X,2)+POW('%f'-Y,2)+POW('%f'-Z,2)) as distance,X,Y,Z,mapId from graveyards where mapId = '%d' ORDER BY distance ASC LIMIT 1;", x, y, z, MapId);
+    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-positionx,2)+POW('%f'-positiony,2)+POW('%f'-positionz,2)) as distance, positionx, positiony, positionz, mapid FROM graveyards WHERE mapid = '%d' ORDER BY distance ASC LIMIT 1;", x, y, z, MapId);
 
     if( ! result )
         return NULL;

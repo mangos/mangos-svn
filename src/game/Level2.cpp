@@ -254,7 +254,9 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     uint32 id  = atoi(charID);
 
-    QueryResult *result = sDatabase.PQuery("SELECT modelid, flag, faction, level, name from creaturetemplate where entryid = '%d';", id);
+    // changed 'flag' to 'flags' acording to table
+    // changed 'entryid' to 'entry' acording to table
+    QueryResult *result = sDatabase.PQuery("SELECT modelid, flags, faction, level, name from creaturetemplate where entry = '%d';", id);
 
     if(result)
     {
@@ -399,7 +401,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     {
         uint32 guidlow = GUID_LOPART(guid);
 
-	sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u' AND itemGuid = '%u'",pCreature->GetEntry(),itemguid);
+	sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u' AND itemguid = '%u'",pCreature->GetEntry(),itemguid);
 
         pCreature->setItemId(slot , 0);
         pCreature->setItemAmount(slot , 0);
@@ -447,7 +449,9 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         return true;
     }
 
-    sDatabase.PExecute("INSERT INTO creatures_mov (creatureId,X,Y,Z) VALUES ('%u', '%f', '%f', '%f');", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
+    // changed 'creatureId' to lowercase
+    // changed 'X', 'y', 'Z' to 'positionx', 'positiony', 'positionz'
+    sDatabase.PExecute("INSERT INTO creatures_mov (creatureid, positionx, positiony, positionz) VALUES ('%u', '%f', '%f', '%f');", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
 
     FillSystemMessageData(&data, m_session, "Waypoint added.");
     m_session->SendPacket( &data );
@@ -492,6 +496,8 @@ bool ChatHandler::HandleRandomCommand(const char* args)
         return true;
     }
 
+    // fix me : 'moverandom' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
+    // perhaps it should be 'state'?
     sDatabase.PExecute("UPDATE creatures SET moverandom = '%i' WHERE guid = '%u';", option, GUID_LOPART(guid));
 
     pCreature->setMoveRandomFlag(option > 0);
@@ -537,6 +543,8 @@ bool ChatHandler::HandleRunCommand(const char* args)
         return true;
     }
 
+    // fix me : 'running' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
+    // perhaps it should be 'state'?
     sDatabase.PExecute("UPDATE creatures SET running = '%i' WHERE guid = '%u';", option, GUID_LOPART(guid));
 
     pCreature->setMoveRunFlag(option > 0);
