@@ -22,7 +22,7 @@ CREATE TABLE `accounts` (
   `gm` tinyint(1) NOT NULL default '0',
   `sessionkey` longtext NOT NULL,
   `email` varchar(50) NOT NULL default '',
-  `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `banned` tinyint(1) NOT NULL default '0',
   `last_ip` varchar(30) NOT NULL default '0',
   `failed_logins` int(6) default '0',
