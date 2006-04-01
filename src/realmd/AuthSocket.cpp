@@ -424,7 +424,7 @@ void AuthSocket::_HandleLogonProof()
     {
         sLog.outBasic("User '%s' successfully authed", _login.c_str());
        
-        sDatabase.PExecute("UPDATE accounts SET sessionkey = '%s', last_ip = '%s' WHERE login='%s'",
+        sDatabase.PExecute("UPDATE accounts SET sessionkey = '%s', last_ip = '%s', `last_login` = NOW() WHERE login='%s'",
 			K.AsHexStr(), GetRemoteAddress().c_str(), _login.c_str() );
 
         sha.Initialize();
