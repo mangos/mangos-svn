@@ -1520,7 +1520,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     
 	char buf[512];
     uint32 guid = m_session->GetPlayer()->GetSelection();
-    uint32 factionid = 0, npcflags = 0, skinid = 0;
+    uint32 faction = 0, npcflags = 0, skinid = 0, Entry = 0;
 
     Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
 
@@ -1531,17 +1531,17 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
         return true;
     }
 
-    factionid = target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE);
+    faction = target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE);
     npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
     skinid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
-
+    Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
 
     // 'id' changed to 'guid'
     QueryResult *result = sDatabase.PQuery("SELECT * FROM creatures WHERE guid = '%u';", target->GetGUIDLow());
 
     Field *fields = result->Fetch();
 
-	sprintf(buf,"Player selected NPC\nGUID: %d.\nFaction: %d.\nnpcFlags: %d.\nNameID: %d.\nSkinID: %d.", guid, factionid, npcflags, fields[8].GetUInt32(), skinid);
+	sprintf(buf,"Player selected NPC\nGUID: %d.\nFaction: %d.\nnpcFlags: %d.\nNameID: %d.\nSkinID: %d.", guid, faction, npcflags, Entry, skinid);
 	sprintf(buf,"%s\nLevel: %u.", buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
 	sprintf(buf,"%s\nHealth (base): %u. (max): %u. (current): %u.", buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
 	sprintf(buf,"%s\nField Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u.", buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
