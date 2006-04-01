@@ -47,7 +47,6 @@ EXTRA_DIST += \
 	win_intel/VC71/framework.vcproj \
 	win_intel/VC71/game.icproj \
 	win_intel/VC71/game.vcproj \
-	win_intel/VC71/httpd.vcproj \
 	win_intel/VC71/mangosd.icproj \
 	win_intel/VC71/mangosd.vcproj \
 	win_intel/VC71/realmlist.icproj \
