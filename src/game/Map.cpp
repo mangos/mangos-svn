@@ -44,7 +44,7 @@ bool FileExists(const char * fn)
 
 GridMap * LoadMAP(int mapid,int x,int y)
 {
-    char tmp[32];
+    char *tmp;
     static bool showcheckmapInfo=false;
     static int oldx=0,oldy=0;
 
@@ -58,7 +58,10 @@ GridMap * LoadMAP(int mapid,int x,int y)
 	    dataPath.append("/");
     }
     
-    sprintf(tmp,(char *)(dataPath+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
+    // Pihhan: dataPath length + "maps/" + 3+2+2+ ".map" length may be > 32 !
+    int len = dataPath.length()+strlen("maps/%03u%02u%02u.map")+1;
+    tmp = new char[len];
+    snprintf(tmp, len, (char *)(dataPath+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
 
     if( (oldx!=x) || (oldy!=y) )
     {
@@ -77,14 +80,17 @@ GridMap * LoadMAP(int mapid,int x,int y)
             sLog.outDetail("Map file %s does not exist",tmp);
 	        showcheckmapInfo = false;
 	    }
+        delete [] tmp;
 	    return NULL;
     }
-//fseek(pf,0,2);
-//uint32 fs=ftell(pf);
-//fseek(pf,0,0);
+    // fseek(pf,0,2);
+    // uint32 fs=ftell(pf);
+    // fseek(pf,0,0);
     GridMap * buf= new GridMap;
     fread(buf,1,sizeof(GridMap),pf);
     fclose(pf);
+
+    delete [] tmp;
 
     return buf;
 }
