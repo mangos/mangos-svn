@@ -27,6 +27,7 @@ CREATE TABLE `accounts` (
   `last_ip` varchar(30) NOT NULL default '0',
   `failed_logins` int(6) default '0',
   `locked` int(1) default '0',
+  `last_login` timestamp NOT NULL,
   PRIMARY KEY  (`acct`),
   UNIQUE KEY `acct` (`acct`),
   KEY `accounts` (`gm`,`banned`)
