@@ -277,16 +277,18 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
 {
     WorldPacket data;
 
-    char* pmana = strtok((char*)args, " ");
-    if (!pmana)
-        return false;
+    // char* pmana = strtok((char*)args, " ");
+    // if (!pmana)
+    //     return false;
 
-    char* pmanaMax = strtok(NULL, " ");
-    if (!pmanaMax)
-        return false;
+    // char* pmanaMax = strtok(NULL, " ");
+    // if (!pmanaMax)
+    //     return false;
 
-    int32 manam = atoi(pmanaMax);
-    int32 mana = atoi(pmana);
+    // int32 manam = atoi(pmanaMax);
+    // int32 mana = atoi(pmana);
+    int32 mana = atoi((char*)args);
+    int32 manam = atoi((char*)args);
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
@@ -327,16 +329,18 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
 {
     WorldPacket data;
 
-    char* pmana = strtok((char*)args, " ");
-    if (!pmana)
-        return false;
+    // char* pmana = strtok((char*)args, " ");
+    // if (!pmana)
+    //     return false;
 
-    char* pmanaMax = strtok(NULL, " ");
-    if (!pmanaMax)
-        return false;
+    // char* pmanaMax = strtok(NULL, " ");
+    // if (!pmanaMax)
+    //     return false;
 
-    int32 manam = atoi(pmanaMax);
-    int32 mana = atoi(pmana);
+    // int32 manam = atoi(pmanaMax);
+    // int32 mana = atoi(pmana);
+    int32 mana = atoi((char*)args)*10;
+    int32 manam = atoi((char*)args)*10;
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
@@ -356,12 +360,12 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
     char buf[256];
 
     
-    sprintf((char*)buf,"You change the ENERGY to %i/%i of %s.", mana, manam, chr->GetName());
+    sprintf((char*)buf,"You change the ENERGY to %i/%i of %s.", mana/10, manam/10, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
     
-    sprintf((char*)buf,"%s changed your ENERGY to %i/%i.", m_session->GetPlayer()->GetName(), mana, manam);
+    sprintf((char*)buf,"%s changed your ENERGY to %i/%i.", m_session->GetPlayer()->GetName(), mana/10, manam/10);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -379,16 +383,18 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
 {
     WorldPacket data;
 
-    char* pmana = strtok((char*)args, " ");
-    if (!pmana)
-        return false;
+    // char* pmana = strtok((char*)args, " ");
+    // if (!pmana)
+    //     return false;
 
-    char* pmanaMax = strtok(NULL, " ");
-    if (!pmanaMax)
-        return false;
+    // char* pmanaMax = strtok(NULL, " ");
+    // if (!pmanaMax)
+    //     return false;
 
-    int32 manam = atoi(pmanaMax);
-    int32 mana = atoi(pmana);
+    // int32 manam = atoi(pmanaMax);
+    // int32 mana = atoi(pmana);
+    int32 mana = atoi((char*)args)*10;
+    int32 manam = atoi((char*)args)*10;
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
@@ -408,12 +414,12 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
     char buf[256];
 
     
-    sprintf((char*)buf,"You change the RAGE to %i/%i of %s.", mana, manam, chr->GetName());
+    sprintf((char*)buf,"You change the RAGE to %i/%i of %s.", mana/10, manam/10, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
     
-    sprintf((char*)buf,"%s changed your RAGE to %i/%i.", m_session->GetPlayer()->GetName(), mana, manam);
+    sprintf((char*)buf,"%s changed your RAGE to %i/%i.", m_session->GetPlayer()->GetName(), mana/10, manam/10);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
