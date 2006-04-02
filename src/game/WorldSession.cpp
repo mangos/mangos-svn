@@ -200,12 +200,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_CHAR_CREATE,              STATUS_AUTHED,   &WorldSession::HandleCharCreateOpcode              },
         { CMSG_CHAR_DELETE,              STATUS_AUTHED,   &WorldSession::HandleCharDeleteOpcode              },
         { CMSG_PLAYER_LOGIN,             STATUS_AUTHED,   &WorldSession::HandlePlayerLoginOpcode             },
-		{ CMSG_CHANGE_PLAYER_NAME,       STATUS_AUTHED,	  &WorldSession::HandleChangePlayerNameOpcode         },
-
+		{ CMSG_CHAR_RENAME,				 STATUS_AUTHED,	  &WorldSession::HandleChangePlayerNameOpcode         },
         
         { CMSG_SET_ACTION_BUTTON,        STATUS_LOGGEDIN, &WorldSession::HandleSetActionButtonOpcode         },
-
-        
         { CMSG_REPOP_REQUEST,            STATUS_LOGGEDIN, &WorldSession::HandleRepopRequestOpcode            },
         { CMSG_AUTOSTORE_LOOT_ITEM,      STATUS_LOGGEDIN, &WorldSession::HandleAutostoreLootItemOpcode       },
         { CMSG_LOOT_MONEY,               STATUS_LOGGEDIN, &WorldSession::HandleLootMoneyOpcode               },
@@ -218,37 +215,27 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GMTICKET_GETTICKET,       STATUS_LOGGEDIN, &WorldSession::HandleGMTicketGetTicketOpcode       },
         { CMSG_GMTICKET_CREATE,          STATUS_LOGGEDIN, &WorldSession::HandleGMTicketCreateOpcode          },
         { CMSG_GMTICKET_SYSTEMSTATUS,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    },
-
-        
         { CMSG_GMTICKET_DELETETICKET,    STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode          },
         { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      },
-        
-        
-        { CMSG_ENABLE_PVP,               STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
+        { CMSG_TOGGLE_PVP,               STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
 
 	// new
         { CMSG_FORCE_MOVE_UNROOT_ACK,	STATUS_LOGGEDIN, &WorldSession::HandleMooveUnRootAck                   },
         { CMSG_FORCE_MOVE_ROOT_ACK,	STATUS_LOGGEDIN, &WorldSession::HandleMooveRootAck               }, 
-
         { CMSG_MOVE_WATER_WALK_ACK,	STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck               }, 
 
-
-	// repair item
+		// repair item
         { CMSG_REPAIR_ITEM,	STATUS_LOGGEDIN, &WorldSession::HandleRepairItemOpcode               }, 
 
-
-	{ CMSG_SET_ACTIVE_MOVER,	STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
+		{ CMSG_SET_ACTIVE_MOVER,	STATUS_LOGGEDIN, &WorldSession::HandleSetActiveMoverOpcode          },
         { MSG_LOOKING_FOR_GROUP,	STATUS_LOGGEDIN, &WorldSession::HandleLookingForGroup                   },
-
         { MSG_MOVE_TELEPORT_ACK,	STATUS_LOGGEDIN, &WorldSession::HandleMoveTeleportAck               }, 
         { CMSG_FORCE_RUN_SPEED_CHANGE_ACK,	STATUS_LOGGEDIN, &WorldSession::HandleForceRunSpeedChangeAck               }, 
         { CMSG_FORCE_SWIM_SPEED_CHANGE_ACK,	STATUS_LOGGEDIN, &WorldSession::HandleForceSwimSpeedChangeAck               }, 
-		
-	{ CMSG_SET_FACTION_ATWAR,	STATUS_LOGGEDIN, &WorldSession::HandleSetFactionAtWar				 },
-	{ CMSG_SET_FACTION_CHEAT,	STATUS_LOGGEDIN, &WorldSession::HandleSetFactionCheat				 },
-
+		{ CMSG_SET_FACTION_ATWAR,	STATUS_LOGGEDIN, &WorldSession::HandleSetFactionAtWar				 },
+		{ CMSG_SET_FACTION_CHEAT,	STATUS_LOGGEDIN, &WorldSession::HandleSetFactionCheat				 },
         { CMSG_ZONEUPDATE,               STATUS_LOGGEDIN, &WorldSession::HandleZoneUpdateOpcode              },
-        { CMSG_SET_TARGET,               STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               },
+        { CMSG_SET_TARGET_OBSOLETE,      STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               },
         { CMSG_SET_SELECTION,            STATUS_LOGGEDIN, &WorldSession::HandleSetSelectionOpcode            },
         { CMSG_STANDSTATECHANGE,         STATUS_LOGGEDIN, &WorldSession::HandleStandStateChangeOpcode        },
         { CMSG_FRIEND_LIST,              STATUS_LOGGEDIN, &WorldSession::HandleFriendListOpcode              },
@@ -261,19 +248,15 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_AREATRIGGER,              STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             },
         { CMSG_UPDATE_ACCOUNT_DATA,      STATUS_LOGGEDIN, &WorldSession::HandleUpdateAccountData             },
         { CMSG_REQUEST_ACCOUNT_DATA,     STATUS_LOGGEDIN, &WorldSession::HandleRequestAccountData            },
-        { CMSG_MEETING_STONE_INFO,       STATUS_LOGGEDIN, &WorldSession::HandleMeetingStoneInfo              },
-        
-        
+        { CMSG_MEETINGSTONE_INFO,		 STATUS_LOGGEDIN, &WorldSession::HandleMeetingStoneInfo              },
         { CMSG_GAMEOBJ_USE,              STATUS_LOGGEDIN, &WorldSession::HandleGameObjectUseOpcode           },
-        
         { MSG_CORPSE_QUERY,              STATUS_LOGGEDIN, &WorldSession::HandleCorpseQueryOpcode             },
         { CMSG_NAME_QUERY,               STATUS_LOGGEDIN, &WorldSession::HandleNameQueryOpcode               },
         { CMSG_QUERY_TIME,               STATUS_LOGGEDIN, &WorldSession::HandleQueryTimeOpcode               },
         { CMSG_CREATURE_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandleCreatureQueryOpcode           },
-        { CMSG_GAMEOBJECT_QUERY,         STATUS_LOGGEDIN, &WorldSession::HandleGameObjectQueryOpcode         },
+		{ CMSG_GAMEOBJECT_QUERY,         STATUS_LOGGEDIN, &WorldSession::HandleGameObjectQueryOpcode         },
         
-        { MSG_MOVE_WORLDPORT_ACK,        STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
-	
+		{ MSG_MOVE_WORLDPORT_ACK,        STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        },
         { MSG_MOVE_HEARTBEAT,            STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes           		 },
         { MSG_MOVE_JUMP,                 STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
         { MSG_MOVE_START_FORWARD,        STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               },
@@ -305,8 +288,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GROUP_SET_LEADER,         STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          },
         { CMSG_GROUP_DISBAND,            STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            },
         { CMSG_LOOT_METHOD,              STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
-        
-		
+
 		{ CMSG_GUILD_QUERY,             STATUS_LOGGEDIN, &WorldSession::HandleGuildQueryOpcode               },
 		{ CMSG_GUILD_CREATE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode              },
 		{ CMSG_GUILD_INVITE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildInviteOpcode              },
@@ -328,8 +310,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 		{ CMSG_GUILD_DEL_RANK,          STATUS_LOGGEDIN, &WorldSession::HandleGuildDelRankOpcode             },
 		{ CMSG_GUILD_CHANGEINFO,          STATUS_LOGGEDIN, &WorldSession::HandleGuildChangeInfoOpcode             },
 		
-		
-        { CMSG_TAXINODE_STATUS_QUERY,    STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     },
+		{ CMSG_TAXINODE_STATUS_QUERY,    STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     },
         { CMSG_TAXIQUERYAVAILABLENODES,  STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAviableNodesOpcode   },
         { CMSG_ACTIVATETAXI,             STATUS_LOGGEDIN, &WorldSession::HandleActivateTaxiOpcode            },
         
@@ -349,7 +330,6 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_DUEL_ACCEPTED,            STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode            },
         { CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
 
-        
         { CMSG_ACCEPT_TRADE,             STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode             },
         { CMSG_BEGIN_TRADE,              STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode              },
         { CMSG_BUSY_TRADE,               STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode               },
@@ -361,8 +341,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SET_TRADE_ITEM,           STATUS_LOGGEDIN, &WorldSession::HandleSetTradeItemOpcode            },
         { CMSG_UNACCEPT_TRADE,           STATUS_LOGGEDIN, &WorldSession::HandleUnacceptTradeOpcode           },
 
-		  { CMSG_SPLIT_ITEM,               STATUS_LOGGEDIN, &WorldSession::HandleSplitItemOpcode               },
-		  { CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
+		{ CMSG_SPLIT_ITEM,               STATUS_LOGGEDIN, &WorldSession::HandleSplitItemOpcode               },
+		{ CMSG_SWAP_INV_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleSwapInvItemOpcode             },
         { CMSG_DESTROYITEM,              STATUS_LOGGEDIN, &WorldSession::HandleDestroyItemOpcode             },
         { CMSG_AUTOEQUIP_ITEM,           STATUS_LOGGEDIN, &WorldSession::HandleAutoEquipItemOpcode           },
         { CMSG_ITEM_QUERY_SINGLE,        STATUS_LOGGEDIN, &WorldSession::HandleItemQuerySingleOpcode         },
@@ -370,25 +350,24 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_BUY_ITEM_IN_SLOT,         STATUS_LOGGEDIN, &WorldSession::HandleBuyItemInSlotOpcode           },
         { CMSG_BUY_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleBuyItemOpcode                 },
         { CMSG_LIST_INVENTORY,           STATUS_LOGGEDIN, &WorldSession::HandleListInventoryOpcode           },
-		  { CMSG_SWAP_ITEM,                STATUS_LOGGEDIN, &WorldSession::HandleSwapItem  	                   },
+		{ CMSG_SWAP_ITEM,                STATUS_LOGGEDIN, &WorldSession::HandleSwapItem  	                   },
         { CMSG_BUYBACK_ITEM,             STATUS_LOGGEDIN, &WorldSession::HandleBuybackItem	                },
         { CMSG_AUTOSTORE_BAG_ITEM,       STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBagItemOpcode        },
         { CMSG_AUTOBANK_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleAutoBankItemOpcode            },
         { CMSG_AUTOSTORE_BANK_ITEM,      STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBankItemOpcode       },
 
-		  { CMSG_ATTACKSWING,              STATUS_LOGGEDIN, &WorldSession::HandleAttackSwingOpcode             },
+		{ CMSG_ATTACKSWING,              STATUS_LOGGEDIN, &WorldSession::HandleAttackSwingOpcode             },
         { CMSG_ATTACKSTOP,               STATUS_LOGGEDIN, &WorldSession::HandleAttackStopOpcode              },
-		  { CMSG_SETSHEATHED,              STATUS_LOGGEDIN, &WorldSession::HandleSetSheathedOpcode             },
+		{ CMSG_SETSHEATHED,              STATUS_LOGGEDIN, &WorldSession::HandleSetSheathedOpcode             },
 
-		  { CMSG_USE_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleUseItemOpcode                 },
+		{ CMSG_USE_ITEM,                 STATUS_LOGGEDIN, &WorldSession::HandleUseItemOpcode                 },
         { CMSG_CAST_SPELL,               STATUS_LOGGEDIN, &WorldSession::HandleCastSpellOpcode               },
         { CMSG_CANCEL_CAST,              STATUS_LOGGEDIN, &WorldSession::HandleCancelCastOpcode              },
         { CMSG_CANCEL_AURA,              STATUS_LOGGEDIN, &WorldSession::HandleCancelAuraOpcode              },
         { CMSG_CANCEL_AUTO_REPEAT_SPELL, STATUS_LOGGEDIN, &WorldSession::HandleCancelAutoRepeatSpellOpcode   },
 
-		  { CMSG_LEARN_TALENT,             STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
+		{ CMSG_LEARN_TALENT,             STATUS_LOGGEDIN, &WorldSession::HandleLearnTalentOpcode             },
 
-        
         { CMSG_QUESTGIVER_STATUS_QUERY,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   },
         { CMSG_QUESTGIVER_HELLO,         STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverHelloOpcode         },
         { CMSG_QUESTGIVER_ACCEPT_QUEST,  STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverAcceptQuestOpcode   },
@@ -404,14 +383,10 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_QUESTGIVER_COMPLETE_QUEST,       STATUS_LOGGEDIN, &WorldSession::HandleQuestComplete          },
         { CMSG_QUESTGIVER_QUEST_AUTOLAUNCH,     STATUS_LOGGEDIN, &WorldSession::HandleQuestAutoLaunch        },
 
-
-		
-
 		{ CMSG_TUTORIAL_FLAG,            STATUS_LOGGEDIN, &WorldSession::HandleTutorialFlag                  },
 		{ CMSG_TUTORIAL_CLEAR,           STATUS_LOGGEDIN, &WorldSession::HandleTutorialClear                 },
 		{ CMSG_TUTORIAL_RESET,           STATUS_LOGGEDIN, &WorldSession::HandleTutorialReset                 },
 
-        
         { CMSG_MESSAGECHAT,              STATUS_LOGGEDIN, &WorldSession::HandleMessagechatOpcode             },
         { CMSG_TEXT_EMOTE,               STATUS_LOGGEDIN, &WorldSession::HandleTextEmoteOpcode               },
         { CMSG_CHAT_IGNORED,             STATUS_LOGGEDIN, &WorldSession::HandleChatIgnoredOpcode             },
@@ -491,9 +466,4 @@ void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
 {
 	uint32 spellid;
 	recv_data >> spellid;
-
-	
-
-
-   
 }
