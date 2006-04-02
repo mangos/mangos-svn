@@ -148,7 +148,7 @@ DROP TABLE IF EXISTS `bids`;
 CREATE TABLE `bids` (
   `bidder` int(32) NOT NULL default '0',
   `id` int(32) NOT NULL default '0',
-  `amt` int(32) NOT NULL default '0'
+  `amount` int(32) NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -189,7 +189,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `char_actions`;
 CREATE TABLE `char_actions` (
-  `charId` int(6) NOT NULL default '0',
+  `charid` int(6) NOT NULL default '0',
   `button` int(2) unsigned NOT NULL default '0',
   `action` int(6) unsigned NOT NULL default '0',
   `type` int(3) unsigned NOT NULL default '0',
@@ -213,9 +213,9 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `char_spells`;
 CREATE TABLE `char_spells` (
   `id` bigint(20) unsigned zerofill NOT NULL auto_increment,
-  `charId` bigint(20) unsigned NOT NULL default '0',
-  `spellId` int(20) unsigned NOT NULL default '0',
-  `slotId` int(11) unsigned default NULL,
+  `charid` bigint(20) unsigned NOT NULL default '0',
+  `spellid` int(20) unsigned NOT NULL default '0',
+  `slotid` int(11) unsigned default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -241,10 +241,10 @@ CREATE TABLE `characters` (
   `name` varchar(21) NOT NULL default '',
   `race` tinyint(2) NOT NULL default '0',
   `class` tinyint(2) NOT NULL default '0',
-  `positionX` float NOT NULL default '0',
-  `positionY` float NOT NULL default '0',
-  `positionZ` float NOT NULL default '0',
-  `mapId` mediumint(8) unsigned NOT NULL default '0',
+  `positionx` float NOT NULL default '0',
+  `positiony` float NOT NULL default '0',
+  `positionz` float NOT NULL default '0',
+  `mapid` mediumint(8) unsigned NOT NULL default '0',
   `orientation` float NOT NULL default '0',
   `taximask` longtext NOT NULL,
   `online` tinyint(1) NOT NULL default '0',
@@ -1000,8 +1000,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `kills`;
 CREATE TABLE `kills` (
-  `killerID` int(32) NOT NULL default '0',
-  `victimID` int(32) NOT NULL default '0',
+  `killerid` int(32) NOT NULL default '0',
+  `victimid` int(32) NOT NULL default '0',
   `honor_pts` float NOT NULL default '0',
   `date` int(32) NOT NULL default '0',
   `type` smallint(5) unsigned NOT NULL default '0'
@@ -1572,8 +1572,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `queststatus`;
 CREATE TABLE `queststatus` (
-  `playerId` bigint(20) unsigned NOT NULL default '0',
-  `questId` bigint(22) unsigned NOT NULL default '0',
+  `playerid` bigint(20) unsigned NOT NULL default '0',
+  `questid` bigint(22) unsigned NOT NULL default '0',
   `status` bigint(20) unsigned NOT NULL default '0',
   `rewarded` bigint(20) unsigned NOT NULL default '0',
   `questMobCount1` bigint(20) unsigned NOT NULL default '0',
@@ -1633,13 +1633,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `reputation`;
 CREATE TABLE `reputation` (
-  `ID` int(32) NOT NULL auto_increment,
-  `playerID` int(32) NOT NULL default '0',
-  `factionID` int(32) NOT NULL default '0',
-  `reputationID` int(32) NOT NULL default '0',
+  `id` int(32) NOT NULL auto_increment,
+  `playerid` int(32) NOT NULL default '0',
+  `factionid` int(32) NOT NULL default '0',
+  `reputationid` int(32) NOT NULL default '0',
   `standing` int(32) NOT NULL default '0',
   `flags` int(32) NOT NULL default '0',
-  PRIMARY KEY  (`ID`)
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1911,7 +1911,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `tutorials`;
 CREATE TABLE `tutorials` (
-  `playerId` bigint(20) unsigned NOT NULL default '0',
+  `playerid` bigint(20) unsigned NOT NULL default '0',
   `tut0` bigint(20) unsigned NOT NULL default '0',
   `tut1` bigint(20) unsigned NOT NULL default '0',
   `tut2` bigint(20) unsigned NOT NULL default '0',
