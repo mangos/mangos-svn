@@ -1984,7 +1984,10 @@ void Player::SaveToDB() {
 	}
 	RemoveFlag( UNIT_FIELD_FLAGS, 0x40000 );
 
-    
+    // Set player sit state to standing on save
+    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+
 	_RemoveStatsMods();
 	_RemoveAllItemMods();
 	_RemoveAllAuraMods();
