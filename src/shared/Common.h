@@ -19,6 +19,8 @@
 #ifndef MANGOSSERVER_COMMON_H
 #define MANGOSSERVER_COMMON_H
 
+#ifndef __GNUC__ 
+
 #pragma warning(disable:4996)
 
 #ifndef __SHOW_STUPID_WARNINGS__
@@ -37,8 +39,9 @@
 #pragma warning(disable:4305)
 
 #pragma warning(disable:4005)
-#endif 
+#endif // __SHOW_STUPID_WARNINGS__
 
+#endif // __GNUC__
 
 
 
