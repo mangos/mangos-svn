@@ -153,7 +153,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             for (itr = pl->GetBidBegin(); itr != pl->GetBidEnd(); itr++)
             {
                 AuctionEntry *ae = objmgr.GetAuction((*itr)->AuctionID);
-                if (ae->auctioneer = GUID_LOPART(guid))
+                if (ae->auctioneer == GUID_LOPART(guid))
                 {
                     cnt++;
                 }
@@ -170,7 +170,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             for (itr = pl->GetBidBegin(); itr != pl->GetBidEnd(); itr++)
             {
                 AuctionEntry *ae = objmgr.GetAuction((*itr)->AuctionID);
-                if ((ae->auctioneer = GUID_LOPART(guid)) && (cnter < 33))
+                if ((ae->auctioneer == GUID_LOPART(guid)) && (cnter < 33))
                 {
                     data << ae->Id;
                     Item *it = objmgr.GetAItem(ae->item);

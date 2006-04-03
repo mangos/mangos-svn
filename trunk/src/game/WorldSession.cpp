@@ -33,8 +33,8 @@
 #include "ObjectAccessor.h"
 
 
-WorldSession::WorldSession(uint32 id, WorldSocket *sock) : _accountId(id), _socket(sock),
-_security(0), _player(0), _logoutTime(0)
+WorldSession::WorldSession(uint32 id, WorldSocket *sock) : _player(0), _socket(sock),
+_security(0), _accountId(id), _logoutTime(0)
 {
 
 }

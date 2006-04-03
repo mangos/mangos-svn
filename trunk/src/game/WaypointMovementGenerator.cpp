@@ -117,7 +117,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 std::set<uint32> WaypointMovementGenerator::si_waypointHolders;
 
 //----------------------------------------------------//
-FlightPathMovementGenerator::FlightPathMovementGenerator(Player &pl, uint32 id) : i_player(pl), i_pathId(id) 
+FlightPathMovementGenerator::FlightPathMovementGenerator(Player &pl, uint32 id) : i_pathId(id), i_player(pl)
 { 
     Initialize();
     FlightMaster::Instance().ReportFlight(&i_player, this);    

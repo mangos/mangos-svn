@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef MANGOS_SPELLAURAS_H
+#define MANGOS_SPELLAURAS_H
+
 #define MAX_AURAS 56
 #define MAX_POSITIVE_AURAS 32                     
 
@@ -289,10 +292,10 @@ class Aura
 		void HandleReflectSpellsSchool(bool Apply);
 		void HandleAuraModSkill(bool Apply);
 
-        Aura() : m_spellProto(NULL), m_duration(0), m_caster(NULL), m_target(NULL), m_auraSlot(0), m_coAura(NULL), m_permanent(false) {}
+        Aura() : m_spellProto(NULL), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_coAura(NULL), m_positive(false), m_permanent(false) {}
 
         Aura(SpellEntry *proto, int32 duration, Unit *caster, Unit *target) :
-        m_spellProto(proto), m_duration(duration), m_caster(caster), m_target(target), m_auraSlot(0), m_coAura(NULL), m_permanent(false) {}
+        m_spellProto(proto), m_caster(caster), m_target(target), m_duration(duration), m_auraSlot(0), m_coAura(NULL), m_positive(false), m_permanent(false){}
 
 		void AddMod(uint8 t, int32 a, uint32 pt,uint32 miscValue, uint32 miscValue2);
 
@@ -350,7 +353,4 @@ class Aura
 
 typedef void(Aura::*pAuraHandler)(bool Apply); 
 
-
-
-
-
+#endif

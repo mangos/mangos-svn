@@ -471,7 +471,8 @@ namespace MaNGOS
 	Spell &i_spell;
 	const uint32& i_index;
 	const uint32& i_push_type;
-	SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i,const uint32 &type) : i_spell(spell), i_data(data), i_index(i), i_push_type(type){}
+	SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i,const uint32 &type) 
+		: i_data(data), i_spell(spell), i_index(i), i_push_type(type){}
 
 	template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
 	{

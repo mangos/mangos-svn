@@ -30,7 +30,9 @@
 class MANGOS_DLL_DECL ObjectGridLoader
 {
 public:
-    ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell) : i_grid(grid), i_mapId(id), i_cell(cell) {}
+	ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell) 
+		: i_cell(cell), i_grid(grid), i_mapId(id), i_gameObjects(0), i_creatures (0)
+	{}
 
     void Load(GridType &grid);
     void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
