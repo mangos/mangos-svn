@@ -63,31 +63,19 @@ namespace MaNGOS
 				return 100.0;
 		}
 
-		inline float HonorableKillPoints(int total_kills, int k_rank, int v_rank, int k_level, int v_level, float diff_honor, float diff_level)
-		{					
+		inline float HonorableKillPoints( Player *killer, Player *victim )
+		{	
+			int total_kills  = killer->CalculateTotalKills(victim);
+			int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
+			int v_rank       = victim->CalculateHonorRank( victim->GetTotalHonor() );
+			int k_level      = killer->GetLevel();
+			int v_level      = victim->GetLevel();
+			float diff_honor = (victim->GetTotalHonor() /(killer->GetTotalHonor()+1))+1;
+			float diff_level = (victim->GetLevel()*(1.0/( killer->GetLevel() ))); 
+
 			int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
 			int honor_points = int(((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level)));
 			return (honor_points <= 400 ? honor_points : 400);
-		}
-
-		inline float HonorableKillPoints2(int victimrank)
-		{
-			if ( victimrank ==  0 ) return 000; else
-			if ( victimrank ==  1 ) return 166; else
-			if ( victimrank ==  2 ) return 175; else
-			if ( victimrank ==  3 ) return 185; else
-			if ( victimrank ==  4 ) return 195; else
-			if ( victimrank ==  5 ) return 205; else
-			if ( victimrank ==  6 ) return 217; else
-			if ( victimrank ==  7 ) return 229; else
-			if ( victimrank ==  8 ) return 241; else
-			if ( victimrank ==  9 ) return 254; else
-			if ( victimrank == 10 ) return 268; else
-			if ( victimrank == 11 ) return 283; else
-			if ( victimrank == 12 ) return 298; else
-			if ( victimrank == 13 ) return 315; else
-			if ( victimrank == 14 ) return 332; else
-				return 400;
 		}
 
 	}
