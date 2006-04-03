@@ -3513,7 +3513,8 @@ void Player::UpdateHonor(void)
 	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, (uint32)lastWeekHonor);
 	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, GetHonorLastWeekRank());
 
-	//RANK BAR //Total honor points
+	//TODO Fix next rank bar... it is not working fine!
+	//NEXT RANK BAR //Total honor points
 	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, (uint32)( (total_honor < 0) ? 0 : total_honor) );
 	
 	if( CalculateHonorRank(total_honor) )
@@ -3597,8 +3598,7 @@ void Player::CalculateHonor(Unit *uVictim)
 
 		if( GetLevel() < (pVictim->GetLevel()+5) )
 		{
-			parcial_honor_points = MaNGOS::Honor::HonorableKillPoints(CalculateTotalKills(pVictim), CalculateHonorRank( GetTotalHonor() ), pVictim->CalculateHonorRank( pVictim->GetTotalHonor() ), GetLevel(), pVictim->GetLevel(), (pVictim->GetTotalHonor() /(GetTotalHonor()+1))+1, (pVictim->GetLevel()*(1.0/( GetLevel() )))  );
-
+			parcial_honor_points = MaNGOS::Honor::HonorableKillPoints( this, pVictim );
 			kill_type = HONORABLE_KILL;				
 			savekill = true;
 		}
