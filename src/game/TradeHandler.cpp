@@ -309,8 +309,22 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         SendPacket(&data);
         return;        
     }
-    
 
+	if( pOther->GetTeam() != GetPlayer()->GetTeam() )
+    {
+        data.Initialize(SMSG_TRADE_STATUS);
+        data << (uint32)11; 
+        SendPacket(&data);
+        return;        
+    }
+	
+	if( pOther->GetDistance2dSq( (Object*) GetPlayer() ) > 100.00 )
+    {
+        data.Initialize(SMSG_TRADE_STATUS);
+        data << (uint32)10; 
+        SendPacket(&data);
+        return;        
+    }
 
     GetPlayer()->pTrader = pOther; 
     pOther->pTrader = GetPlayer();  
@@ -358,3 +372,28 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 
     UpdateTrade();
 }
+
+/*
+OPCODE: TRADE_STATUS
+
+0  - "[NAME] is busy"
+1  - BEGIN TRADE
+2  - OPEN TRADE WINDOW
+3  - "Trade canceled"
+4  - TRADE COMPLETE
+5  - "[NAME] is busy"
+6  - SOUND: I dont have a target
+7  - BACK TRADE
+8  - "Trade Complete" (FECHA A JANELA)
+9  - ?
+10 - "Trade target is too far away"
+11 - "Trade is not party of your alliance"
+12 - CLOSE TRADE WINDOW
+13 - ?
+14 - "[NAME] is ignoring you"
+15 - "You are stunned"
+16 - "Target is stunned"
+17 - "You cannot do that when you are dead"
+18 - "You cannot trade with dead players"
+19 - "You are loging out"
+*/
