@@ -40,9 +40,10 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 	recv_data >> spellid;  
 	recv_data >> flag;    //delete = 0x0700 CastSpell = C100
 	recv_data >> guid2;   //tag guid
-	Player *pl=GetPlayer();
-	Creature* pet=ObjectAccessor::Instance().GetCreature(*pl,guid1);
-    uint16 newFlag=flag;
+
+	Player *pl = GetPlayer();
+	Creature* pet = ObjectAccessor::Instance().GetCreature(*pl,guid1);
+    uint16 newFlag = flag;
 
 	switch(flag){
 	case 0x0000: //spellid=1792  //STAY
