@@ -128,7 +128,4 @@
 
 #define for if(true) for
 
-
-#define LOGOUTDELAY   60  
-
 #endif

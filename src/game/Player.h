@@ -699,9 +699,7 @@ class Player : public Unit {
         uint32 m_currentBuybackSlot; //0~11
 
         bool inCombat;
-        int logoutDelay;
 
-        // std::list<struct Areas> areas;
         std::list<struct Factions> factions;
         std::list<bidentry*> m_bids;
         std::list<Mail*> m_mail;

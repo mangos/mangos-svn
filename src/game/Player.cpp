@@ -90,7 +90,6 @@ Player::Player (WorldSession *session): Unit()
 
 	m_total_honor_points = 0;
     
-    logoutDelay = LOGOUTDELAY;
     inCombat = false;
     pTrader = NULL;
 
@@ -514,9 +513,7 @@ void Player::Update( uint32 p_time )
 
     if (m_state & UF_ATTACKING)
     {
-        inCombat = true;
-        logoutDelay = LOGOUTDELAY;
-		
+        inCombat = true;		
         
         if (isAttackReady())
         {
@@ -572,12 +569,10 @@ void Player::Update( uint32 p_time )
 				AttackerStateUpdate(pVictim, dmg);
 			}
         }
-    } else { 
-        //if( logoutDelay>0 ) logoutDelay--;
-        //else {
-          logoutDelay = LOGOUTDELAY;
-          inCombat = false;
-        //}
+    }
+	else
+	{ 
+		inCombat = false;
     }
 
     if(m_regenTimer > 0)

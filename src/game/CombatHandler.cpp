@@ -41,7 +41,6 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 	    _player->addStateFlag(UF_ATTACKING);
 	    _player->smsg_AttackStart(pEnemy);
 	    _player->inCombat = true;
-	    _player->logoutDelay = LOGOUTDELAY;
 	    return;
 	}
 
