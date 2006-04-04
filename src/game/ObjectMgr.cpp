@@ -142,8 +142,10 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     QueryResult *player_result = sDatabase.PQuery("SELECT * FROM playercreateinfo WHERE race = '%u' AND class = '%u';", race, class_);
     
-    if( !player_result ) 
+    if(!player_result) {
+        sLog.outError("Warning: Can't get info for player creating with race %d and class %d (table 'playercreateinfo' is empty?)", race, class_);
         return NULL;
+    }
 
     pPlayerCreateInfo = new PlayerCreateInfo;
 
