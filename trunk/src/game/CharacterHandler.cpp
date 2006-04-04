@@ -119,10 +119,23 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     Player * pNewChar = new Player(this);
-    pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data );
-    pNewChar->SaveToDB();
 
-    delete pNewChar;
+    if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data )) {
+        // Player create
+        pNewChar->SaveToDB();
+
+        delete pNewChar;
+    }else{
+        // Player not create (race/class problem?)
+        delete pNewChar;
+
+        data.Initialize(SMSG_CHAR_CREATE);
+        data << (uint8)0x2F;                  
+        SendPacket( &data );
+
+        return;
+    }
+
 
     // we have successfull creation
     // note all error codes moved + 1

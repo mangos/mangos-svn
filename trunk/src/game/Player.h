@@ -324,7 +324,7 @@ class Player : public Unit {
 
         void smsg_NewWorld(uint32 mapid, float x, float y, float z, float orientation);
 
-        void Create ( uint32 guidlow, WorldPacket &data );
+        bool Create ( uint32 guidlow, WorldPacket &data );
 
         void Update( uint32 time );
 

@@ -130,12 +130,19 @@ Player::~Player ()
     delete PlayerTalkClass;
 }
 
-void Player::Create( uint32 guidlow, WorldPacket& data )
+bool Player::Create( uint32 guidlow, WorldPacket& data )
 {
     int i;
     uint8 race,class_,gender,skin,face,hairStyle,hairColor,facialHair,outfitId;
 
     Object::_Create(guidlow, HIGHGUID_PLAYER);
+
+    data >> m_name;
+    data >> race >> class_ >> gender >> skin >> face;
+    data >> hairStyle >> hairColor >> facialHair >> outfitId;
+
+    info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
+    if(!info) return false;
 
     
     for (i = 0; i < BANK_SLOT_BAG_END; i++)
@@ -148,13 +155,6 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 //	    SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+j,0);
 //	    SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+j,0);
     }
-
-    data >> m_name;
-    data >> race >> class_ >> gender >> skin >> face;
-    data >> hairStyle >> hairColor >> facialHair >> outfitId;
-
-    info = objmgr.GetPlayerCreateInfo((uint32)race, (uint32)class_);
-    ASSERT(info);
 
     m_race = race;
     m_class = class_;
@@ -327,6 +327,7 @@ void Player::Create( uint32 guidlow, WorldPacket& data )
 
 	m_highest_rank = 0;
 	m_last_week_rank = 0;
+	return true;
 }
 
 void Player::StartMirrorTimer(uint8 Type, uint32 MaxValue)
