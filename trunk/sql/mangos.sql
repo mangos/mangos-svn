@@ -250,6 +250,7 @@ CREATE TABLE `characters` (
   `online` tinyint(1) NOT NULL default '0',
   `highest_rank` int(11) NOT NULL default '0',
   `last_week_rank` int(11) NOT NULL default '0',
+  `cinematic` tinyint(1) NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

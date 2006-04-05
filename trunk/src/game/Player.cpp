@@ -93,6 +93,8 @@ Player::Player (WorldSession *session): Unit()
     inCombat = false;
     pTrader = NULL;
 
+	m_cinematic = 0;
+
     PlayerTalkClass = new PlayerMenu( GetSession() );
     m_timedQuest = 0;
 	m_currentBuybackSlot = 0;
@@ -1998,7 +2000,7 @@ void Player::SaveToDB() {
 
 
 	ss.rdbuf()->str("");
-	ss << "INSERT INTO characters (guid, acct, name, race, class, mapid, positionx, positiony, positionz, orientation, data, taximask, online, highest_rank, last_week_rank) VALUES ("
+	ss << "INSERT INTO characters (guid, acct, name, race, class, mapid, positionx, positiony, positionz, orientation, data, taximask, online, highest_rank, last_week_rank, cinematic) VALUES ("
         << GetGUIDLow() << ", "                   
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -2029,6 +2031,9 @@ void Player::SaveToDB() {
 	
 	ss << ", ";
 	ss << m_last_week_rank;
+
+	ss << ", ";
+	ss << m_cinematic;
 
 	ss << " )";
 
@@ -2150,6 +2155,7 @@ void Player::LoadFromDB( uint32 guid )
     m_orientation = fields[10].GetFloat();
 	m_highest_rank = fields[13].GetUInt32();
 	m_last_week_rank = fields[14].GetUInt32();
+	m_cinematic = fields[15].GetUInt32();
 
     if( HasFlag(PLAYER_FLAGS, 8) )
     SetUInt32Value(PLAYER_FLAGS, 0);

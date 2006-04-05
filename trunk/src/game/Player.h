@@ -424,6 +424,15 @@ class Player : public Unit {
             m_resurrectMana = mana;
         };
 
+		int getCinematic()
+		{
+			return m_cinematic;
+		}
+		void setCinematic(int cine)
+		{
+			m_cinematic = cine;
+		}
+
         uint32 getFaction() {
             return m_faction;
         };
@@ -721,7 +730,8 @@ class Player : public Unit {
         float m_total_honor_points;
         int m_highest_rank;
         int m_last_week_rank;
-        //int m_rank;
+        
+		int m_cinematic;
 
         Player *pTrader;
         bool acceptTrade;
