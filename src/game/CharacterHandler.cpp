@@ -421,99 +421,30 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     data << (float)0.017f;                          
     SendPacket( &data );
 
-    data.Initialize( SMSG_TRIGGER_CINEMATIC );
-    uint8 theRace = GetPlayer()->getRace();         
+	//Show cinematic at the first time that player login
+	if( !GetPlayer()->getCinematic() )
+	{
+		GetPlayer()->setCinematic(1);
 
-    PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(theRace, 1);
-    ASSERT(info);
+		data.Initialize( SMSG_TRIGGER_CINEMATIC );
 
-    if (theRace == HUMAN)                           
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(81);
-                    SendPacket( &data );
-                }
-    }
-
-    if (theRace == ORC)                             
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(21);
-                    SendPacket( &data );
-                }
-    }
-
-    if (theRace == DWARF)                           
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(41);
-                    SendPacket( &data );
-                }
-    }
-    if (theRace == NIGHTELF)                        
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(61);
-                    SendPacket( &data );
-                }
-    }
-    if (theRace == UNDEAD_PLAYER)                   
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(2);
-                    SendPacket( &data );
-                }
-    }
-    if (theRace == TAUREN)                          
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(141);
-                    SendPacket( &data );
-                }
-    }
-    if (theRace == GNOME)                           
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(101);
-                    SendPacket( &data );
-                }
-    }
-    if (theRace == TROLL)                           
-    {
-        if (GetPlayer()->m_positionX == info->positionX)
-            if (GetPlayer()->m_positionY == info->positionY)
-                if (GetPlayer()->m_positionZ == info->positionZ)
-                {
-                    data << uint32(121);
-                    SendPacket( &data );
-                }
-    }
+		uint8 race = GetPlayer()->getRace();
+		switch (race)
+		{
+			case HUMAN:			data << uint32(81);  break;
+			case ORC:			data << uint32(21);  break;
+			case DWARF:			data << uint32(41);  break;
+			case NIGHTELF:		data << uint32(61);  break;
+			case UNDEAD_PLAYER:	data << uint32(2);   break;
+			case TAUREN:		data << uint32(141); break;
+			case GNOME:			data << uint32(101); break;
+			case TROLL:			data << uint32(121); break;
+			default:			data << uint32(0);
+		}
+		SendPacket( &data );
+	}
 
     Player *pCurrChar = GetPlayer();
-
-
-
 
 	QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds_members` WHERE guid = '%d';",pCurrChar->GetGUID());
 
