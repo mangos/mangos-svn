@@ -353,12 +353,12 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     if(!this->isAlive() || !pVictim->isAlive())
         return;
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id);
+        pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), GetGUIDLow(), GetGUIDHigh(), mod->m_amount, spellProto->Id);
 
     WorldPacket data;
     data.Initialize(SMSG_PERIODICAURALOG);
-    data << uint8(0xFF) << pVictim->GetGUID();
     data << uint8(0xFF) << this->GetGUID();
+    data << uint8(0xFF) << pVictim->GetGUID();
     data << spellProto->Id;
     data << uint32(1);                            
 
@@ -368,7 +368,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     data << uint32(0);
     SendMessageToSet(&data,true);
 
-    if(mod->m_auraname == 3) DealDamage(pVictim, mod->m_amount, procFlag);
+    if(mod->m_auraname == 3) DealDamage(this, mod->m_amount, procFlag);
 	else if(mod->m_auraname == 8)
 	{
 		if(GetUInt32Value(UNIT_FIELD_HEALTH) < GetUInt32Value(UNIT_FIELD_MAXHEALTH) + mod->m_amount)
