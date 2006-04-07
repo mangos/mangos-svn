@@ -32,6 +32,9 @@ Event *msEvents=NULL;
 Event *sEvents=NULL;
 Event *mEvents=NULL;
 
+static uint32 eventid=0;
+uint32 avalabelid=0;
+
 uint32 rmse=0;
 uint32 wmse=0;
 uint32 rse=0;
@@ -79,14 +82,14 @@ uint32 wmpe=0;
 #define write_spe while(rspe||wspe);wspe=1;
 #define end_write_spe wspe=0;
 
-#define read_spe while(wse);rspe++;
+#define read_spe while(wspe);rspe++;
 #define end_read_spe rspe--;
 #define expand_spe rspe--;write_spe
 
 #define write_mpe while(rmpe||wmpe);wmpe=1;
 #define end_write_mpe wmpe=0;
 
-#define read_mpe while(wme);rmpe++;
+#define read_mpe while(wmpe);rmpe++;
 #define end_read_mpe rmpe--;
 #define expand_mpe rmpe--;write_mpe
 
@@ -110,9 +113,6 @@ inline uint32 now()
     return  tp.time * 1000 + tp.millitm;
 #endif
 } 
-
-
-
 
 
 void PushmsEvent(Event * event)
@@ -191,19 +191,15 @@ void PushmEvent(Event * event)
 	end_write_me
 }
 
-
-
-
-
 uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread,bool bPeriodic)
 {
-	
-
 	if(bPeriodic)
 	{
-		static uint32 eventid=0;
-		eventid++;
-		
+		if(avalabelid==0)
+		{
+			eventid++;
+			avalabelid=eventid;
+		}
 		PeriodicEvent *event=new PeriodicEvent;
 	
 		event->handler=func;
@@ -233,9 +229,10 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
 			event->pNext =mPEvents;
 			mPEvents=event;
 			end_write_mpe
-		}	
-		
-		return eventid;
+		}
+		uint32 useid=avalabelid;
+		avalabelid=0;
+		return useid;
 	
 	}else
 	{
@@ -297,6 +294,8 @@ void RemovePeriodicEvent(uint32 eventid)
 					msPEvents=(PeriodicEvent*)pos->pNext ;
 				
 				delete pos;
+				if(avalabelid==0)
+					avalabelid=eventid;
 				end_write_mspe
 				return;
 			
@@ -327,6 +326,8 @@ void RemovePeriodicEvent(uint32 eventid)
 					sPEvents=(PeriodicEvent*)pos->pNext ;
 				
 				delete pos;
+				if(avalabelid==0)
+					avalabelid=eventid;
 				end_write_spe
 				return;
 			
@@ -357,6 +358,8 @@ void RemovePeriodicEvent(uint32 eventid)
 					mPEvents=(PeriodicEvent*)pos->pNext ;
 				
 				delete pos;
+				if(avalabelid==0)
+					avalabelid=eventid;
 				end_write_mpe
 				return;
 			
@@ -432,6 +435,7 @@ void mspThread()
 			}
 		
 			ppos=(PeriodicEvent*)ppos->pNext;
+			cur=now();
 		}
 		end_read_mspe	
 	
@@ -480,7 +484,7 @@ void spThread()
 	
 	while(1)
 	{
-		MSleep(ES_RESOLUTION*30-(now()-cur));
+		MSleep(ES_RESOLUTION*30);//-(now()-cur)
 		read_spe
 		cur=now();
 		PeriodicEvent * ppos=sPEvents;
@@ -594,6 +598,4 @@ void StartEventSystem()
 
 	
 }
-
-
 

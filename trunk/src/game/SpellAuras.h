@@ -15,7 +15,6 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
@@ -42,8 +41,8 @@ enum MOD_TYPES
     SPELL_AURA_BIND_SIGHT = 1,
     SPELL_AURA_MOD_POSSESS = 2,                   
 	SPELL_AURA_PERIODIC_DAMAGE = 3,  
-	//missing 4
-    SPELL_AURA_MOD_CONFUSE = 5,                   
+	SPELL_AURA_DUMMY = 4,
+	SPELL_AURA_MOD_CONFUSE = 5,                   
 	SPELL_AURA_MOD_CHARM = 6,                     
     SPELL_AURA_MOD_FEAR = 7,                      
     SPELL_AURA_PERIODIC_HEAL = 8,                 
@@ -348,9 +347,9 @@ class Aura
         bool m_positive;
         bool m_permanent;
 
+		uint32 m_PeriodicEventId;
 };
 
 
 typedef void(Aura::*pAuraHandler)(bool Apply); 
-
 #endif
