@@ -353,12 +353,12 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     if(!this->isAlive() || !pVictim->isAlive())
         return;
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u",
-        pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), GetGUIDLow(), GetGUIDHigh(), mod->m_amount, spellProto->Id);
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id);
 
     WorldPacket data;
     data.Initialize(SMSG_PERIODICAURALOG);
-    data << uint8(0xFF) << this->GetGUID();
     data << uint8(0xFF) << pVictim->GetGUID();
+    data << uint8(0xFF) << this->GetGUID();
     data << spellProto->Id;
     data << uint32(1);                            
 
@@ -368,8 +368,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     data << uint32(0);
     SendMessageToSet(&data,true);
 
-    if(mod->m_auraname == 3) DealDamage(this, mod->m_amount, procFlag);
-	else if(mod->m_auraname == 8)
+    if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE) 
+		DealDamage(pVictim, mod->m_amount, procFlag);
+	else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
 	{
 		if(GetUInt32Value(UNIT_FIELD_HEALTH) < GetUInt32Value(UNIT_FIELD_MAXHEALTH) + mod->m_amount)
 			SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount);
@@ -654,9 +655,15 @@ void Unit::_UpdateSpells( uint32 time )
     AuraList::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-      (*i)->Update( time );
-	  if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
-          RemoveAura(i);
+		(*i)->Update( time );
+		if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
+		{
+			RemoveAura(i);
+			if(!m_Auras.size())
+				break;
+			else
+				i = m_Auras.begin();
+		}
     }
 }
 
