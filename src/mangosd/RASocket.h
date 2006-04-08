@@ -32,7 +32,6 @@
 
 class SocketHandler;
 
-
 class RASocket: public TcpSocket
 
 {
@@ -41,34 +40,31 @@ class RASocket: public TcpSocket
         RASocket(SocketHandler& h);
         ~RASocket();
 
-		void OnAccept();
-		void OnRead();
-static	int zprintf( const char * szText, ... );
+        void OnAccept();
+        void OnRead();
+        static  int zprintf( const char * szText, ... );
 
-	private:
+    private:
 
+        char * buff;
+        char szLogin[17];
+        char szPass[17];
+        uint32 iSess;
+        unsigned int iInputLength;
+        bool bLog;
+        bool bSecure;                                       //kick on wrong pass, non exist. user, user with no priv
+        //will protect from DOS, bruteforce attacks
+        //some 'smart' protection must be added for more scurity
+        uint8 iMinLevel;
+        enum
+        {
+            NONE,                                           //initial value
+            LG,                                             //only login was entered
+            OK,                                             //both login and pass were given, and they are correct and user have enough priv.
+        }stage;
 
-		char * buff;
-		char szLogin[17];
-		char szPass[17];
-		uint32 iSess;
-		unsigned int iInputLength;
-		bool bLog;
-		bool bSecure;//kick on wrong pass, non exist. user, user with no priv
-					 //will protect from DOS, bruteforce attacks
-					 //some 'smart' protection must be added for more scurity
-		uint8 iMinLevel;
-		enum {
-		NONE,//initial value
-		LG,//only login was entered
-		OK, //both login and pass were given, and they are correct and user have enough priv.
-		}stage;
-
-
-		void Log(const char *,...);
+        void Log(const char *,...);
 
 };
-
 #endif
-
 #endif

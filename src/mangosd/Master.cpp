@@ -39,7 +39,6 @@
 INSTANTIATE_SINGLETON_1( CliRunnable );
 #endif
 
-
 #pragma warning(disable:4305)
 
 INSTANTIATE_SINGLETON_1( Master );
@@ -59,122 +58,123 @@ void Master::_OnSignal(int s)
         case SIGABRT:
             Master::m_stopEvent = true;
             break;
-#ifdef _WIN32
+        #ifdef _WIN32
         case SIGBREAK:
             Master::m_stopEvent = true;
             break;
-#endif
+        #endif
     }
 
     signal(s, _OnSignal);
 }
 
-
 Master::Master()
 {
 }
-
 
 Master::~Master()
 {
 }
 
-bool Master::Run() {
-	sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
-	sLog.outString( "<Ctrl-C> to stop.\n\n" );
-	
-	sLog.outString( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
-	sLog.outString( "MM   MM         MM   MM MMM MMM MM  MM MMM MMM");
-	sLog.outString( "MMM MMM         MMM  MM MMM MMM MM  MM MMM");
-	sLog.outString( "MM M MM         MMMM MM MMM     MM  MM  MMM");
-	sLog.outString( "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM");
-	sLog.outString( "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM");
-	sLog.outString( "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM");
-	sLog.outString( "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM");
-	sLog.outString( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
-	sLog.outString( "        MM  MMM http://www.mangosproject.org");
-	sLog.outString( "        MMMMMM\n\n");
+bool Master::Run()
+{
+    sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
+    sLog.outString( "<Ctrl-C> to stop.\n\n" );
 
-	_StartDB();
+    sLog.outString( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
+    sLog.outString( "MM   MM         MM   MM MMM MMM MM  MM MMM MMM");
+    sLog.outString( "MMM MMM         MMM  MM MMM MMM MM  MM MMM");
+    sLog.outString( "MM M MM         MMMM MM MMM     MM  MM  MMM");
+    sLog.outString( "MM M MM  MMMMM  MM MMMM MMM     MM  MM   MMM");
+    sLog.outString( "MM M MM M   MMM MM  MMM MMMMMMM MM  MM    MMM");
+    sLog.outString( "MM   MM     MMM MM   MM MM  MMM MM  MM     MMM");
+    sLog.outString( "MM   MM MMMMMMM MM   MM MMM MMM MM  MM MMM MMM");
+    sLog.outString( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
+    sLog.outString( "        MM  MMM http://www.mangosproject.org");
+    sLog.outString( "        MMMMMM\n\n");
 
-	loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
+    _StartDB();
 
-	std::string host;
-	host = sConfig.GetStringDefault( "Host", DEFAULT_HOST );
-	sLog.outString( "Server: %s\n", host.c_str() );
+    loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
-	sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
-	sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
-	sWorld.SetInitialWorldSettings();
+    std::string host;
+    host = sConfig.GetStringDefault( "Host", DEFAULT_HOST );
+    sLog.outString( "Server: %s\n", host.c_str() );
 
-	port_t wsport, rmport;
-	rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-	wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );    
+    sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
+    sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
+    sWorld.SetInitialWorldSettings();
 
-	uint32 socketSelecttime;
-	socketSelecttime=sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME ); 
-    
-	sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
-	sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
-	sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
-	sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
-	sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
-	sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
-    
-	uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);    
-	sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
-	grid_clean_up_delay *= 1000;
-	MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
-    
-	uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
-	sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
-	MapManager::Instance().SetMapUpdateInterval(map_update_interval);
+    port_t wsport, rmport;
+    rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+    wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
 
-	//    sRealmList.setServerPort(wsport);
-	//    sRealmList.GetAndAddRealms ();
-	SocketHandler h;
-	ListenSocket<WorldSocket> worldListenSocket(h);
-	//    ListenSocket<AuthSocket> authListenSocket(h);
+    uint32 socketSelecttime;
+    socketSelecttime=sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
 
-	if (worldListenSocket.Bind(wsport)) {
-		_StopDB();
-		sLog.outString( "MaNGOS can not bind to that port" );
-		exit(1);
-	}
+    sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
+    sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
+    sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
+    sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
+    sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
+    sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
 
-	h.Add(&worldListenSocket);
-	//    h.Add(&authListenSocket);
+    uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);
+    sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
+    grid_clean_up_delay *= 1000;
+    MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
 
-	_HookSignals();
+    uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
+    sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
+    MapManager::Instance().SetMapUpdateInterval(map_update_interval);
 
-	ZThread::Thread t(new WorldRunnable);
+    //    sRealmList.setServerPort(wsport);
+    //    sRealmList.GetAndAddRealms ();
+    SocketHandler h;
+    ListenSocket<WorldSocket> worldListenSocket(h);
+    //    ListenSocket<AuthSocket> authListenSocket(h);
 
-//#ifndef WIN32
-	t.setPriority ((ZThread::Priority )2);
-//#endif
-    
-#ifdef ENABLE_CLI
-	ZThread::Thread td1(new CliRunnable);
-#endif
-
-#ifdef ENABLE_RA
-
-	ListenSocket<RASocket> RAListenSocket(h);
-
-	if (RAListenSocket.Bind(sConfig.GetIntDefault( "RA.Port", 3443 ))) {
-      
+    if (worldListenSocket.Bind(wsport))
+    {
+        _StopDB();
         sLog.outString( "MaNGOS can not bind to that port" );
-       // exit(1); go on with no RA
-        
+        exit(1);
+    }
+
+    h.Add(&worldListenSocket);
+    //    h.Add(&authListenSocket);
+
+    _HookSignals();
+
+    ZThread::Thread t(new WorldRunnable);
+
+    //#ifndef WIN32
+    t.setPriority ((ZThread::Priority )2);
+    //#endif
+
+    #ifdef ENABLE_CLI
+    ZThread::Thread td1(new CliRunnable);
+    #endif
+
+    #ifdef ENABLE_RA
+
+    ListenSocket<RASocket> RAListenSocket(h);
+
+    if (RAListenSocket.Bind(sConfig.GetIntDefault( "RA.Port", 3443 )))
+    {
+
+        sLog.outString( "MaNGOS can not bind to that port" );
+        // exit(1); go on with no RA
+
     }
 
     h.Add(&RAListenSocket);
-#endif
+    #endif
     uint32 realCurrTime, realPrevTime;
     realCurrTime = realPrevTime = getMSTime();
     while (!Master::m_stopEvent)
     {
-        
+
         if (realPrevTime > realCurrTime)
             realPrevTime = 0;
 
@@ -183,20 +183,18 @@ bool Master::Run() {
         realPrevTime = realCurrTime;
 
         //h.Select(0, 100000);
-		h.Select(0, socketSelecttime);
+        h.Select(0, socketSelecttime);
     }
 
     _UnhookSignals();
 
     t.wait();
 
-    
     _StopDB();
 
     sLog.outString( "Halting process..." );
     return 0;
 }
-
 
 bool Master::_StartDB()
 {
@@ -205,7 +203,7 @@ bool Master::_StartDB()
     {
         sLog.outError("Database not specified");
         exit(1);
-        
+
     }
 
     sLog.outString("Database: %s", dbstring.c_str() );
@@ -213,37 +211,34 @@ bool Master::_StartDB()
     {
         sLog.outError("Cannot connect to database");
         exit(1);
-        
+
     }
 
     sDatabase.PExecute("UPDATE characters SET online=0;");
     return true;
 }
 
-
 void Master::_StopDB()
 {
 }
-
 
 void Master::_HookSignals()
 {
     signal(SIGINT, _OnSignal);
     signal(SIGTERM, _OnSignal);
     signal(SIGABRT, _OnSignal);
-#ifdef _WIN32
+    #ifdef _WIN32
     signal(SIGBREAK, _OnSignal);
-#endif
+    #endif
 }
-
 
 void Master::_UnhookSignals()
 {
     signal(SIGINT, 0);
     signal(SIGTERM, 0);
     signal(SIGABRT, 0);
-#ifdef _WIN32
+    #ifdef _WIN32
     signal(SIGBREAK, 0);
-#endif
+    #endif
 
 }

@@ -40,26 +40,25 @@ int main(int argc, char **argv)
     int c = 1;
     while( c < argc )
     {
-    const char *tmp = argv[c];
-    if( *tmp == '-' && std::string(tmp +1) == "c" )
-    {
-        if( ++c >= argc )
+        const char *tmp = argv[c];
+        if( *tmp == '-' && std::string(tmp +1) == "c" )
         {
-        std::cerr << "Runtime-Error: -c option requires an input argument" << std::endl;
-        usage(argv[0]);
+            if( ++c >= argc )
+            {
+                std::cerr << "Runtime-Error: -c option requires an input argument" << std::endl;
+                usage(argv[0]);
+            }
+            else
+                cfg_file = argv[c];
         }
         else
-        cfg_file = argv[c];
-    }
-    else
-    {
-        std::cerr << "Runtime-Error: unsupported option " << tmp << std::endl;
-        usage(argv[0]);
-    }
-    ++c;
+        {
+            std::cerr << "Runtime-Error: unsupported option " << tmp << std::endl;
+            usage(argv[0]);
+        }
+        ++c;
     }
 
-     
     if (!sConfig.SetSource(cfg_file.c_str()) )
     {
         sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
