@@ -4387,7 +4387,7 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
 
         // First lets check if count is >= to maxcount
         // Stackable is related to unique items, users can't have more than MaxCount items, not even in bank
-        if  (proto->Stackable > 0)
+        if  (proto->Stackable == 0)
         {
             if  (GetItemCount(itemId) >= proto->MaxCount)
             {

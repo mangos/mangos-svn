@@ -372,7 +372,7 @@ void Spell::EffectCreateItem(uint32 i)
                 }
                 if (pUnit->GetItemBySlot(j)->GetItemProto()->MaxCount > 1
                     && pUnit->GetItemBySlot(j)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i]
-                    && pUnit->GetItemBySlot(j)->GetCount() < pUnit->GetItemBySlot(j)->GetItemProto()->MaxCount-num_to_add)
+                    && pUnit->GetItemBySlot(j)->GetItemProto()->MaxCount >= (pUnit->GetItemBySlot(j)->GetCount()+num_to_add))
                 {
 
                     pUnit->GetItemBySlot(j)->SetCount(pUnit->GetItemBySlot(j)->GetCount()+num_to_add);
@@ -404,6 +404,8 @@ void Spell::EffectCreateItem(uint32 i)
         if (newItem->GetItemProto()->Class == ITEM_CLASS_CONSUMABLE && newItem->GetItemProto()->MaxCount > 1)
         {
             num_to_add = ((pUnit->GetLevel() - (m_spellInfo->spellLevel-1))*2);
+			if(num_to_add > newItem->GetItemProto()->MaxCount)
+				num_to_add = newItem->GetItemProto()->MaxCount;
         }
 
         if (num_to_add > 1)
