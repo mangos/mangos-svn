@@ -30,8 +30,8 @@ class TypeNull;
 template<typename HEAD, typename TAIL>
 struct TypeList
 {
-  typedef HEAD Head;
-  typedef TAIL Tail;
+    typedef HEAD Head;
+    typedef TAIL Tail;
 };
 
 // enough for now.. can be expand at any point in time as needed
@@ -40,5 +40,4 @@ struct TypeList
 #define TYPELIST_3(T1, T2, T3)          TypeList<T1, TYPELIST_2(T2, T3) >
 #define TYPELIST_4(T1, T2, T3, T4)      TypeList<T1, TYPELIST_3(T2, T3, T4) >
 #define TYPELIST_5(T1, T2, T3, T4, T5)  TypeList<T1, TYPELIST_4(T2, T3, T4, T5) >
-
 #endif

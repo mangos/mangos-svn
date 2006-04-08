@@ -17,4 +17,3 @@
  */
 
 #include "TypeContainerVisitor.h"
-

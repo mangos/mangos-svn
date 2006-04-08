@@ -37,65 +37,64 @@ class MANGOS_DLL_DECL ObjectRegistry
 
     // protected for friend use since it should be a singleton
     ObjectRegistry() {}
-    ~ObjectRegistry() 
+    ~ObjectRegistry()
     {
-	for(typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
-	    delete iter->second;
-	i_registeredObjects.clear();
+        for(typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+            delete iter->second;
+        i_registeredObjects.clear();
     }
 
-public:
+    public:
 
-    /// Returns a registry item
-    const T* GetRegistryItem(const char *name) const
-    {
-	typename RegistryMapType::const_iterator iter = i_registeredObjects.find(name);
-	return( iter == i_registeredObjects.end() ? NULL : iter->second );
-    }
+        /// Returns a registry item
+        const T* GetRegistryItem(const char *name) const
+        {
+            typename RegistryMapType::const_iterator iter = i_registeredObjects.find(name);
+            return( iter == i_registeredObjects.end() ? NULL : iter->second );
+        }
 
-    /// Inserts a registry item
-    bool InsertItem(T *obj, const char *name, bool override = false)
-    {
-	typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
-	if( iter != i_registeredObjects.end() )
-	{
-	    if( !override )
-		return false;
-	    delete iter->second;
-	    i_registeredObjects.erase(iter);
-	}
+        /// Inserts a registry item
+        bool InsertItem(T *obj, const char *name, bool override = false)
+        {
+            typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
+            if( iter != i_registeredObjects.end() )
+            {
+                if( !override )
+                    return false;
+                delete iter->second;
+                i_registeredObjects.erase(iter);
+            }
 
-	i_registeredObjects[name] = obj;
-	return true;
-    }
+            i_registeredObjects[name] = obj;
+            return true;
+        }
 
-    /// Removes a registry item
-    void RemoveItem(const char *name, bool delete_object = true)
-    {
-	typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
-	if( iter != i_registeredObjects.end() )
-	{
-	    if( delete_object )
-		delete iter->second;
-	    i_registeredObjects.erase(iter);
-	}
-    }
+        /// Removes a registry item
+        void RemoveItem(const char *name, bool delete_object = true)
+        {
+            typename RegistryMapType::iterator iter = i_registeredObjects.find(name);
+            if( iter != i_registeredObjects.end() )
+            {
+                if( delete_object )
+                    delete iter->second;
+                i_registeredObjects.erase(iter);
+            }
+        }
 
-    /// Returns true if registry contains an item
-    bool HasItem(const char *name) const
-    {
-	return (i_registeredObjects.find(name) != i_registeredObjects.end());
-    }
+        /// Returns true if registry contains an item
+        bool HasItem(const char *name) const
+        {
+            return (i_registeredObjects.find(name) != i_registeredObjects.end());
+        }
 
-    /// Return a list of registered items
-    unsigned int GetRegisteredItems(std::vector<std::string> &l) const
-    {
-	unsigned int sz = l.size();
-	l.resize(sz + i_registeredObjects.size());
-	for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
-	    l[sz++] = iter->first;
-	return i_registeredObjects.size();
-    }
+        /// Return a list of registered items
+        unsigned int GetRegisteredItems(std::vector<std::string> &l) const
+        {
+            unsigned int sz = l.size();
+            l.resize(sz + i_registeredObjects.size());
+            for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+                l[sz++] = iter->first;
+            return i_registeredObjects.size();
+        }
 };
-
 #endif

@@ -28,11 +28,11 @@ namespace MaNGOS
      * OperatorNew policy creates an object on the heap using new.
      */
     template <class T>
-    class MANGOS_DLL_DECL OperatorNew
+        class MANGOS_DLL_DECL OperatorNew
     {
-    public:
-	static T* Create(void) { return (new T); }
-	static void Destroy(T *obj) { delete obj; }	
+        public:
+            static T* Create(void) { return (new T); }
+            static void Destroy(T *obj) { delete obj; }
     };
 
     /**
@@ -40,7 +40,7 @@ namespace MaNGOS
      * the first time call Create.
      */
     template <class T>
-    class MANGOS_DLL_DECL LocalStaticCreation
+        class MANGOS_DLL_DECL LocalStaticCreation
     {
         union MaxAlign
         {
@@ -55,54 +55,53 @@ namespace MaNGOS
             int Test::* pMember_;
             int (Test::*pMemberFn_)(int);
         };
-    public:
-	static T* Create(void)
-	{
-	    static MaxAlign si_localStatic;
-	    return new(&si_localStatic) T;
-	}
-	
-	static void Destroy(T *obj) { obj->~T(); }
+        public:
+            static T* Create(void)
+            {
+                static MaxAlign si_localStatic;
+                return new(&si_localStatic) T;
+            }
+
+            static void Destroy(T *obj) { obj->~T(); }
     };
 
     /**
      * CreateUsingMalloc by pass the memory manger.
      */
-    template<class T> 
-    class MANGOS_DLL_DECL CreateUsingMalloc
+    template<class T>
+        class MANGOS_DLL_DECL CreateUsingMalloc
     {
-    public:
-      static T* Create()
-      {
-	void* p = ::malloc(sizeof(T));
-	if (!p) return 0;
-	return new(p) T;
-      }
-      
-        static void Destroy(T* p)
-        {
-            p->~T();
-            ::free(p);
-        }
+        public:
+            static T* Create()
+            {
+                void* p = ::malloc(sizeof(T));
+                if (!p) return 0;
+                return new(p) T;
+            }
+
+            static void Destroy(T* p)
+            {
+                p->~T();
+                ::free(p);
+            }
     };
 
     /**
      * CreateOnCallBack creates the object base on the call back.
      */
     template<class T, class CALL_BACK>
-    class MANGOS_DLL_DECL CreateOnCallBack
+        class MANGOS_DLL_DECL CreateOnCallBack
     {
-    public:	
-	static T* Create()
-	{
-	    return CALL_BACK::createCallBack();
-	}
+        public:
+            static T* Create()
+            {
+                return CALL_BACK::createCallBack();
+            }
 
-	static void Destroy(T *p)
-	{
-	    CALL_BACK::destroyCallBack(p);
-	}
+            static void Destroy(T *p)
+            {
+                CALL_BACK::destroyCallBack(p);
+            }
     };
 }
-
 #endif

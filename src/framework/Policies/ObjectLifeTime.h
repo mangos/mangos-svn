@@ -29,16 +29,18 @@ namespace MaNGOS
     void at_exit( void (*func)() );
 
     template <class T>
-    class MANGOS_DLL_DECL ObjectLifeTime
+        class MANGOS_DLL_DECL ObjectLifeTime
     {
-    public:
-	inline static void ScheduleCall(void (*destroyer)() ) 
-	{
-	    at_exit( destroyer );
-	}
+        public:
+            inline static void ScheduleCall(void (*destroyer)() )
+            {
+                at_exit( destroyer );
+            }
 
-	static void OnDeadReference(void) { throw std::runtime_error("Dead Reference"); } // We don't handle Dead Reference for now
+            static void OnDeadReference(void)               // We don't handle Dead Reference for now
+            {
+                throw std::runtime_error("Dead Reference");
+            }
     };
-}    
-
+}
 #endif

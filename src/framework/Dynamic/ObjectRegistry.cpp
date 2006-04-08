@@ -17,4 +17,3 @@
  */
 
 #include "ObjectRegistry.h"
-

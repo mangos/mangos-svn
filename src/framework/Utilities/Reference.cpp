@@ -17,4 +17,3 @@
  */
 
 #include "Reference.h"
-

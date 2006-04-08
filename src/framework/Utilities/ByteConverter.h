@@ -23,23 +23,21 @@
     for cross platform where they have different endians.
  */
 
-
 namespace ByteConverter
 {
-    template<size_t T> 
-    inline void convert(char *val)
+    template<size_t T>
+        inline void convert(char *val)
     {
-	std::swap(*val, *(val + T - 1));
-	convert<T - 2>(val + 1);
+        std::swap(*val, *(val + T - 1));
+        convert<T - 2>(val + 1);
     }
-    
+
     template<> inline void convert<0>(char *val) {}
-    template<> void convert<1>(char *val); /* link time error all sizes have to be 2 to power n*/
-           
+    template<> void convert<1>(char *val);                  /* link time error all sizes have to be 2 to power n*/
+
     template<typename T> void apply(T *val)
     {
-	convert<sizeof(T)>((char *)(val));
+        convert<sizeof(T)>((char *)(val));
     }
 }
-
 #endif
