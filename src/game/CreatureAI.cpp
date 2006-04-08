@@ -24,4 +24,3 @@ CreatureAI::~CreatureAI()
 }
 
 uint32 HateBinder::si_noHateValue=0;
-

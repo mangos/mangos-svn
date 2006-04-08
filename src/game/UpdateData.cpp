@@ -28,21 +28,16 @@ UpdateData::UpdateData() : m_blockCount(0)
 {
 }
 
-
 void UpdateData::AddOutOfRangeGUID(const uint64 &guid)
 {
     m_outOfRangeGUIDs.insert(guid);
 }
-
 
 void UpdateData::AddUpdateBlock(const ByteBuffer &block)
 {
     m_data.append(block);
     m_blockCount++;
 }
-
-
-
 
 void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
 {
@@ -63,7 +58,7 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     c_stream.avail_out = *dst_size;
     c_stream.next_in = (Bytef*)src;
     c_stream.avail_in = (uInt)src_size;
-    
+
     if (Z_OK != deflate(&c_stream, Z_NO_FLUSH))
     {
         sLog.outError("Can't compress update packet (zlib: deflate)");
@@ -95,13 +90,12 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     *dst_size = c_stream.total_out;
 }
 
-
 bool UpdateData::BuildPacket(WorldPacket *packet)
 {
     ByteBuffer buf(m_data.size() + 10 + m_outOfRangeGUIDs.size()*8);
 
     buf << (uint32) (m_outOfRangeGUIDs.size() > 0 ? m_blockCount + 1 : m_blockCount);
-    buf << (uint8) 0; 
+    buf << (uint8) 0;
 
     if(m_outOfRangeGUIDs.size())
     {
@@ -120,22 +114,20 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 
     packet->clear();
 
-    
     if (m_data.size() > 50 )
     {
-        
+
         unsigned long destsize = buf.size() + buf.size()/10 + 16;
         packet->resize( destsize );
 
         packet->put(0, (uint32)buf.size());
 
-        
         Compress(const_cast<uint8*>(packet->contents()) + sizeof(uint32),
-                    &destsize,
-                    (void*)buf.contents(),
-                    buf.size());
+            &destsize,
+            (void*)buf.contents(),
+            buf.size());
         if (destsize == 0)
-            return false; 
+            return false;
 
         packet->resize( destsize + sizeof(uint32) );
         packet->SetOpcode( SMSG_COMPRESSED_UPDATE_OBJECT );
@@ -149,13 +141,9 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
     return true;
 }
 
-
 void UpdateData::Clear()
 {
     m_data.clear();
     m_outOfRangeGUIDs.clear();
     m_blockCount = 0;
 }
-
-
-

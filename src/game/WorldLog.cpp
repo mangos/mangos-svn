@@ -32,7 +32,7 @@ WorldLog::Initialize()
 {
     if( sConfig.GetBoolDefault("LogWorld", false) )
     {
-	i_file = fopen(WORLD_LOG_FILE_STRING, "w");
+        i_file = fopen(WORLD_LOG_FILE_STRING, "w");
     }
 }
 

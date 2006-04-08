@@ -31,7 +31,7 @@ enum ChatMsg
 {
     CHAT_MSG_SAY                                  = 0x00,
     CHAT_MSG_PARTY                                = 0x01,
-    
+
     CHAT_MSG_GUILD                                = 0x03,
     CHAT_MSG_OFFICER                              = 0x04,
     CHAT_MSG_YELL                                 = 0x05,
@@ -57,8 +57,6 @@ enum ChatMsg
     CHAT_MSG_LOOT                                 = 0x19,
 };
 
-
-
 class ChatCommand
 {
     public:
@@ -69,7 +67,7 @@ class ChatCommand
         ChatCommand *      ChildCommands;
 };
 
-class ChatHandler 
+class ChatHandler
 {
     public:
         ChatHandler();
@@ -85,7 +83,7 @@ class ChatHandler
 
     protected:
         void SpawnCreature(WorldSession *session, const char* pName, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level);
-        
+
         bool hasStringAbbr(const char* s1, const char* s2);
         void SendMultilineMessage(const char *str);
 
@@ -94,7 +92,6 @@ class ChatHandler
 
         ChatCommand* getCommandTable();
 
-        
         bool HandleHelpCommand(const char* args);
         bool HandleCommandsCommand(const char* args);
         bool HandleNYICommand(const char* args);
@@ -105,7 +102,6 @@ class ChatHandler
         bool HandleSaveCommand(const char* args);
         bool HandleGMListCommand(const char* args);
 
-        
         bool HandleNamegoCommand(const char* args);
         bool HandleGonameCommand(const char* args);
         bool HandleRecallCommand(const char* args);
@@ -130,11 +126,10 @@ class ChatHandler
         bool HandleModifyBitCommand(const char* args);
         bool HandleModifyFactionCommand(const char* args);
         bool HandleModifySpellCommand(const char* args);
-		bool HandleReloadCommand(const char* args);
-        
+        bool HandleReloadCommand(const char* args);
+
         bool HandleDebugInArcCommand(const char* args);
 
-        
         bool HandleGUIDCommand(const char* args);
         bool HandleNameCommand(const char* args);
         bool HandleSubNameCommand(const char* args);
@@ -154,7 +149,6 @@ class ChatHandler
         bool HandleFactionIdCommand(const char* args);
         bool HandleAddSpwCommand(const char* args);
 
-        
         bool HandleSecurityCommand(const char* args);
         bool HandleWorldPortCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);
@@ -162,9 +156,9 @@ class ChatHandler
         bool HandleAddSpiritCommand(const char* args);
         bool HandleGoCommand(const char* args);
         bool HandleLearnCommand(const char* args);
-        bool HandleUnLearnCommand(const char* args); 
-	bool HandleLearnSkillCommand(const char* args);
-	bool HandleUnLearnSkillCommand(const char* args);
+        bool HandleUnLearnCommand(const char* args);
+        bool HandleLearnSkillCommand(const char* args);
+        bool HandleUnLearnSkillCommand(const char* args);
         bool HandleObjectCommand(const char* args);
         bool HandleCreatureDistanceCommand(const char* args);
         bool HandleGameObjectCommand(const char* args);
@@ -180,25 +174,24 @@ class ChatHandler
         bool HandleExploreCheatCommand(const char* args);
         bool HandleEmoteCommand(const char* args);
         bool HandleNpcInfoCommand(const char* args);
-		bool HandleNpcInfoSetCommand(const char* args);
+        bool HandleNpcInfoSetCommand(const char* args);
         bool HandleHoverCommand(const char* args);
         bool HandleLevelUpCommand(const char* args);
         bool HandleShowAreaCommand(const char* args);
         bool HandleHideAreaCommand(const char* args);
-        bool HandleAddItemCommand(const char* args); 
-		bool HandleCreateGuildCommand(const char* args);
-		bool HandleShowHonor(const char* args);
-		bool HandleUpdate(const char* args);
-		bool HandleBankCommand(const char* args);
-		bool HandleChangeWeather(const char* args);
-		
-		
-		//! Development Commands
-		bool HandleSet32Value(const char* args);
-		bool HandleSet32Bit(const char* args);
-		bool HandleMod32Value(const char* args);
-		
-		Player* getSelectedChar(WorldSession *client);
+        bool HandleAddItemCommand(const char* args);
+        bool HandleCreateGuildCommand(const char* args);
+        bool HandleShowHonor(const char* args);
+        bool HandleUpdate(const char* args);
+        bool HandleBankCommand(const char* args);
+        bool HandleChangeWeather(const char* args);
+
+        //! Development Commands
+        bool HandleSet32Value(const char* args);
+        bool HandleSet32Bit(const char* args);
+        bool HandleMod32Value(const char* args);
+
+        Player* getSelectedChar(WorldSession *client);
 
         WorldSession *m_session;
 };
@@ -207,4 +200,3 @@ class ChatHandler
 #endif
 
 char const *fmtstring( char const *format, ... );
-

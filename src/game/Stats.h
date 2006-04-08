@@ -32,22 +32,16 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
     else
         xp *= sWorld.getRate(RATE_XP);
 
-
-
     return (uint32)xp;
 }
-
-
 
 inline uint32 CalculateDamage(const Unit *pAttacker)
 {
     uint32 attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACKPOWER);
 
-    
-
     float min_damage = pAttacker->GetFloatValue(UNIT_FIELD_MINDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
     float max_damage = pAttacker->GetFloatValue(UNIT_FIELD_MAXDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
-    
+
     if (min_damage > max_damage)
     {
         float temp = max_damage;
@@ -55,7 +49,6 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
         min_damage = temp;
     }
 
-    
     if(max_damage==0)
         max_damage=5;
 
@@ -63,7 +56,6 @@ inline uint32 CalculateDamage(const Unit *pAttacker)
     float dmg = float (rand()%(uint32)diff + (uint32)min_damage);
     return (uint32)dmg;
 }
-
 
 inline bool isEven (int num)
 {

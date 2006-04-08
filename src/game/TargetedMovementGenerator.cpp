@@ -33,7 +33,7 @@ struct StackCleaner
     void Done(void) { i_creature.StopMoving(); }
     ~StackCleaner()
     {
-	i_creature->Clear();
+        i_creature->Clear();
     }
 };
 
@@ -51,7 +51,7 @@ void
 TargetedMovementGenerator::_setAttackRadius(Creature &owner)
 {
     float combat_reach = owner.GetFloatValue(UNIT_FIELD_COMBATREACH);
-    float bounding_radius = owner.GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);    
+    float bounding_radius = owner.GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
     i_attackRadius =  (combat_reach + bounding_radius - SMALL_ALPHA);
 }
 
@@ -86,44 +86,44 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
 void
 TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
-        
+
     if( owner.IsStopped() )
     {
-	assert( i_target.isAlive() );
-	if( !owner.canReachWithAttack( &i_target ) )
-	{
-	    owner.SetState(CHASE);
-	    _setTargetLocation(owner);
-	    DEBUG_LOG("restart to chase");
-	}
+        assert( i_target.isAlive() );
+        if( !owner.canReachWithAttack( &i_target ) )
+        {
+            owner.SetState(CHASE);
+            _setTargetLocation(owner);
+            DEBUG_LOG("restart to chase");
+        }
     }
     else
     {
-	Traveller<Creature> traveller(owner);
-	if( i_destinationHolder.UpdateTraveller(traveller, time_diff, false) )
-	{
-	    if( i_targetedHome )
-	    {
-		
-		DEBUG_LOG("Target %d ran home", owner.GetGUIDLow());
-		float x, y, z, orientation;
-		owner.GetRespawnCoord(x, y, z);
-		orientation = owner.GetOrientation();		
-		owner.Relocate(x, y, z, orientation);
-		StackCleaner stack_cleaner(owner);
-		stack_cleaner.Done();
-	    }
-	    else if( owner.canReachWithAttack(&i_target) )
-	    {
-		owner.StopMoving();
-		owner.SetState(ATTACKING);
-		DEBUG_LOG("UNIT IS THERE");
-	    }
-	    else
-	    {
-		_setTargetLocation(owner); 
-		DEBUG_LOG("Continue to chase");
-	    }	    
-	}
+        Traveller<Creature> traveller(owner);
+        if( i_destinationHolder.UpdateTraveller(traveller, time_diff, false) )
+        {
+            if( i_targetedHome )
+            {
+
+                DEBUG_LOG("Target %d ran home", owner.GetGUIDLow());
+                float x, y, z, orientation;
+                owner.GetRespawnCoord(x, y, z);
+                orientation = owner.GetOrientation();
+                owner.Relocate(x, y, z, orientation);
+                StackCleaner stack_cleaner(owner);
+                stack_cleaner.Done();
+            }
+            else if( owner.canReachWithAttack(&i_target) )
+            {
+                owner.StopMoving();
+                owner.SetState(ATTACKING);
+                DEBUG_LOG("UNIT IS THERE");
+            }
+            else
+            {
+                _setTargetLocation(owner);
+                DEBUG_LOG("Continue to chase");
+            }
+        }
     }
 }

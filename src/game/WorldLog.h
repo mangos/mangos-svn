@@ -33,36 +33,34 @@ class MANGOS_DLL_DECL WorldLog : public MaNGOS::Singleton<WorldLog, MaNGOS::Clas
     WorldLog& operator=(const WorldLog &);
     typedef MaNGOS::ClassLevelLockable<WorldLog, ZThread::FastMutex>::Lock Guard;
 
-
     ~WorldLog()
     {
-	if( i_file != NULL )
-	    fclose(i_file);
-	i_file = NULL;
+        if( i_file != NULL )
+            fclose(i_file);
+        i_file = NULL;
     }
 
-public:
-    void Initialize();
-    inline bool LogWorld(void) const { return (i_file != NULL); }
-    inline void Log(char const *fmt, ...) 
-    {
-	if( LogWorld() )
-	{
-	    Guard guard(*this);
-	    assert( i_file != NULL );
-	    va_list args;
-	    
-	    va_start(args, fmt);
-	    vfprintf(i_file, fmt, args);
-	    va_end(args);
-	    fflush(i_file);
-	}
-    }
+    public:
+        void Initialize();
+        inline bool LogWorld(void) const { return (i_file != NULL); }
+        inline void Log(char const *fmt, ...)
+        {
+            if( LogWorld() )
+            {
+                Guard guard(*this);
+                assert( i_file != NULL );
+                va_list args;
 
-private:
-    FILE *i_file;
+                va_start(args, fmt);
+                vfprintf(i_file, fmt, args);
+                va_end(args);
+                fflush(i_file);
+            }
+        }
+
+    private:
+        FILE *i_file;
 };
 
-#define sWorldLog WorldLog::Instance()  
-
+#define sWorldLog WorldLog::Instance()
 #endif

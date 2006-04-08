@@ -42,7 +42,7 @@ class Container : public Object
         void SetOwner(Player *owner) { m_owner = owner; }
 
     protected:
-        
+
         Player *m_owner;
         Item **m_Slot;
 };

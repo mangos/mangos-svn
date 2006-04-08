@@ -24,9 +24,8 @@
 #include "RedZoneDistrict.h"
 #include <cmath>
 
-
-template<class LOCK_TYPE,class T, class CONTAINER> 
-inline void 
+template<class LOCK_TYPE,class T, class CONTAINER>
+inline void
 Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
 {
     CellPair standing_cell = (const CellPair &)l;
@@ -34,204 +33,191 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
     switch( (district_t)this->data.Part.reserved )
     {
-    case ALL_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell << 1;
-	    update_cell -= 1;
-	    for(; abs(int(standing_cell.x_coord - update_cell.x_coord)) < 2; update_cell >> 1)
-	    {
-		for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-		{		    
-		    Cell r_zone = RedZone::GetZone(cell_iter);
-		    r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		    CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		    m.Visit(lock, visitor);
-		}
-	    }
-	    break;
-	}
-    case UPPER_LEFT_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    standing_cell << 1;
-	    standing_cell -= 1;
+        case ALL_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell << 1;
+            update_cell -= 1;
+            for(; abs(int(standing_cell.x_coord - update_cell.x_coord)) < 2; update_cell >> 1)
+            {
+                for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+                {
+                    Cell r_zone = RedZone::GetZone(cell_iter);
+                    r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                    CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                    m.Visit(lock, visitor);
+                }
+            }
+            break;
+        }
+        case UPPER_LEFT_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            standing_cell << 1;
+            standing_cell -= 1;
 
-	    
-	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    
-	    for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
-	    break;
-	}
-    case UPPER_RIGHT_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell >> 1;
-	    update_cell -= 1;
+            for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
+            break;
+        }
+        case UPPER_RIGHT_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell >> 1;
+            update_cell -= 1;
 
-	    
-	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    
-	    for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    break;
-	}
-    case LOWER_LEFT_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell << 1;
-	    update_cell += 1;
+            break;
+        }
+        case LOWER_LEFT_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell << 1;
+            update_cell += 1;
 
-	    
-	    for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    
-	    for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    break;
-	}
-    case LOWER_RIGHT_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell >> 1;
-	    update_cell += 1;
+            break;
+        }
+        case LOWER_RIGHT_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell >> 1;
+            update_cell += 1;
 
-	    
-	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    
-	    for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    break;
-	}
-    case LEFT_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell << 1;
-	    update_cell -= 1;
+            break;
+        }
+        case LEFT_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell << 1;
+            update_cell -= 1;
 
-	    
-	    for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    break;
-	}
-    case RIGHT_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell >> 1;
-	    update_cell -= 1;
+            break;
+        }
+        case RIGHT_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell >> 1;
+            update_cell -= 1;
 
-	    
-	    for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
-	    break;
-	}
-    case UPPER_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell << 1;
-	    update_cell -= 1;
+            for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
+            break;
+        }
+        case UPPER_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell << 1;
+            update_cell -= 1;
 
-	    
-	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    break;
-	}
-    case LOWER_DISTRICT:
-	{
-	    CellPair update_cell(standing_cell);
-	    update_cell << 1;
-	    update_cell += 1;
+            break;
+        }
+        case LOWER_DISTRICT:
+        {
+            CellPair update_cell(standing_cell);
+            update_cell << 1;
+            update_cell += 1;
 
-	    
-	    for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-	    {
-		Cell r_zone = RedZone::GetZone(cell_iter);
-		r_zone.data.Part.nocreate = l->data.Part.nocreate;
-		CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-		m.Visit(lock, visitor);
-	    }
+            for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
+            {
+                Cell r_zone = RedZone::GetZone(cell_iter);
+                r_zone.data.Part.nocreate = l->data.Part.nocreate;
+                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
+                m.Visit(lock, visitor);
+            }
 
-	    break;
-	}
-    case CENTER_DISTRICT:
-	{
-	    m.Visit(l, visitor);
-	    break;
-	}
-    default:
-	{
-	    assert( false );
-	    break;
-	}
-    }    
+            break;
+        }
+        case CENTER_DISTRICT:
+        {
+            m.Visit(l, visitor);
+            break;
+        }
+        default:
+        {
+            assert( false );
+            break;
+        }
+    }
 }
-
 #endif

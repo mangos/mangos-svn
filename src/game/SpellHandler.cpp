@@ -25,64 +25,72 @@
 #include "Opcodes.h"
 #include "Spell.h"
 
-void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket) {
-	sLog.outDetail("WORLD: got use Item packet, data length = %i",recvPacket.size());
+void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
+{
+    sLog.outDetail("WORLD: got use Item packet, data length = %i",recvPacket.size());
 
-	Player* pUser = GetPlayer();
-	uint8 bagIndex, slot, tmp3;
-	uint32 spellId;
+    Player* pUser = GetPlayer();
+    uint8 bagIndex, slot, tmp3;
+    uint32 spellId;
 
-	recvPacket >> bagIndex >> slot >> tmp3;
+    recvPacket >> bagIndex >> slot >> tmp3;
 
-	Item *pItem = pUser->GetItemBySlot(bagIndex, slot);
-	ItemPrototype *proto = pItem->GetProto();
-	spellId = proto->Spells[0].SpellId;
-    
-	SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
-	if(!spellInfo) {
-		sLog.outError("WORLD: unknown spell id %i", spellId);
-		return;
-	}
-	
-	if (!pUser->CanUseItem(proto)) return;
+    Item *pItem = pUser->GetItemBySlot(bagIndex, slot);
+    ItemPrototype *proto = pItem->GetProto();
+    spellId = proto->Spells[0].SpellId;
 
-	if (pUser->inCombat) {
-		if (proto->Class == ITEM_CLASS_CONSUMABLE || proto->Class == ITEM_CLASS_TRADE_GOODS || 
-			proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_JUNK) {
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %i", spellId);
+        return;
+    }
 
-			WorldPacket data;
-			data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
-			data << uint8(EQUIP_ERR_CANT_DO_IN_COMBAT);
-			data << (pItem ? pItem->GetGUID() : uint64(0));
-//			data << (pItem ? pItem->GetGUID() : uint64(0));
-			data << uint64(0);
-			data << uint8(0);
-			SendPacket(&data);
-			return;
-		}
-	}
-	
-	Spell *spell = new Spell(pUser, spellInfo, false, 0);
-	WPAssert(spell);
+    if (!pUser->CanUseItem(proto)) return;
 
-	SpellCastTargets targets;
-	targets.read(&recvPacket, pUser);
-	spell->m_CastItem = pItem;
-	spell->prepare(&targets);
+    if (pUser->inCombat)
+    {
+        if (proto->Class == ITEM_CLASS_CONSUMABLE || proto->Class == ITEM_CLASS_TRADE_GOODS ||
+            proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_JUNK)
+        {
 
-	uint32 ItemCount = pItem->GetCount();
-	uint32 ItemClass = proto->Class;
-	uint32 ItemId = proto->ItemId;
+            WorldPacket data;
+            data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
+            data << uint8(EQUIP_ERR_CANT_DO_IN_COMBAT);
+            data << (pItem ? pItem->GetGUID() : uint64(0));
+            //			data << (pItem ? pItem->GetGUID() : uint64(0));
+            data << uint64(0);
+            data << uint8(0);
+            SendPacket(&data);
+            return;
+        }
+    }
 
-	if (ItemClass == ITEM_CLASS_CONSUMABLE) {
-		if (ItemCount > 1) {
-			pItem->SetCount(ItemCount-1);
-		} else {
-			pUser->RemoveItemFromSlot(bagIndex , slot);
-			pItem->DeleteFromDB();
-			delete pItem;
-		}
-	}
+    Spell *spell = new Spell(pUser, spellInfo, false, 0);
+    WPAssert(spell);
+
+    SpellCastTargets targets;
+    targets.read(&recvPacket, pUser);
+    spell->m_CastItem = pItem;
+    spell->prepare(&targets);
+
+    uint32 ItemCount = pItem->GetCount();
+    uint32 ItemClass = proto->Class;
+    uint32 ItemId = proto->ItemId;
+
+    if (ItemClass == ITEM_CLASS_CONSUMABLE)
+    {
+        if (ItemCount > 1)
+        {
+            pItem->SetCount(ItemCount-1);
+        }
+        else
+        {
+            pUser->RemoveItemFromSlot(bagIndex , slot);
+            pItem->DeleteFromDB();
+            delete pItem;
+        }
+    }
 }
 
 #define OPEN_CHEST 11437
@@ -95,31 +103,31 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;
-	uint32 spellId = OPEN_CHEST;
-	const GameObjectInfo *info;
+    uint32 spellId = OPEN_CHEST;
+    const GameObjectInfo *info;
 
     recv_data >> guid;
 
-    sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%d]", guid);   
+    sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%d]", guid);
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
-	if(!obj) return;
-	uint32 t=obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-	obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
-	obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
-	switch(obj->GetUInt32Value(GAMEOBJECT_TYPE_ID))
-	{
-	  case 22:
-		 info = obj->GetGOInfo();
-		 if(info)
-		 {
-		     spellId = info->sound0;
-		     guid=GetPlayer()->GetGUID();
-		 }
-	  break;
-	  default:
-         sLog.outDebug( "Unkonw Object Type %d\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));  
-	   break;
+    if(!obj) return;
+    uint32 t=obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
+    obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+    obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+    switch(obj->GetUInt32Value(GAMEOBJECT_TYPE_ID))
+    {
+        case 22:
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                spellId = info->sound0;
+                guid=GetPlayer()->GetGUID();
+            }
+            break;
+        default:
+            sLog.outDebug( "Unkonw Object Type %d\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
+            break;
     }
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
@@ -149,7 +157,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     sLog.outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i",
         spellId, recvPacket.size());
 
-    
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)
@@ -158,23 +165,21 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-        Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
-        WPAssert(spell);
+    Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
+    WPAssert(spell);
 
-        SpellCastTargets targets;
-        targets.read(&recvPacket,GetPlayer());
+    SpellCastTargets targets;
+    targets.read(&recvPacket,GetPlayer());
 
-        spell->prepare(&targets);
+    spell->prepare(&targets);
 
 }
-
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
     if(GetPlayer()->m_currentSpell)
         GetPlayer()->m_currentSpell->cancel();
 }
-
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 {

@@ -22,9 +22,7 @@
 #include "Platform/Define.h"
 #include "Timer.h"
 
-
 #define TRAVELLER_UPDATE_INTERVAL  300
-
 
 template<typename TRAVELLER>
 class MANGOS_DLL_DECL DestinationHolder
@@ -32,24 +30,23 @@ class MANGOS_DLL_DECL DestinationHolder
     TimeTracker i_tracker;
     uint32 i_totalTravelTime;
     uint32 i_timeStarted;
-    float i_fromX, i_fromY, i_fromZ;    
-    float i_destX, i_destY, i_destZ;    
+    float i_fromX, i_fromY, i_fromZ;
+    float i_destX, i_destY, i_destZ;
 
-public:
-    DestinationHolder() : i_tracker(TRAVELLER_UPDATE_INTERVAL), i_totalTravelTime(0), i_timeStarted(0) {}
-    
-    void SetDestination(TRAVELLER &traveller, const float &dest_x, const float &dest_y, const float &dest_z, const float offset = 0);
-    inline bool UpdateExpired(void) const { return i_tracker.Passed(); }
-    inline void ResetUpdate(uint32 t = TRAVELLER_UPDATE_INTERVAL) { i_tracker.Reset(TRAVELLER_UPDATE_INTERVAL); }    
-    inline uint32 GetTotalTravelTime(void) const { return i_totalTravelTime; }
-    inline bool HasArrived(void) const { return (i_totalTravelTime == 0 || (getMSTime() - i_timeStarted) >= i_totalTravelTime); }
-    bool UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update);
-    void UpdateLocation(TRAVELLER &traveller, const float &, const float &, const float &);
-    void GetLocationNow(float &x, float &y, float &z) const;
+    public:
+        DestinationHolder() : i_tracker(TRAVELLER_UPDATE_INTERVAL), i_totalTravelTime(0), i_timeStarted(0) {}
 
-private:
-    void _findOffSetPoint(const float &x1, const float &y1, const float &x2, const float &y2, const float &offset, float &x, float &y);
+        void SetDestination(TRAVELLER &traveller, const float &dest_x, const float &dest_y, const float &dest_z, const float offset = 0);
+        inline bool UpdateExpired(void) const { return i_tracker.Passed(); }
+        inline void ResetUpdate(uint32 t = TRAVELLER_UPDATE_INTERVAL) { i_tracker.Reset(TRAVELLER_UPDATE_INTERVAL); }
+        inline uint32 GetTotalTravelTime(void) const { return i_totalTravelTime; }
+        inline bool HasArrived(void) const { return (i_totalTravelTime == 0 || (getMSTime() - i_timeStarted) >= i_totalTravelTime); }
+        bool UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update);
+        void UpdateLocation(TRAVELLER &traveller, const float &, const float &, const float &);
+        void GetLocationNow(float &x, float &y, float &z) const;
+
+    private:
+        void _findOffSetPoint(const float &x1, const float &y1, const float &x2, const float &y2, const float &offset, float &x, float &y);
 
 };
-
 #endif

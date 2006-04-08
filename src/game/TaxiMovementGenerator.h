@@ -23,12 +23,11 @@
 
 class MANGOS_DLL_DECL TaxiMovementGenerator : public MovementGenerator
 {
-public:
+    public:
 
-    void Initialize(const Creature &);
-    void Reset(const Creature &);
-    bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation);
-    void Update(Creature &, const uint32 &);
+        void Initialize(const Creature &);
+        void Reset(const Creature &);
+        bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation);
+        void Update(Creature &, const uint32 &);
 };
-
 #endif

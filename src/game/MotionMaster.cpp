@@ -20,15 +20,14 @@
 #include "CreatureAISelector.h"
 #include <cassert>
 
-void 
-MotionMaster::Initialize(Creature *creature) 
+void
+MotionMaster::Initialize(Creature *creature)
 {
     i_owner = creature;
     MovementGenerator* movement = FactorySelector::selectMovementGenerator(i_owner);
     push(  movement == NULL ? &si_idleMovement : movement );
     top()->Initialize(*i_owner);
 }
-
 
 void
 MotionMaster::UpdateMotion(const uint32 &diff)
@@ -42,10 +41,10 @@ MotionMaster::Clear()
 {
     while( !empty() && size() > 1 )
     {
-	MovementGenerator *curr = top();
-	pop();
-	if( !isStatic( curr ) )
-	    delete curr;
+        MovementGenerator *curr = top();
+        pop();
+        if( !isStatic( curr ) )
+            delete curr;
     }
 
     assert( !empty() );
@@ -56,18 +55,16 @@ void
 MotionMaster::MovementExpired()
 {
     if( empty() || size() == 1 )
-	return; 
+        return;
 
     MovementGenerator *curr = top();
     pop();
 
     if( !isStatic(curr) )
-	delete curr;
+        delete curr;
 
     assert( !empty() );
     top()->Reset(*i_owner);
 }
 
-
 IdleMovementGenerator MotionMaster::si_idleMovement;
-

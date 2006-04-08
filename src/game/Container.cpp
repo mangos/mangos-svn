@@ -29,14 +29,13 @@ Container::Container( )
     m_valuesCount = CONTAINER_END;
 }
 
-
 void Container::Create( uint32 guidlow, uint32 itemid, Player *owner )
 {
     Object::_Create( guidlow, HIGHGUID_CONTAINER );
 
     ItemPrototype *m_itemProto = objmgr.GetItemPrototype( itemid );
     ASSERT(m_itemProto);
-	uint32 ContainerSlots =m_itemProto->ContainerSlots;
+    uint32 ContainerSlots =m_itemProto->ContainerSlots;
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, itemid );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1.0f );
@@ -50,7 +49,6 @@ void Container::Create( uint32 guidlow, uint32 itemid, Player *owner )
 
     m_owner = owner;
 }
-
 
 uint8 Container::FindFreeSlot()
 {
@@ -68,7 +66,6 @@ uint8 Container::FindFreeSlot()
     return (uint8)-1;
 }
 
-
 void Container::AddItem(uint8 slot, Item *item)
 {
     ASSERT(m_Slot[slot] == NULL);
@@ -77,7 +74,7 @@ void Container::AddItem(uint8 slot, Item *item)
     SetUInt64Value( (uint16)(CONTAINER_FIELD_SLOT_1  + (slot*2)), item->GetGUID() );
 }
 
-ItemPrototype* Container:: GetProto() 
-{ 
-	return  objmgr.GetItemPrototype(GetUInt32Value( OBJECT_FIELD_ENTRY ));
+ItemPrototype* Container:: GetProto()
+{
+    return  objmgr.GetItemPrototype(GetUInt32Value( OBJECT_FIELD_ENTRY ));
 }

@@ -26,120 +26,115 @@ class WorldSession;
 
 #define GOSSIP_MAX_MENU_ITEMS 15
 
-
-struct GossipMenuItem {
-	uint8		m_gIcon;
-	bool		m_gCoded;
-	char*		m_gMessage;
-	uint32	m_gSender;
-	uint32  m_gAction;
+struct GossipMenuItem
+{
+    uint8       m_gIcon;
+    bool        m_gCoded;
+    char*       m_gMessage;
+    uint32  m_gSender;
+    uint32  m_gAction;
 };
 
-
-struct QuestMenuItem {
-	uint32		m_qId;
-	uint8		m_qIcon;
-	bool		m_qAvailable;
-	char*		m_qTitle;
+struct QuestMenuItem
+{
+    uint32      m_qId;
+    uint8       m_qIcon;
+    bool        m_qAvailable;
+    char*       m_qTitle;
 };
-
 
 class GossipMenu
 {
-public:
-	GossipMenu();
-	~GossipMenu();
+    public:
+        GossipMenu();
+        ~GossipMenu();
 
-	void MenuItem(uint8 Icon, std::string Message, bool Coded = false);
-	void MenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
+        void MenuItem(uint8 Icon, std::string Message, bool Coded = false);
+        void MenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
 
-	uint8 ItemsInMenu()
-	{
-		return m_gItemsCount;
-	}
+        uint8 ItemsInMenu()
+        {
+            return m_gItemsCount;
+        }
 
-	GossipMenuItem GetItem( unsigned int Id )
-	{
-		return m_gItems[ Id ];
-	}
+        GossipMenuItem GetItem( unsigned int Id )
+        {
+            return m_gItems[ Id ];
+        }
 
-	uint32 MenuItemSender( unsigned int ItemId );
-	uint32 MenuItemAction( unsigned int ItemId );
+        uint32 MenuItemSender( unsigned int ItemId );
+        uint32 MenuItemAction( unsigned int ItemId );
 
-	void ClearMenu();
+        void ClearMenu();
 
-protected:
-	int m_gItemsCount;
-	GossipMenuItem m_gItems[GOSSIP_MAX_MENU_ITEMS];
+    protected:
+        int m_gItemsCount;
+        GossipMenuItem m_gItems[GOSSIP_MAX_MENU_ITEMS];
 };
-
 
 class QuestMenu
 {
-public:
-	QuestMenu();
-	~QuestMenu();
+    public:
+        QuestMenu();
+        ~QuestMenu();
 
-	void QuestItem( uint32 QuestId, uint8 Icon , bool Available);
-	void ClearMenu();
+        void QuestItem( uint32 QuestId, uint8 Icon , bool Available);
+        void ClearMenu();
 
-	uint8 QuestsInMenu()
-	{
-		return m_qItemsCount;
-	}
+        uint8 QuestsInMenu()
+        {
+            return m_qItemsCount;
+        }
 
-	QuestMenuItem GetItem( unsigned int Id )
-	{
-		return m_qItems[ Id ];
-	}
+        QuestMenuItem GetItem( unsigned int Id )
+        {
+            return m_qItems[ Id ];
+        }
 
-protected:
-	int m_qItemsCount;
-	QuestMenuItem m_qItems[GOSSIP_MAX_MENU_ITEMS];
+    protected:
+        int m_qItemsCount;
+        QuestMenuItem m_qItems[GOSSIP_MAX_MENU_ITEMS];
 };
-
 
 class PlayerMenu
 {
-private:
-	GossipMenu* pGossipMenu;
-	QuestMenu* pQuestMenu;
-	WorldSession* pSession;
+    private:
+        GossipMenu* pGossipMenu;
+        QuestMenu* pQuestMenu;
+        WorldSession* pSession;
 
-public:
+    public:
 
-	PlayerMenu( WorldSession *Session );
-	~PlayerMenu();
+        PlayerMenu( WorldSession *Session );
+        ~PlayerMenu();
 
-	GossipMenu* GetGossipMenu() { return pGossipMenu; }
-	QuestMenu* GetQuestMenu() { return pQuestMenu; }
+        GossipMenu* GetGossipMenu() { return pGossipMenu; }
+        QuestMenu* GetQuestMenu() { return pQuestMenu; }
 
-	void ClearMenus();
-	uint32 GossipOptionSender( unsigned int Selection );
-	uint32 GossipOptionAction( unsigned int Selection );
-	
+        void ClearMenus();
+        uint32 GossipOptionSender( unsigned int Selection );
+        uint32 GossipOptionAction( unsigned int Selection );
 
-	void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
-	void SendQuestMenu ( QEmote eEmote, std::string Title, uint64 npcGUID );
-	void SendQuestStatus( uint32 questStatus, uint64 npcGUID );
-	void SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
-	void SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
-	void SendUpdateQuestDetails ( Quest *pQuest );
-	void SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable );
-	void SendQuestComplete( Quest *pQuest );
-	void SendQuestUpdateComplete( Quest *pQuest );
-	void CloseGossip();
-	void SendQuestUpdateAddItem( Quest *pQuest, uint32 iLogItem, uint32 iLogNr);
-	void SendQuestLogFull();
-	void SendQuestIncompleteToLog( Quest *pQuest );
-	void SendQuestCompleteToLog( Quest *pQuest );
-	void SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 iNrMob, uint32 iLogMob );
-	void SendQuestUpdateFailedTimer( Quest *pQuest );
-	void SendQuestUpdateFailed( Quest *pQuest );
-	void SendQuestUpdateSetTimer( Quest *pQuest, uint32 TimerValue);
-	void SendQuestFailed( uint32 iReason );
-	void SendQuestInvalid( uint32 iReason );
-	void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const std::string locName );
+        void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
+        void SendQuestMenu ( QEmote eEmote, std::string Title, uint64 npcGUID );
+        void SendQuestStatus( uint32 questStatus, uint64 npcGUID );
+        void SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
+        void SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
+        void SendUpdateQuestDetails ( Quest *pQuest );
+        void SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable );
+        void SendQuestComplete( Quest *pQuest );
+        void SendQuestUpdateComplete( Quest *pQuest );
+        void CloseGossip();
+        void SendQuestUpdateAddItem( Quest *pQuest, uint32 iLogItem, uint32 iLogNr);
+        void SendQuestLogFull();
+        void SendQuestIncompleteToLog( Quest *pQuest );
+        void SendQuestCompleteToLog( Quest *pQuest );
+        void SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 iNrMob, uint32 iLogMob );
+        void SendQuestUpdateFailedTimer( Quest *pQuest );
+        void SendQuestUpdateFailed( Quest *pQuest );
+        void SendQuestUpdateSetTimer( Quest *pQuest, uint32 TimerValue);
+        void SendQuestFailed( uint32 iReason );
+        void SendQuestInvalid( uint32 iReason );
+        void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const std::string locName );
 };
-
 #endif

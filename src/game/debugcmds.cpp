@@ -29,7 +29,6 @@
 #include "Unit.h"
 #include "ObjectAccessor.h"
 
-
 bool ChatHandler::HandleDebugInArcCommand(const char* args)
 {
     WorldPacket data;
@@ -49,10 +48,8 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
         obj = (Object*)m_session->GetPlayer();
 
     char buf[256];
-    
 
     FillSystemMessageData(&data, m_session, buf);
-    
 
     return true;
 }

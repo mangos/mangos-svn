@@ -27,7 +27,7 @@
 
 template<typename TRAVELLER>
 void
-DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1, const float &x2, const float &y2, const float &offset, float &x, float &y) 
+DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1, const float &x2, const float &y2, const float &offset, float &x, float &y)
 {
     /* given the point (x1, y1) and (x2, y2).. need to find the point (x,y) on the same line
      * such that the distance from (x, y) to (x2, y2) is offset.
@@ -37,18 +37,18 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1,
      */
     if( offset == 0 )
     {
-	x = x2;
-	y = y2;
+        x = x2;
+        y = y2;
     }
     else
     {
-	double x_diff = double(x2 - x1);
-	double y_diff = double(y2 - y1);
-	double distance_d = (double)((x_diff*x_diff) + (y_diff * y_diff));
-	distance_d = ::sqrt(distance_d);
-	double distance_ratio = (double)offset/(double)distance_d;
-	x = (float)(x2 - (distance_ratio*x_diff));
-	y = (float)(y2 - (distance_ratio*y_diff));
+        double x_diff = double(x2 - x1);
+        double y_diff = double(y2 - y1);
+        double distance_d = (double)((x_diff*x_diff) + (y_diff * y_diff));
+        distance_d = ::sqrt(distance_d);
+        double distance_ratio = (double)offset/(double)distance_d;
+        x = (float)(x2 - (distance_ratio*x_diff));
+        y = (float)(y2 - (distance_ratio*y_diff));
     }
 }
 
@@ -60,14 +60,14 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     i_fromY = traveller.GetPositionY();
     i_fromZ = traveller.GetPositionZ();
     float dest_x, dest_y;
-    
+
     _findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
     UpdateLocation(traveller, dest_x, dest_y, dest_z);
 
     // now adjust the z scale.. and orientation
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
-    float dz = i_destZ - i_fromZ;    
+    float dz = i_destZ - i_fromZ;
     float d_square = ((dx*dx) + (dy*dy) + (dz*dz)) - offset;
     double speed = traveller.Speed();
     speed *= 0.001;
@@ -91,7 +91,7 @@ DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, const float &
     float dy = i_destY - i_fromY;
     double dist = ::sqrt((dx*dx) + (dy*dy));
     double speed = traveller.Speed();
-    speed *=  0.001f; // speed is in seconds so convert from second to millisecond
+    speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
     i_totalTravelTime = static_cast<uint32>( dist/speed + 0.5 );
     i_timeStarted = getMSTime();
 }
@@ -103,11 +103,11 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32
     i_tracker.Update(diff);
     if( i_tracker.Passed() || force_update )
     {
-	float x,y,z;
-	GetLocationNow(x, y, z);
-	traveller.Relocation(x, y, z);
-	ResetUpdate();
-	return true;
+        float x,y,z;
+        GetLocationNow(x, y, z);
+        traveller.Relocation(x, y, z);
+        ResetUpdate();
+        return true;
     }
 
     return false;
@@ -121,18 +121,17 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
 
     if( i_totalTravelTime == 0 || time_elapsed >= i_totalTravelTime )
     {
-	x = i_destX;
-	y = i_destY;
-	z = i_destZ;	
+        x = i_destX;
+        y = i_destY;
+        z = i_destZ;
     }
     else
     {
-	// otherwise, the unit only when to a fraction of its original location
-	double percent_passed = (double)((double)time_elapsed / (double)i_totalTravelTime);
-	x = i_fromX + ((i_destX - i_fromX) * percent_passed);
-	y = i_fromY + ((i_destY - i_fromY) * percent_passed);
-	z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);
+        // otherwise, the unit only when to a fraction of its original location
+        double percent_passed = (double)((double)time_elapsed / (double)i_totalTravelTime);
+        x = i_fromX + ((i_destX - i_fromX) * percent_passed);
+        y = i_fromY + ((i_destY - i_fromY) * percent_passed);
+        z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);
     }
 }
-
 #endif

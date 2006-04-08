@@ -46,38 +46,38 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     Player* pl = GetPlayer();
 
-    WorldPacket tmpData;                    
-    uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE); 
+    WorldPacket tmpData;
+    uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
 
-    if (tmpMoney - money < 30)    
-    {             
+    if (tmpMoney - money < 30)
+    {
         tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
         tmpData << uint32(0);
         tmpData << uint32(0);
         tmpData << uint32(3);
-        SendPacket(&tmpData);    
+        SendPacket(&tmpData);
     }
     else
     {
 
-	QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", reciever.c_str());
+        QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", reciever.c_str());
 
-		Player *recieve = objmgr.GetPlayer(reciever.c_str());
+        Player *recieve = objmgr.GetPlayer(reciever.c_str());
         uint64 rc = objmgr.GetPlayerGUIDByName(reciever.c_str());
         if (result)
         {
-	    delete result;
-	    data.Initialize(SMSG_SEND_MAIL_RESULT);
+            delete result;
+            data.Initialize(SMSG_SEND_MAIL_RESULT);
             data << uint32(0);
             data << uint32(0);
             data << uint32(0);
             SendPacket(&data);
 
-			if (item != 0)
+            if (item != 0)
             {
                 //uint32 slot = pl->GetSlotByItemGUID(item);
-				uint8 bag,slot;
-				pl->GetSlotByItemGUID(item,bag,slot);
+                uint8 bag,slot;
+                pl->GetSlotByItemGUID(item,bag,slot);
                 //Item *it = pl->GetItemBySlot((uint8)slot);
                 Item *it = pl->GetItemBySlot(bag,(uint8)slot);
 
@@ -85,25 +85,25 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
                 std::stringstream ss;
                 ss << "INSERT INTO mailed_items (guid, data) VALUES ("
-                   << it->GetGUIDLow() << ", '";         
+                    << it->GetGUIDLow() << ", '";
                 for(uint16 i = 0; i < it->GetValuesCount(); i++ )
                 {
-                   ss << it->GetUInt32Value(i) << " ";
+                    ss << it->GetUInt32Value(i) << " ";
                 }
                 ss << "' )";
                 sDatabase.Execute( ss.str().c_str() );
 
                 //pl->RemoveItemFromSlot((uint8)slot);
-				pl->RemoveItemFromSlot(bag,(uint8)slot);
+                pl->RemoveItemFromSlot(bag,(uint8)slot);
             }
             uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
             pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
-        
+
             if (recieve)
             {
                 Mail* m = new Mail;
                 m->messageID = mID;
-                m->sender =   pl->GetGUIDLow();  
+                m->sender =   pl->GetGUIDLow();
                 m->reciever = GUID_LOPART(rc);
                 m->subject = subject;
                 m->body = body;
@@ -114,28 +114,26 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 m->checked = 0;
                 recieve->AddMail(m);
 
-		        
-	        data.Initialize(SMSG_RECEIVED_MAIL);
+                data.Initialize(SMSG_RECEIVED_MAIL);
                 data << uint32(0);
                 SendPacket(&data);
-	        recieve->GetSession()->SendPacket(&data);
+                recieve->GetSession()->SendPacket(&data);
             }
 
-	    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",mID);
+            sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",mID);
             sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
 
-        }     
-		else
-		{
+        }
+        else
+        {
             data.Initialize(SMSG_SEND_MAIL_RESULT);
             data << uint32(0);
             data << uint32(0);
             data << uint32(4);
             SendPacket(&data);
-		}
+        }
     }
 }
-
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
 {
@@ -149,7 +147,6 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
     m->time = time(NULL) + (3 * 3600);
     pl->AddMail(m);
 }
-
 
 void WorldSession::HandleMailDelete(WorldPacket & recv_data )
 {
@@ -173,7 +170,6 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     SendPacket(&data);
 
 }
-
 
 void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 {
@@ -210,7 +206,6 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 
 }
 
-
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 {
     uint64 mailbox;
@@ -222,26 +217,26 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Mail* m = pl->GetMail(message);
     Item *it = objmgr.GetMItem(m->item);
 
-	GetPlayer()->AddNewItem(0,NULL_SLOT,m->item,it->GetCount(),false, false);
+    GetPlayer()->AddNewItem(0,NULL_SLOT,m->item,it->GetCount(),false, false);
 
-	m->item = 0;
+    m->item = 0;
     pl->AddMail(m);
 
-/*    
-	m->item = 0;
-    pl->AddMail(m);
-    for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-    {
-        if (GetPlayer()->GetItemBySlot(i) == NULL)
+    /* 
+        m->item = 0;
+        pl->AddMail(m);
+        for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            slot = i;
-            break;
+            if (GetPlayer()->GetItemBySlot(i) == NULL)
+            {
+                slot = i;
+                break;
+            }
         }
-    }
-    it->SetUInt64Value(ITEM_FIELD_CONTAINED,pl->GetGUID());
-    it->SetUInt64Value(ITEM_FIELD_OWNER,pl->GetGUID());
-    GetPlayer()->AddItemToSlot(slot, it);
-*/
+        it->SetUInt64Value(ITEM_FIELD_CONTAINED,pl->GetGUID());
+        it->SetUInt64Value(ITEM_FIELD_OWNER,pl->GetGUID());
+        GetPlayer()->AddItemToSlot(slot, it);
+    */
     objmgr.RemoveMItem(it->GetGUIDLow());
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(message);
@@ -249,7 +244,6 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 }
-
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 {
@@ -274,7 +268,6 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
 
 }
 
-
 void WorldSession::HandleGetMail(WorldPacket & recv_data )
 {
     uint32 info;
@@ -289,15 +282,15 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << uint32((*itr)->messageID);
         data << uint8(0);
         data << uint32((*itr)->sender);
-        data << uint32(0);                        
-      
+        data << uint32(0);
+
         data << (*itr)->subject.c_str();
-        if((*itr)->body.c_str()!=NULL)            
+        if((*itr)->body.c_str()!=NULL)
             data << uint32((*itr)->messageID);
         else
-            data << uint32(0);                    
-        data << uint32(0);                        
-        data << uint32(41);                       
+            data << uint32(0);
+        data << uint32(0);
+        data << uint32(41);
         if ((*itr)->item != 0)
         {
             Item* i = objmgr.GetMItem((*itr)->item);
@@ -307,17 +300,17 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         {
             data << uint32(0);
         }
-        data << uint32(0);                        
-        data << uint32(0);                        
-        data << uint32(0);                        
-        data << uint8(1);                         
-        data << uint32(0xFFFFFFFF);               
-        data << uint32(0);                        
-        data << uint32(0);                        
-        data << uint32((*itr)->money);            
-        data << uint32((*itr)->COD);              
-        data << uint32((*itr)->checked);          
-        
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint8(1);
+        data << uint32(0xFFFFFFFF);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32((*itr)->money);
+        data << uint32((*itr)->COD);
+        data << uint32((*itr)->checked);
+
         data << float(((*itr)->time - time(NULL)) / 3600);
     }
     SendPacket(&data);
@@ -327,86 +320,83 @@ extern char *fmtstring( char *format, ... );
 
 uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
 {
-	
-	
 
-	
+    uint8 i = 0;
+    Item * srcitem;
 
-	uint8 i = 0;
-	Item * srcitem;
+    for (i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
+    {
+        srcitem = pl->GetItemBySlot(i);
 
-	for (i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
-	{
-		srcitem = pl->GetItemBySlot(i);
-
-		if (srcitem)
-		{
-			if (srcitem->GetItemProto()->DisplayInfoID == displayID)
-			{
-				break;
-			}
-		}
-	}
+        if (srcitem)
+        {
+            if (srcitem->GetItemProto()->DisplayInfoID == displayID)
+            {
+                break;
+            }
+        }
+    }
 
     if( i >= BANK_SLOT_BAG_END )
-	{
+    {
         QueryResult *result = sDatabase.PQuery( "SELECT entry FROM itemstemplate WHERE displayid='%u'", displayID );
 
-		if( !result )
-		{
-	        return (uint8)-1;
-		}
+        if( !result )
+        {
+            return (uint8)-1;
+        }
 
-		uint32 id = (*result)[0].GetUInt32();
-		return id;
-		delete result;
-	}
+        uint32 id = (*result)[0].GetUInt32();
+        return id;
+        delete result;
+    }
 
-	return srcitem->GetItemProto()->ItemId;
+    return srcitem->GetItemProto()->ItemId;
 }
-
 
 extern char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subclassNum, uint32 type, uint32 DisplayID);
 
-bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data ) {
-//    int i;
-	Player* pl = GetPlayer();
-	uint32 realID = GetItemGuidFromDisplayID(itemid, pl);
-	char const *itemInfo;
-	bool resist_added = false;
-	bool names_added = false;
+bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
+{
+    //    int i;
+    Player* pl = GetPlayer();
+    uint32 realID = GetItemGuidFromDisplayID(itemid, pl);
+    char const *itemInfo;
+    bool resist_added = false;
+    bool names_added = false;
 
-	if (realID < 0)
-	{
-        sLog.outError( "WORLD: Unknown item id 0x%.8X", realID );
-        return false;
-    }
-
-    ItemPrototype *itemProto = objmgr.GetItemPrototype(realID);
-    
-	if(!itemProto)
+    if (realID < 0)
     {
         sLog.outError( "WORLD: Unknown item id 0x%.8X", realID );
         return false;
     }
 
-	sLog.outDebug( "WORLD: Real item id is %u. Name %s.", realID, itemProto->Name1 );
+    ItemPrototype *itemProto = objmgr.GetItemPrototype(realID);
 
-	data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+    if(!itemProto)
+    {
+        sLog.outError( "WORLD: Unknown item id 0x%.8X", realID );
+        return false;
+    }
+
+    sLog.outDebug( "WORLD: Real item id is %u. Name %s.", realID, itemProto->Name1 );
+
+    data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
     data << itemid;
 
-	itemInfo = fmtstring("<HTML>\n<BODY>\n");
+    itemInfo = fmtstring("<HTML>\n<BODY>\n");
 
-	itemInfo = fmtstring("%s</P></BODY>\n</HTML>\n", itemInfo);
+    itemInfo = fmtstring("%s</P></BODY>\n</HTML>\n", itemInfo);
 
-	data << itemInfo;
-	data << uint32(0);
-    SendPacket(&data);  
+    data << itemInfo;
+    data << uint32(0);
+    SendPacket(&data);
 
-	return true;
+    return true;
 }
 
-void WorldSession::HandleItemTextQuery(WorldPacket & recv_data ) {
+void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
+{
     WorldPacket data;
     uint32 mailguid;
     uint64 unk1;
@@ -414,12 +404,13 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data ) {
     recv_data >> mailguid >> unk1;
 
     Player* pl = GetPlayer();
-    
+
     Mail *itr;
-    
+
     itr = pl->GetMail(mailguid);
-    if(itr) {
-		sLog.outDebug("We got mailguid: %d with unk: %d", mailguid, unk1);
+    if(itr)
+    {
+        sLog.outDebug("We got mailguid: %d with unk: %d", mailguid, unk1);
 
         data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
         data << mailguid;
@@ -428,40 +419,40 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data ) {
         SendPacket(&data);
     }
 
-	else {
-		QueryResult *result = sDatabase.PQuery( "SELECT * FROM item_pages WHERE id = '%u'", mailguid );
+    else
+    {
+        QueryResult *result = sDatabase.PQuery( "SELECT * FROM item_pages WHERE id = '%u'", mailguid );
 
-		if( result )
-		{
-			data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-			data << mailguid;
+        if( result )
+        {
+            data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+            data << mailguid;
 
-			uint32 nextpage = mailguid;
+            uint32 nextpage = mailguid;
 
-			while (nextpage)
-			{
-				data << (*result)[1].GetString();
-				nextpage = (*result)[2].GetUInt32();
-				data << nextpage;
-			}
+            while (nextpage)
+            {
+                data << (*result)[1].GetString();
+                nextpage = (*result)[2].GetUInt32();
+                data << nextpage;
+            }
 
-			data << uint32(0);
-			SendPacket(&data); 
-		delete result;
-	        return;
-		}
-		
-		
-		if (!SendItemInfo( mailguid, data ))
-		{
-			data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
-			data << mailguid;
+            data << uint32(0);
+            SendPacket(&data);
+            delete result;
+            return;
+        }
 
-			data << "There is no info for this item.";
+        if (!SendItemInfo( mailguid, data ))
+        {
+            data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
+            data << mailguid;
 
-			data << uint32(0);
-			SendPacket(&data);  
-		}
+            data << "There is no info for this item.";
+
+            data << uint32(0);
+            SendPacket(&data);
+        }
     }
 }
 
@@ -478,81 +469,81 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     WorldPacket Data;
 
     Item *item = new Item();
-        
+
     item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, GetPlayer());
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
     Player* pl = GetPlayer();
     GetPlayer()->AddItemToInventory(0, NULL_SLOT,item,false,false,false);
 
-/*
-    for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-    {
-        if (GetPlayer()->GetItemBySlot(i) == NULL)
+    /*
+        for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            slot = i;
-            slotfree=true;
-            break;
+            if (GetPlayer()->GetItemBySlot(i) == NULL)
+            {
+                slot = i;
+                slotfree=true;
+                break;
+            }
         }
-    }
-    if (slotfree)
-    {
-        Item *item = new Item();
-        
-        item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, GetPlayer(), 1);
-        item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
+        if (slotfree)
+        {
+            Item *item = new Item();
 
-        GetPlayer()->AddItemToSlot( slot, item );
+            item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, GetPlayer(), 1);
+            item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
-        Data.Initialize(SMSG_SEND_MAIL_RESULT);
-        Data << uint32(mailid);
-        Data << uint32(sbit2);
-        Data << uint32(0);
-        SendPacket(&Data);    
-    }
-    else
-    { 
-        Data.Initialize(SMSG_SEND_MAIL_RESULT);
-        Data << uint32(mailid);
-        Data << uint32(0);
-        Data << uint32(1);
-        SendPacket(&Data);   
-    }
-*/
-    
+            GetPlayer()->AddItemToSlot( slot, item );
+
+            Data.Initialize(SMSG_SEND_MAIL_RESULT);
+            Data << uint32(mailid);
+            Data << uint32(sbit2);
+            Data << uint32(0);
+            SendPacket(&Data);
+        }
+        else
+        {
+            Data.Initialize(SMSG_SEND_MAIL_RESULT);
+            Data << uint32(mailid);
+            Data << uint32(0);
+            Data << uint32(1);
+            SendPacket(&Data);
+        }
+    */
+
 }
 
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 {
-    
-	WorldPacket Data;
-	bool checkmail=false;
-	Player *pl=GetPlayer();
 
-	std::list<Mail*>::iterator itr;
+    WorldPacket Data;
+    bool checkmail=false;
+    Player *pl=GetPlayer();
+
+    std::list<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
-		if(!(*itr)->checked){
-             checkmail = true;
-			 break;
-		}
-	}
-	
+        if(!(*itr)->checked)
+        {
+            checkmail = true;
+            break;
+        }
+    }
+
     if ( checkmail )
-	{
-	    Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
-        Data << uint32(0); 
-        SendPacket(&Data); 
-	}
-	else
-	{
-	    Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
-        Data << uint8(0x00);  
-		Data << uint8(0xC0);
-		Data << uint8(0xA8);
-		Data << uint8(0xC7);
-        SendPacket(&Data); 
-	}
+    {
+        Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
+        Data << uint32(0);
+        SendPacket(&Data);
+    }
+    else
+    {
+        Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
+        Data << uint8(0x00);
+        Data << uint8(0xC0);
+        Data << uint8(0xA8);
+        Data << uint8(0xC7);
+        SendPacket(&Data);
+    }
 
 }
-

@@ -36,7 +36,7 @@
 #include "ProgressBar.hpp"
 #include "MapManager.h"
 #include "ScriptCalls.h"
-#include "CreatureAIRegistry.h" // need for Game::Initialize()
+#include "CreatureAIRegistry.h"                             // need for Game::Initialize()
 #include "Policies/SingletonImp.h"
 #include "EventSystem.h"
 
@@ -44,19 +44,15 @@ INSTANTIATE_SINGLETON_1( World );
 
 extern bool LoadScriptingModule();
 
-
-
 World::World()
 {
     m_playerLimit = 0;
     m_allowMovement = true;
 }
 
-
 World::~World()
 {
 }
-
 
 WorldSession* World::FindSession(uint32 id) const
 {
@@ -68,7 +64,6 @@ WorldSession* World::FindSession(uint32 id) const
         return 0;
 }
 
-
 void World::RemoveSession(uint32 id)
 {
     SessionMap::iterator itr = m_sessions.find(id);
@@ -79,7 +74,6 @@ void World::RemoveSession(uint32 id)
         m_sessions.erase(itr);
     }
 }
-
 
 void World::AddSession(WorldSession* s)
 {
@@ -94,7 +88,7 @@ void World::SetInitialWorldSettings()
 
     srand((unsigned int)time(NULL));
     m_lastTick = time(NULL);
-    
+
     time_t tiempo;
     char hour[3];
     char minute[3];
@@ -105,28 +99,27 @@ void World::SetInitialWorldSettings()
     strftime( hour, 3, "%H", tmPtr );
     strftime( minute, 3, "%M", tmPtr );
     strftime( second, 3, "%S", tmPtr );
-    
+
     if(!sConfig.GetString("DataDir",&dataPath))
-	dataPath="./";
+        dataPath="./";
     else
     {
-	if(dataPath.at(dataPath.length()-1)!='/')
-	    dataPath.append("/");
+        if(dataPath.at(dataPath.length()-1)!='/')
+            dataPath.append("/");
     }
 
     sLog.outString("Using DataDir %s ...",dataPath.c_str());
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
-    
-    sDatabase.PExecute("UPDATE characters set online=0;");
-    
-    new ChannelMgr;
 
+    sDatabase.PExecute("UPDATE characters set online=0;");
+
+    new ChannelMgr;
 
     sLog.outString("Initialize data stores...");
     barGoLink bar( 12 );
     bar.step();
-    
+
     tmpPath=dataPath;
     tmpPath.append("dbc/EmotesText.dbc");
     sEmoteStore.Load((char *)(tmpPath.c_str()));
@@ -176,7 +169,7 @@ void World::SetInitialWorldSettings()
     tmpPath.append("dbc/ItemDisplayInfo.dbc");
     sItemDisplayTemplateStore.Load((char *)(tmpPath.c_str()));
     bar.step();
-	
+
     tmpPath=dataPath;
     tmpPath.append("dbc/ItemSet.dbc");
     sItemSetStore.Load((char *)(tmpPath.c_str()));
@@ -190,50 +183,43 @@ void World::SetInitialWorldSettings()
     sLog.outString( ">> Loaded 12 data stores" );
     sLog.outString( "" );
 
-
-
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();
 
-    
     sLog.outString( "Loading NPC Texts..." );
     objmgr.LoadGossipText();
 
-    
     sLog.outString( "Loading Quest Area Triggers..." );
     objmgr.LoadAreaTriggerPoints();
 
-    
     sLog.outString( "Loading Items..." );
     objmgr.LoadItemPrototypes();
     objmgr.LoadAuctions();
     objmgr.LoadAuctionItems();
     objmgr.LoadMailedItems();
 
-
     sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();
 
-    
     sLog.outString( "Loading Guilds..." );
     objmgr.LoadGuilds();
-    
+
     sLog.outString( "Loading Teleport Coords..." );
     objmgr.LoadTeleportCoords();
-    
+
     objmgr.SetHighestGuids();
 
     sLog.outString( "Loading Creatures Loot Tables..." );
-	LoadCreaturesLootTables();
+    LoadCreaturesLootTables();
 
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
-    
+
     if(!LoadScriptingModule())
-			exit(1);
-				
-		sLog.outString( "Initializing Scripts..." );
-		Script->ScriptsInit();
+        exit(1);
+
+    sLog.outString( "Initializing Scripts..." );
+    Script->ScriptsInit();
 
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
@@ -291,7 +277,7 @@ void World::Update(time_t diff)
                     ss << "' )";
                     sDatabase.Execute( ss.str().c_str() );
 
-		    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
+                    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
 
                     sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
 
@@ -303,9 +289,9 @@ void World::Update(time_t diff)
                     {
                         rpl->AddMail(m);
                     }
-		    sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",m->reciever);
-		    sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%d'",m->item);
-		    sDatabase.PExecute("DELETE FROM bids WHERE id = '%d'",itr->second->Id);
+                    sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",m->reciever);
+                    sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%d'",m->item);
+                    sDatabase.PExecute("DELETE FROM bids WHERE id = '%d'",itr->second->Id);
 
                     objmgr.RemoveAuction(itr->second->Id);
                 }
@@ -322,8 +308,8 @@ void World::Update(time_t diff)
                     m->time = time(NULL) + (29 * 3600);
                     m->subject = "Your item sold!";
                     m->item = 0;
-                   
-		    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
+
+                    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
 
                     sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
 
@@ -360,7 +346,7 @@ void World::Update(time_t diff)
                     ss << "' )";
                     sDatabase.Execute( ss.str().c_str() );
 
-		    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'", mn->messageID);
+                    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'", mn->messageID);
 
                     sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->reciever, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
 
@@ -398,11 +384,10 @@ void World::Update(time_t diff)
 
     if (m_timers[WUPDATE_OBJECTS].Passed())
     {
-			m_timers[WUPDATE_OBJECTS].Reset();
-			MapManager::Instance().Update(diff);
+        m_timers[WUPDATE_OBJECTS].Reset();
+        MapManager::Instance().Update(diff);
     }
 }
-
 
 void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
 {
@@ -411,13 +396,12 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self)
     {
         if (itr->second->GetPlayer() &&
             itr->second->GetPlayer()->IsInWorld()
-            && itr->second != self)               
+            && itr->second != self)
         {
             itr->second->SendPacket(packet);
         }
     }
 }
-
 
 void World::SendWorldText(const char* text, WorldSession *self)
 {
@@ -425,4 +409,3 @@ void World::SendWorldText(const char* text, WorldSession *self)
     sChatHandler.FillSystemMessageData(&data, 0, text);
     SendGlobalMessage(&data, self);
 }
-

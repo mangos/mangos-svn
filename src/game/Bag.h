@@ -25,34 +25,34 @@
 #include "Creature.h"
 #include "Item.h"
 
-class Bag : public Item {
-	public:
-	
-		Bag();
-		~Bag();
+class Bag : public Item
+{
+    public:
 
-		void Create(uint32 guidlow, uint32 itemid, Player* owner);
+        Bag();
+        ~Bag();
 
-		uint8 AddItemToBag(uint8 slot, Item *item);
-		Item* RemoveItemFromBag(uint8 slot);
+        void Create(uint32 guidlow, uint32 itemid, Player* owner);
 
-		Item* GetItemFromBag(uint8 slot) { return m_bagslot[slot]; }
+        uint8 AddItemToBag(uint8 slot, Item *item);
+        Item* RemoveItemFromBag(uint8 slot);
 
-		int8 FindFreeBagSlot();
-		int8 GetSlotByItemGUID(uint64 guid);
-		bool IsEmpty();
+        Item* GetItemFromBag(uint8 slot) { return m_bagslot[slot]; }
 
-		// DB operations
-		void SaveToDB();
-		void LoadFromDB(uint32 guid, uint32 auctioncheck);
-		void DeleteFromDB();
+        int8 FindFreeBagSlot();
+        int8 GetSlotByItemGUID(uint64 guid);
+        bool IsEmpty();
 
-		void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;
+        // DB operations
+        void SaveToDB();
+        void LoadFromDB(uint32 guid, uint32 auctioncheck);
+        void DeleteFromDB();
 
-	protected:
+        void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;
 
-		// Bag Storage space
-		Item* m_bagslot[20];
+    protected:
+
+        // Bag Storage space
+        Item* m_bagslot[20];
 };
-
 #endif

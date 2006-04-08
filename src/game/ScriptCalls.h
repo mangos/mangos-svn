@@ -27,14 +27,14 @@ typedef void(MANGOS_IMPORT * scriptCallScriptsInit) ();
 typedef void(MANGOS_IMPORT * scriptCallGossipHello) (Player *player, Creature *_Creature );
 typedef void(MANGOS_IMPORT * scriptCallQuestAccept) (Player *player, Creature *_Creature, Quest *);
 typedef void(MANGOS_IMPORT * scriptCallGossipSelect)(Player *player, Creature *_Creature, uint32 sender
-																 , uint32 action);
+, uint32 action);
 typedef void(MANGOS_IMPORT * scriptCallGossipSelectWithCode)( Player *player, Creature *_Creature,
-													uint32 sender, uint64 action, char* sCode );
+uint32 sender, uint64 action, char* sCode );
 typedef void(MANGOS_IMPORT * scriptCallQuestSelect)( Player *player, Creature *_Creature, Quest * );
 typedef void(MANGOS_IMPORT * scriptCallQuestComplete)(Player *player, Creature *_Creature, Quest *);
 typedef uint32(MANGOS_IMPORT * scriptCallNPCDialogStatus)( Player *player, Creature *_Creature);
-typedef void(MANGOS_IMPORT * scriptCallChooseReward)( Player *player, Creature *_Creature, Quest *, 
-																uint32 opt );
+typedef void(MANGOS_IMPORT * scriptCallChooseReward)( Player *player, Creature *_Creature, Quest *,
+uint32 opt );
 typedef void(MANGOS_IMPORT * scriptCallItemHello)( Player *player, Item *, Quest *);
 typedef void(MANGOS_IMPORT * scriptCallGOHello)( Player *player, GameObject * );
 typedef void(MANGOS_IMPORT * scriptCallAreaTrigger)( Player *player, Quest *, uint32 triggerID );
@@ -42,29 +42,27 @@ typedef void(MANGOS_IMPORT * scriptCallAreaTrigger)( Player *player, Quest *, ui
 typedef void(MANGOS_IMPORT * scriptCallItemQuestAccept)(Player *player, Item *, Quest *);
 typedef void(MANGOS_IMPORT * scriptCallGOQuestAccept)(Player *player, GameObject *, Quest *);
 typedef void(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *,
-																uint32 opt );
+uint32 opt );
 
-
-typedef struct{
-scriptCallScriptsInit ScriptsInit;
-scriptCallGossipHello GossipHello;
-scriptCallGOChooseReward GOChooseReward;
-scriptCallQuestAccept QuestAccept;
-scriptCallGossipSelect GossipSelect;
-scriptCallGossipSelectWithCode GossipSelectWithCode;
-scriptCallQuestSelect QuestSelect;
-scriptCallQuestComplete QuestComplete;
-scriptCallNPCDialogStatus NPCDialogStatus;
-scriptCallChooseReward ChooseReward;
-scriptCallItemHello ItemHello;
-scriptCallGOHello GOHello;
-scriptCallAreaTrigger scriptAreaTrigger;
-scriptCallItemQuestAccept ItemQuestAccept;
-scriptCallGOQuestAccept GOQuestAccept;
-MANGOS_LIBRARY_HANDLE hScriptsLib;
+typedef struct
+{
+    scriptCallScriptsInit ScriptsInit;
+    scriptCallGossipHello GossipHello;
+    scriptCallGOChooseReward GOChooseReward;
+    scriptCallQuestAccept QuestAccept;
+    scriptCallGossipSelect GossipSelect;
+    scriptCallGossipSelectWithCode GossipSelectWithCode;
+    scriptCallQuestSelect QuestSelect;
+    scriptCallQuestComplete QuestComplete;
+    scriptCallNPCDialogStatus NPCDialogStatus;
+    scriptCallChooseReward ChooseReward;
+    scriptCallItemHello ItemHello;
+    scriptCallGOHello GOHello;
+    scriptCallAreaTrigger scriptAreaTrigger;
+    scriptCallItemQuestAccept ItemQuestAccept;
+    scriptCallGOQuestAccept GOQuestAccept;
+    MANGOS_LIBRARY_HANDLE hScriptsLib;
 }_ScriptSet,*ScriptsSet;
 
-
 extern ScriptsSet Script;
-
 #endif

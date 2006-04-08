@@ -31,11 +31,10 @@ TaxiMovementGenerator::Reset(const Creature &)
 bool
 TaxiMovementGenerator(const Creature &, float &x, float &y, float &z, float &orientation)
 {
-    return false; 
+    return false;
 }
 
 void
 TaxiMovementGenerator::Update(Creature &, const uint32 &time_diff)
 {
 }
-

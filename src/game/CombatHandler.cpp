@@ -28,23 +28,22 @@
 
 void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 {
-   
-	uint64 guid;
-	recv_data >> guid;
 
-    
-	DEBUG_LOG( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
-    
-	Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
-	if(pEnemy)
-	{
-	    _player->addStateFlag(UF_ATTACKING);
-	    _player->smsg_AttackStart(pEnemy);
-	    _player->inCombat = true;
-	    return;
-	}
+    uint64 guid;
+    recv_data >> guid;
 
-	sLog.outError( "WORLD: Enemy %u %.8X is not a player or a creature",GUID_LOPART(guid), GUID_HIPART(guid));	
+    DEBUG_LOG( "WORLD: Recvd CMSG_ATTACKSWING Message guidlow:%u guidhigh:%u", GUID_LOPART(guid), GUID_HIPART(guid) );
+
+    Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
+    if(pEnemy)
+    {
+        _player->addStateFlag(UF_ATTACKING);
+        _player->smsg_AttackStart(pEnemy);
+        _player->inCombat = true;
+        return;
+    }
+
+    sLog.outError( "WORLD: Enemy %u %.8X is not a player or a creature",GUID_LOPART(guid), GUID_HIPART(guid));
 }
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
@@ -59,13 +58,11 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-	uint64 guid = GetPlayer()->GetGUID();
-	uint32 sheathed;
+    uint64 guid = GetPlayer()->GetGUID();
+    uint32 sheathed;
     recv_data >> sheathed;
 
-	
-	sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
+    sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
 
-	GetPlayer()->SetSheath(~sheathed);
+    GetPlayer()->SetSheath(~sheathed);
 }
-

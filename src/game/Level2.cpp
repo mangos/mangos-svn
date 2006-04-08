@@ -30,7 +30,6 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 
-
 bool ChatHandler::HandleGUIDCommand(const char* args)
 {
     WorldPacket data;
@@ -52,66 +51,64 @@ bool ChatHandler::HandleGUIDCommand(const char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleNameCommand(const char* args)
 {
-/*    WorldPacket data;
-Temp. disabled
-    if(!*args)
-        return false;
-
-    if(strlen((char*)args)>75)
-    {
-        
-        char buf[256];
-        sprintf((char*)buf,"The name was too long by %i", strlen((char*)args)-75);
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
-        return true;
-    }
-
-    for (uint8 i = 0; i < strlen(args); i++)
-    {
-        if(!isalpha(args[i]) && args[i]!=' ')
-        {
-            FillSystemMessageData(&data, m_session, "Error, name can only contain chars A-Z and a-z.");
-            m_session->SendPacket( &data );
+    /*    WorldPacket data;
+    Temp. disabled
+        if(!*args)
             return false;
+
+        if(strlen((char*)args)>75)
+        {
+
+            char buf[256];
+            sprintf((char*)buf,"The name was too long by %i", strlen((char*)args)-75);
+            FillSystemMessageData(&data, m_session, buf);
+            m_session->SendPacket( &data );
+            return true;
         }
-    }
 
-    uint64 guid;
-    guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        FillSystemMessageData(&data, m_session, "No selection.");
-        m_session->SendPacket( &data );
-        return true;
-    }
+        for (uint8 i = 0; i < strlen(args); i++)
+        {
+            if(!isalpha(args[i]) && args[i]!=' ')
+            {
+                FillSystemMessageData(&data, m_session, "Error, name can only contain chars A-Z and a-z.");
+                m_session->SendPacket( &data );
+                return false;
+            }
+        }
 
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+        uint64 guid;
+        guid = m_session->GetPlayer()->GetSelection();
+        if (guid == 0)
+        {
+            FillSystemMessageData(&data, m_session, "No selection.");
+            m_session->SendPacket( &data );
+            return true;
+        }
 
-    if(!pCreature)
-    {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
-        m_session->SendPacket( &data );
-        return true;
-    }
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
-    pCreature->SetName(args);
-    uint32 idname = objmgr.AddCreatureTemplate(pCreature->GetName());
-    pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
+        if(!pCreature)
+        {
+            FillSystemMessageData(&data, m_session, "You should select a creature.");
+            m_session->SendPacket( &data );
+            return true;
+        }
 
-    pCreature->SaveToDB();
-*/
+        pCreature->SetName(args);
+        uint32 idname = objmgr.AddCreatureTemplate(pCreature->GetName());
+        pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
+
+        pCreature->SaveToDB();
+    */
 
     return true;
 }
 
-
 bool ChatHandler::HandleSubNameCommand(const char* args)
 {
-	/* Temp. disabled
+    /* Temp. disabled
     WorldPacket data;
 
     if(!*args)
@@ -119,7 +116,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
 
     if(strlen((char*)args)>75)
     {
-        
+
         char buf[256];
         sprintf((char*)buf,"The subname was too long by %i", strlen((char*)args)-75);
         FillSystemMessageData(&data, m_session, buf);
@@ -158,10 +155,9 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, idname);
 
     pCreature->SaveToDB();
-*/
+    */
     return true;
 }
-
 
 bool ChatHandler::HandleProgCommand(const char* args)
 {
@@ -169,7 +165,6 @@ bool ChatHandler::HandleProgCommand(const char* args)
 
     return true;
 }
-
 
 bool ChatHandler::HandleItemMoveCommand(const char* args)
 {
@@ -189,13 +184,10 @@ bool ChatHandler::HandleItemMoveCommand(const char* args)
     Item * dstitem = m_session->GetPlayer()->GetItemBySlot(dstslot);
     Item * srcitem = m_session->GetPlayer()->GetItemBySlot(srcslot);
 
-//    m_session->GetPlayer()->SwapItemSlots(srcslot, dstslot);
+    //    m_session->GetPlayer()->SwapItemSlots(srcslot, dstslot);
 
     return true;
 }
-
-
-
 
 bool ChatHandler::HandleSpawnCommand(const char* args)
 {
@@ -204,7 +196,6 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     char* pEntry = strtok((char*)args, " ");
     if (!pEntry)
         return false;
-
 
     char* pFlags = strtok(NULL, " ");
     if (!pFlags)
@@ -246,7 +237,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
 
 bool ChatHandler::HandleAddSpwCommand(const char* args)
 {
-    
+
     WorldPacket data;
     char* charID = strtok((char*)args, " ");
     if (!charID)
@@ -261,14 +252,14 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     if(result)
     {
         Field *fields = result->Fetch();
-        
+
         SpawnCreature(m_session, fields[4].GetString(), fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32(), fields[3].GetUInt32());
-	delete result;
+        delete result;
         return true;
     }
     else
-	delete result;
-        return false;
+        delete result;
+    return false;
 }
 
 bool ChatHandler::HandleDeleteCommand(const char* args)
@@ -294,11 +285,9 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
     unit->DeleteFromDB();
 
-    
     MapManager::Instance().GetMap(unit->GetMapId())->Remove(unit, true);
     return true;
 }
-
 
 bool ChatHandler::HandleDeMorphCommand(const char* args)
 {
@@ -306,9 +295,6 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
     m_session->GetPlayer()->DeMorph();
     return true;
 }
-
-
-
 
 bool ChatHandler::HandleItemCommand(const char* args)
 {
@@ -347,7 +333,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
     std::stringstream sstext;
     if(tmpItem)
     {
-	QueryResult *result = sDatabase.PQuery("INSERT INTO vendors VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
+        QueryResult *result = sDatabase.PQuery("INSERT INTO vendors VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
 
         uint8 itemscount = (uint8)pCreature->getItemCount();
         pCreature->setItemId(itemscount , item);
@@ -355,7 +341,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
         pCreature->increaseItemCount();
 
         sstext << "Item '" << item << "' '" << tmpItem->Name1 << "' Added to list" << '\0';
-	delete result;
+        delete result;
     }
     else
     {
@@ -366,7 +352,6 @@ bool ChatHandler::HandleItemCommand(const char* args)
     m_session->SendPacket( &data );
     return true;
 }
-
 
 bool ChatHandler::HandleItemRemoveCommand(const char* args)
 {
@@ -401,7 +386,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     {
         uint32 guidlow = GUID_LOPART(guid);
 
-	sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u' AND itemguid = '%u'",pCreature->GetEntry(),itemguid);
+        sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u' AND itemguid = '%u'",pCreature->GetEntry(),itemguid);
 
         pCreature->setItemId(slot , 0);
         pCreature->setItemAmount(slot , 0);
@@ -426,7 +411,6 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
 
     return true;
 }
-
 
 bool ChatHandler::HandleAddMoveCommand(const char* args)
 {
@@ -456,11 +440,8 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     FillSystemMessageData(&data, m_session, "Waypoint added.");
     m_session->SendPacket( &data );
 
-    
-    
     return true;
 }
-
 
 bool ChatHandler::HandleRandomCommand(const char* args)
 {
@@ -508,7 +489,6 @@ bool ChatHandler::HandleRandomCommand(const char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleRunCommand(const char* args)
 {
     WorldPacket data;
@@ -555,7 +535,6 @@ bool ChatHandler::HandleRunCommand(const char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleChangeLevelCommand(const char* args)
 {
     WorldPacket data;
@@ -597,7 +576,6 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleNPCFlagCommand(const char* args)
 {
     WorldPacket data;
@@ -631,13 +609,11 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
     FillSystemMessageData(&data, m_session, "Value saved, you may need to rejoin or clean your client cache.");
     m_session->SendPacket( &data );
 
-	
-	uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
-	m_session->SendCreatureQuery( entry, guid );
+    uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
+    m_session->SendCreatureQuery( entry, guid );
 
     return true;
 }
-
 
 bool ChatHandler::HandleDisplayIdCommand(const char* args)
 {
@@ -671,7 +647,6 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
 
     return true;
 }
-
 
 bool ChatHandler::HandleFactionIdCommand(const char* args)
 {

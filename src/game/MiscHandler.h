@@ -21,25 +21,22 @@
 
 struct GraveyardTeleport
 {
-  
+
     float X;
     float Y;
     float Z;
-   
+
     uint32 MapId;
-   
-    
+
 };
 
 struct AreaTrigger
 {
-    
-   
+
     uint32 mapId;
     float X;
     float Y;
     float Z;
-    
-};
 
+};
 #endif

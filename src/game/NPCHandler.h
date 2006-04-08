@@ -19,41 +19,39 @@
 #ifndef __NPCHANDLER_H
 #define __NPCHANDLER_H
 
-struct QEmote {
-	uint32 _Emote;
-	uint32 _Delay;
+struct QEmote
+{
+    uint32 _Emote;
+    uint32 _Delay;
 };
 
 struct GossipTextOption
 {
-	std::string Text_0;
-	std::string Text_1;
-	uint32 Language;
-	float Probability;
-	QEmote Emotes[3];
+    std::string Text_0;
+    std::string Text_1;
+    uint32 Language;
+    float Probability;
+    QEmote Emotes[3];
 };
 
 struct GossipText
 {
-	uint32 Text_ID;
-	GossipTextOption Options[8];
+    uint32 Text_ID;
+    GossipTextOption Options[8];
 };
-
 
 struct ItemPage
 {
-	uint32 Page_ID;
-	std::string PageText;
+    uint32 Page_ID;
+    std::string PageText;
 
-	uint32 Next_Page;
+    uint32 Next_Page;
 };
-
 
 struct AreaTriggerPoint
 {
-	uint32 Trigger_ID;
-	uint32 Quest_ID;
-	uint32 Creature_ID;
+    uint32 Trigger_ID;
+    uint32 Quest_ID;
+    uint32 Creature_ID;
 };
-
 #endif

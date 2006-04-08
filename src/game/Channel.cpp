@@ -56,18 +56,15 @@ void Channel::Join(Player *p, const char *pass)
         MakeYouJoined(&data,p);
         SendToOne(&data,p);
 
-
-// if no owner first logged will become
-//        if(!constant && owner == NULL)
-//        {
-//            SetOwner(p);
-//            players[p].moderator = true;
-//        }
-
+        // if no owner first logged will become
+        //        if(!constant && owner == NULL)
+        //        {
+        //            SetOwner(p);
+        //            players[p].moderator = true;
+        //        }
 
     }
 }
-
 
 void Channel::Leave(Player *p, bool send)
 {
@@ -101,7 +98,6 @@ void Channel::Leave(Player *p, bool send)
         }*/
     }
 }
-
 
 void Channel::KickOrBan(Player *good, const char *badname, bool ban)
 {
@@ -153,7 +149,6 @@ void Channel::KickOrBan(Player *good, const char *badname, bool ban)
     }
 }
 
-
 void Channel::UnBan(Player *good, const char *badname)
 {
     WorldPacket data;
@@ -172,7 +167,7 @@ void Channel::UnBan(Player *good, const char *badname)
         Player *bad = objmgr.GetPlayer(badname);
         if(bad == NULL || !IsBanned(bad->GetGUID()))
         {
-            MakeNotOn(&data,badname);             
+            MakeNotOn(&data,badname);
             SendToOne(&data,good);
         }
         else
@@ -183,7 +178,6 @@ void Channel::UnBan(Player *good, const char *badname)
         }
     }
 }
-
 
 void Channel::Password(Player *p, const char *pass)
 {
@@ -205,7 +199,6 @@ void Channel::Password(Player *p, const char *pass)
         SendToAll(&data);
     }
 }
-
 
 void Channel::SetMode(Player *p, const char *p2n, bool mod, bool set)
 {
@@ -246,7 +239,6 @@ void Channel::SetMode(Player *p, const char *p2n, bool mod, bool set)
     }
 }
 
-
 void Channel::SetOwner(Player *p, const char *newname)
 {
     WorldPacket data;
@@ -279,7 +271,6 @@ void Channel::SetOwner(Player *p, const char *newname)
     }
 }
 
-
 void Channel::GetOwner(Player *p)
 {
     WorldPacket data;
@@ -294,7 +285,6 @@ void Channel::GetOwner(Player *p)
         SendToOne(&data,p);
     }
 }
-
 
 void Channel::List(Player *p)
 {
@@ -324,7 +314,6 @@ void Channel::List(Player *p)
     }
 }
 
-
 void Channel::Announce(Player *p)
 {
     WorldPacket data;
@@ -346,7 +335,6 @@ void Channel::Announce(Player *p)
     }
 }
 
-
 void Channel::Moderate(Player *p)
 {
     WorldPacket data;
@@ -367,7 +355,6 @@ void Channel::Moderate(Player *p)
         SendToAll(&data);
     }
 }
-
 
 void Channel::Say(Player *p, const char *what)
 {
@@ -393,20 +380,19 @@ void Channel::Say(Player *p, const char *what)
         uint8 afk = 0;
 
         data.Initialize(SMSG_MESSAGECHAT);
-        data << (uint8)14;                        
-        data << (uint32)0;                        
+        data << (uint8)14;
+        data << (uint32)0;
         data << name.c_str();
-        data << (uint32)0;                        
+        data << (uint32)0;
         data << p->GetGUID();
         data << messageLength;
         data << what;
         data << (uint8)0;
 
         SendToAll(&data);
-        
+
     }
 }
-
 
 void Channel::Invite(Player *p, const char *newname)
 {

@@ -62,7 +62,6 @@ WorldSocket::WorldSocket(SocketHandler &sh): TcpSocket(sh), _remaining(0), _sess
     _seed = _GetSeed();
 }
 
-
 WorldSocket::~WorldSocket()
 {
     WorldPacket *packet;
@@ -74,22 +73,18 @@ WorldSocket::~WorldSocket()
     }
 }
 
-
 uint32 WorldSocket::_GetSeed()
 {
     return 0xDEADBABE;
 }
-
 
 void WorldSocket::SendPacket(WorldPacket* packet)
 {
     WorldPacket *pck = new WorldPacket(*packet);
     ASSERT(pck);
 
-    
     _sendQueue.add(pck);
 }
-
 
 void WorldSocket::OnAccept()
 {
@@ -103,7 +98,6 @@ void WorldSocket::OnAccept()
     SendPacket(&packet);
 }
 
-
 void WorldSocket::OnRead()
 {
     TcpSocket::OnRead();
@@ -113,18 +107,17 @@ void WorldSocket::OnRead()
         if (!_remaining)
         {
             if (ibuf.GetLength() < 6)
-                break;                            
+                break;
 
             ClientPktHeader hdr;
 
             ibuf.Read((char *)&hdr, 6);
             _crypt.DecryptRecv((uint8 *)&hdr, 6);
 
-            _remaining = ntohs(hdr.size) - 4;     
+            _remaining = ntohs(hdr.size) - 4;
             _cmd = hdr.cmd;
         }
 
-        
         if (ibuf.GetLength() < _remaining)
             break;
 
@@ -134,14 +127,13 @@ void WorldSocket::OnRead()
         packet.SetOpcode((uint16)_cmd);
         ibuf.Read((char*)packet.contents(), _remaining);
 
-        
-	if( sWorldLog.LogWorld() )
-	{
-	    sWorldLog.Log("CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
-			  (uint32)GetSocket(),
-			  _remaining,
-			  LookupName(packet.GetOpcode(), g_worldOpcodeNames),
-			  packet.GetOpcode());
+        if( sWorldLog.LogWorld() )
+        {
+            sWorldLog.Log("CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
+                (uint32)GetSocket(),
+                _remaining,
+                LookupName(packet.GetOpcode(), g_worldOpcodeNames),
+                packet.GetOpcode());
 
             uint32 p = 0;
             while (p < packet.size())
@@ -157,7 +149,6 @@ void WorldSocket::OnRead()
 
         _remaining = 0;
 
-        
         switch (_cmd)
         {
             case CMSG_PING:
@@ -181,7 +172,6 @@ void WorldSocket::OnRead()
     }
 }
 
-
 void WorldSocket::OnDelete()
 {
     if (_session)
@@ -192,7 +182,6 @@ void WorldSocket::OnDelete()
 
     sWorldSocketMgr.RemoveSocket(this);
 }
-
 
 void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 {
@@ -220,12 +209,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     QueryResult *result = sDatabase.PQuery("SELECT acct, gm, sessionkey FROM accounts WHERE login = '%s';", account.c_str());
 
-    
     if ( !result )
     {
-        
+
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 21 );                    
+        packet << uint8( 21 );
         SendPacket( &packet );
 
         sLog.outDetail( "SOCKET: Sent Auth Response (unknown account)." );
@@ -238,34 +226,29 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     delete result;
 
-    
     uint32 num = sWorld.GetSessionCount();
     if (sWorld.GetPlayerLimit() > 0 && num > sWorld.GetPlayerLimit() && security == 0)
     {
-        
+
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 21 );                    
+        packet << uint8( 21 );
         SendPacket( &packet );
 
         sLog.outBasic( "SOCKET: Sent Auth Response (server full)." );
         return;
     }
 
-    
     WorldSession *session = sWorld.FindSession( id );
     if( session )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 13 );                    
+        packet << uint8( 13 );
         SendPacket( &packet );
 
         sLog.outDetail( "SOCKET: Sent Auth Response (already connected)." );
 
         session->LogoutPlayer(false);
-        
-        
-        
-        
+
         return;
     }
 
@@ -283,9 +266,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     if (memcmp(sha.GetDigest(), digest, 20))
     {
-        
+
         packet.Initialize( SMSG_AUTH_RESPONSE );
-        packet << uint8( 21 );                    
+        packet << uint8( 21 );
         SendPacket( &packet );
 
         sLog.outDetail( "SOCKET: Sent Auth Response (authentification failed)." );
@@ -296,24 +279,23 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     _crypt.Init();
 
     packet.Initialize( SMSG_AUTH_RESPONSE );
-    packet << uint8( 0x0C );                      
-    packet << uint8( 0xcf );                      
-    packet << uint8( 0xD2 );                      
-    packet << uint8( 0x07 );                      
-    packet << uint8( 0x00 );                      
-    packet << uint8( 0x00 );                      
+    packet << uint8( 0x0C );
+    packet << uint8( 0xcf );
+    packet << uint8( 0xD2 );
+    packet << uint8( 0x07 );
+    packet << uint8( 0x00 );
+    packet << uint8( 0x00 );
 
     SendPacket(&packet);
 
-	//! Enable ADDON's Thanks to Burlex
-	packet.Initialize( SMSG_ADDON_INFO );
-    packet << uint8( 0x0A );			//10
-    for (uint8 i = 0; i < 0x0C; i++)	//10
-	{
-		packet << uint8( 0x02 ) << uint8( 0x01 ) << uint32(0) << uint16(0);                      
-	}
+    //! Enable ADDON's Thanks to Burlex
+    packet.Initialize( SMSG_ADDON_INFO );
+    packet << uint8( 0x0A );                                //10
+    for (uint8 i = 0; i < 0x0C; i++)                        //10
+    {
+        packet << uint8( 0x02 ) << uint8( 0x01 ) << uint32(0) << uint16(0);
+    }
     SendPacket(&packet);
-
 
     _session = new WorldSession(id, this);
     ASSERT(_session);
@@ -324,7 +306,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     return;
 }
-
 
 void WorldSocket::_HandlePing(WorldPacket& recvPacket)
 {
@@ -348,7 +329,6 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
     return;
 }
 
-
 void WorldSocket::Update(time_t diff)
 {
     WorldPacket *packet;
@@ -361,14 +341,13 @@ void WorldSocket::Update(time_t diff)
         hdr.size = ntohs((uint16)packet->size() + 2);
         hdr.cmd = packet->GetOpcode();
 
-        
-	if( sWorldLog.LogWorld() )
-        {         
-	    sWorldLog.Log("SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
-			  (uint32)GetSocket(),
-			  packet->size(),
-			  LookupName(packet->GetOpcode(), g_worldOpcodeNames),
-			  packet->GetOpcode());
+        if( sWorldLog.LogWorld() )
+        {
+            sWorldLog.Log("SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
+                (uint32)GetSocket(),
+                packet->size(),
+                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                packet->GetOpcode());
 
             uint32 p = 0;
             while (p < packet->size())

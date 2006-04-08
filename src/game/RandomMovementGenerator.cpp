@@ -28,9 +28,9 @@ RandomMovementGenerator::Initialize(Creature &creature)
     const float wander_distance=16;
     float x,y,z;
     creature.GetRespawnCoord(x, y, z);
-	int mapid=creature.GetMapId();
-	z=MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-    
+    int mapid=creature.GetMapId();
+    z=MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+
     i_nextMove = 1;
     i_waypoints[0][0] = x;
     i_waypoints[0][1] = y;
@@ -38,22 +38,22 @@ RandomMovementGenerator::Initialize(Creature &creature)
 
     for(unsigned int idx=1; idx < MAX_RAND_WAYPOINTS+1; ++idx)
     {
-	const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-	const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
+        const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
+        const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
 
-	if( idx == 1 )
-	{
-	    i_waypoints[idx][0] = x + wanderX;
-	    i_waypoints[idx][1] = y + wanderY;
-		i_waypoints[idx][2] = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);	    
-	}
-	else
-	{
-	    i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
-	    i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
-	    i_waypoints[idx][2] =  MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],
-			i_waypoints[idx][1]);
-	}
+        if( idx == 1 )
+        {
+            i_waypoints[idx][0] = x + wanderX;
+            i_waypoints[idx][1] = y + wanderY;
+            i_waypoints[idx][2] = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
+        }
+        else
+        {
+            i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
+            i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
+            i_waypoints[idx][2] =  MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],
+                i_waypoints[idx][1]);
+        }
     }
 
     i_nextMoveTime.Reset((rand() % 10000));
@@ -71,55 +71,55 @@ RandomMovementGenerator::Reset(Creature &creature)
 void
 RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
-    i_nextMoveTime.Update(diff);    
+    i_nextMoveTime.Update(diff);
     if( i_nextMoveTime.Passed() )
     {
-	if( creature.IsStopped() )
-	{
-	    assert( i_nextMove <= MAX_RAND_WAYPOINTS );
-	    const float &x = i_waypoints[i_nextMove][0];
-	    const float &y = i_waypoints[i_nextMove][1];
-	    const float &z = i_waypoints[i_nextMove][2];
+        if( creature.IsStopped() )
+        {
+            assert( i_nextMove <= MAX_RAND_WAYPOINTS );
+            const float &x = i_waypoints[i_nextMove][0];
+            const float &y = i_waypoints[i_nextMove][1];
+            const float &z = i_waypoints[i_nextMove][2];
 
-	    creature.SetState(ROAMING);
-	    Traveller<Creature> traveller(creature);
-	    i_destinationHolder.SetDestination(traveller, x, y, z);
-	    i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
-	}
-	else
-	{	    
-	    
-	    Traveller<Creature> traveller(creature);
-	    i_destinationHolder.UpdateTraveller(traveller, diff, true);
-	    creature.StopMoving();
-	    creature.setMoveRunFlag(!urand(0,10));
+            creature.SetState(ROAMING);
+            Traveller<Creature> traveller(creature);
+            i_destinationHolder.SetDestination(traveller, x, y, z);
+            i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
+        }
+        else
+        {
 
-	    if( creature.getMoveRandomFlag() )
-	    {
-		i_nextMove = (rand() % MAX_RAND_WAYPOINTS) + 1;
-		i_nextMoveTime.Reset((rand() % 7000));
-	    }
-	    else
-	    {
-		++i_nextMove;
-		if( i_nextMove == MAX_RAND_WAYPOINTS )
-		{
-		    i_nextMove = 0;
-		    i_nextMoveTime.Reset(rand() % 3000);
-		}
-		else
-		{
-		    i_nextMoveTime.Reset((rand() % 7000));
-		}		
-	    }
-	}
+            Traveller<Creature> traveller(creature);
+            i_destinationHolder.UpdateTraveller(traveller, diff, true);
+            creature.StopMoving();
+            creature.setMoveRunFlag(!urand(0,10));
+
+            if( creature.getMoveRandomFlag() )
+            {
+                i_nextMove = (rand() % MAX_RAND_WAYPOINTS) + 1;
+                i_nextMoveTime.Reset((rand() % 7000));
+            }
+            else
+            {
+                ++i_nextMove;
+                if( i_nextMove == MAX_RAND_WAYPOINTS )
+                {
+                    i_nextMove = 0;
+                    i_nextMoveTime.Reset(rand() % 3000);
+                }
+                else
+                {
+                    i_nextMoveTime.Reset((rand() % 7000));
+                }
+            }
+        }
     }
 }
 
-int 
+int
 RandomMovementGenerator::Permissible(const Creature *creature)
 {
-    if( creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR) 
+    if( creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
@@ -128,8 +128,8 @@ RandomMovementGenerator::Permissible(const Creature *creature)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
         || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR)
-		|| creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_STABLE))
-	return CANNOT_HANDLE_TYPE;
+        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_STABLE))
+        return CANNOT_HANDLE_TYPE;
 
     return RANDOM_MOTION_TYPE;
 }

@@ -24,60 +24,45 @@
 #include "Dynamic/ObjectRegistry.h"
 #include "Dynamic/FactoryHolder.h"
 
-
-
 class Unit;
 class Creature;
 
-class MANGOS_DLL_DECL CreatureAI 
+class MANGOS_DLL_DECL CreatureAI
 {
-public:
-    
-    
-    virtual ~CreatureAI();
+    public:
 
-    
-    virtual void MoveInLineOfSight(Unit *) = 0;
+        virtual ~CreatureAI();
 
-    
-    virtual void AttackStart(Unit *) = 0;
+        virtual void MoveInLineOfSight(Unit *) = 0;
 
-    
-    virtual void AttackStop(Unit *) = 0;
+        virtual void AttackStart(Unit *) = 0;
 
-    
-    virtual void HealBy(Unit *healer, uint32 amount_healed) = 0;
+        virtual void AttackStop(Unit *) = 0;
 
-    
-    virtual void DamageInflict(Unit *done_by, uint32 amount_damage) = 0;
+        virtual void HealBy(Unit *healer, uint32 amount_healed) = 0;
 
-    
-    virtual bool IsVisible(Unit *) const = 0; 
+        virtual void DamageInflict(Unit *done_by, uint32 amount_damage) = 0;
 
-    
-    virtual void UpdateAI(const uint32 diff) = 0;   
+        virtual bool IsVisible(Unit *) const = 0;
+
+        virtual void UpdateAI(const uint32 diff) = 0;
 };
-
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
 {
-    
+
     SelectableAI(const char *id) : FactoryHolder<CreatureAI>(id) {}
 };
-
 
 template<class REAL_AI>
 struct CreatureAIFactory : public SelectableAI
 {
     CreatureAIFactory(const char *name) : SelectableAI(name) {}
 
-    
     CreatureAI* Create(void *) const;
 
-    
     int Permit(const Creature *c) const { return REAL_AI::Permissible(c); }
 };
-
 
 #define NO_PERMIT  -1
 #define IDLE_PERMIT_BASE 1
@@ -89,5 +74,4 @@ struct CreatureAIFactory : public SelectableAI
 typedef FactoryHolder<CreatureAI> CreatureAICreator;
 typedef FactoryHolder<CreatureAI>::FactoryHolderRegistry CreatureAIRegistry;
 typedef FactoryHolder<CreatureAI>::FactoryHolderRepository CreatureAIRepository;
-
 #endif

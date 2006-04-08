@@ -18,17 +18,17 @@
 
 class barGoLink
 {
-  char const * empty;
-  char const * full;
+    char const * empty;
+    char const * full;
 
-  int rec_no;
-  int rec_pos;
-  int num_rec;
-  int indic_len;
+    int rec_no;
+    int rec_pos;
+    int num_rec;
+    int indic_len;
 
-  public:
+    public:
 
-  void step( void );
-  barGoLink( int );
-  ~barGoLink();
+        void step( void );
+        barGoLink( int );
+        ~barGoLink();
 };

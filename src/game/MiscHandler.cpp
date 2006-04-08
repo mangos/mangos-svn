@@ -36,16 +36,15 @@
 #include "ObjectAccessor.h"
 #include "Object.h"
 
-
 void my_esc( char * r, const char * s )
 {
-          int n = strlen( s ), i, j;
-          for ( i = 0, j = 0; s[i]; i++ )
-          {
-            if ( s[i] == '"' || s[i] == '\\' || s[i] == '\'' ) r[j++] = '\\';
-            r[j++] = s[i];
-          }
-          r[j] = 0;
+    int n = strlen( s ), i, j;
+    for ( i = 0, j = 0; s[i]; i++ )
+    {
+        if ( s[i] == '"' || s[i] == '\\' || s[i] == '\'' ) r[j++] = '\\';
+        r[j++] = s[i];
+    }
+    r[j] = 0;
 }
 
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
@@ -59,152 +58,142 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 {
     uint8 lootSlot;
-	Loot * loot;
-	recv_data >> lootSlot;
-	uint64 guid=_player->GetLootGUID();
-	
+    Loot * loot;
+    recv_data >> lootSlot;
+    uint64 guid=_player->GetLootGUID();
 
-	if(IS_GAMEOBJECT_GUID(guid))
-	{
-		GameObject *go=ObjectAccessor::Instance().GetGameObject(*_player, guid);
-		if(!go)return;
-		else loot=&go->loot ;
-	}else
-	{
-		Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-		if (!pCreature)	return;
-		else loot=&pCreature->loot ;
-	}
+    if(IS_GAMEOBJECT_GUID(guid))
+    {
+        GameObject *go=ObjectAccessor::Instance().GetGameObject(*_player, guid);
+        if(!go)return;
+        else loot=&go->loot ;
+    }else
+    {
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+        if (!pCreature) return;
+        else loot=&pCreature->loot ;
+    }
 
-	WorldPacket data;
-	
-		
+    WorldPacket data;
 
-	if (loot->items.at(lootSlot).isLooted)
-	{  
-		data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-		data << uint8(EQUIP_ERR_ALREADY_LOOTED);                        
-		data << uint64(0);
-		data << uint64(0);
-		data << uint8(0);
-		SendPacket( &data );
-		return;
-	}
+    if (loot->items.at(lootSlot).isLooted)
+    {
+        data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
+        data << uint8(EQUIP_ERR_ALREADY_LOOTED);
+        data << uint64(0);
+        data << uint64(0);
+        data << uint8(0);
+        SendPacket( &data );
+        return;
+    }
 
+    if (GetPlayer()->AddNewItem(0,NULL_SLOT,loot->items.at(lootSlot).item.itemid,1,false,false))
+    {
+        loot->items.at(lootSlot).isLooted=true;
+        data.Initialize( SMSG_LOOT_REMOVED );
+        data << uint8(lootSlot);
+        SendPacket( &data );
 
+        data.Initialize( SMSG_ITEM_PUSH_RESULT );
+        data << _player->GetGUID();
+        data << uint64(0x00000000);
+        data << uint8(0x01);
+        data << uint8(0x00);
+        data << uint8(0x00);
+        data << uint8(0x00);
+        data << uint8(0xFF);
+        data << uint32(loot->items.at(lootSlot).item.itemid);
+        data << uint64(0);
 
-	if (GetPlayer()->AddNewItem(0,NULL_SLOT,loot->items.at(lootSlot).item.itemid,1,false,false))
-	{
-		loot->items.at(lootSlot).isLooted=true;
-		data.Initialize( SMSG_LOOT_REMOVED );
-		data << uint8(lootSlot);
-		SendPacket( &data );
-			
-			
-		data.Initialize( SMSG_ITEM_PUSH_RESULT );
-		data << _player->GetGUID();
-		data << uint64(0x00000000);
-		data << uint8(0x01);
-		data << uint8(0x00);
-		data << uint8(0x00);
-		data << uint8(0x00);
-		data << uint8(0xFF);
-		data << uint32(loot->items.at(lootSlot).item.itemid);
-		data << uint64(0);
+        /*data << uint8(0x00);
+        data << uint8(0x00);
+        data << uint8(0x00);
+        data << uint32(0x00000000);
+        data << uint8(0x00);*/
+        SendPacket( &data );
+    }else
+    {
+        data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
+        data << uint8(EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE);
+        data << uint64(0);
+        data << uint64(0);
+        data << uint8(0);
+        SendPacket( &data );
+    }
 
-		/*data << uint8(0x00);
-		data << uint8(0x00);
-		data << uint8(0x00);
-		data << uint32(0x00000000);
-		data << uint8(0x00);*/
-		SendPacket( &data );
-	}else
-	{
-		data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-		data << uint8(EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE);                        
-		data << uint64(0);
-		data << uint64(0);
-		data << uint8(0);
-		SendPacket( &data );
-	}
-	
 }
 
 void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 {
-	Loot * loot;
- 	uint64 guid=_player->GetLootGUID();
+    Loot * loot;
+    uint64 guid=_player->GetLootGUID();
 
-	if(IS_GAMEOBJECT_GUID(guid))
-	{
-		GameObject *go=ObjectAccessor::Instance().GetGameObject(*_player, guid);
-		if(!go)return;
-		else loot=&go->loot ;
-	}else
-	{
-		Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-		if (!pCreature)	return;
-		else loot=&pCreature->loot ;
-	}
+    if(IS_GAMEOBJECT_GUID(guid))
+    {
+        GameObject *go=ObjectAccessor::Instance().GetGameObject(*_player, guid);
+        if(!go)return;
+        else loot=&go->loot ;
+    }else
+    {
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+        if (!pCreature) return;
+        else loot=&pCreature->loot ;
+    }
 
     uint32 newcoinage = _player->GetUInt32Value(PLAYER_FIELD_COINAGE)+ loot->gold ;
-	loot->gold =0;
+    loot->gold =0;
     GetPlayer()->SetUInt32Value(PLAYER_FIELD_COINAGE , newcoinage);
 }
 
 extern int num_item_prototypes;
 
-
 void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
-	recv_data >> guid;
-	GetPlayer()->SendLoot(guid,1);
+    recv_data >> guid;
+    GetPlayer()->SendLoot(guid,1);
 
 }
 
-
 void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
-{	
+{
     uint64 guid;
     recv_data >> guid;
-   
-	GetPlayer()->SetLootGUID(0);
+
+    GetPlayer()->SetLootGUID(0);
 
     WorldPacket data;
     data.Initialize( SMSG_LOOT_RELEASE_RESPONSE );
     data << guid << uint8( 1 );
     SendPacket( &data );
 
-	if(IS_GAMEOBJECT_GUID(guid))
-	{
-		//FIXME: remove go after it's looted
+    if(IS_GAMEOBJECT_GUID(guid))
+    {
+        //FIXME: remove go after it's looted
 
+    }else
+    {
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+        if (!pCreature) return;
+        Loot *  loot=&pCreature->loot ;
+        if(!loot->gold)
+        {
+            bool Looted=true;
+            for(std::vector<__LootItem>::iterator i=loot->items.begin();i!=loot->items.end();i++)
+                if(!i->isLooted){Looted=false;break;}
 
-	}else
-	{
-		Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-		if (!pCreature)	return;
-		Loot * 	loot=&pCreature->loot ;
-		if(!loot->gold)
-		{
-			bool Looted=true;
-			for(std::vector<__LootItem>::iterator i=loot->items.begin();i!=loot->items.end();i++)
-				if(!i->isLooted){Looted=false;break;}
-
-			if(Looted)
-			{
-				pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);//this is probably wrong
-				if(pCreature->GetCreatureInfo()->SkinLootId)
-				pCreature->SetFlag (UNIT_FIELD_FLAGS, 0x4000000);// set skinnable
-			}
-		}
-	}
-
-
+                if(Looted)
+            {
+                                                            //this is probably wrong
+                pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+                if(pCreature->GetCreatureInfo()->SkinLootId)
+                                                            // set skinnable
+                    pCreature->SetFlag (UNIT_FIELD_FLAGS, 0x4000000);
+            }
+        }
+    }
 
 }
-
 
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
@@ -227,8 +216,8 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     }
 
     data.Initialize( SMSG_WHO );
-	data << uint32( clientcount );
-	data << uint32( clientcount );
+    data << uint32( clientcount );
+    data << uint32( clientcount );
 
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
@@ -237,7 +226,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             countcheck++;
 
             data.append(itr->second->GetName() , strlen(itr->second->GetName()) + 1);
-            data << uint8( 0x00 );					
+            data << uint8( 0x00 );
             data << uint32( itr->second->getLevel() );
             data << uint32( itr->second->getClass() );
             data << uint32( itr->second->getRace() );
@@ -246,9 +235,8 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     }
 
     WPAssert(data.size() == datalen);
-	SendPacket(&data);
+    SendPacket(&data);
 }
-
 
 void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 {
@@ -257,37 +245,36 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
     if( !(GetPlayer()->inCombat) )
-	{ 
-		data.Initialize( SMSG_LOGOUT_RESPONSE );
-		data << uint32(0);
-		data << uint8(0);
-		SendPacket( &data );
-     
-		LogoutRequest(time(NULL));
+    {
+        data.Initialize( SMSG_LOGOUT_RESPONSE );
+        data << uint32(0);
+        data << uint8(0);
+        SendPacket( &data );
 
-		//! Set the flag so player sits
-		GetPlayer()->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+        LogoutRequest(time(NULL));
 
-		//! DISABLE_ROTATE = 0x40000;
-		GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+        //! Set the flag so player sits
+        GetPlayer()->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-		// Can't move
-		data.Initialize( SMSG_FORCE_MOVE_ROOT );
-		data << (uint8)0xFF << GetPlayer()->GetGUID();
-		SendPacket( &data );
+        //! DISABLE_ROTATE = 0x40000;
+        GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+
+        // Can't move
+        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        data << (uint8)0xFF << GetPlayer()->GetGUID();
+        SendPacket( &data );
     }
-    else 
-	{
-      data.Initialize( SMSG_LOGOUT_RESPONSE );
-      data << (uint8)0xC; 
-      data << uint32(0);  
-      data << uint8(0);
-      SendPacket( &data );
+    else
+    {
+        data.Initialize( SMSG_LOGOUT_RESPONSE );
+        data << (uint8)0xC;
+        data << uint32(0);
+        data << uint8(0);
+        SendPacket( &data );
 
-      LogoutRequest(0);
+        LogoutRequest(0);
     }
 }
-
 
 void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 {
@@ -297,7 +284,6 @@ void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
     LogoutRequest(0);
     LogoutPlayer(1);
 }
-
 
 void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 {
@@ -316,21 +302,20 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 
     //! Stand Up
-	//! Removes the flag so player stands
-	GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    //! Removes the flag so player stands
+    GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-	//! DISABLE_ROTATE
-	GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+    //! DISABLE_ROTATE
+    GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
 
     sLog.outDebug( "WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message" );
 }
-
 
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     data.Initialize( SMSG_QUERY_TIME_RESPONSE );
-//    data << (uint32)20;
+    //    data << (uint32)20;
     data << (uint32)getMSTime();
     SendPacket( &data );
 
@@ -340,140 +325,136 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 
     QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM gmtickets where guid = '%d';", guid);
 
-        if (result)
+    if (result)
+    {
+        int cnt;
+        fields = result->Fetch();
+        cnt = fields[0].GetUInt32();
+
+        if ( cnt > 0 )
         {
-            int cnt;
+            data.Initialize( SMSG_GMTICKET_GETTICKET );
+
+            QueryResult *result = sDatabase.PQuery("SELECT * FROM gmtickets WHERE guid = '%d';", guid);
             fields = result->Fetch();
-            cnt = fields[0].GetUInt32();
 
-            if ( cnt > 0 )
-            {
-                data.Initialize( SMSG_GMTICKET_GETTICKET );
-
-		QueryResult *result = sDatabase.PQuery("SELECT * FROM gmtickets WHERE guid = '%d';", guid);
-                fields = result->Fetch();
-
-                char tickettext[255];
-                strcpy( tickettext,fields[2].GetString() );
-                data << uint32(6); 
-                data.append((uint8 *)tickettext,strlen(tickettext)+1);
-                SendPacket( &data );
-		delete result;
-            }
-            else
-            {
-                data << uint32(1); 
-                data << uint32(0);
-                SendPacket( &data );
-            }
-
+            char tickettext[255];
+            strcpy( tickettext,fields[2].GetString() );
+            data << uint32(6);
+            data.append((uint8 *)tickettext,strlen(tickettext)+1);
+            SendPacket( &data );
+            delete result;
         }
+        else
+        {
+            data << uint32(1);
+            data << uint32(0);
+            SendPacket( &data );
+        }
+
+    }
     delete result;
 }
 
-
 void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
 {
-        WorldPacket data;
-        uint64 guid = GetPlayer()->GetGUID();
-        std::string ticketText = "";
-        char * p, p1[512];
-        uint8 buf[516];
-        memcpy( buf, recv_data.contents(), sizeof buf <recv_data.size() ? sizeof buf : recv_data.size() );
-        p = (char *)buf + 1;
-        my_esc( p1, (const char *)buf + 1 );
-        ticketText = p1;
-        sDatabase.PExecute("UPDATE `gmtickets` set ticket_text = '%s' WHERE guid = '%d';", ticketText.c_str(), guid);
+    WorldPacket data;
+    uint64 guid = GetPlayer()->GetGUID();
+    std::string ticketText = "";
+    char * p, p1[512];
+    uint8 buf[516];
+    memcpy( buf, recv_data.contents(), sizeof buf <recv_data.size() ? sizeof buf : recv_data.size() );
+    p = (char *)buf + 1;
+    my_esc( p1, (const char *)buf + 1 );
+    ticketText = p1;
+    sDatabase.PExecute("UPDATE `gmtickets` set ticket_text = '%s' WHERE guid = '%d';", ticketText.c_str(), guid);
 
 }
 
 void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
 {
-        WorldPacket data;
-        uint64 guid = GetPlayer()->GetGUID();
+    WorldPacket data;
+    uint64 guid = GetPlayer()->GetGUID();
 
-	sDatabase.PExecute("DELETE FROM `gmtickets` where guid = '%d' LIMIT 1",guid);
+    sDatabase.PExecute("DELETE FROM `gmtickets` where guid = '%d' LIMIT 1",guid);
 
-        data.Initialize( SMSG_GMTICKET_GETTICKET );
-        data << uint32(1); 
-        data << uint32(0);
-        SendPacket( &data );
+    data.Initialize( SMSG_GMTICKET_GETTICKET );
+    data << uint32(1);
+    data << uint32(0);
+    SendPacket( &data );
 }
-
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
- 
-        WorldPacket data;
-        uint64 guid;
-        guid = GetPlayer()->GetGUID();
-	std::string ticketText = "";
-	Field *fields;
-        char * p, p1[512];
-        uint8 buf[516];
-        int   cat[] = { 0,5,1,2,0,6,4,7,0,8,3 };
-        memcpy( buf, recv_data.contents(), sizeof buf < recv_data.size() ? sizeof buf : recv_data.size() );
-        buf[272] = 0;
-        p = (char *)buf + 17;
-        my_esc( p1, (const char *)buf + 17 );
-        ticketText = p1;
 
-	QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM gmtickets where guid = '%d';",guid);
+    WorldPacket data;
+    uint64 guid;
+    guid = GetPlayer()->GetGUID();
+    std::string ticketText = "";
+    Field *fields;
+    char * p, p1[512];
+    uint8 buf[516];
+    int   cat[] = { 0,5,1,2,0,6,4,7,0,8,3 };
+    memcpy( buf, recv_data.contents(), sizeof buf < recv_data.size() ? sizeof buf : recv_data.size() );
+    buf[272] = 0;
+    p = (char *)buf + 17;
+    my_esc( p1, (const char *)buf + 17 );
+    ticketText = p1;
 
-        if (result)
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM gmtickets where guid = '%d';",guid);
+
+    if (result)
+    {
+        int cnt;
+        fields = result->Fetch();
+        cnt = fields[0].GetUInt32();
+
+        if ( cnt > 0 )
         {
-            int cnt;
-            fields = result->Fetch();
-            cnt = fields[0].GetUInt32();
+            data.Initialize( SMSG_GMTICKET_CREATE );
+            data << uint32(1);
+            SendPacket( &data );
+        }
+        else
+        {
 
+            sDatabase.PExecute("INSERT INTO `gmtickets` (guid,ticket_text, ticket_category) VALUES ('%ul', '%s', '%d');", (unsigned long)guid, ticketText.c_str(), cat[buf[0]]);
 
-            if ( cnt > 0 )
-            {
-        data.Initialize( SMSG_GMTICKET_CREATE );
-        data << uint32(1);
-        SendPacket( &data );
-	    }
-	else {
+            data.Initialize( SMSG_QUERY_TIME_RESPONSE );
+            //data << (uint32)20;
+            data << (uint32)getMSTime();
+            SendPacket( &data );
 
-        sDatabase.PExecute("INSERT INTO `gmtickets` (guid,ticket_text, ticket_category) VALUES ('%ul', '%s', '%d');", (unsigned long)guid, ticketText.c_str(), cat[buf[0]]);
+            data.Initialize( SMSG_GMTICKET_CREATE );
+            data << uint32(2);
+            SendPacket( &data );
+            DEBUG_LOG("update the ticket\n");
+        }
+    }
 
-	data.Initialize( SMSG_QUERY_TIME_RESPONSE );
-	//data << (uint32)20;
-	data << (uint32)getMSTime();
-	SendPacket( &data );
-
-        data.Initialize( SMSG_GMTICKET_CREATE );
-        data << uint32(2);
-        SendPacket( &data );
-	DEBUG_LOG("update the ticket\n");
-	     }
-	}
-
-	delete result;
+    delete result;
 }
 
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-    
     data.Initialize( SMSG_GMTICKET_SYSTEMSTATUS );
     data << uint32(1);
 
     SendPacket( &data );
 }
 
-
 void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
-    if ( (!GetPlayer()->isAlive()) || GetPlayer()->inCombat ) 
+    if ( (!GetPlayer()->isAlive()) || GetPlayer()->inCombat )
     {
         data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);
         data << uint8(2);
-        data << uint8(97);  
+        data << uint8(97);
         SendPacket(&data);
         return;
     }
@@ -497,13 +478,12 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
 
     // if player is resting stop resting
     if(GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-	GetPlayer()->RemoveFlag(PLAYER_FLAGS, 0x20);
+        GetPlayer()->RemoveFlag(PLAYER_FLAGS, 0x20);
 
     recv_data >> newZone;
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
 }
-
 
 void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
 {
@@ -516,7 +496,6 @@ void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
     }
 }
 
-
 void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
@@ -525,7 +504,6 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     if( GetPlayer( ) != 0 )
         GetPlayer( )->SetSelection(guid);
 
-    
     if(GetPlayer( )->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
     {
         GetPlayer( )->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
@@ -533,22 +511,20 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     }
 }
 
-
 void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 {
-	sLog.outDebug( "WORLD: Received CMSG_STAND_STATE_CHANGE"  );
+    sLog.outDebug( "WORLD: Received CMSG_STAND_STATE_CHANGE"  );
     if( GetPlayer() != 0 )
     {
         uint8 animstate;
         recv_data >> animstate;
-        
+
         uint32 bytes1 = GetPlayer( )->GetUInt32Value( UNIT_FIELD_BYTES_1 );
-		bytes1 &=0xFFFFFF00;
-		bytes1 |=animstate;
-		GetPlayer( )->SetUInt32Value(UNIT_FIELD_BYTES_1 , bytes1);
+        bytes1 &=0xFFFFFF00;
+        bytes1 |=animstate;
+        GetPlayer( )->SetUInt32Value(UNIT_FIELD_BYTES_1 , bytes1);
     }
 }
-
 
 void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 {
@@ -557,28 +533,28 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST"  );
 
     unsigned char Counter=0, nrignore=0;
-        int i=0;
+    int i=0;
     uint64 guid;
-        Field *fields;
+    Field *fields;
     Player* pObj;
     FriendStr friendstr[255];
 
     guid=GetPlayer()->GetGUID();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `social` WHERE flags = 'FRIEND' AND guid = '%d';",guid);    
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `social` WHERE flags = 'FRIEND' AND guid = '%d';",guid);
 
     if(result)
     {
         fields = result->Fetch();
         Counter=fields[0].GetUInt32();
-				delete result;
+        delete result;
 
-				result = sDatabase.PQuery("SELECT * FROM `social` WHERE flags = 'FRIEND' AND guid = '%d';",guid);
+        result = sDatabase.PQuery("SELECT * FROM `social` WHERE flags = 'FRIEND' AND guid = '%d';",guid);
         if(result)
         {
             fields = result->Fetch();
             friendstr[i].PlayerGUID = fields[2].GetUInt64();
-	    pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
+            pObj = ObjectAccessor::Instance().FindPlayer( friendstr[i].PlayerGUID );
 
             if(pObj && pObj->IsInWorld())
             {
@@ -600,7 +576,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
             while( result->NextRow() )
             {
                 friendstr[i].PlayerGUID = fields[2].GetUInt64();
-		pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
+                pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
                 if(pObj)
                 {
                     friendstr[i].Status = 1;
@@ -621,8 +597,6 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
             delete result;
         }
     }
-		    
-    
 
     data.Initialize( SMSG_FRIEND_LIST );
     data << Counter;
@@ -640,37 +614,34 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
 
-    
-    result = sDatabase.PQuery("SELECT COUNT(*) FROM `social` WHERE flags = 'IGNORE' AND guid = '%d';", guid);    
+    result = sDatabase.PQuery("SELECT COUNT(*) FROM `social` WHERE flags = 'IGNORE' AND guid = '%d';", guid);
 
     if(!result) return;
-    
+
     fields = result->Fetch();
     nrignore=fields[0].GetUInt32();
     delete result;
-    
+
     dataI.Initialize( SMSG_IGNORE_LIST );
     dataI << nrignore;
-    
 
     result = sDatabase.PQuery("SELECT * FROM `social` WHERE flags = 'IGNORE' AND guid = '%d';", guid);
-  
+
     if(!result) return;
-    
-  do
+
+    do
     {
-        
-	fields = result->Fetch();
+
+        fields = result->Fetch();
         dataI << fields[2].GetUInt64();
 
-       }while( result->NextRow() );
-	delete result;
+    }while( result->NextRow() );
+    delete result;
 
-	SendPacket( &dataI );
+    SendPacket( &dataI );
     sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
-	
-}
 
+}
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 {
@@ -687,20 +658,17 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     sLog.outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
-    
-    
-   
+
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
     pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM social WHERE flags = 'FRIEND' AND friendid = '%d';", friendGuid);
 
     if( result )
-	friendResult = FRIEND_ALREADY;
+        friendResult = FRIEND_ALREADY;
 
     if (!strcmp(GetPlayer()->GetName(),friendName.c_str())) friendResult = FRIEND_SELF;
-    
-    
+
     data.Initialize( SMSG_FRIEND_STATUS );
 
     if (friendGuid > 0 && friendResult!=FRIEND_ALREADY && friendResult!=FRIEND_SELF)
@@ -712,19 +680,17 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             friendLevel = pfriend->getLevel();
             friendClass = pfriend->getClass();
 
-			data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
+            data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
             data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
 
+            delete result;
 
-	    delete result;            
-            
             uint64 guid;
             guid=GetPlayer()->GetGUID();
-		   
-			result = sDatabase.PQuery("INSERT INTO `social` VALUES ('%s', '%d', '%d', 'FRIEND');", friendName.c_str(), (uint32)guid, (uint32)friendGuid);
-		
-				
-	    delete result;
+
+            result = sDatabase.PQuery("INSERT INTO `social` VALUES ('%s', '%d', '%d', 'FRIEND');", friendName.c_str(), (uint32)guid, (uint32)friendGuid);
+
+            delete result;
         }
         else
             friendResult = FRIEND_ADDED_OFFLINE;
@@ -749,7 +715,6 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         sLog.outDetail( "WORLD: %s Guid not found. ", friendName.c_str() );
     }
 
-    
     SendPacket( &data );
 
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
@@ -794,35 +759,30 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     sLog.outDetail( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
-    
-    
-   
+
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
     pIgnore = ObjectAccessor::Instance().FindPlayer(IgnoreGuid);
-
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM social WHERE flags = 'IGNORE' AND friendid = '%d';", (uint32)IgnoreGuid);
 
     if( result )
-		ignoreResult = FRIEND_IGNORE_ALREADY;
-	delete result;
+        ignoreResult = FRIEND_IGNORE_ALREADY;
+    delete result;
 
     if (!strcmp(GetPlayer()->GetName(),IgnoreName.c_str())) ignoreResult = FRIEND_IGNORE_SELF;
-    
-    
+
     data.Initialize( SMSG_FRIEND_STATUS );
-    
 
     if (pIgnore && ignoreResult!=FRIEND_IGNORE_ALREADY && ignoreResult!=FRIEND_IGNORE_SELF)
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
-                
+
         uint64 guid;
         guid=GetPlayer()->GetGUID();
 
         data << (uint8)ignoreResult << (uint64)IgnoreGuid;
 
-		QueryResult *result = sDatabase.PQuery("INSERT INTO `social` VALUES ('%s', '%d', '%d', 'IGNORE');", IgnoreName.c_str(), (uint32)guid, (uint32)IgnoreGuid);
+        QueryResult *result = sDatabase.PQuery("INSERT INTO `social` VALUES ('%s', '%d', '%d', 'IGNORE');", IgnoreName.c_str(), (uint32)guid, (uint32)IgnoreGuid);
 
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
@@ -841,7 +801,6 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         sLog.outDetail( "WORLD: %s Guid not found. ", IgnoreName.c_str() );
     }
 
-    
     SendPacket( &data );
     delete result;
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
@@ -857,11 +816,9 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 
     unsigned char IgnoreResult = FRIEND_IGNORE_REMOVED;
 
-    
     data.Initialize( SMSG_FRIEND_STATUS );
 
     data << (uint8)IgnoreResult << (uint64)IgnoreGUID;
-
 
     uint64 guid;
     guid=GetPlayer()->GetGUID();
@@ -895,7 +852,6 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 
 }
 
-
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_RECLAIM_CORPSE");
@@ -915,7 +871,6 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     // update world right away
     MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
 }
-
 
 void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 {
@@ -953,7 +908,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;
 }
 
-
 void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 {
     uint32 ammoId;
@@ -963,72 +917,69 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
     return;
 }
 
-
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 {
-	sLog.outDebug("WORLD: Received CMSG_AREATRIGGER");
-	
+    sLog.outDebug("WORLD: Received CMSG_AREATRIGGER");
+
     uint32 Trigger_ID;
     WorldPacket data;
-    
+
     recv_data >> Trigger_ID;
     sLog.outDebug("Trigger ID:%d",Trigger_ID);
     AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID);
 
-	AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
-	Quest *pQuest;
+    AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
+    Quest *pQuest;
 
-	if (pArea) pQuest = objmgr.GetQuest( pArea->Quest_ID ); else
-		pQuest = NULL;
+    if (pArea) pQuest = objmgr.GetQuest( pArea->Quest_ID ); else
+        pQuest = NULL;
 
-	Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID );
+    Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID );
 
     if(at)
     {
-		if(at->mapId == GetPlayer()->GetMapId() )
-		{
+        if(at->mapId == GetPlayer()->GetMapId() )
+        {
             WorldPacket movedata;
             GetPlayer( )->BuildTeleportAckMsg(&movedata, at->X,
                 at->Y, at->Z, GetPlayer()->GetOrientation() );
             GetPlayer( )->SendMessageToSet(&movedata,true);
-		}else{
-		    GetPlayer()->smsg_NewWorld(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
-		}
+        }
+        else
+        {
+            GetPlayer()->smsg_NewWorld(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
+        }
         delete at;
     }
 
+    //set resting flag we are in the inn
+    Field *fields;
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM tavern WHERE triggerid = '%d';", Trigger_ID);
+    if(result)
+    {
+        int cnt;
+        fields = result->Fetch();
+        cnt = fields[0].GetUInt32();
 
-	//set resting flag we are in the inn
-	Field *fields;
-	QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM tavern WHERE triggerid = '%d';", Trigger_ID);
-        if(result)
+        // player flag 0x20 - resting
+        if ( cnt > 0 )
         {
-		int cnt;
-		fields = result->Fetch();
-		cnt = fields[0].GetUInt32();
-	
-			// player flag 0x20 - resting
-			if ( cnt > 0 )
-			{
-	                if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-                        GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
-			}
+            if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
+                GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
         }
-	delete result;
+    }
+    delete result;
 
 }
-
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 {
 }
 
-
 void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
 }
-
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
@@ -1040,7 +991,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     if(action==0)
     {
         sLog.outString( "MISC: Remove action from button %u", button );
-        
+
         GetPlayer()->removeAction(button);
     }
     else
@@ -1058,7 +1009,6 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
 }
 
-
 void WorldSession::HandleCompleteCinema( WorldPacket & recv_data )
 {
     DEBUG_LOG( "WORLD: Player is watching cinema" );
@@ -1069,23 +1019,20 @@ void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Which movie to play" );
 }
 
-
 void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 {
-    
+
     DEBUG_LOG( "WORLD: Battleground status - not yet" );
 }
 
-
-
-
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
-    
+
     DEBUG_LOG( "WORLD: Move time lag/synchronization fix - not yet" );
 }
 
-void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data) {
+void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
+{
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
     WorldPacket data;
@@ -1111,11 +1058,13 @@ void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data) {
     DEBUG_LOG("O %f",Orientation);
 }
 
-void WorldSession::HandleLookingForGroup(WorldPacket& recv_data) {
-	// TODO send groups need data
+void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
+{
+    // TODO send groups need data
 }
 
-void WorldSession::HandleMooveRootAck(WorldPacket& recv_data) {
+void WorldSession::HandleMooveRootAck(WorldPacket& recv_data)
+{
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
     WorldPacket data;
@@ -1141,46 +1090,50 @@ void WorldSession::HandleMooveRootAck(WorldPacket& recv_data) {
     DEBUG_LOG("O %f",Orientation);
 }
 
-void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data) {
+void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
+{
 
     WorldPacket data;
     uint64 guid;
     uint32 value1;
 
     recv_data >> guid;
-    recv_data >> value1; // ms time ?
+    recv_data >> value1;                                    // ms time ?
     DEBUG_LOG("Guid %d",guid);
     DEBUG_LOG("Value 1 %d",value1);
 }
 
-void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data) {
-        // set run speed ? received data is more
+void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
+{
+    // set run speed ? received data is more
 }
 
-void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data) {
-        // set swim speed ? received data is more
+void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
+{
+    // set swim speed ? received data is more
 }
 
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 {
-	uint8 ActionBar;
-	uint32 temp;
-		
-	recv_data >> ActionBar;
+    uint8 ActionBar;
+    uint32 temp;
 
-	temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
-	GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
+    recv_data >> ActionBar;
+
+    temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
+    GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
 }
+
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
 
-// TODO
-// we receive guid,x,y,z
+    // TODO
+    // we receive guid,x,y,z
 
 }
 
-void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data) 
+void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 {
-	// TODO
-	// need to be written
+    // TODO
+    // need to be written
 }

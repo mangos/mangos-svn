@@ -28,7 +28,6 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 
-
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
     for(uint32 i = 0; table[i].Name != NULL; i++)
@@ -62,7 +61,6 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
     return false;
 }
 
-
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
     ChatCommand *table = getCommandTable();
@@ -83,7 +81,6 @@ bool ChatHandler::HandleHelpCommand(const char* args)
 
     return true;
 }
-
 
 bool ChatHandler::HandleCommandsCommand(const char* args)
 {
@@ -108,25 +105,23 @@ bool ChatHandler::HandleCommandsCommand(const char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleAcctCommand(const char* args)
 {
     WorldPacket data;
 
-    uint32 gmlevel = m_session->GetSecurity();    
+    uint32 gmlevel = m_session->GetSecurity();
     char buf[256];
     sprintf(buf, "Your account level is: %i", gmlevel);
     FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );               
+    m_session->SendPacket( &data );
 
     return true;
 }
 
-
 bool ChatHandler::HandleStartCommand(const char* args)
 {
     Player *chr = m_session->GetPlayer();
-    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);   
+    chr->SetUInt32Value(PLAYER_FARSIGHT, 0x01);
 
     PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo(
         m_session->GetPlayer()->getRace(), m_session->GetPlayer()->getClass());
@@ -137,7 +132,6 @@ bool ChatHandler::HandleStartCommand(const char* args)
     return true;
 }
 
-
 bool ChatHandler::HandleInfoCommand(const char* args)
 {
     WorldPacket data;
@@ -145,14 +139,12 @@ bool ChatHandler::HandleInfoCommand(const char* args)
     uint32 clientsNum = sWorld.GetSessionCount();
     char buf[256];
 
-    
     sprintf((char*)buf,"Number of users connected: %i", (int) clientsNum);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
     return true;
 }
-
 
 bool ChatHandler::HandleNYICommand(const char* args)
 {
@@ -166,8 +158,6 @@ bool ChatHandler::HandleNYICommand(const char* args)
     return true;
 }
 
-
-
 bool ChatHandler::HandleDismountCommand(const char* args)
 {
     WorldPacket data;
@@ -175,14 +165,12 @@ bool ChatHandler::HandleDismountCommand(const char* args)
     m_session->GetPlayer( )->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
 
-    
     if (m_session->GetPlayer( )->GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
         m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
 
     m_session->GetPlayer( )->SetPlayerSpeed(RUN, 7.5, true);
     return true;
 }
-
 
 bool ChatHandler::HandleSaveCommand(const char* args)
 {
@@ -193,7 +181,6 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     m_session->SendPacket( &data );
     return true;
 }
-
 
 bool ChatHandler::HandleGMListCommand(const char* args)
 {
@@ -226,65 +213,66 @@ bool ChatHandler::HandleGMListCommand(const char* args)
 
     return true;
 }
+
 bool ChatHandler::HandleShowHonor(const char* args)
 {
-	WorldPacket data;
+    WorldPacket data;
 
-	uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);		
-	uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-	uint32 highest_rank             = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK);
-	uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_TODAY_KILLS);
-	uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_TODAY_KILLS)>>16);
-	uint32 yestarday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS);
-	uint32 yestarday_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR);
-	uint32 this_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS);
-	uint32 this_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR);
-	uint32 last_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS);
-	uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR);
-	uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING);
-	
-	std::string alliance_ranks[] = {"", "Private ", "Corporal ", "Sergeant ", "Master Sergeant ", "Sergeant Major ", "Knight ", "Knight-Lieutenant ", "Knight-Captain ", "Knight-Champion ", "Lieutenant Commander ", "Commander ", "Marshal ", "Field Marshal ", "Grand Marshal ", "Game Master "};
-	std::string horde_ranks[] = {"", "Scout ", "Grunt ", "Sergeant ", "Senior Sergeant ", "First Sergeant ", "Stone Guard ", "Blood Guard ", "Legionnare ", "Centurion ", "Champion ", "Lieutenant General ", "General ", "Warlord ", "High Warlord ", "Game Master "};
-	std::string rank_name;
-	
-	if ( m_session->GetPlayer()->GetTeam() == ALLIANCE ) 
-	{
-		rank_name = alliance_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
-	}
-	else 
-	if ( m_session->GetPlayer()->GetTeam() == HORDE ) 
-	{
-		rank_name = horde_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
-	}
-	else
-	{
-		rank_name = "No Rank ";
-	}
+    uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
+    uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+    uint32 highest_rank             = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK);
+    uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_TODAY_KILLS);
+    uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_TODAY_KILLS)>>16);
+    uint32 yestarday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS);
+    uint32 yestarday_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR);
+    uint32 this_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS);
+    uint32 this_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR);
+    uint32 last_week_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS);
+    uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR);
+    uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING);
 
-	char msg[256];
+    std::string alliance_ranks[] = {"", "Private ", "Corporal ", "Sergeant ", "Master Sergeant ", "Sergeant Major ", "Knight ", "Knight-Lieutenant ", "Knight-Captain ", "Knight-Champion ", "Lieutenant Commander ", "Commander ", "Marshal ", "Field Marshal ", "Grand Marshal ", "Game Master "};
+    std::string horde_ranks[] = {"", "Scout ", "Grunt ", "Sergeant ", "Senior Sergeant ", "First Sergeant ", "Stone Guard ", "Blood Guard ", "Legionnare ", "Centurion ", "Champion ", "Lieutenant General ", "General ", "Warlord ", "High Warlord ", "Game Master "};
+    std::string rank_name;
+
+    if ( m_session->GetPlayer()->GetTeam() == ALLIANCE )
+    {
+        rank_name = alliance_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
+    }
+    else
+    if ( m_session->GetPlayer()->GetTeam() == HORDE )
+    {
+        rank_name = horde_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
+    }
+    else
+    {
+        rank_name = "No Rank ";
+    }
+
+    char msg[256];
     sprintf(msg, "%s%s (Rank %u)", rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
     FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data ); 
+    m_session->SendPacket( &data );
 
-	sprintf(msg, "Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r]", today_honorable_kills, today_dishonorable_kills);
+    sprintf(msg, "Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r]", today_honorable_kills, today_dishonorable_kills);
     FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data ); 
+    m_session->SendPacket( &data );
 
-	sprintf(msg, "Yestarday: [Kills: |c0000ff00%u|r] [Honor: %u]", yestarday_kills, yestarday_honor);
+    sprintf(msg, "Yestarday: [Kills: |c0000ff00%u|r] [Honor: %u]", yestarday_kills, yestarday_honor);
     FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data ); 
+    m_session->SendPacket( &data );
 
-	sprintf(msg, "This Week: [Kills: |c0000ff00%u|r] [Honor: %u]", this_week_kills, this_week_honor);
+    sprintf(msg, "This Week: [Kills: |c0000ff00%u|r] [Honor: %u]", this_week_kills, this_week_honor);
     FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data ); 
+    m_session->SendPacket( &data );
 
-	sprintf(msg, "Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]", last_week_kills, last_week_honor, last_week_standing);
+    sprintf(msg, "Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]", last_week_kills, last_week_honor, last_week_standing);
     FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data ); 
+    m_session->SendPacket( &data );
 
-	sprintf(msg, "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
+    sprintf(msg, "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
     FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data ); 
+    m_session->SendPacket( &data );
 
-	return true;
+    return true;
 }

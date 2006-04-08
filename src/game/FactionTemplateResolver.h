@@ -22,78 +22,69 @@
 #include "Platform/Define.h"
 #include "Database/DBCStores.h"
 
-
-
-
 struct MANGOS_DLL_DECL FactionTemplateResolver
 {
     FactionTemplateResolver(FactionTemplateEntry *entry)
     {
-	data.All = 0;
-	if( entry != NULL )
-	{
-	    data.Faction.friendly_mask.ALL = entry->friendly;
-	    data.Faction.hostile_mask.ALL = entry->hostile;
-	}
+        data.All = 0;
+        if( entry != NULL )
+        {
+            data.Faction.friendly_mask.ALL = entry->friendly;
+            data.Faction.hostile_mask.ALL = entry->hostile;
+        }
     }
 
     union
     {
-	struct 
-	{
-	    union
-	    {
-		struct
-		{
-		    unsigned All : 1;
-		    unsigned Allia : 1;
-		    unsigned Hrd : 1;
-		    unsigned Monster : 1;
-		} friendly;
-		unsigned ALL : 4;
-	    } friendly_mask;
+        struct
+        {
+            union
+            {
+                struct
+                {
+                    unsigned All : 1;
+                    unsigned Allia : 1;
+                    unsigned Hrd : 1;
+                    unsigned Monster : 1;
+                } friendly;
+                unsigned ALL : 4;
+            } friendly_mask;
 
-	    union
-	    {
-		struct
-		{
-		    unsigned All : 1;
-		    unsigned Allia : 1;
-		    unsigned Hrd : 1;
-		    unsigned Monster : 1;
-		} hostile;
-		unsigned ALL : 4;
-	    } hostile_mask;
+            union
+            {
+                struct
+                {
+                    unsigned All : 1;
+                    unsigned Allia : 1;
+                    unsigned Hrd : 1;
+                    unsigned Monster : 1;
+                } hostile;
+                unsigned ALL : 4;
+            } hostile_mask;
 
-	} Faction;
-	unsigned char All;
+        } Faction;
+        unsigned char All;
     } data;
 
-
-    
-    bool IsHostileToAll(void) const 
+    bool IsHostileToAll(void) const
     {
-	return ( data.Faction.hostile_mask.hostile.All );
+        return ( data.Faction.hostile_mask.hostile.All );
     }
 
-    
     bool IsNeutralToAll(void) const
     {
-	
-	return ( data.Faction.hostile_mask.ALL == 0 && data.Faction.friendly_mask.ALL == 0);
+
+        return ( data.Faction.hostile_mask.ALL == 0 && data.Faction.friendly_mask.ALL == 0);
     }
 
-    
     bool IsHostileTo(const FactionTemplateResolver &holder) const
     {
-	return( IsHostileToAll() || (data.Faction.hostile_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
+        return( IsHostileToAll() || (data.Faction.hostile_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
     }
 
-    
     bool IsFriendlyTo(const FactionTemplateResolver &holder) const
     {
-	return( !IsHostileToAll() && (data.Faction.friendly_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
+        return( !IsHostileToAll() && (data.Faction.friendly_mask.ALL & holder.data.Faction.friendly_mask.ALL) );
     }
 };
-
 #endif

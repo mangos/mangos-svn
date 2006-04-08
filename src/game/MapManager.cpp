@@ -34,7 +34,7 @@ static void grid_compression(const char *src_tbl, const char *dest_tbl)
     sDatabase.PExecute("CREATE TABLE IF NOT EXISTS %s (`guid` bigint(20) unsigned NOT NULL default '0', `x` int(11) NOT NULL default '0', `y` int(11) NOT NULL default '0', `cell_x` int(11) NOT NULL default '0', `cell_y` int(11) NOT NULL default '0', `grid_id` int(11) NOT NULL default '0', `cell_id` int(11) NOT NULL default '0', `mapId` int(11) NOT NULL default '0', KEY srch_grid(grid_id, cell_id, mapId) ) TYPE=MyISAM;", dest_tbl);
 
     sDatabase.PExecute("INSERT INTO %s (guid, mapId, x, y, cell_x, cell_y) SELECT guid,mapId, (( positionX-'%f')/'%f') + '%d' ,((positionY-'%f')/'%f') + '%d', ((positionX-'%f')/'%f') + '%d', ((positionY-'%f')/'%f') + '%d' FROM %s;", dest_tbl, CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, src_tbl);
-    
+
     sDatabase.PExecute("UPDATE %s SET grid_id=(x*'%d') + y,cell_id=((cell_y * '%u') + cell_x);", dest_tbl, MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP);
 }
 
@@ -44,9 +44,9 @@ MapManager::MapManager() : i_gridCleanUpDelay(1000*300)
 }
 
 MapManager::~MapManager()
-{    
+{
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-    delete iter->second;   
+        delete iter->second;
 
     sDatabase.PExecute("TRUNCATE table creatures_grid;");
     sDatabase.PExecute("TRUNCATE table gameobjects_grid;");
@@ -67,13 +67,13 @@ MapManager::GetMap(uint32 id)
     Map *m = NULL;
     if( ( m=_getMap(id) ) == NULL )
     {
-    Guard guard(*this);
-    if( (m = _getMap(id)) == NULL )
-    {
-        m = new Map(id, i_gridCleanUpDelay);
-        i_maps[id] = m;        
-    }
-    
+        Guard guard(*this);
+        if( (m = _getMap(id)) == NULL )
+        {
+            m = new Map(id, i_gridCleanUpDelay);
+            i_maps[id] = m;
+        }
+
     }
 
     assert(m != NULL);
@@ -85,15 +85,13 @@ MapManager::Update(time_t diff)
 {
     i_timer.Update(diff);
     if( !i_timer.Passed() )
-	return;
+        return;
 
     i_timer.Reset();
     Guard guard(*this);
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-	iter->second->Update(diff);
-    
+        iter->second->Update(diff);
+
     ObjectAccessor::Instance().Update(diff);
     FlightMaster::Instance().FlightReportUpdate(diff);
 }
-
-

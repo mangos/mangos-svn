@@ -28,44 +28,38 @@
 
 typedef struct
 {
-	uint32 itemid;
-	uint32 displayid;
+    uint32 itemid;
+    uint32 displayid;
 }_LootItem;
 
 typedef struct
 {
-	_LootItem item;
-	bool	isLooted;
+    _LootItem item;
+    bool    isLooted;
 }__LootItem;
-
 
 typedef struct
 {
-	float chance;
-	_LootItem item;
-	
+    float chance;
+    _LootItem item;
+
 }StoreLootItem;
 
-
-typedef struct 
+typedef struct
 {
-	uint32 count;
-	StoreLootItem*items;
+    uint32 count;
+    StoreLootItem*items;
 }StoreLootList;
 
 typedef struct
 {
-	std::vector<__LootItem> items;
-	uint32 gold;
+    std::vector<__LootItem> items;
+    uint32 gold;
 }Loot;
 
 void FillLoot(Loot * loot,uint32 loot_id);
 void LoadCreaturesLootTables();
 //////////////////////////////////////////////////////////////////////////////////////////
 
-
-typedef HM_NAMESPACE::hash_map<uint32, StoreLootList > LootStore;  
-
-
-
+typedef HM_NAMESPACE::hash_map<uint32, StoreLootList > LootStore;
 #endif

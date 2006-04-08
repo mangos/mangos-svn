@@ -40,35 +40,27 @@
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
 
-
 class Group;
 class Path;
 class Guild;
 
-
-
-class ObjectMgr 
+class ObjectMgr
 {
     public:
         ObjectMgr();
         ~ObjectMgr();
 
-        
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
-   
+
         typedef HM_NAMESPACE::hash_map<uint32, Player*> PlayerMap;
 
-        
         typedef std::set< Group * > GroupSet;
         typedef std::set< Guild * > GuildSet;
 
         typedef HM_NAMESPACE::hash_map<uint32, AuctionEntry*> AuctionEntryMap;
-        
-        
-        
+
         typedef HM_NAMESPACE::hash_map<uint32, TeleportCoords*> TeleportMap;
 
-        
         template <class T>
             typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
             Begin() { return _GetContainer<T>().begin(); }
@@ -107,21 +99,18 @@ class ObjectMgr
         Player* GetPlayer(const char* name){ return ObjectAccessor::Instance().FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid){ return ObjectAccessor::Instance().FindPlayer(guid); }
 
-		GameObjectInfo *GetGameObjectInfo(uint32 id);
-		void LoadGameobjectInfo();
-		void AddGameobjectInfo(GameObjectInfo *goinfo);
+        GameObjectInfo *GetGameObjectInfo(uint32 id);
+        void LoadGameobjectInfo();
+        void AddGameobjectInfo(GameObjectInfo *goinfo);
 
-        
         Group * GetGroupByLeader(const uint64 &guid) const;
         void AddGroup(Group* group) { mGroupSet.insert( group ); }
         void RemoveGroup(Group* group) { mGroupSet.erase( group ); }
 
-		
-		Guild* GetGuildById(const uint32 GuildId) const;
-		void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
+        Guild* GetGuildById(const uint32 GuildId) const;
+        void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
-        
         void AddQuest(Quest* quest)
         {
             ASSERT( quest );
@@ -159,12 +148,11 @@ class ObjectMgr
             mAuctions.erase(i);
             return true;
         }
-        
+
         CreatureInfo *GetCreatureTemplate( uint32 id );
-              
+
         ItemPrototype* GetItemPrototype(uint32 id) ;
-   
-       
+
         Item* GetMItem(uint32 id)
         {
             ItemMap::const_iterator itr = mMitems.find(id);
@@ -217,10 +205,9 @@ class ObjectMgr
         }
         AuctionEntryMap::iterator GetAuctionsBegin() {return mAuctions.begin();}
         AuctionEntryMap::iterator GetAuctionsEnd() {return mAuctions.end();}
-               
-        PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_); 
 
-        
+        PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_);
+
         uint64 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
 
@@ -237,15 +224,8 @@ class ObjectMgr
         void AddGossipText(GossipText *pGText);
         GossipText *GetGossipText(uint32 Text_ID);
 
-        
-
-        
-       
         GraveyardTeleport *GetClosestGraveYard(float x, float y, float z, uint32 MapId);
-       
-       
 
-        
         void AddTeleportCoords(TeleportCoords* TC)
         {
             ASSERT( TC );
@@ -259,10 +239,8 @@ class ObjectMgr
             return NULL;
         }
 
-        
         AreaTrigger * GetAreaTrigger(uint32 trigger);
 
-        
         void LoadGuilds();
         void LoadQuests();
         void LoadCreatureTemplates();
@@ -284,14 +262,13 @@ class ObjectMgr
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
-        
+
         uint32 m_hiCharGuid;
         uint32 m_hiCreatureGuid;
         uint32 m_hiItemGuid;
         uint32 m_hiGoGuid;
         uint32 m_hiDoGuid;
-		uint32 m_hiCorpseGuid;
-       
+        uint32 m_hiCorpseGuid;
 
         template<class T> HM_NAMESPACE::hash_map<uint32,T*>& _GetContainer();
         template<class T> TYPEID _GetTypeId() const;
@@ -300,26 +277,23 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, AreaTriggerPoint*> AreaTriggerMap;
 
-        
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
 
         ItemMap             mItems;
         ItemMap             mAitems;
         ItemMap             mMitems;
- 
+
         AuctionEntryMap     mAuctions;
 
         QuestMap            mQuests;
-        AreaTriggerMap	    mAreaTriggerMap;
+        AreaTriggerMap      mAreaTriggerMap;
         GossipTextMap       mGossipText;
         TeleportMap         mTeleports;
 
-private:
-  
+    private:
+
 };
 
-
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()
-
 #endif

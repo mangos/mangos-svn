@@ -26,21 +26,19 @@ struct MANGOS_DLL_DECL RedZone
 {
     void initialize(const uint32 &grid_x, const uint32 &grid_y, const uint32 &cell_x, const uint32 &cell_y)
     {
-	i_cell.data.Part.grid_x = (unsigned)(grid_x);
-	i_cell.data.Part.grid_y = (unsigned)(grid_y);
-	i_cell.data.Part.cell_x = (unsigned)(cell_x);
-	i_cell.data.Part.cell_y = (unsigned)(cell_y);
-	i_cell.data.Part.reserved = 0;
+        i_cell.data.Part.grid_x = (unsigned)(grid_x);
+        i_cell.data.Part.grid_y = (unsigned)(grid_y);
+        i_cell.data.Part.cell_x = (unsigned)(cell_x);
+        i_cell.data.Part.cell_y = (unsigned)(cell_y);
+        i_cell.data.Part.reserved = 0;
     }
 
     operator const Cell &(void) const { return i_cell; }
     operator Cell &(void) { return i_cell; }
     Cell i_cell;
-    
+
     static const Cell& GetZone(const CellPair &p) { return si_RedZones[p.x_coord][p.y_coord]; }
     static RedZone si_RedZones[MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS][MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_CELLS];
     static void Initialize(void);
 };
-
-
 #endif

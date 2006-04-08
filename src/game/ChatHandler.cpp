@@ -80,7 +80,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
             }
             player->GetSession()->SendPacket(&data);
-		sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,(( char *)((uint32)player->GetGUID() )),msg.c_str() );
+            sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,(( char *)((uint32)player->GetGUID() )),msg.c_str() );
             SendPacket(&data);
         } break;
         case CHAT_MSG_YELL:
@@ -112,7 +112,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         }
         case CHAT_MSG_GUILD:
         {
-        	  std::string msg = "";
+            std::string msg = "";
             recv_data >> msg;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
@@ -124,12 +124,12 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 if (guild)
                     guild->BroadcastToGuild(this, msg);
             }
-        	
-        	break;
+
+            break;
         }
         case CHAT_MSG_OFFICER:
         {
-        	std::string msg = "";
+            std::string msg = "";
             recv_data >> msg;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
@@ -141,14 +141,13 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 if (guild)
                     guild->BroadcastToOfficers(this, msg);
             }
-        	break;
+            break;
         }
-        	
+
         default:
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
     }
 }
-
 
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
@@ -163,7 +162,6 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     const char *nam = 0;
     uint32 namlen = 1;
 
-    
     Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid);
     Creature *pCreature = dynamic_cast<Creature *>(unit);
     if( pCreature != NULL )
@@ -172,17 +170,16 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         namlen = strlen(nam) + 1;
     }
     {
-	Player *pChar = dynamic_cast<Player *>(unit);
-	if( pChar != NULL )
-	{
-	    nam = pChar->GetName();
-	    namlen = strlen(nam) + 1;
-	}
+        Player *pChar = dynamic_cast<Player *>(unit);
+        if( pChar != NULL )
+        {
+            nam = pChar->GetName();
+            namlen = strlen(nam) + 1;
+        }
     }
 
-
     emoteentry *em = sEmoteStore.LookupEntry(text_emote);
-    if (em)                                       
+    if (em)
     {
         uint32 emote_anim = em->textid;
 
@@ -195,7 +192,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         data.Initialize(SMSG_TEXT_EMOTE);
         data << GetPlayer()->GetGUID();
         data << (uint32)text_emote;
-        data << (uint32)0xFF;                     
+        data << (uint32)0xFF;
         data << (uint32)namlen;
         if( namlen > 1 )
         {
@@ -214,16 +211,16 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
-	WorldPacket data;
+    WorldPacket data;
     uint64 iguid;
-	std::string msg = "";
-	sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
+    std::string msg = "";
+    sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
 
-    recv_data >> iguid;	
+    recv_data >> iguid;
 
-	Player *player = objmgr.GetPlayer(iguid);
-	objmgr.GetPlayerNameByGUID(GetPlayer()->GetGUID(),msg);
-	msg += " is ignoring you!";
-	sChatHandler.FillSystemMessageData( &data, player->GetSession() ,msg.c_str() );
-	player->GetSession()->SendPacket(&data);
+    Player *player = objmgr.GetPlayer(iguid);
+    objmgr.GetPlayerNameByGUID(GetPlayer()->GetGUID(),msg);
+    msg += " is ignoring you!";
+    sChatHandler.FillSystemMessageData( &data, player->GetSession() ,msg.c_str() );
+    player->GetSession()->SendPacket(&data);
 }

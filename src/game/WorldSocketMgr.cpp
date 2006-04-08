@@ -27,18 +27,15 @@ WorldSocketMgr::WorldSocketMgr()
 {
 }
 
-
 void WorldSocketMgr::AddSocket(WorldSocket *s)
 {
     m_sockets.insert(s);
 }
 
-
 void WorldSocketMgr::RemoveSocket(WorldSocket *s)
 {
     m_sockets.erase(s);
 }
-
 
 void WorldSocketMgr::Update(time_t diff)
 {

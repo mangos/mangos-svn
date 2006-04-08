@@ -16,43 +16,38 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef WIN32  
-#include <sys/timeb.h>  
-#endif  
+#ifndef WIN32
+#include <sys/timeb.h>
+#endif
 
 typedef void (*EventHandler) (void *arg);
-	
 
 #define ES_RESOLUTION 33
 
-typedef struct{
+typedef struct
+{
 
-	EventHandler handler;
-	void *param;
-	uint32 time;
-	bool st;
+    EventHandler handler;
+    void *param;
+    uint32 time;
+    bool st;
 
-	void * pNext;
-	
+    void * pNext;
 
 }Event;
 
+typedef struct
+{
 
-typedef struct{
-
-	EventHandler handler;
-	void *param;
-	uint32 time;
-	bool st;
-	uint32 id;
-	uint32 period;
-	void * pNext;
-
+    EventHandler handler;
+    void *param;
+    uint32 time;
+    bool st;
+    uint32 id;
+    uint32 period;
+    void * pNext;
 
 }PeriodicEvent;
-
-
-
 
 uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread=false,bool bPeriodic = false);
 void RemovePeriodicEvent(uint32 eventid);

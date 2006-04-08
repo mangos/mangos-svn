@@ -107,18 +107,10 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
 
 }
 
-
-
-
-
 void WorldSession::HandleGroupCancelOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: got CMSG_GROUP_CANCEL." );
 }
-
-
-
-
 
 void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 {
@@ -154,23 +146,17 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
         GetPlayer()->SetInGroup();
         GetPlayer()->SetLeader( player->GetGUID() );
 
-        
         Group * group = new Group;
         ASSERT(group);
 
         group->Create(player->GetGUID(), player->GetName());
 
-        
         group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName());
         objmgr.AddGroup(group);
 
         group->SendUpdate();
     }
 }
-
-
-
-
 
 void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
 {
@@ -190,10 +176,6 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
     player->GetSession()->SendPacket( &data );
 }
 
-
-
-
-
 void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -201,19 +183,19 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
     Group *group;
     Player * player;
 
-	sLog.outDebug("WORLD: UNINVITE");
+    sLog.outDebug("WORLD: UNINVITE");
 
-	recv_data >> membername;
+    recv_data >> membername;
 
     player = objmgr.GetPlayer(membername.c_str());
-	if ( player == NULL )
+    if ( player == NULL )
     {
         data.Initialize( SMSG_PARTY_COMMAND_RESULT );
         data << uint32( 0x0 );
         data << membername;
         data << uint32( 0x00000001 );
-	
-		sLog.outDebug("WORLD: UNINVITE: No player");
+
+        sLog.outDebug("WORLD: UNINVITE: No player");
 
         SendPacket( &data );
         return;
@@ -254,30 +236,29 @@ void WorldSession::HandleGroupUninviteOpcode( WorldPacket & recv_data )
         return;
     }
 
-	if (group->RemoveMember(player->GetGUID()) <= 1)
+    if (group->RemoveMember(player->GetGUID()) <= 1)
     {
         GetPlayer()->UnSetInGroup();
-		       
-		group->Disband();
+
+        group->Disband();
         objmgr.RemoveGroup(group);
 
         data.Initialize( SMSG_GROUP_DESTROYED );
         SendPacket( &data );
 
         group->SendUpdate();
-		player->UnSetInGroup();
-		data.Initialize( SMSG_GROUP_UNINVITE );
-		player->GetSession()->SendPacket( &data );
-		delete group;
-		return;
-	}
+        player->UnSetInGroup();
+        data.Initialize( SMSG_GROUP_UNINVITE );
+        player->GetSession()->SendPacket( &data );
+        delete group;
+        return;
+    }
 
-	group->SendUpdate();
+    group->SendUpdate();
     player->UnSetInGroup();
     data.Initialize( SMSG_GROUP_UNINVITE );
     player->GetSession()->SendPacket( &data );
 }
-
 
 void WorldSession::HandleGroupUninviteGuildOpcode( WorldPacket & recv_data )
 {
@@ -306,12 +287,10 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
         return;
     }
 
-    
     if (!GetPlayer()->IsInGroup() ||
         (GetPlayer()->GetGroupLeader() != GetPlayer()->GetGUID()))
         return;
 
-    
     if (!player->IsInGroup() || (player->GetGroupLeader() != GetPlayer()->GetGUID()))
         return;
 
@@ -321,15 +300,11 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
     group->ChangeLeader(player->GetGUID());
 }
 
-
-
-
-
 void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
-	sLog.outDebug("WORLD: GROUPDISBAND");
-    
+    sLog.outDebug("WORLD: GROUPDISBAND");
+
     if (!GetPlayer()->IsInGroup())
         return;
 
@@ -338,7 +313,7 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
     Group *group;
     group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
 
-	sLog.outDebug( "GROUP: is in group?:%d",GetPlayer()->m_isInGroup);
+    sLog.outDebug( "GROUP: is in group?:%d",GetPlayer()->m_isInGroup);
 
     if(group==NULL)
     {
@@ -358,13 +333,9 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
         delete group;
     }
 
-	data.Initialize( SMSG_GROUP_UNINVITE );
+    data.Initialize( SMSG_GROUP_UNINVITE );
     SendPacket( &data );
 }
-
-
-
-
 
 void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 {
@@ -379,7 +350,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 
     group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
     if (group == NULL)
-        return;                                   
+        return;
 
     group->SetLootMethod( lootMethod );
     group->SetLooterGuid( lootMaster );
