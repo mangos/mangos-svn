@@ -24,30 +24,26 @@
 
 struct Realm
 {
-    
+
     const char *name;
-    
+
     std::string address;
-    
-    
-    
+
     uint32 icon;
-    
+
     uint8 color;
-    
+
     uint8 timezone;
-    
-    
 
     Realm (const char *Name, std::string Address, uint32 Icon, uint8 Color, uint8 Timezone)
     {
         name = Name;
         address = Address;
-        
+
         icon = Icon;
         color = Color;
         timezone = Timezone;
-        
+
     }
 
     ~Realm ()
@@ -55,7 +51,7 @@ struct Realm
     }
 };
 
-class RealmList 
+class RealmList
 {
     public:
         typedef std::map<std::string, Realm*> RealmMap;
@@ -75,18 +71,17 @@ class RealmList
 
     private:
         RealmMap _realms;
-/*
-        struct Patch
-        {
-            uint8 Hash[16];
-            char Platform[4];
-        };
+        /*
+                struct Patch
+                {
+                    uint8 Hash[16];
+                    char Platform[4];
+                };
 
-        //typedef std::map <uint32, Patch*> PatchMap;
-   //     PatchMap _patches;
+                //typedef std::map <uint32, Patch*> PatchMap;
+           //     PatchMap _patches;
 
-
-   */
+           */
         port_t i_serverPort;
 };
 

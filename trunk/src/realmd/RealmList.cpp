@@ -33,17 +33,16 @@ RealmList::~RealmList( )
         delete i->second;
 
     _realms.clear( );
-  /*  for( PatchMap::iterator i = _patches.begin(); i != _patches.end(); i++ )
-        delete i->second;
+    /*  for( PatchMap::iterator i = _patches.begin(); i != _patches.end(); i++ )
+          delete i->second;
 
-    _patches.clear( );
-*/
+      _patches.clear( );
+    */
 }
-
 
 int RealmList::GetAndAddRealms()
 {
-  
+
     QueryResult *result = sDatabase.PQuery( "SELECT name,address,icon,color,timezone FROM realms;" );
     if(result)
     {
@@ -53,9 +52,7 @@ int RealmList::GetAndAddRealms()
         while( result->NextRow() )
         {
             Field *fields = result->Fetch();
-            
-            
-            
+
             AddRealm(fields[0].GetString(),fields[1].GetString(),fields[2].GetUInt8(), fields[3].GetUInt8(), fields[4].GetUInt8());
         }
         delete result;
@@ -64,11 +61,10 @@ int RealmList::GetAndAddRealms()
     else
     {
         sLog.outString( "Realm:***There is no realm defined in database!Working at localhost mode!***" );
-		AddRealm("localhost","127.0.0.1",1,0,1);
+        AddRealm("localhost","127.0.0.1",1,0,1);
         return 0;
     }
 }
-
 
 void RealmList::AddRealm( const char * name, const char * address, uint8 icon, uint8 color, uint8 timezone )
 {
@@ -90,7 +86,6 @@ void RealmList::AddRealm( const char * name, const char * address, uint8 icon, u
     _realms[ name ]->timezone = timezone;
 }
 
-
 void RealmList::SetRealm( const char * name, uint8 icon, uint8 color, uint8 timezone )
 {
     if( _realms.find( name ) != _realms.end( ) )
@@ -100,7 +95,6 @@ void RealmList::SetRealm( const char * name, uint8 icon, uint8 color, uint8 time
         _realms[ name ]->timezone = timezone;
     }
 }
-
 
 void RealmList::RemoveRealm( const char * name )
 {
