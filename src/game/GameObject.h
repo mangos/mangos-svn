@@ -19,6 +19,7 @@
 #ifndef MANGOSSERVER_GAMEOBJECT_H
 #define MANGOSSERVER_GAMEOBJECT_H
 
+#include "Common.h"
 #include "Object.h"
 #include "LootMgr.h"
 
@@ -44,7 +45,7 @@ struct GameObjectInfo
     char* ScriptName;
 };
 
-class GameObject : public Object
+class MANGOS_DLL_SPEC GameObject : public Object
 {
     public:
         GameObject( );

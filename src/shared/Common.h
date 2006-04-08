@@ -118,4 +118,12 @@
 #define STRINGIZE(a) #a
 
 #define for if(true) for
+
+#ifdef WIN32
+#  define MANGOS_DLL_SPEC __declspec(dllexport) 
+#else
+#  define MANGOS_DLL_SPEC 
+#endif
+
+
 #endif

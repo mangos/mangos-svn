@@ -19,11 +19,13 @@
 #ifndef MANGOSSERVER_CREATURE_H
 #define MANGOSSERVER_CREATURE_H
 
+#include "Common.h"
 #include "Unit.h"
 #include "UpdateMask.h"
 #include "MotionMaster.h"
 #include "ItemPrototype.h"
 #include "LootMgr.h"
+
 struct SpellEntry;
 
 class CreatureAI;
@@ -126,7 +128,8 @@ enum UNIT_TYPE
     MECHANICAL = 9,
 };
 
-class Creature : public Unit
+ 
+class MANGOS_DLL_SPEC Creature : public Unit
 {
     CreatureAI *i_AI;
     MotionMaster i_motionMaster;

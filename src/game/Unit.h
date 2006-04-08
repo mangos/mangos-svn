@@ -19,6 +19,7 @@
 #ifndef __UNIT_H
 #define __UNIT_H
 
+#include "Common.h"
 #include "Object.h"
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
@@ -43,6 +44,23 @@ class Aura;
 class Spell;
 class DynamicObject;
 
+struct DamageShield
+{
+    uint32 m_spellId;
+    uint32 m_damage;
+    Unit *m_caster;
+};
+
+struct ProcTriggerSpell
+{
+    uint32 trigger;
+    uint32 spellId;
+    uint64 caster;
+    uint32 procChance;
+    uint32 procFlags;
+    uint32 procCharges;
+};
+
 enum DeathState
 {
     ALIVE = 0,
@@ -51,7 +69,7 @@ enum DeathState
     DEAD
 };
 
-class Unit : public Object
+class MANGOS_DLL_SPEC Unit : public Object
 {
     public:
         typedef std::set<Unit*> AttackerSet;

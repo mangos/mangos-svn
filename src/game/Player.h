@@ -19,6 +19,7 @@
 #ifndef _PLAYER_H
 #define _PLAYER_H
 
+#include "Common.h"
 #include "ItemPrototype.h"
 #include "Unit.h"
 #include "Item.h"
@@ -312,7 +313,7 @@ class WorldSession;
 
 #define BUYBACK_SLOT_END             12
 
-class Player : public Unit
+class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
     public:

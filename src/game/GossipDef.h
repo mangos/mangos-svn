@@ -19,6 +19,7 @@
 #ifndef MANGOSSERVER_GOSSIP_H
 #define MANGOSSERVER_GOSSIP_H
 
+#include "Common.h"
 #include "QuestDef.h"
 #include "NPCHandler.h"
 
@@ -43,7 +44,7 @@ struct QuestMenuItem
     char*       m_qTitle;
 };
 
-class GossipMenu
+class MANGOS_DLL_SPEC GossipMenu
 {
     public:
         GossipMenu();
@@ -96,7 +97,7 @@ class QuestMenu
         QuestMenuItem m_qItems[GOSSIP_MAX_MENU_ITEMS];
 };
 
-class PlayerMenu
+class MANGOS_DLL_SPEC PlayerMenu
 {
     private:
         GossipMenu* pGossipMenu;

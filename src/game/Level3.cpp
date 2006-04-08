@@ -30,6 +30,7 @@
 #include "Guild.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
+#include "SpellAuras.h"
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {

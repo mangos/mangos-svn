@@ -47,7 +47,9 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
-				SubSystem="1"/>
+				SubSystem="1"
+				ImportLibrary="$(OutDir)/mangosd.lib"
+			/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
@@ -113,7 +115,8 @@
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
 				SubSystem="1"
-				ImportLibrary=""/>
+				ImportLibrary="$(OutDir)/mangosd.lib"
+			/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
