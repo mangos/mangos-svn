@@ -286,15 +286,15 @@ void Spell::EffectCreateItem(uint32 i)
 {
 	Player* pUnit = (Player*)m_caster;
 	uint8 slot = 0;
-	for(uint8 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+	for(uint8 j=INVENTORY_SLOT_ITEM_START;j<INVENTORY_SLOT_ITEM_END;j++)
 	{
-		if (pUnit->GetItemBySlot(i) != 0)
+		if (pUnit->GetItemBySlot(j) != 0)
 		{
-			if (pUnit->GetItemBySlot(i)->GetItemProto()->Class == ITEM_CLASS_CONSUMABLE
-				&& pUnit->GetItemBySlot(i)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i]
-				&& pUnit->GetItemBySlot(i)->GetCount() < pUnit->GetItemBySlot(i)->GetItemProto()->MaxCount-1) 
+			if (pUnit->GetItemBySlot(j)->GetItemProto()->Class == ITEM_CLASS_CONSUMABLE
+				&& pUnit->GetItemBySlot(j)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i]
+				&& pUnit->GetItemBySlot(j)->GetCount() < pUnit->GetItemBySlot(j)->GetItemProto()->MaxCount-1) 
 			{
-				slot = i;
+				slot = j;
 				break;
 			}  
 		}
@@ -302,11 +302,11 @@ void Spell::EffectCreateItem(uint32 i)
 
 	if (slot == 0)
 	{
-		for(uint8 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+		for(uint8 j=INVENTORY_SLOT_ITEM_START;j<INVENTORY_SLOT_ITEM_END;j++)
 		{
-			if(pUnit->GetItemBySlot(i) == 0)
+			if(pUnit->GetItemBySlot(j) == 0)
 			{
-				slot = i;
+				slot = j;
 				break;
 			}
 		}
@@ -320,15 +320,15 @@ void Spell::EffectCreateItem(uint32 i)
 
 	Item* pItem;
 	uint8 curSlot;
-	for(uint32 i=0;i<8;i++)
+	for(uint32 x=0;x<8;x++)
 	{
-		for(uint32 j=0;j<m_spellInfo->ReagentCount[i];j++)
+		for(uint32 y=0;y<m_spellInfo->ReagentCount[x];y++)
 		{
-			if(j>10)
+			if(y>10)
 				break;
-			if(m_spellInfo->Reagent[i] == 0)
+			if(m_spellInfo->Reagent[x] == 0)
 				continue;
-			curSlot = (uint8)pUnit->GetSlotByItemID(m_spellInfo->Reagent[i]);
+			curSlot = (uint8)pUnit->GetSlotByItemID(m_spellInfo->Reagent[x]);
 			if(curSlot == 0)
 				continue;
 			pItem = new Item;
@@ -351,7 +351,7 @@ void Spell::EffectCreateItem(uint32 i)
 	pItem = NULL;
 	Item* newItem;
 
-	for(i=0;i<2;i++)
+	for(i=0;i<2;i++)//should "i" be changed to others? need attention here.
 	{
 		if(m_spellInfo->EffectItemType[i] == 0)
 			continue;
@@ -361,26 +361,26 @@ void Spell::EffectCreateItem(uint32 i)
 		uint32 num_to_add = ((pUnit->GetLevel() - (m_spellInfo->spellLevel-1))*2);
 
 		
-		for (uint8 i = INVENTORY_SLOT_ITEM_START; i<INVENTORY_SLOT_ITEM_END;i++)
+		for (uint8 j = INVENTORY_SLOT_ITEM_START; j<INVENTORY_SLOT_ITEM_END;j++)
 		{
-			if (pUnit->GetItemBySlot(i) != 0)
+			if (pUnit->GetItemBySlot(j) != 0)
 			{
-				if (pUnit->GetItemBySlot(i)->GetCount() <= 0)
-					pUnit->GetItemBySlot(i)->SetCount(1); 
+				if (pUnit->GetItemBySlot(j)->GetCount() <= 0)
+					pUnit->GetItemBySlot(j)->SetCount(1); 
 
-				if (pUnit->GetItemBySlot(i)->GetItemProto()->Class != ITEM_CLASS_CONSUMABLE
-					&& pUnit->GetItemBySlot(i)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i])
+				if (pUnit->GetItemBySlot(j)->GetItemProto()->Class != ITEM_CLASS_CONSUMABLE
+					&& pUnit->GetItemBySlot(j)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i])
 				{
 					num_to_add = 1;
 				}
-				if (pUnit->GetItemBySlot(i)->GetItemProto()->MaxCount > 1
-					&& pUnit->GetItemBySlot(i)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i]
-					&& pUnit->GetItemBySlot(i)->GetCount() < pUnit->GetItemBySlot(i)->GetItemProto()->MaxCount-num_to_add) 
+				if (pUnit->GetItemBySlot(j)->GetItemProto()->MaxCount > 1
+					&& pUnit->GetItemBySlot(j)->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i]
+					&& pUnit->GetItemBySlot(j)->GetCount() < pUnit->GetItemBySlot(j)->GetItemProto()->MaxCount-num_to_add) 
 				{
 				
-					pUnit->GetItemBySlot(i)->SetCount(pUnit->GetItemBySlot(i)->GetCount()+num_to_add);
-					pUnit->UpdateSlot(i);
-					slot = i; 
+					pUnit->GetItemBySlot(j)->SetCount(pUnit->GetItemBySlot(j)->GetCount()+num_to_add);
+					pUnit->UpdateSlot(j);
+					slot = j; 
 					continue;
 				}
 			}
@@ -390,9 +390,9 @@ void Spell::EffectCreateItem(uint32 i)
 			return; 
 
 		
-		for (uint8 i = INVENTORY_SLOT_ITEM_START; i<INVENTORY_SLOT_ITEM_END;i++)
-			if(pUnit->GetItemBySlot(i) == 0)
-				slot = i;
+		for (uint8 j = INVENTORY_SLOT_ITEM_START; j<INVENTORY_SLOT_ITEM_END;j++)
+			if(pUnit->GetItemBySlot(j) == 0)
+				slot = j;
 		
 		if(slot == 0)
 		{
