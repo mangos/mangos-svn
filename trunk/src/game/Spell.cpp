@@ -38,7 +38,7 @@
 #include "CellImpl.h"
 #include "Policies/SingletonImp.h"
 #include "SharedDefines.h"
-#include "tools.cpp"
+#include "Tools.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 

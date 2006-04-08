@@ -62,10 +62,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="framework.lib game.lib shared.lib zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="mangosd.lib zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)/MaNGOSScript.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\bin\debug;..\..\dep\lib\debug;.\framework__Win32_Debug;.\game___Win32_Debug;.\shared___Win32_Debug;.\zlib___Win32_Debug;.\zthread___Win32_Debug"
+				AdditionalLibraryDirectories="..\..\bin\debug;..\..\dep\lib\debug;.\zlib___Win32_Debug;.\zthread___Win32_Debug"
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile="$(OutDir)/MaNGOSScript.pdb"
 				SubSystem="2"
@@ -141,10 +141,10 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="framework.lib game.lib shared.lib zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="mangosd.lib zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)/MaNGOSScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\bin\release;..\..\dep\lib\release;.\framework__Win32_Release;.\game___Win32_Release;.\shared___Win32_Release;.\zlib___Win32_Release;.\zthread___Win32_Release"
+				AdditionalLibraryDirectories="..\..\bin\release;..\..\dep\lib\release;.\zlib___Win32_Release;.\zthread___Win32_Release"
 				GenerateDebugInformation="false"
 				SubSystem="2"
 				OptimizeReferences="2"

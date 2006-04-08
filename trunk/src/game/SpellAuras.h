@@ -18,6 +18,8 @@
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
+#include "Spell.h"
+
 #define MAX_AURAS 56
 #define MAX_POSITIVE_AURAS 32
 
@@ -198,13 +200,6 @@ enum MOD_TYPES
 
 };
 
-struct DamageShield
-{
-    uint32 m_spellId;
-    uint32 m_damage;
-    Unit *m_caster;
-};
-
 struct DamageManaShield
 {
     uint32 m_spellId;
@@ -212,16 +207,6 @@ struct DamageManaShield
     int32 m_schoolAbsorb;
     uint32 m_totalAbsorb;
     uint32 m_currAbsorb;
-};
-
-struct ProcTriggerSpell
-{
-    uint32 trigger;
-    uint32 spellId;
-    uint64 caster;
-    uint32 procChance;
-    uint32 procFlags;
-    uint32 procCharges;
 };
 
 struct Modifier
@@ -232,6 +217,10 @@ struct Modifier
     uint32 m_miscvalue2;
     uint32 periodictime;
 };
+
+class Unit;
+struct SpellEntry;
+struct ProcTriggerSpell;
 
 class Aura
 {

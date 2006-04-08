@@ -19,6 +19,8 @@
 #ifndef __WORLDSESSION_H
 #define __WORLDSESSION_H
 
+#include "Common.h"
+
 struct ItemPrototype;
 
 class Player;
@@ -39,7 +41,7 @@ enum SessionStatus
     STATUS_LOGGEDIN
 };
 
-class WorldSession
+class MANGOS_DLL_SPEC WorldSession
 {
     public:
         WorldSession(uint32 id, WorldSocket *sock);

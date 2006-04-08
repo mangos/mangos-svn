@@ -19,6 +19,7 @@
 #ifndef _OBJECT_H
 #define _OBJECT_H
 
+#include "Common.h"
 #include "UpdateMask.h"
 #include "World.h"
 
@@ -59,7 +60,7 @@ class WorldSession;
 class Player;
 class MapCell;
 
-class Object
+class MANGOS_DLL_SPEC Object
 {
     public:
         virtual ~Object ( );

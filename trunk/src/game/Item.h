@@ -19,6 +19,7 @@
 #ifndef MANGOSSERVER_ITEM_H
 #define MANGOSSERVER_ITEM_H
 
+#include "Common.h"
 #include "Object.h"
 #include "ItemPrototype.h"
 
@@ -101,7 +102,7 @@ enum InventoryChangeFailure
     EQUIP_MORE_THAN1_SPECIAL_BAG                 = 64
 };
 
-class Item : public Object
+class MANGOS_DLL_SPEC Item : public Object
 {
     public:
 

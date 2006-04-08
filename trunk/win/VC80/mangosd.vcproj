@@ -79,6 +79,7 @@
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
 				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
 				SubSystem="1"
+				ImportLibrary="$(OutDir)/mangosd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -174,7 +175,7 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
 				SubSystem="1"
-				ImportLibrary=""
+				ImportLibrary="$(OutDir)/mangosd.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
