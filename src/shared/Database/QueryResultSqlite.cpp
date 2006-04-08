@@ -27,17 +27,15 @@ QueryResult(rowCount, fieldCount), mTableData(tableData), mTableIndex(0)
     for (uint32 i = 0; i < mFieldCount; i++)
     {
         mCurrentRow[i].SetName(mTableData[i]);
-        
+
         mCurrentRow[i].SetType(Field::DB_TYPE_UNKNOWN);
     }
 }
-
 
 QueryResultSqlite::~QueryResultSqlite()
 {
     EndQuery();
 }
-
 
 bool QueryResultSqlite::NextRow()
 {
@@ -63,7 +61,6 @@ bool QueryResultSqlite::NextRow()
     return true;
 }
 
-
 void QueryResultSqlite::EndQuery()
 {
     if (mCurrentRow)
@@ -77,7 +74,6 @@ void QueryResultSqlite::EndQuery()
         mTableData = 0;
     }
 }
-
 
 enum Field::DataTypes QueryResultSqlite::ConvertNativeType(const char* sqliteType) const
 {

@@ -24,7 +24,7 @@
 
 extern uint8 loglevel;
 
-class Log 
+class Log
 {
     public:
         void outString( const char * str, ... );
@@ -38,11 +38,9 @@ class Log
 
 #define sLog MaNGOS::Singleton<Log>::Instance()
 
-
 #ifdef MANGOS_DEBUG
 #define DEBUG_LOG MaNGOS::Singleton<Log>::Instance().outDebug
 #else
 #define DEBUG_LOG
 #endif
-
 #endif

@@ -26,11 +26,8 @@ class QueryResultSqlite : public QueryResult
     public:
         QueryResultSqlite(char **tableData, uint32 rowCount, uint32 fieldCount);
 
-        
         ~QueryResultSqlite();
 
-        
-        
         bool NextRow();
 
     private:

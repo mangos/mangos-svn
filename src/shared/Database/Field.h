@@ -31,7 +31,6 @@ class Field
             DB_TYPE_FLOAT   = 0x03
         };
 
-
         Field();
         Field(Field &f);
         Field(const char *value, const char *name, enum DataTypes type);

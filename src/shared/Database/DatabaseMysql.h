@@ -34,16 +34,15 @@ class DatabaseMysql : public Database
     DatabaseMysql();
     ~DatabaseMysql();
 
-public:
-        
-        
-    //! Initializes Mysql and connects to a server.
-    /*! infoString should be formated like hostname;username;password;database. */
-    bool Initialize(const char *infoString);
-    QueryResult* PQuery(const char *format,...);
-    QueryResult* Query(const char *sql);
-    bool Execute(const char *sql);
-	bool PExecute(const char *format,...);
+    public:
+
+        //! Initializes Mysql and connects to a server.
+        /*! infoString should be formated like hostname;username;password;database. */
+        bool Initialize(const char *infoString);
+        QueryResult* PQuery(const char *format,...);
+        QueryResult* Query(const char *sql);
+        bool Execute(const char *sql);
+        bool PExecute(const char *format,...);
 
         operator bool () const { return mMysql != NULL; }
 
@@ -52,5 +51,4 @@ public:
 };
 
 #define sMySqlDatabase MaNGOS::Singleton<DatabaseMysql>::Instance()
-
 #endif

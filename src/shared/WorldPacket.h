@@ -29,7 +29,6 @@ class WorldPacket : public ByteBuffer
         WorldPacket(size_t res) : ByteBuffer(res), m_opcode(0) { }
         WorldPacket(const WorldPacket &packet) : ByteBuffer(packet), m_opcode(packet.m_opcode) {}
 
-        
         void Initialize(uint16 opcode )
         {
             clear();

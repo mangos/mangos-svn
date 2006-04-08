@@ -25,7 +25,7 @@
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
-DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt); 
+DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt);
 
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
@@ -42,44 +42,40 @@ DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTempl
 
 float GetRadius(SpellRadius *radius)
 {
-	if(radius)
+    if(radius)
         return radius->Radius;
-	else
+    else
         return 0;
 }
 
-
 uint32 GetCastTime(SpellCastTime *time)
 {
-	if(time)
+    if(time)
         return time->CastTime;
-	else
-		return 0;
+    else
+        return 0;
 }
-
 
 float GetMaxRange(SpellRange *range)
 {
-	if(range)
+    if(range)
         return range->maxRange;
-	else
-		return 0;
+    else
+        return 0;
 }
-
 
 float GetMinRange(SpellRange *range)
 {
-	if(range)
+    if(range)
         return range->minRange;
-	else
-		return 0;
+    else
+        return 0;
 }
-
 
 uint32 GetDuration(SpellDuration *dur)
 {
-	if(dur)
+    if(dur)
         return dur->Duration1;
-	else
-		return 0;
+    else
+        return 0;
 }

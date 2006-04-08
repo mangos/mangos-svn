@@ -31,11 +31,8 @@ class QueryResultMysql : public QueryResult
     public:
         QueryResultMysql(MYSQL_RES *result, uint64 rowCount, uint32 fieldCount);
 
-        
         ~QueryResultMysql();
 
-        
-        
         bool NextRow();
 
     private:

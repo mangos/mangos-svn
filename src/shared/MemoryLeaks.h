@@ -32,5 +32,4 @@ struct MemoryManager : public MaNGOS::Singleton < MemoryManager >
 {
     MemoryManager();
 };
-
 #endif

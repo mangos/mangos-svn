@@ -23,7 +23,6 @@ mValue(NULL), mName(NULL), mType(DB_TYPE_UNKNOWN)
 {
 }
 
-
 Field::Field(Field &f)
 {
     const char *value, *name;
@@ -44,7 +43,6 @@ Field::Field(Field &f)
     mType = f.GetType();
 }
 
-
 Field::Field(const char *value, const char *name, enum Field::DataTypes type) :
 mType(type)
 {
@@ -59,7 +57,6 @@ mType(type)
         mName = NULL;
 }
 
-
 Field::~Field()
 {
     if (mValue)
@@ -69,12 +66,11 @@ Field::~Field()
     mValue = mName = NULL;
 }
 
-
 void Field::SetValue(const char *value)
 {
     if (mValue)
         delete [] mValue;
-    
+
     if (value)
     {
         mValue = new char[strlen(value) + 1];
@@ -82,9 +78,8 @@ void Field::SetValue(const char *value)
             strcpy(mValue, value);
     }
     else
-	mValue = NULL;
+        mValue = NULL;
 }
-
 
 void Field::SetName(const char *name)
 {

@@ -24,13 +24,11 @@ AuthCrypt::AuthCrypt()
     _initialized = false;
 }
 
-
 void AuthCrypt::Init()
 {
     _send_i = _send_j = _recv_i = _recv_j = 0;
     _initialized = true;
 }
-
 
 void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
 {
@@ -47,7 +45,6 @@ void AuthCrypt::DecryptRecv(uint8 *data, size_t len)
     }
 }
 
-
 void AuthCrypt::EncryptSend(uint8 *data, size_t len)
 {
     if (!_initialized) return;
@@ -62,13 +59,11 @@ void AuthCrypt::EncryptSend(uint8 *data, size_t len)
     }
 }
 
-
 void AuthCrypt::SetKey(uint8 *key, size_t len)
 {
     _key.resize(len);
     std::copy(key, key + len, _key.begin());
 }
-
 
 AuthCrypt::~AuthCrypt()
 {

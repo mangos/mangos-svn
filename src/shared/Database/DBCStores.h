@@ -24,7 +24,6 @@
 #include "dbcfile.h"
 #include "DBCStructure.h"
 
-
 struct bidentry
 {
     uint32 AuctionID;
@@ -43,7 +42,6 @@ struct AuctionEntry
     uint32 Id;
 };
 
-
 float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
@@ -53,45 +51,44 @@ uint32 GetDuration(SpellDuration *dur);
 template<class T>
 class DBCStorage
 {
-public:
-	DBCStorage(const char *f){data = NULL;fmt=f;}
-	~DBCStorage(){if(data) delete [] data;};
-	
-	inline
-	T* LookupEntry(uint32 id)
-	{
-		return (id>nCount)?NULL:data[id];
-		
-	}
-	inline
-	unsigned int GetNumRows()
-	{
-		return nCount;
-	}
+    public:
+        DBCStorage(const char *f){data = NULL;fmt=f;}
+        ~DBCStorage(){if(data) delete [] data;};
 
+        inline
+            T* LookupEntry(uint32 id)
+        {
+            return (id>nCount)?NULL:data[id];
 
-	void Load(char* fn)
-	{
-		
-		dbc = new DBCFile; 
-        // Check if load was sucessful, only then continue
-        if (dbc->Load(fn)) {
-            data=(T **) dbc->AutoProduceData(fmt,&nCount);
         }
-		delete dbc;
-	}
+        inline
+            unsigned int GetNumRows()
+        {
+            return nCount;
+        }
 
-	T** data;
-	uint32 nCount;
+        void Load(char* fn)
+        {
 
-private:
-	DBCFile * dbc;
-	const char * fmt;
+            dbc = new DBCFile;
+            // Check if load was sucessful, only then continue
+            if (dbc->Load(fn))
+            {
+                data=(T **) dbc->AutoProduceData(fmt,&nCount);
+            }
+            delete dbc;
+        }
+
+        T** data;
+        uint32 nCount;
+
+    private:
+        DBCFile * dbc;
+        const char * fmt;
 };
 
-
 extern DBCStorage <TalentEntry> sTalentStore;
-extern DBCStorage <SpellRadius> sSpellRadius; 
+extern DBCStorage <SpellRadius> sSpellRadius;
 extern DBCStorage <AreaTableEntry> sAreaStore;
 extern DBCStorage <FactionTemplateEntry> sFactionTemplateStore;
 

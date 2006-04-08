@@ -22,13 +22,11 @@ DatabaseSqlite::DatabaseSqlite() : Database(), mSqlite(0)
 {
 }
 
-
 DatabaseSqlite::~DatabaseSqlite()
 {
     if (mSqlite)
         sqlite_close(mSqlite);
 }
-
 
 bool DatabaseSqlite::Initialize(const char *infoString)
 {
@@ -38,8 +36,7 @@ bool DatabaseSqlite::Initialize(const char *infoString)
 
     if (!mSqlite)
     {
-        
-        
+
         if (errmsg)
             sqlite_freemem(errmsg);
         return false;
@@ -47,7 +44,6 @@ bool DatabaseSqlite::Initialize(const char *infoString)
 
     return true;
 }
-
 
 QueryResult* DatabaseSqlite::Query(const char *sql)
 {
@@ -63,12 +59,11 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
     sqlite_get_table(mSqlite, sql, &tableData, &rowCount, &fieldCount, &errmsg);
 
     if (!rowCount)
-        return 0;                                 
+        return 0;
 
     if (!tableData)
     {
-        
-        
+
         if (errmsg)
             sqlite_freemem(errmsg);
         return 0;
@@ -77,7 +72,7 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
     QueryResultSqlite *queryResult = new QueryResultSqlite(tableData, rowCount, fieldCount);
     if(!queryResult)
     {
-        
+
         return 0;
     }
 
@@ -85,7 +80,6 @@ QueryResult* DatabaseSqlite::Query(const char *sql)
 
     return queryResult;
 }
-
 
 bool DatabaseSqlite::Execute(const char *sql)
 {

@@ -23,16 +23,9 @@
 
 INSTANTIATE_SINGLETON_1( MemoryManager ) ;
 
-
 MemoryManager::MemoryManager( )
 {
     _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
-
-
-
-
-
 }
-
 #endif

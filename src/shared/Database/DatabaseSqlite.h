@@ -27,8 +27,6 @@ class DatabaseSqlite : public Database
         DatabaseSqlite();
         ~DatabaseSqlite();
 
-        
-        
         bool Initialize(const char *infoString);
 
         QueryResult* Query(const char *sql);
