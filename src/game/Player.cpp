@@ -4179,7 +4179,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
 	if (dstItem && srcItem && !error_code) {
 		// Same items
 		if (dstItem->GetEntry() == srcItem->GetEntry()) {
-			int stack = dstItem->GetProto()->Stackable?dstItem->GetProto()->Stackable:1;
+			int stack = dstItem->GetProto()->MaxCount?dstItem->GetProto()->MaxCount:1;
 			int dstCount = dstItem->GetCount();
 			int srcCount = srcItem->GetCount();
 
@@ -4246,7 +4246,7 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot) 
 	if (dstItem && srcItem) {
 		// Same items
 		if (dstItem->GetEntry() == srcItem->GetEntry()) {
-			int stack = dstItem->GetProto()->Stackable?dstItem->GetProto()->Stackable:1;
+			int stack = dstItem->GetProto()->MaxCount?dstItem->GetProto()->MaxCount:1;
 			int dstCount = dstItem->GetCount();
 			int srcCount = srcItem->GetCount();
 
@@ -4318,7 +4318,7 @@ bool Player::CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 
 			pItem = new Item();
 		}	
 
-		if (count > proto->Stackable) { count = proto->Stackable; }
+		if (count > proto->MaxCount) { count = proto->MaxCount; }
 		if (count < 1) { count = 1; }
 
 		pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this);
@@ -4422,15 +4422,15 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
 
 		Item *pItem = 0;
 		Bag *pBag = 0;
-		int stack = proto->Stackable;
+		int stack = proto->MaxCount;
 		if (stack < 1) { stack = 1; }
 		if (count < 1) { count = 1; }
 		int total = count;
 		int freespace = 0;
 
 		// First lets check if count is >= to maxcount
-		// MaxCount is related to unique items, users can't have more than MaxCount items, not even in bank
-		if	(proto->MaxCount > 0) {
+		// Stackable is related to unique items, users can't have more than MaxCount items, not even in bank
+		if	(proto->Stackable > 0) {
 			if	(GetItemCount(itemId) >= proto->MaxCount)	{
 				sLog.outError("AddNewItem : Too many items, itemId = %i", itemId);
 				return false;
@@ -4665,7 +4665,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
 	WorldPacket packet;
 	Item *pItem = 0;
 	Bag *pBag = 0;
-	int stack = (item->GetProto()->Stackable)?(item->GetProto()->Stackable):1;
+	int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
 	int count = item->GetCount();
 
 	switch(bagIndex) {
@@ -4814,7 +4814,7 @@ uint8 Player::AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool al
 	WorldPacket packet;
 	Item *pItem = 0;
 	Bag *pBag = 0;
-	int stack = (item->GetProto()->Stackable)?(item->GetProto()->Stackable):1;
+	int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
 	int count = item->GetCount();
 	uint8 addtobag = 0;
 	uint8 addtoslot = NULL_SLOT;
@@ -4982,7 +4982,7 @@ uint8 Player::AddItemToBank(uint8 bagIndex,uint8 slot, Item *item, bool allowsta
 	WorldPacket packet;
 	Item *pItem = 0;
 	Bag *pBag = 0;
-	int stack = (item->GetProto()->Stackable)?(item->GetProto()->Stackable):1;
+	int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
 	int count = item->GetCount();
 	uint8 addtobag = 0;
 	uint8 addtoslot = NULL_SLOT;
