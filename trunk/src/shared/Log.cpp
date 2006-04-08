@@ -35,7 +35,6 @@ void Log::outString( const char * str, ... )
     fflush(stdout);
 }
 
-
 void Log::outError( const char * err, ... )
 {
     if( !err ) return;
@@ -46,7 +45,6 @@ void Log::outError( const char * err, ... )
     va_end(ap);
     fflush(stderr);
 }
-
 
 void Log::outBasic( const char * str, ... )
 {
@@ -62,7 +60,6 @@ void Log::outBasic( const char * str, ... )
     }
 }
 
-
 void Log::outDetail( const char * str, ... )
 {
     if( !str ) return;
@@ -77,7 +74,6 @@ void Log::outDetail( const char * str, ... )
     }
 }
 
-
 void Log::outDebug( const char * str, ... )
 {
     if( !str ) return;
@@ -91,7 +87,6 @@ void Log::outDebug( const char * str, ... )
         fflush(stdout);
     }
 }
-
 
 void Log::outMenu( const char * str, ... )
 {

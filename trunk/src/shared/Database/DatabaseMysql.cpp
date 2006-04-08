@@ -29,13 +29,11 @@ DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
     DatabaseRegistry::RegisterDatabase(this);
 }
 
-
 DatabaseMysql::~DatabaseMysql()
 {
     if (mMysql)
         mysql_close(mMysql);
 }
-
 
 bool DatabaseMysql::Initialize(const char *infoString)
 {
@@ -70,10 +68,10 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
     if (mMysql)
         sLog.outDetail( "Connected to MySQL database at %s\n",
-				       host.c_str());
+            host.c_str());
     else
         sLog.outError( "Could not connect to MySQL database at %s: %s\n",
-				      host.c_str(),mysql_error(mysqlInit));
+            host.c_str(),mysql_error(mysqlInit));
 
     if(mMysql)
         return true;
@@ -83,16 +81,16 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
 QueryResult* DatabaseMysql::PQuery(const char *format,...)
 {
-	if( !format || !mMysql) return NULL;
-    
+    if( !format || !mMysql) return NULL;
 
-	va_list ap;
-	char szQuery [512];
-	va_start(ap, format);
-	vsprintf( szQuery, format, ap );
-	va_end(ap);
+    va_list ap;
+    char szQuery [512];
+    va_start(ap, format);
+    vsprintf( szQuery, format, ap );
+    va_end(ap);
 
-    if(int err = mysql_query(mMysql, szQuery)) {
+    if(int err = mysql_query(mMysql, szQuery))
+    {
         DEBUG_LOG( "query = %s\n", szQuery );
         DEBUG_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
         return NULL;
@@ -102,25 +100,27 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     uint64 rowCount = mysql_affected_rows(mMysql);
     uint32 fieldCount = mysql_field_count(mMysql);
     if (!result)
-	   return NULL;
-	else if( !rowCount )
-       return NULL;
+        return NULL;
+    else if( !rowCount )
+        return NULL;
 
     QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
     if(!queryResult)
         return NULL;
-    
+
     queryResult->NextRow();
-	
+
     DEBUG_LOG( "query = %s\n", szQuery );
     return queryResult;
 }
+
 QueryResult* DatabaseMysql::Query(const char *sql)
 {
     if (!mMysql)
         return 0;
 
-    if(int err = mysql_query(mMysql, sql)) {
+    if(int err = mysql_query(mMysql, sql))
+    {
         DEBUG_LOG( "query = %s\n", sql );
         DEBUG_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
         return NULL;
@@ -131,17 +131,16 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     uint64 rowCount = mysql_affected_rows(mMysql);
     uint32 fieldCount = mysql_field_count(mMysql);
 
-	if (!result )
+    if (!result )
         return 0;
     else
     if (!rowCount)
         return 0;
-    
 
     QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
     if(!queryResult)
     {
-        
+
         return 0;
     }
 
@@ -150,16 +149,16 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     return queryResult;
 }
 
-
 bool DatabaseMysql::Execute(const char *sql)
 {
     if (!mMysql)
         return false;
 
     DEBUG_LOG( (std::string("SQL: ") + sql).c_str() );
-    if(int err = mysql_query(mMysql, sql)) {
+    if(int err = mysql_query(mMysql, sql))
+    {
         DEBUG_LOG( (std::string("SQL ERROR: ") + mysql_error(mMysql)).c_str() );
-         return false;
+        return false;
     }
 
     return true;
@@ -169,18 +168,17 @@ bool DatabaseMysql::PExecute(const char * format,...)
 {
     if (!mMysql||!format)
         return false;
-	va_list ap;
-	char szQuery [512];
-	va_start(ap, format);
-	vsprintf( szQuery, format, ap );
-	va_end(ap);
-
-    
+    va_list ap;
+    char szQuery [512];
+    va_start(ap, format);
+    vsprintf( szQuery, format, ap );
+    va_end(ap);
 
     DEBUG_LOG( (std::string("SQL: ") + szQuery).c_str() );
-    if(int err = mysql_query(mMysql, szQuery)) {
+    if(int err = mysql_query(mMysql, szQuery))
+    {
         DEBUG_LOG( (std::string("SQL ERROR: ") + mysql_error(mMysql)).c_str() );
-         return false;
+        return false;
     }
 
     return true;

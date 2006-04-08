@@ -24,24 +24,20 @@ Sha1Hash::Sha1Hash()
     SHA1_Init(&mC);
 }
 
-
 Sha1Hash::~Sha1Hash()
 {
     SHA1_Init(&mC);
 }
-
 
 void Sha1Hash::UpdateData(const uint8 *dta, int len)
 {
     SHA1_Update(&mC, dta, len);
 }
 
-
 void Sha1Hash::UpdateData(const std::string &str)
 {
     UpdateData((uint8 *)str.c_str(), str.length());
 }
-
 
 void Sha1Hash::UpdateBigNumbers(BigNumber *bn0, ...)
 {
@@ -58,12 +54,10 @@ void Sha1Hash::UpdateBigNumbers(BigNumber *bn0, ...)
     va_end(v);
 }
 
-
 void Sha1Hash::Initialize()
 {
     SHA1_Init(&mC);
 }
-
 
 void Sha1Hash::Finalize(void)
 {

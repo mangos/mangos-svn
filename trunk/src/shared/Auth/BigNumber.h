@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "ByteBuffer.h"
 
-
 struct bignum_st;
 
 class BigNumber
@@ -41,7 +40,6 @@ class BigNumber
         void SetRand(int numbits);
 
         BigNumber operator=(const BigNumber &bn);
-        
 
         BigNumber operator+=(const BigNumber &bn);
         BigNumber operator+(const BigNumber &bn)

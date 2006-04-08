@@ -27,13 +27,13 @@ INSTANTIATE_SINGLETON_1( PacketLog );
 
 PacketLog::PacketLog()
 {
-    
+
     if (sConfig.GetBoolDefault("LogRealm", false))
     {
         FILE *pFile = fopen("realm.log", "w+");
         fclose(pFile);
     }
-    
+
     if (sConfig.GetBoolDefault("LogWorld", false))
     {
         FILE *pFile = fopen("world.log", "w+");
@@ -41,24 +41,20 @@ PacketLog::PacketLog()
     }
 }
 
-
 PacketLog::~PacketLog()
 {
 }
-
 
 char PacketLog::makehexchar(int i)
 {
     return (i<=9) ? '0'+i : 'A'+(i-10);
 }
 
-
 int PacketLog::hextoint(char c)
 {
     c = toupper(c);
     return (c > '9' ? c - 'A' + 10 : c - '0');
 }
-
 
 void PacketLog::HexDump(const unsigned char* data, size_t length, const char* file)
 {
@@ -105,12 +101,10 @@ void PacketLog::HexDump(const unsigned char* data, size_t length, const char* fi
     fclose(pFile);
 }
 
-
 void PacketLog::HexDump(const char *data, size_t length, const char* file)
 {
     HexDump((unsigned char *)data, length, file);
 }
-
 
 void PacketLog::HexDumpStr(const char *msg, const char *data, size_t len, const char* file)
 {
@@ -121,7 +115,6 @@ void PacketLog::HexDumpStr(const char *msg, const char *data, size_t len, const 
 
     HexDump(data, len, file);
 }
-
 
 void PacketLog::RealmHexDump(RealmPacket* data, uint32 socket, bool direction)
 {
@@ -143,7 +136,6 @@ void PacketLog::RealmHexDump(RealmPacket* data, uint32 socket, bool direction)
 
 }
 
-
 void PacketLog::WorldHexDump(WorldPacket* data, uint32 socket, bool direction)
 {
     if (!sConfig.GetBoolDefault("LogWorld", false))
@@ -152,7 +144,7 @@ void PacketLog::WorldHexDump(WorldPacket* data, uint32 socket, bool direction)
     FILE *pFile;
     pFile = fopen("world.log", "a");
 
-    uint16 len = data->size();                    
+    uint16 len = data->size();
     uint16 opcode = data->GetOpcode();
     if (direction)
         fprintf(pFile, "SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %.4X\nDATA:\n", socket, len, opcode);

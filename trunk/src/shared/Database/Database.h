@@ -19,41 +19,34 @@
 #if !defined(DATABASE_H)
 #define DATABASE_H
 
-
-class Database 
+class Database
 {
     protected:
         Database() {}
 
     public:
-        
+
         virtual ~Database() {}
 
-        
         virtual bool Initialize(const char *infoString) = 0;
 
-        
-        
         virtual QueryResult* Query(const char *sql) = 0;
-		virtual QueryResult* PQuery(const char *format,...) = 0;
-   
-        
-        
-        virtual bool Execute(const char *sql) = 0;
-		virtual bool PExecute(const char *format,...) = 0;
+        virtual QueryResult* PQuery(const char *format,...) = 0;
 
-		virtual operator bool () const = 0;
+        virtual bool Execute(const char *sql) = 0;
+        virtual bool PExecute(const char *format,...) = 0;
+
+        virtual operator bool () const = 0;
 };
 
 class DatabaseRegistry
 {
     static Database* si_database;
-public:
+    public:
 
-    static Database& GetDatabase(void) { return *si_database; }    
-    static void RegisterDatabase(Database *d) { si_database = d; }
+        static Database& GetDatabase(void) { return *si_database; }
+        static void RegisterDatabase(Database *d) { si_database = d; }
 };
 
 #define sDatabase DatabaseRegistry::GetDatabase()
-
 #endif

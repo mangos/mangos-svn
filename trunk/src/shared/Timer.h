@@ -35,18 +35,17 @@
 inline uint32 getMSTime()
 {
     uint32 time_in_ms = 0;
-#if PLATFORM == PLATFORM_WIN32
+    #if PLATFORM == PLATFORM_WIN32
     time_in_ms = timeGetTime();
-#else
+    #else
     struct timeb tp;
     ftime(&tp);
 
     time_in_ms = tp.time * 1000 + tp.millitm;
-#endif
+    #endif
 
     return time_in_ms;
 }
-
 
 class IntervalTimer
 {
@@ -67,19 +66,14 @@ class IntervalTimer
         time_t _current;
 };
 
-
-
 struct TimeTracker
 {
-    
+
     TimeTracker(time_t expiry) : i_expiryTime(expiry) {}
     void Update(time_t diff) { i_expiryTime -= diff; }
     bool Passed(void) const { return (i_expiryTime <= 0); }
-    void Reset(time_t interval) { i_expiryTime = interval; } 
+    void Reset(time_t interval) { i_expiryTime = interval; }
     time_t GetExpiry(void) const { return i_expiryTime; }
     time_t i_expiryTime;
 };
-
-
-
 #endif

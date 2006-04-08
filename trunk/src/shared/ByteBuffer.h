@@ -47,10 +47,6 @@ class ByteBuffer
             _rpos = _wpos = 0;
         }
 
-        
-        
-        
-
         template <typename T> void append(T value)
         {
             append((uint8 *)&value, sizeof(value));
@@ -60,7 +56,6 @@ class ByteBuffer
             put(pos,(uint8 *)&value,sizeof(value));
         }
 
-        
         ByteBuffer &operator<<(bool value)
         {
             append<char>((char)value);
@@ -109,7 +104,6 @@ class ByteBuffer
             return *this;
         }
 
-        
         ByteBuffer &operator>>(bool &value)
         {
             value = read<char>() > 0 ? true : false;
@@ -213,7 +207,7 @@ class ByteBuffer
         const uint8 *contents() const { return &_storage[0]; };
 
         inline size_t size() const { return _storage.size(); };
-        
+
         void resize(size_t newsize)
         {
             _storage.resize(newsize);
@@ -225,7 +219,6 @@ class ByteBuffer
             if (ressize > size()) _storage.reserve(ressize);
         };
 
-        
         void append(const std::string& str)
         {
             append((uint8 *)str.c_str(),str.size() + 1);
@@ -238,11 +231,6 @@ class ByteBuffer
         {
             if (!cnt) return;
 
-            
-            
-            
-            
-            
             ASSERT(size() < 10000000);
 
             if (_storage.size() < _wpos + cnt)
@@ -267,70 +255,60 @@ class ByteBuffer
                 printf("%u - ", read<uint8>(i) );
         }
 
-		void hexlike()
-		{
-			uint32 j = 1, k = 1;
-			printf("STORAGE_SIZE: %u\n", size() );
-			for(uint32 i = 0; i < size(); i++)
-			{
-				if ((i == (j*8)) && ((i != (k*16))))
-				{
-					if (read<uint8>(i) < 0x0F)
-					{
-						printf("| 0%X ", read<uint8>(i) );
-					}
-					else
-					{
-						printf("| %X ", read<uint8>(i) );
-					}
+        void hexlike()
+        {
+            uint32 j = 1, k = 1;
+            printf("STORAGE_SIZE: %u\n", size() );
+            for(uint32 i = 0; i < size(); i++)
+            {
+                if ((i == (j*8)) && ((i != (k*16))))
+                {
+                    if (read<uint8>(i) < 0x0F)
+                    {
+                        printf("| 0%X ", read<uint8>(i) );
+                    }
+                    else
+                    {
+                        printf("| %X ", read<uint8>(i) );
+                    }
 
-					j++;
-				}
-				else if (i == (k*16))
-				{
-					if (read<uint8>(i) < 0x0F)
-					{
-						printf("\n0%X ", read<uint8>(i) );
-					}
-					else
-					{
-						printf("\n%X ", read<uint8>(i) );
-					}
+                    j++;
+                }
+                else if (i == (k*16))
+                {
+                    if (read<uint8>(i) < 0x0F)
+                    {
+                        printf("\n0%X ", read<uint8>(i) );
+                    }
+                    else
+                    {
+                        printf("\n%X ", read<uint8>(i) );
+                    }
 
-					k++;
-					j++;
-				}
-				else
-				{
-					if (read<uint8>(i) < 0x0F)
-					{
-						printf("0%X ", read<uint8>(i) );
-					}
-					else
-					{
-						printf("%X ", read<uint8>(i) );
-					}
-				}
-			}
-			printf("\n");
+                    k++;
+                    j++;
+                }
+                else
+                {
+                    if (read<uint8>(i) < 0x0F)
+                    {
+                        printf("0%X ", read<uint8>(i) );
+                    }
+                    else
+                    {
+                        printf("%X ", read<uint8>(i) );
+                    }
+                }
+            }
+            printf("\n");
 
-		}
-
-
-
-        
-        
-        
+        }
 
     protected:
-        
+
         size_t _rpos, _wpos;
         std::vector<uint8> _storage;
 };
-
-
-
-
 
 template <typename T> ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
 {
@@ -341,7 +319,6 @@ template <typename T> ByteBuffer &operator<<(ByteBuffer &b, std::vector<T> v)
     }
     return b;
 }
-
 
 template <typename T> ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
 {
@@ -357,7 +334,6 @@ template <typename T> ByteBuffer &operator>>(ByteBuffer &b, std::vector<T> &v)
     return b;
 }
 
-
 template <typename T> ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
 {
     b << (uint32)v.size();
@@ -367,7 +343,6 @@ template <typename T> ByteBuffer &operator<<(ByteBuffer &b, std::list<T> v)
     }
     return b;
 }
-
 
 template <typename T> ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
 {
@@ -383,7 +358,6 @@ template <typename T> ByteBuffer &operator>>(ByteBuffer &b, std::list<T> &v)
     return b;
 }
 
-
 template <typename K, typename V> ByteBuffer &operator<<(ByteBuffer &b, std::map<K, V> &m)
 {
     b << (uint32)m.size();
@@ -393,7 +367,6 @@ template <typename K, typename V> ByteBuffer &operator<<(ByteBuffer &b, std::map
     }
     return b;
 }
-
 
 template <typename K, typename V> ByteBuffer &operator>>(ByteBuffer &b, std::map<K, V> &m)
 {

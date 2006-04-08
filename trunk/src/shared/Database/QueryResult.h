@@ -22,28 +22,19 @@
 class QueryResult
 {
     public:
-        QueryResult(uint64 rowCount, uint32 fieldCount) 
-	    : mFieldCount(fieldCount), mRowCount(rowCount) {}
+        QueryResult(uint64 rowCount, uint32 fieldCount)
+            : mFieldCount(fieldCount), mRowCount(rowCount) {}
 
-        
         virtual ~QueryResult() {}
 
-        
-        
         virtual bool NextRow() = 0;
 
-        
-        
         Field *Fetch() const { return mCurrentRow; }
 
-        
-        
         const Field & operator [] (int index) const { return mCurrentRow[index]; }
 
-        
         int GetFieldCount() const { return mFieldCount; }
 
-        
         uint64 GetRowCount() const { return mRowCount; }
 
     protected:

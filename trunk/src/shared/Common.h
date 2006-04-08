@@ -19,12 +19,11 @@
 #ifndef MANGOSSERVER_COMMON_H
 #define MANGOSSERVER_COMMON_H
 
-#ifndef __GNUC__ 
+#ifndef __GNUC__
 
 #pragma warning(disable:4996)
 
 #ifndef __SHOW_STUPID_WARNINGS__
-
 
 #pragma warning(disable:4244)
 
@@ -39,11 +38,8 @@
 #pragma warning(disable:4305)
 
 #pragma warning(disable:4005)
-#endif // __SHOW_STUPID_WARNINGS__
-
-#endif // __GNUC__
-
-
+#endif                                                      // __SHOW_STUPID_WARNINGS__
+#endif                                                      // __GNUC__
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
@@ -76,8 +72,6 @@
 #include <sstream>
 #include <algorithm>
 
-
-
 #include <zthread/FastMutex.h>
 #include <zthread/LockedQueue.h>
 #include <zthread/Runnable.h>
@@ -96,9 +90,7 @@
 #  include <netdb.h>
 #endif
 
-
 #include "MemoryLeaks.h"
-
 
 #if COMPILER == COMPILER_MICROSOFT
 
@@ -125,7 +117,5 @@
 
 #define STRINGIZE(a) #a
 
-
 #define for if(true) for
-
 #endif
