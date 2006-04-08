@@ -34,12 +34,10 @@ Corpse::Corpse() : Object()
     m_valuesCount = CORPSE_END;
 }
 
-
 void Corpse::Create( uint32 guidlow )
 {
     Object::_Create(guidlow, HIGHGUID_CORPSE);
 }
-
 
 void Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang )
 {
@@ -53,10 +51,9 @@ void Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
 }
 
-
 void Corpse::SaveToDB()
 {
-    
+
     std::stringstream ss;
 
     ss.rdbuf()->str("");
@@ -66,9 +63,8 @@ void Corpse::SaveToDB()
         ss << GetUInt32Value(i) << " ";
     ss << "' )";
 
-		sDatabase.Execute( ss.str().c_str() );
+    sDatabase.Execute( ss.str().c_str() );
 }
-
 
 void Corpse::DeleteFromDB()
 {

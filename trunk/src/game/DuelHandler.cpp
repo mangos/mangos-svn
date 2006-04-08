@@ -30,7 +30,6 @@
 #include "FactionTemplateResolver.h"
 #include "EventSystem.h"
 
-
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {
 
@@ -40,41 +39,39 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
     Player *pl;
     Player *plTarget;
-    
+
     pl     = GetPlayer();
     plTarget = pl->m_pDuel;
 
-	if(pl->GetGUID() != plTarget->GetGUID())
-	{
+    if(pl->GetGUID() != plTarget->GetGUID())
+    {
 
-	    sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
-	    DEBUG_LOG("Player 1 is: %lu", (unsigned long)pl->GetGUID());
-	    DEBUG_LOG("Player 2 is: %lu", (unsigned long)plTarget->GetGUID());
-      
-	    pl->SetUInt32Value(PLAYER_DUEL_TEAM,1);
-	    plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,2);
+        sLog.outDebug( "WORLD: received CMSG_DUEL_ACCEPTED" );
+        DEBUG_LOG("Player 1 is: %lu", (unsigned long)pl->GetGUID());
+        DEBUG_LOG("Player 2 is: %lu", (unsigned long)plTarget->GetGUID());
 
-	    pl->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
-	    pl->SetPvP(true);
+        pl->SetUInt32Value(PLAYER_DUEL_TEAM,1);
+        plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,2);
 
-	    plTarget->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
-	    plTarget->SetPvP(true);
+        pl->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
+        pl->SetPvP(true);
 
-	    pl->m_isInDuel = true;
-	    plTarget->m_isInDuel = true;
+        plTarget->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
+        plTarget->SetPvP(true);
 
-	    WorldPacket data;
+        pl->m_isInDuel = true;
+        plTarget->m_isInDuel = true;
 
-	    data.Initialize(SMSG_DUEL_COUNTDOWN);
-	    data << (uint64)0xbb8; // 3 seconds
-	    pl->GetSession()->SendPacket(&data);
-	    plTarget->GetSession()->SendPacket(&data);
+        WorldPacket data;
 
-	}
+        data.Initialize(SMSG_DUEL_COUNTDOWN);
+        data << (uint64)0xbb8;                              // 3 seconds
+        pl->GetSession()->SendPacket(&data);
+        plTarget->GetSession()->SendPacket(&data);
 
+    }
 
 }
-
 
 void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 {
@@ -88,7 +85,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 
     recvPacket >> guid;
 
-    pl       = GetPlayer();                       
+    pl       = GetPlayer();
     plTarget = pl->m_pDuel;
 
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
@@ -102,7 +99,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     plTarget->GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_DUEL_COMPLETE);
-    data << (uint8)0;                             
+    data << (uint8)0;
     pl->GetSession()->SendPacket(&data);
     plTarget->GetSession()->SendPacket(&data);
 
@@ -111,16 +108,14 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
 
     GameObject* obj = NULL;
     if( pl )
-       obj = ObjectAccessor::Instance().GetGameObject(*pl, guid);
+        obj = ObjectAccessor::Instance().GetGameObject(*pl, guid);
 
     if(obj)
-			MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj,true);
-		
-		pl->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
-   	plTarget->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
-   	pl->SetUInt32Value(PLAYER_DUEL_TEAM,0);
+        MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj,true);
+
+    pl->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
+    plTarget->SetUInt64Value(PLAYER_DUEL_ARBITER,0);
+    pl->SetUInt32Value(PLAYER_DUEL_TEAM,0);
     plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,0);
-   	
+
 }
-
-

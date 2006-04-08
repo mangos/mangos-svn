@@ -33,13 +33,12 @@ namespace AIRegistry
 {
     void Initialize()
     {
-	(new CreatureAIFactory<NullCreatureAI>("NullAI"))->RegisterSelf();
-	(new CreatureAIFactory<AggressorAI>("AggressorAI"))->RegisterSelf();
-	(new CreatureAIFactory<ReactorAI>("ReactorAI"))->RegisterSelf();
+        (new CreatureAIFactory<NullCreatureAI>("NullAI"))->RegisterSelf();
+        (new CreatureAIFactory<AggressorAI>("AggressorAI"))->RegisterSelf();
+        (new CreatureAIFactory<ReactorAI>("ReactorAI"))->RegisterSelf();
 
-	
-	(new MovementGeneratorFactory<RandomMovementGenerator>("Random"))->RegisterSelf();
-	(new MovementGeneratorFactory<WaypointMovementGenerator>("Waypoint"))->RegisterSelf();
+        (new MovementGeneratorFactory<RandomMovementGenerator>("Random"))->RegisterSelf();
+        (new MovementGeneratorFactory<WaypointMovementGenerator>("Waypoint"))->RegisterSelf();
     }
 }
 
@@ -47,13 +46,13 @@ namespace MaNGOS
 {
     namespace Game
     {
-	void Initialize()
-	{
-	    MapManager::Instance().Initialize();
-	    Map::InitStateMachine();
-	    RedZone::Initialize();
-	    AIRegistry::Initialize();
-	    WaypointMovementGenerator::Initialize();
-	}
+        void Initialize()
+        {
+            MapManager::Instance().Initialize();
+            Map::InitStateMachine();
+            RedZone::Initialize();
+            AIRegistry::Initialize();
+            WaypointMovementGenerator::Initialize();
+        }
     }
 }

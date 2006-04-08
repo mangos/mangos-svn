@@ -23,7 +23,7 @@
 
 class WorldSocket;
 
-class WorldSocketMgr 
+class WorldSocketMgr
 {
     public:
         WorldSocketMgr();

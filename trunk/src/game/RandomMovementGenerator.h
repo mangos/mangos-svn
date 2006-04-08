@@ -27,20 +27,18 @@
 
 class MANGOS_DLL_DECL RandomMovementGenerator : public MovementGenerator
 {
-public:
-    RandomMovementGenerator(const Creature &) : i_nextMoveTime(0) {}
+    public:
+        RandomMovementGenerator(const Creature &) : i_nextMoveTime(0) {}
 
-    
-    void Initialize(Creature &);
-    void Reset(Creature &);
-    void Update(Creature &, const uint32 &);
+        void Initialize(Creature &);
+        void Reset(Creature &);
+        void Update(Creature &, const uint32 &);
 
-    static int Permissible(const Creature *);
-private:
-    TimeTracker i_nextMoveTime;
-    float i_waypoints[MAX_RAND_WAYPOINTS+1][3];
-    DestinationHolder<CreatureTraveller> i_destinationHolder;
-    uint32 i_nextMove;
+        static int Permissible(const Creature *);
+    private:
+        TimeTracker i_nextMoveTime;
+        float i_waypoints[MAX_RAND_WAYPOINTS+1][3];
+        DestinationHolder<CreatureTraveller> i_destinationHolder;
+        uint32 i_nextMove;
 };
-
 #endif

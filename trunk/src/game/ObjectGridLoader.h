@@ -25,77 +25,73 @@
 #include "GridDefines.h"
 #include "Cell.h"
 
-
-
 class MANGOS_DLL_DECL ObjectGridLoader
 {
-public:
-	ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell) 
-		: i_cell(cell), i_grid(grid), i_mapId(id), i_gameObjects(0), i_creatures (0)
-	{}
+    public:
+        ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell)
+            : i_cell(cell), i_grid(grid), i_mapId(id), i_gameObjects(0), i_creatures (0)
+            {}
 
-    void Load(GridType &grid);
-    void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
-    void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
+        void Load(GridType &grid);
+        void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
+        void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
 
-    void Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
-    {
-    }
+        void Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+        {
+        }
 
-    void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
-    {
-    
-    }
+        void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
+        {
 
-    void LoadN(void)
-    {
-	i_gameObjects = 0; i_creatures = 0;
-	i_cell.data.Part.cell_y = 0;
-	for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
-	{
-	    i_cell.data.Part.cell_x = x;
-	    for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
-	    {
-		i_cell.data.Part.cell_y = y;
-		GridLoader<Player, AllObjectTypes> loader;
-		loader.Load(i_grid(x, y), *this);
-	    }
-	}
-	sLog.outDebug("%d GameObjects and %d Creatures loaded for grid %d on map %d", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
-    }
+        }
 
-private:
-    Cell i_cell;
-    NGridType &i_grid;
-    uint32 i_mapId;
-    uint32 i_gameObjects;
-    uint32 i_creatures;
+        void LoadN(void)
+        {
+            i_gameObjects = 0; i_creatures = 0;
+            i_cell.data.Part.cell_y = 0;
+            for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
+            {
+                i_cell.data.Part.cell_x = x;
+                for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
+                {
+                    i_cell.data.Part.cell_y = y;
+                    GridLoader<Player, AllObjectTypes> loader;
+                    loader.Load(i_grid(x, y), *this);
+                }
+            }
+            sLog.outDebug("%d GameObjects and %d Creatures loaded for grid %d on map %d", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
+        }
+
+    private:
+        Cell i_cell;
+        NGridType &i_grid;
+        uint32 i_mapId;
+        uint32 i_gameObjects;
+        uint32 i_creatures;
 };
-
 
 class MANGOS_DLL_DECL ObjectGridUnloader
 {
-public:
-    ObjectGridUnloader(NGridType &grid) : i_grid(grid) {}
+    public:
+        ObjectGridUnloader(NGridType &grid) : i_grid(grid) {}
 
-    void UnloadN(void)
-    {
-	for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
-	{
-	    for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
-	    {
-		GridLoader<Player, AllObjectTypes> loader;
-		loader.Unload(i_grid(x, y), *this);
-	    }
-	}
-    }
+        void UnloadN(void)
+        {
+            for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
+            {
+                for(unsigned int y=0; y < MAX_NUMBER_OF_CELLS; ++y)
+                {
+                    GridLoader<Player, AllObjectTypes> loader;
+                    loader.Unload(i_grid(x, y), *this);
+                }
+            }
+        }
 
-    void Unload(GridType &grid);
-    template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
-private:
-    NGridType &i_grid;
+        void Unload(GridType &grid);
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+    private:
+        NGridType &i_grid;
 };
 
 typedef GridLoader<Player, AllObjectTypes> GridLoaderType;
-
 #endif

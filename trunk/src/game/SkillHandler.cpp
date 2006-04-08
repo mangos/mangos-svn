@@ -27,13 +27,6 @@
 #include "ObjectMgr.h"
 #include "UpdateMask.h"
 
-
-
-
-
-
-
-
 void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -45,7 +38,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     uint32 CurTalentPoints =  GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS1);
     if(CurTalentPoints == 0)
     {
-        
+
     }
     else
     {
@@ -58,7 +51,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
         {
             if(!(GetPlayer( )->HasSpell(spellid)))
             {
-                
+
                 data.Initialize(SMSG_LEARNED_SPELL);
                 sLog.outDetail("TalentID: %d Rank: %d Spell: %d\n", talent_id, requested_rank, spellid);
                 data << spellid;
@@ -75,10 +68,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                 }
             }
 
-            
             GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
         }
     }
 }
-
-    

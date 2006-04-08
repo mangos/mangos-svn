@@ -25,27 +25,26 @@ class Unit;
 
 class MANGOS_DLL_DECL ReactorAI : public CreatureAI
 {
-public:
-    
-    ReactorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
+    public:
 
-    void MoveInLineOfSight(Unit *);
-    void AttackStart(Unit *);
-    void AttackStop(Unit *);
-    void HealBy(Unit *healer, uint32 amount_healed);
-    void DamageInflict(Unit *healer, uint32 amount_healed);
-    bool IsVisible(Unit *) const;
+        ReactorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
 
-    void UpdateAI(const uint32);
-    static int Permissible(const Creature *);
+        void MoveInLineOfSight(Unit *);
+        void AttackStart(Unit *);
+        void AttackStop(Unit *);
+        void HealBy(Unit *healer, uint32 amount_healed);
+        void DamageInflict(Unit *healer, uint32 amount_healed);
+        bool IsVisible(Unit *) const;
 
-private:
-    
-    bool needToStop(void) const;
-    void stopAttack(void);
+        void UpdateAI(const uint32);
+        static int Permissible(const Creature *);
 
-    Creature &i_creature;
-    Unit *i_pVictim;
+    private:
+
+        bool needToStop(void) const;
+        void stopAttack(void);
+
+        Creature &i_creature;
+        Unit *i_pVictim;
 };
-
 #endif

@@ -33,7 +33,6 @@ namespace ZThread
     class ReadWriteLock;
 }
 
-
 typedef ZThread::FairReadWriteLock GridRWLock;
 
 template<class MUTEX, class LOCK_TYPE>
@@ -50,7 +49,6 @@ struct WGuard
     MaNGOS::GeneralLock<LOCK_TYPE> i_lock;
 };
 
-
 typedef RGuard<GridRWLock, ZThread::Lockable> GridReadGuard;
 typedef WGuard<GridRWLock, ZThread::Lockable> GridWriteGuard;
 typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
@@ -62,103 +60,91 @@ struct GridInfo
     TimeTracker i_timer;
 };
 
-
-
-
-
-typedef struct{
-uint16 area_flag[16][16];
-uint8 terrain_type[16][16];
-float liquid_level[16][16];
-float Z[MAP_RESOLUTION][MAP_RESOLUTION];
+typedef struct
+{
+    uint16 area_flag[16][16];
+    uint8 terrain_type[16][16];
+    float liquid_level[16][16];
+    float Z[MAP_RESOLUTION][MAP_RESOLUTION];
 }GridMap;
 
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
-{    
-public:
+{
+    public:
 
-    Map(uint32 id, time_t);
+        Map(uint32 id, time_t);
 
-    void Add(Player *);
-    void Remove(Player *, bool);
-    template<class T> void Add(T *);
-    template<class T> void Remove(T *, bool);
+        void Add(Player *);
+        void Remove(Player *, bool);
+        template<class T> void Add(T *);
+        template<class T> void Remove(T *, bool);
 
-    void Update(const uint32&);    
-    uint64 CalculateGridMask(const uint32 &y) const;
+        void Update(const uint32&);
+        uint64 CalculateGridMask(const uint32 &y) const;
 
-    
-    void MessageBoardcast(Player *, WorldPacket *, bool to_self);
+        void MessageBoardcast(Player *, WorldPacket *, bool to_self);
 
-    
-    void MessageBoardcast(Object *, WorldPacket *);
+        void MessageBoardcast(Object *, WorldPacket *);
 
-    
-    void PlayerRelocation(Player *, const float &x, const float &y, const float &z, const float &angl);
+        void PlayerRelocation(Player *, const float &x, const float &y, const float &z, const float &angl);
 
-    
-    void CreatureRelocation(Creature *creature, const float &x, const float &y, const float &, const float &);
+        void CreatureRelocation(Creature *creature, const float &x, const float &y, const float &, const float &);
 
-    
-    template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
+        template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
-    
-    void SetTimer(uint32 t) 
-    { 
-	i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
-    }
+        void SetTimer(uint32 t)
+        {
+            i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t;
+        }
 
-    inline bool IsActiveGrid(Object *obj) const
-    {
-	GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
-	return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
-    }
+        inline bool IsActiveGrid(Object *obj) const
+        {
+            GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
+            return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
+        }
 
-    
-    bool UnloadGrid(const uint32 &x, const uint32 &y);
-    
-	void GetUnitList(const float &x, const float &y, std::list<Unit*> &unlist);
+        bool UnloadGrid(const uint32 &x, const uint32 &y);
 
-    void ResetGridExpiry(GridInfo &info) const
-    {
-	info.i_timer.Reset(i_gridExpiry);
-    }
+        void GetUnitList(const float &x, const float &y, std::list<Unit*> &unlist);
 
-    time_t GetGridExpiry(void) const { return i_gridExpiry; }
-    uint32 GetId(void) const { return i_id; }
+        void ResetGridExpiry(GridInfo &info) const
+        {
+            info.i_timer.Reset(i_gridExpiry);
+        }
 
-    static void InitStateMachine(void);
-	float GetHeight(float x, float y);
-	uint16 GetAreaFlag(float x, float y );
-	uint8 GetTerrainType(float x, float y );
-	float GetWaterLevel(float x, float y );
+        time_t GetGridExpiry(void) const { return i_gridExpiry; }
+        uint32 GetId(void) const { return i_id; }
 
-private:
-    bool loaded(const GridPair &) const;
-    void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
-    void NotifyPlayerVisibility(const Cell &, const CellPair &, Player *);
-    uint64  EnsureGridCreated(const GridPair &);
+        static void InitStateMachine(void);
+        float GetHeight(float x, float y);
+        uint16 GetAreaFlag(float x, float y );
+        uint8 GetTerrainType(float x, float y );
+        float GetWaterLevel(float x, float y );
 
-    template<class T> void AddType(T *obj);
-    template<class T> void RemoveType(T *obj, bool);
+    private:
+        bool loaded(const GridPair &) const;
+        void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
+        void NotifyPlayerVisibility(const Cell &, const CellPair &, Player *);
+        uint64  EnsureGridCreated(const GridPair &);
 
-    uint32 i_id;
+        template<class T> void AddType(T *obj);
+        template<class T> void RemoveType(T *obj, bool);
 
-    GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    volatile uint64 i_gridMask[MAX_NUMBER_OF_GRIDS];
-    volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
-        
-    typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
-    typedef GridReadGuard ReadGuard;
-    typedef GridWriteGuard WriteGuard;
+        uint32 i_id;
 
-    NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-    
-		
-		time_t i_gridExpiry;
+        GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        volatile uint64 i_gridMask[MAX_NUMBER_OF_GRIDS];
+        volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
+
+        typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
+        typedef GridReadGuard ReadGuard;
+        typedef GridWriteGuard WriteGuard;
+
+        NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+
+        time_t i_gridExpiry;
 };
-
 
 inline
 uint64
@@ -169,9 +155,8 @@ Map::CalculateGridMask(const uint32 &y) const
     return mask;
 }
 
-
-template<class LOCK_TYPE, class T, class CONTAINER> 
-inline void 
+template<class LOCK_TYPE, class T, class CONTAINER>
+inline void
 Map::Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor)
 {
     const uint32 x = cell->GridX();
@@ -181,11 +166,9 @@ Map::Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &
 
     if( !cell->NoCreate() || loaded(GridPair(x,y)) )
     {
-	EnsureGridLoadedForPlayer(cell, NULL, false);
-	LOCK_TYPE guard(i_info[x][y]->i_lock);
-	i_grids[x][y]->Visit(cell_x, cell_y, visitor);
+        EnsureGridLoadedForPlayer(cell, NULL, false);
+        LOCK_TYPE guard(i_info[x][y]->i_lock);
+        i_grids[x][y]->Visit(cell_x, cell_y, visitor);
     }
 }
-
 #endif
-

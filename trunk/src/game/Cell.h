@@ -24,88 +24,82 @@
 #include "GridDefines.h"
 #include <cmath>
 
-
 class Map;
 
-
 typedef enum
-    {
-	UPPER_DISTRICT = 1,
-	LOWER_DISTRICT = 1 << 1,
-	LEFT_DISTRICT  = 1 << 2,
-	RIGHT_DISTRICT = 1 << 3,
-	CENTER_DISTRICT = 1 << 4,
-	UPPER_LEFT_DISTRICT = (UPPER_DISTRICT | LEFT_DISTRICT),
-	UPPER_RIGHT_DISTRICT = (UPPER_DISTRICT | RIGHT_DISTRICT),
-	LOWER_LEFT_DISTRICT = (LOWER_DISTRICT | LEFT_DISTRICT),
-	LOWER_RIGHT_DISTRICT = (LOWER_DISTRICT | RIGHT_DISTRICT),
-	ALL_DISTRICT = (UPPER_DISTRICT | LOWER_DISTRICT | LEFT_DISTRICT | RIGHT_DISTRICT | CENTER_DISTRICT)
-    } district_t;
-
+{
+    UPPER_DISTRICT = 1,
+    LOWER_DISTRICT = 1 << 1,
+    LEFT_DISTRICT  = 1 << 2,
+    RIGHT_DISTRICT = 1 << 3,
+    CENTER_DISTRICT = 1 << 4,
+    UPPER_LEFT_DISTRICT = (UPPER_DISTRICT | LEFT_DISTRICT),
+    UPPER_RIGHT_DISTRICT = (UPPER_DISTRICT | RIGHT_DISTRICT),
+    LOWER_LEFT_DISTRICT = (LOWER_DISTRICT | LEFT_DISTRICT),
+    LOWER_RIGHT_DISTRICT = (LOWER_DISTRICT | RIGHT_DISTRICT),
+    ALL_DISTRICT = (UPPER_DISTRICT | LOWER_DISTRICT | LEFT_DISTRICT | RIGHT_DISTRICT | CENTER_DISTRICT)
+} district_t;
 
 template<class T> struct CellLock;
-
 
 struct MANGOS_DLL_DECL Cell
 {
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
 
-
-    
     void operator|=(Cell &cell)
     {
-	data.Part.reserved = 0;
-	cell.data.Part.reserved = 0;
-	uint32 x, y, old_x, old_y;
-	Compute(x, y);
-	cell.Compute(old_x, old_y);
+        data.Part.reserved = 0;
+        cell.data.Part.reserved = 0;
+        uint32 x, y, old_x, old_y;
+        Compute(x, y);
+        cell.Compute(old_x, old_y);
 
-	if( std::abs(int(x-old_x)) > 1 || std::abs(int(y-old_y)) > 1)
-	{
-	    data.Part.reserved = ALL_DISTRICT;
-	    cell.data.Part.reserved = ALL_DISTRICT;
-	    return; 
-	}
+        if( std::abs(int(x-old_x)) > 1 || std::abs(int(y-old_y)) > 1)
+        {
+            data.Part.reserved = ALL_DISTRICT;
+            cell.data.Part.reserved = ALL_DISTRICT;
+            return;
+        }
 
-	if( x < old_x )
-	{
-	    data.Part.reserved |= LEFT_DISTRICT;
-	    cell.data.Part.reserved |= RIGHT_DISTRICT;
-	}
-	else if( old_x < x )
-	{
-	    data.Part.reserved |= RIGHT_DISTRICT;
-	    cell.data.Part.reserved |= LEFT_DISTRICT;
-	}
-	if( y < old_y )
-	{
-	    data.Part.reserved |= UPPER_DISTRICT;
-	    cell.data.Part.reserved |= LOWER_DISTRICT;
-	}
-	else if( old_y < y )
-	{
-	    data.Part.reserved |= LOWER_DISTRICT;
-	    cell.data.Part.reserved |= UPPER_DISTRICT;
-	}
+        if( x < old_x )
+        {
+            data.Part.reserved |= LEFT_DISTRICT;
+            cell.data.Part.reserved |= RIGHT_DISTRICT;
+        }
+        else if( old_x < x )
+        {
+            data.Part.reserved |= RIGHT_DISTRICT;
+            cell.data.Part.reserved |= LEFT_DISTRICT;
+        }
+        if( y < old_y )
+        {
+            data.Part.reserved |= UPPER_DISTRICT;
+            cell.data.Part.reserved |= LOWER_DISTRICT;
+        }
+        else if( old_y < y )
+        {
+            data.Part.reserved |= LOWER_DISTRICT;
+            cell.data.Part.reserved |= UPPER_DISTRICT;
+        }
     }
 
     void Compute(uint32 &x, uint32 &y) const
     {
-	x = data.Part.grid_x*MAX_NUMBER_OF_CELLS + data.Part.cell_x;
-	y = data.Part.grid_y*MAX_NUMBER_OF_CELLS + data.Part.cell_y;
+        x = data.Part.grid_x*MAX_NUMBER_OF_CELLS + data.Part.cell_x;
+        y = data.Part.grid_y*MAX_NUMBER_OF_CELLS + data.Part.cell_y;
     }
 
     inline bool DiffCell(const Cell &cell) const
     {
-	return( data.Part.cell_x != cell.data.Part.cell_x || 
-		data.Part.cell_y != cell.data.Part.cell_y );
+        return( data.Part.cell_x != cell.data.Part.cell_x ||
+            data.Part.cell_y != cell.data.Part.cell_y );
     }
 
     inline bool DiffGrid(const Cell &cell) const
     {
-	return( data.Part.grid_x != cell.data.Part.grid_x || 
-		data.Part.grid_y != cell.data.Part.grid_y );
+        return( data.Part.grid_x != cell.data.Part.grid_x ||
+            data.Part.grid_y != cell.data.Part.grid_y );
     }
 
     inline uint32 CellX(void) const { return data.Part.cell_x; }
@@ -117,52 +111,47 @@ struct MANGOS_DLL_DECL Cell
 
     Cell& operator=(const Cell &cell)
     {
-	this->~Cell();
-	new (this) Cell(cell);
-	return *this;
+        this->~Cell();
+        new (this) Cell(cell);
+        return *this;
     }
-
 
     bool operator==(const Cell &cell) const { return (data.All == cell.data.All); }
     bool operator!=(const Cell &cell) const { return !operator==(cell); }
     union
     {
-	struct 
-	{
-	    unsigned grid_x : 6;
-	    unsigned grid_y : 6;
-	    unsigned cell_x : 4;
-	    unsigned cell_y : 4;
-	    unsigned nocreate : 1;
-	    unsigned reserved : 11;
-	} Part;
-	uint32 All;
+        struct
+        {
+            unsigned grid_x : 6;
+            unsigned grid_y : 6;
+            unsigned cell_x : 4;
+            unsigned cell_y : 4;
+            unsigned nocreate : 1;
+            unsigned reserved : 11;
+        } Part;
+        uint32 All;
     } data;
 
-    
     template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &) const;
 
 };
-
 
 template<class T>
 struct MANGOS_DLL_DECL CellLock
 {
     const Cell& i_cell;
     const CellPair &i_cellPair;
-    CellLock(const Cell &c, const CellPair &p) : i_cell(c), i_cellPair(p) {}    
+    CellLock(const Cell &c, const CellPair &p) : i_cell(c), i_cellPair(p) {}
     CellLock(const CellLock<T> &cell) : i_cell(cell.i_cell), i_cellPair(cell.i_cellPair) {}
     const Cell* operator->(void) const { return &i_cell; }
     const Cell* operator->(void) { return &i_cell; }
     operator const Cell &(void) const { return i_cell; }
     operator const CellPair &(void) const { return i_cellPair; }
-    CellLock<T>& operator=(const CellLock<T> &cell) 
+    CellLock<T>& operator=(const CellLock<T> &cell)
     {
-	this->~CellLock();
-	new (this) CellLock<T>(cell);
-	return *this;
+        this->~CellLock();
+        new (this) CellLock<T>(cell);
+        return *this;
     }
 };
-
-
 #endif

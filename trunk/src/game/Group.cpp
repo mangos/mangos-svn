@@ -48,7 +48,7 @@ void Group::ChangeLeader(const uint64 &guid)
 
     for( i = 0; i < m_count; i++ )
     {
-	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
+        player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
 
         player->SetLeader(guid );
@@ -57,7 +57,6 @@ void Group::ChangeLeader(const uint64 &guid)
 
     SendUpdate();
 }
-
 
 void Group::Disband()
 {
@@ -69,7 +68,7 @@ void Group::Disband()
 
     for( i = 0; i < m_count; i++ )
     {
-	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
+        player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
 
         player->UnSetInGroup();
@@ -77,7 +76,6 @@ void Group::Disband()
     }
 
 }
-
 
 void Group::SendUpdate()
 {
@@ -87,7 +85,7 @@ void Group::SendUpdate()
 
     for( i = 0; i < m_count; i ++ )
     {
-	player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
+        player = ObjectAccessor::Instance().FindPlayer( m_members[i].guid );
         ASSERT( player );
 
         data.Initialize(SMSG_GROUP_LIST);
@@ -112,7 +110,6 @@ void Group::SendUpdate()
         player->GetSession()->SendPacket( &data );
     }
 }
-
 
 uint32 Group::RemoveMember(const uint64 &guid)
 {
@@ -143,7 +140,6 @@ uint32 Group::RemoveMember(const uint64 &guid)
     return m_count;
 }
 
-
 void Group::BroadcastToGroup(WorldSession *session, std::string msg)
 {
     if (session && session->GetPlayer())
@@ -152,7 +148,7 @@ void Group::BroadcastToGroup(WorldSession *session, std::string msg)
         {
             WorldPacket data;
             sChatHandler.FillMessageData(&data, session, CHAT_MSG_PARTY, LANG_UNIVERSAL, NULL, msg.c_str());
-	    Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
+            Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
             if (pl && pl->GetSession())
                 pl->GetSession()->SendPacket(&data);
         }

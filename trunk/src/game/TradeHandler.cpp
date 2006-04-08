@@ -64,7 +64,7 @@ void WorldSession::UpdateTrade()
     for(int i=0; i<7; i++)
     {
         item = (pThis->tradeItems[i] >= 0 ? pThis->GetItemBySlot( (uint8) pThis->tradeItems[i] ) : NULL);
-        
+
         data << (uint8) i;
         if(item)
         {
@@ -78,7 +78,7 @@ void WorldSession::UpdateTrade()
             data << (uint32) 0;
             data << (uint32) 0;
             data << (uint32) 0;
-        }        
+        }
         for(int j=0; j<12; j++)
             data << (uint32) 0;
     }
@@ -92,7 +92,6 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
     Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
     int i, myCount = 0, hisCount = 0, myFreeSlots = 0, hisFreeSlots = 0;
-    
 
     if ( !GetPlayer()->pTrader ) return;
 
@@ -103,23 +102,19 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         data.Initialize(SMSG_TRADE_STATUS);
         data << (uint32)4;
         GetPlayer()->pTrader->GetSession()->SendPacket(&data);
-        
-        
+
         for(i=0; i<6; i++)
         {
-            
+
             if( GetPlayer()->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) myCount++;
             if( GetPlayer()->pTrader->tradeItems[i] >= INVENTORY_SLOT_ITEM_START ) hisCount++;
         }
-        
+
         myFreeSlots = GetPlayer()->CountFreeBagSlot();
-        hisFreeSlots = GetPlayer()->pTrader->CountFreeBagSlot();        
+        hisFreeSlots = GetPlayer()->pTrader->CountFreeBagSlot();
 
-        
-
-        
         if( (myCount + myFreeSlots) < hisCount )
-        {    
+        {
             sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "You do not have enough free slots");
             GetPlayer( )->GetSession( )->SendPacket( &data );
 
@@ -130,7 +125,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
             return;
         }
-        
+
         if( (hisCount + hisFreeSlots) < myCount )
         {
             sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "Your partner do not have enough free bag slots");
@@ -143,52 +138,45 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             GetPlayer()->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
             return;
         }
-        
 
-        
-            GetPlayer()->setGold( -((int) GetPlayer()->tradeGold) );            
-            GetPlayer()->setGold( GetPlayer()->pTrader->tradeGold );
+        GetPlayer()->setGold( -((int) GetPlayer()->tradeGold) );
+        GetPlayer()->setGold( GetPlayer()->pTrader->tradeGold );
 
-            GetPlayer()->pTrader->setGold( -((int) GetPlayer()->pTrader->tradeGold) );            
-            GetPlayer()->pTrader->setGold( GetPlayer()->tradeGold );
+        GetPlayer()->pTrader->setGold( -((int) GetPlayer()->pTrader->tradeGold) );
+        GetPlayer()->pTrader->setGold( GetPlayer()->tradeGold );
 
-            
-            for(i=0; i<6; i++)
+        for(i=0; i<6; i++)
+        {
+            if( GetPlayer()->tradeItems[i] >= 0 )
+                myItems[i] = GetPlayer()->RemoveItemFromSlot(0, (uint8) GetPlayer()->tradeItems[i],true );
+            if( GetPlayer()->pTrader->tradeItems[i] >= 0)
+                hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot(0, (uint8) GetPlayer()->pTrader->tradeItems[i], true );
+        }
+
+        for(i=0; i<6; i++)
+        {
+            if(hisItems[i])
             {
-                if( GetPlayer()->tradeItems[i] >= 0 )
-                    myItems[i] = GetPlayer()->RemoveItemFromSlot(0, (uint8) GetPlayer()->tradeItems[i],true );
-                if( GetPlayer()->pTrader->tradeItems[i] >= 0)
-                    hisItems[i] = GetPlayer()->pTrader->RemoveItemFromSlot(0, (uint8) GetPlayer()->pTrader->tradeItems[i], true );
+
+                hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR, GetPlayer()->pTrader->GetGUID());
+
+                GetPlayer()->AddItemToInventory(0, NULL_SLOT, hisItems[i], false, false, false);
             }
-            
-            for(i=0; i<6; i++)
+            if(myItems[i])
             {
-                if(hisItems[i])
-				{
-					
-					hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR, GetPlayer()->pTrader->GetGUID());
 
-                    GetPlayer()->AddItemToInventory(0, NULL_SLOT, hisItems[i], false, false, false);
-				}
-                if(myItems[i])
-				{
-					
-					myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR, GetPlayer()->GetGUID());
+                myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR, GetPlayer()->GetGUID());
 
-                    GetPlayer()->pTrader->AddItemToInventory(0, NULL_SLOT, myItems[i], false, false, false);
-				}
+                GetPlayer()->pTrader->AddItemToInventory(0, NULL_SLOT, myItems[i], false, false, false);
             }
+        }
 
-        
-
-        
         ClearTrade();
 
-        
         data.Initialize(SMSG_TRADE_STATUS);
         data << (uint32)8;
         GetPlayer()->pTrader->GetSession()->SendPacket(&data);
-    
+
         data.Initialize(SMSG_TRADE_STATUS);
         data << (uint32)8;
         SendPacket(&data);
@@ -199,7 +187,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        
+
         data.Initialize(SMSG_TRADE_STATUS);
         data << (uint32)4;
         GetPlayer()->pTrader->GetSession()->SendPacket(&data);
@@ -211,7 +199,6 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
-    
     data.Initialize(SMSG_TRADE_STATUS);
     data << (uint32)7;
     GetPlayer()->pTrader->GetSession()->SendPacket(&data);
@@ -223,15 +210,13 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
-    
     data.Initialize(SMSG_TRADE_STATUS);
-    data << (uint32)2; 
+    data << (uint32)2;
     GetPlayer()->pTrader->GetSession()->SendPacket(&data);
     GetPlayer()->pTrader->GetSession()->ClearTrade();
 
-    
     data.Initialize(SMSG_TRADE_STATUS);
-    data << (uint32)2; 
+    data << (uint32)2;
     SendPacket(&data);
     ClearTrade();
 }
@@ -243,10 +228,10 @@ void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
     if( GetPlayer()->pTrader )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)3; 
+        data << (uint32)3;
         GetPlayer()->pTrader->GetSession()->SendPacket(&data);
     }
-    
+
     GetPlayer()->pTrader = NULL;
     ClearTrade();
 }
@@ -256,21 +241,20 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     WorldPacket data;
     uint64 ID;
 
-
     if( !GetPlayer()->isAlive() )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)17; 
+        data << (uint32)17;
         SendPacket(&data);
-        return;        
+        return;
     }
 
     if( isLogingOut() )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)19; 
+        data << (uint32)19;
         SendPacket(&data);
-        return;        
+        return;
     }
 
     recvPacket >> ID;
@@ -279,59 +263,58 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     if(!pOther)
     {
-        
+
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)6; 
+        data << (uint32)6;
         SendPacket(&data);
-        return;        
+        return;
     }
-    
+
     if( pOther->pTrader )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)0; 
+        data << (uint32)0;
         SendPacket(&data);
-        return;    
+        return;
     }
-    
+
     if( !pOther->isAlive() )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)18; 
+        data << (uint32)18;
         SendPacket(&data);
-        return;        
+        return;
     }
-    
+
     if( pOther->GetSession()->isLogingOut() )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)20; 
+        data << (uint32)20;
         SendPacket(&data);
-        return;        
+        return;
     }
 
-	if( pOther->GetTeam() != GetPlayer()->GetTeam() )
+    if( pOther->GetTeam() != GetPlayer()->GetTeam() )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)11; 
+        data << (uint32)11;
         SendPacket(&data);
-        return;        
+        return;
     }
-	
-	if( pOther->GetDistance2dSq( (Object*) GetPlayer() ) > 100.00 )
+
+    if( pOther->GetDistance2dSq( (Object*) GetPlayer() ) > 100.00 )
     {
         data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)10; 
+        data << (uint32)10;
         SendPacket(&data);
-        return;        
+        return;
     }
 
-    GetPlayer()->pTrader = pOther; 
-    pOther->pTrader = GetPlayer();  
+    GetPlayer()->pTrader = pOther;
+    pOther->pTrader = GetPlayer();
 
-    
     data.Initialize(SMSG_TRADE_STATUS);
-    data << (uint32) 1; 
+    data << (uint32) 1;
     data << (uint64) GetPlayer()->GetGUID();
     GetPlayer()->pTrader->GetSession()->SendPacket(&data);
 }
@@ -367,7 +350,7 @@ void WorldSession::HandleClearTradeItemOpcode(WorldPacket& recvPacket)
 {
     uint8 slot;
     recvPacket >> slot;
-    
+
     GetPlayer()->tradeItems[slot] = -1;
 
     UpdateTrade();

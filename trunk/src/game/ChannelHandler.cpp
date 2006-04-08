@@ -29,7 +29,6 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
     channelmgr.GetJoinChannel(channelname.c_str(),GetPlayer())->Join(GetPlayer(),pass.c_str());
 }
 
-
 void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 {
     string channelname;
@@ -42,14 +41,12 @@ void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
     channelmgr.LeftChannel(channelname.c_str());
 }
 
-
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->List(GetPlayer());
 }
-
 
 void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 {
@@ -59,7 +56,6 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Password(GetPlayer(),pass.c_str());
 }
 
-
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 {
     string channelname,newp;
@@ -68,14 +64,12 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->SetOwner(GetPlayer(),newp.c_str());
 }
 
-
 void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->GetOwner(GetPlayer());
 }
-
 
 void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 {
@@ -85,7 +79,6 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->SetModerator(GetPlayer(),otp.c_str());
 }
 
-
 void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 {
     string channelname,otp;
@@ -93,7 +86,6 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
     recvPacket >> otp;
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->UnsetModerator(GetPlayer(),otp.c_str());
 }
-
 
 void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 {
@@ -103,7 +95,6 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->SetMute(GetPlayer(),otp.c_str());
 }
 
-
 void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 {
     string channelname,otp;
@@ -111,7 +102,6 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
     recvPacket >> otp;
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->UnsetMute(GetPlayer(),otp.c_str());
 }
-
 
 void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 {
@@ -121,7 +111,6 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Invite(GetPlayer(),otp.c_str());
 }
 
-
 void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 {
     string channelname,otp;
@@ -129,7 +118,6 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
     recvPacket >> otp;
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Kick(GetPlayer(),otp.c_str());
 }
-
 
 void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 {
@@ -139,7 +127,6 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Ban(GetPlayer(),otp.c_str());
 }
 
-
 void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 {
     string channelname,otp;
@@ -148,14 +135,12 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->UnBan(GetPlayer(),otp.c_str());
 }
 
-
 void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
     Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Announce(GetPlayer());
 }
-
 
 void WorldSession::HandleChannelModerate(WorldPacket& recvPacket)
 {

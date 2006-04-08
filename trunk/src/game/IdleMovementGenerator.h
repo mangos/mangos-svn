@@ -23,12 +23,10 @@
 
 class MANGOS_DLL_DECL IdleMovementGenerator : public MovementGenerator
 {
-public:
-    
-    
-    void Initialize(Creature &) {  }
-    void Reset(Creature &);
-    void Update(Creature &, const uint32 &) {}
-};
+    public:
 
+        void Initialize(Creature &) {  }
+        void Reset(Creature &);
+        void Update(Creature &, const uint32 &) {}
+};
 #endif

@@ -43,14 +43,11 @@ ObjectMgr::ObjectMgr()
     m_hiItemGuid = 1;
     m_hiGoGuid = 1;
     m_hiDoGuid = 1;
-	m_hiCorpseGuid=1;
+    m_hiCorpseGuid=1;
 }
-
 
 ObjectMgr::~ObjectMgr()
 {
-
- 
 
     for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); ++ i )
     {
@@ -58,7 +55,6 @@ ObjectMgr::~ObjectMgr()
     }
     mQuests.clear( );
 
-   
     for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
     {
         delete i->second;
@@ -71,14 +67,7 @@ ObjectMgr::~ObjectMgr()
     }
     mAreaTriggerMap.clear( );
 
-  
-   
 }
-
-
-
-
-
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
 {
@@ -94,9 +83,6 @@ Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
     return NULL;
 }
 
-
-
-
 Guild * ObjectMgr::GetGuildById(const uint32 GuildId) const
 {
     GuildSet::const_iterator itr;
@@ -111,26 +97,18 @@ Guild * ObjectMgr::GetGuildById(const uint32 GuildId) const
     return NULL;
 }
 
-
-
-
 CreatureInfo *ObjectMgr::GetCreatureTemplate(uint32 id)
 {
-	return (sCreatureStorage.iNumRecords<=id)?NULL:(CreatureInfo*)sCreatureStorage.pIndex[id];
+    return (sCreatureStorage.iNumRecords<=id)?NULL:(CreatureInfo*)sCreatureStorage.pIndex[id];
 }
-
-
-
-
-
 
 void ObjectMgr::LoadCreatureTemplates()
 {
 
-	sCreatureStorage.Load();
+    sCreatureStorage.Load();
 
-	sLog.outString( ">> Loaded %d creature definitions", sCreatureStorage.RecordCount );
-	sLog.outString( "" );
+    sLog.outString( ">> Loaded %d creature definitions", sCreatureStorage.RecordCount );
+    sLog.outString( "" );
 }
 
 PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
@@ -141,8 +119,9 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     PlayerCreateInfo *pPlayerCreateInfo;
 
     QueryResult *player_result = sDatabase.PQuery("SELECT * FROM playercreateinfo WHERE race = '%u' AND class = '%u';", race, class_);
-    
-    if(!player_result) {
+
+    if(!player_result)
+    {
         sLog.outError("Warning: Can't get info for player creating with race %d and class %d (table 'playercreateinfo' is empty?)", race, class_);
         return NULL;
     }
@@ -182,20 +161,21 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     QueryResult *items_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_items WHERE createid = '0' OR createid = '%u';", createId);
 
-    do {
-		 if(!items_result) break;
-		 items_fields = items_result->Fetch();
-		 pPlayerCreateInfo->item_id.push_back(items_fields[1].GetUInt32());
-		 pPlayerCreateInfo->item_bagIndex.push_back(items_fields[2].GetUInt32());
-		 pPlayerCreateInfo->item_slot.push_back(items_fields[3].GetUInt8());
-		 pPlayerCreateInfo->item_amount.push_back(items_fields[4].GetUInt32());
-	 } while (items_result->NextRow());
+    do
+    {
+        if(!items_result) break;
+        items_fields = items_result->Fetch();
+        pPlayerCreateInfo->item_id.push_back(items_fields[1].GetUInt32());
+        pPlayerCreateInfo->item_bagIndex.push_back(items_fields[2].GetUInt32());
+        pPlayerCreateInfo->item_slot.push_back(items_fields[3].GetUInt8());
+        pPlayerCreateInfo->item_amount.push_back(items_fields[4].GetUInt32());
+    } while (items_result->NextRow());
 
     delete items_result;
-    
+
     QueryResult *spells_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_spells WHERE createid = '0' OR createid = '%u';", createId);
 
-    do 
+    do
     {
         if(!spells_result) break;
         spells_fields = spells_result->Fetch();
@@ -204,10 +184,10 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     } while( spells_result->NextRow() );
 
     delete spells_result;
-    
+
     QueryResult *skills_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_skills WHERE createid = '0' OR createid = '%u';", createId);
 
-    do 
+    do
     {
         if(!skills_result) break;
         skills_fields = skills_result->Fetch();
@@ -221,7 +201,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     QueryResult *actions_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_actions WHERE createid = '0' OR createid = '%u';", createId);
 
-    do 
+    do
     {
         if(!actions_result) break;
         actions_fields = actions_result->Fetch();
@@ -234,7 +214,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete actions_result;
 
-    return pPlayerCreateInfo; 
+    return pPlayerCreateInfo;
 }
 
 uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
@@ -254,7 +234,6 @@ uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
     return guid;
 }
 
-
 bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 {
 
@@ -269,7 +248,6 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 
     return false;
 }
-
 
 void ObjectMgr::LoadAuctions()
 {
@@ -299,13 +277,11 @@ void ObjectMgr::LoadAuctions()
 
 }
 
-
-
 void ObjectMgr::LoadItemPrototypes()
 {
-	sItemStorage.Load ();
- 	sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount);
-	sLog.outString("");
+    sItemStorage.Load ();
+    sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount);
+    sLog.outString("");
 }
 
 void ObjectMgr::LoadAuctionItems()
@@ -326,7 +302,6 @@ void ObjectMgr::LoadAuctionItems()
 
     delete result;
 }
-
 
 void ObjectMgr::LoadMailedItems()
 {
@@ -349,173 +324,164 @@ void ObjectMgr::LoadMailedItems()
 
 void ObjectMgr::LoadGuilds()
 {
-	Guild *newguild;
-	QueryResult *result = sDatabase.PQuery( "SELECT guildid FROM guilds;" );
-	uint32 count = 0;
-	
-	if( !result ) 
-	{
-		
-		barGoLink bar( 1 );
-		
-		bar.step();
+    Guild *newguild;
+    QueryResult *result = sDatabase.PQuery( "SELECT guildid FROM guilds;" );
+    uint32 count = 0;
 
-		sLog.outString( "" );
-		sLog.outString( ">> Loaded %d guild definitions", count );
-		return;
-	}
-	
-	
-	barGoLink bar( result->GetRowCount() );
-	
-	do
-	{
-		Field *fields = result->Fetch();
-		
-		
-		bar.step();
-		count++;
-		
-		newguild = new Guild;
-		newguild->LoadGuildFromDB(fields[0].GetUInt32());
-		AddGuild(newguild);
-		
-	}while( result->NextRow() );
+    if( !result )
+    {
 
-	sLog.outString( "" );
-	sLog.outString( ">> Loaded %d guild definitions", count );
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %d guild definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+        count++;
+
+        newguild = new Guild;
+        newguild->LoadGuildFromDB(fields[0].GetUInt32());
+        AddGuild(newguild);
+
+    }while( result->NextRow() );
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %d guild definitions", count );
 }
 
 void ObjectMgr::LoadQuests()
 {
-	QueryResult *result = sDatabase.PQuery( "SELECT * FROM quests;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM quests;" );
 
     if( !result ) return;
 
-	
-	barGoLink bar( result->GetRowCount() );
+    barGoLink bar( result->GetRowCount() );
 
     Quest *pQuest;
-	uint32 count = 0;
-	int iCalc;
-	int CiC;
+    uint32 count = 0;
+    int iCalc;
+    int CiC;
 
-    do {
+    do
+    {
         Field *fields = result->Fetch();
 
-		
-		bar.step();
+        bar.step();
 
         pQuest = new Quest;
-		iCalc = 0;
+        iCalc = 0;
 
-		pQuest->m_qId        = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qCategory  = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qFlags     = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qId        = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qCategory  = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qFlags     = fields[ iCalc++ ].GetUInt32();
 
-		pQuest->m_qTitle         = fields[ iCalc++ ].GetString();
+        pQuest->m_qTitle         = fields[ iCalc++ ].GetString();
         pQuest->m_qDetails       = fields[ iCalc++ ].GetString();
         pQuest->m_qObjectives    = fields[ iCalc++ ].GetString();
 
-		pQuest->m_qCompletionInfo  = fields[ iCalc++ ].GetString();
-		pQuest->m_qIncompleteInfo  = fields[ iCalc++ ].GetString();
-		pQuest->m_qEndInfo         = fields[ iCalc++ ].GetString();
+        pQuest->m_qCompletionInfo  = fields[ iCalc++ ].GetString();
+        pQuest->m_qIncompleteInfo  = fields[ iCalc++ ].GetString();
+        pQuest->m_qEndInfo         = fields[ iCalc++ ].GetString();
 
-		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-			pQuest->m_qObjectiveInfo[CiC]    = fields[ iCalc++ ].GetString();
+        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+            pQuest->m_qObjectiveInfo[CiC]    = fields[ iCalc++ ].GetString();
 
-		pQuest->m_qPlayerLevel      = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qComplexityLevel  = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qPlayerLevel      = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qComplexityLevel  = fields[ iCalc++ ].GetUInt32();
 
-		pQuest->m_qRequiredQuestsCount = fields[ iCalc++ ].GetUInt32();
-		for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
-		{ pQuest->m_qRequiredQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
+        pQuest->m_qRequiredQuestsCount = fields[ iCalc++ ].GetUInt32();
+        for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
+            { pQuest->m_qRequiredQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-        pQuest->m_qRequiredAbsQuestsCount = fields[ iCalc++ ].GetUInt32();
-		for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
-		{ pQuest->m_qRequiredAbsQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
+            pQuest->m_qRequiredAbsQuestsCount = fields[ iCalc++ ].GetUInt32();
+        for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
+            { pQuest->m_qRequiredAbsQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-		pQuest->m_qLockerQuestsCount = fields[ iCalc++ ].GetUInt32();
-		for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
-		{ pQuest->m_qLockerQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
+            pQuest->m_qLockerQuestsCount = fields[ iCalc++ ].GetUInt32();
+        for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
+            { pQuest->m_qLockerQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-			pQuest->m_qObjItemId[CiC]    = fields[ iCalc++ ].GetUInt32();
+            for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+                pQuest->m_qObjItemId[CiC]    = fields[ iCalc++ ].GetUInt32();
 
-		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-			pQuest->m_qObjItemCount[CiC]    = fields[ iCalc++ ].GetUInt32();
+        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+            pQuest->m_qObjItemCount[CiC]    = fields[ iCalc++ ].GetUInt32();
 
-		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-			pQuest->m_qObjMobId[CiC]    = fields[ iCalc++ ].GetUInt32();
+        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+            pQuest->m_qObjMobId[CiC]    = fields[ iCalc++ ].GetUInt32();
 
-		for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-			pQuest->m_qObjMobCount[CiC]    = fields[ iCalc++ ].GetUInt32();
+        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
+            pQuest->m_qObjMobCount[CiC]    = fields[ iCalc++ ].GetUInt32();
 
+        pQuest->m_qRewChoicesCount = fields[ iCalc++ ].GetUInt32();
+        for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
+            { pQuest->m_qRewChoicesItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-		pQuest->m_qRewChoicesCount = fields[ iCalc++ ].GetUInt32();
-		for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
-		{ pQuest->m_qRewChoicesItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
+            for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
+                { pQuest->m_qRewChoicesItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-		for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
-		{ pQuest->m_qRewChoicesItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
+                pQuest->m_qRewCount = fields[ iCalc++ ].GetUInt32();
+        for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
+            { pQuest->m_qRewItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-		pQuest->m_qRewCount = fields[ iCalc++ ].GetUInt32();
-		for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
-		{ pQuest->m_qRewItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
+            for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
+                { pQuest->m_qRewItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
 
-		for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
-		{ pQuest->m_qRewItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-
-		pQuest->m_qRewMoney         = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qObjRepFaction_1  = fields[ iCalc++ ].GetUInt32();
+                pQuest->m_qRewMoney         = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qObjRepFaction_1  = fields[ iCalc++ ].GetUInt32();
         pQuest->m_qObjRepFaction_2  = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qObjRepValue_1    = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qObjRepValue_1    = fields[ iCalc++ ].GetUInt32();
         pQuest->m_qObjRepValue_2    = fields[ iCalc++ ].GetUInt32();
 
-		pQuest->m_qQuestItem     = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qNextQuestId   = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qRewSpell      = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qObjTime       = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qQuestItem     = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qNextQuestId   = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qRewSpell      = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qObjTime       = fields[ iCalc++ ].GetUInt32();
 
-		pQuest->m_qType          = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qRequiredRaces = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qRequiredClass = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qRequiredTradeskill   = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qSpecialFlags  = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qType          = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qRequiredRaces = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qRequiredClass = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qRequiredTradeskill   = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qSpecialFlags  = fields[ iCalc++ ].GetUInt32();
 
-		pQuest->m_qPointId		 = fields[ iCalc++ ].GetUInt32();
-		pQuest->m_qPointX    	 = fields[ iCalc++ ].GetFloat();
-		pQuest->m_qPointY		 = fields[ iCalc++ ].GetFloat();
-		pQuest->m_qPointOpt		 = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qPointId       = fields[ iCalc++ ].GetUInt32();
+        pQuest->m_qPointX        = fields[ iCalc++ ].GetFloat();
+        pQuest->m_qPointY        = fields[ iCalc++ ].GetFloat();
+        pQuest->m_qPointOpt      = fields[ iCalc++ ].GetUInt32();
 
-		count++;
+        count++;
         AddQuest(pQuest);
     }
     while( result->NextRow() );
 
     delete result;
-	
-	// points all quests for their next quest
-	for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
+
+    // points all quests for their next quest
+    for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
         i->second->m_qNextQuest = objmgr.GetQuest( i->second->m_qNextQuestId );
     }
-	
 
-	sLog.outString( "" );
-	sLog.outString( ">> Loaded %d quest definitions", count );
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %d quest definitions", count );
 }
-
-
 
 void ObjectMgr::AddGossipText(GossipText *pGText)
 {
-	ASSERT( pGText->Text_ID );
+    ASSERT( pGText->Text_ID );
     ASSERT( mGossipText.find(pGText->Text_ID) == mGossipText.end() );
     mGossipText[pGText->Text_ID] = pGText;
 }
-
 
 GossipText *ObjectMgr::GetGossipText(uint32 Text_ID)
 {
@@ -528,97 +494,92 @@ GossipText *ObjectMgr::GetGossipText(uint32 Text_ID)
     return NULL;
 }
 
-
 void ObjectMgr::LoadGossipText()
 {
-	GossipText *pGText;
-	QueryResult *result = sDatabase.PQuery( "SELECT * FROM npc_text;" );
+    GossipText *pGText;
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM npc_text;" );
 
-	int count = 0;
-	if( !result ) return;
-	int cic;
+    int count = 0;
+    if( !result ) return;
+    int cic;
 
-	
-	barGoLink bar( result->GetRowCount() );
+    barGoLink bar( result->GetRowCount() );
 
-	do {
-		count++;
-		cic = 0;
+    do
+    {
+        count++;
+        cic = 0;
 
-		Field *fields = result->Fetch();
+        Field *fields = result->Fetch();
 
-		
-		bar.step();
+        bar.step();
 
-		pGText = new GossipText;
-		pGText->Text_ID    = fields[cic++].GetUInt32();
+        pGText = new GossipText;
+        pGText->Text_ID    = fields[cic++].GetUInt32();
 
-		for (int i=0; i< 8; i++)
-		{
-			pGText->Options[i].Text_0           = fields[cic++].GetString();
-			pGText->Options[i].Text_1           = fields[cic++].GetString();
+        for (int i=0; i< 8; i++)
+        {
+            pGText->Options[i].Text_0           = fields[cic++].GetString();
+            pGText->Options[i].Text_1           = fields[cic++].GetString();
 
-			pGText->Options[i].Language         = fields[cic++].GetUInt32();
-			pGText->Options[i].Probability      = fields[cic++].GetFloat();
+            pGText->Options[i].Language         = fields[cic++].GetUInt32();
+            pGText->Options[i].Probability      = fields[cic++].GetFloat();
 
-			pGText->Options[i].Emotes[0]._Delay  = fields[cic++].GetUInt32();
-			pGText->Options[i].Emotes[0]._Emote  = fields[cic++].GetUInt32();
+            pGText->Options[i].Emotes[0]._Delay  = fields[cic++].GetUInt32();
+            pGText->Options[i].Emotes[0]._Emote  = fields[cic++].GetUInt32();
 
-			pGText->Options[i].Emotes[1]._Delay  = fields[cic++].GetUInt32();
-			pGText->Options[i].Emotes[1]._Emote  = fields[cic++].GetUInt32();
+            pGText->Options[i].Emotes[1]._Delay  = fields[cic++].GetUInt32();
+            pGText->Options[i].Emotes[1]._Emote  = fields[cic++].GetUInt32();
 
-			pGText->Options[i].Emotes[2]._Delay  = fields[cic++].GetUInt32();
-			pGText->Options[i].Emotes[2]._Emote  = fields[cic++].GetUInt32();
-		}
-        
-		if ( !pGText->Text_ID ) continue;
-		AddGossipText( pGText );
+            pGText->Options[i].Emotes[2]._Delay  = fields[cic++].GetUInt32();
+            pGText->Options[i].Emotes[2]._Emote  = fields[cic++].GetUInt32();
+        }
 
-	} while( result->NextRow() );
+        if ( !pGText->Text_ID ) continue;
+        AddGossipText( pGText );
 
-	sLog.outString( "" );
-	sLog.outString( ">> Loaded %d npc texts", count );
-	delete result;
+    } while( result->NextRow() );
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %d npc texts", count );
+    delete result;
 }
-
 
 ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
 {
-	ItemPage *pIText;
-	QueryResult *result = sDatabase.PQuery("SELECT * FROM item_pages WHERE id = '%d';", Page_ID);
+    ItemPage *pIText;
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM item_pages WHERE id = '%d';", Page_ID);
 
-	if( !result ) return NULL;
-	int cic, count = 0;
-	pIText = new ItemPage;
+    if( !result ) return NULL;
+    int cic, count = 0;
+    pIText = new ItemPage;
 
-	do {
-		count++;
-		cic = 0;
+    do
+    {
+        count++;
+        cic = 0;
 
-		Field *fields = result->Fetch();
+        Field *fields = result->Fetch();
 
+        pIText->Page_ID    = fields[cic++].GetUInt32();
 
-		pIText->Page_ID    = fields[cic++].GetUInt32();
+        pIText->PageText   = fields[cic++].GetString();
+        pIText->Next_Page  = fields[cic++].GetUInt32();
 
-		pIText->PageText   = fields[cic++].GetString();
-		pIText->Next_Page  = fields[cic++].GetUInt32();
+        if ( !pIText->Page_ID ) break;
+    } while( result->NextRow() );
 
-		if ( !pIText->Page_ID ) break;
-	} while( result->NextRow() );
-
-	delete result;
-	return pIText;
+    delete result;
+    return pIText;
 }
-
 
 void ObjectMgr::AddAreaTriggerPoint(AreaTriggerPoint *pArea)
 {
-	ASSERT( pArea->Trigger_ID );
-	ASSERT( mAreaTriggerMap.find(pArea->Trigger_ID) == mAreaTriggerMap.end() );
+    ASSERT( pArea->Trigger_ID );
+    ASSERT( mAreaTriggerMap.find(pArea->Trigger_ID) == mAreaTriggerMap.end() );
 
-	mAreaTriggerMap[pArea->Trigger_ID] = pArea;
+    mAreaTriggerMap[pArea->Trigger_ID] = pArea;
 }
-
 
 AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
 {
@@ -631,48 +592,42 @@ AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
     return NULL;
 }
 
-
 void ObjectMgr::LoadAreaTriggerPoints()
 {
-	int count = 0;
-	QueryResult *result = sDatabase.PQuery( "SELECT * FROM triggerquestrelation;" );
-	AreaTriggerPoint *pArea;
+    int count = 0;
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM triggerquestrelation;" );
+    AreaTriggerPoint *pArea;
 
-	if( !result ) return;
+    if( !result ) return;
 
-	
-	barGoLink bar( result->GetRowCount() );
+    barGoLink bar( result->GetRowCount() );
 
-	do {
-		count++;
+    do
+    {
+        count++;
 
-		
-		bar.step();
+        bar.step();
 
-		pArea = new AreaTriggerPoint;
+        pArea = new AreaTriggerPoint;
 
-		Field *fields = result->Fetch();
+        Field *fields = result->Fetch();
 
-		
-		
-		pArea->Trigger_ID      = fields[0].GetUInt32();
-		pArea->Quest_ID        = fields[1].GetUInt32();
-		pArea->Creature_ID     = fields[2].GetUInt32();
+        pArea->Trigger_ID      = fields[0].GetUInt32();
+        pArea->Quest_ID        = fields[1].GetUInt32();
+        pArea->Creature_ID     = fields[2].GetUInt32();
 
-		AddAreaTriggerPoint( pArea );
+        AddAreaTriggerPoint( pArea );
 
-	} while( result->NextRow() );
+    } while( result->NextRow() );
 
-	sLog.outString( "" );
-	sLog.outString( ">> Loaded %d quest trigger points", count );
-	delete result;
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %d quest trigger points", count );
+    delete result;
 }
-
-
 
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
-    
+
     QueryResult *result = sDatabase.PQuery("SELECT taxipath.destination FROM taxipath WHERE taxipath.source = '%d' ORDER BY destination LIMIT 1;", curloc);
 
     if( ! result )
@@ -687,10 +642,9 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
     return 1;
 }
 
-
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
-    
+
     QueryResult *result = sDatabase.PQuery("SELECT taxinodes.ID, SQRT(pow(taxinodes.x-'%f',2)+pow(taxinodes.y-'%f',2)+pow(taxinodes.z-'%f',2)) as distance FROM taxinodes WHERE taxinodes.continent = '%u' ORDER BY distance LIMIT 1;", x, y, z, mapid);
 
     if( ! result  )
@@ -700,13 +654,11 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
     Field *fields = result->Fetch();
     return fields[0].GetUInt8();
 
-    
 }
-
 
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
-    
+
     QueryResult *result = sDatabase.PQuery("SELECT taxipath.price, taxipath.ID FROM taxipath WHERE taxipath.source = '%u' AND taxipath.destination = '%u';", source, destination);
 
     if( ! result )
@@ -720,12 +672,11 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
     path = fields[1].GetUInt16();
 }
 
-
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
 
     QueryResult *result = sDatabase.PQuery("SELECT taxinodes.mount FROM taxinodes WHERE taxinodes.ID = '%u';", id);
-    
+
     if( ! result )
     {
         return 0;
@@ -734,9 +685,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
     Field *fields = result->Fetch();
     return fields[0].GetUInt16();
 
-    
 }
-
 
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 {
@@ -744,7 +693,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
     QueryResult *result = sDatabase.PQuery("SELECT taxipathnodes.X, taxipathnodes.Y, taxipathnodes.Z FROM taxipathnodes WHERE taxipathnodes.path = '%u';", path);
 
     if( ! result )
-	return;
+        return;
 
     uint16 count = result->GetRowCount();
     sLog.outDebug(" ROW COUNT %u ",count);
@@ -761,7 +710,6 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
     } while( result->NextRow() );
 }
 
-
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
 
@@ -769,10 +717,10 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
 
     if( ! result )
         return NULL;
-    
+
     Field *fields = result->Fetch();
     GraveyardTeleport *pgrave = new GraveyardTeleport;
-    
+
     pgrave->X = fields[1].GetFloat();
     pgrave->Y = fields[2].GetFloat();
     pgrave->Z = fields[3].GetFloat();
@@ -793,7 +741,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
         if( totrigger != 0)
         {
 
-	    QueryResult *result1 = sDatabase.PQuery("SELECT TargetMapID,TargetPosX,TargetPosY,TargetPosZ FROM areatrigger WHERE triggerID = '%d';", totrigger);
+            QueryResult *result1 = sDatabase.PQuery("SELECT TargetMapID,TargetPosX,TargetPosY,TargetPosZ FROM areatrigger WHERE triggerID = '%d';", totrigger);
             if ( result1 )
             {
                 Field *fields1 = result1->Fetch();
@@ -820,10 +768,9 @@ void ObjectMgr::LoadTeleportCoords()
     if( !result )
         return;
 
-	uint32 count = 0;
+    uint32 count = 0;
 
     TeleportCoords *pTC;
-
 
     barGoLink bar( result->GetRowCount() );
 
@@ -833,11 +780,11 @@ void ObjectMgr::LoadTeleportCoords()
 
         bar.step();
 
-		count++;
+        count++;
 
         pTC = new TeleportCoords;
         pTC->id = fields[0].GetUInt32();
-		//pTC->Name = fields[6].GetString();
+        //pTC->Name = fields[6].GetString();
         pTC->mapId = fields[5].GetUInt32();
         pTC->x = fields[1].GetFloat();
         pTC->y = fields[2].GetFloat();
@@ -849,14 +796,13 @@ void ObjectMgr::LoadTeleportCoords()
 
     delete result;
 
-	sLog.outString( "" );
-	sLog.outString( ">> Loaded %d teleport definitions", count );
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %d teleport definitions", count );
 }
-
 
 void ObjectMgr::SetHighestGuids()
 {
- 
+
     QueryResult *result = sDatabase.Query( "SELECT MAX(guid) FROM characters;" );
     if( result )
     {
@@ -880,8 +826,6 @@ void ObjectMgr::SetHighestGuids()
 
         delete result;
     }
-
-    
 
     result = sDatabase.Query("SELECT MAX(guid) FROM gameobjects;" );
     if( result )
@@ -913,7 +857,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_mailid = 0;
     }
-    
+
     result = sDatabase.PQuery( "SELECT MAX(guid) FROM corpses;" );
     if( result )
     {
@@ -921,31 +865,27 @@ void ObjectMgr::SetHighestGuids()
 
         delete result;
     }
-	
-}
 
+}
 
 uint32 ObjectMgr::GenerateAuctionID()
 {
- 
+
     return ++m_auctionid;
 }
-
 
 uint32 ObjectMgr::GenerateMailID()
 {
     return ++m_mailid;
 }
 
-
 uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 {
-   
 
     switch(guidhigh)
     {
         case HIGHGUID_ITEM          : return ++m_hiItemGuid;
-		case HIGHGUID_UNIT          : return ++m_hiCreatureGuid;
+        case HIGHGUID_UNIT          : return ++m_hiCreatureGuid;
         case HIGHGUID_PLAYER        : return ++m_hiCharGuid;
         case HIGHGUID_GAMEOBJECT    : return ++m_hiGoGuid;
         case HIGHGUID_CORPSE        : return ++m_hiCorpseGuid;
@@ -953,37 +893,31 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
         default                     : ASSERT(0);
     }
 
-	return 0;    
+    return 0;
 }
-
-
-
-
 
 GameObjectInfo *ObjectMgr::GetGameObjectInfo(uint32 id)
 {
-	//debug
-	if(sGOStorage.iNumRecords<=id)
-	{
-		sLog.outString("ERROR: There is no GO with proto %u id the DB",id);
-		return NULL;
-	}
+    //debug
+    if(sGOStorage.iNumRecords<=id)
+    {
+        sLog.outString("ERROR: There is no GO with proto %u id the DB",id);
+        return NULL;
+    }
 
-	return (sGOStorage.iNumRecords<=id)?NULL:(GameObjectInfo *)sGOStorage.pIndex[id];
+    return (sGOStorage.iNumRecords<=id)?NULL:(GameObjectInfo *)sGOStorage.pIndex[id];
 
 }
 
 void ObjectMgr::LoadGameobjectInfo()
 {
-	sGOStorage.Load();
+    sGOStorage.Load();
 
-	sLog.outString( ">> Loaded %d game object templates", sGOStorage.RecordCount );
-	
+    sLog.outString( ">> Loaded %d game object templates", sGOStorage.RecordCount );
+
 }
-
-
 
 ItemPrototype* ObjectMgr::GetItemPrototype(uint32 id)
 {
-	return (sItemStorage.iNumRecords<=id)?NULL:(ItemPrototype*)sItemStorage.pIndex[id];
+    return (sItemStorage.iNumRecords<=id)?NULL:(ItemPrototype*)sItemStorage.pIndex[id];
 }

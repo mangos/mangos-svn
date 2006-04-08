@@ -27,49 +27,43 @@ class Unit;
 struct MANGOS_DLL_DECL HateMatrix
 {
     typedef hash_map<Unit *, uint32> HateMatrixMapType;
-    
-    
+
     inline uint32 operator[](Unit *unit) const
     {
-	HateMatrixMapType::const_iterator iter = i_hateValues.find(unit);
-	return (iter == i_hateValues.end() ? 0 : iter->second);
+        HateMatrixMapType::const_iterator iter = i_hateValues.find(unit);
+        return (iter == i_hateValues.end() ? 0 : iter->second);
     }
-    
-    
+
     inline uint32& operator[](Unit *unit)
     {
-	HateMatrixMapType::iterator iter = i_hateValues.find(unit);
-	if( iter == i_hateValues.end() )
-	{
-	    std::pair<HateMatrixMapType::iterator, bool> p = i_hateValues.insert( HateMatrixMapType::value_type(unit, 0) );
-	    assert(p.second);
-	    iter = p.first;
-	}
-	
-	return iter->second;
+        HateMatrixMapType::iterator iter = i_hateValues.find(unit);
+        if( iter == i_hateValues.end() )
+        {
+            std::pair<HateMatrixMapType::iterator, bool> p = i_hateValues.insert( HateMatrixMapType::value_type(unit, 0) );
+            assert(p.second);
+            iter = p.first;
+        }
+
+        return iter->second;
     }
-    
-    
-    
+
     inline void ClearMatrix(void) { i_hateValues.clear(); }
-    
-    
+
     inline void RemoveValue(Unit *unit)
     {
-	HateMatrixMapType::iterator iter = i_hateValues.find(unit);
-	if( iter != i_hateValues.end() )
-	    i_hateValues.erase( iter );
+        HateMatrixMapType::iterator iter = i_hateValues.find(unit);
+        if( iter != i_hateValues.end() )
+            i_hateValues.erase( iter );
     }
-    
+
     inline void AddValue(Unit *unit, uint32 val)
     {
-	(*this)[unit] += val;
+        (*this)[unit] += val;
     }
-    
-private:
-    HateMatrixMapType i_hateValues;
-};
 
+    private:
+        HateMatrixMapType i_hateValues;
+};
 
 struct HateBinder
 {
@@ -82,10 +76,9 @@ struct HateBinder
 
     HateBinder& operator=(const HateBinder &obj)
     {
-	this->~HateBinder();
-	new (this) HateBinder(obj);
-	return *this;
+        this->~HateBinder();
+        new (this) HateBinder(obj);
+        return *this;
     }
 };
-
 #endif

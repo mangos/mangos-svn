@@ -20,6 +20,4 @@
 #define MANGOS_GUARDAI_H
 
 #include "CreatureAI.h"
-
-
 #endif

@@ -34,7 +34,6 @@ class DynamicObject;
 class Creature;
 class PlayerMenu;
 
-
 enum Team
 {
     ALLIANCE = 469,
@@ -84,7 +83,6 @@ struct actions
     uint16 action;
 };
 
-
 struct PlayerCreateInfo
 {
     uint8 createId;
@@ -133,9 +131,9 @@ struct Areas
 
 struct Factions
 {
-    uint32 ID;        
+    uint32 ID;
     uint32 ReputationListID;
-    uint32 Flags;     
+    uint32 Flags;
     uint32 Standing;
 };
 
@@ -176,14 +174,14 @@ enum PlayerStateType
     */
 
     PLAYER_STATE_NONE             = 0,
-    PLAYER_STATE_SIT              = 1, 
+    PLAYER_STATE_SIT              = 1,
     PLAYER_STATE_SIT_CHAIR        = 2,
     PLAYER_STATE_SLEEP            = 3,
     PLAYER_STATE_SIT_LOW_CHAIR    = 4,
     PLAYER_STATE_SIT_MEDIUM_CHAIR = 5,
     PLAYER_STATE_SIT_HIGH_CHAIR   = 6,
     PLAYER_STATE_DEAD             = 7,
-    PLAYER_STATE_KNEEL            = 8 
+    PLAYER_STATE_KNEEL            = 8
 };
 
 enum PlayerSpeedType
@@ -197,15 +195,16 @@ enum PlayerSpeedType
 
 enum PlayerState
 {
-    PLAYER_STOPPED = 0,    
+    PLAYER_STOPPED = 0,
     /* Note.. 1 and 2 is reserved in Units.h for UF_TARGET_DIED and UF_ATTACKING */
-    PLAYER_ATTACKING = (1L << 1),                                   // player is attacking someone
-    PLAYER_ATTACK_BY = (1L << 2),                                   // player is attack by someone
-    PLAYER_IN_COMBAT = (PLAYER_ATTACKING | PLAYER_ATTACK_BY),       // player is in combat mode
-    PLAYER_IN_FLIGHT = (1L << 3)                                    // player is i n flight mode
+    PLAYER_ATTACKING = (1L << 1),                           // player is attacking someone
+    PLAYER_ATTACK_BY = (1L << 2),                           // player is attack by someone
+                                                            // player is in combat mode
+    PLAYER_IN_COMBAT = (PLAYER_ATTACKING | PLAYER_ATTACK_BY),
+    PLAYER_IN_FLIGHT = (1L << 3)                            // player is i n flight mode
 };
 
-enum CLIENT_CONTAINER_SLOT  //add by vendy
+enum CLIENT_CONTAINER_SLOT                                  //add by vendy
 {
     CLIENT_SLOT_BACK = 0xFF,
     CLIENT_SLOT_01   = 0x13,
@@ -313,12 +312,13 @@ class WorldSession;
 
 #define BUYBACK_SLOT_END             12
 
-class Player : public Unit {
+class Player : public Unit
+{
     friend class WorldSession;
     public:
         Player (WorldSession *session);
         ~Player ( );
-        
+
         void AddToWorld();
         void RemoveFromWorld();
 
@@ -337,7 +337,7 @@ class Player : public Unit {
         void Die();
         void GiveXP(uint32 xp, const uint64 &guid);
         void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
-        
+
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
         uint32 getQuestStatus(uint32 quest_id);
@@ -350,7 +350,7 @@ class Player : public Unit {
 
         bool isQuestComplete(Quest *pQuest, Creature *pCreature);
         bool isQuestTakable(Quest *pQuest);
-        
+
         void finishExplorationQuest( Quest *pQuest );
         void sendPreparedGossip( uint32 textid, QEmote em, std::string QTitle, uint64 guid);
 
@@ -364,9 +364,8 @@ class Player : public Unit {
         void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
-        void Regenerate(uint16 field_cur, uint16 field_max);  
+        void Regenerate(uint16 field_cur, uint16 field_max);
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
-
 
         inline uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
         inline void ModifyMoney (int32 d) { SetMoney (GetMoney() + d); }
@@ -383,7 +382,7 @@ class Player : public Unit {
             ASSERT( (intId < 8) );
             m_Tutorials[intId] = value;
         }
-        
+
         bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool RemoveItemFromBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
@@ -408,14 +407,15 @@ class Player : public Unit {
         bidentry* GetBid(uint32 id);
         std::list<bidentry*>::iterator GetBidBegin() { return m_bids.begin();};
         std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
-          
+
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
-        bool removeSpell(uint16 spell_id);        
+        bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
         inline std::list<Playerspell*> getSpellList() { return m_spells; };
-        void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana) {
+        void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
+        {
             m_resurrectGUID = guid;
             m_resurrectX = X;
             m_resurrectY = Y;
@@ -424,28 +424,32 @@ class Player : public Unit {
             m_resurrectMana = mana;
         };
 
-		int getCinematic()
-		{
-			return m_cinematic;
-		}
-		void setCinematic(int cine)
-		{
-			m_cinematic = cine;
-		}
+        int getCinematic()
+        {
+            return m_cinematic;
+        }
+        void setCinematic(int cine)
+        {
+            m_cinematic = cine;
+        }
 
-        uint32 getFaction() {
+        uint32 getFaction()
+        {
             return m_faction;
         };
 
-        void SetPvP(bool b) {
+        void SetPvP(bool b)
+        {
             pvpOn = b;
         };
 
-        bool GetPvP() {
+        bool GetPvP()
+        {
             return pvpOn;
         };
 
-        void setGold(int gold) {
+        void setGold(int gold)
+        {
             uint32 moneyuser = GetUInt32Value(PLAYER_FIELD_COINAGE);
             SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
         };
@@ -475,7 +479,7 @@ class Player : public Unit {
         uint32 GetGuildId() { return GetUInt32Value(PLAYER_GUILDID);  }
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
         int GetGuildIdInvited() { return m_GuildIdInvited; }
-        
+
         void SetDuelVs(Player *plyr) { m_pDuel = plyr; }
         void SetInDuel(const bool &val) { m_isInDuel = val; }
         void SetDuelSender(Player *plyr) { m_pDuelSender = plyr; }
@@ -485,22 +489,27 @@ class Player : public Unit {
 
         bool IsGroupMember(Player *plyr);
 
-        void UpdateSlot(uint8 slot) {
+        void UpdateSlot(uint8 slot)
+        {
             Item* Up = RemoveItemFromSlot(0, slot);
             if (Up != NULL) AddItem(0, slot, Up, false, false, false);
         }
-        void UpdateSlot(uint8 bagindex,uint8 slot) {
+        void UpdateSlot(uint8 bagindex,uint8 slot)
+        {
             Item* Up = RemoveItemFromSlot(bagindex, slot);
             if (Up != NULL) AddItem(bagindex,slot, Up, false, false, false);
         }
-        
+
         Item* GetItemBySlot(uint8 bagIndex,uint8 slot) const;
-        Item* GetItemBySlot(uint8 slot) const {
-            ASSERT(slot < BANK_SLOT_BAG_END);     
+        Item* GetItemBySlot(uint8 slot) const
+        {
+            ASSERT(slot < BANK_SLOT_BAG_END);
             return m_items[slot];
         }
-        Item* GetItemByGUID(uint64 guid) const {
-            for (int i=0; i < BANK_SLOT_BAG_END; i++) {
+        Item* GetItemByGUID(uint64 guid) const
+        {
+            for (int i=0; i < BANK_SLOT_BAG_END; i++)
+            {
                 if (m_items[i])
                     if (m_items[i]->GetGUID() == guid) return m_items[i];
             }
@@ -510,7 +519,8 @@ class Player : public Unit {
         uint32 GetSlotByItemGUID(uint64 guid);
         bool GetSlotByItemGUID(uint64 guid,uint8 &bagIndex,uint8 &slot);
 
-        Bag* GetBagBySlot(uint8 slot) const {
+        Bag* GetBagBySlot(uint8 slot) const
+        {
             return (Bag *)m_items[slot];
         }
         void UpdateSkill(uint32 skill_id);
@@ -581,22 +591,24 @@ class Player : public Unit {
         void CleanupChannels();
 
         void BroadcastToFriends(std::string msg);
-        
+
         void UpdateDefense();
         void UpdateSkillWeapon();
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
         uint16 GetSkillValue(uint32 skill);
-    
+
         void SetDontMove(bool dontMove);
         bool GetDontMove() { return m_dontMove; }
 
         void CheckExploreSystem(void);
-    
-        uint32 GetTeam() {
+
+        uint32 GetTeam()
+        {
             return m_team;
         };
-        uint32 GetLevel() {
+        uint32 GetLevel()
+        {
             return (GetUInt32Value(UNIT_FIELD_LEVEL));
         }
 
@@ -605,7 +617,7 @@ class Player : public Unit {
         void UpdateReputation(void);
         void UpdateMaxSkills();
         void ModifySkillBonus(uint32 skillid,int32 val);
-        
+
         //Honor System
         void UpdateHonor(void);
         void CalculateHonor(Unit *pVictim);
@@ -616,13 +628,14 @@ class Player : public Unit {
         int  GetHonorLastWeekRank(void) { return m_last_week_rank; };
         //End of Honor System
 
-        void ApplyItemMods(Item *item,uint8 slot,bool apply) {
+        void ApplyItemMods(Item *item,uint8 slot,bool apply)
+        {
             _ApplyItemMods(item, slot, apply);
         };
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
-        
+
         void CastItemSpell(Item *item,Unit* Target);
         bool IsItemSpellToEquip(SpellEntry *spellInfo);
         bool IsItemSpellToCombat(SpellEntry *spellInfo);
@@ -663,29 +676,27 @@ class Player : public Unit {
 
         void HandleDrowing (uint32 UnderWaterTime);
         void HandleLava();
-        
+
         void StartMirrorTimer(uint8 Type, uint32 MaxValue);
         void ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen);
         void StopMirrorTimer(uint8 Type);
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
-        
-
 
         uint64 m_lootGuid;
 
-        std::string m_name;                       
+        std::string m_name;
         std::string m_rank_name;
-    
+
         PlayerCreateInfo *info;
 
         uint32 m_race;
         uint32 m_class;
         uint32 m_faction;
-        uint32 m_team; 
+        uint32 m_team;
         uint8 m_outfitId;
-        uint16 m_petInfoId;                       
-        uint16 m_petLevel;                        
-        uint16 m_petFamilyId;                     
+        uint16 m_petInfoId;
+        uint16 m_petLevel;
+        uint16 m_petFamilyId;
         uint32 m_dismountCost;
         uint32 m_nextSave;
 
@@ -703,9 +714,9 @@ class Player : public Unit {
         bool m_isInGroup;
         bool m_isInvited;
 
-        uint32 m_GuildIdInvited; 
+        uint32 m_GuildIdInvited;
 
-        uint32 m_currentBuybackSlot; //0~11
+        uint32 m_currentBuybackSlot;                        //0~11
 
         bool inCombat;
 
@@ -714,7 +725,7 @@ class Player : public Unit {
         std::list<Mail*> m_mail;
         std::list<Playerspell*> m_spells;
         std::list<struct actions> m_actions;
-        
+
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
         uint32 m_resurrectHealth, m_resurrectMana;
@@ -730,8 +741,8 @@ class Player : public Unit {
         float m_total_honor_points;
         int m_highest_rank;
         int m_last_week_rank;
-        
-		int m_cinematic;
+
+        int m_cinematic;
 
         Player *pTrader;
         bool acceptTrade;
@@ -750,7 +761,6 @@ class Player : public Unit {
         uint32 m_breathTimer;
         uint8 m_isunderwater;
 };
-
 
 int irand(int min, int max);
 uint32 urand(uint32 min, uint32 max);

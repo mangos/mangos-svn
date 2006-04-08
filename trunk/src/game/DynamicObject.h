@@ -32,7 +32,7 @@ class DynamicObject : public Object
         void Update(uint32 p_time);
         void DealWithSpellDamage(Player &);
         void DealWithSpellDamage(Unit &);
-		void Delete();
+        void Delete();
 
         void PeriodicTriggerDamage(uint32 damage, uint32 tick, float radius)
         {
@@ -40,12 +40,12 @@ class DynamicObject : public Object
             m_PeriodicDamageTick = tick;
             m_PeriodicDamageCurrentTick = tick;
             m_PeriodicDamageRadius = radius;
-			
+
             m_DamageCurTimes = 0;
-			if(tick != 0 )
-			    m_DamageMaxTimes = m_aliveDuration / tick;
-			else
-			    m_DamageCurTimes = 0;
+            if(tick != 0 )
+                m_DamageMaxTimes = m_aliveDuration / tick;
+            else
+                m_DamageCurTimes = 0;
         }
 
     protected:
@@ -64,13 +64,11 @@ class DynamicObject : public Object
         uint32 m_aliveDuration;
 
         time_t m_nextThinkTime;
-        
-		std::list<Unit*> UnitList;
-		bool deleteThis;
-		uint32 m_DamageMaxTimes;
+
+        std::list<Unit*> UnitList;
+        bool deleteThis;
+        uint32 m_DamageMaxTimes;
         uint32 m_DamageCurTimes;
 
 };
-
-
 #endif

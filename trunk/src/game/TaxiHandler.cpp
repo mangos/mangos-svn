@@ -38,24 +38,22 @@ void WorldSession::HandleTaxiNodeStatusQueryOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_TAXINODE_STATUS_QUERY" );
 
     uint64 guid;
-    
+
     recv_data >> guid;
     SendTaxiStatus( guid );
 }
 
 void WorldSession::SendTaxiStatus( uint64 guid )
 {
-	  uint32 curloc;
+    uint32 curloc;
     uint8 field;
     uint32 submask;
-
 
     curloc = objmgr.GetNearestTaxiNode(
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
         GetPlayer( )->GetMapId( ) );
-
 
     sLog.outDebug( "WORLD: current location %u ",curloc);
 
@@ -66,7 +64,6 @@ void WorldSession::SendTaxiStatus( uint64 guid )
     data.Initialize( SMSG_TAXINODE_STATUS );
     data << guid;
 
-    
     if ( (GetPlayer( )->GetTaximask(field) & submask) != submask )
     {
         data << uint8( 0 );
@@ -106,7 +103,6 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     field = (uint8)((curloc - 1) / 32);
     submask = 1<<((curloc-1)%32);
 
-    
     if ( (GetPlayer( )->GetTaximask(field) & submask)
         != submask )
     {
@@ -125,7 +121,6 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
         SendPacket( &update );
     }
 
-    
     memset(TaxiMask, 0, sizeof(TaxiMask));
     if ( !objmgr.GetGlobalTaxiNodeMask( curloc, TaxiMask ) )
         return;
@@ -144,7 +139,6 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Sent SMSG_SHOWTAXINODES" );
 }
-
 
 void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 {
@@ -169,22 +163,15 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     assert( pathnodes.Size() > 0 );
     MountId = objmgr.GetTaxiMount(sourcenode);
 
-    
-    
-    
-    
-    
-
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
 
-    
     if ( MountId == 0 || (path == 0 && cost == 0))
     {
         data << uint32( 1 );
         SendPacket( &data );
         return;
     }
-    
+
     newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - cost);
     if(newmoney < 0 )
     {
@@ -195,24 +182,21 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     GetPlayer( )->setDismountCost( newmoney );
 
     data << uint32( 0 );
-    
-    
-    
-    
+
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
 
     GetPlayer( )->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, MountId );
     GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
     GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
-             
+
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
     data.Initialize( SMSG_MONSTER_MOVE );
-	data << uint8(0xFF);
-    data << GetPlayer( )->GetGUID();  
+    data << uint8(0xFF);
+    data << GetPlayer( )->GetGUID();
     data << GetPlayer( )->GetPositionX( )
-	 << GetPlayer( )->GetPositionY( )
-	 << GetPlayer( )->GetPositionZ( );
+        << GetPlayer( )->GetPositionY( )
+        << GetPlayer( )->GetPositionZ( );
     data << GetPlayer( )->GetOrientation( );
     data << uint8( 0 );
     data << uint32( 0x00000300 );

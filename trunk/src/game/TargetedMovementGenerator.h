@@ -27,26 +27,23 @@ class Unit;
 
 class MANGOS_DLL_DECL TargetedMovementGenerator : public MovementGenerator
 {
-public:
+    public:
 
-    TargetedMovementGenerator(Unit &target) : i_target(target), i_targetedHome(false), i_attackRadius(0) {}
+        TargetedMovementGenerator(Unit &target) : i_target(target), i_targetedHome(false), i_attackRadius(0) {}
 
-    
-    void Initialize(Creature &);
-    void Reset(Creature &);
-    void Update(Creature &, const uint32 &);
+        void Initialize(Creature &);
+        void Reset(Creature &);
+        void Update(Creature &, const uint32 &);
 
-    
-    void TargetedHome(Creature &);
+        void TargetedHome(Creature &);
 
-private:
+    private:
 
-    void _setAttackRadius(Creature &);
-    void _setTargetLocation(Creature &);
-    Unit &i_target;
-    float i_attackRadius;
-    bool i_targetedHome; 
-    DestinationHolder<Traveller<Creature> > i_destinationHolder;
+        void _setAttackRadius(Creature &);
+        void _setTargetLocation(Creature &);
+        Unit &i_target;
+        float i_attackRadius;
+        bool i_targetedHome;
+        DestinationHolder<Traveller<Creature> > i_destinationHolder;
 };
-
 #endif

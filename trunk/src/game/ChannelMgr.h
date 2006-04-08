@@ -19,7 +19,7 @@
 #include "Channel.h"
 #include "Policies/Singleton.h"
 
-class ChannelMgr 
+class ChannelMgr
 {
     map<string,Channel *> channels;
     void MakeNotOnPacket(WorldPacket *data, const char *name)

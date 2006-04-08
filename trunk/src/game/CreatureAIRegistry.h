@@ -28,8 +28,7 @@ namespace MaNGOS
 {
     namespace Game
     {
-	void Initialize(void);
+        void Initialize(void);
     }
 }
-
 #endif

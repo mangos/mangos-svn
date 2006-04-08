@@ -40,31 +40,30 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendTabardVendorActivate( uint64 guid )
 {
-	WorldPacket data;
-	data.Initialize( MSG_TABARDVENDOR_ACTIVATE );
-	data << guid;
-	SendPacket( &data );
+    WorldPacket data;
+    data.Initialize( MSG_TABARDVENDOR_ACTIVATE );
+    data << guid;
+    SendPacket( &data );
 }
 
 void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
 
-	sLog.outString( "WORLD: Received CMSG_BANKER_ACTIVATE" );
+    sLog.outString( "WORLD: Received CMSG_BANKER_ACTIVATE" );
 
-	recv_data >> guid;
+    recv_data >> guid;
 
-	SendShowBank(guid);
+    SendShowBank(guid);
 }
 
 void WorldSession::SendShowBank( uint64 guid )
 {
-	WorldPacket data;
-	data.Initialize( SMSG_SHOW_BANK );
-	data << guid;
-	SendPacket( &data );
+    WorldPacket data;
+    data.Initialize( SMSG_SHOW_BANK );
+    data << guid;
+    SendPacket( &data );
 }
-
 
 void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 {
@@ -77,134 +76,127 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendTrainerList( uint64 guid )
 {
-	std::string str = "Hello! Ready for some training?";
-	SendTrainerList( guid, str );
+    std::string str = "Hello! Ready for some training?";
+    SendTrainerList( guid, str );
 }
 
 void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 {
-	WorldPacket data;
+    WorldPacket data;
 
-	sLog.outDebug( "WORLD: SendTrainerList" );
+    sLog.outDebug( "WORLD: SendTrainerList" );
 
-	Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);        
-    
-	if (!unit)
-	{
-		sLog.outDebug( "WORLD: SendTrainerList - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-		return;
-	}
+    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
-	CreatureInfo *ci = unit->GetCreatureInfo();
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: SendTrainerList - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
 
-	if (!ci)
-	{
-		sLog.outDebug( "WORLD: SendTrainerList - (%u) NO CREATUREINFO! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-		return;
-	}
-		
-	std::list<TrainerSpell*> Tspells;
-	std::list<TrainerSpell*>::iterator itr;
-		
-	for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
-	{		
-		if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id)) 
-			continue;
-		else if(!((*itr)->reqspell) || _player->HasSpell((*itr)->reqspell))
-			Tspells.push_back(*itr);
-	}
-	
-  data.Initialize( SMSG_TRAINER_LIST );     
-  data << guid;
-  data << uint32(0) << uint32(Tspells.size());
-  
-  SpellEntry *spellInfo;
-   
-	for (itr = Tspells.begin(); itr != Tspells.end();itr++)
-	{	
-		spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
-		if(!spellInfo) continue;
-		
-		data << uint32((*itr)->spell->Id);
-		
-    if(_player->getLevel() < spellInfo->spellLevel )
-      	data << uint8(1);
-    else
-    	data << uint8(0);
+    CreatureInfo *ci = unit->GetCreatureInfo();
 
-    data << uint32((*itr)->spellcost);
-    data << uint32(0) << uint32(0);
-    
-    data << uint8(spellInfo->spellLevel);
-    data << uint32(0) << uint32(0);            
-    data << uint32(0) << uint32(0); 
-    data << uint32(0);              
-	}
+    if (!ci)
+    {
+        sLog.outDebug( "WORLD: SendTrainerList - (%u) NO CREATUREINFO! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
 
-	data << strTitle;
-  SendPacket( &data );
-  
-  Tspells.clear();
-  
+    std::list<TrainerSpell*> Tspells;
+    std::list<TrainerSpell*>::iterator itr;
+
+    for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
+    {
+        if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
+            continue;
+        else if(!((*itr)->reqspell) || _player->HasSpell((*itr)->reqspell))
+            Tspells.push_back(*itr);
+    }
+
+    data.Initialize( SMSG_TRAINER_LIST );
+    data << guid;
+    data << uint32(0) << uint32(Tspells.size());
+
+    SpellEntry *spellInfo;
+
+    for (itr = Tspells.begin(); itr != Tspells.end();itr++)
+    {
+        spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
+        if(!spellInfo) continue;
+
+        data << uint32((*itr)->spell->Id);
+
+        if(_player->getLevel() < spellInfo->spellLevel )
+            data << uint8(1);
+        else
+            data << uint8(0);
+
+        data << uint32((*itr)->spellcost);
+        data << uint32(0) << uint32(0);
+
+        data << uint8(spellInfo->spellLevel);
+        data << uint32(0) << uint32(0);
+        data << uint32(0) << uint32(0);
+        data << uint32(0);
+    }
+
+    data << strTitle;
+    SendPacket( &data );
+
+    Tspells.clear();
+
 }
-
-
-
 
 void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;
     uint32 spellId=0, playerGold=0;
-		TrainerSpell *proto=NULL;
-		
+    TrainerSpell *proto=NULL;
+
     recv_data >> guid >> spellId;
-    
+
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    
+
     if(!unit) return;
-    
+
     playerGold = GetPlayer( )->GetUInt32Value( PLAYER_FIELD_COINAGE );
 
-		std::list<TrainerSpell*>::iterator titr;
-						
-		for (titr = unit->GetTspellsBegin(); titr != unit->GetTspellsEnd();titr++)
-		{		
-			if((*titr)->spell->Id == spellId) 
-			{
-        proto = *titr;
-				break;
-			}
-		}
+    std::list<TrainerSpell*>::iterator titr;
+
+    for (titr = unit->GetTspellsBegin(); titr != unit->GetTspellsEnd();titr++)
+    {
+        if((*titr)->spell->Id == spellId)
+        {
+            proto = *titr;
+            break;
+        }
+    }
 
     if( playerGold >= proto->spellcost )
     {
-    	SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
-			if(!spellInfo) return;
-			
-    	if(GetPlayer()->GetUInt32Value( UNIT_FIELD_LEVEL ) < spellInfo->spellLevel)
-    		return; 
-      
-      data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED );
-      data << guid << spellId;
-      SendPacket( &data );
-        
-      GetPlayer( )->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - proto->spellcost );      
+        SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
+        if(!spellInfo) return;
 
-      Spell *spell = new Spell(unit, proto->spell, false, NULL);
+        if(GetPlayer()->GetUInt32Value( UNIT_FIELD_LEVEL ) < spellInfo->spellLevel)
+            return;
 
-      SpellCastTargets targets;
-      targets.m_unitTarget = GetPlayer();
+        data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED );
+        data << guid << spellId;
+        SendPacket( &data );
 
-      spell->prepare(&targets);
-        
-      SendTrainerList( guid );
+        GetPlayer( )->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - proto->spellcost );
+
+        Spell *spell = new Spell(unit, proto->spell, false, NULL);
+
+        SpellCastTargets targets;
+        targets.m_unitTarget = GetPlayer();
+
+        spell->prepare(&targets);
+
+        SendTrainerList( guid );
     }
 }
-
-
-
-
 
 void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
 {
@@ -221,16 +213,12 @@ void WorldSession::HandlePetitionShowListOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
-
-
-
-
 void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
 
     recv_data >> guid;
-		SendAuctionHello(guid);
+    SendAuctionHello(guid);
 }
 
 void WorldSession::SendAuctionHello( uint64 guid )
@@ -245,7 +233,7 @@ void WorldSession::SendAuctionHello( uint64 guid )
 
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 {
-	sLog.outString( "WORLD: Received CMSG_GOSSIP_HELLO" );
+    sLog.outString( "WORLD: Received CMSG_GOSSIP_HELLO" );
 
     WorldPacket data;
     uint64 guid;
@@ -254,18 +242,14 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
-	if (!unit)
-	{
-		sLog.outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-		return;
-	}
+    if (!unit)
+    {
+        sLog.outDebug( "WORLD: CMSG_GOSSIP_HELLO - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
+    }
 
-	Script->GossipHello( GetPlayer(), unit );
+    Script->GossipHello( GetPlayer(), unit );
 }
-
-
-
-
 
 void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 {
@@ -273,26 +257,25 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint32 option;
     uint64 guid;
-    
+
     recv_data >> guid >> option;
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if (!unit)
     {
-	sLog.outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
-	return;
+        sLog.outDebug( "WORLD: CMSG_GOSSIP_SELECT_OPTION - (%u) NO SUCH UNIT! (GUID: %u)", uint32(GUID_LOPART(guid)), guid );
+        return;
     }
-    
+
     Script->GossipSelect( GetPlayer(), unit, GetPlayer()->PlayerTalkClass->GossipOptionSender( option ), GetPlayer()->PlayerTalkClass->GossipOptionAction( option ) );
 }
 
 void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 {
-	SendSpiritRessurect();   
+    SendSpiritRessurect();
 }
 
 void WorldSession::SendSpiritRessurect()
 {
-		
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry( 15007 );
     if(spellInfo)
@@ -320,114 +303,124 @@ void WorldSession::SendSpiritRessurect()
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 {
-	WorldPacket data;
-	
-	// binding
-	data.Initialize( SMSG_BINDPOINTUPDATE );
-	data << float(GetPlayer( )->GetPositionX());
-	data << float(GetPlayer( )->GetPositionY());
-	data << float(GetPlayer( )->GetPositionZ());
-	data << uint32(GetPlayer( )->GetMapId());
-	data << uint32(GetPlayer( )->GetZoneId());
-	SendPacket( &data );
+    WorldPacket data;
 
-	DEBUG_LOG("New Home Position X is %f",GetPlayer( )->GetPositionX());
-	DEBUG_LOG("New Home Position Y is %f",GetPlayer( )->GetPositionY());
-	DEBUG_LOG("New Home Position Z is %f",GetPlayer( )->GetPositionZ());
-	DEBUG_LOG("New Home MapId is %d",GetPlayer( )->GetMapId());
-	DEBUG_LOG("New Home ZoneId is %d",GetPlayer( )->GetZoneId());
+    // binding
+    data.Initialize( SMSG_BINDPOINTUPDATE );
+    data << float(GetPlayer( )->GetPositionX());
+    data << float(GetPlayer( )->GetPositionY());
+    data << float(GetPlayer( )->GetPositionZ());
+    data << uint32(GetPlayer( )->GetMapId());
+    data << uint32(GetPlayer( )->GetZoneId());
+    SendPacket( &data );
 
-	// zone update
-	data.Initialize( SMSG_PLAYERBOUND );
-	data << uint64(GetPlayer( )->GetGUID());
-	data << uint32(GetPlayer( )->GetZoneId());
-	SendPacket( &data );	
+    DEBUG_LOG("New Home Position X is %f",GetPlayer( )->GetPositionX());
+    DEBUG_LOG("New Home Position Y is %f",GetPlayer( )->GetPositionY());
+    DEBUG_LOG("New Home Position Z is %f",GetPlayer( )->GetPositionZ());
+    DEBUG_LOG("New Home MapId is %d",GetPlayer( )->GetMapId());
+    DEBUG_LOG("New Home ZoneId is %d",GetPlayer( )->GetZoneId());
 
-	// update sql homebind
+    // zone update
+    data.Initialize( SMSG_PLAYERBOUND );
+    data << uint64(GetPlayer( )->GetGUID());
+    data << uint32(GetPlayer( )->GetZoneId());
+    SendPacket( &data );
+
+    // update sql homebind
     // fix me : is 'id' even used in 'homebind' table?
     // https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/homebind
-	sDatabase.PExecute("UPDATE `homebind` SET mapid = '%d', zoneid = '%d', positionx = '%f', positiony = '%f', positionz = '%f' WHERE guid = '%lu';", GetPlayer( )->GetMapId(), GetPlayer( )->GetZoneId(), GetPlayer( )->GetPositionX(), GetPlayer( )->GetPositionY(), GetPlayer( )->GetPositionZ(), (unsigned long)GetPlayer( )->GetGUID());
+    sDatabase.PExecute("UPDATE `homebind` SET mapid = '%d', zoneid = '%d', positionx = '%f', positiony = '%f', positionz = '%f' WHERE guid = '%lu';", GetPlayer( )->GetMapId(), GetPlayer( )->GetZoneId(), GetPlayer( )->GetPositionX(), GetPlayer( )->GetPositionY(), GetPlayer( )->GetPositionZ(), (unsigned long)GetPlayer( )->GetGUID());
 
-	// send spell for bind 3286 bind magic
-	data.Initialize(SMSG_SPELL_START );
-	data << uint8(0xFF) << GetPlayer()->GetGUID() << uint8(0xFF) << GetPlayer()->GetGUID() << uint16(3286);
-	data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
-	SendPacket( &data );
+    // send spell for bind 3286 bind magic
+    data.Initialize(SMSG_SPELL_START );
+    data << uint8(0xFF) << GetPlayer()->GetGUID() << uint8(0xFF) << GetPlayer()->GetGUID() << uint16(3286);
+    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+    SendPacket( &data );
 
-	data.Initialize(SMSG_SPELL_GO);
-	data << uint8(0xFF) << GetPlayer()->GetGUID() << uint8(0xFF) << GetPlayer()->GetGUID() << uint16(3286);
-	data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GetPlayer()->GetGUID();
-	data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
-	SendPacket( &data );
+    data.Initialize(SMSG_SPELL_GO);
+    data << uint8(0xFF) << GetPlayer()->GetGUID() << uint8(0xFF) << GetPlayer()->GetGUID() << uint16(3286);
+    data << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << GetPlayer()->GetGUID();
+    data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
+    SendPacket( &data );
 }
 
-void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data ) {
-	sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
-	WorldPacket data;
-	Item* pItem;
-	uint64 npcGUID, itemGUID;
+void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
+    WorldPacket data;
+    Item* pItem;
+    uint64 npcGUID, itemGUID;
 
-	recv_data >> npcGUID >> itemGUID;
+    recv_data >> npcGUID >> itemGUID;
 
-	if (itemGUID) {
-		sLog.outDetail("ITEM: Repair item, itemGUID = %d, npcGUID = %d", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
+    if (itemGUID)
+    {
+        sLog.outDetail("ITEM: Repair item, itemGUID = %d, npcGUID = %d", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
-		pItem = GetPlayer()->GetItemByGUID(itemGUID);
+        pItem = GetPlayer()->GetItemByGUID(itemGUID);
 
-		if (!pItem) {
-			sLog.outDetail("PLAYER: Invalid item, GUID = %d", GUID_LOPART(itemGUID));
-			return;
-		}
-		uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-		if (durability != 0) {
+        if (!pItem)
+        {
+            sLog.outDetail("PLAYER: Invalid item, GUID = %d", GUID_LOPART(itemGUID));
+            return;
+        }
+        uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+        if (durability != 0)
+        {
 
-		// some simple repair formula depending on durability lost
-		uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
-		uint32 costs = durability - curdur;
+            // some simple repair formula depending on durability lost
+            uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
+            uint32 costs = durability - curdur;
 
-		if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
-		{
-		    uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
-		    GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-		    // repair item
-		    pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
-		}
-                else {
-                    DEBUG_LOG("You do not have enough money");
+            if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+            {
+                uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
+                GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                // repair item
+                pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
+            }
+            else
+            {
+                DEBUG_LOG("You do not have enough money");
+            }
+
+        }
+
+    }
+    else
+    {
+        sLog.outDetail("ITEM: Repair all items, npcGUID = %d", GUID_LOPART(npcGUID));
+
+        for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+        {
+            pItem = GetPlayer()->GetItemBySlot(i);
+            if (pItem)
+            {
+                uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+                if (durability != 0)
+                {
+
+                    // some simple repair formula depending on durability lost
+                    uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
+                    uint32 costs = durability - curdur;
+
+                    if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+                    {
+                        uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
+                        GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                        // repair item
+                        pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
+                        // DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);
+                        // GetPlayer()->_ApplyItemMods(srcitem,i, false);
+
+                    }
+                    else
+                    {
+                        DEBUG_LOG("You do not have enough money");
+                    }
+
                 }
-
-
-		}
-
-	} else {
-		sLog.outDetail("ITEM: Repair all items, npcGUID = %d", GUID_LOPART(npcGUID));
-
-		for (int i = 0; i < EQUIPMENT_SLOT_END; i++) {
-			pItem = GetPlayer()->GetItemBySlot(i);
-			if (pItem) {
-				uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-				if (durability != 0) {
-
-		// some simple repair formula depending on durability lost
-		uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
-		uint32 costs = durability - curdur;
-
-		if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
-		{
-		    uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
-		    GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-		    // repair item
-		    pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
-		    // DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);
-		    // GetPlayer()->_ApplyItemMods(srcitem,i, false);
-
-		}
-		else {
-		    DEBUG_LOG("You do not have enough money");
-		}
-
-				}
-			}
-		}
-	}
+            }
+        }
+    }
 }

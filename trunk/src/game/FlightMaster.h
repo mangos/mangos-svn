@@ -44,39 +44,36 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
     typedef std::map<Player *, FlightPathMovementGenerator *> FlightMapType;
     FlightMapType i_flights;
 
-public:
+    public:
 
-    /** ReportFlight reports a certain flight just started
-     * so that the flight master can keep track of the flight.
-     */
-    inline void ReportFlight(Player *pl, FlightPathMovementGenerator *gen)
-    {
-	Guard guard(*this);
-	i_flights[pl] = gen;
-    }
+        /** ReportFlight reports a certain flight just started
+         * so that the flight master can keep track of the flight.
+         */
+        inline void ReportFlight(Player *pl, FlightPathMovementGenerator *gen)
+        {
+            Guard guard(*this);
+            i_flights[pl] = gen;
+        }
 
-    /** FlightReportUpdate updates each flight and if the flight has arrived
-     * to its destination, it will report to its player that the flight has
-     * finish and the flight path will be remove.
-     */
-    inline void FlightReportUpdate(const uint32 &diff)
-    {
-	Guard guard(*this);
-	for(FlightMapType::iterator iter=i_flights.begin(); iter != i_flights.end();)
-	{
-	    if( iter->second->CheckFlight(diff) )
-	    {
-		DEBUG_LOG("Removing player %s flight from flight master.", iter->first->GetName());
-		delete iter->second;
-		i_flights.erase(iter++);
-	    }
-	    else
-		++iter;
-	}
-    }
+        /** FlightReportUpdate updates each flight and if the flight has arrived
+         * to its destination, it will report to its player that the flight has
+         * finish and the flight path will be remove.
+         */
+        inline void FlightReportUpdate(const uint32 &diff)
+        {
+            Guard guard(*this);
+            for(FlightMapType::iterator iter=i_flights.begin(); iter != i_flights.end();)
+            {
+                if( iter->second->CheckFlight(diff) )
+                {
+                    DEBUG_LOG("Removing player %s flight from flight master.", iter->first->GetName());
+                    delete iter->second;
+                    i_flights.erase(iter++);
+                }
+                else
+                    ++iter;
+            }
+        }
 
 };
-
-
 #endif
-

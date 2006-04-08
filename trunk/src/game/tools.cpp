@@ -21,26 +21,26 @@
 
 uint64 readGUID(WorldPacket *data)
 {
-	uint8 guidmark=0;
-	uint8 bit;
-	uint8 shiftdata=0x1;
-	uint64 Temp=0,guid=0;
-	*data >> guidmark;
-	for(int i=0;i<8;i++)
-	{
-		if(guidmark & shiftdata)
-		{
-			Temp = 0;
-			*data >> bit;
-			Temp = bit;
-			Temp <<= i*8;
-			guid |= Temp;
-			//guid=guid+bit*pow(16,i*2);
-		}
-	   shiftdata=shiftdata<<1;
-	}
+    uint8 guidmark=0;
+    uint8 bit;
+    uint8 shiftdata=0x1;
+    uint64 Temp=0,guid=0;
+    *data >> guidmark;
+    for(int i=0;i<8;i++)
+    {
+        if(guidmark & shiftdata)
+        {
+            Temp = 0;
+            *data >> bit;
+            Temp = bit;
+            Temp <<= i*8;
+            guid |= Temp;
+            //guid=guid+bit*pow(16,i*2);
+        }
+        shiftdata=shiftdata<<1;
+    }
 
-	return guid;
+    return guid;
 }
 
 void  writeGUID(WorldPacket * data)

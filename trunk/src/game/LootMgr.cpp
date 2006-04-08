@@ -26,110 +26,98 @@
 
 bool Rand(float chance)
 {
-	uint32 val=rand()%100000;//in %	
-	uint32 p = uint32(chance*1000);
-	return p > val;
+    uint32 val=rand()%100000;                               //in %
+    uint32 p = uint32(chance*1000);
+    return p > val;
 }
 
-
-
 LootStore CreatureLoot;
-
-
 
 void UnloadLoot()
 {
 
-  for(LootStore::iterator iter=CreatureLoot.begin(); iter != CreatureLoot.end(); ++iter)
-  delete [] iter->second.items;
+    for(LootStore::iterator iter=CreatureLoot.begin(); iter != CreatureLoot.end(); ++iter)
+        delete [] iter->second.items;
 
-  CreatureLoot.clear();
+    CreatureLoot.clear();
 
 }
-
 
 void LoadCreaturesLootTables()
 {
 
-	uint32 curId=0;
-	LootStore::iterator tab;
-	uint32 ind;
-	uint32 count = 0;
-	QueryResult *result = sDatabase.Query("SELECT * FROM `loottemplate`;");
-    
+    uint32 curId=0;
+    LootStore::iterator tab;
+    uint32 ind;
+    uint32 count = 0;
+    QueryResult *result = sDatabase.Query("SELECT * FROM `loottemplate`;");
+
     if( result )
-    { 
-		barGoLink bar( result->GetRowCount() );
-    
-		do 
-		{     
-			Field *fields = result->Fetch();
-			bar.step();
-			
-			uint32 entry_id=fields[0].GetUInt32();
-		
-			
-			if( entry_id != curId )
-			{
-				curId = entry_id;
-				ind=0;
-				//new	
-				
-				
-				QueryResult *result1 = 
-				sDatabase.PQuery("SELECT COUNT(*) FROM loottemplate where entry = '%u';",entry_id);
-				
-				if(!result1) continue;
-				
-				Field *fields1 = result1->Fetch();
+    {
+        barGoLink bar( result->GetRowCount() );
 
-				CreatureLoot[entry_id].count=fields1[0].GetUInt32();
-				
-				
-				CreatureLoot[entry_id].items=new StoreLootItem[CreatureLoot[entry_id].count];
-				
-				delete result1;
-			}
-		
-			CreatureLoot[entry_id].items[ind].item.itemid=fields[1].GetUInt32();
-			ItemPrototype*proto=objmgr.GetItemPrototype(fields[1].GetUInt32());
-		
-			if(proto)
-			{
-				CreatureLoot[entry_id].items[ind].item.displayid=proto->DisplayInfoID;
+        do
+        {
+            Field *fields = result->Fetch();
+            bar.step();
 
-			}
-				CreatureLoot[entry_id].items[ind].chance=fields[2].GetFloat();
+            uint32 entry_id=fields[0].GetUInt32();
 
-			ind++;
+            if( entry_id != curId )
+            {
+                curId = entry_id;
+                ind=0;
+                //new
+
+                QueryResult *result1 =
+                    sDatabase.PQuery("SELECT COUNT(*) FROM loottemplate where entry = '%u';",entry_id);
+
+                if(!result1) continue;
+
+                Field *fields1 = result1->Fetch();
+
+                CreatureLoot[entry_id].count=fields1[0].GetUInt32();
+
+                CreatureLoot[entry_id].items=new StoreLootItem[CreatureLoot[entry_id].count];
+
+                delete result1;
+            }
+
+            CreatureLoot[entry_id].items[ind].item.itemid=fields[1].GetUInt32();
+            ItemPrototype*proto=objmgr.GetItemPrototype(fields[1].GetUInt32());
+
+            if(proto)
+            {
+                CreatureLoot[entry_id].items[ind].item.displayid=proto->DisplayInfoID;
+
+            }
+            CreatureLoot[entry_id].items[ind].chance=fields[2].GetFloat();
+
+            ind++;
             count++;
-		} while( result->NextRow() );
-		delete result;
-		sLog.outString( "" );
-		sLog.outString( ">> Loaded %d loot definitions", count );
+        } while( result->NextRow() );
+        delete result;
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %d loot definitions", count );
     }
 
 }
 
-
 void FillLoot(Loot * loot,uint32 loot_id)
 {
-	loot->items.clear ();
-	loot->gold =0;
-	
-	LootStore::iterator tab =CreatureLoot.find(loot_id);
-	if( CreatureLoot.end()==tab)return;
+    loot->items.clear ();
+    loot->gold =0;
 
-	for(uint32 x =0; x<tab->second.count;x++)
-	if(Rand(tab->second.items[x].chance))
-	{
-		__LootItem itm;
-		itm.item =tab->second.items[x].item;
-		itm.isLooted =false;
-		loot->items.push_back(itm);
-						
-	}
+    LootStore::iterator tab =CreatureLoot.find(loot_id);
+    if( CreatureLoot.end()==tab)return;
+
+    for(uint32 x =0; x<tab->second.count;x++)
+        if(Rand(tab->second.items[x].chance))
+    {
+        __LootItem itm;
+        itm.item =tab->second.items[x].item;
+        itm.isLooted =false;
+        loot->items.push_back(itm);
+
+    }
 }
-
-
-

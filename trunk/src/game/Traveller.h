@@ -35,11 +35,11 @@ struct MANGOS_DLL_DECL Traveller
     T &i_traveller;
     Traveller(T &t) : i_traveller(t) {}
     Traveller(const Traveller &obj) : i_traveller(obj) {}
-    Traveller& operator=(const Traveller &obj) 
+    Traveller& operator=(const Traveller &obj)
     {
-	this->~Traveller();
-	new (this) Traveller(obj);
-	return *this;
+        this->~Traveller();
+        new (this) Traveller(obj);
+        return *this;
     }
 
     operator T&(void) { return i_traveller; }
@@ -56,7 +56,7 @@ struct MANGOS_DLL_DECL Traveller
 };
 
 // specializetion for creatures
-template<> 
+template<>
 inline float Traveller<Creature>::Speed()
 {
     return i_traveller.GetMobSpeed() * (i_traveller.getMoveRunFlag() ? UNIT_RUN_SPEED : UNIT_WALK_SPEED);
@@ -84,11 +84,9 @@ inline float Traveller<Player>::Speed()
 template<>
 inline void Traveller<Player>::Relocation(const float &x, const float &y, const float &z, const float &orientation)
 {
-    MapManager::Instance().GetMap(i_traveller.GetMapId())->PlayerRelocation(&i_traveller, x, y, z, orientation);    
+    MapManager::Instance().GetMap(i_traveller.GetMapId())->PlayerRelocation(&i_traveller, x, y, z, orientation);
 }
-
 
 typedef Traveller<Creature> CreatureTraveller;
 typedef Traveller<Player> PlayerTraveller;
-
 #endif

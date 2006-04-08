@@ -27,54 +27,51 @@
 
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >
 {
-    
+
     friend class MaNGOS::OperatorNew<MapManager>;
     typedef HM_NAMESPACE::hash_map<uint32, Map*> MapMapType;
     typedef std::pair<HM_NAMESPACE::hash_map<uint32, Map*>::iterator, bool>  MapMapPair;
-    
-public:
-    
-    Map* GetMap(uint32);
-    void Initialize(void);
-    void Update(time_t);
 
-    inline void SetGridCleanUpDelay(uint32 t) 
-    { 
-    if( t < MIN_GRID_DELAY )
-        i_gridCleanUpDelay = MIN_GRID_DELAY;
-    else
-        i_gridCleanUpDelay = t; 
-    }
+    public:
 
-    inline void SetMapUpdateInterval(uint32 t) 
-    {
-    
-    if( t > 50 )
-    {
-        i_timer.SetInterval(t);
-        i_timer.Reset();
-    }
-    }
+        Map* GetMap(uint32);
+        void Initialize(void);
+        void Update(time_t);
 
-private:
-    MapManager();
-    ~MapManager();
-    
-    
-    MapManager(const MapManager &);
-    MapManager& operator=(const MapManager &);
+        inline void SetGridCleanUpDelay(uint32 t)
+        {
+            if( t < MIN_GRID_DELAY )
+                i_gridCleanUpDelay = MIN_GRID_DELAY;
+            else
+                i_gridCleanUpDelay = t;
+        }
 
-    inline Map* _getMap(uint32 id) 
-    {
-    MapMapType::iterator iter = i_maps.find(id);
-    return (iter == i_maps.end() ? NULL : iter->second);
-    }
+        inline void SetMapUpdateInterval(uint32 t)
+        {
 
-    typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;    
-    uint32 i_gridCleanUpDelay;
-    MapMapType i_maps;
-    IntervalTimer i_timer;
+            if( t > 50 )
+            {
+                i_timer.SetInterval(t);
+                i_timer.Reset();
+            }
+        }
+
+    private:
+        MapManager();
+        ~MapManager();
+
+        MapManager(const MapManager &);
+        MapManager& operator=(const MapManager &);
+
+        inline Map* _getMap(uint32 id)
+        {
+            MapMapType::iterator iter = i_maps.find(id);
+            return (iter == i_maps.end() ? NULL : iter->second);
+        }
+
+        typedef MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>::Lock Guard;
+        uint32 i_gridCleanUpDelay;
+        MapMapType i_maps;
+        IntervalTimer i_timer;
 };
-
-
 #endif

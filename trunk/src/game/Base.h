@@ -28,29 +28,27 @@
  */
 class Base
 {
-private:
-	/// Object reference count
-	int RefCount;
+    private:
+        /// Object reference count
+        int RefCount;
 
-protected:
-	/**
-	 * Destroy this object. Destructor is virtual, because class contains
-	 * virtual methods; also it is private because it is never intended
-	 * to be called directly; use DecRef() instead: when reference counter
-	 * reaches zero, the object will be destroyed.
-	 */
-	virtual ~Base ();
+    protected:
+        /**
+         * Destroy this object. Destructor is virtual, because class contains
+         * virtual methods; also it is private because it is never intended
+         * to be called directly; use DecRef() instead: when reference counter
+         * reaches zero, the object will be destroyed.
+         */
+        virtual ~Base ();
 
-public:
-	
+    public:
 
-	Base ();
+        Base ();
 
-	void IncRef ();
-	
-	void DecRef ();
-	int GetRefCount ();
-	
+        void IncRef ();
+
+        void DecRef ();
+        int GetRefCount ();
+
 };
-
-#endif // __BASE_H__
+#endif                                                      // __BASE_H__

@@ -39,7 +39,7 @@ class Channel
     Player *owner;
     string password;
     private:
-        
+
         WorldPacket *MakeNotifyPacket(WorldPacket *data, uint8 code)
         {
             data->Initialize(SMSG_CHANNEL_NOTIFY);
@@ -58,7 +58,7 @@ class Channel
         void MakeNotOn(WorldPacket *data, const char *who) { *MakeNotifyPacket(data,0x09) << who; }
         void MakeNotOwner(WorldPacket *data) { MakeNotifyPacket(data,0x0A); }
         void MakeWhoOwner(WorldPacket *data) { *MakeNotifyPacket(data,0x0B) << ((constant || owner == NULL) ? "Nobody" : owner->GetName()); }
-        
+
         void MakeModeChange(WorldPacket *data, Player *who, char moderator, char voice)
         {
             MakeNotifyPacket(data,0x0C);
@@ -82,11 +82,11 @@ class Channel
         void MakeYouAreBanned(WorldPacket *data) { MakeNotifyPacket(data,0x13); }
         void MakeBanned(WorldPacket *data, Player *good, Player *bad) { *MakeNotifyPacket(data,0x14) << bad->GetGUID() << good->GetGUID(); }
         void MakeUnbanned(WorldPacket *data, Player *good, Player *bad) { *MakeNotifyPacket(data,0x15) << bad->GetGUID() << good->GetGUID(); }
-        
+
         void MakeAlreadyOn(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x17) << who->GetGUID(); }
         void MakeInvited(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x18) << who->GetGUID(); }
         void MakeWrongAlliance(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x19) << who->GetGUID(); }
-        
+
         void MakeYouInvited(WorldPacket *data, Player *who) { *MakeNotifyPacket(data,0x1D) << who->GetName(); }
 
         void SendToAll(WorldPacket *data)

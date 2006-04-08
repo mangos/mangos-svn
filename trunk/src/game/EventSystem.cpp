@@ -56,7 +56,6 @@ uint32 wmpe=0;
 #define end_read_mse rmse--;
 #define expand_mse rmse--;write_mse
 
-
 #define write_se while(rse||wse);wse=1;
 #define end_write_se wse=0;
 
@@ -99,503 +98,483 @@ uint32 wmpe=0;
 #define MSleep sleep
 #endif
 
-
-
-
 inline uint32 now()
 {
-#if PLATFORM == PLATFORM_WIN32
+    #if PLATFORM == PLATFORM_WIN32
     return timeGetTime();
-#else
+    #else
     struct timeb tp;
     ftime(&tp);
 
     return  tp.time * 1000 + tp.millitm;
-#endif
-} 
-
+    #endif
+}
 
 void PushmsEvent(Event * event)
 {
-	Event *pos;
-	read_mse
-	if(msEvents)
-	{
-		pos=msEvents;
-		while(pos->pNext && ((Event *)(pos->pNext))->time <=event->time)
-		pos=(Event*)pos->pNext;
-		
-		event->pNext =pos->pNext ;
-			
-		expand_mse
-		pos->pNext =event;
-		
-	}
-	else
-	{
-		event->pNext =NULL;
-		expand_mse
-		msEvents =event;
-		
-	}
-	end_write_mse
-}
+    Event *pos;
+    read_mse
+        if(msEvents)
+    {
+        pos=msEvents;
+        while(pos->pNext && ((Event *)(pos->pNext))->time <=event->time)
+            pos=(Event*)pos->pNext;
 
+        event->pNext =pos->pNext ;
+
+        expand_mse
+            pos->pNext =event;
+
+    }
+    else
+    {
+        event->pNext =NULL;
+        expand_mse
+            msEvents =event;
+
+    }
+    end_write_mse
+}
 
 void PushsEvent(Event * event)
 {
-	Event *pos;
-	read_se
-	if(sEvents)
-	{
-		pos=sEvents;
-		while(pos->pNext && ((Event *)(pos->pNext))->time <=event->time)
-		pos=(Event*)pos->pNext;
-		
-		event->pNext =pos->pNext ;
-			
-		expand_se
-		pos->pNext =event;
-		
-	}
-	else
-	{
-		event->pNext =NULL;
-		expand_se
-		sEvents =event;
-	}
-	end_write_se
-}
+    Event *pos;
+    read_se
+        if(sEvents)
+    {
+        pos=sEvents;
+        while(pos->pNext && ((Event *)(pos->pNext))->time <=event->time)
+            pos=(Event*)pos->pNext;
 
+        event->pNext =pos->pNext ;
+
+        expand_se
+            pos->pNext =event;
+
+    }
+    else
+    {
+        event->pNext =NULL;
+        expand_se
+            sEvents =event;
+    }
+    end_write_se
+}
 
 void PushmEvent(Event * event)
 {
-	Event *pos;
-	read_me
-	if(mEvents)
-	{
-		pos=mEvents;
-		while(pos->pNext && ((Event *)(pos->pNext))->time <=event->time)
-		pos=(Event*)pos->pNext;
-			
-		event->pNext =pos->pNext;
-		expand_me
-		pos->pNext =event;
-	}
-	else
-	{
-		event->pNext =NULL;
-		expand_me
-		mEvents =event;
-	}
-	end_write_me
+    Event *pos;
+    read_me
+        if(mEvents)
+    {
+        pos=mEvents;
+        while(pos->pNext && ((Event *)(pos->pNext))->time <=event->time)
+            pos=(Event*)pos->pNext;
+
+        event->pNext =pos->pNext;
+        expand_me
+            pos->pNext =event;
+    }
+    else
+    {
+        event->pNext =NULL;
+        expand_me
+            mEvents =event;
+    }
+    end_write_me
 }
 
 uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread,bool bPeriodic)
 {
-	if(bPeriodic)
-	{
-		if(avalabelid==0)
-		{
-			eventid++;
-			avalabelid=eventid;
-		}
-		PeriodicEvent *event=new PeriodicEvent;
-	
-		event->handler=func;
-		event->param =param;
-		event->period =timer;
-		event->st =separate_thread;
-		event->id=eventid;
-		event->time =now()+timer;
+    if(bPeriodic)
+    {
+        if(avalabelid==0)
+        {
+            eventid++;
+            avalabelid=eventid;
+        }
+        PeriodicEvent *event=new PeriodicEvent;
 
-		if(timer<=60000)//less then a minute
-		{
-			write_mspe
-			event->pNext =msPEvents;
-			msPEvents=event;
-			end_write_mspe
-		}
-		else if(timer<=3600000)//hour
-		{
-			write_spe
-			event->pNext =sPEvents;
-			sPEvents=event;
-			end_write_mpe
-		}
-		else
-		{
-			write_mpe
-			event->pNext =mPEvents;
-			mPEvents=event;
-			end_write_mpe
-		}
-		uint32 useid=avalabelid;
-		avalabelid=0;
-		return useid;
-	
-	}else
-	{
-		Event * event=new Event;
-		
-		event->handler=func;
-		event->param =param;
-		event->st =separate_thread;
-        event->time =now()+timer;	
-		
-		if(timer<=60000)//less then a minute
-		{
-			if(rmse||wmse)
-			{
-				MThread* t=new MThread;
-				t->Start(( void (*)(void*))&PushmsEvent,event);
-			}
-			else PushmsEvent(event);
-		}
-		else if(timer<=3600000)//hour
-		{
-			if(rse||wse)
-			{
-				MThread* t=new MThread;
-				t->Start(( void (*)(void*))&PushsEvent,event);
-			}
-			else PushsEvent(event);
-		}
-		else
-		{
-			if(rme||wme)
-			{
-				MThread* t=new MThread;
-				t->Start(( void (*)(void*))&PushmEvent,event);
-			}
-			else PushmEvent(event);
-		} 	
-		return 0;
-	}
+        event->handler=func;
+        event->param =param;
+        event->period =timer;
+        event->st =separate_thread;
+        event->id=eventid;
+        event->time =now()+timer;
 
-	
+        if(timer<=60000)                                    //less then a minute
+        {
+            write_mspe
+                event->pNext =msPEvents;
+            msPEvents=event;
+            end_write_mspe
+        }
+        else if(timer<=3600000)                             //hour
+        {
+            write_spe
+                event->pNext =sPEvents;
+            sPEvents=event;
+            end_write_mpe
+        }
+        else
+        {
+            write_mpe
+                event->pNext =mPEvents;
+            mPEvents=event;
+            end_write_mpe
+        }
+        uint32 useid=avalabelid;
+        avalabelid=0;
+        return useid;
+
+    }else
+    {
+        Event * event=new Event;
+
+        event->handler=func;
+        event->param =param;
+        event->st =separate_thread;
+        event->time =now()+timer;
+
+        if(timer<=60000)                                    //less then a minute
+        {
+            if(rmse||wmse)
+            {
+                MThread* t=new MThread;
+                t->Start(( void (*)(void*))&PushmsEvent,event);
+            }
+            else PushmsEvent(event);
+        }
+        else if(timer<=3600000)                             //hour
+        {
+            if(rse||wse)
+            {
+                MThread* t=new MThread;
+                t->Start(( void (*)(void*))&PushsEvent,event);
+            }
+            else PushsEvent(event);
+        }
+        else
+        {
+            if(rme||wme)
+            {
+                MThread* t=new MThread;
+                t->Start(( void (*)(void*))&PushmEvent,event);
+            }
+            else PushmEvent(event);
+        }
+        return 0;
+    }
+
 }
 
 void RemovePeriodicEvent(uint32 eventid)
 {
-		
-		PeriodicEvent * prev=NULL;
-		read_mspe
-		PeriodicEvent * pos=msPEvents;
-	
-		while(pos)
-		{
-			if(pos->id==eventid)
-			{
-				expand_mspe
-				if(prev)
-					prev->pNext=pos->pNext ;
-				else
-					msPEvents=(PeriodicEvent*)pos->pNext ;
-				
-				delete pos;
-				if(avalabelid==0)
-					avalabelid=eventid;
-				end_write_mspe
-				return;
-			
-			}else
-			{
-				prev=pos;
-				pos=(PeriodicEvent*)pos->pNext ;
-			}
-								
 
-		}
-		end_read_mspe
+    PeriodicEvent * prev=NULL;
+    read_mspe
+        PeriodicEvent * pos=msPEvents;
 
+    while(pos)
+    {
+        if(pos->id==eventid)
+        {
+            expand_mspe
+                if(prev)
+                prev->pNext=pos->pNext ;
+            else
+                msPEvents=(PeriodicEvent*)pos->pNext ;
 
-		prev=NULL;
+            delete pos;
+            if(avalabelid==0)
+                avalabelid=eventid;
+            end_write_mspe
+                return;
 
-		read_spe
-		pos=sPEvents;
-	
-		while(pos)
-		{
-			if(pos->id==eventid)
-			{
-				expand_spe
-				if(prev)
-					prev->pNext=pos->pNext ;
-				else
-					sPEvents=(PeriodicEvent*)pos->pNext ;
-				
-				delete pos;
-				if(avalabelid==0)
-					avalabelid=eventid;
-				end_write_spe
-				return;
-			
-			}else
-			{
-				prev=pos;
-				pos=(PeriodicEvent*)pos->pNext ;
-			}
-								
+        }else
+        {
+            prev=pos;
+            pos=(PeriodicEvent*)pos->pNext ;
+        }
 
-		}
-		end_read_spe	
+    }
+    end_read_mspe
 
+        prev=NULL;
 
-		prev=NULL;
+    read_spe
+        pos=sPEvents;
 
-		read_mpe
-		pos=mPEvents;
-	
-		while(pos)
-		{
-			if(pos->id==eventid)
-			{
-				expand_mpe
-				if(prev)
-					prev->pNext=pos->pNext ;
-				else
-					mPEvents=(PeriodicEvent*)pos->pNext ;
-				
-				delete pos;
-				if(avalabelid==0)
-					avalabelid=eventid;
-				end_write_mpe
-				return;
-			
-			}else
-			{
-				prev=pos;
-				pos=(PeriodicEvent*)pos->pNext ;
-			}
-								
+    while(pos)
+    {
+        if(pos->id==eventid)
+        {
+            expand_spe
+                if(prev)
+                prev->pNext=pos->pNext ;
+            else
+                sPEvents=(PeriodicEvent*)pos->pNext ;
 
-		}
-		end_read_mpe	
+            delete pos;
+            if(avalabelid==0)
+                avalabelid=eventid;
+            end_write_spe
+                return;
+
+        }else
+        {
+            prev=pos;
+            pos=(PeriodicEvent*)pos->pNext ;
+        }
+
+    }
+    end_read_spe
+
+        prev=NULL;
+
+    read_mpe
+        pos=mPEvents;
+
+    while(pos)
+    {
+        if(pos->id==eventid)
+        {
+            expand_mpe
+                if(prev)
+                prev->pNext=pos->pNext ;
+            else
+                mPEvents=(PeriodicEvent*)pos->pNext ;
+
+            delete pos;
+            if(avalabelid==0)
+                avalabelid=eventid;
+            end_write_mpe
+                return;
+
+        }else
+        {
+            prev=pos;
+            pos=(PeriodicEvent*)pos->pNext ;
+        }
+
+    }
+    end_read_mpe
 
 }
 
 void msThread()
 {
 
-	uint32 cur=now();
-	
-	while(1)
-	{
-		MSleep(ES_RESOLUTION-(now()-cur));//execution time compensation
-		
-		write_mse
-		Event * pos=msEvents;
-		cur=now();
-		while(pos && cur >= pos->time)
-		{
-			if(pos->st)
-			{
-				MThread *tr=new MThread ();
-				tr->Start (pos->handler,pos->param );
-			}
-			else
-				pos->handler (pos->param );
-		
-			msEvents=(Event*)pos->pNext ;
-			delete pos;
-			pos=msEvents;
-		}
-		end_write_mse	
-	}
+    uint32 cur=now();
+
+    while(1)
+    {
+        MSleep(ES_RESOLUTION-(now()-cur));                  //execution time compensation
+
+        write_mse
+            Event * pos=msEvents;
+        cur=now();
+        while(pos && cur >= pos->time)
+        {
+            if(pos->st)
+            {
+                MThread *tr=new MThread ();
+                tr->Start (pos->handler,pos->param );
+            }
+            else
+                pos->handler (pos->param );
+
+            msEvents=(Event*)pos->pNext ;
+            delete pos;
+            pos=msEvents;
+        }
+        end_write_mse
+    }
 
 }
-
 
 void mspThread()
 {
 
-	uint32 cur=now();
-	
-	while(1)
-	{
-		MSleep(ES_RESOLUTION-(now()-cur));//execution time compensation
-		read_mspe
-		PeriodicEvent * ppos=msPEvents;
-		cur=now();
+    uint32 cur=now();
 
-		while(ppos)
-		{
-			if(cur >= ppos->time)
-			{
-				if(ppos->st)
-				{
-					MThread *tr=new MThread ();
-					tr->Start (ppos->handler,ppos->param );
-				}
-				else
-					ppos->handler (ppos->param );
+    while(1)
+    {
+        MSleep(ES_RESOLUTION-(now()-cur));                  //execution time compensation
+        read_mspe
+            PeriodicEvent * ppos=msPEvents;
+        cur=now();
 
-				ppos->time=cur+ppos->period ;
-			}
-		
-			ppos=(PeriodicEvent*)ppos->pNext;
-			cur=now();
-		}
-		end_read_mspe	
-	
-	}
+        while(ppos)
+        {
+            if(cur >= ppos->time)
+            {
+                if(ppos->st)
+                {
+                    MThread *tr=new MThread ();
+                    tr->Start (ppos->handler,ppos->param );
+                }
+                else
+                    ppos->handler (ppos->param );
+
+                ppos->time=cur+ppos->period ;
+            }
+
+            ppos=(PeriodicEvent*)ppos->pNext;
+            cur=now();
+        }
+        end_read_mspe
+
+    }
 
 }
- 
+
 void sThread()
 {
 
-	uint32 cur=now();
-	
-	while(1)
-	{
-		MSleep(ES_RESOLUTION*30-(now()-cur));
-		write_se
-		Event * pos=sEvents;
-		cur=now();
+    uint32 cur=now();
 
-		while(pos && cur >= pos->time)
-		{
-			if(pos->st)
-			{
-				MThread *tr=new MThread ();
-				tr->Start (pos->handler,pos->param );
-			}
-			else
-				pos->handler (pos->param );
-		
-			sEvents=(Event*)pos->pNext ;
-			delete pos;
-			pos=sEvents;
-		}
-			
-		end_write_se
+    while(1)
+    {
+        MSleep(ES_RESOLUTION*30-(now()-cur));
+        write_se
+            Event * pos=sEvents;
+        cur=now();
 
-	}
+        while(pos && cur >= pos->time)
+        {
+            if(pos->st)
+            {
+                MThread *tr=new MThread ();
+                tr->Start (pos->handler,pos->param );
+            }
+            else
+                pos->handler (pos->param );
+
+            sEvents=(Event*)pos->pNext ;
+            delete pos;
+            pos=sEvents;
+        }
+
+        end_write_se
+
+    }
 
 }
-
 
 void spThread()
 {
 
-	uint32 cur=now();
-	
-	while(1)
-	{
-		MSleep(ES_RESOLUTION*30);//-(now()-cur)
-		read_spe
-		cur=now();
-		PeriodicEvent * ppos=sPEvents;
-		while(ppos)
-		{
-			if(cur >= ppos->time)
-			{
-				if(ppos->st)
-				{
-					MThread *tr=new MThread ();
-					tr->Start (ppos->handler,ppos->param );
-				}
-				else
-					ppos->handler (ppos->param );
+    uint32 cur=now();
 
-				ppos->time=cur+ppos->period;
-			}
-		
-			ppos=(PeriodicEvent*)ppos->pNext;
-		}
-		end_read_spe
+    while(1)
+    {
+        MSleep(ES_RESOLUTION*30);                           //-(now()-cur)
+        read_spe
+            cur=now();
+        PeriodicEvent * ppos=sPEvents;
+        while(ppos)
+        {
+            if(cur >= ppos->time)
+            {
+                if(ppos->st)
+                {
+                    MThread *tr=new MThread ();
+                    tr->Start (ppos->handler,ppos->param );
+                }
+                else
+                    ppos->handler (ppos->param );
 
+                ppos->time=cur+ppos->period;
+            }
 
-	}
+            ppos=(PeriodicEvent*)ppos->pNext;
+        }
+        end_read_spe
+
+    }
 
 }
-
 
 void mThread()
 {
 
-	uint32 cur=now();
-	
-	while(1)
-	{
-		MSleep(ES_RESOLUTION*30*60-(now()-cur));
-		
-		write_me
-		Event * pos=mEvents;
-		cur=now();
-		
-		while(pos && cur >= pos->time)
-		{
-			if(pos->st)
-			{
-				MThread *tr=new MThread ();
-				tr->Start (pos->handler,pos->param );
-			}
-			else
-				pos->handler (pos->param );
-		
-			mEvents=(Event*)pos->pNext ;
-			delete pos;
-			pos=mEvents;
-		}
-			
-		end_write_me
-	}
+    uint32 cur=now();
+
+    while(1)
+    {
+        MSleep(ES_RESOLUTION*30*60-(now()-cur));
+
+        write_me
+            Event * pos=mEvents;
+        cur=now();
+
+        while(pos && cur >= pos->time)
+        {
+            if(pos->st)
+            {
+                MThread *tr=new MThread ();
+                tr->Start (pos->handler,pos->param );
+            }
+            else
+                pos->handler (pos->param );
+
+            mEvents=(Event*)pos->pNext ;
+            delete pos;
+            pos=mEvents;
+        }
+
+        end_write_me
+    }
 
 }
 
 void mpThread()
 {
-	uint32 cur=now();
-	
-	while(1)
-	{
-		MSleep(ES_RESOLUTION*30*60-(now()-cur));
-		read_mpe
-		PeriodicEvent * ppos=mPEvents;
-		cur=now();
-		while(ppos)
-		{
-			if(cur >= ppos->time)
-			{
-				if(ppos->st)
-				{
-					MThread *tr=new MThread ();
-					tr->Start (ppos->handler,ppos->param );
-				}
-				else
-					ppos->handler (ppos->param );
+    uint32 cur=now();
 
-				ppos->time=cur+ppos->period;
-			}
-		
-			ppos=(PeriodicEvent*)ppos->pNext;
-		}
-			
-		end_read_mpe
-	}
+    while(1)
+    {
+        MSleep(ES_RESOLUTION*30*60-(now()-cur));
+        read_mpe
+            PeriodicEvent * ppos=mPEvents;
+        cur=now();
+        while(ppos)
+        {
+            if(cur >= ppos->time)
+            {
+                if(ppos->st)
+                {
+                    MThread *tr=new MThread ();
+                    tr->Start (ppos->handler,ppos->param );
+                }
+                else
+                    ppos->handler (ppos->param );
+
+                ppos->time=cur+ppos->period;
+            }
+
+            ppos=(PeriodicEvent*)ppos->pNext;
+        }
+
+        end_read_mpe
+    }
 
 }
-
-
 
 void StartEventSystem()
 {
-	MThread* t1=new MThread;
-	t1->Start(( void (*)(void*))&mThread,NULL);
-	MThread* t2=new MThread;
-	t2->Start(( void (*)(void*))&sThread,NULL);
-	MThread* t3=new MThread;
-	t3->Start(( void (*)(void*))&msThread,NULL);
-	MThread* t4=new MThread;
-	t4->Start(( void (*)(void*))&mpThread,NULL);
-	MThread* t5=new MThread;
-	t5->Start(( void (*)(void*))&spThread,NULL);
-	MThread* t6=new MThread;
-	t6->Start(( void (*)(void*))&mspThread,NULL);
+    MThread* t1=new MThread;
+    t1->Start(( void (*)(void*))&mThread,NULL);
+    MThread* t2=new MThread;
+    t2->Start(( void (*)(void*))&sThread,NULL);
+    MThread* t3=new MThread;
+    t3->Start(( void (*)(void*))&msThread,NULL);
+    MThread* t4=new MThread;
+    t4->Start(( void (*)(void*))&mpThread,NULL);
+    MThread* t5=new MThread;
+    t5->Start(( void (*)(void*))&spThread,NULL);
+    MThread* t6=new MThread;
+    t6->Start(( void (*)(void*))&mspThread,NULL);
 
-	
 }
-

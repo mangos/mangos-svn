@@ -47,7 +47,6 @@ class Group
 
         void AddMember(uint64 guid, const char* name)
         {
-            
 
             if (m_count < MAXGROUPSIZE-1)
             {
@@ -58,7 +57,7 @@ class Group
             else
             {
                 ;
-                
+
             }
         }
 
@@ -71,7 +70,6 @@ class Group
         void Disband();
 
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
-        
 
         void SetLootMethod(uint32 method) { m_lootMethod = method; }
         void SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
@@ -82,7 +80,6 @@ class Group
         uint32 GetMembersCount() const { return m_count; }
         const uint64& GetMemberGUID(uint32 i) const { ASSERT(i < m_count); return m_members[i].guid; }
 
-        
         bool GroupCheck(uint64 guid)
         {
             for(uint32 i = 0; i < m_count; i++ )
@@ -95,7 +92,6 @@ class Group
             return false;
         }
 
-        
         void BroadcastToGroup(WorldSession *session, std::string msg);
 
     protected:

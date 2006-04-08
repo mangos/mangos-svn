@@ -21,7 +21,7 @@
 
 #include "Timer.h"
 #include "Policies/Singleton.h"
-#include "SharedDefines.h" 
+#include "SharedDefines.h"
 
 class Object;
 class WorldPacket;
@@ -56,7 +56,7 @@ enum EnviromentalDamage
     DAMAGE_FIRE = 5
 };
 
-class World 
+class World
 {
     public:
         World();
@@ -83,7 +83,6 @@ class World
         void SendWorldText(const char *text, WorldSession *self = 0);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
 
-        
         void Update(time_t diff);
 
         void setRate(int index,float value)
@@ -96,17 +95,15 @@ class World
         {
             if((index>=0)&&(index<MAX_RATES))
                 return regen_values[index];
-			else
-				return 0;
+            else
+                return 0;
         }
-		
-      
 
     protected:
-       
+
         time_t _UpdateGameTime()
         {
-            
+
             time_t thisTime = time(NULL);
             m_gameTime += thisTime - m_lastTick;
             m_lastTick = thisTime;
@@ -115,7 +112,7 @@ class World
         }
 
     private:
-        
+
         IntervalTimer m_timers[WUPDATE_COUNT];
 
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;

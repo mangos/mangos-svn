@@ -26,52 +26,44 @@
 
 class Creature;
 
-typedef enum 
-    {
-	MOTIONLESS_TYPE = 0,
-	RANDOM_MOTION_TYPE,
-	TARGETED_MOTION_TYPE,
-        SPECIAL_MOTION_TYPE
-    } motion_t;
-
-class MANGOS_DLL_DECL MovementGenerator 
+typedef enum
 {
-public:
-    
-    virtual ~MovementGenerator();
+    MOTIONLESS_TYPE = 0,
+    RANDOM_MOTION_TYPE,
+    TARGETED_MOTION_TYPE,
+    SPECIAL_MOTION_TYPE
+} motion_t;
 
-    
-    virtual void Initialize(Creature &) = 0;
+class MANGOS_DLL_DECL MovementGenerator
+{
+    public:
 
-    
-    virtual void Reset(Creature &) = 0;
+        virtual ~MovementGenerator();
 
-    
-    virtual void Update(Creature &, const uint32 &time_diff) = 0;
+        virtual void Initialize(Creature &) = 0;
+
+        virtual void Reset(Creature &) = 0;
+
+        virtual void Update(Creature &, const uint32 &time_diff) = 0;
 };
-
 
 struct SelectableMovement : public FactoryHolder<MovementGenerator>, public Permissible<Creature>
 {
     SelectableMovement(const char *id) : FactoryHolder<MovementGenerator>(id) {}
 };
 
-
 template<class REAL_MOVEMENT>
 struct MovementGeneratorFactory : public SelectableMovement
 {
     MovementGeneratorFactory(const char *name) : SelectableMovement(name) {}
 
-    
     MovementGenerator* Create(void *) const;
 
-    
     int Permit(const Creature *c) const { return REAL_MOVEMENT::Permissible(c); }
 };
 
-
 #define     CANNOT_HANDLE_TYPE   -1
-#define	    MOTIONLESS_TYPE      0
+#define     MOTIONLESS_TYPE      0
 #define     RANDOM_MOTION_TYPE   100
 #define     TARGETED_MOTION_TYPE 200
 #define     SPECIAL_MOTION_TYPE  400
@@ -80,6 +72,4 @@ struct MovementGeneratorFactory : public SelectableMovement
 typedef FactoryHolder<MovementGenerator> MovementGeneratorCreator;
 typedef FactoryHolder<MovementGenerator>::FactoryHolderRegistry MovementGeneratorRegistry;
 typedef FactoryHolder<MovementGenerator>::FactoryHolderRepository MovementGeneratorRepository;
-
 #endif
-

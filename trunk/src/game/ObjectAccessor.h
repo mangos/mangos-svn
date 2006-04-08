@@ -35,7 +35,6 @@ class Unit;
 class GameObject;
 class DynamicObject;
 class Object;
-	    
 
 class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex> >
 {
@@ -45,77 +44,72 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
     ObjectAccessor(const ObjectAccessor &);
     ObjectAccessor& operator=(const ObjectAccessor &);
 
-public:
+    public:
 
-    typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;  
-    typedef HM_NAMESPACE::hash_map<uint64, Corpse* > CorpsesMapType;  
-    typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;  
-    typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;  
+        typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;
+        typedef HM_NAMESPACE::hash_map<uint64, Corpse* > CorpsesMapType;
+        typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
+        typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
+        Creature* GetCreature(Unit &, uint64);
+        Corpse* GetCorpse(Unit &, uint64);
+        Unit* GetUnit(Unit &, uint64);
+        Player* GetPlayer(Unit &, uint64);
+        GameObject* GetGameObject(Unit &, uint64);
+        DynamicObject* GetDynamicObject(Unit &, uint64);
 
-    Creature* GetCreature(Unit &, uint64);
-    Corpse* GetCorpse(Unit &, uint64);
-    Unit* GetUnit(Unit &, uint64);
-    Player* GetPlayer(Unit &, uint64);
-    GameObject* GetGameObject(Unit &, uint64);
-    DynamicObject* GetDynamicObject(Unit &, uint64);
+        Player* FindPlayer(uint64);
+        Player* FindPlayerByName(const char *name) ;
+        void BuildCreateForSameMapPlayer(Player *pl);
 
-    
-    Player* FindPlayer(uint64);
-    Player* FindPlayerByName(const char *name) ;
-    void BuildCreateForSameMapPlayer(Player *pl);
+        inline PlayersMapType& GetPlayers(void) { return i_players; }
+        void InsertPlayer(Player *);
+        void RemovePlayer(Player *);
 
-    inline PlayersMapType& GetPlayers(void) { return i_players; }
-    void InsertPlayer(Player *);
-    void RemovePlayer(Player *);
+        void AddUpdateObject(Object *obj);
+        void RemoveUpdateObject(Object *obj);
+        void RemoveCreatureCorpseFromPlayerView(Creature *);
 
-    void AddUpdateObject(Object *obj);
-    void RemoveUpdateObject(Object *obj);
-    void RemoveCreatureCorpseFromPlayerView(Creature *);
+        void Update(const uint32 &diff);
 
-    
-    void Update(const uint32 &diff);
+        Corpse* GetCorpseForPlayer(Player &);
+        void RemoveCorpse(uint64);
+        void AddCorpse(Corpse *corpse);
 
-    
-    Corpse* GetCorpseForPlayer(Player &);
-    void RemoveCorpse(uint64);
-    void AddCorpse(Corpse *corpse);
+        bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
 
-    
-    bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &) const;
+        template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
 
-    template<class T> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, T *> &);
+    #ifdef WIN32
 
-#ifdef WIN32
-	
-	template<> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
-#endif
-private:
+        template<> void RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &);
+    #endif
+    private:
 
-    struct ObjectChangeAccumulator
-    {
-	UpdateDataMapType &i_updateDatas;
-	Object &i_object;
-	ObjectAccessor &i_accessor;
-	ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_updateDatas(d), i_object(obj), i_accessor(a) {}
-	void Visit(std::map<OBJECT_HANDLE, Player *> &);
-    };
+        struct ObjectChangeAccumulator
+        {
+            UpdateDataMapType &i_updateDatas;
+            Object &i_object;
+            ObjectAccessor &i_accessor;
+            ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d, ObjectAccessor &a) : i_updateDatas(d), i_object(obj), i_accessor(a) {}
+            void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        };
 
-    friend struct ObjectChangeAccumulator; 
-    PlayersMapType i_players;
-    CorpsesMapType i_corpse;
+        friend struct ObjectChangeAccumulator;
+        PlayersMapType i_players;
+        CorpsesMapType i_corpse;
 
-    typedef ZThread::FastMutex LockType;
-    typedef MaNGOS::GeneralLock<LockType > Guard;
-    
-    void _buildChangeObjectForPlayer(Object *, UpdateDataMapType &);
-    void _buildUpdateObject(Object *, UpdateDataMapType &);
-    void _buildPacket(Player *, Object *, UpdateDataMapType &);
-    void _update(void);
-    std::set<Object *> i_objects;
-    LockType i_playerGuard;
-    LockType i_updateGuard;
-    LockType i_corpseGuard;
+        typedef ZThread::FastMutex LockType;
+        typedef MaNGOS::GeneralLock<LockType > Guard;
+
+        void _buildChangeObjectForPlayer(Object *, UpdateDataMapType &);
+        void _buildUpdateObject(Object *, UpdateDataMapType &);
+        void _buildPacket(Player *, Object *, UpdateDataMapType &);
+        void _update(void);
+        std::set<Object *> i_objects;
+        LockType i_playerGuard;
+        LockType i_updateGuard;
+        LockType i_corpseGuard;
 };
 
 #ifndef WIN32
@@ -124,24 +118,20 @@ template<> void ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corp
 
 namespace MaNGOS
 {
-    
+
     struct MANGOS_DLL_DECL BuildUpdateForPlayer
     {
-		Player &i_player;
-		ObjectAccessor::UpdateDataMapType &i_updatePlayers;
-		BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
-		void Visit(std::map<OBJECT_HANDLE, Player *> &);
+        Player &i_player;
+        ObjectAccessor::UpdateDataMapType &i_updatePlayers;
+        BuildUpdateForPlayer(Player &player, ObjectAccessor::UpdateDataMapType &data_map) : i_player(player), i_updatePlayers(data_map) {}
+        void Visit(std::map<OBJECT_HANDLE, Player *> &);
     };
 
-    
     struct MANGOS_DLL_DECL CreatureCorpseViewRemover
     {
-	Creature &i_creature;
-	CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
-	void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+        Creature &i_creature;
+        CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
+        void Visit(std::map<OBJECT_HANDLE, Player *>  &);
     };
 }
-
-
-
 #endif

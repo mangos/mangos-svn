@@ -19,8 +19,6 @@
 #ifndef MANGOS_AGGRESSORAI_H
 #define MANGOS_AGGRESSORAI_H
 
-
-
 #include "CreatureAI.h"
 #include "FactionTemplateResolver.h"
 #include "Timer.h"
@@ -30,36 +28,35 @@ class Creature;
 class MANGOS_DLL_DECL AggressorAI : public CreatureAI
 {
     enum AggressorState
-	{
-	    STATE_NORMAL = 1,
-	    STATE_LOOK_AT_VICTIM = 2
-	};
+    {
+        STATE_NORMAL = 1,
+        STATE_LOOK_AT_VICTIM = 2
+    };
 
-public:
-    
-    AggressorAI(Creature &c);
+    public:
 
-    void MoveInLineOfSight(Unit *);
-    void AttackStart(Unit *);
-    void AttackStop(Unit *);
-    void HealBy(Unit *healer, uint32 amount_healed);
-    void DamageInflict(Unit *healer, uint32 amount_healed);
-    bool IsVisible(Unit *) const;
+        AggressorAI(Creature &c);
 
-    void UpdateAI(const uint32);
-    static int Permissible(const Creature *);
+        void MoveInLineOfSight(Unit *);
+        void AttackStart(Unit *);
+        void AttackStop(Unit *);
+        void HealBy(Unit *healer, uint32 amount_healed);
+        void DamageInflict(Unit *healer, uint32 amount_healed);
+        bool IsVisible(Unit *) const;
 
-private:
-    bool _isVisible(Unit *) const;
-    void _taggedToKill(Unit *);
-    bool _needToStop(void) const;
-    void _stopAttack(void);
+        void UpdateAI(const uint32);
+        static int Permissible(const Creature *);
 
-    Creature &i_creature;
-    FactionTemplateResolver i_myFaction;
-    Unit *i_pVictim;
-    AggressorState i_state;
-    TimeTracker i_tracker;
+    private:
+        bool _isVisible(Unit *) const;
+        void _taggedToKill(Unit *);
+        bool _needToStop(void) const;
+        void _stopAttack(void);
+
+        Creature &i_creature;
+        FactionTemplateResolver i_myFaction;
+        Unit *i_pVictim;
+        AggressorState i_state;
+        TimeTracker i_tracker;
 };
-
 #endif

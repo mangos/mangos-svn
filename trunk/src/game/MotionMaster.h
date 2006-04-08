@@ -25,43 +25,35 @@
 class MANGOS_DLL_DECL MotionMaster : public std::stack<MovementGenerator *>
 {
     static IdleMovementGenerator si_idleMovement;
-public:
-    
-    MotionMaster() : i_owner(NULL) {}
+    public:
 
-    
-    void Initialize(Creature *creature);
+        MotionMaster() : i_owner(NULL) {}
 
-    
-    MovementGenerator* operator->(void) { return top(); }
+        void Initialize(Creature *creature);
 
-    
-    void UpdateMotion(const uint32 &diff);
-    
-    
-    void Clear(void);
+        MovementGenerator* operator->(void) { return top(); }
 
-    
-    void MovementExpired(void);
+        void UpdateMotion(const uint32 &diff);
 
-    
-    void Idle(void)
-    {
-	if( !isStatic( top() ) )
-	    push( &si_idleMovement );
-    }
+        void Clear(void);
 
-    
-    void Mutate(MovementGenerator *m) 
-    {
-	m->Initialize(*i_owner);
-	push(m);
-    }
+        void MovementExpired(void);
 
-private:
+        void Idle(void)
+        {
+            if( !isStatic( top() ) )
+                push( &si_idleMovement );
+        }
 
-    inline bool isStatic(MovementGenerator *mv) const { return (mv == & si_idleMovement); }
-    Creature *i_owner; 
+        void Mutate(MovementGenerator *m)
+        {
+            m->Initialize(*i_owner);
+            push(m);
+        }
+
+    private:
+
+        inline bool isStatic(MovementGenerator *mv) const { return (mv == & si_idleMovement); }
+        Creature *i_owner;
 };
-
 #endif

@@ -19,28 +19,23 @@
 #ifndef MANGOS_NULLCREATUREAI_H
 #define MANGOS_NULLCREATUREAI_H
 
-
-
 #include "CreatureAI.h"
 
-class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI 
+class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
 {
-public:
-    
-    NullCreatureAI(Creature &) {}
-    NullCreatureAI() {}
+    public:
 
-    void MoveInLineOfSight(Unit *) {}
-    void AttackStart(Unit *) {}
-    void AttackStop(Unit *) {}
-    void HealBy(Unit *healer, uint32 amount_healed) {}
-    void DamageInflict(Unit *healer, uint32 amount_healed) {}
-    bool IsVisible(Unit *) const { return false;  }
+        NullCreatureAI(Creature &) {}
+        NullCreatureAI() {}
 
-    void UpdateAI(const uint32) {}
-    static int Permissible(const Creature *) { return IDLE_PERMIT_BASE;  }
+        void MoveInLineOfSight(Unit *) {}
+        void AttackStart(Unit *) {}
+        void AttackStop(Unit *) {}
+        void HealBy(Unit *healer, uint32 amount_healed) {}
+        void DamageInflict(Unit *healer, uint32 amount_healed) {}
+        bool IsVisible(Unit *) const { return false;  }
+
+        void UpdateAI(const uint32) {}
+        static int Permissible(const Creature *) { return IDLE_PERMIT_BASE;  }
 };
-
-
-
 #endif
