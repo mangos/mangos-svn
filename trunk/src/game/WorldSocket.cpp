@@ -125,7 +125,7 @@ void WorldSocket::OnRead()
 
         packet.resize(_remaining);
         packet.SetOpcode((uint16)_cmd);
-        ibuf.Read((char*)packet.contents(), _remaining);
+        if(_remaining) ibuf.Read((char*)packet.contents(), _remaining);
 
         if( sWorldLog.LogWorld() )
         {
@@ -364,7 +364,7 @@ void WorldSocket::Update(time_t diff)
         _crypt.EncryptSend((uint8*)&hdr, 4);
 
         TcpSocket::SendBuf((char*)&hdr, 4);
-        TcpSocket::SendBuf((char*)packet->contents(), packet->size());
+        if(packet->size()) TcpSocket::SendBuf((char*)packet->contents(), packet->size());
 
         delete packet;
     }

@@ -240,7 +240,7 @@ class ByteBuffer
         }
         void append(const ByteBuffer& buffer)
         {
-            append(buffer.contents(),buffer.size());
+            if(buffer.size()) append(buffer.contents(),buffer.size());
         }
 
         void put(size_t pos, const uint8 *src, size_t cnt)
