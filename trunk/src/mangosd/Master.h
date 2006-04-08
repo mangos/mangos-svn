@@ -25,8 +25,7 @@
 #include "Database/DatabaseEnv.h"
 #include "SystemConfig.h"
 
-
-class Master 
+class Master
 {
     public:
         Master();

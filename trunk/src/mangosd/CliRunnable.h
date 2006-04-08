@@ -24,5 +24,4 @@ class CliRunnable : public ZThread::Runnable
     public:
         void run();
 };
-
 #endif
