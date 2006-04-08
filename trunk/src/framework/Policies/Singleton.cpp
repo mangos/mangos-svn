@@ -17,6 +17,3 @@
  */
 
 #include "Singleton.h"
-
-
-

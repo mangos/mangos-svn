@@ -36,34 +36,31 @@
 
 template
 <
-    class OBJECT,
-    class OBJECT_TYPES
+class OBJECT,
+class OBJECT_TYPES
 >
 class MANGOS_DLL_DECL GridLoader
 {
-public:
-    
-    /** Loads the grid
-     */
-    template<class LOADER>
-    void Load(Grid<OBJECT, OBJECT_TYPES> &grid, LOADER &loader)
-    {
-	grid.LockGrid();
-	loader.Load(grid);
-	grid.UnlockGrid();
-    }
-    
-    /** Unloads the grid
-     */
-    template<class UNLOADER>
-    void Unload(Grid<OBJECT, OBJECT_TYPES> &grid, UNLOADER &unloader)
-    {
-	grid.LockGrid();	
-	unloader.Unload(grid);
-	grid.UnlockGrid();
-    }
+    public:
+
+        /** Loads the grid
+         */
+        template<class LOADER>
+            void Load(Grid<OBJECT, OBJECT_TYPES> &grid, LOADER &loader)
+        {
+            grid.LockGrid();
+            loader.Load(grid);
+            grid.UnlockGrid();
+        }
+
+        /** Unloads the grid
+         */
+        template<class UNLOADER>
+            void Unload(Grid<OBJECT, OBJECT_TYPES> &grid, UNLOADER &unloader)
+        {
+            grid.LockGrid();
+            unloader.Unload(grid);
+            grid.UnlockGrid();
+        }
 };
-
-
-
 #endif

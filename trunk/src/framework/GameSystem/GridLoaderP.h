@@ -20,6 +20,4 @@
 #define MANGOS_GRIDLOADERP_H
 
 #include "GridLoader.h"
-
-
 #endif

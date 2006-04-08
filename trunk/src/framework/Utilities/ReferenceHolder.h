@@ -19,7 +19,6 @@
 #ifndef MANGOS_REFERENCEHOLDER_H
 #define MANGOS_REFERENCEHOLDER_H
 
-
 /** ReferenceHolder holds the actualy referenced obejct as well the refence
     count.  The ReferenecHolder implements as a policy base object and
     will decided by the Reference class to be consnsitent.
@@ -27,8 +26,8 @@
 
 template
 <
-    typename T, 
-    class THREADING_MODEL
+typename T,
+class THREADING_MODEL
 >
 struct ReferenceHolder : public THREADING_MODEL
 {
@@ -37,5 +36,4 @@ struct ReferenceHolder : public THREADING_MODEL
     unsigned int i_referenceCount;
     typedef typename THREADING_MODEL::Lock Lock;
 };
-
 #endif

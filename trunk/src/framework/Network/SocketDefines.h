@@ -19,7 +19,6 @@
 #ifndef MANGOS_SOCKETDEFINES_H
 #define MANGOS_SOCKETDEFINES_H
 
-
 #ifdef WIN32
 
 /* Windows socket definitions
@@ -37,12 +36,10 @@ typedef fd_set SelectSet;
 #include <sys/socket.h>
 #include <netinet/in.h>
 #ifdef __APPLE__
-#include <sys/select.h> 
+#include <sys/select.h>
 #endif
 
 typedef int SocketHandle;
 typedef fd_set SelectSet;
-
 #endif
-
 #endif

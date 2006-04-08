@@ -60,6 +60,4 @@ namespace __gnu_cxx
 #define HM_NAMESPACE std
 using std::hash_map;
 #endif
-
-
 #endif

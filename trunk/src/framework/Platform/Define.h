@@ -22,7 +22,7 @@
 #include "Platform/CompilerDefs.h"
 
 #ifdef WIN32
-#define MANGOS_EXPORT __declspec(dllexport) 
+#define MANGOS_EXPORT __declspec(dllexport)
 #define MANGOS_LIBRARY_HANDLE HMODULE
 #define MANGOS_LOAD_LIBRARY(a) LoadLibrary(a)
 #define MANGOS_CLOSE_LIBRARY FreeLibrary
@@ -50,7 +50,6 @@
 #else
 #define MANGOS_DLL_DECL
 #endif
-
 #endif
 
 #else
@@ -85,5 +84,4 @@ typedef unsigned long        uint32;
 typedef unsigned short       uint16;
 typedef unsigned char        uint8;
 typedef uint64 OBJECT_HANDLE;
-
-#endif 
+#endif

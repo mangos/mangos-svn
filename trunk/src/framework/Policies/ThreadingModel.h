@@ -32,88 +32,90 @@ namespace MaNGOS
 
     template<typename MUTEX> class MANGOS_DLL_DECL GeneralLock
     {
-    public:
-	GeneralLock(MUTEX &m) : i_mutex(m) 
-	{
-		i_mutex.acquire();
-	}
-	
-	~GeneralLock()
-	{
-	    i_mutex.release();
-	}
-    private:
-	GeneralLock(const GeneralLock &); 
-	GeneralLock& operator=(const GeneralLock &); 
-	MUTEX &i_mutex;
+        public:
+            GeneralLock(MUTEX &m) : i_mutex(m)
+            {
+                i_mutex.acquire();
+            }
+
+            ~GeneralLock()
+            {
+                i_mutex.release();
+            }
+        private:
+            GeneralLock(const GeneralLock &);
+            GeneralLock& operator=(const GeneralLock &);
+            MUTEX &i_mutex;
     };
 
     template <class T>
-    class MANGOS_DLL_DECL SingleThreaded
+        class MANGOS_DLL_DECL SingleThreaded
     {
-    public:
+        public:
 
-	struct Lock // empty object
-	{
-	    Lock() {}
-	    Lock(const T &) {}
-	    Lock(const SingleThreaded<T> &) {} // for single threaded we ignore this
-	};
+            struct Lock                                     // empty object
+            {
+                Lock() {}
+                Lock(const T &) {}
+                Lock(const SingleThreaded<T> &)             // for single threaded we ignore this
+                {
+                }
+            };
 
-	typedef T VolatileType;
+            typedef T VolatileType;
     };
 
     // object level lockable
     template<class T, class MUTEX>
-    class MANGOS_DLL_DECL ObjectLevelLockable
+        class MANGOS_DLL_DECL ObjectLevelLockable
     {
-    public:
-	ObjectLevelLockable() : i_mtx() {}
+        public:
+            ObjectLevelLockable() : i_mtx() {}
 
-	friend class Lock;
-	
-	class Lock 
-	{
-	public:
-	    Lock(ObjectLevelLockable<T, MUTEX> &host) : i_lock(host.i_mtx)
-	    {
-	    }
+            friend class Lock;
 
-	private:
-	    GeneralLock<MUTEX> i_lock;
-	};
+            class Lock
+            {
+                public:
+                    Lock(ObjectLevelLockable<T, MUTEX> &host) : i_lock(host.i_mtx)
+                    {
+                    }
 
-	typedef volatile T VolatileType;
+                private:
+                    GeneralLock<MUTEX> i_lock;
+            };
 
-    private:
-	// prevent the compiler creating a copy construct
-	ObjectLevelLockable(const ObjectLevelLockable<T, MUTEX> &); 
-	ObjectLevelLockable<T, MUTEX>& operator=(const ObjectLevelLockable<T, MUTEX> &);
+            typedef volatile T VolatileType;
 
-	MUTEX i_mtx;
+        private:
+            // prevent the compiler creating a copy construct
+            ObjectLevelLockable(const ObjectLevelLockable<T, MUTEX> &);
+            ObjectLevelLockable<T, MUTEX>& operator=(const ObjectLevelLockable<T, MUTEX> &);
+
+            MUTEX i_mtx;
     };
 
     template<class T, class MUTEX>
-    class MANGOS_DLL_DECL ClassLevelLockable
+        class MANGOS_DLL_DECL ClassLevelLockable
     {
-    public:
-	class Lock;
-	friend class Lock;
-	typedef volatile T VolatileType;
+        public:
+            class Lock;
+            friend class Lock;
+            typedef volatile T VolatileType;
 
-	ClassLevelLockable() {}
+            ClassLevelLockable() {}
 
-	class Lock
-	{
-	public:
-	    Lock(T &host) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
-	    Lock(ClassLevelLockable<T, MUTEX> &) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
-	    Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }	    
-	    ~Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.release(); }	    
-	};
+            class Lock
+            {
+                public:
+                    Lock(T &host) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
+                    Lock(ClassLevelLockable<T, MUTEX> &) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
+                    Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
+                    ~Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.release(); }
+            };
 
-    private:
-      static MUTEX si_mtx;
+        private:
+            static MUTEX si_mtx;
     };
 
 }
@@ -121,7 +123,5 @@ namespace MaNGOS
 template<class T, class MUTEX> MUTEX MaNGOS::ClassLevelLockable<T, MUTEX>::si_mtx;
 
 #define INSTANTIATE_CLASS_MUTEX(CTYPE,MUTEX) \
-  template class MANGOS_DLL_DECL MaNGOS::ClassLevelLockable<CTYPE, MUTEX >
-  
-
+    template class MANGOS_DLL_DECL MaNGOS::ClassLevelLockable<CTYPE, MUTEX >
 #endif
