@@ -28,29 +28,28 @@
 #define MAX_SCRIPTS 1000
 
 struct Script
-{	
-	std::string Name;
+{
+    std::string Name;
 
-	// -- Quest/gossip Methods to be scripted --
-	void (*pGossipHello)(Player *player, Creature *_Creature);
-	void (*pQuestAccept)(Player *player, Creature *_Creature, Quest *_Quest );
-	void (*pGossipSelect)(Player *player, Creature *_Creature, uint32 sender, uint32 action );
-	void (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
-	void (*pQuestSelect)(Player *player, Creature *_Creature, Quest *_Quest );
-	void (*pQuestComplete)(Player *player, Creature *_Creature, Quest *_Quest );
-	uint32 (*pNPCDialogStatus)(Player *player, Creature *_Creature );
-	void (*pChooseReward)(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
-	void (*pItemHello)(Player *player, Item *_Item, Quest *_Quest );
-	void (*pGOHello)(Player *player, GameObject *_GO );
-	void (*pAreaTrigger)(Player *player, Quest *_Quest, uint32 triggerID );
-	void (*pItemQuestAccept)(Player *player, Item *_Item, Quest *_Quest );
-	void (*pGOQuestAccept)(Player *player, GameObject *_GO, Quest *_Quest );
-	void (*pGOChooseReward)(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
-	// ----------------------------
+    // -- Quest/gossip Methods to be scripted --
+    void (*pGossipHello)(Player *player, Creature *_Creature);
+    void (*pQuestAccept)(Player *player, Creature *_Creature, Quest *_Quest );
+    void (*pGossipSelect)(Player *player, Creature *_Creature, uint32 sender, uint32 action );
+    void (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
+    void (*pQuestSelect)(Player *player, Creature *_Creature, Quest *_Quest );
+    void (*pQuestComplete)(Player *player, Creature *_Creature, Quest *_Quest );
+    uint32 (*pNPCDialogStatus)(Player *player, Creature *_Creature );
+    void (*pChooseReward)(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
+    void (*pItemHello)(Player *player, Item *_Item, Quest *_Quest );
+    void (*pGOHello)(Player *player, GameObject *_GO );
+    void (*pAreaTrigger)(Player *player, Quest *_Quest, uint32 triggerID );
+    void (*pItemQuestAccept)(Player *player, Item *_Item, Quest *_Quest );
+    void (*pGOQuestAccept)(Player *player, GameObject *_GO, Quest *_Quest );
+    void (*pGOChooseReward)(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
+    // ----------------------------
 
 };
 
 extern int nrscripts;
-extern Script *m_scripts[MAX_SCRIPTS];	
-
+extern Script *m_scripts[MAX_SCRIPTS];
 #endif

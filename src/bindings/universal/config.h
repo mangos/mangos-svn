@@ -29,4 +29,3 @@
 #else
 #define MANGOS_DLL_EXPORT extern "C" export
 #endif
-
