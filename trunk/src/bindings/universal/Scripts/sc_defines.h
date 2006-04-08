@@ -15,7 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
- 
+
 #ifndef SC_DEFINES_H
 #define SC_DEFINES_H
 
@@ -45,20 +45,20 @@
 
 // Dialog defines
 
-#define DIALOG_STATUS_NONE           	    0
-#define DIALOG_STATUS_UNAVAILABLE    	    1
-#define DIALOG_STATUS_CHAT           	    2
-#define DIALOG_STATUS_INCOMPLETE     	    3
-#define DIALOG_STATUS_REWARD_REP     	    4
-#define DIALOG_STATUS_AVAILABLE      	    5
-#define DIALOG_STATUS_REWARD         	    6
+#define DIALOG_STATUS_NONE                  0
+#define DIALOG_STATUS_UNAVAILABLE           1
+#define DIALOG_STATUS_CHAT                  2
+#define DIALOG_STATUS_INCOMPLETE            3
+#define DIALOG_STATUS_REWARD_REP            4
+#define DIALOG_STATUS_AVAILABLE             5
+#define DIALOG_STATUS_REWARD                6
 
 // Gossip defines
 
-#define GOSSIP_ACTION_TRADE 				1
-#define GOSSIP_ACTION_TRAIN 				2
+#define GOSSIP_ACTION_TRADE                 1
+#define GOSSIP_ACTION_TRAIN                 2
 #define GOSSIP_ACTION_TAXI                  3
-#define GOSSIP_ACTION_GUILD 		 	    4
+#define GOSSIP_ACTION_GUILD                 4
 #define GOSSIP_ACTION_BATTLE                5
 #define GOSSIP_ACTION_BANK                  6
 #define GOSSIP_ACTION_INN                   7
@@ -80,27 +80,24 @@
 
 extern uint32 GetSkillLevel(Player *player,uint32 skill);
 
-// Defined fuctions to use with player. 
+// Defined fuctions to use with player.
 
 #define ADD_GOSSIP_ITEM(a,b,c,d)   PlayerTalkClass->GetGossipMenu()->MenuItem(a,b,c,d)
 #define SEND_GOSSIP_MENU(a,b)      PlayerTalkClass->SendGossipMenu(a,b)
-#define SEND_POI(a,b,c,d,e,f)	   PlayerTalkClass->SendPointOfInterest(a,b,c,d,e,f)
-#define CLOSE_GOSSIP_MENU()		   PlayerTalkClass->CloseGossip();
-
+#define SEND_POI(a,b,c,d,e,f)      PlayerTalkClass->SendPointOfInterest(a,b,c,d,e,f)
+#define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip();
 
 #define QUEST_DIALOG_STATUS(a,b)   getDialogStatus(a,b)
 #define SEND_QUEST_DETAILS(a,b,c)  PlayerTalkClass->SendQuestDetails(a,b,c)
 #define SEND_REQUESTEDITEMS(a,b,c) PlayerTalkClass->SendRequestedItems(a,b,c)
 
-#define SEND_VENDORLIST(a)		   GetSession()->SendListInventory(a)
-#define SEND_TRAINERLIST(a)		   GetSession()->SendTrainerList(a)
-#define SEND_BANKERLIST(a)		   GetSession()->SendShowBank(a)
-#define SEND_TABARDLIST(a)		   GetSession()->SendTabardVendorActivate(a)
-#define SEND_AUCTIONLIST(a)		   GetSession()->SendAuctionHello(a)
-#define SEND_TAXILIST(a)		   GetSession()->SendTaxiStatus(a)
-#define SEND_SPRESSURECT()		   GetSession()->SendSpiritRessurect()
+#define SEND_VENDORLIST(a)         GetSession()->SendListInventory(a)
+#define SEND_TRAINERLIST(a)        GetSession()->SendTrainerList(a)
+#define SEND_BANKERLIST(a)         GetSession()->SendShowBank(a)
+#define SEND_TABARDLIST(a)         GetSession()->SendTabardVendorActivate(a)
+#define SEND_AUCTIONLIST(a)        GetSession()->SendAuctionHello(a)
+#define SEND_TAXILIST(a)           GetSession()->SendTaxiStatus(a)
+#define SEND_SPRESSURECT()         GetSession()->SendSpiritRessurect()
 
 // -----------------------------------
-
-
 #endif
