@@ -109,8 +109,9 @@ namespace MaNGOS
         typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
         if( iter != elements._element.end() )
         {
+            SPECIFIC_TYPE* t = iter->second;
             elements._element.erase(iter);
-            return iter->second;
+            return t;
         }
 
         return NULL;                                        // found... terminate the search
