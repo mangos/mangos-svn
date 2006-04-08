@@ -145,7 +145,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             ((Creature*)pVictim)->generateLoot();
 
         //If a player kill some one call honor calcules
-        ((Player*)this)->CalculateHonor(pVictim);
+        if (GetTypeId() == TYPEID_PLAYER) ((Player*)this)->CalculateHonor(pVictim);
 
         DEBUG_LOG("DealDamageAura");
         pVictim->RemoveAllAuras();
