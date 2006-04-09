@@ -3,9 +3,15 @@
 	ProjectType="Intel C++ Project"
 	Version="9.0"
 	Name="zthread"
-	ProjectGUID="{D2226811-731F-4872-B7A2-E058ADEC49FD}"
+	ProjectGUID="{EA39C75D-0AFF-455B-BEA6-F9A93FA1F1AA}"
+	SccProjectName=""
+	SccLocalPath=""
 	VCNestedProjectGUID="{262199E8-EEDF-4700-A1D1-E9CC901CF480}"
 	VCNestedProjectFileName="zthread.vcproj">
+	<Platforms>
+		<Platform 
+			Name="Win32"/>
+	</Platforms>
 	<Configurations>
 		<Configuration 
 			Name="Debug|Win32">
@@ -52,8 +58,6 @@
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Release|Win32">
@@ -97,10 +101,10 @@
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="DebugTool"/>
 		</Configuration>
 	</Configurations>
+	<References>
+	</References>
 	<Files>
 		<Filter 
 			Name="Source Files"
@@ -377,5 +381,7 @@
 			</File>
 		</Filter>
 	</Files>
+	<Globals>
+	</Globals>
 </VisualStudioProject>
 
