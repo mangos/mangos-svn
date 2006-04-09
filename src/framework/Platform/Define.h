@@ -29,6 +29,7 @@
 #define MANGOS_GET_PROC_ADDR GetProcAddress
 #define MANGOS_IMPORT __cdecl
 #define MANGOS_SCRIPT_FILE "MaNGOSScript.dll"
+#define SIGQUIT 3
 #else
 #define MANGOS_LIBRARY_HANDLE void*
 #define MANGOS_EXPORT export
