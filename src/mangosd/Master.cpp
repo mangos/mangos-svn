@@ -50,11 +50,8 @@ void Master::_OnSignal(int s)
     switch (s)
     {
         case SIGINT:
-            Master::m_stopEvent = true;
-            break;
+        case SIGQUIT:
         case SIGTERM:
-            Master::m_stopEvent = true;
-            break;
         case SIGABRT:
             Master::m_stopEvent = true;
             break;
@@ -225,6 +222,7 @@ void Master::_StopDB()
 void Master::_HookSignals()
 {
     signal(SIGINT, _OnSignal);
+    signal(SIGQUIT, _OnSignal);
     signal(SIGTERM, _OnSignal);
     signal(SIGABRT, _OnSignal);
     #ifdef _WIN32
@@ -235,6 +233,7 @@ void Master::_HookSignals()
 void Master::_UnhookSignals()
 {
     signal(SIGINT, 0);
+    signal(SIGQUIT, 0);
     signal(SIGTERM, 0);
     signal(SIGABRT, 0);
     #ifdef _WIN32

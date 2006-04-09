@@ -114,11 +114,8 @@ void OnSignal(int s)
     switch (s)
     {
         case SIGINT:
-            stopEvent = true;
-            break;
+        case SIGQUIT:
         case SIGTERM:
-            stopEvent = true;
-            break;
         case SIGABRT:
             stopEvent = true;
             break;
@@ -157,6 +154,7 @@ bool StartDB()
 void HookSignals()
 {
     signal(SIGINT, OnSignal);
+    signal(SIGQUIT, OnSignal);
     signal(SIGTERM, OnSignal);
     signal(SIGABRT, OnSignal);
     #ifdef _WIN32
@@ -167,6 +165,7 @@ void HookSignals()
 void UnhookSignals()
 {
     signal(SIGINT, 0);
+    signal(SIGQUIT, 0);
     signal(SIGTERM, 0);
     signal(SIGABRT, 0);
     #ifdef _WIN32
