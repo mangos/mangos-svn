@@ -378,6 +378,10 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
 
     sDatabase.PExecute("DELETE FROM `gmtickets` where guid = '%d' LIMIT 1",guid);
 
+    data.Initialize( SMSG_GMTICKET_DELETETICKET );
+    data << uint32(1);
+    data << uint32(0);
+    SendPacket( &data );
     data.Initialize( SMSG_GMTICKET_GETTICKET );
     data << uint32(1);
     data << uint32(0);
