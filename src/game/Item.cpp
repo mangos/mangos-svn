@@ -78,21 +78,21 @@ void AddItemsSetItem(Player*player,uint32 setid)
     for(uint32 x=0;x<8;x++)
         if(set->spells [x])
                                                             //enough for  spell
-                    if(set->items_to_triggerspell[x] <= eff->item_count)
-                    {
-                        uint32 z=0;
-                        for(;z<8;z++)
-                            if(eff->spells[z])
-                                if(eff->spells[z]->m_spellInfo->Id==set->spells[x])break;
+            if(set->items_to_triggerspell[x] <= eff->item_count)
+            {
+                uint32 z=0;
+                for(;z<8;z++)
+                    if(eff->spells[z])
+                        if(eff->spells[z]->m_spellInfo->Id==set->spells[x])break;
 
-                        if(z==8)                            //new spell
-                            for(uint32 y=0;y<8;y++)
-                                if(!eff->spells[y])
-                                {
-                                    eff->spells[y]=Cast(player,set->spells[x]);
-                                    break;
-                                }
-                    }
+                if(z==8)                                    //new spell
+                    for(uint32 y=0;y<8;y++)
+                        if(!eff->spells[y])
+                        {
+                            eff->spells[y]=Cast(player,set->spells[x]);
+                            break;
+                        }
+            }
 
 }
 
@@ -117,19 +117,19 @@ void RemoveItemsSetItem(Player*player,uint32 setid)
     for(uint32 x=0;x<8;x++)
         if(set->spells[x])
                                                             //not enough for spell
-                    if(set->items_to_triggerspell[x] > eff->item_count)
-                    {
-                        for(uint32 z=0;z<8;z++)
-                            if(eff->spells[z])
-                                if(eff->spells[z]->m_spellInfo->Id==set->spells[x])
-                                {
+            if(set->items_to_triggerspell[x] > eff->item_count)
+            {
+                for(uint32 z=0;z<8;z++)
+                    if(eff->spells[z])
+                        if(eff->spells[z]->m_spellInfo->Id==set->spells[x])
+                        {
             //fixme: remove spell effect
-                                    delete eff->spells[z];
-                                    eff->spells[z]=NULL;
-                                    break;
-                                }
+                            delete eff->spells[z];
+                            eff->spells[z]=NULL;
+                            break;
+                        }
 
-                    }
+            }
 
     if(!eff->item_count)                                    //all items of a set were removed
     {

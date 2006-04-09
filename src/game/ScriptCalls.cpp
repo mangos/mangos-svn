@@ -84,7 +84,7 @@ bool LoadScriptingModule()
                                                                 if(!(testScript->GOQuestAccept=(scriptCallGOQuestAccept)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept")))
                                                                 CLOSE_LIB
 
-                                                                //heh we are still there :P we have a valid library
+                                                            //heh we are still there :P we have a valid library
                                                             //we reload script
                                                                     if(Script)
     {

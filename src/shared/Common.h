@@ -43,9 +43,9 @@
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// like crashing on 1.8.0, reputation on 1.8.4 ...
+// will only support 1.9.4 client, build 5086 ...
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {4996,5059,5086,0}
+#define EXPECTED_MANGOS_CLIENT_BUILD        {5086,0}
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>
@@ -120,10 +120,8 @@
 #define for if(true) for
 
 #ifdef WIN32
-#  define MANGOS_DLL_SPEC __declspec(dllexport) 
+#  define MANGOS_DLL_SPEC __declspec(dllexport)
 #else
-#  define MANGOS_DLL_SPEC 
+#  define MANGOS_DLL_SPEC
 #endif
-
-
 #endif
