@@ -452,10 +452,20 @@ void CliRunnable::run()
         printf("mangos>");
         fflush(stdout);
         char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
-        for(int x=0;true;x++)
-            if(command[x]==0xd||command[x]==0xa)
-                {command[x]=0;break;}
-                ParseCommand(&printf,command);
+        if (command != NULL)
+        {
+            for(int x=0;true;x++)
+                if(command[x]==0xd||command[x]==0xa)
+            {
+                command[x]=0;
+                break;
+            }
+            ParseCommand(&printf,command);
+        }
+        else if (feof(stdin))
+        {
+            Master::m_stopEvent = true;
+        }
 
     }
 
