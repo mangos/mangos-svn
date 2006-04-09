@@ -217,7 +217,9 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Mail* m = pl->GetMail(message);
     Item *it = objmgr.GetMItem(m->item);
 
-    GetPlayer()->AddNewItem(0,NULL_SLOT,m->item,it->GetCount(),false, false);
+    GetPlayer()->AddNewItem(0,NULL_SLOT,it->GetEntry(),it->GetCount(), false, false);
+    /* still needs some condition so that if item can not be recived, both mail and
+       mailed_items to stay till delete or return, otherwise it's dumped, also a client message */ 
 
     m->item = 0;
     pl->AddMail(m);
