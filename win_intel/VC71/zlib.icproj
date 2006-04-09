@@ -3,9 +3,15 @@
 	ProjectType="Intel C++ Project"
 	Version="9.0"
 	Name="zlib"
-	ProjectGUID="{517B1E53-28EF-4C15-90AE-AEBA1D210C1A}"
+	ProjectGUID="{FF24F46F-6D9E-4965-BC47-98933AFE82A7}"
+	SccProjectName=""
+	SccLocalPath=""
 	VCNestedProjectGUID="{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}"
 	VCNestedProjectFileName="zlib.vcproj">
+	<Platforms>
+		<Platform 
+			Name="Win32"/>
+	</Platforms>
 	<Configurations>
 		<Configuration 
 			Name="Debug|Win32">
@@ -52,8 +58,6 @@
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="DebugTool"/>
 		</Configuration>
 		<Configuration 
 			Name="Release|Win32">
@@ -97,10 +101,10 @@
 				Name="VCManagedWrapperGeneratorTool"/>
 			<Tool 
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
-			<Tool 
-				Name="DebugTool"/>
 		</Configuration>
 	</Configurations>
+	<References>
+	</References>
 	<Files>
 		<Filter 
 			Name="Source Files"
@@ -182,5 +186,7 @@
 			</File>
 		</Filter>
 	</Files>
+	<Globals>
+	</Globals>
 </VisualStudioProject>
 
