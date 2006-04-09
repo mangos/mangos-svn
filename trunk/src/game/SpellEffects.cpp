@@ -404,8 +404,8 @@ void Spell::EffectCreateItem(uint32 i)
         if (newItem->GetItemProto()->Class == ITEM_CLASS_CONSUMABLE && newItem->GetItemProto()->MaxCount > 1)
         {
             num_to_add = ((pUnit->GetLevel() - (m_spellInfo->spellLevel-1))*2);
-			if(num_to_add > newItem->GetItemProto()->MaxCount)
-				num_to_add = newItem->GetItemProto()->MaxCount;
+            if(num_to_add > newItem->GetItemProto()->MaxCount)
+                num_to_add = newItem->GetItemProto()->MaxCount;
         }
 
         if (num_to_add > 1)

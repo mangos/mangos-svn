@@ -128,7 +128,6 @@ enum UNIT_TYPE
     MECHANICAL = 9,
 };
 
- 
 class MANGOS_DLL_SPEC Creature : public Unit
 {
     CreatureAI *i_AI;

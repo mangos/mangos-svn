@@ -74,8 +74,8 @@ libgame_a_SOURCES = \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
 	PetHandler.cpp \
-	PetHandler.cpp \
 	Player.cpp \
+	ProgressBar.cpp \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestHandler.cpp \
@@ -84,13 +84,14 @@ libgame_a_SOURCES = \
 	RedZoneDistrict.cpp \
 	ScriptCalls.cpp \
 	SkillHandler.cpp \
+	SpellAuras.cpp \
 	Spell.cpp \
 	SpellEffects.cpp \
-	SpellAuras.cpp \
 	SpellHandler.cpp \
 	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TaxiMovementGenerator.cpp \
+	tools.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
 	UpdateData.cpp \
@@ -109,6 +110,7 @@ libgame_a_SOURCES = \
 	Channel.h \
 	ChannelMgr.h \
 	Chat.h \
+	CompositeAI.h \
 	Container.h \
 	Corpse.h \
 	CreatureAI.h \
@@ -116,9 +118,13 @@ libgame_a_SOURCES = \
 	CreatureAIRegistry.h \
 	CreatureAISelector.h \
 	Creature.h \
+	DestinationHolder.h \
+	DestinationHolderImp.h \
 	DynamicObject.h \
 	EventSystem.h \
 	FactionTemplateResolver.h \
+	FlightMaster.h \
+	Formulas.h \
 	GameObject.h \
 	GossipDef.h \
 	GridDefines.h \
@@ -139,34 +145,41 @@ libgame_a_SOURCES = \
 	MiscHandler.h \
 	MotionMaster.h \
 	MovementGenerator.h \
+	MovementGeneratorImpl.h \
 	Mthread.h \
 	NameTables.h \
 	NPCHandler.h \
 	NullCreatureAI.h \
 	ObjectAccessor.h \
+	ObjectDefines.h \
 	ObjectGridLoader.h \
 	Object.h \
 	ObjectMgr.h \
 	Opcodes.h \
 	Path.h \
 	Player.h \
+	ProgressBar.hpp \
 	QuestDef.h \
 	RandomMovementGenerator.h \
 	ReactorAI.h \
 	RedZoneDistrict.h \
 	ScriptCalls.h \
 	SharedDefines.h \
-	Spell.h \
 	SpellAuras.h \
+	Spell.h \
 	Stats.h \
 	TargetedMovementGenerator.h \
 	TaxiMovementGenerator.h \
+	Tools.h \
+	Traveller.h \
 	Unit.h \
 	UpdateData.h \
 	UpdateFields.h \
 	UpdateMask.h \
 	Utilities.h \
+	WaypointMovementGenerator.h \
 	World.h \
+	WorldLog.h \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h

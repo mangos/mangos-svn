@@ -88,15 +88,15 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	NullCreatureAI.$(OBJEXT) ObjectAccessor.$(OBJEXT) \
 	Object.$(OBJEXT) ObjectGridLoader.$(OBJEXT) \
 	ObjectMgr.$(OBJEXT) Opcodes.$(OBJEXT) PetHandler.$(OBJEXT) \
-	PetHandler.$(OBJEXT) Player.$(OBJEXT) QueryHandler.$(OBJEXT) \
+	Player.$(OBJEXT) ProgressBar.$(OBJEXT) QueryHandler.$(OBJEXT) \
 	QuestDef.$(OBJEXT) QuestHandler.$(OBJEXT) \
 	RandomMovementGenerator.$(OBJEXT) ReactorAI.$(OBJEXT) \
 	RedZoneDistrict.$(OBJEXT) ScriptCalls.$(OBJEXT) \
-	SkillHandler.$(OBJEXT) Spell.$(OBJEXT) SpellEffects.$(OBJEXT) \
-	SpellAuras.$(OBJEXT) SpellHandler.$(OBJEXT) \
+	SkillHandler.$(OBJEXT) SpellAuras.$(OBJEXT) Spell.$(OBJEXT) \
+	SpellEffects.$(OBJEXT) SpellHandler.$(OBJEXT) \
 	TargetedMovementGenerator.$(OBJEXT) TaxiHandler.$(OBJEXT) \
-	TaxiMovementGenerator.$(OBJEXT) TradeHandler.$(OBJEXT) \
-	Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
+	TaxiMovementGenerator.$(OBJEXT) tools.$(OBJEXT) \
+	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
 	WaypointMovementGenerator.$(OBJEXT) World.$(OBJEXT) \
 	WorldLog.$(OBJEXT) WorldSession.$(OBJEXT) \
 	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT)
@@ -308,8 +308,8 @@ libgame_a_SOURCES = \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
 	PetHandler.cpp \
-	PetHandler.cpp \
 	Player.cpp \
+	ProgressBar.cpp \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestHandler.cpp \
@@ -318,13 +318,14 @@ libgame_a_SOURCES = \
 	RedZoneDistrict.cpp \
 	ScriptCalls.cpp \
 	SkillHandler.cpp \
+	SpellAuras.cpp \
 	Spell.cpp \
 	SpellEffects.cpp \
-	SpellAuras.cpp \
 	SpellHandler.cpp \
 	TargetedMovementGenerator.cpp \
 	TaxiHandler.cpp \
 	TaxiMovementGenerator.cpp \
+	tools.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
 	UpdateData.cpp \
@@ -343,6 +344,7 @@ libgame_a_SOURCES = \
 	Channel.h \
 	ChannelMgr.h \
 	Chat.h \
+	CompositeAI.h \
 	Container.h \
 	Corpse.h \
 	CreatureAI.h \
@@ -350,9 +352,13 @@ libgame_a_SOURCES = \
 	CreatureAIRegistry.h \
 	CreatureAISelector.h \
 	Creature.h \
+	DestinationHolder.h \
+	DestinationHolderImp.h \
 	DynamicObject.h \
 	EventSystem.h \
 	FactionTemplateResolver.h \
+	FlightMaster.h \
+	Formulas.h \
 	GameObject.h \
 	GossipDef.h \
 	GridDefines.h \
@@ -373,34 +379,41 @@ libgame_a_SOURCES = \
 	MiscHandler.h \
 	MotionMaster.h \
 	MovementGenerator.h \
+	MovementGeneratorImpl.h \
 	Mthread.h \
 	NameTables.h \
 	NPCHandler.h \
 	NullCreatureAI.h \
 	ObjectAccessor.h \
+	ObjectDefines.h \
 	ObjectGridLoader.h \
 	Object.h \
 	ObjectMgr.h \
 	Opcodes.h \
 	Path.h \
 	Player.h \
+	ProgressBar.hpp \
 	QuestDef.h \
 	RandomMovementGenerator.h \
 	ReactorAI.h \
 	RedZoneDistrict.h \
 	ScriptCalls.h \
 	SharedDefines.h \
-	Spell.h \
 	SpellAuras.h \
+	Spell.h \
 	Stats.h \
 	TargetedMovementGenerator.h \
 	TaxiMovementGenerator.h \
+	Tools.h \
+	Traveller.h \
 	Unit.h \
 	UpdateData.h \
 	UpdateFields.h \
 	UpdateMask.h \
 	Utilities.h \
+	WaypointMovementGenerator.h \
 	World.h \
+	WorldLog.h \
 	WorldSession.h \
 	WorldSocket.h \
 	WorldSocketMgr.h
@@ -507,6 +520,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PetHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Player.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProgressBar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueryHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestDef.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestHandler.Po@am__quote@
@@ -532,6 +546,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocket.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSocketMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debugcmds.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tools.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
