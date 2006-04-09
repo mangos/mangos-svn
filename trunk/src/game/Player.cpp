@@ -2729,17 +2729,22 @@ void Player::RepopAtGraveyard()
     if(closestX != 0 && closestY != 0 && closestZ != 0)
     {
 
-        //GetSession()->GetPlayer()->smsg_NewWorld(GetMapId(), closestX, closestY, closestZ,0.0);
+	// we should be able to make 2 kinds of teleport after death
+	// near if in the same zoneid and far if in different zoneid
+
+
+	// teleport far
+        GetSession()->GetPlayer()->smsg_NewWorld(GetMapId(), closestX, closestY, closestZ,0.0);
 
         WorldPacket data;
 
-        BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0);
-        GetSession()->SendPacket(&data);
+	// teleport near
+	// BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0);
+	// GetSession()->SendPacket(&data);
 
         SetPosition(closestX, closestY, closestZ, 0);
         BuildHeartBeatMsg(&data);
         SendMessageToSet(&data, true);
-
     }
 
 }
