@@ -18,7 +18,7 @@
 
 #include <stdlib.h>
 #include <functional>
-#include <ext/functional>
+// #include <ext/functional>
 
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
@@ -42,7 +42,7 @@ void LoadCreaturesLootTables()
     uint32 curId = 0;
     LootStore::iterator tab;
     uint32 itemid, displayid, entry_id;
-    uint32 count;
+    uint32 count = 0;
     float chance;
 
     QueryResult *result = sDatabase.Query("SELECT * FROM `loottemplate`;");
