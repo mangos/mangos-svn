@@ -14,7 +14,7 @@
 		<Configuration
 			Name="Debug|Win32"
 			OutputDirectory="..\..\bin\Debug"
-			IntermediateDirectory="Debug"
+			IntermediateDirectory=".\script___Win32_Debug"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
@@ -66,7 +66,7 @@
 		<Configuration
 			Name="Release|Win32"
 			OutputDirectory="..\..\bin\Release"
-			IntermediateDirectory="Release"
+			IntermediateDirectory=".\script___Win32_Release"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
