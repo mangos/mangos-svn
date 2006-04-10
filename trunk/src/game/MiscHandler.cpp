@@ -57,26 +57,38 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 {
-    uint8 lootSlot;
-    Loot * loot;
-    recv_data >> lootSlot;
-    uint64 guid=_player->GetLootGUID();
+    Player  *player =   GetPlayer();
+    uint64   lguid =    player->GetLootGUID();
+    Loot    *loot;
+    uint8    lootSlot;
 
-    if(IS_GAMEOBJECT_GUID(guid))
+    recv_data >> lootSlot;
+
+    if (IS_GAMEOBJECT_GUID(lguid))
     {
-        GameObject *go=ObjectAccessor::Instance().GetGameObject(*_player, guid);
-        if(!go)return;
-        else loot=&go->loot ;
-    }else
+        GameObject *go =
+            ObjectAccessor::Instance().GetGameObject(*player, lguid);
+
+        if (!go)
+            return;
+
+        loot = &go->loot;
+    }
+    else
     {
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-        if (!pCreature) return;
-        else loot=&pCreature->loot ;
+        Creature* pCreature =
+            ObjectAccessor::Instance().GetCreature(*player, lguid);
+
+        if (!pCreature)
+            return;
+
+        loot = &pCreature->loot;
     }
 
     WorldPacket data;
+    LootItem &item = loot->items[lootSlot];
 
-    if (loot->items.at(lootSlot).isLooted)
+    if (item.is_looted)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
         data << uint8(EQUIP_ERR_ALREADY_LOOTED);
@@ -87,22 +99,23 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (GetPlayer()->AddNewItem(0,NULL_SLOT,loot->items.at(lootSlot).item.itemid,1,false,false))
+    if (player->AddNewItem(0, NULL_SLOT, item.itemid, 1, false, false))
     {
-        loot->items.at(lootSlot).isLooted=true;
+        item.is_looted = true;
+
         data.Initialize( SMSG_LOOT_REMOVED );
         data << uint8(lootSlot);
         SendPacket( &data );
 
         data.Initialize( SMSG_ITEM_PUSH_RESULT );
-        data << _player->GetGUID();
+        data << player->GetGUID();
         data << uint64(0x00000000);
         data << uint8(0x01);
         data << uint8(0x00);
         data << uint8(0x00);
         data << uint8(0x00);
         data << uint8(0xFF);
-        data << uint32(loot->items.at(lootSlot).item.itemid);
+        data << uint32(item.itemid);
         data << uint64(0);
 
         /*data << uint8(0x00);
@@ -111,7 +124,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint32(0x00000000);
         data << uint8(0x00);*/
         SendPacket( &data );
-    }else
+    }
+    else
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
         data << uint8(EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE);
@@ -120,29 +134,37 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint8(0);
         SendPacket( &data );
     }
-
 }
 
 void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 {
-    Loot * loot;
-    uint64 guid=_player->GetLootGUID();
+    Player  *player =   GetPlayer();
+    uint64   lguid =    player->GetLootGUID();
+    Loot    *loot;
 
-    if(IS_GAMEOBJECT_GUID(guid))
+    if (IS_GAMEOBJECT_GUID(lguid))
     {
-        GameObject *go=ObjectAccessor::Instance().GetGameObject(*_player, guid);
-        if(!go)return;
-        else loot=&go->loot ;
-    }else
+        GameObject *go =
+            ObjectAccessor::Instance().GetGameObject(*player, lguid);
+
+        if (!go)
+            return;
+
+        loot = &go->loot;
+    }
+    else
     {
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-        if (!pCreature) return;
-        else loot=&pCreature->loot ;
+        Creature* pCreature =
+            ObjectAccessor::Instance().GetCreature(*player, lguid);
+
+        if (!pCreature)
+            return;
+
+        loot = &pCreature->loot ;
     }
 
-    uint32 newcoinage = _player->GetUInt32Value(PLAYER_FIELD_COINAGE)+ loot->gold ;
-    loot->gold =0;
-    GetPlayer()->SetUInt32Value(PLAYER_FIELD_COINAGE , newcoinage);
+    player->ModifyMoney(loot->gold);
+    loot->gold = 0;
 }
 
 extern int num_item_prototypes;
@@ -151,48 +173,64 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;
-    GetPlayer()->SendLoot(guid,1);
-
+    GetPlayer()->SendLoot(guid, 1);
 }
 
 void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 {
-    uint64 guid;
-    recv_data >> guid;
+    Player  *player = GetPlayer();
+    Loot    *loot;
+    uint64   lguid;
 
-    GetPlayer()->SetLootGUID(0);
+    recv_data >> lguid;
+
+    player->SetLootGUID(0);
 
     WorldPacket data;
     data.Initialize( SMSG_LOOT_RELEASE_RESPONSE );
-    data << guid << uint8( 1 );
+    data << lguid << uint8(1);
     SendPacket( &data );
 
-    if(IS_GAMEOBJECT_GUID(guid))
+    if (IS_GAMEOBJECT_GUID(lguid))
     {
-        //FIXME: remove go after it's looted
+        GameObject *go =
+            ObjectAccessor::Instance().GetGameObject(*player, lguid);
 
-    }else
+        if (!go)
+            return;
+
+        go->setLootState(LOOTED);
+    }
+    else
     {
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-        if (!pCreature) return;
-        Loot *  loot=&pCreature->loot ;
+        Creature* pCreature =
+            ObjectAccessor::Instance().GetCreature(*player, lguid);
+
+        if (!pCreature)
+            return;
+
+        loot = &pCreature->loot;
+
         if(!loot->gold)
         {
-            bool Looted=true;
-            for(std::vector<__LootItem>::iterator i=loot->items.begin();i!=loot->items.end();i++)
-                if(!i->isLooted){Looted=false;break;}
+            vector<LootItem>::iterator i;
 
-                if(Looted)
+            i = find_if(loot->items.begin(), loot->items.end(),
+                LootItem::not_looted);
+
+            if(i == loot->items.end())
             {
                                                             //this is probably wrong
                 pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
                 if(pCreature->GetCreatureInfo()->SkinLootId)
                                                             // set skinnable
-                    pCreature->SetFlag (UNIT_FIELD_FLAGS, 0x4000000);
+                    pCreature->SetFlag(UNIT_FIELD_FLAGS, 0x4000000);
             }
+
+            remove_if(loot->items.begin(), loot->items.end(),
+                LootItem::looted);
         }
     }
-
 }
 
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )

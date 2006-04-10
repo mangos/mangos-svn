@@ -19,47 +19,72 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include <map>
-#include <string>
+#include <list>
 #include <vector>
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "ItemPrototype.h"
+#include "ByteBuffer.h"
 
-typedef struct
+using std::vector;
+using std::list;
+
+struct LootItem
 {
-    uint32 itemid;
-    uint32 displayid;
-}_LootItem;
+    uint32  itemid;
+    uint32  displayid;
+    float   chance;
+    bool    is_looted;
 
-typedef struct
+    LootItem(uint32 _itemid = 0, uint32 _displayid = 0,
+        float _chance = 0, bool _isLooted = false) :
+    itemid(_itemid), displayid(_displayid),
+        chance(_chance), is_looted(_isLooted) {}
+
+    static bool looted(LootItem &itm) { return itm.is_looted; }
+    static bool not_looted(LootItem &itm) { return !itm.is_looted; }
+
+    static bool not_chance_for(LootItem &itm)
+    {
+        return (itm.chance * 1000) < (rand() % 100000);
+    }
+};
+
+struct Loot
 {
-    _LootItem item;
-    bool    isLooted;
-}__LootItem;
-
-typedef struct
-{
-    float chance;
-    _LootItem item;
-
-}StoreLootItem;
-
-typedef struct
-{
-    uint32 count;
-    StoreLootItem*items;
-}StoreLootList;
-
-typedef struct
-{
-    std::vector<__LootItem> items;
+    vector<LootItem> items;
     uint32 gold;
-}Loot;
 
-void FillLoot(Loot * loot,uint32 loot_id);
+    Loot(uint32 _gold = 0) : gold(_gold) {}
+
+    ~Loot()
+    {
+        items.clear();
+    }
+};
+
+void FillLoot(Loot *loot, uint32 loot_id);
 void LoadCreaturesLootTables();
-//////////////////////////////////////////////////////////////////////////////////////////
 
-typedef HM_NAMESPACE::hash_map<uint32, StoreLootList > LootStore;
+typedef HM_NAMESPACE::hash_map<uint32, list<LootItem> > LootStore;
+
+inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
+{
+    b << uint32(li.itemid);
+    b << uint32(1);                                         // nr of items of this type
+    b << uint32(li.displayid);
+    b << uint64(0) << uint8(0);
+    return b;
+}
+
+inline ByteBuffer& operator<<(ByteBuffer& b, Loot& l)
+{
+    b << l.gold;
+    b << uint8(l.items.size());
+
+    for (uint8 i = 0; i < l.items.size(); i++)
+        b << uint8(i) << l.items[i];
+
+    return b;
+}
 #endif

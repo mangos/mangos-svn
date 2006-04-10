@@ -5885,29 +5885,33 @@ void Player::_ApplyAllItemMods()
 3-Fishing
 */
 
-void Player::SendLoot(uint64 guid,uint8 loot_type)
+void Player::SendLoot(uint64 guid, uint8 loot_type)
 {
+    Player  *player = this;
+    Loot    *loot;
 
-    Loot * loot;
-
-    if(IS_GAMEOBJECT_GUID(guid))
+    if (IS_GAMEOBJECT_GUID(guid))
     {
-        GameObject* go = ObjectAccessor::Instance().GetGameObject(*((Unit*)this), guid);
-        if(!go)return;
+        GameObject *go =
+            ObjectAccessor::Instance().GetGameObject(*player, guid);
+
+        if (!go)
+            return;
+
         go->generateLoot();
-
-        loot=&go->loot;
-
+        loot = &go->loot;
     }
     else
     {
-        Creature*creature = ObjectAccessor::Instance().GetCreature(*((Unit*)this), guid);
-        if(!creature) return;
+        Creature *creature =
+            ObjectAccessor::Instance().GetCreature(*player, guid);
 
-        loot=&creature->loot;
-        if(loot_type==2)
-            FillLoot(loot,creature->GetCreatureInfo()->SkinLootId);
+        if (!creature)
+            return;
 
+        loot = &creature->loot;
+        if (loot_type == 2)
+            FillLoot(loot, creature->GetCreatureInfo()->SkinLootId);
     }
 
     m_lootGuid = guid;
@@ -5917,17 +5921,7 @@ void Player::SendLoot(uint64 guid,uint8 loot_type)
 
     data << guid;
     data << loot_type;                                      //loot_type;
-    data << loot->gold;
-    data << (uint8)loot->items.size();
+    data << *loot;
 
-    for(uint8 i = 0; i < loot->items.size(); i++)
-    {
-        data << uint8(i);
-        data << uint32(loot->items[i].item.itemid);
-        data << uint32(1);                                  //nr of items of this type
-        data << uint32(loot->items[i].item.displayid);
-        data << uint64(0) << uint8(0);
-    }
-
-    SendMessageToSet(&data,true);
+    SendMessageToSet(&data, true);
 }

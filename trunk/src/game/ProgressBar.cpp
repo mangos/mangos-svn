@@ -21,6 +21,7 @@
 barGoLink::~barGoLink()
 {
     printf( "\n" );
+    fflush(stdout);
 }
 
 barGoLink::barGoLink( int row_count )
@@ -46,6 +47,7 @@ barGoLink::barGoLink( int row_count )
     #else
     printf( "] 0%%\r[" );
     #endif
+    fflush(stdout);
 }
 
 void barGoLink::step( void )
@@ -70,6 +72,7 @@ void barGoLink::step( void )
         #else
         printf( "] %i%%  \r[", (int)percent);
         #endif
+        fflush(stdout);
 
         rec_pos = n;
     }
