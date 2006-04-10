@@ -1411,27 +1411,27 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
         case MAGE:
             //*HP +=
             //*MP +=
-            STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            STA += (lvl > 5  ? 1 : 0);
-            AGI += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            INT += (lvl > 24 ? 2 : (lvl > 1 ? 1 : 0));
-            SPI += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
+            *STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
+            *STA += (lvl > 5  ? 1 : 0);
+            *AGI += (lvl > 9 && !(lvl%2) ? 1 : 0);
+            *INT += (lvl > 24 ? 2 : (lvl > 1 ? 1 : 0));
+            *SPI += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
             break;
         case WARLOCK:
             //*HP +=
             //*MP +=
-            STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            STA += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
-            AGI += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            INT += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
-            SPI += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
+            *STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
+            *STA += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
+            *AGI += (lvl > 9 && !(lvl%2) ? 1 : 0);
+            *INT += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
+            *SPI += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
             break;
         case DRUID:
-            STR += (lvl > 38 ? 2 : (lvl > 6 && (lvl%2) ? 1 : 0));
-            STA += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
-            AGI += (lvl > 38 ? 2 : (lvl > 8 && (lvl%2) ? 1 : 0));
-            INT += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
-            SPI += (lvl > 38 ? 3 : (lvl > 5 ? 1 : 0));
+            *STR += (lvl > 38 ? 2 : (lvl > 6 && (lvl%2) ? 1 : 0));
+            *STA += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
+            *AGI += (lvl > 38 ? 2 : (lvl > 8 && (lvl%2) ? 1 : 0));
+            *INT += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
+            *SPI += (lvl > 38 ? 3 : (lvl > 5 ? 1 : 0));
     }
 
 }
