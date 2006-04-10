@@ -462,14 +462,11 @@ void AuthSocket::_HandleRealmList()
 
     uint8 chars = 0;
 
-    result = sDatabase.PQuery( "SELECT guid FROM characters WHERE acct=%d",id);
+    result = sDatabase.PQuery( "SELECT COUNT(*) FROM characters WHERE acct=%d",id);
     if( result )
     {
-        do
-        {
-            chars++;
-        }
-        while( result->NextRow() );
+        Field *fields = result->Fetch();
+        chars = fields[0].GetUInt8();
 
         delete result;
     }
