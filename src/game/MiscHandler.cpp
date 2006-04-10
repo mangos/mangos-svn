@@ -1010,6 +1010,11 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
             sLog.outString( "MISC: Added Action %u into button %u", action, button );
             GetPlayer()->addAction(button,action,type,misc);
         }
+        else if(type==128)
+        {
+            sLog.outString( "MISC: Added Item %u into button %u", action, button );
+            GetPlayer()->addAction(button,action,type,misc);
+        }
     }
 }
 
