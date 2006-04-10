@@ -49,8 +49,10 @@ EXTRA_DIST += \
 	win_intel/VC71/game.vcproj \
 	win_intel/VC71/mangosd.icproj \
 	win_intel/VC71/mangosd.vcproj \
-	win_intel/VC71/realmlist.icproj \
-	win_intel/VC71/realmlist.vcproj \
+	win_intel/VC71/realmd.icproj \
+	win_intel/VC71/realmd.vcproj \
+	win_intel/VC71/script.icproj \
+	win_intel/VC71/script.vcproj \
 	win_intel/VC71/shared.icproj \
 	win_intel/VC71/shared.vcproj \
 	win_intel/VC71/zlib.icproj \

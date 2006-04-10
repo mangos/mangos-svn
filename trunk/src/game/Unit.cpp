@@ -341,14 +341,14 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 {
-	while(eventrun);
-	eventrun = true;
+    while(eventrun);
+    eventrun = true;
     uint32 procFlag = 0;
     if(!this || !pVictim || !this->isAlive() || !pVictim->isAlive())
-	{
-		eventrun=false;
+    {
+        eventrun=false;
         return;
-	}
+    }
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id);
 
@@ -374,7 +374,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
-	eventrun=false;
+    eventrun=false;
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
