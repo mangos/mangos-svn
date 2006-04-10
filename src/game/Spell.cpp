@@ -883,16 +883,16 @@ uint8 Spell::CanCast()
 
 uint8 Spell::CheckItems()
 {
-	//update by Ant009,need more test.
+    //update by Ant009,need more test.
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return uint8(0);
 
     Player* p_caster = (Player*)m_caster;
     Item* itm;
-	Bag* pBag;
+    Bag* pBag;
     uint32 tmpReagentCount[8];
-	uint8 curSlot;
-	uint8 bagIndex;
+    uint8 curSlot;
+    uint8 bagIndex;
 
     for(uint32 i=0;i<8;i++)
         tmpReagentCount[i] = m_spellInfo->ReagentCount[i];
@@ -901,7 +901,7 @@ uint8 Spell::CheckItems()
     {
         if(m_spellInfo->Reagent[i] == 0)
             continue;
-		
+
         for(uint32 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
         {
             itm = p_caster->GetItemBySlot(j);
@@ -913,25 +913,25 @@ uint8 Spell::CheckItems()
             else
                 tmpReagentCount[i] -= itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
         }
-		for(bagIndex=CLIENT_SLOT_01;bagIndex<=CLIENT_SLOT_04;bagIndex++) 
-		{
-			pBag = new Bag;
-			pBag = p_caster->GetBagBySlot(bagIndex);
-			if (pBag) 
-				for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++) 
-				{	
-					itm = new Item;
-					itm = p_caster->GetItemBySlot(bagIndex,pSlot);
-					if(!itm)
-						continue;
-					if(itm->GetProto()->ItemId == m_spellInfo->Reagent[i] && tmpReagentCount[i] > 0)
-						if(itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > tmpReagentCount[i])
-							tmpReagentCount[i] = 0;
-					else
-						tmpReagentCount[i] -= itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
-				}
-		}
-		pBag = NULL;
+        for(bagIndex=CLIENT_SLOT_01;bagIndex<=CLIENT_SLOT_04;bagIndex++)
+        {
+            pBag = new Bag;
+            pBag = p_caster->GetBagBySlot(bagIndex);
+            if (pBag)
+                for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
+            {
+                itm = new Item;
+                itm = p_caster->GetItemBySlot(bagIndex,pSlot);
+                if(!itm)
+                    continue;
+                if(itm->GetProto()->ItemId == m_spellInfo->Reagent[i] && tmpReagentCount[i] > 0)
+                    if(itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > tmpReagentCount[i])
+                        tmpReagentCount[i] = 0;
+                else
+                    tmpReagentCount[i] -= itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
+            }
+        }
+        pBag = NULL;
         if(tmpReagentCount[i] != 0)
             return uint8(0x54);
     }
@@ -941,10 +941,10 @@ uint8 Spell::CheckItems()
     {
         if(m_spellInfo->Totem[i] != 0)
         {
-			if(p_caster->GetSlotByItemID(m_spellInfo->Totem[i], bagIndex, curSlot,true,false))
-			{
-				itm = new Item;
-				itm = p_caster->GetItemBySlot(bagIndex,curSlot);
+            if(p_caster->GetSlotByItemID(m_spellInfo->Totem[i], bagIndex, curSlot,true,false))
+            {
+                itm = new Item;
+                itm = p_caster->GetItemBySlot(bagIndex,curSlot);
                 if(!itm)continue;
                 if(itm->GetProto()->ItemId == m_spellInfo->Totem[i])
                 {
@@ -955,7 +955,7 @@ uint8 Spell::CheckItems()
         }else
         totems -= 1;
     }
-	itm = NULL;
+    itm = NULL;
     if(totems != 0)
         return uint8(0x70);
 

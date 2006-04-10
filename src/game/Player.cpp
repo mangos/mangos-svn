@@ -2729,18 +2729,17 @@ void Player::RepopAtGraveyard()
     if(closestX != 0 && closestY != 0 && closestZ != 0)
     {
 
-	// we should be able to make 2 kinds of teleport after death
-	// near if in the same zoneid and far if in different zoneid
+        // we should be able to make 2 kinds of teleport after death
+        // near if in the same zoneid and far if in different zoneid
 
-
-	// teleport far
+        // teleport far
         GetSession()->GetPlayer()->smsg_NewWorld(GetMapId(), closestX, closestY, closestZ,0.0);
 
         WorldPacket data;
 
-	// teleport near
-	// BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0);
-	// GetSession()->SendPacket(&data);
+        // teleport near
+        // BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0);
+        // GetSession()->SendPacket(&data);
 
         SetPosition(closestX, closestY, closestZ, 0);
         BuildHeartBeatMsg(&data);
@@ -5446,105 +5445,105 @@ uint32 Player::GetSlotByItemID(uint32 ID)
     return 0;
 }
 
-bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInventorySlot,bool additems) 
+bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInventorySlot,bool additems)
 {
-	Bag *pBag;
-	Item *pItem;
-	if(CheckInventorySlot)
-	{
-		for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-		{
-			pItem = new Item;
-			pItem = GetItemBySlot(j);
-			if(!pItem)
-				continue;
-			if(additems)
-			{
-				if(pItem->GetProto()->ItemId == ID 
-					&& pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
-					slot = j;
-			}
-			else if(pItem->GetProto()->ItemId == ID)
-					slot = j;
-		}
-		if(slot) 
-		{
-			if(slot >=23 && slot <=39)
-			{
-				bagIndex = CLIENT_SLOT_BACK;
-				return true;
-			}
-			if(slot >=0 && slot <19)
-			{
-				bagIndex = 0;
-				return true;
-			}
-		}
-	}
-	else if(additems)
-	{
-		for(uint32 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
-		{
-			pItem = new Item;
-			pItem = GetItemBySlot(i);
-			if(!pItem)
-				continue;
-			if(pItem->GetProto()->ItemId == ID 
-				&& pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
-			{
-				bagIndex = CLIENT_SLOT_BACK;
-				slot = i;
-				return true;
-			}
-		}
-	}
-	else
-	{
-		slot=GetSlotByItemID(ID);
-		if(slot)
-		{
-			bagIndex = 0;
-			return true;
-		}
-	}
-	for(uint8 i=CLIENT_SLOT_01;i<=CLIENT_SLOT_04;i++) 
-	{
-		pBag = new Bag;
-		pBag = GetBagBySlot(i);
-		if (pBag) 
-			for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++) 
-			{	
-				pItem = new Item;
-				pItem = pBag->GetItemFromBag(pSlot);
-				if(pItem)
-				{
-					if(additems)
-					{
-						if(pItem->GetItemProto()->ItemId == ID
-							&& pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
-						{	
-							slot = pSlot;
-							bagIndex = i;
-							pBag = NULL;
-							pItem = NULL;
-							return true;
-						}
-					}
-					else if(pItem->GetItemProto()->ItemId == ID)
-					{
-						slot = pSlot;
-						bagIndex = i;
-						pBag = NULL;
-						pItem = NULL;
-						return true;
-					}
-					
-				}
-			}
-	}
-	pBag = NULL;
-	pItem = NULL;
-	return false;
+    Bag *pBag;
+    Item *pItem;
+    if(CheckInventorySlot)
+    {
+        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
+        {
+            pItem = new Item;
+            pItem = GetItemBySlot(j);
+            if(!pItem)
+                continue;
+            if(additems)
+            {
+                if(pItem->GetProto()->ItemId == ID
+                    && pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
+                    slot = j;
+            }
+            else if(pItem->GetProto()->ItemId == ID)
+                slot = j;
+        }
+        if(slot)
+        {
+            if(slot >=23 && slot <=39)
+            {
+                bagIndex = CLIENT_SLOT_BACK;
+                return true;
+            }
+            if(slot >=0 && slot <19)
+            {
+                bagIndex = 0;
+                return true;
+            }
+        }
+    }
+    else if(additems)
+    {
+        for(uint32 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+        {
+            pItem = new Item;
+            pItem = GetItemBySlot(i);
+            if(!pItem)
+                continue;
+            if(pItem->GetProto()->ItemId == ID
+                && pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
+            {
+                bagIndex = CLIENT_SLOT_BACK;
+                slot = i;
+                return true;
+            }
+        }
+    }
+    else
+    {
+        slot=GetSlotByItemID(ID);
+        if(slot)
+        {
+            bagIndex = 0;
+            return true;
+        }
+    }
+    for(uint8 i=CLIENT_SLOT_01;i<=CLIENT_SLOT_04;i++)
+    {
+        pBag = new Bag;
+        pBag = GetBagBySlot(i);
+        if (pBag)
+            for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
+        {
+            pItem = new Item;
+            pItem = pBag->GetItemFromBag(pSlot);
+            if(pItem)
+            {
+                if(additems)
+                {
+                    if(pItem->GetItemProto()->ItemId == ID
+                        && pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
+                    {
+                        slot = pSlot;
+                        bagIndex = i;
+                        pBag = NULL;
+                        pItem = NULL;
+                        return true;
+                    }
+                }
+                else if(pItem->GetItemProto()->ItemId == ID)
+                {
+                    slot = pSlot;
+                    bagIndex = i;
+                    pBag = NULL;
+                    pItem = NULL;
+                    return true;
+                }
+
+            }
+        }
+    }
+    pBag = NULL;
+    pItem = NULL;
+    return false;
 }
 
 uint32 Player::GetSlotByItemGUID(uint64 guid)

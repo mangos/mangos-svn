@@ -248,8 +248,9 @@ EXTRA_DIST = reconf configure win/mangosdVC71.sln \
 	win/VC80/zthread.vcproj win_intel/mangosdVC71.sln \
 	win_intel/VC71/framework.vcproj win_intel/VC71/game.icproj \
 	win_intel/VC71/game.vcproj win_intel/VC71/mangosd.icproj \
-	win_intel/VC71/mangosd.vcproj win_intel/VC71/realmlist.icproj \
-	win_intel/VC71/realmlist.vcproj win_intel/VC71/shared.icproj \
+	win_intel/VC71/mangosd.vcproj win_intel/VC71/realmd.icproj \
+	win_intel/VC71/realmd.vcproj win_intel/VC71/script.icproj \
+	win_intel/VC71/script.vcproj win_intel/VC71/shared.icproj \
 	win_intel/VC71/shared.vcproj win_intel/VC71/zlib.icproj \
 	win_intel/VC71/zlib.vcproj win_intel/VC71/zthread.icproj \
 	win_intel/VC71/zthread.vcproj dep/include/mysql/config-win.h \

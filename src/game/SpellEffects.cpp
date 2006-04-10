@@ -287,119 +287,119 @@ void Spell::EffectCreateItem(uint32 i)
     uint8 slot = 0;
     Item* pItem;
     uint8 curSlot=0;
-	uint8 bagIndex;
-	//Fix by Ant009,code is poor,and run slowly,hope someone make it better. 
-	//reduce items that need for spell
+    uint8 bagIndex;
+    //Fix by Ant009,code is poor,and run slowly,hope someone make it better.
+    //reduce items that need for spell
     for(uint32 x=0;x<8;x++)
     {
-		if(m_spellInfo->Reagent[x] == 0)
-			continue;
-		for(uint32 y=0;y<m_spellInfo->ReagentCount[x];y++)
-		{
-			if(pUnit->GetSlotByItemID(m_spellInfo->Reagent[x],bagIndex,curSlot,true,false))
-			{
-				//pItem = new Item;
-				pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
-			}
-			if(pItem)
-			{
-				if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > 1)
-				{
-					pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)-1);
-					pUnit->UpdateSlot(bagIndex,curSlot);
-				}
-				else
-				{
-					pUnit->RemoveItemFromSlot(bagIndex,curSlot,true);
-					pItem->DeleteFromDB();
-				}
-				pItem = NULL;
-				curSlot = 0;
-			}
-		}
+        if(m_spellInfo->Reagent[x] == 0)
+            continue;
+        for(uint32 y=0;y<m_spellInfo->ReagentCount[x];y++)
+        {
+            if(pUnit->GetSlotByItemID(m_spellInfo->Reagent[x],bagIndex,curSlot,true,false))
+            {
+                //pItem = new Item;
+                pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
+            }
+            if(pItem)
+            {
+                if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > 1)
+                {
+                    pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)-1);
+                    pUnit->UpdateSlot(bagIndex,curSlot);
+                }
+                else
+                {
+                    pUnit->RemoveItemFromSlot(bagIndex,curSlot,true);
+                    pItem->DeleteFromDB();
+                }
+                pItem = NULL;
+                curSlot = 0;
+            }
+        }
     }
 
     pItem = NULL;
     Item* newItem;
-	curSlot=0;
-	//add items that spell creates
+    curSlot=0;
+    //add items that spell creates
     for(i=0;i<2;i++)
     {
         if(m_spellInfo->EffectItemType[i] == 0)
             continue;
 
         slot = 0;
-		ItemPrototype *m_itemProto = objmgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
+        ItemPrototype *m_itemProto = objmgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
 
         uint32 num_to_add = ((pUnit->GetLevel() - (m_spellInfo->spellLevel-1))*2);
-		if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
-			num_to_add = 1;
-		if(num_to_add > m_itemProto->MaxCount)
-			num_to_add = m_itemProto->MaxCount;
-		
-		for(uint32 num=0;num < num_to_add;num++)
-		{
-			if(pUnit->GetSlotByItemID(m_spellInfo->EffectItemType[i],bagIndex,curSlot,false,true))
-			{
-				pItem = new Item;
-				pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
-				if(pItem && pItem->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i])
-				{
-					if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetItemProto()->MaxCount)
-					{
-						pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)+1);
-						pUnit->UpdateSlot(bagIndex,curSlot);
-						slot = curSlot;
-						continue;
-					}else slot = 0;
-				}
-			}
-				
-			//if (slot == 0),Old slots has reach MaxCount, need a new solt to put items.
-			for (uint8 j = INVENTORY_SLOT_ITEM_START; j<INVENTORY_SLOT_ITEM_END;j++)
-			{
-				if(pUnit->GetItemBySlot(j) == 0)
-				{
-					slot = j;
-					bagIndex = CLIENT_SLOT_BACK;
-				}
-			}
+        if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
+            num_to_add = 1;
+        if(num_to_add > m_itemProto->MaxCount)
+            num_to_add = m_itemProto->MaxCount;
 
-			Bag* pBag;
-			if(slot == 0)
-				for(uint8 bagID=CLIENT_SLOT_01;bagID<=CLIENT_SLOT_04;bagID++) 
-				{
-					pBag = new Bag;
-					pBag = pUnit->GetBagBySlot(bagID);
-					if (pBag) 
-						for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++) 
-						{	
-							pItem = new Item;
-							pItem = pBag->GetItemFromBag(pSlot);
-							if(!pItem)
-							{
-								slot = pSlot;
-								bagIndex = bagID;
-								pBag = NULL;
-								pItem = NULL;
-								break;
-							}
-						}
-				}
+        for(uint32 num=0;num < num_to_add;num++)
+        {
+            if(pUnit->GetSlotByItemID(m_spellInfo->EffectItemType[i],bagIndex,curSlot,false,true))
+            {
+                pItem = new Item;
+                pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
+                if(pItem && pItem->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i])
+                {
+                    if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetItemProto()->MaxCount)
+                    {
+                        pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)+1);
+                        pUnit->UpdateSlot(bagIndex,curSlot);
+                        slot = curSlot;
+                        continue;
+                    }else slot = 0;
+                }
+            }
 
-			if(slot == 0)
-			{
-				SendCastResult(0x18);
-				return;
-			}
-			newItem = new Item;
-			newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
-			pUnit->AddItem(bagIndex, slot, newItem, false, false, false);
-			newItem = NULL;
-			
-		}
-		
-	}
+            //if (slot == 0),Old slots has reach MaxCount, need a new solt to put items.
+            for (uint8 j = INVENTORY_SLOT_ITEM_START; j<INVENTORY_SLOT_ITEM_END;j++)
+            {
+                if(pUnit->GetItemBySlot(j) == 0)
+                {
+                    slot = j;
+                    bagIndex = CLIENT_SLOT_BACK;
+                }
+            }
+
+            Bag* pBag;
+            if(slot == 0)
+                for(uint8 bagID=CLIENT_SLOT_01;bagID<=CLIENT_SLOT_04;bagID++)
+            {
+                pBag = new Bag;
+                pBag = pUnit->GetBagBySlot(bagID);
+                if (pBag)
+                    for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
+                {
+                    pItem = new Item;
+                    pItem = pBag->GetItemFromBag(pSlot);
+                    if(!pItem)
+                    {
+                        slot = pSlot;
+                        bagIndex = bagID;
+                        pBag = NULL;
+                        pItem = NULL;
+                        break;
+                    }
+                }
+            }
+
+            if(slot == 0)
+            {
+                SendCastResult(0x18);
+                return;
+            }
+            newItem = new Item;
+            newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
+            pUnit->AddItem(bagIndex, slot, newItem, false, false, false);
+            newItem = NULL;
+
+        }
+
+    }
 }
 
 void Spell::EffectPresistentAA(uint32 i)
