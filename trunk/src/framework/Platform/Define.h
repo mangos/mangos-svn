@@ -28,7 +28,8 @@
 #define MANGOS_CLOSE_LIBRARY FreeLibrary
 #define MANGOS_GET_PROC_ADDR GetProcAddress
 #define MANGOS_IMPORT __cdecl
-#define MANGOS_SCRIPT_FILE "MaNGOSScript.dll"
+#define MANGOS_SCRIPT_EXT ".dll"
+#define MANGOS_SCRIPT_NAME "MaNGOSScript"
 #define SIGQUIT 3
 #else
 #define MANGOS_LIBRARY_HANDLE void*
@@ -37,7 +38,8 @@
 #define MANGOS_CLOSE_LIBRARY dlclose
 #define MANGOS_GET_PROC_ADDR dlsym
 #define MANGOS_IMPORT __attribute__ ((cdecl))
-#define MANGOS_SCRIPT_FILE "libMaNGOSScript.so"
+#define MANGOS_SCRIPT_EXT ".so"
+#define MANGOS_SCRIPT_NAME "libMaNGOSScript"
 #endif
 
 #ifdef WIN32

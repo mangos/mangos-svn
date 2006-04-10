@@ -149,6 +149,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "bank",        3, &ChatHandler::HandleBankCommand,          "",   NULL },
         { "wchange",     3, &ChatHandler::HandleChangeWeather,        "",   NULL },
         { "reload",      3, &ChatHandler::HandleReloadCommand,        "",   NULL },
+        { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,   "",   NULL },
         //! Development Commands
         { "set32value",  3, &ChatHandler::HandleSet32Value,           "",   NULL },
         { "Set32Bit",    3, &ChatHandler::HandleSet32Value,           "",   NULL },

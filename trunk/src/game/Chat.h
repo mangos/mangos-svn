@@ -127,6 +127,7 @@ class ChatHandler
         bool HandleModifyFactionCommand(const char* args);
         bool HandleModifySpellCommand(const char* args);
         bool HandleReloadCommand(const char* args);
+        bool HandleLoadScriptsCommand(const char* args);
 
         bool HandleDebugInArcCommand(const char* args);
 
