@@ -62,3 +62,4 @@ INSERT INTO `commands` VALUES ('npcinfo', 4, '');
 INSERT INTO `commands` VALUES ('demorph', 4, 'Syntax: .demorph\r\nWill change your skin back to the default skin.\r\n');
 INSERT INTO `commands` VALUES ('revive', 4, 'Syntax: .revive\r\nWill revive the selected character.');
 INSERT INTO `commands` VALUES ('addspw', 4, 'Syntax: .addspw <entry id>\r\nAllows to spawn a creature from a creature template using the given template id.\r\n<entry id> = decimal template id\r\n');
+INSERT INTO `commands` VALUES ('loadscripts', 4, 'Syntax: .loadscripts <library_name>\r\nLoad script library with name <library_name> or default script library, and unload currently loaded script libarary.');

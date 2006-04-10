@@ -42,8 +42,6 @@
 
 INSTANTIATE_SINGLETON_1( World );
 
-extern bool LoadScriptingModule();
-
 World::World()
 {
     m_playerLimit = 0;
@@ -215,11 +213,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
 
+    sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
         exit(1);
-
-    sLog.outString( "Initializing Scripts..." );
-    Script->ScriptsInit();
 
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);

@@ -21,6 +21,7 @@
 #include "World.h"
 #include "Master.h"
 #include "Timer.h"
+#include "ScriptCalls.h"
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
@@ -52,6 +53,7 @@ void CliExit(char*,pPrintf);
 void CliBroadcast(char*,pPrintf);
 void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
+void CliLoadScripts(char*,pPrintf);
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -68,7 +70,8 @@ const CliCommand Commands[]=
     {CMD("create"), & CliCreate,"Create account"},
     {CMD("delete"), & CliDelete,"Delete account and characters"},
     {CMD("exit"), & CliExit,"Shutdown server"},
-    {CMD("version"), & CliVersion,"Display server version"}
+    {CMD("version"), & CliVersion,"Display server version"},
+    {CMD("loadscripts"), & CliLoadScripts,"Load script library"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
@@ -90,6 +93,26 @@ bool IsItIP(char* banip)
         return false;
 
     return true;
+}
+
+void CliLoadScripts(char*command,pPrintf zprintf)
+{
+
+    char *del;
+    int x=0;
+    while(command[x]==' ')
+        x++;
+    del=&command[x];
+    if(!strlen(del))
+    {
+        if(!LoadScriptingModule()) return;
+    }
+    else
+    {
+        if(!LoadScriptingModule(del)) return;
+    }
+    
+    sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
 }
 
 void CliDelete(char*command,pPrintf zprintf)

@@ -31,9 +31,25 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "SpellAuras.h"
+#include "ScriptCalls.h"
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
+    return true;
+}
+
+bool ChatHandler::HandleLoadScriptsCommand(const char* args)
+{
+    if(!strlen(args))
+    {
+        if(!LoadScriptingModule()) return true;
+    }
+    else
+    {
+        if(!LoadScriptingModule(args)) return true;
+    }
+
+    sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
 
     return true;
 }

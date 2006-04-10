@@ -25,76 +25,57 @@
 
 ScriptsSet Script=NULL;
 
-#define CLOSE_LIB {MANGOS_CLOSE_LIBRARY(testScript->hScriptsLib);delete testScript;return false;}
-bool LoadScriptingModule()
+bool LoadScriptingModule(char const* libName)
 {
     ScriptsSet testScript=new _ScriptSet;
 
-    testScript->hScriptsLib=MANGOS_LOAD_LIBRARY(MANGOS_SCRIPT_FILE);
+    std::string name = libName ? libName : "";
+    name += MANGOS_SCRIPT_EXT;
+
+    testScript->hScriptsLib=MANGOS_LOAD_LIBRARY(name.c_str());
 
     if(!testScript->hScriptsLib )
     {
-        printf("Error loading Scripts Library!\n");
+        printf("Error loading Scripts Library %s !\n",name.c_str());
         return false;
     }
-    else printf("Scripts Library was successfully loaded.\n");
+    else printf("Scripts Library %s was successfully loaded.\n",name.c_str());
 
-    if(!(testScript->ScriptsInit=(scriptCallScriptsInit)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit")))
-        CLOSE_LIB
+    if(!(testScript->ScriptsInit         =(scriptCallScriptsInit         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
+     ||!(testScript->GossipHello         =(scriptCallGossipHello         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello"         ))
+     ||!(testScript->GOChooseReward      =(scriptCallGOChooseReward      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward"      ))
+     ||!(testScript->QuestAccept         =(scriptCallQuestAccept         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept"         ))
+     ||!(testScript->GossipSelect        =(scriptCallGossipSelect        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelect"        ))
+     ||!(testScript->GossipSelectWithCode=(scriptCallGossipSelectWithCode)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelectWithCode"))
+     ||!(testScript->QuestSelect         =(scriptCallQuestSelect         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestSelect"         ))
+     ||!(testScript->QuestComplete       =(scriptCallQuestComplete       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestComplete"       ))
+     ||!(testScript->NPCDialogStatus     =(scriptCallNPCDialogStatus     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"NPCDialogStatus"     ))
+     ||!(testScript->ChooseReward        =(scriptCallChooseReward        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ChooseReward"        ))
+     ||!(testScript->ItemHello           =(scriptCallItemHello           )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemHello"           ))
+     ||!(testScript->GOHello             =(scriptCallGOHello             )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOHello"             ))
+     ||!(testScript->scriptAreaTrigger   =(scriptCallAreaTrigger         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger"         ))
+     ||!(testScript->ItemQuestAccept     =(scriptCallItemQuestAccept     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept"     ))
+     ||!(testScript->GOQuestAccept       =(scriptCallGOQuestAccept       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept"       ))
+    ) { 
+        MANGOS_CLOSE_LIBRARY(testScript->hScriptsLib);
+        delete testScript;
+        return false;
+    }
 
-            if(!(testScript->GossipHello=(scriptCallGossipHello)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello")))
-            CLOSE_LIB
 
-                if(!(testScript->GOChooseReward=(scriptCallGOChooseReward)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward")))
-                CLOSE_LIB
-
-                    if(!(testScript->QuestAccept=(scriptCallQuestAccept)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept")))
-                    CLOSE_LIB
-
-                        if(!(testScript->GossipSelect=(scriptCallGossipSelect)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelect")))
-                        CLOSE_LIB
-
-                            if(!(testScript->GossipSelectWithCode=(scriptCallGossipSelectWithCode)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelectWithCode")))
-                            CLOSE_LIB
-
-                                if(!(testScript->QuestSelect=(scriptCallQuestSelect)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestSelect")))
-                                CLOSE_LIB
-
-                                    if(!(testScript->QuestComplete=(scriptCallQuestComplete)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestComplete")))
-                                    CLOSE_LIB
-
-                                        if(!(testScript->NPCDialogStatus=(scriptCallNPCDialogStatus)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"NPCDialogStatus")))
-                                        CLOSE_LIB
-
-                                            if(!(testScript->ChooseReward=(scriptCallChooseReward)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ChooseReward")))
-                                            CLOSE_LIB
-
-                                                if(!(testScript->ItemHello=(scriptCallItemHello)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemHello")))
-                                                CLOSE_LIB
-
-                                                    if(!(testScript->GOHello=(scriptCallGOHello)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOHello")))
-                                                    CLOSE_LIB
-
-                                                        if(!(testScript->scriptAreaTrigger=(scriptCallAreaTrigger)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger")))
-                                                        CLOSE_LIB
-
-                                                            if(!(testScript->ItemQuestAccept=(scriptCallItemQuestAccept)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept")))
-                                                            CLOSE_LIB
-
-                                                                if(!(testScript->GOQuestAccept=(scriptCallGOQuestAccept)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept")))
-                                                                CLOSE_LIB
-
-                                                            //heh we are still there :P we have a valid library
-                                                            //we reload script
-                                                                    if(Script)
+    //heh we are still there :P we have a valid library
+    //we reload script
+    if(Script)
     {
-        ScriptsSet current =testScript;
+        ScriptsSet current =Script;
         //todo: some check if some func from script library is called right now
         Script=testScript;
         MANGOS_CLOSE_LIBRARY(current->hScriptsLib);
         delete current;
     }else
     Script=testScript;
+
+    Script->ScriptsInit();
 
     return true;
 

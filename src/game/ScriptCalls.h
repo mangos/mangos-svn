@@ -19,8 +19,11 @@
 #ifndef __SCRIPT_CALLS_H
 #define __SCRIPT_CALLS_H
 
+#include "Platform/Define.h"
 #include "GossipDef.h"
 #include "Player.h"
+
+bool LoadScriptingModule(char const* libName = MANGOS_SCRIPT_NAME);
 
 typedef void(MANGOS_IMPORT * scriptCallScriptsInit) ();
 
