@@ -362,16 +362,14 @@ void Creature::generateLoot()
     //Looit is used as goods id for vendors
     //they have no loot but have items to trade
 
-    uint32 lootid=GetCreatureInfo()->lootid;
-    if(!HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR))
-    {
-        if(lootid)
-            FillLoot(&loot,lootid);
-    }
-    uint32 level=getLevel();
+    uint32 lootid = GetCreatureInfo()->lootid;
 
-    loot.gold=rand()%(level*level*5);
+    if (!HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+        FillLoot(&loot, lootid);
 
+    uint32 level = getLevel();
+
+    loot.gold = rand() % (level * level * 5);
 }
 
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run)

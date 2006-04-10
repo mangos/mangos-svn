@@ -33,14 +33,20 @@ GameObject::GameObject() : Object()
     m_objectTypeId = TYPEID_GAMEOBJECT;
 
     m_valuesCount = GAMEOBJECT_END;
-    m_RespawnTimer = 0;
+    m_respawnTimer = 0;
+    m_respawnDelayTimer = 25000;
+    m_lootState = CLOSED;
+
     lootid=0;
 }
 
 void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
 {
     GameObjectInfo*  goinfo = objmgr.GetGameObjectInfo(name_id);
-    if(!goinfo)return;
+
+    if (!goinfo)
+        return;
+
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
 
     //
@@ -72,27 +78,41 @@ void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetFloatValue (GAMEOBJECT_ROTATION+1, rotation1);
     SetFloatValue (GAMEOBJECT_ROTATION+2, rotation2);
     SetFloatValue (GAMEOBJECT_ROTATION+3, rotation3);
-
 }
 
 void GameObject::Update(uint32 p_time)
 {
+    WorldPacket     data;
 
-    if(m_RespawnTimer > 0)
+    switch (m_lootState)
     {
-        if(m_RespawnTimer > p_time)
-            m_RespawnTimer -= p_time;
-        else
-        {
-            WorldPacket data;
-            data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-            data << GetGUID();
-            SendMessageToSet(&data,true);
-            SetUInt32Value(GAMEOBJECT_STATE,1);
-            m_RespawnTimer = 0;
-        }
-    }
+        case CLOSED:
+            if (m_respawnTimer > 0)
+            {
+                if (m_respawnTimer > p_time)
+                {
+                    m_respawnTimer -= p_time;
+                }
+                else
+                {
+                    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+                    data << GetGUID();
+                    SendMessageToSet(&data, true);
+                    SetUInt32Value(GAMEOBJECT_STATE, 1);
+                    m_respawnTimer = 0;
+                }
+            }
+            break;
+        case LOOTED:
+            setLootState(CLOSED);
 
+            data.Initialize(SMSG_DESTROY_OBJECT);
+            data << GetGUID();
+            SendMessageToSet(&data, true);
+
+            m_respawnTimer = m_respawnDelayTimer;
+            break;
+    }
 }
 
 void GameObject::generateLoot()
@@ -124,7 +144,7 @@ void GameObject::SaveToDB()
         << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << lootid <<", "
-        << m_RespawnTimer <<")";
+        << m_respawnTimer <<")";
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
@@ -151,7 +171,7 @@ void GameObject::LoadFromDB(uint32 guid)
     rotation2 = fields[9].GetFloat();
     rotation3 = fields[10].GetFloat();
     lootid=fields[11].GetUInt32();
-    m_RespawnTimer=fields[11].GetUInt32();
+    m_respawnTimer=fields[11].GetUInt32();
     Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
     delete result;
 }

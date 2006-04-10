@@ -25,45 +25,54 @@
 
 struct GameObjectInfo
 {
-    uint32 id;
-    uint32 type;
-    uint32 displayId;
-    char* name;
-    uint32 faction;
-    uint32 flags;
-    float size;
-    uint32 sound0;
-    uint32 sound1;
-    uint32 sound2;
-    uint32 sound3;
-    uint32 sound4;
-    uint32 sound5;
-    uint32 sound6;
-    uint32 sound7;
-    uint32 sound8;
-    uint32 sound9;
-    char* ScriptName;
+    uint32  id;
+    uint32  type;
+    uint32  displayId;
+    char   *name;
+    uint32  faction;
+    uint32  flags;
+    float   size;
+    uint32  sound0;
+    uint32  sound1;
+    uint32  sound2;
+    uint32  sound3;
+    uint32  sound4;
+    uint32  sound5;
+    uint32  sound6;
+    uint32  sound7;
+    uint32  sound8;
+    uint32  sound9;
+    char   *ScriptName;
+};
+
+enum LootState
+{
+    CLOSED = 0,
+    LOOTED
 };
 
 class MANGOS_DLL_SPEC GameObject : public Object
 {
     public:
-        GameObject( );
+        GameObject();
 
         void Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3);
         void Update(uint32 p_time);
-        GameObjectInfo *GetGOInfo();
+        GameObjectInfo* GetGOInfo();
 
         void SaveToDB();
         void LoadFromDB(uint32 guid);
         void DeleteFromDB();
         void generateLoot();
+        void setLootState(LootState s) { m_lootState = s; }
+        LootState getLootState() { return m_lootState; }
 
-        Loot loot;
-        uint32 lootid;
+        Loot        loot;
+        uint32      lootid;
     protected:
 
-        uint32 m_RespawnTimer;
-
+        uint32      m_respawnTimer;
+        uint32      m_respawnDelayTimer;
+        LootState   m_lootState;
 };
 #endif
