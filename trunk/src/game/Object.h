@@ -166,10 +166,10 @@ class MANGOS_DLL_SPEC Object
         float GetDistance( const Object* obj ) const;
         float GetDistance2d( const Object* obj ) const;
         float GetDistance(const float x, const float y, const float z) const;
-		float GetAngle( const Object* obj ) const;
-		bool IsInArc( const float arcangle, const Object* obj ) const;
+        float GetAngle( const Object* obj ) const;
+        bool IsInArc( const float arcangle, const Object* obj ) const;
 
-		void SendMessageToSet(WorldPacket *data, bool self);
+        void SendMessageToSet(WorldPacket *data, bool self);
 
         void LoadValues(const char* data);
         void LoadTaxiMask(const char* data);

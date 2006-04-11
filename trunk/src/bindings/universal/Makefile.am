@@ -16,7 +16,7 @@
 AM_CXXFLAGS = @COMPILER_OPTIONS@ @EXTRA_COMPILER_OPTIONS@
 INCLUDES += -I$(srcdir) -I$(srcdir)/../../../dep/include  -I$(srcdir)/../../shared -I$(srcdir)/../../framework
 
-libdir=$(prefix)/lib
+pkglibdir = $(libdir)
 
 lib_LTLIBRARIES = libMaNGOSScript.la
 

@@ -42,26 +42,26 @@ bool LoadScriptingModule(char const* libName)
     else printf("Scripts Library %s was successfully loaded.\n",name.c_str());
 
     if(!(testScript->ScriptsInit         =(scriptCallScriptsInit         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
-     ||!(testScript->GossipHello         =(scriptCallGossipHello         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello"         ))
-     ||!(testScript->GOChooseReward      =(scriptCallGOChooseReward      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward"      ))
-     ||!(testScript->QuestAccept         =(scriptCallQuestAccept         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept"         ))
-     ||!(testScript->GossipSelect        =(scriptCallGossipSelect        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelect"        ))
-     ||!(testScript->GossipSelectWithCode=(scriptCallGossipSelectWithCode)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelectWithCode"))
-     ||!(testScript->QuestSelect         =(scriptCallQuestSelect         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestSelect"         ))
-     ||!(testScript->QuestComplete       =(scriptCallQuestComplete       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestComplete"       ))
-     ||!(testScript->NPCDialogStatus     =(scriptCallNPCDialogStatus     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"NPCDialogStatus"     ))
-     ||!(testScript->ChooseReward        =(scriptCallChooseReward        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ChooseReward"        ))
-     ||!(testScript->ItemHello           =(scriptCallItemHello           )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemHello"           ))
-     ||!(testScript->GOHello             =(scriptCallGOHello             )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOHello"             ))
-     ||!(testScript->scriptAreaTrigger   =(scriptCallAreaTrigger         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger"         ))
-     ||!(testScript->ItemQuestAccept     =(scriptCallItemQuestAccept     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept"     ))
-     ||!(testScript->GOQuestAccept       =(scriptCallGOQuestAccept       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept"       ))
-    ) { 
+        ||!(testScript->GossipHello         =(scriptCallGossipHello         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello"         ))
+        ||!(testScript->GOChooseReward      =(scriptCallGOChooseReward      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward"      ))
+        ||!(testScript->QuestAccept         =(scriptCallQuestAccept         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept"         ))
+        ||!(testScript->GossipSelect        =(scriptCallGossipSelect        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelect"        ))
+        ||!(testScript->GossipSelectWithCode=(scriptCallGossipSelectWithCode)MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipSelectWithCode"))
+        ||!(testScript->QuestSelect         =(scriptCallQuestSelect         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestSelect"         ))
+        ||!(testScript->QuestComplete       =(scriptCallQuestComplete       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestComplete"       ))
+        ||!(testScript->NPCDialogStatus     =(scriptCallNPCDialogStatus     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"NPCDialogStatus"     ))
+        ||!(testScript->ChooseReward        =(scriptCallChooseReward        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ChooseReward"        ))
+        ||!(testScript->ItemHello           =(scriptCallItemHello           )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemHello"           ))
+        ||!(testScript->GOHello             =(scriptCallGOHello             )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOHello"             ))
+        ||!(testScript->scriptAreaTrigger   =(scriptCallAreaTrigger         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"AreaTrigger"         ))
+        ||!(testScript->ItemQuestAccept     =(scriptCallItemQuestAccept     )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemQuestAccept"     ))
+        ||!(testScript->GOQuestAccept       =(scriptCallGOQuestAccept       )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOQuestAccept"       ))
+        )
+    {
         MANGOS_CLOSE_LIBRARY(testScript->hScriptsLib);
         delete testScript;
         return false;
     }
-
 
     //heh we are still there :P we have a valid library
     //we reload script

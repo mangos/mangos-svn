@@ -193,7 +193,8 @@ AggressorAI::UpdateAI(const uint32 diff)
 bool
 AggressorAI::_isVisible(Unit *u) const
 {
-   return ( ((Creature*)&i_creature)->GetDistance(u) * 1.0 <= IN_LINE_OF_SIGHT ); // offset=1.0
+                                                            // offset=1.0
+    return ( ((Creature*)&i_creature)->GetDistance(u) * 1.0 <= IN_LINE_OF_SIGHT );
 }
 
 void

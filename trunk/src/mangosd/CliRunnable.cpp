@@ -104,7 +104,7 @@ void CliLoadScripts(char*command,pPrintf zprintf)
         x++;
     del=&command[x];
     if(!LoadScriptingModule(del)) return;
-    
+
     sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
 }
 
