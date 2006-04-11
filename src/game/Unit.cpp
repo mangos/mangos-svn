@@ -685,12 +685,12 @@ void Unit::InterruptSpell()
 
 bool Unit::isInFront(Unit* target, float radius)
 {
-	return GetDistance(target)<=radius && IsInArc( M_PI, target );
+    return GetDistance(target)<=radius && IsInArc( M_PI, target );
 }
 
 bool Unit::setInFront(Unit* target)
 {
-	m_orientation = GetAngle(target);
+    m_orientation = GetAngle(target);
     return true;
 }
 
