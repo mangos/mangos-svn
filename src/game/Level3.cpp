@@ -40,14 +40,7 @@ bool ChatHandler::HandleReloadCommand(const char* args)
 
 bool ChatHandler::HandleLoadScriptsCommand(const char* args)
 {
-    if(!strlen(args))
-    {
-        if(!LoadScriptingModule()) return true;
-    }
-    else
-    {
-        if(!LoadScriptingModule(args)) return true;
-    }
+    if(!LoadScriptingModule(args)) return true;
 
     sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
 
