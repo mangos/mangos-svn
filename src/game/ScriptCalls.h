@@ -25,6 +25,7 @@
 bool LoadScriptingModule(char const* libName = "");
 
 typedef void(MANGOS_IMPORT * scriptCallScriptsInit) ();
+typedef void(MANGOS_IMPORT * scriptCallScriptsFree) ();
 
 typedef void(MANGOS_IMPORT * scriptCallGossipHello) (Player *player, Creature *_Creature );
 typedef void(MANGOS_IMPORT * scriptCallQuestAccept) (Player *player, Creature *_Creature, Quest *);
@@ -49,6 +50,8 @@ uint32 opt );
 typedef struct
 {
     scriptCallScriptsInit ScriptsInit;
+    scriptCallScriptsFree ScriptsFree;
+    
     scriptCallGossipHello GossipHello;
     scriptCallGOChooseReward GOChooseReward;
     scriptCallQuestAccept QuestAccept;
