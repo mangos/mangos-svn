@@ -50,8 +50,8 @@ class MANGOS_DLL_SPEC GossipMenu
         GossipMenu();
         ~GossipMenu();
 
-        void MenuItem(uint8 Icon, std::string Message, bool Coded = false);
-        void MenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
+        void MenuItem(uint8 Icon, char const* Message, bool Coded = false);
+        void MenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
 
         uint8 ItemsInMenu()
         {
@@ -136,6 +136,6 @@ class MANGOS_DLL_SPEC PlayerMenu
         void SendQuestUpdateSetTimer( Quest *pQuest, uint32 TimerValue);
         void SendQuestFailed( uint32 iReason );
         void SendQuestInvalid( uint32 iReason );
-        void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const std::string locName );
+        void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char *locName );
 };
 #endif
