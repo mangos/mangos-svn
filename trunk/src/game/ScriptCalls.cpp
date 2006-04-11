@@ -41,7 +41,8 @@ bool LoadScriptingModule(char const* libName)
     }
     else printf("Scripts Library %s was successfully loaded.\n",name.c_str());
 
-    if(!(testScript->ScriptsInit         =(scriptCallScriptsInit         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
+    if(   !(testScript->ScriptsInit         =(scriptCallScriptsInit         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsInit"         ))
+        ||!(testScript->ScriptsFree         =(scriptCallScriptsFree         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ScriptsFree"         ))
         ||!(testScript->GossipHello         =(scriptCallGossipHello         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GossipHello"         ))
         ||!(testScript->GOChooseReward      =(scriptCallGOChooseReward      )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GOChooseReward"      ))
         ||!(testScript->QuestAccept         =(scriptCallQuestAccept         )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"QuestAccept"         ))
@@ -70,6 +71,7 @@ bool LoadScriptingModule(char const* libName)
         ScriptsSet current =Script;
         //todo: some check if some func from script library is called right now
         Script=testScript;
+        current->ScriptsFree();
         MANGOS_CLOSE_LIBRARY(current->hScriptsLib);
         delete current;
     }else
