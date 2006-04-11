@@ -2022,7 +2022,7 @@ void Player::_SaveQuestStatus()
 
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        sDatabase.PExecute("INSERT INTO queststatus (playerid, questid, status, rewarded, questMobCount1, questMobCount2, questMobCount3, questMobCount4, questItemCount1, questItemCount2, questItemCount3, questItemCount4) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), i->first, i->second.status, i->second.rewarded, i->second.m_questMobCount[0], i->second.m_questMobCount[1], i->second.m_questMobCount[2], i->second.m_questMobCount[3], i->second.m_questItemCount[0], i->second.m_questItemCount[1], i->second.m_questItemCount[2], i->second.m_questItemCount[3]);
+        sDatabase.PExecute("INSERT INTO queststatus (playerid, questid, status, rewarded, questMobCount1, questMobCount2, questMobCount3, questMobCount4, questItemCount1, questItemCount2, questItemCount3, questItemCount4) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u','%u');", GetGUIDLow(), i->first, i->second.status, i->second.rewarded, i->second.m_questMobCount[0], i->second.m_questMobCount[1], i->second.m_questMobCount[2], i->second.m_questMobCount[3], i->second.m_questItemCount[0], i->second.m_questItemCount[1], i->second.m_questItemCount[2], i->second.m_questItemCount[3]);
     }
 }
 
