@@ -113,7 +113,7 @@ void DynamicObject::DealWithSpellDamage(Player &caster)
             {
                 if( (*iter)->isAlive() )
                 {
-                    if(_CalcDistance(GetPositionX(),GetPositionY(),GetPositionZ(),(*iter)->GetPositionX(),(*iter)->GetPositionY(),(*iter)->GetPositionZ()) < m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+					if(GetDistance(*iter) < m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
                     {
                         caster.PeriodicAuraLog((*iter),m_spell,&mod);
                     }

@@ -229,21 +229,20 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
         }break;
         case TARGET_AC_P:
-        {
-            Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
-            if(pGroup)
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
-            {
-                Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                if(!Target || Target->GetGUID() == m_caster->GetGUID())
-                    continue;
-                if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])))
-                    TagUnitMap.push_back(Target);
-            }
-            else
-                TagUnitMap.push_back(m_caster);
-        }break;
-        case TARGET_S_F:
+		{
+			Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
+			if(pGroup)
+				for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+				{
+				Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+				if(!Target || Target->GetGUID() == m_caster->GetGUID())
+					continue;
+				if(m_caster->GetDistance(Target) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])))
+					TagUnitMap.push_back(Target);
+				}
+			else
+				TagUnitMap.push_back(m_caster);
+		}break;
         case TARGET_S_F_2:
         {
             TagUnitMap.push_back(m_targets.m_unitTarget);
@@ -335,7 +334,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                 if(!Target || Target->GetGUID() == m_caster->GetGUID())
                     continue;
-                if(_CalcDistance(Target->GetPositionX(),Target->GetPositionY(),Target->GetPositionZ(),m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && Target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+				if(m_caster->GetDistance(Target) < GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])) && Target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
                     TagUnitMap.push_back(Target);
             }
         }break;
@@ -856,22 +855,27 @@ uint8 Spell::CanCast()
     Unit *target = NULL;
     target = m_targets.m_unitTarget;
 
-    if(target)
-    {
-        if(!m_caster->isInFront(target,GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex))))
-            castResult = 0x76;
-        if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),target->GetPositionX(),target->GetPositionY(),target->GetPositionZ()) > GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex)))
-            castResult = 0x56;
-    }
+	if(target)
+	{
+		if(!m_caster->isInFront( target, GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex))))
+			castResult = 0x76;
+		if(m_caster->GetDistance(target) > GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex)))
+			castResult = 0x56;
+	}
 
-    if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
-    {
-        if(_CalcDistance(m_caster->GetPositionX(),m_caster->GetPositionY(),m_caster->GetPositionZ(),m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex)))
-            castResult = 0x56;
-    }
+	if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
+	{
+		if(m_caster->GetDistance( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex)))
+			castResult = 0x56;
+	}
 
     if(m_caster->m_silenced)
         castResult = 0x5A;
+	if( castResult != 0 )
+	{
+		SendCastResult(castResult);
+		return castResult;
+	}
 
     castResult = CheckItems();
 

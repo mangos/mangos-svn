@@ -24,7 +24,7 @@
 #include "FactionTemplateResolver.h"
 #include "Log.h"
 
-#define REACTOR_VISIBLE_RANGE (700.0f)
+#define REACTOR_VISIBLE_RANGE (26.46f)
 
 int
 ReactorAI::Permissible(const Creature *creature)
@@ -107,8 +107,8 @@ ReactorAI::needToStop() const
     if( !i_pVictim->isAlive() || !i_creature.isAlive()  || i_pVictim->m_stealth)
         return true;
 
-    float length_square = i_creature.GetDistanceSq(i_pVictim);
-    if( length_square > REACTOR_VISIBLE_RANGE )
+    float length = i_creature.GetDistance(i_pVictim);
+    if( length > REACTOR_VISIBLE_RANGE )
         return true;
     return false;
 }

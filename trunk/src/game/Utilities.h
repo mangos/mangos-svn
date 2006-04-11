@@ -22,38 +22,15 @@
 #include "Object.h"
 #include "Map.h"
 
-#define VISIBILITY_RANGE    10000
+#define VISIBILITY_RANGE    100
 #define SPIRIT_HEALER       5233
 
-#define IN_LINE_OF_SIGHT         900
+#define IN_LINE_OF_SIGHT         30
 
 namespace MaNGOS
 {
     namespace Utilities
     {
-
-        inline float calculate_distance_square(const float &x1, const float &y1, const float &h1, const float &x2, const float &y2, const float &h2)
-        {
-            float x_p = (x2 - x1);
-            float y_p = (y2 - y1);
-            float h_p = (h2 - h1);
-            x_p *= x_p;
-            y_p *= y_p;
-            h_p *= h_p;
-            return (x_p + y_p + h_p);
-        }
-
-        inline bool is_in_range(Player *obj1, Object *obj2)
-        {
-            assert(obj1->GetMapId() == obj2->GetMapId());
-            return (calculate_distance_square(obj1->GetPositionX(), obj1->GetPositionY(), obj1->GetPositionZ(), obj2->GetPositionX(), obj2->GetPositionY(), obj2->GetPositionZ()) < VISIBILITY_RANGE);
-        }
-
-        inline bool is_in_line_of_sight(const float &x1, const float &y1, const float &z1, const float &x2, const float &y2, const float &z2, const float off_set)
-        {
-            return( (calculate_distance_square(x1, y1, z1, x2, y2, z2)*off_set) <= IN_LINE_OF_SIGHT );
-        }
-
         template<class T> inline bool IsSpiritHealer(T *obj)
         {
             return false;

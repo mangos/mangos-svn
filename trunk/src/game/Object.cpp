@@ -455,3 +455,72 @@ uint32 Object::GetZoneId( )
 {
     return sAreaStore.LookupEntry(MapManager::Instance().GetMap(m_mapId)->GetAreaFlag(m_positionX,m_positionY))->zone;
 }
+
+float Object::GetDistance(const Object* obj) const
+{
+	ASSERT(obj->GetMapId() == m_mapId);
+	float dx  = obj->GetPositionX() - GetPositionX();
+	float dy  = obj->GetPositionY() - GetPositionY();
+	float dz  = obj->GetPositionZ() - GetPositionZ();
+	return sqrt((dx*dx) + (dy*dy) + (dz*dz));
+}
+
+
+float Object::GetDistance(const float x, const float y, const float z) const
+{
+	float dx  = x - GetPositionX();
+	float dy  = y - GetPositionY();
+	float dz  = z - GetPositionZ();
+	return sqrt((dx*dx) + (dy*dy) + (dz*dz));
+}
+
+float Object::GetDistance2d(const Object* obj) const
+{
+	ASSERT(obj->GetMapId() == m_mapId);
+	float dx  = obj->GetPositionX() - GetPositionX();
+	float dy  = obj->GetPositionY() - GetPositionY();
+	return sqrt((dx*dx) + (dy*dy));
+}
+
+float Object::GetAngle(const Object* obj) const
+{
+	if(!obj) return 0;
+
+	float VictimX = obj->GetPositionX();
+	float VictimY = obj->GetPositionY();
+	float PlayerX = GetPositionX();
+	float PlayerY = GetPositionY();
+	
+	if( VictimX==PlayerX )
+	{
+		if(VictimY>=PlayerY)
+			return 1.57079633;
+		else
+			return 4.71238898;
+	}
+	float ang=atan((VictimY - PlayerY) / (VictimX - PlayerX));
+	if(VictimY>PlayerY)
+	{
+		if(ang<0)
+			ang+=M_PI;
+	}
+	else
+		if(ang<0)
+			ang+=2.0f * M_PI;
+	return ang;
+}
+
+
+bool Object::IsInArc(const float arcangle, const Object* obj) const
+{
+	float arc=arcangle;
+	if(arcangle>2.0f * M_PI)
+		arc=arcangle*M_PI/180.0f;
+	float angle = GetAngle( obj );
+    float lborder = GetOrientation() - (arc/2.0f);
+    float rborder = GetOrientation() + (arc/2.0f);
+	if(lborder<0)
+		return ((angle >= 2.0f * M_PI+lborder && angle <= 2.0f * M_PI) || (angle>=0 && angle<=rborder));
+	return ( angle >= lborder ) && ( angle <= rborder );
+}
+

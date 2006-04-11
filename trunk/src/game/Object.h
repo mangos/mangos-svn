@@ -24,6 +24,7 @@
 #include "World.h"
 
 #include <set>
+#define M_PI       3.14159265358979323846
 
 enum TYPE
 {
@@ -162,50 +163,13 @@ class MANGOS_DLL_SPEC Object
             m_objectUpdated = false;
         }
 
-        float GetDistanceSq(const Object* obj) const
-        {
-            ASSERT(obj->GetMapId() == m_mapId);
+        float GetDistance( const Object* obj ) const;
+        float GetDistance2d( const Object* obj ) const;
+        float GetDistance(const float x, const float y, const float z) const;
+		float GetAngle( const Object* obj ) const;
+		bool IsInArc( const float arcangle, const Object* obj ) const;
 
-            float dx  = obj->GetPositionX() - GetPositionX();
-            float dy  = obj->GetPositionY() - GetPositionY();
-            float dz  = obj->GetPositionZ() - GetPositionZ();
-
-            return ((dx*dx) + (dy*dy) + (dz*dz));
-        }
-
-        float GetDistance2dSq(Object* obj) const
-        {
-            ASSERT(obj->GetMapId() == m_mapId);
-
-            float dx  = obj->GetPositionX() - GetPositionX();
-            float dy  = obj->GetPositionY() - GetPositionY();
-
-            return (dx*dx) + (dy*dy);
-        }
-
-        float GetFacing(Object* obj) const
-        {
-            if(!obj) return 0;
-
-            float VictimX = obj->GetPositionX();
-            float VictimY = obj->GetPositionY();
-            float PlayerX = GetPositionX();
-            float PlayerY = GetPositionY();
-
-            float dr1 = atan((VictimY - PlayerY) / (VictimX - PlayerX));
-
-            if (VictimX >= PlayerX)
-            {
-                dr1 += 1.57079633;                          //rads (1/4)*2*PI
-            }
-            else
-            {
-                dr1 += 4.71238898;                          //rads (3/4)*2*PI
-            }
-            return (dr1 - GetOrientation());                //default return if in front of Victim 1.57079633
-        }
-
-        void SendMessageToSet(WorldPacket *data, bool self);
+		void SendMessageToSet(WorldPacket *data, bool self);
 
         void LoadValues(const char* data);
         void LoadTaxiMask(const char* data);
