@@ -1,7 +1,9 @@
 # MaNGOS Configuration file
 
 # Data directory setting.
-DataDir = @MANGOSD_DATA@
+# Important: DataDir needs to be quoted, as it is a string which may
+# contain space characters.
+DataDir = "@MANGOSD_DATA@"
 
 # Database connection settings.
 # Default: hostname,username,password,database
