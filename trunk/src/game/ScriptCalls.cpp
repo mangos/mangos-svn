@@ -29,7 +29,7 @@ bool LoadScriptingModule(char const* libName)
 {
     ScriptsSet testScript=new _ScriptSet;
 
-    std::string name = libName ? libName : "";
+    std::string name = strlen(libName) ? libName : MANGOS_SCRIPT_NAME;
     name += MANGOS_SCRIPT_EXT;
 
     testScript->hScriptsLib=MANGOS_LOAD_LIBRARY(name.c_str());
