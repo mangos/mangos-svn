@@ -37,8 +37,6 @@
 #include "Formulas.h"
 
 #include <math.h>
-#define DEG2RAD (M_PI/180.0)
-#define M_PI       3.14159265358979323846
 
 static bool eventrun=false;
 
@@ -108,12 +106,9 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 {
     float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
     float radius = GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
-    float distance = GetDistanceSq(pVictim);
+    float distance = GetDistance(pVictim);
 
-    if (distance > ((reach + radius)*(reach + radius)))
-        return false;
-
-    return true;
+    return (distance <= reach + radius );
 }
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
@@ -688,85 +683,15 @@ void Unit::InterruptSpell()
     }
 }
 
-float Unit::getdistance( float xe, float ye, float xz, float yz )
+bool Unit::isInFront(Unit* target, float radius)
 {
-    return sqrt( ( xe - xz ) * ( xe - xz ) + ( ye - yz ) * ( ye - yz ) );
+	return GetDistance(target)<=radius && IsInArc( M_PI, target );
 }
 
-float Unit::getangle( float xe, float ye, float xz, float yz )
+bool Unit::setInFront(Unit* target)
 {
-    float w;
-    w = atan( ( yz - ye ) / ( xz - xe ) );
-    w = ( w / (float)DEG2RAD );
-    if (xz>=xe)
-    {
-        w = 90+w;
-    }
-    else
-    {
-        w = 270+w;
-    }
-    return w;
-}
-
-float Unit::geteasyangle( float angle )
-{
-    while ( angle < 0 )
-    {
-        angle = angle + 360;
-    }
-    while ( angle >= 360 )
-    {
-        angle = angle - 360;
-    }
-    return angle;
-}
-
-bool Unit::inarc( float radius, float xM, float yM, float fov, float orientation, float xP, float yP )
-{
-    float distance = getdistance( xM, yM, xP, yP );
-    float angle = getangle( xM, yM, xP, yP );
-    float lborder = geteasyangle( ( orientation - (fov/2) ) );
-    float rborder = geteasyangle( ( orientation + (fov/2) ) );
-    if(radius>=distance &&( ( angle >= lborder ) &&
-        ( angle <= rborder ) ||
-        ( lborder > rborder && ( angle < rborder || angle > lborder ) ) ) )
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
-
-bool Unit::isInFront(Unit* target,float distance)
-{
-    float orientation = GetOrientation()/float(2*M_PI)*360;
-    orientation += 90.0f;
-    return inarc(distance,GetPositionX(),GetPositionY(),float(180),GetOrientation(),target->GetPositionX(),target->GetPositionY());
-}
-
-bool Unit::setInFront(Unit* target, float distance)
-{
-
-    sLog.outError("Orentation Start: %f",GetOrientation());
-    float orientation = GetOrientation()/float(2*M_PI)*360;
-    orientation += 45.0f;
-    sLog.outError("Orentation b4 loop: %f",orientation);
-    for(int i=0;i<8;i++)
-    {
-        if(inarc(distance,GetPositionX(),GetPositionY(),float(180),orientation,target->GetPositionX(),target->GetPositionY()) == true)
-        {
-            orientation = float(2*M_PI)/360*(orientation-90.0f);
-            sLog.outError("Orentation: %f",orientation);
-            m_orientation = orientation;
-            break;
-        }else
-        orientation += 90;
-    }
-    sLog.outError("Orentation after loop: %f",orientation);
-    return inarc(distance,GetPositionX(),GetPositionY(),float(180),orientation,target->GetPositionX(),target->GetPositionY());
+	m_orientation = GetAngle(target);
+    return true;
 }
 
 void Unit::DeMorph()

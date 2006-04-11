@@ -49,10 +49,6 @@ class DynamicObject : public Object
         }
 
     protected:
-        float _CalcDistance(float sX, float sY, float sZ, float dX, float dY, float dZ)
-        {
-            return sqrt((dX-sX)*(dX-sX)+(dY-sY)*(dY-sY)+(dZ-sZ)*(dZ-sZ));
-        }
 
         Unit* m_caster;
         SpellEntry * m_spell;

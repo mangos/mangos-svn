@@ -529,7 +529,7 @@ void Player::Update( uint32 p_time )
             // TODO add weapon,skill check
 
             float pldistance = 0;
-            float plrotation = GetFacing(pVictim);
+            float plrotation = GetAngle(pVictim);
             if(getClass() == 1)
             {
                 pldistance = pldistance + 1;
@@ -550,7 +550,7 @@ void Player::Update( uint32 p_time )
                 clearStateFlag(UF_ATTACKING);
                 smsg_AttackStop(m_curSelection);
             }
-            else if(GetDistanceSq(pVictim) > pldistance+12)
+            else if(GetDistance(pVictim) > pldistance+3.465f)
             {
                 setAttackTimer(uint32(1000));
                 data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);

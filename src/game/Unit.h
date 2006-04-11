@@ -183,7 +183,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         float m_speed;
 
         bool isInFront(Unit* target,float distance);
-        bool setInFront(Unit* target, float distance);
+        bool setInFront(Unit* target);
 
         bool m_silenced;
         bool waterbreath;
@@ -220,10 +220,5 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         AuraList m_Auras;
 
-        float geteasyangle( float angle );
-
-        bool inarc( float radius,  float xM, float yM, float fov, float orientation, float xP, float yP );
-        float getangle( float xe, float ye, float xz, float yz );
-        float getdistance( float xe, float ye, float xz, float yz );
 };
 #endif

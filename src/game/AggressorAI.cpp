@@ -27,8 +27,6 @@
 
 #define TIME_INTERVAL_LOOK   5000
 
-using MaNGOS::Utilities::is_in_line_of_sight;
-
 int
 AggressorAI::Permissible(const Creature *creature)
 {
@@ -195,8 +193,7 @@ AggressorAI::UpdateAI(const uint32 diff)
 bool
 AggressorAI::_isVisible(Unit *u) const
 {
-    return is_in_line_of_sight(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(),
-        u->GetPositionX(), u->GetPositionY(), u->GetPositionZ(), 1.0);
+   return ( ((Creature*)&i_creature)->GetDistance(u) * 1.0 <= IN_LINE_OF_SIGHT ); // offset=1.0
 }
 
 void

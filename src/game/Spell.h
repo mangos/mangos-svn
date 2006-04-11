@@ -383,11 +383,6 @@ class Spell
 
     protected:
 
-        float _CalcDistance(float sX, float sY, float sZ, float dX, float dY, float dZ)
-        {
-            return sqrt((dX-sX)*(dX-sX)+(dY-sY)*(dY-sY)+(dZ-sZ)*(dZ-sZ));
-        }
-
         Unit* m_caster;
 
         // Current targets, to be used in SpellEffects
@@ -450,8 +445,8 @@ namespace MaNGOS
             {
                 if( !itr->second->isAlive() )
                     continue;
-                if( i_spell._CalcDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ,
-                    itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+				if( itr->second->GetDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) 
+					< GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
                     i_data.push_back(itr->second);
             }
         }
@@ -468,27 +463,25 @@ namespace MaNGOS
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
-            for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
-            {
-
-                switch(i_push_type)
-                {
-                    case PUSH_IN_FRONT:
-                        if(i_spell.m_caster->isInFront((Unit*)(itr->second),GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]))) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                            i_data.push_back(itr->second);
-                        break;
-                    case PUSH_SELF_CENTER:
-                        if( i_spell._CalcDistance(i_spell.m_caster->GetPositionX(), i_spell.m_caster->GetPositionY(), i_spell.m_caster->GetPositionZ(),
-                            itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
-                            i_data.push_back(itr->second);
-                        break;
-                    case PUSH_DEST_CENTER:
-                        if( i_spell._CalcDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ,
-                            itr->second->GetPositionX(),itr->second->GetPositionY(),itr->second->GetPositionZ()) < GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
-                            i_data.push_back(itr->second);
-                        break;
-                }
-            }
+			for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+			{
+			
+				switch(i_push_type) 
+				{ 
+				case PUSH_IN_FRONT:  
+					if(i_spell.m_caster->isInFront((Unit*)(itr->second),GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]))) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+						i_data.push_back(itr->second);
+				break;
+				case PUSH_SELF_CENTER:  
+					if(i_spell.m_caster->GetDistance( (Unit*)(itr->second) ) < GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+						i_data.push_back(itr->second);
+				break;
+				case PUSH_DEST_CENTER:
+					if(itr->second->GetDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index])) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+						i_data.push_back(itr->second);
+				break;
+				}
+			}
         }
 
         #ifdef WIN32
