@@ -530,15 +530,16 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\shared\SystemConfig.h"
+			RelativePath="..\..\src\shared\SystemConfig.h.in"
 			>
 			<FileConfiguration
 				Name="Release|Win32"
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h&#x0D;&#x0A;"
-					Outputs="SystemConfig.h"
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h"
+					Outputs="..\..\src\shared\SystemConfig.h"
 				/>
 			</FileConfiguration>
 			<FileConfiguration
@@ -546,8 +547,10 @@
 				>
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h&#x0D;&#x0A;"
-					Outputs="SystemConfig.h"
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h"
+					AdditionalDependencies=""
+					Outputs="..\..\src\shared\SystemConfig.h"
 				/>
 			</FileConfiguration>
 		</File>
