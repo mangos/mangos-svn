@@ -130,7 +130,7 @@ FlightPathMovementGenerator::LoadPath(Player &pl)
 void
 FlightPathMovementGenerator::Initialize()
 {
-    i_player.addStateFlag(PLAYER_IN_FLIGHT);
+    i_player.addStateFlag(UNIT_STAT_IN_FLIGHT);
     LoadPath(i_player);
     i_currentNode = 0;
     Traveller<Player> traveller(i_player);

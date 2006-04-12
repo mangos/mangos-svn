@@ -26,7 +26,6 @@
 
 #include <list>
 #define UF_TARGET_DIED  1
-#define UF_ATTACKING    2
 
 #define PLAYER_MAX_SKILLS       127
 #define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + (x*3))
@@ -105,7 +104,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
 
-        inline void removeAttacker(Unit *pAttacker)
+        inline AttackerSet getAttackerSet( ) {	return m_attackers;	}
+         inline void addAttacker(Unit *pAttacker)
+        {
+            AttackerSet::iterator itr = m_attackers.find(pAttacker);
+            if(itr != m_attackers.end())
+				m_attackers.insert(pAttacker);
+		}
+		inline void removeAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())

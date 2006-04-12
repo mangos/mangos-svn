@@ -331,7 +331,7 @@ void Spell::EffectCreateItem(uint32 i)
         slot = 0;
         ItemPrototype *m_itemProto = objmgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
 
-        uint32 num_to_add = ((pUnit->GetLevel() - (m_spellInfo->spellLevel-1))*2);
+        uint32 num_to_add = ((pUnit->getLevel() - (m_spellInfo->spellLevel-1))*2);
         if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
             num_to_add = 1;
         if(num_to_add > m_itemProto->MaxCount)

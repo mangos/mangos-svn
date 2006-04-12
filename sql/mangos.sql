@@ -1285,6 +1285,38 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `objectquestrelation` ENABLE KEYS */;
 
 --
+-- Table structure for table `pets`
+--
+
+DROP TABLE IF EXISTS `pets`;
+CREATE TABLE `pets` (
+  `guid` int(11) unsigned NOT NULL default '0',
+  `entry` int(11) unsigned NOT NULL default '0',
+  `owner` bigint(30) unsigned NOT NULL default '0',
+  `level` int(11) unsigned NOT NULL default '1',
+  `exp` int(11) unsigned NOT NULL default '0',
+  `nextlvlexp` int(11) unsigned NOT NULL default '0',
+  `spell1` mediumint(8) unsigned NOT NULL default '0',
+  `spell2` mediumint(8) unsigned NOT NULL default '0',
+  `spell3` mediumint(8) unsigned NOT NULL default '0',
+  `spell4` mediumint(8) unsigned NOT NULL default '0',
+  `action` int(11) unsigned NOT NULL default '0',
+  `fealty` float NOT NULL default '0',
+  `name` varchar(50) NOT NULL default '',
+  PRIMARY KEY  (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `pets`
+--
+
+
+/*!40000 ALTER TABLE `pets` DISABLE KEYS */;
+LOCK TABLES `pets` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `pets` ENABLE KEYS */;
+
+--
 -- Table structure for table `playercreateinfo`
 --
 

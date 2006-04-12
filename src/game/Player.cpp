@@ -514,7 +514,7 @@ void Player::Update( uint32 p_time )
         }
     }
 
-    if (m_state & UF_ATTACKING)
+    if (m_state & UNIT_STAT_ATTACKING)
     {
         inCombat = true;
 
@@ -547,7 +547,7 @@ void Player::Update( uint32 p_time )
             {
                 sLog.outDetail("Player::Update:  No valid current selection to attack, stopping attack\n");
                 this->setRegenTimer(5000);
-                clearStateFlag(UF_ATTACKING);
+                clearStateFlag(UNIT_STAT_ATTACKING);
                 smsg_AttackStop(m_curSelection);
             }
             else if(GetDistance(pVictim) > pldistance+3.465f)
@@ -1105,7 +1105,7 @@ void Player::RegenerateAll()
         return;
     uint32 regenDelay = 2000;
 
-    if (!(m_state & UF_ATTACKING))
+    if (!(m_state & UNIT_STAT_ATTACKING))
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
         Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
@@ -1930,7 +1930,7 @@ void Player::DestroyForPlayer( Player *target ) const
 void Player::SaveToDB()
 {
 
-    if (testStateFlag(PLAYER_IN_FLIGHT))
+    if (testStateFlag(UNIT_STAT_IN_FLIGHT))
     {
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
         RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
@@ -3496,7 +3496,7 @@ void Player::CalculateHonor(Unit *uVictim)
         Creature *cVictim = (Creature *)uVictim;
         if( cVictim->isCivilian() )
         {
-            parcial_honor_points = MaNGOS::Honor::DishonorableKillPoints( GetLevel() );
+            parcial_honor_points = MaNGOS::Honor::DishonorableKillPoints( getLevel() );
             kill_type = DISHONORABLE_KILL;
             savekill = true;
         }
@@ -3508,7 +3508,7 @@ void Player::CalculateHonor(Unit *uVictim)
 
         if( GetTeam() == pVictim->GetTeam() ) return;
 
-        if( GetLevel() < (pVictim->GetLevel()+5) )
+        if( getLevel() < (pVictim->getLevel()+5) )
         {
             parcial_honor_points = MaNGOS::Honor::HonorableKillPoints( this, pVictim );
             kill_type = HONORABLE_KILL;
@@ -3624,7 +3624,7 @@ void Player::smsg_AttackStart(Unit* pVictim)
 //       Flight callback
 void Player::FlightComplete()
 {
-    clearStateFlag(PLAYER_IN_FLIGHT);
+    clearStateFlag(UNIT_STAT_IN_FLIGHT);
     SetUInt32Value( PLAYER_FIELD_COINAGE , m_dismountCost);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
@@ -3981,7 +3981,7 @@ uint8 Player::CanEquipItemInSlot(uint8 bagIndex, uint8 slot, Item* item, Item* s
                 return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
             if (!(proto->AllowableClass & getClass()))
                 return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
-            if (proto->RequiredLevel > GetLevel())
+            if (proto->RequiredLevel > getLevel())
                 return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
 
             uint8 slots[4];
@@ -4150,9 +4150,9 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
         {
             uint32 reqlevel = 0;
             if (srcItem)
-                if (srcItem->GetProto()->RequiredLevel > GetLevel()) reqlevel = srcItem->GetProto()->RequiredLevel;
+                if (srcItem->GetProto()->RequiredLevel > getLevel()) reqlevel = srcItem->GetProto()->RequiredLevel;
             if ((dstItem) && (!reqlevel))
-                if (dstItem->GetProto()->RequiredLevel > GetLevel()) reqlevel = dstItem->GetProto()->RequiredLevel;
+                if (dstItem->GetProto()->RequiredLevel > getLevel()) reqlevel = dstItem->GetProto()->RequiredLevel;
             data << reqlevel;
         }
         data << uint64((srcItem ? srcItem->GetGUID() : 0));
@@ -4227,9 +4227,9 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         {
             uint32 reqlevel = 0;
             if (srcItem)
-                if (srcItem->GetProto()->RequiredLevel > GetLevel()) reqlevel = srcItem->GetProto()->RequiredLevel;
+                if (srcItem->GetProto()->RequiredLevel > getLevel()) reqlevel = srcItem->GetProto()->RequiredLevel;
             if ((dstItem) && (!reqlevel))
-                if (dstItem->GetProto()->RequiredLevel > GetLevel()) reqlevel = dstItem->GetProto()->RequiredLevel;
+                if (dstItem->GetProto()->RequiredLevel > getLevel()) reqlevel = dstItem->GetProto()->RequiredLevel;
             data << reqlevel;
         }
         data << uint64((srcItem ? srcItem->GetGUID() : 0));
