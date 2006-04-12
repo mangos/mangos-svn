@@ -19,5 +19,47 @@
 #ifndef MANGOS_GUARDAI_H
 #define MANGOS_GUARDAI_H
 
+
+
 #include "CreatureAI.h"
+#include "FactionTemplateResolver.h"
+#include "Timer.h"
+
+class Creature;
+
+class MANGOS_DLL_DECL GuardAI : public CreatureAI
+{
+    enum GuardState
+	{
+	    STATE_NORMAL = 1,
+	    STATE_LOOK_AT_VICTIM = 2
+	};
+
+public:
+    
+    GuardAI(Creature &c);
+
+    void MoveInLineOfSight(Unit *);
+    void AttackStart(Unit *);
+    void AttackStop(Unit *);
+    void HealBy(Unit *healer, uint32 amount_healed);
+    void DamageInflict(Unit *healer, uint32 amount_healed);
+    bool IsVisible(Unit *) const;
+
+    void UpdateAI(const uint32);
+    static int Permissible(const Creature *);
+
+private:
+    bool _isVisible(Unit *) const;
+    void _taggedToKill(Unit *);
+    bool _needToStop(void) const;
+    void _stopAttack(void);
+
+    Creature &i_creature;
+    FactionTemplateEntry* i_myFaction;
+    Unit *i_pVictim;
+    GuardState i_state;
+    TimeTracker i_tracker;
+};
+
 #endif

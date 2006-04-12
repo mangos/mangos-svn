@@ -88,13 +88,21 @@ AggressorAI::_needToStop() const
     if( !i_pVictim->isAlive() || !i_creature.isAlive() || i_pVictim->m_stealth)
         return true;
     return !(_isVisible(i_pVictim));
+
+	float rx,ry,rz;
+	i_creature.GetRespawnCoord(rx, ry, rz);
+	float spawndist=i_creature.GetDistance(rx,ry,rz);
+    float length = i_creature.GetDistance(i_pVictim);
+	float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
+	return (( length > 12.0f + hostillen && spawndist > 80.0f ) || 
+		( length > 22.0f + hostillen && spawndist > 50.0f ) || ( length > 32.0f + hostillen ));
 }
 
 void
 AggressorAI::_stopAttack()
 {
     assert( i_pVictim != NULL );
-    i_creature.ClearState(ATTACKING);
+    i_creature.ClearState(UNIT_STAT_IN_COMBAT);
     i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
 
     if( !i_creature.isAlive() )
@@ -202,7 +210,7 @@ AggressorAI::_taggedToKill(Unit *u)
 {
     assert( i_pVictim == NULL );
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%d]", i_creature.GetName(), u->GetGUIDLow());
-    i_creature.SetState(ATTACKING);
+    i_creature.SetState(UNIT_STAT_ATTACKING);
     i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     i_creature->Mutate(new TargetedMovementGenerator(*u));
     i_pVictim = u;

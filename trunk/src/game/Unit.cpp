@@ -1050,3 +1050,40 @@ Aura* Unit::FindAur(uint32 spellId)
             return (*i);
     return NULL;
 }
+
+Hostil* Unit::GetHostil(uint64 guid)
+{
+	std::list<Hostil*>::iterator i;
+	for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+        if((*i)->UnitGuid==guid)
+            return (*i);
+    return NULL;
+}
+
+float Unit::GetHostility(uint64 guid)
+{
+	std::list<Hostil*>::iterator i;
+	for ( i = m_hostilList.begin(); i!= m_hostilList.end(); i++)
+	{
+		if((*i)->UnitGuid==guid)
+			return (*i)->Hostility;
+	}
+	return 0.0f;
+}
+
+void Unit::AddHostil(uint64 guid, float hostility)
+{
+	std::list<Hostil*>::iterator i;
+	for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+	{
+        if((*i)->UnitGuid==guid)
+		{
+			(*i)->Hostility+=hostility;
+			return;
+		}
+	}
+	Hostil *uh=new Hostil;
+	uh->UnitGuid=GetGUID();
+	uh->Hostility=hostility;
+	m_hostilList.push_back(uh);
+}

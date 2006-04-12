@@ -61,7 +61,7 @@ TargetedMovementGenerator::Initialize(Creature &owner)
     owner.setMoveRunFlag(true);
     _setAttackRadius(owner);
     _setTargetLocation(owner);
-    owner.SetState(CHASE);
+    owner.SetState(UNIT_STAT_CHASE);
 }
 
 void
@@ -79,8 +79,8 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     i_targetedHome = true;
-    owner.ClearState(ALL_STATE);
-    owner.SetState(FLEEING);
+    owner.ClearState(UNIT_STAT_ALL_STATE);
+    owner.SetState(UNIT_STAT_FLEEING);
 }
 
 void
@@ -92,7 +92,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         assert( i_target.isAlive() );
         if( !owner.canReachWithAttack( &i_target ) )
         {
-            owner.SetState(CHASE);
+            owner.SetState(UNIT_STAT_CHASE);
             _setTargetLocation(owner);
             DEBUG_LOG("restart to chase");
         }
@@ -116,7 +116,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             else if( owner.canReachWithAttack(&i_target) )
             {
                 owner.StopMoving();
-                owner.SetState(ATTACKING);
+                owner.SetState(UNIT_STAT_ATTACKING);
                 DEBUG_LOG("UNIT IS THERE");
             }
             else
