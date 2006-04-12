@@ -167,7 +167,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline bool getMoveRunFlag() { return m_moveRun; }
         inline bool IsStopped(void) const { return !(TestState(MOVING)); }
         inline void StopMoving(void) { ClearState(MOVING); }
-        inline const float& GetMobSpeed(void) const { return m_moveSpeed; }
 
         void setItemId(int slot, uint32 tempitemid);
         void setItemAmount(int slot, int tempamount);
@@ -251,7 +250,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_moveBackward;
         bool m_moveRandom;
         bool m_moveRun;
-        float m_moveSpeed;
         unsigned i_creatureState;
 
         uint32 m_faction;

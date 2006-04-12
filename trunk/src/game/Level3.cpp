@@ -1375,8 +1375,8 @@ bool ChatHandler::HandleReviveCommand(const char* args)
 
     SelectedPlayer->SetMovement(MOVE_LAND_WALK);
     SelectedPlayer->SetMovement(MOVE_UNROOT);
-    SelectedPlayer->SetPlayerSpeed(RUN, (float)7.5, true);
-    SelectedPlayer->SetPlayerSpeed(SWIM, (float)4.9, true);
+    SelectedPlayer->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
+    SelectedPlayer->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
 
     SelectedPlayer->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
     SelectedPlayer->SetUInt32Value(UNIT_FIELD_AURA+32, 0);

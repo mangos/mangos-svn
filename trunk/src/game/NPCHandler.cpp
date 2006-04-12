@@ -286,8 +286,8 @@ void WorldSession::SendSpiritRessurect()
 
     GetPlayer( )->DeathDurabilityLoss(0.25);
     GetPlayer( )->SetMovement(MOVE_LAND_WALK);
-    GetPlayer( )->SetPlayerSpeed(RUN, (float)7.5, true);
-    GetPlayer( )->SetPlayerSpeed(SWIM, (float)4.9, true);
+    GetPlayer( )->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
+    GetPlayer( )->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
 
     GetPlayer( )->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
     GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURA+32, 0);

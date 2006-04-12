@@ -168,7 +168,7 @@ bool ChatHandler::HandleDismountCommand(const char* args)
     if (m_session->GetPlayer( )->GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
         m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
 
-    m_session->GetPlayer( )->SetPlayerSpeed(RUN, 7.5, true);
+    m_session->GetPlayer( )->SetPlayerSpeed(MOVE_RUN, 7.5, true);
     return true;
 }
 
