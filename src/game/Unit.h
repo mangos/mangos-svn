@@ -71,25 +71,25 @@ enum DeathState
 enum UnitState
 {
     UNIT_STAT_STOPPED = 0,
-    UNIT_STAT_ATTACKING = (1u << 1),                                   // player is attacking someone
-    UNIT_STAT_ATTACK_BY = (1u << 2),                                   // player is attack by someone
-    UNIT_STAT_IN_COMBAT = (UNIT_STAT_ATTACKING | UNIT_STAT_ATTACK_BY),      // player is in combat mode
-    UNIT_STAT_STUNDED = (1u << 3), 
+    UNIT_STAT_ATTACKING = (1u << 1),                        // player is attacking someone
+    UNIT_STAT_ATTACK_BY = (1u << 2),                        // player is attack by someone
+                                                            // player is in combat mode
+    UNIT_STAT_IN_COMBAT = (UNIT_STAT_ATTACKING | UNIT_STAT_ATTACK_BY),
+    UNIT_STAT_STUNDED = (1u << 3),
     UNIT_STAT_ROAMING = (1u << 4),
     UNIT_STAT_CHASE = (1u << 5),
     UNIT_STAT_SEARCHING = (1u << 6),
     UNIT_STAT_FLEEING = (1u << 7),
     UNIT_STAT_MOVING = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
-    UNIT_STAT_IN_FLIGHT = (1u << 8),                                 // player is i n flight mode
+    UNIT_STAT_IN_FLIGHT = (1u << 8),                        // player is i n flight mode
     UNIT_STAT_ALL_STATE = (UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
 struct Hostil
 {
-	uint64 UnitGuid;
-	float Hostility;
+    uint64 UnitGuid;
+    float Hostility;
 };
-
 
 class MANGOS_DLL_SPEC Unit : public Object
 {
@@ -104,14 +104,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
 
-        inline AttackerSet getAttackerSet( ) {	return m_attackers;	}
-         inline void addAttacker(Unit *pAttacker)
+        inline AttackerSet getAttackerSet( ) {  return m_attackers; }
+        inline void addAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
-				m_attackers.insert(pAttacker);
-		}
-		inline void removeAttacker(Unit *pAttacker)
+                m_attackers.insert(pAttacker);
+        }
+        inline void removeAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         inline bool testStateFlag(const uint32 f) const { return (m_state & f); }
         inline void clearStateFlag(uint32 f) { m_state &= ~f; };
 
-		inline uint32 getLevel() { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
+        inline uint32 getLevel() { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
         inline uint8 getRace() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
         inline uint8 getClass() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
         inline uint8 getGender() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
@@ -223,10 +223,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         Spell * m_currentSpell;
 
-		float GetHostility(uint64 guid);
-		Hostil* GetHostil(uint64 guid);
-		void AddHostil(uint64 guid, float hostility);
-
+        float GetHostility(uint64 guid);
+        Hostil* GetHostil(uint64 guid);
+        void AddHostil(uint64 guid, float hostility);
 
     protected:
         Unit ( );
@@ -254,8 +253,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         AuraList m_Auras;
 
-		std::list<Hostil*> m_hostilList;
-        
+        std::list<Hostil*> m_hostilList;
 
 };
 #endif

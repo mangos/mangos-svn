@@ -688,66 +688,65 @@ void Aura::HandleAuraModStat(bool apply)
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 {
-	if(cmod->m_amount<=1)
-		return;
-	WorldPacket data;
-	if(apply)
-		m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f ); 
-	else
-		m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
-	data.Initialize(MSG_MOVE_SET_RUN_SPEED);
-	data << m_target->GetGUID();
-	data << m_target->GetSpeed( MOVE_RUN );
-	m_target->SendMessageToSet(&data,true);
+    if(cmod->m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
+    data.Initialize(MSG_MOVE_SET_RUN_SPEED);
+    data << m_target->GetGUID();
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
 }
-
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
 {
-	if(cmod->m_amount<=1)
-		return;
-	WorldPacket data;
-	if(apply)
-		m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f ); 
-	else
-		m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
-	data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-	data << uint8(0xFF);
-	data << m_target->GetGUID();
-	data << m_target->GetSpeed( MOVE_RUN );
-	m_target->SendMessageToSet(&data,true);
+    if(cmod->m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
 }
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 {
-	if(cmod->m_amount<=1)
-		return;
-	WorldPacket data;
-	if(apply)
-		m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f ); 
-	else
-		m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
-	data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-	data << uint8(0xFF);
-	data << m_target->GetGUID();
-	data << m_target->GetSpeed( MOVE_RUN );
-	m_target->SendMessageToSet(&data,true);
+    if(cmod->m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
 {
-	if(cmod->m_amount<=1)
-		return;
-	WorldPacket data;
-	if(apply)
-		m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f ); 
-	else
-		m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
-	data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-	data << uint8(0xFF);
-	data << m_target->GetGUID();
-	data << m_target->GetSpeed( MOVE_RUN );
-	m_target->SendMessageToSet(&data,true);
+    if(cmod->m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * cmod->m_amount/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/cmod->m_amount );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply)

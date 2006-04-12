@@ -29,7 +29,7 @@ extern void AddSC_default();
 
 MANGOS_DLL_EXPORT
 void ScriptsFree()
-{ // Free resources before library unload
+{                                                           // Free resources before library unload
     for(int i=0;i<nrscripts;i++)
         delete m_scripts[i];
 }

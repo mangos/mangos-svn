@@ -89,13 +89,13 @@ AggressorAI::_needToStop() const
         return true;
     return !(_isVisible(i_pVictim));
 
-	float rx,ry,rz;
-	i_creature.GetRespawnCoord(rx, ry, rz);
-	float spawndist=i_creature.GetDistance(rx,ry,rz);
+    float rx,ry,rz;
+    i_creature.GetRespawnCoord(rx, ry, rz);
+    float spawndist=i_creature.GetDistance(rx,ry,rz);
     float length = i_creature.GetDistance(i_pVictim);
-	float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
-	return (( length > 12.0f + hostillen && spawndist > 80.0f ) || 
-		( length > 22.0f + hostillen && spawndist > 50.0f ) || ( length > 32.0f + hostillen ));
+    float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
+    return (( length > 12.0f + hostillen && spawndist > 80.0f ) ||
+        ( length > 22.0f + hostillen && spawndist > 50.0f ) || ( length > 32.0f + hostillen ));
 }
 
 void

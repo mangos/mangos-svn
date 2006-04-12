@@ -843,7 +843,7 @@ enum NPCFlags
     UNIT_NPC_FLAG_TAXIVENDOR        = 8,
     UNIT_NPC_FLAG_TRAINER           = 16,
     UNIT_NPC_FLAG_SPIRITHEALER      = 32,
-    UNIT_NPC_FLAG_GUARD		        = 64,       //UQ1: ???  We can use as guard flag? 
+    UNIT_NPC_FLAG_GUARD             = 64,                   //UQ1: ???  We can use as guard flag?
     UNIT_NPC_FLAG_INNKEEPER         = 128,
     UNIT_NPC_FLAG_BANKER            = 256,
     UNIT_NPC_FLAG_PETITIONER        = 512,

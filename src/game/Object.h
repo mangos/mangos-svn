@@ -24,25 +24,25 @@
 #include "World.h"
 
 #include <set>
-#define M_PI			3.14159265358979323846
+#define M_PI            3.14159265358979323846
 
-#define SPEED_STOP		0.0f
-#define SPEED_WALK		2.5f
-#define SPEED_RUN		7.0f
-#define SPEED_WALKBACK	2.5f
-#define SPEED_SWIM		4.722222f
-#define SPEED_SWIMBACK	4.5f
-#define SPEED_TURN		3.141594f
+#define SPEED_STOP      0.0f
+#define SPEED_WALK      2.5f
+#define SPEED_RUN       7.0f
+#define SPEED_WALKBACK  2.5f
+#define SPEED_SWIM      4.722222f
+#define SPEED_SWIMBACK  4.5f
+#define SPEED_TURN      3.141594f
 
 enum ObjMoveType
 {
-	MOVE_STOP		=0,
-	MOVE_WALK		=1,
-	MOVE_RUN		=2,
-	MOVE_WALKBACK	=3,
-	MOVE_SWIM		=4,
-	MOVE_SWIMBACK	=5,
-	MOVE_TURN		=6
+    MOVE_STOP       =0,
+    MOVE_WALK       =1,
+    MOVE_RUN        =2,
+    MOVE_WALKBACK   =3,
+    MOVE_SWIM       =4,
+    MOVE_SWIMBACK   =5,
+    MOVE_TURN       =6
 };
 
 enum TYPE
@@ -197,37 +197,37 @@ class MANGOS_DLL_SPEC Object
 
         void InitValues() { _InitValues(); }
 
-		float GetSpeed() const { return m_speed; }
-		float GetSpeed( ObjMoveType mtype ) const 
-		{ 
-			float DefaultSpeed;	//[7] = { 0.0f, 2.5f, 7.0f, 2.5f, 4.722222f, 4.5f, 3.141594f };
-			switch(mtype)
-			{
-			case MOVE_WALK:
-				DefaultSpeed=SPEED_WALK;
-				break;
-			case MOVE_RUN:
-				DefaultSpeed=SPEED_RUN;
-				break;
-			case MOVE_WALKBACK:
-				DefaultSpeed=SPEED_WALKBACK;
-				break;
-			case MOVE_SWIM:
-				DefaultSpeed=SPEED_SWIM;
-				break;
-			case MOVE_SWIMBACK:
-				DefaultSpeed=SPEED_SWIMBACK;
-				break;
-			case MOVE_TURN:
-				DefaultSpeed=SPEED_TURN;
-				break;
-			default:
-				DefaultSpeed=SPEED_STOP;
-				break;
-			}
-			return m_speed * DefaultSpeed; 
-		}
-		void SetSpeed(float newspd)	{ m_speed = newspd; }
+        float GetSpeed() const { return m_speed; }
+        float GetSpeed( ObjMoveType mtype ) const
+        {
+            float DefaultSpeed;                             //[7] = { 0.0f, 2.5f, 7.0f, 2.5f, 4.722222f, 4.5f, 3.141594f };
+            switch(mtype)
+            {
+                case MOVE_WALK:
+                    DefaultSpeed=SPEED_WALK;
+                    break;
+                case MOVE_RUN:
+                    DefaultSpeed=SPEED_RUN;
+                    break;
+                case MOVE_WALKBACK:
+                    DefaultSpeed=SPEED_WALKBACK;
+                    break;
+                case MOVE_SWIM:
+                    DefaultSpeed=SPEED_SWIM;
+                    break;
+                case MOVE_SWIMBACK:
+                    DefaultSpeed=SPEED_SWIMBACK;
+                    break;
+                case MOVE_TURN:
+                    DefaultSpeed=SPEED_TURN;
+                    break;
+                default:
+                    DefaultSpeed=SPEED_STOP;
+                    break;
+            }
+            return m_speed * DefaultSpeed;
+        }
+        void SetSpeed(float newspd) { m_speed = newspd; }
 
     protected:
         Object ( );
@@ -263,8 +263,8 @@ class MANGOS_DLL_SPEC Object
         float m_orientation;
         uint32 m_taximask[8];
 
-		float m_speed;
-		uint8 m_moveType;
+        float m_speed;
+        uint8 m_moveType;
 
         bool mSemaphoreTeleport;
 

@@ -2428,7 +2428,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
     {
         case MOVE_RUN:
         {
-			SetSpeed( value / SPEED_RUN );
+            SetSpeed( value / SPEED_RUN );
             if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE); }
             else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
             data << uint8(0xFF);
@@ -2438,7 +2438,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
         }break;
         case MOVE_WALKBACK:
         {
-			SetSpeed( value / SPEED_WALKBACK );
+            SetSpeed( value / SPEED_WALKBACK );
             if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE); }
             else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
             data << uint8(0xFF);
@@ -2448,7 +2448,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
         }break;
         case MOVE_SWIM:
         {
-			SetSpeed( value / SPEED_SWIM );
+            SetSpeed( value / SPEED_SWIM );
             if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE); }
             else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
             data << uint8(0xFF);
@@ -2458,7 +2458,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
         }break;
         case MOVE_SWIMBACK:
         {
-			SetSpeed( value / SPEED_SWIMBACK );
+            SetSpeed( value / SPEED_SWIMBACK );
             data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED);
             data << uint8(0xFF);
             data << GetGUID();
