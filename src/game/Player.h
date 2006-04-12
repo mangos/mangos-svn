@@ -185,15 +185,6 @@ enum PlayerStateType
     PLAYER_STATE_KNEEL            = 8
 };
 
-enum PlayerSpeedType
-{
-    RUN      = 1,
-    RUNBACK  = 2,
-    SWIM     = 3,
-    SWIMBACK = 4,
-    WALK     = 5,
-};
-
 enum PlayerState
 {
     PLAYER_STOPPED = 0,

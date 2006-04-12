@@ -56,7 +56,6 @@ Creature::Creature() : Unit(), i_AI(NULL)
     m_moveRandom = false;
     m_moveRun = false;
     i_creatureState = STOPPED;
-    m_moveSpeed = 1.0f;
     m_respawnradius=0;
 }
 
@@ -514,7 +513,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg);
 
-    m_moveSpeed=cinfo->speed ;
+    SetSpeed( cinfo->speed ) ;
     return true;
 }
 

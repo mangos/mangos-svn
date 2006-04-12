@@ -459,13 +459,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
         if (GetPlayer()->getRace() == RACE_NIGHT_ELF)
         {
-            pCurrChar->SetPlayerSpeed(RUN, (float)12.75, true);
-            pCurrChar->SetPlayerSpeed(SWIM, (float)8.85, true);
+            pCurrChar->SetPlayerSpeed(MOVE_RUN, (float)12.75, true);
+            pCurrChar->SetPlayerSpeed(MOVE_SWIM, (float)8.85, true);
         }
         else
         {
-            pCurrChar->SetPlayerSpeed(RUN, (float)10.625, true);
-            pCurrChar->SetPlayerSpeed(SWIM, (float)7.375, true);
+            pCurrChar->SetPlayerSpeed(MOVE_RUN, (float)10.625, true);
+            pCurrChar->SetPlayerSpeed(MOVE_SWIM, (float)7.375, true);
         }
     }
 

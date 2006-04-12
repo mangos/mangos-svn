@@ -25,10 +25,8 @@
 /** Traveller is a wrapper for units (creatures or players) that
  * travel from point A to point B using the destination holder.
  */
-#define UNIT_WALK_SPEED            2.5f
-#define UNIT_RUN_SPEED             7.0f
-#define UNIT_SWIM_SPEED            7.0f
 #define PLAYER_FLIGHT_SPEED        32.0f
+
 template<class T>
 struct MANGOS_DLL_DECL Traveller
 {
@@ -59,7 +57,7 @@ struct MANGOS_DLL_DECL Traveller
 template<>
 inline float Traveller<Creature>::Speed()
 {
-    return i_traveller.GetMobSpeed() * (i_traveller.getMoveRunFlag() ? UNIT_RUN_SPEED : UNIT_WALK_SPEED);
+    return i_traveller.GetSpeed(i_traveller.getMoveRunFlag() ? MOVE_RUN : MOVE_WALK);
 }
 
 template<>
