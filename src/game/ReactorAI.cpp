@@ -48,7 +48,7 @@ ReactorAI::AttackStart(Unit *p)
     if( i_pVictim == NULL )
     {
         DEBUG_LOG("Tag unit LowGUID(%d) HighGUID(%d) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
-        i_creature.SetState(ATTACKING);
+        i_creature.SetState(UNIT_STAT_ATTACKING);
         i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
         i_creature->Mutate(new TargetedMovementGenerator(*p));
         i_pVictim = p;
@@ -107,10 +107,14 @@ ReactorAI::needToStop() const
     if( !i_pVictim->isAlive() || !i_creature.isAlive()  || i_pVictim->m_stealth)
         return true;
 
+	
+	float rx,ry,rz;
+	i_creature.GetRespawnCoord(rx, ry, rz);
+	float spawndist=i_creature.GetDistance(rx,ry,rz);
     float length = i_creature.GetDistance(i_pVictim);
-    if( length > REACTOR_VISIBLE_RANGE )
-        return true;
-    return false;
+	float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(2.5f * i_creature.getLevel()+1.0f);
+	return (( (length > 10.0f + hostillen) && spawndist > 80.0f ) || 
+		( (length > 20.0f + hostillen) && spawndist > 50.0f ) || ( length > 30.0f + hostillen ));
 }
 
 void
@@ -118,7 +122,7 @@ ReactorAI::stopAttack()
 {
     if( i_pVictim != NULL )
     {
-        i_creature.ClearState(ATTACKING);
+        i_creature.ClearState(UNIT_STAT_IN_COMBAT);
         i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
 
         if( !i_creature.isAlive() )

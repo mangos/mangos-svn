@@ -93,7 +93,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
         if( i_creature.IsStopped() )
         {
             assert( i_currentNode < i_path.Size() );
-            creature.SetState(ROAMING);
+            creature.SetState(UNIT_STAT_ROAMING);
             const Path::PathNode &node(i_path(i_currentNode));
             Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);

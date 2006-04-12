@@ -27,6 +27,10 @@
 class Unit;
 class Creature;
 
+#define IN_LINE_OF_SIGHT         30
+#define VISIBILITY_RANGE    100
+#define SPIRIT_HEALER       5233
+
 class MANGOS_DLL_DECL CreatureAI
 {
     public:

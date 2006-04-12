@@ -55,7 +55,7 @@ Creature::Creature() : Unit(), i_AI(NULL)
     m_moveBackward = false;
     m_moveRandom = false;
     m_moveRun = false;
-    i_creatureState = STOPPED;
+    i_creatureState = UNIT_STAT_STOPPED;
     m_respawnradius=0;
 }
 
@@ -127,7 +127,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
                 SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
                 m_deathState = ALIVE;
-                ClearState(ALL_STATE);
+                ClearState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
                 MapManager::Instance().GetMap(GetMapId())->Add(this);
             }
