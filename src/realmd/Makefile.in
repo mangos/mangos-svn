@@ -68,7 +68,12 @@ PROGRAMS = $(bin_PROGRAMS)
 am_realmd_OBJECTS = AuthSocket.$(OBJEXT) Main.$(OBJEXT) \
 	RealmList.$(OBJEXT)
 realmd_OBJECTS = $(am_realmd_OBJECTS)
-realmd_DEPENDENCIES =
+realmd_DEPENDENCIES = $(top_builddir)/src/shared/libdatabase.a \
+	$(top_builddir)/src/shared/libconfig.a \
+	$(top_builddir)/src/shared/libauth.a \
+	$(top_builddir)/src/shared/libshared.a \
+	$(top_builddir)/src/shared/libnetwork.a \
+	$(top_builddir)/src/framework/libframework.a
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
@@ -229,11 +234,8 @@ realmd_SOURCES = \
     RealmList.cpp \
     RealmList.h
 
-realmd_LDADD = -ldatabase -lconfig -lauth -lshared -lframework -lZThread -lnetwork
-realmd_LDFLAGS = -L$(top_builddir)/src/shared \
-               -L$(top_builddir)/src/framework \
-               -L$(top_builddir)/dep/src/zthread
-
+realmd_LDADD = $(top_builddir)/src/shared/libdatabase.a $(top_builddir)/src/shared/libconfig.a $(top_builddir)/src/shared/libauth.a $(top_builddir)/src/shared/libshared.a $(top_builddir)/src/shared/libnetwork.a $(top_builddir)/src/framework/libframework.a -lZThread
+realmd_LDFLAGS = -L$(top_builddir)/dep/src/zthread
 all: all-am
 
 .SUFFIXES:
