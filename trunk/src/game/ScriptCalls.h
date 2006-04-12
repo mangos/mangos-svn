@@ -51,7 +51,7 @@ typedef struct
 {
     scriptCallScriptsInit ScriptsInit;
     scriptCallScriptsFree ScriptsFree;
-    
+
     scriptCallGossipHello GossipHello;
     scriptCallGOChooseReward GOChooseReward;
     scriptCallQuestAccept QuestAccept;

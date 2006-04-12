@@ -230,8 +230,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
     {
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
-		pVictim->addStateFlag(UNIT_STAT_ATTACK_BY);
-		pVictim->addAttacker(pVictim);
+        pVictim->addStateFlag(UNIT_STAT_ATTACK_BY);
+        pVictim->addAttacker(pVictim);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
@@ -1055,8 +1055,8 @@ Aura* Unit::FindAur(uint32 spellId)
 
 Hostil* Unit::GetHostil(uint64 guid)
 {
-	std::list<Hostil*>::iterator i;
-	for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+    std::list<Hostil*>::iterator i;
+    for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
         if((*i)->UnitGuid==guid)
             return (*i);
     return NULL;
@@ -1064,28 +1064,28 @@ Hostil* Unit::GetHostil(uint64 guid)
 
 float Unit::GetHostility(uint64 guid)
 {
-	std::list<Hostil*>::iterator i;
-	for ( i = m_hostilList.begin(); i!= m_hostilList.end(); i++)
-	{
-		if((*i)->UnitGuid==guid)
-			return (*i)->Hostility;
-	}
-	return 0.0f;
+    std::list<Hostil*>::iterator i;
+    for ( i = m_hostilList.begin(); i!= m_hostilList.end(); i++)
+    {
+        if((*i)->UnitGuid==guid)
+            return (*i)->Hostility;
+    }
+    return 0.0f;
 }
 
 void Unit::AddHostil(uint64 guid, float hostility)
 {
-	std::list<Hostil*>::iterator i;
-	for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
-	{
+    std::list<Hostil*>::iterator i;
+    for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+    {
         if((*i)->UnitGuid==guid)
-		{
-			(*i)->Hostility+=hostility;
-			return;
-		}
-	}
-	Hostil *uh=new Hostil;
-	uh->UnitGuid=GetGUID();
-	uh->Hostility=hostility;
-	m_hostilList.push_back(uh);
+        {
+            (*i)->Hostility+=hostility;
+            return;
+        }
+    }
+    Hostil *uh=new Hostil;
+    uh->UnitGuid=GetGUID();
+    uh->Hostility=hostility;
+    m_hostilList.push_back(uh);
 }

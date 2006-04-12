@@ -37,8 +37,8 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
     if(pEnemy)
     {
-	    _player->addStateFlag(UNIT_STAT_ATTACKING);
-		_player->addAttacker(pEnemy);
+        _player->addStateFlag(UNIT_STAT_ATTACKING);
+        _player->addAttacker(pEnemy);
         _player->smsg_AttackStart(pEnemy);
         _player->inCombat = true;
         return;
