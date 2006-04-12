@@ -24,116 +24,114 @@
 #include "Pet.h"
 #include "MapManager.h"
 
-
 void Pet::SavePetToDB()
 {
-	if(!isPet())
-		return;
-	
-	//sDatabase.PExecute("UPDATE pets SET (level=%u, exp=%u, nextlvlexp=%u, spell1=%u, spell2=%u, spell3=%u, spell4=%u, action=%u, fealty=%u, name='%s') WHERE guid=%u",
-	//	GetUInt32Value(UNIT_FIELD_LEVEL), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP), 
-	//	m_spells[0], m_spells[0], m_spells[0], m_spells[0], m_actState, m_fealty, m_name);
+    if(!isPet())
+        return;
+
+    //sDatabase.PExecute("UPDATE pets SET (level=%u, exp=%u, nextlvlexp=%u, spell1=%u, spell2=%u, spell3=%u, spell4=%u, action=%u, fealty=%u, name='%s') WHERE guid=%u",
+    //	GetUInt32Value(UNIT_FIELD_LEVEL), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+    //	m_spells[0], m_spells[0], m_spells[0], m_spells[0], m_actState, m_fealty, m_name);
     std::stringstream ss;
     sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'",GetGUIDLow());
-	ss.rdbuf()->str("");
-	ss << "INSERT INTO pets (guid,entry,owner,level,exp,nextlvlexp,spell1,spell2,spell3,spell4,action,fealty,name) VALUES (";
-	ss << GetGUIDLow() << ","
-		<< GetEntry() << ","
-		<< GetUInt64Value(UNIT_FIELD_SUMMONEDBY) << ","
-		<< GetUInt32Value(UNIT_FIELD_LEVEL) << ","
-		<< GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ","
-		<< GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP) << ","
-		<< m_spells[0] << ","
-		<< m_spells[1] << ","
-		<< m_spells[2] << ","
-		<< m_spells[3] << ","
-		<< m_actState << ","
-		<< m_fealty << ",'"
-		<< m_name <<"'";
-	ss << ")";
+    ss.rdbuf()->str("");
+    ss << "INSERT INTO pets (guid,entry,owner,level,exp,nextlvlexp,spell1,spell2,spell3,spell4,action,fealty,name) VALUES (";
+    ss << GetGUIDLow() << ","
+        << GetEntry() << ","
+        << GetUInt64Value(UNIT_FIELD_SUMMONEDBY) << ","
+        << GetUInt32Value(UNIT_FIELD_LEVEL) << ","
+        << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ","
+        << GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP) << ","
+        << m_spells[0] << ","
+        << m_spells[1] << ","
+        << m_spells[2] << ","
+        << m_spells[3] << ","
+        << m_actState << ","
+        << m_fealty << ",'"
+        << m_name <<"'";
+    ss << ")";
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
 void Pet::LoadPetFromDB(Unit* owner, uint32 guid)
 {
-	WorldPacket data;
+    WorldPacket data;
     QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE guid = '%u';", guid);
     ASSERT(result);
     Field *fields = result->Fetch();
-	
-	Create(guid, owner->GetMapId(), owner->GetPositionX(), owner->GetPositionY(), 
-	owner->GetPositionZ(), owner->GetOrientation(), fields[1].GetUInt32());
-	
-	uint32 petlevel=owner->getLevel();
-	SetUInt32Value(UNIT_FIELD_LEVEL, fields[3].GetUInt32());
-	SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
-	SetUInt32Value(UNIT_NPC_FLAGS , 0);
-	SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
-	SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
-	
-	SetUInt32Value(UNIT_FIELD_BYTES_0,2048); 
-	
-	SetUInt32Value(UNIT_FIELD_FLAGS,0);
-	
-	SetUInt32Value(UNIT_FIELD_BYTES_1,0); 
-	SetUInt32Value(UNIT_FIELD_PETNUMBER, guid ); 
-	SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5); 
-	SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32()); 
-	SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32()); 
-	//SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id); 
-	SetUInt32Value(UNIT_FIELD_STAT0,22);
-	SetUInt32Value(UNIT_FIELD_STAT1,22); 
-	//SetUInt32Value(UNIT_FIELD_STAT2,25); 
-	//SetUInt32Value(UNIT_FIELD_STAT3,28);
-	SetUInt32Value(UNIT_FIELD_STAT4,27); 
-	
-	m_name = fields[11].GetString();
-	m_fealty = fields[12].GetUInt32();
 
-	SetisPet(true);
-	AIM_Initialize(); 
-	m_spells[0] = fields[6].GetUInt16();
-	m_spells[1] = fields[7].GetUInt16();
-	m_spells[2] = fields[8].GetUInt16();
-	m_spells[3] = fields[9].GetUInt16();
-	m_actState = fields[10].GetUInt32();
+    Create(guid, owner->GetMapId(), owner->GetPositionX(), owner->GetPositionY(),
+        owner->GetPositionZ(), owner->GetOrientation(), fields[1].GetUInt32());
 
-	MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
-	owner->SetUInt64Value(UNIT_FIELD_SUMMON, GetGUID());
-	sLog.outDebug("New Pet has guid %u", GetGUID());
-                               
-	//summon imp Template ID is 416
-	if(owner->GetTypeId() == TYPEID_PLAYER)
-	{
-		uint16 Command = 7;
-		uint16 State = 6;
-		
-		sLog.outDebug("Pet Spells Groups");
-		data.clear();
-		data.Initialize(SMSG_PET_SPELLS);
-			
-		//Data is send 2x
+    uint32 petlevel=owner->getLevel();
+    SetUInt32Value(UNIT_FIELD_LEVEL, fields[3].GetUInt32());
+    SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
+    SetUInt32Value(UNIT_NPC_FLAGS , 0);
+    SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
+    SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
 
-		data << (uint64)GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-			
-		data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+    SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
 
-		uint16 SpellID;
-		SpellID = fields[6].GetUInt16(); //0x2DF3;	//Firebolt = correct
-		data << uint16 (SpellID) << uint16 (0xC100);  //C100 = maybe group
-		SpellID = fields[7].GetUInt16(); //0x2DF7;	//Blood Pact = correct
-		data << uint16 (SpellID) << uint16 (0xC100);
-		SpellID = fields[8].GetUInt16(); //0x2DFB;	//Fire Shield = correct
-		data << uint16 (SpellID) << uint16 (0xC100);
-		SpellID = fields[9].GetUInt16(); //0x119F;	//Phase Shift = correct
-		data << uint16 (SpellID) << uint16 (0xC100);
+    SetUInt32Value(UNIT_FIELD_FLAGS,0);
 
-		data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+    SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+    SetUInt32Value(UNIT_FIELD_PETNUMBER, guid );
+    SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+    SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());
+    //SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    SetUInt32Value(UNIT_FIELD_STAT0,22);
+    SetUInt32Value(UNIT_FIELD_STAT1,22);
+    //SetUInt32Value(UNIT_FIELD_STAT2,25);
+    //SetUInt32Value(UNIT_FIELD_STAT3,28);
+    SetUInt32Value(UNIT_FIELD_STAT4,27);
 
-		((Player*)owner)->GetSession()->SendPacket(&data);
-	}
+    m_name = fields[11].GetString();
+    m_fealty = fields[12].GetUInt32();
+
+    SetisPet(true);
+    AIM_Initialize();
+    m_spells[0] = fields[6].GetUInt16();
+    m_spells[1] = fields[7].GetUInt16();
+    m_spells[2] = fields[8].GetUInt16();
+    m_spells[3] = fields[9].GetUInt16();
+    m_actState = fields[10].GetUInt32();
+
+    MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
+    owner->SetUInt64Value(UNIT_FIELD_SUMMON, GetGUID());
+    sLog.outDebug("New Pet has guid %u", GetGUID());
+
+    //summon imp Template ID is 416
+    if(owner->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint16 Command = 7;
+        uint16 State = 6;
+
+        sLog.outDebug("Pet Spells Groups");
+        data.clear();
+        data.Initialize(SMSG_PET_SPELLS);
+
+        //Data is send 2x
+
+        data << (uint64)GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+        uint16 SpellID;
+        SpellID = fields[6].GetUInt16();                    //0x2DF3;	//Firebolt = correct
+        data << uint16 (SpellID) << uint16 (0xC100);        //C100 = maybe group
+        SpellID = fields[7].GetUInt16();                    //0x2DF7;	//Blood Pact = correct
+        data << uint16 (SpellID) << uint16 (0xC100);
+        SpellID = fields[8].GetUInt16();                    //0x2DFB;	//Fire Shield = correct
+        data << uint16 (SpellID) << uint16 (0xC100);
+        SpellID = fields[9].GetUInt16();                    //0x119F;	//Phase Shift = correct
+        data << uint16 (SpellID) << uint16 (0xC100);
+
+        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+        ((Player*)owner)->GetSession()->SendPacket(&data);
+    }
 }
-
 
 void Pet::DeletePetFromDB()
 {

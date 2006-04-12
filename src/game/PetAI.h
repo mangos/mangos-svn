@@ -19,8 +19,6 @@
 #ifndef MANGOS_GUARDAI_H
 #define MANGOS_GUARDAI_H
 
-
-
 #include "CreatureAI.h"
 #include "FactionTemplateResolver.h"
 #include "Timer.h"
@@ -30,42 +28,41 @@ class Creature;
 class MANGOS_DLL_DECL PetAI : public CreatureAI
 {
     enum PetState
-	{
-		STATE_RA_FOLLOW			= 1,
-		STATE_RA_ACTIVE			= 2,
-		STATE_RA_PASSIVE		= 4,
-		STATE_RA_SPELL1			= 8,
-		STATE_RA_SPELL2			= 16,
-		STATE_RA_SPELL3			= 32,
-		STATE_RA_SPELL4			= 64
-	};
+    {
+        STATE_RA_FOLLOW         = 1,
+        STATE_RA_ACTIVE         = 2,
+        STATE_RA_PASSIVE        = 4,
+        STATE_RA_SPELL1         = 8,
+        STATE_RA_SPELL2         = 16,
+        STATE_RA_SPELL3         = 32,
+        STATE_RA_SPELL4         = 64
+    };
 
-public:
-    
-    PetAI(Creature &c);
+    public:
 
-    void MoveInLineOfSight(Unit *);
-    void AttackStart(Unit *);
-    void AttackStop(Unit *);
-    void HealBy(Unit *healer, uint32 amount_healed);
-    void DamageInflict(Unit *healer, uint32 amount_healed);
-    bool IsVisible(Unit *) const;
+        PetAI(Creature &c);
 
-    void UpdateAI(const uint32);
-    static int Permissible(const Creature *);
-	
-private:
-    bool _isVisible(Unit *) const;
-    void _taggedToKill(Unit *);
-    bool _needToStop(void) const;
-    void _stopAttack(void);
+        void MoveInLineOfSight(Unit *);
+        void AttackStart(Unit *);
+        void AttackStop(Unit *);
+        void HealBy(Unit *healer, uint32 amount_healed);
+        void DamageInflict(Unit *healer, uint32 amount_healed);
+        bool IsVisible(Unit *) const;
 
-    Creature &i_pet;
-	Creature* i_owner;
-    Unit *i_pVictim;
-	uint32 i_state;
-    TimeTracker i_tracker;
-	//uint32 i_RepeatAction;
+        void UpdateAI(const uint32);
+        static int Permissible(const Creature *);
+
+    private:
+        bool _isVisible(Unit *) const;
+        void _taggedToKill(Unit *);
+        bool _needToStop(void) const;
+        void _stopAttack(void);
+
+        Creature &i_pet;
+        Creature* i_owner;
+        Unit *i_pVictim;
+        uint32 i_state;
+        TimeTracker i_tracker;
+        //uint32 i_RepeatAction;
 };
-
 #endif
