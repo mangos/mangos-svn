@@ -68,10 +68,10 @@ namespace MaNGOS
             int total_kills  = killer->CalculateTotalKills(victim);
             int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
             int v_rank       = victim->CalculateHonorRank( victim->GetTotalHonor() );
-            int k_level      = killer->GetLevel();
-            int v_level      = victim->GetLevel();
+            int k_level      = killer->getLevel();
+            int v_level      = victim->getLevel();
             float diff_honor = (victim->GetTotalHonor() /(killer->GetTotalHonor()+1))+1;
-            float diff_level = (victim->GetLevel()*(1.0/( killer->GetLevel() )));
+            float diff_level = (victim->getLevel()*(1.0/( killer->getLevel() )));
 
             int f = (4 - total_kills) >= 0 ? (4 - total_kills) : 0;
             int honor_points = int(((float)(f * 0.25)*(float)((k_level+(v_rank*5+1))*(1+0.05*diff_honor)*diff_level)));

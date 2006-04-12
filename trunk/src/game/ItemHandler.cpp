@@ -401,7 +401,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 return;
             }
             //check level
-            if(ItemPro->RequiredLevel> GetPlayer()->GetLevel())
+            if(ItemPro->RequiredLevel> GetPlayer()->getLevel())
             {
                 data.Initialize( SMSG_BUY_FAILED );
                 data << uint64(srcguid);

@@ -37,19 +37,6 @@ class WorldSession;
 #define MAX_CREATURE_WAYPOINTS 16
 #define MAX_CREATURE_ITEMS 128
 
-enum CreatureState
-{
-    STOPPED = 0,
-    STUNDED = 1L,
-    ROAMING = (1L << 1),
-    CHASE = (1L << 2),
-    SEARCHING = (1L << 3),
-    FLEEING = (1L << 4),
-    MOVING = (ROAMING | CHASE | SEARCHING | FLEEING),
-    ATTACKING = (1L << 5),
-    ALL_STATE = (STOPPED | MOVING | SEARCHING | ATTACKING)
-};
-
 struct CreatureItem
 {
     uint32 ItemId;

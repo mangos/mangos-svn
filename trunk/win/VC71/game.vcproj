@@ -464,6 +464,18 @@
 				RelativePath="..\..\src\game\ObjectMgr.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\Pet.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Pet.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Player.cpp">
 			</File>
 			<File

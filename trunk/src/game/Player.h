@@ -185,17 +185,6 @@ enum PlayerStateType
     PLAYER_STATE_KNEEL            = 8
 };
 
-enum PlayerState
-{
-    PLAYER_STOPPED = 0,
-    /* Note.. 1 and 2 is reserved in Units.h for UF_TARGET_DIED and UF_ATTACKING */
-    PLAYER_ATTACKING = (1L << 1),                           // player is attacking someone
-    PLAYER_ATTACK_BY = (1L << 2),                           // player is attack by someone
-                                                            // player is in combat mode
-    PLAYER_IN_COMBAT = (PLAYER_ATTACKING | PLAYER_ATTACK_BY),
-    PLAYER_IN_FLIGHT = (1L << 3)                            // player is i n flight mode
-};
-
 enum CLIENT_CONTAINER_SLOT                                  //add by vendy
 {
     CLIENT_SLOT_BACK = 0xFF,
@@ -600,7 +589,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             return m_team;
         };
-        uint32 GetLevel()
+        uint32 getLevel()
         {
             return (GetUInt32Value(UNIT_FIELD_LEVEL));
         }

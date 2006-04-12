@@ -37,7 +37,8 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
     if(pEnemy)
     {
-        _player->addStateFlag(UF_ATTACKING);
+	    _player->addStateFlag(UNIT_STAT_ATTACKING);
+		_player->addAttacker(pEnemy);
         _player->smsg_AttackStart(pEnemy);
         _player->inCombat = true;
         return;
@@ -52,7 +53,7 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
     uint64 guid = GetPlayer()->GetSelection();
 
     GetPlayer()->smsg_AttackStop(guid);
-    GetPlayer()->clearStateFlag(UF_ATTACKING);
+    GetPlayer()->clearStateFlag(UNIT_STAT_ATTACKING);
 }
 
 void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )

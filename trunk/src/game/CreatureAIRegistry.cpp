@@ -37,6 +37,7 @@ namespace AIRegistry
         (new CreatureAIFactory<AggressorAI>("AggressorAI"))->RegisterSelf();
         (new CreatureAIFactory<ReactorAI>("ReactorAI"))->RegisterSelf();
         (new CreatureAIFactory<ReactorAI>("GuardAI"))->RegisterSelf();
+        (new CreatureAIFactory<ReactorAI>("PetAI"))->RegisterSelf();
 
         (new MovementGeneratorFactory<RandomMovementGenerator>("Random"))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator>("Waypoint"))->RegisterSelf();
