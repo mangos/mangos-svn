@@ -398,22 +398,22 @@
 			RelativePath="..\..\src\shared\Common.h">
 		</File>
 		<File
-			RelativePath="..\..\src\shared\SystemConfig.h">
+			RelativePath="..\..\src\shared\SystemConfig.h.in">
 			<FileConfiguration
 				Name="Release|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-"
-					Outputs="SystemConfig.h"/>
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h"
+					Outputs="..\..\src\shared\SystemConfig.h"/>
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Debug|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
-					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h
-"
-					Outputs="SystemConfig.h"/>
+					Description="Performing Build SystemConfig.h"
+					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h"
+					Outputs="..\..\src\shared\SystemConfig.h"/>
 			</FileConfiguration>
 		</File>
 	</Files>
