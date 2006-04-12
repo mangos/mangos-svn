@@ -87,8 +87,9 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	Mthread.$(OBJEXT) NPCHandler.$(OBJEXT) \
 	NullCreatureAI.$(OBJEXT) ObjectAccessor.$(OBJEXT) \
 	Object.$(OBJEXT) ObjectGridLoader.$(OBJEXT) \
-	ObjectMgr.$(OBJEXT) Opcodes.$(OBJEXT) PetHandler.$(OBJEXT) \
-	Player.$(OBJEXT) ProgressBar.$(OBJEXT) QueryHandler.$(OBJEXT) \
+	ObjectMgr.$(OBJEXT) Opcodes.$(OBJEXT) Pet.$(OBJEXT) \
+	PetAI.$(OBJEXT) PetHandler.$(OBJEXT) Player.$(OBJEXT) \
+	ProgressBar.$(OBJEXT) QueryHandler.$(OBJEXT) \
 	QuestDef.$(OBJEXT) QuestHandler.$(OBJEXT) \
 	RandomMovementGenerator.$(OBJEXT) ReactorAI.$(OBJEXT) \
 	RedZoneDistrict.$(OBJEXT) ScriptCalls.$(OBJEXT) \
@@ -307,6 +308,10 @@ libgame_a_SOURCES = \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
+	Pet.cpp \
+	Pet.h \
+	PetAI.cpp \
+	PetAI.h \
 	PetHandler.cpp \
 	Player.cpp \
 	ProgressBar.cpp \
@@ -518,6 +523,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectGridLoader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Opcodes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Pet.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PetAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PetHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Player.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProgressBar.Po@am__quote@

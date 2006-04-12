@@ -73,6 +73,10 @@ libgame_a_SOURCES = \
 	ObjectGridLoader.cpp \
 	ObjectMgr.cpp \
 	Opcodes.cpp \
+	Pet.cpp \
+	Pet.h \
+	PetAI.cpp \
+	PetAI.h \
 	PetHandler.cpp \
 	Player.cpp \
 	ProgressBar.cpp \
