@@ -400,6 +400,63 @@ void Spell::EffectCreateItem(uint32 i)
         }
 
     }
+	switch(m_spellInfo->SpellVisual)
+	{
+		case 1168:
+			((Player*)m_caster)->UpdateSkill(SKILL_TAILORING);
+			break;
+		case 92:
+			{
+				if(m_spellInfo->SpellIconID == 1)
+					((Player*)m_caster)->UpdateSkill(SKILL_ALCHEMY);
+				break;
+				//if(m_spellInfo->SpellIconID == 513 || m_spellInfo->SpellIconID == 248)
+				//	((Player*)m_caster)->UpdateSkill(SKILL_POISONS);
+				//break;
+			}
+		case 4439:
+			((Player*)m_caster)->UpdateSkill(SKILL_LEATHERWORKING);
+			break;
+		case 5499:
+			((Player*)m_caster)->UpdateSkill(SKILL_FIRST_AID);
+			break;
+		case 3881:
+			((Player*)m_caster)->UpdateSkill(SKILL_COOKING);
+			break;
+		case 1008:
+			((Player*)m_caster)->UpdateSkill(SKILL_SKINNING);
+			break;
+		case 3182:
+			((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
+			break;
+		case 2641:
+			((Player*)m_caster)->UpdateSkill(SKILL_ENGINERING);
+			break;
+		case 395:
+			{
+				if(m_spellInfo->SpellIconID == 1)
+					((Player*)m_caster)->UpdateSkill(SKILL_ENGINERING);
+				break;
+				if(m_spellInfo->SpellIconID == 140)
+					((Player*)m_caster)->UpdateSkill(SKILL_BLACKSMITHING);
+				break;
+			}
+/*
+		case 91:
+			((Player*)m_caster)->UpdateSkill(SKILL_HERBALISM);
+			break;
+		case 93:
+			((Player*)m_caster)->UpdateSkill(SKILL_MINING);
+			break;
+		case 759:
+			((Player*)m_caster)->UpdateSkill(SKILL_FISHING);
+			break;
+		case 215:
+			((Player*)m_caster)->UpdateSkill(SKILL_BLACKSMITHING);
+			break;
+*/
+			default:break;
+	}
 }
 
 void Spell::EffectPresistentAA(uint32 i)
