@@ -25,7 +25,6 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 
-#define TIME_INTERVAL_LOOK   5000
 
 int
 AggressorAI::Permissible(const Creature *creature)
@@ -33,9 +32,9 @@ AggressorAI::Permissible(const Creature *creature)
     FactionTemplateEntry *fact = sFactionTemplateStore.LookupEntry(creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
     FactionTemplateResolver fact_source(fact);
     if( fact_source.IsHostileToAll() )
-        return PROACTIVE_PERMIT_BASE;
+        return PERMIT_BASE_PROACTIVE;
 
-    return NO_PERMIT;
+    return PERMIT_BASE_NO;
 }
 
 AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFaction(sFactionTemplateStore.LookupEntry(c.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)

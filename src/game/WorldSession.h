@@ -88,6 +88,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTabardVendorActivate( uint64 guid );
         void SendTaxiStatus( uint64 guid );
         void SendSpiritRessurect();
+		void SendBindPoint();
 
     protected:
 
@@ -170,6 +171,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleMoveTimeSkippedOpcode(WorldPacket &recv_data);
 
         void HandleBattlefieldStatusOpcode(WorldPacket &recv_data);
+        void HandleBattleMasterHelloOpcode(WorldPacket &recv_data);
 
         void HandleGroupInviteOpcode(WorldPacket& recvPacket);
         void HandleGroupCancelOpcode(WorldPacket& recvPacket);
@@ -218,6 +220,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleSpiritHealerActivateOpcode(WorldPacket& recvPacket);
         void HandleNpcTextQueryOpcode(WorldPacket& recvPacket);
         void HandleBinderActivateOpcode(WorldPacket& recvPacket);
+        void HandleListStabledPetsOpcode(WorldPacket& recvPacket);
 
         void HandleDuelAcceptedOpcode(WorldPacket& recvPacket);
         void HandleDuelCancelledOpcode(WorldPacket& recvPacket);

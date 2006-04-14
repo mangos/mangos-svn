@@ -317,6 +317,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_SPIRIT_HEALER_ACTIVATE,   STATUS_LOGGEDIN, &WorldSession::HandleSpiritHealerActivateOpcode    },
         { CMSG_NPC_TEXT_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandleNpcTextQueryOpcode            },
         { CMSG_BINDER_ACTIVATE,          STATUS_LOGGEDIN, &WorldSession::HandleBinderActivateOpcode          },
+        { MSG_LIST_STABLED_PETS ,        STATUS_LOGGEDIN, &WorldSession::HandleListStabledPetsOpcode         },
 
         { CMSG_DUEL_ACCEPTED,            STATUS_LOGGEDIN, &WorldSession::HandleDuelAcceptedOpcode            },
         { CMSG_DUEL_CANCELLED,           STATUS_LOGGEDIN, &WorldSession::HandleDuelCancelledOpcode           },
@@ -422,6 +423,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_NEXT_CINEMATIC_CAMERA,    STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera           },
 
         { CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
+        { CMSG_BATTLEMASTER_HELLO ,      STATUS_LOGGEDIN, &WorldSession::HandleBattleMasterHelloOpcode		 },
 
         { CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
 

@@ -179,6 +179,30 @@ Item* Bag::RemoveItemFromBag(uint8 slot)
     return pItem;
 }
 
+uint32 Bag::RemoveItemFromBag(uint8 slot,uint32 count) 
+{
+	Item *pItem = m_bagslot[slot];
+	int oldcnt=0,removed=0;
+	if(m_bagslot[slot])
+	{
+		if((oldcnt=pItem->GetCount())>count)
+		{
+			m_bagslot[slot]->SetCount(oldcnt-count);
+			removed=count;
+		}
+		else
+		{
+			m_bagslot[slot] = NULL;
+			removed=oldcnt;
+		}
+	}
+	if(removed>=oldcnt)
+		SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
+
+	return removed;
+}
+
+
 void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
 {
     Item::BuildCreateUpdateBlockForPlayer( data, target );

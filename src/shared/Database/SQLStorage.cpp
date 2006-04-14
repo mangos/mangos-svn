@@ -23,10 +23,12 @@
 const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiis";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
 const char CreatureInfofmt[]="iissiiiiiififfiiiiiiififiiffifiiiiiiiiiiiiiiiiiiiisss";
+const char Questsfmt[]="iiiiiiiiiiiiiiissssssssssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffi";
 
 SQLStorage sItemStorage(ItemPrototypefmt,"itemstemplate");
 SQLStorage sGOStorage(GameObjectInfofmt,"gameobjecttemplate");
 SQLStorage sCreatureStorage(CreatureInfofmt,"creaturetemplate");
+SQLStorage sQuestsStorage(Questsfmt,"quests");
 
 void FreeStorage(SQLStorage * p)
 {
@@ -154,10 +156,10 @@ void SQLStorage::Load ()
 
     pOldData=data;
     pOldIndex=pIndex;
-    iOldNumRecords=iNumRecords;
+    iOldNumRecords=MaxEntry;
 
     pIndex =newIndex;
-    iNumRecords=maxi;
+    MaxEntry=maxi;
     data=_data;
 
 }

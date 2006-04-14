@@ -32,20 +32,20 @@ struct Script
     std::string Name;
 
     // -- Quest/gossip Methods to be scripted --
-    void (*pGossipHello)(Player *player, Creature *_Creature);
-    void (*pQuestAccept)(Player *player, Creature *_Creature, Quest *_Quest );
-    void (*pGossipSelect)(Player *player, Creature *_Creature, uint32 sender, uint32 action );
-    void (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
-    void (*pQuestSelect)(Player *player, Creature *_Creature, Quest *_Quest );
-    void (*pQuestComplete)(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pGossipHello)(Player *player, Creature *_Creature);
+    bool (*pQuestAccept)(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pGossipSelect)(Player *player, Creature *_Creature, uint32 sender, uint32 action );
+    bool (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
+    bool (*pQuestSelect)(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pQuestComplete)(Player *player, Creature *_Creature, Quest *_Quest );
     uint32 (*pNPCDialogStatus)(Player *player, Creature *_Creature );
-    void (*pChooseReward)(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
-    void (*pItemHello)(Player *player, Item *_Item, Quest *_Quest );
-    void (*pGOHello)(Player *player, GameObject *_GO );
-    void (*pAreaTrigger)(Player *player, Quest *_Quest, uint32 triggerID );
-    void (*pItemQuestAccept)(Player *player, Item *_Item, Quest *_Quest );
-    void (*pGOQuestAccept)(Player *player, GameObject *_GO, Quest *_Quest );
-    void (*pGOChooseReward)(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
+    bool (*pChooseReward)(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
+    bool (*pItemHello)(Player *player, Item *_Item, Quest *_Quest );
+    bool (*pGOHello)(Player *player, GameObject *_GO );
+    bool (*pAreaTrigger)(Player *player, Quest *_Quest, uint32 triggerID );
+    bool (*pItemQuestAccept)(Player *player, Item *_Item, Quest *_Quest );
+    bool (*pGOQuestAccept)(Player *player, GameObject *_GO, Quest *_Quest );
+    bool (*pGOChooseReward)(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
     // ----------------------------
 
 };

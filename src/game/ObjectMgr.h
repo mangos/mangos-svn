@@ -39,6 +39,9 @@
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
+#include "Database/SQLStorage.h"
+
+extern SQLStorage sQuestsStorage;
 
 class Group;
 class Path;
@@ -111,19 +114,19 @@ class ObjectMgr
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
-        void AddQuest(Quest* quest)
-        {
-            ASSERT( quest );
-            ASSERT( mQuests.find(quest->m_qId) == mQuests.end() );
-            mQuests[quest->m_qId] = quest;
-        }
+		QuestInfo *GetQuestInfo(uint32 id) { return (sQuestsStorage.MaxEntry<=id)?NULL:(QuestInfo*)sQuestsStorage.pIndex[id]; }
         Quest* GetQuest(uint32 id) const
         {
-            QuestMap::const_iterator itr = mQuests.find( id );
-            if( itr != mQuests.end( ) )
-                return itr->second;
-            return NULL;
+			if(sQuestsStorage.MaxEntry<=id)
+				return NULL;
+			Quest *rquest=new Quest;
+			QuestInfo *qi=(QuestInfo*)sQuestsStorage.pIndex[id];
+			if(!qi)
+				return NULL;
+			rquest->LoadQuest(qi);
+			return rquest;
         }
+
         void AddAuction(AuctionEntry *ah)
         {
             ASSERT( ah );

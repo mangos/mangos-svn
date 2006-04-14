@@ -21,23 +21,30 @@
 #include "Log.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
+#include "ObjectMgr.h"
 #include "Pet.h"
 #include "MapManager.h"
+
+Pet::Pet() 
+{
+	m_name = "Pet";
+	m_actState = STATE_RA_FOLLOW;
+	m_fealty = 0;
+	for(uint32 i=0;i<PETMAXSPELLS;i++)
+		m_spells[i]=0;
+}
 
 void Pet::SavePetToDB()
 {
     if(!isPet())
         return;
 
-    //sDatabase.PExecute("UPDATE pets SET (level=%u, exp=%u, nextlvlexp=%u, spell1=%u, spell2=%u, spell3=%u, spell4=%u, action=%u, fealty=%u, name='%s') WHERE guid=%u",
-    //	GetUInt32Value(UNIT_FIELD_LEVEL), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-    //	m_spells[0], m_spells[0], m_spells[0], m_spells[0], m_actState, m_fealty, m_name);
+	sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'",GetGUIDLow());
+
     std::stringstream ss;
-    sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'",GetGUIDLow());
     ss.rdbuf()->str("");
-    ss << "INSERT INTO pets (guid,entry,owner,level,exp,nextlvlexp,spell1,spell2,spell3,spell4,action,fealty,name) VALUES (";
-    ss << GetGUIDLow() << ","
-        << GetEntry() << ","
+    ss << "INSERT INTO pets (entry,owner,level,exp,nextlvlexp,spell1,spell2,spell3,spell4,action,fealty,name,current) VALUES (";
+    ss << GetEntry() << ","
         << GetUInt64Value(UNIT_FIELD_SUMMONEDBY) << ","
         << GetUInt32Value(UNIT_FIELD_LEVEL) << ","
         << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ","
@@ -48,18 +55,19 @@ void Pet::SavePetToDB()
         << m_spells[3] << ","
         << m_actState << ","
         << m_fealty << ",'"
-        << m_name <<"'";
-    ss << ")";
+        << m_name <<"',";
+    ss << "1 )";
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
-void Pet::LoadPetFromDB(Unit* owner, uint32 guid)
+void Pet::LoadPetFromDB(Unit* owner, uint32 id)
 {
     WorldPacket data;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE guid = '%u';", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE id = '%u';", id);
     ASSERT(result);
     Field *fields = result->Fetch();
 
+	uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     Create(guid, owner->GetMapId(), owner->GetPositionX(), owner->GetPositionY(),
         owner->GetPositionZ(), owner->GetOrientation(), fields[1].GetUInt32());
 
@@ -91,10 +99,10 @@ void Pet::LoadPetFromDB(Unit* owner, uint32 guid)
 
     SetisPet(true);
     AIM_Initialize();
-    m_spells[0] = fields[6].GetUInt16();
-    m_spells[1] = fields[7].GetUInt16();
-    m_spells[2] = fields[8].GetUInt16();
-    m_spells[3] = fields[9].GetUInt16();
+    m_spells[0] = fields[6].GetUInt32();
+    m_spells[1] = fields[7].GetUInt32();
+    m_spells[2] = fields[8].GetUInt32();
+    m_spells[3] = fields[9].GetUInt32();
     m_actState = fields[10].GetUInt32();
 
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);

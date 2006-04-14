@@ -25,139 +25,115 @@
 
 Quest::Quest()
 {
-
-    m_qId = 0;
+	m_quest=new QuestInfo;
+	m_qReqItemsCount=0;
+	m_qReqMobsCount=0;
+	m_qRewChoiceItemsCount=0;
+	m_qRewItemsCount=0;
 }
+
+void Quest::LoadQuest(uint32 quest_id)
+{
+	QuestInfo *qi=objmgr.GetQuestInfo(quest_id);
+	if(qi!=NULL)
+		LoadQuest(qi);
+}
+
+void Quest::LoadQuest(QuestInfo *questinfo)
+{
+	if(!questinfo)
+		return;
+	m_quest=questinfo;
+	m_qReqItemsCount=0;
+	m_qReqMobsCount=0;
+	m_qRewItemsCount=0;
+	m_qRewChoiceItemsCount=0;
+	for (int i=0; i < QUEST_REWARD_CHOICES_COUNT; i++) 
+	{
+		if(i<QUEST_OBJECTIVES_COUNT)
+		{
+			if (questinfo->ReqItemId[i]) 
+				m_qReqItemsCount++;
+			if (questinfo->ReqKillMobId[i]) 
+				m_qReqMobsCount++;
+			if (questinfo->RewItemId[i]) 
+				m_qRewItemsCount++;
+		}
+		if ( questinfo->RewChoiceItemId[i]) 
+			m_qRewChoiceItemsCount++;
+	}
+}
+
 
 uint32 Quest::XPValue(Player* _Player)
 {
-
-    return 100;
-}
-
-uint32 Quest::GetKillObjectivesCount()
-{
-    uint32 i, count = 0;
-
-    for (i=0; i < QUEST_OBJECTIVES_COUNT; i++)
-        if (m_qObjMobId[i]) count++;
-
-    return count;
-}
-
-uint32 Quest::GetDeliverObjectivesCount()
-{
-    uint32 i, count = 0;
-
-    for (i=0; i < QUEST_OBJECTIVES_COUNT; i++)
-        if (m_qObjItemId[i]) count++;
-
-    return count;
+	if(GetQuestInfo()->RewXP<=0)
+		return 100;
+	return (uint32)(GetQuestInfo()->RewXP*(1.0+((double)GetQuestInfo()->MaxLevel+(double)GetQuestInfo()->MinLevel-(double)_Player->getLevel()*2.0)*0.05));
 }
 
 bool Quest::CanBeTaken( Player *_Player )
 {
-    bool result = ( !RewardIsTaken( _Player ) && IsCompatible( _Player ) &&
-        PreReqSatisfied( _Player ) );
-
-    return result;
+	bool result = ( !RewardIsTaken( _Player ) && IsCompatible( _Player ) &&
+					LevelSatisfied( _Player ) && PreReqSatisfied( _Player ) );
+	return result;
 }
+
 
 bool Quest::RewardIsTaken( Player *_Player )
 {
-    bool bResult = false;
-    if ( !HasFlag(QUEST_SPECIAL_FLAGS_REPEATABLE) )
-        bResult = ( _Player->getQuestRewardStatus( m_qId ) );
-
-    return bResult;
+	bool bResult = false;
+	if ( !HasFlag(QUEST_SPECIAL_FLAGS_REPEATABLE) ) 
+		bResult = ( _Player->getQuestRewardStatus( GetQuestInfo()->QuestId ) );
+	return bResult;
 }
 
 bool Quest::IsCompatible( Player *_Player )
 {
-    return ( ReputationSatisfied ( _Player ) &&
-        RaceSatisfied       ( _Player ) &&
-        ClassSatisfied      ( _Player ) &&
-        TradeSkillSatisfied ( _Player ) );
+	return ( ReputationSatisfied ( _Player ) &&
+		     RaceSatisfied       ( _Player ) &&
+			 ClassSatisfied      ( _Player ) &&
+			 TradeSkillSatisfied ( _Player ) );
 }
 
 bool Quest::ReputationSatisfied( Player *_Player )
 {
-    return true;
-
+	return true;
 }
 
 bool Quest::TradeSkillSatisfied( Player *_Player )
 {
-    return true;
-
+	return true;
 }
 
 bool Quest::RaceSatisfied( Player *_Player )
 {
-    if ( m_qRequiredRaces == QUEST_RACE_NONE ) return true;
-    return (((m_qRequiredRaces >> (_Player->getRace() - 1)) & 0x01) == 0x01);
+	if ( GetQuestInfo()->RequiredRaces == QUEST_RACE_NONE ) return true;
+	return (((GetQuestInfo()->RequiredRaces >> (_Player->getRace() - 1)) & 0x01) == 0x01);
 }
 
 bool Quest::ClassSatisfied( Player *_Player )
 {
-    if ( m_qRequiredClass == QUEST_CLASS_NONE ) return true;
-    return (m_qRequiredClass == _Player->getClass());
+	if ( GetQuestInfo()->RequiredClass == QUEST_CLASS_NONE ) return true;
+	return (GetQuestInfo()->RequiredClass == _Player->getClass());
 }
 
 bool Quest::LevelSatisfied( Player *_Player )
 {
-    return ( _Player->getLevel() >= m_qPlayerLevel );
-}
-
-bool Quest::CanShowAvailable( Player *_Player )
-{
-    uint8 iPLevel;
-    iPLevel = _Player->getLevel();
-
-    if ( iPLevel < m_qPlayerLevel ) return false;
-    return ( (iPLevel - m_qPlayerLevel) <= 7 );
+	uint32 plevel=_Player->getLevel();
+	return ( plevel >= GetQuestInfo()->MinLevel && plevel <= GetQuestInfo()->MaxLevel );
 }
 
 bool Quest::CanShowUnsatified( Player *_Player )
 {
-    uint8 iPLevel;
-    iPLevel = _Player->getLevel();
-
-    if ( iPLevel > m_qPlayerLevel ) return false;
-    return ( (m_qPlayerLevel - iPLevel) <= 7 );
+	uint8 iPLevel;
+	iPLevel = _Player->getLevel();
+	return iPLevel>=GetQuestInfo()->MinLevel -7 && iPLevel<GetQuestInfo()->MinLevel ;
 }
 
 bool Quest::PreReqSatisfied( Player *_Player )
 {
-    bool bResult = true;
-
-    if ( m_qRequiredQuestsCount > 0 )
-    {
-        bResult = false;
-        for (uint32 iI = 0; iI < m_qRequiredQuestsCount; iI++ )
-            bResult |= _Player->getQuestRewardStatus( m_qRequiredQuests[iI] );
-    }
-
-    if (!bResult) return false;
-
-    if ( m_qRequiredAbsQuestsCount > 0 )
-    {
-        for (uint32 iI = 0; iI < m_qRequiredAbsQuestsCount; iI++ )
-            bResult &= _Player->getQuestRewardStatus( m_qRequiredAbsQuests[iI] );
-    }
-
-    if (!bResult) return false;
-
-    if ( m_qLockerQuestsCount > 0 )
-    {
-        for (uint32 iI = 0; iI < m_qLockerQuestsCount; iI++ )
-        {
-            bResult &= (!_Player->getQuestRewardStatus( m_qLockerQuests[iI] ));
-            bResult &= ( _Player->getQuestStatus( m_qLockerQuests[iI] ) != QUEST_STATUS_COMPLETE);
-            bResult &= ( _Player->getQuestStatus( m_qLockerQuests[iI] ) != QUEST_STATUS_INCOMPLETE);
-
-        }
-    }
-
-    return bResult;
+	if (GetQuestInfo()->PrevQuestId > 0  && !_Player->getQuestRewardStatus(  GetQuestInfo()->PrevQuestId ))
+		return false;
+	return true;
 }

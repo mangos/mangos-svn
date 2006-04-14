@@ -64,6 +64,7 @@ struct Loot
 };
 
 void FillLoot(Loot *loot, uint32 loot_id);
+void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance);
 void LoadCreaturesLootTables();
 
 typedef HM_NAMESPACE::hash_map<uint32, list<LootItem> > LootStore;

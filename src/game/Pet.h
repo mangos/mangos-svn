@@ -21,10 +21,24 @@
 
 #include "Creature.h"
 
+#define PETMAXSPELLS		4
+
+enum PetState
+{
+    STATE_RA_FOLLOW         = 1,
+    STATE_RA_REACTIVE       = 2,
+    STATE_RA_PROACTIVE      = 4,
+    STATE_RA_PASSIVE        = 8,
+    STATE_RA_SPELL1         = 16,
+    STATE_RA_SPELL2         = 32,
+    STATE_RA_SPELL3         = 64,
+    STATE_RA_SPELL4         = 128
+};
+
 class Pet : public Creature
 {
     public:
-        Pet() {};
+        Pet();
         virtual ~Pet(){};
 
         uint32 GetActState() { return m_actState; }
@@ -34,18 +48,18 @@ class Pet : public Creature
         uint32* GetSpells() { return m_spells; }
         void SetSpells(uint8 index, uint32 spellid)
         {
-            if(index>=0 && index<4)
+            if(index>=0 && index<PETMAXSPELLS)
                 m_spells[index]=spellid;
         }
         std::string GetName() { return m_name; }
         void SetName(std::string newname) { m_name=newname; }
 
         void SavePetToDB();
-        void LoadPetFromDB(Unit* owner, uint32 guid);
+        void LoadPetFromDB(Unit* owner, uint32 id);
         void DeletePetFromDB();
 
     protected:
-        uint32 m_spells[4];
+        uint32 m_spells[PETMAXSPELLS];
         std::string m_name;
         uint32 m_actState;
         uint32 m_fealty;

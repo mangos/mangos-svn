@@ -27,6 +27,7 @@
 class Unit;
 class Creature;
 
+#define TIME_INTERVAL_LOOK   5000
 #define IN_LINE_OF_SIGHT         30
 #define VISIBILITY_RANGE    100
 #define SPIRIT_HEALER       5233
@@ -68,12 +69,12 @@ struct CreatureAIFactory : public SelectableAI
     int Permit(const Creature *c) const { return REAL_AI::Permissible(c); }
 };
 
-#define NO_PERMIT  -1
-#define IDLE_PERMIT_BASE 1
-#define REACTIVE_PERMIT_BASE 100
-#define PROACTIVE_PERMIT_BASE 200
-#define FACTION_SPECIFIC_PERMIT_BASE 400
-#define SPEICAL_PERMIT_BASE 800
+#define PERMIT_BASE_NO					-1
+#define PERMIT_BASE_IDLE				1
+#define PERMIT_BASE_REACTIVE			100
+#define PERMIT_BASE_PROACTIVE			200
+#define PERMIT_BASE_FACTION_SPECIFIC	400
+#define PERMIT_BASE_SPECIAL				800
 
 typedef FactoryHolder<CreatureAI> CreatureAICreator;
 typedef FactoryHolder<CreatureAI>::FactoryHolderRegistry CreatureAIRegistry;

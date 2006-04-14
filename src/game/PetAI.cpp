@@ -20,18 +20,16 @@
 #include "Errors.h"
 #include "Pet.h"
 #include "Player.h"
-#include "FactionTemplateResolver.h"
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 
-#define TIME_INTERVAL_LOOK   5000
 
 int PetAI::Permissible(const Creature *creature)
 {
     if( ((Pet*)&creature)->isPet())
-        return SPEICAL_PERMIT_BASE;
+        return PERMIT_BASE_SPECIAL;
 
-    return NO_PERMIT;
+    return PERMIT_BASE_NO;
 }
 
 PetAI::PetAI(Creature &c) : i_pet(c), i_pVictim(NULL), i_owner(ObjectAccessor::Instance().GetCreature(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY))), i_state( ((Pet*)&c)->GetActState() ), i_tracker(TIME_INTERVAL_LOOK)

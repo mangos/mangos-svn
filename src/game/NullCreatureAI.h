@@ -36,6 +36,6 @@ class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
         bool IsVisible(Unit *) const { return false;  }
 
         void UpdateAI(const uint32) {}
-        static int Permissible(const Creature *) { return IDLE_PERMIT_BASE;  }
+        static int Permissible(const Creature *) { return PERMIT_BASE_IDLE;  }
 };
 #endif

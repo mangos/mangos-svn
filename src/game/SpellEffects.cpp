@@ -37,6 +37,7 @@
 #include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "SharedDefines.h"
+#include "Pet.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -815,103 +816,109 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
 void Spell::EffectSummonPet(uint32 i)
 {
-    WorldPacket data;
+	WorldPacket data;
 
-    if(m_caster->GetUInt64Value(UNIT_FIELD_SUMMON) != 0)
-    {
-        Creature *OldSummon;
-        OldSummon = ObjectAccessor::Instance().GetCreature(*m_caster, m_caster->GetUInt64Value(UNIT_FIELD_SUMMON));
-        if(OldSummon)
-        {
-            m_caster->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-            data.Initialize(SMSG_DESTROY_OBJECT);
-            data << OldSummon->GetGUID();
-            OldSummon->SendMessageToSet (&data, true);
-            MapManager::Instance().GetMap(OldSummon->GetMapId())->Remove(OldSummon,true);
-        }
-    }
-    Creature* NewSummon = new Creature();
+	uint64 petguid;
+	if((petguid=m_caster->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+	{
+		Creature *OldSummon;
+		OldSummon = ObjectAccessor::Instance().GetCreature(*m_caster, petguid);
+		if(OldSummon && OldSummon->isPet())
+		{
+			if(OldSummon->isDead())
+			{
+                OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
+                OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL) );
+				OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL));
+                OldSummon->setDeathState(ALIVE);
+				OldSummon->ClearState(UNIT_STAT_ALL_STATE);
+                ((Creature&)*OldSummon)->Clear();
+                MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
+			}
+			OldSummon->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), OldSummon->GetOrientation());
+			return;
+		}
+	}
+	uint32 petentry = m_spellInfo->EffectMiscValue[i];
+	Pet* NewSummon = new Pet();
+	QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE owner = '%u' AND entry = '%u' AND current = '1';", m_caster->GetGUIDLow(), petentry );
+	if(result)
+	{
+		Field *fields = result->Fetch();
+		uint32 id = fields[0].GetUInt32();
+		NewSummon->LoadPetFromDB(m_caster, id);
+		return;
+	}
+	if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), m_caster->GetPositionX(), 
+		m_caster->GetPositionY(), m_caster->GetPositionZ()+1, m_caster->GetOrientation(), petentry))
+	{
+		uint32 petlevel=m_caster->getLevel();
+		NewSummon->SetUInt32Value(UNIT_FIELD_LEVEL,petlevel);
+		NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
+		NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
+		NewSummon->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
+		NewSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
+		NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+		
+		NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048); 
+		
+		NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+		
+	
+		NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0); 
+		NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER, NewSummon->GetGUIDLow()); 
+		NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5); 
+		NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0); 
+		NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000); 
+		NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id); 
+		NewSummon->SetUInt32Value(UNIT_FIELD_STAT0,22);
+		NewSummon->SetUInt32Value(UNIT_FIELD_STAT1,22); 
+		//NewSummon->SetUInt32Value(UNIT_FIELD_STAT2,25); 
+		//NewSummon->SetUInt32Value(UNIT_FIELD_STAT3,28);
+		NewSummon->SetUInt32Value(UNIT_FIELD_STAT4,27); 
+		std::string name;
+		if(m_caster->GetTypeId() == TYPEID_PLAYER)
+			name = ((Player*)m_caster)->GetName();
+		else
+			name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
+		name.append("\\\'s Pet");
+		NewSummon->SetName( name );
+		NewSummon->SetFealty( 10 );
+		for(uint32 i=0;i<PETMAXSPELLS;i++)
+			NewSummon->SetSpells(i, 0);
+		if(petentry == 416)	//imp
+			NewSummon->SetSpells(0, 133); //133---fire bolt 1
 
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(),
-        m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ()+10, m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i]))
-    {
-        NewSummon->SetUInt32Value(UNIT_FIELD_LEVEL,m_caster->GetUInt32Value(UNIT_FIELD_LEVEL));
-        NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
-        NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 30 * m_caster->GetUInt32Value(UNIT_FIELD_LEVEL));
-        NewSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 30 * m_caster->GetUInt32Value(UNIT_FIELD_LEVEL));
-        NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+		NewSummon->SetisPet(true);
+		NewSummon->SavePetToDB();
+		NewSummon->AIM_Initialize(); 
+		MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
 
-        NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+		m_caster->SetUInt64Value(UNIT_FIELD_SUMMON, NewSummon->GetGUID());
+		sLog.outDebug("New Pet has guid %u", NewSummon->GetGUID());
+                                
+		if(m_caster->GetTypeId() == TYPEID_PLAYER)
+		{
+			uint16 Command = 7;
+			uint16 State = 6;
+			
+			sLog.outDebug("Pet Spells Groups");
 
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+			data.clear();
+			data.Initialize(SMSG_PET_SPELLS);
+			
+			data << (uint64)NewSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+			
+			data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER, NewSummon->GetGUIDLow());
-        NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT0,22);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT1,22);
-        //NewSummon->SetUInt32Value(UNIT_FIELD_STAT2,25);
-        //NewSummon->SetUInt32Value(UNIT_FIELD_STAT3,28);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT4,27);
+			for(uint32 i=0;i<PETMAXSPELLS;i++)
+				data << uint16 (NewSummon->GetSpells()[i]) << uint16 (0xC100);  //C100 = maybe group
 
-        NewSummon->SaveToDB();
-        NewSummon->AIM_Initialize();
-        MapManager::Instance().GetMap(NewSummon->GetMapId())->Add(NewSummon);
+			data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
-        m_caster->SetUInt64Value(UNIT_FIELD_SUMMON, NewSummon->GetGUID());
-        sLog.outDebug("New Pet has guid %u", NewSummon->GetGUID());
-
-        //summon imp Template ID is 416
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            uint16 Command = 7;
-            uint16 State = 6;
-
-            sLog.outDebug("Pet Spells Groups");
-
-            data.clear();
-            data.Initialize(SMSG_PET_SPELLS);
-
-            /*data.clear();
-            data.Initialize(SMSG_PET_SPELLS);
-            data << (uint64)NewSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000)
-                 << uint32(0x07000002) << uint32(0x07000001);
-            data << uint32(0x07000000) << uint32(0xC1002DF3) << uint32(0xC1002DF7)
-                 << uint32(0xC1002DFB) << uint32(0xC100119F) << uint32(0x06000002);
-            data << uint32(0x06000001) << uint32(0x06000000) << uint32(0x00492807)
-                 << uint32(0x00493101) << uint32(0x00493401) << uint32(0x00449F01);
-            data << uint32(0x002DF7C1) << uint32(0x002DFBC1) << uint32(0x002DF3C1)
-                 << uint32(0x119F02C1) << uint32(0x00000000) << uint32(0x00000000);
-            data << uint32(0x5CE88000) << uint32(0x000000) << uint32(0x00000000)<<uint16(0x0000);
-            ((Player*)m_caster)->GetSession()->SendPacket(&data);*/
-
-            //Data is send 2x
-
-            data << (uint64)NewSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-            data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-            uint16 SpellID;
-            SpellID = 0x2DF3;                               //Firebolt = correct
-            data << uint16 (SpellID) << uint16 (0xC100);    //C100 = maybe group
-            SpellID = 0x2DF7;                               //Blood Pact = correct
-            data << uint16 (SpellID) << uint16 (0xC100);
-            SpellID = 0x2DFB;                               //Fire Shield = correct
-            data << uint16 (SpellID) << uint16 (0xC100);
-            SpellID = 0x119F;                               //Phase Shift = correct
-            data << uint16 (SpellID) << uint16 (0xC100);
-
-            data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-            ((Player*)m_caster)->GetSession()->SendPacket(&data);
-        }
-    }
-
+			((Player*)m_caster)->GetSession()->SendPacket(&data);
+		}
+	}
 }
 
 void Spell::EffectWeaponDmg(uint32 i)
