@@ -106,9 +106,9 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 {
     float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
     float radius = GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
-    float distance = GetDistance(pVictim);
+    float distance = GetDistanceSq(pVictim);
 
-    return (distance <= reach + radius );
+    return (distance <= (reach + radius) * (reach + radius));
 }
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
@@ -694,7 +694,7 @@ void Unit::InterruptSpell()
 
 bool Unit::isInFront(Unit* target, float radius)
 {
-    return GetDistance(target)<=radius && IsInArc( M_PI, target );
+    return GetDistanceSq(target)<=radius * radius && IsInArc( M_PI, target );
 }
 
 bool Unit::setInFront(Unit* target)

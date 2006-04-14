@@ -165,7 +165,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
 bool PetAI::_isVisible(Unit *u) const
 {
-    return ( ((Creature*)&i_pet)->GetDistance(u) * 1.0<= IN_LINE_OF_SIGHT && !u->m_stealth );
+    return ( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= IN_LINE_OF_SIGHT && !u->m_stealth );
 }
 
 void PetAI::_taggedToKill(Unit *u)

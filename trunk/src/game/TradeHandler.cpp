@@ -302,7 +302,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if( pOther->GetDistance2d( (Object*) GetPlayer() ) > 10.00 )
+    if( pOther->GetDistance2dSq( (Object*) GetPlayer() ) > 100.00 )
     {
         data.Initialize(SMSG_TRADE_STATUS);
         data << (uint32)10;

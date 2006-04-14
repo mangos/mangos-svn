@@ -22,11 +22,6 @@
 #include "Object.h"
 #include "Map.h"
 
-#define VISIBILITY_RANGE    100
-#define SPIRIT_HEALER       5233
-
-#define IN_LINE_OF_SIGHT         30
-
 namespace MaNGOS
 {
     namespace Utilities
