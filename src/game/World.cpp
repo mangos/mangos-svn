@@ -112,6 +112,9 @@ void World::SetInitialWorldSettings()
 
     sDatabase.PExecute("UPDATE characters set online=0;");
 
+    // remove old bonnes
+    sDatabase.PExecute("DELETE from corpses WHERE time <> 0;");
+
     new ChannelMgr;
 
     sLog.outString("Initialize data stores...");

@@ -51,17 +51,24 @@ void Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
 }
 
-void Corpse::SaveToDB()
+void Corpse::SaveToDB(bool bonnes)
 {
+
+    std::string btime = "0";
+    if (bonnes)
+        {
+        btime = "NOW()";
+        DEBUG_LOG("we have bonnes");
+        }
 
     std::stringstream ss;
 
     ss.rdbuf()->str("");
-    ss << "REPLACE INTO corpses (guid, player_guid, positionx, positiony, positionz, orientation, mapid, data) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
+    ss << "REPLACE INTO corpses (guid, player_guid, positionx, positiony, positionz, orientation, mapid, data, time) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
-    ss << "' )";
+    ss << "', " << btime << " )";
 
     sDatabase.Execute( ss.str().c_str() );
 }

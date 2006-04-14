@@ -30,7 +30,7 @@ class Corpse : public Object
         void Create ( uint32 guidlow, Player *owner, uint32 mapid,
             float x, float y, float z, float ang );
 
-        void SaveToDB();
+        void SaveToDB(bool bonnes = false);
         void DeleteFromDB();
 };
 #endif
