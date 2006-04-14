@@ -157,8 +157,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAuctioner()    { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER ); }
         bool isArmorer()      { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ); }
         bool isGuard()        { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD ); }
-        //Need fix or use this
-        bool IsGuard()        { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD); }
 
         bool isStunned() { return m_attackTimer == 0;};
 
