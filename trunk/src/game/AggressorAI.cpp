@@ -93,8 +93,8 @@ AggressorAI::_needToStop() const
     float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
     return (( length > (15.0f + hostillen) * (15.0f + hostillen) && spawndist > VISIBILITY_RANGE )
-        || ( length > (25.0f + hostillen) * (25.0f + hostillen) && spawndist > 5000.0f ) 
-		|| ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
+        || ( length > (25.0f + hostillen) * (25.0f + hostillen) && spawndist > 5000.0f )
+        || ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
 }
 
 void
@@ -200,7 +200,8 @@ AggressorAI::UpdateAI(const uint32 diff)
 bool
 AggressorAI::_isVisible(Unit *u) const
 {
-    return ( ((Creature*)&i_creature)->GetDistanceSq(u) * 1.0 <= IN_LINE_OF_SIGHT && !u->m_stealth  ); // offset=1.0
+                                                            // offset=1.0
+    return ( ((Creature*)&i_creature)->GetDistanceSq(u) * 1.0 <= IN_LINE_OF_SIGHT && !u->m_stealth  );
 
 }
 

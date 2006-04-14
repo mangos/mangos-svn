@@ -113,8 +113,8 @@ ReactorAI::needToStop() const
     float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(2.5f * i_creature.getLevel()+1.0f);
     return (( length > (13.0f + hostillen) * (13.0f + hostillen) && spawndist > VISIBILITY_RANGE )
-        || ( length > (23.0f + hostillen) * (23.0f + hostillen) && spawndist > 5000.0f ) 
-		|| ( length > (33.0f + hostillen) * (33.0f + hostillen) ));
+        || ( length > (23.0f + hostillen) * (23.0f + hostillen) && spawndist > 5000.0f )
+        || ( length > (33.0f + hostillen) * (33.0f + hostillen) ));
 }
 
 void

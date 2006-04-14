@@ -197,7 +197,7 @@ void Spell::FillTargetMap()
 
 void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::list<Item*> &TagItemMap,std::list<GameObject*> &TagGOMap)
 {
-	float radius =  GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius =  GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     switch(cur)
     {
         case TARGET_SELF:
@@ -858,7 +858,7 @@ uint8 Spell::CanCast()
 
     if(target)
     {
-		float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+        float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
         if(!m_caster->isInFront( target, range ))
             castResult = 0x76;
         if(m_caster->GetDistanceSq(target) > range * range )
@@ -867,6 +867,7 @@ uint8 Spell::CanCast()
 
     if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
     {
+        float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
         if(m_caster->GetDistanceSq( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > range * range )
             castResult = 0x56;
     }
