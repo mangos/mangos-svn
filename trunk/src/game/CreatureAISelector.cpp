@@ -36,7 +36,7 @@ namespace FactorySelector
         std::string ainame=cinfo->AIName;
         if( ainame=="")
         {
-            if( creature->IsGuard() )
+            if( creature->isGuard() )
                 ainame="GuardAI";
             else if(creature->isPet())
                 ainame="PetAI";

@@ -35,12 +35,12 @@ GossipMenu::~GossipMenu()
     ClearMenu();
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, uint32 dtAction, bool Coded)
 {
     //	uint64 gtData;
 
-    char* Text = new char[strlen(Message.c_str()) + 1];
-    strcpy( Text, Message.c_str() );
+    char* Text = new char[strlen(Message) + 1];
+    strcpy( Text, Message );
 
     m_gItemsCount++;
     ASSERT( m_gItemsCount < GOSSIP_MAX_MENU_ITEMS  );
@@ -52,7 +52,7 @@ void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, uint32 dtSender, u
     m_gItems[m_gItemsCount - 1].m_gAction   = dtAction;
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, bool Coded)
 {
     AddMenuItem( Icon, Message, 0, 0, Coded);
 }
@@ -587,7 +587,7 @@ void PlayerMenu::SendQuestUpdateFailedTimer( Quest *pQuest )
 
 }
 
-void PlayerMenu::SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const std::string locName )
+void PlayerMenu::SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, char const * locName )
 {
     WorldPacket data;
 
@@ -671,15 +671,15 @@ void PlayerMenu::SendTalking( uint32 textID )
     sLog.outString( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
-void PlayerMenu::SendTalking( std::string title, std::string text )
+void PlayerMenu::SendTalking( char const * title, char const * text )
 {
     WorldPacket data;
 
     data.Initialize( SMSG_NPC_TEXT_UPDATE );
     data << uint32( 0 );
     data << uint32( 0 );
-    data << title.c_str();
-    data << text.c_str();
+    data << title;
+    data << text;
 
     pSession->SendPacket( &data );
 
