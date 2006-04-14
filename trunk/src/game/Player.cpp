@@ -2005,7 +2005,7 @@ void Player::SaveToDB()
     _SaveAuras();
     _SaveReputation();
 
-    if(m_pCorpse) m_pCorpse->SaveToDB();
+    if(m_pCorpse) m_pCorpse->SaveToDB(false);
 
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
@@ -2668,12 +2668,8 @@ void Player::SpawnCorpseBones()
 
     MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
 
-    m_pCorpse->SaveToDB();
+    m_pCorpse->SaveToDB(true);
     m_pCorpse = NULL;
-
-    // TODO
-    // we need to add field timer in corpse table
-    // and after passing certain time we should call delete
 
 }
 
@@ -5477,7 +5473,7 @@ bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInv
                 bagIndex = CLIENT_SLOT_BACK;
                 return true;
             }
-            if(slot >=0 && slot <19)
+            if(slot >0 && slot <19)
             {
                 bagIndex = 0;
                 return true;
