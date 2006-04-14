@@ -457,13 +457,13 @@ namespace MaNGOS
         SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_data(data), i_spell(spell), i_index(i) {}
         inline void Visit(PlayerMapType &m)
         {
-			float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]);
+            float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 if( !itr->second->isAlive() )
                     continue;
-                if( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ) 
-					&& itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+                if(( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
+                    && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
                     i_data.push_back(itr->second);
             }
         }
@@ -480,22 +480,22 @@ namespace MaNGOS
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
-			float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]);
+            float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
 
                 switch(i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if(i_spell.m_caster->isInFront((Unit*)(itr->second), radisu )) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+                        if((i_spell.m_caster->isInFront((Unit*)(itr->second), radius )) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_SELF_CENTER:
-                        if(i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+                        if((i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_DEST_CENTER:
-                        if(itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
                             i_data.push_back(itr->second);
                         break;
                 }
