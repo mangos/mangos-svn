@@ -114,17 +114,17 @@ class ObjectMgr
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
-		QuestInfo *GetQuestInfo(uint32 id) { return (sQuestsStorage.MaxEntry<=id)?NULL:(QuestInfo*)sQuestsStorage.pIndex[id]; }
+        QuestInfo *GetQuestInfo(uint32 id) { return (sQuestsStorage.MaxEntry<=id)?NULL:(QuestInfo*)sQuestsStorage.pIndex[id]; }
         Quest* GetQuest(uint32 id) const
         {
-			if(sQuestsStorage.MaxEntry<=id)
-				return NULL;
-			Quest *rquest=new Quest;
-			QuestInfo *qi=(QuestInfo*)sQuestsStorage.pIndex[id];
-			if(!qi)
-				return NULL;
-			rquest->LoadQuest(qi);
-			return rquest;
+            if(sQuestsStorage.MaxEntry<=id)
+                return NULL;
+            Quest *rquest=new Quest;
+            QuestInfo *qi=(QuestInfo*)sQuestsStorage.pIndex[id];
+            if(!qi)
+                return NULL;
+            rquest->LoadQuest(qi);
+            return rquest;
         }
 
         void AddAuction(AuctionEntry *ah)

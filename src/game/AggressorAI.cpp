@@ -25,7 +25,6 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 
-
 int
 AggressorAI::Permissible(const Creature *creature)
 {

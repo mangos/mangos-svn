@@ -77,21 +77,21 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         }break;
         case 0x0003:                                        //dismiss
         {
-			if(pet)
-			{
-				if( pl->getClass() == WARLOCK )
-					((Pet*)pet)->SavePetToDB();
-				pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-				
-				data.Initialize(SMSG_DESTROY_OBJECT);
-				data << pet->GetGUID();
-				pl->SendMessageToSet (&data, true);
-				MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
-				
-				data.Initialize(SMSG_PET_SPELLS);
-				data << uint64(0);
-				pl->GetSession()->SendPacket(&data);
-			}
+            if(pet)
+            {
+                if( pl->getClass() == WARLOCK )
+                    ((Pet*)pet)->SavePetToDB();
+                pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+
+                data.Initialize(SMSG_DESTROY_OBJECT);
+                data << pet->GetGUID();
+                pl->SendMessageToSet (&data, true);
+                MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
+
+                data.Initialize(SMSG_PET_SPELLS);
+                data << uint64(0);
+                pl->GetSession()->SendPacket(&data);
+            }
         }break;
         case 0xC100:                                        //pet cast spell
         case 0x100:
@@ -116,21 +116,22 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             targets.m_unitTarget = unit_target;             //(Unit*)pl;
             spell->prepare(&targets);
         }break;
-        case 0x0700:                                      //delete pet
-        {/*
-            if(pet)
-            {
-                pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+        case 0x0700:                                        //delete pet
+        {
+            /*
+                        if(pet)
+                        {
+                            pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
 
-                data.Initialize(SMSG_DESTROY_OBJECT);
-                data << pet->GetGUID();
-                pl->SendMessageToSet (&data, true);
-                MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
+                            data.Initialize(SMSG_DESTROY_OBJECT);
+                            data << pet->GetGUID();
+                            pl->SendMessageToSet (&data, true);
+                            MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
 
-                data.Initialize(SMSG_PET_SPELLS);
-                data << uint64(0);
-                pl->GetSession()->SendPacket(&data);
-            }*/
+                            data.Initialize(SMSG_PET_SPELLS);
+                            data << uint64(0);
+                            pl->GetSession()->SendPacket(&data);
+                        }*/
         }break;
         default:
             sLog.outError("WORLD: unknown PET flag Action %i\n", flag);

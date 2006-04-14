@@ -24,7 +24,6 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 
-
 int GuardAI::Permissible(const Creature *creature)
 {
     if( ((Creature*)&creature)->isGuard())

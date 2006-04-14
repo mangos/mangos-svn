@@ -32,17 +32,17 @@ namespace FactorySelector
     {
         CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );
-		CreatureInfo* cinfo=creature->GetCreatureInfo();
-		std::string ainame=cinfo->AIName;
-		if( ainame=="")
-		{
-			if( creature->IsGuard() )
-				ainame="GuardAI";
-			else if(creature->isPet())
-				ainame="PetAI";
-		}
+        CreatureInfo* cinfo=creature->GetCreatureInfo();
+        std::string ainame=cinfo->AIName;
+        if( ainame=="")
+        {
+            if( creature->IsGuard() )
+                ainame="GuardAI";
+            else if(creature->isPet())
+                ainame="PetAI";
+        }
 
-		const CreatureAICreator *ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
+        const CreatureAICreator *ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
 
         if( ai_factory == NULL  )
         {

@@ -56,10 +56,10 @@ void Corpse::SaveToDB(bool bonnes)
 
     std::string btime = "0";
     if (bonnes)
-        {
+    {
         btime = "NOW()";
         DEBUG_LOG("we have bonnes");
-        }
+    }
 
     std::stringstream ss;
 

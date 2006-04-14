@@ -88,7 +88,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTabardVendorActivate( uint64 guid );
         void SendTaxiStatus( uint64 guid );
         void SendSpiritRessurect();
-		void SendBindPoint();
+        void SendBindPoint();
 
     protected:
 

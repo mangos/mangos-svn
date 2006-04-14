@@ -94,20 +94,19 @@ void FillLoot(Loot *loot, uint32 loot_id)
 
 void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance)
 {
-	LootStore::iterator tab =CreatureLoot.find(loot_id);
-	if( CreatureLoot.end()==tab)return;
+    LootStore::iterator tab =CreatureLoot.find(loot_id);
+    if( CreatureLoot.end()==tab)return;
 
-	for(list<LootItem>::iterator iter = tab->second.begin(); iter!=tab->second.end();iter++)
-	{
-		if((*iter).itemid==itemid && (rand()%100000 < chance*1000))
-		{
-			LootItem itm;
-			itm.itemid = itemid;
-			itm.displayid = (*iter).displayid;
-			itm.is_looted =false;
-			itm.chance=0;
-			loot->items.push_back(itm);
-		}
-	}
+    for(list<LootItem>::iterator iter = tab->second.begin(); iter!=tab->second.end();iter++)
+    {
+        if((*iter).itemid==itemid && (rand()%100000 < chance*1000))
+        {
+            LootItem itm;
+            itm.itemid = itemid;
+            itm.displayid = (*iter).displayid;
+            itm.is_looted =false;
+            itm.chance=0;
+            loot->items.push_back(itm);
+        }
+    }
 }
-

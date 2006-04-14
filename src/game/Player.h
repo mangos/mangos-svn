@@ -321,34 +321,34 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
-		uint32 getQuestStatus(uint32 quest_id);
-		bool getQuestRewardStatus(uint32 quest_id);
-		uint32 addNewQuest(uint32 quest_id, uint32 status = QUEST_STATUS_AVAILABLE);
-		uint32 addNewQuest(Quest *quest, uint32 status = QUEST_STATUS_AVAILABLE);
-		void loadExistingQuest(struct quest_status qs);
-		void setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded);
-		bool isQuestComplete(Quest *pQuest);
-		quest_status getQuestStatusStruct(uint32 quest_id);
-		bool isQuestTakable(Quest *pQuest);
-		bool isQuestTakable(uint32 quest_id);
+        uint32 getQuestStatus(uint32 quest_id);
+        bool getQuestRewardStatus(uint32 quest_id);
+        uint32 addNewQuest(uint32 quest_id, uint32 status = QUEST_STATUS_AVAILABLE);
+        uint32 addNewQuest(Quest *quest, uint32 status = QUEST_STATUS_AVAILABLE);
+        void loadExistingQuest(struct quest_status qs);
+        void setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded);
+        bool isQuestComplete(Quest *pQuest);
+        quest_status getQuestStatusStruct(uint32 quest_id);
+        bool isQuestTakable(Quest *pQuest);
+        bool isQuestTakable(uint32 quest_id);
 
-		void finishExplorationQuest( Quest *pQuest );
+        void finishExplorationQuest( Quest *pQuest );
 
-		uint16 getOpenQuestSlot();
-		uint16 getQuestSlot(uint32 quest_id);
-		uint16 getQuestSlotById(uint32 slot_id);
-		void AddQuestsLoot(Creature* creature);
-		uint32 GetBagItemCount(uint32 itemId);
+        uint16 getOpenQuestSlot();
+        uint16 getQuestSlot(uint32 quest_id);
+        uint16 getQuestSlotById(uint32 slot_id);
+        void AddQuestsLoot(Creature* creature);
+        uint32 GetBagItemCount(uint32 itemId);
 
-		void RemovItemFromBag(uint32 itemId,uint32 itemcount);
-		void RemovedItemFromBag(uint32 entry);
-		void AddedItemToBag(uint32 entry, uint32 count);
-		void KilledMonster(uint32 entry, uint64 guid);
-		void SetBindPoint(uint64 guid);
-		void CalcRage( uint32 damage,bool attacker );
-		void RegenerateAll();
-		void Regenerate(uint16 field_cur, uint16 field_max);  
-		void setRegenTimer(uint32 time) {m_regenTimer = time;}
+        void RemovItemFromBag(uint32 itemId,uint32 itemcount);
+        void RemovedItemFromBag(uint32 entry);
+        void AddedItemToBag(uint32 entry, uint32 count);
+        void KilledMonster(uint32 entry, uint64 guid);
+        void SetBindPoint(uint64 guid);
+        void CalcRage( uint32 damage,bool attacker );
+        void RegenerateAll();
+        void Regenerate(uint16 field_cur, uint16 field_max);
+        void setRegenTimer(uint32 time) {m_regenTimer = time;}
 
         inline uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
         inline void ModifyMoney (int32 d) { SetMoney (GetMoney() + d); }

@@ -362,9 +362,9 @@ void ObjectMgr::LoadGuilds()
 
 void ObjectMgr::LoadQuests()
 {
-	sQuestsStorage.Load ();
-	sLog.outString( ">> Loaded %d quests definitions", sQuestsStorage.RecordCount );
-	sLog.outString( "" );
+    sQuestsStorage.Load ();
+    sLog.outString( ">> Loaded %d quests definitions", sQuestsStorage.RecordCount );
+    sLog.outString( "" );
 }
 
 void ObjectMgr::AddGossipText(GossipText *pGText)
