@@ -112,8 +112,8 @@ void World::SetInitialWorldSettings()
 
     sDatabase.PExecute("UPDATE characters set online=0;");
 
-    // remove old bonnes
-    sDatabase.PExecute("DELETE from corpses WHERE time <> 0;");
+    // remove bonnes after restart
+    sDatabase.PExecute("DELETE from corpses WHERE bonnes_flag = '1';");
 
     new ChannelMgr;
 
