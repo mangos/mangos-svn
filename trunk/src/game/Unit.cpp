@@ -141,15 +141,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
             ((Creature*)pVictim)->generateLoot();
 
-        /*
-        THIS IS WRONG, FUNCTION CalculateHonor() ALSO NEED TO BE CALLED IN CASE OF
-        PLAYER KILL AN CREATURE
-        //If a player kill some one call honor calcules
+        // If a player kill some one call honor calcules
+        // TODO: We need to count dishonorable kills for civilian creatures.
         if (GetTypeId() == TYPEID_PLAYER) ((Player*)this)->CalculateHonor(pVictim);
-        */
-
-        if (GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_UNIT)
-            ((Player*)this)->CalculateHonor(pVictim);
 
         DEBUG_LOG("DealDamageAura");
         pVictim->RemoveAllAuras();
