@@ -45,7 +45,7 @@ class Aura;
 #define SKILL_BLACKSMITHING     164
 #define SKILL_HERBALISM         182
 #define SKILL_FISHING           356
-#define SKILL_OPENLOCK			242
+#define SKILL_OPENLOCK          242
 
 enum SpellCastTargetFlags
 {

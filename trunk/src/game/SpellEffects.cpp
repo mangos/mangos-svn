@@ -412,10 +412,10 @@ void Spell::EffectCreateItem(uint32 i)
                 ((Player*)m_caster)->UpdateSkill(SKILL_ALCHEMY);
             break;
             if(m_spellInfo->SpellIconID == 513 || m_spellInfo->SpellIconID == 248
-				|| m_spellInfo->SpellIconID == 247 || m_spellInfo->SpellIconID == 163
-				|| m_spellInfo->SpellIconID == 264 || m_spellInfo->SpellIconID == 351
-				|| m_spellInfo->SpellIconID == 1496)
-            	((Player*)m_caster)->UpdateSkill(SKILL_POISONS);
+                || m_spellInfo->SpellIconID == 247 || m_spellInfo->SpellIconID == 163
+                || m_spellInfo->SpellIconID == 264 || m_spellInfo->SpellIconID == 351
+                || m_spellInfo->SpellIconID == 1496)
+                ((Player*)m_caster)->UpdateSkill(SKILL_POISONS);
             break;
         }
         case 4439:
@@ -436,9 +436,9 @@ void Spell::EffectCreateItem(uint32 i)
         case 2641:
             ((Player*)m_caster)->UpdateSkill(SKILL_ENGINERING);
             break;
-		case 215:
-			((Player*)m_caster)->UpdateSkill(SKILL_BLACKSMITHING);
-			break;
+        case 215:
+            ((Player*)m_caster)->UpdateSkill(SKILL_BLACKSMITHING);
+            break;
         case 395:
         {
             if(m_spellInfo->SpellIconID == 1)
@@ -639,8 +639,8 @@ void Spell::EffectOpenLock(uint32 i)
 
         loottype=2;
     }else loottype=1;
-	if(loottype == 1)
-		((Player*)m_caster)->UpdateSkill(SKILL_OPENLOCK);
+    if(loottype == 1)
+        ((Player*)m_caster)->UpdateSkill(SKILL_OPENLOCK);
 
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
@@ -761,7 +761,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
         upd.BuildPacket(&packet);
         p_caster->GetSession()->SendPacket(&packet);
-		((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
+        ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
     }
 
 }
@@ -806,7 +806,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
         upd.BuildPacket(&packet);
         p_caster->GetSession()->SendPacket(&packet);
-		((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
+        ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
     }
 }
 
