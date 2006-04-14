@@ -25,13 +25,13 @@
 #include "Pet.h"
 #include "MapManager.h"
 
-Pet::Pet() 
+Pet::Pet()
 {
-	m_name = "Pet";
-	m_actState = STATE_RA_FOLLOW;
-	m_fealty = 0;
-	for(uint32 i=0;i<PETMAXSPELLS;i++)
-		m_spells[i]=0;
+    m_name = "Pet";
+    m_actState = STATE_RA_FOLLOW;
+    m_fealty = 0;
+    for(uint32 i=0;i<PETMAXSPELLS;i++)
+        m_spells[i]=0;
 }
 
 void Pet::SavePetToDB()
@@ -39,7 +39,7 @@ void Pet::SavePetToDB()
     if(!isPet())
         return;
 
-	sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'",GetGUIDLow());
 
     std::stringstream ss;
     ss.rdbuf()->str("");
@@ -67,7 +67,7 @@ void Pet::LoadPetFromDB(Unit* owner, uint32 id)
     ASSERT(result);
     Field *fields = result->Fetch();
 
-	uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     Create(guid, owner->GetMapId(), owner->GetPositionX(), owner->GetPositionY(),
         owner->GetPositionZ(), owner->GetOrientation(), fields[1].GetUInt32());
 

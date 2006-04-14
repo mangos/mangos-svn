@@ -67,7 +67,7 @@ bool GossipHello ( Player * player, Creature *_Creature )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pGossipHello(player,_Creature);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -82,7 +82,7 @@ bool GossipSelect( Player *player, Creature *_Creature,uint32 sender, uint32 act
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pGossipSelect(player,_Creature,sender,action);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -95,7 +95,7 @@ bool GossipSelectWithCode( Player *player, Creature *_Creature, uint32 sender, u
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pGossipSelectWithCode(player,_Creature,sender,action,sCode);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -108,7 +108,7 @@ bool QuestAccept( Player *player, Creature *_Creature, Quest *_Quest )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pQuestAccept(player,_Creature,_Quest);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -121,7 +121,7 @@ bool QuestSelect( Player *player, Creature *_Creature, Quest *_Quest )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pQuestSelect(player,_Creature,_Quest);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -134,7 +134,7 @@ bool QuestComplete( Player *player, Creature *_Creature, Quest *_Quest )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pQuestComplete(player,_Creature,_Quest);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -147,7 +147,7 @@ bool ChooseReward( Player *player, Creature *_Creature, Quest *_Quest, uint32 op
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pChooseReward(player,_Creature,_Quest,opt);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -172,7 +172,7 @@ bool ItemHello( Player *player, Item *_Item, Quest *_Quest )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pItemHello(player,_Item,_Quest);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -185,7 +185,7 @@ bool ItemQuestAccept( Player *player, Item *_Item, Quest *_Quest )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pItemQuestAccept(player,_Item,_Quest);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -198,7 +198,7 @@ bool GOHello( Player *player, GameObject *_GO )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pGOHello(player,_GO);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -211,7 +211,7 @@ bool GOQuestAccept( Player *player, GameObject *_GO, Quest *_Quest )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pGOQuestAccept(player,_GO,_Quest);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -224,7 +224,7 @@ bool GOChooseReward( Player *player, GameObject *_GO, Quest *_Quest, uint32 opt 
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pGOChooseReward(player,_GO,_Quest,opt);
-	return true;
+    return true;
 }
 
 MANGOS_DLL_EXPORT
@@ -238,5 +238,5 @@ bool AreaTrigger      ( Player *player, Quest *_Quest, uint32 triggerID )
 
     player->PlayerTalkClass->ClearMenus();
     tmpscript->pAreaTrigger(player,_Quest,triggerID);
-	return true;
+    return true;
 }

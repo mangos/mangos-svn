@@ -23,7 +23,6 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 
-
 int PetAI::Permissible(const Creature *creature)
 {
     if( ((Pet*)&creature)->isPet())

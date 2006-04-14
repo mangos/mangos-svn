@@ -131,17 +131,17 @@ enum __QuestSpecialFlags
 
 struct QuestInfo
 {
-	uint32 QuestId;
+    uint32 QuestId;
     uint32 ZoneId;
-	uint32 Flags;
+    uint32 Flags;
     uint32 MinLevel;
     uint32 MaxLevel;
-	uint32 Type;
-	uint32 RequiredRaces;
-	uint32 RequiredClass;
-	uint32 RequiredTradeskill;
-	uint32 LimitTime;
-	uint32 LootEntry;
+    uint32 Type;
+    uint32 RequiredRaces;
+    uint32 RequiredClass;
+    uint32 RequiredTradeskill;
+    uint32 LimitTime;
+    uint32 LootEntry;
     uint32 PrevQuestId;
     uint32 NextQuestId;
     uint32 SrcItemId;
@@ -151,7 +151,7 @@ struct QuestInfo
     char* Objectives;
     char* CompletionText;
     char* IncompleteText;
-	char* EndText;
+    char* EndText;
     char* ObjectiveText1;
     char* ObjectiveText2;
     char* ObjectiveText3;
@@ -165,65 +165,66 @@ struct QuestInfo
     uint32 RewChoiceItemCount[ QUEST_REWARD_CHOICES_COUNT ];
     uint32 RewItemId[ QUEST_REWARDS_COUNT ];
     uint32 RewItemCount[ QUEST_REWARDS_COUNT ];
-	uint32 RewRepFaction1;
-	uint32 RewRepFaction2;
-	uint32 RewRepValue1;
-	uint32 RewRepValue2;
+    uint32 RewRepFaction1;
+    uint32 RewRepFaction2;
+    uint32 RewRepValue1;
+    uint32 RewRepValue2;
     uint32 RewMoney;
     uint32 RewXP;
- 	uint32 RewSpell;
-	uint32 PointMapId;
-	float PointX;
-	float PointY;
-	uint32 PointOpt;
+    uint32 RewSpell;
+    uint32 PointMapId;
+    float PointX;
+    float PointY;
+    uint32 PointOpt;
 };
 class Quest
 {
-public:
-	Quest();
+    public:
+        Quest();
 
-	QuestInfo *GetQuestInfo() {return m_quest;} 
-	uint32 m_qReqItemsCount;
-	uint32 m_qReqMobsCount;
-	uint32 m_qRewChoiceItemsCount;
-	uint32 m_qRewItemsCount;
-	
-	uint32 XPValue(Player* _Player);
-	void LoadQuest(QuestInfo *questinfo);
-	void LoadQuest(uint32 quest_id);
-	bool CanBeTaken( Player *_Player );
-	bool IsCompatible( Player *_Player );
-	bool ReputationSatisfied( Player *_Player );
-	bool TradeSkillSatisfied( Player *_Player );
-	bool RaceSatisfied( Player *_Player );
-	bool ClassSatisfied( Player *_Player );
-	bool LevelSatisfied( Player *_Player );
-	bool CanShowUnsatified( Player *_Player );
-	bool PreReqSatisfied( Player *_Player );
-	bool RewardIsTaken( Player *_Player );
-	bool HasFlag( uint32 Flag )  { return (( GetQuestInfo()->Flags & Flag ) == Flag); }
-private:
-	QuestInfo *m_quest; 
+        QuestInfo *GetQuestInfo() {return m_quest;}
+        uint32 m_qReqItemsCount;
+        uint32 m_qReqMobsCount;
+        uint32 m_qRewChoiceItemsCount;
+        uint32 m_qRewItemsCount;
+
+        uint32 XPValue(Player* _Player);
+        void LoadQuest(QuestInfo *questinfo);
+        void LoadQuest(uint32 quest_id);
+        bool CanBeTaken( Player *_Player );
+        bool IsCompatible( Player *_Player );
+        bool ReputationSatisfied( Player *_Player );
+        bool TradeSkillSatisfied( Player *_Player );
+        bool RaceSatisfied( Player *_Player );
+        bool ClassSatisfied( Player *_Player );
+        bool LevelSatisfied( Player *_Player );
+        bool CanShowUnsatified( Player *_Player );
+        bool PreReqSatisfied( Player *_Player );
+        bool RewardIsTaken( Player *_Player );
+        bool HasFlag( uint32 Flag )  { return (( GetQuestInfo()->Flags & Flag ) == Flag); }
+    private:
+        QuestInfo *m_quest;
 
 };
 
-struct quest_status{
+struct quest_status
+{
 
-    quest_status(){
+    quest_status()
+    {
         memset(m_questItemCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_questMobCount , 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
-		m_timerrel = 0;
+        m_timerrel = 0;
     }
 
     Quest *m_quest;
     uint32 status;
-	bool rewarded;
-    uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ]; 
-    uint32 m_questMobCount [ QUEST_OBJECTIVES_COUNT ];  
+    bool rewarded;
+    uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 m_questMobCount [ QUEST_OBJECTIVES_COUNT ];
 
-	uint32	m_timer;
-	uint32	m_timerrel;
-	bool	m_explored;
+    uint32  m_timer;
+    uint32  m_timerrel;
+    bool    m_explored;
 };
-
 #endif

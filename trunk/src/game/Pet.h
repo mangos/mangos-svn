@@ -21,7 +21,7 @@
 
 #include "Creature.h"
 
-#define PETMAXSPELLS		4
+#define PETMAXSPELLS        4
 
 enum PetState
 {

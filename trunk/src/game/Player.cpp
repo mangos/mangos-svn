@@ -759,46 +759,46 @@ void Player::finishExplorationQuest( Quest *pQuest )
 bool Player::isQuestComplete(Quest *pQuest )
 {
     quest_status qs = mQuestStatus[pQuest->GetQuestInfo()->QuestId];
-	if(qs.status==QUEST_STATUS_COMPLETE)
-		return true;
-	if((pQuest->GetQuestInfo()->Flags & 0xffff)==0)
-		return false;
+    if(qs.status==QUEST_STATUS_COMPLETE)
+        return true;
+    if((pQuest->GetQuestInfo()->Flags & 0xffff)==0)
+        return false;
     bool Result = true;
 
     if (qs.status==QUEST_STATUS_INCOMPLETE)
-	{
-		if(pQuest->HasFlag( QUEST_SPECIAL_FLAGS_SPEAKTO))
-			Result &=true;
+    {
+        if(pQuest->HasFlag( QUEST_SPECIAL_FLAGS_SPEAKTO))
+            Result &=true;
 
-		if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_EXPLORATION))
-			Result &= qs.m_explored;
+        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_EXPLORATION))
+            Result &= qs.m_explored;
 
-		if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED))
-			Result &= (qs.m_timer > 0);
+        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED))
+            Result &= (qs.m_timer > 0);
 
-		if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_DELIVER))
-		{
-			Result &=(GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[0]) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
-				GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[1])>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
-				GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[2])>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
-				GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[3])>= pQuest->GetQuestInfo()->ReqItemCount[3]);
-		}
-		if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_KILL))
-		{
-			Result &= (qs.m_questMobCount[0] >= pQuest->GetQuestInfo()->ReqKillMobCount[0] &&
-				qs.m_questMobCount[1] >= pQuest->GetQuestInfo()->ReqKillMobCount[1] &&
-				qs.m_questMobCount[2] >= pQuest->GetQuestInfo()->ReqKillMobCount[2] &&
-				qs.m_questMobCount[3] >= pQuest->GetQuestInfo()->ReqKillMobCount[3]);
-		}
-		if(Result)
-		{
-			PlayerTalkClass->SendQuestUpdateComplete( pQuest );
+        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_DELIVER))
+        {
+            Result &=(GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[0]) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
+                GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[1])>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
+                GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[2])>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
+                GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[3])>= pQuest->GetQuestInfo()->ReqItemCount[3]);
+        }
+        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_KILL))
+        {
+            Result &= (qs.m_questMobCount[0] >= pQuest->GetQuestInfo()->ReqKillMobCount[0] &&
+                qs.m_questMobCount[1] >= pQuest->GetQuestInfo()->ReqKillMobCount[1] &&
+                qs.m_questMobCount[2] >= pQuest->GetQuestInfo()->ReqKillMobCount[2] &&
+                qs.m_questMobCount[3] >= pQuest->GetQuestInfo()->ReqKillMobCount[3]);
+        }
+        if(Result)
+        {
+            PlayerTalkClass->SendQuestUpdateComplete( pQuest );
             //PlayerTalkClass->SendQuestCompleteToLog( pQuest );
-			setQuestStatus(pQuest->GetQuestInfo()->QuestId,QUEST_STATUS_COMPLETE,false);
-		}
-	}
-	else
-		Result=false;
+            setQuestStatus(pQuest->GetQuestInfo()->QuestId,QUEST_STATUS_COMPLETE,false);
+        }
+    }
+    else
+        Result=false;
     return Result;
 }
 
@@ -807,7 +807,6 @@ bool Player::isQuestTakable(Quest *quest)
     if (!quest) return false;
 
     uint32 status = getQuestStatus(quest->GetQuestInfo()->QuestId);
-
 
     if ( quest->CanBeTaken( this ) )
     {
@@ -828,7 +827,7 @@ bool Player::isQuestTakable(Quest *quest)
 bool Player::isQuestTakable(uint32 quest_id)
 {
     if (!quest_id) return false;
-	Quest *quest=objmgr.GetQuest(quest_id);
+    Quest *quest=objmgr.GetQuest(quest_id);
     uint32 status = getQuestStatus(quest_id);
 
     if ( quest->CanBeTaken( this ) )
@@ -896,21 +895,21 @@ void Player::setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarde
             Quest *pQuest = mQuestStatus[quest_id].m_quest;
             if (pQuest)
                 if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED))
-                {
-                    
-                    time_t kk = time(NULL);
-                    kk += pQuest->GetQuestInfo()->LimitTime * 60;
+            {
 
-                    mQuestStatus[quest_id].m_timerrel = (int32)kk;
-                    mQuestStatus[quest_id].m_timer = pQuest->GetQuestInfo()->LimitTime * 60 * 1000; 
+                time_t kk = time(NULL);
+                kk += pQuest->GetQuestInfo()->LimitTime * 60;
 
-                    m_timedQuest = quest_id;
-                    PlayerTalkClass->SendQuestUpdateSetTimer( pQuest, pQuest->GetQuestInfo()->LimitTime );
-                }
+                mQuestStatus[quest_id].m_timerrel = (int32)kk;
+                mQuestStatus[quest_id].m_timer = pQuest->GetQuestInfo()->LimitTime * 60 * 1000;
+
+                m_timedQuest = quest_id;
+                PlayerTalkClass->SendQuestUpdateSetTimer( pQuest, pQuest->GetQuestInfo()->LimitTime );
+            }
         }
     }
 
-	mQuestStatus[quest_id].status     = new_status;
+    mQuestStatus[quest_id].status     = new_status;
     mQuestStatus[quest_id].rewarded   = new_rewarded;
     mQuestStatus[quest_id].m_explored = false;
 }
@@ -926,7 +925,6 @@ uint16 Player::getOpenQuestSlot()
     return 0;
 }
 
-
 uint16 Player::getQuestSlot(uint32 quest_id)
 {
     uint16 start = PLAYER_QUEST_LOG_1_1;
@@ -938,7 +936,6 @@ uint16 Player::getQuestSlot(uint32 quest_id)
     return 0;
 }
 
-
 uint16 Player::getQuestSlotById(uint32 slot_id)
 {
     uint16 start = PLAYER_QUEST_LOG_1_1;
@@ -946,8 +943,8 @@ uint16 Player::getQuestSlotById(uint32 slot_id)
     uint16 idx   = 0;
 
     for (uint16 i = start; i <= end; i+=3)
-    { 
-        idx++; 
+    {
+        idx++;
         if ( idx == slot_id )
             return i;
     }
@@ -957,10 +954,10 @@ uint16 Player::getQuestSlotById(uint32 slot_id)
 
 void Player::AddedItemToBag(uint32 entry, uint32 count)
 {
-	quest_status qs;
+    quest_status qs;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-		qs=i->second;
+        qs=i->second;
         if (qs.status == QUEST_STATUS_INCOMPLETE)
         {
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
@@ -971,25 +968,25 @@ void Player::AddedItemToBag(uint32 entry, uint32 count)
                     {
                         PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, count);
                     }
-					else if ( isQuestComplete(qs.m_quest) )
+                    else if ( isQuestComplete(qs.m_quest) )
                     {
                         PlayerTalkClass->SendQuestCompleteToLog( qs.m_quest );
                         //i->second.status = QUEST_STATUS_COMPLETE;
                     }
                     //_SaveQuestStatus();
                     return;
-                } 
-            } 
-        } 
-    } 
+                }
+            }
+        }
+    }
 }
 
 void Player::RemovedItemFromBag(uint32 entry)
 {
-	quest_status qs;
+    quest_status qs;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-		qs=i->second;
+        qs=i->second;
         if (qs.status == QUEST_STATUS_COMPLETE)
         {
             Quest *pQuest = qs.m_quest;
@@ -1000,72 +997,72 @@ void Player::RemovedItemFromBag(uint32 entry)
                     if ( GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[j])< pQuest->GetQuestInfo()->ReqItemCount[j] )
                     {
                         //PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, count);
-						i->second.status = QUEST_STATUS_INCOMPLETE;
+                        i->second.status = QUEST_STATUS_INCOMPLETE;
                     }
 
                     //_SaveQuestStatus();
                     return;
-                } 
-            } 
-        } 
-    } 
+                }
+            }
+        }
+    }
 }
 
-uint32 Player::GetBagItemCount(uint32 itemId) 
+uint32 Player::GetBagItemCount(uint32 itemId)
 {
-	int fcount = 0;
-	if(itemId==0)
-		return true;
-	Item* pItem;
-	Bag* bag;
-	for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++) 
-	{
-		bag = GetBagBySlot(i);
-		if (!bag || bag->IsEmpty()) 
-			continue;
-		for (uint8 j=0; j < bag->GetItemProto()->ContainerSlots; j++) 
-		{
-			pItem = bag->GetItemFromBag(j);
-			if(!pItem)
-				continue;
-			if (pItem->GetItemProto()->ItemId==itemId)
-			{
-				fcount+=pItem->GetCount();
-			}
-		}
-	}
-	for (uint8 i =INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
-	{
-		pItem = GetItemBySlot(i);
-		if (!pItem) 
-			continue;
-		if(pItem->GetItemProto()->ItemId==itemId)
-		{
-			fcount+=pItem->GetCount();
-		}
-	}
-	return fcount;
+    int fcount = 0;
+    if(itemId==0)
+        return true;
+    Item* pItem;
+    Bag* bag;
+    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        bag = GetBagBySlot(i);
+        if (!bag || bag->IsEmpty())
+            continue;
+        for (uint8 j=0; j < bag->GetItemProto()->ContainerSlots; j++)
+        {
+            pItem = bag->GetItemFromBag(j);
+            if(!pItem)
+                continue;
+            if (pItem->GetItemProto()->ItemId==itemId)
+            {
+                fcount+=pItem->GetCount();
+            }
+        }
+    }
+    for (uint8 i =INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+    {
+        pItem = GetItemBySlot(i);
+        if (!pItem)
+            continue;
+        if(pItem->GetItemProto()->ItemId==itemId)
+        {
+            fcount+=pItem->GetCount();
+        }
+    }
+    return fcount;
 }
 
 void Player::SetBindPoint(uint64 guid)
 {
 
-        // end gossip
-        WorldPacket data;
-        data.Initialize( SMSG_GOSSIP_COMPLETE );
-        GetSession()->SendPacket( &data );
+    // end gossip
+    WorldPacket data;
+    data.Initialize( SMSG_GOSSIP_COMPLETE );
+    GetSession()->SendPacket( &data );
 
-	data.Initialize( MSG_BINDPOINT_CONFIRM );
-	data << guid;
-	GetSession()->SendPacket( &data );
+    data.Initialize( MSG_BINDPOINT_CONFIRM );
+    data << guid;
+    GetSession()->SendPacket( &data );
 }
 
 void Player::KilledMonster(uint32 entry, uint64 guid)
 {
-	quest_status qs;
+    quest_status qs;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-		qs=i->second;
+        qs=i->second;
         if (qs.status == QUEST_STATUS_INCOMPLETE)
         {
             if (!qs.m_quest) continue;
@@ -1078,43 +1075,43 @@ void Player::KilledMonster(uint32 entry, uint64 guid)
                     {
                         i->second.m_questMobCount[j]++;
                         PlayerTalkClass->SendQuestUpdateAddKill(qs.m_quest,guid,i->second.m_questMobCount[j],j);
-						//_SaveQuestStatus();
+                        //_SaveQuestStatus();
                     }
                     else if (isQuestComplete(qs.m_quest ))
                     {
                         //PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
                         PlayerTalkClass->SendQuestCompleteToLog( qs.m_quest );
                         //i->second.status = QUEST_STATUS_COMPLETE;
-						//_SaveQuestStatus();
+                        //_SaveQuestStatus();
                     }
                     return;
-                } 
-            } 
-        } 
-    } 
+                }
+            }
+        }
+    }
 }
 
 void Player::AddQuestsLoot(Creature* creature)
 {
-	quest_status qs;
-	uint32 itemid=0;
+    quest_status qs;
+    uint32 itemid=0;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-		qs=i->second;
+        qs=i->second;
         if (qs.status == QUEST_STATUS_INCOMPLETE)
         {
             if (!qs.m_quest) continue;
 
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
             {
-				itemid=qs.m_quest->GetQuestInfo()->ReqItemId[j];
+                itemid=qs.m_quest->GetQuestInfo()->ReqItemId[j];
                 if ( itemid>0 )
                 {
-					ChangeLoot(&(creature->loot),creature->GetCreatureInfo()->lootid,itemid,70.0f);
-				}
-			}
-		}
-	}
+                    ChangeLoot(&(creature->loot),creature->GetCreatureInfo()->lootid,itemid,70.0f);
+                }
+            }
+        }
+    }
 }
 
 void Player::CalcRage( uint32 damage,bool attacker )
@@ -2008,15 +2005,15 @@ void Player::SaveToDB()
 
     if(m_pCorpse) m_pCorpse->SaveToDB(false);
 
-	uint64 petguid;
-	if((petguid=GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
-	{
-		Creature *OldSummon = ObjectAccessor::Instance().GetCreature(*this, petguid);
-		if(OldSummon && OldSummon->isPet())
-		{
-			((Pet*)OldSummon)->SavePetToDB();
-		}
-	}
+    uint64 petguid;
+    if((petguid=GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+    {
+        Creature *OldSummon = ObjectAccessor::Instance().GetCreature(*this, petguid);
+        if(OldSummon && OldSummon->isPet())
+        {
+            ((Pet*)OldSummon)->SavePetToDB();
+        }
+    }
 
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
@@ -4666,7 +4663,7 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
             }
         }
 
-		AddedItemToBag(itemId,count);
+        AddedItemToBag(itemId,count);
         sLog.outDetail("AddNewItem : Item partially added, itemId = %i, amount = %i, rest = %i, dontadd = %i", itemId, total, count, dontadd);
         return (total - count);
     }
@@ -4775,7 +4772,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
                         m_session->SendPacket(&packet);
                     }
                 }
-				AddedItemToBag(item->GetEntry(),count);
+                AddedItemToBag(item->GetEntry(),count);
                 sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked), dontadd = %i", pItem->GetEntry(), bagIndex, slot, dontadd);
                 return 2;
             }
@@ -5312,91 +5309,100 @@ uint8 Player::AddItemToBag(uint8 bagIndex, Item *item, bool allowstack, bool don
 
 void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
 {
-	if(itemId==0)
-		return;
-	UpdateData upd;
-	WorldPacket packet;
-	uint32 removed=0,oldcnt=0;
-	Bag* pBag;
-	Item* pItem;
-	bool client_remove=true;
-	for (uint8 i =INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
-	{
-		pItem = m_items[i];
-		if (!pItem) 
-			continue;
-		if(pItem->GetItemProto()->ItemId==itemId)
-		{
-			if((oldcnt=pItem->GetCount())>itemcount)
-			{
-				m_items[i]->SetCount(oldcnt-itemcount);
-				removed+=itemcount;
-			}
-			else
-			{
-				removed+=oldcnt;
-				m_items[i] = NULL;
-				SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2)), 0);
-				_ApplyItemMods(pItem, i, false);
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (i * 12);
-				for (int k = VisibleBase; k < VisibleBase + 12; ++k)
-					SetUInt32Value(k, 0);
+    if(itemId==0)
+        return;
+    UpdateData upd;
+    WorldPacket packet;
+    uint32 removed=0,oldcnt=0;
+    Bag* pBag;
+    Item* pItem;
+    bool client_remove=true;
+    for (uint8 i =INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+    {
+        pItem = m_items[i];
+        if (!pItem)
+            continue;
+        if(pItem->GetItemProto()->ItemId==itemId)
+        {
+            if((oldcnt=pItem->GetCount())>itemcount)
+            {
+                m_items[i]->SetCount(oldcnt-itemcount);
+                removed+=itemcount;
+            }
+            else
+            {
+                removed+=oldcnt;
+                m_items[i] = NULL;
+                SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2)), 0);
+                _ApplyItemMods(pItem, i, false);
+                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (i * 12);
+                for (int k = VisibleBase; k < VisibleBase + 12; ++k)
+                    SetUInt32Value(k, 0);
 
-				if (client_remove) 
-				{
-					pItem->SetOwner(0);
-					if (IsInWorld()) {
-						pItem->RemoveFromWorld();
-						pItem->DestroyForPlayer(this);
-						RemovedItemFromBag(pItem->GetEntry());
-					}
-				}
-			}
-			if(removed>=itemcount)
-				return;
-			sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i", i);
-			break;
-		}
-	}
-	for(uint8 i=INVENTORY_SLOT_BAG_START;i<INVENTORY_SLOT_BAG_END;i++)
-	{
-		pBag = GetBagBySlot(i);
-		if (pBag) 
-		{
-			uint32 ContainerSlots=pBag->GetItemProto()->ContainerSlots;
-			for(uint8 j=0;j<ContainerSlots;j++)
-			{
-				pItem = pBag->GetItemFromBag(j);
-				if (pItem) {
-					removed+=pBag->RemoveItemFromBag(j,itemcount);
-					if (client_remove) {
-						pItem->SetOwner(0);
-						if (IsInWorld()) {
-							pItem->RemoveFromWorld();
-							pItem->DestroyForPlayer(this);
-							RemovedItemFromBag(pItem->GetEntry());
-						}
-					}
-					if (IsInWorld()) {
-						upd.Clear();
-						pBag->Item::BuildCreateUpdateBlockForPlayer(&upd, this);
-						upd.BuildPacket(&packet);
-						m_session->SendPacket(&packet);
-					}
-					if(removed>=itemcount)
-						return;
-					sLog.outDetail("RemoveItemFromSlot : Item removed, bagIndex = %i, slot = %i", i, j);
-					break;
-				} else {
-					sLog.outError("RemoveItemFromSlot : No item found, bagIndex = %i, slot = %i", i, j);
-					return ;
-				}
-			}
-		} else {
-			sLog.outError("RemoveItemFromSlot : No bag in that bagIndex, bagIndex = %i", i);
-			return ;
-		}
-	}
+                if (client_remove)
+                {
+                    pItem->SetOwner(0);
+                    if (IsInWorld())
+                    {
+                        pItem->RemoveFromWorld();
+                        pItem->DestroyForPlayer(this);
+                        RemovedItemFromBag(pItem->GetEntry());
+                    }
+                }
+            }
+            if(removed>=itemcount)
+                return;
+            sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i", i);
+            break;
+        }
+    }
+    for(uint8 i=INVENTORY_SLOT_BAG_START;i<INVENTORY_SLOT_BAG_END;i++)
+    {
+        pBag = GetBagBySlot(i);
+        if (pBag)
+        {
+            uint32 ContainerSlots=pBag->GetItemProto()->ContainerSlots;
+            for(uint8 j=0;j<ContainerSlots;j++)
+            {
+                pItem = pBag->GetItemFromBag(j);
+                if (pItem)
+                {
+                    removed+=pBag->RemoveItemFromBag(j,itemcount);
+                    if (client_remove)
+                    {
+                        pItem->SetOwner(0);
+                        if (IsInWorld())
+                        {
+                            pItem->RemoveFromWorld();
+                            pItem->DestroyForPlayer(this);
+                            RemovedItemFromBag(pItem->GetEntry());
+                        }
+                    }
+                    if (IsInWorld())
+                    {
+                        upd.Clear();
+                        pBag->Item::BuildCreateUpdateBlockForPlayer(&upd, this);
+                        upd.BuildPacket(&packet);
+                        m_session->SendPacket(&packet);
+                    }
+                    if(removed>=itemcount)
+                        return;
+                    sLog.outDetail("RemoveItemFromSlot : Item removed, bagIndex = %i, slot = %i", i, j);
+                    break;
+                }
+                else
+                {
+                    sLog.outError("RemoveItemFromSlot : No item found, bagIndex = %i, slot = %i", i, j);
+                    return ;
+                }
+            }
+        }
+        else
+        {
+            sLog.outError("RemoveItemFromSlot : No bag in that bagIndex, bagIndex = %i", i);
+            return ;
+        }
+    }
 }
 
 // Removes an Item from a bag and/or slot

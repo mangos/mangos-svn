@@ -301,7 +301,7 @@ CREATE TABLE `corpses` (
   `zoneid` int(11) NOT NULL default '38',
   `mapid` int(11) NOT NULL default '0',
   `data` longtext NOT NULL,
-  `time` timestamp(14) DEFAULT 0,
+  `time` timestamp(14) NOT NULL,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
 
