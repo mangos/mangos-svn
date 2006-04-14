@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef MANGOS_GUARDAI_H
-#define MANGOS_GUARDAI_H
+#ifndef MANGOS_PETAI_H
+#define MANGOS_PETAI_H
 
 #include "CreatureAI.h"
 #include "FactionTemplateResolver.h"
@@ -27,16 +27,6 @@ class Creature;
 
 class MANGOS_DLL_DECL PetAI : public CreatureAI
 {
-    enum PetState
-    {
-        STATE_RA_FOLLOW         = 1,
-        STATE_RA_ACTIVE         = 2,
-        STATE_RA_PASSIVE        = 4,
-        STATE_RA_SPELL1         = 8,
-        STATE_RA_SPELL2         = 16,
-        STATE_RA_SPELL3         = 32,
-        STATE_RA_SPELL4         = 64
-    };
 
     public:
 

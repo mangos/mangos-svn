@@ -36,6 +36,7 @@ class Bag : public Item
 
         uint8 AddItemToBag(uint8 slot, Item *item);
         Item* RemoveItemFromBag(uint8 slot);
+		uint32 RemoveItemFromBag(uint8 slot,uint32 count);
 
         Item* GetItemFromBag(uint8 slot) { return m_bagslot[slot]; }
 

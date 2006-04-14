@@ -29,6 +29,7 @@
 #include "TargetedMovementGenerator.h"
 #include "CreatureAI.h"
 #include "Util.h"
+#include "Pet.h"
 
 void WorldSession::HandlePetAction( WorldPacket & recv_data )
 {
@@ -74,9 +75,23 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             SendPacket(&data);
 
         }break;
-        case 0x0003:                                        //spellid=1792  //dismiss
+        case 0x0003:                                        //dismiss
         {
-            pet->RemoveFromWorld();
+			if(pet)
+			{
+				if( pl->getClass() == WARLOCK )
+					((Pet*)pet)->SavePetToDB();
+				pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+				
+				data.Initialize(SMSG_DESTROY_OBJECT);
+				data << pet->GetGUID();
+				pl->SendMessageToSet (&data, true);
+				MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
+				
+				data.Initialize(SMSG_PET_SPELLS);
+				data << uint64(0);
+				pl->GetSession()->SendPacket(&data);
+			}
         }break;
         case 0xC100:                                        //pet cast spell
         case 0x100:
@@ -101,8 +116,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             targets.m_unitTarget = unit_target;             //(Unit*)pl;
             spell->prepare(&targets);
         }break;
-        case 0x0700:                                        //delete pet
-        {
+        case 0x0700:                                      //delete pet
+        {/*
             if(pet)
             {
                 pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
@@ -115,7 +130,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 data.Initialize(SMSG_PET_SPELLS);
                 data << uint64(0);
                 pl->GetSession()->SendPacket(&data);
-            }
+            }*/
         }break;
         default:
             sLog.outError("WORLD: unknown PET flag Action %i\n", flag);

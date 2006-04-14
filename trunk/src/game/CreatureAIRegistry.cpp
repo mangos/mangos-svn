@@ -20,6 +20,8 @@
 #include "NullCreatureAI.h"
 #include "ReactorAI.h"
 #include "AggressorAI.h"
+#include "GuardAI.h"
+#include "PetAI.h"
 #include "RandomMovementGenerator.h"
 #include "CreatureAIImpl.h"
 #include "MovementGeneratorImpl.h"
@@ -36,8 +38,8 @@ namespace AIRegistry
         (new CreatureAIFactory<NullCreatureAI>("NullAI"))->RegisterSelf();
         (new CreatureAIFactory<AggressorAI>("AggressorAI"))->RegisterSelf();
         (new CreatureAIFactory<ReactorAI>("ReactorAI"))->RegisterSelf();
-        (new CreatureAIFactory<ReactorAI>("GuardAI"))->RegisterSelf();
-        (new CreatureAIFactory<ReactorAI>("PetAI"))->RegisterSelf();
+        (new CreatureAIFactory<GuardAI>("GuardAI"))->RegisterSelf();
+        (new CreatureAIFactory<PetAI>("PetAI"))->RegisterSelf();
 
         (new MovementGeneratorFactory<RandomMovementGenerator>("Random"))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator>("Waypoint"))->RegisterSelf();

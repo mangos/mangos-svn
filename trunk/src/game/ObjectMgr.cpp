@@ -35,6 +35,7 @@ INSTANTIATE_SINGLETON_1(ObjectMgr);
 extern SQLStorage sItemStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sCreatureStorage;
+extern SQLStorage sQuestsStorage;
 
 ObjectMgr::ObjectMgr()
 {
@@ -99,7 +100,7 @@ Guild * ObjectMgr::GetGuildById(const uint32 GuildId) const
 
 CreatureInfo *ObjectMgr::GetCreatureTemplate(uint32 id)
 {
-    return (sCreatureStorage.iNumRecords<=id)?NULL:(CreatureInfo*)sCreatureStorage.pIndex[id];
+    return (sCreatureStorage.MaxEntry<=id)?NULL:(CreatureInfo*)sCreatureStorage.pIndex[id];
 }
 
 void ObjectMgr::LoadCreatureTemplates()
@@ -361,119 +362,9 @@ void ObjectMgr::LoadGuilds()
 
 void ObjectMgr::LoadQuests()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM quests;" );
-
-    if( !result ) return;
-
-    barGoLink bar( result->GetRowCount() );
-
-    Quest *pQuest;
-    uint32 count = 0;
-    int iCalc;
-    int CiC;
-
-    do
-    {
-        Field *fields = result->Fetch();
-
-        bar.step();
-
-        pQuest = new Quest;
-        iCalc = 0;
-
-        pQuest->m_qId        = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qCategory  = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qFlags     = fields[ iCalc++ ].GetUInt32();
-
-        pQuest->m_qTitle         = fields[ iCalc++ ].GetString();
-        pQuest->m_qDetails       = fields[ iCalc++ ].GetString();
-        pQuest->m_qObjectives    = fields[ iCalc++ ].GetString();
-
-        pQuest->m_qCompletionInfo  = fields[ iCalc++ ].GetString();
-        pQuest->m_qIncompleteInfo  = fields[ iCalc++ ].GetString();
-        pQuest->m_qEndInfo         = fields[ iCalc++ ].GetString();
-
-        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-            pQuest->m_qObjectiveInfo[CiC]    = fields[ iCalc++ ].GetString();
-
-        pQuest->m_qPlayerLevel      = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qComplexityLevel  = fields[ iCalc++ ].GetUInt32();
-
-        pQuest->m_qRequiredQuestsCount = fields[ iCalc++ ].GetUInt32();
-        for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
-            { pQuest->m_qRequiredQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-            pQuest->m_qRequiredAbsQuestsCount = fields[ iCalc++ ].GetUInt32();
-        for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
-            { pQuest->m_qRequiredAbsQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-            pQuest->m_qLockerQuestsCount = fields[ iCalc++ ].GetUInt32();
-        for ( CiC = 0; CiC < QUEST_DEPLINK_COUNT; CiC++)
-            { pQuest->m_qLockerQuests[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-            for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-                pQuest->m_qObjItemId[CiC]    = fields[ iCalc++ ].GetUInt32();
-
-        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-            pQuest->m_qObjItemCount[CiC]    = fields[ iCalc++ ].GetUInt32();
-
-        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-            pQuest->m_qObjMobId[CiC]    = fields[ iCalc++ ].GetUInt32();
-
-        for (CiC = 0; CiC < QUEST_OBJECTIVES_COUNT; CiC++)
-            pQuest->m_qObjMobCount[CiC]    = fields[ iCalc++ ].GetUInt32();
-
-        pQuest->m_qRewChoicesCount = fields[ iCalc++ ].GetUInt32();
-        for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
-            { pQuest->m_qRewChoicesItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-            for ( CiC = 0; CiC < QUEST_REWARD_CHOICES_COUNT; CiC++)
-                { pQuest->m_qRewChoicesItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-                pQuest->m_qRewCount = fields[ iCalc++ ].GetUInt32();
-        for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
-            { pQuest->m_qRewItemId[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-            for ( CiC = 0; CiC < QUEST_REWARDS_COUNT; CiC++)
-                { pQuest->m_qRewItemCount[CiC] = fields[ iCalc++ ].GetUInt32(); }
-
-                pQuest->m_qRewMoney         = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qObjRepFaction_1  = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qObjRepFaction_2  = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qObjRepValue_1    = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qObjRepValue_2    = fields[ iCalc++ ].GetUInt32();
-
-        pQuest->m_qQuestItem     = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qNextQuestId   = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qRewSpell      = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qObjTime       = fields[ iCalc++ ].GetUInt32();
-
-        pQuest->m_qType          = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qRequiredRaces = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qRequiredClass = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qRequiredTradeskill   = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qSpecialFlags  = fields[ iCalc++ ].GetUInt32();
-
-        pQuest->m_qPointId       = fields[ iCalc++ ].GetUInt32();
-        pQuest->m_qPointX        = fields[ iCalc++ ].GetFloat();
-        pQuest->m_qPointY        = fields[ iCalc++ ].GetFloat();
-        pQuest->m_qPointOpt      = fields[ iCalc++ ].GetUInt32();
-
-        count++;
-        AddQuest(pQuest);
-    }
-    while( result->NextRow() );
-
-    delete result;
-
-    // points all quests for their next quest
-    for( QuestMap::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        i->second->m_qNextQuest = objmgr.GetQuest( i->second->m_qNextQuestId );
-    }
-
-    sLog.outString( "" );
-    sLog.outString( ">> Loaded %d quest definitions", count );
+	sQuestsStorage.Load ();
+	sLog.outString( ">> Loaded %d quests definitions", sQuestsStorage.RecordCount );
+	sLog.outString( "" );
 }
 
 void ObjectMgr::AddGossipText(GossipText *pGText)
@@ -899,13 +790,13 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 GameObjectInfo *ObjectMgr::GetGameObjectInfo(uint32 id)
 {
     //debug
-    if(sGOStorage.iNumRecords<=id)
+    if(sGOStorage.MaxEntry<=id)
     {
         sLog.outString("ERROR: There is no GO with proto %u id the DB",id);
         return NULL;
     }
 
-    return (sGOStorage.iNumRecords<=id)?NULL:(GameObjectInfo *)sGOStorage.pIndex[id];
+    return (sGOStorage.MaxEntry<=id)?NULL:(GameObjectInfo *)sGOStorage.pIndex[id];
 
 }
 
@@ -919,5 +810,5 @@ void ObjectMgr::LoadGameobjectInfo()
 
 ItemPrototype* ObjectMgr::GetItemPrototype(uint32 id)
 {
-    return (sItemStorage.iNumRecords<=id)?NULL:(ItemPrototype*)sItemStorage.pIndex[id];
+    return (sItemStorage.MaxEntry<=id)?NULL:(ItemPrototype*)sItemStorage.pIndex[id];
 }

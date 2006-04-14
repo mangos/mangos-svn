@@ -24,14 +24,13 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 
-#define TIME_INTERVAL_LOOK   5000
 
 int GuardAI::Permissible(const Creature *creature)
 {
-    if((creature->GetUInt32Value(UNIT_NPC_FLAGS) & UNIT_NPC_FLAG_GUARD)>0)
-        return SPEICAL_PERMIT_BASE;
+    if( ((Creature*)&creature)->isGuard())
+        return PERMIT_BASE_SPECIAL;
 
-    return NO_PERMIT;
+    return PERMIT_BASE_NO;
 }
 
 GuardAI::GuardAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFaction(sFactionTemplateStore.LookupEntry(c.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
