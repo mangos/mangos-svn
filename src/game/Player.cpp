@@ -551,7 +551,7 @@ void Player::Update( uint32 p_time )
                 clearStateFlag(UNIT_STAT_ATTACKING);
                 smsg_AttackStop(m_curSelection);
             }
-            else if(GetDistance(pVictim) > pldistance+3.465f)
+            else if(GetDistanceSq(pVictim) > pldistance+10.0f)
             {
                 setAttackTimer(uint32(1000));
                 data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);

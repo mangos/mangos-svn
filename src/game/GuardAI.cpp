@@ -78,11 +78,12 @@ bool GuardAI::_needToStop() const
 
     float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
-    float spawndist=i_creature.GetDistance(rx,ry,rz);
-    float length = i_creature.GetDistance(i_pVictim);
+    float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
+    float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.0f * i_creature.getLevel()+1.0f);
-    return (( length > 14.0f + hostillen && spawndist > 70.0f ) ||
-        ( length > 24.0f + hostillen && spawndist > 40.0f ) || ( length > 34.0f + hostillen ));
+    return (( length > (15.0f + hostillen) * (15.0f + hostillen) && spawndist > VISIBILITY_RANGE )
+        || ( length > (25.0f + hostillen) * (25.0f + hostillen) && spawndist > 5000.0f ) 
+		|| ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
 }
 
 void GuardAI::_stopAttack()
@@ -193,7 +194,7 @@ void GuardAI::UpdateAI(const uint32 diff)
 
 bool GuardAI::_isVisible(Unit *u) const
 {
-    return ( ((Creature*)&i_creature)->GetDistance(u) * 1.0<= IN_LINE_OF_SIGHT && !u->m_stealth );
+    return ( ((Creature*)&i_creature)->GetDistanceSq(u) * 1.0<= IN_LINE_OF_SIGHT && !u->m_stealth );
 }
 
 void GuardAI::_taggedToKill(Unit *u)

@@ -452,29 +452,29 @@ uint32 Object::GetZoneId( )
     return sAreaStore.LookupEntry(MapManager::Instance().GetMap(m_mapId)->GetAreaFlag(m_positionX,m_positionY))->zone;
 }
 
-float Object::GetDistance(const Object* obj) const
+float Object::GetDistanceSq(const Object* obj) const
 {
     ASSERT(obj->GetMapId() == m_mapId);
     float dx  = obj->GetPositionX() - GetPositionX();
     float dy  = obj->GetPositionY() - GetPositionY();
     float dz  = obj->GetPositionZ() - GetPositionZ();
-    return sqrt((dx*dx) + (dy*dy) + (dz*dz));
+    return (dx*dx) + (dy*dy) + (dz*dz);
 }
 
-float Object::GetDistance(const float x, const float y, const float z) const
+float Object::GetDistanceSq(const float x, const float y, const float z) const
 {
     float dx  = x - GetPositionX();
     float dy  = y - GetPositionY();
     float dz  = z - GetPositionZ();
-    return sqrt((dx*dx) + (dy*dy) + (dz*dz));
+    return (dx*dx) + (dy*dy) + (dz*dz);
 }
 
-float Object::GetDistance2d(const Object* obj) const
+float Object::GetDistance2dSq(const Object* obj) const
 {
     ASSERT(obj->GetMapId() == m_mapId);
     float dx  = obj->GetPositionX() - GetPositionX();
     float dy  = obj->GetPositionY() - GetPositionY();
-    return sqrt((dx*dx) + (dy*dy));
+    return (dx*dx) + (dy*dy);
 }
 
 float Object::GetAngle(const Object* obj) const
