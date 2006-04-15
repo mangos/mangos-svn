@@ -28,39 +28,19 @@ namespace MaNGOS
     {
         inline float DishonorableKillPoints(int level)
         {
-            if(level <= 29) return  10.0; else
-                if(level == 30) return  11.5; else
-                    if(level == 31) return  13.0; else
-                        if(level == 32) return  14.5; else
-                            if(level == 33) return  16.0; else
-                                if(level == 34) return  17.5; else
-                                    if(level == 35) return  19.0; else
-                                        if(level == 36) return  21.0; else
-                                            if(level == 37) return  23.0; else
-                                                if(level == 38) return  25.0; else
-                                                    if(level == 39) return  27.0; else
-                                                        if(level == 40) return  29.0; else
-                                                            if(level == 41) return  31.0; else
-                                                                if(level == 42) return  34.2; else
-                                                                    if(level == 43) return  37.4; else
-                                                                        if(level == 44) return  40.7; else
-                                                                            if(level == 45) return  43.9; else
-                                                                                if(level == 46) return  47.1; else
-                                                                                    if(level == 47) return  50.3; else
-                                                                                        if(level == 48) return  53.6; else
-                                                                                            if(level == 49) return  56.8; else
-                                                                                                if(level == 50) return  60.0; else
-                                                                                                    if(level == 51) return  64.0; else
-                                                                                                        if(level == 52) return  68.0; else
-                                                                                                            if(level == 53) return  72.0; else
-                                                                                                                if(level == 54) return  76.0; else
-                                                                                                                    if(level == 55) return  80.0; else
-                                                                                                                        if(level == 56) return  84.0; else
-                                                                                                                            if(level == 57) return  88.0; else
-                                                                                                                                if(level == 58) return  92.0; else
-                                                                                                                                    if(level == 59) return  96.0; else
-                                                                                                                                        if(level == 60) return 100.0; else
-                                                                                                                                            return 100.0;
+            float result = 10;
+            if(level >= 30 && level <= 35)
+                result = result + 1.5 * (level - 29);
+            if(level >= 36 && level <= 41)
+                result = result + 9 + 2 * (level - 35);
+            if(level >= 42 && level <= 50)
+                result = result + 21 + 3.2 * (level - 41);
+            if(level >= 51)
+                result = result + 50 + 4 * (level - 50);
+            if(result > 100)
+                return 100.0;
+            else
+                return result;
         }
 
         inline float HonorableKillPoints( Player *killer, Player *victim )
