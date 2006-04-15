@@ -3251,21 +3251,21 @@ void Player::_LoadReputation()
 void Player::_LoadCorpse()
 {
     // TODO do we need to load all corpses ?
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE player_guid = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE player_guid = '%u' AND bonnes_flag = '0';",GetGUIDLow());
 
     if(!result) return;
 
     Field *fields = result->Fetch();
 
-    //DeleteCorpse();
+    DeleteCorpse();
     m_pCorpse = new Corpse();
 
     float positionX = fields[2].GetFloat();
     float positionY = fields[3].GetFloat();
     float positionZ = fields[4].GetFloat();
     float ort       = fields[5].GetFloat();
-    uint32 mapid     = fields[6].GetUInt32();
-    //uint32 zoneid    = fields[7].GetUInt32();
+    //uint32 zoneid   = fields[6].GetUInt32();
+    uint32 mapid    = fields[7].GetUInt32();
 
     m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
     m_pCorpse->SetMapId(mapid);
