@@ -39,7 +39,7 @@ void Pet::SavePetToDB()
     if(!isPet())
         return;
 
-	uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
     sDatabase.PExecute("DELETE FROM pets WHERE owner = '%u' AND current = 1", owner );
 
     std::stringstream ss;
@@ -64,10 +64,10 @@ void Pet::SavePetToDB()
 bool Pet::LoadPetFromDB( Unit* owner )
 {
     WorldPacket data;
-	uint32 ownerid = owner->GetGUIDLow();
+    uint32 ownerid = owner->GetGUIDLow();
     QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE owner = '%u' AND current = 1;", ownerid );
     if(!result)
-		return false;
+        return false;
     Field *fields = result->Fetch();
 
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
@@ -134,11 +134,11 @@ bool Pet::LoadPetFromDB( Unit* owner )
 
         ((Player*)owner)->GetSession()->SendPacket(&data);
     }
-	return true;
+    return true;
 }
 
 void Pet::DeletePetFromDB()
 {
-	uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
     sDatabase.PExecute("DELETE FROM pets WHERE owner = '%u' AND current = 1", owner );
 }

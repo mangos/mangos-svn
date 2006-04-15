@@ -139,14 +139,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
     if (health <= damage && pVictim->isAlive())
     {
         DEBUG_LOG("DealDamage: victim just died");
-		if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
-		{
-			((Creature*)pVictim)->generateLoot();
-			if(GetTypeId() == TYPEID_PLAYER)
-			{
-				((Player*)this)->AddQuestsLoot((Creature*)pVictim);
-			}
-		}			
+        if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
+        {
+            ((Creature*)pVictim)->generateLoot();
+            if(GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)this)->AddQuestsLoot((Creature*)pVictim);
+            }
+        }
 
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
@@ -154,7 +154,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 
         DEBUG_LOG("DealDamageAura");
         pVictim->RemoveAllAuras();
-		pVictim->m_hostilList.clear();
+        pVictim->m_hostilList.clear();
 
         pVictim->setDeathState(JUST_DIED);
         uint64 attackerGuid, victimGuid;
@@ -238,8 +238,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
- 			pVictim->AddHostil(GetGUID(), damage);
-			if( getClass() == WARRIOR )
+            pVictim->AddHostil(GetGUID(), damage);
+            if( getClass() == WARRIOR )
                 ((Player*)this)->CalcRage(damage,true);
         }
         else
@@ -675,24 +675,23 @@ void Unit::_UpdateSpells( uint32 time )
 
 void Unit::_UpdateHostil( uint32 time )
 {
-	if(!testStateFlag(UNIT_STAT_IN_COMBAT) && m_hostilList.size() )
-	{
-		std::list<Hostil*>::iterator iter;
-		for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); iter++)
-		{
-			(*iter)->Hostility-=time/1000.0f;
-			if((*iter)->Hostility<=0.0f)
-			{
-				m_hostilList.erase(iter);
-				if(!m_hostilList.size())
-					break;
-				else
-					iter = m_hostilList.begin();
-			}
-		}
-	}
+    if(!testStateFlag(UNIT_STAT_IN_COMBAT) && m_hostilList.size() )
+    {
+        std::list<Hostil*>::iterator iter;
+        for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); iter++)
+        {
+            (*iter)->Hostility-=time/1000.0f;
+            if((*iter)->Hostility<=0.0f)
+            {
+                m_hostilList.erase(iter);
+                if(!m_hostilList.size())
+                    break;
+                else
+                    iter = m_hostilList.begin();
+            }
+        }
+    }
 }
-
 
 void Unit::castSpell( Spell * pSpell )
 {

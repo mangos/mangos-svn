@@ -838,7 +838,7 @@ void Spell::EffectSummonPet(uint32 i)
     if(NewSummon->LoadPetFromDB( m_caster ))
         return;
 
-	WorldPacket data;
+    WorldPacket data;
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), m_caster->GetPositionX(),
         m_caster->GetPositionY(), m_caster->GetPositionZ()+1, m_caster->GetOrientation(), petentry))
     {
