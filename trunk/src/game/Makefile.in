@@ -75,32 +75,31 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	DestinationHolder.$(OBJEXT) DuelHandler.$(OBJEXT) \
 	DynamicObject.$(OBJEXT) EventSystem.$(OBJEXT) \
 	FlightMaster.$(OBJEXT) GameObject.$(OBJEXT) \
-	GlobalEvents.$(OBJEXT) \
-	GossipDef.$(OBJEXT) GridNotifiers.$(OBJEXT) \
-	GridStates.$(OBJEXT) Group.$(OBJEXT) GroupHandler.$(OBJEXT) \
-	GuardAI.$(OBJEXT) Guild.$(OBJEXT) GuildHandler.$(OBJEXT) \
-	IdleMovementGenerator.$(OBJEXT) Item.$(OBJEXT) \
-	ItemHandler.$(OBJEXT) Level0.$(OBJEXT) Level1.$(OBJEXT) \
-	Level2.$(OBJEXT) Level3.$(OBJEXT) LootMgr.$(OBJEXT) \
-	Mail.$(OBJEXT) Map.$(OBJEXT) MapManager.$(OBJEXT) \
-	MiscHandler.$(OBJEXT) MotionMaster.$(OBJEXT) \
-	MovementGenerator.$(OBJEXT) MovementHandler.$(OBJEXT) \
-	Mthread.$(OBJEXT) NPCHandler.$(OBJEXT) \
-	NullCreatureAI.$(OBJEXT) ObjectAccessor.$(OBJEXT) \
-	Object.$(OBJEXT) ObjectGridLoader.$(OBJEXT) \
-	ObjectMgr.$(OBJEXT) Opcodes.$(OBJEXT) Pet.$(OBJEXT) \
-	PetAI.$(OBJEXT) PetHandler.$(OBJEXT) Player.$(OBJEXT) \
-	ProgressBar.$(OBJEXT) QueryHandler.$(OBJEXT) \
-	QuestDef.$(OBJEXT) QuestHandler.$(OBJEXT) \
-	RandomMovementGenerator.$(OBJEXT) ReactorAI.$(OBJEXT) \
-	RedZoneDistrict.$(OBJEXT) ScriptCalls.$(OBJEXT) \
-	SkillHandler.$(OBJEXT) SpellAuras.$(OBJEXT) Spell.$(OBJEXT) \
-	SpellEffects.$(OBJEXT) SpellHandler.$(OBJEXT) \
-	TargetedMovementGenerator.$(OBJEXT) TaxiHandler.$(OBJEXT) \
-	TaxiMovementGenerator.$(OBJEXT) tools.$(OBJEXT) \
-	TradeHandler.$(OBJEXT) Unit.$(OBJEXT) UpdateData.$(OBJEXT) \
-	WaypointMovementGenerator.$(OBJEXT) World.$(OBJEXT) \
-	WorldLog.$(OBJEXT) WorldSession.$(OBJEXT) \
+	GlobalEvents.$(OBJEXT) GossipDef.$(OBJEXT) \
+	GridNotifiers.$(OBJEXT) GridStates.$(OBJEXT) Group.$(OBJEXT) \
+	GroupHandler.$(OBJEXT) GuardAI.$(OBJEXT) Guild.$(OBJEXT) \
+	GuildHandler.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) \
+	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
+	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
+	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
+	MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
+	MotionMaster.$(OBJEXT) MovementGenerator.$(OBJEXT) \
+	MovementHandler.$(OBJEXT) Mthread.$(OBJEXT) \
+	NPCHandler.$(OBJEXT) NullCreatureAI.$(OBJEXT) \
+	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
+	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
+	Opcodes.$(OBJEXT) Pet.$(OBJEXT) PetAI.$(OBJEXT) \
+	PetHandler.$(OBJEXT) Player.$(OBJEXT) ProgressBar.$(OBJEXT) \
+	QueryHandler.$(OBJEXT) QuestDef.$(OBJEXT) \
+	QuestHandler.$(OBJEXT) RandomMovementGenerator.$(OBJEXT) \
+	ReactorAI.$(OBJEXT) RedZoneDistrict.$(OBJEXT) \
+	ScriptCalls.$(OBJEXT) SkillHandler.$(OBJEXT) \
+	SpellAuras.$(OBJEXT) Spell.$(OBJEXT) SpellEffects.$(OBJEXT) \
+	SpellHandler.$(OBJEXT) TargetedMovementGenerator.$(OBJEXT) \
+	TaxiHandler.$(OBJEXT) TaxiMovementGenerator.$(OBJEXT) \
+	tools.$(OBJEXT) TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
+	UpdateData.$(OBJEXT) WaypointMovementGenerator.$(OBJEXT) \
+	World.$(OBJEXT) WorldLog.$(OBJEXT) WorldSession.$(OBJEXT) \
 	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)

@@ -546,6 +546,9 @@
 				RelativePath="..\..\src\game\EventSystem.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\GlobalEvents.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Mthread.cpp">
 			</File>
 			<File

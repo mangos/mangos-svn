@@ -49,7 +49,7 @@ i_creatureState(UNIT_STAT_STOPPED), m_faction(0),m_emoteState(0),m_isPet(false)
     m_valuesCount = UNIT_END;
 
     memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
-    for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;   
+    for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
 }
 
 Creature::~Creature()
