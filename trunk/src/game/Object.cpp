@@ -53,11 +53,11 @@ Object::Object( )
     m_valuesCount       = 0;
 
     m_speed             = 1.0f;
-	m_moveType			= MOVE_STOP;
+    m_moveType          = MOVE_STOP;
 
     mSemaphoreTeleport  = false;
-	m_inWorld			= false;
-	m_objectUpdated		= false;
+    m_inWorld           = false;
+    m_objectUpdated     = false;
 }
 
 Object::~Object( )

@@ -855,7 +855,7 @@ uint8 Spell::CanCast()
 
     Unit *target = NULL;
     target = m_targets.m_unitTarget;
-	float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+    float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
 
     if(target)
     {
