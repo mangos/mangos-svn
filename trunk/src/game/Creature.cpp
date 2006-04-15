@@ -39,24 +39,17 @@
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
-Creature::Creature() : Unit(), i_AI(NULL)
+Creature::Creature() : 
+    Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
+    m_respawnDelay(25000), m_corpseDelay(45000), m_respawnradius(0.0),
+    itemcount(0), mTaxiNode(0),
+    m_moveBackward(false), m_moveRandom(false), m_moveRun(false), 
+    i_creatureState(UNIT_STAT_STOPPED), m_faction(0),m_emoteState(0),m_isPet(false)
 {
-    m_corpseDelay = 45000;
-    m_respawnDelay = 25000;
-
-    m_respawnTimer = 0;
-    m_deathTimer = 0;
-
     m_valuesCount = UNIT_END;
-
-    itemcount = 0;
+    
     memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
-
-    m_moveBackward = false;
-    m_moveRandom = false;
-    m_moveRun = false;
-    i_creatureState = UNIT_STAT_STOPPED;
-    m_respawnradius=0;
+    for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
 }
 
 Creature::~Creature()
