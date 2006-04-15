@@ -31,8 +31,11 @@ int PetAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature &c) : i_pet(c), i_pVictim(NULL), i_owner(ObjectAccessor::Instance().GetCreature(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY))), i_state( ((Pet*)&c)->GetActState() ), i_tracker(TIME_INTERVAL_LOOK)
+PetAI::PetAI(Creature &c) : i_pet(c), i_pVictim(NULL), i_state( ((Pet*)&c)->GetActState() ), i_tracker(TIME_INTERVAL_LOOK)
 {
+	i_owner = ObjectAccessor::Instance().GetCreature(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
+	if(!i_owner)
+		i_owner = ObjectAccessor::Instance().GetPlayer(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)

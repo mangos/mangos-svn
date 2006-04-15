@@ -49,7 +49,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         void _stopAttack(void);
 
         Creature &i_pet;
-        Creature* i_owner;
+        Unit* i_owner;
         Unit *i_pVictim;
         uint32 i_state;
         TimeTracker i_tracker;
