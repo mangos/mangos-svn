@@ -52,7 +52,7 @@ void Log::outError( const char * err, ... )
     va_start(ap, err);
     vfprintf( stderr, err, ap );
     fprintf( stderr, "\n" );
-	vfprintf(logfile, str, ap);
+	vfprintf(logfile, err, ap);
 	fprintf(logfile, "\n" );
     va_end(ap);
     fflush(stderr);
