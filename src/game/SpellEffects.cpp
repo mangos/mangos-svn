@@ -812,8 +812,6 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
 void Spell::EffectSummonPet(uint32 i)
 {
-    WorldPacket data;
-
     uint64 petguid;
     if((petguid=m_caster->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
     {
@@ -839,6 +837,8 @@ void Spell::EffectSummonPet(uint32 i)
     Pet* NewSummon = new Pet();
     if(NewSummon->LoadPetFromDB( m_caster ))
         return;
+
+	WorldPacket data;
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), m_caster->GetPositionX(),
         m_caster->GetPositionY(), m_caster->GetPositionZ()+1, m_caster->GetOrientation(), petentry))
     {

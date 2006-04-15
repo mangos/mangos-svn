@@ -122,21 +122,13 @@ bool Pet::LoadPetFromDB( Unit* owner )
         data.clear();
         data.Initialize(SMSG_PET_SPELLS);
 
-        //Data is send 2x
-
         data << (uint64)GetGUID() << uint32(0x00000000) << uint32(0x00001000);
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        uint16 SpellID;
-        SpellID = fields[6].GetUInt16();                    //0x2DF3;	//Firebolt = correct
-        data << uint16 (SpellID) << uint16 (0xC100);        //C100 = maybe group
-        SpellID = fields[7].GetUInt16();                    //0x2DF7;	//Blood Pact = correct
-        data << uint16 (SpellID) << uint16 (0xC100);
-        SpellID = fields[8].GetUInt16();                    //0x2DFB;	//Fire Shield = correct
-        data << uint16 (SpellID) << uint16 (0xC100);
-        SpellID = fields[9].GetUInt16();                    //0x119F;	//Phase Shift = correct
-        data << uint16 (SpellID) << uint16 (0xC100);
+        for(uint32 i=0;i<PETMAXSPELLS;i++)
+                                                            //C100 = maybe group
+            data << uint16 (m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
