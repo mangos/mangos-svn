@@ -1314,20 +1314,22 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pets`;
 CREATE TABLE `pets` (
-  `guid` int(11) unsigned NOT NULL default '0',
+  `id` int(11) unsigned NOT NULL auto_increment,
   `entry` int(11) unsigned NOT NULL default '0',
-  `owner` bigint(30) unsigned NOT NULL default '0',
+  `owner` int(11) unsigned NOT NULL default '0',
   `level` int(11) unsigned NOT NULL default '1',
   `exp` int(11) unsigned NOT NULL default '0',
-  `nextlvlexp` int(11) unsigned NOT NULL default '0',
-  `spell1` mediumint(8) unsigned NOT NULL default '0',
-  `spell2` mediumint(8) unsigned NOT NULL default '0',
-  `spell3` mediumint(8) unsigned NOT NULL default '0',
-  `spell4` mediumint(8) unsigned NOT NULL default '0',
+  `nextlvlexp` int(11) unsigned NOT NULL default '100',
+  `spell1` smallint(5) unsigned NOT NULL default '0',
+  `spell2` smallint(5) unsigned NOT NULL default '0',
+  `spell3` smallint(5) unsigned NOT NULL default '0',
+  `spell4` smallint(5) unsigned NOT NULL default '0',
   `action` int(11) unsigned NOT NULL default '0',
-  `fealty` float NOT NULL default '0',
-  `name` varchar(50) NOT NULL default '',
-  PRIMARY KEY  (`guid`)
+  `fealty` int(11) unsigned NOT NULL default '0',
+  `name` varchar(50) NOT NULL default 'pet',
+  `current` tinyint(1) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`id`),
+  KEY `owner` (`owner`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
