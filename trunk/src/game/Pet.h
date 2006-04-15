@@ -48,7 +48,7 @@ class Pet : public Creature
         uint32* GetSpells() { return m_spells; }
         void SetSpells(uint8 index, uint32 spellid)
         {
-            if(index>=0 && index<PETMAXSPELLS)
+            if(index>0 && index<PETMAXSPELLS)
                 m_spells[index]=spellid;
         }
         std::string GetName() { return m_name; }

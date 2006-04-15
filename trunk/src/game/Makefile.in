@@ -75,6 +75,7 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	DestinationHolder.$(OBJEXT) DuelHandler.$(OBJEXT) \
 	DynamicObject.$(OBJEXT) EventSystem.$(OBJEXT) \
 	FlightMaster.$(OBJEXT) GameObject.$(OBJEXT) \
+	GlobalEvents.$(OBJEXT) \
 	GossipDef.$(OBJEXT) GridNotifiers.$(OBJEXT) \
 	GridStates.$(OBJEXT) Group.$(OBJEXT) GroupHandler.$(OBJEXT) \
 	GuardAI.$(OBJEXT) Guild.$(OBJEXT) GuildHandler.$(OBJEXT) \
@@ -277,6 +278,7 @@ libgame_a_SOURCES = \
 	EventSystem.cpp \
 	FlightMaster.cpp \
 	GameObject.cpp \
+	GlobalEvents.cpp \
 	GossipDef.cpp \
 	GridNotifiers.cpp \
 	GridStates.cpp \
@@ -492,6 +494,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EventSystem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FlightMaster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GameObject.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GlobalEvents.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GossipDef.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridNotifiers.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridStates.Po@am__quote@
