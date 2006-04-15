@@ -103,6 +103,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLookingForGroup(WorldPacket& recvPacket);
 
         void HandleMoveWaterWalkAck(WorldPacket& recvPacket);
+		void HandleMountSpecialAnimOpcode(WorldPacket &recvdata);
 
         // repair
         void HandleRepairItemOpcode(WorldPacket& recvPacket);
