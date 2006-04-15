@@ -118,3 +118,13 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
     uint32 guild, time;
     recv_data >> guild >> time;
 }
+
+void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
+{
+	//sLog.outDebug("WORLD: Recvd CMSG_MOUNTSPECIAL_ANIM");
+    
+	WorldPacket data;
+    data.Initialize(SMSG_MOUNTSPECIAL_ANIM);
+    data << uint64(GetPlayer()->GetGUID());
+	GetPlayer()->SendMessageToSet(&data, false);
+}
