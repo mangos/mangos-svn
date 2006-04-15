@@ -212,7 +212,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline bool TestState(unsigned mask) const { return (i_creatureState & mask); }
         inline void SetState(unsigned mask) { i_creatureState |= mask; }
         inline void ClearState(unsigned mask) { i_creatureState &= ~mask; }
-        bool isPet() { return m_isPet; }
+        bool isPet() const { return m_isPet; }
         bool isCivilian() { return (bool)GetCreatureInfo()->civilian; }
 
         void SetisPet(bool val) { m_isPet=val; }

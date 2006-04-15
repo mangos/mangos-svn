@@ -855,10 +855,10 @@ uint8 Spell::CanCast()
 
     Unit *target = NULL;
     target = m_targets.m_unitTarget;
+	float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
 
     if(target)
     {
-        float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
         if(!m_caster->isInFront( target, range ))
             castResult = 0x76;
         if(m_caster->GetDistanceSq(target) > range * range )
@@ -867,7 +867,6 @@ uint8 Spell::CanCast()
 
     if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
     {
-        float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
         if(m_caster->GetDistanceSq( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > range * range )
             castResult = 0x56;
     }
