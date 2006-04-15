@@ -39,9 +39,7 @@ namespace AIRegistry
         (new CreatureAIFactory<AggressorAI>("AggressorAI"))->RegisterSelf();
         (new CreatureAIFactory<ReactorAI>("ReactorAI"))->RegisterSelf();
         (new CreatureAIFactory<GuardAI>("GuardAI"))->RegisterSelf();
-        // disable while PetAI bugs not fixed (main: deadlock at owner seletion in PetAI constructor. 
-        // See ticket 93
-        //(new CreatureAIFactory<PetAI>("PetAI"))->RegisterSelf();
+        (new CreatureAIFactory<PetAI>("PetAI"))->RegisterSelf();
 
         (new MovementGeneratorFactory<RandomMovementGenerator>("Random"))->RegisterSelf();
         (new MovementGeneratorFactory<WaypointMovementGenerator>("Waypoint"))->RegisterSelf();

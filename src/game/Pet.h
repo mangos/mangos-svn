@@ -55,7 +55,7 @@ class Pet : public Creature
         void SetName(std::string newname) { m_name=newname; }
 
         void SavePetToDB();
-        void LoadPetFromDB(Unit* owner, uint32 id);
+        bool LoadPetFromDB( Unit* owner );
         void DeletePetFromDB();
 
     protected:

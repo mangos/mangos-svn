@@ -39,13 +39,14 @@ void Pet::SavePetToDB()
     if(!isPet())
         return;
 
-    sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'",GetGUIDLow());
+	uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    sDatabase.PExecute("DELETE FROM pets WHERE owner = '%u' AND current = 1", owner );
 
     std::stringstream ss;
     ss.rdbuf()->str("");
     ss << "INSERT INTO pets (entry,owner,level,exp,nextlvlexp,spell1,spell2,spell3,spell4,action,fealty,name,current) VALUES (";
     ss << GetEntry() << ","
-        << GetUInt64Value(UNIT_FIELD_SUMMONEDBY) << ","
+        << owner << ","
         << GetUInt32Value(UNIT_FIELD_LEVEL) << ","
         << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ","
         << GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP) << ","
@@ -60,11 +61,13 @@ void Pet::SavePetToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
-void Pet::LoadPetFromDB(Unit* owner, uint32 id)
+bool Pet::LoadPetFromDB( Unit* owner )
 {
     WorldPacket data;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE id = '%u';", id);
-    ASSERT(result);
+	uint32 ownerid = owner->GetGUIDLow();
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE owner = '%u' AND current = 1;", ownerid );
+    if(!result)
+		return false;
     Field *fields = result->Fetch();
 
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
@@ -139,9 +142,11 @@ void Pet::LoadPetFromDB(Unit* owner, uint32 id)
 
         ((Player*)owner)->GetSession()->SendPacket(&data);
     }
+	return true;
 }
 
 void Pet::DeletePetFromDB()
 {
-    sDatabase.PExecute("DELETE FROM pets WHERE guid = '%u'", GetGUIDLow());
+	uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
+    sDatabase.PExecute("DELETE FROM pets WHERE owner = '%u' AND current = 1", owner );
 }

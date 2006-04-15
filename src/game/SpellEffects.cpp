@@ -837,14 +837,8 @@ void Spell::EffectSummonPet(uint32 i)
     }
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
     Pet* NewSummon = new Pet();
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE owner = '%u' AND entry = '%u' AND current = '1';", m_caster->GetGUIDLow(), petentry );
-    if(result)
-    {
-        Field *fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
-        NewSummon->LoadPetFromDB(m_caster, id);
+    if(NewSummon->LoadPetFromDB( m_caster ))
         return;
-    }
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), m_caster->GetPositionX(),
         m_caster->GetPositionY(), m_caster->GetPositionZ()+1, m_caster->GetOrientation(), petentry))
     {
