@@ -42,6 +42,7 @@ libgame_a_SOURCES = \
 	EventSystem.cpp \
 	FlightMaster.cpp \
 	GameObject.cpp \
+	GlobalEvents.cpp \
 	GossipDef.cpp \
 	GridNotifiers.cpp \
 	GridStates.cpp \
