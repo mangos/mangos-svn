@@ -34,7 +34,7 @@ class MANGOS_DLL_DECL FactoryHolder
         typedef MaNGOS::Singleton<FactoryHolderRegistry > FactoryHolderRepository;
 
         FactoryHolder(const char*s) : i_name(s) {}
-        inline const char* name(void) const { return i_name; }
+        inline std::string name(void) const { return i_name; }
 
         void RegisterSelf(void) { FactoryHolderRepository::Instance().InsertItem(this, i_name.c_str()); }
         void DeregisterSelf(void) { FactoryHolderRepository::Instance().RemoveItem(this, false); }
