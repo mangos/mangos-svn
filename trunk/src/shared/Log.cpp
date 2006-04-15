@@ -24,6 +24,12 @@
 
 INSTANTIATE_SINGLETON_1( Log );
 
+void Log::Initialize()
+{
+	//std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
+	logfile = fopen("Server.log", "w");//logfn.c_str()
+}
+
 void Log::outString( const char * str, ... )
 {
     if( !str ) return;
@@ -31,9 +37,13 @@ void Log::outString( const char * str, ... )
     va_start(ap, str);
     vprintf( str, ap );
     printf( "\n" );
+	vfprintf(logfile, str, ap);
+	fprintf(logfile, "\n" );
     va_end(ap);
     fflush(stdout);
+	fflush(logfile);
 }
+
 
 void Log::outError( const char * err, ... )
 {
@@ -42,51 +52,67 @@ void Log::outError( const char * err, ... )
     va_start(ap, err);
     vfprintf( stderr, err, ap );
     fprintf( stderr, "\n" );
+	vfprintf(logfile, str, ap);
+	fprintf(logfile, "\n" );
     va_end(ap);
     fflush(stderr);
+	fflush(logfile);
 }
+
 
 void Log::outBasic( const char * str, ... )
 {
     if( !str ) return;
+    va_list ap;
+    va_start(ap, str);
+	vfprintf(logfile, str, ap);
+	fprintf(logfile, "\n" );
     if( loglevel > 0 )
     {
-        va_list ap;
-        va_start(ap, str);
         vprintf( str, ap );
         printf( "\n" );
-        va_end(ap);
-        fflush(stdout);
     }
+    va_end(ap);
+	fflush(stdout);
+	fflush(logfile);
 }
+
 
 void Log::outDetail( const char * str, ... )
 {
     if( !str ) return;
+	va_list ap;
+	va_start(ap, str);
+	vfprintf(logfile, str, ap);
+	fprintf(logfile, "\n" );
     if( loglevel > 1 )
     {
-        va_list ap;
-        va_start(ap, str);
         vprintf( str, ap );
         printf( "\n" );
-        va_end(ap);
-        fflush(stdout);
-    }
+	}
+	va_end(ap);
+	fflush(stdout);
+	fflush(logfile);
 }
+
 
 void Log::outDebug( const char * str, ... )
 {
     if( !str ) return;
+	va_list ap;
+	va_start(ap, str);
+	vfprintf(logfile, str, ap);
+	fprintf(logfile, "\n" );
     if( loglevel > 2 )
     {
-        va_list ap;
-        va_start(ap, str);
         vprintf( str, ap );
         printf( "\n" );
-        va_end(ap);
-        fflush(stdout);
-    }
+	}
+	va_end(ap);
+	fflush(stdout);
+	fflush(logfile);
 }
+
 
 void Log::outMenu( const char * str, ... )
 {
@@ -94,6 +120,9 @@ void Log::outMenu( const char * str, ... )
     va_list ap;
     va_start(ap, str);
     vprintf( str, ap );
+	vfprintf(logfile, str, ap);
+	fprintf(logfile, "\n" );
     va_end(ap);
     fflush(stdout);
+	fflush(logfile);
 }

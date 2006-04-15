@@ -23,6 +23,8 @@
 #include "Object.h"
 #include "Map.h"
 
+#define SPIRIT_HEALER       5233
+
 namespace MaNGOS
 {
     namespace Utilities

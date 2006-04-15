@@ -30,7 +30,6 @@ class Creature;
 #define TIME_INTERVAL_LOOK   5000
 #define IN_LINE_OF_SIGHT     900
 #define VISIBILITY_RANGE    10000
-#define SPIRIT_HEALER       5233
 
 class MANGOS_DLL_DECL CreatureAI
 {

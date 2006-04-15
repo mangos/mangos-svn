@@ -25,7 +25,7 @@
 
 int PetAI::Permissible(const Creature *creature)
 {
-    if( ((Pet*)&creature)->isPet())
+    if( creature->isPet())
         return PERMIT_BASE_SPECIAL;
 
     return PERMIT_BASE_NO;

@@ -25,7 +25,6 @@
 #include "Opcodes.h"
 
 #include <list>
-#define UF_TARGET_DIED  1
 
 #define PLAYER_MAX_SKILLS       127
 #define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + (x*3))
@@ -70,19 +69,20 @@ enum DeathState
 
 enum UnitState
 {
-    UNIT_STAT_STOPPED = 0,
-    UNIT_STAT_ATTACKING = (1u << 1),                        // player is attacking someone
-    UNIT_STAT_ATTACK_BY = (1u << 2),                        // player is attack by someone
+    UNIT_STAT_STOPPED		= 0,
+	UNIT_STAT_DIED			= 1,
+    UNIT_STAT_ATTACKING		= 2,                        // player is attacking someone
+    UNIT_STAT_ATTACK_BY		= 4,                        // player is attack by someone
                                                             // player is in combat mode
-    UNIT_STAT_IN_COMBAT = (UNIT_STAT_ATTACKING | UNIT_STAT_ATTACK_BY),
-    UNIT_STAT_STUNDED = (1u << 3),
-    UNIT_STAT_ROAMING = (1u << 4),
-    UNIT_STAT_CHASE = (1u << 5),
-    UNIT_STAT_SEARCHING = (1u << 6),
-    UNIT_STAT_FLEEING = (1u << 7),
-    UNIT_STAT_MOVING = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
-    UNIT_STAT_IN_FLIGHT = (1u << 8),                        // player is i n flight mode
-    UNIT_STAT_ALL_STATE = (UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
+    UNIT_STAT_IN_COMBAT		= (UNIT_STAT_ATTACKING | UNIT_STAT_ATTACK_BY),
+    UNIT_STAT_STUNDED		= 8,
+    UNIT_STAT_ROAMING		= 16,
+    UNIT_STAT_CHASE			= 32,
+    UNIT_STAT_SEARCHING		= 64,
+    UNIT_STAT_FLEEING		= 128,
+    UNIT_STAT_MOVING		= (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
+    UNIT_STAT_IN_FLIGHT		= 256,                        // player is i n flight mode
+    UNIT_STAT_ALL_STATE		= 0xffff	//(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
 struct Hostil
@@ -156,9 +156,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isTabardVendor() { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR ); }
         bool isAuctioner()    { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER ); }
         bool isArmorer()      { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ); }
-        bool isGuard()        { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD ); }
+        //Need fix or use this
+        bool isGuard() const  { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD); }
 
-        bool isStunned() { return m_attackTimer == 0;};
+		bool isStunned() { return m_attackTimer == 0;};
 
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
@@ -241,6 +242,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         Aura* FindAur(uint32 spellId);
 
         void _UpdateSpells(uint32 time);
+		void _UpdateHostil( uint32 time );
         //void _UpdateAura();
 
         //Aura* m_aura;

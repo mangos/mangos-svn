@@ -24,15 +24,26 @@
 
 extern uint8 loglevel;
 
-class Log
+class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
+    friend class MaNGOS::OperatorNew<Log>;
+	Log() : logfile(NULL) { Initialize(); }
+	~Log()
+	{
+		if( logfile != NULL )
+			fclose(logfile);
+		logfile = NULL;
+	}
     public:
+		void Initialize();
         void outString( const char * str, ... );
         void outError( const char * err, ... );
         void outBasic( const char * str, ... );
         void outDetail( const char * str, ... );
         void outDebug( const char * str, ... );
         void outMenu( const char * str, ... );
+	private:
+		FILE* logfile;
 
 };
 
