@@ -149,7 +149,7 @@ void GuardAI::UpdateAI(const uint32 diff)
                     float dx = i_pVictim->GetPositionX() - i_creature.GetPositionX();
                     float dy = i_pVictim->GetPositionY() - i_creature.GetPositionY();
                     float orientation = (float)atan2((double)dy, (double)dx);
-                    i_creature.Relocate(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(), orientation);
+                    i_creature.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
                 }
 
                 break;

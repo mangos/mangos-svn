@@ -25,14 +25,15 @@
 
 enum PetState
 {
-    STATE_RA_FOLLOW         = 1,
-    STATE_RA_REACTIVE       = 2,
-    STATE_RA_PROACTIVE      = 4,
-    STATE_RA_PASSIVE        = 8,
-    STATE_RA_SPELL1         = 16,
-    STATE_RA_SPELL2         = 32,
-    STATE_RA_SPELL3         = 64,
-    STATE_RA_SPELL4         = 128
+    STATE_RA_STAY	        = 1,
+    STATE_RA_FOLLOW         = 2,
+    STATE_RA_REACTIVE       = 4,
+    STATE_RA_PROACTIVE      = 8,
+    STATE_RA_PASSIVE        = 16,
+    STATE_RA_SPELL1         = 32,
+    STATE_RA_SPELL2         = 64,
+    STATE_RA_SPELL3         = 128,
+    STATE_RA_SPELL4         = 256
 };
 
 class Pet : public Creature
@@ -43,7 +44,9 @@ class Pet : public Creature
 
         uint32 GetActState() { return m_actState; }
         void SetActState(uint32 st) { m_actState=st; }
-        uint32 GetFealty() { return m_fealty; }
+        void AddActState(uint32 st) { m_actState |= st; }
+		void ClearActState(uint32 st) { m_state &= ~st; };
+		uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
         uint32* GetSpells() { return m_spells; }
         void SetSpells(uint8 index, uint32 spellid)

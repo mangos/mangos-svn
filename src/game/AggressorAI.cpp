@@ -92,7 +92,7 @@ AggressorAI::_needToStop() const
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
     float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
-    return (( length > (15.0f + hostillen) * (15.0f + hostillen) && spawndist > VISIBILITY_RANGE )
+    return (( length > (14.0f + hostillen) * (14.0f + hostillen) && spawndist > VISIBILITY_RANGE )
         || ( length > (25.0f + hostillen) * (25.0f + hostillen) && spawndist > 5000.0f )
         || ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
 }
@@ -166,7 +166,7 @@ AggressorAI::UpdateAI(const uint32 diff)
                     float dx = i_pVictim->GetPositionX() - i_creature.GetPositionX();
                     float dy = i_pVictim->GetPositionY() - i_creature.GetPositionY();
                     float orientation = (float)atan2((double)dy, (double)dx);
-                    i_creature.Relocate(i_creature.GetPositionX(), i_creature.GetPositionY(), i_creature.GetPositionZ(), orientation);
+                    i_creature.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
                 }
 
                 break;
