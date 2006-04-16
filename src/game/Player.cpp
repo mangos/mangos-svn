@@ -693,22 +693,23 @@ void Player::BuildEnumData( WorldPacket * p_data )
 
 void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orientation)
 {
+	MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
     data.Initialize(SMSG_TRANSFER_PENDING);
     data << uint32(mapid);
-
     GetSession()->SendPacket(&data);
-    MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
 
     data.Initialize(SMSG_NEW_WORLD);
     data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
     GetSession()->SendPacket( &data );
-    SetMapId(mapid);
-    Relocate(x, y, z, orientation);
-    SetPosition(x,y,z,orientation);
-    MapManager::Instance().GetMap(GetMapId())->Add(this);
+	
+	SetMapId(mapid);
+	SetPosition(x,y,z,orientation);
     SetDontMove(true);
     SaveToDB();
+
+	MapManager::Instance().GetMap(GetMapId())->Add(this);
+
 }
 
 void Player::AddToWorld()
@@ -2563,18 +2564,19 @@ void Player::ResurrectPlayer()
 
     setDeathState(ALIVE);
 
-    GetSession()->GetPlayer()->SetMovement(MOVE_LAND_WALK);
-    GetSession()->GetPlayer()->SetMovement(MOVE_UNROOT);
+    SetMovement(MOVE_LAND_WALK);
+    SetMovement(MOVE_UNROOT);
 
-    GetSession()->GetPlayer( )->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
-    GetSession()->GetPlayer( )->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
+    SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
+    SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
 
-    GetSession()->GetPlayer( )->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-    GetSession()->GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-    GetSession()->GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-    GetSession()->GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-    GetSession()->GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-    GetSession()->GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
+    SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
+
+    SetUInt32Value(UNIT_FIELD_AURA+32, 0);
+    SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
+    SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
+    SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
+    SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
 
     if(getRace() == NIGHTELF)
     {
@@ -2721,9 +2723,7 @@ void Player::DeathDurabilityLoss(double percent)
 
 void Player::RepopAtGraveyard()
 {
-
     float closestX = 0, closestY = 0, closestZ = 0;
-    WorldPacket data;
 
     GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId() );
 
@@ -2741,18 +2741,28 @@ void Player::RepopAtGraveyard()
         // we should be able to make 2 kinds of teleport after death
         // near if in the same zoneid and far if in different zoneid
 
-        // teleport far
-        GetSession()->GetPlayer()->smsg_NewWorld(GetMapId(), closestX, closestY, closestZ,0.0);
+        
+		WorldPacket data;
+		BuildHeartBeatMsg(&data);
+        SendMessageToSet(&data, true);
 
-        WorldPacket data;
 
         // teleport near
-        // BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0);
-        // GetSession()->SendPacket(&data);
+		SetDontMove(true);
+		MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
+		
+        BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0.0);
+        GetSession()->SendPacket(&data);
 
-        SetPosition(closestX, closestY, closestZ, 0);
-        BuildHeartBeatMsg(&data);
-        SendMessageToSet(&data, true);
+		SetPosition( closestX, closestY, closestZ, 0.0);
+		RemoveFromWorld();
+		MapManager::Instance().GetMap(GetMapId())->Add(this);
+		SetDontMove(false);
+		SaveToDB();
+
+		// teleport far
+		//smsg_NewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
+     
     }
 
 }
@@ -3252,7 +3262,7 @@ void Player::_LoadReputation()
 void Player::_LoadCorpse()
 {
     // TODO do we need to load all corpses ?
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE player_guid = '%u' AND bonnes_flag = '0';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE player_guid = '%u' AND bones_flag = '0';",GetGUIDLow());
 
     if(!result) return;
 

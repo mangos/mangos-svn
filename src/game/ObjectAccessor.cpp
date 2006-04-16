@@ -125,31 +125,6 @@ ObjectAccessor::FindPlayer(uint64 guid)
     return NULL;
 }
 
-void
-ObjectAccessor::BuildCreateForSameMapPlayer(Player *pl)
-{
-    if(!pl) return;
-    for(PlayersMapType::iterator iter=i_players.begin(); iter != i_players.end(); ++iter)
-    {
-        //	   if( (iter->second->GetMapId()==pl->GetMapId()) && (iter->second->GetGUID()!=pl->GetGUID()) )
-
-        // fix 2-3 players bug/player updates for death
-        // need to be tested
-        if(
-            (iter->second->GetMapId() == pl->GetMapId()) &&
-            (iter->second->GetGUID()!=pl->GetGUID()) &&
-            ((pl->isAlive() && iter->second->isAlive()) ||
-            (!pl->isAlive() && !iter->second->isAlive())
-            ))
-
-        {
-            sLog.outDebug("Creating same map for both player %d and %d", pl->GetGUIDLow(), iter->second->GetGUIDLow());
-            iter->second->SendUpdateToPlayer(pl);
-            pl->SendUpdateToPlayer(iter->second);
-        }
-    }
-}
-
 Player*
 ObjectAccessor::FindPlayerByName(const char *name)
 {
@@ -417,11 +392,36 @@ ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId()));
 }
 
+void
+ObjectAccessor::RemovePlayerFromPlayerView(Player *pl, Player *pl2)
+{
+    MaNGOS::PlayerDeadViewRemover remover(*pl,*pl2);
+    TypeContainerVisitor<MaNGOS::PlayerDeadViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
+    Cell cell = RedZone::GetZone(p);
+    cell.SetNoCreate();
+    cell.data.Part.reserved = ALL_DISTRICT;
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(pl->GetMapId()));
+}
+
+void
+ObjectAccessor::RemoveCreatureFromPlayerView(Player *pl, Creature *c)
+{
+    MaNGOS::CreatureViewRemover remover(*pl,*c);
+    TypeContainerVisitor<MaNGOS::CreatureViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    CellPair p = MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY());
+    Cell cell = RedZone::GetZone(p);
+    cell.SetNoCreate();
+    cell.data.Part.reserved = ALL_DISTRICT;
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(pl->GetMapId()));
+}
+
 namespace MaNGOS
 {
 
-    void
-        BuildUpdateForPlayer::Visit(PlayerMapType &m)
+    void BuildUpdateForPlayer::Visit(PlayerMapType &m)
     {
         for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         {
@@ -444,6 +444,17 @@ namespace MaNGOS
     {
         for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
             i_creature.DestroyForPlayer(iter->second);
+    }
+
+	void PlayerDeadViewRemover::Visit(PlayerMapType &m)
+    {
+		i_player.DestroyForPlayer(&i_player2);
+		i_player2.DestroyForPlayer(&i_player);
+    }
+
+	void CreatureViewRemover::Visit(PlayerMapType &m)
+    {
+		i_creature.DestroyForPlayer(&i_player);
     }
 }
 

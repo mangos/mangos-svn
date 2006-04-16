@@ -51,11 +51,11 @@ void Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
 }
 
-void Corpse::SaveToDB(bool bonnes)
+void Corpse::SaveToDB(bool bones)
 {
 
     int bflag = 0;
-    if (bonnes)
+    if (bones)
     {
         bflag = 1;
     }
@@ -63,7 +63,7 @@ void Corpse::SaveToDB(bool bonnes)
     std::stringstream ss;
 
     ss.rdbuf()->str("");
-    ss << "REPLACE INTO corpses (guid, player_guid, positionx, positiony, positionz, orientation, mapid, data, time, bonnes_flag) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
+    ss << "REPLACE INTO corpses (guid, player_guid, positionx, positiony, positionz, orientation, mapid, data, time, bones_flag) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";

@@ -132,7 +132,7 @@ void Creature::AIM_Update(const uint32 &diff)
         {
             if( m_deathTimer <= diff )
             {
-                DEBUG_LOG("Removing corpse...");
+                DEBUG_LOG("Removing corpse... %d ", GetUInt32Value(OBJECT_FIELD_ENTRY));
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
@@ -870,8 +870,8 @@ void Creature::LoadFromDB(uint32 guid)
     respawn_cord[2] = fields[13].GetFloat();
 
     m_respawnDelay =(fields[7].GetUInt32()+fields[8].GetUInt32())*1000/2;
-    m_respawnTimer=fields[17].GetUInt32();
-    m_deathState=(DeathState)fields[18].GetUInt32();
+    m_respawnTimer = fields[17].GetUInt32();
+    m_deathState = (DeathState)fields[18].GetUInt32();
 
     delete result;
 

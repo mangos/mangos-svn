@@ -1348,7 +1348,7 @@ bool ChatHandler::HandleDieCommand(const char* args)
         SelectedPlayer = objmgr.GetPlayer(guid);
 
     if(!SelectedPlayer)
-        SelectedPlayer =player;
+        SelectedPlayer = player;
 
     SelectedPlayer->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
     SelectedPlayer->setDeathState(JUST_DIED);
@@ -1375,6 +1375,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
 
     SelectedPlayer->SetMovement(MOVE_LAND_WALK);
     SelectedPlayer->SetMovement(MOVE_UNROOT);
+
     SelectedPlayer->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
     SelectedPlayer->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
 

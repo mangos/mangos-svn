@@ -24,40 +24,32 @@
 #include "Player.h"
 #include "UpdateData.h"
 #include "CreatureAI.h"
+#include "Utilities.h"
 
 template<>
 inline void
 MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-    if( i_player.isAlive() )
-    {
-        for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-            if( iter->second->isAlive() )
-                iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-    }
-    else
-    {
-        for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-            if( iter->second->isDead() )
-                iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-    }
+	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+		if( ( i_player.isAlive() && iter->second->isAlive()) ||
+		(i_player.isDead() && iter->second->isDead()) )
+			iter->second->BuildOutOfRangeUpdateBlock(&i_data);
 }
 
 template<>
 inline void
 MaNGOS::NotVisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
-    Player *player = &i_player;
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second == player )
+        if( iter->second == &i_player )
             continue;
         if( (i_player.isAlive() && iter->second->isAlive()) ||
-            (!i_player.isAlive() && !iter->second->isAlive()) )
+            (i_player.isDead() && iter->second->isDead()) )
         {
             iter->second->BuildOutOfRangeUpdateBlock(&i_data);
 
-            UpdateData his_data;
+			UpdateData his_data;
             WorldPacket his_pk;
             i_player.BuildOutOfRangeUpdateBlock(&his_data);
             his_data.BuildPacket(&his_pk);
@@ -70,41 +62,41 @@ template<>
 inline void
 MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
-
-    if( i_player.isAlive() )
-    {
-        for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-            if( iter->second->isAlive() && iter->second->GetUInt32Value(OBJECT_FIELD_ENTRY) != 6491)
-                iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-    }
-    else
-    {
-        for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-            if( iter->second->isDead() || iter->second->GetUInt32Value(OBJECT_FIELD_ENTRY) == 6491)
-                iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-    }
+	for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	{
+		if( (i_player.isAlive() && iter->second->isAlive() ) ||
+		(i_player.isDead() && iter->second->isDead()))
+		{
+			iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
+		}
+		else
+		{
+			ObjectAccessor::Instance().RemoveCreatureFromPlayerView(&i_player, iter->second);
+		}
+	}
 }
 
 template<>
 inline void
 MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
+	for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	{
+		if( iter->second == &i_player )
+			continue;
 
-    Player *player = &i_player;
-    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        if( iter->second == player )
-            continue;
-
-        if( (i_player.isAlive() && iter->second->isAlive()) ||
-            (!i_player.isAlive() && !iter->second->isAlive()) )
-        {
-
-            sLog.outDebug("Creating in range packet for both player %d and %d", i_player.GetGUID(), iter->second->GetGUID());
-            iter->second->SendUpdateToPlayer(&i_player);
+		if( (i_player.isAlive() && iter->second->isAlive()) ||
+			(i_player.isDead() && iter->second->isDead()) )
+		{
+			iter->second->SendUpdateToPlayer(&i_player);
             i_player.SendUpdateToPlayer(iter->second);
-        }
-    }
+
+		}
+		else
+		{
+			ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
+		}
+	}
 }
 
 template<>
@@ -113,7 +105,8 @@ MaNGOS::ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
     std::map<OBJECT_HANDLE, Creature *> tmp(m);
     for(std::map<OBJECT_HANDLE, Creature*>::iterator iter=tmp.begin(); iter != tmp.end(); ++iter)
-        iter->second->Update(i_timeDiff);
+		if(!MaNGOS::Utilities::IsSpiritHealer(iter->second))
+        	iter->second->Update(i_timeDiff);
 }
 
 template<>
