@@ -110,8 +110,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         virtual void Create( uint32 guidlow, uint32 itemid, Player* owner);
 
-        ItemPrototype* GetProto();
-        ItemPrototype *GetItemProto();
+        ItemPrototype* GetProto() const;
 
         Player* GetOwner() const { return m_owner; }
         void SetOwner(Player *owner) { m_owner = owner; }
@@ -132,6 +131,8 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetEntry() { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         uint32 GetCount() { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
+        uint32 GetMaxStackCount() const { return GetProto()->MaxCount ? GetProto()->MaxCount : 1; }
+
     protected:
 
         Player *m_owner;

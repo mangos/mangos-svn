@@ -271,13 +271,8 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
                 {
                     pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
                     pItem->SaveToDB();
-                    if (m_owner->IsInWorld())
-                    {
-                        upd.Clear();
-                        pItem->BuildCreateUpdateBlockForPlayer(&upd, m_owner);
-                        upd.BuildPacket(&packet);
-                        m_owner->GetSession()->SendPacket(&packet);
-                    }
+
+                    pItem->SendUpdateToPlayer(m_owner);
                     return 2;
                 }
                 else
@@ -330,13 +325,7 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
                             count -= plus;
                             pItem->SetCount(pItem->GetCount() + plus);
                             pItem->SaveToDB();
-                            if (m_owner->IsInWorld())
-                            {
-                                upd.Clear();
-                                pItem->BuildCreateUpdateBlockForPlayer(&upd, m_owner);
-                                upd.BuildPacket(&packet);
-                                m_owner->GetSession()->SendPacket(&packet);
-                            }
+                            pItem->SendUpdateToPlayer(m_owner);
                             if (!count) { return 2; }
                         }
                     }
@@ -349,14 +338,7 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
     m_bagslot[addtoslot] = item;
     SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (addtoslot * 2), item->GetGUID());
     item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
-
-    if (m_owner->IsInWorld())
-    {
-        upd.Clear();
-        item->BuildCreateUpdateBlockForPlayer(&upd, m_owner);
-        upd.BuildPacket(&packet);
-        m_owner->GetSession()->SendPacket(&packet);
-    }
+    item->SendUpdateToPlayer(m_owner);
 
     return 1;
 }

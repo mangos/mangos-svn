@@ -109,6 +109,8 @@ class MANGOS_DLL_SPEC Object
         }
 
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
+        void SendUpdateToPlayer(Player* player) const;
+
         void BuildValuesUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void BuildOutOfRangeUpdateBlock( UpdateData *data ) const;
         void BuildMovementUpdateBlock( UpdateData * data, uint32 flags = 0 ) const;

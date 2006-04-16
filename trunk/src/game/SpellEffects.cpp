@@ -344,9 +344,9 @@ void Spell::EffectCreateItem(uint32 i)
             {
                 pItem = new Item;
                 pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
-                if(pItem && pItem->GetItemProto()->ItemId == m_spellInfo->EffectItemType[i])
+                if(pItem && pItem->GetProto()->ItemId == m_spellInfo->EffectItemType[i])
                 {
-                    if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetItemProto()->MaxCount)
+                    if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
                     {
                         pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)+1);
                         pUnit->UpdateSlot(bagIndex,curSlot);
@@ -782,14 +782,8 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             if (m_spellInfo->EffectMiscValue[i])
                 m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
 
-        UpdateData upd;
-        WorldPacket packet;
-
         p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-        upd.Clear();
-        m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
-        upd.BuildPacket(&packet);
-        p_caster->GetSession()->SendPacket(&packet);
+        m_CastItem->SendUpdateToPlayer((Player *)p_caster);
         ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
     }
 
@@ -827,14 +821,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             if (m_spellInfo->EffectMiscValue[i])
                 m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
 
-        UpdateData upd;
-        WorldPacket packet;
-
         p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-        upd.Clear();
-        m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
-        upd.BuildPacket(&packet);
-        p_caster->GetSession()->SendPacket(&packet);
+        m_CastItem->SendUpdateToPlayer((Player *)p_caster);
         ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
     }
 }
@@ -1254,14 +1242,8 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             if (m_spellInfo->EffectMiscValue[i])
                 m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
 
-        UpdateData upd;
-        WorldPacket packet;
-
         p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-        upd.Clear();
-        m_CastItem->BuildCreateUpdateBlockForPlayer(&upd, (Player *)p_caster);
-        upd.BuildPacket(&packet);
-        p_caster->GetSession()->SendPacket(&packet);
+        m_CastItem->SendUpdateToPlayer((Player *)p_caster);
     }
 
 }

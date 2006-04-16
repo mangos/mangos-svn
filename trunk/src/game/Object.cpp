@@ -166,6 +166,18 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
 }
 
+void Object::SendUpdateToPlayer(Player* player) const {
+    if (!player->IsInWorld()) return;
+   
+    UpdateData upd;
+    WorldPacket packet;
+
+    upd.Clear();
+    BuildCreateUpdateBlockForPlayer(&upd, player);
+    upd.BuildPacket(&packet);
+    player->GetSession()->SendPacket(&packet);
+}
+
 void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) const
 {
     ByteBuffer buf(500);

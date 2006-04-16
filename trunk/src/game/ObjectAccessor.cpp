@@ -144,17 +144,8 @@ ObjectAccessor::BuildCreateForSameMapPlayer(Player *pl)
 
         {
             sLog.outDebug("Creating same map for both player %d and %d", pl->GetGUIDLow(), iter->second->GetGUIDLow());
-            UpdateData my_data;
-            WorldPacket my_packet;
-            iter->second->BuildCreateUpdateBlockForPlayer(&my_data, pl);
-            my_data.BuildPacket(&my_packet);
-            pl->GetSession()->SendPacket(&my_packet);
-
-            UpdateData his_data;
-            WorldPacket his_pk;
-            pl->BuildCreateUpdateBlockForPlayer(&his_data, iter->second);
-            his_data.BuildPacket(&his_pk);
-            iter->second->GetSession()->SendPacket(&his_pk);
+            iter->second->SendUpdateToPlayer(pl);
+            pl->SendUpdateToPlayer(iter->second);
         }
     }
 }
