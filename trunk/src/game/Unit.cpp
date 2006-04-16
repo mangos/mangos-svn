@@ -150,23 +150,17 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
 
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
-        if (GetTypeId() == TYPEID_PLAYER) ((Player*)this)->CalculateHonor(pVictim);
+        if (GetTypeId() == TYPEID_PLAYER) 
+			((Player*)this)->CalculateHonor(pVictim);
+
 
         DEBUG_LOG("DealDamageAura");
         pVictim->RemoveAllAuras();
-        pVictim->m_hostilList.clear();
 
         pVictim->setDeathState(JUST_DIED);
         uint64 attackerGuid, victimGuid;
         attackerGuid = GetGUID();
         victimGuid = pVictim->GetGUID();
-
-        // 10% durability loss on death
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-        {
-            DEBUG_LOG("We are dead, loosing 10 percents durability");
-            ((Player*)pVictim)->DeathDurabilityLoss(0.10);
-        }
 
         DEBUG_LOG("DealDamageAttackStop");
         pVictim->smsg_AttackStop(attackerGuid);
@@ -178,8 +172,49 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
         pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
 
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+        // 10% durability loss on death
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
+            DEBUG_LOG("We are dead, loosing 10 percents durability");
+            ((Player*)pVictim)->DeathDurabilityLoss(0.10);
+			std::list<Hostil*>::iterator i;
+			for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+			{
+				if((*i)->UnitGuid==victimGuid)
+				{
+					m_hostilList.erase(i);
+					break;
+				}
+			}
+			uint64 petguid;
+			if((petguid=pVictim->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+			{
+				Creature *pet;
+				pet = ObjectAccessor::Instance().GetCreature(*pVictim, petguid);
+				if(pet && pet->isPet())
+				{
+					pet->RemoveAllAuras();
+					pet->setDeathState(JUST_DIED);
+					pet->smsg_AttackStop(attackerGuid);
+					pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+					pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+					pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
+					pet->addStateFlag(UNIT_STAT_DIED);
+					for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+					{
+						if((*i)->UnitGuid==pet->GetGUID())
+						{
+							m_hostilList.erase(i);
+							break;
+						}
+					}
+				}
+				//pVictim->SetUInt64Value( UNIT_FIELD_SUMMON, 0 );
+			}
+        }
+		else
+        {
+			pVictim->m_hostilList.clear();
             DEBUG_LOG("DealDamageNotPlayer");
             if (crtype == 8)
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
@@ -233,7 +268,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
         pVictim->addStateFlag(UNIT_STAT_ATTACK_BY);
-        pVictim->addAttacker(pVictim);
+        pVictim->addAttacker(this);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {

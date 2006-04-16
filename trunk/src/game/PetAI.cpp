@@ -116,7 +116,7 @@ void PetAI::UpdateAI(const uint32 diff)
 {
     if( i_pVictim != NULL )
     {
-        if( _isVisible(i_pVictim) )
+        /*if( _isVisible(i_pVictim) )
         {
             DEBUG_LOG("Victim %d re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
             i_state = UNIT_STAT_STOPPED;
@@ -133,14 +133,14 @@ void PetAI::UpdateAI(const uint32 diff)
             else
                 i_pet->Idle();
             i_pVictim = NULL;
-        }
-        else if( !i_pet.canReachWithAttack( i_pVictim ))
+        }*/
+        if( !i_pet.canReachWithAttack( i_pVictim ))
         {
 
             float dx = i_pVictim->GetPositionX() - i_pet.GetPositionX();
             float dy = i_pVictim->GetPositionY() - i_pet.GetPositionY();
             float orientation = (float)atan2((double)dy, (double)dx);
-            i_pet.Relocate(i_pet.GetPositionX(), i_pet.GetPositionY(), i_pet.GetPositionZ(), orientation);
+            i_pet.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
         }
 
         if( _needToStop() )
