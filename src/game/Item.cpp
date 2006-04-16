@@ -467,12 +467,8 @@ void Item::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM item_instances WHERE guid = '%u'",GetGUIDLow());
 }
 
-ItemPrototype *Item::GetProto()
+ItemPrototype *Item::GetProto() const
 {
     return objmgr.GetItemPrototype(GetUInt32Value(OBJECT_FIELD_ENTRY));
 }
 
-ItemPrototype *Item::GetItemProto()
-{
-    return objmgr.GetItemPrototype(GetUInt32Value(OBJECT_FIELD_ENTRY));
-}

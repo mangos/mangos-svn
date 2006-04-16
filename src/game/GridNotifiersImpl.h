@@ -101,17 +101,8 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         {
 
             sLog.outDebug("Creating in range packet for both player %d and %d", i_player.GetGUID(), iter->second->GetGUID());
-            UpdateData my_data;
-            WorldPacket my_packet;
-            iter->second->BuildCreateUpdateBlockForPlayer(&my_data, &i_player);
-            my_data.BuildPacket(&my_packet);
-            i_player.GetSession()->SendPacket(&my_packet);
-
-            UpdateData his_data;
-            WorldPacket his_pk;
-            i_player.BuildCreateUpdateBlockForPlayer(&his_data, iter->second);
-            his_data.BuildPacket(&his_pk);
-            iter->second->GetSession()->SendPacket(&his_pk);
+            iter->second->SendUpdateToPlayer(&i_player);
+            i_player.SendUpdateToPlayer(iter->second);
         }
     }
 }

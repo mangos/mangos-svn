@@ -1021,12 +1021,12 @@ uint32 Player::GetBagItemCount(uint32 itemId)
         bag = GetBagBySlot(i);
         if (!bag || bag->IsEmpty())
             continue;
-        for (uint8 j=0; j < bag->GetItemProto()->ContainerSlots; j++)
+        for (uint8 j=0; j < bag->GetProto()->ContainerSlots; j++)
         {
             pItem = bag->GetItemFromBag(j);
             if(!pItem)
                 continue;
-            if (pItem->GetItemProto()->ItemId==itemId)
+            if (pItem->GetProto()->ItemId==itemId)
             {
                 fcount+=pItem->GetCount();
             }
@@ -1037,7 +1037,7 @@ uint32 Player::GetBagItemCount(uint32 itemId)
         pItem = GetItemBySlot(i);
         if (!pItem)
             continue;
-        if(pItem->GetItemProto()->ItemId==itemId)
+        if(pItem->GetProto()->ItemId==itemId)
         {
             fcount+=pItem->GetCount();
         }
@@ -4107,7 +4107,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
         // Same items
         if (dstItem->GetEntry() == srcItem->GetEntry())
         {
-            int stack = dstItem->GetProto()->MaxCount?dstItem->GetProto()->MaxCount:1;
+            int stack = dstItem->GetMaxStackCount();
             int dstCount = dstItem->GetCount();
             int srcCount = srcItem->GetCount();
 
@@ -4140,10 +4140,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
     {
         AddItem(dstBag, dstSlot, dstItem, false, false, true);
         srcItem->SetCount(srcItem->GetCount() - count);
-        upd.Clear();
-        srcItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-        upd.BuildPacket(&data);
-        GetSession()->SendPacket(&data);
+        srcItem->SendUpdateToPlayer(this);
         _SaveInventory();
         return true;
     }
@@ -4183,7 +4180,7 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         // Same items
         if (dstItem->GetEntry() == srcItem->GetEntry())
         {
-            int stack = dstItem->GetProto()->MaxCount?dstItem->GetProto()->MaxCount:1;
+            int stack = dstItem->GetMaxStackCount();
             int dstCount = dstItem->GetCount();
             int srcCount = srcItem->GetCount();
 
@@ -4474,13 +4471,7 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
                         {
                             pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
                             pItem->SaveToDB();
-                            if (IsInWorld())
-                            {
-                                upd.Clear();
-                                pItem->BuildCreateUpdateBlockForPlayer( &upd, this );
-                                upd.BuildPacket( &packet );
-                                m_session->SendPacket(&packet);
-                            }
+                            pItem->SendUpdateToPlayer(this);
                         }
                         sLog.outDetail("AddNewItem : Item added (stack), itemId = %i, amount = %i, bagIndex = %i, slot = %i, dontadd = %i", itemId, ((pItem->GetCount() + count) > stack)?(stack - pItem->GetCount()):count, bagIndex, slot, dontadd);
                         return ((pItem->GetCount() + count) > stack)?(stack - pItem->GetCount()):count;
@@ -4573,13 +4564,7 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
                                     {
                                         pItem->SetCount(pItem->GetCount() + plus);
                                         pItem->SaveToDB();
-                                        if (IsInWorld())
-                                        {
-                                            upd.Clear();
-                                            pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                                            upd.BuildPacket(&packet);
-                                            m_session->SendPacket(&packet);
-                                        }
+                                        pItem->SendUpdateToPlayer(this);
                                     }
                                     if (!count)
                                     {
@@ -4641,13 +4626,7 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
                                             {
                                                 pItem->SetCount(pItem->GetCount() + plus);
                                                 pItem->SaveToDB();
-                                                if (IsInWorld())
-                                                {
-                                                    upd.Clear();
-                                                    pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                                                    upd.BuildPacket(&packet);
-                                                    m_session->SendPacket(&packet);
-                                                }
+                                                pItem->SendUpdateToPlayer(this);
                                             }
                                             if (!count)
                                             {
@@ -4700,7 +4679,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
     WorldPacket packet;
     Item *pItem = 0;
     Bag *pBag = 0;
-    int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
+    int stack = item->GetMaxStackCount();
     int count = item->GetCount();
 
     switch(bagIndex)
@@ -4765,13 +4744,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
                 {
                     pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
                     _SaveInventory();
-                    if (IsInWorld())
-                    {
-                        upd.Clear();
-                        pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                        upd.BuildPacket(&packet);
-                        m_session->SendPacket(&packet);
-                    }
+                    pItem->SendUpdateToPlayer(this);
                 }
                 AddedItemToBag(item->GetEntry(),count);
                 sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked), dontadd = %i", pItem->GetEntry(), bagIndex, slot, dontadd);
@@ -4833,14 +4806,8 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
                     _ApplyItemMods(item, slot, true);
                 }
                 if (!dontsave) { _SaveInventory(); }
-                if (IsInWorld())
-                {
-                    item->AddToWorld();
-                    upd.Clear();
-                    item->BuildCreateUpdateBlockForPlayer(&upd, this);
-                    upd.BuildPacket(&packet);
-                    GetSession()->SendPacket(&packet);
-                }
+                if (IsInWorld()) item->AddToWorld();
+                item->SendUpdateToPlayer(this);
             }
             sLog.outDetail("AddItem: Item %i added to slot, slot = %i, dontadd = %i", item->GetEntry(), slot, dontadd);
         }
@@ -4880,7 +4847,7 @@ uint8 Player::AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool al
     WorldPacket packet;
     Item *pItem = 0;
     Bag *pBag = 0;
-    int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
+    int stack = item->GetMaxStackCount();
     int count = item->GetCount();
     uint8 addtobag = 0;
     uint8 addtoslot = NULL_SLOT;
@@ -4991,13 +4958,7 @@ uint8 Player::AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool al
                                 if (!dontadd)
                                 {
                                     pItem->SetCount(pItem->GetCount() + plus);
-                                    if (IsInWorld())
-                                    {
-                                        upd.Clear();
-                                        pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                                        upd.BuildPacket(&packet);
-                                        m_session->SendPacket(&packet);
-                                    }
+                                    pItem->SendUpdateToPlayer(this);
                                 }
                                 if (!count)
                                 {
@@ -5050,13 +5011,7 @@ uint8 Player::AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool al
                                         if (!dontadd)
                                         {
                                             pItem->SetCount(pItem->GetCount() + plus);
-                                            if (IsInWorld())
-                                            {
-                                                upd.Clear();
-                                                pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                                                upd.BuildPacket(&packet);
-                                                m_session->SendPacket(&packet);
-                                            }
+                                            pItem->SendUpdateToPlayer(this);
                                         }
                                         if (!count)
                                         {
@@ -5096,7 +5051,7 @@ uint8 Player::AddItemToBank(uint8 bagIndex,uint8 slot, Item *item, bool allowsta
     WorldPacket packet;
     Item *pItem = 0;
     Bag *pBag = 0;
-    int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
+    int stack = item->GetMaxStackCount();
     int count = item->GetCount();
     uint8 addtobag = 0;
     uint8 addtoslot = NULL_SLOT;
@@ -5209,13 +5164,7 @@ uint8 Player::AddItemToBank(uint8 bagIndex,uint8 slot, Item *item, bool allowsta
                                 if (!dontadd)
                                 {
                                     pItem->SetCount(pItem->GetCount() + plus);
-                                    if (IsInWorld())
-                                    {
-                                        upd.Clear();
-                                        pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                                        upd.BuildPacket(&packet);
-                                        m_session->SendPacket(&packet);
-                                    }
+                                    pItem->SendUpdateToPlayer(this);
                                 }
                                 if (!count)
                                 {
@@ -5268,13 +5217,7 @@ uint8 Player::AddItemToBank(uint8 bagIndex,uint8 slot, Item *item, bool allowsta
                                         if (!dontadd)
                                         {
                                             pItem->SetCount(pItem->GetCount() + plus);
-                                            if (IsInWorld())
-                                            {
-                                                upd.Clear();
-                                                pItem->BuildCreateUpdateBlockForPlayer(&upd, this);
-                                                upd.BuildPacket(&packet);
-                                                m_session->SendPacket(&packet);
-                                            }
+                                            pItem->SendUpdateToPlayer(this);
                                         }
                                         if (!count)
                                         {
@@ -5323,7 +5266,7 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
         pItem = m_items[i];
         if (!pItem)
             continue;
-        if(pItem->GetItemProto()->ItemId==itemId)
+        if(pItem->GetProto()->ItemId==itemId)
         {
             if((oldcnt=pItem->GetCount())>itemcount)
             {
@@ -5362,7 +5305,7 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
         pBag = GetBagBySlot(i);
         if (pBag)
         {
-            uint32 ContainerSlots=pBag->GetItemProto()->ContainerSlots;
+            uint32 ContainerSlots=pBag->GetProto()->ContainerSlots;
             for(uint8 j=0;j<ContainerSlots;j++)
             {
                 pItem = pBag->GetItemFromBag(j);
@@ -5379,13 +5322,8 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                             RemovedItemFromBag(pItem->GetEntry());
                         }
                     }
-                    if (IsInWorld())
-                    {
-                        upd.Clear();
-                        pBag->Item::BuildCreateUpdateBlockForPlayer(&upd, this);
-                        upd.BuildPacket(&packet);
-                        m_session->SendPacket(&packet);
-                    }
+                    pBag->SendUpdateToPlayer(this);
+
                     if(removed>=itemcount)
                         return;
                     sLog.outDetail("RemoveItemFromSlot : Item removed, bagIndex = %i, slot = %i", i, j);
@@ -5481,13 +5419,8 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                             pItem->DestroyForPlayer(this);
                         }
                     }
-                    if (IsInWorld())
-                    {
-                        upd.Clear();
-                        pBag->Item::BuildCreateUpdateBlockForPlayer(&upd, this);
-                        upd.BuildPacket(&packet);
-                        m_session->SendPacket(&packet);
-                    }
+
+                    pBag->SendUpdateToPlayer(this);
                     sLog.outDetail("RemoveItemFromSlot : Item removed, bagIndex = %i, slot = %i", bagIndex, slot);
                     break;
                 }
@@ -5628,7 +5561,7 @@ bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInv
             {
                 if(additems)
                 {
-                    if(pItem->GetItemProto()->ItemId == ID
+                    if(pItem->GetProto()->ItemId == ID
                         && pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
                     {
                         slot = pSlot;
@@ -5638,7 +5571,7 @@ bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInv
                         return true;
                     }
                 }
-                else if(pItem->GetItemProto()->ItemId == ID)
+                else if(pItem->GetProto()->ItemId == ID)
                 {
                     slot = pSlot;
                     bagIndex = i;

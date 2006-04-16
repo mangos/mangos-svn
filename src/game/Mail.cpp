@@ -332,7 +332,7 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
 
         if (srcitem)
         {
-            if (srcitem->GetItemProto()->DisplayInfoID == displayID)
+            if (srcitem->GetProto()->DisplayInfoID == displayID)
             {
                 break;
             }
@@ -353,7 +353,7 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
         delete result;
     }
 
-    return srcitem->GetItemProto()->ItemId;
+    return srcitem->GetProto()->ItemId;
 }
 
 extern char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subclassNum, uint32 type, uint32 DisplayID);
