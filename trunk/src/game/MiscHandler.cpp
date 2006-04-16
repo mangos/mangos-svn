@@ -944,7 +944,9 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->BuildTeleportAckMsg(&data, GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
     GetPlayer()->GetSession()->SendPacket(&data);
+
     GetPlayer()->SetPosition(GetPlayer()->m_resurrectX ,GetPlayer()->m_resurrectY ,GetPlayer()->m_resurrectZ,GetPlayer()->GetOrientation());
+
     GetPlayer()->m_resurrectGUID = 0;
     GetPlayer()->m_resurrectHealth = GetPlayer()->m_resurrectHealth = 0;
     GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;

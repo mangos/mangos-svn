@@ -28,43 +28,33 @@ using namespace MaNGOS;
 
 void PlayerNotifier::Visit(PlayerMapType &m)
 {
+	BuildForMySelf();
 
-    BuildForMySelf();
+	for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+	{
+		if( iter->second == &i_player )
+			continue;
 
-    UpdateData my_data;
-    Player *player = &i_player;
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        if( iter->second == player )
-            continue;
-
-        WorldPacket packet;
-        UpdateData update_data;
-
-        i_player.BuildCreateUpdateBlockForPlayer(&update_data, iter->second);
-        update_data.BuildPacket(&packet);
-        iter->second->GetSession()->SendPacket(&packet);
-
-        iter->second->BuildCreateUpdateBlockForPlayer(&my_data, &i_player);
-    }
-
-    if( my_data.HasData() )
-    {
-        WorldPacket my_packet;
-        my_data.BuildPacket(&my_packet);
-        i_player.GetSession()->SendPacket(&my_packet);
-    }
-
+		if( (i_player.isAlive() && iter->second->isAlive()) ||
+			(i_player.isDead() && iter->second->isDead()) )
+		{
+			iter->second->SendUpdateToPlayer(&i_player);
+            i_player.SendUpdateToPlayer(iter->second);
+		}
+		else
+		{
+			ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
+		}
+	}
 }
 
 void
 PlayerNotifier::BuildForMySelf()
 {
-    WorldPacket packet;
-    UpdateData data;
-
     if( !i_player.IsInWorld() )
     {
+		WorldPacket packet;
+		UpdateData data;
         sLog.outDetail("Creating player data for himself %d", i_player.GetGUID());
         i_player.BuildCreateUpdateBlockForPlayer(&data, &i_player);
         data.BuildPacket(&packet);
@@ -76,10 +66,9 @@ PlayerNotifier::BuildForMySelf()
 void
 VisibleNotifier::Notify()
 {
-    WorldPacket packet;
-
     if( i_data.HasData() )
     {
+		WorldPacket packet;
         i_data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);
     }
@@ -96,9 +85,9 @@ VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 void
 NotVisibleNotifier::Notify()
 {
-    WorldPacket packet;
     if( i_data.HasData() )
     {
+		WorldPacket packet;
         i_data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);
     }
@@ -141,10 +130,9 @@ ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
 void
 MessageDeliverer::Visit(PlayerMapType &m)
 {
-    Player *player = &i_player;
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second != player || i_toSelf )
+        if( iter->second != &i_player || i_toSelf )
         {
             iter->second->GetSession()->SendPacket(i_message);
         }
@@ -154,7 +142,6 @@ MessageDeliverer::Visit(PlayerMapType &m)
 void
 ObjectMessageDeliverer::Visit(PlayerMapType &m)
 {
-    uint64 guid = i_object.GetGUID();
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         iter->second->GetSession()->SendPacket(i_message);

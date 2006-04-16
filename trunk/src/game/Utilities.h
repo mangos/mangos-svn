@@ -23,7 +23,7 @@
 #include "Object.h"
 #include "Map.h"
 
-#define SPIRIT_HEALER       5233
+#define SPIRIT_HEALER       6491
 
 namespace MaNGOS
 {
@@ -36,7 +36,7 @@ namespace MaNGOS
 
         template<> inline bool IsSpiritHealer(Creature *obj)
         {
-            return ( obj->GetUInt32Value(UNIT_FIELD_DISPLAYID) == SPIRIT_HEALER );
+            return ( obj->GetUInt32Value(OBJECT_FIELD_ENTRY) == SPIRIT_HEALER );
         }
     }
 }

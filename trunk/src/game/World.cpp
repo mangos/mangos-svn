@@ -112,8 +112,8 @@ void World::SetInitialWorldSettings()
 
     sDatabase.PExecute("UPDATE characters set online=0;");
 
-    // remove bonnes after restart
-    sDatabase.PExecute("DELETE from corpses WHERE bonnes_flag = '1';");
+    // remove bones after restart
+    sDatabase.PExecute("DELETE from corpses WHERE bones_flag = '1';");
 
     new ChannelMgr;
 

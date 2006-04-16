@@ -60,4 +60,4 @@ void HandleCorpsesErase(void*)
 
 
     // global event to erase corpses/bones
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,60000,false,true);
+    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,600000,false,true);

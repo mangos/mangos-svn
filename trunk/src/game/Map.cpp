@@ -211,8 +211,6 @@ void Map::Add(Player *player)
     EnsureGridLoadedForPlayer(cell, player, true);
     cell.data.Part.reserved = ALL_DISTRICT;
     NotifyPlayerVisibility(cell, p, player);
-
-    ObjectAccessor::Instance().BuildCreateForSameMapPlayer(player);
 }
 
 template<class T>
@@ -407,13 +405,12 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
     CellLock<ReadGuard> cell_lock(new_cell, new_val);
 
     MaNGOS::VisibleNotifier notifier(*player);
-    TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
-    TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
 
-    if( same_cell )
-        new_cell.data.Part.reserved = ALL_DISTRICT;
-
-    cell_lock->Visit(cell_lock, player_notifier, *this);
+	if( !same_cell )
+	{
+		TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
+		cell_lock->Visit(cell_lock, player_notifier, *this);
+	}
 
     MaNGOS::PlayerConfrontationNotifier confront(*player);
     TypeContainerVisitor<MaNGOS::PlayerConfrontationNotifier, TypeMapContainer<AllObjectTypes> > player_confronted(confront);
@@ -423,6 +420,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
     if( same_cell )
         return;
 
+	TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
     cell_lock->Visit(cell_lock, object_notifier, *this);
     notifier.Notify();
 
