@@ -40,8 +40,8 @@ class Bag : public Item
 
         Item* GetItemFromBag(uint8 slot) { return m_bagslot[slot]; }
 
-        int8 FindFreeBagSlot();
-        int8 GetSlotByItemGUID(uint64 guid);
+        uint8 FindFreeBagSlot();
+        uint8 GetSlotByItemGUID(uint64 guid);
         bool IsEmpty();
 
         // DB operations

@@ -40,7 +40,6 @@
 #include "Group.h"
 #include "Formulas.h"
 #include "Pet.h"
-#include "GlobalEvents.cpp"
 
 #include <cmath>
 
@@ -5615,16 +5614,13 @@ bool Player::GetSlotByItemGUID(uint64 guid,uint8 &bagIndex,uint8 &slot)
         bagIndex = CLIENT_SLOT_BACK;
         return true;
     }
-    Bag *pBag;
-    int8 s;
 
     for (uint8 i=CLIENT_SLOT_01;i<=CLIENT_SLOT_04;i++)
     {
-        pBag = GetBagBySlot(i);
-        if (pBag)
+        if (Bag *pBag = GetBagBySlot(i))
         {
-            s=pBag->GetSlotByItemGUID(guid);
-            if (s != -1)
+            uint8 s=pBag->GetSlotByItemGUID(guid);
+            if (s != NULL_SLOT)
             {
                 slot = s;
                 bagIndex = i;

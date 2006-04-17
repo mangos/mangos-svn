@@ -158,14 +158,14 @@ void Bag::DeleteFromDB()
     Item::DeleteFromDB();
 }
 
-int8 Bag::FindFreeBagSlot()
+uint8 Bag::FindFreeBagSlot()
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
     for (uint8 i=0; i <ContainerSlots; i++)
         if (!m_bagslot[i])
             return i;
 
-    return -1;
+    return NULL_SLOT;
 }
 
 Item* Bag::RemoveItemFromBag(uint8 slot)
@@ -223,7 +223,7 @@ bool Bag::IsEmpty()
     return true;
 }
 
-int8 Bag::GetSlotByItemGUID(uint64 guid)
+uint8 Bag::GetSlotByItemGUID(uint64 guid)
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
 
@@ -233,7 +233,7 @@ int8 Bag::GetSlotByItemGUID(uint64 guid)
             if(m_bagslot[i]->GetGUID() == guid)
                 return i;
     }
-    return -1;
+    return NULL_SLOT;
 }
 
 // Adds an item to a bag slot
