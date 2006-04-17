@@ -65,15 +65,15 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             T *obj = new T;
             uint32 guid = fields[0].GetUInt32();
             obj->LoadFromDB(guid);
-			m[obj->GetGUID()] = obj;
+            m[obj->GetGUID()] = obj;
 
-            SetState(obj);		
+            SetState(obj);
             obj->AddToWorld();
             ++count;
 
         }while( result->NextRow() );
-		result = NULL;
-		delete result;
+        result = NULL;
+        delete result;
     }
 }
 

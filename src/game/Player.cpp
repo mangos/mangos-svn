@@ -693,7 +693,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
 
 void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orientation)
 {
-	MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
+    MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
     data.Initialize(SMSG_TRANSFER_PENDING);
     data << uint32(mapid);
@@ -702,13 +702,13 @@ void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orient
     data.Initialize(SMSG_NEW_WORLD);
     data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
     GetSession()->SendPacket( &data );
-	
-	SetMapId(mapid);
-	SetPosition(x,y,z,orientation);
+
+    SetMapId(mapid);
+    SetPosition(x,y,z,orientation);
     SetDontMove(true);
     SaveToDB();
 
-	MapManager::Instance().GetMap(GetMapId())->Add(this);
+    MapManager::Instance().GetMap(GetMapId())->Add(this);
 
 }
 
@@ -2741,28 +2741,26 @@ void Player::RepopAtGraveyard()
         // we should be able to make 2 kinds of teleport after death
         // near if in the same zoneid and far if in different zoneid
 
-        
-		WorldPacket data;
-		BuildHeartBeatMsg(&data);
+        WorldPacket data;
+        BuildHeartBeatMsg(&data);
         SendMessageToSet(&data, true);
 
-
         // teleport near
-		SetDontMove(true);
-		MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
-		
+        SetDontMove(true);
+        MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
+
         BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0.0);
         GetSession()->SendPacket(&data);
 
-		SetPosition( closestX, closestY, closestZ, 0.0);
-		RemoveFromWorld();
-		MapManager::Instance().GetMap(GetMapId())->Add(this);
-		SetDontMove(false);
-		SaveToDB();
+        SetPosition( closestX, closestY, closestZ, 0.0);
+        RemoveFromWorld();
+        MapManager::Instance().GetMap(GetMapId())->Add(this);
+        SetDontMove(false);
+        SaveToDB();
 
-		// teleport far
-		//smsg_NewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
-     
+        // teleport far
+        //smsg_NewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
+
     }
 
 }

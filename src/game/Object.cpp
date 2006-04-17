@@ -166,9 +166,10 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
 }
 
-void Object::SendUpdateToPlayer(Player* player) const {
+void Object::SendUpdateToPlayer(Player* player) const
+{
     if (!player->IsInWorld()) return;
-   
+
     UpdateData upd;
     WorldPacket packet;
 

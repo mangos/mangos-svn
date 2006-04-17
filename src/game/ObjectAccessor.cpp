@@ -446,15 +446,15 @@ namespace MaNGOS
             i_creature.DestroyForPlayer(iter->second);
     }
 
-	void PlayerDeadViewRemover::Visit(PlayerMapType &m)
+    void PlayerDeadViewRemover::Visit(PlayerMapType &m)
     {
-		i_player.DestroyForPlayer(&i_player2);
-		i_player2.DestroyForPlayer(&i_player);
+        i_player.DestroyForPlayer(&i_player2);
+        i_player2.DestroyForPlayer(&i_player);
     }
 
-	void CreatureViewRemover::Visit(PlayerMapType &m)
+    void CreatureViewRemover::Visit(PlayerMapType &m)
     {
-		i_creature.DestroyForPlayer(&i_player);
+        i_creature.DestroyForPlayer(&i_player);
     }
 }
 
