@@ -36,6 +36,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "realmd", "VC80\realmd.vcpro
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "script", "VC80\script.vcproj", "{4205C8A9-79B7-4354-8064-F05FB9CA0C96}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SQL", "SQL", "{C53CCFDA-49FA-4041-AB64-A61FD6107730}"
+	ProjectSection(SolutionItems) = preProject
+		..\sql\data\commands.sql = ..\sql\data\commands.sql
+		..\sql\mangos.sql = ..\sql\mangos.sql
+		..\sql\data\playercreateinfo.sql = ..\sql\data\playercreateinfo.sql
+		..\sql\data\playercreateinfoData.sql = ..\sql\data\playercreateinfoData.sql
+		..\sql\data\realms.sql = ..\sql\data\realms.sql
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
