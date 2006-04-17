@@ -471,4 +471,3 @@ ItemPrototype *Item::GetProto() const
 {
     return objmgr.GetItemPrototype(GetUInt32Value(OBJECT_FIELD_ENTRY));
 }
-

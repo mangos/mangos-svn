@@ -28,24 +28,24 @@ using namespace MaNGOS;
 
 void PlayerNotifier::Visit(PlayerMapType &m)
 {
-	BuildForMySelf();
+    BuildForMySelf();
 
-	for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-	{
-		if( iter->second == &i_player )
-			continue;
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        if( iter->second == &i_player )
+            continue;
 
-		if( (i_player.isAlive() && iter->second->isAlive()) ||
-			(i_player.isDead() && iter->second->isDead()) )
-		{
-			iter->second->SendUpdateToPlayer(&i_player);
+        if( (i_player.isAlive() && iter->second->isAlive()) ||
+            (i_player.isDead() && iter->second->isDead()) )
+        {
+            iter->second->SendUpdateToPlayer(&i_player);
             i_player.SendUpdateToPlayer(iter->second);
-		}
-		else
-		{
-			ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
-		}
-	}
+        }
+        else
+        {
+            ObjectAccessor::Instance().RemovePlayerFromPlayerView(&i_player, iter->second);
+        }
+    }
 }
 
 void
@@ -53,8 +53,8 @@ PlayerNotifier::BuildForMySelf()
 {
     if( !i_player.IsInWorld() )
     {
-		WorldPacket packet;
-		UpdateData data;
+        WorldPacket packet;
+        UpdateData data;
         sLog.outDetail("Creating player data for himself %d", i_player.GetGUID());
         i_player.BuildCreateUpdateBlockForPlayer(&data, &i_player);
         data.BuildPacket(&packet);
@@ -68,7 +68,7 @@ VisibleNotifier::Notify()
 {
     if( i_data.HasData() )
     {
-		WorldPacket packet;
+        WorldPacket packet;
         i_data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);
     }
@@ -87,7 +87,7 @@ NotVisibleNotifier::Notify()
 {
     if( i_data.HasData() )
     {
-		WorldPacket packet;
+        WorldPacket packet;
         i_data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);
     }

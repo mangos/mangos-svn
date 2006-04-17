@@ -406,11 +406,11 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 
     MaNGOS::VisibleNotifier notifier(*player);
 
-	if( !same_cell )
-	{
-		TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
-		cell_lock->Visit(cell_lock, player_notifier, *this);
-	}
+    if( !same_cell )
+    {
+        TypeContainerVisitor<MaNGOS::VisibleNotifier, ContainerMapList<Player> > player_notifier(notifier);
+        cell_lock->Visit(cell_lock, player_notifier, *this);
+    }
 
     MaNGOS::PlayerConfrontationNotifier confront(*player);
     TypeContainerVisitor<MaNGOS::PlayerConfrontationNotifier, TypeMapContainer<AllObjectTypes> > player_confronted(confront);
@@ -420,7 +420,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
     if( same_cell )
         return;
 
-	TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+    TypeContainerVisitor<MaNGOS::VisibleNotifier, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
     cell_lock->Visit(cell_lock, object_notifier, *this);
     notifier.Notify();
 
