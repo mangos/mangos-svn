@@ -134,10 +134,10 @@ class MANGOS_DLL_SPEC Object
         const float& GetPositionY( ) const { return m_positionY; }
         const float& GetPositionZ( ) const { return m_positionZ; }
         const float& GetOrientation( ) const { return m_orientation; }
-		void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
-		void GetClosePoint( const float ox, const float oy, float &x, float &y, float &z ) const;
-		//Need fix to the right
-		const float GetObjectSize() const { return 1.0f; };
+        void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
+        void GetClosePoint( const float ox, const float oy, float &x, float &y, float &z ) const;
+        //Need fix to the right
+        const float GetObjectSize() const { return 1.0f; };
 
         const uint32& GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }

@@ -18,7 +18,6 @@
 */
 
 #include "Mthread.h"
-#include "Process.h"
 
 #ifdef __FreeBSD__
 #  define MANGOS_PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE
