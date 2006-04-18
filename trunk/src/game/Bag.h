@@ -56,4 +56,10 @@ class Bag : public Item
         // Bag Storage space
         Item* m_bagslot[20];
 };
+
+inline Item* NewItemOrBag(ItemPrototype* proto) 
+{ 
+    return (proto->InventoryType == INVTYPE_BAG) ? new Bag : new Item; 
+}
+
 #endif

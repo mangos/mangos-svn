@@ -80,14 +80,14 @@ void Bag::SaveToDB()
 {
     Item::SaveToDB();
 
-    sDatabase.PExecute("DELETE FROM bag WHERE bag_guid = '%u';", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%u';", GetGUIDLow());
 
     for (int i = 0; i < 20; i++)
     {
         if (m_bagslot[i])
         {
             m_bagslot[i]->SaveToDB();
-            sDatabase.PExecute("INSERT INTO bag VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO inventory VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
         }
     }
 
@@ -107,33 +107,21 @@ void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM bag WHERE bag_guid = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM inventory WHERE guid = '%u';", GetGUIDLow());
 
     if (result)
     {
-        uint8 slot;
-        uint32 item_guid, item_id;
-        Item* item;
-        ItemPrototype* proto;
-
         do
         {
             Field *fields = result->Fetch();
 
-            slot = fields[1].GetUInt8();
-            item_guid = fields[2].GetUInt32();
-            item_id = fields[3].GetUInt32();
+            uint8  slot      = fields[1].GetUInt8();
+            uint32 item_guid = fields[2].GetUInt32();
+            uint32 item_id   = fields[3].GetUInt32();
 
-            proto = objmgr.GetItemPrototype(item_id);
+            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            if (proto->InventoryType == INVTYPE_BAG)
-            {
-                item = new Bag;
-            }
-            else
-            {
-                item = new Item;
-            }
+            Item* item = NewItemOrBag(proto);
             item->SetOwner(this->GetOwner());
             item->LoadFromDB(item_guid, 1);
             AddItemToBag(slot, item);
@@ -153,7 +141,7 @@ void Bag::DeleteFromDB()
         }
     }
 
-    sDatabase.PExecute("DELETE FROM bag WHERE bag_guid = '%u';", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%u';", GetGUIDLow());
 
     Item::DeleteFromDB();
 }

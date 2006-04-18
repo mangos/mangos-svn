@@ -248,7 +248,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     _ApplyStatsMods();
 
-    Item *item;
     uint32 titem_id;
     uint8 titem_slot;
     uint8 titem_bagIndex;
@@ -274,7 +273,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
         if (titem_id)
         {
-            item = new Item();
             sLog.outDebug("ITEM: Creating initial item, itemId = %d, bagIndex = %d, slot = %d, count = %d",titem_id, titem_bagIndex, titem_slot, titem_amount);
             AddNewItem(titem_bagIndex, titem_slot, titem_id, titem_amount, false, false);
         }
@@ -2037,7 +2035,7 @@ void Player::_SaveQuestStatus()
 
 void Player::_SaveInventory()
 {
-    sDatabase.PExecute("DELETE FROM inventory WHERE player_guid = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%d'",GetGUIDLow());
 
     for(unsigned int i = 0; i < BANK_SLOT_BAG_END; i++)
     {
@@ -2161,33 +2159,20 @@ void Player::_LoadInventory()
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM inventory WHERE player_guid = '%d';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM inventory WHERE guid = '%d';",GetGUIDLow());
 
     if (result)
     {
-        uint8 slot;
-        uint32 item_guid, item_id;
-        Item* item;
-        ItemPrototype* proto;
-
         do
         {
             Field *fields = result->Fetch();
-            slot = fields[1].GetUInt8();
-            item_guid = fields[2].GetUInt32();
-            item_id = fields[3].GetUInt32();
+            uint8  slot      = fields[1].GetUInt8();
+            uint32 item_guid = fields[2].GetUInt32();
+            uint32 item_id   = fields[3].GetUInt32();
 
-            proto = objmgr.GetItemPrototype(item_id);
+            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            if (proto->InventoryType == INVTYPE_BAG)
-            {
-                item = new Bag;
-            }
-            else
-            {
-                item = new Item;
-            }
-
+            Item *item = NewItemOrBag(proto);
             item->SetOwner(this);
             item->LoadFromDB(item_guid, 1);
             AddItem(0, slot, item, false, false, true);
@@ -2363,7 +2348,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM char_spells WHERE charid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM tutorials WHERE playerid = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM inventory WHERE player_guid = '%d'",guid);
+    sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%d'",guid);
     sDatabase.PExecute("DELETE FROM social WHERE guid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM mail WHERE reciver = '%u'",guid);
     sDatabase.PExecute("DELETE FROM corpses WHERE player_guid = '%u'",guid);
@@ -3722,7 +3707,7 @@ bool Player::CanUseItem(ItemPrototype * proto)
     if (error_code)
     {
         WorldPacket data;
-        Item* pItem = new Item();
+        Item* pItem = NewItemOrBag(proto);
         pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this);
 
         data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
@@ -3738,7 +3723,6 @@ bool Player::CanUseItem(ItemPrototype * proto)
 
         GetSession()->SendPacket (&data);
         delete pItem;
-        pItem = NULL;
         return false;
     }
     else
@@ -4106,8 +4090,13 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
     Item *dstItem = GetItemBySlot(dstBag, dstSlot);
     Item *srcItem = GetItemBySlot(srcBag, srcSlot);
 
-    if (count == srcItem->GetCount()) { return SwapItem(dstBag, dstSlot, srcBag, srcSlot); }
-    if (count > srcItem->GetCount()) error_code = EQUIP_ERR_TRIED_TO_SPLIT_MORE_THAN_COUNT;
+    if(!srcItem) error_code = EQUIP_ERR_ITEM_NOT_FOUND;
+    
+    if(!error_code) 
+    {
+        if (count == srcItem->GetCount()) { return SwapItem(dstBag, dstSlot, srcBag, srcSlot); }
+        if (count > srcItem->GetCount()) error_code = EQUIP_ERR_TRIED_TO_SPLIT_MORE_THAN_COUNT;
+    }
 
     if (dstItem && srcItem && !error_code)
     {
@@ -4216,7 +4205,15 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         }
     }
 
-    if (srcItem) error_code = CanEquipItemInSlot(dstBag, dstSlot, srcItem, dstItem);
+    if (srcItem) 
+    {
+        error_code = CanEquipItemInSlot(dstBag, dstSlot, srcItem, dstItem);
+    }
+    else
+    {
+         error_code = EQUIP_ERR_ITEM_NOT_FOUND;
+    }
+
     if ((!error_code) && (dstItem)) error_code = CanEquipItemInSlot(srcBag, srcSlot, dstItem, srcItem);
 
     if (!error_code)
@@ -4261,16 +4258,7 @@ bool Player::CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 
 
     if(proto)
     {
-        Item* pItem;
-
-        if (proto->InventoryType == INVTYPE_BAG)
-        {
-            pItem = new Bag();
-        }
-        else
-        {
-            pItem = new Item();
-        }
+        Item *pItem = NewItemOrBag(proto);
 
         if (count > proto->MaxCount) { count = proto->MaxCount; }
         if (count < 1) { count = 1; }
@@ -5502,7 +5490,6 @@ bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInv
     {
         for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
         {
-            pItem = new Item;
             pItem = GetItemBySlot(j);
             if(!pItem)
                 continue;
@@ -5533,7 +5520,6 @@ bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInv
     {
         for(uint32 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
         {
-            pItem = new Item;
             pItem = GetItemBySlot(i);
             if(!pItem)
                 continue;
@@ -5557,12 +5543,10 @@ bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInv
     }
     for(uint8 i=CLIENT_SLOT_01;i<=CLIENT_SLOT_04;i++)
     {
-        pBag = new Bag;
         pBag = GetBagBySlot(i);
         if (pBag)
             for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
         {
-            pItem = new Item;
             pItem = pBag->GetItemFromBag(pSlot);
             if(pItem)
             {

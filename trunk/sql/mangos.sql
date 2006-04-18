@@ -118,29 +118,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `auctionhouse` ENABLE KEYS */;
 
 --
--- Table structure for table `bag`
---
-
-DROP TABLE IF EXISTS `bag`;
-CREATE TABLE `bag` (
-  `bag_guid` bigint(20) NOT NULL default '0',
-  `slot` tinyint(3) unsigned NOT NULL default '0',
-  `item_guid` bigint(20) NOT NULL default '0',
-  `item_id` int(8) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`item_guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `bag`
---
-
-
-/*!40000 ALTER TABLE `bag` DISABLE KEYS */;
-LOCK TABLES `bag` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `bag` ENABLE KEYS */;
-
---
 -- Table structure for table `bids`
 --
 
@@ -805,7 +782,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `inventory`;
 CREATE TABLE `inventory` (
-  `player_guid` bigint(20) NOT NULL default '0',
+  `guid` bigint(20) NOT NULL default '0',
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `item_guid` bigint(20) NOT NULL default '0',
   `item_id` int(8) unsigned NOT NULL default '0',

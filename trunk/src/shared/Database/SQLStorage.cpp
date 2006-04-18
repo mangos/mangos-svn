@@ -87,7 +87,7 @@ void SQLStorage::Load ()
 
     if(iNumFields!=result->GetFieldCount())
     {
-        printf("Error, probably sql file format was updated (there should be %d fields in sql).\n",iNumFields);
+        printf("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
         return;
     }
 
