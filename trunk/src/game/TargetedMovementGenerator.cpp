@@ -41,9 +41,11 @@ struct StackCleaner
 void
 TargetedMovementGenerator::_setTargetLocation(Creature &owner)
 {
-    float x = i_target.GetPositionX();
-    float y = i_target.GetPositionY();
-    float z = i_target.GetPositionZ();
+    //float x = i_target.GetPositionX();
+    //float y = i_target.GetPositionY();
+    //float z = i_target.GetPositionZ();
+	float x, y, z;
+	owner.GetClosePoint( &i_target, x, y, z );
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z, i_attackRadius);
 }

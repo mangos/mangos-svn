@@ -471,17 +471,23 @@ uint32 Object::GetZoneId( )
 float Object::GetDistanceSq(const Object* obj) const
 {
     ASSERT(obj->GetMapId() == m_mapId);
-    float dx  = obj->GetPositionX() - GetPositionX();
-    float dy  = obj->GetPositionY() - GetPositionY();
-    float dz  = obj->GetPositionZ() - GetPositionZ();
+	float x1, y1, z1, x2, y2, z2;
+	GetClosePoint( obj, x1, y1, z1 );
+	obj->GetClosePoint( this, x2, y2, z2 );
+    float dx  = x2 - x1;
+    float dy  = y2 - y1;
+    float dz  = z2 - z1;
     return (dx*dx) + (dy*dy) + (dz*dz);
 }
 
 float Object::GetDistanceSq(const float x, const float y, const float z) const
 {
-    float dx  = x - GetPositionX();
-    float dy  = y - GetPositionY();
-    float dz  = z - GetPositionZ();
+	float x1, y1, z1;
+	GetClosePoint( x, y, x1, y1, z1 );
+
+    float dx  = x - x1;
+    float dy  = y - y1;
+    float dz  = z - z1;
     return (dx*dx) + (dy*dy) + (dz*dz);
 }
 
@@ -521,6 +527,32 @@ float Object::GetAngle(const Object* obj) const
     return ang;
 }
 
+float Object::GetAngle( const float x, const float y ) const
+{
+    if( x==0 && y==0) return 0;
+
+    float PlayerX = GetPositionX();
+    float PlayerY = GetPositionY();
+
+    if( x==PlayerX )
+    {
+        if(y>=PlayerY)
+            return 1.57079633;
+        else
+            return 4.71238898;
+    }
+    float ang=atan((y - PlayerY) / (x - PlayerX));
+    if(y>PlayerY)
+    {
+        if(ang<0)
+            ang+=M_PI;
+    }
+    else
+    if(ang<0)
+        ang+=2.0f * M_PI;
+    return ang;
+}
+
 bool Object::IsInArc(const float arcangle, const Object* obj) const
 {
     float arc=arcangle;
@@ -532,4 +564,30 @@ bool Object::IsInArc(const float arcangle, const Object* obj) const
     if(lborder<0)
         return ((angle >= 2.0f * M_PI+lborder && angle <= 2.0f * M_PI) || (angle>=0 && angle<=rborder));
     return ( angle >= lborder ) && ( angle <= rborder );
+}
+
+void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z ) const
+{
+	float angle;
+	if(!victim)
+		angle = m_orientation;
+	else
+		angle = GetAngle( victim );
+	x = m_positionX + GetObjectSize() * sin(angle);
+	y = m_positionY + GetObjectSize() * cos(angle);
+    int mapid = GetMapId();
+    z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+}
+
+void Object::GetClosePoint( const float ox, const float oy, float &x, float &y, float &z ) const
+{
+	float angle;
+	if(ox==0 && oy ==0)
+		angle = m_orientation;
+	else
+		angle = GetAngle( ox, oy );
+	x = m_positionX + GetObjectSize() * sin(angle);
+	y = m_positionY + GetObjectSize() * cos(angle);
+    int mapid = GetMapId();
+    z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
 }
