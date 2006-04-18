@@ -16,49 +16,80 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
-#include "WorldPacket.h"
-#include "WorldSession.h"
-#include "UpdateMask.h"
-#include "Opcodes.h"
 #include "Log.h"
 #include "Database/DatabaseEnv.h"
+#include "MapManager.h"
+#include "ObjectAccessor.h"
 #include "EventSystem.h"
 
-
+Corpse *m_pCorpse;
 
 void HandleCorpsesErase(void*)
 {
     sLog.outBasic("Global Event (corpses/bones removal)");
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time) > 1200;");
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time) > 1200 AND bones_flag = 1;");
 
-    if(!result)
+    if(result)
 	{
-	DEBUG_LOG("No corpses to erase");
-	delete result;
-	}
-    else {
-	DEBUG_LOG("We have corpses to erase");
 	Field *fields = result->Fetch();
+	m_pCorpse = new Corpse();
 
 	uint64 guid = fields[0].GetUInt64();
+	float positionX = fields[2].GetFloat();
+	float positionY = fields[3].GetFloat();
+	float positionZ = fields[4].GetFloat();
+	float ort       = fields[5].GetFloat();
+	uint32 mapid    = fields[7].GetUInt32();
 	uint32 flag = fields[10].GetUInt32();
 
-	// TODO check flag and time,
-	// destroy object,delete corpse from DB
+	m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
+	m_pCorpse->SetMapId(mapid);
+	m_pCorpse->LoadValues( fields[8].GetString() );
 
-	//WorldPacket data;
-	//data.Initialize( SMSG_DESTROY_OBJECT );
-	//data << guid;
-	//SendMessageToSet(&data,true);
+	ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
+	MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
+	sDatabase.PExecute("DELETE from corpses WHERE guid = '%ul';",(unsigned long)guid);
+
+	m_pCorpse=NULL;
 	delete result;
 	}
 
+
+    result = sDatabase.PQuery("SELECT * FROM corpses WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time) > 259200 AND bones_flag = 0;");
+
+    if(result)
+	{
+
+	Field *fields = result->Fetch();
+	m_pCorpse = new Corpse();
+
+	uint64 guid = fields[0].GetUInt64();
+	float positionX = fields[2].GetFloat();
+	float positionY = fields[3].GetFloat();
+	float positionZ = fields[4].GetFloat();
+	float ort       = fields[5].GetFloat();
+	uint32 mapid    = fields[7].GetUInt32();
+	uint32 flag = fields[10].GetUInt32();
+
+	m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
+	m_pCorpse->SetMapId(mapid);
+	m_pCorpse->LoadValues( fields[8].GetString() );
+
+	ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
+	MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+
+	sDatabase.PExecute("DELETE from corpses WHERE guid = '%ul';",(unsigned long)guid);
+
+	m_pCorpse=NULL;
+	delete result;
+	}
 }
 
 
     // global event to erase corpses/bones
-	//this will let server very lag. temp disable.
-    //uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,600000,false,true);
+    // deleting expired bones time > 20 minutes and corpses > 3 days
+    // it is run each 20 minutes
+
+    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,true,true);

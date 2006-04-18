@@ -392,6 +392,22 @@ ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId()));
 }
 
+
+void
+ObjectAccessor::RemoveBonesFromPlayerView(Object *o)
+{
+    MaNGOS::BonesViewRemover remover(*o);
+    TypeContainerVisitor<MaNGOS::BonesViewRemover, ContainerMapList<Player> > player_notifier(remover);
+    CellPair p = MaNGOS::ComputeCellPair(o->GetPositionX(), o->GetPositionY());
+    Cell cell = RedZone::GetZone(p);
+    cell.SetNoCreate();
+    cell.data.Part.reserved = ALL_DISTRICT;
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(o->GetMapId()));
+}
+
+
+
 void
 ObjectAccessor::RemovePlayerFromPlayerView(Player *pl, Player *pl2)
 {
@@ -444,6 +460,12 @@ namespace MaNGOS
     {
         for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
             i_creature.DestroyForPlayer(iter->second);
+    }
+
+    void BonesViewRemover::Visit(PlayerMapType &m)
+    {
+        for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+            i_objects.DestroyForPlayer(iter->second);
     }
 
     void PlayerDeadViewRemover::Visit(PlayerMapType &m)

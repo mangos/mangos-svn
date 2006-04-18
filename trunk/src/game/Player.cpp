@@ -40,6 +40,7 @@
 #include "Group.h"
 #include "Formulas.h"
 #include "Pet.h"
+#include "GlobalEvents.cpp"
 
 #include <cmath>
 

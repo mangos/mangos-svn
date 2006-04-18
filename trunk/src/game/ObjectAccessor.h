@@ -69,6 +69,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void RemoveUpdateObject(Object *obj);
 
         void RemoveCreatureCorpseFromPlayerView(Creature *);
+        void RemoveBonesFromPlayerView(Object *);
         void RemovePlayerFromPlayerView(Player *, Player *);
         void RemoveCreatureFromPlayerView(Player *pl, Creature *c);
 
@@ -133,6 +134,13 @@ namespace MaNGOS
     {
         Creature &i_creature;
         CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
+        void Visit(std::map<OBJECT_HANDLE, Player *>  &);
+    };
+
+    struct MANGOS_DLL_DECL BonesViewRemover
+    {
+        Object &i_objects;
+        BonesViewRemover(Object &o) : i_objects(o) {}
         void Visit(std::map<OBJECT_HANDLE, Player *>  &);
     };
 
