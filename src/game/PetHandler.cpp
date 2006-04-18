@@ -133,7 +133,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 unit_target=ObjectAccessor::Instance().FindPlayer(selectguid);
             //guid2 = pl->GetGUID();
             SpellCastTargets targets;
-            targets.m_unitTarget = unit_target;             //(Unit*)pl;
+            targets.setUnitTarget( unit_target );             //(Unit*)pl;
             spell->prepare(&targets);
             break;
         }

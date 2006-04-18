@@ -5851,7 +5851,7 @@ void Player::CastItemSpell(Item *item,Unit* Target)
         WPAssert(spell);
 
         SpellCastTargets targets;
-        targets.m_unitTarget = Target;
+        targets.setUnitTarget( Target );
         spell->m_CastItem = item;
         spell->prepare(&targets);
     }

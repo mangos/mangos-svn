@@ -34,7 +34,7 @@ Spell* Cast(Player*player,uint32 spellId)
     WPAssert(spell);
 
     SpellCastTargets targets;
-    targets.m_unitTarget = player;
+    targets.setUnitTarget( player );
     spell->prepare(&targets);
     return spell;
 

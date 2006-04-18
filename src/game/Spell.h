@@ -144,8 +144,15 @@ class SpellCastTargets
 
             return *this;
         }
+		Unit *getUnitTarget() { return m_unitTarget;};
+		void setUnitTarget(Unit *target)
+		{
+            m_destX = target->GetPositionX();
+            m_destY = target->GetPositionY();
+            m_destZ = target->GetPositionZ();
+			m_unitTarget = target;
+		}
 
-        Unit *m_unitTarget;
         Item *m_itemTarget;
         GameObject *m_GOTarget;
         float m_srcX, m_srcY, m_srcZ;
@@ -153,6 +160,8 @@ class SpellCastTargets
         std::string m_strTarget;
 
         uint16 m_targetMask;
+	private:
+        Unit *m_unitTarget;
 };
 
 enum SpellState

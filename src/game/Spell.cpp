@@ -178,9 +178,9 @@ void Spell::FillTargetMap()
                                                             // Apply Aura
             if(m_spellInfo->Effect[i] == 27) tmpUnitMap.push_back(m_caster);
                                                             // Learn Spell
-            else if(m_spellInfo->Effect[i] == 36) tmpUnitMap.push_back(m_targets.m_unitTarget);
+            else if(m_spellInfo->Effect[i] == 36) tmpUnitMap.push_back(m_targets.getUnitTarget());
                                                             // Learn Skill
-            else if(m_spellInfo->Effect[i] == 44) tmpUnitMap.push_back(m_targets.m_unitTarget);
+            else if(m_spellInfo->Effect[i] == 44) tmpUnitMap.push_back(m_targets.getUnitTarget());
                                                             // Execute Skill
             else if(m_spellInfo->Effect[i] == 118) tmpUnitMap.push_back(m_caster);
         }
@@ -212,7 +212,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_S_E:
         {
-            TagUnitMap.push_back(m_targets.m_unitTarget);
+            TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_AE_E:
         {
@@ -246,7 +246,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_S_F_2:
         {
-            TagUnitMap.push_back(m_targets.m_unitTarget);
+            TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_AC_E:
         {
@@ -280,12 +280,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_DUELVSPLAYER:
         {
-            TagUnitMap.push_back(m_targets.m_unitTarget);
+            TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_GOITEM:
         {
-            if(m_targets.m_unitTarget)
-                TagUnitMap.push_back(m_targets.m_unitTarget);
+            if(m_targets.getUnitTarget())
+                TagUnitMap.push_back(m_targets.getUnitTarget());
             if(m_targets.m_itemTarget)
                 TagItemMap.push_back(m_targets.m_itemTarget);
         }break;
@@ -307,7 +307,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_S_P:
         {
-            TagUnitMap.push_back(m_targets.m_unitTarget);
+            TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
         case TARGET_SELF_FISHING:
         {
@@ -317,13 +317,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         {
             bool onlyParty = false;
 
-            if(!m_targets.m_unitTarget)
+            if(!m_targets.getUnitTarget())
                 break;
 
             Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
             for(uint32 p=0;p<pGroup->GetMembersCount();p++)
             {
-                if(m_targets.m_unitTarget->GetGUID() == pGroup->GetMemberGUID(p))
+                if(m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
                 {
                     onlyParty = true;
                     break;
@@ -695,8 +695,8 @@ void Spell::SendLogExecute()
     data << m_spellInfo->SpellVisual;
     data << uint32(1);
 
-    if(m_targets.m_unitTarget)
-        data << m_targets.m_unitTarget->GetGUID();
+    if(m_targets.getUnitTarget())
+        data << m_targets.getUnitTarget()->GetGUID();
     else if(m_targets.m_itemTarget)
         data << m_targets.m_itemTarget->GetGUID();
     else if(m_targets.m_GOTarget)
@@ -834,7 +834,7 @@ void Spell::TriggerSpell()
 
     Spell spell(m_caster, m_TriggerSpell,false, 0);
     SpellCastTargets targets;
-    targets.m_unitTarget = m_targets.m_unitTarget;
+    targets.setUnitTarget( m_targets.getUnitTarget());
     spell.prepare(&targets);
 
 }
@@ -854,7 +854,7 @@ uint8 Spell::CanCast()
     }
 
     Unit *target = NULL;
-    target = m_targets.m_unitTarget;
+    target = m_targets.getUnitTarget();
     float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
 
     if(target)
@@ -1104,7 +1104,7 @@ void Spell::reflect(Unit *refunit)
     Spell *spell = new Spell(refunit, refspell, true, 0);
 
     SpellCastTargets targets;
-    targets.m_unitTarget = m_caster;
+    targets.setUnitTarget( m_caster );
     spell->prepare(&targets);
 
 }
