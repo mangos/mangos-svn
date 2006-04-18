@@ -299,7 +299,6 @@ void Spell::EffectCreateItem(uint32 i)
         {
             if(pUnit->GetSlotByItemID(m_spellInfo->Reagent[x],bagIndex,curSlot,true,false))
             {
-                //pItem = new Item;
                 pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
             }
             if(pItem)
@@ -342,7 +341,6 @@ void Spell::EffectCreateItem(uint32 i)
         {
             if(pUnit->GetSlotByItemID(m_spellInfo->EffectItemType[i],bagIndex,curSlot,false,true))
             {
-                pItem = new Item;
                 pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
                 if(pItem && pItem->GetProto()->ItemId == m_spellInfo->EffectItemType[i])
                 {
@@ -370,12 +368,10 @@ void Spell::EffectCreateItem(uint32 i)
             if(slot == 0)
                 for(uint8 bagID=CLIENT_SLOT_01;bagID<=CLIENT_SLOT_04;bagID++)
             {
-                pBag = new Bag;
                 pBag = pUnit->GetBagBySlot(bagID);
                 if (pBag)
                     for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
                 {
-                    pItem = new Item;
                     pItem = pBag->GetItemFromBag(pSlot);
                     if(!pItem)
                     {

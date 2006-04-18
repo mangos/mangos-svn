@@ -921,12 +921,10 @@ uint8 Spell::CheckItems()
         }
         for(bagIndex=CLIENT_SLOT_01;bagIndex<=CLIENT_SLOT_04;bagIndex++)
         {
-            pBag = new Bag;
             pBag = p_caster->GetBagBySlot(bagIndex);
             if (pBag)
                 for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
             {
-                itm = new Item;
                 itm = p_caster->GetItemBySlot(bagIndex,pSlot);
                 if(!itm)
                     continue;
@@ -949,7 +947,6 @@ uint8 Spell::CheckItems()
         {
             if(p_caster->GetSlotByItemID(m_spellInfo->Totem[i], bagIndex, curSlot,true,false))
             {
-                itm = new Item;
                 itm = p_caster->GetItemBySlot(bagIndex,curSlot);
                 if(!itm)continue;
                 if(itm->GetProto()->ItemId == m_spellInfo->Totem[i])

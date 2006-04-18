@@ -122,14 +122,10 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetDurability(uint32 Value);
         void SetDurabilityToMax();
 
-        bool IsBag() const
-        {
-            if (GetProto()->InventoryType == INVTYPE_BAG) return true;
-            return false;
-        }
+        bool IsBag() const { return GetProto()->InventoryType == INVTYPE_BAG; }
 
-        uint32 GetEntry() { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
-        uint32 GetCount() { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
+        uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
+        uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->MaxCount ? GetProto()->MaxCount : 1; }
 
