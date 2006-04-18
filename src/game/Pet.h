@@ -23,7 +23,7 @@
 
 enum PetState
 {
-    STATE_RA_STAY	        = 1,
+    STATE_RA_STAY           = 1,
     STATE_RA_FOLLOW         = 2,
     STATE_RA_REACTIVE       = 4,
     STATE_RA_PROACTIVE      = 8,
@@ -43,9 +43,9 @@ class Pet : public Creature
         uint32 GetActState() { return m_actState; }
         void SetActState(uint32 st) { m_actState=st; }
         void AddActState(uint32 st) { m_actState |= st; }
-		void ClearActState(uint32 st) { m_state &= ~st; };
-		bool HasActState(uint32 st)	{ return m_actState & st;};
-		uint32 GetFealty() { return m_fealty; }
+        void ClearActState(uint32 st) { m_state &= ~st; };
+        bool HasActState(uint32 st) { return m_actState & st;};
+        uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }
         std::string GetName() { return m_name; }
         void SetName(std::string newname) { m_name=newname; }

@@ -50,7 +50,7 @@ i_creatureState(UNIT_STAT_STOPPED), m_faction(0),m_emoteState(0),m_isPet(false)
 
     memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
     for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
-	m_isPet = false;
+    m_isPet = false;
 }
 
 Creature::~Creature()
@@ -845,7 +845,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg);
 
-	m_spells[0] = cinfo->spell1;
+    m_spells[0] = cinfo->spell1;
     m_spells[1] = cinfo->spell2;
     m_spells[2] = cinfo->spell3;
     m_spells[3] = cinfo->spell4;

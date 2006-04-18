@@ -270,21 +270,21 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
 
 void RemoveEvent(uint32 eventid)
 {
-	//DWORD dwtid;
+    //DWORD dwtid;
     //HANDLE hThread;
 
-	//newthr->th = (HANDLE)_beginthreadex(NULL, WIN32_THREAD_STACK_SIZE, RemovePeriodicEvent, &eventid, 0, &dwtid);
+    //newthr->th = (HANDLE)_beginthreadex(NULL, WIN32_THREAD_STACK_SIZE, RemovePeriodicEvent, &eventid, 0, &dwtid);
 
-	//WaitForSingleObject(hThread,20000);
+    //WaitForSingleObject(hThread,20000);
 
-	MThread* tr=new MThread;
-	tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)eventid);
-	return;
+    MThread* tr=new MThread;
+    tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)eventid);
+    return;
 }
 
 void RemovePeriodicEvent(void* etid)
 {
-	uint32 eventid = (uint32)etid;
+    uint32 eventid = (uint32)etid;
     PeriodicEvent * prev=NULL;
     read_mspe
         PeriodicEvent * pos=msPEvents;
@@ -373,7 +373,7 @@ void RemovePeriodicEvent(void* etid)
 
     }
     end_read_mpe
-	return;
+        return;
 }
 
 void msThread()

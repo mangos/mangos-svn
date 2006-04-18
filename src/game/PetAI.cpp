@@ -134,7 +134,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 i_pet->Idle();
             i_pVictim = NULL;
         }
-		if( !i_pet.canReachWithAttack( i_pVictim ))
+        if( !i_pet.canReachWithAttack( i_pVictim ))
         {
 
             float dx = i_pVictim->GetPositionX() - i_pet.GetPositionX();
@@ -176,6 +176,6 @@ void PetAI::_taggedToKill(Unit *u)
     assert( i_pVictim == NULL );
     i_pet.SetState(UNIT_STAT_ATTACKING);
     i_pet.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
-	i_pet->Mutate(new TargetedMovementGenerator(*u));
-	i_pVictim = u;
+    i_pet->Mutate(new TargetedMovementGenerator(*u));
+    i_pVictim = u;
 }

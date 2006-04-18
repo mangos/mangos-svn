@@ -144,14 +144,14 @@ class SpellCastTargets
 
             return *this;
         }
-		Unit *getUnitTarget() { return m_unitTarget;};
-		void setUnitTarget(Unit *target)
-		{
+        Unit *getUnitTarget() { return m_unitTarget;};
+        void setUnitTarget(Unit *target)
+        {
             m_destX = target->GetPositionX();
             m_destY = target->GetPositionY();
             m_destZ = target->GetPositionZ();
-			m_unitTarget = target;
-		}
+            m_unitTarget = target;
+        }
 
         Item *m_itemTarget;
         GameObject *m_GOTarget;
@@ -160,7 +160,7 @@ class SpellCastTargets
         std::string m_strTarget;
 
         uint16 m_targetMask;
-	private:
+    private:
         Unit *m_unitTarget;
 };
 
