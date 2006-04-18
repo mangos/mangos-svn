@@ -18,6 +18,7 @@
 */
 
 #include "Mthread.h"
+#include "Process.h"
 
 #ifdef __FreeBSD__
 #  define MANGOS_PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE
@@ -157,12 +158,13 @@ bool MThread::SetPriority (ThreadPriority prio)
     return SetThreadPriority (th, p);
 }
 
-static DWORD WINAPI thread_start_routine (void *arg)
+//static DWORD WINAPI thread_start_routine (void *arg)
+static void thread_start_routine (void *arg)
 {
     MThread *newthr = (MThread *)arg;
     newthr->id = GetCurrentThreadId ();
     newthr->routine (newthr->arg);
-    return 0;
+    return ;
 }
 
 MThread *MThread::Start (void (*routine) (void *arg), void *arg)
@@ -171,14 +173,13 @@ MThread *MThread::Start (void (*routine) (void *arg), void *arg)
     MThread *newthr = new MThread ();
     newthr->routine = routine;
     newthr->arg = arg;
-    newthr->th = CreateThread (NULL, WIN32_THREAD_STACK_SIZE,
-        thread_start_routine, newthr, 0, &dwtid);
+	//newthr->th = CreateThread (NULL, WIN32_THREAD_STACK_SIZE, thread_start_routine, newthr, 0, &dwtid);
+	newthr->th = (HANDLE)_beginthread(thread_start_routine, 0, newthr);
     if (!newthr->th)
     {
         newthr->DecRef ();
         return NULL;
     }
-
     return newthr;
 }
 

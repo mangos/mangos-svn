@@ -35,19 +35,19 @@ Event *mEvents=NULL;
 static uint32 eventid=0;
 uint32 avalabelid=0;
 
-uint32 rmse=0;
-uint32 wmse=0;
-uint32 rse=0;
-uint32 wse=0;
-uint32 rme=0;
-uint32 wme=0;
+volatile uint32 rmse=0;
+volatile uint32 wmse=0;
+volatile uint32 rse=0;
+volatile uint32 wse=0;
+volatile uint32 rme=0;
+volatile uint32 wme=0;
 
-uint32 rmspe=0;
-uint32 wmspe=0;
-uint32 rspe=0;
-uint32 wspe=0;
-uint32 rmpe=0;
-uint32 wmpe=0;
+volatile uint32 rmspe=0;
+volatile uint32 wmspe=0;
+volatile uint32 rspe=0;
+volatile uint32 wspe=0;
+volatile uint32 rmpe=0;
+volatile uint32 wmpe=0;
 
 #define write_mse while(rmse||wmse);wmse=1;
 #define end_write_mse wmse=0;
@@ -268,9 +268,23 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
 
 }
 
-void RemovePeriodicEvent(uint32 eventid)
+void RemoveEvent(uint32 eventid)
 {
+	//DWORD dwtid;
+    //HANDLE hThread;
 
+	//newthr->th = (HANDLE)_beginthreadex(NULL, WIN32_THREAD_STACK_SIZE, RemovePeriodicEvent, &eventid, 0, &dwtid);
+
+	//WaitForSingleObject(hThread,20000);
+
+	MThread* tr=new MThread;
+	tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)eventid);
+	return;
+}
+
+void RemovePeriodicEvent(void* etid)
+{
+	uint32 eventid = (uint32)etid;
     PeriodicEvent * prev=NULL;
     read_mspe
         PeriodicEvent * pos=msPEvents;
@@ -359,7 +373,7 @@ void RemovePeriodicEvent(uint32 eventid)
 
     }
     end_read_mpe
-
+	return;
 }
 
 void msThread()
@@ -421,7 +435,6 @@ void mspThread()
             }
 
             ppos=(PeriodicEvent*)ppos->pNext;
-            cur=now();
         }
         end_read_mspe
 

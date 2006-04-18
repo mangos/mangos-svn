@@ -21,6 +21,7 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "MapManager.h"
+#include "Spell.h"
 
 #define SMALL_ALPHA 0.05
 
@@ -90,7 +91,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     if( owner.IsStopped() )
     {
         assert( i_target.isAlive() );
-        if( !owner.canReachWithAttack( &i_target ) )
+        if( !owner.canReachWithAttack( &i_target ) && !owner.reachWithSpellAttack( &i_target) )
         {
             owner.SetState(UNIT_STAT_CHASE);
             _setTargetLocation(owner);
@@ -102,6 +103,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         Traveller<Creature> traveller(owner);
         if( i_destinationHolder.UpdateTraveller(traveller, time_diff, false) )
         {
+			Spell* spell;
             if( i_targetedHome )
             {
 
@@ -113,6 +115,16 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 StackCleaner stack_cleaner(owner);
                 stack_cleaner.Done();
             }
+			else if( owner.TestState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
+			{
+                owner.StopMoving();
+                //owner.SetState(UNIT_STAT_ATTACKING);
+				SpellCastTargets targets;
+				targets.m_unitTarget = &i_target;
+				spell->prepare(&targets);
+				owner.m_canMove = false;
+                DEBUG_LOG("Spell Attack.");
+			}
             else if( owner.canReachWithAttack(&i_target) )
             {
                 owner.StopMoving();

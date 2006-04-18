@@ -829,6 +829,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
 void Spell::EffectSummonPet(uint32 i)
 {
+    WorldPacket data;
     uint64 petguid;
     if((petguid=m_caster->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
     {
@@ -847,6 +848,28 @@ void Spell::EffectSummonPet(uint32 i)
                 MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
             }
             OldSummon->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), OldSummon->GetOrientation());
+			if(m_caster->GetTypeId() == TYPEID_PLAYER)
+			{
+				uint16 Command = 7;
+				uint16 State = 6;
+
+				sLog.outDebug("Pet Spells Groups");
+
+				data.clear();
+				data.Initialize(SMSG_PET_SPELLS);
+
+				data << (uint64)OldSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+				data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+				for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+																//C100 = maybe group
+					data << uint16 (OldSummon->m_spells[i]) << uint16 (0xC100);
+
+				data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+				((Player*)m_caster)->GetSession()->SendPacket(&data);
+			}
             return;
         }
     }
@@ -855,7 +878,6 @@ void Spell::EffectSummonPet(uint32 i)
     if(NewSummon->LoadPetFromDB( m_caster ))
         return;
 
-    WorldPacket data;
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), m_caster->GetPositionX(),
         m_caster->GetPositionY(), m_caster->GetPositionZ()+1, m_caster->GetOrientation(), petentry))
     {
@@ -890,10 +912,23 @@ void Spell::EffectSummonPet(uint32 i)
         name.append("\\\'s Pet");
         NewSummon->SetName( name );
         NewSummon->SetFealty( 10 );
-        for(uint32 i=0;i<PETMAXSPELLS;i++)
-            NewSummon->SetSpells(i, 0);
+        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+            NewSummon->m_spells[i] = 0;
         if(petentry == 416)                                 //imp
-            NewSummon->SetSpells(0, 133);                   //133---fire bolt 1
+		{
+            NewSummon->m_spells[0] = 133;                   //133---fire bolt 1
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(133 );
+            if(!spellInfo)
+            {
+                sLog.outError("WORLD: unknown spell id 133\n");
+                return;
+            }
+
+            Spell *spell = new Spell(NewSummon, spellInfo, false, 0);
+            WPAssert(spell);
+			NewSummon->m_currentSpell = spell;
+			NewSummon->AddActState(STATE_RA_SPELL1);
+		}
 
         NewSummon->SetisPet(true);
         NewSummon->SavePetToDB();
@@ -917,9 +952,9 @@ void Spell::EffectSummonPet(uint32 i)
 
             data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-            for(uint32 i=0;i<PETMAXSPELLS;i++)
+            for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
                                                             //C100 = maybe group
-                data << uint16 (NewSummon->GetSpells()[i]) << uint16 (0xC100);
+                data << uint16 (NewSummon->m_spells[i]) << uint16 (0xC100);
 
             data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 

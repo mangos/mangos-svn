@@ -172,6 +172,10 @@ struct CreatureInfo
     uint32  resistance4;
     uint32  resistance5;
     uint32  resistance6;
+	uint32	spell1;
+	uint32	spell2;
+	uint32	spell3;
+	uint32	spell4;
     char*   AIName;
     char*   MovementGen;
     char*   ScriptName;
@@ -281,7 +285,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         virtual void setDeathState(DeathState s)
         {
+			while(eventrun);
+			eventrun=true;
             m_deathState = s;
+			eventrun=false;
             if(s == JUST_DIED)
             {
                 m_deathTimer = m_corpseDelay;

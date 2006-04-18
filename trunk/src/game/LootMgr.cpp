@@ -105,7 +105,7 @@ void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance)
             itm.itemid = itemid;
             itm.displayid = (*iter).displayid;
             itm.is_looted =false;
-            itm.chance=0;
+            itm.chance=chance;
             loot->items.push_back(itm);
         }
     }

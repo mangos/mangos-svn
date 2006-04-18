@@ -401,7 +401,7 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
 
     data << uint32(pQuest->GetQuestInfo()->QuestId);
     data << uint32(pQuest->GetQuestInfo()->MinLevel);
-    data << uint32(pQuest->GetQuestInfo()->MaxLevel);
+    data << uint32(pQuest->GetQuestInfo()->QuestLevel);
     data << uint32(pQuest->GetQuestInfo()->ZoneId);
 
     data << uint32(pQuest->GetQuestInfo()->Type);

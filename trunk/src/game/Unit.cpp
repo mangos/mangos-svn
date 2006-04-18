@@ -38,8 +38,6 @@
 
 #include <math.h>
 
-static bool eventrun=false;
-
 Unit::Unit() : Object()
 {
     m_objectType |= TYPE_UNIT;
@@ -71,6 +69,11 @@ Unit::Unit() : Object()
     m_ReflectSpellPerc   = 0;
 
     m_damageManaShield = NULL;
+	m_spells[0] = 0;
+    m_spells[1] = 0;
+    m_spells[2] = 0;
+    m_spells[3] = 0;
+
 }
 
 Unit::~Unit()
@@ -101,6 +104,38 @@ void Unit::Update( uint32 p_time )
 void Unit::setAttackTimer(uint32 time)
 {
     time ? m_attackTimer = time : m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+}
+
+Spell *Unit::reachWithSpellAttack(Unit *pVictim)
+{
+	SpellEntry *spellInfo;
+	Spell *spell;
+    SpellCastTargets targets;
+    targets.m_unitTarget = pVictim; 
+	for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+	{
+		if(!m_spells[i])
+			break;
+		spellInfo = sSpellStore.LookupEntry(m_spells[i] );
+	    if(!spellInfo)
+		{
+			sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
+			break;
+		}
+
+		spell = new Spell(this, spellInfo, false, 0);
+		spell->m_targets = targets;
+		if(!spell)
+		{
+			sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
+			break;
+		}
+	    if(spell->CanCast()==0)
+		{
+			return spell;
+		}
+	}
+	return NULL;
 }
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
@@ -382,12 +417,9 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 {
-    while(eventrun);
-    eventrun = true;
     uint32 procFlag = 0;
     if(!this || !pVictim || !this->isAlive() || !pVictim->isAlive())
     {
-        eventrun=false;
         return;
     }
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u",
@@ -415,7 +447,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
-    eventrun=false;
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)

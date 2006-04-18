@@ -68,7 +68,7 @@ uint32 Quest::XPValue(Player* _Player)
 {
     if(GetQuestInfo()->RewXP<=0)
         return 100;
-    return (uint32)(GetQuestInfo()->RewXP*(1.0+((double)GetQuestInfo()->MaxLevel+(double)GetQuestInfo()->MinLevel-(double)_Player->getLevel()*2.0)*0.05));
+    return (uint32)(GetQuestInfo()->RewXP*(1.0+((double)GetQuestInfo()->QuestLevel+(double)GetQuestInfo()->MinLevel-(double)_Player->getLevel()*2.0)*0.05));
 }
 
 bool Quest::CanBeTaken( Player *_Player )
@@ -119,7 +119,7 @@ bool Quest::ClassSatisfied( Player *_Player )
 bool Quest::LevelSatisfied( Player *_Player )
 {
     uint32 plevel=_Player->getLevel();
-    return ( plevel >= GetQuestInfo()->MinLevel && plevel <= GetQuestInfo()->MaxLevel );
+    return ( plevel >= GetQuestInfo()->MinLevel );
 }
 
 bool Quest::CanShowUnsatified( Player *_Player )

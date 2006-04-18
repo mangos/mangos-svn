@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetDurability(uint32 Value);
         void SetDurabilityToMax();
 
-        bool IsBag()
+        bool IsBag() const
         {
             if (GetProto()->InventoryType == INVTYPE_BAG) return true;
             return false;
