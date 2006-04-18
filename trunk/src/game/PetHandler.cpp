@@ -46,11 +46,11 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     Player *pl=GetPlayer();
     Creature* pet=ObjectAccessor::Instance().GetCreature(*pl,guid1);
     sLog.outString( "HandlePetAction.Pet %u flag is %u, spellid is %u, tanget %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
-	if(!pet)
-	{
-		sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid1)) );
-		return;
-	}
+    if(!pet)
+    {
+        sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid1)) );
+        return;
+    }
     switch(flag)
     {
         case 1792:                                          //0x0700
@@ -133,7 +133,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 unit_target=ObjectAccessor::Instance().FindPlayer(selectguid);
             //guid2 = pl->GetGUID();
             SpellCastTargets targets;
-            targets.setUnitTarget( unit_target );             //(Unit*)pl;
+            targets.setUnitTarget( unit_target );           //(Unit*)pl;
             spell->prepare(&targets);
             break;
         }

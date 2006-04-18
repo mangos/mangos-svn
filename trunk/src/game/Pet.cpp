@@ -100,10 +100,10 @@ bool Pet::LoadPetFromDB( Unit* owner )
     m_name = fields[11].GetString();
     m_fealty = fields[12].GetUInt32();
 
-	m_spells[0] = fields[6].GetUInt32();
-	m_spells[1] = fields[7].GetUInt32();
-	m_spells[2] = fields[8].GetUInt32();
-	m_spells[3] = fields[9].GetUInt32();
+    m_spells[0] = fields[6].GetUInt32();
+    m_spells[1] = fields[7].GetUInt32();
+    m_spells[2] = fields[8].GetUInt32();
+    m_spells[3] = fields[9].GetUInt32();
     m_actState = fields[10].GetUInt32();
     SetisPet(true);
     AIM_Initialize();

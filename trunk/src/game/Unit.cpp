@@ -69,7 +69,7 @@ Unit::Unit() : Object()
     m_ReflectSpellPerc   = 0;
 
     m_damageManaShield = NULL;
-	m_spells[0] = 0;
+    m_spells[0] = 0;
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
@@ -108,34 +108,34 @@ void Unit::setAttackTimer(uint32 time)
 
 Spell *Unit::reachWithSpellAttack(Unit *pVictim)
 {
-	SpellEntry *spellInfo;
-	Spell *spell;
+    SpellEntry *spellInfo;
+    Spell *spell;
     SpellCastTargets targets;
-    targets.setUnitTarget( pVictim ); 
-	for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-	{
-		if(!m_spells[i])
-			break;
-		spellInfo = sSpellStore.LookupEntry(m_spells[i] );
-	    if(!spellInfo)
-		{
-			sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
-			break;
-		}
+    targets.setUnitTarget( pVictim );
+    for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+    {
+        if(!m_spells[i])
+            break;
+        spellInfo = sSpellStore.LookupEntry(m_spells[i] );
+        if(!spellInfo)
+        {
+            sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
+            break;
+        }
 
-		spell = new Spell(this, spellInfo, false, 0);
-		spell->m_targets = targets;
-		if(!spell)
-		{
-			sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
-			break;
-		}
-	    if(spell->CanCast()==0)
-		{
-			return spell;
-		}
-	}
-	return NULL;
+        spell = new Spell(this, spellInfo, false, 0);
+        spell->m_targets = targets;
+        if(!spell)
+        {
+            sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
+            break;
+        }
+        if(spell->CanCast()==0)
+        {
+            return spell;
+        }
+    }
+    return NULL;
 }
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
