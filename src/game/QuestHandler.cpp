@@ -30,7 +30,6 @@
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY" );
     uint64 guid;
     recv_data >> guid;
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY NpcGUID=%u",uint32(GUID_LOPART(guid)) );
@@ -43,7 +42,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     }
 
     uint32 questStatus = Script->NPCDialogStatus(_player, pCreature );
-    if(questStatus == 0)
+    if( questStatus > 6 )
     {
         uint32 defstatus=DIALOG_STATUS_CHAT;
         if(pCreature->isQuestGiver())

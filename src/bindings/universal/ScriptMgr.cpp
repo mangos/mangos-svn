@@ -156,7 +156,7 @@ uint32 NPCDialogStatus( Player *player, Creature *_Creature )
     Script *tmpscript = NULL;
 
     tmpscript = GetScriptByName(_Creature->GetCreatureInfo()->ScriptName);
-    if(!tmpscript || !tmpscript->pNPCDialogStatus) return 0;
+    if(!tmpscript || !tmpscript->pNPCDialogStatus) return 100;
 
     player->PlayerTalkClass->ClearMenus();
     return tmpscript->pNPCDialogStatus(player,_Creature);

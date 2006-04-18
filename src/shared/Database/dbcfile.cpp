@@ -97,7 +97,7 @@ void * DBCFile::AutoProduceData(const char * format,uint32 * records)
         return NULL;
     }
     //get struct size
-    for(int x=0;x<fieldCount;x++)
+    for(uint32 x=0;x<fieldCount;x++)
         switch(format[x])
         {
             case FT_FLOAT:

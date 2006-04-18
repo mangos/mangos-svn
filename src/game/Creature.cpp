@@ -41,7 +41,7 @@
 
 Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
-m_respawnDelay(25000), m_corpseDelay(45000), m_respawnradius(0.0),
+m_respawnDelay(25000), m_corpseDelay(120000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0),
 m_moveBackward(false), m_moveRandom(false), m_moveRun(false),
 i_creatureState(UNIT_STAT_STOPPED), m_faction(0),m_emoteState(0),m_isPet(false)
@@ -50,6 +50,7 @@ i_creatureState(UNIT_STAT_STOPPED), m_faction(0),m_emoteState(0),m_isPet(false)
 
     memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
     for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
+	m_isPet = false;
 }
 
 Creature::~Creature()
@@ -106,7 +107,7 @@ void Creature::AIM_Update(const uint32 &diff)
         case JUST_DIED:
         {
             SetUInt32Value(UNIT_NPC_FLAGS, 0);
-            m_deathState = CORPSE;
+            setDeathState( CORPSE );
 
             i_AI->UpdateAI(diff);
             break;
@@ -119,7 +120,7 @@ void Creature::AIM_Update(const uint32 &diff)
 
                 RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
                 SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
-                m_deathState = ALIVE;
+                setDeathState( ALIVE );
                 ClearState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
                 MapManager::Instance().GetMap(GetMapId())->Add(this);
@@ -843,6 +844,11 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg);
+
+	m_spells[0] = cinfo->spell1;
+    m_spells[1] = cinfo->spell2;
+    m_spells[2] = cinfo->spell3;
+    m_spells[3] = cinfo->spell4;
 
     SetSpeed( cinfo->speed ) ;
     return true;

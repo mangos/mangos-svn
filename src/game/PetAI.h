@@ -51,7 +51,6 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         Creature &i_pet;
         Unit* i_owner;
         Unit *i_pVictim;
-        uint32 i_state;
         TimeTracker i_tracker;
         //uint32 i_RepeatAction;
 };

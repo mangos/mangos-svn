@@ -31,7 +31,7 @@ int PetAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature &c) : i_pet(c), i_pVictim(NULL), i_state( ((Pet*)&c)->GetActState() ), i_tracker(TIME_INTERVAL_LOOK)
+PetAI::PetAI(Creature &c) : i_pet(c), i_pVictim(NULL), i_tracker(TIME_INTERVAL_LOOK)
 {
     i_owner = ObjectAccessor::Instance().GetCreature(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
     if(!i_owner)
@@ -88,7 +88,7 @@ void PetAI::_stopAttack()
     else if( !i_pVictim->isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%d]", i_pet.GetGUIDLow());
-        if((i_state & STATE_RA_FOLLOW)>0)
+        if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
         else
             i_pet->Idle();
@@ -96,7 +96,7 @@ void PetAI::_stopAttack()
     else if( i_pVictim->m_stealth )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%d]", i_pet.GetGUIDLow());
-        if((i_state & STATE_RA_FOLLOW)>0)
+        if(((Pet*)&i_pet)->HasActState( STATE_RA_FOLLOW))
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
         else
             i_pet->Idle();
@@ -104,7 +104,7 @@ void PetAI::_stopAttack()
     else
     {
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%d]", i_pet.GetGUIDLow());
-        if((i_state & STATE_RA_FOLLOW)>0)
+        if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
         else
             i_pet->Idle();
@@ -133,15 +133,15 @@ void PetAI::UpdateAI(const uint32 diff)
             else
                 i_pet->Idle();
             i_pVictim = NULL;
-        }*/
-        if( !i_pet.canReachWithAttack( i_pVictim ))
+        }
+		if( !i_pet.canReachWithAttack( i_pVictim ))
         {
 
             float dx = i_pVictim->GetPositionX() - i_pet.GetPositionX();
             float dy = i_pVictim->GetPositionY() - i_pet.GetPositionY();
             float orientation = (float)atan2((double)dy, (double)dx);
             i_pet.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
-        }
+        }*/
 
         if( _needToStop() )
         {
@@ -176,6 +176,6 @@ void PetAI::_taggedToKill(Unit *u)
     assert( i_pVictim == NULL );
     i_pet.SetState(UNIT_STAT_ATTACKING);
     i_pet.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
-    i_pet->Mutate(new TargetedMovementGenerator(*u));
-    i_pVictim = u;
+	i_pet->Mutate(new TargetedMovementGenerator(*u));
+	i_pVictim = u;
 }

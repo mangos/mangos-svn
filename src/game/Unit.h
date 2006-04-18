@@ -23,9 +23,11 @@
 #include "Object.h"
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
+#include "Mthread.h"
 
 #include <list>
 
+#define UNIT_MAX_SPELLS			4
 #define PLAYER_MAX_SKILLS       127
 #define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + (x*3))
 // DWORD definitions gathered from windows api
@@ -91,6 +93,8 @@ struct Hostil
     float Hostility;
 };
 
+static bool eventrun=false;
+
 class MANGOS_DLL_SPEC Unit : public Object
 {
     public:
@@ -103,6 +107,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void setAttackTimer(uint32 time);
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
+		Spell *reachWithSpellAttack(Unit *pVictim);
 
         inline AttackerSet getAttackerSet( ) {  return m_attackers; }
         inline void addAttacker(Unit *pAttacker)
@@ -176,7 +181,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isDead() { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         virtual void setDeathState(DeathState s)
         {
+			while(eventrun);
+			eventrun=true;
             m_deathState = s;
+			eventrun=false;
         };
         DeathState getDeathState() { return m_deathState; }
 
@@ -223,6 +231,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         struct DamageManaShield* m_damageManaShield;
 
+		uint32 m_spells[UNIT_MAX_SPELLS];
         Spell * m_currentSpell;
 
         float GetHostility(uint64 guid);

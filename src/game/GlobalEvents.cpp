@@ -60,4 +60,5 @@ void HandleCorpsesErase(void*)
 
 
     // global event to erase corpses/bones
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,600000,false,true);
+	//this will let server very lag. temp disable.
+    //uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,600000,false,true);

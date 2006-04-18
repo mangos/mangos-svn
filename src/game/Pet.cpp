@@ -30,7 +30,7 @@ Pet::Pet()
     m_name = "Pet";
     m_actState = STATE_RA_FOLLOW;
     m_fealty = 0;
-    for(uint32 i=0;i<PETMAXSPELLS;i++)
+    for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
         m_spells[i]=0;
 }
 
@@ -100,14 +100,13 @@ bool Pet::LoadPetFromDB( Unit* owner )
     m_name = fields[11].GetString();
     m_fealty = fields[12].GetUInt32();
 
+	m_spells[0] = fields[6].GetUInt32();
+	m_spells[1] = fields[7].GetUInt32();
+	m_spells[2] = fields[8].GetUInt32();
+	m_spells[3] = fields[9].GetUInt32();
+    m_actState = fields[10].GetUInt32();
     SetisPet(true);
     AIM_Initialize();
-    m_spells[0] = fields[6].GetUInt32();
-    m_spells[1] = fields[7].GetUInt32();
-    m_spells[2] = fields[8].GetUInt32();
-    m_spells[3] = fields[9].GetUInt32();
-    m_actState = fields[10].GetUInt32();
-
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
     owner->SetUInt64Value(UNIT_FIELD_SUMMON, GetGUID());
     sLog.outDebug("New Pet has guid %u", GetGUID());
@@ -126,7 +125,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        for(uint32 i=0;i<PETMAXSPELLS;i++)
+        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
                                                             //C100 = maybe group
             data << uint16 (m_spells[i]) << uint16 (0xC100);
 

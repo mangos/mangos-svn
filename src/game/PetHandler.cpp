@@ -46,7 +46,11 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     Player *pl=GetPlayer();
     Creature* pet=ObjectAccessor::Instance().GetCreature(*pl,guid1);
     sLog.outString( "HandlePetAction.Pet %u flag is %u, spellid is %u, tanget %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
-
+	if(!pet)
+	{
+		sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid1)) );
+		return;
+	}
     switch(flag)
     {
         case 1792:                                          //0x0700
@@ -123,9 +127,10 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
             Spell *spell = new Spell(pet, spellInfo, false, 0);
             WPAssert(spell);
-            Unit* unit_target=ObjectAccessor::Instance().GetCreature(*pl,guid2);
+            uint64 selectguid = pl->GetSelection();
+            Unit* unit_target=ObjectAccessor::Instance().GetCreature(*pl,selectguid);
             if(!unit_target)
-                unit_target=ObjectAccessor::Instance().FindPlayer(guid2);
+                unit_target=ObjectAccessor::Instance().FindPlayer(selectguid);
             //guid2 = pl->GetGUID();
             SpellCastTargets targets;
             targets.m_unitTarget = unit_target;             //(Unit*)pl;
@@ -135,22 +140,6 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         default:
             sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
     }
-    /*        case 0x0700:                                        //delete pet
-           {
-
-                           if(pet)
-                           {
-                               pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-
-                               data.Initialize(SMSG_DESTROY_OBJECT);
-                               data << pet->GetGUID();
-                               pl->SendMessageToSet (&data, true);
-                               MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
-
-                               data.Initialize(SMSG_PET_SPELLS);
-                               data << uint64(0);
-                               pl->GetSession()->SendPacket(&data);
-                           }*/
 }
 
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )

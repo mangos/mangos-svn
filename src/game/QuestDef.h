@@ -135,7 +135,7 @@ struct QuestInfo
     uint32 ZoneId;
     uint32 Flags;
     uint32 MinLevel;
-    uint32 MaxLevel;
+    uint32 QuestLevel;
     uint32 Type;
     uint32 RequiredRaces;
     uint32 RequiredClass;
