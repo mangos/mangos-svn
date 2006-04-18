@@ -120,7 +120,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 owner.StopMoving();
                 //owner.SetState(UNIT_STAT_ATTACKING);
 				SpellCastTargets targets;
-				targets.m_unitTarget = &i_target;
+				targets.setUnitTarget( &i_target );
 				spell->prepare(&targets);
 				owner.m_canMove = false;
                 DEBUG_LOG("Spell Attack.");

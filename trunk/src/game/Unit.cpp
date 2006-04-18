@@ -111,7 +111,7 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
 	SpellEntry *spellInfo;
 	Spell *spell;
     SpellCastTargets targets;
-    targets.m_unitTarget = pVictim; 
+    targets.setUnitTarget( pVictim ); 
 	for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
 	{
 		if(!m_spells[i])
@@ -353,7 +353,7 @@ void Unit::CastSpell(Unit* caster,Unit* Victim, uint32 spellId, bool triggered)
     WPAssert(spell);
 
     SpellCastTargets targets;
-    targets.m_unitTarget = Victim;
+    targets.setUnitTarget( Victim );
     spell->prepare(&targets);
     m_canMove = false;
 }

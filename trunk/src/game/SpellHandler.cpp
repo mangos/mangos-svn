@@ -29,7 +29,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     sLog.outDetail("WORLD: got use Item packet, data length = %i",recvPacket.size());
 
-    Player* pUser = GetPlayer();
+    Player* pUser = _player;
     uint8 bagIndex, slot, tmp3;
     uint32 spellId;
 
@@ -122,7 +122,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(info)
             {
                 spellId = info->sound0;
-                guid=GetPlayer()->GetGUID();
+                guid=_player->GetGUID();
             }
             break;
         default:
@@ -138,11 +138,11 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
+    Spell *spell = new Spell(_player, spellInfo, false, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
-    targets.m_unitTarget = GetPlayer();
+    targets.setUnitTarget( _player );
     targets.m_GOTarget = obj;
     spell->prepare(&targets);
 
@@ -165,11 +165,11 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Spell *spell = new Spell(GetPlayer(), spellInfo, false, 0);
+    Spell *spell = new Spell(_player, spellInfo, false, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
-    targets.read(&recvPacket,GetPlayer());
+    targets.read(&recvPacket,_player);
 
     spell->prepare(&targets);
 
@@ -177,19 +177,19 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
-    if(GetPlayer()->m_currentSpell)
-        GetPlayer()->m_currentSpell->cancel();
+    if(_player->m_currentSpell)
+        _player->m_currentSpell->cancel();
 }
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 {
     uint32 spellId;
     recvPacket >> spellId;
-    GetPlayer()->RemoveAura(spellId);
+    _player->RemoveAura(spellId);
 }
 
 void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
 {
-    if(GetPlayer()->m_currentSpell)
-        GetPlayer()->m_currentSpell->cancel();
+    if(_player->m_currentSpell)
+        _player->m_currentSpell->cancel();
 }

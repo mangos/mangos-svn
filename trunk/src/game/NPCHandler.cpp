@@ -178,7 +178,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
         if(!spellInfo) return;
 
-        if(GetPlayer()->GetUInt32Value( UNIT_FIELD_LEVEL ) < spellInfo->spellLevel)
+        if(_player->GetUInt32Value( UNIT_FIELD_LEVEL ) < spellInfo->spellLevel)
             return;
 
         data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED );
@@ -190,7 +190,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         Spell *spell = new Spell(unit, proto->spell, false, NULL);
 
         SpellCastTargets targets;
-        targets.m_unitTarget = GetPlayer();
+        targets.setUnitTarget( _player );
 
         spell->prepare(&targets);
 
@@ -283,7 +283,7 @@ void WorldSession::SendSpiritRessurect()
     SpellEntry *spellInfo = sSpellStore.LookupEntry( 15007 );
     if(spellInfo)
     {
-        Aura *Aur = new Aura(spellInfo,600000,GetPlayer(),GetPlayer());
+        Aura *Aur = new Aura(spellInfo,600000,_player,_player);
         GetPlayer( )->AddAura(Aur);
     }
 
@@ -300,7 +300,7 @@ void WorldSession::SendSpiritRessurect()
     GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
 
     GetPlayer( )->ResurrectPlayer();
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
+    GetPlayer( )->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(_player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
     GetPlayer( )->SpawnCorpseBones();
 }
 
@@ -384,10 +384,10 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
             uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
             uint32 costs = durability - curdur;
 
-            if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+            if (_player->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
             {
-                uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
-                GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                uint32 newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
                 // repair item
                 pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
             }
@@ -405,7 +405,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 
         for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         {
-            pItem = GetPlayer()->GetItemBySlot(i);
+            pItem = _player->GetItemBySlot(i);
             if (pItem)
             {
                 uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
@@ -416,14 +416,14 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
                     uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
                     uint32 costs = durability - curdur;
 
-                    if (GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+                    if (_player->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
                     {
-                        uint32 newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
-                        GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                        uint32 newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
+                        _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
                         // repair item
                         pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
                         // DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);
-                        // GetPlayer()->_ApplyItemMods(srcitem,i, false);
+                        // _player->_ApplyItemMods(srcitem,i, false);
 
                     }
                     else
