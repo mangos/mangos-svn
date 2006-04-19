@@ -44,8 +44,8 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
     //float x = i_target.GetPositionX();
     //float y = i_target.GetPositionY();
     //float z = i_target.GetPositionZ();
-	float x, y, z;
-	i_target.GetClosePoint( &owner, x, y, z );
+    float x, y, z;
+    i_target.GetClosePoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z, i_attackRadius);
 }
@@ -54,10 +54,10 @@ void
 TargetedMovementGenerator::_setAttackRadius(Creature &owner)
 {
     float combat_reach = owner.GetFloatValue(UNIT_FIELD_COMBATREACH);
-	if( combat_reach <= 0.0f )
-		combat_reach = 1.0f;
+    if( combat_reach <= 0.0f )
+        combat_reach = 1.0f;
     //float bounding_radius = owner.GetFloatValue(UNIT_FIELD_BOUNDINGRADIUS);
-    i_attackRadius = combat_reach; // - SMALL_ALPHA);
+    i_attackRadius = combat_reach;                          // - SMALL_ALPHA);
 }
 
 void
@@ -131,10 +131,10 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             }
             else if( owner.canReachWithAttack(&i_target) )
             {
-				owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
+                owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
                 owner.StopMoving();
                 if(owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID())
-					owner.SetState(UNIT_STAT_ATTACKING);
+                    owner.SetState(UNIT_STAT_ATTACKING);
                 DEBUG_LOG("UNIT IS THERE");
             }
             else

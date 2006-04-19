@@ -141,8 +141,8 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
 bool Unit::canReachWithAttack(Unit *pVictim) const
 {
     float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
-	if( reach <= 0.0f )
-		reach = 1.0f;
+    if( reach <= 0.0f )
+        reach = 1.0f;
     float distance = GetDistanceSq(pVictim);
 
     return ( distance <= reach * reach );
@@ -162,7 +162,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
         crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
-		pVictim->Relocate(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), pVictim->GetAngle( this ));
+        pVictim->Relocate(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), pVictim->GetAngle( this ));
         ((Creature*)pVictim)->AI().AttackStart((Player*)this);
     }
 

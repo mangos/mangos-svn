@@ -392,7 +392,6 @@ ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId()));
 }
 
-
 void
 ObjectAccessor::RemoveBonesFromPlayerView(Object *o)
 {
@@ -405,8 +404,6 @@ ObjectAccessor::RemoveBonesFromPlayerView(Object *o)
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(o->GetMapId()));
 }
-
-
 
 void
 ObjectAccessor::RemovePlayerFromPlayerView(Player *pl, Player *pl2)

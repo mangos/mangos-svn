@@ -557,7 +557,7 @@ void Player::Update( uint32 p_time )
             }
             //120 degreas of radiant range
             //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551	//1,57079633-1,047197551   //1,57079633+1,047197551
-            else if( !IsInArc( 2.0943951024, pVictime ))
+            else if( !IsInArc( 2.0943951024, pVictim ))
             {
                 setAttackTimer(uint32(1000));
                 data.Initialize(SMSG_ATTACKSWING_BADFACING);
@@ -4091,8 +4091,8 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
     Item *srcItem = GetItemBySlot(srcBag, srcSlot);
 
     if(!srcItem) error_code = EQUIP_ERR_ITEM_NOT_FOUND;
-    
-    if(!error_code) 
+
+    if(!error_code)
     {
         if (count == srcItem->GetCount()) { return SwapItem(dstBag, dstSlot, srcBag, srcSlot); }
         if (count > srcItem->GetCount()) error_code = EQUIP_ERR_TRIED_TO_SPLIT_MORE_THAN_COUNT;
@@ -4205,13 +4205,13 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         }
     }
 
-    if (srcItem) 
+    if (srcItem)
     {
         error_code = CanEquipItemInSlot(dstBag, dstSlot, srcItem, dstItem);
     }
     else
     {
-         error_code = EQUIP_ERR_ITEM_NOT_FOUND;
+        error_code = EQUIP_ERR_ITEM_NOT_FOUND;
     }
 
     if ((!error_code) && (dstItem)) error_code = CanEquipItemInSlot(srcBag, srcSlot, dstItem, srcItem);
