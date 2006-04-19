@@ -191,8 +191,8 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         SpellCastTargets targets;
         targets.setUnitTarget( _player );
-		if(proto->spell->SpellVisual == 222)
-			spell = new Spell(_player, proto->spell, false, NULL);
+        if(proto->spell->SpellVisual == 222)
+            spell = new Spell(_player, proto->spell, false, NULL);
 
         spell->prepare(&targets);
 
