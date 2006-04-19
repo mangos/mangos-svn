@@ -528,8 +528,7 @@ void Player::Update( uint32 p_time )
             // default combat reach 10
             // TODO add weapon,skill check
 
-            float pldistance = 0;
-            float plrotation = GetAngle(pVictim);
+            float pldistance = 10.0f;
             if(getClass() == 1)
             {
                 pldistance = pldistance + 1;
@@ -550,7 +549,7 @@ void Player::Update( uint32 p_time )
                 clearStateFlag(UNIT_STAT_ATTACKING);
                 smsg_AttackStop(m_curSelection);
             }
-            else if(GetDistanceSq(pVictim) > pldistance+10.0f)
+            else if( GetDistanceSq(pVictim) > pldistance )
             {
                 setAttackTimer(uint32(1000));
                 data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
@@ -558,7 +557,7 @@ void Player::Update( uint32 p_time )
             }
             //120 degreas of radiant range
             //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551	//1,57079633-1,047197551   //1,57079633+1,047197551
-            else if( (plrotation < (float)0.523598779) || (plrotation > (float)2.617993881))
+            else if( !IsInArc( 2.0943951024, pVictime ))
             {
                 setAttackTimer(uint32(1000));
                 data.Initialize(SMSG_ATTACKSWING_BADFACING);
