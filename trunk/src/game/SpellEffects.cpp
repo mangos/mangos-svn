@@ -667,8 +667,8 @@ void Spell::EffectLearnSpell(uint32 i)
 
     if(!unitTarget)
         return;
-	if(unitTarget->GetTypeId() != TYPEID_PLAYER)
-		unitTarget = m_targets.getUnitTarget();
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        unitTarget = m_targets.getUnitTarget();
 
     uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
     data.Initialize(SMSG_LEARNED_SPELL);
@@ -703,7 +703,7 @@ void Spell::EffectLearnSpell(uint32 i)
                 ((Player*)unitTarget)->addSpell(??);
                 break;
             */
-		default:break;
+        default:break;
     }
 
 }
