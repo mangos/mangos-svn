@@ -92,4 +92,4 @@ void HandleCorpsesErase(void*)
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
 
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,true,true);
+    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
