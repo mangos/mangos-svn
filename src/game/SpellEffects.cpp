@@ -827,6 +827,8 @@ void Spell::EffectSummonPet(uint32 i)
 {
     WorldPacket data;
     uint64 petguid;
+	float px, py, pz;
+	m_caster->GetClosePoint(NULL, px, py, pz);
     if((petguid=m_caster->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
     {
         Creature *OldSummon;
@@ -843,7 +845,7 @@ void Spell::EffectSummonPet(uint32 i)
                 ((Creature&)*OldSummon)->Clear();
                 MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
             }
-            OldSummon->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), OldSummon->GetOrientation());
+			OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
             if(m_caster->GetTypeId() == TYPEID_PLAYER)
             {
                 uint16 Command = 7;
@@ -874,8 +876,7 @@ void Spell::EffectSummonPet(uint32 i)
     if(NewSummon->LoadPetFromDB( m_caster ))
         return;
 
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), m_caster->GetPositionX(),
-        m_caster->GetPositionY(), m_caster->GetPositionZ()+1, m_caster->GetOrientation(), petentry))
+    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
         uint32 petlevel=m_caster->getLevel();
         NewSummon->SetUInt32Value(UNIT_FIELD_LEVEL,petlevel);

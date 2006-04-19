@@ -70,9 +70,10 @@ bool Pet::LoadPetFromDB( Unit* owner )
         return false;
     Field *fields = result->Fetch();
 
+	float px, py, pz;
+	owner->GetClosePoint(NULL, px, py, pz);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
-    Create(guid, owner->GetMapId(), owner->GetPositionX(), owner->GetPositionY(),
-        owner->GetPositionZ(), owner->GetOrientation(), fields[1].GetUInt32());
+    Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), fields[1].GetUInt32());
 
     uint32 petlevel=owner->getLevel();
     SetUInt32Value(UNIT_FIELD_LEVEL, fields[3].GetUInt32());
