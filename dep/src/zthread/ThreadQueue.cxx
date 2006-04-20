@@ -107,7 +107,7 @@ namespace ZThread {
       waitRequired = waitRequired && !(_userThreads.empty() && !_pendingThreads.empty());
 
       // Reference threads can't be interrupted or otherwise 
-      // manipulated. The only signal this monitor will recieve
+      // manipulated. The only signal this monitor will receive
       // at this point will be from the last pending thread.
       if(waitRequired && m.wait() != Monitor::SIGNALED) {
         assert(0);

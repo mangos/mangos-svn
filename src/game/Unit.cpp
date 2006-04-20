@@ -73,7 +73,7 @@ Unit::Unit() : Object()
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
-	m_PeriodicRun = false;
+    m_PeriodicRun = false;
 }
 
 Unit::~Unit()
@@ -99,17 +99,17 @@ void Unit::Update( uint32 p_time )
         else
             m_attackTimer -= p_time;
     }
-	while(m_PeriodicRun);
+    while(m_PeriodicRun);
     if(m_PeriodicAuras.size())
-	{
-		AuraList::iterator i;
-		for (i = m_PeriodicAuras.begin(); i != m_PeriodicAuras.end(); i++)
-		{
-			Aura *aura = *i;
-			aura->GetCaster()->PeriodicAuraLog(aura->GetTarget(), aura->GetSpellProto(), aura->cmod);
-		}
-		m_PeriodicAuras.clear();
-	}
+    {
+        AuraList::iterator i;
+        for (i = m_PeriodicAuras.begin(); i != m_PeriodicAuras.end(); i++)
+        {
+            Aura *aura = *i;
+            aura->GetCaster()->PeriodicAuraLog(aura->GetTarget(), aura->GetSpellProto(), aura->cmod);
+        }
+        m_PeriodicAuras.clear();
+    }
 }
 
 void Unit::setAttackTimer(uint32 time)
@@ -141,8 +141,8 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
             sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
             break;
         }
-		if(spell->m_spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
-			break;
+        if(spell->m_spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
+            break;
         if(spell->CanCast()==0)
         {
             return spell;

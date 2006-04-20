@@ -1558,14 +1558,14 @@ void Player::_SaveAuctions()
 void Player::_SaveMail()
 {
 
-    sDatabase.PExecute("DELETE FROM mail WHERE reciever = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'",GetGUIDLow());
 
     std::list<Mail*>::iterator itr;
     for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         Mail *m = (*itr);
 
-        QueryResult *result = sDatabase.PQuery("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
+        QueryResult *result = sDatabase.PQuery("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
         delete result;
     }
 }
@@ -1591,7 +1591,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM mail WHERE reciever = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM mail WHERE receiver = '%u';",GetGUIDLow());
 
     if(result)
     {
@@ -1601,7 +1601,7 @@ void Player::_LoadMail()
             Mail *be = new Mail;
             be->messageID = fields[0].GetUInt32();
             be->sender = fields[1].GetUInt32();
-            be->reciever = fields[2].GetUInt32();
+            be->receiver = fields[2].GetUInt32();
             be->subject = fields[3].GetString();
             be->body = fields[4].GetString();
             be->item = fields[5].GetUInt32();
@@ -2349,7 +2349,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM tutorials WHERE playerid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%d'",guid);
     sDatabase.PExecute("DELETE FROM social WHERE guid = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM mail WHERE reciever = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'",guid);
     sDatabase.PExecute("DELETE FROM corpses WHERE player_guid = '%u'",guid);
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)

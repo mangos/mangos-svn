@@ -1054,7 +1054,7 @@ DROP TABLE IF EXISTS `mail`;
 CREATE TABLE `mail` (
   `mailid` bigint(20) unsigned NOT NULL default '0',
   `sender` bigint(20) unsigned NOT NULL default '0',
-  `reciever` bigint(20) unsigned NOT NULL default '0',
+  `receiver` bigint(20) unsigned NOT NULL default '0',
   `subject` longtext,
   `body` longtext,
   `item` bigint(20) unsigned NOT NULL default '0',

@@ -99,7 +99,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             Mail* n = new Mail;
             n->messageID = objmgr.GenerateMailID();
             n->sender = ah->owner;
-            n->reciever = ah->bidder;
+            n->receiver = ah->bidder;
             n->subject = "You have lost a bid";
             n->body = "";
             n->item = 0;
@@ -112,7 +112,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             objmgr.GetPlayerNameByGUID(rc,name);
             Player *rpl = objmgr.GetPlayer(name.c_str());
 
-            sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", n->messageID , n->sender , n->reciever , n->subject.c_str() , n->body.c_str(),  n->item , n->time ,n->money ,n->COD ,n->checked);
+            sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES( '%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", n->messageID , n->sender , n->receiver , n->subject.c_str() , n->body.c_str(),  n->item , n->time ,n->money ,n->COD ,n->checked);
 
             if (rpl)
             {
@@ -133,7 +133,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 Mail* m = new Mail;
                 m->messageID = objmgr.GenerateMailID();
                 m->sender = ah->owner;
-                m->reciever = pl->GetGUIDLow();
+                m->receiver = pl->GetGUIDLow();
                 m->subject = "You have lost a bid";
                 m->body = "";
                 m->item = 0;
@@ -203,7 +203,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             Mail *m = new Mail;
             m->messageID = objmgr.GenerateMailID();
             m->sender = ah->owner;
-            m->reciever = pl->GetGUIDLow();
+            m->receiver = pl->GetGUIDLow();
             m->subject = "You won an item!";
             m->body = "";
             m->checked = 0;
@@ -226,9 +226,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             sDatabase.Execute( ss.str().c_str() );
 
             sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u';", m->messageID);
-            sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');",m->messageID, pl->GetGUIDLow(), m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
+            sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');",m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
 
-            uint64 rcpl = m->reciever;
+            uint64 rcpl = m->receiver;
             std::string pname;
             objmgr.GetPlayerNameByGUID(rcpl,pname);
             Player *rpl = objmgr.GetPlayer(pname.c_str());
@@ -249,7 +249,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             Mail *mn = new Mail;
             mn->messageID = objmgr.GenerateMailID();
             mn->sender = ah->bidder;
-            mn->reciever = ah->owner;
+            mn->receiver = ah->owner;
             mn->subject = "Your item sold!";
             mn->body = "";
             mn->checked = 0;
@@ -259,9 +259,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             mn->time = time(NULL) + (29 * 3600);
 
             sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u';", mn->messageID);
-            sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->reciever,  mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
+            sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver,  mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
 
-            uint64 rcpln = mn->reciever;
+            uint64 rcpln = mn->receiver;
             std::string pnamen;
             objmgr.GetPlayerNameByGUID(rcpln,pnamen);
             Player *rpln = objmgr.GetPlayer(pnamen.c_str());

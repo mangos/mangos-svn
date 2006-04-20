@@ -42,7 +42,7 @@
 Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
-itemcount(0), mTaxiNode(0), m_regenTimer(2000), 
+itemcount(0), mTaxiNode(0), m_regenTimer(2000),
 m_moveBackward(false), m_moveRandom(false), m_moveRun(false),
 m_faction(0),m_emoteState(0),m_isPet(false)
 {
@@ -147,19 +147,19 @@ void Creature::AIM_Update(const uint32 &diff)
             Unit::Update( diff );
             i_AI->UpdateAI(diff);
             i_motionMaster.UpdateMotion(diff);
-			if(m_regenTimer > 0)
-			{
-				if(diff >= m_regenTimer)
-					m_regenTimer = 0;
-				else
-					m_regenTimer -= diff;
-			}
-			if (m_regenTimer != 0)
-				break;
-			if (!hasUnitState( UNIT_STAT_ATTACKING))
-				Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH );
-			Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
-			m_regenTimer = 2000;
+            if(m_regenTimer > 0)
+            {
+                if(diff >= m_regenTimer)
+                    m_regenTimer = 0;
+                else
+                    m_regenTimer -= diff;
+            }
+            if (m_regenTimer != 0)
+                break;
+            if (!hasUnitState( UNIT_STAT_ATTACKING))
+                Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH );
+            Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
+            m_regenTimer = 2000;
             break;
         }
         default:
@@ -194,21 +194,20 @@ void Creature::Regenerate(uint16 field_cur, uint16 field_max)
     {
         case UNIT_FIELD_HEALTH:
         {
-			if( GetUInt32Value(UNIT_FIELD_POWER1)>0 )
-                addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); 
-			else
-                addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); 
+            if( GetUInt32Value(UNIT_FIELD_POWER1)>0 )
+                addvalue = uint32((Spirit*0.25) * HealthIncreaseRate);
+            else
+                addvalue = uint32((Spirit*0.80) * HealthIncreaseRate);
         }break;
         case UNIT_FIELD_POWER1:
-            addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); 
-			break;
+            addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate);
+            break;
     }
 
     curValue += addvalue;
     if (curValue > maxValue) curValue = maxValue;
     SetUInt32Value(field_cur, curValue);
 }
-
 
 void Creature::AIM_Initialize()
 {

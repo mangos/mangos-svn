@@ -333,8 +333,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint8 m_emoteState;
         bool m_isPet;                                       //add by vendy
         float GetAttackDistance(Unit *pl);
-		void Regenerate(uint16 field_cur, uint16 field_max);
-		uint32 m_regenTimer;
+        void Regenerate(uint16 field_cur, uint16 field_max);
+        uint32 m_regenTimer;
 
 };
 #endif

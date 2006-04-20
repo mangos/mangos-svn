@@ -232,13 +232,13 @@ class MANGOS_DLL_SPEC Unit : public Object
         float GetHostility(uint64 guid);
         Hostil* GetHostil(uint64 guid);
         void AddHostil(uint64 guid, float hostility);
-		void AddPeriodicAura(Aura * aura) 
-		{ 
-			while(m_PeriodicRun);
-			m_PeriodicRun=true;
-			m_PeriodicAuras.push_back(aura);
-			m_PeriodicRun=false;
-		}
+        void AddPeriodicAura(Aura * aura)
+        {
+            while(m_PeriodicRun);
+            m_PeriodicRun=true;
+            m_PeriodicAuras.push_back(aura);
+            m_PeriodicRun=false;
+        }
 
     protected:
         Unit ( );
@@ -269,7 +269,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraList m_PeriodicAuras;
 
         std::list<Hostil*> m_hostilList;
-		bool m_PeriodicRun;
+        bool m_PeriodicRun;
 
 };
 #endif
