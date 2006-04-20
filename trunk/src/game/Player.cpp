@@ -2367,8 +2367,10 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM kills WHERE killerid = '%d'",guid);
     sDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM bids WHERE bidder = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%u'",guid);
+    // Temporary disabled, we need to lookup both auctionhouse and auctioned_items
+    // together. auctioned_items are saved by item_guid not by player guid.
+    // sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",guid);
+    // sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%u'",guid);
 
     // Honor table does not exist anymore.
     // sDatabase.PExecute("DELETE FROM honor WHERE guid = '%d'",guid);
