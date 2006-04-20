@@ -315,7 +315,7 @@ void Aura::HandleNULL(bool apply)
 void HandleDOTEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
-	Aur->GetCaster()->AddPeriodicAura(Aur);
+    Aur->GetCaster()->AddPeriodicAura(Aur);
     //Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->cmod);
 }
 

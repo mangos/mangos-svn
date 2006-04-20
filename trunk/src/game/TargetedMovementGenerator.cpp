@@ -122,9 +122,9 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             else if( owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
             {
                 owner.StopMoving();
-				owner->Idle();
+                owner->Idle();
                 owner.addUnitState(UNIT_STAT_ATTACKING);
-				owner.clearUnitState(UNIT_STAT_CHASE);
+                owner.clearUnitState(UNIT_STAT_CHASE);
                 SpellCastTargets targets;
                 targets.setUnitTarget( &i_target );
                 spell->prepare(&targets);

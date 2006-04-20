@@ -253,7 +253,7 @@ void World::Update(time_t diff)
                 if (itr->second->bidder == 0)
                 {
                     Mail *m = new Mail;
-                    m->reciever = itr->second->owner;
+                    m->receiver = itr->second->owner;
                     m->body = "";
                     m->sender = itr->second->owner;
                     m->checked = 0;
@@ -278,9 +278,9 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
 
-                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
+                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
 
-                    uint64 rcpl = m->reciever;
+                    uint64 rcpl = m->receiver;
                     std::string pname;
                     objmgr.GetPlayerNameByGUID(rcpl,pname);
                     Player *rpl = objmgr.GetPlayer(pname.c_str());
@@ -288,7 +288,7 @@ void World::Update(time_t diff)
                     {
                         rpl->AddMail(m);
                     }
-                    sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",m->reciever);
+                    sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",m->receiver);
                     sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%d'",m->item);
                     sDatabase.PExecute("DELETE FROM bids WHERE id = '%d'",itr->second->Id);
 
@@ -297,7 +297,7 @@ void World::Update(time_t diff)
                 else
                 {
                     Mail *m = new Mail;
-                    m->reciever = itr->second->owner;
+                    m->receiver = itr->second->owner;
                     m->body = "";
                     m->sender = itr->second->bidder;
                     m->checked = 0;
@@ -310,9 +310,9 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'",m->messageID);
 
-                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->reciever, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
+                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
 
-                    uint64 rcpl = m->reciever;
+                    uint64 rcpl = m->receiver;
                     std::string pname;
                     objmgr.GetPlayerNameByGUID(rcpl,pname);
                     Player *rpl = objmgr.GetPlayer(pname.c_str());
@@ -322,7 +322,7 @@ void World::Update(time_t diff)
                     }
 
                     Mail *mn = new Mail;
-                    mn->reciever = itr->second->bidder;
+                    mn->receiver = itr->second->bidder;
                     mn->body = "";
                     mn->sender = itr->second->owner;
                     mn->checked = 0;
@@ -347,9 +347,9 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%d'", mn->messageID);
 
-                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->reciever, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
+                    sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
 
-                    uint64 rcpl1 = mn->reciever;
+                    uint64 rcpl1 = mn->receiver;
                     std::string pname1;
                     objmgr.GetPlayerNameByGUID(rcpl1,pname1);
                     Player *rpl1 = objmgr.GetPlayer(pname1.c_str());

@@ -840,12 +840,12 @@ void Spell::EffectSummonPet(uint32 i)
         {
             if(OldSummon->isDead())
             {
-				uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
+                uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
                 OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
                 OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * petlvl );
                 OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlvl );
-				OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);
-				OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
+                OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);
+                OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
                 OldSummon->setDeathState(ALIVE);
                 OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
                 ((Creature&)*OldSummon)->Clear();
@@ -890,8 +890,8 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
         NewSummon->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
-		NewSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
-		NewSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
+        NewSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
+        NewSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);

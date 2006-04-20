@@ -33,15 +33,15 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     time_t etime = base + (30 * 3600);
     WorldPacket data;
     uint64 sender,item;
-    std::string reciever,subject,body;
+    std::string receiver,subject,body;
     uint32 unk1,unk2,money,COD,mID;
     recv_data >> sender;
-    recv_data >> reciever >> subject >> body;
+    recv_data >> receiver >> subject >> body;
     recv_data >> unk1 >> unk2;
     recv_data >> item;
     recv_data >> money >> COD;
 
-    sLog.outString("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),reciever.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
+    sLog.outString("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
     mID = objmgr.GenerateMailID();
 
     Player* pl = GetPlayer();
@@ -60,10 +60,10 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
     {
 
-        QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", reciever.c_str());
+        QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", receiver.c_str());
 
-        Player *recieve = objmgr.GetPlayer(reciever.c_str());
-        uint64 rc = objmgr.GetPlayerGUIDByName(reciever.c_str());
+        Player *receive = objmgr.GetPlayer(receiver.c_str());
+        uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
         if (result)
         {
             delete result;
@@ -99,12 +99,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
             pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
 
-            if (recieve)
+            if (receive)
             {
                 Mail* m = new Mail;
                 m->messageID = mID;
                 m->sender =   pl->GetGUIDLow();
-                m->reciever = GUID_LOPART(rc);
+                m->receiver = GUID_LOPART(rc);
                 m->subject = subject;
                 m->body = body;
                 m->item = GUID_LOPART(item);
@@ -112,16 +112,16 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 m->time = etime;
                 m->COD = 0;
                 m->checked = 0;
-                recieve->AddMail(m);
+                receive->AddMail(m);
 
                 data.Initialize(SMSG_RECEIVED_MAIL);
                 data << uint32(0);
                 SendPacket(&data);
-                recieve->GetSession()->SendPacket(&data);
+                receive->GetSession()->SendPacket(&data);
             }
 
             sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",mID);
-            sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
+            sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
 
         }
         else
@@ -180,7 +180,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     recv_data >> message;
     Player *pl = GetPlayer();
     Mail *m = pl->GetMail(message);
-    m->reciever = m->sender;
+    m->receiver = m->sender;
     m->sender = pl->GetGUIDLow();
     m->time = sWorld.GetGameTime() + (30 * 3600);
     m->checked = 0;
@@ -192,17 +192,17 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 
-    uint64 rc = m->reciever;
+    uint64 rc = m->receiver;
     std::string name;
     objmgr.GetPlayerNameByGUID(rc,name);
-    Player *recieve = objmgr.GetPlayer(name.c_str());
-    if (recieve)
+    Player *receive = objmgr.GetPlayer(name.c_str());
+    if (receive)
     {
-        recieve->AddMail(m);
+        receive->AddMail(m);
     }
 
     sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",m->messageID);
-    sDatabase.PExecute("INSERT INTO mail (mailid, sender, reciever, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->reciever, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
+    sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
 
 }
 
@@ -218,7 +218,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Item *it = objmgr.GetMItem(m->item);
 
     GetPlayer()->AddNewItem(0,NULL_SLOT,it->GetEntry(),it->GetCount(), false, false);
-    /* still needs some condition so that if item can not be recived, both mail and
+    /* still needs some condition so that if item can not be received, both mail and
        mailed_items to stay till delete or return, otherwise it's dumped, also a client message */
 
     m->item = 0;

@@ -20,7 +20,7 @@ struct Mail
 {
     uint32 messageID;
     uint32 sender;
-    uint32 reciever;
+    uint32 receiver;
     std::string subject;
     std::string body;
     uint32 item;

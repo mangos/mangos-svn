@@ -115,7 +115,7 @@ enum __QuestGiverStatus
     DIALOG_STATUS_REWARD                   = 6,
 };
 
-enum __QuestSpecialFlags		//according to mangos-db-11-02-2006-for_1_9_x;
+enum __QuestSpecialFlags                                    //according to mangos-db-11-02-2006-for_1_9_x;
 {
     QUEST_SPECIAL_FLAGS_NONE          = 0,
     QUEST_SPECIAL_FLAGS_DELIVER       = 1,
@@ -124,7 +124,7 @@ enum __QuestSpecialFlags		//according to mangos-db-11-02-2006-for_1_9_x;
 
     QUEST_SPECIAL_FLAGS_KILL          = 8,
     QUEST_SPECIAL_FLAGS_TIMED         = 16,
-    QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,		//?
+    QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,                 //?
 
     QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
 };
