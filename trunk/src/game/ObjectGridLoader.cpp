@@ -38,12 +38,12 @@ ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
     }
 }
 
-template<class T> void SetState(T *obj)
+template<class T> void addUnitState(T *obj)
 {
     obj->AddToWorld();
 }
 
-template<> void SetState(Creature *obj)
+template<> void addUnitState(Creature *obj)
 {
     if( MaNGOS::Utilities::IsSpiritHealer(obj) )
         obj->setDeathState(DEAD);
@@ -67,7 +67,7 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             obj->LoadFromDB(guid);
             m[obj->GetGUID()] = obj;
 
-            SetState(obj);
+            addUnitState(obj);
             obj->AddToWorld();
             ++count;
 

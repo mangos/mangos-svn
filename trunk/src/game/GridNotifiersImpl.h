@@ -114,7 +114,7 @@ inline void
 MaNGOS::PlayerConfrontationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 {
     for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( iter->second->isAlive() && !iter->second->testStateFlag(UNIT_STAT_IN_FLIGHT) && iter->second->AI().IsVisible(&i_player) )
+        if( iter->second->isAlive() && !iter->second->hasUnitState(UNIT_STAT_IN_FLIGHT) && iter->second->AI().IsVisible(&i_player) )
             iter->second->AI().MoveInLineOfSight(&i_player);
 }
 #endif

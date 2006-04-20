@@ -66,7 +66,7 @@ TargetedMovementGenerator::Initialize(Creature &owner)
     owner.setMoveRunFlag(true);
     _setAttackRadius(owner);
     _setTargetLocation(owner);
-    owner.SetState(UNIT_STAT_CHASE);
+    owner.addUnitState(UNIT_STAT_CHASE);
 }
 
 void
@@ -84,8 +84,8 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     i_targetedHome = true;
-    owner.ClearState(UNIT_STAT_ALL_STATE);
-    owner.SetState(UNIT_STAT_FLEEING);
+    owner.clearUnitState(UNIT_STAT_ALL_STATE);
+    owner.addUnitState(UNIT_STAT_FLEEING);
 }
 
 void
@@ -95,9 +95,9 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     if( owner.IsStopped() )
     {
         assert( i_target.isAlive() );
-        if( !owner.canReachWithAttack( &i_target ) && (!owner.TestState(UNIT_STAT_IN_COMBAT) || !owner.reachWithSpellAttack( &i_target)) )
+        if( !owner.canReachWithAttack( &i_target ) && (!owner.hasUnitState(UNIT_STAT_IN_COMBAT) || !owner.reachWithSpellAttack( &i_target)) )
         {
-            owner.SetState(UNIT_STAT_CHASE);
+            owner.addUnitState(UNIT_STAT_CHASE);
             _setTargetLocation(owner);
             DEBUG_LOG("restart to chase");
         }
@@ -119,10 +119,12 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 StackCleaner stack_cleaner(owner);
                 stack_cleaner.Done();
             }
-            else if( owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.TestState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
+            else if( owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
             {
                 owner.StopMoving();
-                //owner.SetState(UNIT_STAT_ATTACKING);
+				owner->Idle();
+                owner.addUnitState(UNIT_STAT_ATTACKING);
+				owner.clearUnitState(UNIT_STAT_CHASE);
                 SpellCastTargets targets;
                 targets.setUnitTarget( &i_target );
                 spell->prepare(&targets);
@@ -134,7 +136,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
                 owner.StopMoving();
                 if(owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID())
-                    owner.SetState(UNIT_STAT_ATTACKING);
+                    owner.addUnitState(UNIT_STAT_ATTACKING);
                 DEBUG_LOG("UNIT IS THERE");
             }
             else

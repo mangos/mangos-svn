@@ -73,7 +73,7 @@ Unit::Unit() : Object()
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
-
+	m_writeDeathState = false;
 }
 
 Unit::~Unit()
@@ -130,6 +130,8 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
             sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
             break;
         }
+		if(spell->m_spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
+			break;
         if(spell->CanCast()==0)
         {
             return spell;
@@ -235,7 +237,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
-                    pet->addStateFlag(UNIT_STAT_DIED);
+                    pet->addUnitState(UNIT_STAT_DIED);
                     for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
                     {
                         if((*i)->UnitGuid==pet->GetGUID())
@@ -296,14 +298,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             DEBUG_LOG("DealDamageIsCreature");
             smsg_AttackStop(victimGuid);
             RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
-            addStateFlag(UNIT_STAT_DIED);
+            addUnitState(UNIT_STAT_DIED);
         }
     }
     else
     {
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
-        pVictim->addStateFlag(UNIT_STAT_ATTACK_BY);
+        pVictim->addUnitState(UNIT_STAT_ATTACK_BY);
         pVictim->addAttacker(this);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -315,7 +317,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         }
         else
         {
-            ((Player*)pVictim)->addStateFlag(UNIT_STAT_ATTACKING);
+            ((Player*)pVictim)->addUnitState(UNIT_STAT_ATTACKING);
 
             if( (((Player*)pVictim)->getClass()) == WARRIOR )
                 ((Player*)pVictim)->CalcRage(damage,false);
@@ -742,7 +744,7 @@ void Unit::_UpdateSpells( uint32 time )
 
 void Unit::_UpdateHostil( uint32 time )
 {
-    if(!testStateFlag(UNIT_STAT_IN_COMBAT) && m_hostilList.size() )
+    if(!hasUnitState(UNIT_STAT_IN_COMBAT) && m_hostilList.size() )
     {
         std::list<Hostil*>::iterator iter;
         for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); iter++)

@@ -93,8 +93,6 @@ struct Hostil
     float Hostility;
 };
 
-static bool eventrun=false;
-
 class MANGOS_DLL_SPEC Unit : public Object
 {
     public:
@@ -123,9 +121,9 @@ class MANGOS_DLL_SPEC Unit : public Object
                 m_attackers.erase(itr);
         }
 
-        inline void addStateFlag(uint32 f) { m_state |= f; };
-        inline bool testStateFlag(const uint32 f) const { return (m_state & f); }
-        inline void clearStateFlag(uint32 f) { m_state &= ~f; };
+        inline void addUnitState(uint32 f) { m_state |= f; };
+        inline bool hasUnitState(const uint32 f) const { return (m_state & f); }
+        inline void clearUnitState(uint32 f) { m_state &= ~f; };
 
         inline uint32 getLevel() { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
         inline uint8 getRace() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
@@ -177,14 +175,18 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void DealWithSpellDamage(DynamicObject &);
         virtual void MoveOutOfRange(Player &) {  }
 
-        bool isAlive() { return m_deathState == ALIVE; };
+        bool isAlive() 
+		{ 
+			while( m_writeDeathState );
+			return (m_deathState == ALIVE); 
+		};
         bool isDead() { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         virtual void setDeathState(DeathState s)
         {
-            while(eventrun);
-            eventrun=true;
+            while(m_writeDeathState);
+            m_writeDeathState=true;
             m_deathState = s;
-            eventrun=false;
+            m_writeDeathState=false;
         };
         DeathState getDeathState() { return m_deathState; }
 
@@ -266,6 +268,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraList m_Auras;
 
         std::list<Hostil*> m_hostilList;
+		bool m_writeDeathState;
 
 };
 #endif

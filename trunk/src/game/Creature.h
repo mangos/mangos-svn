@@ -213,9 +213,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         virtual void Update( uint32 time );
         inline void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
 
-        inline bool TestState(unsigned mask) const { return (i_creatureState & mask); }
-        inline void SetState(unsigned mask) { i_creatureState |= mask; }
-        inline void ClearState(unsigned mask) { i_creatureState &= ~mask; }
         bool isPet() const { return m_isPet; }
         bool isCivilian() { return (bool)GetCreatureInfo()->civilian; }
 
@@ -232,8 +229,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline void setMoveRunFlag(bool f) { m_moveRun = f; }
         inline bool getMoveRandomFlag() { return m_moveRandom; }
         inline bool getMoveRunFlag() { return m_moveRun; }
-        inline bool IsStopped(void) const { return !(TestState(UNIT_STAT_MOVING)); }
-        inline void StopMoving(void) { ClearState(UNIT_STAT_MOVING); }
+        inline bool IsStopped(void) const { return !(hasUnitState(UNIT_STAT_MOVING)); }
+        inline void StopMoving(void) { clearUnitState(UNIT_STAT_MOVING); }
 
         void setItemId(int slot, uint32 tempitemid);
         void setItemAmount(int slot, int tempamount);
@@ -285,10 +282,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         virtual void setDeathState(DeathState s)
         {
-            while(eventrun);
-            eventrun=true;
+            while(m_writeDeathState);
+            m_writeDeathState=true;
             m_deathState = s;
-            eventrun=false;
+            m_writeDeathState=false;
             if(s == JUST_DIED)
             {
                 m_deathTimer = m_corpseDelay;
@@ -334,12 +331,13 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_moveBackward;
         bool m_moveRandom;
         bool m_moveRun;
-        unsigned i_creatureState;
 
         uint32 m_faction;
         uint8 m_emoteState;
         bool m_isPet;                                       //add by vendy
         float GetAttackDistance(Unit *pl);
+		void Regenerate(uint16 field_cur, uint16 field_max);
+		uint32 m_regenTimer;
 
 };
 #endif

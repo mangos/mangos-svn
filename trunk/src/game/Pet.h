@@ -31,7 +31,8 @@ enum PetState
     STATE_RA_SPELL1         = 32,
     STATE_RA_SPELL2         = 64,
     STATE_RA_SPELL3         = 128,
-    STATE_RA_SPELL4         = 256
+    STATE_RA_SPELL4         = 256,
+	STATE_RA_AUTOSPELL		= STATE_RA_SPELL1 | STATE_RA_SPELL2 | STATE_RA_SPELL3 | STATE_RA_SPELL4
 };
 
 class Pet : public Creature

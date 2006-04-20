@@ -89,7 +89,7 @@ bool GuardAI::_needToStop() const
 void GuardAI::_stopAttack()
 {
     assert( i_pVictim != NULL );
-    i_creature.ClearState(UNIT_STAT_ATTACKING);
+    i_creature.clearUnitState(UNIT_STAT_ATTACKING);
     i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
 
     if( !i_creature.isAlive() )
@@ -184,7 +184,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         MapManager::Instance().GetMap(i_creature.GetMapId())->GetUnitList(i_creature.GetPositionX(), i_creature.GetPositionY(),unitlist);
         for(std::list<Unit*>::iterator iter=unitlist.begin();iter!=unitlist.end();iter++)
         {
-            if((*iter) && (*iter)->isAlive() && !(*iter)->testStateFlag(UNIT_STAT_IN_FLIGHT) && IsVisible( *iter ) )
+            if((*iter) && (*iter)->isAlive() && !(*iter)->hasUnitState(UNIT_STAT_IN_FLIGHT) && IsVisible( *iter ) )
             {
                 MoveInLineOfSight(*iter);
             }
@@ -201,7 +201,7 @@ void GuardAI::_taggedToKill(Unit *u)
 {
     assert( i_pVictim == NULL );
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%d]", i_creature.GetName(), u->GetGUIDLow());
-    i_creature.SetState(UNIT_STAT_ATTACKING);
+    i_creature.addUnitState(UNIT_STAT_ATTACKING);
     i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     i_creature->Mutate(new TargetedMovementGenerator(*u));
     i_pVictim = u;
