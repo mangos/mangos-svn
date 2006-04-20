@@ -490,7 +490,7 @@ void Player::Update( uint32 p_time )
         pQuest = objmgr.GetQuest( m_timedQuest );
 
         if (pQuest)
-            if ( !pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED) ) pQuest = NULL;
+            if ( !pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) ) pQuest = NULL;
 
         if (pQuest)
         {
@@ -765,23 +765,23 @@ bool Player::isQuestComplete(Quest *pQuest )
 
     if (qs.status==QUEST_STATUS_INCOMPLETE)
     {
-        if(pQuest->HasFlag( QUEST_SPECIAL_FLAGS_SPEAKTO))
+        if(pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO))
             Result &=true;
 
-        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_EXPLORATION))
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_EXPLORATION))
             Result &= qs.m_explored;
 
-        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED))
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
             Result &= (qs.m_timer > 0);
 
-        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_DELIVER))
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
         {
             Result &=(GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[0]) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
                 GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[1])>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
                 GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[2])>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
                 GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[3])>= pQuest->GetQuestInfo()->ReqItemCount[3]);
         }
-        if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_KILL))
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL))
         {
             Result &= (qs.m_questMobCount[0] >= pQuest->GetQuestInfo()->ReqKillMobCount[0] &&
                 qs.m_questMobCount[1] >= pQuest->GetQuestInfo()->ReqKillMobCount[1] &&
@@ -892,7 +892,7 @@ void Player::setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarde
         {
             Quest *pQuest = mQuestStatus[quest_id].m_quest;
             if (pQuest)
-                if (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED))
+                if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
             {
 
                 time_t kk = time(NULL);
@@ -2303,7 +2303,7 @@ void Player::_LoadQuestStatus()
             pQuest = objmgr.GetQuest(fields[1].GetUInt32());
             qs.m_quest = pQuest;
 
-            if (pQuest && (pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED)) )
+            if (pQuest && (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED)) )
             {
                 sLog.outDebug("Time now {%u}, then {%u} in quest {%u}!", q_abs, qs.m_timerrel, qs.m_quest->GetQuestInfo()->QuestId);
                 if  ( qs.m_timerrel > q_abs )

@@ -175,18 +175,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void DealWithSpellDamage(DynamicObject &);
         virtual void MoveOutOfRange(Player &) {  }
 
-        bool isAlive() 
-		{ 
-			while( m_writeDeathState );
-			return (m_deathState == ALIVE); 
-		};
+        bool isAlive() { return (m_deathState == ALIVE); };
         bool isDead() { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         virtual void setDeathState(DeathState s)
         {
-            while(m_writeDeathState);
-            m_writeDeathState=true;
             m_deathState = s;
-            m_writeDeathState=false;
         };
         DeathState getDeathState() { return m_deathState; }
 
@@ -239,6 +232,13 @@ class MANGOS_DLL_SPEC Unit : public Object
         float GetHostility(uint64 guid);
         Hostil* GetHostil(uint64 guid);
         void AddHostil(uint64 guid, float hostility);
+		void AddPeriodicAura(Aura * aura) 
+		{ 
+			while(m_PeriodicRun);
+			m_PeriodicRun=true;
+			m_PeriodicAuras.push_back(aura);
+			m_PeriodicRun=false;
+		}
 
     protected:
         Unit ( );
@@ -266,9 +266,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         DeathState m_deathState;
 
         AuraList m_Auras;
+        AuraList m_PeriodicAuras;
 
         std::list<Hostil*> m_hostilList;
-		bool m_writeDeathState;
+		bool m_PeriodicRun;
 
 };
 #endif

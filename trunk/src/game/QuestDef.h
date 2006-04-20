@@ -115,18 +115,18 @@ enum __QuestGiverStatus
     DIALOG_STATUS_REWARD                   = 6,
 };
 
-enum __QuestSpecialFlags
+enum __QuestSpecialFlags		//according to mangos-db-11-02-2006-for_1_9_x;
 {
     QUEST_SPECIAL_FLAGS_NONE          = 0,
     QUEST_SPECIAL_FLAGS_DELIVER       = 1,
-    QUEST_SPECIAL_FLAGS_KILL          = 2,
+    QUEST_SPECIAL_FLAGS_EXPLORATION   = 2,
     QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,
 
-    QUEST_SPECIAL_FLAGS_REPEATABLE    = 8,
-    QUEST_SPECIAL_FLAGS_EXPLORATION   = 16,
+    QUEST_SPECIAL_FLAGS_KILL          = 8,
+    QUEST_SPECIAL_FLAGS_TIMED         = 16,
+    QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,		//?
 
-    QUEST_SPECIAL_FLAGS_TIMED         = 32,
-    QUEST_SPECIAL_FLAGS_REPUTATION    = 128,
+    QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
 };
 
 struct QuestInfo
@@ -141,7 +141,7 @@ struct QuestInfo
     uint32 RequiredClass;
     uint32 RequiredTradeskill;
     uint32 LimitTime;
-    uint32 LootEntry;
+    uint32 SpecialFlags;
     uint32 PrevQuestId;
     uint32 NextQuestId;
     uint32 SrcItemId;
@@ -201,7 +201,7 @@ class Quest
         bool CanShowUnsatified( Player *_Player );
         bool PreReqSatisfied( Player *_Player );
         bool RewardIsTaken( Player *_Player );
-        bool HasFlag( uint32 Flag )  { return (( GetQuestInfo()->Flags & Flag ) == Flag); }
+        bool HasSpecialFlag( uint32 Flag )  { return (( m_quest->SpecialFlags & Flag ) == Flag); }
     private:
         QuestInfo *m_quest;
 

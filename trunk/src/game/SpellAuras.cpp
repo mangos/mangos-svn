@@ -315,14 +315,14 @@ void Aura::HandleNULL(bool apply)
 void HandleDOTEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
-    Unit * caster = Aur->GetCaster();
-    caster->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->cmod);
+	Aur->GetCaster()->AddPeriodicAura(Aur);
+    //Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->cmod);
 }
 
 void Aura::HandlePeriodicDamage(bool apply)
 {
     if( apply )
-        m_PeriodicEventId=AddEvent(&HandleDOTEvent,(void*)this,cmod->periodictime,true,true);
+        m_PeriodicEventId=AddEvent(&HandleDOTEvent,(void*)this,cmod->periodictime,false,true);
     else if(m_PeriodicEventId>0)
     {
         //RemovePeriodicEvent(m_PeriodicEventId);

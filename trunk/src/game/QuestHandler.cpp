@@ -84,7 +84,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     if (!pQuest)
         return;
 
-    if ( (_player->m_timedQuest) && pQuest->HasFlag(QUEST_SPECIAL_FLAGS_TIMED))
+    if ( (_player->m_timedQuest) && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
     {
         _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
         return;
