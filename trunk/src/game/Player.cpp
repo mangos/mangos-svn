@@ -2368,6 +2368,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM bids WHERE bidder = '%d'",GetGUIDLow());
     sDatabase.PExecute("DELETE FROM auctionhouse WHERE itemowner = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM auctioned_items WHERE guid = '%u'",it->GetGUIDLow());
 
     // Honor table does not exist anymore.
     // sDatabase.PExecute("DELETE FROM honor WHERE guid = '%d'",guid);
