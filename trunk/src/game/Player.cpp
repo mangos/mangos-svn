@@ -2349,7 +2349,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM tutorials WHERE playerid = '%u'",guid);
     sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%d'",guid);
     sDatabase.PExecute("DELETE FROM social WHERE guid = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM mail WHERE reciver = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM mail WHERE reciever = '%u'",guid);
     sDatabase.PExecute("DELETE FROM corpses WHERE player_guid = '%u'",guid);
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
