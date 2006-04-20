@@ -545,7 +545,7 @@ void Player::Update( uint32 p_time )
             {
                 sLog.outDetail("Player::Update:  No valid current selection to attack, stopping attack\n");
                 this->setRegenTimer(5000);
-                clearStateFlag(UNIT_STAT_ATTACKING);
+                clearUnitState(UNIT_STAT_IN_COMBAT);
                 smsg_AttackStop(m_curSelection);
             }
             else if( GetDistanceSq(pVictim) > pldistance )
@@ -1926,7 +1926,7 @@ void Player::DestroyForPlayer( Player *target ) const
 void Player::SaveToDB()
 {
 
-    if (testStateFlag(UNIT_STAT_IN_FLIGHT))
+    if (hasUnitState(UNIT_STAT_IN_FLIGHT))
     {
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
         RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
@@ -3620,7 +3620,7 @@ void Player::smsg_AttackStart(Unit* pVictim)
 //       Flight callback
 void Player::FlightComplete()
 {
-    clearStateFlag(UNIT_STAT_IN_FLIGHT);
+    clearUnitState(UNIT_STAT_IN_FLIGHT);
     SetUInt32Value( PLAYER_FIELD_COINAGE , m_dismountCost);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
@@ -4116,7 +4116,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
                 srcItem->BuildCreateUpdateBlockForPlayer(&upd, this);
                 upd.BuildPacket(&data);
                 GetSession()->SendPacket(&data);
-                _SaveInventory();
+                //_SaveInventory();
                 return true;
             }
         }
@@ -4136,7 +4136,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
         AddItem(dstBag, dstSlot, dstItem, false, false, true);
         srcItem->SetCount(srcItem->GetCount() - count);
         srcItem->SendUpdateToPlayer(this);
-        _SaveInventory();
+        //_SaveInventory();
         return true;
     }
     else
@@ -4198,7 +4198,7 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
                 }
                 upd.BuildPacket(&data);
                 GetSession()->SendPacket(&data);
-                _SaveInventory();
+                //_SaveInventory();
                 return true;
             }
         }
@@ -4221,7 +4221,7 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         if (srcItem) RemoveItemFromSlot(srcBag, srcSlot);
         if (dstItem) AddItem(srcBag, srcSlot, dstItem, false, false, true);
         if (srcItem) AddItem(dstBag, dstSlot, srcItem, false, false, true);
-        _SaveInventory();
+        //_SaveInventory();
         return true;
     }
     else
@@ -4269,7 +4269,7 @@ bool Player::CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 
         {
             case 0:
             case CLIENT_SLOT_BACK:
-                AddItem(0, slot, (Item*)pItem, false, false, false);
+                AddItem(0, slot, (Item*)pItem, false, false, true);
                 sLog.outDetail("CreateObjectItem : item %i created, bagIndex = backpack, slot = %i, amount = %i", itemId, slot, count);
                 return true;
             case CLIENT_SLOT_01:
@@ -4285,7 +4285,7 @@ bool Player::CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 
                 bag = GetBagBySlot(bagIndex);
                 if (bag)
                 {
-                    AddItem(bagIndex, slot, (Item*)pItem, false, false, false);
+                    AddItem(bagIndex, slot, (Item*)pItem, false, false, true);
                     sLog.outDetail("CreateObjectItem : item %i created, bagIndex = %i, slot = %i, amount = %i", itemId, bagIndex, slot, count);
                     return true;
                 }
@@ -4737,7 +4737,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
                 if (!dontadd)
                 {
                     pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
-                    _SaveInventory();
+                    //_SaveInventory();
                     pItem->SendUpdateToPlayer(this);
                 }
                 AddedItemToBag(item->GetEntry(),count);

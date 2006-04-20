@@ -41,16 +41,15 @@
 
 Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
-m_respawnDelay(25000), m_corpseDelay(120000), m_respawnradius(0.0),
-itemcount(0), mTaxiNode(0),
+m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
+itemcount(0), mTaxiNode(0), m_regenTimer(2000), 
 m_moveBackward(false), m_moveRandom(false), m_moveRun(false),
-i_creatureState(UNIT_STAT_STOPPED), m_faction(0),m_emoteState(0),m_isPet(false)
+m_faction(0),m_emoteState(0),m_isPet(false)
 {
     m_valuesCount = UNIT_END;
 
     memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
     for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
-    m_isPet = false;
 }
 
 Creature::~Creature()
@@ -121,7 +120,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
                 SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
                 setDeathState( ALIVE );
-                ClearState(UNIT_STAT_ALL_STATE);
+                clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
                 MapManager::Instance().GetMap(GetMapId())->Add(this);
             }
@@ -148,12 +147,68 @@ void Creature::AIM_Update(const uint32 &diff)
             Unit::Update( diff );
             i_AI->UpdateAI(diff);
             i_motionMaster.UpdateMotion(diff);
+			if(m_regenTimer > 0)
+			{
+				if(diff >= m_regenTimer)
+					m_regenTimer = 0;
+				else
+					m_regenTimer -= diff;
+			}
+			if (m_regenTimer != 0)
+				break;
+			if (!hasUnitState( UNIT_STAT_ATTACKING))
+				Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH );
+			Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
+			m_regenTimer = 2000;
             break;
         }
         default:
             break;
     }
 }
+
+void Creature::Regenerate(uint16 field_cur, uint16 field_max)
+{
+    uint32 curValue = GetUInt32Value(field_cur);
+    uint32 maxValue = GetUInt32Value(field_max);
+
+    if(field_cur != UNIT_FIELD_POWER2)
+    {
+        if (curValue >= maxValue)   return;
+    }
+    else if (curValue == 0)
+        return;
+
+    float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
+    float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);
+
+    uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
+    uint16 Class = getClass();
+
+    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
+    if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
+
+    uint32 addvalue = 0;
+
+    switch (field_cur)
+    {
+        case UNIT_FIELD_HEALTH:
+        {
+			if( GetUInt32Value(UNIT_FIELD_POWER1)>0 )
+                addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); 
+			else
+                addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); 
+        }break;
+        case UNIT_FIELD_POWER1:
+            addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); 
+			break;
+    }
+
+    curValue += addvalue;
+    if (curValue > maxValue) curValue = maxValue;
+    SetUInt32Value(field_cur, curValue);
+}
+
 
 void Creature::AIM_Initialize()
 {
@@ -268,7 +323,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
                 wasRewardRep = true;
             else if( !pPlayer->getQuestRewardStatus(questinfo->QuestId))
             {
-                pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 4, 6, 30, questinfo->Title);
+                pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
                 wasReward = true;
             }
         }

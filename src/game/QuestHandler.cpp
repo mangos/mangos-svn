@@ -127,10 +127,10 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         }
         else
             Script->ItemQuestAccept(_player, pItem, pQuest );
-        _player->PlayerTalkClass->CloseGossip();
     }
     else
         Script->QuestAccept(_player, pCreature, pQuest );
+    _player->PlayerTalkClass->CloseGossip();
     if(!(Script->GossipHello( _player, pCreature )))
     {
         pCreature->prepareQuestMenu( _player );

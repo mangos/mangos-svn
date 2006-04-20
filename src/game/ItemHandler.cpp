@@ -128,7 +128,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     {
         item->SetCount(item->GetCount() - count);
     }
-    GetPlayer()->_SaveInventory();
+    //GetPlayer()->_SaveInventory();
 }
 
 extern void CheckItemDamageValues ( ItemPrototype *itemProto );
@@ -737,7 +737,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         pItem->DeleteFromDB();
         delete pItem;
     }
-    GetPlayer()->_SaveInventory();
+    //GetPlayer()->_SaveInventory();
 }
 
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
@@ -829,7 +829,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         pItem->DeleteFromDB();
         delete pItem;
     }
-    GetPlayer()->_SaveInventory();
+    //GetPlayer()->_SaveInventory();
 }
 
 void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
@@ -869,5 +869,5 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         pItem->DeleteFromDB();
         delete pItem;
     }
-    GetPlayer()->_SaveInventory();
+    //GetPlayer()->_SaveInventory();
 }

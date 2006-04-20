@@ -22,6 +22,7 @@
 #include "Player.h"
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
+#include "Spell.h"
 
 int PetAI::Permissible(const Creature *creature)
 {
@@ -76,7 +77,7 @@ bool PetAI::_needToStop() const
 void PetAI::_stopAttack()
 {
     assert( i_pVictim != NULL );
-    i_pet.ClearState(UNIT_STAT_ATTACKING);
+    i_pet.clearUnitState(UNIT_STAT_ATTACKING);
     i_pet.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
 
     if( !i_pet.isAlive() )
@@ -116,33 +117,6 @@ void PetAI::UpdateAI(const uint32 diff)
 {
     if( i_pVictim != NULL )
     {
-        /*if( _isVisible(i_pVictim) )
-        {
-            DEBUG_LOG("Victim %d re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
-            i_state = UNIT_STAT_STOPPED;
-            i_pet->MovementExpired();
-            // back to the cat and mice game if you move back in range
-        }
-        i_tracker.Update(diff);
-        if( i_tracker.Passed() )
-        {
-            i_pet->MovementExpired();
-            DEBUG_LOG("Creature running back home [guid=%d]", i_pet.GetGUIDLow());
-            if((i_state & STATE_RA_FOLLOW)>0)
-                i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
-            else
-                i_pet->Idle();
-            i_pVictim = NULL;
-        }
-        if( !i_pet.canReachWithAttack( i_pVictim ))
-        {
-
-            float dx = i_pVictim->GetPositionX() - i_pet.GetPositionX();
-            float dy = i_pVictim->GetPositionY() - i_pet.GetPositionY();
-            float orientation = (float)atan2((double)dy, (double)dx);
-            i_pet.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
-        }*/
-
         if( _needToStop() )
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%d]", i_pet.GetGUIDLow());
@@ -150,7 +124,18 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if( i_pet.IsStopped() )
         {
-            if( i_pet.isAttackReady() )
+			Spell* spell;
+			if ( !i_pet.m_canMove && i_pet.m_currentSpell )
+				return;
+			else if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && i_pet.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = i_pet.reachWithSpellAttack(i_pVictim)))
+			{
+                SpellCastTargets targets;
+                targets.setUnitTarget( i_pVictim );
+                spell->prepare(&targets);
+                i_pet.m_canMove = false;
+                DEBUG_LOG("Spell Attack.");
+			}
+            else if( i_pet.isAttackReady() )
             {
                 i_pet.AttackerStateUpdate(i_pVictim, 0);
                 i_pet.setAttackTimer(0);
@@ -161,7 +146,7 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else
     {
-        if(i_owner->testStateFlag(UNIT_STAT_IN_COMBAT) && i_owner->getAttackerSet().size())
+        if(i_owner->hasUnitState(UNIT_STAT_IN_COMBAT) && i_owner->getAttackerSet().size())
             AttackStart(*(i_owner->getAttackerSet().begin()));
     }
 }
@@ -174,8 +159,18 @@ bool PetAI::_isVisible(Unit *u) const
 void PetAI::_taggedToKill(Unit *u)
 {
     assert( i_pVictim == NULL );
-    i_pet.SetState(UNIT_STAT_ATTACKING);
+    i_pet.addUnitState(UNIT_STAT_ATTACKING);
     i_pet.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
-    i_pet->Mutate(new TargetedMovementGenerator(*u));
     i_pVictim = u;
+	Spell *spell;
+	if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spell = i_pet.reachWithSpellAttack( u )))
+	{
+        SpellCastTargets targets;
+        targets.setUnitTarget( u );
+        spell->prepare(&targets);
+        i_pet.m_canMove = false;
+        DEBUG_LOG("Spell Attack.");
+	}
+	else
+		i_pet->Mutate(new TargetedMovementGenerator(*u));
 }

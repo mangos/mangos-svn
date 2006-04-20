@@ -48,7 +48,7 @@ ReactorAI::AttackStart(Unit *p)
     if( i_pVictim == NULL )
     {
         DEBUG_LOG("Tag unit LowGUID(%d) HighGUID(%d) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
-        i_creature.SetState(UNIT_STAT_ATTACKING);
+        i_creature.addUnitState(UNIT_STAT_ATTACKING);
         i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
         i_creature->Mutate(new TargetedMovementGenerator(*p));
         i_pVictim = p;
@@ -122,7 +122,7 @@ ReactorAI::stopAttack()
 {
     if( i_pVictim != NULL )
     {
-        i_creature.ClearState(UNIT_STAT_IN_COMBAT);
+        i_creature.clearUnitState(UNIT_STAT_IN_COMBAT);
         i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
 
         if( !i_creature.isAlive() )

@@ -81,6 +81,8 @@ bool Pet::LoadPetFromDB( Unit* owner )
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
+    SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
+    SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
 
     SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
 
@@ -98,8 +100,8 @@ bool Pet::LoadPetFromDB( Unit* owner )
     //SetUInt32Value(UNIT_FIELD_STAT3,28);
     SetUInt32Value(UNIT_FIELD_STAT4,27);
 
-    m_name = fields[11].GetString();
-    m_fealty = fields[12].GetUInt32();
+    m_fealty = fields[11].GetUInt32();
+    m_name = fields[12].GetString();
 
     m_spells[0] = fields[6].GetUInt32();
     m_spells[1] = fields[7].GetUInt32();

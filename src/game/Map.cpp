@@ -444,7 +444,7 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
     Cell new_cell = RedZone::GetZone(new_val);
     creature->Relocate(x, y, z, ang);
 
-    if( creature->TestState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING) )
+    if( creature->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING) )
     {
         if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
         {

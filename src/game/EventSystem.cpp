@@ -270,16 +270,8 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
 
 void RemoveEvent(uint32 eventid)
 {
-    //DWORD dwtid;
-    //HANDLE hThread;
-
-    //newthr->th = (HANDLE)_beginthreadex(NULL, WIN32_THREAD_STACK_SIZE, RemovePeriodicEvent, &eventid, 0, &dwtid);
-
-    //WaitForSingleObject(hThread,20000);
-
     MThread* tr=new MThread;
     tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)eventid);
-    return;
 }
 
 void RemovePeriodicEvent(void* etid)

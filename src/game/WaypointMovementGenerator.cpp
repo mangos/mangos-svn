@@ -93,7 +93,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
         if( i_creature.IsStopped() )
         {
             assert( i_currentNode < i_path.Size() );
-            creature.SetState(UNIT_STAT_ROAMING);
+            creature.addUnitState(UNIT_STAT_ROAMING);
             const Path::PathNode &node(i_path(i_currentNode));
             Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
@@ -130,7 +130,7 @@ FlightPathMovementGenerator::LoadPath(Player &pl)
 void
 FlightPathMovementGenerator::Initialize()
 {
-    i_player.addStateFlag(UNIT_STAT_IN_FLIGHT);
+    i_player.addUnitState(UNIT_STAT_IN_FLIGHT);
     LoadPath(i_player);
     i_currentNode = 0;
     Traveller<Player> traveller(i_player);

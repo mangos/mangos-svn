@@ -391,7 +391,7 @@ void Spell::EffectCreateItem(uint32 i)
             }
             newItem = new Item;
             newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
-            pUnit->AddItem(bagIndex, slot, newItem, false, false, false);
+            pUnit->AddItem(bagIndex, slot, newItem, false, false, true);
             newItem = NULL;
 
         }
@@ -840,11 +840,14 @@ void Spell::EffectSummonPet(uint32 i)
         {
             if(OldSummon->isDead())
             {
+				uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
                 OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
-                OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL) );
-                OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL));
+                OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * petlvl );
+                OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlvl );
+				OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);
+				OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
                 OldSummon->setDeathState(ALIVE);
-                OldSummon->ClearState(UNIT_STAT_ALL_STATE);
+                OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
                 ((Creature&)*OldSummon)->Clear();
                 MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
             }
@@ -887,6 +890,8 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
         NewSummon->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
+		NewSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
+		NewSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
@@ -917,16 +922,6 @@ void Spell::EffectSummonPet(uint32 i)
         if(petentry == 416)                                 //imp
         {
             NewSummon->m_spells[0] = 133;                   //133---fire bolt 1
-            SpellEntry *spellInfo = sSpellStore.LookupEntry(133 );
-            if(!spellInfo)
-            {
-                sLog.outError("WORLD: unknown spell id 133\n");
-                return;
-            }
-
-            Spell *spell = new Spell(NewSummon, spellInfo, false, 0);
-            WPAssert(spell);
-            NewSummon->m_currentSpell = spell;
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 

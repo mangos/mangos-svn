@@ -40,7 +40,7 @@ bool ChooseReward_default(Player *player, Creature *_Creature, Quest *_Quest, ui
 
 uint32 NPCDialogStatus_default(Player *player, Creature *_Creature )
 {
-    return 100;
+    return 128;
 }
 
 bool ItemHello_default(Player *player, Item *_Item, Quest *_Quest )
