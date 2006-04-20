@@ -282,10 +282,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         virtual void setDeathState(DeathState s)
         {
-            while(m_writeDeathState);
-            m_writeDeathState=true;
             m_deathState = s;
-            m_writeDeathState=false;
             if(s == JUST_DIED)
             {
                 m_deathTimer = m_corpseDelay;

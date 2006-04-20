@@ -319,7 +319,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         }
         if ( status == QUEST_STATUS_COMPLETE)
         {
-            if (pQuest->HasFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ))
+            if (pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ))
                 wasRewardRep = true;
             else if( !pPlayer->getQuestRewardStatus(questinfo->QuestId))
             {

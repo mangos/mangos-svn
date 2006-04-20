@@ -81,7 +81,7 @@ bool Quest::CanBeTaken( Player *_Player )
 bool Quest::RewardIsTaken( Player *_Player )
 {
     bool bResult = false;
-    if ( !HasFlag(QUEST_SPECIAL_FLAGS_REPEATABLE) )
+    if ( !HasSpecialFlag(QUEST_SPECIAL_FLAGS_REPEATABLE) )
         bResult = ( _Player->getQuestRewardStatus( GetQuestInfo()->QuestId ) );
     return bResult;
 }

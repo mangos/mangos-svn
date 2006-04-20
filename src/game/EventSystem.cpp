@@ -199,7 +199,7 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
         event->param =param;
         event->period =timer;
         event->st =separate_thread;
-        event->id=eventid;
+        event->id=avalabelid;
         event->time =now()+timer;
 
         if(timer<=60000)                                    //less then a minute
