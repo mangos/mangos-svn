@@ -35,13 +35,13 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-    sLog.outDebug("CHAT: packet received");
 
     uint32 type;
     uint32 lang;
 
     recv_data >> type;
     recv_data >> lang;
+    sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
     switch(type)
     {

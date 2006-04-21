@@ -454,7 +454,20 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     SendMessageToSet(&data,true);
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
+	{
+		data.Initialize(SMSG_SPELLNONMELEEDAMAGELOG);
+		data << uint8(0xFF) << pVictim->GetGUID();
+		data << uint8(0xFF) << this->GetGUID();
+		data << uint32(spellProto->Id);
+		data << uint32(mod->m_amount);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		data << uint32(0);
+		SendMessageToSet(&data,true);
+
         DealDamage(pVictim, mod->m_amount, procFlag);
+	}
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
         if(GetUInt32Value(UNIT_FIELD_HEALTH) < GetUInt32Value(UNIT_FIELD_MAXHEALTH) + mod->m_amount)
