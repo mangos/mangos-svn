@@ -35,6 +35,7 @@
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
 #include "Formulas.h"
+#include "Pet.h"
 
 #include <math.h>
 
@@ -192,16 +193,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
         {
             ((Creature*)pVictim)->generateLoot();
-            if(GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)this)->AddQuestsLoot((Creature*)pVictim);
-            }
         }
 
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
-        if (GetTypeId() == TYPEID_PLAYER)
-            ((Player*)this)->CalculateHonor(pVictim);
 
         DEBUG_LOG("DealDamageAura");
         pVictim->RemoveAllAuras();
@@ -271,16 +266,37 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
         }
 
-        if ((GetTypeId() == TYPEID_PLAYER) && (crtype != 8))
-        {
+		bool playerkill = false;
+		Player *player;
+		if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet() && (crtype != 8))
+		{
+			Unit* owner = ((Pet*)this)->GetOwner();
+			if(!owner)
+				playerkill = false;
+			if(owner->GetTypeId() == TYPEID_PLAYER)
+			{
+				player = (Player*)owner;
+				playerkill = true;
+			}
+		}
+		if ((GetTypeId() == TYPEID_PLAYER) && (crtype != 8))
+		{
+			playerkill = true;
+			player = (Player*)this;
+		}
+		if (playerkill)
+		{
+			if(pVictim->GetTypeId() == TYPEID_UNIT)
+				player->AddQuestsLoot((Creature*)pVictim);
+            player->CalculateHonor(pVictim);
             DEBUG_LOG("DealDamageIsPlayer");
-            uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(this), pVictim);
+            uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
 
             uint32 entry = 0;
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
 
-            Group *pGroup = objmgr.GetGroupByLeader(((Player*)this)->GetGroupLeader());
+            Group *pGroup = objmgr.GetGroupByLeader(player->GetGroupLeader());
             if (pGroup)
             {
                 DEBUG_LOG("DealDamageInGroup");
@@ -298,10 +314,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             {
                 DEBUG_LOG("DealDamageNotInGroup");
 
-                ((Player*)this)->GiveXP(xp, victimGuid);
+                player->GiveXP(xp, victimGuid);
 
                 if (pVictim->GetTypeId() != TYPEID_PLAYER)
-                    ((Player*)this)->KilledMonster(entry, victimGuid);
+                    player->KilledMonster(entry, victimGuid);
             }
         }
         else
