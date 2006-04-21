@@ -337,6 +337,7 @@ class Spell
         void EffectApplyAura(uint32 i);
         void EffectPowerDrain(uint32 i);
         void EffectHeal(uint32 i);
+		void EffectHealthLeach(uint32 i);
         void EffectCreateItem(uint32 i);
         void EffectPresistentAA(uint32 i);
         void EffectEnergize(uint32 i);
