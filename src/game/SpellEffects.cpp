@@ -322,6 +322,7 @@ void Spell::EffectCreateItem(uint32 i)
     pItem = NULL;
     Item* newItem;
     curSlot=0;
+	bool GetSoltflag = false;
     //add items that spell creates
     for(i=0;i<2;i++)
     {
@@ -349,8 +350,9 @@ void Spell::EffectCreateItem(uint32 i)
                         pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)+1);
                         pUnit->UpdateSlot(bagIndex,curSlot);
                         slot = curSlot;
+						GetSoltflag = true;
                         continue;
-                    }else slot = 0;
+                    }else GetSoltflag = false;
                 }
             }
 
@@ -361,11 +363,12 @@ void Spell::EffectCreateItem(uint32 i)
                 {
                     slot = j;
                     bagIndex = CLIENT_SLOT_BACK;
+					GetSoltflag = true;
                 }
             }
 
             Bag* pBag;
-            if(slot == 0)
+            if(!GetSoltflag)
                 for(uint8 bagID=CLIENT_SLOT_01;bagID<=CLIENT_SLOT_04;bagID++)
             {
                 pBag = pUnit->GetBagBySlot(bagID);
@@ -379,12 +382,13 @@ void Spell::EffectCreateItem(uint32 i)
                         bagIndex = bagID;
                         pBag = NULL;
                         pItem = NULL;
+						GetSoltflag = true;
                         break;
                     }
                 }
             }
 
-            if(slot == 0)
+            if(!GetSoltflag)
             {
                 SendCastResult(0x18);
                 return;
@@ -637,7 +641,11 @@ void Spell::EffectOpenLock(uint32 i)
     }else loottype=1;
     if(loottype == 1)
         ((Player*)m_caster)->UpdateSkill(SKILL_OPENLOCK);
-
+	//not sure if its need while loottype ==2 or 3
+	if(loottype == 2)
+		((Player*)m_caster)->UpdateSkill(SKILL_HERBALISM);
+	if(loottype == 3)
+		((Player*)m_caster)->UpdateSkill(SKILL_MINING);
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
 }
