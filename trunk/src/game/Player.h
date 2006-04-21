@@ -338,7 +338,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 getQuestSlot(uint32 quest_id);
         uint16 getQuestSlotById(uint32 slot_id);
         void AddQuestsLoot(Creature* creature);
-        uint32 GetBagItemCount(uint32 itemId);
 
         void RemovItemFromBag(uint32 itemId,uint32 itemcount);
         void RemovedItemFromBag(uint32 entry);
@@ -520,7 +519,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SwapItem(uint8 dstBag,uint8 dstSlot,uint8 srcBag,uint8 srcSlot);
 
         bool CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 count);
-        int GetItemCount(uint32 itemId);
+        int GetItemCount(uint32 itemId, bool includebank);
         uint32 AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 count, bool addmaxpossible, bool dontadd);
         uint8 AddItem(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
         uint8 AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);

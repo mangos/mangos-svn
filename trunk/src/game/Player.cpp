@@ -776,10 +776,10 @@ bool Player::isQuestComplete(Quest *pQuest )
 
         if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
         {
-            Result &=(GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[0]) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
-                GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[1])>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
-                GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[2])>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
-                GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[3])>= pQuest->GetQuestInfo()->ReqItemCount[3]);
+            Result &=(GetItemCount( pQuest->GetQuestInfo()->ReqItemId[0], false) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
+                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[1], false)>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
+                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[2], false)>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
+                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[3], false)>= pQuest->GetQuestInfo()->ReqItemCount[3]);
         }
         if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL))
         {
@@ -962,7 +962,7 @@ void Player::AddedItemToBag(uint32 entry, uint32 count)
             {
                 if (qs.m_quest->GetQuestInfo()->ReqItemId [j] == entry)
                 {
-                    if ( GetBagItemCount( qs.m_quest->GetQuestInfo()->ReqItemId[j])< qs.m_quest->GetQuestInfo()->ReqItemCount[j] )
+                    if ( GetItemCount( qs.m_quest->GetQuestInfo()->ReqItemId[j], false)< qs.m_quest->GetQuestInfo()->ReqItemCount[j] )
                     {
                         PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, count);
                     }
@@ -992,7 +992,7 @@ void Player::RemovedItemFromBag(uint32 entry)
             {
                 if (pQuest->GetQuestInfo()->ReqItemId[j] == entry)
                 {
-                    if ( GetBagItemCount( pQuest->GetQuestInfo()->ReqItemId[j])< pQuest->GetQuestInfo()->ReqItemCount[j] )
+                    if ( GetItemCount( pQuest->GetQuestInfo()->ReqItemId[j], false)< pQuest->GetQuestInfo()->ReqItemCount[j] )
                     {
                         //PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, count);
                         i->second.status = QUEST_STATUS_INCOMPLETE;
@@ -1004,42 +1004,6 @@ void Player::RemovedItemFromBag(uint32 entry)
             }
         }
     }
-}
-
-uint32 Player::GetBagItemCount(uint32 itemId)
-{
-    int fcount = 0;
-    if(itemId==0)
-        return true;
-    Item* pItem;
-    Bag* bag;
-    for (uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        bag = GetBagBySlot(i);
-        if (!bag || bag->IsEmpty())
-            continue;
-        for (uint8 j=0; j < bag->GetProto()->ContainerSlots; j++)
-        {
-            pItem = bag->GetItemFromBag(j);
-            if(!pItem)
-                continue;
-            if (pItem->GetProto()->ItemId==itemId)
-            {
-                fcount+=pItem->GetCount();
-            }
-        }
-    }
-    for (uint8 i =INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
-    {
-        pItem = GetItemBySlot(i);
-        if (!pItem)
-            continue;
-        if(pItem->GetProto()->ItemId==itemId)
-        {
-            fcount+=pItem->GetCount();
-        }
-    }
-    return fcount;
 }
 
 void Player::SetBindPoint(uint64 guid)
@@ -4309,8 +4273,8 @@ bool Player::CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 
     return false;
 }
 
-// Returns the amount of items that player has (bank too)
-int Player::GetItemCount(uint32 itemId)
+// Returns the amount of items that player has (include bank or not)
+int Player::GetItemCount(uint32 itemId, bool includebank)
 {
     int countitems = 0;
     Item* pItem = 0;
@@ -4339,6 +4303,9 @@ int Player::GetItemCount(uint32 itemId)
             }
         }
     }
+	if(!includebank)
+		return countitems;
+
     for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
     {
         pItem = GetItemBySlot(i);
@@ -4399,7 +4366,7 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
         // Stackable is related to unique items, users can't have more than MaxCount items, not even in bank
         if  (proto->Stackable == 0)
         {
-            if  (GetItemCount(itemId) >= proto->MaxCount)
+            if  (GetItemCount(itemId, true) >= proto->MaxCount)
             {
                 sLog.outError("AddNewItem : Too many items, itemId = %i", itemId);
                 return false;
@@ -5272,6 +5239,8 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
             {
                 m_items[i]->SetCount(oldcnt-itemcount);
                 removed+=itemcount;
+				sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i, count = %u", i, removed);
+				return;
             }
             else
             {
@@ -5295,9 +5264,10 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                 }
             }
             if(removed>=itemcount)
-                return;
-            sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i", i);
-            break;
+			{
+				sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i, count = %u", i, removed);
+               return;
+			}
         }
     }
     for(uint8 i=INVENTORY_SLOT_BAG_START;i<INVENTORY_SLOT_BAG_END;i++)
@@ -5306,12 +5276,12 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
         if (pBag)
         {
             uint32 ContainerSlots=pBag->GetProto()->ContainerSlots;
-            for(uint8 j=0;j<ContainerSlots;j++)
+            for( uint8 j=0; j<ContainerSlots; j++ )
             {
                 pItem = pBag->GetItemFromBag(j);
-                if (pItem)
+                if ( pItem && pItem->GetProto()->ItemId == itemId )
                 {
-                    removed+=pBag->RemoveItemFromBag(j,itemcount);
+                    removed += pBag->RemoveItemFromBag( j, itemcount );
                     if (client_remove)
                     {
                         pItem->SetOwner(0);
@@ -5325,21 +5295,12 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                     pBag->SendUpdateToPlayer(this);
 
                     if(removed>=itemcount)
-                        return;
-                    sLog.outDetail("RemoveItemFromSlot : Item removed, bagIndex = %i, slot = %i", i, j);
-                    break;
-                }
-                else
-                {
-                    sLog.outError("RemoveItemFromSlot : No item found, bagIndex = %i, slot = %i", i, j);
-                    return ;
+					{
+						sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i, count = %u", i, removed);
+						return;
+					}
                 }
             }
-        }
-        else
-        {
-            sLog.outError("RemoveItemFromSlot : No bag in that bagIndex, bagIndex = %i", i);
-            return ;
         }
     }
 }
