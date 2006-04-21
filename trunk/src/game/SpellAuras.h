@@ -21,7 +21,8 @@
 #include "Spell.h"
 
 #define MAX_AURAS 56
-#define MAX_POSITIVE_AURAS 32
+#define MAX_NEGATIVE_AURAS 32
+
 
 enum AURA_FLAGS
 {

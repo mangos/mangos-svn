@@ -246,9 +246,9 @@ void Aura::_AddAura()
 
     slot = 0xFF;
 
-    if (IsPositive())
+    if (!IsPositive())
     {
-        for (i = 0; i < MAX_POSITIVE_AURAS; i++)
+        for (i = 0; i < MAX_NEGATIVE_AURAS; i++)
         {
             if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
             {
@@ -259,7 +259,7 @@ void Aura::_AddAura()
     }
     else
     {
-        for (i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
+        for (i = MAX_NEGATIVE_AURAS; i < MAX_AURAS; i++)
         {
             if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
             {

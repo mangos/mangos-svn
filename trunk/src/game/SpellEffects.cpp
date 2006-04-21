@@ -50,7 +50,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_MANA_DRAIN
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_LEECH
+    &Spell::EffectHealthLeach,                              //SPELL_EFFECT_HEALTH_LEECH
     &Spell::EffectHeal,                                     //SPELL_EFFECT_HEAL
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL
@@ -281,6 +281,32 @@ void Spell::EffectHeal(uint32 i)
         unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth+damage);
 
 }
+
+void Spell::EffectHealthLeach(uint32 i)
+{
+	if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
+
+	//okey Touch of Death works
+
+	sLog.outDebug("HealthLeach :%d", damage);
+	uint32 dHealth = damage; //something like this //maybe some other things are needed
+
+	
+	//Please let me know if this is correct
+	m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dHealth);
+
+	uint32 curHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
+    uint32 maxHealth = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+	
+	if ((curHealth + (dHealth/2)) < maxHealth)
+		m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) + (dHealth/2));
+	else
+		m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
+}
+
 
 void Spell::EffectCreateItem(uint32 i)
 {
@@ -1002,6 +1028,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             if(equipInvType != INVTYPE_THROWN && ( equipInvType == INVTYPE_RANGED || equipInvType == INVTYPE_RANGEDRIGHT ))
             {
                 // FIX-ME - get the ammo that is in ammo slot, then decrease
+
             }
             else if(equipInvType != INVTYPE_THROWN)
                 return;
@@ -1455,3 +1482,5 @@ void Spell::EffectSkill(uint32)
     ((Player*)m_caster)->UpdateSkill(m_spellInfo->EffectMiscValue[1]);
 
 }
+
+
