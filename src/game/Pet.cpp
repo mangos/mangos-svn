@@ -34,6 +34,14 @@ Pet::Pet()
         m_spells[i]=0;
 }
 
+Unit *Pet::GetOwner()
+{
+    uint64 ownerid = GetUInt64Value(UNIT_FIELD_SUMMONEDBY);
+	if(!ownerid)
+		return NULL;
+	return ObjectAccessor::Instance().GetUnit(*this, ownerid);
+}
+
 void Pet::SavePetToDB()
 {
     if(!isPet())
