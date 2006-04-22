@@ -700,6 +700,7 @@ void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orient
     GetSession()->SendPacket( &data );
 
     SetMapId(mapid);
+	Relocate(x,y,z,orientation);
     SetPosition(x,y,z,orientation);
     SetDontMove(true);
     SaveToDB();
