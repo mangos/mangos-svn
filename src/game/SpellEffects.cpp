@@ -49,7 +49,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectTepeportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS
     &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_MANA_DRAIN
+    &Spell::EffectManaDrain,                                //SPELL_EFFECT_MANA_DRAIN
     &Spell::EffectHealthLeach,                              //SPELL_EFFECT_HEALTH_LEECH
     &Spell::EffectHeal,                                     //SPELL_EFFECT_HEAL
     &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND
@@ -251,9 +251,9 @@ void Spell::EffectApplyAura(uint32 i)
 
 }
 
-void Spell::EffectPowerDrain(uint32 i)
+void Spell::EffectManaDrain(uint32 i)
 {
-    if(!unitTarget)
+	if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
@@ -263,6 +263,22 @@ void Spell::EffectPowerDrain(uint32 i)
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
     else
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
+}
+
+void Spell::EffectPowerDrain(uint32 i)
+{
+    if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
+
+    uint32 curPower = unitTarget->GetUInt32Value(UNIT_FIELD_POWER1);
+	uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+    if(curPower < damage)
+        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
+    else
+        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
+	unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth-damage/2);
 
 }
 
