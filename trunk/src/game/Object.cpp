@@ -483,7 +483,7 @@ float Object::GetDistanceSq(const Object* obj) const
 float Object::GetDistanceSq(const float x, const float y, const float z) const
 {
     float x1, y1, z1;
-    GetClosePoint( x, y, x1, y1, z1 );
+    GetClosePoint( x, y, z, x1, y1, z1 );
 
     float dx  = x - x1;
     float dy  = y - y1;
@@ -547,9 +547,11 @@ void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z )
     y = m_positionY + GetObjectSize() * sin(angle);
     int mapid = GetMapId();
     z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+	if( abs( z - victim->GetPositionZ() ) > 5.0f )
+		z = victim->GetPositionZ();
 }
 
-void Object::GetClosePoint( const float ox, const float oy, float &x, float &y, float &z ) const
+void Object::GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const
 {
     float angle;
     if(ox==0 && oy ==0)
@@ -560,4 +562,7 @@ void Object::GetClosePoint( const float ox, const float oy, float &x, float &y, 
     y = m_positionY + GetObjectSize() * sin(angle);
     int mapid = GetMapId();
     z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+	if( abs( z - oz ) > 5.0f )
+		z = oz;
+
 }

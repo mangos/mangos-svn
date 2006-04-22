@@ -621,16 +621,16 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
         switch(gossip->Action)
         {
             case GOSSIP_GUARD_BANK:
-                icon=ICON_POI_4;
+                icon=ICON_POI_HOUSE;
                 break;
             case GOSSIP_GUARD_RIDE:
-                icon=ICON_POI_40;
+                icon=ICON_POI_RWHORSE;
                 break;
             case GOSSIP_GUARD_GUILD:
-                icon=ICON_POI_18;
+                icon=ICON_POI_BLUETOWER;
                 break;
             default:
-                icon=ICON_POI_5;
+                icon=ICON_POI_TOWER;
                 break;
         }
         uint32 textid=GetGossipTextId( gossip->Action, zoneid );
