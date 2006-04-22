@@ -119,7 +119,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     Field *player_fields, *items_fields, *spells_fields, *skills_fields, *actions_fields;
     PlayerCreateInfo *pPlayerCreateInfo;
 
-    QueryResult *player_result = sDatabase.PQuery("SELECT * FROM playercreateinfo WHERE race = '%u' AND class = '%u';", race, class_);
+    QueryResult *player_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u';", race, class_);
 
     if(!player_result)
     {
@@ -160,7 +160,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete player_result;
 
-    QueryResult *items_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_items WHERE createid = '0' OR createid = '%u';", createId);
+    QueryResult *items_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_item` WHERE `createid` = '0' OR `createid` = '%u';", createId);
 
     do
     {
@@ -174,7 +174,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete items_result;
 
-    QueryResult *spells_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_spells WHERE createid = '0' OR createid = '%u';", createId);
+    QueryResult *spells_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_spell` WHERE `createid` = '0' OR `createid` = '%u';", createId);
 
     do
     {
@@ -186,7 +186,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete spells_result;
 
-    QueryResult *skills_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_skills WHERE createid = '0' OR createid = '%u';", createId);
+    QueryResult *skills_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_skill` WHERE `createid` = '0' OR `createid` = '%u';", createId);
 
     do
     {
@@ -200,7 +200,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     delete skills_result;
 
-    QueryResult *actions_result = sDatabase.PQuery("SELECT * FROM playercreateinfo_actions WHERE createid = '0' OR createid = '%u';", createId);
+    QueryResult *actions_result = sDatabase.PQuery("SELECT * FROM `playercreateinfo_action` WHERE `createid` = '0' OR `createid` = '%u';", createId);
 
     do
     {
@@ -223,7 +223,7 @@ uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 
     uint64 guid = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", name);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s';", name);
 
     if(result)
     {
@@ -238,7 +238,7 @@ uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT name FROM characters WHERE guid = '%d';", GUID_LOPART(guid));
+    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%d';", GUID_LOPART(guid));
 
     if(result)
     {
@@ -252,7 +252,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 
 void ObjectMgr::LoadAuctions()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM auctionhouse;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `auctionhouse`;" );
 
     if( !result )
         return;
@@ -287,7 +287,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM auctioned_items;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * `FROM auctioned_item`;" );
 
     if( !result )
         return;
@@ -306,7 +306,7 @@ void ObjectMgr::LoadAuctionItems()
 
 void ObjectMgr::LoadMailedItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM mailed_items;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `mail_item`;" );
 
     if( !result )
         return;
@@ -326,7 +326,7 @@ void ObjectMgr::LoadMailedItems()
 void ObjectMgr::LoadGuilds()
 {
     Guild *newguild;
-    QueryResult *result = sDatabase.PQuery( "SELECT guildid FROM guilds;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT `guildid` FROM `guild`;" );
     uint32 count = 0;
 
     if( !result )
@@ -388,7 +388,7 @@ GossipText *ObjectMgr::GetGossipText(uint32 Text_ID)
 void ObjectMgr::LoadGossipText()
 {
     GossipText *pGText;
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM npc_text;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_text`;" );
 
     int count = 0;
     if( !result ) return;
@@ -439,7 +439,7 @@ void ObjectMgr::LoadGossipText()
 ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
 {
     ItemPage *pIText;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM item_pages WHERE id = '%d';", Page_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page` WHERE `id` = '%d';", Page_ID);
 
     if( !result ) return NULL;
     int cic, count = 0;
@@ -486,7 +486,7 @@ AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
 void ObjectMgr::LoadAreaTriggerPoints()
 {
     int count = 0;
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM triggerquestrelation;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `areatrigger_involvedrelation`;" );
     AreaTriggerPoint *pArea;
 
     if( !result ) return;
@@ -519,7 +519,7 @@ void ObjectMgr::LoadAreaTriggerPoints()
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT taxipath.destination FROM taxipath WHERE taxipath.source = '%d' ORDER BY destination LIMIT 1;", curloc);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxipath.destination` FROM `taxipath` WHERE `taxipath.source` = '%d' ORDER BY `destination` LIMIT 1;", curloc);
 
     if( ! result )
     {
@@ -536,7 +536,7 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT taxinodes.ID, SQRT(pow(taxinodes.x-'%f',2)+pow(taxinodes.y-'%f',2)+pow(taxinodes.z-'%f',2)) as distance FROM taxinodes WHERE taxinodes.continent = '%u' ORDER BY distance LIMIT 1;", x, y, z, mapid);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxinode.id`, SQRT(pow(`taxinode.position_x`-'%f',2)+pow(`taxinode.position_y`-'%f',2)+pow(`taxinode.position_z`-'%f',2)) AS `distance` FROM `taxinode` WHERE `taxinode.continent` = '%u' ORDER BY `distance` LIMIT 1;", x, y, z, mapid);
 
     if( ! result  )
     {
@@ -550,7 +550,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT taxipath.price, taxipath.ID FROM taxipath WHERE taxipath.source = '%u' AND taxipath.destination = '%u';", source, destination);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxipath.price`, `taxipath.id` FROM `taxipath` WHERE `taxipath.source` = '%u' AND `taxipath.destination` = '%u';", source, destination);
 
     if( ! result )
     {
@@ -566,7 +566,7 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT taxinodes.mount FROM taxinodes WHERE taxinodes.ID = '%u';", id);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxinode.mount` FROM `taxinode WHERE `taxinode.id` = '%u';", id);
 
     if( ! result )
     {
@@ -581,7 +581,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT taxipathnodes.X, taxipathnodes.Y, taxipathnodes.Z FROM taxipathnodes WHERE taxipathnodes.path = '%u';", path);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxipathnode.position_x`,`taxipathnode.position_y`,`taxipathnode.position_z` FROM `taxipathnode` WHERE `taxipathnode.path` = '%u';", path);
 
     if( ! result )
         return;
@@ -604,7 +604,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-positionx,2)+POW('%f'-positiony,2)+POW('%f'-positionz,2)) as distance, positionx, positiony, positionz, mapid FROM graveyards WHERE mapid = '%d' ORDER BY distance ASC LIMIT 1;", x, y, z, MapId);
+    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`,`map` FROM `graveyard` WHERE `map` = '%d' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
 
     if( ! result )
         return NULL;
@@ -623,7 +623,7 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
 AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT triggerID FROM areatrigger WHERE triggerID = '%d';", Trigger_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `areatrigger_template` WHERE `id` = '%d';", Trigger_ID);
 
     if ( result )
     {
@@ -632,7 +632,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
         if( totrigger != 0)
         {
 
-            QueryResult *result1 = sDatabase.PQuery("SELECT TargetMapID,TargetPosX,TargetPosY,TargetPosZ FROM areatrigger WHERE triggerID = '%d';", totrigger);
+            QueryResult *result1 = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z` FROM `areatrigger_template` WHERE `id` = '%d';", totrigger);
             if ( result1 )
             {
                 Field *fields1 = result1->Fetch();
@@ -654,7 +654,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 void ObjectMgr::LoadTeleportCoords()
 {
 
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM areatrigger;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `areatrigger_template`;" );
 
     if( !result )
         return;
@@ -694,7 +694,7 @@ void ObjectMgr::LoadTeleportCoords()
 void ObjectMgr::SetHighestGuids()
 {
 
-    QueryResult *result = sDatabase.Query( "SELECT MAX(guid) FROM characters;" );
+    QueryResult *result = sDatabase.Query( "SELECT MAX(`guid`) FROM `character`;" );
     if( result )
     {
         m_hiCharGuid = (*result)[0].GetUInt32()+1;
@@ -702,7 +702,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(guid) FROM creatures;" );
+    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `creature`;" );
     if( result )
     {
         m_hiCreatureGuid = (*result)[0].GetUInt32()+1;
@@ -710,7 +710,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(guid) FROM item_instances;" );
+    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `item_instance`;" );
     if( result )
     {
         m_hiItemGuid = (*result)[0].GetUInt32()+1;
@@ -718,7 +718,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query("SELECT MAX(guid) FROM gameobjects;" );
+    result = sDatabase.Query("SELECT MAX(`guid`) FROM `gameobject`;" );
     if( result )
     {
         m_hiGoGuid = (*result)[0].GetUInt32()+1;
@@ -726,7 +726,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query("SELECT MAX(id) FROM auctionhouse;" );
+    result = sDatabase.Query("SELECT MAX(`id`) FROM `auctionhouse`;" );
     if( result )
     {
         m_auctionid = (*result)[0].GetUInt32()+1;
@@ -737,7 +737,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_auctionid = 0;
     }
-    result = sDatabase.PQuery( "SELECT MAX(mailid) FROM mail;" );
+    result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `mail`;" );
     if( result )
     {
         m_mailid = (*result)[0].GetUInt32()+1;
@@ -749,7 +749,7 @@ void ObjectMgr::SetHighestGuids()
         m_mailid = 0;
     }
 
-    result = sDatabase.PQuery( "SELECT MAX(guid) FROM corpses;" );
+    result = sDatabase.PQuery( "SELECT MAX(`guid`) FROM `corpse`;" );
     if( result )
     {
         m_hiCorpseGuid = (*result)[0].GetUInt32()+1;

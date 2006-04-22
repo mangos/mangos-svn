@@ -45,7 +45,7 @@ void LoadCreaturesLootTables()
     uint32 count = 0;
     float chance;
 
-    QueryResult *result = sDatabase.Query("SELECT * FROM `loottemplate`;");
+    QueryResult *result = sDatabase.Query("SELECT * FROM `loot_template`;");
 
     if (result)
     {
@@ -86,12 +86,12 @@ void FillLoot(Loot *loot, uint32 loot_id)
     if ((tab = CreatureLoot.find(loot_id)) == CreatureLoot.end())
         return;
 
-	vector <LootItem>::iterator new_end;
+    vector <LootItem>::iterator new_end;
     loot->items.resize(tab->second.size());
     // fill loot with items that have a chance
     new_end = remove_copy_if(tab->second.begin(), tab->second.end(), loot->items.begin(),
         LootItem::not_chance_for);
-	loot->items.erase(new_end, loot->items.end());
+    loot->items.erase(new_end, loot->items.end());
 }
 
 void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance)

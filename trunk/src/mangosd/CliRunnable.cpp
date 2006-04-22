@@ -122,8 +122,7 @@ void CliDelete(char*command,pPrintf zprintf)
         return;
     }
     Field *fields;
-    QueryResult *result = sDatabase.PQuery(
-        "SELECT acct FROM accounts WHERE login = '%s';",del );
+    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';",del);
 
     if (!result)
     {
@@ -133,8 +132,8 @@ void CliDelete(char*command,pPrintf zprintf)
 
     fields = result->Fetch();
     int guid = fields[0].GetUInt32();
-    sDatabase.PExecute("DELETE FROM `characters` WHERE acct = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM `accounts` WHERE login = '%s'",del);
+    sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",guid);
+    sDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",del);
     delete result;
 
     zprintf("We deleted : %s\x0d\x0a",del);
@@ -163,7 +162,7 @@ void CliExit(char*,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM characters WHERE online>0;");
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character` WHERE `online` > 0;");
 
     if (result)
     {
@@ -173,7 +172,7 @@ void CliInfo(char*,pPrintf zprintf)
         if ( cnt > 0 )
         {
             zprintf("Online users: %d\x0d\x0a",cnt);
-            result = sDatabase.PQuery( "SELECT c.name,c.acct,a.gm,a.login,a.last_ip FROM characters c,accounts a where c.online>0 and a.acct=c.acct;" );
+            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`accounts`.`gmlevel`,`accounts`.`username`,`accounts`.`last_ip` FROM `character` LEFT JOIN `accounts` ON `accounts`.`id` = `character`.`account` WHERE `character`.`online` > 0;" );
 
             zprintf("========================================================\x0d\x0a");
             zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
@@ -201,7 +200,7 @@ void CliInfo(char*,pPrintf zprintf)
 void CliBanList(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result2 = sDatabase.PQuery( "SELECT login FROM accounts WHERE banned>0;" );
+    QueryResult *result2 = sDatabase.PQuery( "SELECT `username` FROM `account` WHERE `banned` > 0;" );
     if(result2)
     {
         zprintf("Banned Accounts:\x0d\x0a");
@@ -213,7 +212,7 @@ void CliBanList(char*,pPrintf zprintf)
         delete result2;
     }
 
-    QueryResult *result3 = sDatabase.PQuery( "SELECT ip FROM ipbantable;" );
+    QueryResult *result3 = sDatabase.PQuery( "SELECT `ip` FROM `ip_banned`;" );
     if(result3)
     {
         zprintf("Banned IPs:\x0d\x0a");
@@ -247,12 +246,12 @@ void CliBan(char*command,pPrintf zprintf)
     if(IsItIP(banip))
     {
 
-        sDatabase.PExecute("INSERT into `ipbantable` values('%s')",banip);
+        sDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s')",banip);
         zprintf("We banned IP: %s\x0d\x0a",banip);
     }
     else
     {
-        sDatabase.PExecute("UPDATE `accounts` SET banned = '1' WHERE login = '%s'",banip);
+        sDatabase.PExecute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",banip);
         zprintf("We banned account (if it exists): %s\x0d\x0a",banip);
     }
 
@@ -277,13 +276,13 @@ void CliRemoveBan(char *command,pPrintf zprintf)
 
     if(IsItIP(banip))
     {
-        sDatabase.PExecute("DELETE FROM ipbantable WHERE ip = '%s'",banip);
+        sDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",banip);
         zprintf("We removed banned IP: %s\x0d\x0a",banip);
     }
 
     else
     {
-        sDatabase.PExecute("UPDATE `accounts` SET banned = '0' WHERE login = '%s'",banip);
+        sDatabase.PExecute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",banip);
         zprintf("We removed ban from account: %s\x0d\x0a",banip);
     }
 
@@ -294,7 +293,7 @@ void CliListGM(char *command,pPrintf zprintf)
 
     Field *fields;
 
-    QueryResult *result = sDatabase.PQuery( "SELECT login,gm FROM accounts WHERE gm > 0;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0;" );
     if(result)
     {
 
@@ -354,13 +353,11 @@ void CliSetGM(char *command,pPrintf zprintf)
     //wow it's ok,let's hope it was integer given
     int lev=atoi(&charcr[x]);                               //get int anyway
 
-    QueryResult *result = sDatabase.PQuery(
-        "SELECT gm FROM accounts WHERE login = '%s';",szAcc );
+    QueryResult *result = sDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `username` = '%s';",szAcc );
 
     if (result)
     {
-        sDatabase.PExecute(
-            "UPDATE `accounts` SET gm = '%d' WHERE login = '%s'",lev,szAcc);
+        sDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,szAcc);
         zprintf("We added %s gmlevel %d\x0d\x0a",szAcc,lev);
 
         delete result;
@@ -408,7 +405,7 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT login FROM accounts WHERE login = '%s';",szAcc );
+    QueryResult *result1 = sDatabase.PQuery("SELECT `username` FROM `account` WHERE `username` = '%s';",szAcc );
 
     if (result1)
     {
@@ -417,9 +414,7 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    if(sDatabase.PExecute(
-        "INSERT into `accounts` (acct,login,password,gm,sessionkey,email,joindate,banned,last_ip,failed_logins,locked) values (NULL,'%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]
-        ))
+    if(sDatabase.PExecute("INSERT into `account` (`id`,`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES (NULL,'%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
         zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
     else
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);

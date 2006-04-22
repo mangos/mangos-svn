@@ -29,13 +29,13 @@ struct Realm
 
     std::string address;
 
-    uint32 icon;
+    uint8 icon;
 
     uint8 color;
 
     uint8 timezone;
 
-    Realm (const char *Name, std::string Address, uint32 Icon, uint8 Color, uint8 Timezone)
+    Realm (const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone)
     {
         name = Name;
         address = Address;
@@ -59,10 +59,10 @@ class RealmList
         RealmList();
         ~RealmList();
 
-        void AddRealm( const char * name, const char * address, uint8 icon, uint8 color, uint8 timezone );
+        void AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone );
         int GetAndAddRealms();
-        void SetRealm( const char * name, uint8 icon, uint8 color, uint8 timezone );
-        void RemoveRealm (const char * name );
+        void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
+        void RemoveRealm (const char *name );
         inline void setServerPort(port_t p) { i_serverPort = p; }
 
         RealmMap::const_iterator begin() const { return _realms.begin(); }

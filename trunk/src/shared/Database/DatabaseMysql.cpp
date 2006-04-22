@@ -84,7 +84,7 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     if( !format || !mMysql) return NULL;
 
     va_list ap;
-    char szQuery [512];
+    char szQuery [1024];
     va_start(ap, format);
     vsprintf( szQuery, format, ap );
     va_end(ap);
@@ -169,7 +169,7 @@ bool DatabaseMysql::PExecute(const char * format,...)
     if (!mMysql||!format)
         return false;
     va_list ap;
-    char szQuery [512];
+    char szQuery [1024];
     va_start(ap, format);
     vsprintf( szQuery, format, ap );
     va_end(ap);

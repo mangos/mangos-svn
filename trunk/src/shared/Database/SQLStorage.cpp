@@ -25,10 +25,10 @@ const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
 const char CreatureInfofmt[]="iissiiiiiififfiiiiiiififiiffifiiiiiiiiiiiiiiiiiiiiiiiisss";
 const char Questsfmt[]="iiiiiiiiiiiiiiissssssssssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffi";
 
-SQLStorage sItemStorage(ItemPrototypefmt,"itemstemplate");
-SQLStorage sGOStorage(GameObjectInfofmt,"gameobjecttemplate");
-SQLStorage sCreatureStorage(CreatureInfofmt,"creaturetemplate");
-SQLStorage sQuestsStorage(Questsfmt,"quests");
+SQLStorage sItemStorage(ItemPrototypefmt,"item_template");
+SQLStorage sGOStorage(GameObjectInfofmt,"gameobject_template");
+SQLStorage sCreatureStorage(CreatureInfofmt,"creature_template");
+SQLStorage sQuestsStorage(Questsfmt,"quest_template");
 
 void FreeStorage(SQLStorage * p)
 {
@@ -58,7 +58,7 @@ void SQLStorage::Load ()
 {
     uint32 maxi;
     Field *fields;
-    QueryResult *result  = sDatabase.PQuery("SELECT MAX(entry) FROM %s;",table);
+    QueryResult *result  = sDatabase.PQuery("SELECT MAX(`entry`) FROM `%s`;",table);
     if(!result)
     {
         printf("Error loading %s table\n",table);
@@ -68,13 +68,13 @@ void SQLStorage::Load ()
     maxi= (*result)[0].GetUInt32()+1;
     delete result;
 
-    result = sDatabase.PQuery("SELECT COUNT(*) FROM %s;",table);
+    result = sDatabase.PQuery("SELECT COUNT(*) FROM `%s`;",table);
 
     fields = result->Fetch();
     RecordCount=fields[0].GetUInt32();
     delete result;
 
-    result = sDatabase.PQuery("SELECT * from %s;",table);
+    result = sDatabase.PQuery("SELECT * FROM `%s`;",table);
 
     if(!result)
     {

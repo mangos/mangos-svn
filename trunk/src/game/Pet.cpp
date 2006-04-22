@@ -37,9 +37,9 @@ Pet::Pet()
 Unit *Pet::GetOwner()
 {
     uint64 ownerid = GetUInt64Value(UNIT_FIELD_SUMMONEDBY);
-	if(!ownerid)
-		return NULL;
-	return ObjectAccessor::Instance().GetUnit(*this, ownerid);
+    if(!ownerid)
+        return NULL;
+    return ObjectAccessor::Instance().GetUnit(*this, ownerid);
 }
 
 void Pet::SavePetToDB()
@@ -48,11 +48,11 @@ void Pet::SavePetToDB()
         return;
 
     uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
-    sDatabase.PExecute("DELETE FROM pets WHERE owner = '%u' AND current = 1", owner );
+    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
 
     std::stringstream ss;
     ss.rdbuf()->str("");
-    ss << "INSERT INTO pets (entry,owner,level,exp,nextlvlexp,spell1,spell2,spell3,spell4,action,fealty,name,current) VALUES (";
+    ss << "INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (";
     ss << GetEntry() << ","
         << owner << ","
         << GetUInt32Value(UNIT_FIELD_LEVEL) << ","
@@ -73,7 +73,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
 {
     WorldPacket data;
     uint32 ownerid = owner->GetGUIDLow();
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM pets WHERE owner = '%u' AND current = 1;", ownerid );
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1;", ownerid );
     if(!result)
         return false;
     Field *fields = result->Fetch();
@@ -150,5 +150,5 @@ bool Pet::LoadPetFromDB( Unit* owner )
 void Pet::DeletePetFromDB()
 {
     uint32 owner = uint32(GUID_LOPART(GetUInt64Value(UNIT_FIELD_SUMMONEDBY)));
-    sDatabase.PExecute("DELETE FROM pets WHERE owner = '%u' AND current = 1", owner );
+    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
 }

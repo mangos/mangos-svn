@@ -424,7 +424,7 @@ void Item::SaveToDB()
     DeleteFromDB();
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO item_instances (guid, data) VALUES ("
+    ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES ("
         << GetGUIDLow() << ", '";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
@@ -441,15 +441,15 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
     if (auctioncheck == 1)
     {
-        result = sDatabase.PQuery("SELECT data FROM item_instances WHERE guid = '%u';", guid);
+        result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u';", guid);
     }
     else if (auctioncheck == 2)
     {
-        result = sDatabase.PQuery("SELECT data FROM auctioned_items WHERE guid = '%u';", guid);
+        result = sDatabase.PQuery("SELECT `data` FROM `auctioned_item` WHERE `guid` = '%u';", guid);
     }
     else
     {
-        result = sDatabase.PQuery("SELECT data FROM mailed_items WHERE guid = '%u';", guid);
+        result = sDatabase.PQuery("SELECT `data` FROM `mail_item` WHERE `guid` = '%u';", guid);
     }
 
     if (!result) return;
@@ -464,7 +464,7 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
 void Item::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM item_instances WHERE guid = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 ItemPrototype *Item::GetProto() const

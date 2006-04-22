@@ -140,8 +140,7 @@ void RASocket::OnRead()
                     //if(bLog)Log("User %s",
                     strcpy(szLogin,&buff[5]);
                     //access db now
-                    QueryResult* result = sDatabase.PQuery(
-                        "SELECT password,gm FROM accounts WHERE login='%s'",szLogin);
+                    QueryResult* result = sDatabase.PQuery("SELECT `password`,`gmlevel` FROM `accounts` WHERE `username` = '%s'",szLogin);
                     if(!result)
                     {
                         Sendf("-No such user.\x0d\x0a");

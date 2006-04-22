@@ -207,7 +207,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT acct, gm, sessionkey FROM accounts WHERE login = '%s';", account.c_str());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey` FROM `account` WHERE `username` = '%s';", account.c_str());
 
     if ( !result )
     {

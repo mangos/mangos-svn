@@ -63,7 +63,7 @@ void Corpse::SaveToDB(bool bones)
     std::stringstream ss;
 
     ss.rdbuf()->str("");
-    ss << "REPLACE INTO corpses (guid, player_guid, positionx, positiony, positionz, orientation, mapid, data, time, bones_flag) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
+    ss << "REPLACE INTO `corpses` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`time`,`bones_flag`) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
@@ -74,5 +74,5 @@ void Corpse::SaveToDB(bool bones)
 
 void Corpse::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM corpses WHERE guid = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `corpses` WHERE `guid` = '%u'",GetGUIDLow());
 }

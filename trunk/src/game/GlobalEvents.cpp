@@ -28,7 +28,7 @@ void HandleCorpsesErase(void*)
 {
     sLog.outBasic("Global Event (corpses/bones removal)");
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM corpses WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time) > 1200 AND bones_flag = 1;");
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 1200 AND `bones_flag` = 1;");
 
     if(result)
 	{
@@ -50,14 +50,14 @@ void HandleCorpsesErase(void*)
 	ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
 	MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
-	sDatabase.PExecute("DELETE from corpses WHERE guid = '%ul';",(unsigned long)guid);
+	sDatabase.PExecute("DELETE FROM `corpse` WHERE guid = '%ul';",(unsigned long)guid);
 
 	m_pCorpse=NULL;
 	delete result;
 	}
 
 
-    result = sDatabase.PQuery("SELECT * FROM corpses WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time) > 259200 AND bones_flag = 0;");
+    result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 259200 AND `bones_flag` = 0;");
 
     if(result)
 	{
@@ -80,7 +80,7 @@ void HandleCorpsesErase(void*)
 	ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
 	MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
-	sDatabase.PExecute("DELETE from corpses WHERE guid = '%ul';",(unsigned long)guid);
+	sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%ul';",(unsigned long)guid);
 
 	m_pCorpse=NULL;
 	delete result;
@@ -91,7 +91,7 @@ void HandleCorpsesErase(void*)
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
-	//this event can't use in windows.
+	// this event can't use in windows.
 #ifndef WIN32
     uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
 #endif

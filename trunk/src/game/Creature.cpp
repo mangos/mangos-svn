@@ -68,7 +68,7 @@ void Creature::CreateTrainerSpells()
 {
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM trainers WHERE guid = %d", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `trainer` WHERE `guid` = '%d'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -596,8 +596,9 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
         uint32 zoneid=area->zone;
         std::string areaname= gossip->Option;
         uint16 pflag;
-        //use the action relate to creaturetemplate.trainer_type ?
-        result= sDatabase.PQuery("SELECT creatures.positionx,creatures.positiony FROM creatures,creaturetemplate WHERE creatures.mapid=%u AND creatures.entry=creaturetemplate.entry AND creaturetemplate.trainer_type=%u;", mapid, gossip->Action );
+
+        // use the action relate to creaturetemplate.trainer_type ?
+        result= sDatabase.PQuery("SELECT `creature`.`position_x`,`creature`.`position_y` FROM `creature`,`creature_template` WHERE `creature`.`map` = '%u' AND `creature`.`id` = `creature_template`.`entry` AND `creature_template`.`trainer_type` = '%u';", mapid, gossip->Action );
         if(!result)
             return;
         do
@@ -614,7 +615,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
         }while(result->NextRow());
         if(!findnpc)
         {
-            player->PlayerTalkClass->SendTalking( "$N£¬Sorry", "Here no this person.");
+            player->PlayerTalkClass->SendTalking( "$NSorry", "Here no this person.");
             return;
         }
         //need add more case.
@@ -641,7 +642,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
 
 uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 {
-    QueryResult *result= sDatabase.PQuery("SELECT textid FROM gossip_textid WHERE action=%u and zoneid=%u;", action, zoneid );
+    QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u';", action, zoneid );
     if(!result)
         return 0;
     Field *fields = result->Fetch();
@@ -663,7 +664,7 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
 
 uint32 Creature::GetNpcTextId()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM npc_gossip where npc_guid=%u;",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_gossip` WHERE `npc_guid`= '%u';",GetGUIDLow());
     if(result)
     {
         Field *fields = result->Fetch();
@@ -700,7 +701,8 @@ void Creature::LoadGossipOptions()
 {
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
     uint32 zoneid=GetZoneId();
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM npc_options where (npcflag & %u)!=0;", npcflags );
+
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (type & %u)!=0;", npcflags );
     if(!result)
         return;
     GossipOption *go;
@@ -808,9 +810,9 @@ int Creature::getItemSlotById(uint32 itemid)
 void Creature::SaveToDB()
 {
     std::stringstream ss;
-    sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
 
-    ss << "INSERT INTO creatures VALUES (";
+    ss << "INSERT INTO `creature` VALUES (";
 
     ss << GetGUIDLow () << ","
         << GetEntry() << ","
@@ -819,7 +821,7 @@ void Creature::SaveToDB()
         << m_positionY << ","
         << m_positionZ << ","
         << m_orientation << ","
-        << m_respawnDelay << ","                            //fix me: store x-y delay but not 1
+        << m_respawnDelay << ","                            // fix me: store x-y delay but not 1
         << m_respawnDelay << ","
         << (float) 0  << ","
         << (uint32) (0) << ","
@@ -828,12 +830,12 @@ void Creature::SaveToDB()
         << respawn_cord[2] << ","
         << (float)(0) << ","
         << GetUInt32Value(UNIT_FIELD_HEALTH) << ","
-        << (uint32)(0) << ","
+        << (uint32)(0) << ","                               // should contain current mana
         << m_respawnTimer << ","
-        << (uint32)(m_deathState) << ","
+        << (uint32)(m_deathState) << ","                    // is it really death state or just state?
         << GetUInt32Value(UNIT_NPC_FLAGS) << ","
         << GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) << ","
-        << "'')";
+        << "'')";                                           // should save auras
 
     sDatabase.Execute( ss.str( ).c_str( ) );
 
@@ -911,7 +913,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 void Creature::LoadFromDB(uint32 guid)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM creatures WHERE guid = '%u';", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u';", guid);
     ASSERT(result);
 
     Field *fields = result->Fetch();
@@ -951,11 +953,8 @@ void Creature::_LoadGoods()
 {
 
     itemcount = 0;
-    //this needs fix, it's wrong to save goods by vendor GUID, as it may change del-spawn op
-    //it should be stored by 'entry' field id (c) Phantomas
-    //Use entry instead of GUID, fixed by Ant009 need more test
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM vendors WHERE entry = '%u';", GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `vendor` WHERE `entry` = '%u';", GetEntry());
 
     if(!result) return;
 
@@ -987,7 +986,7 @@ void Creature::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM creaturequestrelation WHERE creatureid = '%u' ORDER BY questid;", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature_questrelation` WHERE `id` = '%u' ORDER BY `quest`;", GetEntry ());
 
     if(result)
     {
@@ -1004,7 +1003,7 @@ void Creature::_LoadQuests()
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM creatureinvolvedrelation WHERE creatureid = '%u' ORDER BY questid;", GetUInt32Value (OBJECT_FIELD_ENTRY));
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `creature_involvedrelation` WHERE `id` = '%u' ORDER BY `quest`;", GetEntry ());
 
     if(!result1) return;
 
@@ -1024,10 +1023,10 @@ void Creature::_LoadQuests()
 void Creature::DeleteFromDB()
 {
 
-    sDatabase.PExecute("DELETE FROM creatures WHERE guid = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM vendors WHERE entry = '%u'", GetEntry());
-    sDatabase.PExecute("DELETE FROM trainers WHERE guid = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM creaturequestrelation WHERE creatureid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `vendor` WHERE `entry` = '%u'", GetEntry());
+    sDatabase.PExecute("DELETE FROM `trainer` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `creature_questrelation WHERE `id` = '%u'", GetGUIDLow());
 }
 
 float Creature::GetAttackDistance(Unit *pl)
