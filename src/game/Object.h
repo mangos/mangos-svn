@@ -135,7 +135,7 @@ class MANGOS_DLL_SPEC Object
         const float& GetPositionZ( ) const { return m_positionZ; }
         const float& GetOrientation( ) const { return m_orientation; }
         void GetClosePoint( const Object* victim, float &x, float &y, float &z ) const;
-        void GetClosePoint( const float ox, const float oy, float &x, float &y, float &z ) const;
+        void GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const;
         const float GetObjectSize() const
         {
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
