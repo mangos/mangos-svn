@@ -124,14 +124,14 @@ void GameObject::generateLoot()
 void GameObject::SaveToDB()
 {
     std::stringstream ss;
-    sDatabase.PExecute("DELETE FROM gameobjects WHERE guid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
 
     const GameObjectInfo *goI = GetGOInfo();
 
     if (!goI)
         return;
 
-    ss << "INSERT INTO gameobjects VALUES ( "
+    ss << "INSERT INTO `gameobject` VALUES ( "
         << GetGUIDLow() << ", "
         << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
         << GetMapId() << ", "
@@ -153,7 +153,7 @@ void GameObject::LoadFromDB(uint32 guid)
 {
     float rotation0, rotation1, rotation2, rotation3;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM gameobjects WHERE guid = '%u';", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject` WHERE `guid` = '%u';", guid);
 
     if( ! result )
         return;
@@ -178,7 +178,7 @@ void GameObject::LoadFromDB(uint32 guid)
 
 void GameObject::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM gameobjects WHERE guid = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
 }
 
 GameObjectInfo *GameObject::GetGOInfo()

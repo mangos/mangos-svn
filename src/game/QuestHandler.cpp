@@ -228,13 +228,13 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++ )
     {
         if ( pQuest->GetQuestInfo()->ReqItemId[iI] > 0 )
-		{
+        {
             if (_player->GetItemCount( pQuest->GetQuestInfo()->ReqItemId[iI], false)< pQuest->GetQuestInfo()->ReqItemCount[iI])
-			{
-				_player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_ITEMS );
-				return;
-			}
-		}
+            {
+                _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_ITEMS );
+                return;
+            }
+        }
     }
 
     if ( ( rewardid >= pQuest->m_qRewChoiceItemsCount ) && ( pQuest->m_qRewChoiceItemsCount > 0 ) )

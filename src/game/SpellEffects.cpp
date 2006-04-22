@@ -284,29 +284,27 @@ void Spell::EffectHeal(uint32 i)
 
 void Spell::EffectHealthLeach(uint32 i)
 {
-	if(!unitTarget)
+    if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
 
-	//okey Touch of Death works
+    //okey Touch of Death works
 
-	sLog.outDebug("HealthLeach :%d", damage);
-	uint32 dHealth = damage; //something like this //maybe some other things are needed
+    sLog.outDebug("HealthLeach :%d", damage);
+    uint32 dHealth = damage;                                //something like this //maybe some other things are needed
 
-	
-	//Please let me know if this is correct
-	m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dHealth);
+    //Please let me know if this is correct
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dHealth);
 
-	uint32 curHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
+    uint32 curHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
     uint32 maxHealth = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-	
-	if ((curHealth + (dHealth/2)) < maxHealth)
-		m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) + (dHealth/2));
-	else
-		m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
-}
 
+    if ((curHealth + (dHealth/2)) < maxHealth)
+        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) + (dHealth/2));
+    else
+        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
+}
 
 void Spell::EffectCreateItem(uint32 i)
 {
@@ -348,7 +346,7 @@ void Spell::EffectCreateItem(uint32 i)
     pItem = NULL;
     Item* newItem;
     curSlot=0;
-	bool GetSoltflag = false;
+    bool GetSoltflag = false;
     //add items that spell creates
     for(i=0;i<2;i++)
     {
@@ -376,7 +374,7 @@ void Spell::EffectCreateItem(uint32 i)
                         pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)+1);
                         pUnit->UpdateSlot(bagIndex,curSlot);
                         slot = curSlot;
-						GetSoltflag = true;
+                        GetSoltflag = true;
                         continue;
                     }else GetSoltflag = false;
                 }
@@ -389,7 +387,7 @@ void Spell::EffectCreateItem(uint32 i)
                 {
                     slot = j;
                     bagIndex = CLIENT_SLOT_BACK;
-					GetSoltflag = true;
+                    GetSoltflag = true;
                 }
             }
 
@@ -408,7 +406,7 @@ void Spell::EffectCreateItem(uint32 i)
                         bagIndex = bagID;
                         pBag = NULL;
                         pItem = NULL;
-						GetSoltflag = true;
+                        GetSoltflag = true;
                         break;
                     }
                 }
@@ -667,11 +665,11 @@ void Spell::EffectOpenLock(uint32 i)
     }else loottype=1;
     if(loottype == 1)
         ((Player*)m_caster)->UpdateSkill(SKILL_OPENLOCK);
-	//not sure if its need while loottype ==2 or 3
-	if(loottype == 2)
-		((Player*)m_caster)->UpdateSkill(SKILL_HERBALISM);
-	if(loottype == 3)
-		((Player*)m_caster)->UpdateSkill(SKILL_MINING);
+    //not sure if its need while loottype ==2 or 3
+    if(loottype == 2)
+        ((Player*)m_caster)->UpdateSkill(SKILL_HERBALISM);
+    if(loottype == 3)
+        ((Player*)m_caster)->UpdateSkill(SKILL_MINING);
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
 }
@@ -1482,5 +1480,3 @@ void Spell::EffectSkill(uint32)
     ((Player*)m_caster)->UpdateSkill(m_spellInfo->EffectMiscValue[1]);
 
 }
-
-

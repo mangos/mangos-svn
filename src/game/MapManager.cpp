@@ -29,13 +29,12 @@ INSTANTIATE_CLASS_MUTEX(MapManager, ZThread::Mutex);
 
 static void grid_compression(const char *src_tbl, const char *dest_tbl)
 {
-    sDatabase.PExecute("DROP TABLE IF EXISTS %s;", dest_tbl);
+    sDatabase.PExecute("TRUNCATE `%s`;", dest_tbl);
 
-    sDatabase.PExecute("CREATE TABLE IF NOT EXISTS %s (`guid` bigint(20) unsigned NOT NULL default '0', `x` int(11) NOT NULL default '0', `y` int(11) NOT NULL default '0', `cell_x` int(11) NOT NULL default '0', `cell_y` int(11) NOT NULL default '0', `grid_id` int(11) NOT NULL default '0', `cell_id` int(11) NOT NULL default '0', `mapid` int(11) NOT NULL default '0', KEY srch_grid(grid_id, cell_id, mapid) ) TYPE=MyISAM;", dest_tbl);
-
-    sDatabase.PExecute("INSERT INTO %s (guid, mapid, x, y, cell_x, cell_y) SELECT guid,mapid, (( positionX-%f)/%f) + %d ,((positionY-%f)/%f) + %d, ((positionX-%f)/%f) + %d, ((positionY-%f)/%f) + %d FROM %s;", dest_tbl, CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, src_tbl);
-
-    sDatabase.PExecute("UPDATE %s SET grid_id=(x*%d) + y,cell_id=((cell_y * %u) + cell_x);", dest_tbl, MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP);
+    sDatabase.PExecute("DROP INDEX `idx_search` ON `%s`", dest_tbl);
+    sDatabase.PExecute("INSERT INTO `%s` (`guid`,`position_x`,`position_y`,`cell_position_x`,`cell_position_y`,`map`) SELECT `guid`,((`position_x`-%f)/%f) + %d,((`position_y`-%f)/%f) + %d,((`position_x`-%f)/%f) + %d,((`position_y`-%f)/%f) + %d,`map` FROM `%s`;", dest_tbl, CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, src_tbl);
+    sDatabase.PExecute("UPDATE `%s` SET `grid`=(`position_x`*%d) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`);", dest_tbl, MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP);
+    sDatabase.PExecute("CREATE INDEX `idx_search` ON `%s` (`grid`,`cell`,`map`)", dest_tbl);
 }
 
 MapManager::MapManager() : i_gridCleanUpDelay(1000*300)
@@ -48,17 +47,17 @@ MapManager::~MapManager()
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         delete iter->second;
 
-    sDatabase.PExecute("TRUNCATE table creatures_grid;");
-    sDatabase.PExecute("TRUNCATE table gameobjects_grid;");
+    sDatabase.PExecute("TRUNCATE table `creature_grid`;");
+    sDatabase.PExecute("TRUNCATE table `gameobject_grid`;");
 }
 
 void
 MapManager::Initialize()
 {
-    sLog.outDebug("Grid compression apply on creatures....");
-    grid_compression("creatures", "creatures_grid");
-    sLog.outDebug("Grid compression apply on gameobjects....");
-    grid_compression("gameobjects", "gameobjects_grid");
+    sLog.outDebug("Grid compression apply on creature(s) ...");
+    grid_compression("creature", "creature_grid");
+    sLog.outDebug("Grid compression apply on gameobject(s) ...");
+    grid_compression("gameobject", "gameobject_grid");
 }
 
 Map*

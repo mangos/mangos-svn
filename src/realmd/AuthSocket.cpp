@@ -162,7 +162,7 @@ void AuthSocket::_HandleLogonChallenge()
         pkt << (uint8) AUTH_LOGON_CHALLENGE;
         pkt << (uint8) 0x00;
 
-        QueryResult *result = sDatabase.PQuery(  "SELECT * FROM `ipbantable` where ip='%s'",GetRemoteAddress().c_str());
+        QueryResult *result = sDatabase.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s'",GetRemoteAddress().c_str());
         if(result)
         {
             pkt << (uint8)CE_IPBAN;
@@ -171,7 +171,7 @@ void AuthSocket::_HandleLogonChallenge()
         }
         else
         {
-            QueryResult *result = sDatabase.PQuery("SELECT password, gm, banned, locked, last_ip FROM accounts WHERE login='%s'",_login.c_str ());
+            QueryResult *result = sDatabase.PQuery("SELECT `password`,`gmlevel`,`banned`,`locked`,`last_ip` FROM `account` WHERE `username` = '%s'",_login.c_str ());
             if( result )
             {
                 if((*result)[3].GetUInt8() == 1)            // if ip is locked
@@ -204,7 +204,7 @@ void AuthSocket::_HandleLogonChallenge()
                 {
                     password = (*result)[0].GetString();
 
-                    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM characters c,accounts a WHERE c.online > 0 and a.gm = 0;");
+                    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character` LEFT JOIN `account` ON `account`.`id` = `character`.`account` WHERE `character`.`online` > 0 AND `account`.`gmlevel` = 0;");
                     uint32 cnt=0;
                     if(result)
                     {
@@ -221,15 +221,14 @@ void AuthSocket::_HandleLogonChallenge()
                     {                                       //if server is not full
 
                         uint32 acct;
-                        QueryResult *resultAcct = sDatabase.PQuery("SELECT acct FROM accounts WHERE login = '%s';", _login.c_str ());
+                        QueryResult *resultAcct = sDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
                         if(resultAcct)
                         {
                             Field *fields = resultAcct->Fetch();
                             acct=fields[0].GetUInt32();
                             delete resultAcct;
 
-                            QueryResult *result =
-                                sDatabase.PQuery("SELECT * FROM characters WHERE online > 0 and acct = '%u';",acct);
+                            QueryResult *result = sDatabase.PQuery("SELECT * FROM `character` WHERE `online` > 0 AND `account` = '%u';",acct);
                             if(result)
                             {
                                 delete result;
@@ -411,8 +410,7 @@ void AuthSocket::_HandleLogonProof()
     {
         sLog.outBasic("User '%s' successfully authed", _login.c_str());
 
-        sDatabase.PExecute("UPDATE accounts SET sessionkey = '%s', last_ip = '%s', `last_login` = NOW() WHERE login='%s'",
-            K.AsHexStr(), GetRemoteAddress().c_str(), _login.c_str() );
+        sDatabase.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _login.c_str() );
 
         sha.Initialize();
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
@@ -448,7 +446,7 @@ void AuthSocket::_HandleRealmList()
 
     ByteBuffer pkt;
 
-    QueryResult *result = sDatabase.PQuery("SELECT acct FROM accounts WHERE login='%s'",_login.c_str());
+    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",_login.c_str());
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cant find him in the database.",_login.c_str());
@@ -462,7 +460,7 @@ void AuthSocket::_HandleRealmList()
 
     uint8 chars = 0;
 
-    result = sDatabase.PQuery( "SELECT COUNT(*) FROM characters WHERE acct=%d",id);
+    result = sDatabase.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
     if( result )
     {
         Field *fields = result->Fetch();

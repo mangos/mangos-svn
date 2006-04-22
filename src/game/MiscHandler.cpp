@@ -361,7 +361,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
     Field *fields;
     guid = GetPlayer()->GetGUID();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM gmtickets where guid = '%d';", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%d';", guid);
 
     if (result)
     {
@@ -373,7 +373,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
         {
             data.Initialize( SMSG_GMTICKET_GETTICKET );
 
-            QueryResult *result = sDatabase.PQuery("SELECT * FROM gmtickets WHERE guid = '%d';", guid);
+            QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_ticket` WHERE `guid` = '%d';", guid);
             fields = result->Fetch();
 
             char tickettext[255];
@@ -405,7 +405,7 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
     p = (char *)buf + 1;
     my_esc( p1, (const char *)buf + 1 );
     ticketText = p1;
-    sDatabase.PExecute("UPDATE `gmtickets` set ticket_text = '%s' WHERE guid = '%d';", ticketText.c_str(), guid);
+    sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%d';", ticketText.c_str(), guid);
 
 }
 
@@ -414,7 +414,7 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint64 guid = GetPlayer()->GetGUID();
 
-    sDatabase.PExecute("DELETE FROM `gmtickets` where guid = '%d' LIMIT 1",guid);
+    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%d' LIMIT 1",guid);
 
     data.Initialize( SMSG_GMTICKET_DELETETICKET );
     data << uint32(1);
@@ -443,7 +443,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
     my_esc( p1, (const char *)buf + 17 );
     ticketText = p1;
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM gmtickets where guid = '%d';",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%d';",guid);
 
     if (result)
     {
@@ -460,7 +460,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         else
         {
 
-            sDatabase.PExecute("INSERT INTO `gmtickets` (guid,ticket_text, ticket_category) VALUES ('%ul', '%s', '%d');", (unsigned long)guid, ticketText.c_str(), cat[buf[0]]);
+            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%ul', '%s', '%d');", (unsigned long)guid, ticketText.c_str(), cat[buf[0]]);
 
             data.Initialize( SMSG_QUERY_TIME_RESPONSE );
             //data << (uint32)20;
@@ -583,7 +583,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
     guid=GetPlayer()->GetGUID();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `social` WHERE flags = 'FRIEND' AND guid = '%d';",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%d';",guid);
 
     if(result)
     {
@@ -591,7 +591,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
         Counter=fields[0].GetUInt32();
         delete result;
 
-        result = sDatabase.PQuery("SELECT * FROM `social` WHERE flags = 'FRIEND' AND guid = '%d';",guid);
+        result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%d';",guid);
         if(result)
         {
             fields = result->Fetch();
@@ -656,7 +656,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
 
-    result = sDatabase.PQuery("SELECT COUNT(*) FROM `social` WHERE flags = 'IGNORE' AND guid = '%d';", guid);
+    result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%d';", guid);
 
     if(!result) return;
 
@@ -667,7 +667,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     dataI.Initialize( SMSG_IGNORE_LIST );
     dataI << nrignore;
 
-    result = sDatabase.PQuery("SELECT * FROM `social` WHERE flags = 'IGNORE' AND guid = '%d';", guid);
+    result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%d';", guid);
 
     if(!result) return;
 
@@ -704,7 +704,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
     pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM social WHERE flags = 'FRIEND' AND friendid = '%d';", friendGuid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%d';", friendGuid);
 
     if( result )
         friendResult = FRIEND_ALREADY;
@@ -730,7 +730,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             uint64 guid;
             guid=GetPlayer()->GetGUID();
 
-            result = sDatabase.PQuery("INSERT INTO `social` VALUES ('%s', '%d', '%d', 'FRIEND');", friendName.c_str(), (uint32)guid, (uint32)friendGuid);
+            result = sDatabase.PQuery("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%d', '%s', '%d', 'FRIEND');", (uint32)guid, friendName.c_str(), (uint32)friendGuid);
 
             delete result;
         }
@@ -779,7 +779,7 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
     uint64 guid;
     guid=GetPlayer()->GetGUID();
 
-    sDatabase.PExecute("DELETE FROM `social` WHERE flags = 'FRIEND' AND `guid` = '%d' AND `friendid` = '%d'",(uint32)guid,(uint32)FriendGUID);
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%d' AND `friend` = '%d'",(uint32)guid,(uint32)FriendGUID);
 
     SendPacket( &data );
 
@@ -805,7 +805,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
     pIgnore = ObjectAccessor::Instance().FindPlayer(IgnoreGuid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM social WHERE flags = 'IGNORE' AND friendid = '%d';", (uint32)IgnoreGuid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`name`,`friend`,`flags` FROM `character_social` WHERE `flags` = 'IGNORE' AND `friend` = '%d';", (uint32)IgnoreGuid);
 
     if( result )
         ignoreResult = FRIEND_IGNORE_ALREADY;
@@ -824,7 +824,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
         data << (uint8)ignoreResult << (uint64)IgnoreGuid;
 
-        QueryResult *result = sDatabase.PQuery("INSERT INTO `social` VALUES ('%s', '%d', '%d', 'IGNORE');", IgnoreName.c_str(), (uint32)guid, (uint32)IgnoreGuid);
+        QueryResult *result = sDatabase.PQuery("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%d', '%s', '%d', 'IGNORE');", (uint32)guid, IgnoreName.c_str(), (uint32)IgnoreGuid);
 
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
@@ -865,7 +865,7 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
     uint64 guid;
     guid=GetPlayer()->GetGUID();
 
-    sDatabase.PExecute("DELETE FROM `social` WHERE flags = 'IGNORE' AND `guid` = '%d' AND `friendid` = '%d'",(uint32)guid,(uint32)IgnoreGUID);
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%d' AND `friend` = '%d'",(uint32)guid,(uint32)IgnoreGUID);
 
     SendPacket( &data );
 
@@ -890,7 +890,7 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
     sLog.outDebug( type.c_str( ) );
     sLog.outDebug( content.c_str( ) );
 
-    sDatabase.PExecute ("INSERT INTO bugreport (rep_type, rep_content) VALUES('%s', '%s');", type.c_str( ), content.c_str( ));
+    sDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s');", type.c_str( ), content.c_str( ));
 
 }
 
@@ -996,9 +996,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         delete at;
     }
 
-    //set resting flag we are in the inn
+    // set resting flag we are in the inn
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM tavern WHERE triggerid = '%d';", Trigger_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `tavern` WHERE `triggerid` = '%d';", Trigger_ID);
     if(result)
     {
         int cnt;

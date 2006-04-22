@@ -75,7 +75,7 @@ void Guild::create(uint64 lGuid, std::string gname)
 
     sLog.outDebug("GUILD: creating guild %s to leader:%d", gname.c_str(), leaderGuid);
 
-    QueryResult *result = sDatabase.PQuery( "SELECT MAX(guildid) FROM guilds;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`guildid`) FROM `guild`;" );
     if( result )
     {
         Id = (*result)[0].GetUInt32()+1;
@@ -99,7 +99,7 @@ void Guild::create(uint64 lGuid, std::string gname)
 void Guild::LoadGuildFromDB(uint32 GuildId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds` where guildid = '%u';", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild` WHERE `guildid` = '%u';", GuildId);
 
     if(!result)
         return;
@@ -118,21 +118,21 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
 
     delete result;
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT DATE_FORMAT(createdate,\"%d\") FROM guilds WHERE guildid = '%u';", GuildId);
+    QueryResult *result1 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%d\") FROM `guild` WHERE `guildid` = '%u';", GuildId);
     if(!result1) return;
     fields = result1->Fetch();
     CreatedDay = fields[0].GetUInt32();
 
     delete result1;
 
-    QueryResult *result2 = sDatabase.PQuery("SELECT DATE_FORMAT(createdate,\"%m\") FROM guilds WHERE guildid = '%u';", GuildId);
+    QueryResult *result2 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%m\") FROM `guild` WHERE `guildid` = '%u';", GuildId);
     if(!result2) return;
     fields = result2->Fetch();
     CreatedMonth = fields[0].GetUInt32();
 
     delete result2;
 
-    QueryResult *result3 = sDatabase.PQuery("SELECT DATE_FORMAT(createdate,\"%Y\") FROM guilds WHERE guildid = '%u';", GuildId);
+    QueryResult *result3 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%Y\") FROM `guild` WHERE `guildid` = '%u';", GuildId);
     if(!result3) return;
     fields = result3->Fetch();
     CreatedYear = fields[0].GetUInt32();
@@ -146,7 +146,7 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
 void Guild::LoadRanksFromDB(uint32 GuildId)
 {
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds_ranks` where guildid = '%u';", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_rank` WHERE `guildid` = '%u';", GuildId);
 
     if(!result) return;
 
@@ -165,7 +165,7 @@ void Guild::LoadMembersFromDB(uint32 GuildId)
     Player *pl;
     MemberSlot *newmember;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds_members` where guildid = '%u';", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guildid` = '%u';", GuildId);
 
     if(!result)
         return;
@@ -190,8 +190,11 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
 {
     Field *fields;
 
-    // row 'level' doesn't exist in characters table
-    QueryResult *result = sDatabase.PQuery("SELECT (name, level, class, zoneId) FROM characters WHERE guid = '%lu';", (unsigned long)memslot->guid);
+    // column 'level' doesn't exist in `character` table.
+    // column 'zoneId' doesn't exist in `character` table.
+    // are these part of data?
+    // FIXME: Get proper values for characters' zone and level.
+    QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
 
     if(!result) return;
 
@@ -264,8 +267,8 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
 
 void Guild::SaveGuildToDB()
 {
-    sDatabase.PExecute("DELETE FROM guilds WHERE guildid = '%u'",Id);
-    sDatabase.PExecute("INSERT INTO guilds VALUES('%u','%s','%u', '%u', '%u', '%u', '%u', '%u', '%s', 'NOW()');", Id, name.c_str(), leaderGuid, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, MOTD.c_str());
+    sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
+    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%u', '%u', '%u', '%u', '%u', '%s', 'NOW()');", Id, name.c_str(), leaderGuid, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, MOTD.c_str());
     SaveRanksToDB();
     SaveGuildMembersToDB();
 }
@@ -274,13 +277,13 @@ void Guild::SaveRanksToDB()
 {
     std::stringstream ss;
 
-    sDatabase.PExecute("DELETE FROM guilds_ranks WHERE guildid = '%u';",Id);
+    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u';",Id);
 
     std::list<RankInfo*>::iterator itr;
 
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     {
-        sDatabase.PExecute("INSERT INTO guilds_ranks VALUES ('%u', '%s', '%u');", Id, (*itr)->name.c_str(), (*itr)->rights);
+        sDatabase.PExecute("INSERT INTO `guild_rank` (`guildid`,`rname`,`rights`) VALUES ('%u', '%s', '%u');", Id, (*itr)->name.c_str(), (*itr)->rights);
         sLog.outDebug( "query rank: %s", ss.str( ).c_str( ) );
     }
 }
@@ -299,14 +302,14 @@ void Guild::SaveMemberToDB(MemberSlot *memslot)
 {
     if(!memslot) return;
 
-    sDatabase.PExecute("DELETE FROM guilds_members WHERE guid = '%u';",memslot->guid);
-    sDatabase.PExecute("INSERT INTO guilds_members VALUES ('%u', '%u', '%u', '%s', '%s');", Id, memslot->guid, memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
+    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u';",memslot->guid);
+    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u', '%s', '%s');", Id, memslot->guid, memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
 }
 
 void Guild::DelGuildFromDB()
 {
-    sDatabase.PExecute("DELETE FROM guilds WHERE guildid = '%u';",Id);
-    sDatabase.PExecute("DELETE FROM guilds_ranks WHERE guildid = '%u';",Id);
+    sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u';",Id);
+    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u';",Id);
 }
 
 void Guild::DelGuildMembersFromDB()
@@ -321,7 +324,7 @@ void Guild::DelGuildMembersFromDB()
 
 void Guild::DelMemberFromDB(uint64 guid)
 {
-    sDatabase.PExecute("DELETE FROM guilds_members WHERE guid = '%d';",guid);
+    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%d';",guid);
 }
 
 void Guild::BroadcastToGuild(WorldSession *session, std::string msg)

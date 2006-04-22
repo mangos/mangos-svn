@@ -147,7 +147,7 @@ bool StartDB()
 
     }
 
-    sDatabase.PExecute( "UPDATE characters SET online=0;" );
+    sDatabase.PExecute( "UPDATE `character` SET `online` = 0;" );
     return true;
 }
 

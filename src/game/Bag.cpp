@@ -80,14 +80,14 @@ void Bag::SaveToDB()
 {
     Item::SaveToDB();
 
-    sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%u';", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
 
     for (int i = 0; i < 20; i++)
     {
         if (m_bagslot[i])
         {
             m_bagslot[i]->SaveToDB();
-            sDatabase.PExecute("INSERT INTO inventory VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
         }
     }
 
@@ -107,7 +107,7 @@ void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM inventory WHERE guid = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
 
     if (result)
     {
@@ -141,7 +141,7 @@ void Bag::DeleteFromDB()
         }
     }
 
-    sDatabase.PExecute("DELETE FROM inventory WHERE guid = '%u';", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
 
     Item::DeleteFromDB();
 }

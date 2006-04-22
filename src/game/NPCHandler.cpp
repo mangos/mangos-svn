@@ -337,7 +337,7 @@ void WorldSession::SendBindPoint()
     SendPacket( &data );
 
     // update sql homebind
-    sDatabase.PExecute("UPDATE `homebind` SET mapid = '%d', zoneid = '%d', positionx = '%f', positiony = '%f', positionz = '%f' WHERE guid = '%lu';", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), (unsigned long)_player->GetGUID());
+    sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%d', `zone` = '%d', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%lu';", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), (unsigned long)_player->GetGUID());
 
     // send spell for bind 3286 bind magic
     data.Initialize(SMSG_SPELL_START );

@@ -84,7 +84,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
         chr->GetSession()->SendPacket(&data);
         chr->GetSession()->SetSecurity(gm);
 
-        sDatabase.PExecute("UPDATE accounts SET gm = '%i' WHERE acct = '%u';", gm, chr->GetSession()->GetAccountId());
+        sDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u';", gm, chr->GetSession()->GetAccountId());
 
     }
     else
@@ -142,7 +142,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
         UpdateMask unitMask;
         WorldPacket data;
 
-        QueryResult *result = sDatabase.PQuery("SELECT X,Y,Z,F,name_id,mapId,zoneId,faction_id FROM spirithealers;");
+        QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`F`,`name_id`,`map`,`zone`,`faction` FROM `spirithealer`;");
 
         if(!result)
         {
@@ -182,7 +182,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
             pCreature->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME+1, 2000 );
             pCreature->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, 2.0f );
 
-            sLog.outError("AddObject at Level3.cpp line 172");
+            sLog.outError("AddObject at Level3.cpp line 185");
 
             pCreature->AIM_Initialize();
 
@@ -1425,11 +1425,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
 
-    // changed 'mapId' to lowercase
-    // changed 'zoneId' to lowercase
-    // 'X', 'Y', 'Z', and 'O' renamed to 'positionx', 'positiony', 'positionz', and 'orientation'
-    // 'faction_id' renamed to 'faction'
-    sDatabase.PExecute("INSERT INTO graveyards ( positionx, positiony, positionz, mapid) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
+    sDatabase.PExecute("INSERT INTO `graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
 
     return true;
 }
@@ -1471,7 +1467,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000);
     pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
 
-    sLog.outError("AddObject at Level3.cpp line 455");
+    sLog.outError("AddObject at Level3.cpp line 1470");
     pCreature->AIM_Initialize();
     MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
 
@@ -1480,27 +1476,24 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     std::stringstream ss,ss2,ss3;
     QueryResult *result;
 
-    result = sDatabase.PQuery( "SELECT MAX(ID) FROM npc_gossip;" );
+    result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_gossip`;" );
     if( result )
     {
-        sDatabase.PExecute("INSERT INTO npc_gossip ( ID , NPC_GUID, GOSSIP_TYPE,TEXTID, OPTION_COUNT) VALUES ('%d', '%d', '%d', '%d', '%d');", (*result)[0].GetUInt32()+1, pCreature->GetGUIDLow(), 1, 1, 1);
+        sDatabase.PExecute("INSERT INTO `npc_gossip` (`id`,`npc_guid`,`gossip_type`,`textid`,`option_count`) VALUES ('%d', '%d', '%d', '%d', '%d');", (*result)[0].GetUInt32()+1, pCreature->GetGUIDLow(), 1, 1, 1);
         delete result;
         result = NULL;
 
-        result = sDatabase.PQuery( "SELECT MAX(ID) FROM npc_options;" );
+        result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_option`;" );
         if( result )
         {
-            sDatabase.PExecute("INSERT INTO npc_options ( ID, GOSSIP_ID, TYPE, OPTION, NPC_TEXT_NEXTID, SPECIAL) VALUES ('%u', '%u', '%u', '%s', '%u', '%u');", (*result)[0].GetUInt32()+1, (*result)[0].GetUInt32()+2, 0, "Return me to life.", 0, 2);
+            sDatabase.PExecute("INSERT INTO `npc_option` (`id`,`gossip_id`,`type`,`option`,`npc_text_nextid`,`special`) VALUES ('%u', '%u', '%u', '%s', '%u', '%u');", (*result)[0].GetUInt32()+1, (*result)[0].GetUInt32()+2, 0, "Return me to life.", 0, 2);
             delete result;
             result = NULL;
         }
-        result = sDatabase.PQuery( "SELECT MAX(ID) FROM npc_text;" );
+        result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_text`;" );
         if( result )
         {
-
-        // what is the correct structure of npc_text ?
-        // why do we insert ?!
-            sDatabase.PExecute("INSERT INTO npc_text ( ID, text0_0 ) VALUES ('%d', '%s');", (*result)[0].GetUInt32()+1, "It is not yet your time. I shall aid your journey back to the realm of the living... For a price.");
+            sDatabase.PExecute("INSERT INTO `npc_text` (`id`,`text0_0`) VALUES ('%d', '%s');", (*result)[0].GetUInt32()+1, "It is not yet your time. I shall aid your journey back to the realm of the living... For a price.");
 
             delete result;
             result = NULL;
@@ -1552,7 +1545,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
 
     // 'id' changed to 'guid'
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM creatures WHERE guid = '%u';", target->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u';", target->GetGUIDLow());
 
     Field *fields = result->Fetch();
 

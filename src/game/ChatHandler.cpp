@@ -35,7 +35,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-
     uint32 type;
     uint32 lang;
 

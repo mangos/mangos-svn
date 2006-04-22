@@ -60,7 +60,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
     {
 
-        QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", receiver.c_str());
+        QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s';", receiver.c_str());
 
         Player *receive = objmgr.GetPlayer(receiver.c_str());
         uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
@@ -84,7 +84,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 objmgr.AddMItem(it);
 
                 std::stringstream ss;
-                ss << "INSERT INTO mailed_items (guid, data) VALUES ("
+                ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
                     << it->GetGUIDLow() << ", '";
                 for(uint16 i = 0; i < it->GetValuesCount(); i++ )
                 {
@@ -120,8 +120,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 receive->GetSession()->SendPacket(&data);
             }
 
-            sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",mID);
-            sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
+            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
 
         }
         else
@@ -201,8 +201,8 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
         receive->AddMail(m);
     }
 
-    sDatabase.PExecute("DELETE FROM mail WHERE mailid = '%u'",m->messageID);
-    sDatabase.PExecute("INSERT INTO mail (mailid, sender, receiver, subject, body, item, time, money, COD, checked) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
 
 }
 
@@ -341,7 +341,7 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
 
     if( i >= BANK_SLOT_BAG_END )
     {
-        QueryResult *result = sDatabase.PQuery( "SELECT entry FROM itemstemplate WHERE displayid='%u'", displayID );
+        QueryResult *result = sDatabase.PQuery( "SELECT `entry` FROM `item_template` WHERE `displayid`='%u'", displayID );
 
         if( !result )
         {
@@ -423,7 +423,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 
     else
     {
-        QueryResult *result = sDatabase.PQuery( "SELECT * FROM item_pages WHERE id = '%u'", mailguid );
+        QueryResult *result = sDatabase.PQuery( "SELECT * FROM `item_page` WHERE `id` = '%u'", mailguid );
 
         if( result )
         {

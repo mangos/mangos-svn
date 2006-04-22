@@ -23,7 +23,6 @@
 #define MAX_AURAS 56
 #define MAX_NEGATIVE_AURAS 32
 
-
 enum AURA_FLAGS
 {
     AFLAG_EMPTY = 0x0,

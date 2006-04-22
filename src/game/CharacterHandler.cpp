@@ -45,7 +45,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
     data.Initialize(SMSG_CHAR_ENUM);
 
-    QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE acct = '%lu';", (unsigned long)GetAccountId());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu';", (unsigned long)GetAccountId());
 
     uint8 num = 0;
 
@@ -87,7 +87,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> name;
     recv_data.rpos(0);
 
-    QueryResult *result = sDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s';", name.c_str());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s';", name.c_str());
 
     if ( result )
     {
@@ -100,7 +100,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    result = sDatabase.PQuery("SELECT guid FROM characters WHERE acct = '%lu';", (unsigned long)GetAccountId());
+    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu';", (unsigned long)GetAccountId());
 
     if ( result )
     {
@@ -202,7 +202,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // home bind stuff
     Field *fields;
-    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(*) FROM homebind where guid = '%d';", playerGuid);
+    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(*) FROM `character_homebind` WHERE `guid` = '%d';", playerGuid);
     if (result7)
     {
         int cnt;
@@ -211,7 +211,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            QueryResult *result4 = sDatabase.PQuery("SELECT mapid, zoneid, positionx, positiony, positionz from homebind where guid = '%d';", playerGuid);
+            QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%d';", playerGuid);
             fields = result4->Fetch();
             data.Initialize (SMSG_BINDPOINTUPDATE);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
@@ -225,10 +225,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         {
             int plrace = GetPlayer()->getRace();
             int plclass = GetPlayer()->getClass();
-            QueryResult *result5 = sDatabase.PQuery("SELECT mapid, zoneid, positionx, positiony, positionz from playercreateinfo where race = '%u' AND class = '%u';", plrace, plclass);
+            QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u';", plrace, plclass);
             fields = result5->Fetch();
             // store and send homebind for player
-            sDatabase.PExecute("INSERT INTO `homebind` (guid, mapid, zoneid, positionx, positiony, positionz) VALUES ('%lu', '%d', '%d', '%f', '%f', '%f');", (unsigned long)playerGuid, fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%lu', '%d', '%d', '%f', '%f', '%f');", (unsigned long)playerGuid, fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
             data.Initialize (SMSG_BINDPOINTUPDATE);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
             data << fields[0].GetUInt32();
@@ -433,7 +433,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Player *pCurrChar = GetPlayer();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guilds_members` WHERE guid = '%d';",pCurrChar->GetGUID());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guid` = '%d';",pCurrChar->GetGUID());
 
     if(result)
     {
@@ -446,7 +446,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     MapManager::Instance().GetMap(pCurrChar->GetMapId())->Add(pCurrChar);
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
 
-    sDatabase.PExecute("UPDATE characters SET online = 1 WHERE guid = '%u';", pCurrChar->GetGUID());
+    sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u';", pCurrChar->GetGUID());
 
     std::string outstring = pCurrChar->GetName();
     outstring.append( " has come online." );

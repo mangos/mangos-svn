@@ -29,7 +29,7 @@ WaypointMovementGenerator::_load(Creature &c)
 {
     i_path.Clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT positionx, positiony, positionz, WaitTime1 FROM creatures_mov WHERE creatureid = '%d' ORDER BY id;", c.GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `waittime` FROM `creature_movement` WHERE `id` = '%d' ORDER BY `point`;", c.GetGUIDLow());
 
     if( result )
     {
@@ -59,7 +59,7 @@ WaypointMovementGenerator::_load(Creature &c)
 void
 WaypointMovementGenerator::Initialize()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT creatureid FROM creatures_mov;");
+    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `creature_movement`;");
 
     if( result )
     {

@@ -124,7 +124,7 @@ void WorldSession::LogoutPlayer(bool Save)
     if (_player)
     {
 
-        sDatabase.PExecute("UPDATE characters SET online = 0 WHERE guid = '%u';", _player->GetGUID());
+        sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `guid` = '%u';", _player->GetGUID());
 
         if (_player->IsInGroup())
         {

@@ -43,7 +43,7 @@ RealmList::~RealmList( )
 int RealmList::GetAndAddRealms()
 {
 
-    QueryResult *result = sDatabase.PQuery( "SELECT name,address,icon,color,timezone FROM realms;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist`;" );
     if(result)
     {
         Field *fields = result->Fetch();
@@ -66,7 +66,7 @@ int RealmList::GetAndAddRealms()
     }
 }
 
-void RealmList::AddRealm( const char * name, const char * address, uint8 icon, uint8 color, uint8 timezone )
+void RealmList::AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone )
 {
     RemoveRealm( name );
 
@@ -86,7 +86,7 @@ void RealmList::AddRealm( const char * name, const char * address, uint8 icon, u
     _realms[ name ]->timezone = timezone;
 }
 
-void RealmList::SetRealm( const char * name, uint8 icon, uint8 color, uint8 timezone )
+void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone )
 {
     if( _realms.find( name ) != _realms.end( ) )
     {
@@ -96,7 +96,7 @@ void RealmList::SetRealm( const char * name, uint8 icon, uint8 color, uint8 time
     }
 }
 
-void RealmList::RemoveRealm( const char * name )
+void RealmList::RemoveRealm( const char *name )
 {
     if( _realms.find( name ) != _realms.end( ) )
     {
