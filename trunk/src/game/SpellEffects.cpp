@@ -253,7 +253,7 @@ void Spell::EffectApplyAura(uint32 i)
 
 void Spell::EffectManaDrain(uint32 i)
 {
-	if(!unitTarget)
+    if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
@@ -273,12 +273,12 @@ void Spell::EffectPowerDrain(uint32 i)
         return;
 
     uint32 curPower = unitTarget->GetUInt32Value(UNIT_FIELD_POWER1);
-	uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+    uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
     if(curPower < damage)
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
     else
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
-	unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth-damage/2);
+    unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth-damage/2);
 
 }
 

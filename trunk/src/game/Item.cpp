@@ -445,7 +445,7 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
     }
     else if (auctioncheck == 2)
     {
-        result = sDatabase.PQuery("SELECT `data` FROM `auctioned_item` WHERE `guid` = '%u';", guid);
+        result = sDatabase.PQuery("SELECT `data` FROM `auctionhouse_item` WHERE `guid` = '%u';", guid);
     }
     else
     {

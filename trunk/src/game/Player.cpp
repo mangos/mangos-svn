@@ -2047,7 +2047,7 @@ void Player::_SaveAuras()
 void Player::LoadFromDB( uint32 guid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `characters` WHERE `guid` = '%lu';",(unsigned long)guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
 
     ASSERT(result);
 
@@ -2330,8 +2330,8 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%d'",guid);
     sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%d'",guid);
     sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%d'",guid);
-    // Temporary disabled, we need to lookup both auctionhouse and auctioned_items
-    // together. auctioned_items are saved by item_guid not by player guid.
+    // Temporary disabled, we need to lookup both auctionhouse and auctionhouse_items
+    // together. auctionhouse_items are saved by item_guid not by player guid.
     // sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%d'",guid);
     // sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",guid);
     // sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%d'",guid);
