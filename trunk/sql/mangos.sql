@@ -620,7 +620,7 @@ CREATE TABLE `creature_grid` (
   `grid` int(11) unsigned NOT NULL default '0' COMMENT 'Grid Identifier',
   `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  PRIMARY KEY  (`grid`,`cell`,`map`)
+  UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Exploration System';
 
 --
@@ -822,8 +822,7 @@ CREATE TABLE `gameobject_grid` (
   `grid` int(11) unsigned NOT NULL default '0' COMMENT 'Grid Identifier',
   `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  KEY `idx_grid_map` (`grid`,`map`),
-  KEY `idx_grid_cell_map` (`grid`,`cell`,`map`)
+  UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
 
 --
@@ -1471,8 +1470,8 @@ CREATE TABLE `playercreateinfo` (
   `createId` tinyint(3) unsigned NOT NULL auto_increment,
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
-  `mapid` mediumint(8) unsigned NOT NULL default '0',
-  `zoneid` mediumint(8) unsigned NOT NULL default '0',
+  `map` mediumint(8) unsigned NOT NULL default '0',
+  `zone` mediumint(8) unsigned NOT NULL default '0',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
