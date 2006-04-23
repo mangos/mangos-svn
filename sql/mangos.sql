@@ -357,6 +357,40 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `character_pet` ENABLE KEYS */;
 
 --
+-- Table structure for table `character_queststatus`
+--
+
+DROP TABLE IF EXISTS `character_queststatus`;
+CREATE TABLE `character_queststatus` (
+  `playerid` bigint(20) unsigned NOT NULL default '0',
+  `questid` bigint(22) unsigned NOT NULL default '0',
+  `status` bigint(20) unsigned NOT NULL default '0',
+  `rewarded` bigint(20) unsigned NOT NULL default '0',
+  `questMobCount1` bigint(20) unsigned NOT NULL default '0',
+  `questMobCount2` bigint(20) unsigned NOT NULL default '0',
+  `questMobCount3` bigint(20) unsigned NOT NULL default '0',
+  `questMobCount4` bigint(20) unsigned NOT NULL default '0',
+  `questItemCount1` bigint(20) unsigned NOT NULL default '0',
+  `questItemCount2` bigint(20) unsigned NOT NULL default '0',
+  `questItemCount3` bigint(20) unsigned NOT NULL default '0',
+  `questItemCount4` bigint(20) unsigned NOT NULL default '0',
+  `timer` bigint(20) unsigned NOT NULL default '0',
+  `explored` bigint(20) unsigned NOT NULL default '0',
+  `id` int(11) NOT NULL auto_increment,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `character_queststatus`
+--
+
+
+/*!40000 ALTER TABLE `character_queststatus` DISABLE KEYS */;
+LOCK TABLES `character_queststatus` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `character_queststatus` ENABLE KEYS */;
+
+--
 -- Table structure for table `character_reputation`
 --
 
@@ -1589,172 +1623,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `playercreateinfo_spell` ENABLE KEYS */;
 
 --
--- Table structure for table `quest_item`
---
-
-DROP TABLE IF EXISTS `quest_item`;
-CREATE TABLE `quest_item` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  `count` int(11) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`id`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_item`
---
-
-
-/*!40000 ALTER TABLE `quest_item` DISABLE KEYS */;
-LOCK TABLES `quest_item` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_item` ENABLE KEYS */;
-
---
--- Table structure for table `quest_kill`
---
-
-DROP TABLE IF EXISTS `quest_kill`;
-CREATE TABLE `quest_kill` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `creature` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
-  `count` int(11) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`id`,`creature`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_kill`
---
-
-
-/*!40000 ALTER TABLE `quest_kill` DISABLE KEYS */;
-LOCK TABLES `quest_kill` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_kill` ENABLE KEYS */;
-
---
--- Table structure for table `quest_req_quest`
---
-
-DROP TABLE IF EXISTS `quest_req_quest`;
-CREATE TABLE `quest_req_quest` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
-  `status` tinyint(3) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`,`quest`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_req_quest`
---
-
-
-/*!40000 ALTER TABLE `quest_req_quest` DISABLE KEYS */;
-LOCK TABLES `quest_req_quest` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_req_quest` ENABLE KEYS */;
-
---
--- Table structure for table `quest_rew_choice`
---
-
-DROP TABLE IF EXISTS `quest_rew_choice`;
-CREATE TABLE `quest_rew_choice` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  `count` int(11) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`id`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_rew_choice`
---
-
-
-/*!40000 ALTER TABLE `quest_rew_choice` DISABLE KEYS */;
-LOCK TABLES `quest_rew_choice` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_rew_choice` ENABLE KEYS */;
-
---
--- Table structure for table `quest_rew_item`
---
-
-DROP TABLE IF EXISTS `quest_rew_item`;
-CREATE TABLE `quest_rew_item` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  `count` int(11) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`id`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_rew_item`
---
-
-
-/*!40000 ALTER TABLE `quest_rew_item` DISABLE KEYS */;
-LOCK TABLES `quest_rew_item` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_rew_item` ENABLE KEYS */;
-
---
--- Table structure for table `quest_src_item`
---
-
-DROP TABLE IF EXISTS `quest_src_item`;
-CREATE TABLE `quest_src_item` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  `count` int(11) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`id`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_src_item`
---
-
-
-/*!40000 ALTER TABLE `quest_src_item` DISABLE KEYS */;
-LOCK TABLES `quest_src_item` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_src_item` ENABLE KEYS */;
-
---
--- Table structure for table `quest_status`
---
-
-DROP TABLE IF EXISTS `quest_status`;
-CREATE TABLE `quest_status` (
-  `playerid` bigint(20) unsigned NOT NULL default '0',
-  `questid` bigint(22) unsigned NOT NULL default '0',
-  `status` bigint(20) unsigned NOT NULL default '0',
-  `rewarded` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount1` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount2` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount3` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount4` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount1` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount2` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount3` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount4` bigint(20) unsigned NOT NULL default '0',
-  `timer` bigint(20) unsigned NOT NULL default '0',
-  `explored` bigint(20) unsigned NOT NULL default '0',
-  `id` int(11) NOT NULL auto_increment,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `quest_status`
---
-
-
-/*!40000 ALTER TABLE `quest_status` DISABLE KEYS */;
-LOCK TABLES `quest_status` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_status` ENABLE KEYS */;
-
---
 -- Table structure for table `quest_template`
 --
 
@@ -1844,54 +1712,6 @@ CREATE TABLE `quest_template` (
 LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `quest_template` ENABLE KEYS */;
-
---
--- Table structure for table `quest_template_old`
---
-
-DROP TABLE IF EXISTS `quest_template_old`;
-CREATE TABLE `quest_template_old` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `zone` int(11) unsigned NOT NULL default '0' COMMENT 'Zone Identifier',
-  `questflags` bigint(20) unsigned NOT NULL default '0',
-  `req_level` int(11) unsigned NOT NULL default '0',
-  `questlevel` int(11) unsigned NOT NULL default '0',
-  `type` bigint(20) NOT NULL default '0',
-  `req_side` tinyint(3) unsigned NOT NULL default '0',
-  `req_race` tinyint(3) unsigned NOT NULL default '0',
-  `req_class` tinyint(3) unsigned NOT NULL default '0',
-  `req_skill` int(11) unsigned NOT NULL default '0',
-  `req_skill_rank` int(11) unsigned NOT NULL default '0',
-  `req_reputation_faction` int(11) unsigned NOT NULL default '0',
-  `req_reputation_value` int(11) unsigned NOT NULL default '0',
-  `time` bigint(20) NOT NULL default '0',
-  `title` longtext,
-  `details` longtext,
-  `objectives` longtext,
-  `completedtext` longtext,
-  `incompletetext` longtext,
-  `secondtext` longtext,
-  `objectives_part1` longtext,
-  `objectives_part2` longtext,
-  `objectives_part3` longtext,
-  `objectives_part4` longtext,
-  `rew_reputation_faction` int(11) unsigned NOT NULL default '0',
-  `rew_reputation_value` int(11) unsigned NOT NULL default '0',
-  `rew_gold` int(11) unsigned NOT NULL default '0',
-  `rew_xp` int(11) unsigned NOT NULL default '0',
-  `rew_spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Quest System';
-
---
--- Dumping data for table `quest_template_old`
---
-
-
-/*!40000 ALTER TABLE `quest_template_old` DISABLE KEYS */;
-LOCK TABLES `quest_template_old` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `quest_template_old` ENABLE KEYS */;
 
 --
 -- Table structure for table `realmlist`
