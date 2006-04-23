@@ -1028,7 +1028,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(m_spellInfo->Id == 8690 )
     {
         Field *fields;
-        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `characters_homebind` WHERE `guid` = '%d';", m_caster->GetGUID());
+        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%d';", m_caster->GetGUID());
         fields = result4->Fetch();
         TC->mapId = fields[0].GetUInt32();
         TC->x = fields[2].GetFloat();

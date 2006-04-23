@@ -82,7 +82,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x, y);
-    LoadHelper<GameObject>("gameobjects_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_gameObjects);
+    LoadHelper<GameObject>("gameobject_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_gameObjects);
 }
 
 void
@@ -91,7 +91,7 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
-    LoadHelper<Creature>("creatures_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_creatures);
+    LoadHelper<Creature>("creature_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_creatures);
 }
 
 void

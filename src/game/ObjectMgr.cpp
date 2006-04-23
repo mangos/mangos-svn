@@ -287,7 +287,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * `FROM auctioned_item`;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * `FROM auctionhouse_item`;" );
 
     if( !result )
         return;
@@ -519,7 +519,7 @@ void ObjectMgr::LoadAreaTriggerPoints()
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxipath.destination` FROM `taxipath` WHERE `taxipath.source` = '%d' ORDER BY `destination` LIMIT 1;", curloc);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxipath`.`destination` FROM `taxipath` WHERE `taxipath`.`source` = '%d' ORDER BY `destination` LIMIT 1;", curloc);
 
     if( ! result )
     {
@@ -536,7 +536,7 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxinode.id`, SQRT(pow(`taxinode.position_x`-'%f',2)+pow(`taxinode.position_y`-'%f',2)+pow(`taxinode.position_z`-'%f',2)) AS `distance` FROM `taxinode` WHERE `taxinode.continent` = '%u' ORDER BY `distance` LIMIT 1;", x, y, z, mapid);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxinode`.`id`, SQRT(pow(`taxinode`.`position_x`-'%f',2)+pow(`taxinode`.`position_y`-'%f',2)+pow(`taxinode`.`position_z`-'%f',2)) AS `distance` FROM `taxinode` WHERE `taxinode`.`continent` = '%u' ORDER BY `distance` LIMIT 1;", x, y, z, mapid);
 
     if( ! result  )
     {
@@ -550,7 +550,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxipath.price`, `taxipath.id` FROM `taxipath` WHERE `taxipath.source` = '%u' AND `taxipath.destination` = '%u';", source, destination);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxipath`.`price`, `taxipath`.`id` FROM `taxipath` WHERE `taxipath`.`source` = '%u' AND `taxipath`.`destination` = '%u';", source, destination);
 
     if( ! result )
     {
@@ -566,7 +566,7 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxinode.mount` FROM `taxinode WHERE `taxinode.id` = '%u';", id);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxinode`.`mount` FROM `taxinode WHERE `taxinode`.`id` = '%u';", id);
 
     if( ! result )
     {
@@ -581,7 +581,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxipathnode.position_x`,`taxipathnode.position_y`,`taxipathnode.position_z` FROM `taxipathnode` WHERE `taxipathnode.path` = '%u';", path);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxipathnode`.`position_x`,`taxipathnode`.`position_y`,`taxipathnode`.`position_z` FROM `taxipathnode` WHERE `taxipathnode`.`path` = '%u';", path);
 
     if( ! result )
         return;
