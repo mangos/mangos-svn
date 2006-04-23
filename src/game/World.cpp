@@ -39,6 +39,8 @@
 #include "CreatureAIRegistry.h"                             // need for Game::Initialize()
 #include "Policies/SingletonImp.h"
 #include "EventSystem.h"
+#include "BattleGroundMgr.h"
+
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -223,6 +225,9 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
+
+	sLog.outString( "WORLD: Starting BattleGround System" );
+	sBattleGroundMgr.CreateInitialBattleGrounds();
 
     MaNGOS::Game::Initialize();
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
