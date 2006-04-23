@@ -287,7 +287,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * `FROM auctionhouse_item`;" );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `auctionhouse_item`;" );
 
     if( !result )
         return;
@@ -566,7 +566,7 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxinode`.`mount` FROM `taxinode WHERE `taxinode`.`id` = '%u';", id);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxinode`.`mount` FROM `taxinode` WHERE `taxinode`.`id` = '%u';", id);
 
     if( ! result )
     {
