@@ -1989,11 +1989,11 @@ void Player::SaveToDB()
 
 void Player::_SaveQuestStatus()
 {
-    sDatabase.PExecute("DELETE FROM `quest_status` WHERE `playerid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",GetGUIDLow());
 
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        sDatabase.PExecute("INSERT INTO `quest_status` (`playerid`,`questid`,`status`,`rewarded`,`questMobCount1`,`questMobCount2`,`questMobCount3`,`questMobCount4`,`questItemCount1`,`questItemCount2`,`questItemCount3`,`questItemCount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u','%u');", GetGUIDLow(), i->first, i->second.status, i->second.rewarded, i->second.m_questMobCount[0], i->second.m_questMobCount[1], i->second.m_questMobCount[2], i->second.m_questMobCount[3], i->second.m_questItemCount[0], i->second.m_questItemCount[1], i->second.m_questItemCount[2], i->second.m_questItemCount[3]);
+        sDatabase.PExecute("INSERT INTO `character_queststatus` (`playerid`,`questid`,`status`,`rewarded`,`questMobCount1`,`questMobCount2`,`questMobCount3`,`questMobCount4`,`questItemCount1`,`questItemCount2`,`questItemCount3`,`questItemCount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u','%u');", GetGUIDLow(), i->first, i->second.status, i->second.rewarded, i->second.m_questMobCount[0], i->second.m_questMobCount[1], i->second.m_questMobCount[2], i->second.m_questMobCount[3], i->second.m_questItemCount[0], i->second.m_questItemCount[1], i->second.m_questItemCount[2], i->second.m_questItemCount[3]);
     }
 }
 
@@ -2242,7 +2242,7 @@ void Player::_LoadQuestStatus()
 
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `quest_status` WHERE `playerid` = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_queststatus` WHERE `playerid` = '%u';", GetGUIDLow());
 
     if(result)
     {
@@ -2325,7 +2325,7 @@ void Player::DeleteFromDB()
         m_items[i]->DeleteFromDB();
     }
 
-    sDatabase.PExecute("DELETE FROM `quest_status` WHERE `playerid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%d'",guid);
     sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%d'",guid);
     sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%d'",guid);
