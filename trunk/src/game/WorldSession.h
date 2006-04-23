@@ -346,7 +346,17 @@ class MANGOS_DLL_SPEC WorldSession
 
         void HandleChangePlayerNameOpcode(WorldPacket& recv_data);
 
-        OpcodeHandler* _GetOpcodeHandlerTable() const;
+	   
+      //BattleGround
+      void HandleBattleGroundHelloOpcode(WorldPacket &recv_data);
+      void HandleBattleGroundJoinOpcode(WorldPacket &recv_data);
+      void HandleBattleGroundPlayerPositionsOpcode(WorldPacket& recv_data);
+      void HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data );
+      void HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data );
+      void HandleBattleGroundListOpcode( WorldPacket &recv_data );
+      void HandleBattleGroundLeaveOpcode( WorldPacket &recv_data ); 
+
+      OpcodeHandler* _GetOpcodeHandlerTable() const;
 
     private:
         Player *_player;

@@ -706,7 +706,6 @@ void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orient
     SaveToDB();
 
     MapManager::Instance().GetMap(GetMapId())->Add(this);
-
 }
 
 void Player::AddToWorld()
@@ -1015,7 +1014,7 @@ void Player::SetBindPoint(uint64 guid)
     data.Initialize( SMSG_GOSSIP_COMPLETE );
     GetSession()->SendPacket( &data );
 
-    data.Initialize( MSG_BINDPOINT_CONFIRM );
+    data.Initialize( SMSG_BINDER_CONFIRM );
     data << guid;
     GetSession()->SendPacket( &data );
 }
@@ -1918,7 +1917,7 @@ void Player::SaveToDB()
     ss.rdbuf()->str("");
     ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic`) VALUES ("
         << GetGUIDLow() << ", "
-        << GetSession()->GetAccountId() << ", '"
+		<< GetSession()->GetAccountId() << ", '"
         << m_name << "', "
         << m_race << ", "
         << m_class << ", "
@@ -5918,4 +5917,270 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
     data << *loot;
 
     SendMessageToSet(&data, true);
+}
+
+void Player::SendUpdateWordState(uint16 Field, uint16 Value)
+{
+ 	WorldPacket data;
+ 	data.Initialize(SMSG_UPDATE_WORLD_STATE); //0x2D4
+ 	data << uint32(Field);
+ 	data << uint32(Value);
+	GetSession()->SendPacket(&data);
+}
+
+void Player::SendInitWorldStates(uint32 MapID)
+{
+	// TODO Figure out the unknown data.
+
+	if ((MapID == 0) || (MapID == 1))
+	{
+		sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%d",MapID);
+		
+		uint16 NumberOfFields = 108;
+		WorldPacket data;
+		data.Initialize (SMSG_INIT_WORLD_STATES); //0x2C5
+		data << 
+			(uint32)MapID <<
+			(uint16)NumberOfFields <<
+			//field (uint16)  value (uint16)
+			(uint16)0x07AE<< (uint16)0x01<< 
+			(uint16)0x0532<< (uint16)0x01<< 
+			(uint16)0x0531<< (uint16)0x00<< 
+			(uint16)0x052E<< (uint16)0x00<< 
+			(uint16)0x06F9<< (uint16)0x00<< 
+			(uint16)0x06F3<< (uint16)0x00<< 
+			(uint16)0x06F1<< (uint16)0x00<< 
+			(uint16)0x06EE<< (uint16)0x00<< 
+			(uint16)0x06ED<< (uint16)0x00<< 
+			(uint16)0x0571<< (uint16)0x00<< 
+			(uint16)0x0570<< (uint16)0x00<< 
+			(uint16)0x0567<< (uint16)0x01<< 
+			(uint16)0x0566<< (uint16)0x01<< 
+			(uint16)0x0550<< (uint16)0x01<< 
+			(uint16)0x0544<< (uint16)0x00<< 
+			(uint16)0x0536<< (uint16)0x00<< 
+			(uint16)0x0535<< (uint16)0x01<< 
+			(uint16)0x03C6<< (uint16)0x00<< 
+			(uint16)0x03C4<< (uint16)0x00<< 
+			(uint16)0x03C2<< (uint16)0x00<< 
+			(uint16)0x07A8<< (uint16)0x00<< 
+			(uint16)0x07A3<< (uint16)0x270F<<
+			(uint16)0x0574<< (uint16)0x00<< 
+			(uint16)0x0573<< (uint16)0x00<< 
+			(uint16)0x0572<< (uint16)0x00<< 
+			(uint16)0x056F<< (uint16)0x00<< 
+			(uint16)0x056E<< (uint16)0x00<< 
+			(uint16)0x056D<< (uint16)0x00<< 
+			(uint16)0x056C<< (uint16)0x00<< 
+			(uint16)0x056B<< (uint16)0x00<< 
+			(uint16)0x056A<< (uint16)0x01<< 
+			(uint16)0x0569<< (uint16)0x01<< 
+			(uint16)0x0568<< (uint16)0x01<< 
+			(uint16)0x0565<< (uint16)0x00<< 
+			(uint16)0x0564<< (uint16)0x00<< 
+			(uint16)0x0563<< (uint16)0x00<< 
+			(uint16)0x0562<< (uint16)0x00<< 
+			(uint16)0x0561<< (uint16)0x00<< 
+			(uint16)0x0560<< (uint16)0x00<< 
+			(uint16)0x055F<< (uint16)0x00<< 
+			(uint16)0x055E<< (uint16)0x00<< 
+			(uint16)0x055D<< (uint16)0x00<< 
+			(uint16)0x055C<< (uint16)0x00<< 
+			(uint16)0x055B<< (uint16)0x00<< 
+			(uint16)0x055A<< (uint16)0x00<< 
+			(uint16)0x0559<< (uint16)0x00<< 
+			(uint16)0x0558<< (uint16)0x00<< 
+			(uint16)0x0557<< (uint16)0x00<< 
+			(uint16)0x0556<< (uint16)0x00<< 
+			(uint16)0x0555<< (uint16)0x00<< 
+			(uint16)0x0554<< (uint16)0x01<< 
+			(uint16)0x0553<< (uint16)0x01<< 
+			(uint16)0x0552<< (uint16)0x01<< 
+			(uint16)0x0551<< (uint16)0x01<< 
+			(uint16)0x054F<< (uint16)0x00<< 
+			(uint16)0x054E<< (uint16)0x00<< 
+			(uint16)0x054D<< (uint16)0x01<< 
+			(uint16)0x054C<< (uint16)0x00<< 
+			(uint16)0x054B<< (uint16)0x00<< 
+			(uint16)0x0545<< (uint16)0x00<< 
+			(uint16)0x0543<< (uint16)0x01<< 
+			(uint16)0x0542<< (uint16)0x00<< 
+			(uint16)0x0540<< (uint16)0x00<< 
+			(uint16)0x053F<< (uint16)0x00<< 
+			(uint16)0x053E<< (uint16)0x00<< 
+			(uint16)0x053D<< (uint16)0x00<< 
+			(uint16)0x053C<< (uint16)0x00<< 
+			(uint16)0x053B<< (uint16)0x00<< 
+			(uint16)0x053A<< (uint16)0x01<< 
+			(uint16)0x0539<< (uint16)0x00<< 
+			(uint16)0x0538<< (uint16)0x00<< 
+			(uint16)0x0537<< (uint16)0x00<< 
+			(uint16)0x0534<< (uint16)0x00<< 
+			(uint16)0x0533<< (uint16)0x00<< 
+			(uint16)0x0530<< (uint16)0x00<< 
+			(uint16)0x052F<< (uint16)0x00<< 
+			(uint16)0x052D<< (uint16)0x01<< 
+			(uint16)0x0516<< (uint16)0x01<< 
+			(uint16)0x0515<< (uint16)0x00<< 
+			(uint16)0x03B6<< (uint16)0x00<< 
+			(uint16)0x0745<< (uint16)0x02<< 
+			(uint16)0x0736<< (uint16)0x01<< 
+			(uint16)0x0735<< (uint16)0x01<< 
+			(uint16)0x0734<< (uint16)0x01<< 
+			(uint16)0x0733<< (uint16)0x01<< 
+			(uint16)0x0732<< (uint16)0x01<< 
+			(uint16)0x0702<< (uint16)0x00<< 
+			(uint16)0x0701<< (uint16)0x00<< 
+			(uint16)0x0700<< (uint16)0x00<< 
+			(uint16)0x06FE<< (uint16)0x00<< 
+			(uint16)0x06FD<< (uint16)0x00<< 
+			(uint16)0x06FC<< (uint16)0x00<< 
+			(uint16)0x06FB<< (uint16)0x00<< 
+			(uint16)0x06F8<< (uint16)0x00<< 
+			(uint16)0x06F7<< (uint16)0x00<< 
+			(uint16)0x06F6<< (uint16)0x00<< 
+			(uint16)0x06F4<< (uint16)0x7D0<<
+			(uint16)0x06F2<< (uint16)0x00<< 
+			(uint16)0x06F0<< (uint16)0x00<< 
+			(uint16)0x06EF<< (uint16)0x00<< 
+			(uint16)0x06EC<< (uint16)0x00<< 
+			(uint16)0x06EA<< (uint16)0x00<< 
+			(uint16)0x06E9<< (uint16)0x00<< 
+			(uint16)0x06E8<< (uint16)0x00<< 
+			(uint16)0x06E7<< (uint16)0x00<< 
+			(uint16)0x0518<< (uint16)0x00<< 
+			(uint16)0x0517<< (uint16)0x00<< 
+			(uint16)0x0703<< (uint16)0x00;
+			GetSession()->SendPacket(&data);
+	}
+
+	//BattleGround currently only map 489
+	else if (MapID == 489) // && and guid is in a current Battlefield)
+	{
+		sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%d",MapID);
+		
+		uint16 NumberOfFields = 114;
+		WorldPacket data;
+		data.Initialize (SMSG_INIT_WORLD_STATES);
+		data <<
+		
+		(uint32)MapID<<
+		(uint16)NumberOfFields <<
+		//field (uint16)  value (uint16)
+		(uint16)0x07AE<< (uint16)0x01<<
+		(uint16)0x0532<< (uint16)0x01<<
+		(uint16)0x0531<< (uint16)0x00<<
+		(uint16)0x052E<< (uint16)0x00<<
+		(uint16)0x06F9<< (uint16)0x00<<
+		(uint16)0x06F3<< (uint16)0x00<<
+		(uint16)0x06F1<< (uint16)0x00<<
+		(uint16)0x06EE<< (uint16)0x00<<
+		(uint16)0x06ED<< (uint16)0x00<<
+		(uint16)0x0571<< (uint16)0x00<<
+		(uint16)0x0570<< (uint16)0x00<<
+		(uint16)0x0567<< (uint16)0x01<<
+		(uint16)0x0566<< (uint16)0x01<<
+		(uint16)0x0550<< (uint16)0x01<<
+		(uint16)0x0544<< (uint16)0x00<<
+		(uint16)0x0536<< (uint16)0x00<<
+		(uint16)0x0535<< (uint16)0x01<<
+		(uint16)0x03C6<< (uint16)0x00<<
+		(uint16)0x03C4<< (uint16)0x00<<
+		(uint16)0x03C2<< (uint16)0x00<<
+		(uint16)0x07A8<< (uint16)0x00<<
+		(uint16)0x07A3<< (uint16)0x270F <<
+		(uint16)0x060B<< (uint16)0x02<<
+		(uint16)0x0574<< (uint16)0x00<<
+		(uint16)0x0573<< (uint16)0x00<<
+		(uint16)0x0572<< (uint16)0x00<<
+		(uint16)0x056F<< (uint16)0x00<<
+		(uint16)0x056E<< (uint16)0x00<<
+		(uint16)0x056D<< (uint16)0x00<<
+		(uint16)0x056C<< (uint16)0x00<<
+		(uint16)0x056B<< (uint16)0x00<<
+		(uint16)0x056A<< (uint16)0x01<<
+		(uint16)0x0569<< (uint16)0x01<<
+		(uint16)0x0568<< (uint16)0x01<<
+		(uint16)0x0565<< (uint16)0x00<<
+		(uint16)0x0564<< (uint16)0x00<<
+		(uint16)0x0563<< (uint16)0x00<<
+		(uint16)0x0562<< (uint16)0x00<<
+		(uint16)0x0561<< (uint16)0x00<<
+		(uint16)0x0560<< (uint16)0x00<<
+		(uint16)0x055F<< (uint16)0x00<<
+		(uint16)0x055E<< (uint16)0x00<<
+		(uint16)0x055D<< (uint16)0x00<<
+		(uint16)0x055C<< (uint16)0x00<<
+		(uint16)0x055B<< (uint16)0x00<<
+		(uint16)0x055A<< (uint16)0x00<<
+		(uint16)0x0559<< (uint16)0x00<<
+		(uint16)0x0558<< (uint16)0x00<<
+		(uint16)0x0557<< (uint16)0x00<<
+		(uint16)0x0556<< (uint16)0x00<<
+		(uint16)0x0555<< (uint16)0x00<<
+		(uint16)0x0554<< (uint16)0x01<<
+		(uint16)0x0553<< (uint16)0x01<<
+		(uint16)0x0552<< (uint16)0x01<<
+		(uint16)0x0551<< (uint16)0x01<<
+		(uint16)0x054F<< (uint16)0x00<<
+		(uint16)0x054E<< (uint16)0x00<<
+		(uint16)0x054D<< (uint16)0x01<<
+		(uint16)0x054C<< (uint16)0x00<<
+		(uint16)0x054B<< (uint16)0x00<<
+		(uint16)0x0545<< (uint16)0x00<<
+		(uint16)0x0543<< (uint16)0x01<<
+		(uint16)0x0542<< (uint16)0x00<<
+		(uint16)0x0540<< (uint16)0x00<<
+		(uint16)0x053F<< (uint16)0x00<<
+		(uint16)0x053E<< (uint16)0x00<<
+		(uint16)0x053D<< (uint16)0x00<<
+		(uint16)0x053C<< (uint16)0x00<<
+		(uint16)0x053B<< (uint16)0x00<<
+		(uint16)0x053A<< (uint16)0x01<<
+		(uint16)0x0539<< (uint16)0x00<<
+		(uint16)0x0538<< (uint16)0x00<<
+		(uint16)0x0537<< (uint16)0x00<<
+		(uint16)0x0534<< (uint16)0x00<<
+		(uint16)0x0533<< (uint16)0x00<<
+		(uint16)0x0530<< (uint16)0x00<<
+		(uint16)0x052F<< (uint16)0x00<<
+		(uint16)0x052D<< (uint16)0x01<<
+		(uint16)0x0516<< (uint16)0x01<<
+		(uint16)0x0515<< (uint16)0x00<<
+		(uint16)0x03B6<< (uint16)0x00<<
+		(uint16)0x0745<< (uint16)0x02<<
+		(uint16)0x0736<< (uint16)0x01<<
+		(uint16)0x0735<< (uint16)0x01<<
+		(uint16)0x0734<< (uint16)0x01<<
+		(uint16)0x0733<< (uint16)0x01<<
+		(uint16)0x0732<< (uint16)0x01<<
+		(uint16)0x0702<< (uint16)0x00<<
+		(uint16)0x0701<< (uint16)0x00<<
+		(uint16)0x0700<< (uint16)0x00<<
+		(uint16)0x06FE<< (uint16)0x00<<
+		(uint16)0x06FD<< (uint16)0x00<<
+		(uint16)0x06FC<< (uint16)0x00<<
+		(uint16)0x06FB<< (uint16)0x00<<
+		(uint16)0x06F8<< (uint16)0x00<<
+		(uint16)0x06F7<< (uint16)0x00<<
+		(uint16)0x06F6<< (uint16)0x00<<
+		(uint16)0x06F4<< (uint16)0x07D0 <<
+		(uint16)0x06F2<< (uint16)0x00<<
+		(uint16)0x06F0<< (uint16)0x00<<
+		(uint16)0x06EF<< (uint16)0x00<<
+		(uint16)0x06EC<< (uint16)0x00<<
+		(uint16)0x06EA<< (uint16)0x00<<
+		(uint16)0x06E9<< (uint16)0x00<<
+		(uint16)0x06E8<< (uint16)0x00<<
+		(uint16)0x06E7<< (uint16)0x00<<
+		(uint16)0x0641<< (uint16)0x03<<
+		(uint16)0x062E<< (uint16)0x00<<
+		(uint16)0x062D<< (uint16)0x00<<
+		(uint16)0x060A<< (uint16)0x00<<
+		(uint16)0x0609<< (uint16)0x00<<
+		(uint16)0x0518<< (uint16)0x00<<
+		(uint16)0x0517<< (uint16)0x00<<
+		(uint16)0x0703<< (uint16)0x00;
+		GetSession()->SendPacket(&data);
+	}
 }

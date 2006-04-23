@@ -622,11 +622,25 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CastItemSpell(Item *item,Unit* Target);
         bool IsItemSpellToEquip(SpellEntry *spellInfo);
         bool IsItemSpellToCombat(SpellEntry *spellInfo);
+	
+		void SendInitWorldStates(uint32 MapID);
+		void SendUpdateWordState(uint16 Field, uint16 Value);
 
         PlayerMenu* PlayerTalkClass;
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
         void SendLoot(uint64 guid,uint8 loot_type);
+
+		uint32 m_bgBattleGroundID;
+		bool m_bgInBattleGround;
+		uint8 m_bgTeam;
+		uint32 m_bgEntryPointMap;
+		uint32 m_bgEntryPointO;
+		float m_bgEntryPointX;
+		float m_bgEntryPointY;
+		float m_bgEntryPointZ;
+
+
     protected:
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
