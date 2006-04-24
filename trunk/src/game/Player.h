@@ -340,8 +340,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddQuestsLoot(Creature* creature);
 
         void RemovItemFromBag(uint32 itemId,uint32 itemcount);
-        void RemovedItemFromBag(uint32 entry);
-        void AddedItemToBag(uint32 entry, uint32 count);
+        void ItemRemoved(uint32 entry);
+        void ItemAdded(uint32 entry, uint32 count);
         void KilledMonster(uint32 entry, uint64 guid);
         void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
@@ -525,7 +525,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 AddItem(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
         uint8 AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
         uint8 AddItemToBank(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
-        uint8 AddItemToBag(uint8 bagIndex, Item *item, bool allowstack, bool dontadd, bool dontsave);
 
         Item* RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove=true);
         int CountFreeBagSlot();

@@ -719,7 +719,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    result = GetPlayer()->AddItemToBag(dstBag, pItem, true, true, false);
+    result = GetPlayer()->AddItem(dstBag, NULL_SLOT, pItem, true, true, false);
 
     if (!result)
     {
@@ -733,7 +733,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     }
 
     GetPlayer()->RemoveItemFromSlot(srcBag, srcSlot);
-    GetPlayer()->AddItemToBag(dstBag, pItem, true, false, true);
+    GetPlayer()->AddItem(dstBag, NULL_SLOT, pItem, true, false, true);
     if (result == 2)
     {
         pItem->DeleteFromDB();

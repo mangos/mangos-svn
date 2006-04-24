@@ -78,25 +78,20 @@ void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 
 void Bag::SaveToDB()
 {
-    Item::SaveToDB();
-
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
-
+	Item::SaveToDB();
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%d'",GetGUIDLow());
     for (int i = 0; i < 20; i++)
     {
         if (m_bagslot[i])
         {
+			sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
             m_bagslot[i]->SaveToDB();
         }
     }
-    sDatabase.PExecute("INSERT INTO inventory VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), GetSlot(), GetGUIDLow(), GetEntry());
-
 }
 
 void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
-    Item::LoadFromDB(guid, auctioncheck);
-
     for (uint8 i = 0; i < 20; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
@@ -114,17 +109,16 @@ void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
         do
         {
             Field *fields = result->Fetch();
-
             uint8  slot      = fields[1].GetUInt8();
             uint32 item_guid = fields[2].GetUInt32();
             uint32 item_id   = fields[3].GetUInt32();
 
             ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            Item* item = NewItemOrBag(proto);
-            item->SetOwner(this->GetOwner());
+            Item *item = NewItemOrBag(proto);
+            item->SetOwner(m_owner);
 			item->SetSlot(slot);
-            item->LoadFromDB(item_guid, 1);
+			item->LoadFromDB(item_guid, auctioncheck);
             AddItemToBag(slot, item);
         } while (result->NextRow());
 
@@ -141,10 +135,7 @@ void Bag::DeleteFromDB()
             m_bagslot[i]->DeleteFromDB();
         }
     }
-
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
-
-    Item::DeleteFromDB();
+	Item::DeleteFromDB();
 }
 
 uint8 Bag::FindFreeBagSlot()
@@ -164,7 +155,7 @@ Item* Bag::RemoveItemFromBag(uint8 slot)
         m_bagslot[slot] = NULL;
 
     SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
-
+	pItem->SetSlot( 0 );
     return pItem;
 }
 
@@ -259,7 +250,7 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
                 if ((stack - pItem->GetCount()) >= count)
                 {
                     pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
-                    pItem->SaveToDB();
+                    //pItem->SaveToDB();
 
                     pItem->SendUpdateToPlayer(m_owner);
                     return 2;
@@ -313,7 +304,7 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
                             if ((pItem->GetCount() + count) > stack) { plus = stack - pItem->GetCount(); }
                             count -= plus;
                             pItem->SetCount(pItem->GetCount() + plus);
-                            pItem->SaveToDB();
+                            //pItem->SaveToDB();
                             pItem->SendUpdateToPlayer(m_owner);
                             if (!count) { return 2; }
                         }
@@ -324,6 +315,8 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
     }
 
     item->SetCount(count);
+	item->SetSlot( addtoslot );
+
     m_bagslot[addtoslot] = item;
     SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (addtoslot * 2), item->GetGUID());
     item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());

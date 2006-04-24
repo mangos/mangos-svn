@@ -950,7 +950,7 @@ uint16 Player::getQuestSlotById(uint32 slot_id)
     return 0;
 }
 
-void Player::AddedItemToBag(uint32 entry, uint32 count)
+void Player::ItemAdded(uint32 entry, uint32 count)
 {
     quest_status qs;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
@@ -979,7 +979,7 @@ void Player::AddedItemToBag(uint32 entry, uint32 count)
     }
 }
 
-void Player::RemovedItemFromBag(uint32 entry)
+void Player::ItemRemoved(uint32 entry)
 {
     quest_status qs;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
@@ -2004,11 +2004,11 @@ void Player::_SaveInventory()
     {
         if (m_items[i] != 0)
         {
+			sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
 			if(m_items[i]->IsBag())
 				((Bag*)m_items[i])->SaveToDB();
 			else
 				m_items[i]->SaveToDB();
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%d', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
         }
     }
 }
@@ -2125,7 +2125,7 @@ void Player::_LoadInventory()
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%d';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `player` = '%d';",GetGUIDLow());
 
     if (result)
     {
@@ -2141,8 +2141,10 @@ void Player::_LoadInventory()
             Item *item = NewItemOrBag(proto);
             item->SetOwner(this);
 			item->SetSlot(slot);
-            item->LoadFromDB(item_guid, 1);
+			item->LoadFromDB(item_guid, 1);
             AddItem(0, slot, item, false, false, true);
+			if(item->IsBag())
+				((Bag*)item)->LoadFromDB(item->GetGUIDLow(), 1);
         } while (result->NextRow());
 
         delete result;
@@ -2324,8 +2326,10 @@ void Player::DeleteFromDB()
     {
         if(m_items[i] == NULL)
             continue;
-
-        m_items[i]->DeleteFromDB();
+		if(m_items[i]->IsBag())
+			((Bag*)m_items[i])->DeleteFromDB();
+		else
+			m_items[i]->DeleteFromDB();
     }
 
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",guid);
@@ -4352,272 +4356,19 @@ uint32 Player::AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 coun
     WorldPacket packet;
     ItemPrototype *proto = objmgr.GetItemPrototype(itemId);
 
-    if (proto)
+    if(proto)
     {
+        Item *pItem = NewItemOrBag(proto);
 
-        Item *pItem = 0;
-        Bag *pBag = 0;
-        int stack = proto->MaxCount;
-        if (stack < 1) { stack = 1; }
+        if (count > proto->MaxCount) { count = proto->MaxCount; }
         if (count < 1) { count = 1; }
-        int total = count;
-        int freespace = 0;
 
-        // First lets check if count is >= to maxcount
-        // Stackable is related to unique items, users can't have more than MaxCount items, not even in bank
-        if  (proto->Stackable == 0)
-        {
-            if  (GetItemCount(itemId, true) >= proto->MaxCount)
-            {
-                sLog.outError("AddNewItem : Too many items, itemId = %i", itemId);
-                return false;
-            }
-        }
+        pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this);
+        pItem->SetCount (count);
 
-        // The slot must be free or, if the same item is there
-        // it should be added to stack (if it's stackable)
-        if (slot != NULL_SLOT)
-        {
-            switch(bagIndex)
-            {
-                case 0:
-                case CLIENT_SLOT_BACK:
-                    if (slot >= BANK_SLOT_BAG_END)
-                    {
-                        sLog.outError("AddNewItem : Invalid slot, slot = %i", slot);
-                        return 0;
-                    }
-                    if ((((slot >= INVENTORY_SLOT_BAG_START) && (slot < INVENTORY_SLOT_BAG_END)) || ((slot >= BANK_SLOT_BAG_START) && (slot < BANK_SLOT_BAG_END))) && (proto->InventoryType != INVTYPE_BAG))
-                    {
-                        sLog.outError("AddNewItem : Non-bag item in bag slot, itemId = %i, slot = %i", itemId, slot);
-                        return 0;
-                    }
-                    pItem = GetItemBySlot(slot);
-                    break;
-                case CLIENT_SLOT_01:
-                case CLIENT_SLOT_02:
-                case CLIENT_SLOT_03:
-                case CLIENT_SLOT_04:
-                case BANK_SLOT_BAG_1:
-                case BANK_SLOT_BAG_2:
-                case BANK_SLOT_BAG_3:
-                case BANK_SLOT_BAG_4:
-                case BANK_SLOT_BAG_5:
-                case BANK_SLOT_BAG_6:
-                    pBag = GetBagBySlot(bagIndex);
-                    if (pBag)
-                    {
-                        if (slot >= pBag->GetProto()->ContainerSlots)
-                        {
-                            sLog.outError("AddNewItem : Invalid slot, bagIndex = %i, slot = %i", bagIndex, slot);
-                            return 0;
-                        }
-                        pItem = pBag->GetItemFromBag(slot);
-                    }
-                    else
-                    {
-                        sLog.outError("AddNewItem : No bag in that bagIndex, bagIndex = %i", bagIndex);
-                        return 0;
-                    }
-                    break;
-                default:
-                    sLog.outError("AddNewItem : Unknown bagIndex, bagIndex = %i", bagIndex);
-                    return 0;
-            }
-            if (pItem)
-            {
-                if (pItem->GetEntry() != itemId)
-                {
-                    sLog.outError("AddNewItem : Player slot already has another item, bagIndex = %i, slot = %i", bagIndex, slot);
-                    return 0;
-                }
-                else
-                {
-                    if (((stack - pItem->GetCount()) >= count) || (addmaxpossible))
-                    {
-                        if (!dontadd)
-                        {
-                            pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
-                            pItem->SaveToDB();
-                            pItem->SendUpdateToPlayer(this);
-                        }
-                        sLog.outDetail("AddNewItem : Item added (stack), itemId = %i, amount = %i, bagIndex = %i, slot = %i, dontadd = %i", itemId, ((pItem->GetCount() + count) > stack)?(stack - pItem->GetCount()):count, bagIndex, slot, dontadd);
-                        return ((pItem->GetCount() + count) > stack)?(stack - pItem->GetCount()):count;
-                    }
-                    else
-                    {
-                        sLog.outError("AddNewItem : Player slot is full, bagIndex = %i, slot = %i", bagIndex, slot);
-                        return 0;
-                    }
-                }
-            }
-            else
-            {
-                CreateObjectItem(bagIndex, slot, itemId, (count > stack)?stack:count);
-                sLog.outDetail("AddNewItem : Item added, itemId = %i, amount = %i, bagIndex = %i, slot = %i, dontadd = %i", itemId, (count > stack)?stack:count, bagIndex, slot, dontadd);
-                return count;
-            }
-        }
-
-        if ((bagIndex) && (((bagIndex < CLIENT_SLOT_01) || (bagIndex > CLIENT_SLOT_04)) && (bagIndex != CLIENT_SLOT_BACK)))
-        {
-            sLog.outError("AddNewItem : Unknown bagIndex, bagIndex = %i", bagIndex);
-            return 0;
-        }
-
-        if ((bagIndex) && (bagIndex != CLIENT_SLOT_BACK) && (!GetBagBySlot(bagIndex)))
-        {
-            sLog.outError("AddNewItem : No bag in bagIndex, bagIndex = %i", bagIndex);
-            return 0;
-        }
-
-        // If bag is specified, don't search in other bags
-        uint8 bagIndexStart = ((bagIndex) && (bagIndex != CLIENT_SLOT_BACK))?bagIndex:CLIENT_SLOT_01;
-        uint8 bagIndexEnd = ((bagIndex) && (bagIndex != CLIENT_SLOT_BACK))?bagIndex:CLIENT_SLOT_04;
-
-        // If slot is not specified, check for free slots (and stacks, if allowstack = true)
-        // cycle 0 - searching for stack space
-        // cycle 1 - searching for free slots
-        // cycle 2 - adding to stacks
-        // cycle 3 - adding to free slots
-        for (int cycle=0; cycle <= 3; cycle++)
-        {
-
-            if ((cycle > 1) && ((!freespace) || ((freespace) && (freespace < total) && (!addmaxpossible))))
-            {
-                sLog.outError("AddNewItem : Not enough free space, itemId = %i, amount = %i, total space = %i, addmaxpossible = %i", itemId, total, freespace, addmaxpossible);
-                return 0;
-            }
-
-            // Player backpack
-            if ((bagIndex == CLIENT_SLOT_BACK) || (!bagIndex))
-            {
-                for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-                {
-                    pItem = GetItemBySlot(i);
-                    if (!pItem)
-                    {
-                        if (cycle == 1)
-                        {
-                            freespace += stack;
-                        }
-                        else if (cycle == 3)
-                        {
-                            int plus = (count >= stack)?stack:count;
-                            count -= plus;
-                            if (!dontadd) { CreateObjectItem(CLIENT_SLOT_BACK, i, itemId, plus); }
-                            if (!count)
-                            {
-                                sLog.outDetail("AddNewItem : Item added, itemId = %i, amount = %i, dontadd = %i", itemId, total, dontadd);
-                                return total;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (pItem->GetEntry() == itemId)
-                        {
-                            if ((pItem->GetCount() < stack) && (count))
-                            {
-                                int plus = count;
-                                if ((pItem->GetCount() + count) > stack) { plus = stack - pItem->GetCount(); }
-                                if (cycle == 0)
-                                {
-                                    freespace += plus;
-                                }
-                                else if (cycle == 2)
-                                {
-                                    count -= plus;
-                                    if (!dontadd)
-                                    {
-                                        pItem->SetCount(pItem->GetCount() + plus);
-                                        pItem->SaveToDB();
-                                        pItem->SendUpdateToPlayer(this);
-                                    }
-                                    if (!count)
-                                    {
-                                        sLog.outDetail("AddNewItem : Item added (stacked), itemId = %i, amount = %i, dontadd = %i", itemId, total, bagIndex, slot, dontadd);
-                                        return total;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Additional bags
-            if (bagIndex != CLIENT_SLOT_BACK)
-            {
-                for(uint8 bagIndex2 = bagIndexStart; bagIndex2 <= bagIndexEnd; bagIndex2++)
-                {
-                    pBag = GetBagBySlot(bagIndex2);
-                    if (pBag)
-                    {
-                        for (uint8 slot2=0; slot2 < pBag->GetProto()->ContainerSlots; slot2++)
-                        {
-                            pItem = pBag->GetItemFromBag(slot2);
-                            if (!pItem)
-                            {
-                                if (cycle == 1)
-                                {
-                                    freespace += stack;
-                                }
-                                else if (cycle == 3)
-                                {
-                                    int plus = (count >= stack)?stack:count;
-                                    count -= plus;
-                                    if (!dontadd) { CreateObjectItem(bagIndex2, slot2, itemId, plus); }
-                                    if (!count)
-                                    {
-                                        sLog.outDetail("AddNewItem : Item added, itemId = %i, amount = %i, dontadd = %i", itemId, total, dontadd);
-                                        return total;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                if (pItem->GetEntry() == itemId)
-                                {
-                                    if ((pItem->GetCount() < stack) && (count))
-                                    {
-                                        int plus = count;
-                                        if ((pItem->GetCount() + count) > stack) { plus = stack - pItem->GetCount(); }
-                                        if (cycle == 0)
-                                        {
-                                            freespace += plus;
-                                        }
-                                        else if (cycle == 2)
-                                        {
-                                            count -= plus;
-                                            if (!dontadd)
-                                            {
-                                                pItem->SetCount(pItem->GetCount() + plus);
-                                                pItem->SaveToDB();
-                                                pItem->SendUpdateToPlayer(this);
-                                            }
-                                            if (!count)
-                                            {
-                                                sLog.outDetail("AddNewItem : Item added (stacked), itemId = %i, amount = %i, dontadd = %i", itemId, total, bagIndex, slot, dontadd);
-                                                return total;
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        AddedItemToBag(itemId,count);
-        sLog.outDetail("AddNewItem : Item partially added, itemId = %i, amount = %i, rest = %i, dontadd = %i", itemId, total, count, dontadd);
-        return (total - count);
-    }
-
-    sLog.outError("AddNewItem : Unknown itemId, itemId = %i", itemId);
-    return 0;
+		AddItem(bagIndex, slot, pItem, false, false, true);
+	}
+	return count;
 }
 
 // Adds an existing item (pointed by *item) to player inventory
@@ -4714,7 +4465,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
                     //_SaveInventory();
                     pItem->SendUpdateToPlayer(this);
                 }
-                AddedItemToBag(item->GetEntry(),count);
+                ItemAdded(item->GetEntry(),count);
                 sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked), dontadd = %i", pItem->GetEntry(), bagIndex, slot, dontadd);
                 return 2;
             }
@@ -4756,6 +4507,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack, bo
         {
             if (!dontadd)
             {
+				item->SetSlot( slot );
                 m_items[slot] = item;
                 SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), m_items[slot]?m_items[slot]->GetGUID():0);
                 item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
@@ -4811,7 +4563,6 @@ uint8 Player::AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool al
         return 0;
     }
 
-    UpdateData upd;
     WorldPacket packet;
     Item *pItem = 0;
     Bag *pBag = 0;
@@ -5015,7 +4766,6 @@ uint8 Player::AddItemToBank(uint8 bagIndex,uint8 slot, Item *item, bool allowsta
         return 0;
     }
 
-    UpdateData upd;
     WorldPacket packet;
     Item *pItem = 0;
     Bag *pBag = 0;
@@ -5206,19 +4956,6 @@ uint8 Player::AddItemToBank(uint8 bagIndex,uint8 slot, Item *item, bool allowsta
     return AddItem(addtobag, addtoslot, item, allowstack, dontadd, dontsave);
 }
 
-uint8 Player::AddItemToBag(uint8 bagIndex, Item *item, bool allowstack, bool dontadd, bool dontsave)
-{
-    if ((bagIndex >= INVENTORY_SLOT_BAG_START) && (bagIndex < INVENTORY_SLOT_BAG_END))
-    {
-        return AddItemToInventory(bagIndex, NULL_SLOT, item, allowstack, dontadd, dontsave);
-    }
-    else if ((bagIndex >= BANK_SLOT_BAG_START) && (bagIndex < BANK_SLOT_BAG_END))
-    {
-        return AddItemToBank(bagIndex, NULL_SLOT, item, allowstack, dontadd, dontsave);
-    }
-    return 0;
-}
-
 void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
 {
     if(itemId==0)
@@ -5260,7 +4997,7 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                     {
                         pItem->RemoveFromWorld();
                         pItem->DestroyForPlayer(this);
-                        RemovedItemFromBag(pItem->GetEntry());
+                        ItemRemoved(pItem->GetEntry());
                     }
                 }
             }
@@ -5290,7 +5027,7 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                         {
                             pItem->RemoveFromWorld();
                             pItem->DestroyForPlayer(this);
-                            RemovedItemFromBag(pItem->GetEntry());
+                            ItemRemoved(pItem->GetEntry());
                         }
                     }
                     pBag->SendUpdateToPlayer(this);
