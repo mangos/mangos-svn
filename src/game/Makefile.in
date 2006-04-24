@@ -66,7 +66,9 @@ ARFLAGS = cru
 libgame_a_AR = $(AR) $(ARFLAGS)
 libgame_a_LIBADD =
 am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
-	Bag.$(OBJEXT) Base.$(OBJEXT) Channel.$(OBJEXT) \
+	Bag.$(OBJEXT) Base.$(OBJEXT) BattleGround.$(OBJEXT) \
+	BattleGroundHandler.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
+	Channel.$(OBJEXT) \
 	ChannelHandler.$(OBJEXT) CharacterHandler.$(OBJEXT) \
 	Chat.$(OBJEXT) ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
 	Container.$(OBJEXT) Corpse.$(OBJEXT) CreatureAI.$(OBJEXT) \
@@ -258,6 +260,9 @@ libgame_a_SOURCES = \
 	AuctionHouse.cpp \
 	Bag.cpp \
 	Base.cpp \
+	BattleGround.cpp \
+	BattleGroundHandler.cpp \
+	BattleGroundMgr.cpp \
 	Channel.cpp \
 	ChannelHandler.cpp \
 	CharacterHandler.cpp \
@@ -345,6 +350,8 @@ libgame_a_SOURCES = \
 	AnimalRandomMovementGenerator.h \
 	Bag.h \
 	Base.h \
+	BattleGround.h \
+	BattleGroundMgr.h \
 	Cell.h \
 	CellImpl.h \
 	Channel.h \
@@ -475,6 +482,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AuctionHouse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Bag.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Base.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BattleGround.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BattleGroundHandler.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BattleGroundMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Channel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ChannelHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CharacterHandler.Po@am__quote@

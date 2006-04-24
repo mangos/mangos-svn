@@ -23,6 +23,9 @@ libgame_a_SOURCES = \
 	AuctionHouse.cpp \
 	Bag.cpp \
 	Base.cpp \
+	BattleGround.cpp \
+	BattleGroundHandler.cpp \
+	BattleGroundMgr.cpp \
 	Channel.cpp \
 	ChannelHandler.cpp \
 	CharacterHandler.cpp \
@@ -110,6 +113,8 @@ libgame_a_SOURCES = \
 	AnimalRandomMovementGenerator.h \
 	Bag.h \
 	Base.h \
+	BattleGround.h \
+	BattleGroundMgr.h \
 	Cell.h \
 	CellImpl.h \
 	Channel.h \

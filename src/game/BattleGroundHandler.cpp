@@ -99,7 +99,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 	//sBattleGroundMgr.BuildBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(),3);
 
 	GetPlayer()->m_bgEntryPointMap = GetPlayer()->GetMapId();
-	GetPlayer()->m_bgEntryPointO = GetPlayer()->GetOrientation();
+	GetPlayer()->m_bgEntryPointO = (long unsigned)GetPlayer()->GetOrientation();
     GetPlayer()->m_bgEntryPointX = GetPlayer()->GetPositionX();
 	GetPlayer()->m_bgEntryPointY = GetPlayer()->GetPositionY();
     GetPlayer()->m_bgEntryPointZ = GetPlayer()->GetPositionZ();
