@@ -279,7 +279,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
 
     _player->setQuestStatus(quest_id, QUEST_STATUS_COMPLETE, true);
-    _player->SaveToDB();
+    //_player->SaveToDB();
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid1);
     GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid1);
@@ -353,7 +353,7 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
         _player->SetUInt32Value(log_slot2 + iCx, temp1);
     }
 
-    _player->SaveToDB();
+    //_player->SaveToDB();
 }
 
 void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
@@ -382,7 +382,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     _player->SetUInt32Value(log_slot + 2, 0);
     _player->setQuestStatus( quest_id, QUEST_STATUS_AVAILABLE, false);
 
-    _player->SaveToDB();
+    //_player->SaveToDB();
 }
 
 void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
@@ -456,7 +456,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
         _player->SetUInt32Value(log_slot+0, 0);
         _player->SetUInt32Value(log_slot+1, 0);
         _player->SetUInt32Value(log_slot+2, 0);
-        _player->SaveToDB();
+        //_player->SaveToDB();
         Quest* nextquest;
         if(nextquest=pCreature->getNextAvailableQuest(_player,pQuest))
             _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);

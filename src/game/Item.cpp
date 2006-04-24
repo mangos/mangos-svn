@@ -145,6 +145,7 @@ Item::Item( )
     m_objectTypeId = TYPEID_ITEM;
 
     m_valuesCount = ITEM_END;
+	m_slot = 0;
 }
 
 uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
@@ -420,12 +421,11 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
 
 void Item::SaveToDB()
 {
-    std::stringstream ss;
-    DeleteFromDB();
-
+	DeleteFromDB();
+	std::stringstream ss;
     ss.rdbuf()->str("");
     ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES ("
-        << GetGUIDLow() << ", '";
+        << GetGUIDLow() << ",'";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
@@ -464,7 +464,7 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
 void Item::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 ItemPrototype *Item::GetProto() const
