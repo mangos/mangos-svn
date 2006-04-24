@@ -26,7 +26,7 @@ BattleGround::BattleGround()
     m_Name = "";
     m_LevelMin = 0;
     m_LevelMax = 0;
-   
+
     m_TeamScores[0] = 0;
     m_TeamScores[1] = 0;
     m_PlayerScores.clear();
@@ -39,20 +39,19 @@ BattleGround::BattleGround()
     m_MapId = 0;
     m_TeamStartLocX[0] = 0;
     m_TeamStartLocX[1] = 0;
-    
+
     m_TeamStartLocY[0] = 0;
     m_TeamStartLocY[1] = 0;
-    
+
     m_TeamStartLocZ[0] = 0;
     m_TeamStartLocZ[1] = 0;
-    
+
     m_TeamStartLocO[0] = 0;
     m_TeamStartLocO[1] = 0;
 }
 
 BattleGround::~BattleGround()
 {
-
 
 }
 
@@ -134,7 +133,7 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     {
         // Needs vars added to player class and I'm too lazy to rebuild..
 
-		plr->smsg_NewWorld(plr->m_bgEntryPointMap, plr->m_bgEntryPointX, plr->m_bgEntryPointY, plr->m_bgEntryPointZ, plr->m_bgEntryPointO);
+        plr->smsg_NewWorld(plr->m_bgEntryPointMap, plr->m_bgEntryPointX, plr->m_bgEntryPointY, plr->m_bgEntryPointZ, plr->m_bgEntryPointO);
     }
 
     if(SendPacket)
@@ -166,9 +165,9 @@ void BattleGround::AddPlayer(Player *plr)
 
     m_PlayerScores[guid] = sc;
 
-	plr->SendInitWorldStates(plr->GetMapId());
+    plr->SendInitWorldStates(plr->GetMapId());
 
-	// Let others from your team know //dono if correct if team1 only get team packages?
+    // Let others from your team know //dono if correct if team1 only get team packages?
     SendPacketToTeam(plr->m_bgTeam,&sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(plr));
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
@@ -176,7 +175,7 @@ void BattleGround::AddPlayer(Player *plr)
 
 void BattleGround::EventPlayerCaptureFlag(Player *Source)
 {
-	// TODO Event handled, trough spell system
+    // TODO Event handled, trough spell system
     // TODO Use packet instead
     WorldPacket data;
     char message[100];
@@ -187,7 +186,7 @@ void BattleGround::EventPlayerCaptureFlag(Player *Source)
 
 void BattleGround::EventPlayerDroppedFlag(Player *Source)
 {
-	// TODO Event handled, trough spell system
+    // TODO Event handled, trough spell system
     // TODO Use packet instead
     WorldPacket data;
     char message[100];
@@ -198,7 +197,7 @@ void BattleGround::EventPlayerDroppedFlag(Player *Source)
 
 void BattleGround::EventPlayerPassFlag(Player *Source, Player *Target)
 {
-	// TODO Event handled, trough spell system
+    // TODO Event handled, trough spell system
     // TODO Use packet instead
     WorldPacket data;
     char message[100];
@@ -209,7 +208,7 @@ void BattleGround::EventPlayerPassFlag(Player *Source, Player *Target)
 
 bool BattleGround::HasFreeSlots(uint32 Team)
 {
-	//check if the current BG had free slots
+    //check if the current BG had free slots
     uint32 TeamCounts[2];
     TeamCounts[0] = 0;
     TeamCounts[1] = 0;

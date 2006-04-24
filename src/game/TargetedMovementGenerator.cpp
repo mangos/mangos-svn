@@ -144,7 +144,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             spell->prepare(&targets);
             owner.m_canMove = false;
             DEBUG_LOG("Spell Attack.");
-			return;
+            return;
         }
     }
 }

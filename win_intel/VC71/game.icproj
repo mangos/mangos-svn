@@ -135,6 +135,21 @@
 			<File 
 				RelativePath="..\..\src\game\AuctionHouse.cpp">
 			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGround.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundMgr.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundMgr.h">
+			</File>
 			<File 
 				RelativePath="..\..\src\game\Cell.h">
 			</File>

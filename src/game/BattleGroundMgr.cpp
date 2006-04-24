@@ -37,34 +37,33 @@ BattleGroundMgr::~BattleGroundMgr()
 void BattleGroundMgr::BuildBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time)
 {
     WorldPacket data;
-    data.Initialize(SMSG_BATTLEFIELD_STATUS); //0x2D4
-	data << uint32(0x0);                      // Unknown 1
-    data << uint32(MapID);                    // MapID
-	data << uint8(0);                         // Unknown
-    data << uint32(InstanceID);			      // Instance ID
-    data << uint32(StatusID);			      // Status ID
-	data << uint32(Time);				      // Time
-	pl->GetSession()->SendPacket( &data );
+    data.Initialize(SMSG_BATTLEFIELD_STATUS);               //0x2D4
+    data << uint32(0x0);                                    // Unknown 1
+    data << uint32(MapID);                                  // MapID
+    data << uint8(0);                                       // Unknown
+    data << uint32(InstanceID);                             // Instance ID
+    data << uint32(StatusID);                               // Status ID
+    data << uint32(Time);                                   // Time
+    pl->GetSession()->SendPacket( &data );
 }
 
 WorldPacket BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(Player *plr)
 {
-	// "player" Has left the battle.
+    // "player" Has left the battle.
     WorldPacket data;
-    data.Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT);  //0x2EE
-    data << plr->GetGUID();                         
+    data.Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT);         //0x2EE
+    data << plr->GetGUID();
     return data;
 }
 
 WorldPacket BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(Player *plr)
 {
-	// "player" Has joined the battle.
-	WorldPacket data;
-	data.Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED); //0x2ED
-	data << plr->GetGUID();
+    // "player" Has joined the battle.
+    WorldPacket data;
+    data.Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED);       //0x2ED
+    data << plr->GetGUID();
     return data;
 }
-
 
 uint32 BattleGroundMgr::CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, std::string BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
 {
@@ -78,12 +77,12 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 Leve
     bg->SetTeamStartLoc(0, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
     bg->SetTeamStartLoc(1, Team2StartLocX, Team2StartLocY, Team2StartLocZ, Team2StartLocO);
     bg->SetLevelRange(LevelMin, LevelMax);
-    
-    uint32 BattleGroundID = m_BattleGrounds.size();     // this will be replaced with instance ID later.
+
+    uint32 BattleGroundID = m_BattleGrounds.size();         // this will be replaced with instance ID later.
     if(BattleGroundID == 0) BattleGroundID = 1;
 
     bg->SetID(BattleGroundID);
-    
+
     AddBattleGround(BattleGroundID, bg);
     sLog.outString("BattleGroundMgr: Created new battleground: %d %s (Map %d, %d players per team, Levels %d-%d)", BattleGroundID, bg->m_Name.c_str(), bg->m_MapId, bg->m_MaxPlayersPerTeam, bg->m_LevelMin, bg->m_LevelMax);
     return BattleGroundID;
@@ -97,21 +96,21 @@ uint32 BattleGroundMgr::GenerateTeamByRace(uint8 Race)
         case RACE_UNDEAD:
         case RACE_TAUREN:
         case RACE_TROLL:
-            {
-                return 1;
-            }break;
+        {
+            return 1;
+        }break;
         case RACE_HUMAN:
         case RACE_DWARF:
         case RACE_NIGHT_ELF:
         case RACE_GNOME:
-            {
-                return 0;
-            }break;
+        {
+            return 0;
+        }break;
         default:
-            {
-                sLog.outError("BattleGroundMgr: Warning! Unable to determine race for %d", Race);
-                return 0;
-            }break;
+        {
+            sLog.outError("BattleGroundMgr: Warning! Unable to determine race for %d", Race);
+            return 0;
+        }break;
     }
 }
 
@@ -133,7 +132,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     AStartLoc[1] = 1481.868408f;
     AStartLoc[2] = 352.023743f;
     AStartLoc[3] = 3.141593f;
-    
+
     HStartLoc[0] = 933.989685f;
     HStartLoc[1] = 1430.735840f;
     HStartLoc[2] = 345.537140f;
@@ -143,7 +142,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     LevMax = 60;
     sLog.outString("Creating battleground %s, %d-%d", bg_Name.c_str(), LevMin, LevMax);
     CreateBattleGround(MaxPlayersPerTeam, LevMin, LevMax, bg_Name, MapId, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
-    
+
     sLog.outString("Created initial battlegrounds.");
 }
 
@@ -157,7 +156,7 @@ WorldPacket BattleGroundMgr::BuildBattleGroundListPacket(uint64 guid, Player* pl
         PlayerLevel = plr->GetUInt32Value(UNIT_FIELD_LEVEL);
 
     // TODO Lookup npc entry code and find mapid
-	// Gossip related
+    // Gossip related
 
     WorldPacket data;
     data.Initialize(SMSG_BATTLEFIELD_LIST);
@@ -179,28 +178,28 @@ WorldPacket BattleGroundMgr::BuildBattleGroundListPacket(uint64 guid, Player* pl
         data << uint32(count << 8);
         count++;
     }
-    
+
     SendList.clear();
     return data;
 }
 
 void BattleGroundMgr::AddPlayerToBattleGround(Player *pl, uint32 bgId)
 {
-	sLog.outDetail("BATTLEGROUND: Added %s to BattleGround.", pl->GetName());
-	BattleGround *bg = GetBattleGround(bgId);
-	bg->AddPlayer(pl);
+    sLog.outDetail("BATTLEGROUND: Added %s to BattleGround.", pl->GetName());
+    BattleGround *bg = GetBattleGround(bgId);
+    bg->AddPlayer(pl);
 
 }
 
 void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 teamId, uint32 bgId)
 {
-	uint32 mapid = GetBattleGround(bgId)->GetMapId();
-	float x = GetBattleGround(bgId)->GetTeamStartLocX(teamId);
-	float y = GetBattleGround(bgId)->GetTeamStartLocY(teamId);
-	float z = GetBattleGround(bgId)->GetTeamStartLocZ(teamId);
-	float O = GetBattleGround(bgId)->GetTeamStartLocO(teamId);
+    uint32 mapid = GetBattleGround(bgId)->GetMapId();
+    float x = GetBattleGround(bgId)->GetTeamStartLocX(teamId);
+    float y = GetBattleGround(bgId)->GetTeamStartLocY(teamId);
+    float z = GetBattleGround(bgId)->GetTeamStartLocZ(teamId);
+    float O = GetBattleGround(bgId)->GetTeamStartLocO(teamId);
 
-	sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
-	pl->smsg_NewWorld(mapid, x, y, z, O);
-	pl->SendInitWorldStates(mapid);
+    sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
+    pl->smsg_NewWorld(mapid, x, y, z, O);
+    pl->SendInitWorldStates(mapid);
 }

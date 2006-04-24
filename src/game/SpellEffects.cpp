@@ -1039,15 +1039,15 @@ void Spell::EffectWeaponDmg(uint32 i)
 
             uint32 equipInvType = equipitem->GetProto()->InventoryType;
 
-			minDmg = equipitem->GetProto()->Damage[0].DamageMin;
-			maxDmg = equipitem->GetProto()->Damage[0].DamageMax;
+            minDmg = equipitem->GetProto()->Damage[0].DamageMin;
+            maxDmg = equipitem->GetProto()->Damage[0].DamageMax;
 
             if(equipInvType == INVTYPE_THROWN)
                 stackitem = equipitem;
             else
                 stackitem = ammoitem;
 
-			slot = ((Player*)m_caster)->GetSlotByItemGUID(stackitem->GetGUID());
+            slot = ((Player*)m_caster)->GetSlotByItemGUID(stackitem->GetGUID());
             if(stackitem)
             {
                 uint32 ItemCount = stackitem->GetCount();
@@ -1060,17 +1060,17 @@ void Spell::EffectWeaponDmg(uint32 i)
                 }
                 else
                 {
-	                ((Player*)m_caster)->RemoveItemFromSlot(0,slot);
+                    ((Player*)m_caster)->RemoveItemFromSlot(0,slot);
                     stackitem->DeleteFromDB();
-					//if(equipInvType == INVTYPE_THROWN)
-					//	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_THROWN)
-					//else
-					//	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_AMMO)
-					//if(!stackitem)
-					//{
-						delete stackitem;
-						m_TriggerSpell = NULL;
-					//}
+                    //if(equipInvType == INVTYPE_THROWN)
+                    //	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_THROWN)
+                    //else
+                    //	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_AMMO)
+                    //if(!stackitem)
+                    //{
+                    delete stackitem;
+                    m_TriggerSpell = NULL;
+                    //}
                 }
             }
         }

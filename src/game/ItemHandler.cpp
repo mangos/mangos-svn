@@ -436,7 +436,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             {
                 if (unit->getItemId(i) == itemid)
                 {
-					amount = unit->getItemAmount(i);
+                    amount = unit->getItemAmount(i);
                     vendorslot = i;
                     break;
                 }
@@ -508,7 +508,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             if (unit->getItemId(i) == itemid)
             {
                 vendorslot = i;
-				amount = unit->getItemAmount(i);
+                amount = unit->getItemAmount(i);
                 break;
             }
         }

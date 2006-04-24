@@ -43,114 +43,113 @@ struct BattleGroundScore
 
 class BattleGround
 {
-	friend class BattleGroundMgr;
+    friend class BattleGroundMgr;
 
-	public:
-		/* Construction */
-		BattleGround();
-		~BattleGround();
+    public:
+        /* Construction */
+        BattleGround();
+        ~BattleGround();
 
-		/* Battleground */
-		inline void SetName(std::string Name) { m_Name = Name; };
-		inline std::string GetName() { return m_Name; };
-		inline void SetID(uint32 ID) { m_ID = ID; };
-		inline uint32 GetID() { return m_ID; };
-		inline void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; };
-		inline uint32 GetMaxPlayers() { return m_MaxPlayers; };
-		inline void SetLevelRange(uint32 min, uint32 max)
-		{
-			m_LevelMin = min;
-			m_LevelMax = max;
-		}
-		inline uint32 GetMinLevel() { return m_LevelMin; };
-		inline uint32 GetMaxLevel() { return m_LevelMax; };
-		
-		inline void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; };
-		inline uint32 GetMaxPlayersPerTeam() { return m_MaxPlayersPerTeam; };
+        /* Battleground */
+        inline void SetName(std::string Name) { m_Name = Name; };
+        inline std::string GetName() { return m_Name; };
+        inline void SetID(uint32 ID) { m_ID = ID; };
+        inline uint32 GetID() { return m_ID; };
+        inline void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; };
+        inline uint32 GetMaxPlayers() { return m_MaxPlayers; };
+        inline void SetLevelRange(uint32 min, uint32 max)
+        {
+            m_LevelMin = min;
+            m_LevelMax = max;
+        }
+        inline uint32 GetMinLevel() { return m_LevelMin; };
+        inline uint32 GetMaxLevel() { return m_LevelMax; };
 
-		bool HasFreeSlots(uint32 Team);
-		
-		/* Player lists */
-		inline std::list<Player*>::iterator GetPlayersBegin() { return m_Players.begin(); };
-		inline std::list<Player*>::iterator GetPlayersEnd() { return m_Players.end(); };
-		inline uint32 GetPlayersSize() { return m_Players.size(); };
+        inline void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; };
+        inline uint32 GetMaxPlayersPerTeam() { return m_MaxPlayersPerTeam; };
 
-		inline std::list<Player*>::iterator GetQueuedPlayersBegin() { return m_QueuedPlayers.begin(); };
-		inline std::list<Player*>::iterator GetQueuedPlayersEnd() { return m_QueuedPlayers.end(); };
-		
-		inline std::map<uint64, BattleGroundScore>::iterator GetPlayerScoresBegin() { return m_PlayerScores.begin(); };
-		inline std::map<uint64, BattleGroundScore>::iterator GetPlayerScoresEnd() { return m_PlayerScores.end(); };
+        bool HasFreeSlots(uint32 Team);
 
-		inline uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
+        /* Player lists */
+        inline std::list<Player*>::iterator GetPlayersBegin() { return m_Players.begin(); };
+        inline std::list<Player*>::iterator GetPlayersEnd() { return m_Players.end(); };
+        inline uint32 GetPlayersSize() { return m_Players.size(); };
 
-		void AddPlayer(Player* plr);
-		void RemovePlayer(Player *plr, bool Transport = false, bool SendPacket = false);
+        inline std::list<Player*>::iterator GetQueuedPlayersBegin() { return m_QueuedPlayers.begin(); };
+        inline std::list<Player*>::iterator GetQueuedPlayersEnd() { return m_QueuedPlayers.end(); };
 
-		/* Battleground Events */
-		void EventPlayerCaptureFlag(Player* Source);
-		void EventPlayerDroppedFlag(Player* Source);
-		void EventPlayerPassFlag(Player* Source, Player* Target);
+        inline std::map<uint64, BattleGroundScore>::iterator GetPlayerScoresBegin() { return m_PlayerScores.begin(); };
+        inline std::map<uint64, BattleGroundScore>::iterator GetPlayerScoresEnd() { return m_PlayerScores.end(); };
 
-		/* Location */
-		inline void SetMapId(uint32 MapID) { m_MapId = MapID; };
-		inline uint32 GetMapId() { return m_MapId; };
+        inline uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
 
-		void SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O);
-		inline float GetTeamStartLocX(uint32 TeamID) { return m_TeamStartLocX[TeamID]; };
-		inline float GetTeamStartLocY(uint32 TeamID) { return m_TeamStartLocY[TeamID]; };
-		inline float GetTeamStartLocZ(uint32 TeamID) { return m_TeamStartLocZ[TeamID]; };
-		inline float GetTeamStartLocO(uint32 TeamID) { return m_TeamStartLocO[TeamID]; };
+        void AddPlayer(Player* plr);
+        void RemovePlayer(Player *plr, bool Transport = false, bool SendPacket = false);
 
-		/* Packet Transfer */
-		void SendPacketToTeam(uint32 TeamID, WorldPacket *packet);
-		void SendPacketToAll(WorldPacket *packet);
+        /* Battleground Events */
+        void EventPlayerCaptureFlag(Player* Source);
+        void EventPlayerDroppedFlag(Player* Source);
+        void EventPlayerPassFlag(Player* Source, Player* Target);
 
-		/* Scorekeeping */
-		inline uint32 GetTeamScore(uint32 TeamID)
-		{
-			ASSERT(TeamID > 1);
-			return m_TeamScores[TeamID];
-		}
+        /* Location */
+        inline void SetMapId(uint32 MapID) { m_MapId = MapID; };
+        inline uint32 GetMapId() { return m_MapId; };
 
-		inline void AddPoint(uint32 TeamID, uint32 Points = 1)
-		{
-			ASSERT(TeamID > 1);
-			m_TeamScores[TeamID] += Points;
+        void SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O);
+        inline float GetTeamStartLocX(uint32 TeamID) { return m_TeamStartLocX[TeamID]; };
+        inline float GetTeamStartLocY(uint32 TeamID) { return m_TeamStartLocY[TeamID]; };
+        inline float GetTeamStartLocZ(uint32 TeamID) { return m_TeamStartLocZ[TeamID]; };
+        inline float GetTeamStartLocO(uint32 TeamID) { return m_TeamStartLocO[TeamID]; };
 
-			// TODO: Update all players
-		}
+        /* Packet Transfer */
+        void SendPacketToTeam(uint32 TeamID, WorldPacket *packet);
+        void SendPacketToAll(WorldPacket *packet);
 
-		inline void RemovePoint(uint32 TeamID, uint32 Points = 1)
-		{
-			ASSERT(TeamID > 1);
-			m_TeamScores[TeamID] -= Points;
+        /* Scorekeeping */
+        inline uint32 GetTeamScore(uint32 TeamID)
+        {
+            ASSERT(TeamID > 1);
+            return m_TeamScores[TeamID];
+        }
 
-			// TODO: Update all players
-		} 
+        inline void AddPoint(uint32 TeamID, uint32 Points = 1)
+        {
+            ASSERT(TeamID > 1);
+            m_TeamScores[TeamID] += Points;
 
-	private:
-		/* Battleground */
-		uint32 m_ID;
-		std::string m_Name;
-		uint32 m_LevelMin;
-		uint32 m_LevelMax;
+            // TODO: Update all players
+        }
 
-		/* Scorekeeping */
-		uint32 m_TeamScores[2];                                // Usually Alliance/Horde
-		std::map<uint64, BattleGroundScore> m_PlayerScores;    // Player scores.. usually I would say by Player* pointer, but it's easier to build with guid
+        inline void RemovePoint(uint32 TeamID, uint32 Points = 1)
+        {
+            ASSERT(TeamID > 1);
+            m_TeamScores[TeamID] -= Points;
 
-		/* Player lists */
-		std::list<Player*> m_Players;
-		std::list<Player*> m_QueuedPlayers;
-		uint32 m_MaxPlayersPerTeam;
-		uint32 m_MaxPlayers;
+            // TODO: Update all players
+        }
 
-		/* Location */
-		uint32 m_MapId;
-		float m_TeamStartLocX[2];
-		float m_TeamStartLocY[2];
-		float m_TeamStartLocZ[2];
-		float m_TeamStartLocO[2];
+    private:
+        /* Battleground */
+        uint32 m_ID;
+        std::string m_Name;
+        uint32 m_LevelMin;
+        uint32 m_LevelMax;
+
+        /* Scorekeeping */
+        uint32 m_TeamScores[2];                             // Usually Alliance/Horde
+        std::map<uint64, BattleGroundScore> m_PlayerScores; // Player scores.. usually I would say by Player* pointer, but it's easier to build with guid
+
+        /* Player lists */
+        std::list<Player*> m_Players;
+        std::list<Player*> m_QueuedPlayers;
+        uint32 m_MaxPlayersPerTeam;
+        uint32 m_MaxPlayers;
+
+        /* Location */
+        uint32 m_MapId;
+        float m_TeamStartLocX[2];
+        float m_TeamStartLocY[2];
+        float m_TeamStartLocZ[2];
+        float m_TeamStartLocO[2];
 };
-
 #endif

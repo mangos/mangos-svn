@@ -129,10 +129,10 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->MaxCount ? GetProto()->MaxCount : 1; }
 
-		uint32 GetSlot() const {return m_slot;}
-		void SetSlot(uint32 slot) {m_slot = slot;};
+        uint32 GetSlot() const {return m_slot;}
+        void SetSlot(uint32 slot) {m_slot = slot;};
     protected:
-		uint32 m_slot;
+        uint32 m_slot;
         Player *m_owner;
 };
 #endif

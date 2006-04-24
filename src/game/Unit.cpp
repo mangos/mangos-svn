@@ -115,34 +115,34 @@ void Unit::Update( uint32 p_time )
 
 void Unit::setAttackTimer(uint32 time, bool rangeattack)
 {
-	if(time)
+    if(time)
         m_attackTimer = time;
-	else
-	{
-		if(rangeattack)
-		{
-			if (GetTypeId() == TYPEID_PLAYER)
-			{
-				Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_RANGED);
-				if(!weapon)
-					m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
-				else
-					m_attackTimer = weapon->GetProto()->Delay;
-			}
-		}
-		else
-		{
-			if (GetTypeId() == TYPEID_PLAYER)
-			{
-				Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
-				if(!weapon)
-					m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
-				else	
-					m_attackTimer = weapon->GetProto()->Delay;
-			}
-		}
-		m_attackTimer = (m_attackTimer >= 1000) ? m_attackTimer : 2000;
-	}
+    else
+    {
+        if(rangeattack)
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_RANGED);
+                if(!weapon)
+                    m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
+                else
+                    m_attackTimer = weapon->GetProto()->Delay;
+            }
+        }
+        else
+        {
+            if (GetTypeId() == TYPEID_PLAYER)
+            {
+                Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
+                if(!weapon)
+                    m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+                else
+                    m_attackTimer = weapon->GetProto()->Delay;
+            }
+        }
+        m_attackTimer = (m_attackTimer >= 1000) ? m_attackTimer : 2000;
+    }
 }
 
 Spell *Unit::reachWithSpellAttack(Unit *pVictim)
@@ -787,22 +787,22 @@ void Unit::_UpdateSpells( uint32 time )
     if(m_currentSpell != NULL)
     {
         m_currentSpell->update(time);
-		if( m_currentSpell->m_spellInfo->Id == 75 )			//Auto shot
-		{
-			if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
-			{
-				setAttackTimer( 0, true ); // GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
-				m_currentSpell->setState(SPELL_STATE_IDLE);
-			}
-			else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
-				m_currentSpell->setState(SPELL_STATE_PREPARING);
-		}
+        if( m_currentSpell->m_spellInfo->Id == 75 )         //Auto shot
+        {
+            if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
+            {
+                setAttackTimer( 0, true );                  // GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
+                m_currentSpell->setState(SPELL_STATE_IDLE);
+            }
+            else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
+                m_currentSpell->setState(SPELL_STATE_PREPARING);
+        }
         else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
         {
             delete m_currentSpell;
             m_currentSpell = NULL;
         }
-			
+
     }
 
     AuraList::iterator i;
