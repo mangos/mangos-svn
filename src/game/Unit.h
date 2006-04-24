@@ -102,7 +102,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         virtual void Update( uint32 time );
 
-        void setAttackTimer(uint32 time);
+        void setAttackTimer(uint32 time, bool rangeattack = false);
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
         Spell *reachWithSpellAttack(Unit *pVictim);
@@ -111,7 +111,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         inline void addAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
-            if(itr != m_attackers.end())
+            if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
         }
         inline void removeAttacker(Unit *pAttacker)

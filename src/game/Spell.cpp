@@ -859,7 +859,7 @@ uint8 Spell::CanCast()
 
     if(target)
     {
-        if(!m_caster->isInFront( target, range ))
+        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
             castResult = 0x76;
         if(m_caster->GetDistanceSq(target) > range * range )
             castResult = 0x56;

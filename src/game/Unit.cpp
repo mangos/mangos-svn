@@ -113,9 +113,36 @@ void Unit::Update( uint32 p_time )
     }
 }
 
-void Unit::setAttackTimer(uint32 time)
+void Unit::setAttackTimer(uint32 time, bool rangeattack)
 {
-    time ? m_attackTimer = time : m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+	if(time)
+        m_attackTimer = time;
+	else
+	{
+		if(rangeattack)
+		{
+			if (GetTypeId() == TYPEID_PLAYER)
+			{
+				Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_RANGED);
+				if(!weapon)
+					m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
+				else
+					m_attackTimer = weapon->GetProto()->Delay;
+			}
+		}
+		else
+		{
+			if (GetTypeId() == TYPEID_PLAYER)
+			{
+				Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
+				if(!weapon)
+					m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+				else	
+					m_attackTimer = weapon->GetProto()->Delay;
+			}
+		}
+		m_attackTimer = (m_attackTimer >= 1000) ? m_attackTimer : 2000;
+	}
 }
 
 Spell *Unit::reachWithSpellAttack(Unit *pVictim)
@@ -352,7 +379,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             // random durability for items (HIT)
             if (pVictim->GetTypeId() == TYPEID_PLAYER)
             {
-                int randdurability = urand(0, 30);
+                int randdurability = urand(0, 300);
                 if (randdurability == 10)
                 {
                     DEBUG_LOG("HIT: We decrease durability with 5 percent");
@@ -565,7 +592,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
     // random durability loss for items on absorb (ABSORB)
     if (pVictim->GetTypeId() == TYPEID_PLAYER)
     {
-        int randdurability = urand(0, 30);
+        int randdurability = urand(0, 300);
         if (randdurability == 10)
         {
             DEBUG_LOG("BLOCK: We decrease durability with 5 percent");
@@ -760,11 +787,22 @@ void Unit::_UpdateSpells( uint32 time )
     if(m_currentSpell != NULL)
     {
         m_currentSpell->update(time);
-        if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
+		if( m_currentSpell->m_spellInfo->Id == 75 )			//Auto shot
+		{
+			if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
+			{
+				setAttackTimer( 0, true ); // GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
+				m_currentSpell->setState(SPELL_STATE_IDLE);
+			}
+			else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
+				m_currentSpell->setState(SPELL_STATE_PREPARING);
+		}
+        else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
         {
             delete m_currentSpell;
             m_currentSpell = NULL;
         }
+			
     }
 
     AuraList::iterator i;
@@ -851,7 +889,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 {
     AuraList::const_iterator i;
 
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
@@ -870,7 +908,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     Aur->ApplyModifiers(true);
     Aur->_AddAura();
 
-    _ApplyStatsMods();
+    //_ApplyStatsMods();
 
     return true;
 }
@@ -905,7 +943,7 @@ void Unit::RemoveAura(uint32 spellId)
 
 void Unit::RemoveAura(AuraList::iterator i)
 {
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
 
     if((*i)->GetCoAura() != 0)
         RemoveAura((*i)->GetCoAura()->GetId());
@@ -917,7 +955,7 @@ void Unit::RemoveAura(AuraList::iterator i)
     delete *i;
     m_Auras.erase(i);
 
-    _ApplyStatsMods();
+    //_ApplyStatsMods();
 }
 
 bool Unit::SetAurDuration(uint32 spellId,Unit* caster,uint32 duration)
@@ -950,7 +988,7 @@ void Unit::RemoveAllAuras()
 
     AuraList::iterator i;
 
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
@@ -960,7 +998,7 @@ void Unit::RemoveAllAuras()
 
     m_Auras.clear();
 
-    _ApplyStatsMods();
+    //_ApplyStatsMods();
 }
 
 void Unit::_RemoveStatsMods()
@@ -1097,7 +1135,7 @@ void Unit::_RemoveAllAuraMods()
 {
     AuraList::iterator i;
 
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
@@ -1105,14 +1143,14 @@ void Unit::_RemoveAllAuraMods()
         (*i)->_RemoveAura();
     }
 
-    _ApplyStatsMods();
+    //_ApplyStatsMods();
 }
 
 void Unit::_ApplyAllAuraMods()
 {
     AuraList::iterator i;
 
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
@@ -1120,7 +1158,7 @@ void Unit::_ApplyAllAuraMods()
         (*i)->_RemoveAura();
     }
 
-    _ApplyStatsMods();
+    //_ApplyStatsMods();
 }
 
 // TODO: FIX-ME!!!
