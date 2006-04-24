@@ -87,9 +87,9 @@ void Bag::SaveToDB()
         if (m_bagslot[i])
         {
             m_bagslot[i]->SaveToDB();
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
         }
     }
+    sDatabase.PExecute("INSERT INTO inventory VALUES ('%u', '%d', '%u', '%d');", GetGUIDLow(), GetSlot(), GetGUIDLow(), GetEntry());
 
 }
 
@@ -123,6 +123,7 @@ void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
             Item* item = NewItemOrBag(proto);
             item->SetOwner(this->GetOwner());
+			item->SetSlot(slot);
             item->LoadFromDB(item_guid, 1);
             AddItemToBag(slot, item);
         } while (result->NextRow());

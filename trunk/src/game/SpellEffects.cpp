@@ -1032,29 +1032,22 @@ void Spell::EffectWeaponDmg(uint32 i)
         {
             uint8 slot=EQUIPMENT_SLOT_RANGED;
             Item *equipitem = ((Player*)m_caster)->GetItemBySlot(slot);
-            Item *ammoitem = NULL;
+            Item *ammoitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_AMMO);
             Item *stackitem = NULL;
 
             if(!equipitem) return;
 
             uint32 equipInvType = equipitem->GetProto()->InventoryType;
 
-            if(equipInvType != INVTYPE_THROWN && ( equipInvType == INVTYPE_RANGED || equipInvType == INVTYPE_RANGEDRIGHT ))
-            {
-                // FIX-ME - get the ammo that is in ammo slot, then decrease
-
-            }
-            else if(equipInvType != INVTYPE_THROWN)
-                return;
-
-            minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-            maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+			minDmg = equipitem->GetProto()->Damage[0].DamageMin;
+			maxDmg = equipitem->GetProto()->Damage[0].DamageMax;
 
             if(equipInvType == INVTYPE_THROWN)
                 stackitem = equipitem;
             else
                 stackitem = ammoitem;
 
+			slot = ((Player*)m_caster)->GetSlotByItemGUID(stackitem->GetGUID());
             if(stackitem)
             {
                 uint32 ItemCount = stackitem->GetCount();
@@ -1063,14 +1056,21 @@ void Spell::EffectWeaponDmg(uint32 i)
                 if (ItemCount > 1)
                 {
                     stackitem->SetCount(ItemCount-1);
-                    m_TriggerSpell = m_spellInfo;
+                    //m_TriggerSpell = m_spellInfo;
                 }
                 else
                 {
-                    ((Player*)m_caster)->RemoveItemFromSlot(0,slot);
+	                ((Player*)m_caster)->RemoveItemFromSlot(0,slot);
                     stackitem->DeleteFromDB();
-                    delete stackitem;
-                    m_TriggerSpell = NULL;
+					//if(equipInvType == INVTYPE_THROWN)
+					//	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_THROWN)
+					//else
+					//	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_AMMO)
+					//if(!stackitem)
+					//{
+						delete stackitem;
+						m_TriggerSpell = NULL;
+					//}
                 }
             }
         }

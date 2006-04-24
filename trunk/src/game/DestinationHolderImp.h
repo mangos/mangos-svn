@@ -101,11 +101,11 @@ bool
 DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update)
 {
     i_tracker.Update(diff);
+    float x,y,z;
+    GetLocationNow(x, y, z);
+    traveller.Relocation(x, y, z);
     if( i_tracker.Passed() || force_update )
     {
-        float x,y,z;
-        GetLocationNow(x, y, z);
-        traveller.Relocation(x, y, z);
         ResetUpdate();
         return true;
     }

@@ -497,6 +497,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             }
             return NULL;
         }
+        Item* GetItemByItemType(uint32 type);
         uint32 GetSlotByItemID(uint32 ID);
         bool GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInventorySlot,bool additems);
         uint32 GetSlotByItemGUID(uint64 guid);

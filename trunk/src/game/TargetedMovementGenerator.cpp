@@ -107,7 +107,6 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         Traveller<Creature> traveller(owner);
         if( i_destinationHolder.UpdateTraveller(traveller, time_diff, false) )
         {
-            Spell* spell;
             if( i_targetedHome )
             {
 
@@ -118,18 +117,6 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 owner.Relocate(x, y, z, orientation);
                 StackCleaner stack_cleaner(owner);
                 stack_cleaner.Done();
-            }
-            else if( owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
-            {
-                owner.StopMoving();
-                owner->Idle();
-                owner.addUnitState(UNIT_STAT_ATTACKING);
-                owner.clearUnitState(UNIT_STAT_CHASE);
-                SpellCastTargets targets;
-                targets.setUnitTarget( &i_target );
-                spell->prepare(&targets);
-                owner.m_canMove = false;
-                DEBUG_LOG("Spell Attack.");
             }
             else if( owner.canReachWithAttack(&i_target) )
             {
@@ -144,6 +131,20 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 _setTargetLocation(owner);
                 DEBUG_LOG("Continue to chase");
             }
+        }
+        Spell* spell;
+        if(!i_targetedHome && owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
+        {
+            owner.StopMoving();
+            owner->Idle();
+            owner.addUnitState(UNIT_STAT_ATTACKING);
+            owner.clearUnitState(UNIT_STAT_CHASE);
+            SpellCastTargets targets;
+            targets.setUnitTarget( &i_target );
+            spell->prepare(&targets);
+            owner.m_canMove = false;
+            DEBUG_LOG("Spell Attack.");
+			return;
         }
     }
 }

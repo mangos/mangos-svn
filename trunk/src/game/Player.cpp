@@ -1236,7 +1236,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
         level += 1;
         newXP -= nextLvlXP;
 
-        _RemoveStatsMods();
+        //_RemoveStatsMods();
 
         BuildLvlUpStats(&MPGain,&HPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
 
@@ -1280,7 +1280,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
         SetUInt32Value(UNIT_FIELD_IQ, newINT);
         SetUInt32Value(UNIT_FIELD_SPIRIT, newSPI);
 
-        _ApplyStatsMods();
+        //_ApplyStatsMods();
 
         data.Initialize(SMSG_LEVELUP_INFO);
         data << uint32(level);
@@ -1902,7 +1902,7 @@ void Player::SaveToDB()
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
     RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
 
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
     _RemoveAllItemMods();
     _RemoveAllAuraMods();
 
@@ -2004,7 +2004,10 @@ void Player::_SaveInventory()
     {
         if (m_items[i] != 0)
         {
-            m_items[i]->SaveToDB();
+			if(m_items[i]->IsBag())
+				((Bag*)m_items[i])->SaveToDB();
+			else
+				m_items[i]->SaveToDB();
             sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%d', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
         }
     }
@@ -2137,6 +2140,7 @@ void Player::_LoadInventory()
 
             Item *item = NewItemOrBag(proto);
             item->SetOwner(this);
+			item->SetSlot(slot);
             item->LoadFromDB(item_guid, 1);
             AddItem(0, slot, item, false, false, true);
         } while (result->NextRow());
@@ -5445,6 +5449,17 @@ uint32 Player::GetSlotByItemID(uint32 ID)
     return 0;
 }
 
+Item* Player::GetItemByItemType(uint32 type)
+{
+    for(uint32 i=INVENTORY_SLOT_ITEM_START;i<INVENTORY_SLOT_ITEM_END;i++)
+    {
+        if(m_items[i] != 0)
+            if(m_items[i]->GetProto()->InventoryType == type)
+                return m_items[i];
+    }
+    return NULL;
+}
+
 bool Player::GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInventorySlot,bool additems)
 {
     Bag *pBag;
@@ -5639,7 +5654,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if(!proto) return;
 
-    _RemoveStatsMods();
+    //_RemoveStatsMods();
 
     if (apply)
     {
@@ -5763,7 +5778,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     else for (int i = 0; i < 5; i++)
         RemoveAura(proto->Spells[i].SpellId );
 
-    _ApplyStatsMods();
+    //_ApplyStatsMods();
 
 }
 

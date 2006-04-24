@@ -385,6 +385,7 @@ class Spell
         void Delayed(int32 delaytime);
         void reflect(Unit *refunit);
         inline uint32 getState() { return m_spellState; }
+        inline void setState(uint32 state) { m_spellState = state; }
 
         void writeSpellGoTargets( WorldPacket * data );
         void FillTargetMap();
