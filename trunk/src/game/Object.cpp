@@ -562,6 +562,6 @@ void Object::GetClosePoint( const float ox, const float oy, const float oz, floa
     y = m_positionY + GetObjectSize() * sin(angle);
     int mapid = GetMapId();
     z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-	if( abs( z - oz ) > 15.0f )
-		z = oz;
+    if( abs( z - oz ) > 15.0f )
+        z = oz;
 }

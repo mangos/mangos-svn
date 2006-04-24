@@ -26,50 +26,49 @@ class BattleGround;
 
 class BattleGroundMgr
 {
-	public:
-		/* Construction */
-		BattleGroundMgr();
-		~BattleGroundMgr();
-		
-		/* Packet Building */
-		WorldPacket BuildPlayerLeftBattleGroundPacket(Player* plr);
-		WorldPacket BuildPlayerJoinedBattleGroundPacket(Player* plr);
+    public:
+        /* Construction */
+        BattleGroundMgr();
+        ~BattleGroundMgr();
 
-		WorldPacket BuildBattleGroundListPacket(uint64 guid, Player* plr);
+        /* Packet Building */
+        WorldPacket BuildPlayerLeftBattleGroundPacket(Player* plr);
+        WorldPacket BuildPlayerJoinedBattleGroundPacket(Player* plr);
 
-		/* Battlegrounds */
-		inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
+        WorldPacket BuildBattleGroundListPacket(uint64 guid, Player* plr);
 
-		inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsEnd() { return m_BattleGrounds.end(); };
+        /* Battlegrounds */
+        inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
 
-		inline BattleGround* GetBattleGround(uint8 ID)
-		{
-			std::map<uint32, BattleGround*>::iterator i = m_BattleGrounds.find(ID);
-			if(i != m_BattleGrounds.end())
-				return i->second;
-			else
-				return NULL;
-		};
-		uint32 CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, std::string BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO);
+        inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsEnd() { return m_BattleGrounds.end(); };
 
-		inline void AddBattleGround(uint32 ID, BattleGround* BG) { m_BattleGrounds[ID] = BG; };
+        inline BattleGround* GetBattleGround(uint8 ID)
+        {
+            std::map<uint32, BattleGround*>::iterator i = m_BattleGrounds.find(ID);
+            if(i != m_BattleGrounds.end())
+                return i->second;
+            else
+                return NULL;
+        };
+        uint32 CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, std::string BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO);
 
-		void CreateInitialBattleGrounds();
+        inline void AddBattleGround(uint32 ID, BattleGround* BG) { m_BattleGrounds[ID] = BG; };
 
-		uint32 GenerateTeamByRace(uint8 Race);
+        void CreateInitialBattleGrounds();
 
-		void AddPlayerToBattleGround(Player *pl, uint32 bgId);
-		void SendToBattleGround(Player *pl, uint32 teamId, uint32 bgId);
+        uint32 GenerateTeamByRace(uint8 Race);
 
-		void BuildBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time = 0x00FFFF00);
-		
-	private:
+        void AddPlayerToBattleGround(Player *pl, uint32 bgId);
+        void SendToBattleGround(Player *pl, uint32 teamId, uint32 bgId);
 
-		/* Battlegrounds */
-		typedef std::map<uint32, BattleGround*> BattleGroundSet;
-		BattleGroundSet m_BattleGrounds;
+        void BuildBattleGroundStatusPacket(Player *pl, uint32 MapID, uint8 InstanceID, uint8 StatusID, uint32 Time = 0x00FFFF00);
+
+    private:
+
+        /* Battlegrounds */
+        typedef std::map<uint32, BattleGround*> BattleGroundSet;
+        BattleGroundSet m_BattleGrounds;
 };
-  
+
 #define sBattleGroundMgr MaNGOS::Singleton<BattleGroundMgr>::Instance()
-    
 #endif

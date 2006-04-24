@@ -145,7 +145,7 @@ Item::Item( )
     m_objectTypeId = TYPEID_ITEM;
 
     m_valuesCount = ITEM_END;
-	m_slot = 0;
+    m_slot = 0;
 }
 
 uint32 GetRandPropertiesSeedfromDisplayInfoDBC(uint32 DisplayID)
@@ -421,8 +421,8 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
 
 void Item::SaveToDB()
 {
-	DeleteFromDB();
-	std::stringstream ss;
+    DeleteFromDB();
+    std::stringstream ss;
     ss.rdbuf()->str("");
     ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES ("
         << GetGUIDLow() << ",'";
