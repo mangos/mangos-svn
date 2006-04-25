@@ -142,7 +142,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
         UpdateMask unitMask;
         WorldPacket data;
 
-        QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`F`,`name_id`,`map`,`zone`,`faction` FROM `spirithealer`;");
+        QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`F`,`name_id`,`map`,`zone`,`faction` FROM `npc_spirithealer`;");
 
         if(!result)
         {
@@ -1425,7 +1425,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
 
-    sDatabase.PExecute("INSERT INTO `graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
+    sDatabase.PExecute("INSERT INTO `game_graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
 
     return true;
 }

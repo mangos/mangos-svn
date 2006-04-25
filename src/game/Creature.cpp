@@ -68,7 +68,7 @@ void Creature::CreateTrainerSpells()
 {
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `trainer` WHERE `guid` = '%d'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_trainer` WHERE `guid` = '%d'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -642,7 +642,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
 
 uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 {
-    QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u';", action, zoneid );
+    QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `npc_gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u';", action, zoneid );
     if(!result)
         return 0;
     Field *fields = result->Fetch();
@@ -953,7 +953,7 @@ void Creature::_LoadGoods()
 
     itemcount = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `vendor` WHERE `entry` = '%u';", GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_vendor` WHERE `entry` = '%u';", GetEntry());
 
     if(!result) return;
 
@@ -1023,8 +1023,8 @@ void Creature::DeleteFromDB()
 {
 
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `vendor` WHERE `entry` = '%u'", GetEntry());
-    sDatabase.PExecute("DELETE FROM `trainer` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
+    sDatabase.PExecute("DELETE FROM `npc_trainer` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `creature_questrelation WHERE `id` = '%u'", GetGUIDLow());
 }
 

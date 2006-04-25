@@ -2320,7 +2320,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%d'",guid);
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `corpse` WHERE `player` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `player` = '%u'",guid);
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
     {
@@ -3218,7 +3218,7 @@ void Player::_LoadReputation()
 void Player::_LoadCorpse()
 {
     // TODO do we need to load all corpses ?
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE `player` = '%u' AND `bones_flag` = '0';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE `player` = '%u' AND `bones_flag` = '0';",GetGUIDLow());
 
     if(!result) return;
 
