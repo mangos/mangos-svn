@@ -37,7 +37,7 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
 
 inline uint32 CalculateDamage(const Unit *pAttacker)
 {
-    uint32 attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACKPOWER);
+    uint32 attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
 
     float min_damage = pAttacker->GetFloatValue(UNIT_FIELD_MINDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
     float max_damage = pAttacker->GetFloatValue(UNIT_FIELD_MAXDAMAGE)+pAttacker->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);

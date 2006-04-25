@@ -448,6 +448,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_LEAVE_BATTLEFIELD,        STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode      },
 
         { CMSG_SET_ACTIONBAR_TOGGLES,    STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  },
+        { CMSG_FIELD_WATCHED_FACTION_SHOW_BAR, STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode },
 
         { 0,                             0,               NULL                                               }
     };

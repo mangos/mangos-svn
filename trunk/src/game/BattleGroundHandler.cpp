@@ -146,19 +146,20 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
 {
     sLog.outDebug( "WORLD: Recvd MSG_PVP_LOG_DATA Message");
     WorldPacket data;
+
     data.Initialize(MSG_PVP_LOG_DATA);                      // MSG_PVP_LOG_DATA
     data << uint8(0x0);
     data << uint32(sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresSize());
 
     for(std::map<uint64, BattleGroundScore>::iterator itr=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresBegin();itr!=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresEnd();++itr)
     {
-        data << (uint64)itr->first;
-        data << (uint32)itr->second.Unk;                    //Rank
-        data << (uint32)itr->second.KillingBlows;
-        data << (uint32)itr->second.Deaths;
-        data << (uint32)itr->second.HonorableKills;
-        data << (uint32)itr->second.DishonorableKills;
-        data << (uint32)itr->second.BonusHonor;
+        data << (uint64)itr->first; //8
+		data << (uint32)itr->second.Rank; //4                    //Rank
+        data << (uint32)itr->second.KillingBlows; //4
+        data << (uint32)itr->second.Deaths; //4
+        data << (uint32)itr->second.HonorableKills; //4
+        data << (uint32)itr->second.DishonorableKills; //4
+        data << (uint32)itr->second.BonusHonor; //4
         data << (uint32)0;
         data << (uint32)0;
         /*data << itr->second.Rank;

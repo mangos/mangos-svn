@@ -43,9 +43,9 @@
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support 1.9.4 client, build 5086 ...
+// will only support 1.10.1 client, build 5230 ...
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {5086,0}
+#define EXPECTED_MANGOS_CLIENT_BUILD        {5230,0}
 
 #ifdef HAVE_CONFIG_H
 # include <config.h>

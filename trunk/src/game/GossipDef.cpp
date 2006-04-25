@@ -412,6 +412,7 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
 
     data << uint32(pQuest->GetQuestInfo()->NextQuestId);
     data << uint32(pQuest->GetQuestInfo()->RewMoney);
+    data << uint32(0);  // new 1.10 field
 
     data << uint32(pQuest->GetQuestInfo()->RewSpell);
 

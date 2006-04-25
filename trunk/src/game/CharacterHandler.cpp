@@ -554,3 +554,11 @@ void WorldSession::HandleTutorialReset( WorldPacket & recv_data )
     for ( uint32 iI = 0; iI < 8; iI++)
         GetPlayer()->SetTutorialInt( iI, 0x00000000 );
 }
+
+void WorldSession::HandleSetWatchedFactionIndexOpcode(WorldPacket & recv_data)
+{
+    DEBUG_LOG("WORLD: Received CMSG_SET_WATCHED_FACTION_INDEX");
+    uint32 fact;
+    recv_data >> fact;
+    GetPlayer()->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, fact);
+}

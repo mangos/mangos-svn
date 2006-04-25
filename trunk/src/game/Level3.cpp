@@ -1840,7 +1840,7 @@ bool ChatHandler::HandleChangeWeather(const char* args)
 
     //!change weather effect //looks/sounds like sound effect
     sLog.outDebug( "WORLD: change weather effect" );
-    data.Initialize( 0x2F4 );
+    data.Initialize( SMSG_WEATHER );
     data << (uint32)type << (float)value << (uint32)0;
     m_session->SendPacket( &data );
 

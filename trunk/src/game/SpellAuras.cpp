@@ -715,7 +715,9 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
-    data << m_target->GetSpeed( MOVE_RUN );
+    data << (uint32)0;
+	data << m_target->GetSpeed( MOVE_RUN );
+
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -731,6 +733,7 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
+	data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
 }
@@ -747,6 +750,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
+	data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
 }
