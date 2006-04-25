@@ -187,7 +187,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_IQ, info->intellect );
     SetUInt32Value(UNIT_FIELD_SPIRIT, info->spirit );
     SetUInt32Value(UNIT_FIELD_ARMOR, info->basearmor );
-    SetUInt32Value(UNIT_FIELD_ATTACKPOWER, info->attackpower );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, info->attackpower );
 
     SetUInt32Value(UNIT_FIELD_HEALTH, info->health);
     SetUInt32Value(UNIT_FIELD_MAXHEALTH, info->health);
@@ -224,6 +224,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
+	SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, -1); //-1 is default value
 
     SetPvP(false);
 
@@ -1815,13 +1816,13 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
 
         updateMask->SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2) + 1));
 
-        //updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
-
     }
     //Players visible items are not inventory stuff
+	//431) = 884 (0x374) = main weapon
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
+		//updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + 1 + (i*12)));
     }
 
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
@@ -2401,6 +2402,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
             data << uint8(0xFF);
             data << GetGUID();
+			data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -2411,6 +2413,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
             data << uint8(0xFF);
             data << GetGUID();
+			data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -2421,6 +2424,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
             data << uint8(0xFF);
             data << GetGUID();
+			data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -2430,6 +2434,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED);
             data << uint8(0xFF);
             data << GetGUID();
+            data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -3384,26 +3389,26 @@ void Player::UpdateHonor(void)
     }
 
     //TODAY
-    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
+    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
     //YESTERDAY
-    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, yestardayKills);
-    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, (uint32)yestardayHonor);
+    SetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS, yestardayKills);
+    SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)yestardayHonor);
     //THIS WEEK
-    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, thisWeekKills);
-    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, (uint32)thisWeekHonor);
+    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_KILLS, thisWeekKills);
+    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_CONTRIBUTION, (uint32)thisWeekHonor);
     //LAST WEEK
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, lastWeekKills);
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, (uint32)lastWeekHonor);
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, GetHonorLastWeekRank());
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS, lastWeekKills);
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32)lastWeekHonor);
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekRank());
 
     //TODO Fix next rank bar... it is not working fine!
     //NEXT RANK BAR //Total honor points
-    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, (uint32)( (total_honor < 0) ? 0 : total_honor) );
+    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0 : total_honor) );
 
     if( CalculateHonorRank(total_honor) )
-        SetUInt32Value(PLAYER_FIELD_HONOR_RANK, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) );
+        SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) );
     else
-        SetUInt32Value(PLAYER_FIELD_HONOR_RANK, 0);
+        SetUInt32Value(PLAYER_BYTES_3, 0);
 
     //LIFE TIME
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
@@ -3415,9 +3420,9 @@ void Player::UpdateHonor(void)
         m_highest_rank = CalculateHonorRank(total_honor);
 
     if ( GetHonorHighestRank() )
-        SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
+        SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
     else
-        SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);
+        SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, 0);
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
@@ -5818,7 +5823,7 @@ void Player::SendInitWorldStates(uint32 MapID)
 
             (uint32)MapID<<
             (uint16)NumberOfFields <<
-        //field (uint16)  value (uint16)
+            //field (uint16)  value (uint16)
             (uint16)0x07AE<< (uint16)0x01<<
             (uint16)0x0532<< (uint16)0x01<<
             (uint16)0x0531<< (uint16)0x00<<

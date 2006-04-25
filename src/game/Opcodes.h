@@ -809,8 +809,8 @@ enum OpCodes
     CMSG_GUILD_CHANGEINFO                           = 764-2,
 
     //newfound *NEW VERSION 2-4-2006*
-    //	SMSG_FIELD_WATCHED_FACTION_INACTIVE				= 791,
-    //	SMSG_FIELD_WATCHED_FACTION_SHOW_BAR				= 792,
+    CMSG_FIELD_WATCHED_FACTION_INACTIVE				= 791,
+    CMSG_FIELD_WATCHED_FACTION_SHOW_BAR				= 792,
 };
 
 enum FriendsResult

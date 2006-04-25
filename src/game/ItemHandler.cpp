@@ -164,12 +164,71 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->Name2;
     data << itemProto->Name3;
     data << itemProto->Name4;
-
-    data.append((const char*)&itemProto->DisplayInfoID,30*4+sizeof(itemProto->ItemStat)+sizeof(itemProto->Damage)+sizeof(itemProto->Spells));
-
+    data << itemProto->DisplayInfoID;
+    data << itemProto->Quality;
+    data << itemProto->Flags;
+    data << itemProto->BuyPrice;
+    data << itemProto->SellPrice;
+    data << itemProto->InventoryType;
+    data << itemProto->AllowableClass;
+    data << itemProto->AllowableRace;
+    data << itemProto->ItemLevel;
+    data << itemProto->RequiredLevel;
+    data << itemProto->RequiredSkill;
+    data << itemProto->RequiredSkillRank;
+    data << itemProto->RequiredSpell;
+    data << itemProto->RequiredHonorRank;
+    data << itemProto->RequiredCityRank;
+    data << itemProto->RequiredReputationFaction;
+    data << itemProto->RequiredRaputationRank;
+    data << itemProto->Stackable;
+    data << itemProto->MaxCount;
+    data << itemProto->ContainerSlots;;
+    for(int i = 0; i < 10; i++) {
+        data << itemProto->ItemStat[i].ItemStatType;
+        data << itemProto->ItemStat[i].ItemStatValue;
+    }
+    for(int i = 0; i < 5; i++) {
+        data << itemProto->Damage[i].DamageMin;
+        data << itemProto->Damage[i].DamageMax;
+        data << itemProto->Damage[i].DamageType;
+    }
+    data << itemProto->Armor;
+    data << itemProto->HolyRes;
+    data << itemProto->FireRes;
+    data << itemProto->NatureRes;
+    data << itemProto->FrostRes;
+    data << itemProto->ShadowRes;
+    data << itemProto->ArcaneRes;
+    data << itemProto->Delay;
+    data << itemProto->Ammo_type;
+    data << uint32(0); //new 2 fields socalled (uint16)field70 and (uint16)field71: usess unknown
+    for(int s = 0; s < 5; s++) {
+        data << itemProto->Spells[s].SpellId;
+        data << itemProto->Spells[s].SpellTrigger;
+        data << itemProto->Spells[s].SpellCharges;
+        data << itemProto->Spells[s].SpellCooldown;
+        data << itemProto->Spells[s].SpellCategory;
+        data << itemProto->Spells[s].SpellCategoryCooldown;
+    }
+    data << itemProto->Bonding;
     data << itemProto->Description;
-    data.append((const char*)&itemProto->PageText,12*4);
-    SendPacket(&data);
+    data << itemProto->PageText;
+    data << itemProto->LanguageID;
+    data << itemProto->PageMaterial;
+    data << itemProto->StartQuest;
+    data << itemProto->LockID;
+    data << itemProto->Material;
+    data << itemProto->Sheath;
+    data << itemProto->Extra;
+    data << itemProto->Block;
+    data << itemProto->ItemSet;
+    data << itemProto->MaxDurability;
+    data << itemProto->Area;
+    data << uint32(0);
+
+    WPAssert(data.size() == 453 + strlen(itemProto->Name1) + strlen(itemProto->Name2) + strlen(itemProto->Name3) + strlen(itemProto->Name4) + strlen(itemProto->Description));
+    SendPacket( &data );
 }
 
 extern char *fmtstring( char *format, ... );
@@ -719,8 +778,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    result = GetPlayer()->AddItem(dstBag, NULL_SLOT, pItem, true, true, false);
-
+	result = GetPlayer()->AddItem(dstBag, NULL_SLOT, pItem, true, false, true);
+   
     if (!result)
     {
         data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
@@ -733,8 +792,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     }
 
     GetPlayer()->RemoveItemFromSlot(srcBag, srcSlot);
-    GetPlayer()->AddItem(dstBag, NULL_SLOT, pItem, true, false, true);
-    if (result == 2)
+    GetPlayer()->AddItem(dstBag,srcSlot,pItem,true,false,true);
+	if (result == 2)
     {
         pItem->DeleteFromDB();
         delete pItem;
@@ -790,7 +849,8 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     if (playerGold >= price)
     {
         GetPlayer()->SetUInt32Value(PLAYER_BYTES_2, bank);
-        GetPlayer()->SetUInt32Value(PLAYER_FIELD_COINAGE, playerGold - price);
+        GetPlayer()->SetMoney(playerGold - price);
+			
     }
 }
 

@@ -144,7 +144,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 GetUnitBlockValue() { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
         uint32 GetUnitStrength() { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
-        uint32 GetUnitMeleeSkill(){ return (uint32)m_uint32Values[ UNIT_FIELD_ATTACKPOWER ]; }
+        uint32 GetUnitMeleeSkill(){ return (uint32)m_uint32Values[ UNIT_FIELD_ATTACK_POWER ]; }
 
         bool isVendor()       { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
         bool isTrainer()      { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }

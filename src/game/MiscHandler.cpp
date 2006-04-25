@@ -546,9 +546,9 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     if( GetPlayer( ) != 0 )
         GetPlayer( )->SetSelection(guid);
 
-    if(GetPlayer( )->GetUInt64Value(PLAYER__FIELD_COMBO_TARGET) != guid)
+    if(GetPlayer( )->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
     {
-        GetPlayer( )->SetUInt64Value(PLAYER__FIELD_COMBO_TARGET,0);
+        GetPlayer( )->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
         GetPlayer( )->SetUInt32Value(PLAYER_FIELD_BYTES,((GetPlayer( )->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 }
@@ -1155,11 +1155,14 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
     // set run speed ? received data is more
+	sLog.outDebug("CMSG_FORCE_RUN_SPEED_CHANGE_ACK");
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
 {
     // set swim speed ? received data is more
+	sLog.outDebug("CMSG_FORCE_SWIM_SPEED_CHANGE_ACK");
+	
 }
 
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
