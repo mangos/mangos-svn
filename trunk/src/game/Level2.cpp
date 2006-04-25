@@ -541,7 +541,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return false;
 
     uint8 lvl = (uint8) atoi((char*)args);
-    if ( lvl < 1 || lvl > 99)
+    if ( lvl < 1 || lvl > 63)
     {
         FillSystemMessageData(&data, m_session, "Incorrect value.");
         m_session->SendPacket( &data );
