@@ -79,7 +79,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         obj = (Object*)m_session->GetPlayer();
 
     char buf[256];
-    sprintf((char*)buf, "X: %f Y: %f Z %f Orientation: %f",
+    sprintf((char*)buf, "X: %f Y: %f Z: %f Orientation: %f",
         obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation());
 
