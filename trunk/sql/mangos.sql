@@ -72,6 +72,28 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `areatrigger_involvedrelation` ENABLE KEYS */;
 
 --
+-- Table structure for table `areatrigger_tavern`
+--
+
+DROP TABLE IF EXISTS `areatrigger_tavern`;
+CREATE TABLE `areatrigger_tavern` (
+  `triggerid` int(20) NOT NULL auto_increment,
+  `Triggername` text NOT NULL,
+  PRIMARY KEY  (`triggerid`),
+  UNIQUE KEY `acct` (`triggerid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+
+--
+-- Dumping data for table `areatrigger_tavern`
+--
+
+
+/*!40000 ALTER TABLE `areatrigger_tavern` DISABLE KEYS */;
+LOCK TABLES `areatrigger_tavern` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `areatrigger_tavern` ENABLE KEYS */;
+
+--
 -- Table structure for table `areatrigger_template`
 --
 
@@ -533,38 +555,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 
 --
--- Table structure for table `corpse`
---
-
-DROP TABLE IF EXISTS `corpse`;
-CREATE TABLE `corpse` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
-  `position_x` float NOT NULL default '0',
-  `position_y` float NOT NULL default '0',
-  `position_z` float NOT NULL default '0',
-  `orientation` float NOT NULL default '0',
-  `zone` int(11) unsigned NOT NULL default '38' COMMENT 'Zone Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `data` longtext NOT NULL,
-  `time` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `bones_flag` tinyint(3) NOT NULL default '0',
-  PRIMARY KEY  (`guid`),
-  UNIQUE KEY `idx_player` (`player`),
-  KEY `idx_bones_flag` (`bones_flag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
-
---
--- Dumping data for table `corpse`
---
-
-
-/*!40000 ALTER TABLE `corpse` DISABLE KEYS */;
-LOCK TABLES `corpse` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `corpse` ENABLE KEYS */;
-
---
 -- Table structure for table `creature`
 --
 
@@ -777,6 +767,122 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 
 --
+-- Table structure for table `game_corpse`
+--
+
+DROP TABLE IF EXISTS `game_corpse`;
+CREATE TABLE `game_corpse` (
+  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `zone` int(11) unsigned NOT NULL default '38' COMMENT 'Zone Identifier',
+  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `data` longtext NOT NULL,
+  `time` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `bones_flag` tinyint(3) NOT NULL default '0',
+  PRIMARY KEY  (`guid`),
+  UNIQUE KEY `idx_player` (`player`),
+  KEY `idx_bones_flag` (`bones_flag`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+--
+-- Dumping data for table `game_corpse`
+--
+
+
+/*!40000 ALTER TABLE `game_corpse` DISABLE KEYS */;
+LOCK TABLES `game_corpse` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_corpse` ENABLE KEYS */;
+
+--
+-- Table structure for table `game_graveyard`
+--
+
+DROP TABLE IF EXISTS `game_graveyard`;
+CREATE TABLE `game_graveyard` (
+  `id` int(60) NOT NULL auto_increment,
+  `position_x` float default NULL,
+  `position_y` float default NULL,
+  `position_z` float default NULL,
+  `orientation` float default NULL,
+  `zone` int(16) default NULL,
+  `map` int(16) default NULL,
+  `faction` int(32) unsigned default NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_graveyard`
+--
+
+
+/*!40000 ALTER TABLE `game_graveyard` DISABLE KEYS */;
+LOCK TABLES `game_graveyard` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_graveyard` ENABLE KEYS */;
+
+--
+-- Table structure for table `game_spell`
+--
+
+DROP TABLE IF EXISTS `game_spell`;
+CREATE TABLE `game_spell` (
+  `Id` int(11) NOT NULL auto_increment,
+  `learn` int(11) unsigned NOT NULL default '0',
+  `trigger_spell` int(11) unsigned NOT NULL default '0',
+  `create_item` int(11) unsigned NOT NULL default '0',
+  `craft_skill` int(11) unsigned NOT NULL default '0',
+  `name` char(255) default NULL,
+  `rank` char(64) default NULL,
+  `description` char(255) default NULL,
+  PRIMARY KEY  (`Id`),
+  KEY `spell_index` (`name`,`rank`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_spell`
+--
+
+
+/*!40000 ALTER TABLE `game_spell` DISABLE KEYS */;
+LOCK TABLES `game_spell` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_spell` ENABLE KEYS */;
+
+--
+-- Table structure for table `game_talent`
+--
+
+DROP TABLE IF EXISTS `game_talent`;
+CREATE TABLE `game_talent` (
+  `id` int(10) NOT NULL auto_increment,
+  `t_id` int(10) NOT NULL default '0',
+  `maxrank` int(7) NOT NULL default '0',
+  `class` int(10) NOT NULL default '0',
+  `rank1` longtext NOT NULL,
+  `rank2` longtext NOT NULL,
+  `rank3` longtext NOT NULL,
+  `rank4` longtext NOT NULL,
+  `rank5` longtext NOT NULL,
+  PRIMARY KEY  (`id`),
+  KEY `talents_index` (`t_id`,`maxrank`,`class`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_talent`
+--
+
+
+/*!40000 ALTER TABLE `game_talent` DISABLE KEYS */;
+LOCK TABLES `game_talent` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_talent` ENABLE KEYS */;
+
+--
 -- Table structure for table `gameobject`
 --
 
@@ -871,55 +977,6 @@ CREATE TABLE `gameobject_template` (
 LOCK TABLES `gameobject_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `gameobject_template` ENABLE KEYS */;
-
---
--- Table structure for table `gossip_textid`
---
-
-DROP TABLE IF EXISTS `gossip_textid`;
-CREATE TABLE `gossip_textid` (
-  `zoneid` int(11) unsigned NOT NULL default '0',
-  `action` int(3) unsigned NOT NULL default '0',
-  `textid` int(11) unsigned NOT NULL default '0',
-  KEY `zoneid` (`zoneid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `gossip_textid`
---
-
-
-/*!40000 ALTER TABLE `gossip_textid` DISABLE KEYS */;
-LOCK TABLES `gossip_textid` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `gossip_textid` ENABLE KEYS */;
-
---
--- Table structure for table `graveyard`
---
-
-DROP TABLE IF EXISTS `graveyard`;
-CREATE TABLE `graveyard` (
-  `id` int(60) NOT NULL auto_increment,
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `orientation` float default NULL,
-  `zone` int(16) default NULL,
-  `map` int(16) default NULL,
-  `faction` int(32) unsigned default NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `graveyard`
---
-
-
-/*!40000 ALTER TABLE `graveyard` DISABLE KEYS */;
-LOCK TABLES `graveyard` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `graveyard` ENABLE KEYS */;
 
 --
 -- Table structure for table `guild`
@@ -1293,6 +1350,28 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_gossip` ENABLE KEYS */;
 
 --
+-- Table structure for table `npc_gossip_textid`
+--
+
+DROP TABLE IF EXISTS `npc_gossip_textid`;
+CREATE TABLE `npc_gossip_textid` (
+  `zoneid` int(11) unsigned NOT NULL default '0',
+  `action` int(3) unsigned NOT NULL default '0',
+  `textid` int(11) unsigned NOT NULL default '0',
+  KEY `zoneid` (`zoneid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `npc_gossip_textid`
+--
+
+
+/*!40000 ALTER TABLE `npc_gossip_textid` DISABLE KEYS */;
+LOCK TABLES `npc_gossip_textid` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `npc_gossip_textid` ENABLE KEYS */;
+
+--
 -- Table structure for table `npc_option`
 --
 
@@ -1316,6 +1395,32 @@ CREATE TABLE `npc_option` (
 LOCK TABLES `npc_option` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_option` ENABLE KEYS */;
+
+--
+-- Table structure for table `npc_spirithealer`
+--
+
+DROP TABLE IF EXISTS `npc_spirithealer`;
+CREATE TABLE `npc_spirithealer` (
+  `position_x` float default NULL,
+  `position_y` float default NULL,
+  `position_z` float default NULL,
+  `F` float default NULL,
+  `name_id` int(8) default NULL,
+  `zone` int(16) default NULL,
+  `map` int(16) default NULL,
+  `faction` int(32) unsigned default NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `npc_spirithealer`
+--
+
+
+/*!40000 ALTER TABLE `npc_spirithealer` DISABLE KEYS */;
+LOCK TABLES `npc_spirithealer` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `npc_spirithealer` ENABLE KEYS */;
 
 --
 -- Table structure for table `npc_text`
@@ -1416,6 +1521,55 @@ CREATE TABLE `npc_text` (
 LOCK TABLES `npc_text` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_text` ENABLE KEYS */;
+
+--
+-- Table structure for table `npc_trainer`
+--
+
+DROP TABLE IF EXISTS `npc_trainer`;
+CREATE TABLE `npc_trainer` (
+  `rowid` int(11) NOT NULL default '0',
+  `guid` int(11) NOT NULL default '0',
+  `spell` int(11) NOT NULL default '0',
+  `spellcost` int(11) default '0',
+  `reqspell` int(11) default '0',
+  PRIMARY KEY  (`rowid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `npc_trainer`
+--
+
+
+/*!40000 ALTER TABLE `npc_trainer` DISABLE KEYS */;
+LOCK TABLES `npc_trainer` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `npc_trainer` ENABLE KEYS */;
+
+--
+-- Table structure for table `npc_vendor`
+--
+
+DROP TABLE IF EXISTS `npc_vendor`;
+CREATE TABLE `npc_vendor` (
+  `entry` bigint(20) unsigned NOT NULL default '0',
+  `itemguid` bigint(20) unsigned NOT NULL default '0',
+  `amount` bigint(20) NOT NULL default '5',
+  `index_id` bigint(20) NOT NULL auto_increment,
+  PRIMARY KEY  (`index_id`),
+  UNIQUE KEY `index_id` (`index_id`),
+  KEY `vendor_id` (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
+
+--
+-- Dumping data for table `npc_vendor`
+--
+
+
+/*!40000 ALTER TABLE `npc_vendor` DISABLE KEYS */;
+LOCK TABLES `npc_vendor` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `npc_vendor` ENABLE KEYS */;
 
 --
 -- Table structure for table `object_involvedrelation`
@@ -1739,116 +1893,11 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 
 --
--- Table structure for table `spell`
+-- Table structure for table `taxi_node`
 --
 
-DROP TABLE IF EXISTS `spell`;
-CREATE TABLE `spell` (
-  `Id` int(11) NOT NULL auto_increment,
-  `learn` int(11) unsigned NOT NULL default '0',
-  `trigger_spell` int(11) unsigned NOT NULL default '0',
-  `create_item` int(11) unsigned NOT NULL default '0',
-  `craft_skill` int(11) unsigned NOT NULL default '0',
-  `name` char(255) default NULL,
-  `rank` char(64) default NULL,
-  `description` char(255) default NULL,
-  PRIMARY KEY  (`Id`),
-  KEY `spell_index` (`name`,`rank`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `spell`
---
-
-
-/*!40000 ALTER TABLE `spell` DISABLE KEYS */;
-LOCK TABLES `spell` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `spell` ENABLE KEYS */;
-
---
--- Table structure for table `spirithealer`
---
-
-DROP TABLE IF EXISTS `spirithealer`;
-CREATE TABLE `spirithealer` (
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `F` float default NULL,
-  `name_id` int(8) default NULL,
-  `zone` int(16) default NULL,
-  `map` int(16) default NULL,
-  `faction` int(32) unsigned default NULL
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `spirithealer`
---
-
-
-/*!40000 ALTER TABLE `spirithealer` DISABLE KEYS */;
-LOCK TABLES `spirithealer` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `spirithealer` ENABLE KEYS */;
-
---
--- Table structure for table `talent`
---
-
-DROP TABLE IF EXISTS `talent`;
-CREATE TABLE `talent` (
-  `id` int(10) NOT NULL auto_increment,
-  `t_id` int(10) NOT NULL default '0',
-  `maxrank` int(7) NOT NULL default '0',
-  `class` int(10) NOT NULL default '0',
-  `rank1` longtext NOT NULL,
-  `rank2` longtext NOT NULL,
-  `rank3` longtext NOT NULL,
-  `rank4` longtext NOT NULL,
-  `rank5` longtext NOT NULL,
-  PRIMARY KEY  (`id`),
-  KEY `talents_index` (`t_id`,`maxrank`,`class`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `talent`
---
-
-
-/*!40000 ALTER TABLE `talent` DISABLE KEYS */;
-LOCK TABLES `talent` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `talent` ENABLE KEYS */;
-
---
--- Table structure for table `tavern`
---
-
-DROP TABLE IF EXISTS `tavern`;
-CREATE TABLE `tavern` (
-  `triggerid` int(20) NOT NULL auto_increment,
-  `Triggername` text NOT NULL,
-  PRIMARY KEY  (`triggerid`),
-  UNIQUE KEY `acct` (`triggerid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
-
---
--- Dumping data for table `tavern`
---
-
-
-/*!40000 ALTER TABLE `tavern` DISABLE KEYS */;
-LOCK TABLES `tavern` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `tavern` ENABLE KEYS */;
-
---
--- Table structure for table `taxinode`
---
-
-DROP TABLE IF EXISTS `taxinode`;
-CREATE TABLE `taxinode` (
+DROP TABLE IF EXISTS `taxi_node`;
+CREATE TABLE `taxi_node` (
   `id` tinyint(3) unsigned NOT NULL auto_increment,
   `continent` tinyint(3) unsigned NOT NULL default '0',
   `position_x` float default NULL,
@@ -1862,21 +1911,21 @@ CREATE TABLE `taxinode` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
--- Dumping data for table `taxinode`
+-- Dumping data for table `taxi_node`
 --
 
 
-/*!40000 ALTER TABLE `taxinode` DISABLE KEYS */;
-LOCK TABLES `taxinode` WRITE;
+/*!40000 ALTER TABLE `taxi_node` DISABLE KEYS */;
+LOCK TABLES `taxi_node` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `taxinode` ENABLE KEYS */;
+/*!40000 ALTER TABLE `taxi_node` ENABLE KEYS */;
 
 --
--- Table structure for table `taxipath`
+-- Table structure for table `taxi_path`
 --
 
-DROP TABLE IF EXISTS `taxipath`;
-CREATE TABLE `taxipath` (
+DROP TABLE IF EXISTS `taxi_path`;
+CREATE TABLE `taxi_path` (
   `id` smallint(5) unsigned NOT NULL default '0',
   `source` tinyint(3) unsigned default NULL,
   `destination` tinyint(3) unsigned default NULL,
@@ -1886,21 +1935,21 @@ CREATE TABLE `taxipath` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
 
 --
--- Dumping data for table `taxipath`
+-- Dumping data for table `taxi_path`
 --
 
 
-/*!40000 ALTER TABLE `taxipath` DISABLE KEYS */;
-LOCK TABLES `taxipath` WRITE;
+/*!40000 ALTER TABLE `taxi_path` DISABLE KEYS */;
+LOCK TABLES `taxi_path` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `taxipath` ENABLE KEYS */;
+/*!40000 ALTER TABLE `taxi_path` ENABLE KEYS */;
 
 --
--- Table structure for table `taxipathnode`
+-- Table structure for table `taxi_pathnode`
 --
 
-DROP TABLE IF EXISTS `taxipathnode`;
-CREATE TABLE `taxipathnode` (
+DROP TABLE IF EXISTS `taxi_pathnode`;
+CREATE TABLE `taxi_pathnode` (
   `id` smallint(5) unsigned NOT NULL default '0',
   `path` smallint(5) unsigned default NULL,
   `index` tinyint(3) unsigned default NULL,
@@ -1914,63 +1963,14 @@ CREATE TABLE `taxipathnode` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `taxipathnode`
+-- Dumping data for table `taxi_pathnode`
 --
 
 
-/*!40000 ALTER TABLE `taxipathnode` DISABLE KEYS */;
-LOCK TABLES `taxipathnode` WRITE;
+/*!40000 ALTER TABLE `taxi_pathnode` DISABLE KEYS */;
+LOCK TABLES `taxi_pathnode` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `taxipathnode` ENABLE KEYS */;
-
---
--- Table structure for table `trainer`
---
-
-DROP TABLE IF EXISTS `trainer`;
-CREATE TABLE `trainer` (
-  `rowid` int(11) NOT NULL default '0',
-  `guid` int(11) NOT NULL default '0',
-  `spell` int(11) NOT NULL default '0',
-  `spellcost` int(11) default '0',
-  `reqspell` int(11) default '0',
-  PRIMARY KEY  (`rowid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `trainer`
---
-
-
-/*!40000 ALTER TABLE `trainer` DISABLE KEYS */;
-LOCK TABLES `trainer` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `trainer` ENABLE KEYS */;
-
---
--- Table structure for table `vendor`
---
-
-DROP TABLE IF EXISTS `vendor`;
-CREATE TABLE `vendor` (
-  `entry` bigint(20) unsigned NOT NULL default '0',
-  `itemguid` bigint(20) unsigned NOT NULL default '0',
-  `amount` bigint(20) NOT NULL default '5',
-  `index_id` bigint(20) NOT NULL auto_increment,
-  PRIMARY KEY  (`index_id`),
-  UNIQUE KEY `index_id` (`index_id`),
-  KEY `vendor_id` (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
-
---
--- Dumping data for table `vendor`
---
-
-
-/*!40000 ALTER TABLE `vendor` DISABLE KEYS */;
-LOCK TABLES `vendor` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `vendor` ENABLE KEYS */;
+/*!40000 ALTER TABLE `taxi_pathnode` ENABLE KEYS */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

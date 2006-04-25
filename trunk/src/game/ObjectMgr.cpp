@@ -519,7 +519,7 @@ void ObjectMgr::LoadAreaTriggerPoints()
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxipath`.`destination` FROM `taxipath` WHERE `taxipath`.`source` = '%d' ORDER BY `destination` LIMIT 1;", curloc);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%d' ORDER BY `destination` LIMIT 1;", curloc);
 
     if( ! result )
     {
@@ -536,7 +536,7 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxinode`.`id`, SQRT(pow(`taxinode`.`position_x`-'%f',2)+pow(`taxinode`.`position_y`-'%f',2)+pow(`taxinode`.`position_z`-'%f',2)) AS `distance` FROM `taxinode` WHERE `taxinode`.`continent` = '%u' ORDER BY `distance` LIMIT 1;", x, y, z, mapid);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_node`.`id`, SQRT(pow(`taxi_node`.`position_x`-'%f',2)+pow(`taxi_node`.`position_y`-'%f',2)+pow(`taxi_node`.`position_z`-'%f',2)) AS `distance` FROM `taxi_node` WHERE `taxi_node`.`continent` = '%u' ORDER BY `distance` LIMIT 1;", x, y, z, mapid);
 
     if( ! result  )
     {
@@ -550,7 +550,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxipath`.`price`, `taxipath`.`id` FROM `taxipath` WHERE `taxipath`.`source` = '%u' AND `taxipath`.`destination` = '%u';", source, destination);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`price`, `taxi_path`.`id` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' AND `taxi_path`.`destination` = '%u';", source, destination);
 
     if( ! result )
     {
@@ -566,7 +566,7 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
 uint16 ObjectMgr::GetTaxiMount( uint32 id )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxinode`.`mount` FROM `taxinode` WHERE `taxinode`.`id` = '%u';", id);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_node`.`mount` FROM `taxi_node` WHERE `taxi_node`.`id` = '%u';", id);
 
     if( ! result )
     {
@@ -581,7 +581,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id )
 void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxipathnode`.`position_x`,`taxipathnode`.`position_y`,`taxipathnode`.`position_z` FROM `taxipathnode` WHERE `taxipathnode`.`path` = '%u';", path);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_pathnode`.`position_x`,`taxi_pathnode`.`position_y`,`taxi_pathnode`.`position_z` FROM `taxi_pathnode` WHERE `taxi_pathnode`.`path` = '%u';", path);
 
     if( ! result )
         return;
@@ -604,7 +604,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`,`map` FROM `graveyard` WHERE `map` = '%d' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
+    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`,`map` FROM `game_graveyard` WHERE `map` = '%d' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
 
     if( ! result )
         return NULL;
@@ -749,7 +749,7 @@ void ObjectMgr::SetHighestGuids()
         m_mailid = 0;
     }
 
-    result = sDatabase.PQuery( "SELECT MAX(`guid`) FROM `corpse`;" );
+    result = sDatabase.PQuery( "SELECT MAX(`guid`) FROM `game_corpse`;" );
     if( result )
     {
         m_hiCorpseGuid = (*result)[0].GetUInt32()+1;

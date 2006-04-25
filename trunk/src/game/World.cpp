@@ -114,7 +114,7 @@ void World::SetInitialWorldSettings()
     sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
 
     // remove bones after restart
-    sDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1';");
+    sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `bones_flag` = '1';");
 
     new ChannelMgr;
 
