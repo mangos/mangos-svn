@@ -84,7 +84,7 @@ void Bag::SaveToDB()
     {
         if (m_bagslot[i])
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u');", GetGUIDLow(), m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u');", GetGUIDLow(),i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
             m_bagslot[i]->SaveToDB();
         }
     }
