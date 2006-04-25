@@ -2004,7 +2004,7 @@ void Player::_SaveInventory()
     {
         if (m_items[i] != 0)
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
             if(m_items[i]->IsBag())
                 ((Bag*)m_items[i])->SaveToDB();
             else
