@@ -464,7 +464,7 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
 void Item::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 ItemPrototype *Item::GetProto() const

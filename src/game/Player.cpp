@@ -1999,7 +1999,7 @@ void Player::_SaveQuestStatus()
 
 void Player::_SaveInventory()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",GetGUIDLow());
 
     for(unsigned int i = 0; i < BANK_SLOT_BAG_END; i++)
     {
@@ -2116,7 +2116,7 @@ void Player::LoadFromDB( uint32 guid )
 
 void Player::_LoadInventory()
 {
-    for(uint16 i = 0; i < BANK_SLOT_BAG_END; i++)
+    for(uint16 i = 0; i < BANK_SLOT_BAG_END; i+=2)
     {
         if(m_items[i])
         {
@@ -2126,7 +2126,7 @@ void Player::_LoadInventory()
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%d';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u';",GetGUIDLow());
 
     if (result)
     {

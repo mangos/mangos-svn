@@ -79,7 +79,7 @@ void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 void Bag::SaveToDB()
 {
     Item::SaveToDB();
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",GetGUIDLow());
     for (int i = 0; i < 20; i++)
     {
         if (m_bagslot[i])
@@ -92,7 +92,7 @@ void Bag::SaveToDB()
 
 void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
-    for (uint8 i = 0; i < 20; i++)
+    for (uint8 i = 0; i < 20; i+=2)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
         if (m_bagslot[i])
