@@ -63,7 +63,7 @@ enum __QuestClass
     QUEST_CLASS_DRUID           = 11,
 };
 
-enum __QuestRase
+enum __QuestRace
 {
     QUEST_RACE_NONE            = 0,
     QUEST_RACE_HUMAN           = 1,
