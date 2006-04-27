@@ -172,7 +172,7 @@ void CliInfo(char*,pPrintf zprintf)
         if ( cnt > 0 )
         {
             zprintf("Online users: %d\x0d\x0a",cnt);
-            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`accounts`.`gmlevel`,`accounts`.`username`,`accounts`.`last_ip` FROM `character` LEFT JOIN `accounts` ON `accounts`.`id` = `character`.`account` WHERE `character`.`online` > 0;" );
+            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`account`.`gmlevel`,`account`.`username`,`account`.`last_ip` FROM `character` LEFT JOIN `account` ON `account`.`id` = `character`.`account` WHERE `character`.`online` > 0;" );
 
             zprintf("========================================================\x0d\x0a");
             zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
