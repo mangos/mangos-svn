@@ -701,7 +701,7 @@ void Creature::LoadGossipOptions()
 {
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
 
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (type & %u)!=0;", npcflags );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (npcflag & %u)!=0;", npcflags );
     if(!result)
         return;
     GossipOption *go;

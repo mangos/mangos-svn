@@ -55,7 +55,7 @@ Unit::Unit() : Object()
     //m_Aura = NULL;
     //m_AurasCheck = 2000;
     //m_removeAuraTimer = 4;
-    tmpAura = NULL;
+    //tmpAura = NULL;
     m_silenced = false;
     waterbreath = false;
 
@@ -74,7 +74,6 @@ Unit::Unit() : Object()
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
-    m_PeriodicRun = false;
 }
 
 Unit::~Unit()
@@ -99,17 +98,6 @@ void Unit::Update( uint32 p_time )
             m_attackTimer = 0;
         else
             m_attackTimer -= p_time;
-    }
-    while(m_PeriodicRun);
-    if(m_PeriodicAuras.size())
-    {
-        AuraList::iterator i;
-        for (i = m_PeriodicAuras.begin(); i != m_PeriodicAuras.end(); i++)
-        {
-            Aura *aura = *i;
-            aura->GetCaster()->PeriodicAuraLog(aura->GetTarget(), aura->GetSpellProto(), aura->cmod);
-        }
-        m_PeriodicAuras.clear();
     }
 }
 
@@ -791,7 +779,7 @@ void Unit::_UpdateSpells( uint32 time )
         {
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
-                setAttackTimer( 0, true );                  // GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
+                setAttackTimer( 0, true );                  
                 m_currentSpell->setState(SPELL_STATE_IDLE);
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
@@ -809,14 +797,14 @@ void Unit::_UpdateSpells( uint32 time )
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
         (*i)->Update( time );
-        if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
-        {
-            RemoveAura(i);
-            if(!m_Auras.size())
-                break;
-            else
-                i = m_Auras.begin();
-        }
+		if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
+		{
+			RemoveAura(i);
+			if(m_Auras.empty())
+				break;
+			else
+				i = m_Auras.begin();
+		}
     }
 }
 
@@ -893,21 +881,19 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-        if ((*i)->GetId() == Aur->GetId() &&
-            (uniq || (*i)->GetCaster() == Aur->GetCaster()))
+        if ((*i)->GetId() == Aur->GetId() && (*i)->GetEffIndex() == Aur->GetEffIndex())
         {
             break;
         }
     }
     // take out same spell
     if (i != m_Auras.end())
-        (*i)->SetDuration(0);
-
-    m_Auras.push_back(Aur);
-
-    Aur->ApplyModifiers(true);
-    Aur->_AddAura();
-
+        (*i)->SetDuration(Aur->GetDuration());
+	else
+	{
+		m_Auras.push_back(Aur);
+		Aur->_AddAura();
+	}
     //_ApplyStatsMods();
 
     return true;
@@ -927,12 +913,12 @@ void Unit::RemoveFirstAuraByCategory(uint32 category)
     RemoveAura(i);
 }
 
-void Unit::RemoveAura(uint32 spellId)
+void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 {
     AuraList::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-        if ((*i)->GetId() == spellId)
+        if ((*i)->GetId() == spellId && (*i)->GetEffIndex() == effindex)
             break;
     }
 
@@ -941,16 +927,26 @@ void Unit::RemoveAura(uint32 spellId)
     RemoveAura(i);
 }
 
+void Unit::RemoveAura(uint32 spellId)
+{
+    AuraList::iterator i;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    {
+        if ((*i)->GetId() == spellId )
+			RemoveAura(i);
+		if(m_Auras.empty())
+			break;
+		else
+			i = m_Auras.begin();
+    }
+}
+
 void Unit::RemoveAura(AuraList::iterator i)
 {
     //_RemoveStatsMods();
-
-    if((*i)->GetCoAura() != 0)
-        RemoveAura((*i)->GetCoAura()->GetId());
-
-    (*i)->ApplyModifiers(false);
-
-    (*i)->_RemoveAura();
+	if(!(*i))
+		return;
+	(*i)->_RemoveAura();
 
     delete *i;
     m_Auras.erase(i);
@@ -992,7 +988,7 @@ void Unit::RemoveAllAuras()
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-        (*i)->ApplyModifiers(false);
+        (*i)->ApplyModifier(false);
         (*i)->_RemoveAura();
     }
 
@@ -1139,8 +1135,13 @@ void Unit::_RemoveAllAuraMods()
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-        (*i)->ApplyModifiers(false);
+        //(*i)->ApplyModifier(false);
         (*i)->_RemoveAura();
+		//RemoveAura(i);
+		//if(m_Auras.empty())
+		//	break;
+		//else
+		//	i = m_Auras.begin();
     }
 
     //_ApplyStatsMods();
@@ -1154,8 +1155,9 @@ void Unit::_ApplyAllAuraMods()
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-        (*i)->ApplyModifiers(true);
-        (*i)->_RemoveAura();
+        //(*i)->ApplyModifier(true);
+        //(*i)->_RemoveAura();
+		(*i)->_AddAura();
     }
 
     //_ApplyStatsMods();
@@ -1214,7 +1216,7 @@ void Unit::_ApplyAllAuraMods()
         m_removeAuraTimer = 4;
 }*/
 
-Aura* Unit::FindAur(uint32 spellId)
+Aura* Unit::GetAura(uint32 spellId)
 {
     AuraList::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)

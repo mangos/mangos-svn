@@ -454,7 +454,7 @@ void Spell::cast()
         for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
         {
             if((*iunit)->m_ReflectSpellSchool) reflect(*iunit);
-            HandleAddAura((*iunit));
+            //HandleAddAura((*iunit));
         }
     }
 
@@ -817,7 +817,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     }
 }
 
-void Spell::HandleAddAura(Unit* Target)
+/*void Spell::HandleAddAura(Unit* Target)
 {
     if(!Target) return;
 
@@ -827,6 +827,7 @@ void Spell::HandleAddAura(Unit* Target)
         Target->tmpAura = 0;
     }
 }
+*/
 
 void Spell::TriggerSpell()
 {

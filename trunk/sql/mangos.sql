@@ -274,6 +274,28 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `character_action` ENABLE KEYS */;
 
 --
+-- Table structure for table `character_aura`
+--
+
+DROP TABLE IF EXISTS `character_aura`;
+CREATE TABLE `character_aura` (
+  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `spell` int(11) unsigned NOT NULL default '0',
+  `effect_index` int(11) unsigned NOT NULL default '0',
+  `remaintime` int(11) NOT NULL default '0',
+  KEY  (`guid`,`spell`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+
+--
+-- Dumping data for table `character_aura`
+--
+
+
+/*!40000 ALTER TABLE `character_aura` DISABLE KEYS */;
+LOCK TABLES `character_aura` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `character_aura` ENABLE KEYS */;
+--
 -- Table structure for table `character_homebind`
 --
 

@@ -44,7 +44,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     sLog.outString("Player %u is sending mail to %s with subject %s and body %s includes item %u and %u copper and %u COD copper",GUID_LOPART(sender),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(item),money,COD);
     mID = objmgr.GenerateMailID();
 
-    Player* pl = GetPlayer();
+    Player* pl = _player;
 
     WorldPacket tmpData;
     uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
@@ -141,7 +141,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
     uint32 message;
     recv_data >> mailbox;
     recv_data >> message;
-    Player *pl = GetPlayer();
+    Player *pl = _player;
     Mail *m = pl->GetMail(message);
     m->checked = 1;
     m->time = time(NULL) + (3 * 3600);
@@ -155,7 +155,7 @@ void WorldSession::HandleMailDelete(WorldPacket & recv_data )
     WorldPacket data;
     recv_data >> mailbox;
     recv_data >> message;
-    Player *pl = GetPlayer();
+    Player *pl = _player;
     Mail *m = pl->GetMail(message);
     if (m->item != 0)
     {
@@ -178,7 +178,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     WorldPacket data;
     recv_data >> mailbox;
     recv_data >> message;
-    Player *pl = GetPlayer();
+    Player *pl = _player;
     Mail *m = pl->GetMail(message);
     m->receiver = m->sender;
     m->sender = pl->GetGUIDLow();
@@ -213,11 +213,11 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     WorldPacket data;
     recv_data >> mailbox;
     recv_data >> message;
-    Player* pl = GetPlayer();
+    Player* pl = _player;
     Mail* m = pl->GetMail(message);
     Item *it = objmgr.GetMItem(m->item);
 
-    GetPlayer()->AddNewItem(0,NULL_SLOT,it->GetEntry(),it->GetCount(), false, false);
+    _player->AddNewItem(it->GetEntry(),it->GetCount(), true);
     /* still needs some condition so that if item can not be received, both mail and
        mailed_items to stay till delete or return, otherwise it's dumped, also a client message */
 
@@ -229,7 +229,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         pl->AddMail(m);
         for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            if (GetPlayer()->GetItemBySlot(i) == NULL)
+            if (_player->GetItemBySlot(i) == NULL)
             {
                 slot = i;
                 break;
@@ -237,7 +237,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         }
         it->SetUInt64Value(ITEM_FIELD_CONTAINED,pl->GetGUID());
         it->SetUInt64Value(ITEM_FIELD_OWNER,pl->GetGUID());
-        GetPlayer()->AddItemToSlot(slot, it);
+        _player->AddItemToSlot(slot, it);
     */
     objmgr.RemoveMItem(it->GetGUIDLow());
     data.Initialize(SMSG_SEND_MAIL_RESULT);
@@ -254,7 +254,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     uint32 id;
     recv_data >> mailbox;
     recv_data >> id;
-    Player *pl = GetPlayer();
+    Player *pl = _player;
     Mail* m = pl->GetMail(id);
     uint32 money = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
 
@@ -275,7 +275,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     uint32 info;
     recv_data >> info;
     WorldPacket data;
-    Player* pl = GetPlayer();
+    Player* pl = _player;
     data.Initialize(SMSG_MAIL_LIST_RESULT);
     data << uint8(pl->GetMailSize());
     std::list<Mail*>::iterator itr;
@@ -361,8 +361,7 @@ extern char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subcla
 bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
 {
     //    int i;
-    Player* pl = GetPlayer();
-    uint32 realID = GetItemGuidFromDisplayID(itemid, pl);
+    uint32 realID = GetItemGuidFromDisplayID(itemid, _player);
     char const *itemInfo;
     bool resist_added = false;
     bool names_added = false;
@@ -405,7 +404,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
 
     recv_data >> mailguid >> unk1;
 
-    Player* pl = GetPlayer();
+    Player* pl = _player;
 
     Mail *itr;
 
@@ -472,16 +471,15 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
     Item *item = new Item();
 
-    item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, GetPlayer());
+    item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, _player);
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
-    Player* pl = GetPlayer();
-    GetPlayer()->AddItemToInventory(0, NULL_SLOT,item,false,false,false);
+    _player->AddItemToInventory(item, true);
 
     /*
         for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            if (GetPlayer()->GetItemBySlot(i) == NULL)
+            if (_player->GetItemBySlot(i) == NULL)
             {
                 slot = i;
                 slotfree=true;
@@ -492,10 +490,10 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         {
             Item *item = new Item();
 
-            item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, GetPlayer(), 1);
+            item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, _player, 1);
             item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
-            GetPlayer()->AddItemToSlot( slot, item );
+            _player->AddItemToSlot( slot, item );
 
             Data.Initialize(SMSG_SEND_MAIL_RESULT);
             Data << uint32(mailid);
@@ -520,7 +518,7 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 
     WorldPacket Data;
     bool checkmail=false;
-    Player *pl=GetPlayer();
+    Player *pl=_player;
 
     std::list<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)

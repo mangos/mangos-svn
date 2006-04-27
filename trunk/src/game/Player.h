@@ -474,12 +474,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateSlot(uint8 slot)
         {
             Item* Up = RemoveItemFromSlot(0, slot);
-            if (Up != NULL) AddItem(0, slot, Up, false, false, false);
+            if (Up != NULL) AddItem(0, slot, Up, true);
         }
         void UpdateSlot(uint8 bagindex,uint8 slot)
         {
             Item* Up = RemoveItemFromSlot(bagindex, slot);
-            if (Up != NULL) AddItem(bagindex,slot, Up, false, false, false);
+            if (Up != NULL) AddItem(bagindex,slot, Up, true);
         }
 
         Item* GetItemBySlot(uint8 bagIndex,uint8 slot) const;
@@ -513,18 +513,20 @@ class MANGOS_DLL_SPEC Player : public Unit
         void GetSlotByItem(uint32 type, uint8 slots[4]);
         uint8 FindEquipSlot(uint32 type);
         uint8 FindFreeItemSlot(uint32 type);
+		uint32 CanAddItemCount(Item* item, uint32 where = 1);
+		uint32 CanAddItemCount(uint32 itemid, uint32 where = 1);
 
         uint8 CanEquipItemInSlot(uint8 bag, uint8 slot, Item* item, Item* swapitem);
         bool CanUseItem (ItemPrototype* proto);
         bool SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot, uint8 count);
         bool SwapItem(uint8 dstBag,uint8 dstSlot,uint8 srcBag,uint8 srcSlot);
 
-        bool CreateObjectItem (uint8 bagIndex, uint8 slot, uint32 itemId, uint8 count);
-        int GetItemCount(uint32 itemId, bool includebank);
-        uint32 AddNewItem(uint8 bagIndex, uint8 slot, uint32 itemId, uint32 count, bool addmaxpossible, bool dontadd);
-        uint8 AddItem(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
-        uint8 AddItemToInventory(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
-        uint8 AddItemToBank(uint8 bagIndex, uint8 slot, Item *item, bool allowstack, bool dontadd, bool dontsave);
+        Item* CreateNewItem (uint32 itemId, uint8 count = 1);
+        int GetItemCount(uint32 itemId, bool includebank = false);
+        uint8 AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible);
+        uint8 AddItem(uint8 bagIndex, uint8 slot, Item *item, bool allowstack);
+        uint8 AddItemToInventory(Item *item, bool addmaxpossible = false);
+        uint8 AddItemToBank(Item *item, bool addmaxpossible = false);
 
         Item* RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove=true);
         int CountFreeBagSlot();
