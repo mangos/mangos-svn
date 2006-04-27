@@ -62,7 +62,7 @@ void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
     uint64 guid = GetPlayer()->GetGUID();
     uint32 sheathed;
     recv_data >> sheathed;
-	
+
     sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u guidhigh:%u value1:%u", GUID_LOPART(guid), GUID_HIPART(guid), sheathed );
 
     GetPlayer()->SetSheath(sheathed);

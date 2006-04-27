@@ -92,6 +92,7 @@ void Bag::SaveToDB()
 
 void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
+    Item::LoadFromDB(guid, auctioncheck);
     for (uint8 i = 0; i < 20; i+=2)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
@@ -102,8 +103,7 @@ void Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
         }
     }
 
-	Item::LoadFromDB(guid, auctioncheck); 
-	QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u';", GetGUIDLow());
 
     if (result)
     {

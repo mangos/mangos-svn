@@ -277,23 +277,23 @@ class Aura
         void HandleAuraSchoolAbsorb(bool Apply);
         void HandleReflectSpellsSchool(bool Apply);
         void HandleAuraModSkill(bool Apply);
-		void HandleModDamagePercentDone(bool Apply);
-		void HandleModPercentStat(bool Apply);
-		void HandleModResistancePercent(bool Apply);
+        void HandleModDamagePercentDone(bool Apply);
+        void HandleModPercentStat(bool Apply);
+        void HandleModResistancePercent(bool Apply);
 
         Aura() : m_spellId(0), m_effIndex(0), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_positive(false), m_permanent(false), m_isPeriodic(false) {}
         Aura(uint32 spellid, uint32 eff, Unit *caster, Unit *target);
-		Aura(uint32 spellid, uint32 eff, int32 duration, Unit *caster, Unit *target);
-		Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target);
+        Aura(uint32 spellid, uint32 eff, int32 duration, Unit *caster, Unit *target);
+        Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target);
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
-		void SetModifier(Modifier* mod) {m_modifier=mod;}
-		Modifier* GetModifier() {return m_modifier;}
+        void SetModifier(Modifier* mod) {m_modifier=mod;}
+        Modifier* GetModifier() {return m_modifier;}
 
         SpellEntry* GetSpellProto() const { return sSpellStore.LookupEntry( m_spellId ); }
         uint32 GetId() const{ return m_spellId; }
         uint32 GetEffIndex() const{ return m_effIndex; }
-		void SetEffIndex(uint32 eff) { m_effIndex = eff; }
+        void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetDuration() const { return m_duration; }
         void SetDuration(int32 duration) { m_duration = duration; }
 
@@ -317,25 +317,25 @@ class Aura
 
         void _AddAura();
         void _RemoveAura();
-		uint32 CalculateDamage(SpellEntry* spellproto, uint8 i);
+        uint32 CalculateDamage(SpellEntry* spellproto, uint8 i);
 
     private:
 
         Modifier *m_modifier;
-		uint32 m_spellId;
-		uint32 m_effIndex;
+        uint32 m_spellId;
+        uint32 m_effIndex;
         //SpellEntry *m_spellProto;
         Unit* m_caster;
         Unit* m_target;
         int32 m_duration;
-		
+
         uint8 m_auraSlot;
 
         bool m_positive;
         bool m_permanent;
-		bool m_isPeriodic;
+        bool m_isPeriodic;
         uint32 m_periodicTimer;
-		uint32 m_PeriodicEventId;
+        uint32 m_PeriodicEventId;
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply);

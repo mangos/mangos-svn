@@ -153,13 +153,13 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
 
     for(std::map<uint64, BattleGroundScore>::iterator itr=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresBegin();itr!=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresEnd();++itr)
     {
-        data << (uint64)itr->first; //8
-		data << (uint32)itr->second.Rank; //4                    //Rank
-        data << (uint32)itr->second.KillingBlows; //4
-        data << (uint32)itr->second.Deaths; //4
-        data << (uint32)itr->second.HonorableKills; //4
-        data << (uint32)itr->second.DishonorableKills; //4
-        data << (uint32)itr->second.BonusHonor; //4
+        data << (uint64)itr->first;                         //8
+        data << (uint32)itr->second.Rank;                   //4                    //Rank
+        data << (uint32)itr->second.KillingBlows;           //4
+        data << (uint32)itr->second.Deaths;                 //4
+        data << (uint32)itr->second.HonorableKills;         //4
+        data << (uint32)itr->second.DishonorableKills;      //4
+        data << (uint32)itr->second.BonusHonor;             //4
         data << (uint32)0;
         data << (uint32)0;
         /*data << itr->second.Rank;

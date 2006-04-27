@@ -124,10 +124,10 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     uint32 LevMin;
     uint32 LevMax;
 
-    // Create BG, Warsong Gulch, Levels 1-60, 16 per team
+    // Create BG, Warsong Gulch, Levels 1-60, 10 per team
     bg_Name = "Warsong Gulch";
     MapId = 489;
-    MaxPlayersPerTeam = 16;
+    MaxPlayersPerTeam = 10;
     AStartLoc[0] = 1519.530273f;
     AStartLoc[1] = 1481.868408f;
     AStartLoc[2] = 352.023743f;

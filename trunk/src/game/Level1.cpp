@@ -674,7 +674,7 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
     data << uint8(0xFF);
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
-	data << (uint32)0;
+    data << (uint32)0;
     data << (float)ASpeed;
     chr->SendMessageToSet( &data, true );
 
@@ -682,14 +682,14 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
     data << uint8(0xFF);
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
-	data << (uint32)0;
+    data << (uint32)0;
     data << (float)ASpeed;
     chr->SendMessageToSet( &data, true );
     data.Initialize( SMSG_FORCE_RUN_BACK_SPEED_CHANGE );
     data << uint8(0xFF);
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
-	data << (uint32)0;
+    data << (uint32)0;
     data << (float)ASpeed;
     chr->SendMessageToSet( &data, true );
     return true;
@@ -732,12 +732,12 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE );
     data << uint8(0xFF);
-    data << chr->GetUInt32Value( OBJECT_FIELD_GUID ); //4
-    data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 ); //4
-	data << uint32(0x0);
-    data << (float)Speed; //4
-	
-	chr->SendMessageToSet( &data, true );
+    data << chr->GetUInt32Value( OBJECT_FIELD_GUID );       //4
+    data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );   //4
+    data << uint32(0x0);
+    data << (float)Speed;                                   //4
+
+    chr->SendMessageToSet( &data, true );
 
     return true;
 }
@@ -781,7 +781,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
     data << uint8(0xFF);
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
-	data << (uint32)0;
+    data << (uint32)0;
     data << (float)Swim;
     chr->SendMessageToSet( &data, true );
 
@@ -827,7 +827,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
     data << uint8(0xFF);
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
-	data << (uint32)0;
+    data << (uint32)0;
     data << (float)BSpeed;
     chr->SendMessageToSet( &data, true );
 
@@ -1130,14 +1130,14 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
     data << (uint32)0;
-	data << float(speed);
+    data << float(speed);
     chr->SendMessageToSet( &data, true );
 
     data.Initialize( SMSG_FORCE_SWIM_SPEED_CHANGE );
     data << uint8(0xFF);
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID );
     data << chr->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
-	data << (uint32)0;
+    data << (uint32)0;
     data << float(speed);
     chr->SendMessageToSet( &data, true );
 

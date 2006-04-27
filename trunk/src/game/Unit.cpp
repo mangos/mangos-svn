@@ -779,7 +779,7 @@ void Unit::_UpdateSpells( uint32 time )
         {
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
-                setAttackTimer( 0, true );                  
+                setAttackTimer( 0, true );
                 m_currentSpell->setState(SPELL_STATE_IDLE);
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
@@ -797,14 +797,14 @@ void Unit::_UpdateSpells( uint32 time )
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
         (*i)->Update( time );
-		if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
-		{
-			RemoveAura(i);
-			if(m_Auras.empty())
-				break;
-			else
-				i = m_Auras.begin();
-		}
+        if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
+        {
+            RemoveAura(i);
+            if(m_Auras.empty())
+                break;
+            else
+                i = m_Auras.begin();
+        }
     }
 }
 
@@ -889,11 +889,11 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     // take out same spell
     if (i != m_Auras.end())
         (*i)->SetDuration(Aur->GetDuration());
-	else
-	{
-		m_Auras.push_back(Aur);
-		Aur->_AddAura();
-	}
+    else
+    {
+        m_Auras.push_back(Aur);
+        Aur->_AddAura();
+    }
     //_ApplyStatsMods();
 
     return true;
@@ -933,20 +933,20 @@ void Unit::RemoveAura(uint32 spellId)
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
         if ((*i)->GetId() == spellId )
-			RemoveAura(i);
-		if(m_Auras.empty())
-			break;
-		else
-			i = m_Auras.begin();
+            RemoveAura(i);
+        if(m_Auras.empty())
+            break;
+        else
+            i = m_Auras.begin();
     }
 }
 
 void Unit::RemoveAura(AuraList::iterator i)
 {
     //_RemoveStatsMods();
-	if(!(*i))
-		return;
-	(*i)->_RemoveAura();
+    if(!(*i))
+        return;
+    (*i)->_RemoveAura();
 
     delete *i;
     m_Auras.erase(i);
@@ -1137,11 +1137,11 @@ void Unit::_RemoveAllAuraMods()
     {
         //(*i)->ApplyModifier(false);
         (*i)->_RemoveAura();
-		//RemoveAura(i);
-		//if(m_Auras.empty())
-		//	break;
-		//else
-		//	i = m_Auras.begin();
+        //RemoveAura(i);
+        //if(m_Auras.empty())
+        //	break;
+        //else
+        //	i = m_Auras.begin();
     }
 
     //_ApplyStatsMods();
@@ -1157,7 +1157,7 @@ void Unit::_ApplyAllAuraMods()
     {
         //(*i)->ApplyModifier(true);
         //(*i)->_RemoveAura();
-		(*i)->_AddAura();
+        (*i)->_AddAura();
     }
 
     //_ApplyStatsMods();

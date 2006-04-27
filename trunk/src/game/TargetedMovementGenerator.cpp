@@ -44,8 +44,8 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
     //float x = i_target.GetPositionX();
     //float y = i_target.GetPositionY();
     //float z = i_target.GetPositionZ();
-	if(!&i_target || !&owner)
-		return;
+    if(!&i_target || !&owner)
+        return;
     float x, y, z;
     i_target.GetClosePoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
@@ -55,8 +55,8 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
 void
 TargetedMovementGenerator::_setAttackRadius(Creature &owner)
 {
-	if(!&owner)
-		return;
+    if(!&owner)
+        return;
     float combat_reach = owner.GetFloatValue(UNIT_FIELD_COMBATREACH);
     if( combat_reach <= 0.0f )
         combat_reach = 1.0f;
@@ -67,8 +67,8 @@ TargetedMovementGenerator::_setAttackRadius(Creature &owner)
 void
 TargetedMovementGenerator::Initialize(Creature &owner)
 {
-	if(!&owner)
-		return;
+    if(!&owner)
+        return;
     owner.setMoveRunFlag(true);
     _setAttackRadius(owner);
     _setTargetLocation(owner);
@@ -84,8 +84,8 @@ TargetedMovementGenerator::Reset(Creature &owner)
 void
 TargetedMovementGenerator::TargetedHome(Creature &owner)
 {
-	if(!&owner)
-		return;
+    if(!&owner)
+        return;
     DEBUG_LOG("Target home location %d", owner.GetGUIDLow());
     float x, y, z;
     owner.GetRespawnCoord(x, y, z);
@@ -99,13 +99,13 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
 void
 TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
-	if(!&owner || !&i_target)
-		return;
+    if(!&owner || !&i_target)
+        return;
 
     if( owner.IsStopped() )
     {
         if( i_target.isAlive() )
-        if( !owner.canReachWithAttack( &i_target ) && (!owner.hasUnitState(UNIT_STAT_IN_COMBAT) || !owner.reachWithSpellAttack( &i_target)) )
+            if( !owner.canReachWithAttack( &i_target ) && (!owner.hasUnitState(UNIT_STAT_IN_COMBAT) || !owner.reachWithSpellAttack( &i_target)) )
         {
             owner.addUnitState(UNIT_STAT_CHASE);
             _setTargetLocation(owner);
@@ -127,23 +127,23 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 owner.Relocate(x, y, z, orientation);
                 //StackCleaner stack_cleaner(owner);
                 //stack_cleaner.Done();
-				clearUnitState(UNIT_STAT_ALL_STATE);
-				owner.addUnitState(UNIT_STAT_FLEEING);
+                clearUnitState(UNIT_STAT_ALL_STATE);
+                owner.addUnitState(UNIT_STAT_FLEEING);
             }*/
-        Spell* spell;
-        if(!i_targetedHome && owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
-        {
-            owner.StopMoving();
-            owner->Idle();
-            owner.addUnitState(UNIT_STAT_ATTACKING);
-            owner.clearUnitState(UNIT_STAT_CHASE);
-            SpellCastTargets targets;
-            targets.setUnitTarget( &i_target );
-            spell->prepare(&targets);
-            owner.m_canMove = false;
-            DEBUG_LOG("Spell Attack.");
-            return;
-        }
+            Spell* spell;
+            if(!i_targetedHome && owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
+            {
+                owner.StopMoving();
+                owner->Idle();
+                owner.addUnitState(UNIT_STAT_ATTACKING);
+                owner.clearUnitState(UNIT_STAT_CHASE);
+                SpellCastTargets targets;
+                targets.setUnitTarget( &i_target );
+                spell->prepare(&targets);
+                owner.m_canMove = false;
+                DEBUG_LOG("Spell Attack.");
+                return;
+            }
             else if( owner.canReachWithAttack(&i_target) )
             {
                 owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));

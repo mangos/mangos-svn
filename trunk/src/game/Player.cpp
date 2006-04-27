@@ -225,7 +225,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
-	SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, -1); //-1 is default value
+    SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, -1); //-1 is default value
 
     SetPvP(false);
 
@@ -277,7 +277,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         {
             sLog.outDebug("ITEM: Creating initial item, itemId = %d, bagIndex = %d, slot = %d, count = %d",titem_id, titem_bagIndex, titem_slot, titem_amount);
             AddItem(titem_bagIndex, titem_slot, CreateNewItem(titem_id, titem_amount), true);
-			//AddNewItem(titem_bagIndex, titem_slot, titem_id, titem_amount, false, false);
+            //AddNewItem(titem_bagIndex, titem_slot, titem_id, titem_amount, false, false);
         }
     }
 
@@ -1820,11 +1820,11 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
 
     }
     //Players visible items are not inventory stuff
-	//431) = 884 (0x374) = main weapon
+    //431) = 884 (0x374) = main weapon
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + (i*12)));
-		//updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + 1 + (i*12)));
+        //updateMask->SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_0 + 1 + (i*12)));
     }
 
     updateMask->SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
@@ -2049,7 +2049,7 @@ void Player::_SaveAuras()
 {
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
-	AuraList auras = GetAuras();
+    AuraList auras = GetAuras();
     AuraList::iterator itr;
     for (itr = auras.begin(); itr != auras.end(); ++itr)
     {
@@ -2328,11 +2328,11 @@ void Player::_LoadAuras()
         do
         {
             Field *fields = result->Fetch();
-			uint32 spellid = fields[1].GetUInt32();
-			uint32 effindex = fields[2].GetUInt32();
-			int32 remaintime = (int32)fields[3].GetUInt32();
-			Aura* aura = new Aura(spellid, effindex, remaintime, NULL, this);
-			AddAura(aura);
+            uint32 spellid = fields[1].GetUInt32();
+            uint32 effindex = fields[2].GetUInt32();
+            int32 remaintime = (int32)fields[3].GetUInt32();
+            Aura* aura = new Aura(spellid, effindex, remaintime, NULL, this);
+            AddAura(aura);
             //addAction(fields[1].GetUInt8(), fields[2].GetUInt16(), fields[3].GetUInt8(), fields[4].GetUInt8());
         }
         while( result->NextRow() );
@@ -2432,7 +2432,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             else { data.Initialize(MSG_MOVE_SET_RUN_SPEED); }
             data << uint8(0xFF);
             data << GetGUID();
-			data << (uint32)0;
+            data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -2443,7 +2443,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED); }
             data << uint8(0xFF);
             data << GetGUID();
-			data << (uint32)0;
+            data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -2454,7 +2454,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
             else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED); }
             data << uint8(0xFF);
             data << GetGUID();
-			data << (uint32)0;
+            data << (uint32)0;
             data << float(value);
             GetSession()->SendPacket( &data );
         }break;
@@ -3953,7 +3953,6 @@ uint8 Player::FindFreeItemSlot(uint32 type)
     return INVENTORY_SLOT_ITEM_END;
 }
 
-
 int Player::CountFreeBagSlot()
 {
     int count = 0;
@@ -4262,10 +4261,10 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
 {
     ItemPrototype *proto = objmgr.GetItemPrototype(itemId);
     if(!proto)
-	{
-		sLog.outError("CreateNewItem : Unknown itemId, itemId = %i", itemId);
-		return NULL;
-	}
+    {
+        sLog.outError("CreateNewItem : Unknown itemId, itemId = %i", itemId);
+        return NULL;
+    }
     Item *pItem = NewItemOrBag(proto);
 
     if (count > proto->MaxCount) { count = proto->MaxCount; }
@@ -4335,80 +4334,80 @@ int Player::GetItemCount(uint32 itemId, bool includebank)
 }
 
 //where =1 : inventory; =2 : bank; =3 all
-uint32 Player::CanAddItemCount(uint32 itemid, uint32 where)	
+uint32 Player::CanAddItemCount(uint32 itemid, uint32 where)
 {
-	return CanAddItemCount(CreateNewItem(itemid, 1), where);
+    return CanAddItemCount(CreateNewItem(itemid, 1), where);
 }
 
 //where =1 : inventory; =2 : bank; =3 all
-uint32 Player::CanAddItemCount(Item* item, uint32 where)	
+uint32 Player::CanAddItemCount(Item* item, uint32 where)
 {
-	if(!item)
-		return 0;
-	uint8 i;
-	uint32 stack = item->GetMaxStackCount();
-	uint32 count = 0;
-	Item *pItem;
-	Bag *pBag;
-	if(where & 1)
-	{
-		for (i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-		{
-			pItem = GetItemBySlot(i);
-			if(!pItem)
-				count += stack;
-			else if (pItem->GetEntry() == item->GetEntry()) 
-				count += stack - pItem->GetCount(); 
-		}
-		for (i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-		{
-			pItem = GetItemBySlot(i);
-			if(!pItem || !pItem->IsBag())
-				continue;
-			pBag = (Bag*)pItem;
-			if(pBag && pBag->IsBag())
-			{
-				for(uint8 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
-				{
-					pItem = GetItemBySlot(j);
-					if(!pItem)
-						count += stack;
-					else if (pItem->GetEntry() == item->GetEntry()) 
-						count += stack - pItem->GetCount(); 
-				}
-			}
-		}
-	}
-	if(where & 2)
-	{
-		for (i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
-		{
-			pItem = GetItemBySlot(i);
-			if(!pItem)
-				count += stack;
-			else if (pItem->GetEntry() == item->GetEntry()) 
-				count += stack - pItem->GetCount(); 
-		}
-		for (i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-		{
-			pItem = GetItemBySlot(i);
-			if(!pItem || !pItem->IsBag())
-				continue;
-			pBag = (Bag*)pItem;
-			if(pBag && pBag->IsBag())
-			{
-				for(uint8 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
-				{
-					pItem = GetItemBySlot(j);
-					if(!pItem)
-						count += stack;
-					else if (pItem->GetEntry() == item->GetEntry()) 
-						count += stack - pItem->GetCount(); 
-				}
-			}
-		}
-	}
-	return count;
+    if(!item)
+        return 0;
+    uint8 i;
+    uint32 stack = item->GetMaxStackCount();
+    uint32 count = 0;
+    Item *pItem;
+    Bag *pBag;
+    if(where & 1)
+    {
+        for (i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        {
+            pItem = GetItemBySlot(i);
+            if(!pItem)
+                count += stack;
+            else if (pItem->GetEntry() == item->GetEntry())
+                count += stack - pItem->GetCount();
+        }
+        for (i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+        {
+            pItem = GetItemBySlot(i);
+            if(!pItem || !pItem->IsBag())
+                continue;
+            pBag = (Bag*)pItem;
+            if(pBag && pBag->IsBag())
+            {
+                for(uint8 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
+                {
+                    pItem = GetItemBySlot(j);
+                    if(!pItem)
+                        count += stack;
+                    else if (pItem->GetEntry() == item->GetEntry())
+                        count += stack - pItem->GetCount();
+                }
+            }
+        }
+    }
+    if(where & 2)
+    {
+        for (i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+        {
+            pItem = GetItemBySlot(i);
+            if(!pItem)
+                count += stack;
+            else if (pItem->GetEntry() == item->GetEntry())
+                count += stack - pItem->GetCount();
+        }
+        for (i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+        {
+            pItem = GetItemBySlot(i);
+            if(!pItem || !pItem->IsBag())
+                continue;
+            pBag = (Bag*)pItem;
+            if(pBag && pBag->IsBag())
+            {
+                for(uint8 j = 0; j < pBag->GetProto()->ContainerSlots; j++)
+                {
+                    pItem = GetItemBySlot(j);
+                    if(!pItem)
+                        count += stack;
+                    else if (pItem->GetEntry() == item->GetEntry())
+                        count += stack - pItem->GetCount();
+                }
+            }
+        }
+    }
+    return count;
 }
 
 // Adds a new item to player inventory
@@ -4422,9 +4421,9 @@ uint8 Player::AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible)
         sLog.outError("AddNewItem : No itemId provided");
         return 0;
     }
-	Item *pItem = CreateNewItem(itemId, count);
-	if(pItem)
-       return AddItemToInventory(pItem, addmaxpossible);
+    Item *pItem = CreateNewItem(itemId, count);
+    if(pItem)
+        return AddItemToInventory(pItem, addmaxpossible);
     return 0;
 }
 
@@ -4461,7 +4460,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
     {
         case 0:
         case CLIENT_SLOT_BACK:
-	        if (slot >= BANK_SLOT_BAG_END)
+            if (slot >= BANK_SLOT_BAG_END)
             {
                 sLog.outError("AddItem : Invalid slot, slot = %i", slot);
                 return 0;
@@ -4589,14 +4588,14 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
         sLog.outError("AddItemToInventory: No item provided");
         return 0;
     }
-	ItemPrototype *proto = item->GetProto();
+    ItemPrototype *proto = item->GetProto();
     if (!proto)
     {
         sLog.outError("AddItemToInventory: Unknown item, itemId = %i",item->GetEntry());
         return 0;
     }
     int count = item->GetCount();
-	if(CanAddItemCount(item, 1) < count && !addmaxpossible)
+    if(CanAddItemCount(item, 1) < count && !addmaxpossible)
     {
         sLog.outError("AddItemToInventory: Can't add, Bag is full.");
         return 0;
@@ -4605,68 +4604,68 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
     Item *pItem = 0;
     Bag *pBag = 0;
     int stack = item->GetMaxStackCount();
-	uint8 i;
+    uint8 i;
 
     for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
-		pItem = GetItemBySlot(i);
-		if(!pItem)
-		{
-			if(item->GetCount() <= stack)
-				return AddItem(0, i, item, true);
-			else
-			{
-				item->SetCount(stack);
-				AddItem(0, i, item, true);
-				item->SetCount(item->GetCount() - stack);
-			}
-		}
-		else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-		{
-			if(pItem->GetCount() + item->GetCount() <= stack)
-				return AddItem(0, i, item, true);
-			else
-			{
-				item->SetCount(stack - pItem->GetCount());
-				AddItem(0, i, item, true);
-				item->SetCount(item->GetCount() + pItem->GetCount() - stack);
-			}
-		}
-	}
-	for(i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-	{
-		pItem = GetItemBySlot(i);
-		if(!pItem || !pItem->IsBag())
-			continue;
+        pItem = GetItemBySlot(i);
+        if(!pItem)
+        {
+            if(item->GetCount() <= stack)
+                return AddItem(0, i, item, true);
+            else
+            {
+                item->SetCount(stack);
+                AddItem(0, i, item, true);
+                item->SetCount(item->GetCount() - stack);
+            }
+        }
+        else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+        {
+            if(pItem->GetCount() + item->GetCount() <= stack)
+                return AddItem(0, i, item, true);
+            else
+            {
+                item->SetCount(stack - pItem->GetCount());
+                AddItem(0, i, item, true);
+                item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+            }
+        }
+    }
+    for(i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pItem = GetItemBySlot(i);
+        if(!pItem || !pItem->IsBag())
+            continue;
         pBag = (Bag*)pItem;
         for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
         {
-			pItem = pBag->GetItemFromBag(j);
-			if(!pItem)
-			{
-				if(item->GetCount() <= stack)
-					return AddItem(i, j, item, true);
-				else
-				{
-					item->SetCount(stack);
-					AddItem(i, j, item, true);
-					item->SetCount(item->GetCount() - stack);
-				}
-			}
-			else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-			{
-				if(pItem->GetCount() + item->GetCount() <= stack)
-					return AddItem(i, j, item, true);
-				else
-				{
-					item->SetCount(stack - pItem->GetCount());
-					AddItem(i, j, item, true);
-					item->SetCount(item->GetCount() + pItem->GetCount() - stack);
-				}
-			}
-		}
+            pItem = pBag->GetItemFromBag(j);
+            if(!pItem)
+            {
+                if(item->GetCount() <= stack)
+                    return AddItem(i, j, item, true);
+                else
+                {
+                    item->SetCount(stack);
+                    AddItem(i, j, item, true);
+                    item->SetCount(item->GetCount() - stack);
+                }
+            }
+            else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+            {
+                if(pItem->GetCount() + item->GetCount() <= stack)
+                    return AddItem(i, j, item, true);
+                else
+                {
+                    item->SetCount(stack - pItem->GetCount());
+                    AddItem(i, j, item, true);
+                    item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+                }
+            }
+        }
     }
-	return 0;
+    return 0;
 }
 
 //Adds an existing item to bank
@@ -4678,14 +4677,14 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
         sLog.outError("AddItemToBank: No item provided");
         return 0;
     }
-	ItemPrototype *proto = item->GetProto();
+    ItemPrototype *proto = item->GetProto();
     if (!proto)
     {
         sLog.outError("AddItemToBank: Unknown item, itemId = %i",item->GetEntry());
         return 0;
     }
     int count = item->GetCount();
-	if(CanAddItemCount(item, 2) < count && !addmaxpossible)
+    if(CanAddItemCount(item, 2) < count && !addmaxpossible)
     {
         sLog.outError("AddItemToBank: Can't add, Bank is full.");
         return 0;
@@ -4694,68 +4693,68 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
     Item *pItem = 0;
     Bag *pBag = 0;
     int stack = item->GetMaxStackCount();
-	uint8 i;
+    uint8 i;
 
     for(i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
     {
-		pItem = GetItemBySlot(i);
-		if(!pItem)
-		{
-			if(item->GetCount() <= stack)
-				return AddItem(0, i, item, true);
-			else
-			{
-				item->SetCount(stack);
-				AddItem(0, i, item, true);
-				item->SetCount(item->GetCount() - stack);
-			}
-		}
-		else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-		{
-			if(pItem->GetCount() + item->GetCount() <= stack)
-				return AddItem(0, i, item, true);
-			else
-			{
-				item->SetCount(stack - pItem->GetCount());
-				AddItem(0, i, item, true);
-				item->SetCount(item->GetCount() + pItem->GetCount() - stack);
-			}
-		}
-	}
-	for(i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-	{
-		pItem = GetItemBySlot(i);
-		if(!pItem || !pItem->IsBag())
-			continue;
+        pItem = GetItemBySlot(i);
+        if(!pItem)
+        {
+            if(item->GetCount() <= stack)
+                return AddItem(0, i, item, true);
+            else
+            {
+                item->SetCount(stack);
+                AddItem(0, i, item, true);
+                item->SetCount(item->GetCount() - stack);
+            }
+        }
+        else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+        {
+            if(pItem->GetCount() + item->GetCount() <= stack)
+                return AddItem(0, i, item, true);
+            else
+            {
+                item->SetCount(stack - pItem->GetCount());
+                AddItem(0, i, item, true);
+                item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+            }
+        }
+    }
+    for(i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+    {
+        pItem = GetItemBySlot(i);
+        if(!pItem || !pItem->IsBag())
+            continue;
         pBag = (Bag*)pItem;
         for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
         {
-			pItem = pBag->GetItemFromBag(j);
-			if(!pItem)
-			{
-				if(item->GetCount() <= stack)
-					return AddItem(i, j, item, true);
-				else
-				{
-					item->SetCount(stack);
-					AddItem(i, j, item, true);
-					item->SetCount(item->GetCount() - stack);
-				}
-			}
-			else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-			{
-				if(pItem->GetCount() + item->GetCount() <= stack)
-					return AddItem(i, j, item, true);
-				else
-				{
-					item->SetCount(stack - pItem->GetCount());
-					AddItem(i, j, item, true);
-					item->SetCount(item->GetCount() + pItem->GetCount() - stack);
-				}
-			}
-		}
+            pItem = pBag->GetItemFromBag(j);
+            if(!pItem)
+            {
+                if(item->GetCount() <= stack)
+                    return AddItem(i, j, item, true);
+                else
+                {
+                    item->SetCount(stack);
+                    AddItem(i, j, item, true);
+                    item->SetCount(item->GetCount() - stack);
+                }
+            }
+            else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+            {
+                if(pItem->GetCount() + item->GetCount() <= stack)
+                    return AddItem(i, j, item, true);
+                else
+                {
+                    item->SetCount(stack - pItem->GetCount());
+                    AddItem(i, j, item, true);
+                    item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+                }
+            }
+        }
     }
-	return 0;
+    return 0;
 }
 
 void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
@@ -5620,7 +5619,7 @@ void Player::SendInitWorldStates(uint32 MapID)
 
             (uint32)MapID<<
             (uint16)NumberOfFields <<
-            //field (uint16)  value (uint16)
+        //field (uint16)  value (uint16)
             (uint16)0x07AE<< (uint16)0x01<<
             (uint16)0x0532<< (uint16)0x01<<
             (uint16)0x0531<< (uint16)0x00<<

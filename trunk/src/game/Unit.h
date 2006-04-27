@@ -234,7 +234,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         Hostil* GetHostil(uint64 guid);
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId);
-		AuraList GetAuras( ) {return m_Auras;}
+        AuraList GetAuras( ) {return m_Auras;}
 
     protected:
         Unit ( );
@@ -245,7 +245,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
-
 
         void _UpdateSpells(uint32 time);
         void _UpdateHostil( uint32 time );

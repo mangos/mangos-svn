@@ -1155,14 +1155,14 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
     // set run speed ? received data is more
-	sLog.outDebug("CMSG_FORCE_RUN_SPEED_CHANGE_ACK");
+    sLog.outDebug("CMSG_FORCE_RUN_SPEED_CHANGE_ACK");
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
 {
     // set swim speed ? received data is more
-	sLog.outDebug("CMSG_FORCE_SWIM_SPEED_CHANGE_ACK");
-	
+    sLog.outDebug("CMSG_FORCE_SWIM_SPEED_CHANGE_ACK");
+
 }
 
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)

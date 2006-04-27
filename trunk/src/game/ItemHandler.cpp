@@ -184,11 +184,13 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->Stackable;
     data << itemProto->MaxCount;
     data << itemProto->ContainerSlots;;
-    for(int i = 0; i < 10; i++) {
+    for(int i = 0; i < 10; i++)
+    {
         data << itemProto->ItemStat[i].ItemStatType;
         data << itemProto->ItemStat[i].ItemStatValue;
     }
-    for(int i = 0; i < 5; i++) {
+    for(int i = 0; i < 5; i++)
+    {
         data << itemProto->Damage[i].DamageMin;
         data << itemProto->Damage[i].DamageMax;
         data << itemProto->Damage[i].DamageType;
@@ -202,8 +204,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
     data << itemProto->Ammo_type;
-    data << uint32(0); //new 2 fields socalled (uint16)field70 and (uint16)field71: usess unknown
-    for(int s = 0; s < 5; s++) {
+    data << uint32(0);                                      //new 2 fields socalled (uint16)field70 and (uint16)field71: usess unknown
+    for(int s = 0; s < 5; s++)
+    {
         data << itemProto->Spells[s].SpellId;
         data << itemProto->Spells[s].SpellTrigger;
         data << itemProto->Spells[s].SpellCharges;
@@ -382,7 +385,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         if(_player->CanAddItemCount(buybackItem, 1) >= buybackItem->GetCount())
         {
             _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-			_player->AddItemToInventory(buybackItem, true);
+            _player->AddItemToInventory(buybackItem, true);
             _player->RemoveItemFromBuyBackSlot(slot);
         }
     }
@@ -779,8 +782,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-	result = (_player->CanAddItemCount(pItem, 1) >= pItem->GetCount()) ? 1 : 0;
-   
+    result = (_player->CanAddItemCount(pItem, 1) >= pItem->GetCount()) ? 1 : 0;
+
     if (!result)
     {
         data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
@@ -794,7 +797,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 
     _player->RemoveItemFromSlot(srcBag, srcSlot);
     result = _player->AddItemToInventory(pItem, false);
-	if (result == 2)
+    if (result == 2)
     {
         pItem->DeleteFromDB();
         delete pItem;
@@ -851,7 +854,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     {
         _player->SetUInt32Value(PLAYER_BYTES_2, bank);
         _player->SetMoney(playerGold - price);
-			
+
     }
 }
 
@@ -872,7 +875,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-	result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount()) ? 1 : 0;
+    result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount()) ? 1 : 0;
 
     if (!result)
     {
@@ -912,7 +915,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-	result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount())? 1 : 0;
+    result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount())? 1 : 0;
 
     if (!result)
     {

@@ -513,8 +513,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void GetSlotByItem(uint32 type, uint8 slots[4]);
         uint8 FindEquipSlot(uint32 type);
         uint8 FindFreeItemSlot(uint32 type);
-		uint32 CanAddItemCount(Item* item, uint32 where = 1);
-		uint32 CanAddItemCount(uint32 itemid, uint32 where = 1);
+        uint32 CanAddItemCount(Item* item, uint32 where = 1);
+        uint32 CanAddItemCount(uint32 itemid, uint32 where = 1);
 
         uint8 CanEquipItemInSlot(uint8 bag, uint8 slot, Item* item, Item* swapitem);
         bool CanUseItem (ItemPrototype* proto);
