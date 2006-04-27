@@ -86,7 +86,7 @@ AggressorAI::_needToStop() const
     if( !i_pVictim->isAlive() || !i_creature.isAlive() || i_pVictim->m_stealth)
         return true;
 
-	float rx,ry,rz;
+    float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
     float length = i_creature.GetDistanceSq(i_pVictim);

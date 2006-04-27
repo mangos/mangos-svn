@@ -45,18 +45,18 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1,
         double x_diff = double(x2 - x1);
         double y_diff = double(y2 - y1);
         double distance_d = (double)((x_diff*x_diff) + (y_diff * y_diff));
-		if(distance_d == 0)
-		{
-			x = x2;
-			y = y2;
-		}
-		else
-		{
-			distance_d = ::sqrt(distance_d);
-			double distance_ratio = (double)offset/(double)distance_d;
-			x = (float)(x2 - (distance_ratio*x_diff));
-			y = (float)(y2 - (distance_ratio*y_diff));
-		}
+        if(distance_d == 0)
+        {
+            x = x2;
+            y = y2;
+        }
+        else
+        {
+            distance_d = ::sqrt(distance_d);
+            double distance_ratio = (double)offset/(double)distance_d;
+            x = (float)(x2 - (distance_ratio*x_diff));
+            y = (float)(y2 - (distance_ratio*y_diff));
+        }
     }
 }
 
@@ -77,13 +77,13 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
     float dist = ((dx*dx) + (dy*dy) + (dz*dz)) - offset;
-	if(dist<0)
-		dist = 0;
-	else
-		dist = ::sqrt(dist);
+    if(dist<0)
+        dist = 0;
+    else
+        dist = ::sqrt(dist);
     double speed = traveller.Speed();
-	if(speed<=0)
-		speed = 2.5f;
+    if(speed<=0)
+        speed = 2.5f;
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
     float orientation = (float)atan2((double)dy, (double)dx);
@@ -105,8 +105,8 @@ DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, const float &
     float dy = i_destY - i_fromY;
     double dist = ::sqrt((dx*dx) + (dy*dy));
     double speed = traveller.Speed();
-	if(speed<=0)
-		speed = 2.5f;
+    if(speed<=0)
+        speed = 2.5f;
     speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
     i_totalTravelTime = static_cast<uint32>( dist/speed + 0.5 );
     i_timeStarted = getMSTime();

@@ -232,7 +232,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     int32 duration = GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex));
     Aura* Aur = new Aura(m_spellInfo, i, duration, m_caster, unitTarget);
-	unitTarget->AddAura(Aur);	
+    unitTarget->AddAura(Aur);
 }
 
 void Spell::EffectManaDrain(uint32 i)
@@ -355,8 +355,8 @@ void Spell::EffectCreateItem(uint32 i)
 
         slot = 0;
         ItemPrototype *m_itemProto = objmgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
-		if(!m_itemProto)
-			continue;
+        if(!m_itemProto)
+            continue;
         uint32 num_to_add = ((pUnit->getLevel() - (m_spellInfo->spellLevel-1))*2);
         if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
             num_to_add = 1;
@@ -364,10 +364,10 @@ void Spell::EffectCreateItem(uint32 i)
             num_to_add = m_itemProto->MaxCount;
         newItem = new Item;
         newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
-		if(!newItem)
-			continue;
-		newItem->SetCount(num_to_add);
-		GetSoltflag = pUnit->AddItemToInventory(newItem, false);
+        if(!newItem)
+            continue;
+        newItem->SetCount(num_to_add);
+        GetSoltflag = pUnit->AddItemToInventory(newItem, false);
         if(!GetSoltflag)
         {
             SendCastResult(0x18);
@@ -639,7 +639,7 @@ void Spell::EffectApplyAA(uint32 i)
 
     Aura* Aur = new Aura(m_spellInfo, i, 6000, m_caster, unitTarget);
     Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
-	unitTarget->AddAura(Aur);
+    unitTarget->AddAura(Aur);
     //unitTarget->SetAura(aff); FIX-ME!
 }
 
