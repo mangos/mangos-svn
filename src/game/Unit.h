@@ -187,6 +187,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void RemoveFirstAuraByCategory(uint32 category);
         void RemoveAura(AuraList::iterator i);
+        void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAura(uint32 spellId);
 
         void RemoveAllAuras();
@@ -232,13 +233,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         float GetHostility(uint64 guid);
         Hostil* GetHostil(uint64 guid);
         void AddHostil(uint64 guid, float hostility);
-        void AddPeriodicAura(Aura * aura)
-        {
-            while(m_PeriodicRun);
-            m_PeriodicRun=true;
-            m_PeriodicAuras.push_back(aura);
-            m_PeriodicRun=false;
-        }
+        Aura* GetAura(uint32 spellId);
+		AuraList GetAuras( ) {return m_Auras;}
 
     protected:
         Unit ( );
@@ -250,7 +246,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 
-        Aura* FindAur(uint32 spellId);
 
         void _UpdateSpells(uint32 time);
         void _UpdateHostil( uint32 time );
@@ -266,10 +261,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         DeathState m_deathState;
 
         AuraList m_Auras;
-        AuraList m_PeriodicAuras;
 
         std::list<Hostil*> m_hostilList;
-        bool m_PeriodicRun;
 
 };
 #endif

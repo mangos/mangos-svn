@@ -72,12 +72,12 @@ struct SpellEntry
     uint32    EquippedItemClass;
     uint32    EquippedItemSubClass;
     uint32    Effect[3];
-    uint32    EffectDieSides[3];
+    int32     EffectDieSides[3];
     uint32    EffectBaseDice[3];
     float     EffectDicePerLevel[3];
     float     EffectRealPointsPerLevel[3];
     int32     EffectBasePoints[3];
-    uint32      EffectImplicitTargetA[3];
+    uint32    EffectImplicitTargetA[3];
     uint32    EffectImplicitTargetB[3];
     uint32    EffectRadiusIndex[3];
     uint32    EffectApplyAuraName[3];

@@ -213,7 +213,7 @@ struct Modifier
 {
     uint8 m_auraname;
     int32 m_amount;
-    uint32 m_miscvalue;
+    int32 m_miscvalue;
     uint32 m_miscvalue2;
     uint32 periodictime;
 };
@@ -277,16 +277,23 @@ class Aura
         void HandleAuraSchoolAbsorb(bool Apply);
         void HandleReflectSpellsSchool(bool Apply);
         void HandleAuraModSkill(bool Apply);
+		void HandleModDamagePercentDone(bool Apply);
+		void HandleModPercentStat(bool Apply);
+		void HandleModResistancePercent(bool Apply);
 
-        Aura() : m_spellProto(NULL), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_coAura(NULL), m_positive(false), m_permanent(false) {}
+        Aura() : m_spellId(0), m_effIndex(0), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_positive(false), m_permanent(false), m_isPeriodic(false) {}
+        Aura(uint32 spellid, uint32 eff, Unit *caster, Unit *target);
+		Aura(uint32 spellid, uint32 eff, int32 duration, Unit *caster, Unit *target);
+		Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target);
 
-        Aura(SpellEntry *proto, int32 duration, Unit *caster, Unit *target) :
-        m_spellProto(proto), m_caster(caster), m_target(target), m_duration(duration), m_auraSlot(0), m_coAura(NULL), m_positive(false), m_permanent(false){}
+        void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
+		void SetModifier(Modifier* mod) {m_modifier=mod;}
+		Modifier* GetModifier() {return m_modifier;}
 
-        void AddMod(uint8 t, int32 a, uint32 pt,uint32 miscValue, uint32 miscValue2);
-
-        SpellEntry* GetSpellProto() const { return m_spellProto; }
-        uint32 GetId() const{ return (m_spellProto ? m_spellProto->Id : 0); }
+        SpellEntry* GetSpellProto() const { return sSpellStore.LookupEntry( m_spellId ); }
+        uint32 GetId() const{ return m_spellId; }
+        uint32 GetEffIndex() const{ return m_effIndex; }
+		void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetDuration() const { return m_duration; }
         void SetDuration(int32 duration) { m_duration = duration; }
 
@@ -294,11 +301,6 @@ class Aura
         Unit* GetTarget() const { return m_target; }
         void SetCaster(Unit* caster) { m_caster = caster; }
         void SetTarget(Unit* target) { m_target = target; }
-
-        const ModList& GetModList() const { return m_modList; }
-
-        void SetCoAura(Aura* coAur) { m_coAura = coAur; }
-        Aura* GetCoAura() { return m_coAura; }
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
         void SetAuraSlot(uint8 slot) { m_auraSlot = slot; }
@@ -311,30 +313,29 @@ class Aura
         void SetPermanent(bool value) { m_permanent = value; }
 
         void Update(uint32 diff);
-        void ApplyModifiers(bool Apply);
+        void ApplyModifier(bool Apply);
 
         void _AddAura();
         void _RemoveAura();
-
-        Modifier *cmod;
+		uint32 CalculateDamage(SpellEntry* spellproto, uint8 i);
 
     private:
 
-        SpellEntry *m_spellProto;
+        Modifier *m_modifier;
+		uint32 m_spellId;
+		uint32 m_effIndex;
+        //SpellEntry *m_spellProto;
         Unit* m_caster;
         Unit* m_target;
         int32 m_duration;
-
+		
         uint8 m_auraSlot;
-
-        ModList m_modList;
-
-        Aura* m_coAura;
 
         bool m_positive;
         bool m_permanent;
-
-        uint32 m_PeriodicEventId;
+		bool m_isPeriodic;
+        uint32 m_periodicTimer;
+		uint32 m_PeriodicEventId;
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply);

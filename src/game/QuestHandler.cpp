@@ -245,8 +245,8 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     if ( pQuest->m_qRewChoiceItemsCount > 0 )
     {
-        if  (_player->CountFreeBagSlot()>=(int)pQuest->m_qRewChoiceItemsCount)
-            _player->AddNewItem(0,NULL_SLOT,pQuest->GetQuestInfo()->RewChoiceItemId[rewardid],pQuest->GetQuestInfo()->RewChoiceItemCount[rewardid],false,false);
+        if  (_player->CanAddItemCount(pQuest->GetQuestInfo()->RewChoiceItemId[rewardid], pQuest->GetQuestInfo()->RewChoiceItemCount[rewardid])>=(int)pQuest->m_qRewChoiceItemsCount)
+            _player->AddNewItem(pQuest->GetQuestInfo()->RewChoiceItemId[rewardid],pQuest->GetQuestInfo()->RewChoiceItemCount[rewardid], true);
         else
         {
             _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );

@@ -1075,7 +1075,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     Player* pl = m_session->GetPlayer();
 
     sLog.outDetail("Command : Additem, itemId = %i, amount = %i", itemId, count);
-    uint32 result = pl->AddNewItem(0, NULL_SLOT, itemId, count, true, false);
+    uint32 result = pl->AddNewItem(itemId, count, true);
     if (!result)
     {
         FillSystemMessageData(&data, m_session, fmtstring("Cannot create item '%i' (amount: %i)", itemId, count));

@@ -401,7 +401,7 @@ class Spell
         void SendResurrectRequest(Player* target);
 
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
-        void HandleAddAura(Unit* Target);
+        //void HandleAddAura(Unit* Target);
 
         SpellEntry * m_spellInfo;
         Item* m_CastItem;

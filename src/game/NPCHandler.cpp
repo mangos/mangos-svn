@@ -160,7 +160,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     if(!unit) return;
 
-    playerGold = GetPlayer( )->GetUInt32Value( PLAYER_FIELD_COINAGE );
+    playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
 
     std::list<TrainerSpell*>::iterator titr;
 
@@ -185,7 +185,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         data << guid << spellId;
         SendPacket( &data );
 
-        GetPlayer( )->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - proto->spellcost );
+        _player->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - proto->spellcost );
 
         Spell *spell = new Spell(unit, proto->spell, false, NULL);
 
@@ -285,25 +285,40 @@ void WorldSession::SendSpiritRessurect()
     SpellEntry *spellInfo = sSpellStore.LookupEntry( 15007 );
     if(spellInfo)
     {
-        Aura *Aur = new Aura(spellInfo,600000,_player,_player);
-        GetPlayer( )->AddAura(Aur);
+        for(uint32 i = 0;i<3;i++)
+        {
+			uint8 eff = spellInfo->Effect[i];
+			if(eff>=TOTAL_SPELL_EFFECTS)
+				continue;
+			SpellDuration* sd = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
+			int32 duration;
+			if(i==0)
+				duration = sd->Duration1;
+			if(i==1)
+				duration = sd->Duration2;
+			if(i==2)
+				duration = sd->Duration3;
+
+			Aura *Aur = new Aura(spellInfo, i, duration, _player, _player);
+			_player->AddAura(Aur);
+		}
     }
 
-    GetPlayer( )->DeathDurabilityLoss(0.25);
-    GetPlayer( )->SetMovement(MOVE_LAND_WALK);
-    GetPlayer( )->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
-    GetPlayer( )->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
+    _player->DeathDurabilityLoss(0.25);
+    _player->SetMovement(MOVE_LAND_WALK);
+    _player->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
+    _player->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
 
-    GetPlayer( )->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
+    _player->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
+    _player->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
+    _player->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
+    _player->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
+    _player->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
+    _player->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
 
-    GetPlayer( )->ResurrectPlayer();
-    GetPlayer( )->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(_player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
-    GetPlayer( )->SpawnCorpseBones();
+    _player->ResurrectPlayer();
+    //_player->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(_player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
+    _player->SpawnCorpseBones();
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )

@@ -230,25 +230,9 @@ void Spell::EffectApplyAura(uint32 i)
         return;
     }
 
-    if(unitTarget->tmpAura == 0)
-    {
-        unitTarget->RemoveAura(m_spellInfo->Id);
-        int32 duration = GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex));
-        Aura* Aur = new Aura(m_spellInfo,duration,m_caster,unitTarget);
-        if(duration < 0) Aur->SetPermanent(true);
-        unitTarget->tmpAura = Aur;
-    }
-
-    if(m_spellInfo->EffectBasePoints[0] < 0)
-        unitTarget->tmpAura->SetNegative();
-
-    uint32 type = 0;
-
-    if(m_spellInfo->EffectBasePoints[i] < 0)
-        type = 1;
-
-    unitTarget->tmpAura->AddMod(m_spellInfo->EffectApplyAuraName[i],damage,m_spellInfo->EffectAmplitude[i],m_spellInfo->EffectMiscValue[i],type);
-
+    int32 duration = GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex));
+    Aura* Aur = new Aura(m_spellInfo, i, duration, m_caster, unitTarget);
+	unitTarget->AddAura(Aur);	
 }
 
 void Spell::EffectManaDrain(uint32 i)
@@ -351,7 +335,7 @@ void Spell::EffectCreateItem(uint32 i)
                 else
                 {
                     pUnit->RemoveItemFromSlot(bagIndex,curSlot,true);
-                    pItem->DeleteFromDB();
+                    //pItem->DeleteFromDB();
                 }
                 pItem = NULL;
                 curSlot = 0;
@@ -362,84 +346,34 @@ void Spell::EffectCreateItem(uint32 i)
     pItem = NULL;
     Item* newItem;
     curSlot=0;
-    bool GetSoltflag = false;
+    uint8 GetSoltflag = 0;
     //add items that spell creates
-    for(i=0;i<2;i++)
+    for(i=0;i<3;i++)
     {
         if(m_spellInfo->EffectItemType[i] == 0)
             continue;
 
         slot = 0;
         ItemPrototype *m_itemProto = objmgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
-
+		if(!m_itemProto)
+			continue;
         uint32 num_to_add = ((pUnit->getLevel() - (m_spellInfo->spellLevel-1))*2);
         if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
             num_to_add = 1;
         if(num_to_add > m_itemProto->MaxCount)
             num_to_add = m_itemProto->MaxCount;
-
-        for(uint32 num=0;num < num_to_add;num++)
+        newItem = new Item;
+        newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
+		if(!newItem)
+			continue;
+		newItem->SetCount(num_to_add);
+		GetSoltflag = pUnit->AddItemToInventory(newItem, false);
+        if(!GetSoltflag)
         {
-            if(pUnit->GetSlotByItemID(m_spellInfo->EffectItemType[i],bagIndex,curSlot,false,true))
-            {
-                pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
-                if(pItem && pItem->GetProto()->ItemId == m_spellInfo->EffectItemType[i])
-                {
-                    if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) < pItem->GetProto()->MaxCount)
-                    {
-                        pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)+1);
-                        pUnit->UpdateSlot(bagIndex,curSlot);
-                        slot = curSlot;
-                        GetSoltflag = true;
-                        continue;
-                    }else GetSoltflag = false;
-                }
-            }
-
-            //if (slot == 0),Old slots has reach MaxCount, need a new solt to put items.
-            for (uint8 j = INVENTORY_SLOT_ITEM_START; j<INVENTORY_SLOT_ITEM_END;j++)
-            {
-                if(pUnit->GetItemBySlot(j) == 0)
-                {
-                    slot = j;
-                    bagIndex = CLIENT_SLOT_BACK;
-                    GetSoltflag = true;
-                }
-            }
-
-            Bag* pBag;
-            if(!GetSoltflag)
-                for(uint8 bagID=CLIENT_SLOT_01;bagID<=CLIENT_SLOT_04;bagID++)
-            {
-                pBag = pUnit->GetBagBySlot(bagID);
-                if (pBag)
-                    for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
-                {
-                    pItem = pBag->GetItemFromBag(pSlot);
-                    if(!pItem)
-                    {
-                        slot = pSlot;
-                        bagIndex = bagID;
-                        pBag = NULL;
-                        pItem = NULL;
-                        GetSoltflag = true;
-                        break;
-                    }
-                }
-            }
-
-            if(!GetSoltflag)
-            {
-                SendCastResult(0x18);
-                return;
-            }
-            newItem = new Item;
-            newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
-            pUnit->AddItem(bagIndex, slot, newItem, false, false, true);
-            newItem = NULL;
-
+            SendCastResult(0x18);
+            return;
         }
-
+        newItem = NULL;
     }
     switch(m_spellInfo->SpellVisual)
     {
@@ -703,9 +637,9 @@ void Spell::EffectApplyAA(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    Aura* Aur = new Aura(m_spellInfo,6000,m_caster,unitTarget);
-    Aur->AddMod(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
-
+    Aura* Aur = new Aura(m_spellInfo, i, 6000, m_caster, unitTarget);
+    Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
+	unitTarget->AddAura(Aur);
     //unitTarget->SetAura(aff); FIX-ME!
 }
 

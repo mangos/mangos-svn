@@ -99,7 +99,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (player->AddNewItem(0, NULL_SLOT, item.itemid, 1, false, false))
+    if (player->AddNewItem(item.itemid, 1, false))
     {
         item.is_looted = true;
 

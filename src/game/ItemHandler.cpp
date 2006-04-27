@@ -38,7 +38,7 @@ void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("ITEM: Split item, srcBag = %d, srcSlot = %d, dstBag = %d, dstSlot = %d, count = %d",srcBag, srcSlot, dstBag, dstSlot, count);
 
-    GetPlayer()->SplitItem(srcBag, srcSlot, dstBag, dstSlot, count);
+    _player->SplitItem(srcBag, srcSlot, dstBag, dstSlot, count);
 }
 
 void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
@@ -52,7 +52,7 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("ITEM: Swap inventory, srcSlot = %u, dstSlot = %u", (uint32)srcSlot, (uint32)dstSlot);
 
-    GetPlayer()->SwapItem(0, dstSlot, 0, srcSlot);
+    _player->SwapItem(0, dstSlot, 0, srcSlot);
 }
 
 void WorldSession::HandleSwapItem( WorldPacket & recv_data )
@@ -64,7 +64,7 @@ void WorldSession::HandleSwapItem( WorldPacket & recv_data )
     recv_data >> dstBag >> dstSlot >> srcBag >> srcSlot ;
     sLog.outDetail("ITEM: Swap, srcBag = %d, srcSlot = %d, dstBag = %d, dstSlot = %d", srcBag, srcSlot, dstBag, dstSlot);
 
-    GetPlayer()->SwapItem(dstBag, dstSlot, srcBag, srcSlot);
+    _player->SwapItem(dstBag, dstSlot, srcBag, srcSlot);
 }
 
 void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
@@ -76,13 +76,13 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     recv_data >> srcBag >> srcSlot;
     sLog.outDetail("ITEM: Auto equip, srcBag = %d, srcSlot = %d", srcBag, srcSlot);
 
-    Item *item  = GetPlayer()->GetItemBySlot(srcBag, srcSlot);
+    Item *item  = _player->GetItemBySlot(srcBag, srcSlot);
 
     if (!item) error_msg = EQUIP_ERR_ITEM_NOT_FOUND;
 
     if (!error_msg)
     {
-        dstSlot = GetPlayer()->FindEquipSlot(item->GetProto()->InventoryType);
+        dstSlot = _player->FindEquipSlot(item->GetProto()->InventoryType);
         if (dstSlot == INVENTORY_SLOT_ITEM_END) error_msg = EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
     }
 
@@ -97,7 +97,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    GetPlayer()->SwapItem(CLIENT_SLOT_BACK,dstSlot,srcBag,srcSlot);
+    _player->SwapItem(CLIENT_SLOT_BACK,dstSlot,srcBag,srcSlot);
 }
 
 void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
@@ -110,7 +110,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("ITEM: Destroy, bagIndex = %d, slot = %d, count = %d (Uknown data: %d %d %d)", bagIndex, slot, count, data1, data2, data3);
 
-    Item *item = GetPlayer()->GetItemBySlot(bagIndex,slot);
+    Item *item = _player->GetItemBySlot(bagIndex,slot);
 
     if (!item)
     {
@@ -120,7 +120,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
     if ((!count) || (count >= item->GetCount()))
     {
-        GetPlayer()->RemoveItemFromSlot(bagIndex,slot);
+        _player->RemoveItemFromSlot(bagIndex,slot);
         item->DeleteFromDB();
         delete item;
     }
@@ -128,7 +128,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     {
         item->SetCount(item->GetCount() - count);
     }
-    //GetPlayer()->_SaveInventory();
+    //_player->_SaveInventory();
 }
 
 extern void CheckItemDamageValues ( ItemPrototype *itemProto );
@@ -243,11 +243,11 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
     recv_data >> bagIndex >> slot;
 
     sLog.outDetail("ITEM: Read, bagIndex = %d, slot = %d", bagIndex, slot);
-    Item *pItem = GetPlayer()->GetItemBySlot(bagIndex, slot);
+    Item *pItem = _player->GetItemBySlot(bagIndex, slot);
 
     if (pItem)
     {
-        if ((!pItem->GetProto()->PageText) || (GetPlayer()->inCombat) || (GetPlayer()->isDead()))
+        if ((!pItem->GetProto()->PageText) || (_player->inCombat) || (_player->isDead()))
         {
             data.Initialize( SMSG_READ_ITEM_FAILED );
             sLog.outDetail("ITEM: Unable to read item");
@@ -311,9 +311,9 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 
     Item *item=NULL;
     uint8 bag,slot;
-    if (GetPlayer()->GetSlotByItemGUID(itemguid,bag,slot))
+    if (_player->GetSlotByItemGUID(itemguid,bag,slot))
     {
-        item = GetPlayer()->GetItemBySlot(bag,slot);
+        item = _player->GetItemBySlot(bag,slot);
         if (item)
         {
             if(item->GetProto()->SellPrice !=0)
@@ -324,13 +324,13 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 SendPacket( &data );
 
                 //if (amount == 0) amount = 1;
-                newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) + (item->GetProto()->SellPrice) * item->GetCount());
-                GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) + (item->GetProto()->SellPrice) * item->GetCount());
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
 
-                uint32 buyBackslot=GetPlayer()->GetCurrentBuybackSlot();
-                GetPlayer()->AddItemToBuyBackSlot(buyBackslot,item);
-                GetPlayer()->SetCurrentBuybackSlot(buyBackslot+1);
-                GetPlayer()->RemoveItemFromSlot(bag,slot,false);
+                uint32 buyBackslot=_player->GetCurrentBuybackSlot();
+                _player->AddItemToBuyBackSlot(buyBackslot,item);
+                _player->SetCurrentBuybackSlot(buyBackslot+1);
+                _player->RemoveItemFromSlot(bag,slot,false);
             }
             else
             {
@@ -365,11 +365,11 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
     //sLog.outDetail( "Packet Info: vendorguid: %u buybackslot: %u ", vendorguid, buybackslot);
     Item *buybackItem=NULL;
     uint32 slot=buybackslot-0x45;
-    buybackItem = GetPlayer()->GetItemFromBuyBackSlot(slot);
+    buybackItem = _player->GetItemFromBuyBackSlot(slot);
     if (buybackItem)
     {
         int32 newmoney;
-        newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (GetPlayer()->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+slot)));
+        newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (_player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+slot)));
         if(newmoney < 0 )
         {
             data.Initialize( SMSG_BUY_FAILED );
@@ -379,10 +379,11 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
             SendPacket( &data );
             return;
         }
-        if(GetPlayer()->AddItemToInventory(0, NULL_SLOT, buybackItem, false, false, false))
+        if(_player->CanAddItemCount(buybackItem, 1) >= buybackItem->GetCount())
         {
-            GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-            GetPlayer()->RemoveItemFromBuyBackSlot(slot);
+            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+			_player->AddItemToInventory(buybackItem, true);
+            _player->RemoveItemFromBuyBackSlot(slot);
         }
     }
 }
@@ -418,12 +419,12 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     recv_data >> srcguid >> itemid >> dstguid >> slot >> amount;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, srcguid);
-    Player *player = GetPlayer();
+    Player *player = _player;
 
     if (unit == NULL)
         return;
 
-    if(dstguid == GetPlayer()->GetGUID())
+    if(dstguid == _player->GetGUID())
     {
         slotType=CLIENT_SLOT_BACK;
     }
@@ -431,7 +432,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     {
         for (uint8 i=CLIENT_SLOT_01;i<=CLIENT_SLOT_04;i++)
         {
-            bag=GetPlayer()->GetBagBySlot(i);
+            bag=_player->GetBagBySlot(i);
             if(bag)
             {
                 if( dstguid == bag->GetGUID() )
@@ -449,7 +450,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
         //check money
         if( slotType>0 )
         {
-            newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (ItemPro->BuyPrice));
+            newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (ItemPro->BuyPrice));
             if(newmoney < 0 )
             {
                 data.Initialize( SMSG_BUY_FAILED );
@@ -460,7 +461,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 return;
             }
             //check level
-            if(ItemPro->RequiredLevel> GetPlayer()->getLevel())
+            if(ItemPro->RequiredLevel> _player->getLevel())
             {
                 data.Initialize( SMSG_BUY_FAILED );
                 data << uint64(srcguid);
@@ -473,7 +474,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             if( (slot < EQUIPMENT_SLOT_END) && (slotType==CLIENT_SLOT_BACK) )
             {
                 uint8 error =0;
-                //	            uint8 error = GetPlayer()->CanEquipItem(ItemPro);
+                //	            uint8 error = _player->CanEquipItem(ItemPro);
                 if (error)
                 {
                     data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
@@ -511,9 +512,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 return;
             }
             //add to slot
-            if(GetPlayer()->AddNewItem (slotType,slot,itemid,amount,false,false))
+            if(_player->AddNewItem (itemid,amount,false))
             {
-                GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
                 data.Initialize( SMSG_BUY_ITEM );
                 data << uint64(srcguid);
                 data << uint32(itemid) << uint32(amount);
@@ -583,7 +584,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             return;
         }
 
-        newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (objmgr.GetItemPrototype(itemid)->BuyPrice));
+        newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (objmgr.GetItemPrototype(itemid)->BuyPrice));
         if(newmoney < 0 )
         {
             data.Initialize( SMSG_BUY_FAILED );
@@ -594,9 +595,9 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             return;
         }
 
-        if (GetPlayer()->AddNewItem(0,NULL_SLOT,itemid,amount,false,false))
+        if (_player->AddNewItem(itemid,amount,false))
         {
-            GetPlayer()->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
             data.Initialize( SMSG_BUY_ITEM );
             data << uint64(srcguid);
             data << uint32(itemid) << uint32(amount);
@@ -770,7 +771,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("ITEM: Autostore item, srcBag = %d, srcSlot = %d, dstBag = %d", srcBag, srcSlot, dstBag);
 
-    Item *pItem = GetPlayer()->GetItemBySlot(srcBag, srcSlot);
+    Item *pItem = _player->GetItemBySlot(srcBag, srcSlot);
 
     if (!pItem)
     {
@@ -778,7 +779,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-	result = GetPlayer()->AddItem(dstBag, NULL_SLOT, pItem, true, false, true);
+	result = (_player->CanAddItemCount(pItem, 1) >= pItem->GetCount()) ? 1 : 0;
    
     if (!result)
     {
@@ -791,14 +792,14 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    GetPlayer()->RemoveItemFromSlot(srcBag, srcSlot);
-    GetPlayer()->AddItem(dstBag,srcSlot,pItem,true,false,true);
+    _player->RemoveItemFromSlot(srcBag, srcSlot);
+    result = _player->AddItemToInventory(pItem, false);
 	if (result == 2)
     {
         pItem->DeleteFromDB();
         delete pItem;
     }
-    //GetPlayer()->_SaveInventory();
+    //_player->_SaveInventory();
 }
 
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
@@ -806,7 +807,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     sLog.outDebug("WORLD: CMSG_BUY_BANK_SLOT");
     uint32 bank, result, price, playerGold;
 
-    bank = GetPlayer()->GetUInt32Value(PLAYER_BYTES_2);
+    bank = _player->GetUInt32Value(PLAYER_BYTES_2);
     result = (bank & 0x70000) >> 16;
 
     sLog.outDetail("PLAYER: Buy bank bag slot, slot number = %d", result);
@@ -845,11 +846,11 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
         return;
     }
     bank = (bank & ~0x70000) + (result << 16);
-    playerGold = GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE);
+    playerGold = _player->GetUInt32Value(PLAYER_FIELD_COINAGE);
     if (playerGold >= price)
     {
-        GetPlayer()->SetUInt32Value(PLAYER_BYTES_2, bank);
-        GetPlayer()->SetMoney(playerGold - price);
+        _player->SetUInt32Value(PLAYER_BYTES_2, bank);
+        _player->SetMoney(playerGold - price);
 			
     }
 }
@@ -863,7 +864,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> bagIndex >> slot;
 
-    pItem = GetPlayer()->GetItemBySlot(bagIndex, slot);
+    pItem = _player->GetItemBySlot(bagIndex, slot);
 
     if (!pItem)
     {
@@ -871,7 +872,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    result = GetPlayer()->AddItemToBank(0, NULL_SLOT, pItem, true, true, true);
+	result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount()) ? 1 : 0;
 
     if (!result)
     {
@@ -884,14 +885,14 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    GetPlayer()->RemoveItemFromSlot(bagIndex, slot);
-    GetPlayer()->AddItemToBank(0, NULL_SLOT, pItem, true, false, false);
+    _player->RemoveItemFromSlot(bagIndex, slot);
+    result = _player->AddItemToBank(pItem, true);
     if (result == 2)
     {
-        pItem->DeleteFromDB();
+        //pItem->DeleteFromDB();
         delete pItem;
     }
-    //GetPlayer()->_SaveInventory();
+    //_player->_SaveInventory();
 }
 
 void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
@@ -903,7 +904,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> bagIndex >> slot;
 
-    pItem = GetPlayer()->GetItemBySlot(bagIndex, slot);
+    pItem = _player->GetItemBySlot(bagIndex, slot);
 
     if (!pItem)
     {
@@ -911,7 +912,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    result = GetPlayer()->AddItemToInventory(0, NULL_SLOT, pItem, true, true, true);
+	result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount())? 1 : 0;
 
     if (!result)
     {
@@ -924,12 +925,12 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    GetPlayer()->RemoveItemFromSlot(bagIndex, slot);
-    GetPlayer()->AddItemToInventory(0, NULL_SLOT, pItem, true, false, false);
+    _player->RemoveItemFromSlot(bagIndex, slot);
+    result = _player->AddItemToBank(pItem, true);
     if (result == 2)
     {
-        pItem->DeleteFromDB();
+        //pItem->DeleteFromDB();
         delete pItem;
     }
-    //GetPlayer()->_SaveInventory();
+    //_player->_SaveInventory();
 }
