@@ -460,7 +460,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         else
         {
 
-            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%ul', '%s', '%d');", (unsigned long)guid, ticketText.c_str(), cat[buf[0]]);
+            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%d');", (unsigned long)guid, ticketText.c_str(), cat[buf[0]]);
 
             data.Initialize( SMSG_QUERY_TIME_RESPONSE );
             //data << (uint32)20;
