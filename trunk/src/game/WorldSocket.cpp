@@ -187,6 +187,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 {
     uint8 digest[20];
     uint32 clientSeed;
+	uint32 ADDONCount;
     std::string account;
     uint32 unk1, unk2;
     uint32 id, security;
@@ -200,6 +201,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         recvPacket >> account;
         recvPacket >> clientSeed;
         recvPacket.read(digest, 20);
+		recvPacket >> ADDONCount;
+		
     }
     catch(ByteBuffer::error &)
     {
@@ -278,26 +281,32 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     _crypt.SetKey(K.AsByteArray(), 40);
     _crypt.Init();
 
-    packet.Initialize( SMSG_AUTH_RESPONSE );
-    packet << uint8( 0x0C );
-    packet << uint8( 0xcf );
-    packet << uint8( 0xD2 );
-    packet << uint8( 0x07 );
+	uint8 size = 12;
+	packet.Initialize( SMSG_AUTH_RESPONSE );
+    packet << uint8( size ); //0x0C
+    packet << uint8( 0xB0 );
+    packet << uint8( 0x09 );
+    packet << uint8( 0x02 );
     packet << uint8( 0x00 );
-    packet << uint8( 0x00 );
+    packet << uint8( 0x02 );
+	packet << uint32( 0x0 );
 
     SendPacket(&packet);
 
     //! Enable ADDON's Thanks to Burlex
-    packet.Initialize( SMSG_ADDON_INFO );
-    packet << uint8( 0x0A );                                //10
-    for (uint8 i = 0; i < 0x0C; i++)                        //10
-    {
-        packet << uint8( 0x02 ) << uint8( 0x01 ) << uint32(0) << uint16(0);
-    }
-    SendPacket(&packet);
+	//! this is a fast hack, real fix is comming
 
-    _session = new WorldSession(id, this);
+	packet.Initialize(0x2EF); // SMSG_ADDON_INFO
+	packet << uint8(0x00);
+	for(int i = 0; i < ADDONCount; i++)
+		packet << uint8(0x01);
+	
+	packet << uint8(0x00);
+
+	SendPacket(&packet);
+	packet.hexlike();
+	
+	_session = new WorldSession(id, this);
     ASSERT(_session);
     _session->SetSecurity(security);
     sWorld.AddSession(_session);
