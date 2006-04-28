@@ -1,11 +1,17 @@
-Welcome to MaNGOS.
+= MaNGOS -- README =
+
+Copyright (c) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+
+See the COPYING file for copying conditions.
+
+== Welcome to MaNGOS ==
 
 MaNGOS (the Massive Network Game Object Server) is an Open Source reference
 implementation for a MMORPG server system. Please see the file COPYING for
 license details.
 
 For further information on the MaNGOS project, please visit our project web
-site at <http://www.mangosproject.org/forum/>
+site at <http://www.mangosproject.org/>
 
 Documenation on various development related topics can be found in the doc/
 subdirectory, including Doxygen-generated API documentation.

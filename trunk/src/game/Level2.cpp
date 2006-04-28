@@ -159,6 +159,18 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleNYICommand(const char* args)
+{
+    WorldPacket data;
+    char buf[256];
+
+    sprintf((char*)buf,"Not yet implemented");
+    FillSystemMessageData(&data, m_session, buf);
+    m_session->SendPacket( &data );
+
+    return true;
+}
+
 bool ChatHandler::HandleProgCommand(const char* args)
 {
     m_session->GetPlayer()->smsg_NewWorld(451, 16391.80f, 16341.20f, 69.44f,0.0f);
@@ -475,7 +487,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
         return true;
     }
 
-    // fix me : 'moverandom' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
+    // fix me : 'moverandom' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creature ?
     // perhaps it should be 'state'?
     sDatabase.PExecute("UPDATE `creature` SET `moverandom` = '%i' WHERE `guid` = '%u';", option, GUID_LOPART(guid));
 

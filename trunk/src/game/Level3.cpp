@@ -1173,7 +1173,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     GameObject* pGameObj = new GameObject();
     pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0);
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
-    sLog.outError("AddObject at Level3.cpp line 252");
+    sLog.outError("AddObject at Level3.cpp line 1176");
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     if(strcmp(safe,"true") == 0)

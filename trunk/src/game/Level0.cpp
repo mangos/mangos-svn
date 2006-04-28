@@ -146,18 +146,6 @@ bool ChatHandler::HandleInfoCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleNYICommand(const char* args)
-{
-    WorldPacket data;
-    char buf[256];
-
-    sprintf((char*)buf,"Not yet Implamented");
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
-    return true;
-}
-
 bool ChatHandler::HandleDismountCommand(const char* args)
 {
     WorldPacket data;
