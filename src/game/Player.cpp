@@ -2155,8 +2155,8 @@ void Player::_LoadInventory()
             item->LoadFromDB(item_guid, 1);
             if(item->IsBag())
                 ((Bag*)item)->LoadFromDB(item->GetGUIDLow(), 1);
-			else
-				AddItem(0, slot, item, true);
+            else
+                AddItem(0, slot, item, true);
         } while (result->NextRow());
 
         delete result;

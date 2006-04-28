@@ -797,16 +797,16 @@ void Unit::_UpdateSpells( uint32 time )
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
         (*i)->Update( time );
-				if(m_Auras.empty() || !(*i))
-					break;
-				else if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
-				{
-					RemoveAura(i);
-					if(m_Auras.empty())
-						break;
-					else
-						i = m_Auras.begin();
-				}
+        if(m_Auras.empty() || !(*i))
+            break;
+        else if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
+        {
+            RemoveAura(i);
+            if(m_Auras.empty())
+                break;
+            else
+                i = m_Auras.begin();
+        }
     }
 }
 

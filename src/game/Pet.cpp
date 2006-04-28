@@ -83,8 +83,8 @@ bool Pet::LoadPetFromDB( Unit* owner )
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), fields[1].GetUInt32());
 
-    uint32 petlevel=owner->getLevel();
-    SetUInt32Value(UNIT_FIELD_LEVEL, fields[3].GetUInt32());
+    uint32 petlevel=fields[3].GetUInt32();
+    SetUInt32Value(UNIT_FIELD_LEVEL, petlevel);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
