@@ -1241,7 +1241,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         //_RemoveStatsMods();
 
-        BuildLvlUpStats(&MPGain,&HPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
+        BuildLvlUpStats(&HPGain,&MPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
 
         uint32 newMP;
 
@@ -2153,9 +2153,10 @@ void Player::_LoadInventory()
             item->SetOwner(this);
             item->SetSlot(slot);
             item->LoadFromDB(item_guid, 1);
-            AddItem(0, slot, item, true);
             if(item->IsBag())
                 ((Bag*)item)->LoadFromDB(item->GetGUIDLow(), 1);
+			else
+				AddItem(0, slot, item, true);
         } while (result->NextRow());
 
         delete result;
