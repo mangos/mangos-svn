@@ -74,5 +74,5 @@ void Corpse::SaveToDB(bool bones)
 
 void Corpse::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `corpses` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%u'",GetGUIDLow());
 }
