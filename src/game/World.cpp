@@ -233,14 +233,20 @@ void World::SetInitialWorldSettings()
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
 
     StartEventSystem();
+	sLog.outString( "WORLD: Starting Event System" );
 
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     // need good tests on windows
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,120000,false,true);
-
-    sLog.outString( "WORLD: Starting Event System" );
+	
+#ifndef WIN32
+    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
+#else
+    //Temporairy hack for windows event system
+    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,3600001,false,true);
+#endif
+    sLog.outString( "WORLD: Starting Corpse Handler" );
 }
 
 void World::Update(time_t diff)
