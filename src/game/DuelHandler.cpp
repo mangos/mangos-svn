@@ -63,7 +63,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 
         data.Initialize(SMSG_DUEL_COUNTDOWN);
         //data << (uint64)0xbb8;                              // 3 seconds
-        data << (uint32)3000;                              // 3 seconds
+        data << (uint32)3000;                               // 3 seconds
         pl->GetSession()->SendPacket(&data);
         plTarget->GetSession()->SendPacket(&data);
 

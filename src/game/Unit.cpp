@@ -798,9 +798,9 @@ void Unit::_UpdateSpells( uint32 time )
     {
         (*i)->Update( time );
         if(m_Auras.empty())
-			break; 
-		else if(!(*i))
-			continue;
+            break;
+        else if(!(*i))
+            continue;
         else if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
         {
             RemoveAura(i);
