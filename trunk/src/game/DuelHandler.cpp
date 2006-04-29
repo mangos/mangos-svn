@@ -53,10 +53,7 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         pl->SetUInt32Value(PLAYER_DUEL_TEAM,1);
         plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,2);
 
-        pl->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
         pl->SetPvP(true);
-
-        plTarget->SetUInt32Value(UNIT_FIELD_FLAGS , 0x1008 );
         plTarget->SetPvP(true);
 
         pl->m_isInDuel = true;
@@ -65,7 +62,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         WorldPacket data;
 
         data.Initialize(SMSG_DUEL_COUNTDOWN);
-        data << (uint64)0xbb8;                              // 3 seconds
+        //data << (uint64)0xbb8;                              // 3 seconds
+        data << (uint32)3000;                              // 3 seconds
         pl->GetSession()->SendPacket(&data);
         plTarget->GetSession()->SendPacket(&data);
 

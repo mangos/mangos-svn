@@ -136,6 +136,7 @@ libgame_a_SOURCES = \
 	FlightMaster.h \
 	Formulas.h \
 	GameObject.h \
+	GlobalEvents.h \
 	GossipDef.h \
 	GridDefines.h \
 	GridNotifiers.h \
