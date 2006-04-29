@@ -42,7 +42,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared"
-				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_VER_1_9_2"
+				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
@@ -751,8 +751,10 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GlobalEvents.cpp"
-				>
+				RelativePath="..\..\src\game\GlobalEvents.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GlobalEvents.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\Mthread.cpp"
