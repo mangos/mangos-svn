@@ -225,7 +225,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
-    SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1)); //-1 is default value
+                                                            //-1 is default value
+    SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
 
     SetPvP(false);
 
