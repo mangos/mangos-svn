@@ -2001,17 +2001,16 @@ void Player::_SaveQuestStatus()
 
 void Player::_SaveInventory()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0';",GetGUIDLow());
 
-    for(unsigned int i = 0; i < BANK_SLOT_BAG_END; i++)
+    for(uint8 i = 0; i < BANK_SLOT_BAG_END; i++)
     {
         if (m_items[i] != 0)
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', 0, '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
+            m_items[i]->SaveToDB();
             if(m_items[i]->IsBag())
                 ((Bag*)m_items[i])->SaveToDB();
-            else
-                m_items[i]->SaveToDB();
         }
     }
 }
@@ -2136,16 +2135,16 @@ void Player::_LoadInventory()
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0';",GetGUIDLow());
 
     if (result)
     {
         do
         {
             Field *fields = result->Fetch();
-            uint8  slot      = fields[1].GetUInt8();
-            uint32 item_guid = fields[2].GetUInt32();
-            uint32 item_id   = fields[3].GetUInt32();
+            uint8  slot      = fields[2].GetUInt8();
+            uint32 item_guid = fields[3].GetUInt32();
+            uint32 item_id   = fields[4].GetUInt32();
 
             ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
@@ -2153,10 +2152,9 @@ void Player::_LoadInventory()
             item->SetOwner(this);
             item->SetSlot(slot);
             item->LoadFromDB(item_guid, 1);
+            AddItem(0, slot, item, true);
             if(item->IsBag())
-                ((Bag*)item)->LoadFromDB(item->GetGUIDLow(), 1);
-            else
-                AddItem(0, slot, item, true);
+                ((Bag*)item)->LoadFromDB();
         } while (result->NextRow());
 
         delete result;
@@ -2358,10 +2356,9 @@ void Player::DeleteFromDB()
     {
         if(m_items[i] == NULL)
             continue;
+        m_items[i]->DeleteFromDB();
         if(m_items[i]->IsBag())
             ((Bag*)m_items[i])->DeleteFromDB();
-        else
-            m_items[i]->DeleteFromDB();
     }
 
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",guid);

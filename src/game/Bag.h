@@ -46,7 +46,7 @@ class Bag : public Item
 
         // DB operations
         void SaveToDB();
-        void LoadFromDB(uint32 guid, uint32 auctioncheck);
+        void LoadFromDB();
         void DeleteFromDB();
 
         void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;
