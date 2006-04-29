@@ -21,6 +21,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "EventSystem.h"
+#include "GlobalEvents.h"
 
 Corpse *m_pCorpse;
 
@@ -87,11 +88,3 @@ void HandleCorpsesErase(void*)
 	}
 }
 
-
-    // global event to erase corpses/bones
-    // deleting expired bones time > 20 minutes and corpses > 3 days
-    // it is run each 20 minutes
-	// this event can't use in windows.
-#ifndef WIN32
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
-#endif

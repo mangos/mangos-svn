@@ -39,6 +39,7 @@
 #include "CreatureAIRegistry.h"                             // need for Game::Initialize()
 #include "Policies/SingletonImp.h"
 #include "EventSystem.h"
+#include "GlobalEvents.h"
 #include "BattleGroundMgr.h"
 
 INSTANTIATE_SINGLETON_1( World );
@@ -232,6 +233,13 @@ void World::SetInitialWorldSettings()
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
 
     StartEventSystem();
+
+    // global event to erase corpses/bones
+    // deleting expired bones time > 20 minutes and corpses > 3 days
+    // it is run each 20 minutes
+    // need good tests on windows
+    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,120000,false,true);
+
     sLog.outString( "WORLD: Starting Event System" );
 }
 

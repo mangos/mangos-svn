@@ -374,6 +374,7 @@ libgame_a_SOURCES = \
 	Formulas.h \
 	GameObject.h \
 	GossipDef.h \
+	GlobalEvents.h \
 	GridDefines.h \
 	GridNotifiers.h \
 	GridNotifiersImpl.h \
