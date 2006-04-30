@@ -112,9 +112,9 @@ void Bag::LoadFromDB()
             uint32 item_guid = fields[3].GetUInt32();
             uint32 item_id   = fields[4].GetUInt32();
 
-            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
+            //ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            Item *item = NewItemOrBag(proto);
+            Item *item = new Item();//NewItemOrBag(proto);
             item->SetOwner(m_owner);
             item->SetSlot(slot);
             item->LoadFromDB(item_guid, 1);
