@@ -202,7 +202,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         recvPacket >> clientSeed;
         recvPacket.read(digest, 20);
         recvPacket >> ADDONCount;
-
     }
     catch(ByteBuffer::error &)
     {
@@ -296,7 +295,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     //! Enable ADDON's Thanks to Burlex
     //! this is a fast hack, real fix is comming
 
-    packet.Initialize(0x2EF);                               // SMSG_ADDON_INFO
+    packet.Initialize(0x2EF); // SMSG_ADDON_INFO
     packet << uint8(0x00);
     for(int i = 0; i < ADDONCount; i++)
         packet << uint8(0x01);
@@ -304,9 +303,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     packet << uint8(0x00);
 
     SendPacket(&packet);
-    packet.hexlike();
 
     _session = new WorldSession(id, this);
+
     ASSERT(_session);
     _session->SetSecurity(security);
     sWorld.AddSession(_session);
