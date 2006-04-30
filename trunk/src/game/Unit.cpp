@@ -921,8 +921,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         (*i)->SetDuration(Aur->GetDuration());
     else
     {
-        Aur->_AddAura();
         m_Auras.push_back(Aur);
+        Aur->_AddAura();
     }
     //_ApplyStatsMods();
 

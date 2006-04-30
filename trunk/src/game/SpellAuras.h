@@ -282,8 +282,6 @@ class Aura
         void HandleModResistancePercent(bool Apply);
 
         Aura() : m_spellId(0), m_effIndex(0), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_positive(false), m_permanent(false), m_isPeriodic(false), m_procSpell(NULL) {}
-        Aura(uint32 spellid, uint32 eff, Unit *caster, Unit *target);
-        Aura(uint32 spellid, uint32 eff, int32 duration, Unit *caster, Unit *target);
         Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target);
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);

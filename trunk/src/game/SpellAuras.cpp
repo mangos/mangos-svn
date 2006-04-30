@@ -201,23 +201,6 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI	=	157	,//	Mod Pet Damage
 };
 
-Aura::Aura(uint32 spellid, uint32 eff, Unit *caster, Unit *target)
-{
-	m_spellId = spellid;
-    SpellEntry* spellproto = GetSpellProto();
-	assert(spellproto);
-    uint32 duration =sSpellDuration.LookupEntry(spellproto->DurationIndex)->Duration1;
-    Aura(spellproto, eff, duration, caster, target);
-}
-
-Aura::Aura(uint32 spellid, uint32 eff, int32 duration, Unit *caster, Unit *target)
-{
-	m_spellId = spellid;
-    SpellEntry* spellproto = GetSpellProto();
-	assert(spellproto);
-    Aura(spellproto, eff, duration, caster, target);
-}
-
 Aura::Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target) :
 m_spellId(spellproto->Id), m_caster(caster), m_target(target), m_effIndex(eff), m_duration(duration),
 m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_procSpell(NULL)
@@ -1003,7 +986,6 @@ void Aura::HandleAuraModDispelImmunity(bool apply)
     apply ? m_target->m_immuneToDispel = m_modifier->m_miscvalue : m_target->m_immuneToDispel = 0;
 }
 
-// FIX-ME PLS!!!
 void Aura::HandleAuraProcTriggerSpell(bool apply)
 {
 	if(apply)
