@@ -66,9 +66,23 @@ void Quest::LoadQuest(QuestInfo *questinfo)
 
 uint32 Quest::XPValue(Player* _Player)
 {
-    if(GetQuestInfo()->RewXP<=0)
+	uint32 fullxp = GetQuestInfo()->RewXP;
+    if(fullxp<=0)
         return 100;
-    return (uint32)(GetQuestInfo()->RewXP*(1.0+((double)GetQuestInfo()->QuestLevel+(double)GetQuestInfo()->MinLevel-(double)_Player->getLevel()*2.0)*0.05));
+	uint32 playerlvl = _Player->getLevel();
+	uint32 questlvl = GetQuestInfo()->QuestLevel;
+	if(playerlvl <= questlvl +  5 )
+		return fullxp;
+	else if(playerlvl == questlvl +  6 )
+		return (uint32)((fullxp * 0.8f / 5.0f) * 5);
+	else if(playerlvl == questlvl +  7 )
+		return (uint32)((fullxp * 0.6f / 5.0f) * 5);
+	else if(playerlvl == questlvl +  8 )
+		return (uint32)((fullxp * 0.4f / 5.0f) * 5);
+	else if(playerlvl == questlvl +  9 )
+		return (uint32)((fullxp * 0.2f / 5.0f) * 5);
+	else if(playerlvl >= questlvl +  10 )
+		return (uint32)((fullxp * 0.1f / 5.0f) * 5);
 }
 
 bool Quest::CanBeTaken( Player *_Player )
