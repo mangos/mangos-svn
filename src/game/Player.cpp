@@ -2331,9 +2331,12 @@ void Player::_LoadAuras()
             uint32 spellid = fields[1].GetUInt32();
             uint32 effindex = fields[2].GetUInt32();
             int32 remaintime = (int32)fields[3].GetUInt32();
-            Aura* aura = new Aura(spellid, effindex, remaintime, NULL, this);
+			
+			SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
+			assert(spellproto);
+
+            Aura* aura = new Aura(spellproto, effindex, remaintime, this, this);
             AddAura(aura);
-            //addAction(fields[1].GetUInt8(), fields[2].GetUInt16(), fields[3].GetUInt8(), fields[4].GetUInt8());
         }
         while( result->NextRow() );
 
