@@ -4111,9 +4111,9 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
         // Same items
         if (dstItem->GetEntry() == srcItem->GetEntry())
         {
-            int stack = dstItem->GetMaxStackCount();
-            int dstCount = dstItem->GetCount();
-            int srcCount = srcItem->GetCount();
+            uint32 stack = dstItem->GetMaxStackCount();
+            uint32 dstCount = dstItem->GetCount();
+            uint32 srcCount = srcItem->GetCount();
 
             // If item is stackable and stack is not full, add to stack
             if (dstCount+count <= stack)
@@ -4184,9 +4184,9 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         // Same items
         if (dstItem->GetEntry() == srcItem->GetEntry())
         {
-            int stack = dstItem->GetMaxStackCount();
-            int dstCount = dstItem->GetCount();
-            int srcCount = srcItem->GetCount();
+            uint32 stack = dstItem->GetMaxStackCount();
+            uint32 dstCount = dstItem->GetCount();
+            uint32 srcCount = srcItem->GetCount();
 
             // If item is stackable and stack is not full, add to stack
             if (dstCount < stack)
@@ -4451,8 +4451,8 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
     WorldPacket packet;
     Item *pItem = 0;
     Bag *pBag = 0;
-    int stack = item->GetMaxStackCount();
-    int count = item->GetCount();
+    uint32 stack = item->GetMaxStackCount();
+    uint32 count = item->GetCount();
 
     switch(bagIndex)
     {
@@ -4592,7 +4592,7 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
         sLog.outError("AddItemToInventory: Unknown item, itemId = %i",item->GetEntry());
         return 0;
     }
-    int count = item->GetCount();
+    uint32 count = item->GetCount();
     if(CanAddItemCount(item, 1) < count && !addmaxpossible)
     {
         sLog.outError("AddItemToInventory: Can't add, Bag is full.");
@@ -4601,7 +4601,7 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
 
     Item *pItem = 0;
     Bag *pBag = 0;
-    int stack = item->GetMaxStackCount();
+    uint32 stack = item->GetMaxStackCount();
     uint8 i;
 	if( stack > 1 )
 	{
@@ -4615,8 +4615,9 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
 				else
 				{
 					item->SetCount(stack - pItem->GetCount());
+					count = count - item->GetCount();
 					AddItem(0, i, item, true);
-					item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+					item->SetCount(count);
 				}
 			}
 		}
@@ -4636,8 +4637,9 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
 					else
 					{
 						item->SetCount(stack - pItem->GetCount());
+						count = count - item->GetCount();
 						AddItem(i, j, item, true);
-						item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+						item->SetCount(count);
 					}
 				}
 			}
@@ -4653,8 +4655,9 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
             else
             {
                 item->SetCount(stack);
+				count = count - item->GetCount();
                 AddItem(0, i, item, true);
-                item->SetCount(item->GetCount() - stack);
+                item->SetCount(count);
             }
         }
     }
@@ -4674,8 +4677,9 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
                 else
                 {
                     item->SetCount(stack);
+					count = count - item->GetCount();
                     AddItem(i, j, item, true);
-                    item->SetCount(item->GetCount() - stack);
+                    item->SetCount(count);
                 }
             }
         }
@@ -4698,7 +4702,7 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
         sLog.outError("AddItemToBank: Unknown item, itemId = %i",item->GetEntry());
         return 0;
     }
-    int count = item->GetCount();
+    uint32 count = item->GetCount();
     if(CanAddItemCount(item, 2) < count && !addmaxpossible)
     {
         sLog.outError("AddItemToBank: Can't add, Bank is full.");
@@ -4707,7 +4711,7 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
 
     Item *pItem = 0;
     Bag *pBag = 0;
-    int stack = item->GetMaxStackCount();
+    uint32 stack = item->GetMaxStackCount();
     uint8 i;
 
 	if( stack > 1 )
@@ -4722,8 +4726,9 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
 				else
 				{
 					item->SetCount(stack - pItem->GetCount());
+					count = count - item->GetCount();
 					AddItem(0, i, item, true);
-					item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+					item->SetCount(count);
 				}
 			}
 		}
@@ -4743,8 +4748,9 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
 					else
 					{
 						item->SetCount(stack - pItem->GetCount());
+						count = count - item->GetCount();
 						AddItem(i, j, item, true);
-						item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+						item->SetCount(count);
 					}
 				}
 			}
@@ -4760,8 +4766,9 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
             else
             {
                 item->SetCount(stack);
+				count = count - item->GetCount();
                 AddItem(0, i, item, true);
-                item->SetCount(item->GetCount() - stack);
+                item->SetCount(count);
             }
         }
     }
@@ -4781,8 +4788,9 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
                 else
                 {
                     item->SetCount(stack);
+					count = count - item->GetCount();
                     AddItem(i, j, item, true);
-                    item->SetCount(item->GetCount() - stack);
+                    item->SetCount(count);
                 }
             }
         }

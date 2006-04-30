@@ -615,11 +615,6 @@ void Spell::EffectOpenLock(uint32 i)
     }else loottype=1;
     if(loottype == 1)
         ((Player*)m_caster)->UpdateSkill(SKILL_OPENLOCK);
-    //not sure if its need while loottype ==2 or 3
-    if(loottype == 2)
-        ((Player*)m_caster)->UpdateSkill(SKILL_HERBALISM);
-    if(loottype == 3)
-        ((Player*)m_caster)->UpdateSkill(SKILL_MINING);
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
 }
@@ -657,37 +652,6 @@ void Spell::EffectLearnSpell(uint32 i)
     data << spellToLearn;
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
     ((Player*)unitTarget)->addSpell((uint16)spellToLearn);
-    switch(m_spellInfo->Id)
-    {
-        case 2372:
-            ((Player*)unitTarget)->addSpell(2369);
-            break;
-        case 2373:
-            ((Player*)unitTarget)->addSpell(2371);
-            break;
-        case 2581:
-            ((Player*)unitTarget)->addSpell(2577);
-            break;
-        case 2582:
-            ((Player*)unitTarget)->addSpell(2578);
-            break;
-        case 3568:
-            ((Player*)unitTarget)->addSpell(2579);
-            break;
-            /*
-            case 10249:
-                ((Player*)unitTarget)->addSpell(??);
-                break;
-            case 3571:
-                ((Player*)unitTarget)->addSpell(??);
-                break;
-            case 11994:
-                ((Player*)unitTarget)->addSpell(??);
-                break;
-            */
-        default:break;
-    }
-
 }
 
 void Spell::EffectDispel(uint32 i)
