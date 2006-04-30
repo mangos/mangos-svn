@@ -2147,9 +2147,9 @@ void Player::_LoadInventory()
             uint32 item_guid = fields[3].GetUInt32();
             uint32 item_id   = fields[4].GetUInt32();
 
-            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
+            //ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            Item *item = NewItemOrBag(proto);
+            Item *item = new Item();//NewItemOrBag(proto);
             item->SetOwner(this);
             item->SetSlot(slot);
             item->LoadFromDB(item_guid, 1);
@@ -3715,7 +3715,7 @@ bool Player::CanUseItem(ItemPrototype * proto)
     if (error_code)
     {
         WorldPacket data;
-        Item* pItem = NewItemOrBag(proto);
+        Item* pItem = new Item();//NewItemOrBag(proto);
         pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this);
 
         data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
@@ -4264,8 +4264,7 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
         sLog.outError("CreateNewItem : Unknown itemId, itemId = %i", itemId);
         return NULL;
     }
-    Item *pItem = NewItemOrBag(proto);
-
+    Item *pItem = new Item();// = NewItemOrBag(proto);
     if (count > proto->MaxCount) { count = proto->MaxCount; }
     if (count < 1) { count = 1; }
     pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this);
@@ -4604,11 +4603,50 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
     Bag *pBag = 0;
     int stack = item->GetMaxStackCount();
     uint8 i;
-
+	if( stack > 1 )
+	{
+		for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+		{
+			pItem = GetItemBySlot(i);
+			if(pItem && pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+			{
+				if(pItem->GetCount() + item->GetCount() <= stack)
+					return AddItem(0, i, item, true);
+				else
+				{
+					item->SetCount(stack - pItem->GetCount());
+					AddItem(0, i, item, true);
+					item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+				}
+			}
+		}
+		for(i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+		{
+			pItem = GetItemBySlot(i);
+			if(!pItem || !pItem->IsBag())
+				continue;
+			pBag = (Bag*)pItem;
+			for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
+			{
+				pItem = pBag->GetItemFromBag(j);
+				if(pItem && pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+				{
+					if(pItem->GetCount() + item->GetCount() <= stack)
+						return AddItem(i, j, item, true);
+					else
+					{
+						item->SetCount(stack - pItem->GetCount());
+						AddItem(i, j, item, true);
+						item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+					}
+				}
+			}
+		}
+	}
     for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         pItem = GetItemBySlot(i);
-        if(!pItem)
+		if(!pItem)
         {
             if(item->GetCount() <= stack)
                 return AddItem(0, i, item, true);
@@ -4619,17 +4657,6 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
                 item->SetCount(item->GetCount() - stack);
             }
         }
-        else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-        {
-            if(pItem->GetCount() + item->GetCount() <= stack)
-                return AddItem(0, i, item, true);
-            else
-            {
-                item->SetCount(stack - pItem->GetCount());
-                AddItem(0, i, item, true);
-                item->SetCount(item->GetCount() + pItem->GetCount() - stack);
-            }
-        }
     }
     for(i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -4637,10 +4664,10 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
         if(!pItem || !pItem->IsBag())
             continue;
         pBag = (Bag*)pItem;
-        for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
+         for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
         {
             pItem = pBag->GetItemFromBag(j);
-            if(!pItem)
+			if(!pItem)
             {
                 if(item->GetCount() <= stack)
                     return AddItem(i, j, item, true);
@@ -4651,20 +4678,9 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
                     item->SetCount(item->GetCount() - stack);
                 }
             }
-            else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-            {
-                if(pItem->GetCount() + item->GetCount() <= stack)
-                    return AddItem(i, j, item, true);
-                else
-                {
-                    item->SetCount(stack - pItem->GetCount());
-                    AddItem(i, j, item, true);
-                    item->SetCount(item->GetCount() + pItem->GetCount() - stack);
-                }
-            }
         }
-    }
-    return 0;
+	}
+   return 0;
 }
 
 //Adds an existing item to bank
@@ -4694,10 +4710,50 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
     int stack = item->GetMaxStackCount();
     uint8 i;
 
-    for(i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+	if( stack > 1 )
+	{
+		for(i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+		{
+			pItem = GetItemBySlot(i);
+			if(pItem && pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+			{
+				if(pItem->GetCount() + item->GetCount() <= stack)
+					return AddItem(0, i, item, true);
+				else
+				{
+					item->SetCount(stack - pItem->GetCount());
+					AddItem(0, i, item, true);
+					item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+				}
+			}
+		}
+		for(i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+		{
+			pItem = GetItemBySlot(i);
+			if(!pItem || !pItem->IsBag())
+				continue;
+			pBag = (Bag*)pItem;
+			for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
+			{
+				pItem = pBag->GetItemFromBag(j);
+				if(pItem && pItem->GetProto()->ItemId == item->GetProto()->ItemId)
+				{
+					if(pItem->GetCount() + item->GetCount() <= stack)
+						return AddItem(i, j, item, true);
+					else
+					{
+						item->SetCount(stack - pItem->GetCount());
+						AddItem(i, j, item, true);
+						item->SetCount(item->GetCount() + pItem->GetCount() - stack);
+					}
+				}
+			}
+		}
+	}
+	for(i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
     {
         pItem = GetItemBySlot(i);
-        if(!pItem)
+		if(!pItem)
         {
             if(item->GetCount() <= stack)
                 return AddItem(0, i, item, true);
@@ -4706,17 +4762,6 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
                 item->SetCount(stack);
                 AddItem(0, i, item, true);
                 item->SetCount(item->GetCount() - stack);
-            }
-        }
-        else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-        {
-            if(pItem->GetCount() + item->GetCount() <= stack)
-                return AddItem(0, i, item, true);
-            else
-            {
-                item->SetCount(stack - pItem->GetCount());
-                AddItem(0, i, item, true);
-                item->SetCount(item->GetCount() + pItem->GetCount() - stack);
             }
         }
     }
@@ -4729,7 +4774,7 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
         for (uint8 j=0; j < pBag->GetProto()->ContainerSlots; j++)
         {
             pItem = pBag->GetItemFromBag(j);
-            if(!pItem)
+			if(!pItem)
             {
                 if(item->GetCount() <= stack)
                     return AddItem(i, j, item, true);
@@ -4738,17 +4783,6 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
                     item->SetCount(stack);
                     AddItem(i, j, item, true);
                     item->SetCount(item->GetCount() - stack);
-                }
-            }
-            else if(pItem->GetProto()->ItemId == item->GetProto()->ItemId)
-            {
-                if(pItem->GetCount() + item->GetCount() <= stack)
-                    return AddItem(i, j, item, true);
-                else
-                {
-                    item->SetCount(stack - pItem->GetCount());
-                    AddItem(i, j, item, true);
-                    item->SetCount(item->GetCount() + pItem->GetCount() - stack);
                 }
             }
         }
@@ -5191,6 +5225,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if(!proto) return;
 
+    sLog.outDebug("_ApplyItemMods start.");
     //_RemoveStatsMods();
 
     if (apply)
@@ -5312,10 +5347,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if(apply)
         CastItemSpell(item,(Unit*)this);
-    else for (int i = 0; i < 5; i++)
-        RemoveAura(proto->Spells[i].SpellId );
+    //else for (int i = 0; i < 5; i++)
+    //    RemoveAura(proto->Spells[i].SpellId );
 
-    //_ApplyStatsMods();
+    sLog.outDebug("_ApplyItemMods complete.");
+   //_ApplyStatsMods();
 
 }
 
@@ -5408,11 +5444,13 @@ bool Player::IsItemSpellToCombat(SpellEntry *spellInfo)
 
 void Player::_RemoveAllItemMods()
 {
+	sLog.outDebug("_RemoveAllItemMods start.");
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
             _ApplyItemMods(m_items[i],i, false);
     }
+	sLog.outDebug("_RemoveAllItemMods complete.");
 }
 
 void Player::_ApplyAllItemMods()

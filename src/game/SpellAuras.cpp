@@ -203,20 +203,24 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 
 Aura::Aura(uint32 spellid, uint32 eff, Unit *caster, Unit *target)
 {
+	m_spellId = spellid;
     SpellEntry* spellproto = GetSpellProto();
+	assert(spellproto);
     uint32 duration =sSpellDuration.LookupEntry(spellproto->DurationIndex)->Duration1;
     Aura(spellproto, eff, duration, caster, target);
 }
 
 Aura::Aura(uint32 spellid, uint32 eff, int32 duration, Unit *caster, Unit *target)
 {
+	m_spellId = spellid;
     SpellEntry* spellproto = GetSpellProto();
+	assert(spellproto);
     Aura(spellproto, eff, duration, caster, target);
 }
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target) :
 m_spellId(spellproto->Id), m_caster(caster), m_target(target), m_effIndex(eff), m_duration(duration),
-m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false)
+m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_procSpell(NULL)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -330,7 +334,18 @@ void Aura::_AddAura()
 
     ApplyModifier(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-
+	if(m_effIndex > 0)
+	{
+		Aura* aura;
+		aura = m_target->GetAura(m_spellId, m_effIndex - 1);
+		if(!aura && m_effIndex>1)
+			aura = m_target->GetAura(m_spellId, m_effIndex - 2);
+		if(aura)
+		{
+			SetAuraSlot( aura->GetAuraSlot());
+			return;
+		}
+	}
     WorldPacket data;
 
     uint8 slot, i;
@@ -991,31 +1006,20 @@ void Aura::HandleAuraModDispelImmunity(bool apply)
 // FIX-ME PLS!!!
 void Aura::HandleAuraProcTriggerSpell(bool apply)
 {
-    /*	uint32 i=0;
-                for(i=0;i<2;i++)
-                    if(GetSpellProto()->EffectApplyAuraName[i] == m_modifier->m_auraname)
-                        break;
-                if(apply)
-                {
-                    ProcTriggerSpell* pts = new ProcTriggerSpell();
-                    pts->caster = GetCaster();
-                    pts->spellId = GetSpellProto()->EffectTriggerSpell[i];
-                    pts->trigger = GetSpellProto()->EffectBasePoints[i];
-                    pts->procChance = GetSpellProto()->procChance;
-                    pts->procFlags = GetSpellProto()->procFlags;
-                    GetSpellProto()->procCharges == 0 ? pts->procCharges = 0
-                        : pts->procCharges = GetSpellProto()->procCharges;
-                    m_procSpells.push_back((*pts));
-                }
-                else
-                {
-                    for(std::list<struct ProcTriggerSpell>::iterator itr = m_procSpells.begin();itr != m_procSpells.end();itr++)
-                        if(itr->spellId == GetId() && itr->caster == GetCaster())
-                    {
-                        m_procSpells.erase(itr);
-                        break;
-                    }
-                }*/
+	if(apply)
+	{
+		m_procSpell = new ProcTriggerSpell();
+		m_procSpell->caster = m_caster->GetGUID();
+		m_procSpell->spellId = GetSpellProto()->EffectTriggerSpell[m_effIndex];
+		m_procSpell->trigger = GetSpellProto()->EffectBasePoints[m_effIndex];
+		m_procSpell->procChance = GetSpellProto()->procChance;
+		m_procSpell->procFlags = GetSpellProto()->procFlags;
+		m_procSpell->procCharges = GetSpellProto()->procCharges;
+	}
+	else
+	{
+		m_procSpell = NULL;
+	}
 }
 
 // FIX-ME PLS!!!

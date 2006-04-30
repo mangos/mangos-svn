@@ -656,6 +656,32 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ((Player*)pVictim)->UpdateDefense();
     }
 
+    AuraList::iterator i;
+    for (i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); i++)
+	{
+		ProcTriggerSpell *procspell;
+		if((procspell = (*i)->GetProcSpell()))
+		{
+			if(procspell->procFlags == 40 && procspell->procChance * 1000 > rand() % 100000)
+			{
+				SpellEntry *spellInfo = sSpellStore.LookupEntry((*i)->GetProcSpell()->spellId );
+
+				if(!spellInfo)
+				{
+					sLog.outError("WORLD: unknown spell id %i\n", (*i)->GetProcSpell()->spellId);
+					return;
+				}
+
+				Spell *spell = new Spell(pVictim, spellInfo, false, 0);
+				WPAssert(spell);
+
+				SpellCastTargets targets;
+				targets.setUnitTarget( this );
+				spell->prepare(&targets);
+			}
+		}
+	}
+
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
         sLog.outString("Spell Delayed!");
@@ -895,8 +921,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         (*i)->SetDuration(Aur->GetDuration());
     else
     {
-        m_Auras.push_back(Aur);
         Aur->_AddAura();
+        m_Auras.push_back(Aur);
     }
     //_ApplyStatsMods();
 
@@ -1220,11 +1246,11 @@ void Unit::_ApplyAllAuraMods()
         m_removeAuraTimer = 4;
 }*/
 
-Aura* Unit::GetAura(uint32 spellId)
+Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
 {
     AuraList::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
-        if((*i)->GetId() == spellId)
+        if((*i)->GetId() == spellId && (*i)->GetEffIndex() == effindex)
             return (*i);
     return NULL;
 }

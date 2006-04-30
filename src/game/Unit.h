@@ -223,7 +223,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool m_silenced;
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
-        std::list<struct ProcTriggerSpell> m_procSpells;
 
         struct DamageManaShield* m_damageManaShield;
 
@@ -233,7 +232,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         float GetHostility(uint64 guid);
         Hostil* GetHostil(uint64 guid);
         void AddHostil(uint64 guid, float hostility);
-        Aura* GetAura(uint32 spellId);
+        Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraList GetAuras( ) {return m_Auras;}
 
     protected:
