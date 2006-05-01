@@ -81,8 +81,7 @@ uint32 Quest::XPValue(Player* _Player)
 		return (uint32)((fullxp * 0.4f / 5.0f) * 5);
 	else if(playerlvl == questlvl +  9 )
 		return (uint32)((fullxp * 0.2f / 5.0f) * 5);
-	else if(playerlvl >= questlvl +  10 )
-		return (uint32)((fullxp * 0.1f / 5.0f) * 5);
+	return (uint32)((fullxp * 0.1f / 5.0f) * 5);
 }
 
 bool Quest::CanBeTaken( Player *_Player )

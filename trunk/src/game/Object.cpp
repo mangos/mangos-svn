@@ -471,24 +471,27 @@ uint32 Object::GetZoneId( )
 float Object::GetDistanceSq(const Object* obj) const
 {
     ASSERT(obj->GetMapId() == m_mapId);
+	float size = GetObjectSize();
+	float size1 = obj->GetObjectSize();
     float x1, y1, z1, x2, y2, z2;
     GetClosePoint( obj, x1, y1, z1 );
     obj->GetClosePoint( this, x2, y2, z2 );
     float dx  = x2 - x1;
     float dy  = y2 - y1;
     float dz  = z2 - z1;
-    return (dx*dx) + (dy*dy) + (dz*dz);
+    return (dx*dx) + (dy*dy) + (dz*dz) + size * size + size1 * size1;
 }
 
 float Object::GetDistanceSq(const float x, const float y, const float z) const
 {
+	float size = GetObjectSize();
     float x1, y1, z1;
     GetClosePoint( x, y, z, x1, y1, z1 );
 
     float dx  = x - x1;
     float dy  = y - y1;
     float dz  = z - z1;
-    return (dx*dx) + (dy*dy) + (dz*dz);
+    return (dx*dx) + (dy*dy) + (dz*dz) + size * size * 2;
 }
 
 float Object::GetDistance2dSq(const Object* obj) const

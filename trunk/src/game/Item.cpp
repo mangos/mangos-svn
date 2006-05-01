@@ -421,11 +421,12 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
 
 void Item::SaveToDB()
 {
-    DeleteFromDB();
+	uint32 guid = GetGUIDLow();
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
     std::stringstream ss;
     ss.rdbuf()->str("");
     ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES ("
-        << GetGUIDLow() << ",'";
+        << guid << ",'";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
@@ -435,7 +436,7 @@ void Item::SaveToDB()
     sDatabase.Execute( ss.str().c_str() );
 }
 
-void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
+bool Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
     QueryResult *result;
 
@@ -452,14 +453,14 @@ void Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
         result = sDatabase.PQuery("SELECT `data` FROM `mail_item` WHERE `guid` = '%u';", guid);
     }
 
-    if (!result) return;
+    if (!result) return false;
 
     Field *fields = result->Fetch();
 
     LoadValues(fields[0].GetString());
 
     delete result;
-
+	return true;
 }
 
 void Item::DeleteFromDB()

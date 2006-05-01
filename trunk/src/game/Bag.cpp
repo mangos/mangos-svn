@@ -78,19 +78,22 @@ void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 
 void Bag::SaveToDB()
 {
+	Item::SaveToDB();
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", m_owner->GetGUIDLow(), GetSlot());
     for (uint8 i = 0; i < 20; i++)
     {
         if (m_bagslot[i])
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", m_owner->GetGUIDLow(), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
             m_bagslot[i]->SaveToDB();
         }
     }
 }
 
-void Bag::LoadFromDB()
+bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
+	if(!Item::LoadFromDB(guid, auctioncheck))
+		return false;
     for (uint8 i = 0; i < 20; i+=2)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
@@ -100,7 +103,6 @@ void Bag::LoadFromDB()
             m_bagslot[i] = NULL;
         }
     }
-
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", m_owner->GetGUIDLow(), GetSlot());
 
     if (result)
@@ -112,17 +114,19 @@ void Bag::LoadFromDB()
             uint32 item_guid = fields[3].GetUInt32();
             uint32 item_id   = fields[4].GetUInt32();
 
-            //ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
+            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            Item *item = new Item();//NewItemOrBag(proto);
+            Item *item = NewItemOrBag(proto);
             item->SetOwner(m_owner);
             item->SetSlot(slot);
-            item->LoadFromDB(item_guid, 1);
+            if(!item->LoadFromDB(item_guid, 1))
+				continue;
             AddItemToBag(slot, item);
         } while (result->NextRow());
 
         delete result;
     }
+	return true;
 }
 
 void Bag::DeleteFromDB()

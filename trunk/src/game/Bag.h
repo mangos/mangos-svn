@@ -34,6 +34,7 @@ class Bag : public Item
 
         void Create(uint32 guidlow, uint32 itemid, Player* owner);
 
+		void Clear();
         uint8 AddItemToBag(uint8 slot, Item *item);
         Item* RemoveItemFromBag(uint8 slot);
         uint32 RemoveItemFromBag(uint8 slot,uint32 count);
@@ -46,7 +47,7 @@ class Bag : public Item
 
         // DB operations
         void SaveToDB();
-        void LoadFromDB();
+        bool LoadFromDB(uint32 guid, uint32 auctioncheck);
         void DeleteFromDB();
 
         void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;

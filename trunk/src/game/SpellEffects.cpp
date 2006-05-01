@@ -959,7 +959,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 else
                 {
                     ((Player*)m_caster)->RemoveItemFromSlot(0,slot);
-                    stackitem->DeleteFromDB();
+                    //stackitem->DeleteFromDB();
                     //if(equipInvType == INVTYPE_THROWN)
                     //	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_THROWN)
                     //else

@@ -116,7 +116,7 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetOwner(Player *owner) { m_owner = owner; }
 
         virtual void SaveToDB();
-        virtual void LoadFromDB(uint32 guid, uint32 auctioncheck);
+        virtual bool LoadFromDB(uint32 guid, uint32 auctioncheck);
         virtual void DeleteFromDB();
 
         void SetDurability(uint32 Value);
