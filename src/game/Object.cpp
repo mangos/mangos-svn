@@ -541,17 +541,23 @@ bool Object::IsInArc(const float arcangle, const Object* obj) const
 
 void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z ) const
 {
-    float angle;
+    float angle, z1;
     if(!victim)
+	{
+		z1 = GetPositionZ();
         angle = m_orientation;
+	}
     else
+	{
+		z1 = victim->GetPositionZ();
         angle = GetAngle( victim );
+	}
     x = m_positionX + GetObjectSize() * cos(angle);
     y = m_positionY + GetObjectSize() * sin(angle);
     int mapid = GetMapId();
     z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-    if( abs( z - victim->GetPositionZ() ) > 15.0f )
-        z = victim->GetPositionZ();
+    if( abs( z - z1 ) > 15.0f )
+        z = z1;
 }
 
 void Object::GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const

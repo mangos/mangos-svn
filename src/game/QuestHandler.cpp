@@ -262,11 +262,10 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     {
         WorldPacket sdata;
 
-        _player->addSpell( pQuest->GetQuestInfo()->RewSpell );
-
         sdata.Initialize (SMSG_LEARNED_SPELL);
         sdata << pQuest->GetQuestInfo()->RewSpell;
         SendPacket( &sdata );
+        _player->addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell );
     }
 
     _player->PlayerTalkClass->SendQuestUpdateComplete( pQuest );
