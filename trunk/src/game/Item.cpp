@@ -421,7 +421,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
 
 void Item::SaveToDB()
 {
-	uint32 guid = GetGUIDLow();
+    uint32 guid = GetGUIDLow();
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
     std::stringstream ss;
     ss.rdbuf()->str("");
@@ -460,7 +460,7 @@ bool Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
     LoadValues(fields[0].GetString());
 
     delete result;
-	return true;
+    return true;
 }
 
 void Item::DeleteFromDB()

@@ -656,32 +656,32 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ((Player*)pVictim)->UpdateDefense();
     }
 
-	// proc trigger aura   
-	AuraList::iterator i;
+    // proc trigger aura
+    AuraList::iterator i;
     for (i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); i++)
-	{
-		ProcTriggerSpell *procspell;
-		if((procspell = (*i)->GetProcSpell()))
-		{
-			if(procspell->procFlags == 40 && procspell->procChance * 1000 > rand() % 100000)
-			{
-				SpellEntry *spellInfo = sSpellStore.LookupEntry((*i)->GetProcSpell()->spellId );
+    {
+        ProcTriggerSpell *procspell;
+        if((procspell = (*i)->GetProcSpell()))
+        {
+            if(procspell->procFlags == 40 && procspell->procChance * 1000 > rand() % 100000)
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i)->GetProcSpell()->spellId );
 
-				if(!spellInfo)
-				{
-					sLog.outError("WORLD: unknown spell id %i\n", (*i)->GetProcSpell()->spellId);
-					return;
-				}
+                if(!spellInfo)
+                {
+                    sLog.outError("WORLD: unknown spell id %i\n", (*i)->GetProcSpell()->spellId);
+                    return;
+                }
 
-				Spell *spell = new Spell(pVictim, spellInfo, false, 0);
-				WPAssert(spell);
+                Spell *spell = new Spell(pVictim, spellInfo, false, 0);
+                WPAssert(spell);
 
-				SpellCastTargets targets;
-				targets.setUnitTarget( this );
-				spell->prepare(&targets);
-			}
-		}
-	}
+                SpellCastTargets targets;
+                targets.setUnitTarget( this );
+                spell->prepare(&targets);
+            }
+        }
+    }
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {

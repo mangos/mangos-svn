@@ -317,18 +317,18 @@ void Aura::_AddAura()
 
     ApplyModifier(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-	if(m_effIndex > 0)
-	{
-		Aura* aura;
-		aura = m_target->GetAura(m_spellId, m_effIndex - 1);
-		if(!aura && m_effIndex>1)
-			aura = m_target->GetAura(m_spellId, m_effIndex - 2);
-		if(aura)
-		{
-			SetAuraSlot( aura->GetAuraSlot());
-			return;
-		}
-	}
+    if(m_effIndex > 0)
+    {
+        Aura* aura;
+        aura = m_target->GetAura(m_spellId, m_effIndex - 1);
+        if(!aura && m_effIndex>1)
+            aura = m_target->GetAura(m_spellId, m_effIndex - 2);
+        if(aura)
+        {
+            SetAuraSlot( aura->GetAuraSlot());
+            return;
+        }
+    }
     WorldPacket data;
 
     uint8 slot, i;
@@ -388,11 +388,11 @@ void Aura::_RemoveAura()
     ApplyModifier(false);
 
     uint8 slot = GetAuraSlot();
-	if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
-	{
-		SetAuraSlot(0);
-		return;
-	}
+    if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
+    {
+        SetAuraSlot(0);
+        return;
+    }
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
 
     uint8 flagslot = slot >> 3;
@@ -992,20 +992,20 @@ void Aura::HandleAuraModDispelImmunity(bool apply)
 
 void Aura::HandleAuraProcTriggerSpell(bool apply)
 {
-	if(apply)
-	{
-		m_procSpell = new ProcTriggerSpell();
-		m_procSpell->caster = m_caster->GetGUID();
-		m_procSpell->spellId = GetSpellProto()->EffectTriggerSpell[m_effIndex];
-		m_procSpell->trigger = GetSpellProto()->EffectBasePoints[m_effIndex];
-		m_procSpell->procChance = GetSpellProto()->procChance;
-		m_procSpell->procFlags = GetSpellProto()->procFlags;
-		m_procSpell->procCharges = GetSpellProto()->procCharges;
-	}
-	else
-	{
-		m_procSpell = NULL;
-	}
+    if(apply)
+    {
+        m_procSpell = new ProcTriggerSpell();
+        m_procSpell->caster = m_caster->GetGUID();
+        m_procSpell->spellId = GetSpellProto()->EffectTriggerSpell[m_effIndex];
+        m_procSpell->trigger = GetSpellProto()->EffectBasePoints[m_effIndex];
+        m_procSpell->procChance = GetSpellProto()->procChance;
+        m_procSpell->procFlags = GetSpellProto()->procFlags;
+        m_procSpell->procCharges = GetSpellProto()->procCharges;
+    }
+    else
+    {
+        m_procSpell = NULL;
+    }
 }
 
 // FIX-ME PLS!!!

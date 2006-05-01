@@ -182,22 +182,22 @@ AggressorAI::UpdateAI(const uint32 diff)
                 {
                     if( i_creature.isAttackReady() )
                     {
-						std::list<Hostil*> hostillist = i_creature.GetHostilList();
-						if(hostillist.size())
-						{
-							hostillist.sort();
-							hostillist.reverse();
-							uint64 guid;
-							if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
-							{
-								Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
-								if(newtarget)
-								{
-									i_pVictim = NULL;
-									_taggedToKill(newtarget);
-								}
-							}
-						}
+                        std::list<Hostil*> hostillist = i_creature.GetHostilList();
+                        if(hostillist.size())
+                        {
+                            hostillist.sort();
+                            hostillist.reverse();
+                            uint64 guid;
+                            if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
+                            {
+                                Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
+                                if(newtarget)
+                                {
+                                    i_pVictim = NULL;
+                                    _taggedToKill(newtarget);
+                                }
+                            }
+                        }
                         i_creature.AttackerStateUpdate(i_pVictim, 0);
                         i_creature.setAttackTimer(0);
 

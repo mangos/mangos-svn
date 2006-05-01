@@ -414,7 +414,7 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    if(sDatabase.PExecute("INSERT into `account` (`id`,`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES (NULL,'%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
+    if(sDatabase.PExecute("INSERT into `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
         zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
     else
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);
