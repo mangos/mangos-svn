@@ -142,12 +142,12 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
     for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
     {
         if(!m_spells[i])
-            break;
+            continue;
         spellInfo = sSpellStore.LookupEntry(m_spells[i] );
         if(!spellInfo)
         {
             sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
-            break;
+            continue;
         }
 
         spell = new Spell(this, spellInfo, false, 0);
@@ -155,10 +155,10 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
         if(!spell)
         {
             sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
-            break;
+            continue;
         }
         if(spell->m_spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
-            break;
+            continue;
         if(spell->CanCast()==0)
         {
             return spell;
@@ -817,7 +817,6 @@ void Unit::_UpdateSpells( uint32 time )
             delete m_currentSpell;
             m_currentSpell = NULL;
         }
-
     }
 
     AuraList::iterator i;
