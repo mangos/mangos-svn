@@ -710,7 +710,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `character_inventory`;" );
+    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `item_instance`;" );
     if( result )
     {
         m_hiItemGuid = (*result)[0].GetUInt32()+1;

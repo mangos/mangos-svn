@@ -4516,11 +4516,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
 				{
 					pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
 					//_SaveInventory();
-					//pItem->SendUpdateToPlayer(this);
-					upd.Clear();
-					item->BuildCreateUpdateBlockForPlayer(&upd, this);
-					upd.BuildPacket(&packet);
-					GetSession()->SendPacket(&packet);
+					pItem->SendUpdateToPlayer(this);
 					ItemAdded(item->GetEntry(),count);
 					sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked)",  pItem->GetEntry(), bagIndex, slot);
 					return 2;
@@ -4547,11 +4543,8 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
 		if (IsInWorld())
 		{
 			item->AddToWorld();
-			//item->SendUpdateToPlayer(this);
-			//pBag->SendUpdateToPlayer(this);
 			upd.Clear();
 			pBag->BuildCreateUpdateBlockForPlayer(&upd, this);
-			//item->BuildCreateUpdateBlockForPlayer(&upd, this);
 			upd.BuildPacket(&packet);
 			GetSession()->SendPacket(&packet);
 		}
@@ -4561,34 +4554,30 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
 	else
 	{
 		item->SetSlot( slot );
-		m_items[slot] = item;
-		SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), m_items[slot]?m_items[slot]->GetGUID():0);
+		SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), item->GetGUID());
 		item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
 		if (slot < EQUIPMENT_SLOT_END)
-			{
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-				SetUInt32Value(VisibleBase, item->GetUInt32Value(OBJECT_FIELD_ENTRY));
-				SetUInt32Value(VisibleBase + 1, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
-				SetUInt32Value(VisibleBase + 2, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
-				SetUInt32Value(VisibleBase + 3, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
-				SetUInt32Value(VisibleBase + 4, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
-				SetUInt32Value(VisibleBase + 5, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
-				SetUInt32Value(VisibleBase + 6, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
-				SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
-				SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
-				_ApplyItemMods(item, slot, true);
-			}
+		{
+			int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+			SetUInt32Value(VisibleBase, item->GetUInt32Value(OBJECT_FIELD_ENTRY));
+			SetUInt32Value(VisibleBase + 1, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
+			SetUInt32Value(VisibleBase + 2, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
+			SetUInt32Value(VisibleBase + 3, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
+			SetUInt32Value(VisibleBase + 4, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
+			SetUInt32Value(VisibleBase + 5, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
+			SetUInt32Value(VisibleBase + 6, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
+			SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
+			SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
+			_ApplyItemMods(item, slot, true);
+		}
 		if (IsInWorld()) 
 		{
 			item->AddToWorld();
-			upd.Clear();
-			item->BuildCreateUpdateBlockForPlayer(&upd, this);
-			upd.BuildPacket(&packet);
-			GetSession()->SendPacket(&packet);
-			//item->SendUpdateToPlayer(this);
+			item->SendUpdateToPlayer(this);
 			ItemAdded(item->GetEntry(),count);
 			sLog.outDetail("AddItem: Item %i added to slot, slot = %i", item->GetEntry(), slot);
 		}
+		m_items[slot] = item;
 	}
 	return 1;
 }
