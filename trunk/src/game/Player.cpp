@@ -2124,7 +2124,7 @@ void Player::LoadFromDB( uint32 guid )
 
 void Player::_LoadInventory()
 {
-    for(uint16 i = 0; i < BANK_SLOT_BAG_END; i+=2)
+    for(uint16 i = 0; i < BANK_SLOT_BAG_END; i++)
     {
         if(m_items[i])
         {
