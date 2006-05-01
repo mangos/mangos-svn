@@ -78,7 +78,7 @@ void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 
 void Bag::SaveToDB()
 {
-	Item::SaveToDB();
+    Item::SaveToDB();
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", m_owner->GetGUIDLow(), GetSlot());
     for (uint8 i = 0; i < 20; i++)
     {
@@ -92,8 +92,8 @@ void Bag::SaveToDB()
 
 bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
-	if(!Item::LoadFromDB(guid, auctioncheck))
-		return false;
+    if(!Item::LoadFromDB(guid, auctioncheck))
+        return false;
     for (uint8 i = 0; i < 20; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
@@ -120,13 +120,13 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
             item->SetOwner(m_owner);
             item->SetSlot(slot);
             if(!item->LoadFromDB(item_guid, 1))
-				continue;
+                continue;
             AddItemToBag(slot, item);
         } while (result->NextRow());
 
         delete result;
     }
-	return true;
+    return true;
 }
 
 void Bag::DeleteFromDB()

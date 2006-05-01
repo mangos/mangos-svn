@@ -91,12 +91,12 @@ struct Hostil
 {
     uint64 UnitGuid;
     float Hostility;
-	bool operator <(Hostil item) 
+    bool operator <(Hostil item)
     {
         if(Hostility < item.Hostility)
             return true;
-		else
-			return false;
+        else
+            return false;
     };
 };
 
@@ -238,7 +238,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         float GetHostility(uint64 guid);
         Hostil* GetHostil(uint64 guid);
-		std::list<Hostil*> GetHostilList() { return m_hostilList; }
+        std::list<Hostil*> GetHostilList() { return m_hostilList; }
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraList GetAuras( ) {return m_Auras;}

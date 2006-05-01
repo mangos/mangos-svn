@@ -295,7 +295,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     //! Enable ADDON's Thanks to Burlex
     //! this is a fast hack, real fix is comming
 
-    packet.Initialize(0x2EF); // SMSG_ADDON_INFO
+    packet.Initialize(0x2EF);                               // SMSG_ADDON_INFO
     packet << uint8(0x00);
     for(int i = 0; i < ADDONCount; i++)
         packet << uint8(0x01);
