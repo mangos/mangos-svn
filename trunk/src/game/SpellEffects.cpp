@@ -42,7 +42,7 @@
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
     &Spell::EffectNULL,                                     //nothing
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_INSTAKILL
+    &Spell::EffectInstaKill,                                //SPELL_EFFECT_INSTAKILL
     &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DUMMY
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT
@@ -168,6 +168,15 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 void Spell::EffectNULL(uint32 i)
 {
 }
+
+
+void Spell::EffectInstaKill(uint32 i) 
+{
+    if(!unitTarget) return; 
+    if(!unitTarget->isAlive()) return; 
+    uint32 health = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH); 
+    m_caster->DealDamage(unitTarget, health, 0); 
+} 
 
 void Spell::EffectSchoolDMG(uint32 i)
 {
