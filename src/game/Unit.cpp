@@ -656,7 +656,8 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ((Player*)pVictim)->UpdateDefense();
     }
 
-    AuraList::iterator i;
+	// proc trigger aura   
+	AuraList::iterator i;
     for (i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); i++)
 	{
 		ProcTriggerSpell *procspell;

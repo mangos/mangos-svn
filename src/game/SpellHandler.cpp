@@ -87,7 +87,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         else
         {
             pUser->RemoveItemFromSlot(bagIndex , slot);
-            pItem->DeleteFromDB();
+            //pItem->DeleteFromDB();
             delete pItem;
         }
     }

@@ -121,7 +121,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     if ((!count) || (count >= item->GetCount()))
     {
         _player->RemoveItemFromSlot(bagIndex,slot);
-        item->DeleteFromDB();
+        //item->DeleteFromDB();
         delete item;
     }
     else
@@ -799,7 +799,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     result = _player->AddItemToInventory(pItem, false);
     if (result == 2)
     {
-        pItem->DeleteFromDB();
+        //pItem->DeleteFromDB();
         delete pItem;
     }
     //_player->_SaveInventory();

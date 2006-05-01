@@ -24,6 +24,7 @@
 #include "FactionTemplateResolver.h"
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
+#include <list>
 
 int
 AggressorAI::Permissible(const Creature *creature)
@@ -91,8 +92,8 @@ AggressorAI::_needToStop() const
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
     float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
-    return (( length > (14.0f + hostillen) * (14.0f + hostillen) && spawndist > VISIBILITY_RANGE )
-        || ( length > (25.0f + hostillen) * (25.0f + hostillen) && spawndist > 5000.0f )
+    return (( length > (12.0f + hostillen) * (12.0f + hostillen) && spawndist > 3600.0f )
+        || ( length > (24.0f + hostillen) * (24.0f + hostillen) && spawndist > 1600.0f )
         || ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
 }
 
@@ -181,6 +182,22 @@ AggressorAI::UpdateAI(const uint32 diff)
                 {
                     if( i_creature.isAttackReady() )
                     {
+						std::list<Hostil*> hostillist = i_creature.GetHostilList();
+						if(hostillist.size())
+						{
+							hostillist.sort();
+							hostillist.reverse();
+							uint64 guid;
+							if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
+							{
+								Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
+								if(newtarget)
+								{
+									i_pVictim = NULL;
+									_taggedToKill(newtarget);
+								}
+							}
+						}
                         i_creature.AttackerStateUpdate(i_pVictim, 0);
                         i_creature.setAttackTimer(0);
 

@@ -388,7 +388,11 @@ void Aura::_RemoveAura()
     ApplyModifier(false);
 
     uint8 slot = GetAuraSlot();
-
+	if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
+	{
+		SetAuraSlot(0);
+		return;
+	}
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
 
     uint8 flagslot = slot >> 3;

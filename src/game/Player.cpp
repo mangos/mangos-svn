@@ -707,7 +707,7 @@ void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orient
     Relocate(x,y,z,orientation);
     SetPosition(x,y,z,orientation);
     SetDontMove(true);
-    SaveToDB();
+    //SaveToDB();
 
     MapManager::Instance().GetMap(GetMapId())->Add(this);
 }
@@ -2009,9 +2009,7 @@ void Player::_SaveInventory()
         if (m_items[i] != 0)
         {
             sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', 0, '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
-            m_items[i]->SaveToDB();
-            if(m_items[i]->IsBag())
-                ((Bag*)m_items[i])->SaveToDB();
+			m_items[i]->SaveToDB();
         }
     }
 }
@@ -2147,15 +2145,14 @@ void Player::_LoadInventory()
             uint32 item_guid = fields[3].GetUInt32();
             uint32 item_id   = fields[4].GetUInt32();
 
-            //ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
+            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            Item *item = new Item();//NewItemOrBag(proto);
+            Item *item = NewItemOrBag(proto);
             item->SetOwner(this);
             item->SetSlot(slot);
-            item->LoadFromDB(item_guid, 1);
+            if(!item->LoadFromDB(item_guid, 1))
+				continue;
             AddItem(0, slot, item, true);
-            if(item->IsBag())
-                ((Bag*)item)->LoadFromDB();
         } while (result->NextRow());
 
         delete result;
@@ -2751,7 +2748,7 @@ void Player::RepopAtGraveyard()
         RemoveFromWorld();
         MapManager::Instance().GetMap(GetMapId())->Add(this);
         SetDontMove(false);
-        SaveToDB();
+        //SaveToDB();
 
         // teleport far
         //smsg_NewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
@@ -3718,7 +3715,7 @@ bool Player::CanUseItem(ItemPrototype * proto)
     if (error_code)
     {
         WorldPacket data;
-        Item* pItem = new Item();//NewItemOrBag(proto);
+        Item* pItem = NewItemOrBag(proto);
         pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this);
 
         data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
@@ -4205,7 +4202,7 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
                 else
                 {
                     RemoveItemFromSlot(srcBag, srcSlot);
-                    srcItem->DeleteFromDB();
+                    //srcItem->DeleteFromDB();
                     delete srcItem;
                 }
                 upd.BuildPacket(&data);
@@ -4267,7 +4264,7 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
         sLog.outError("CreateNewItem : Unknown itemId, itemId = %i", itemId);
         return NULL;
     }
-    Item *pItem = new Item();// = NewItemOrBag(proto);
+    Item *pItem = NewItemOrBag(proto);
     if (count > proto->MaxCount) { count = proto->MaxCount; }
     if (count < 1) { count = 1; }
     pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this);
@@ -4457,131 +4454,150 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
     uint32 stack = item->GetMaxStackCount();
     uint32 count = item->GetCount();
 
-    switch(bagIndex)
-    {
-        case 0:
-        case CLIENT_SLOT_BACK:
-            if (slot >= BANK_SLOT_BAG_END)
-            {
-                sLog.outError("AddItem : Invalid slot, slot = %i", slot);
-                return 0;
-            }
-            else if ((((slot >= INVENTORY_SLOT_BAG_START) && (slot < INVENTORY_SLOT_BAG_END)) || ((slot >= BANK_SLOT_BAG_START) && (slot < BANK_SLOT_BAG_END))) && (item->GetProto()->InventoryType != INVTYPE_BAG))
-            {
-                sLog.outError("AddItem : Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
-                return 0;
-            }
-            pItem = GetItemBySlot(slot);
-            break;
-        case CLIENT_SLOT_01:
-        case CLIENT_SLOT_02:
-        case CLIENT_SLOT_03:
-        case CLIENT_SLOT_04:
-        case BANK_SLOT_BAG_1:
-        case BANK_SLOT_BAG_2:
-        case BANK_SLOT_BAG_3:
-        case BANK_SLOT_BAG_4:
-        case BANK_SLOT_BAG_5:
-        case BANK_SLOT_BAG_6:
-            pBag = GetBagBySlot(bagIndex);
-            if (pBag)
-            {
-                if ((slot >= pBag->GetProto()->ContainerSlots))
-                {
-                    sLog.outError("AddItem: Invalid slot, bagIndex = %i, slot = %i", bagIndex, slot);
-                    return 0;
-                }
-                pItem = pBag->GetItemFromBag(slot);
-            }
-            else
-            {
-                sLog.outError("AddItem: No bag in that bagIndex, bagIndex = %i", bagIndex);
-                return 0;
-            }
-            break;
-        default:
-            sLog.outError("AddItem: Unknown bagIndex, bagIndex = %i", bagIndex);
-            return 0;
-    }
+	if(stack > 1 && allowstack)
+	{
+		switch(bagIndex)
+		{
+			case 0:
+			case CLIENT_SLOT_BACK:
+				if (slot >= BANK_SLOT_BAG_END)
+				{
+					sLog.outError("AddItem : Invalid slot, slot = %i", slot);
+					return 0;
+				}
+				else if ((((slot >= INVENTORY_SLOT_BAG_START) && (slot < INVENTORY_SLOT_BAG_END)) || ((slot >= BANK_SLOT_BAG_START) && (slot < BANK_SLOT_BAG_END))) && (item->GetProto()->InventoryType != INVTYPE_BAG))
+				{
+					sLog.outError("AddItem : Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
+					return 0;
+				}
+				pItem = GetItemBySlot(slot);
+				break;
+			case CLIENT_SLOT_01:
+			case CLIENT_SLOT_02:
+			case CLIENT_SLOT_03:
+			case CLIENT_SLOT_04:
+			case BANK_SLOT_BAG_1:
+			case BANK_SLOT_BAG_2:
+			case BANK_SLOT_BAG_3:
+			case BANK_SLOT_BAG_4:
+			case BANK_SLOT_BAG_5:
+			case BANK_SLOT_BAG_6:
+				pBag = GetBagBySlot(bagIndex);
+				if (pBag)
+				{
+					if ((slot >= pBag->GetProto()->ContainerSlots))
+					{
+						sLog.outError("AddItem: Invalid slot, bagIndex = %i, slot = %i", bagIndex, slot);
+						return 0;
+					}
+					pItem = pBag->GetItemFromBag(slot);
+				}
+				else
+				{
+					sLog.outError("AddItem: No bag in that bagIndex, bagIndex = %i", bagIndex);
+					return 0;
+				}
+				break;
+			default:
+				sLog.outError("AddItem: Unknown bagIndex, bagIndex = %i", bagIndex);
+				return 0;
+		}
 
-    if (pItem)
-    {
-        if (pItem->GetEntry() != item->GetEntry())
-        {
-            sLog.outError("AddItem : Player slot already has another item" );
-            return 0;
-        }
-        else
-        {
-            if (((stack - pItem->GetCount()) >= count) && (allowstack))
-            {
-                pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
-                //_SaveInventory();
-                pItem->SendUpdateToPlayer(this);
-                ItemAdded(item->GetEntry(),count);
-                sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked)",  pItem->GetEntry(), bagIndex, slot);
-                return 2;
-            }
-            else
-            {
-                sLog.outError("AddItem : Player slot is full" );
-                return 0;
-            }
-        }
-    }
-    else
-    {
-        item->SetOwner(this);
-        //item->SetCount(count);
-        if (((bagIndex >= INVENTORY_SLOT_BAG_START) && (bagIndex < INVENTORY_SLOT_BAG_END)) || ((bagIndex >= BANK_SLOT_BAG_START) && (bagIndex < BANK_SLOT_BAG_END)))
-        {
-            pBag = GetBagBySlot(bagIndex);
-            pBag->AddItemToBag(slot, item);
-            if (IsInWorld())
-            {
-                item->AddToWorld();
-                upd.Clear();
-                pBag->BuildCreateUpdateBlockForPlayer(&upd, this);
-                item->BuildCreateUpdateBlockForPlayer(&upd, this);
-                upd.BuildPacket(&packet);
-                GetSession()->SendPacket(&packet);
-            }
-            ItemAdded(item->GetEntry(),count);
-            sLog.outDetail("AddItem: Item %i added to bag, bagIndex = %i, slot = %i", item->GetEntry(), bagIndex, slot);
-        }
-        else
-        {
-            item->SetSlot( slot );
-            m_items[slot] = item;
-            SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), m_items[slot]?m_items[slot]->GetGUID():0);
-            item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
-            if (slot < EQUIPMENT_SLOT_END)
-            {
-                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-                SetUInt32Value(VisibleBase, item->GetUInt32Value(OBJECT_FIELD_ENTRY));
-                SetUInt32Value(VisibleBase + 1, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
-                SetUInt32Value(VisibleBase + 2, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
-                SetUInt32Value(VisibleBase + 3, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
-                SetUInt32Value(VisibleBase + 4, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
-                SetUInt32Value(VisibleBase + 5, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
-                SetUInt32Value(VisibleBase + 6, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
-                SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
-                SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
-                _ApplyItemMods(item, slot, true);
-            }
-            if (IsInWorld()) item->AddToWorld();
-            item->SendUpdateToPlayer(this);
-            ItemAdded(item->GetEntry(),count);
-            sLog.outDetail("AddItem: Item %i added to slot, slot = %i", item->GetEntry(), slot);
-        }
-        return 1;
-    }
+		if (pItem)
+		{
+			if (pItem->GetEntry() != item->GetEntry())
+			{
+				sLog.outError("AddItem : Player slot already has another item" );
+				return 0;
+			}
+			else
+			{
+				if (((stack - pItem->GetCount()) >= count) && (allowstack))
+				{
+					pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
+					//_SaveInventory();
+					//pItem->SendUpdateToPlayer(this);
+					upd.Clear();
+					item->BuildCreateUpdateBlockForPlayer(&upd, this);
+					upd.BuildPacket(&packet);
+					GetSession()->SendPacket(&packet);
+					ItemAdded(item->GetEntry(),count);
+					sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked)",  pItem->GetEntry(), bagIndex, slot);
+					return 2;
+				}
+				else
+				{
+					sLog.outError("AddItem : Player slot is full" );
+					return 0;
+				}
+			}
+		}
+	}
+	item->SetOwner(this);
+	//item->SetCount(count);
+	if (((bagIndex >= INVENTORY_SLOT_BAG_START) && (bagIndex < INVENTORY_SLOT_BAG_END)) || ((bagIndex >= BANK_SLOT_BAG_START) && (bagIndex < BANK_SLOT_BAG_END)))
+	{
+		pBag = GetBagBySlot(bagIndex);
+		if(!pBag)
+		{
+			sLog.outError("AddItem : Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
+			return 0;
+		}
+		pBag->AddItemToBag(slot, item);
+		if (IsInWorld())
+		{
+			item->AddToWorld();
+			//item->SendUpdateToPlayer(this);
+			//pBag->SendUpdateToPlayer(this);
+			upd.Clear();
+			pBag->BuildCreateUpdateBlockForPlayer(&upd, this);
+			//item->BuildCreateUpdateBlockForPlayer(&upd, this);
+			upd.BuildPacket(&packet);
+			GetSession()->SendPacket(&packet);
+		}
+		ItemAdded(item->GetEntry(),count);
+		sLog.outDetail("AddItem: Item %i added to bag, bagIndex = %i, slot = %i", item->GetEntry(), bagIndex, slot);
+	}
+	else
+	{
+		item->SetSlot( slot );
+		m_items[slot] = item;
+		SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), m_items[slot]?m_items[slot]->GetGUID():0);
+		item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
+		if (slot < EQUIPMENT_SLOT_END)
+			{
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+				SetUInt32Value(VisibleBase, item->GetUInt32Value(OBJECT_FIELD_ENTRY));
+				SetUInt32Value(VisibleBase + 1, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
+				SetUInt32Value(VisibleBase + 2, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
+				SetUInt32Value(VisibleBase + 3, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
+				SetUInt32Value(VisibleBase + 4, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
+				SetUInt32Value(VisibleBase + 5, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
+				SetUInt32Value(VisibleBase + 6, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
+				SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
+				SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
+				_ApplyItemMods(item, slot, true);
+			}
+		if (IsInWorld()) 
+		{
+			item->AddToWorld();
+			upd.Clear();
+			item->BuildCreateUpdateBlockForPlayer(&upd, this);
+			upd.BuildPacket(&packet);
+			GetSession()->SendPacket(&packet);
+			//item->SendUpdateToPlayer(this);
+			ItemAdded(item->GetEntry(),count);
+			sLog.outDetail("AddItem: Item %i added to slot, slot = %i", item->GetEntry(), slot);
+		}
+	}
+	return 1;
 }
 
 //Adds an existing item to inventory
 // - Return values: 0 - item not added
 //                  1 - item added to a free slot (and perhaps to a stack)
 //                  2 - item added to a stack (item should be deleted)
+//                  3 - item added some.
 uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
 {
     if (!item)
@@ -4687,7 +4703,7 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
             }
         }
 	}
-   return 0;
+   return 3;
 }
 
 //Adds an existing item to bank
@@ -4798,7 +4814,7 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
             }
         }
     }
-    return 0;
+    return 3;
 }
 
 void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
