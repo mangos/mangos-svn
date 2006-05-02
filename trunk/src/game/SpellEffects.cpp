@@ -27,6 +27,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Unit.h"
+#include "CreatureAI.h"
 #include "Spell.h"
 #include "DynamicObject.h"
 #include "SpellAuras.h"
@@ -155,7 +156,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEMON
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RESURRECT_NEW
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK_ME
+    &Spell::EffectAttackMe,                                 //SPELL_EFFECT_ATTACK_ME
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SPIRIT_HEAL
@@ -909,6 +910,15 @@ void Spell::EffectSummonPet(uint32 i)
 
             ((Player*)m_caster)->GetSession()->SendPacket(&data);
         }
+    }
+}
+
+void Spell::EffectAttackMe(uint32 i)
+{
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+    {
+	unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetAngle(m_caster));
+	((Creature*)unitTarget)->AI().AttackStart((Player*)m_caster);
     }
 }
 
