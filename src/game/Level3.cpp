@@ -1694,8 +1694,8 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         uint32 nextLvlXP = m_session->GetPlayer()->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
         uint32 givexp = nextLvlXP - curXP;
 
-        uint32 points2 = m_session->GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS2);
-        m_session->GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS2,points2+2);
+//        uint32 points2 = m_session->GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS2);
+//        m_session->GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS2,points2+2);
 
         m_session->GetPlayer()->GiveXP(givexp,m_session->GetPlayer()->GetGUID());
 
