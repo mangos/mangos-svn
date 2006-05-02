@@ -389,6 +389,11 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
 {
     WorldPacket data;
 
+    if (Player::HasSpell(5227)) 
+    { 
+	UnderWaterTime*=4; 
+    } 
+
     //if have water breath , then remove bar
     if(waterbreath)
     {
@@ -1107,7 +1112,8 @@ void Player::RegenerateAll()
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
         Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
-    }
+	Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4); 
+   }
 
     Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
     Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
