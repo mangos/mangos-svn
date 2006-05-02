@@ -90,7 +90,6 @@ typedef __uint16_t  uint16;
 typedef __uint8_t   uint8;
 typedef uint16      WORD;
 typedef uint32      DWORD;
-typedef uint64      OBJECT_HANDLE;
-
 #endif
+typedef uint64      OBJECT_HANDLE;
 #endif
