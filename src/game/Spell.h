@@ -368,6 +368,7 @@ class Spell
         void EffectTriggerSpell(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectSkill(uint32);
+	void EffectAttackMe(uint32 i);
 
         Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur );
 
