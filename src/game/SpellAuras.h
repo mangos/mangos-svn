@@ -271,7 +271,7 @@ class Aura
         void HandleWaterBreathing(bool apply);
         void HandleModRegen(bool apply);
         void HandleModPowerRegen(bool apply);
-		void HandleChannelDeathItem(bool apply);
+        void HandleChannelDeathItem(bool apply);
         void HandleAuraModAttackPower(bool Apply);
         void HandleAuraTransform(bool Apply);
         void HandleAuraManaShield(bool Apply);
