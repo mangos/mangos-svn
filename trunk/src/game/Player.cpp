@@ -1112,7 +1112,8 @@ void Player::RegenerateAll()
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
         Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
-        Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
+	// removed 5 seconds regenerate after using skill
+        //Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
     }
 
     Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
