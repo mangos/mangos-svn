@@ -127,7 +127,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_BASE_RESISTANCE = 83,
     &Aura::HandleModRegen,                                  //SPELL_AURA_MOD_REGEN = 84,
     &Aura::HandleModPowerRegen,                             //SPELL_AURA_MOD_POWER_REGEN = 85,
-    &Aura::HandleNULL,                                      //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
+    &Aura::HandleChannelDeathItem,                          //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PERCENT_REGEN = 88,
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
@@ -1106,7 +1106,50 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
 {
     apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 }
+void Aura::HandleChannelDeathItem(bool apply)
+{
+	SpellEntry *spellInfo = GetSpellProto();
+	if(apply)
+	{	
+		uint8 slot;
+		Item* newItem;
+		Player* pUnit = (Player*)m_caster;
+		uint8 GetSoltflag = 0;
+		//if(m_target->isAlive())  //FIX ME,it should be done after mods dead
+			//return;
+		for(uint8 i=0;i<3;i++)
+		{
+			if(spellInfo->EffectItemType[i] == 0)
+				continue;
 
+			slot = 0;
+			ItemPrototype *m_itemProto = objmgr.GetItemPrototype(spellInfo->EffectItemType[i]);
+			if(!m_itemProto)
+				continue;
+			uint32 num_to_add = 1;
+			/*
+			num_to_add = ((pUnit->getLevel() - (spellInfo->spellLevel-1))*2);
+			if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
+				num_to_add = 1;
+			if(num_to_add > m_itemProto->MaxCount)
+				num_to_add = m_itemProto->MaxCount;
+			*/
+			newItem = new Item;
+			newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),spellInfo->EffectItemType[i],pUnit);
+			if(!newItem)
+				continue;
+			newItem->SetCount(num_to_add);
+			GetSoltflag = pUnit->AddItemToInventory(newItem, false);
+			if(!GetSoltflag)
+			{
+				//SendCastResult(0x18);
+				return;
+			}
+			newItem = NULL;
+		}
+
+	}
+}
 void Aura::HandleAuraModAttackPower(bool apply)
 {
     m_target->SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,m_target->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS)+ apply?(m_modifier->m_amount):(-m_modifier->m_amount));
