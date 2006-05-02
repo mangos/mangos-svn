@@ -145,6 +145,7 @@ class ChatHandler
         bool HandleRandomCommand(const char* args);
         bool HandleRunCommand(const char* args);
         bool HandleChangeLevelCommand(const char* args);
+	bool HandleSetPoiCommand(const char* args);
         bool HandleNPCFlagCommand(const char* args);
         bool HandleDisplayIdCommand(const char* args);
         bool HandleFactionIdCommand(const char* args);
