@@ -1,0 +1,24 @@
+MaNGOS 0.5    (May ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.5
+
+ MaNGOS 0.5 adds further improvements to the server core as well as to
+ the majority of game classes and the game content database. A complete
+ list of all updated items follows below:
+
+ === Code Features ===
+ *
+
+ === Documentation Features ===
+ *
+
+ === Game Features ===
+ *
+
+ === Server Features ===
+ * 
+
+ === Release Statistics ===
+ * Fixed Bugs: 
+ * Total number of changes: ???.
+
+ The complete list of closed tickets can be found here:
+   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.5
