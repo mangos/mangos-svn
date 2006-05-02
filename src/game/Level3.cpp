@@ -33,8 +33,20 @@
 #include "SpellAuras.h"
 #include "ScriptCalls.h"
 
-bool ChatHandler::HandleReloadCommand(const char* args)
-{
+
+bool ChatHandler::HandleSetPoiCommand(const char* args) 
+    { 
+    Player *  pPlayer = m_session->GetPlayer(); 
+    Unit* target = ObjectAccessor::Instance().GetCreature(*pPlayer, pPlayer->GetSelection()); 
+    uint32 icon = atol((char*)args); 
+	if ( icon < 0 ) 
+	icon = 0; 
+	sLog.outDetail("Command : POI, NPC = %u, icon = %u", target->GetGUID(), icon); 
+	pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), icon, 6, 30, "Test POI"); 
+        return true; 
+    }
+
+bool ChatHandler::HandleReloadCommand(const char* args) {
     return true;
 }
 
