@@ -74,7 +74,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand commandTable[] =
     {
-	{ "setpoi",	 3, &ChatHandler::HandleSetPoiCommand,		 "",   NULL }, 
+        { "setpoi",  3, &ChatHandler::HandleSetPoiCommand,       "",   NULL },
         { "acct",        0, &ChatHandler::HandleAcctCommand,             "",   NULL },
         { "addmove",     2, &ChatHandler::HandleAddMoveCommand,          "",   NULL },
         { "addspirit",   3, &ChatHandler::HandleAddSpiritCommand,        "",   NULL },
@@ -152,8 +152,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         //! Development Commands
-        { "setvalue",	 3, &ChatHandler::HandleSetValue,                "",   NULL },
-        { "getvalue",	 3, &ChatHandler::HandleGetValue,				 "",   NULL },
+        { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
+        { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
         { "Set32Bit",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
 
