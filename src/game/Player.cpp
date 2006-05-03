@@ -714,7 +714,7 @@ void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orient
     SetDontMove(true);
     //SaveToDB();
 
-    MapManager::Instance().GetMap(GetMapId())->Add(this);
+    MapManager::Instance().GetMap(mapid)->Add(this);
 }
 
 void Player::AddToWorld()
@@ -726,6 +726,7 @@ void Player::AddToWorld()
         if(m_items[i])
             m_items[i]->AddToWorld();
     }
+	AddWeather();
 }
 
 void Player::RemoveFromWorld()
@@ -5796,4 +5797,16 @@ void Player::SendInitWorldStates(uint32 MapID)
             (uint16)0x0703<< (uint16)0x00;
         GetSession()->SendPacket(&data);
     }
+}
+
+
+
+void Player::AddWeather()
+{
+	uint32 zoneid = GetZoneId();
+	if(!sWorld.FindWeather(zoneid))
+	{
+		Weather *wth = new Weather(this);
+		sWorld.AddWeather(wth);
+	}
 }

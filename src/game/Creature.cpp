@@ -263,7 +263,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         {
             if ( pQuest->LevelSatisfied( pPlayer ) )
             {
-                pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
+                //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
                 wasAvailShow = true;
             }
             wasAvail   = true;
@@ -310,7 +310,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         {
             if ( pPlayer->isQuestComplete(pQuest ) )
             {
-                pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 4, 6, 30, questinfo->Title);
+                //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 4, 6, 30, questinfo->Title);
                 wasReward = true;
             }
             else
@@ -322,7 +322,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
                 wasRewardRep = true;
             else if( !pPlayer->getQuestRewardStatus(questinfo->QuestId))
             {
-                pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
+                //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
                 wasReward = true;
             }
         }
@@ -398,7 +398,7 @@ void Creature::prepareQuestMenu( Player *pPlayer )
             float x,y,z;
             GetRespawnCoord(x,y,z);
             std::string mapname=pQuest->GetQuestInfo()->Title;
-            pPlayer->PlayerTalkClass->SendPointOfInterest(x, y, 4, 2, 30, mapname.c_str());
+            //pPlayer->PlayerTalkClass->SendPointOfInterest(x, y, 4, 2, 30, mapname.c_str());
             //player->PlayerTalkClass->SendGossipMenu(gossip->TextId, GetGUID());
         }
     }

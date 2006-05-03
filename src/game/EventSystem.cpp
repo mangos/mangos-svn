@@ -214,7 +214,7 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
             write_spe
                 event->pNext =sPEvents;
             sPEvents=event;
-            end_write_mpe
+            end_write_spe
         }
         else
         {
@@ -401,7 +401,6 @@ void msThread()
 
 void mspThread()
 {
-
     uint32 cur=now();
 
     while(1)
@@ -429,9 +428,7 @@ void mspThread()
             ppos=(PeriodicEvent*)ppos->pNext;
         }
         end_read_mspe
-
     }
-
 }
 
 void sThread()
@@ -469,15 +466,14 @@ void sThread()
 
 void spThread()
 {
-
     uint32 cur=now();
 
     while(1)
     {
-        MSleep(ES_RESOLUTION*30);                           //-(now()-cur)
+        MSleep(ES_RESOLUTION*30-(now()-cur));
         read_spe
-            cur=now();
         PeriodicEvent * ppos=sPEvents;
+        cur=now();
         while(ppos)
         {
             if(cur >= ppos->time)
@@ -496,9 +492,7 @@ void spThread()
             ppos=(PeriodicEvent*)ppos->pNext;
         }
         end_read_spe
-
     }
-
 }
 
 void mThread()

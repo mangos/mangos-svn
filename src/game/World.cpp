@@ -24,6 +24,7 @@
 #include "WorldSocket.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
+#include "Weather.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
@@ -79,6 +80,33 @@ void World::AddSession(WorldSession* s)
 {
     ASSERT(s);
     m_sessions[s->GetAccountId()] = s;
+}
+
+Weather* World::FindWeather(uint32 id) const
+{
+    WeatherMap::const_iterator itr = m_weathers.find(id);
+
+    if(itr != m_weathers.end())
+        return itr->second;
+    else
+        return 0;
+}
+
+void World::RemoveWeather(uint32 id)
+{
+    WeatherMap::iterator itr = m_weathers.find(id);
+
+    if(itr != m_weathers.end())
+    {
+        delete itr->second;
+        m_weathers.erase(itr);
+    }
+}
+
+void World::AddWeather(Weather* w)
+{
+    ASSERT(w);
+    m_weathers[w->GetZone()] = w;
 }
 
 void World::SetInitialWorldSettings()
@@ -224,6 +252,7 @@ void World::SetInitialWorldSettings()
 
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
+    m_timers[WUPDATE_WEATHERS].SetInterval(1000);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
 
     sLog.outString( "WORLD: Starting BattleGround System" );
@@ -240,12 +269,7 @@ void World::SetInitialWorldSettings()
     // it is run each 20 minutes
     // need good tests on windows
 
-    #ifndef WIN32
     uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
-    #else
-    //Temporairy hack for windows event system
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,3600001,false,true);
-    #endif
     sLog.outString( "WORLD: Starting Corpse Handler" );
 }
 
@@ -395,6 +419,24 @@ void World::Update(time_t diff)
             {
                 delete itr->second;
                 m_sessions.erase(itr);
+            }
+        }
+    }
+
+    if (m_timers[WUPDATE_WEATHERS].Passed())
+    {
+        m_timers[WUPDATE_WEATHERS].Reset();
+
+        WeatherMap::iterator itr, next;
+        for (itr = m_weathers.begin(); itr != m_weathers.end(); itr = next)
+        {
+            next = itr;
+            next++;
+
+            if(!itr->second->Update(diff))
+            {
+                delete itr->second;
+                m_weathers.erase(itr);
             }
         }
     }

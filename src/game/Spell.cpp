@@ -856,14 +856,19 @@ uint8 Spell::CanCast()
 
     Unit *target = NULL;
     target = m_targets.getUnitTarget();
-    float range = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-
+	SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
+    float range = GetMaxRange(srange);
+	float minrange = GetMinRange(srange);
+	//if(m_caster->m_currentSpell)
+	//	castResult = CAST_FAIL_ANOTHER_ACTION_IS_IN_PROGRESS
     if(target)
     {
         if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
-            castResult = 0x76;
+            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT; //0x76;
         if(m_caster->GetDistanceSq(target) > range * range )
             castResult = 0x56;
+		if(m_caster->GetDistanceSq(target) < minrange * minrange )
+            castResult = CAST_FAIL_OUT_OF_RANGE;	//83
     }
 
     if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
@@ -873,7 +878,7 @@ uint8 Spell::CanCast()
     }
 
     if(m_caster->m_silenced)
-        castResult = 0x5A;
+        castResult = CAST_FAIL_SILENCED;	//0x5A;
     if( castResult != 0 )
     {
         SendCastResult(castResult);

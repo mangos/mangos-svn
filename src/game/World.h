@@ -26,13 +26,15 @@
 class Object;
 class WorldPacket;
 class WorldSession;
+class Weather;
 
 enum WorldTimers
 {
     WUPDATE_OBJECTS = 0,
     WUPDATE_SESSIONS = 1,
     WUPDATE_AUCTIONS = 2,
-    WUPDATE_COUNT = 3
+    WUPDATE_WEATHERS = 3,
+    WUPDATE_COUNT = 4
 };
 
 enum Rates
@@ -65,8 +67,12 @@ class World
         WorldSession* FindSession(uint32 id) const;
         void AddSession(WorldSession *s);
         void RemoveSession(uint32 id);
-
         uint32 GetSessionCount() const { return m_sessions.size(); }
+
+        Weather* FindWeather(uint32 id) const;
+        void AddWeather(Weather *w);
+        void RemoveWeather(uint32 id);
+
         uint32 GetPlayerLimit() const { return m_playerLimit; }
         void SetPlayerLimit(uint32 limit) { m_playerLimit = limit; }
 
@@ -115,6 +121,8 @@ class World
 
         IntervalTimer m_timers[WUPDATE_COUNT];
 
+		typedef HM_NAMESPACE::hash_map<uint32, Weather*> WeatherMap;
+		WeatherMap m_weathers;
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         float regen_values[5];

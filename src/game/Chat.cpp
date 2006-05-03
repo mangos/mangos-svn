@@ -152,8 +152,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         //! Development Commands
-        { "set32value",  3, &ChatHandler::HandleSet32Value,              "",   NULL },
-        { "Set32Bit",    3, &ChatHandler::HandleSet32Value,              "",   NULL },
+        { "setvalue",	 3, &ChatHandler::HandleSetValue,                "",   NULL },
+        { "getvalue",	 3, &ChatHandler::HandleGetValue,				 "",   NULL },
+        { "Set32Bit",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
 
         { NULL,          0, NULL,                                        "",   NULL }
