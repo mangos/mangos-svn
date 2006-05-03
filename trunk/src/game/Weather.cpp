@@ -22,6 +22,7 @@
 #include "World.h"
 #include "Weather.h"
 #include "EventSystem.h"
+#include "Config/ConfigEnv.h"
 
 /*void HandleWeather(void *weather)
 {
@@ -68,29 +69,30 @@ uint32 Weather::GetSound()
 
 Weather::Weather(Player *player) : m_player(player), m_zone( player->GetZoneId())
 {
-    ReGenerate();
-    sLog.outString( "WORLD: Starting weather system(change per 10 minutes)." );
-    m_timer = WEATHER_CHANGE_TIME;
-    //AddEvent(&HandleWeather, NULL, 420000, false, true);
+	m_interval = sConfig.GetIntDefault("ChangeWeatherInterval", WEATHER_CHANGE_TIME);
+	ReGenerate();
+    sLog.outString( "WORLD: Starting weather system(change per %u minutes).", (uint32)(m_interval / 60000) );
+	m_timer = m_interval;
+	//AddEvent(&HandleWeather, NULL, 420000, false, true);
 }
 
 bool Weather::Update(uint32 diff)
 {
-    if(m_timer > 0)
-    {
-        if(diff > m_timer)
-            m_timer = 0;
-        else
-            m_timer -= diff;
-    }
-    if(m_timer == 0 )
-    {
-        ReGenerate();
-        m_timer = WEATHER_CHANGE_TIME;
-    }
-    if(!m_player)
-        return false;
-    return true;
+	if(m_timer > 0)
+	{
+		if(diff > m_timer)
+			m_timer = 0;
+		else
+			m_timer -= diff;
+	}
+	if(m_timer == 0 )
+	{
+		ReGenerate();
+		m_timer = m_interval;
+	}
+	if(!m_player)
+		return false;
+	return true;
 }
 
 void Weather::ReGenerate()
@@ -139,13 +141,13 @@ void Weather::ReGenerate()
 }
 
 void Weather::ChangeWeather()
-{
-    if(!m_player || !m_player->IsInWorld())
-    {
-        m_player = GetPlayerInZone();
-        if(!m_player)
-            return;
-    }
+{	
+	//if(!m_player || !m_player->IsInWorld() || m_player->GetZoneId() != m_zone)
+	//{
+		m_player = sWorld.FindPlayerInZone(m_zone);
+		if(!m_player)
+			return;
+	//}
 
     WorldPacket data;
     uint32 sound = GetSound();
@@ -188,12 +190,4 @@ void Weather::ChangeWeather()
             break;
     }
     sLog.outString("Change the weather of zone %u to %s.", m_zone, wthstr);
-}
-
-Player *Weather::GetPlayerInZone()
-{
-    WorldSession * session = sWorld.FindSession(m_zone);
-    if(!session)
-        return NULL;
-    return session->GetPlayer();
 }

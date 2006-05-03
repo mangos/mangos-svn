@@ -25,9 +25,9 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "Weather.h"
+#include "Player.h"
 #include "World.h"
 #include "ObjectMgr.h"
-#include "Player.h"
 #include "Group.h"
 #include "UpdateData.h"
 #include "Chat.h"
@@ -53,6 +53,23 @@ World::World()
 
 World::~World()
 {
+}
+
+Player* World::FindPlayerInZone(uint32 zone)
+{
+    SessionMap::iterator itr, next;
+    for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+    {
+        next = itr;
+        next++;
+		
+		Player *player = itr->second->GetPlayer();
+        if(player->GetZoneId() == zone && player->IsInWorld())
+        {
+			return itr->second->GetPlayer();
+        }
+    }
+    return NULL;
 }
 
 WorldSession* World::FindSession(uint32 id) const
