@@ -472,7 +472,7 @@ void spThread()
     {
         MSleep(ES_RESOLUTION*30-(now()-cur));
         read_spe
-        PeriodicEvent * ppos=sPEvents;
+            PeriodicEvent * ppos=sPEvents;
         cur=now();
         while(ppos)
         {

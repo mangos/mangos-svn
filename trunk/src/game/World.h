@@ -121,8 +121,8 @@ class World
 
         IntervalTimer m_timers[WUPDATE_COUNT];
 
-		typedef HM_NAMESPACE::hash_map<uint32, Weather*> WeatherMap;
-		WeatherMap m_weathers;
+        typedef HM_NAMESPACE::hash_map<uint32, Weather*> WeatherMap;
+        WeatherMap m_weathers;
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         float regen_values[5];

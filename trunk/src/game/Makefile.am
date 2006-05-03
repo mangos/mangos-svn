@@ -104,6 +104,7 @@ libgame_a_SOURCES = \
 	Unit.cpp \
 	UpdateData.cpp \
 	WaypointMovementGenerator.cpp \
+	Weather.cpp \
 	World.cpp \
 	WorldLog.cpp \
 	WorldSession.cpp \
@@ -189,6 +190,7 @@ libgame_a_SOURCES = \
 	UpdateMask.h \
 	Utilities.h \
 	WaypointMovementGenerator.h \
+	Weather.h \
 	World.h \
 	WorldLog.h \
 	WorldSession.h \

@@ -802,7 +802,8 @@ void Unit::_UpdateSpells( uint32 time )
     if(m_currentSpell != NULL)
     {
         m_currentSpell->update(time);
-        if( m_currentSpell->m_spellInfo->Id == 75 || GetTypeId() != TYPEID_PLAYER )         //Auto shot
+                                                            //Auto shot
+        if( m_currentSpell->m_spellInfo->Id == 75 || GetTypeId() != TYPEID_PLAYER )
         {
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {

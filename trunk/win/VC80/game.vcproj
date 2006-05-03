@@ -439,6 +439,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\Weather.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Weather.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\World.cpp"
 				>
 			</File>

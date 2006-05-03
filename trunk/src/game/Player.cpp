@@ -726,7 +726,7 @@ void Player::AddToWorld()
         if(m_items[i])
             m_items[i]->AddToWorld();
     }
-	AddWeather();
+    AddWeather();
 }
 
 void Player::RemoveFromWorld()
@@ -1113,7 +1113,7 @@ void Player::RegenerateAll()
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
         Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
-	// removed 5 seconds regenerate after using skill
+        // removed 5 seconds regenerate after using skill
         //Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
     }
 
@@ -5799,14 +5799,12 @@ void Player::SendInitWorldStates(uint32 MapID)
     }
 }
 
-
-
 void Player::AddWeather()
 {
-	uint32 zoneid = GetZoneId();
-	if(!sWorld.FindWeather(zoneid))
-	{
-		Weather *wth = new Weather(this);
-		sWorld.AddWeather(wth);
-	}
+    uint32 zoneid = GetZoneId();
+    if(!sWorld.FindWeather(zoneid))
+    {
+        Weather *wth = new Weather(this);
+        sWorld.AddWeather(wth);
+    }
 }

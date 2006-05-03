@@ -22,38 +22,38 @@
 #include "Common.h"
 
 // weather difines
-#define WEATHER_NOSOUND					0	
-#define WEATHER_RAINLIGHT				8533
-#define WEATHER_RAINMEDIUM				8534
-#define WEATHER_RAINHEAVY				8535
-#define WEATHER_SNOWLIGHT				8536
-#define WEATHER_SNOWMEDIUM				8537
-#define WEATHER_SNOWHEAVY				8538
-#define WEATHER_SANDSTORMLIGHT			8556
-#define WEATHER_SANDSTORMMEDIUM			8557
-#define WEATHER_SANDSTORMHEAVY			8558	
+#define WEATHER_NOSOUND                 0
+#define WEATHER_RAINLIGHT               8533
+#define WEATHER_RAINMEDIUM              8534
+#define WEATHER_RAINHEAVY               8535
+#define WEATHER_SNOWLIGHT               8536
+#define WEATHER_SNOWMEDIUM              8537
+#define WEATHER_SNOWHEAVY               8538
+#define WEATHER_SANDSTORMLIGHT          8556
+#define WEATHER_SANDSTORMMEDIUM         8557
+#define WEATHER_SANDSTORMHEAVY          8558
 
-#define WEATHER_CHANGE_TIME				600			//seconds
+#define WEATHER_CHANGE_TIME             600                 //seconds
 
 class Player;
 
 class Weather
 {
-public:
-	Weather(Player *player);
-	~Weather() { m_player = NULL;};
-	void ReGenerate();
-	void ChangeWeather();
-	uint32 GetZone() { return m_zone; };
-	bool Update(uint32 diff);
-private:
-	Player *GetPlayerInZone();
-	uint32 GetSound();
-	uint32 m_zone;
-	uint32 m_type;
-	float m_grade;
-	Player *m_player;
-	uint32 m_timer;
+    public:
+        Weather(Player *player);
+        ~Weather() { m_player = NULL;};
+        void ReGenerate();
+        void ChangeWeather();
+        uint32 GetZone() { return m_zone; };
+        bool Update(uint32 diff);
+    private:
+        Player *GetPlayerInZone();
+        uint32 GetSound();
+        uint32 m_zone;
+        uint32 m_type;
+        float m_grade;
+        Player *m_player;
+        uint32 m_timer;
 };
 
 //void HandleWeather(void *weather);

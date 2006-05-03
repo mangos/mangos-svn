@@ -645,7 +645,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
     protected:
 
-		void AddWeather();
+        void AddWeather();
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;

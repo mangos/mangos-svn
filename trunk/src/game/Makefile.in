@@ -101,8 +101,9 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	TaxiHandler.$(OBJEXT) TaxiMovementGenerator.$(OBJEXT) \
 	tools.$(OBJEXT) TradeHandler.$(OBJEXT) Unit.$(OBJEXT) \
 	UpdateData.$(OBJEXT) WaypointMovementGenerator.$(OBJEXT) \
-	World.$(OBJEXT) WorldLog.$(OBJEXT) WorldSession.$(OBJEXT) \
-	WorldSocket.$(OBJEXT) WorldSocketMgr.$(OBJEXT)
+	Weather.$(OBJEXT) World.$(OBJEXT) WorldLog.$(OBJEXT) \
+	WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
+	WorldSocketMgr.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -341,6 +342,7 @@ libgame_a_SOURCES = \
 	Unit.cpp \
 	UpdateData.cpp \
 	WaypointMovementGenerator.cpp \
+	Weather.cpp \
 	World.cpp \
 	WorldLog.cpp \
 	WorldSession.cpp \
@@ -426,6 +428,7 @@ libgame_a_SOURCES = \
 	UpdateMask.h \
 	Utilities.h \
 	WaypointMovementGenerator.h \
+	Weather.h \
 	World.h \
 	WorldLog.h \
 	WorldSession.h \
@@ -560,6 +563,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Unit.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/UpdateData.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WaypointMovementGenerator.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Weather.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/World.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldLog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/WorldSession.Po@am__quote@
