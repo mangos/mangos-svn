@@ -66,8 +66,11 @@ SocketSelectTime = 10
 # Default grid clean up delay (seconds)
 GridCleanUpDelay = 300
 
-# Default map update intervat (miliseconds)
+# Default map update interval (miliseconds)
 MapUpdateInterval = 100
+
+# Default weather update interval
+ChangeWeatherInterval = 600000
 
 # Default WorldServerPort
 WorldServerPort = 8085
