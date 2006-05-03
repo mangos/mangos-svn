@@ -28,6 +28,7 @@
 #include "NPCHandler.h"
 #include "QuestDef.h"
 #include "Bag.h"
+#include "Weather.h"
 
 struct Mail;
 class Channel;
@@ -644,6 +645,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
     protected:
 
+		void AddWeather();
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;

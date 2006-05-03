@@ -25,6 +25,7 @@
 
 Corpse *m_pCorpse;
 
+
 void HandleCorpsesErase(void*)
 {
     sLog.outBasic("Global Event (corpses/bones removal)");
@@ -87,4 +88,3 @@ void HandleCorpsesErase(void*)
 	delete result;
 	}
 }
-

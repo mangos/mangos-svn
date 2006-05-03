@@ -1841,9 +1841,13 @@ bool ChatHandler::HandleChangeWeather(const char* args)
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
+    char* pz = strtok(NULL, " ");
 
-    uint32 type = (uint32)atoi(px);
-    float value = (float)atof(py);
+    uint32 type = (uint32)atoi(px);	//0 to 3, 0: fine, 1: rain, 2: snow, 3: storm
+    float value = (float)atof(py);	//0 to 1
+	uint32 sound = 0;
+	if(pz)
+		sound = (uint32)atoi(pz);
 
     /*opcode 756 (0x2F4)
     uint32 - weather type ?
@@ -1853,31 +1857,111 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     //!change weather effect //looks/sounds like sound effect
     sLog.outDebug( "WORLD: change weather effect" );
     data.Initialize( SMSG_WEATHER );
-    data << (uint32)type << (float)value << (uint32)0;
+    data << (uint32)type << (float)value << (uint32)sound;
     m_session->SendPacket( &data );
 
     return true;
 }
 
-bool ChatHandler::HandleSet32Value(const char* args)
+bool ChatHandler::HandleSetValue(const char* args)
 {
     WorldPacket data;
 
     char buf[256];
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
+    char* pz = strtok(NULL, " ");
 
     if (!px || !py)
         return false;
 
+    uint64 guid = m_session->GetPlayer()->GetSelection();
+    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+	if(!target)
+	{
+		target = m_session->GetPlayer();
+		guid = target->GetGUID();
+	}
+
     uint32 Opcode = (uint32)atoi(px);
-    uint32 Value = (uint32)atoi(py);
+	if(Opcode >= target->GetValuesCount())
+	{
+		sprintf((char*)buf,"The value index %u is too big to %u(count: %u).", Opcode, GUID_LOPART(guid), target->GetValuesCount());
+		FillSystemMessageData(&data, m_session, buf);
+		m_session->SendPacket( &data );
+		return false;
+	}
+	uint32 iValue;
+	float fValue;
+	bool isint32 = true;
+	if(pz)
+		isint32 = (bool)atoi(pz);
+	if(isint32)
+	{
+		iValue = (uint32)atoi(py);
+		sLog.outDebug( "Set %u uint32 Value:[OPCODE]:%d [VALUE]:%d", GUID_LOPART(guid), Opcode, iValue);
+		target->SetUInt32Value( Opcode , iValue );
+		sprintf((char*)buf,"You Set %u Field:%i to uint32 Value: %i", GUID_LOPART(guid), Opcode,iValue);
+	}
+	else
+	{
+		fValue = (float)atof(py);
+		sLog.outDebug( "Set %u float Value:[OPCODE]:%d [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
+		target->SetFloatValue( Opcode , fValue );
+		sprintf((char*)buf,"You Set %u Field:%i to float Value: %i", GUID_LOPART(guid), Opcode,fValue);
+	}
 
-    sLog.outDebug( ".Set32Value:[OPCODE]:%d [VALUE]:%d" , Opcode, Value);
+    FillSystemMessageData(&data, m_session, buf);
+    m_session->SendPacket( &data );
 
-    m_session->GetPlayer( )->SetUInt32Value( Opcode , Value );
+    return true;
+}
 
-    sprintf((char*)buf,"You Set Field:%i to Value: %i", Opcode,Value);
+bool ChatHandler::HandleGetValue(const char* args)
+{
+    WorldPacket data;
+
+    char buf[256];
+    char* px = strtok((char*)args, " ");
+    char* pz = strtok(NULL, " ");
+
+    if (!px)
+        return false;
+
+    uint64 guid = m_session->GetPlayer()->GetSelection();
+    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+	if(!target)
+	{
+		target = m_session->GetPlayer();
+		guid = target->GetGUID();
+	}
+
+    uint32 Opcode = (uint32)atoi(px);
+	if(Opcode >= target->GetValuesCount())
+	{
+		sprintf((char*)buf,"The value index %u is too big to %u(count: %u).", Opcode, GUID_LOPART(guid), target->GetValuesCount());
+		FillSystemMessageData(&data, m_session, buf);
+		m_session->SendPacket( &data );
+		return false;
+	}
+    uint32 iValue;
+	float fValue;
+	bool isint32 = true;
+	if(pz)
+		isint32 = (bool)atoi(pz);
+	
+	if(isint32)
+	{
+		iValue = target->GetUInt32Value( Opcode );
+	    sLog.outDebug( "Get %u uint32 Value:[OPCODE]:%d [VALUE]:%d", GUID_LOPART(guid), Opcode, iValue);
+		sprintf((char*)buf,"The uint32 value of %u in %u is: %u", GUID_LOPART(guid), Opcode,	iValue);
+	}
+	else
+	{
+		fValue = target->GetFloatValue( Opcode );
+	    sLog.outDebug( "Get %u float Value:[OPCODE]:%d [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
+		sprintf((char*)buf,"The float of %u value in %u is: %f", GUID_LOPART(guid), Opcode,	fValue);
+	}
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 

@@ -189,7 +189,8 @@ class ChatHandler
         bool HandleChangeWeather(const char* args);
 
         //! Development Commands
-        bool HandleSet32Value(const char* args);
+        bool HandleSetValue(const char* args);
+        bool HandleGetValue(const char* args);
         bool HandleSet32Bit(const char* args);
         bool HandleMod32Value(const char* args);
 
