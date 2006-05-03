@@ -69,7 +69,7 @@ class World
         void AddSession(WorldSession *s);
         void RemoveSession(uint32 id);
         uint32 GetSessionCount() const { return m_sessions.size(); }
-		Player* FindPlayerInZone(uint32 zone);
+        Player* FindPlayerInZone(uint32 zone);
 
         Weather* FindWeather(uint32 id) const;
         void AddWeather(Weather *w);
