@@ -29,7 +29,7 @@ WaypointMovementGenerator::_load(Creature &c)
 {
     i_path.Clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `waittime` FROM `creature_movement` WHERE `id` = '%d' ORDER BY `point`;", c.GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `waittime` FROM `creature_movement` WHERE `id` = '%u' ORDER BY `point`;", c.GetGUIDLow());
 
     if( result )
     {
@@ -77,7 +77,7 @@ WaypointMovementGenerator::Permissible(const Creature *c)
 {
     if (si_waypointHolders.find(c->GetGUIDLow()) != si_waypointHolders.end())
     {
-        DEBUG_LOG("Creature [guid=%d] returns waypoint movement permit.", c->GetGUIDLow());
+        DEBUG_LOG("Creature [guid=%u] returns waypoint movement permit.", c->GetGUIDLow());
         return CUSTOM_MOTION_TYPE;
     }
 

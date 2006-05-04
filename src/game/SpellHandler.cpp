@@ -108,7 +108,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
     recv_data >> guid;
 
-    sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%d]", guid);
+    sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", guid);
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
     if(!obj) return;
@@ -126,7 +126,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
         default:
-            sLog.outDebug( "Unkonw Object Type %d\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
+            sLog.outDebug( "Unkonw Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
             break;
     }
 

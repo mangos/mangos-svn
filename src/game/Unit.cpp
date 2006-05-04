@@ -129,7 +129,7 @@ void Unit::setAttackTimer(uint32 time, bool rangeattack)
                     m_attackTimer = weapon->GetProto()->Delay;
             }
         }
-        m_attackTimer = (m_attackTimer >= 1000) ? m_attackTimer : 2000;
+        m_attackTimer = (m_attackTimer >= 500) ? m_attackTimer : 2000;
     }
 }
 
@@ -319,7 +319,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
                 for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
                 {
                     Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
-                    pGroupGuy->GiveXP(xp, victimGuid);
+					if(!pGroupGuy)
+						continue;
+					if(GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GETXP_DISTANCE))
+						continue;
+					if(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel()) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
+						continue;
+					pGroupGuy->GiveXP(xp, victimGuid);
 
                     if (pVictim->GetTypeId() != TYPEID_PLAYER)
                         pGroupGuy->KilledMonster(entry, victimGuid);

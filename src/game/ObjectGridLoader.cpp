@@ -53,7 +53,7 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
 {
     uint32 cell_id = (cell.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell.x_coord;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `%s` WHERE `grid` = '%d' AND `cell` = '%d' AND `map` = '%d'", table, grid_id, cell_id, map_id);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `%s` WHERE `grid` = '%u' AND `cell` = '%u' AND `map` = '%u'", table, grid_id, cell_id, map_id);
 
     if( result )
 

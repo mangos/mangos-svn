@@ -36,7 +36,7 @@ void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
 
     recv_data >> srcBag >> srcSlot >> dstBag >> dstSlot >> count;
 
-    sLog.outDetail("ITEM: Split item, srcBag = %d, srcSlot = %d, dstBag = %d, dstSlot = %d, count = %d",srcBag, srcSlot, dstBag, dstSlot, count);
+    sLog.outDetail("ITEM: Split item, srcBag = %u, srcSlot = %u, dstBag = %u, dstSlot = %u, count = %u",srcBag, srcSlot, dstBag, dstSlot, count);
 
     _player->SplitItem(srcBag, srcSlot, dstBag, dstSlot, count);
 }
@@ -62,7 +62,7 @@ void WorldSession::HandleSwapItem( WorldPacket & recv_data )
     uint8 dstBag, dstSlot, srcBag, srcSlot;
 
     recv_data >> dstBag >> dstSlot >> srcBag >> srcSlot ;
-    sLog.outDetail("ITEM: Swap, srcBag = %d, srcSlot = %d, dstBag = %d, dstSlot = %d", srcBag, srcSlot, dstBag, dstSlot);
+    sLog.outDetail("ITEM: Swap, srcBag = %u, srcSlot = %u, dstBag = %u, dstSlot = %u", srcBag, srcSlot, dstBag, dstSlot);
 
     _player->SwapItem(dstBag, dstSlot, srcBag, srcSlot);
 }
@@ -74,7 +74,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     uint8 srcBag, srcSlot, dstSlot, error_msg = 0;
 
     recv_data >> srcBag >> srcSlot;
-    sLog.outDetail("ITEM: Auto equip, srcBag = %d, srcSlot = %d", srcBag, srcSlot);
+    sLog.outDetail("ITEM: Auto equip, srcBag = %u, srcSlot = %u", srcBag, srcSlot);
 
     Item *item  = _player->GetItemBySlot(srcBag, srcSlot);
 
@@ -108,7 +108,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
     recv_data >> bagIndex >> slot >> count >> data1 >> data2 >> data3;
 
-    sLog.outDetail("ITEM: Destroy, bagIndex = %d, slot = %d, count = %d (Uknown data: %d %d %d)", bagIndex, slot, count, data1, data2, data3);
+    sLog.outDetail("ITEM: Destroy, bagIndex = %u, slot = %u, count = %u (Uknown data: %u %u %u)", bagIndex, slot, count, data1, data2, data3);
 
     Item *item = _player->GetItemBySlot(bagIndex,slot);
 
@@ -154,7 +154,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         return;
     }
 
-    sLog.outDetail("ITEM: Item query, itemId = %d, guidLow = %d, guidHigh = %d", itemId, guidLow, guidHigh);
+    sLog.outDetail("ITEM: Item query, itemId = %u, guidLow = %u, guidHigh = %u", itemId, guidLow, guidHigh);
 
     data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
     data << itemProto->ItemId;
@@ -245,7 +245,7 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
     WorldPacket data;
     recv_data >> bagIndex >> slot;
 
-    sLog.outDetail("ITEM: Read, bagIndex = %d, slot = %d", bagIndex, slot);
+    sLog.outDetail("ITEM: Read, bagIndex = %u, slot = %u", bagIndex, slot);
     Item *pItem = _player->GetItemBySlot(bagIndex, slot);
 
     if (pItem)
@@ -274,7 +274,7 @@ void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 
     recv_data >> itemid >> guidlow >> guidhigh;
 
-    sLog.outDetail( "Packet Info: itemid: %d guidlow: %d guidhigh: %d", itemid, guidlow, guidhigh );
+    sLog.outDetail( "Packet Info: itemid: %u guidlow: %u guidhigh: %u", itemid, guidlow, guidhigh );
 }
 
 void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
@@ -772,7 +772,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 
     recv_data >> srcBag >> srcSlot >> dstBag;
 
-    sLog.outDetail("ITEM: Autostore item, srcBag = %d, srcSlot = %d, dstBag = %d", srcBag, srcSlot, dstBag);
+    sLog.outDetail("ITEM: Autostore item, srcBag = %u, srcSlot = %u, dstBag = %u", srcBag, srcSlot, dstBag);
 
     Item *pItem = _player->GetItemBySlot(srcBag, srcSlot);
 
@@ -813,7 +813,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
     bank = _player->GetUInt32Value(PLAYER_BYTES_2);
     result = (bank & 0x70000) >> 16;
 
-    sLog.outDetail("PLAYER: Buy bank bag slot, slot number = %d", result);
+    sLog.outDetail("PLAYER: Buy bank bag slot, slot number = %u", result);
 
     // Prices Hardcoded
     switch (result)

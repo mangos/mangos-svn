@@ -41,7 +41,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;
-    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: %d" , guid);
+    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: %lu" , guid);
 
     // For now we'll assume all battlefield npcs are mapid 489
     // gossip related
@@ -85,7 +85,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
     recv_data >> guid;                                      // >> MapID >> Instance;
-    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: %d" , guid);
+    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: %lu" , guid);
 
     // We're in BG.
     GetPlayer()->m_bgBattleGroundID = 1;
@@ -170,7 +170,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
     }
     GetPlayer()->GetSession()->SendPacket(&data);
 
-    sLog.outDebug( "WORLD: Send MSG_PVP_LOG_DATA Message players:%d", sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresSize());
+    sLog.outDebug( "WORLD: Send MSG_PVP_LOG_DATA Message players:%u", sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresSize());
 
     //data << (uint8)0; ////Warsong Gulch
     /*data << (uint8)1; //
@@ -255,7 +255,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
             Instance = GetPlayer()->GetCurrentInstance();
             //MapID = GetPlayer()->GetInstanceMapId();
 
-            sLog.outDebug( "BATTLEGROUND: Sending Player:%d to Map:%d Instance %d",(uint32)guid, MapID, Instance);
+            sLog.outDebug( "BATTLEGROUND: Sending Player:%u to Map:%u Instance %u",(uint32)guid, MapID, Instance);
 
             //data << uint32(0x000001E9) << float(1519.530273f) << float(1481.868408f) << float(352.023743f) << float(3.141593f);
             //Map* Map = MapManager::Instance().GetMap(GetPlayer()->GetInstanceMapId());

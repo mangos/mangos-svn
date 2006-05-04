@@ -162,7 +162,7 @@ class ChatHandler
         bool HandleLearnSkillCommand(const char* args);
         bool HandleUnLearnSkillCommand(const char* args);
         bool HandleObjectCommand(const char* args);
-        bool HandleCreatureDistanceCommand(const char* args);
+        bool HandleGetDistanceCommand(const char* args);
         bool HandleGameObjectCommand(const char* args);
         bool HandleAnimCommand(const char* args);
         bool HandleStandStateCommand(const char* args);

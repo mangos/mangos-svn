@@ -313,7 +313,7 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
     Group *group;
     group = objmgr.GetGroupByLeader(GetPlayer()->GetGroupLeader());
 
-    sLog.outDebug( "GROUP: is in group?:%d",GetPlayer()->m_isInGroup);
+    sLog.outDebug( "GROUP: is in group?:%u",GetPlayer()->m_isInGroup);
 
     if(group==NULL)
     {

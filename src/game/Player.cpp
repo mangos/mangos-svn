@@ -66,7 +66,7 @@ Player::Player (WorldSession *session): Unit()
     m_regenTimer = 0;
     m_dismountCost = 0;
 
-    m_nextSave = 900000;
+    m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
     m_pCorpse = NULL;
     m_currentSpell = NULL;
@@ -276,7 +276,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
         if (titem_id)
         {
-            sLog.outDebug("ITEM: Creating initial item, itemId = %d, bagIndex = %d, slot = %d, count = %d",titem_id, titem_bagIndex, titem_slot, titem_amount);
+            sLog.outDebug("ITEM: Creating initial item, itemId = %u, bagIndex = %u, slot = %u, count = %u",titem_id, titem_bagIndex, titem_slot, titem_amount);
             AddItem(titem_bagIndex, titem_slot, CreateNewItem(titem_id, titem_amount), true);
             //AddNewItem(titem_bagIndex, titem_slot, titem_id, titem_amount, false, false);
         }
@@ -289,7 +289,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         tspell = (*spell_itr);
         if (tspell)
         {
-            sLog.outDebug("PLAYER: Adding initial spell, id = %d",tspell);
+            sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
             addSpell(tspell, 0);
         }
     }
@@ -304,7 +304,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
         if (tskill[0])
         {
-            sLog.outDebug("PLAYER: Adding initial skill line, skillId = %d, value = %d, max = %d", tskill[0], tskill[1], tskill[2]);
+            sLog.outDebug("PLAYER: Adding initial skill line, skillId = %u, value = %u, max = %u", tskill[0], tskill[1], tskill[2]);
             SetSkill(tskill[0], tskill[1], tskill[2]);
         }
 
@@ -1505,7 +1505,7 @@ void Player::AddMail(Mail *m)
 
 void Player::_SaveAuctions()
 {
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",GetGUIDLow());
 
     ObjectMgr::AuctionEntryMap::iterator itr;
     for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
@@ -1516,7 +1516,7 @@ void Player::_SaveAuctions()
             Item *it = objmgr.GetAItem(Aentry->item);
 
             sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%d', '%d', '%d', '%d', '%u', '%d', '%d', '%d');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
 
             std::stringstream ss;
             ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
@@ -1548,7 +1548,7 @@ void Player::_SaveMail()
 
 void Player::_SaveBids()
 {
-    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%u'",GetGUIDLow());
 
     std::list<bidentry*>::iterator itr;
     for (itr = m_bids.begin(); itr != m_bids.end(); itr++)
@@ -1556,7 +1556,7 @@ void Player::_SaveBids()
         AuctionEntry *a = objmgr.GetAuction((*itr)->AuctionID);
         if (a)
         {
-            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%d', '%d', '%d');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
+            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
         }
     }
 
@@ -1599,7 +1599,7 @@ void Player::_LoadBids()
 
     m_bids.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%d';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%u';",GetGUIDLow());
 
     if(result)
     {
@@ -2042,7 +2042,7 @@ void Player::_SaveTutorials()
 void Player::_SaveActions()
 {
     std::stringstream query;
-    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%d'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::list<struct actions>::iterator itr;
     for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
@@ -2326,7 +2326,7 @@ void Player::_LoadAuras()
 {
     m_Auras.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%d';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u';",GetGUIDLow());
 
     if(result)
     {
@@ -2356,7 +2356,7 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%d'",guid);
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `player` = '%u'",guid);
@@ -2371,15 +2371,15 @@ void Player::DeleteFromDB()
     }
 
     sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%d'",guid);
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
     // Temporary disabled, we need to lookup both auctionhouse and auctionhouse_items
     // together. auctionhouse_items are saved by item_guid not by player guid.
-    // sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%d'",guid);
+    // sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",guid);
     // sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",guid);
-    // sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%d'",guid);
+    // sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%u'",guid);
 
 }
 
@@ -2742,20 +2742,20 @@ void Player::RepopAtGraveyard()
         // near if in the same zoneid and far if in different zoneid
 
         WorldPacket data;
-        BuildHeartBeatMsg(&data);
-        SendMessageToSet(&data, true);
 
         // teleport near
-        SetDontMove(true);
-        MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
+        //SetDontMove(true);
+        //MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
 
         BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0.0);
         GetSession()->SendPacket(&data);
 
         SetPosition( closestX, closestY, closestZ, 0.0);
-        RemoveFromWorld();
-        MapManager::Instance().GetMap(GetMapId())->Add(this);
-        SetDontMove(false);
+        BuildHeartBeatMsg(&data);
+        SendMessageToSet(&data, true);
+        //RemoveFromWorld();
+        //MapManager::Instance().GetMap(GetMapId())->Add(this);
+        //SetDontMove(false);
         //SaveToDB();
 
         // teleport far
@@ -2787,7 +2787,7 @@ void Player::BroadcastToFriends(std::string msg)
     Field *fields;
     Player *pfriend;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%d';", GetGUID());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u';", GetGUIDLow());
 
     if(!result) return;
 
@@ -2991,7 +2991,7 @@ void Player::removeAction(uint8 button)
             break;
         }
     }
-    sLog.outString( "Action Button '%u' Removed from Player '%u'", button, GetGUID() );
+    sLog.outString( "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow() );
 }
 
 void Player::SetDontMove(bool dontMove)
@@ -3232,7 +3232,7 @@ void Player::_LoadReputation()
 
     factions.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%d';",GetGUID());
+    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u';",GetGUIDLow());
 
     if(result)
     {
@@ -3292,12 +3292,12 @@ void Player::_SaveReputation()
 
     std::stringstream ss;
 
-    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%d'",GetGUID());
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
 
-        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%d', '%d', '%d', '%d', '%d');", (uint32)GetGUID(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+		sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u');", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
 
     }
 }
@@ -3371,7 +3371,7 @@ void Player::UpdateHonor(void)
 
     sLog.outDetail("PLAYER: UpdateHonor");
 
-    QueryResult *result = sDatabase.PQuery("SELECT `type`,`honor`,`date` FROM `character_kill` WHERE `guid` = '%d';", GetGUID());
+    QueryResult *result = sDatabase.PQuery("SELECT `type`,`honor`,`date` FROM `character_kill` WHERE `guid` = '%u';", GetGUIDLow());
 
     if(result)
     {
@@ -3483,7 +3483,7 @@ int Player::CalculateTotalKills(Player *pVictim)
 {
     int total_kills = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `honor` FROM `character_kill` WHERE `guid` = '%d' AND `creature_template` = '%d';", GetGUID(), pVictim->GetGUID());
+    QueryResult *result = sDatabase.PQuery("SELECT `honor` FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u';", GetGUIDLow(), pVictim->GetEntry());
 
     if(result)
     {
@@ -3538,7 +3538,7 @@ void Player::CalculateHonor(Unit *uVictim)
         now = localtime( &rawtime );
         today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
 
-        sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`,`type`) VALUES (%d, %d, %f, %d, %u);", (uint32)GetGUID(), (uint32)uVictim->GetGUID(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
+        sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`,`type`) VALUES (%u, %u, %f, %u, %u);", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
 
         UpdateHonor();
     }
@@ -5548,7 +5548,7 @@ void Player::SendInitWorldStates(uint32 MapID)
 
     if ((MapID == 0) || (MapID == 1))
     {
-        sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%d",MapID);
+        sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%u",MapID);
 
         uint16 NumberOfFields = 108;
         WorldPacket data;
@@ -5671,7 +5671,7 @@ void Player::SendInitWorldStates(uint32 MapID)
     //BattleGround currently only map 489
     else if (MapID == 489)                                  // && and guid is in a current Battlefield)
     {
-        sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%d",MapID);
+        sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%u",MapID);
 
         uint16 NumberOfFields = 114;
         WorldPacket data;

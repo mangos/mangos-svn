@@ -237,9 +237,9 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                 rpl->AddMail(m);
             }
 
-            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` =  '%d'",ah->owner);
+            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` =  '%u'",ah->owner);
             sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",ah->item);
-            sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `id` = '%d'",ah->Id);
+            sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `id` = '%u'",ah->Id);
 
             data.Initialize( SMSG_AUCTION_LIST_RESULT );
             data << uint32(0);

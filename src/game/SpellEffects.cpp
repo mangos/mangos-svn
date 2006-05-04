@@ -219,7 +219,7 @@ void Spell::EffectApplyAura(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    sLog.outDebug("Apply Auraname is: %d", m_spellInfo->EffectApplyAuraName[i]);
+    sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     if(m_spellInfo->Id == 2457)
     {
@@ -300,7 +300,7 @@ void Spell::EffectHealthLeach(uint32 i)
 
     //okey Touch of Death works
 
-    sLog.outDebug("HealthLeach :%d", damage);
+    sLog.outDebug("HealthLeach :%u", damage);
     uint32 dHealth = damage;                                //something like this //maybe some other things are needed
 
     //Please let me know if this is correct

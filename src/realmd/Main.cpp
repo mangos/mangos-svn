@@ -32,7 +32,7 @@
 bool StartDB();
 void UnhookSignals();
 void HookSignals();
-uint8 loglevel = DEFAULT_LOG_LEVEL;
+//uint8 loglevel = DEFAULT_LOG_LEVEL;
 
 bool stopEvent = false;
 int usage(const char *prog)
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
     StartDB();
 
-    loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
+    //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
     port_t wsport, rmport;
     rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );

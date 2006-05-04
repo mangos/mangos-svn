@@ -73,7 +73,7 @@ void Guild::create(uint64 lGuid, std::string gname)
     rname = "Initiate";
     CreateRank(rname,GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 
-    sLog.outDebug("GUILD: creating guild %s to leader:%d", gname.c_str(), leaderGuid);
+    sLog.outDebug("GUILD: creating guild %s to leader:%lu", gname.c_str(), leaderGuid);
 
     QueryResult *result = sDatabase.PQuery( "SELECT MAX(`guildid`) FROM `guild`;" );
     if( result )
@@ -324,7 +324,7 @@ void Guild::DelGuildMembersFromDB()
 
 void Guild::DelMemberFromDB(uint64 guid)
 {
-    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%d';",guid);
+    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u';", GUID_LOPART(guid));
 }
 
 void Guild::BroadcastToGuild(WorldSession *session, std::string msg)

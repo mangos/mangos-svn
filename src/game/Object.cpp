@@ -154,7 +154,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         //case TYPEID_AREATRIGGER:
         //break;
         default:                                            //know type
-            sLog.outDetail("Unknow Object Type %d Create Update Block.\n", m_objectTypeId);
+            sLog.outDetail("Unknow Object Type %u Create Update Block.\n", m_objectTypeId);
             break;
     }
 
@@ -320,10 +320,10 @@ void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, f
     *data << uint32(0x800000);
     *data << uint16(0x67EE);
     *data << uint16(0xD1EB);
+    *data<< ang;
     *data<< x;
     *data<< y;
     *data<< z;
-    *data<< ang;
     *data<< uint32(0x0);
 }
 
@@ -471,15 +471,20 @@ uint32 Object::GetZoneId( )
 float Object::GetDistanceSq(const Object* obj) const
 {
     ASSERT(obj->GetMapId() == m_mapId);
-    float size = GetObjectSize();
-    float size1 = obj->GetObjectSize();
+    //float size = GetObjectSize();
+    float size = obj->GetObjectSize();
     float x1, y1, z1, x2, y2, z2;
     GetClosePoint( obj, x1, y1, z1 );
     obj->GetClosePoint( this, x2, y2, z2 );
     float dx  = x2 - x1;
     float dy  = y2 - y1;
     float dz  = z2 - z1;
-    return (dx*dx) + (dy*dy) + (dz*dz) + size * size + size1 * size1;
+	float rdist = (dx*dx) + (dy*dy) + (dz*dz);
+	dx = obj->GetPositionX() - m_positionX;
+	dy = obj->GetPositionY() - m_positionY;
+	dz = obj->GetPositionZ() - m_positionZ;
+	float realdist = (dx*dx) + (dy*dy) + (dz*dz);
+	return (realdist < size * size) ? 0 : rdist;
 }
 
 float Object::GetDistanceSq(const float x, const float y, const float z) const
@@ -491,23 +496,37 @@ float Object::GetDistanceSq(const float x, const float y, const float z) const
     float dx  = x - x1;
     float dy  = y - y1;
     float dz  = z - z1;
-    return (dx*dx) + (dy*dy) + (dz*dz) + size * size * 2;
+	float rdist = (dx*dx) + (dy*dy) + (dz*dz);
+	dx = x - m_positionX;
+	dy = y - m_positionY;
+	dz = z - m_positionZ;
+	float realdist = (dx*dx) + (dy*dy) + (dz*dz);
+	return (realdist < size * size) ? 0 : rdist;
 }
 
 float Object::GetDistance2dSq(const Object* obj) const
 {
     ASSERT(obj->GetMapId() == m_mapId);
-    float dx  = obj->GetPositionX() - GetPositionX();
-    float dy  = obj->GetPositionY() - GetPositionY();
-    return (dx*dx) + (dy*dy);
+    //float size = GetObjectSize();
+    float size = obj->GetObjectSize();
+    float x1, y1, z1, x2, y2, z2;
+    GetClosePoint( obj, x1, y1, z1 );
+    obj->GetClosePoint( this, x2, y2, z2 );
+    float dx  = x2 - x1;
+    float dy  = y2 - y1;
+	float rdist = (dx*dx) + (dy*dy);
+	dx = obj->GetPositionX() - m_positionX;
+	dy = obj->GetPositionY() - m_positionY;
+	float realdist = (dx*dx) + (dy*dy);
+	return (realdist < size * size) ? 0 : rdist;
 }
 
 float Object::GetAngle(const Object* obj) const
 {
     if(!obj) return 0;
 
-    float dx = obj->GetPositionX() - GetPositionX();
-    float dy = obj->GetPositionY() - GetPositionY();
+    float dx = obj->GetPositionX() - m_positionX;
+    float dy = obj->GetPositionY() - m_positionY;
 
     float ang = (float)atan2((double)dy, (double)dx);
     ang = (ang >= 0) ? ang : 2 * M_PI + ang;
@@ -518,8 +537,8 @@ float Object::GetAngle( const float x, const float y ) const
 {
     if( x==0 && y==0) return 0;
 
-    float dx = x - GetPositionX();
-    float dy = y - GetPositionY();
+    float dx = x - m_positionX;
+    float dy = y - m_positionY;
 
     float ang = (float)atan2((double)dy, (double)dx);
     ang = (ang >= 0) ? ang : 2 * M_PI + ang;
@@ -532,8 +551,8 @@ bool Object::IsInArc(const float arcangle, const Object* obj) const
     if(arcangle>2.0f * M_PI)
         arc=arcangle - 2.0f * M_PI;
     float angle = GetAngle( obj );
-    float lborder = GetOrientation() - (arc/2.0f);
-    float rborder = GetOrientation() + (arc/2.0f);
+    float lborder = m_orientation - (arc/2.0f);
+    float rborder = m_orientation + (arc/2.0f);
     if(lborder<0)
         return ((angle >= 2.0f * M_PI+lborder && angle <= 2.0f * M_PI) || (angle>=0 && angle<=rborder));
     return ( angle >= lborder ) && ( angle <= rborder );
@@ -544,7 +563,7 @@ void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z )
     float angle, z1;
     if(!victim)
     {
-        z1 = GetPositionZ();
+        z1 = m_positionZ;
         angle = m_orientation;
     }
     else

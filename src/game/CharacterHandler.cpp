@@ -59,7 +59,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
             plr = new Player(this);
             ASSERT(plr);
 
-            sLog.outError("Loading char guid %d from account %d.",(*result)[0].GetUInt32(),GetAccountId());
+            sLog.outError("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
             plr->LoadFromDB( (*result)[0].GetUInt32() );
 
@@ -202,7 +202,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // home bind stuff
     Field *fields;
-    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(*) FROM `character_homebind` WHERE `guid` = '%d';", playerGuid);
+    QueryResult *result7 = sDatabase.PQuery("SELECT COUNT(*) FROM `character_homebind` WHERE `guid` = '%u';", GUID_LOPART(playerGuid));
     if (result7)
     {
         int cnt;
@@ -211,14 +211,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%d';", playerGuid);
+            QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u';", GUID_LOPART(playerGuid));
             fields = result4->Fetch();
             data.Initialize (SMSG_BINDPOINTUPDATE);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
             data << fields[0].GetUInt32();
             data << fields[1].GetUInt32();
             SendPacket (&data);
-            DEBUG_LOG("Setting player home position: mapid is: %d, zoneid is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+            DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
             delete result4;
         }
         else
@@ -228,13 +228,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u';", plrace, plclass);
             fields = result5->Fetch();
             // store and send homebind for player
-            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%lu', '%d', '%d', '%f', '%f', '%f');", (unsigned long)playerGuid, fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f');", GUID_LOPART(playerGuid), fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
             data.Initialize (SMSG_BINDPOINTUPDATE);
             data << fields[2].GetFloat() << fields[3].GetFloat() << fields[4].GetFloat();
             data << fields[0].GetUInt32();
             data << fields[1].GetUInt32();
             SendPacket (&data);
-            DEBUG_LOG("Setting player home position: mapid is: %d, zoneid is %d, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
+            DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",fields[0].GetUInt32(),fields[1].GetUInt32(),fields[2].GetFloat(), fields[3].GetFloat(), fields[4].GetFloat());
             delete result5;
         }
         delete result7;
@@ -433,7 +433,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     Player *pCurrChar = GetPlayer();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guid` = '%d';",pCurrChar->GetGUID());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild_member` WHERE `guid` = '%u';",pCurrChar->GetGUIDLow());
 
     if(result)
     {

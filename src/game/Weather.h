@@ -33,8 +33,6 @@
 #define WEATHER_SANDSTORMMEDIUM         8557
 #define WEATHER_SANDSTORMHEAVY          8558
 
-#define WEATHER_CHANGE_TIME             600000              //mseconds
-
 class Player;
 
 class Weather

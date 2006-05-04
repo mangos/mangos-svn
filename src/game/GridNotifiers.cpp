@@ -55,7 +55,7 @@ PlayerNotifier::BuildForMySelf()
     {
         WorldPacket packet;
         UpdateData data;
-        sLog.outDetail("Creating player data for himself %d", i_player.GetGUID());
+        sLog.outDetail("Creating player data for himself %u", i_player.GetGUIDLow());
         i_player.BuildCreateUpdateBlockForPlayer(&data, &i_player);
         data.BuildPacket(&packet);
         i_player.GetSession()->SendPacket(&packet);

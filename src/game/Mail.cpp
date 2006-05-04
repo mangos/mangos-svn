@@ -411,7 +411,7 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     itr = pl->GetMail(mailguid);
     if(itr)
     {
-        sLog.outDebug("We got mailguid: %d with unk: %d", mailguid, unk1);
+        sLog.outDebug("We got mailguid: %u with unk: %u", mailguid, unk1);
 
         data.Initialize(SMSG_ITEM_TEXT_QUERY_RESPONSE);
         data << mailguid;
@@ -463,7 +463,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
     recv_data >> unk1 >> unk2 >> mailid;
 
-    sLog.outString("HandleMailCreateTextItem unk1=%d,unk2=%d,mailid=%d",unk1,unk2,mailid);
+    sLog.outString("HandleMailCreateTextItem unk1=%u,unk2=%u,mailid=%u",unk1,unk2,mailid);
 
     uint32 sbit2=5;
     bool   slotfree=false;
