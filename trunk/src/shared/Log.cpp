@@ -28,8 +28,8 @@ INSTANTIATE_SINGLETON_1( Log );
 void Log::Initialize()
 {
     std::string logfn=sConfig.GetStringDefault("ServerLogFile", "Server.log");
-    logfile = fopen(logfn.c_str(), "w");                   
-	m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
+    logfile = fopen(logfn.c_str(), "w");
+    m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
 }
 
 void Log::outString( const char * str, ... )

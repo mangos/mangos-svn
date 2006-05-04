@@ -3297,7 +3297,7 @@ void Player::_SaveReputation()
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
 
-		sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u');", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u');", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
 
     }
 }
@@ -3466,9 +3466,10 @@ void Player::UpdateHonor(void)
 }
 
 int Player::GetHonorRank()
- { 
-	 return CalculateHonorRank(m_total_honor_points);
- }
+{
+    return CalculateHonorRank(m_total_honor_points);
+}
+
 //What is Player's rank... private, scout...
 int Player::CalculateHonorRank(float honor_points)
 {

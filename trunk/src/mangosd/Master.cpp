@@ -103,11 +103,12 @@ bool Master::Run()
     sWorld.SetInitialWorldSettings();
 
     port_t wsport, rmport;
-    rmport = sWorld.getConfig(CONFIG_PORT_REALM);//sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sWorld.getConfig(CONFIG_PORT_WORLD);//sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
+    rmport = sWorld.getConfig(CONFIG_PORT_REALM);           //sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+    wsport = sWorld.getConfig(CONFIG_PORT_WORLD);           //sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
 
     uint32 socketSelecttime;
-    socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);//sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
+                                                            //sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
+    socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);
 
     //sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
     //sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));

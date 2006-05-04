@@ -49,10 +49,10 @@ enum WorldConfigs
     CONFIG_INTERVAL_CHANGEWEATHER,
     CONFIG_PORT_WORLD,
     CONFIG_PORT_REALM,
-	CONFIG_SOCKET_SELECTTIME,
-	CONFIG_GETXP_DISTANCE,
-	CONFIG_GETXP_LEVELDIFF,
-	CONFIG_VALUE_COUNT
+    CONFIG_SOCKET_SELECTTIME,
+    CONFIG_GETXP_DISTANCE,
+    CONFIG_GETXP_LEVELDIFF,
+    CONFIG_VALUE_COUNT
 };
 
 enum Rates
@@ -166,7 +166,7 @@ class World
         time_t m_lastTick;
 
         time_t m_nextThinkTime;
-		uint32 m_configs[CONFIG_VALUE_COUNT];
+        uint32 m_configs[CONFIG_VALUE_COUNT];
 };
 
 #define sWorld MaNGOS::Singleton<World>::Instance()

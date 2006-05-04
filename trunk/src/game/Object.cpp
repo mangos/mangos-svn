@@ -479,12 +479,12 @@ float Object::GetDistanceSq(const Object* obj) const
     float dx  = x2 - x1;
     float dy  = y2 - y1;
     float dz  = z2 - z1;
-	float rdist = (dx*dx) + (dy*dy) + (dz*dz);
-	dx = obj->GetPositionX() - m_positionX;
-	dy = obj->GetPositionY() - m_positionY;
-	dz = obj->GetPositionZ() - m_positionZ;
-	float realdist = (dx*dx) + (dy*dy) + (dz*dz);
-	return (realdist < size * size) ? 0 : rdist;
+    float rdist = (dx*dx) + (dy*dy) + (dz*dz);
+    dx = obj->GetPositionX() - m_positionX;
+    dy = obj->GetPositionY() - m_positionY;
+    dz = obj->GetPositionZ() - m_positionZ;
+    float realdist = (dx*dx) + (dy*dy) + (dz*dz);
+    return (realdist < size * size) ? 0 : rdist;
 }
 
 float Object::GetDistanceSq(const float x, const float y, const float z) const
@@ -496,12 +496,12 @@ float Object::GetDistanceSq(const float x, const float y, const float z) const
     float dx  = x - x1;
     float dy  = y - y1;
     float dz  = z - z1;
-	float rdist = (dx*dx) + (dy*dy) + (dz*dz);
-	dx = x - m_positionX;
-	dy = y - m_positionY;
-	dz = z - m_positionZ;
-	float realdist = (dx*dx) + (dy*dy) + (dz*dz);
-	return (realdist < size * size) ? 0 : rdist;
+    float rdist = (dx*dx) + (dy*dy) + (dz*dz);
+    dx = x - m_positionX;
+    dy = y - m_positionY;
+    dz = z - m_positionZ;
+    float realdist = (dx*dx) + (dy*dy) + (dz*dz);
+    return (realdist < size * size) ? 0 : rdist;
 }
 
 float Object::GetDistance2dSq(const Object* obj) const
@@ -514,11 +514,11 @@ float Object::GetDistance2dSq(const Object* obj) const
     obj->GetClosePoint( this, x2, y2, z2 );
     float dx  = x2 - x1;
     float dy  = y2 - y1;
-	float rdist = (dx*dx) + (dy*dy);
-	dx = obj->GetPositionX() - m_positionX;
-	dy = obj->GetPositionY() - m_positionY;
-	float realdist = (dx*dx) + (dy*dy);
-	return (realdist < size * size) ? 0 : rdist;
+    float rdist = (dx*dx) + (dy*dy);
+    dx = obj->GetPositionX() - m_positionX;
+    dy = obj->GetPositionY() - m_positionY;
+    float realdist = (dx*dx) + (dy*dy);
+    return (realdist < size * size) ? 0 : rdist;
 }
 
 float Object::GetAngle(const Object* obj) const

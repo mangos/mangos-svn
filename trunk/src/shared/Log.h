@@ -45,7 +45,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outMenu( const char * str, ... );
     private:
         FILE* logfile;
-		uint32 m_logLevel;
+        uint32 m_logLevel;
 
 };
 

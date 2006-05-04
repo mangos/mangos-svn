@@ -116,7 +116,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "name",        2, &ChatHandler::HandleNameCommand,             "",   NULL },
         { "subname",     2, &ChatHandler::HandleSubNameCommand,          "",   NULL },
         { "npcflag",     2, &ChatHandler::HandleNPCFlagCommand,          "",   NULL },
-        { "distance",    3, &ChatHandler::HandleGetDistanceCommand,		 "",   NULL },
+        { "distance",    3, &ChatHandler::HandleGetDistanceCommand,      "",   NULL },
         { "object",      3, &ChatHandler::HandleObjectCommand,           "",   NULL },
         { "gameobject",  3, &ChatHandler::HandleGameObjectCommand,       "",   NULL },
         { "addgo",       3, &ChatHandler::HandleGameObjectCommand,       "",   NULL },
