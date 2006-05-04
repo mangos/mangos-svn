@@ -1171,7 +1171,7 @@ bool ChatHandler::HandleGetDistanceCommand(const char* args)
         return true;
     }
 
-	FillSystemMessageData(&data, m_session, fmtstring("The distance(sqr) is: %f.", m_session->GetPlayer()->GetDistanceSq(pCreature)));
+    FillSystemMessageData(&data, m_session, fmtstring("The distance(sqr) is: %f.", m_session->GetPlayer()->GetDistanceSq(pCreature)));
     m_session->SendPacket(&data);
 
     return true;

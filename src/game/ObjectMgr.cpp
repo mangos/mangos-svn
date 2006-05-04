@@ -599,7 +599,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
         pathnodes[ i ].z = fields[2].GetFloat();
         i++;
     } while( result->NextRow() );
-	delete result;
+    delete result;
 }
 
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
@@ -618,27 +618,27 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     pgrave->Z = fields[3].GetFloat();
     pgrave->MapId = MapId;
 
-	delete result;
+    delete result;
     return pgrave;
 }
 
 AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 {
-	if( !Trigger_ID )
-		return NULL;
+    if( !Trigger_ID )
+        return NULL;
     QueryResult *result = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z` FROM `areatrigger_template` WHERE `id` = '%u';", Trigger_ID);
     if ( !result )
-		return NULL;
+        return NULL;
     Field *fields = result->Fetch();
-	AreaTrigger *at = new AreaTrigger;
+    AreaTrigger *at = new AreaTrigger;
 
-	at->mapId = fields[0].GetUInt32();
-	at->X = fields[1].GetFloat();
-	at->Y = fields[2].GetFloat();
-	at->Z = fields[3].GetFloat();
+    at->mapId = fields[0].GetUInt32();
+    at->X = fields[1].GetFloat();
+    at->Y = fields[2].GetFloat();
+    at->Z = fields[3].GetFloat();
 
-	delete result;
-	return at;
+    delete result;
+    return at;
 }
 
 void ObjectMgr::LoadTeleportCoords()

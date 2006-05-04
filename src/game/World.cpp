@@ -154,24 +154,24 @@ void World::SetInitialWorldSettings()
     }
     sLog.outString("Using DataDir %s ...",dataPath.c_str());
 
-	regen_values[RATE_HEALTH] = sConfig.GetFloatDefault("Rate.Health", 1);
-	regen_values[RATE_POWER1] = sConfig.GetFloatDefault("Rate.Power1", 1);
-	regen_values[RATE_POWER2] = sConfig.GetFloatDefault("Rate.Power2", 1);
-	regen_values[RATE_POWER3] = sConfig.GetFloatDefault("Rate.Power3", 1);
-	regen_values[RATE_DROP] = sConfig.GetFloatDefault("Rate.Drop", 1);
-	regen_values[RATE_XP] = sConfig.GetFloatDefault("Rate.XP", 1);
-	m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
-	m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
-	m_configs[CONFIG_LOG_REALM] = sConfig.GetIntDefault("LogRealm", 0);
-	m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900) * 1000;
-	m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300) * 1000;
-	m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
-	m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600) * 1000;
-	m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
-	m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
-	m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10) * 1000;
-	m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 75);
-	m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
+    regen_values[RATE_HEALTH] = sConfig.GetFloatDefault("Rate.Health", 1);
+    regen_values[RATE_POWER1] = sConfig.GetFloatDefault("Rate.Power1", 1);
+    regen_values[RATE_POWER2] = sConfig.GetFloatDefault("Rate.Power2", 1);
+    regen_values[RATE_POWER3] = sConfig.GetFloatDefault("Rate.Power3", 1);
+    regen_values[RATE_DROP] = sConfig.GetFloatDefault("Rate.Drop", 1);
+    regen_values[RATE_XP] = sConfig.GetFloatDefault("Rate.XP", 1);
+    m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
+    m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
+    m_configs[CONFIG_LOG_REALM] = sConfig.GetIntDefault("LogRealm", 0);
+    m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900) * 1000;
+    m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300) * 1000;
+    m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
+    m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600) * 1000;
+    m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
+    m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
+    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10) * 1000;
+    m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 75);
+    m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 

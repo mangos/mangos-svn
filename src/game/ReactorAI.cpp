@@ -112,7 +112,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
                 i_creature.setAttackTimer(0);
 
                 if( !i_creature.isAlive() || !i_pVictim->isAlive() )
-                   stopAttack();
+                    stopAttack();
             }
         }
     }
