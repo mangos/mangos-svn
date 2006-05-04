@@ -3465,6 +3465,10 @@ void Player::UpdateHonor(void)
     m_total_honor_points = total_honor;
 }
 
+int Player::GetHonorRank()
+ { 
+	 return CalculateHonorRank(m_total_honor_points);
+ }
 //What is Player's rank... private, scout...
 int Player::CalculateHonorRank(float honor_points)
 {
