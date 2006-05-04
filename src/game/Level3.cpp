@@ -1849,29 +1849,26 @@ bool ChatHandler::HandleBankCommand(const char* args)
 
 bool ChatHandler::HandleChangeWeather(const char* args)
 {
+	//*Change the weather of a cell
     WorldPacket data;
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
     char* pz = strtok(NULL, " ");
 
-    uint32 type = (uint32)atoi(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: storm
-    float value = (float)atof(py);                          //0 to 1
+    uint32 type = (uint32)atoi(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
+    float value = (float)atof(py);                          //0 to 1, sending -1 is instand good weather
     uint32 sound = 0;
     if(pz)
         sound = (uint32)atoi(pz);
-
-    /*opcode 756 (0x2F4)
-    uint32 - weather type ?
-    float32 - intensity
-    uint32 - unknown*/
 
     //!change weather effect //looks/sounds like sound effect
     sLog.outDebug( "WORLD: change weather effect" );
     data.Initialize( SMSG_WEATHER );
     data << (uint32)type << (float)value << (uint32)sound;
-    m_session->SendPacket( &data );
-
+	//!this should send the packed to all players in the cell.
+    m_session->GetPlayer()->SendMessageToSet(&data, true);
+		
     return true;
 }
 
