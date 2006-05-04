@@ -371,16 +371,12 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
                 ((Player*)pVictim)->CalcRage(damage,false);
 
             // random durability for items (HIT)
-            if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            int randdurability = urand(0, 300);
+            if (randdurability == 10)
             {
-                int randdurability = urand(0, 300);
-                if (randdurability == 10)
-                {
-                    DEBUG_LOG("HIT: We decrease durability with 5 percent");
-                    ((Player*)pVictim)->DeathDurabilityLoss(0.05);
-                }
+                DEBUG_LOG("HIT: We decrease durability with 5 percent");
+                ((Player*)pVictim)->DeathDurabilityLoss(0.05);
             }
-
         }
         for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
         {
@@ -1294,7 +1290,7 @@ void Unit::AddHostil(uint64 guid, float hostility)
         }
     }
     Hostil *uh=new Hostil;
-    uh->UnitGuid=GetGUID();
+    uh->UnitGuid=guid;
     uh->Hostility=hostility;
     m_hostilList.push_back(uh);
 }
