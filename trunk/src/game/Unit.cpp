@@ -306,7 +306,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
             player->CalculateHonor(pVictim);
             DEBUG_LOG("DealDamageIsPlayer");
             uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
-
             uint32 entry = 0;
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
@@ -966,11 +965,13 @@ void Unit::RemoveAura(uint32 spellId)
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
         if ((*i)->GetId() == spellId )
+		{
             RemoveAura(i);
-        if(m_Auras.empty())
-            break;
-        else
-            i = m_Auras.begin();
+			if(m_Auras.empty())
+				break;
+			else
+				i = m_Auras.begin();
+		}
     }
 }
 
