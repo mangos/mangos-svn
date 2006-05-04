@@ -159,10 +159,9 @@ namespace MaNGOS
             if( xp_gain == 0 )
                 return 0;
 
-            if( Misc::IsRest(pl) )
-                xp_gain *= 2;
-            if( Misc::IsEliteUnit(u) )
-                xp_gain *= 2;
+            xp_gain = pl->ApplyRestBonus(xp_gain);
+            if( false ) 
+                xp_gain *= 2;	//*= u->GetEliteLevel()/2 + 1
 
             return (uint32)(xp_gain*sWorld.getRate(RATE_XP));
         }

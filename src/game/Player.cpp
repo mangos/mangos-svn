@@ -108,6 +108,7 @@ Player::Player (WorldSession *session): Unit()
     m_regenTimer = 0;
     m_breathTimer = 0;
     m_isunderwater = 0;
+	m_restTime = 0;
 }
 
 Player::~Player ()
@@ -5813,3 +5814,18 @@ void Player::AddWeather()
         sWorld.AddWeather(wth);
     }
 }
+
+uint32 Player::ApplyRestBonus(uint32 xp)
+{
+	uint32 bonus = m_restTime / 1000;
+	if(bonus < 1 )
+		bonus = 1;
+	if(bonus > 3 )
+		bonus = 3;
+	if(m_restTime < bonus * 1000)
+		m_restTime = 0;
+	else
+		m_restTime -= bonus * 1000;
+	return bonus * xp;
+}
+

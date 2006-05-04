@@ -644,6 +644,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_bgEntryPointY;
         float m_bgEntryPointZ;
 
+		uint32 ApplyRestBonus(uint32 xp);
+
     protected:
 
         void AddWeather();
@@ -761,6 +763,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_regenTimer;
         uint32 m_breathTimer;
         uint8 m_isunderwater;
+
+		uint32 m_restTime;
 };
 
 int irand(int min, int max);

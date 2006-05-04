@@ -479,11 +479,11 @@ void Spell::update(uint32 difftime)
     {
         SendInterrupted(0);
         SendCastResult(0x20);
-        //if(m_spellState == SPELL_STATE_CASTING)
-        //{
-        //    m_caster->RemoveAura(m_spellInfo->Id);
-        //    SendChannelUpdate(0);
-        //}
+        if(m_spellState == SPELL_STATE_CASTING)
+        {
+            m_caster->RemoveAura(m_spellInfo->Id);
+            SendChannelUpdate(0);
+        }
         finish();
         m_spellState = SPELL_STATE_FINISHED;
     }
