@@ -151,7 +151,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
 
     if (!pQuest)
     {
-        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%d' received from _player.", quest_id);
+        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%u' received from _player.", quest_id);
         return;
     }
 
@@ -310,13 +310,13 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
     if (!pQuest)
     {
-        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%d' received from _player.", quest_id);
+        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%u' received from _player.", quest_id);
         return;
     }
 
     if (!pCreature)
     {
-        sLog.outError("Invalid NPC GUID (or not in the ObjMgr) '%d' received from _player.", guid);
+        sLog.outError("Invalid NPC GUID (or not in the ObjMgr) '%u' received from _player.", GUID_LOPART(guid));
         return;
     }
 
@@ -373,7 +373,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
         _player->SetUInt32Value(log_slot + 0, 0);
         _player->SetUInt32Value(log_slot + 1, 0);
         _player->SetUInt32Value(log_slot + 2, 0);
-        sLog.outError("Trying to remove an invalid quest '%d' from log.", quest_id);
+        sLog.outError("Trying to remove an invalid quest '%u' from log.", quest_id);
         return;
     }
     _player->SetUInt32Value(log_slot + 0, 0);
@@ -394,7 +394,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
 
     if (!pQuest)
     {
-        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%d' received from _player.", quest_id);
+        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%u' received from _player.", quest_id);
         return;
     }
 }
@@ -412,7 +412,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 
     if (!pQuest)
     {
-        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%d' received from _player.", quest_id);
+        sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%u' received from _player.", quest_id);
         return;
     }
     if(_player->getQuestStatus(quest_id)!=QUEST_STATUS_COMPLETE)

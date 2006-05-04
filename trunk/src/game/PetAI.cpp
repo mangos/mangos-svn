@@ -82,13 +82,13 @@ void PetAI::_stopAttack()
 
     if( !i_pet.isAlive() )
     {
-        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%d]", i_pet.GetGUIDLow());
+        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
         i_pet.StopMoving();
         i_pet->Idle();
     }
     else if( !i_pVictim->isAlive() )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%d]", i_pet.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_pet.GetGUIDLow());
         if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
         else
@@ -96,7 +96,7 @@ void PetAI::_stopAttack()
     }
     else if( i_pVictim->m_stealth )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%d]", i_pet.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_pet.GetGUIDLow());
         if(((Pet*)&i_pet)->HasActState( STATE_RA_FOLLOW))
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
         else
@@ -104,7 +104,7 @@ void PetAI::_stopAttack()
     }
     else
     {
-        DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%d]", i_pet.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_pet.GetGUIDLow());
         if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
         else
@@ -119,7 +119,7 @@ void PetAI::UpdateAI(const uint32 diff)
     {
         if( _needToStop() )
         {
-            DEBUG_LOG("Guard AI stoped attacking [guid=%d]", i_pet.GetGUIDLow());
+            DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_pet.GetGUIDLow());
             _stopAttack();
         }
         else if( i_pet.IsStopped() )

@@ -211,7 +211,7 @@ class ObjectMgr
 
         PlayerCreateInfo* GetPlayerCreateInfo(uint32 race, uint32 class_);
 
-        uint64 GetPlayerGUIDByName(const char *name) const;
+        uint32 GetPlayerGUIDByName(const char *name) const;
         bool GetPlayerNameByGUID(const uint64 &guid, std::string &name) const;
 
         bool GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask );

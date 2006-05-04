@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "Log.h"
 #include "Policies/SingletonImp.h"
+#include "Config/ConfigEnv.h"
 
 #include <stdarg.h>
 
@@ -26,8 +27,9 @@ INSTANTIATE_SINGLETON_1( Log );
 
 void Log::Initialize()
 {
-    //std::string logfn=sConfig.GetStringDefault("LogFile", "Server.log");
-    logfile = fopen("Server.log", "w");                     //logfn.c_str()
+    std::string logfn=sConfig.GetStringDefault("ServerLogFile", "Server.log");
+    logfile = fopen(logfn.c_str(), "w");                   
+	m_logLevel = sConfig.GetIntDefault("LogLevel", 0);
 }
 
 void Log::outString( const char * str, ... )
@@ -65,7 +67,7 @@ void Log::outBasic( const char * str, ... )
     va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
-    if( loglevel > 0 )
+    if( m_logLevel > 0 )
     {
         vprintf( str, ap );
         printf( "\n" );
@@ -82,7 +84,7 @@ void Log::outDetail( const char * str, ... )
     va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
-    if( loglevel > 1 )
+    if( m_logLevel > 1 )
     {
         vprintf( str, ap );
         printf( "\n" );
@@ -99,7 +101,7 @@ void Log::outDebug( const char * str, ... )
     va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
-    if( loglevel > 2 )
+    if( m_logLevel > 2 )
     {
         vprintf( str, ap );
         printf( "\n" );

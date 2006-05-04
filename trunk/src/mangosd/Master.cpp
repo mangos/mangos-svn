@@ -92,7 +92,7 @@ bool Master::Run()
 
     _StartDB();
 
-    loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
+    //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
     std::string host;
     host = sConfig.GetStringDefault( "Host", DEFAULT_HOST );
@@ -103,27 +103,27 @@ bool Master::Run()
     sWorld.SetInitialWorldSettings();
 
     port_t wsport, rmport;
-    rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
+    rmport = sWorld.getConfig(CONFIG_PORT_REALM);//sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+    wsport = sWorld.getConfig(CONFIG_PORT_WORLD);//sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
 
     uint32 socketSelecttime;
-    socketSelecttime=sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
+    socketSelecttime = sWorld.getConfig(CONFIG_SOCKET_SELECTTIME);//sConfig.GetIntDefault( "SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME );
 
-    sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
-    sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
-    sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
+    //sWorld.setRate(RATE_HEALTH,sConfig.GetFloatDefault("Rate.Health",DEFAULT_REGEN_RATE));
+    //sWorld.setRate(RATE_POWER1,sConfig.GetFloatDefault("Rate.Power1",DEFAULT_REGEN_RATE));
+    //sWorld.setRate(RATE_POWER2,sConfig.GetFloatDefault("Rate.Power2",DEFAULT_REGEN_RATE));
+    //sWorld.setRate(RATE_POWER3,sConfig.GetFloatDefault("Rate.Power4",DEFAULT_REGEN_RATE));
+    //sWorld.setRate(RATE_DROP,sConfig.GetFloatDefault("Rate.Drop",DEFAULT_DROP_RATE));
+    //sWorld.setRate(RATE_XP,sConfig.GetFloatDefault("Rate.XP",DEFAULT_XP_RATE));
 
-    uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);
-    sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
-    grid_clean_up_delay *= 1000;
-    MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
+    //uint32 grid_clean_up_delay = sConfig.GetIntDefault("GridCleanUpDelay", 300);
+    //sLog.outDebug("Setting Grid clean up delay to %d seconds.", grid_clean_up_delay);
+    //grid_clean_up_delay *= 1000;
+    //MapManager::Instance().SetGridCleanUpDelay(grid_clean_up_delay);
 
-    uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
-    sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
-    MapManager::Instance().SetMapUpdateInterval(map_update_interval);
+    //uint32 map_update_interval = sConfig.GetIntDefault("MapUpdateInterval", 100);
+    //sLog.outDebug("Setting map update interval to %d milli-seconds.", map_update_interval);
+    //MapManager::Instance().SetMapUpdateInterval(map_update_interval);
 
     //    sRealmList.setServerPort(wsport);
     //    sRealmList.GetAndAddRealms ();

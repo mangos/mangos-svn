@@ -59,7 +59,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
                     loader.Load(i_grid(x, y), *this);
                 }
             }
-            sLog.outDebug("%d GameObjects and %d Creatures loaded for grid %d on map %d", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
+            sLog.outDebug("%u GameObjects and %u Creatures loaded for grid %u on map %u", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
         }
 
     private:

@@ -86,7 +86,7 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
 {
     if(!&owner)
         return;
-    DEBUG_LOG("Target home location %d", owner.GetGUIDLow());
+    DEBUG_LOG("Target home location %u", owner.GetGUIDLow());
     float x, y, z;
     owner.GetRespawnCoord(x, y, z);
     Traveller<Creature> traveller(owner);
@@ -120,7 +120,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             /*if( i_targetedHome )
             {
 
-                DEBUG_LOG("Target %d ran home", owner.GetGUIDLow());
+                DEBUG_LOG("Target %u ran home", owner.GetGUIDLow());
                 float x, y, z, orientation;
                 owner.GetRespawnCoord(x, y, z);
                 orientation = owner.GetOrientation();

@@ -108,7 +108,7 @@ void ObjectMgr::LoadCreatureTemplates()
 
     sCreatureStorage.Load();
 
-    sLog.outString( ">> Loaded %d creature definitions", sCreatureStorage.RecordCount );
+    sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
     sLog.outString( "" );
 }
 
@@ -123,7 +123,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
 
     if(!player_result)
     {
-        sLog.outError("Warning: Can't get info for player creating with race %d and class %d (table 'playercreateinfo' is empty?)", race, class_);
+        sLog.outError("Warning: Can't get info for player creating with race %u and class %u (table 'playercreateinfo' is empty?)", race, class_);
         return NULL;
     }
 
@@ -218,7 +218,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     return pPlayerCreateInfo;
 }
 
-uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
+uint32 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {
 
     uint64 guid = 0;
@@ -238,7 +238,7 @@ uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%d';", GUID_LOPART(guid));
+    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%u';", GUID_LOPART(guid));
 
     if(result)
     {
@@ -337,7 +337,7 @@ void ObjectMgr::LoadGuilds()
         bar.step();
 
         sLog.outString( "" );
-        sLog.outString( ">> Loaded %d guild definitions", count );
+        sLog.outString( ">> Loaded %u guild definitions", count );
         return;
     }
 
@@ -357,13 +357,13 @@ void ObjectMgr::LoadGuilds()
     }while( result->NextRow() );
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %d guild definitions", count );
+    sLog.outString( ">> Loaded %u guild definitions", count );
 }
 
 void ObjectMgr::LoadQuests()
 {
     sQuestsStorage.Load ();
-    sLog.outString( ">> Loaded %d quests definitions", sQuestsStorage.RecordCount );
+    sLog.outString( ">> Loaded %u quests definitions", sQuestsStorage.RecordCount );
     sLog.outString( "" );
 }
 
@@ -432,14 +432,14 @@ void ObjectMgr::LoadGossipText()
     } while( result->NextRow() );
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %d npc texts", count );
+    sLog.outString( ">> Loaded %u npc texts", count );
     delete result;
 }
 
 ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
 {
     ItemPage *pIText;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page` WHERE `id` = '%d';", Page_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `item_page` WHERE `id` = '%u';", Page_ID);
 
     if( !result ) return NULL;
     int cic, count = 0;
@@ -512,14 +512,14 @@ void ObjectMgr::LoadAreaTriggerPoints()
     } while( result->NextRow() );
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %d quest trigger points", count );
+    sLog.outString( ">> Loaded %u quest trigger points", count );
     delete result;
 }
 
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%d' ORDER BY `destination` LIMIT 1;", curloc);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' ORDER BY `destination` LIMIT 1;", curloc);
 
     if( ! result )
     {
@@ -599,12 +599,13 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
         pathnodes[ i ].z = fields[2].GetFloat();
         i++;
     } while( result->NextRow() );
+	delete result;
 }
 
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT SQRT(POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`,`map` FROM `game_graveyard` WHERE `map` = '%d' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
+    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `game_graveyard` WHERE `map` = '%u' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
 
     if( ! result )
         return NULL;
@@ -615,40 +616,29 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     pgrave->X = fields[1].GetFloat();
     pgrave->Y = fields[2].GetFloat();
     pgrave->Z = fields[3].GetFloat();
-    pgrave->MapId = fields[4].GetUInt32();
+    pgrave->MapId = MapId;
 
+	delete result;
     return pgrave;
 }
 
 AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 {
+	if( !Trigger_ID )
+		return NULL;
+    QueryResult *result = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z` FROM `areatrigger_template` WHERE `id` = '%u';", Trigger_ID);
+    if ( !result )
+		return NULL;
+    Field *fields = result->Fetch();
+	AreaTrigger *at = new AreaTrigger;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `areatrigger_template` WHERE `id` = '%d';", Trigger_ID);
+	at->mapId = fields[0].GetUInt32();
+	at->X = fields[1].GetFloat();
+	at->Y = fields[2].GetFloat();
+	at->Z = fields[3].GetFloat();
 
-    if ( result )
-    {
-        Field *fields = result->Fetch();
-        uint32 totrigger = fields[0].GetUInt32();
-        if( totrigger != 0)
-        {
-
-            QueryResult *result1 = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z` FROM `areatrigger_template` WHERE `id` = '%d';", totrigger);
-            if ( result1 )
-            {
-                Field *fields1 = result1->Fetch();
-                AreaTrigger *at = new AreaTrigger;
-
-                at->mapId = fields1[0].GetUInt32();
-
-                at->X = fields1[1].GetFloat();
-                at->Y = fields1[2].GetFloat();
-                at->Z = fields1[3].GetFloat();
-
-                return at;
-            }
-        }
-    }
-    return NULL;
+	delete result;
+	return at;
 }
 
 void ObjectMgr::LoadTeleportCoords()
@@ -688,7 +678,7 @@ void ObjectMgr::LoadTeleportCoords()
     delete result;
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %d teleport definitions", count );
+    sLog.outString( ">> Loaded %u teleport definitions", count );
 }
 
 void ObjectMgr::SetHighestGuids()
@@ -804,7 +794,7 @@ void ObjectMgr::LoadGameobjectInfo()
 {
     sGOStorage.Load();
 
-    sLog.outString( ">> Loaded %d game object templates", sGOStorage.RecordCount );
+    sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
 
 }
 

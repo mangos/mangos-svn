@@ -352,7 +352,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 
     if( !info  )
     {
-        sLog.outDebug( "Missing game object info for entry %d", entryID);
+        sLog.outDebug( "Missing game object info for entry %u", entryID);
 
         data << uint64(0);
         data << uint64(0);

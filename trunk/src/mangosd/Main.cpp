@@ -24,7 +24,7 @@
 
 #include <iostream>
 
-uint8 loglevel = DEFAULT_LOG_LEVEL;
+//uint8 loglevel = DEFAULT_LOG_LEVEL;
 
 int usage(const char *prog)
 {

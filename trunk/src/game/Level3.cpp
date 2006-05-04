@@ -288,11 +288,11 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
     if (skill > 0)
     {
         target->SetSkill(skill, level, max);
-        FillSystemMessageData(&data, m_session, fmtstring("You've learned skill %d", skill));
+        FillSystemMessageData(&data, m_session, fmtstring("You've learned skill %u", skill));
         m_session->SendPacket(&data);
     } else
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Invalid skill id (%d)", skill));
+        FillSystemMessageData(&data, m_session, fmtstring("Invalid skill id (%u)", skill));
         m_session->SendPacket(&data);
     }
     return true;
@@ -331,7 +331,7 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
     if (target->GetSkillValue(skill))
     {
         target->SetSkill(skill, 0, 0);
-        FillSystemMessageData(&data, m_session, fmtstring("You've unlearned skill %d", skill));
+        FillSystemMessageData(&data, m_session, fmtstring("You've unlearned skill %u", skill));
         m_session->SendPacket(&data);
     } else
     {
@@ -1148,18 +1148,30 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
     return true;
 }
 
-float max_creature_distance = 160;
+//float max_creature_distance = 160;
 
-bool ChatHandler::HandleCreatureDistanceCommand(const char* args)
+bool ChatHandler::HandleGetDistanceCommand(const char* args)
 {
     WorldPacket data;
 
-    if (!*args)
-        return false;
+    uint64 guid = m_session->GetPlayer()->GetSelection();
+    if (guid == 0)
+    {
+        FillSystemMessageData(&data, m_session, "No selection.");
+        m_session->SendPacket( &data );
+        return true;
+    }
 
-    max_creature_distance = (float)atof((char*)args);
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
-    FillSystemMessageData(&data, m_session, fmtstring("Creature max think distance set to %f (units from nearest player).", max_creature_distance));
+    if(!pCreature)
+    {
+        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        m_session->SendPacket( &data );
+        return true;
+    }
+
+	FillSystemMessageData(&data, m_session, fmtstring("The distance(sqr) is: %f.", m_session->GetPlayer()->GetDistanceSq(pCreature)));
     m_session->SendPacket(&data);
 
     return true;
@@ -1437,7 +1449,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
 
-    sDatabase.PExecute("INSERT INTO `game_graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%d');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
+    sDatabase.PExecute("INSERT INTO `game_graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%u');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
 
     return true;
 }
@@ -1491,7 +1503,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_gossip`;" );
     if( result )
     {
-        sDatabase.PExecute("INSERT INTO `npc_gossip` (`id`,`npc_guid`,`gossip_type`,`textid`,`option_count`) VALUES ('%d', '%d', '%d', '%d', '%d');", (*result)[0].GetUInt32()+1, pCreature->GetGUIDLow(), 1, 1, 1);
+        sDatabase.PExecute("INSERT INTO `npc_gossip` (`id`,`npc_guid`,`gossip_type`,`textid`,`option_count`) VALUES ('%u', '%u', '%u', '%u', '%u');", (*result)[0].GetUInt32()+1, pCreature->GetGUIDLow(), 1, 1, 1);
         delete result;
         result = NULL;
 
@@ -1505,7 +1517,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
         result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_text`;" );
         if( result )
         {
-            sDatabase.PExecute("INSERT INTO `npc_text` (`id`,`text0_0`) VALUES ('%d', '%s');", (*result)[0].GetUInt32()+1, "It is not yet your time. I shall aid your journey back to the realm of the living... For a price.");
+            sDatabase.PExecute("INSERT INTO `npc_text` (`id`,`text0_0`) VALUES ('%u', '%s');", (*result)[0].GetUInt32()+1, "It is not yet your time. I shall aid your journey back to the realm of the living... For a price.");
 
             delete result;
             result = NULL;
@@ -1539,10 +1551,10 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     WorldPacket data;
 
     char buf[512];
-    uint32 guid = m_session->GetPlayer()->GetSelection();
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     uint32 faction = 0, npcflags = 0, skinid = 0, Entry = 0;
 
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!target)
     {
@@ -1561,7 +1573,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     Field *fields = result->Fetch();
 
-    sprintf(buf,"Player selected NPC\nGUID: %d.\nFaction: %d.\nnpcFlags: %d.\nNameID: %d.\nSkinID: %d.", guid, faction, npcflags, Entry, skinid);
+    sprintf(buf,"Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nNameID: %u.\nSkinID: %u.", GUID_LOPART(guid), faction, npcflags, Entry, skinid);
     sprintf(buf,"%s\nLevel: %u.", buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
     sprintf(buf,"%s\nHealth (base): %u. (max): %u. (current): %u.", buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
     sprintf(buf,"%s\nField Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u.", buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
@@ -1876,7 +1888,7 @@ bool ChatHandler::HandleSetValue(const char* args)
         return false;
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
     if(!target)
     {
         target = m_session->GetPlayer();
@@ -1899,14 +1911,14 @@ bool ChatHandler::HandleSetValue(const char* args)
     if(isint32)
     {
         iValue = (uint32)atoi(py);
-        sLog.outDebug( "Set %u uint32 Value:[OPCODE]:%d [VALUE]:%d", GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug( "Set %u uint32 Value:[OPCODE]:%u [VALUE]:%u", GUID_LOPART(guid), Opcode, iValue);
         target->SetUInt32Value( Opcode , iValue );
-        sprintf((char*)buf,"You Set %u Field:%i to uint32 Value: %i", GUID_LOPART(guid), Opcode,iValue);
+        sprintf((char*)buf,"You Set %u Field:%u to uint32 Value: %u", GUID_LOPART(guid), Opcode,iValue);
     }
     else
     {
         fValue = (float)atof(py);
-        sLog.outDebug( "Set %u float Value:[OPCODE]:%d [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug( "Set %u float Value:[OPCODE]:%u [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
         target->SetFloatValue( Opcode , fValue );
         sprintf((char*)buf,"You Set %u Field:%i to float Value: %i", GUID_LOPART(guid), Opcode,fValue);
     }
@@ -1953,13 +1965,13 @@ bool ChatHandler::HandleGetValue(const char* args)
     if(isint32)
     {
         iValue = target->GetUInt32Value( Opcode );
-        sLog.outDebug( "Get %u uint32 Value:[OPCODE]:%d [VALUE]:%d", GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug( "Get %u uint32 Value:[OPCODE]:%u [VALUE]:%u", GUID_LOPART(guid), Opcode, iValue);
         sprintf((char*)buf,"The uint32 value of %u in %u is: %u", GUID_LOPART(guid), Opcode,    iValue);
     }
     else
     {
         fValue = target->GetFloatValue( Opcode );
-        sLog.outDebug( "Get %u float Value:[OPCODE]:%d [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug( "Get %u float Value:[OPCODE]:%u [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
         sprintf((char*)buf,"The float of %u value in %u is: %f", GUID_LOPART(guid), Opcode, fValue);
     }
     FillSystemMessageData(&data, m_session, buf);
@@ -1984,11 +1996,11 @@ bool ChatHandler::HandleSet32Bit(const char* args)
     if (Value > 32)                                         //uint32 = 32 bits
         return false;
 
-    sLog.outDebug( ".Set32Bit:[OPCODE]:%d [VALUE]:%d" , Opcode, Value);
+    sLog.outDebug( ".Set32Bit:[OPCODE]:%u [VALUE]:%u" , Opcode, Value);
 
     m_session->GetPlayer( )->SetUInt32Value( Opcode , 2^Value );
 
-    sprintf((char*)buf,"You set Bit of Field:%i to Value: %i", Opcode,1);
+    sprintf((char*)buf,"You set Bit of Field:%u to Value: %u", Opcode,1);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
     return true;
@@ -2008,7 +2020,7 @@ bool ChatHandler::HandleMod32Value(const char* args)
     uint32 Opcode = (uint32)atoi(px);
     uint32 Value = (uint32)atoi(py);
 
-    sLog.outDebug( ".Mod32Value:[OPCODE]:%d [VALUE]:%d" , Opcode, Value);
+    sLog.outDebug( ".Mod32Value:[OPCODE]:%u [VALUE]:%u" , Opcode, Value);
 
     uint32 CurrentValue = m_session->GetPlayer( )->GetUInt32Value( Opcode );
 
@@ -2022,7 +2034,7 @@ bool ChatHandler::HandleMod32Value(const char* args)
     }
     m_session->GetPlayer( )->SetUInt32Value( Opcode , CurrentValue );
 
-    sprintf((char*)buf,"You modified the value of Field:%i to Value: %i", Opcode,CurrentValue);
+    sprintf((char*)buf,"You modified the value of Field:%u to Value: %u", Opcode,CurrentValue);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 

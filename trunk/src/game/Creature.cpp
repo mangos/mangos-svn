@@ -68,7 +68,7 @@ void Creature::CreateTrainerSpells()
 {
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_trainer` WHERE `guid` = '%d'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_trainer` WHERE `guid` = '%u'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -132,7 +132,7 @@ void Creature::AIM_Update(const uint32 &diff)
         {
             if( m_deathTimer <= diff )
             {
-                DEBUG_LOG("Removing corpse... %d ", GetUInt32Value(OBJECT_FIELD_ENTRY));
+                DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;

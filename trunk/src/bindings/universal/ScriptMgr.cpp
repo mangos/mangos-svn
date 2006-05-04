@@ -19,7 +19,7 @@
 #include "config.h"
 #include "ScriptMgr.h"
 
-uint8 loglevel = 0;
+//uint8 loglevel = 0;
 int nrscripts;
 Script *m_scripts[MAX_SCRIPTS];
 

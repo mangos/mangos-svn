@@ -69,7 +69,7 @@ uint32 Weather::GetSound()
 
 Weather::Weather(Player *player) : m_player(player), m_zone( player->GetZoneId())
 {
-    m_interval = sConfig.GetIntDefault("ChangeWeatherInterval", WEATHER_CHANGE_TIME);
+    m_interval = sWorld.getConfig(CONFIG_INTERVAL_CHANGEWEATHER);
     ReGenerate();
     sLog.outString( "WORLD: Starting weather system(change per %u minutes).", (uint32)(m_interval / 60000) );
     m_timer = m_interval;

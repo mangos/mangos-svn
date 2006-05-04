@@ -38,6 +38,23 @@ enum WorldTimers
     WUPDATE_COUNT = 4
 };
 
+enum WorldConfigs
+{
+    CONFIG_LOG_LEVEL = 0,
+    CONFIG_LOG_WORLD,
+    CONFIG_LOG_REALM,
+    CONFIG_INTERVAL_SAVE,
+    CONFIG_INTERVAL_GRIDCLEAN,
+    CONFIG_INTERVAL_MAPUPDATE,
+    CONFIG_INTERVAL_CHANGEWEATHER,
+    CONFIG_PORT_WORLD,
+    CONFIG_PORT_REALM,
+	CONFIG_SOCKET_SELECTTIME,
+	CONFIG_GETXP_DISTANCE,
+	CONFIG_GETXP_LEVELDIFF,
+	CONFIG_VALUE_COUNT
+};
+
 enum Rates
 {
     RATE_HEALTH=0,
@@ -93,16 +110,29 @@ class World
 
         void Update(time_t diff);
 
-        void setRate(int index,float value)
+        void setRate(uint32 index,float value)
         {
-            if((index>=0)&&(index<MAX_RATES))
+            if(index<MAX_RATES)
                 regen_values[index]=value;
         }
 
-        float getRate(int index)
+        float getRate(uint32 index)
         {
-            if((index>=0)&&(index<MAX_RATES))
+            if(index<MAX_RATES)
                 return regen_values[index];
+            else
+                return 0;
+        }
+        void setConfig(uint32 index,uint32 value)
+        {
+            if(index<CONFIG_VALUE_COUNT)
+                m_configs[index]=value;
+        }
+
+        uint32 getConfig(uint32 index)
+        {
+            if(index<CONFIG_VALUE_COUNT)
+                return m_configs[index];
             else
                 return 0;
         }
@@ -127,7 +157,7 @@ class World
         WeatherMap m_weathers;
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
-        float regen_values[5];
+        float regen_values[MAX_RATES];
         uint32 m_playerLimit;
         bool m_allowMovement;
         std::string m_motd;
@@ -136,6 +166,7 @@ class World
         time_t m_lastTick;
 
         time_t m_nextThinkTime;
+		uint32 m_configs[CONFIG_VALUE_COUNT];
 };
 
 #define sWorld MaNGOS::Singleton<World>::Instance()

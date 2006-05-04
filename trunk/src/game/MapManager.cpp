@@ -32,14 +32,14 @@ static void grid_compression(const char *src_tbl, const char *dest_tbl)
     sDatabase.PExecute("TRUNCATE `%s`;", dest_tbl);
 
     sDatabase.PExecute("DROP INDEX `idx_search` ON `%s`", dest_tbl);
-    sDatabase.PExecute("INSERT INTO `%s` (`guid`,`map`,`position_x`,`position_y`,`cell_position_x`,`cell_position_y` ) SELECT `guid`,`map`,((`position_x`-%f)/%f) + %d,((`position_y`-%f)/%f) + %d,((`position_x`-%f)/%f) + %d,((`position_y`-%f)/%f) + %d  FROM `%s`;", dest_tbl, CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, src_tbl);
-    sDatabase.PExecute("UPDATE `%s` SET `grid`=(`position_x`*%d) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`);", dest_tbl, MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP);
+    sDatabase.PExecute("INSERT INTO `%s` (`guid`,`map`,`position_x`,`position_y`,`cell_position_x`,`cell_position_y` ) SELECT `guid`,`map`,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u  FROM `%s`;", dest_tbl, CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, src_tbl);
+    sDatabase.PExecute("UPDATE `%s` SET `grid`=(`position_x`*%u) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`);", dest_tbl, MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP);
     sDatabase.PExecute("CREATE INDEX `idx_search` ON `%s` (`grid`,`cell`,`map`)", dest_tbl);
 }
 
-MapManager::MapManager() : i_gridCleanUpDelay(1000*300)
+MapManager::MapManager() : i_gridCleanUpDelay(sWorld.getConfig(CONFIG_INTERVAL_GRIDCLEAN))
 {
-    i_timer.SetInterval(100);
+    i_timer.SetInterval(sWorld.getConfig(CONFIG_INTERVAL_MAPUPDATE));
 }
 
 MapManager::~MapManager()

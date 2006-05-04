@@ -129,7 +129,7 @@ void WorldSocket::OnRead()
 
         if( sWorldLog.LogWorld() )
         {
-            sWorldLog.Log("CLIENT:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
+            sWorldLog.Log("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                 (uint32)GetSocket(),
                 _remaining,
                 LookupName(packet.GetOpcode(), g_worldOpcodeNames),
@@ -351,7 +351,7 @@ void WorldSocket::Update(time_t diff)
 
         if( sWorldLog.LogWorld() )
         {
-            sWorldLog.Log("SERVER:\nSOCKET: %d\nLENGTH: %d\nOPCODE: %s (0x%.4X)\nDATA:\n",
+            sWorldLog.Log("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                 (uint32)GetSocket(),
                 packet->size(),
                 LookupName(packet->GetOpcode(), g_worldOpcodeNames),

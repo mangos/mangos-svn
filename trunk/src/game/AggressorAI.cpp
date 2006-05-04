@@ -106,26 +106,26 @@ AggressorAI::_stopAttack()
 
     if( !i_creature.isAlive() )
     {
-        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%d]", i_creature.GetGUIDLow());
+        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature.StopMoving();
         i_creature->Idle();
         i_pVictim = NULL;
     }
     else if( !i_pVictim->isAlive() )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%d]", i_creature.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_creature.GetGUIDLow());
         i_pVictim = NULL;
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( i_pVictim->m_stealth )
     {
-        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%d]", i_creature.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
         i_pVictim = NULL;
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else
     {
-        DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%d]", i_creature.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_creature.GetGUIDLow());
         i_creature.StopMoving();
         i_creature->Idle();
         i_state = STATE_LOOK_AT_VICTIM;
@@ -144,7 +144,7 @@ AggressorAI::UpdateAI(const uint32 diff)
             {
                 if( _isVisible(i_pVictim) )
                 {
-                    DEBUG_LOG("Victim %d re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
+                    DEBUG_LOG("Victim %u re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
                     i_state = STATE_NORMAL;
                     i_creature->MovementExpired();
                     break;                                  // move on
@@ -155,7 +155,7 @@ AggressorAI::UpdateAI(const uint32 diff)
                 if( i_tracker.Passed() )
                 {
                     i_creature->MovementExpired();
-                    DEBUG_LOG("Creature running back home [guid=%d]", i_creature.GetGUIDLow());
+                    DEBUG_LOG("Creature running back home [guid=%u]", i_creature.GetGUIDLow());
                     static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
                     i_state = STATE_NORMAL;
                     i_pVictim = NULL;
@@ -175,7 +175,7 @@ AggressorAI::UpdateAI(const uint32 diff)
             {
                 if( _needToStop() )
                 {
-                    DEBUG_LOG("Aggressor AI stoped attacking [guid=%d]", i_creature.GetGUIDLow());
+                    DEBUG_LOG("Aggressor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
                     _stopAttack();
                 }
                 else if( i_creature.IsStopped() )
@@ -225,7 +225,7 @@ void
 AggressorAI::_taggedToKill(Unit *u)
 {
     assert( i_pVictim == NULL );
-    //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%d]", i_creature.GetName(), u->GetGUIDLow());
+    //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     i_creature.addUnitState(UNIT_STAT_ATTACKING);
     i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     i_creature->Mutate(new TargetedMovementGenerator(*u));

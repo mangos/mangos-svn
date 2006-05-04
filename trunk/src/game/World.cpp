@@ -152,8 +152,26 @@ void World::SetInitialWorldSettings()
         if(dataPath.at(dataPath.length()-1)!='/')
             dataPath.append("/");
     }
-
     sLog.outString("Using DataDir %s ...",dataPath.c_str());
+
+	regen_values[RATE_HEALTH] = sConfig.GetFloatDefault("Rate.Health", 1);
+	regen_values[RATE_POWER1] = sConfig.GetFloatDefault("Rate.Power1", 1);
+	regen_values[RATE_POWER2] = sConfig.GetFloatDefault("Rate.Power2", 1);
+	regen_values[RATE_POWER3] = sConfig.GetFloatDefault("Rate.Power3", 1);
+	regen_values[RATE_DROP] = sConfig.GetFloatDefault("Rate.Drop", 1);
+	regen_values[RATE_XP] = sConfig.GetFloatDefault("Rate.XP", 1);
+	m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
+	m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
+	m_configs[CONFIG_LOG_REALM] = sConfig.GetIntDefault("LogRealm", 0);
+	m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900) * 1000;
+	m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300) * 1000;
+	m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
+	m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600) * 1000;
+	m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
+	m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
+	m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10) * 1000;
+	m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 75);
+	m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
@@ -335,7 +353,7 @@ void World::Update(time_t diff)
                     ss << "' )";
                     sDatabase.Execute( ss.str().c_str() );
 
-                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%d'",m->messageID);
+                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
 
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
 
@@ -347,9 +365,9 @@ void World::Update(time_t diff)
                     {
                         rpl->AddMail(m);
                     }
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%d'",m->receiver);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%d'",m->item);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `id` = '%d'",itr->second->Id);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",m->receiver);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",m->item);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `id` = '%u'",itr->second->Id);
 
                     objmgr.RemoveAuction(itr->second->Id);
                 }
@@ -367,7 +385,7 @@ void World::Update(time_t diff)
                     m->subject = "Your item sold!";
                     m->item = 0;
 
-                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%d'",m->messageID);
+                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
 
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
 
@@ -404,7 +422,7 @@ void World::Update(time_t diff)
                     ss << "' )";
                     sDatabase.Execute( ss.str().c_str() );
 
-                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%d'", mn->messageID);
+                    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mn->messageID);
 
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
 

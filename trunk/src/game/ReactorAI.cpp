@@ -47,7 +47,7 @@ ReactorAI::AttackStart(Unit *p)
 {
     if( i_pVictim == NULL )
     {
-        DEBUG_LOG("Tag unit LowGUID(%d) HighGUID(%d) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
+        DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
         i_creature.addUnitState(UNIT_STAT_ATTACKING);
         i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
         i_creature->Mutate(new TargetedMovementGenerator(*p));
@@ -85,17 +85,34 @@ ReactorAI::UpdateAI(const uint32 time_diff)
     {
         if( needToStop() )
         {
-            DEBUG_LOG("Creature %d stopped attacking.", i_creature.GetGUIDLow());
+            DEBUG_LOG("Creature %u stopped attacking.", i_creature.GetGUIDLow());
             stopAttack();
         }
         else if( i_creature.IsStopped() )
         {
             if( i_creature.isAttackReady() )
             {
+                std::list<Hostil*> hostillist = i_creature.GetHostilList();
+                if(hostillist.size())
+                {
+                    hostillist.sort();
+                    hostillist.reverse();
+                    uint64 guid;
+                    if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
+                    {
+                        Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
+                        if(newtarget)
+                        {
+                            i_pVictim = NULL;
+                            AttackStart(newtarget);
+                        }
+                    }
+                }
                 i_creature.AttackerStateUpdate(i_pVictim, 0);
                 i_creature.setAttackTimer(0);
+
                 if( !i_creature.isAlive() || !i_pVictim->isAlive() )
-                    stopAttack();
+                   stopAttack();
             }
         }
     }
@@ -127,18 +144,18 @@ ReactorAI::stopAttack()
 
         if( !i_creature.isAlive() )
         {
-            DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%d]", i_creature.GetGUIDLow());
+            DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
             i_creature->Idle();
         }
         else if( i_pVictim->m_stealth )
         {
-            DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%d]", i_creature.GetGUIDLow());
+            DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
             i_pVictim = NULL;
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
         else
         {
-            DEBUG_LOG("Creature stopped attacking due to target %s [guid=%d]", i_pVictim->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
+            DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", i_pVictim->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
 

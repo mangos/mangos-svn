@@ -22,7 +22,8 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 
-extern uint8 loglevel;
+//extern uint8 loglevel;
+class Config;
 
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
@@ -44,6 +45,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outMenu( const char * str, ... );
     private:
         FILE* logfile;
+		uint32 m_logLevel;
 
 };
 

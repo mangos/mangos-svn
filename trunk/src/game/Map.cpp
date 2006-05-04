@@ -165,10 +165,10 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             if( player != NULL )
             {
                 player->SendDelayResponse(MAX_GRID_LOAD_TIME);
-                DEBUG_LOG("Player %s enter cell[%d,%d] triggers of loading grid[%d,%d] on map %d", player->GetName(), cell.CellX(), cell.CellY(), cell.GridX(), cell.GridY(), i_id);
+                DEBUG_LOG("Player %s enter cell[%u,%u] triggers of loading grid[%u,%u] on map %u", player->GetName(), cell.CellX(), cell.CellY(), cell.GridX(), cell.GridY(), i_id);
             }
             else
-                DEBUG_LOG("Player nearby triggers of loading grid [%d,%d] on map %d", cell.GridX(), cell.GridY(), i_id);
+                DEBUG_LOG("Player nearby triggers of loading grid [%u,%u] on map %u", cell.GridX(), cell.GridY(), i_id);
 
             ObjectGridLoader loader(*grid, i_id, cell);
             loader.LoadN();
@@ -231,7 +231,7 @@ Map::Add(T *obj)
         (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
     }
 
-    DEBUG_LOG("Object %lu enters grid[%d,%d]", (unsigned long)obj->GetGUID(), cell.GridX(), cell.GridY());
+    DEBUG_LOG("Object %lu enters grid[%u,%u]", (unsigned long)obj->GetGUID(), cell.GridX(), cell.GridY());
     cell.data.Part.reserved = ALL_DISTRICT;
 
     MaNGOS::ObjectVisibleNotifier notifier(*static_cast<Object *>(obj));
@@ -318,7 +318,7 @@ void Map::Remove(Player *player, bool remove)
         return;
     }
 
-    DEBUG_LOG("Remove player %s from grid[%d,%d]", player->GetName(), cell.GridX(), cell.GridY());
+    DEBUG_LOG("Remove player %s from grid[%u,%u]", player->GetName(), cell.GridX(), cell.GridY());
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert(grid != NULL);
 
@@ -351,7 +351,7 @@ Map::Remove(T *obj, bool remove)
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
         return;
 
-    DEBUG_LOG("Remove object %lu from grid[%d,%d]", (unsigned long)obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
+    DEBUG_LOG("Remove object %lu from grid[%u,%u]", (unsigned long)obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
 
@@ -386,7 +386,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
 
     if( old_cell.DiffGrid(new_cell) || old_cell.DiffCell(new_cell) )
     {
-        DEBUG_LOG("Player %s relocation grid[%d,%d]cell[%d,%d]->grid[%d,%d]cell[%d,%d]", player->GetName(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+        DEBUG_LOG("Player %s relocation grid[%u,%u]cell[%u,%u]->grid[%u,%u]cell[%u,%u]", player->GetName(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
 
         NGridType &grid(*i_grids[old_cell.GridX()][old_cell.GridY()]);
 
@@ -448,7 +448,7 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
     {
         if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
         {
-            DEBUG_LOG("Creature "I64FMT" moved from grid[%d,%d]cell[%d,%d] to grid[%d,%d]cell[%d,%d].", creature->GetGUID(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+            DEBUG_LOG("Creature "I64FMT" moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", creature->GetGUID(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
 
             {
                 assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
@@ -482,7 +482,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
             return false;
 
         WriteGuard guard(i_info[x][y]->i_lock);
-        DEBUG_LOG("Unloading grid[%d,%d] for map %d", x,y, i_id);
+        DEBUG_LOG("Unloading grid[%u,%u] for map %u", x,y, i_id);
         ObjectGridUnloader unloader(*grid);
         uint64 mask = CalculateGridMask(y);
         i_gridMask[x] &= ~mask;

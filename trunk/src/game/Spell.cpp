@@ -811,7 +811,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
             EffectEnchantItemTmp(i);
         else
         {
-            sLog.outError("SPELL: unknown effect %d spell id %i\n",
+            sLog.outError("SPELL: unknown effect %u spell id %u\n",
                 eff, m_spellInfo->Id);
         }
     }
@@ -1035,7 +1035,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(m_spellInfo->Id == 8690 )
     {
         Field *fields;
-        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%d';", m_caster->GetGUID());
+        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u';", m_caster->GetGUIDLow());
         fields = result4->Fetch();
         TC->mapId = fields[0].GetUInt32();
         TC->x = fields[2].GetFloat();

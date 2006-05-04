@@ -72,7 +72,7 @@ void LoadCreaturesLootTables()
         delete result;
 
         sLog.outString( "" );
-        sLog.outString( ">> Loaded %d loot definitions", count );
+        sLog.outString( ">> Loaded %u loot definitions", count );
     }
 }
 

@@ -342,8 +342,8 @@ void WorldSession::SendBindPoint()
     DEBUG_LOG("New Home Position X is %f",_player->GetPositionX());
     DEBUG_LOG("New Home Position Y is %f",_player->GetPositionY());
     DEBUG_LOG("New Home Position Z is %f",_player->GetPositionZ());
-    DEBUG_LOG("New Home MapId is %d",_player->GetMapId());
-    DEBUG_LOG("New Home ZoneId is %d",_player->GetZoneId());
+    DEBUG_LOG("New Home MapId is %u",_player->GetMapId());
+    DEBUG_LOG("New Home ZoneId is %u",_player->GetZoneId());
 
     // zone update
     data.Initialize( SMSG_PLAYERBOUND );
@@ -352,7 +352,7 @@ void WorldSession::SendBindPoint()
     SendPacket( &data );
 
     // update sql homebind
-    sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%d', `zone` = '%d', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%lu';", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), (unsigned long)_player->GetGUID());
+    sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u';", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
 
     // send spell for bind 3286 bind magic
     data.Initialize(SMSG_SPELL_START );
@@ -385,13 +385,13 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 
     if (itemGUID)
     {
-        sLog.outDetail("ITEM: Repair item, itemGUID = %d, npcGUID = %d", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
+        sLog.outDetail("ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
         pItem = _player->GetItemByGUID(itemGUID);
 
         if (!pItem)
         {
-            sLog.outDetail("PLAYER: Invalid item, GUID = %d", GUID_LOPART(itemGUID));
+            sLog.outDetail("PLAYER: Invalid item, GUID = %u", GUID_LOPART(itemGUID));
             return;
         }
         uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
@@ -418,7 +418,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     }
     else
     {
-        sLog.outDetail("ITEM: Repair all items, npcGUID = %d", GUID_LOPART(npcGUID));
+        sLog.outDetail("ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
 
         for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         {
