@@ -101,6 +101,38 @@ void Unit::Update( uint32 p_time )
     }
 }
 
+void Unit::SendMoveToPacket(float x, float y, float z, bool run)
+{
+	float dx = x - GetPositionX();
+	float dy = y - GetPositionY();
+	float dz = z - GetPositionZ();
+    float dist = ((dx*dx) + (dy*dy) + (dz*dz));
+    if(dist<0)
+        dist = 0;
+    else
+        dist = ::sqrt(dist);
+	double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
+    if(speed<=0)
+        speed = 2.5f;
+    speed *= 0.001f;
+    uint32 time = static_cast<uint32>(dist / speed + 0.5);
+    float orientation = (float)atan2((double)dy, (double)dx);
+
+	WorldPacket data;
+    data.Initialize( SMSG_MONSTER_MOVE );
+    data << uint8(0xFF);
+    data << GetGUID();
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    data << (uint32)getMSTime();
+    data << uint8(0);
+    data << uint32(run ? 0x00000100 : 0x00000000);
+    data << time;
+    data << uint32(1);
+    data << x << y << z;
+    //WPAssert( data.size() == 49 );
+    SendMessageToSet( &data, true );
+}
+
 void Unit::setAttackTimer(uint32 time, bool rangeattack)
 {
     if(time)

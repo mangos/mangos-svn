@@ -138,7 +138,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PHANTASM
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SELF_RESURRECT
     &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_CHARGE
+    &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_CRITTER
     &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISENCHANT
@@ -986,7 +986,6 @@ void Spell::EffectWeaponDmg(uint32 i)
                     //if(!stackitem)
                     //{
                     delete stackitem;
-                    m_TriggerSpell = NULL;
                     //}
                 }
             }
@@ -1371,6 +1370,22 @@ void Spell::EffectSkinning(uint32 i)
 
     }
 
+}
+
+void Spell::EffectCharge(uint32 i)
+{
+    assert(unitTarget);
+    assert(m_caster);
+
+	float x, y, z;
+	unitTarget->GetClosePoint(m_caster, x, y, z);
+	float oldspeed = m_caster->GetSpeed();
+	m_caster->SetSpeed(oldspeed * 3.5);
+	m_caster->SendMoveToPacket(x, y, z, true);
+    m_caster->addUnitState(UNIT_STAT_ATTACKING);
+    m_caster->addAttacker(unitTarget);
+	m_caster->SetSpeed(oldspeed);
+    //m_caster->smsg_AttackStart(pEnemy);
 }
 
 void Spell::EffectTransmitted(uint32 i)
