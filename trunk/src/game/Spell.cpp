@@ -835,7 +835,7 @@ void Spell::TriggerSpell()
 {
     if(!m_TriggerSpell) return;
 
-    Spell spell(m_caster, m_TriggerSpell,false, 0);
+    Spell spell(m_caster, m_TriggerSpell, true, 0);
     SpellCastTargets targets;
     targets.setUnitTarget( m_targets.getUnitTarget());
     spell.prepare(&targets);

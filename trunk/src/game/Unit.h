@@ -242,6 +242,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraList GetAuras( ) {return m_Auras;}
+		void SendMoveToPacket(float x, float y, float z, bool run);
 
     protected:
         Unit ( );
