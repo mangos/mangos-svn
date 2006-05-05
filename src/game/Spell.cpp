@@ -378,7 +378,7 @@ void Spell::prepare(SpellCastTargets * targets)
         if(m_triggeredByAura)
         {
             SendChannelUpdate(0);
-            m_triggeredByAura->SetDuration(0);
+            m_triggeredByAura->SetAuraDuration(0);
         }
         finish();
     }
@@ -425,7 +425,7 @@ void Spell::cast()
         if(m_spellInfo->ChannelInterruptFlags != 0)
         {
             m_spellState = SPELL_STATE_CASTING;
-            SendChannelStart(GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex)));
+            SendChannelStart(GetDuration(m_spellInfo, 0));
         }
 
         std::list<Unit*>::iterator iunit;
@@ -461,11 +461,11 @@ void Spell::cast()
     if(m_spellState != SPELL_STATE_CASTING)
         finish();
 
-    if(castResult == 0)
-    {
-        TriggerSpell();
+    //if(castResult == 0)
+    //{
+    //    TriggerSpell();
 
-    }
+    //}
 
 }
 
@@ -569,6 +569,8 @@ void Spell::finish()
     m_ObjToDel.clear();
 
     ((Player*)m_caster)->setRegenTimer(5000);
+	if(m_TriggerSpell)
+		TriggerSpell();
 }
 
 void Spell::SendCastResult(uint8 result)
@@ -858,28 +860,24 @@ uint8 Spell::CanCast()
     target = m_targets.getUnitTarget();
     SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
     float range = GetMaxRange(srange);
-    float minrange = GetMinRange(srange);
-    //if(m_caster->m_currentSpell)
-    //	castResult = CAST_FAIL_ANOTHER_ACTION_IS_IN_PROGRESS
     if(target)
     {
-        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
-                                                            //0x76;
-            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
+        if(!m_caster->isInFront( target, range ) && m_spellInfo->AttributesEx )
+            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;     //0x76;
         if(m_caster->GetDistanceSq(target) > range * range )
             castResult = 0x56;
-        if(m_caster->GetDistanceSq(target) < minrange * minrange )
-            castResult = CAST_FAIL_OUT_OF_RANGE;            //83
-    }
+   }
 
     if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
     {
         if(m_caster->GetDistanceSq( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > range * range )
-            castResult = 0x56;
+            castResult = CAST_FAIL_OUT_OF_RANGE;	//0x56;
     }
 
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
+	//if(m_spellInfo->Id == 100 && m_caster->hasUnitState(UNIT_STAT_IN_COMBAT))		//charge
+    //    castResult = CAST_FAIL_TARGET_IS_IN_COMBAT;                  
     if( castResult != 0 )
     {
         SendCastResult(castResult);

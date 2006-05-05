@@ -44,25 +44,12 @@ AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFact
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_pVictim == NULL && !u->m_stealth)
+    if( i_pVictim == NULL && !u->m_stealth && u->isAlive())
     {
         FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
         if( i_myFaction.IsHostileTo( your_faction ) )
-            _taggedToKill(u);
+            AttackStart(u);
     }
-}
-
-void
-AggressorAI::AttackStart(Unit *u)
-{
-    if( i_pVictim == NULL )
-        _taggedToKill(u);
-}
-
-void
-AggressorAI::AttackStop(Unit *)
-{
-
 }
 
 void
@@ -76,12 +63,6 @@ AggressorAI::DamageInflict(Unit *healer, uint32 amount_healed)
 }
 
 bool
-AggressorAI::IsVisible(Unit *pl) const
-{
-    return _isVisible(pl);
-}
-
-bool
 AggressorAI::_needToStop() const
 {
     if( !i_pVictim->isAlive() || !i_creature.isAlive() || i_pVictim->m_stealth)
@@ -92,13 +73,13 @@ AggressorAI::_needToStop() const
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
     float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.5f * i_creature.getLevel()+1.0f);
-    return (( length > (12.0f + hostillen) * (12.0f + hostillen) && spawndist > 3600.0f )
-        || ( length > (24.0f + hostillen) * (24.0f + hostillen) && spawndist > 1600.0f )
-        || ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
+    return (( length > (10.0f + hostillen) * (10.0f + hostillen) && spawndist > 6400.0f )
+        || ( length > (20.0f + hostillen) * (20.0f + hostillen) && spawndist > 2500.0f )
+        || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
 }
 
 void
-AggressorAI::_stopAttack()
+AggressorAI::AttackStop(Unit *)
 {
     assert( i_pVictim != NULL );
     i_creature.clearUnitState(UNIT_STAT_IN_COMBAT);
@@ -138,11 +119,17 @@ AggressorAI::UpdateAI(const uint32 diff)
 {
     if( i_pVictim != NULL )
     {
+        if( _needToStop() )
+        {
+            DEBUG_LOG("Aggressor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
+            AttackStop(i_pVictim);
+			return;
+        }
         switch( i_state )
         {
             case STATE_LOOK_AT_VICTIM:
             {
-                if( _isVisible(i_pVictim) )
+                if( IsVisible(i_pVictim) )
                 {
                     DEBUG_LOG("Victim %u re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
                     i_state = STATE_NORMAL;
@@ -173,12 +160,7 @@ AggressorAI::UpdateAI(const uint32 diff)
             }
             case STATE_NORMAL:
             {
-                if( _needToStop() )
-                {
-                    DEBUG_LOG("Aggressor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-                    _stopAttack();
-                }
-                else if( i_creature.IsStopped() )
+                if( i_creature.IsStopped() )
                 {
                     if( i_creature.isAttackReady() )
                     {
@@ -194,7 +176,7 @@ AggressorAI::UpdateAI(const uint32 diff)
                                 if(newtarget)
                                 {
                                     i_pVictim = NULL;
-                                    _taggedToKill(newtarget);
+                                    AttackStart(newtarget);
                                 }
                             }
                         }
@@ -202,7 +184,7 @@ AggressorAI::UpdateAI(const uint32 diff)
                         i_creature.setAttackTimer(0);
 
                         if( !i_creature.isAlive() || !i_pVictim->isAlive() )
-                            _stopAttack();
+                            AttackStop(i_pVictim);
                     }
                 }
                 break;
@@ -214,15 +196,14 @@ AggressorAI::UpdateAI(const uint32 diff)
 }
 
 bool
-AggressorAI::_isVisible(Unit *u) const
+AggressorAI::IsVisible(Unit *pl) const
 {
                                                             // offset=1.0
-    return ( ((Creature*)&i_creature)->GetDistanceSq(u) * 1.0 <= IN_LINE_OF_SIGHT && !u->m_stealth  );
-
+    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0 <= IN_LINE_OF_SIGHT && !pl->m_stealth && pl->isAlive() );
 }
 
 void
-AggressorAI::_taggedToKill(Unit *u)
+AggressorAI::AttackStart(Unit *u)
 {
     assert( i_pVictim == NULL );
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());

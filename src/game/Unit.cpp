@@ -214,9 +214,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         // TODO: We need to count dishonorable kills for civilian creatures.
 
         DEBUG_LOG("DealDamageAura");
-        pVictim->RemoveAllAuras();
-
         pVictim->setDeathState(JUST_DIED);
+        pVictim->RemoveAllAuras();
+		if(m_currentSpell && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
+			m_currentSpell->cancel();
+
         uint64 attackerGuid, victimGuid;
         attackerGuid = GetGUID();
         victimGuid = pVictim->GetGUID();
@@ -301,7 +303,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         }
         if (playerkill)
         {
-            if(pVictim->GetTypeId() == TYPEID_UNIT)
+            if(pVictim->GetTypeId() != TYPEID_PLAYER)
                 player->AddQuestsLoot((Creature*)pVictim);
             player->CalculateHonor(pVictim);
             DEBUG_LOG("DealDamageIsPlayer");
@@ -804,7 +806,7 @@ void Unit::_UpdateSpells( uint32 time )
     {
         m_currentSpell->update(time);
                                                             //Auto shot
-        if( m_currentSpell->m_spellInfo->Id == 75 || GetTypeId() != TYPEID_PLAYER )
+        if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )
         {
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
@@ -829,7 +831,7 @@ void Unit::_UpdateSpells( uint32 time )
             break;
         else if(!(*i))
             continue;
-        else if ( !(*i)->GetDuration() && !(*i)->IsPermanent() )
+        else if ( !(*i)->GetAuraDuration() && !(*i)->IsPermanent() )
         {
             RemoveAura(i);
             if(m_Auras.empty())
@@ -920,7 +922,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     // take out same spell
     if (i != m_Auras.end())
-        (*i)->SetDuration(Aur->GetDuration());
+        (*i)->SetAuraDuration(Aur->GetAuraDuration());
     else
     {
         m_Auras.push_back(Aur);
@@ -995,7 +997,7 @@ bool Unit::SetAurDuration(uint32 spellId,Unit* caster,uint32 duration)
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
         if ((*i)->GetId() == spellId && (*i)->GetCaster() == caster)
     {
-        (*i)->SetDuration(duration);
+        (*i)->SetAuraDuration(duration);
         return true;
     }
 
@@ -1008,7 +1010,7 @@ uint32 Unit::GetAurDuration(uint32 spellId,Unit* caster)
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
         if ((*i)->GetId() == spellId && (*i)->GetCaster() == caster)
-            return (*i)->GetDuration();
+            return (*i)->GetAuraDuration();
 
     return 0;
 }
@@ -1022,7 +1024,7 @@ void Unit::RemoveAllAuras()
 
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
-        (*i)->ApplyModifier(false);
+        //(*i)->ApplyModifier(false);
         (*i)->_RemoveAura();
     }
 

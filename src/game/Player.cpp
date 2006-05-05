@@ -2060,7 +2060,7 @@ void Player::_SaveAuras()
     AuraList::iterator itr;
     for (itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr)->GetId(), (uint32)(*itr)->GetEffIndex(), int((*itr)->GetDuration()));
+        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr)->GetId(), (uint32)(*itr)->GetEffIndex(), int((*itr)->GetAuraDuration()));
     }
 }
 
@@ -2126,8 +2126,8 @@ void Player::LoadFromDB( uint32 guid )
 
     _LoadCorpse();
 
-    _ApplyAllAuraMods();
-    _ApplyAllItemMods();
+    //_ApplyAllAuraMods();
+    //_ApplyAllItemMods();
 
 }
 
@@ -2327,6 +2327,11 @@ void Player::_LoadAuras()
 {
     m_Auras.clear();
 
+	for(uint8 i = 0; i < 48; i++)
+	    SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
+	for(uint8 j = 0; j < 6; j++)
+		SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
+
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u';",GetGUIDLow());
 
     if(result)
@@ -2341,7 +2346,8 @@ void Player::_LoadAuras()
             SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
             assert(spellproto);
 
-            Aura* aura = new Aura(spellproto, effindex, remaintime, this, this);
+            Aura* aura = new Aura(spellproto, effindex, this, this);
+			aura->SetAuraDuration(remaintime);
             AddAura(aura);
         }
         while( result->NextRow() );

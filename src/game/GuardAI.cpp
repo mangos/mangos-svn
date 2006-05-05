@@ -38,24 +38,13 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFaction(sFac
 
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_pVictim == NULL )
+    if( i_pVictim == NULL && !u->m_stealth && u->isAlive())
     {
         FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
         //Need add code to let guard suport player
         if(( i_myFaction->hostile & 1 )>0 || (i_myFaction->hostile & your_faction->friendly)>0 || (your_faction->hostile & 1)>0 )
-            _taggedToKill(u);
+            AttackStart(u);
     }
-}
-
-void GuardAI::AttackStart(Unit *u)
-{
-    if( i_pVictim == NULL )
-        _taggedToKill(u);
-}
-
-void GuardAI::AttackStop(Unit *)
-{
-
 }
 
 void GuardAI::HealBy(Unit *healer, uint32 amount_healed)
@@ -64,11 +53,6 @@ void GuardAI::HealBy(Unit *healer, uint32 amount_healed)
 
 void GuardAI::DamageInflict(Unit *healer, uint32 amount_healed)
 {
-}
-
-bool GuardAI::IsVisible(Unit *pl) const
-{
-    return _isVisible(pl);
 }
 
 bool GuardAI::_needToStop() const
@@ -81,12 +65,12 @@ bool GuardAI::_needToStop() const
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
     float length = i_creature.GetDistanceSq(i_pVictim);
     float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(3.0f * i_creature.getLevel()+1.0f);
-    return (( length > (15.0f + hostillen) * (15.0f + hostillen) && spawndist > VISIBILITY_RANGE )
-        || ( length > (25.0f + hostillen) * (25.0f + hostillen) && spawndist > 5000.0f )
-        || ( length > (35.0f + hostillen) * (35.0f + hostillen) ));
+    return (( length > (10.0f + hostillen) * (10.0f + hostillen) && spawndist > 6400.0f )
+        || ( length > (20.0f + hostillen) * (20.0f + hostillen) && spawndist > 2500.0f )
+        || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
 }
 
-void GuardAI::_stopAttack()
+void GuardAI::AttackStop(Unit *)
 {
     assert( i_pVictim != NULL );
     i_creature.clearUnitState(UNIT_STAT_ATTACKING);
@@ -121,11 +105,16 @@ void GuardAI::UpdateAI(const uint32 diff)
 {
     if( i_pVictim != NULL )
     {
+        if( _needToStop() )
+        {
+            DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
+            AttackStop(i_pVictim);
+        }
         switch( i_state )
         {
             case STATE_LOOK_AT_VICTIM:
             {
-                if( _isVisible(i_pVictim) )
+                if( IsVisible(i_pVictim) )
                 {
                     DEBUG_LOG("Victim %u re-enters creature's aggro radius fater stop attacking", i_pVictim->GetGUIDLow());
                     i_state = STATE_NORMAL;
@@ -143,33 +132,44 @@ void GuardAI::UpdateAI(const uint32 diff)
                     i_state = STATE_NORMAL;
                     i_pVictim = NULL;
                 }
-                else if( !i_creature.canReachWithAttack( i_pVictim ))
+                /*else if( !i_creature.canReachWithAttack( i_pVictim ))
                 {
 
                     float dx = i_pVictim->GetPositionX() - i_creature.GetPositionX();
                     float dy = i_pVictim->GetPositionY() - i_creature.GetPositionY();
                     float orientation = (float)atan2((double)dy, (double)dx);
                     i_creature.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
-                }
+                }*/
 
                 break;
             }
             case STATE_NORMAL:
             {
-                if( _needToStop() )
-                {
-                    DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-                    _stopAttack();
-                }
-                else if( i_creature.IsStopped() )
+                if( i_creature.IsStopped() )
                 {
                     if( i_creature.isAttackReady() )
                     {
+                        std::list<Hostil*> hostillist = i_creature.GetHostilList();
+                        if(hostillist.size())
+                        {
+                            hostillist.sort();
+                            hostillist.reverse();
+                            uint64 guid;
+                            if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
+                            {
+                                Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
+                                if(newtarget)
+                                {
+                                    i_pVictim = NULL;
+                                    AttackStart(newtarget);
+                                }
+                            }
+                        }
                         i_creature.AttackerStateUpdate(i_pVictim, 0);
                         i_creature.setAttackTimer(0);
 
                         if( !i_creature.isAlive() || !i_pVictim->isAlive() )
-                            _stopAttack();
+                            AttackStop(i_pVictim);
                     }
                 }
                 break;
@@ -192,12 +192,12 @@ void GuardAI::UpdateAI(const uint32 diff)
     }
 }
 
-bool GuardAI::_isVisible(Unit *u) const
+bool GuardAI::IsVisible(Unit *pl) const
 {
-    return ( ((Creature*)&i_creature)->GetDistanceSq(u) * 1.0<= IN_LINE_OF_SIGHT && !u->m_stealth );
+    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0<= IN_LINE_OF_SIGHT && !pl->m_stealth && pl->isAlive() );
 }
 
-void GuardAI::_taggedToKill(Unit *u)
+void GuardAI::AttackStart(Unit *u)
 {
     assert( i_pVictim == NULL );
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());

@@ -153,7 +153,7 @@ void Weather::ChangeWeather()
     uint32 sound = GetSound();
     data.Initialize( SMSG_WEATHER );
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
-    m_player->GetSession()->SendPacket( &data );
+    m_player->SendMessageToSet( &data, true );
     char* wthstr;
     switch(sound)
     {
