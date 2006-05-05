@@ -1849,7 +1849,7 @@ bool ChatHandler::HandleBankCommand(const char* args)
 
 bool ChatHandler::HandleChangeWeather(const char* args)
 {
-	//*Change the weather of a cell
+    //*Change the weather of a cell
     WorldPacket data;
 
     char* px = strtok((char*)args, " ");
@@ -1866,9 +1866,9 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     sLog.outDebug( "WORLD: change weather effect" );
     data.Initialize( SMSG_WEATHER );
     data << (uint32)type << (float)value << (uint32)sound;
-	//!this should send the packed to all players in the cell.
+    //!this should send the packed to all players in the cell.
     m_session->GetPlayer()->SendMessageToSet(&data, true);
-		
+
     return true;
 }
 

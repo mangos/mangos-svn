@@ -160,8 +160,8 @@ namespace MaNGOS
                 return 0;
 
             xp_gain = pl->ApplyRestBonus(xp_gain);
-            if( false ) 
-                xp_gain *= 2;	//*= u->GetEliteLevel()/2 + 1
+            if( false )
+                xp_gain *= 2;                               //*= u->GetEliteLevel()/2 + 1
 
             return (uint32)(xp_gain*sWorld.getRate(RATE_XP));
         }

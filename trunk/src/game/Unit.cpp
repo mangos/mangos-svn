@@ -999,13 +999,13 @@ void Unit::RemoveAura(uint32 spellId)
     for (i = m_Auras.begin(); i != m_Auras.end(); i++)
     {
         if ((*i)->GetId() == spellId )
-		{
+        {
             RemoveAura(i);
-			if(m_Auras.empty())
-				break;
-			else
-				i = m_Auras.begin();
-		}
+            if(m_Auras.empty())
+                break;
+            else
+                i = m_Auras.begin();
+        }
     }
 }
 
