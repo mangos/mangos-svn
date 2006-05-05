@@ -201,18 +201,19 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI	=	157	,//	Mod Pet Damage
 };
 
-Aura::Aura(SpellEntry* spellproto, uint32 eff, int32 duration, Unit *caster, Unit *target) :
-m_spellId(spellproto->Id), m_caster(caster), m_target(target), m_effIndex(eff), m_duration(duration),
+Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
+m_spellId(spellproto->Id), m_caster(caster), m_target(target), m_effIndex(eff),
 m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_procSpell(NULL)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
-    if(m_duration < 0)
+	m_duration = GetDuration(spellproto, eff);
+	if(m_duration == -1)
         m_permanent = true;
     if(spellproto->EffectBasePoints[eff] < 0)
         m_positive = false;
     uint32 type = 0;
-    if(spellproto->EffectBasePoints[eff] < 0)
+    if(!m_positive)
         type = 1;
     uint32 damage;
     if(!caster)
@@ -317,52 +318,62 @@ void Aura::_AddAura()
 
     ApplyModifier(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-    if(m_effIndex > 0)
-    {
-        Aura* aura;
-        aura = m_target->GetAura(m_spellId, m_effIndex - 1);
-        if(!aura && m_effIndex>1)
-            aura = m_target->GetAura(m_spellId, m_effIndex - 2);
-        if(aura)
-        {
-            SetAuraSlot( aura->GetAuraSlot());
-            return;
-        }
+	bool samespell = false;
+    uint8 slot, i;
+	uint32 maxduration = m_duration;
+    Aura* aura = NULL;
+	for(i = 0; i< 3; i++)
+	{
+		if(i == m_effIndex)
+			continue;
+        aura = m_target->GetAura(m_spellId, i);
+		if(aura)
+		{
+			maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
+		}
+	}
+	if(aura)
+	{
+		slot = aura->GetAuraSlot();
+        SetAuraSlot( slot );
+		if(m_duration <= maxduration)
+	        return;
+		samespell = true;
     }
     WorldPacket data;
 
-    uint8 slot, i;
+	if(!samespell)
+	{
+		slot = 0xFF;
 
-    slot = 0xFF;
+		if (!IsPositive())
+		{
+			for (i = 0; i < MAX_NEGATIVE_AURAS; i++)
+			{
+				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+				{
+					slot = i;
+					break;
+				}
+			}
+		}
+		else
+		{
+			for (i = MAX_NEGATIVE_AURAS; i < MAX_AURAS; i++)
+			{
+				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+				{
+					slot = i;
+					break;
+				}
+			}
+		}
 
-    if (!IsPositive())
-    {
-        for (i = 0; i < MAX_NEGATIVE_AURAS; i++)
-        {
-            if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
-            {
-                slot = i;
-                break;
-            }
-        }
-    }
-    else
-    {
-        for (i = MAX_NEGATIVE_AURAS; i < MAX_AURAS; i++)
-        {
-            if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
-            {
-                slot = i;
-                break;
-            }
-        }
-    }
-
-    if (slot == 0xFF)
-    {
-        return;
-    }
-
+		if (slot == 0xFF)
+		{
+			return;
+		}
+	}
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
     uint8 flagslot = slot >> 3;
@@ -375,7 +386,7 @@ void Aura::_AddAura()
     if( m_target->GetTypeId() == TYPEID_PLAYER )
     {
         data.Initialize(SMSG_UPDATE_AURA_DURATION);
-        data << (uint8)slot << (uint32)GetDuration();
+        data << (uint8)slot << (uint32)maxduration;
         ((Player*)m_target)->GetSession()->SendPacket(&data);
     }
 
@@ -387,10 +398,20 @@ void Aura::_RemoveAura()
     sLog.outDebug("Aura %u now is remove", m_modifier->m_auraname);
     ApplyModifier(false);
 
-    uint8 slot = GetAuraSlot();
+	uint8 slot = GetAuraSlot();
+    SetAuraSlot(0);
+    Aura* aura = NULL;
+	for(uint8 i = 0; i< 3; i++)
+	{
+		if(i == m_effIndex)
+			continue;
+        aura = m_target->GetAura(m_spellId, i);
+		if(aura)
+			return;
+	}
+	
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
     {
-        SetAuraSlot(0);
         return;
     }
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
@@ -400,9 +421,6 @@ void Aura::_RemoveAura()
     uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
     value &= 0xFFFFFFFF ^ (0xF << ((slot & 7) << 2));
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
-
-    SetAuraSlot(0);
-
 }
 
 void Aura::HandleNULL(bool apply)
@@ -1109,46 +1127,14 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
 
 void Aura::HandleChannelDeathItem(bool apply)
 {
-    SpellEntry *spellInfo = GetSpellProto();
-    if(apply)
+    if(!apply)
     {
-        uint8 slot;
-        Item* newItem;
-        Player* pUnit = (Player*)m_caster;
-        uint8 GetSoltflag = 0;
-        //if(m_target->isAlive())  //FIX ME,it should be done after mods dead
-        //return;
-        for(uint8 i=0;i<3;i++)
-        {
-            if(spellInfo->EffectItemType[i] == 0)
-                continue;
-
-            slot = 0;
-            ItemPrototype *m_itemProto = objmgr.GetItemPrototype(spellInfo->EffectItemType[i]);
-            if(!m_itemProto)
-                continue;
-            uint32 num_to_add = 1;
-            /*
-            num_to_add = ((pUnit->getLevel() - (spellInfo->spellLevel-1))*2);
-            if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
-                num_to_add = 1;
-            if(num_to_add > m_itemProto->MaxCount)
-                num_to_add = m_itemProto->MaxCount;
-            */
-            newItem = new Item;
-            newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),spellInfo->EffectItemType[i],pUnit);
-            if(!newItem)
-                continue;
-            newItem->SetCount(num_to_add);
-            GetSoltflag = pUnit->AddItemToInventory(newItem, false);
-            if(!GetSoltflag)
-            {
-                //SendCastResult(0x18);
-                return;
-            }
-            newItem = NULL;
-        }
-
+		if(m_caster->GetTypeId() != TYPEID_PLAYER || m_target->isAlive())
+			return;
+		SpellEntry *spellInfo = GetSpellProto();
+        if(spellInfo->EffectItemType[m_effIndex] == 0)
+           return;
+		((Player*)m_caster)->AddNewItem(spellInfo->EffectItemType[m_effIndex], 1, true);
     }
 }
 

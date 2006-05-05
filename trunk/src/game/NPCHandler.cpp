@@ -291,16 +291,7 @@ void WorldSession::SendSpiritRessurect()
             uint8 eff = spellInfo->Effect[i];
             if(eff>=TOTAL_SPELL_EFFECTS)
                 continue;
-            SpellDuration* sd = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
-            int32 duration;
-            if(i==0)
-                duration = sd->Duration1;
-            if(i==1)
-                duration = sd->Duration2;
-            if(i==2)
-                duration = sd->Duration3;
-
-            Aura *Aur = new Aura(spellInfo, i, duration, _player, _player);
+            Aura *Aur = new Aura(spellInfo, i, _player, _player);
             _player->AddAura(Aur);
         }
     }

@@ -48,10 +48,7 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-        bool _isVisible(Unit *) const;
-        void _taggedToKill(Unit *);
         bool _needToStop(void) const;
-        void _stopAttack(void);
 
         Creature &i_creature;
         FactionTemplateEntry* i_myFaction;

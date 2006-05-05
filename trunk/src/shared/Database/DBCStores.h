@@ -46,7 +46,8 @@ float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
 float GetMaxRange(SpellRange *range);
-uint32 GetDuration(SpellDuration *dur);
+int32 GetDuration(SpellEntry *spellInfo, uint8 effindex);
+int32 GetMaxDuration(SpellEntry *spellInfo);
 
 template<class T>
 class DBCStorage

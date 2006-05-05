@@ -239,8 +239,8 @@ void Spell::EffectApplyAura(uint32 i)
         return;
     }
 
-    int32 duration = GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex));
-    Aura* Aur = new Aura(m_spellInfo, i, duration, m_caster, unitTarget);
+    //int32 duration = GetDuration(m_spellInfo, i);
+    Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
     unitTarget->AddAura(Aur);
 }
 
@@ -444,7 +444,7 @@ void Spell::EffectPresistentAA(uint32 i)
     m_AreaAura = true;
 
     DynamicObject* dynObj = new DynamicObject();
-    dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(sSpellDuration.LookupEntry(m_spellInfo->DurationIndex)));
+    dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo, i));
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
@@ -641,8 +641,8 @@ void Spell::EffectApplyAA(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    Aura* Aur = new Aura(m_spellInfo, i, 6000, m_caster, unitTarget);
-    Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
+    Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
+    //Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
     unitTarget->AddAura(Aur);
     //unitTarget->SetAura(aff); FIX-ME!
 }
