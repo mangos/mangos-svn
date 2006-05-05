@@ -661,7 +661,7 @@ void Spell::EffectLearnSpell(uint32 i)
     data << spellToLearn;
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
     ((Player*)unitTarget)->addSpell((uint16)spellToLearn);
-	sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", ((Player*)unitTarget)->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
+    sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", ((Player*)unitTarget)->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
 void Spell::EffectDispel(uint32 i)

@@ -155,7 +155,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     TrainerSpell *proto=NULL;
 
     recv_data >> guid >> spellId;
-	sLog.outDebug( "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u",uint32(GUID_LOPART(guid)), spellId );
+    sLog.outDebug( "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u",uint32(GUID_LOPART(guid)), spellId );
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
