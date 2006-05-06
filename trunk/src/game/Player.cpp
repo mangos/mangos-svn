@@ -2126,7 +2126,7 @@ void Player::LoadFromDB( uint32 guid )
 
     _LoadCorpse();
 
-    //_ApplyAllAuraMods();
+    _ApplyAllAuraMods();
     _ApplyAllItemMods();
 
 }
@@ -5320,7 +5320,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) + (apply ? proto->Armor : -(int32)proto->Armor));
 
     if (proto->Block)
-        SetUInt32Value(PLAYER_BLOCK_PERCENTAGE, GetUInt32Value(PLAYER_BLOCK_PERCENTAGE) + (apply ? proto->Block : -(int32)proto->Block));
+        SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE) + (apply ? proto->Block : -(float)proto->Block));
 
     if (proto->HolyRes)
         SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) + (apply ? proto->HolyRes : -(int32)proto->HolyRes));
