@@ -118,24 +118,48 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     data << uint32(0) << uint32(Tspells.size());
 
     SpellEntry *spellInfo;
+	bool ReqspellFlag = false;
+	bool ReqskillValueFlag = false;
+	bool LevelFlag = false;
 
     for (itr = Tspells.begin(); itr != Tspells.end();itr++)
     {
+
+		uint8 canlearnflag = 1;
         spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
-        if(!spellInfo) continue;
+		if(!spellInfo) 
+			continue;
 
-        data << uint32((*itr)->spell->Id);
+		if((*itr)->reqspell)
+		{
+			SpellEntry *ReqSpellInfo;
+			ReqSpellInfo = sSpellStore.LookupEntry((*itr)->reqspell);
+			if(_player->HasSpell(ReqSpellInfo->EffectTriggerSpell[0]))
+				ReqspellFlag = true;
+		}
+		else ReqspellFlag = true;
 
-        if(_player->getLevel() < spellInfo->spellLevel )
-            data << uint8(1);
-        else
-            data << uint8(0);
+		if((*itr)->reqskill)
+		{	if(_player->GetSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
+				ReqskillValueFlag = true;
+		}
+		else ReqskillValueFlag = true;
+		
+		if(_player->getLevel() >= spellInfo->spellLevel)
+			LevelFlag = true;
 
+		if(ReqspellFlag && ReqskillValueFlag && LevelFlag)
+			canlearnflag = 0;
+		else canlearnflag =1;
+
+		data << uint32((*itr)->spell->Id);
+		data << uint8(canlearnflag);
         data << uint32((*itr)->spellcost);
-        data << uint32(0) << uint32(0);
-
+		data << uint32((*itr)->reqspell) ;
+		data << uint32(0);
         data << uint8(spellInfo->spellLevel);
-        data << uint32(0) << uint32(0);
+        data << uint32((*itr)->reqskill); 
+		data << uint32((*itr)->reqskillvalue);
         data << uint32(0) << uint32(0);
         data << uint32(0);
     }

@@ -68,7 +68,7 @@ void Creature::CreateTrainerSpells()
 {
     TrainerSpell *tspell;
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_trainer` WHERE `guid` = '%u'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -86,13 +86,14 @@ void Creature::CreateTrainerSpells()
         tspell->spell = spellinfo;
         tspell->spellcost = fields[3].GetUInt32();
         tspell->reqspell = fields[4].GetUInt32();
+		tspell->reqskill = fields[5].GetUInt32();
+		tspell->reqskillvalue = fields[6].GetUInt32();
 
         m_tspells.push_back(tspell);
 
     } while( result->NextRow() );
 
 }
-
 //---------------------------------------------------------------//
 /* with compiler optimzation, switch statement differs
  * from if statement.  Going to a switch statement can
