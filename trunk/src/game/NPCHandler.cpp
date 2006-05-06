@@ -104,14 +104,22 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     std::list<TrainerSpell*> Tspells;
     std::list<TrainerSpell*>::iterator itr;
+	SpellEntry *ReqSpellInfo;
+
 
     for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
     {
         if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
             continue;
-        else if(!((*itr)->reqspell) || _player->HasSpell((*itr)->reqspell))
-            Tspells.push_back(*itr);
-    }
+		if(!(*itr)->reqspell)
+			Tspells.push_back(*itr);
+        else 
+		{
+			ReqSpellInfo = sSpellStore.LookupEntry((*itr)->reqspell);
+			if(_player->HasSpell(ReqSpellInfo->EffectTriggerSpell[0]))
+				Tspells.push_back(*itr);
+		}
+	}
 
     data.Initialize( SMSG_TRAINER_LIST );
     data << guid;
@@ -132,7 +140,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
 		if((*itr)->reqspell)
 		{
-			SpellEntry *ReqSpellInfo;
 			ReqSpellInfo = sSpellStore.LookupEntry((*itr)->reqspell);
 			if(_player->HasSpell(ReqSpellInfo->EffectTriggerSpell[0]))
 				ReqspellFlag = true;
