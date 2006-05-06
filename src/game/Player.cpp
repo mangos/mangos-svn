@@ -2127,7 +2127,7 @@ void Player::LoadFromDB( uint32 guid )
     _LoadCorpse();
 
     //_ApplyAllAuraMods();
-    //_ApplyAllItemMods();
+    _ApplyAllItemMods();
 
 }
 
@@ -5262,7 +5262,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if(!proto) return;
 
     sLog.outDebug("_ApplyItemMods start.");
-    //_RemoveStatsMods();
+    _RemoveStatsMods();
 
     if (apply)
     {
@@ -5387,7 +5387,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     //    RemoveAura(proto->Spells[i].SpellId );
 
     sLog.outDebug("_ApplyItemMods complete.");
-    //_ApplyStatsMods();
+    _ApplyStatsMods();
 
 }
 
