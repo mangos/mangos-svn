@@ -78,40 +78,38 @@ AggressorAI::_needToStop() const
         || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
 }
 
-void
-AggressorAI::AttackStop(Unit *)
+void AggressorAI::AttackStop(Unit *)
+{
+}
+
+void AggressorAI::_stopAttack()
 {
     assert( i_pVictim != NULL );
     i_creature.clearUnitState(UNIT_STAT_IN_COMBAT);
     i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
+    i_pVictim = NULL;
 
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
-        i_creature.StopMoving();
-        i_creature->Idle();
-        i_pVictim = NULL;
     }
     else if( !i_pVictim->isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_creature.GetGUIDLow());
-        i_pVictim = NULL;
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else if( i_pVictim->m_stealth )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
-        i_pVictim = NULL;
-        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else
     {
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_creature.GetGUIDLow());
-        i_creature.StopMoving();
-        i_creature->Idle();
-        i_state = STATE_LOOK_AT_VICTIM;
-        i_tracker.Reset(TIME_INTERVAL_LOOK);
+        //i_state = STATE_LOOK_AT_VICTIM;
+        //i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
+    //i_creature.StopMoving();
+    //i_creature->Idle();
+    static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 }
 
 void
@@ -122,12 +120,12 @@ AggressorAI::UpdateAI(const uint32 diff)
         if( _needToStop() )
         {
             DEBUG_LOG("Aggressor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            AttackStop(i_pVictim);
+            _stopAttack();
 			return;
         }
-        switch( i_state )
-        {
-            case STATE_LOOK_AT_VICTIM:
+        //switch( i_state )
+        //{
+            /*case STATE_LOOK_AT_VICTIM:
             {
                 if( IsVisible(i_pVictim) )
                 {
@@ -147,19 +145,19 @@ AggressorAI::UpdateAI(const uint32 diff)
                     i_state = STATE_NORMAL;
                     i_pVictim = NULL;
                 }
-                /*else
+                else
                 {
 
                     float dx = i_pVictim->GetPositionX() - i_creature.GetPositionX();
                     float dy = i_pVictim->GetPositionY() - i_creature.GetPositionY();
                     float orientation = (float)atan2((double)dy, (double)dx);
                     i_creature.Relocate(i_pVictim->GetPositionX(), i_pVictim->GetPositionY(), i_pVictim->GetPositionZ(), orientation);
-                }*/
+                }
 
                 break;
-            }
-            case STATE_NORMAL:
-            {
+            }*/
+            //case STATE_NORMAL:
+            //{
                 if( i_creature.IsStopped() )
                 {
                     if( i_creature.isAttackReady() )
@@ -184,14 +182,14 @@ AggressorAI::UpdateAI(const uint32 diff)
                         i_creature.setAttackTimer(0);
 
                         if( !i_creature.isAlive() || !i_pVictim->isAlive() )
-                            AttackStop(i_pVictim);
+                            _stopAttack();
                     }
                 }
-                break;
-            }
-            default:
-                break;
-        }
+            //   break;
+            //}
+            //default:
+            //    break;
+        //}
     }
 }
 
@@ -205,10 +203,12 @@ AggressorAI::IsVisible(Unit *pl) const
 void
 AggressorAI::AttackStart(Unit *u)
 {
-    assert( i_pVictim == NULL );
+    if( i_pVictim || !u )
+		return;
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     i_creature.addUnitState(UNIT_STAT_ATTACKING);
     i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
-    i_creature->Mutate(new TargetedMovementGenerator(*u));
+	i_creature.setAttackTimer(0);
+	i_creature->Mutate(new TargetedMovementGenerator(*u));
     i_pVictim = u;
 }

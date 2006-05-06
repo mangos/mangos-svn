@@ -84,6 +84,7 @@ enum UnitState
     UNIT_STAT_FLEEING       = 128,
     UNIT_STAT_MOVING        = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
     UNIT_STAT_IN_FLIGHT     = 256,                          // player is i n flight mode
+	UNIT_STAT_FOLLOW		= 512,
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
@@ -112,7 +113,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void setAttackTimer(uint32 time, bool rangeattack = false);
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
-        Spell *reachWithSpellAttack(Unit *pVictim);
+        SpellEntry *reachWithSpellAttack(Unit *pVictim);
 
         inline AttackerSet getAttackerSet( ) {  return m_attackers; }
         inline void addAttacker(Unit *pAttacker)

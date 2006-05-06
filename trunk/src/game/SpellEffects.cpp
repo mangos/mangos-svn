@@ -119,7 +119,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM
     &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD
-    &Spell::EffectHeal,                                     //SPELL_EFFECT_SCRIPT_EFFECT
+    &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SANCTUARY
     &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS
@@ -317,118 +317,84 @@ void Spell::EffectHealthLeach(uint32 i)
 
 void Spell::EffectCreateItem(uint32 i)
 {
-    Player* pUnit = (Player*)m_caster;
-    uint8 slot = 0;
-    Item* pItem;
-    uint8 curSlot=0;
-    uint8 bagIndex;
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player* player = (Player*)m_caster;
+	uint32 newitemid, itemid, itemcount;
+    if((newitemid = m_spellInfo->EffectItemType[i]) == 0)
+        return;
     //Fix by Ant009,code is poor,and run slowly,hope someone make it better.
     //reduce items that need for spell
     for(uint32 x=0;x<8;x++)
     {
         if(m_spellInfo->Reagent[x] == 0)
             continue;
-        for(uint32 y=0;y<m_spellInfo->ReagentCount[x];y++)
-        {
-            if(pUnit->GetSlotByItemID(m_spellInfo->Reagent[x],bagIndex,curSlot,true,false))
-            {
-                pItem = pUnit->GetItemBySlot(bagIndex,curSlot);
-            }
-            if(pItem)
-            {
-                if(pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > 1)
-                {
-                    pItem->SetUInt32Value(ITEM_FIELD_STACK_COUNT,pItem->GetUInt32Value(ITEM_FIELD_STACK_COUNT)-1);
-                    pUnit->UpdateSlot(bagIndex,curSlot);
-                }
-                else
-                {
-                    pUnit->RemoveItemFromSlot(bagIndex,curSlot,true);
-                    //pItem->DeleteFromDB();
-                }
-                pItem = NULL;
-                curSlot = 0;
-            }
-        }
+		itemid = m_spellInfo->Reagent[x];
+		itemcount = m_spellInfo->ReagentCount[x];
+		if(player->GetItemCount(itemid, false) >= itemcount && player->CanAddItemCount(newitemid) >= 1 )
+			player->RemoveItemFromInventory(itemid, itemcount);
+		else 
+		{
+			SendCastResult(CAST_FAIL_ITEM_NOT_READY);
+			return;
+		}
     }
 
-    pItem = NULL;
-    Item* newItem;
-    curSlot=0;
-    uint8 GetSoltflag = 0;
-    //add items that spell creates
-    for(i=0;i<3;i++)
+     //uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
+     //if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
+     //   num_to_add = 1;
+     //   if(num_to_add > m_itemProto->MaxCount)
+     //       num_to_add = m_itemProto->MaxCount;
+    if(! player->AddNewItem(newitemid, 1, false))
     {
-        if(m_spellInfo->EffectItemType[i] == 0)
-            continue;
-
-        slot = 0;
-        ItemPrototype *m_itemProto = objmgr.GetItemPrototype(m_spellInfo->EffectItemType[i]);
-        if(!m_itemProto)
-            continue;
-        uint32 num_to_add = ((pUnit->getLevel() - (m_spellInfo->spellLevel-1))*2);
-        if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
-            num_to_add = 1;
-        if(num_to_add > m_itemProto->MaxCount)
-            num_to_add = m_itemProto->MaxCount;
-        newItem = new Item;
-        newItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),m_spellInfo->EffectItemType[i],pUnit);
-        if(!newItem)
-            continue;
-        newItem->SetCount(num_to_add);
-        GetSoltflag = pUnit->AddItemToInventory(newItem, false);
-        if(!GetSoltflag)
-        {
-            SendCastResult(0x18);
-            return;
-        }
-        newItem = NULL;
+        SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
+        return;
     }
     switch(m_spellInfo->SpellVisual)
     {
         case 1168:
-            ((Player*)m_caster)->UpdateSkill(SKILL_TAILORING);
+            player->UpdateSkill(SKILL_TAILORING);
             break;
         case 92:
         {
             if(m_spellInfo->SpellIconID == 1)
-                ((Player*)m_caster)->UpdateSkill(SKILL_ALCHEMY);
+                player->UpdateSkill(SKILL_ALCHEMY);
             break;
             if(m_spellInfo->SpellIconID == 513 || m_spellInfo->SpellIconID == 248
                 || m_spellInfo->SpellIconID == 247 || m_spellInfo->SpellIconID == 163
                 || m_spellInfo->SpellIconID == 264 || m_spellInfo->SpellIconID == 351
                 || m_spellInfo->SpellIconID == 1496)
-                ((Player*)m_caster)->UpdateSkill(SKILL_POISONS);
+                player->UpdateSkill(SKILL_POISONS);
             break;
         }
         case 4439:
-            ((Player*)m_caster)->UpdateSkill(SKILL_LEATHERWORKING);
+            player->UpdateSkill(SKILL_LEATHERWORKING);
             break;
         case 5499:
-            ((Player*)m_caster)->UpdateSkill(SKILL_FIRST_AID);
+            player->UpdateSkill(SKILL_FIRST_AID);
             break;
         case 3881:
-            ((Player*)m_caster)->UpdateSkill(SKILL_COOKING);
+            player->UpdateSkill(SKILL_COOKING);
             break;
         case 1008:
-            ((Player*)m_caster)->UpdateSkill(SKILL_SKINNING);
+            player->UpdateSkill(SKILL_SKINNING);
             break;
         case 3182:
-            ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
+            player->UpdateSkill(SKILL_ENCHANTING);
             break;
         case 2641:
-            ((Player*)m_caster)->UpdateSkill(SKILL_ENGINERING);
+            player->UpdateSkill(SKILL_ENGINERING);
             break;
         case 215:
-            ((Player*)m_caster)->UpdateSkill(SKILL_BLACKSMITHING);
+            player->UpdateSkill(SKILL_BLACKSMITHING);
             break;
         case 395:
         {
             if(m_spellInfo->SpellIconID == 1)
-                ((Player*)m_caster)->UpdateSkill(SKILL_ENGINERING);
+                player->UpdateSkill(SKILL_ENGINERING);
             break;
             if(m_spellInfo->SpellIconID == 140)
-                ((Player*)m_caster)->UpdateSkill(SKILL_BLACKSMITHING);
+                player->UpdateSkill(SKILL_BLACKSMITHING);
             break;
         }
         default:break;
@@ -919,7 +885,7 @@ void Spell::EffectAttackMe(uint32 i)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
         unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetAngle(m_caster));
-        ((Creature*)unitTarget)->AI().AttackStart((Player*)m_caster);
+        ((Creature*)unitTarget)->AI().AttackStart(m_caster);
     }
 }
 
@@ -1054,6 +1020,37 @@ void Spell::EffectInterruptCast(uint32 i)
 
     unitTarget->InterruptSpell();
 
+}
+
+void Spell::EffectScriptEffect(uint32 i)
+{
+	//temply use, need fix to right way.
+	if(!m_spellInfo->Reagent[0])
+		EffectHeal( i );
+	else
+	{
+		switch(m_spellInfo->Id)
+		{
+		case 6201:
+			m_spellInfo->EffectItemType[0] = 5512;	//spell 6261;	//primary healstone
+			break;
+		case 6202:
+			m_spellInfo->EffectItemType[0] = 5511;	//spell 6262;	//inferior healstone
+			break;
+		case 5699:
+			m_spellInfo->EffectItemType[0] = 5509;	//spell 5720;	//healstone
+			break;
+		case 11729:
+			m_spellInfo->EffectItemType[0] = 5510;	//spell 5723;	//strong healstone
+			break;
+		case 11730:
+			m_spellInfo->EffectItemType[0] = 9421;	//spell 11732;	//super healstone
+			break;
+		default:
+			return;
+		}
+		EffectCreateItem( i );
+	}
 }
 
 void Spell::EffectAddComboPoints(uint32 i)

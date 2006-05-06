@@ -4826,7 +4826,7 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
     return 3;
 }
 
-void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
+void Player::RemoveItemFromInventory(uint32 itemId,uint32 itemcount)
 {
     if(itemId==0)
         return;
@@ -4889,8 +4889,8 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                 pItem = pBag->GetItemFromBag(j);
                 if ( pItem && pItem->GetProto()->ItemId == itemId )
                 {
-                    removed += pBag->RemoveItemFromBag( j, itemcount );
-                    if (client_remove)
+                    removed += pBag->RemoveItem( j, itemcount );
+                    /*if (client_remove)
                     {
                         pItem->SetOwner(0);
                         if (IsInWorld())
@@ -4899,7 +4899,7 @@ void Player::RemovItemFromBag(uint32 itemId,uint32 itemcount)
                             pItem->DestroyForPlayer(this);
                             ItemRemoved(pItem->GetEntry());
                         }
-                    }
+                    }*/
                     pBag->SendUpdateToPlayer(this);
 
                     if(removed>=itemcount)
@@ -4978,7 +4978,7 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                 pItem = pBag->GetItemFromBag(slot);
                 if (pItem)
                 {
-                    pretItem = pBag->RemoveItemFromBag(slot);
+                    pretItem = pBag->RemoveItem(slot);
                     if (client_remove)
                     {
                         pItem->SetOwner(0);
@@ -5240,7 +5240,7 @@ Item* Player::RemoveItemFromBuyBackSlot(uint32 slot)
     Item *pItem = m_buybackitems[slot];
     if(m_buybackitems[slot])
     {
-        m_buybackitems[slot]->DeleteFromDB();
+        //m_buybackitems[slot]->DeleteFromDB();
         m_buybackitems[slot]->RemoveFromWorld();
     }
 

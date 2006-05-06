@@ -41,15 +41,13 @@ struct StackCleaner
 void
 TargetedMovementGenerator::_setTargetLocation(Creature &owner)
 {
-    //float x = i_target.GetPositionX();
-    //float y = i_target.GetPositionY();
-    //float z = i_target.GetPositionZ();
     if(!&i_target || !&owner)
         return;
+    owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
     float x, y, z;
     i_target.GetClosePoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
-    i_destinationHolder.SetDestination(traveller, x, y, z, i_attackRadius);
+    i_destinationHolder.SetDestination(traveller, x, y, z, 0);
 }
 
 void
@@ -102,54 +100,44 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     if(!&owner || !&i_target)
         return;
 
-    if( owner.IsStopped() )
-    {
-        if( i_target.isAlive() )
-            if( !owner.canReachWithAttack( &i_target ) && (!owner.hasUnitState(UNIT_STAT_IN_COMBAT) || !owner.reachWithSpellAttack( &i_target)) )
-        {
-            owner.addUnitState(UNIT_STAT_CHASE);
-            _setTargetLocation(owner);
-            DEBUG_LOG("restart to chase");
-        }
+    SpellEntry* spellInfo;
+    if( owner.IsStopped() && i_target.isAlive())
+    { 
+		if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && !owner.m_currentSpell)
+		{
+			if( spellInfo = owner.reachWithSpellAttack( &i_target))
+			{
+				_spellAtack(owner, spellInfo);
+				return;
+			}
+		}
+        if( !owner.canReachWithAttack( &i_target ) )
+		{
+			owner.addUnitState(UNIT_STAT_CHASE);
+			_setTargetLocation(owner);
+			DEBUG_LOG("restart to chase");
+		}
     }
     else
     {
         Traveller<Creature> traveller(owner);
-        if( i_destinationHolder.UpdateTraveller(traveller, time_diff, false) )
+        bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
+		if(i_targetedHome)
+			return;
+        else if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
         {
-            /*if( i_targetedHome )
-            {
-
-                DEBUG_LOG("Target %u ran home", owner.GetGUIDLow());
-                float x, y, z, orientation;
-                owner.GetRespawnCoord(x, y, z);
-                orientation = owner.GetOrientation();
-                owner.Relocate(x, y, z, orientation);
-                //StackCleaner stack_cleaner(owner);
-                //stack_cleaner.Done();
-                clearUnitState(UNIT_STAT_ALL_STATE);
-                owner.addUnitState(UNIT_STAT_FLEEING);
-            }*/
-            Spell* spell;
-            if(!i_targetedHome && owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID() && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spell = owner.reachWithSpellAttack(&i_target)) )
-            {
-                owner.StopMoving();
-                owner->Idle();
-                owner.addUnitState(UNIT_STAT_ATTACKING);
-                owner.clearUnitState(UNIT_STAT_CHASE);
-                SpellCastTargets targets;
-                targets.setUnitTarget( &i_target );
-                spell->prepare(&targets);
-                owner.m_canMove = false;
-                DEBUG_LOG("Spell Attack.");
-                return;
-            }
-            else if( owner.canReachWithAttack(&i_target) )
+			_spellAtack(owner, spellInfo);
+			return;
+        }
+		if(reach)
+        {
+            if( owner.canReachWithAttack(&i_target) )
             {
                 owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
                 owner.StopMoving();
-                if(owner.GetUInt64Value(UNIT_FIELD_SUMMONEDBY)!= i_target.GetGUID())
+                if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
                     owner.addUnitState(UNIT_STAT_ATTACKING);
+				owner.clearUnitState(UNIT_STAT_CHASE);
                 DEBUG_LOG("UNIT IS THERE");
             }
             else
@@ -159,4 +147,31 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             }
         }
     }
+}
+
+void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellInfo)
+{
+	if(!spellInfo)
+		return;
+    owner.StopMoving();
+    owner->Idle();
+	if(owner.m_currentSpell)
+	{
+		if(owner.m_currentSpell->m_spellInfo->Id == spellInfo->Id )
+			return;
+		else
+		{
+			delete owner.m_currentSpell;
+			owner.m_currentSpell = NULL;
+		}
+	}
+ 	Spell *spell = new Spell(&owner, spellInfo, false, 0);
+	spell->SetAutoRepeat(true);
+	owner.addUnitState(UNIT_STAT_ATTACKING);
+    owner.clearUnitState(UNIT_STAT_CHASE);
+    SpellCastTargets targets;
+    targets.setUnitTarget( &i_target );
+    spell->prepare(&targets);
+    owner.m_canMove = false;
+    DEBUG_LOG("Spell Attack.");
 }

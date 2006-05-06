@@ -61,8 +61,8 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 
     *data >> m_targetMask;
 
-    if(m_targetMask & TARGET_FLAG_SELF)
-        m_unitTarget = caster;
+    if(m_targetMask == TARGET_FLAG_SELF)
+		setUnitTarget(caster);
 
     if(m_targetMask & TARGET_FLAG_UNIT)
         m_unitTarget = ObjectAccessor::Instance().GetUnit(*caster, readGUID(data));
@@ -89,7 +89,7 @@ void SpellCastTargets::write ( WorldPacket * data)
 
     *data << m_targetMask;
 
-    if(m_targetMask & TARGET_FLAG_SELF)
+    if(m_targetMask == TARGET_FLAG_SELF)
         *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);
 
     if(m_targetMask & TARGET_FLAG_UNIT)
@@ -134,7 +134,14 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     m_AreaAura = false;
     m_CastItem = NULL;
 
-    m_triggeredByAura = Aur;
+    unitTarget = NULL;
+    itemTarget = NULL;
+    gameObjTarget = NULL;
+
+	m_triggeredByAura = Aur;
+	m_autoRepeat = false;
+	if(info->Id == 75)		//auto shot
+		m_autoRepeat = true;
 
     casttime = GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex));
 
@@ -363,6 +370,12 @@ void Spell::prepare(SpellCastTargets * targets)
     WorldPacket data;
 
     m_targets = *targets;
+	if(!unitTarget)
+		unitTarget = m_targets.getUnitTarget();
+	if(!itemTarget)
+		itemTarget = m_targets.m_itemTarget;
+	if(!gameObjTarget)
+		gameObjTarget = m_targets.m_GOTarget;
 
     SendSpellStart();
 
@@ -417,7 +430,6 @@ void Spell::cast()
     if(castResult == 0)
     {
         TakePower();
-        //RemoveItems();
         FillTargetMap();
         SendCastResult(castResult);
         SendSpellGo();
@@ -471,11 +483,20 @@ void Spell::cast()
 
 void Spell::update(uint32 difftime)
 {
+	if(unitTarget && !unitTarget->isAlive())
+	{
+		if(m_autoRepeat)
+		{
+			m_autoRepeat = false;
+			m_spellState = SPELL_STATE_FINISHED;
+			return;
+		}
+	}
 
-    if( (m_castPositionX != m_caster->GetPositionX()  ||
-        m_castPositionY != m_caster->GetPositionY()  ||
-        m_castPositionZ != m_caster->GetPositionZ() ) &&
-        ( m_timer != 0 ))
+    if( ( m_timer != 0 ) && (m_caster->GetTypeId() == TYPEID_PLAYER) &&
+		(m_castPositionX != m_caster->GetPositionX() ||
+        m_castPositionY != m_caster->GetPositionY() ||
+        m_castPositionZ != m_caster->GetPositionZ() ) )
     {
         SendInterrupted(0);
         SendCastResult(0x20);
@@ -596,9 +617,14 @@ void Spell::SendSpellStart()
     uint16 cast_flags;
 
     cast_flags = 2;
+	Unit * target;
+	if(!unitTarget)
+		target = m_caster;
+	else
+		target = unitTarget;
 
     data.Initialize(SMSG_SPELL_START);
-    data << uint8(0xFF) << m_caster->GetGUID() << uint8(0xFF) << m_caster->GetGUID();
+    data << uint8(0xFF) << target->GetGUID() << uint8(0xFF) << m_caster->GetGUID();
     data << m_spellInfo->Id;
     data << cast_flags;
     data << uint32(m_timer);
@@ -617,9 +643,14 @@ void Spell::SendSpellGo()
     flags = m_targets.m_targetMask;
     if(flags == 0)
         flags = 2;
+	Unit * target;
+	if(!unitTarget)
+		target = m_caster;
+	else
+		target = unitTarget;
 
     data.Initialize(SMSG_SPELL_GO);
-    data << uint8(0xFF)<< m_caster->GetGUID() << uint8(0xFF) << m_caster->GetGUID();
+    data << uint8(0xFF)<< target->GetGUID() << uint8(0xFF) << m_caster->GetGUID();
     data << m_spellInfo->Id;
 
     data << uint16(0x0500);
@@ -684,13 +715,18 @@ void Spell::writeSpellGoTargets( WorldPacket * data )
 
 void Spell::SendLogExecute()
 {
+	Unit * target;
+	if(!unitTarget)
+		target = m_caster;
+	else
+		target = unitTarget;
     WorldPacket data;
     data.Initialize(SMSG_SPELLLOGEXECUTE);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         data << uint8(0xFF) << m_caster->GetGUID();
     else
-        data << m_caster->GetGUID();
+        data << target->GetGUID();
 
     data << m_spellInfo->Id;
     data << uint32(1);
@@ -862,17 +898,17 @@ uint8 Spell::CanCast()
     float range = GetMaxRange(srange);
     if(target)
     {
-        if(!m_caster->isInFront( target, range ) && m_spellInfo->AttributesEx )
-            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;     //0x76;
+        if(!m_caster->isInFront( target, range ) && m_spellInfo->AttributesEx && m_caster->GetGUID() != target->GetGUID())
+            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;     //121
         if(m_caster->GetDistanceSq(target) > range * range )
-            castResult = 0x56;
+            castResult = CAST_FAIL_OUT_OF_RANGE;	//0x56;
    }
 
-    if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
-    {
-        if(m_caster->GetDistanceSq( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > range * range )
-            castResult = CAST_FAIL_OUT_OF_RANGE;	//0x56;
-    }
+    //if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
+    //{
+    //    if(m_caster->GetDistanceSq( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > range * range )
+    //        castResult = CAST_FAIL_OUT_OF_RANGE;	//0x56;
+    //}
 
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
@@ -898,54 +934,18 @@ uint8 Spell::CheckItems()
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return uint8(0);
 
+	uint32 itemid, itemcount;
     Player* p_caster = (Player*)m_caster;
-    Item* itm;
-    Bag* pBag;
-    uint32 tmpReagentCount[8];
-    uint8 curSlot;
-    uint8 bagIndex;
-
-    for(uint32 i=0;i<8;i++)
-        tmpReagentCount[i] = m_spellInfo->ReagentCount[i];
-
     for(uint32 i=0;i<8;i++)
     {
-        if(m_spellInfo->Reagent[i] == 0)
+        if((itemid = m_spellInfo->Reagent[i]) == 0)
             continue;
-
-        for(uint32 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-        {
-            itm = p_caster->GetItemBySlot(j);
-            if(!itm)
-                continue;
-            if(itm->GetProto()->ItemId == m_spellInfo->Reagent[i] && tmpReagentCount[i] > 0)
-                if(itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > tmpReagentCount[i])
-                    tmpReagentCount[i] = 0;
-            else
-                tmpReagentCount[i] -= itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
-        }
-        for(bagIndex=CLIENT_SLOT_01;bagIndex<=CLIENT_SLOT_04;bagIndex++)
-        {
-            pBag = p_caster->GetBagBySlot(bagIndex);
-            if (pBag)
-                for(uint8 pSlot=0; pSlot < pBag->GetProto()->ContainerSlots; pSlot++)
-            {
-                itm = p_caster->GetItemBySlot(bagIndex,pSlot);
-                if(!itm)
-                    continue;
-                if(itm->GetProto()->ItemId == m_spellInfo->Reagent[i] && tmpReagentCount[i] > 0)
-                    if(itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT) > tmpReagentCount[i])
-                        tmpReagentCount[i] = 0;
-                else
-                    tmpReagentCount[i] -= itm->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
-            }
-        }
-        pBag = NULL;
-        if(tmpReagentCount[i] != 0)
-            return uint8(0x54);
+		itemcount = m_spellInfo->ReagentCount[i];
+		if(p_caster->GetItemCount(itemid) < itemcount)
+            return (uint8)CAST_FAIL_ITEM_NOT_READY;	//0x54
     }
 
-    uint32 totems = 2;
+/*    uint32 totems = 2;
     for(uint32 i=0;i<2;i++)
     {
         if(m_spellInfo->Totem[i] != 0)
@@ -966,33 +966,8 @@ uint8 Spell::CheckItems()
     itm = NULL;
     if(totems != 0)
         return uint8(0x70);
-
+*/
     return uint8(0);
-}
-
-void Spell::RemoveItems()
-{
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    Player* p_caster = (Player*)m_caster;
-    Item* itm;
-
-    for(uint32 i=0;i<8;i++)
-    {
-        if(m_spellInfo->Reagent[i] == 0)
-            continue;
-        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-        {
-            itm = p_caster->GetItemBySlot(j);
-            if(!itm)
-                continue;
-            if(itm->GetProto()->ItemId == m_spellInfo->Reagent[i])
-                //p_caster->RemoveItemFromSlot(j);
-                p_caster->RemoveItemFromSlot(0,j,true);
-            itm = NULL;
-        }
-    }
 }
 
 uint32 Spell::CalculateDamage(uint8 i)

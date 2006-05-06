@@ -90,6 +90,14 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         return;
     }
 
+	if (pQuest->GetQuestInfo()->SrcItemId>0)
+	{
+		if ( !_player->AddNewItem(pQuest->GetQuestInfo()->SrcItemId,pQuest->GetQuestInfo()->SrcItemCount,false) )
+		{
+			_player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+			return; 
+		}
+	}
     if(_player->getQuestStatus(pQuest->GetQuestInfo()->QuestId)==QUEST_STATUS_NONE)
         _player->addNewQuest(pQuest,QUEST_STATUS_INCOMPLETE);
     uint16 log_slot = _player->getOpenQuestSlot();
@@ -256,7 +264,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++ )
         if ( pQuest->GetQuestInfo()->ReqItemId[iI] )
-            _player->RemovItemFromBag( pQuest->GetQuestInfo()->ReqItemId[iI], pQuest->GetQuestInfo()->ReqItemCount[iI]);
+            _player->RemoveItemFromInventory( pQuest->GetQuestInfo()->ReqItemId[iI], pQuest->GetQuestInfo()->ReqItemCount[iI]);
 
     if ( pQuest->GetQuestInfo()->RewSpell > 0 )
     {

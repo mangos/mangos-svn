@@ -49,6 +49,7 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
 
     private:
         bool _needToStop(void) const;
+        void _stopAttack(void);
 
         Creature &i_creature;
         FactionTemplateEntry* i_myFaction;

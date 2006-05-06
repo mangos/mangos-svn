@@ -63,6 +63,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     ((Pet*)pet)->ClearActState( STATE_RA_FOLLOW );
                     break;
                 case 0x0001:                                //spellid=1792  //FOLLOW
+					pet->clearUnitState(UNIT_STAT_IN_COMBAT);
+					pet->addUnitState(UNIT_STAT_FOLLOW);
                     (*pet)->Mutate(new TargetedMovementGenerator(*pl));
                     ((Pet*)pet)->AddActState( STATE_RA_FOLLOW );
                     ((Pet*)pet)->ClearActState( STATE_RA_STAY );

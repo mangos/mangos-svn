@@ -165,12 +165,11 @@ void Unit::setAttackTimer(uint32 time, bool rangeattack)
     }
 }
 
-Spell *Unit::reachWithSpellAttack(Unit *pVictim)
+SpellEntry *Unit::reachWithSpellAttack(Unit *pVictim)
 {
+	if(!pVictim)
+		return NULL;
     SpellEntry *spellInfo;
-    Spell *spell;
-    SpellCastTargets targets;
-    targets.setUnitTarget( pVictim );
     for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
     {
         if(!m_spells[i])
@@ -182,20 +181,27 @@ Spell *Unit::reachWithSpellAttack(Unit *pVictim)
             continue;
         }
 
-        spell = new Spell(this, spellInfo, false, 0);
+        /*spell = new Spell(this, spellInfo, false, 0);
         spell->m_targets = targets;
         if(!spell)
         {
             sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
             continue;
-        }
-        if(spell->m_spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
+        }*/
+        if(spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
             continue;
-        if(spell->CanCast()==0)
-        {
-            return spell;
-        }
-    }
+	    SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+		float range = GetMaxRange(srange);
+		float minrange = GetMinRange(srange);
+		float dist = GetDistanceSq(pVictim);
+		//if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
+		//	continue;
+		if( dist > range * range || dist < minrange * minrange )
+			continue;
+		if(m_silenced)
+			continue;
+		return spellInfo;
+	}
     return NULL;
 }
 
@@ -224,7 +230,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
     {
         crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
         pVictim->Relocate(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), pVictim->GetAngle( this ));
-        ((Creature*)pVictim)->AI().AttackStart((Player*)this);
+        ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
     // no loot,xp,health if type 8 /critters/
@@ -837,16 +843,22 @@ void Unit::_UpdateSpells( uint32 time )
     if(m_currentSpell != NULL)
     {
         m_currentSpell->update(time);
-                                                            //Auto shot
-        if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )
-        {
+		if(m_currentSpell->IsAutoRepeat())
+		{
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
-                setAttackTimer( 0, true );
+				if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )	//Auto shot
+					setAttackTimer( 0, true );
+				else
+					setAttackTimer(m_currentSpell->m_spellInfo->RecoveryTime);
+                                                
                 m_currentSpell->setState(SPELL_STATE_IDLE);
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
+			{
                 m_currentSpell->setState(SPELL_STATE_PREPARING);
+				m_currentSpell->ReSetTimer();
+			}
         }
         else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
         {

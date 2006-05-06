@@ -170,7 +170,6 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     SpellCastTargets targets;
     targets.read(&recvPacket,_player);
-
     spell->prepare(&targets);
 
 }

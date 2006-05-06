@@ -150,7 +150,7 @@ uint8 Bag::FindFreeBagSlot()
     return NULL_SLOT;
 }
 
-Item* Bag::RemoveItemFromBag(uint8 slot)
+Item* Bag::RemoveItem(uint8 slot)
 {
     Item *pItem = m_bagslot[slot];
     if(m_bagslot[slot])
@@ -161,7 +161,7 @@ Item* Bag::RemoveItemFromBag(uint8 slot)
     return pItem;
 }
 
-uint32 Bag::RemoveItemFromBag(uint8 slot,uint32 count)
+uint32 Bag::RemoveItem(uint8 slot,uint32 count)
 {
     Item *pItem = m_bagslot[slot];
     int oldcnt=0,removed=0;

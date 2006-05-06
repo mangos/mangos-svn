@@ -72,6 +72,10 @@ bool GuardAI::_needToStop() const
 
 void GuardAI::AttackStop(Unit *)
 {
+}
+
+void GuardAI::_stopAttack()
+{
     assert( i_pVictim != NULL );
     i_creature.clearUnitState(UNIT_STAT_ATTACKING);
     i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
@@ -108,7 +112,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         if( _needToStop() )
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            AttackStop(i_pVictim);
+            _stopAttack();
         }
         switch( i_state )
         {
@@ -169,7 +173,7 @@ void GuardAI::UpdateAI(const uint32 diff)
                         i_creature.setAttackTimer(0);
 
                         if( !i_creature.isAlive() || !i_pVictim->isAlive() )
-                            AttackStop(i_pVictim);
+                            _stopAttack();
                     }
                 }
                 break;
@@ -199,7 +203,8 @@ bool GuardAI::IsVisible(Unit *pl) const
 
 void GuardAI::AttackStart(Unit *u)
 {
-    assert( i_pVictim == NULL );
+    if( i_pVictim || !u )
+		return;
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     i_creature.addUnitState(UNIT_STAT_ATTACKING);
     i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);

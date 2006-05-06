@@ -27,7 +27,6 @@ class Creature;
 
 class MANGOS_DLL_DECL PetAI : public CreatureAI
 {
-
     public:
 
         PetAI(Creature &c);
