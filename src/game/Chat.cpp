@@ -69,6 +69,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand debugCommandTable[] =
     {
         { "inarc",       1, &ChatHandler::HandleDebugInArcCommand,       "",   NULL },
+        { "spellfail",   1, &ChatHandler::HandleDebugSpellFailCommand,   "",   NULL },
         { NULL,          0, NULL,                                        "",   NULL }
     };
 

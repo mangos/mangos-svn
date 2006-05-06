@@ -340,7 +340,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 getQuestSlotById(uint32 slot_id);
         void AddQuestsLoot(Creature* creature);
 
-        void RemovItemFromBag(uint32 itemId,uint32 itemcount);
+        void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
         void ItemRemoved(uint32 entry);
         void ItemAdded(uint32 entry, uint32 count);
         void KilledMonster(uint32 entry, uint64 guid);

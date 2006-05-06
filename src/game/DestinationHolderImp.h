@@ -54,8 +54,8 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1,
         {
             distance_d = ::sqrt(distance_d);
             double distance_ratio = (double)offset/(double)distance_d;
-            x = (float)(x2 - (distance_ratio*x_diff));
-            y = (float)(y2 - (distance_ratio*y_diff));
+            x = (float)(x1 + (distance_ratio*x_diff));
+            y = (float)(y1 + (distance_ratio*y_diff));
         }
     }
 }

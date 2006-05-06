@@ -39,6 +39,7 @@ class MANGOS_DLL_DECL TargetedMovementGenerator : public MovementGenerator
 
     private:
 
+        void _spellAtack(Creature &owner, SpellEntry* spellInfo);
         void _setAttackRadius(Creature &);
         void _setTargetLocation(Creature &);
         Unit &i_target;
