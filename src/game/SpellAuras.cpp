@@ -1253,7 +1253,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
     }
     if(m_modifier->m_miscvalue == 126)
     {
-        m_target->SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, )(m_target->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
         m_target->SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
     }
     if(m_modifier->m_miscvalue == 127)
