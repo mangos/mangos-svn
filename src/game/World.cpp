@@ -62,12 +62,12 @@ Player* World::FindPlayerInZone(uint32 zone)
     {
         next = itr;
         next++;
-		
-		if(!itr->second)
-			continue;
+
+        if(!itr->second)
+            continue;
         Player *player = itr->second->GetPlayer();
-		if(!player)
-			continue;
+        if(!player)
+            continue;
         if( player->IsInWorld() && player->GetZoneId() == zone )
         {
             return player;
@@ -251,7 +251,7 @@ void World::SetInitialWorldSettings()
     tmpPath.append("dbc/AreaTable.dbc");
     sAreaStore.Load((char *)(tmpPath.c_str()));
 
-	tmpPath=dataPath;
+    tmpPath=dataPath;
     tmpPath.append("dbc/SkillLineAbility.dbc");
     sSkillLineAbilityStore.Load((char *)(tmpPath.c_str()));
     bar.step();

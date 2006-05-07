@@ -78,7 +78,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetFloatValue (GAMEOBJECT_ROTATION+1, rotation1);
     SetFloatValue (GAMEOBJECT_ROTATION+2, rotation2);
     SetFloatValue (GAMEOBJECT_ROTATION+3, rotation3);
-	return true;
+    return true;
 }
 
 void GameObject::Update(uint32 p_time)
@@ -174,7 +174,7 @@ bool GameObject::LoadFromDB(uint32 guid)
     lootid=fields[11].GetUInt32();
     m_respawnTimer=fields[11].GetUInt32();
     delete result;
-	return Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
+    return Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
 }
 
 void GameObject::DeleteFromDB()

@@ -102,34 +102,34 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
     SpellEntry* spellInfo;
     if( owner.IsStopped() && i_target.isAlive())
-    { 
-		if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT))
-		{
-			if( spellInfo = owner.reachWithSpellAttack( &i_target))
-			{
-				_spellAtack(owner, spellInfo);
-				return;
-			}
-		}
+    {
+        if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT))
+        {
+            if( spellInfo = owner.reachWithSpellAttack( &i_target))
+            {
+                _spellAtack(owner, spellInfo);
+                return;
+            }
+        }
         if( !owner.canReachWithAttack( &i_target ) )
-		{
-			owner.addUnitState(UNIT_STAT_CHASE);
-			_setTargetLocation(owner);
-			DEBUG_LOG("restart to chase");
-		}
+        {
+            owner.addUnitState(UNIT_STAT_CHASE);
+            _setTargetLocation(owner);
+            DEBUG_LOG("restart to chase");
+        }
     }
     else
     {
         Traveller<Creature> traveller(owner);
         bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
-		if(i_targetedHome)
-			return;
+        if(i_targetedHome)
+            return;
         else if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
         {
-			_spellAtack(owner, spellInfo);
-			return;
+            _spellAtack(owner, spellInfo);
+            return;
         }
-		if(reach)
+        if(reach)
         {
             if( owner.canReachWithAttack(&i_target) )
             {
@@ -137,7 +137,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 owner.StopMoving();
                 if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
                     owner.addUnitState(UNIT_STAT_ATTACKING);
-				owner.clearUnitState(UNIT_STAT_CHASE);
+                owner.clearUnitState(UNIT_STAT_CHASE);
                 DEBUG_LOG("UNIT IS THERE");
             }
             else
@@ -151,23 +151,23 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
 void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellInfo)
 {
-	if(!spellInfo)
-		return;
+    if(!spellInfo)
+        return;
     owner.StopMoving();
     owner->Idle();
-	if(owner.m_currentSpell)
-	{
-		if(owner.m_currentSpell->m_spellInfo->Id == spellInfo->Id )
-			return;
-		else
-		{
-			delete owner.m_currentSpell;
-			owner.m_currentSpell = NULL;
-		}
-	}
- 	Spell *spell = new Spell(&owner, spellInfo, false, 0);
-	spell->SetAutoRepeat(true);
-	owner.addUnitState(UNIT_STAT_ATTACKING);
+    if(owner.m_currentSpell)
+    {
+        if(owner.m_currentSpell->m_spellInfo->Id == spellInfo->Id )
+            return;
+        else
+        {
+            delete owner.m_currentSpell;
+            owner.m_currentSpell = NULL;
+        }
+    }
+    Spell *spell = new Spell(&owner, spellInfo, false, 0);
+    spell->SetAutoRepeat(true);
+    owner.addUnitState(UNIT_STAT_ATTACKING);
     owner.clearUnitState(UNIT_STAT_CHASE);
     SpellCastTargets targets;
     targets.setUnitTarget( &i_target );

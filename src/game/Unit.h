@@ -84,7 +84,7 @@ enum UnitState
     UNIT_STAT_FLEEING       = 128,
     UNIT_STAT_MOVING        = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
     UNIT_STAT_IN_FLIGHT     = 256,                          // player is i n flight mode
-	UNIT_STAT_FOLLOW		= 512,
+    UNIT_STAT_FOLLOW        = 512,
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
@@ -243,7 +243,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraList GetAuras( ) {return m_Auras;}
-		void SendMoveToPacket(float x, float y, float z, bool run);
+        void SendMoveToPacket(float x, float y, float z, bool run);
 
     protected:
         Unit ( );

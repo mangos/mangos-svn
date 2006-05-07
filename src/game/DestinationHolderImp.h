@@ -69,8 +69,8 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     i_fromZ = traveller.GetPositionZ();
     float dest_x, dest_y;
 
-	if(i_fromX == x2 && i_fromY == y2)
-		return;
+    if(i_fromX == x2 && i_fromY == y2)
+        return;
     _findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
     UpdateLocation(traveller, dest_x, dest_y, dest_z);
 
@@ -78,7 +78,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
-    float dist = ((dx*dx) + (dy*dy) + (dz*dz));// - offset;
+    float dist = ((dx*dx) + (dy*dy) + (dz*dz));             // - offset;
     if(dist<0)
         dist = 0;
     else

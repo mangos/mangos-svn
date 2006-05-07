@@ -45,10 +45,10 @@ void PetAI::MoveInLineOfSight(Unit *u)
 
 void PetAI::AttackStart(Unit *u)
 {
-	if(!u)
-		return;
-	if(i_pVictim)
-		i_pVictim = NULL;
+    if(!u)
+        return;
+    if(i_pVictim)
+        i_pVictim = NULL;
     _taggedToKill(u);
 }
 
@@ -80,11 +80,11 @@ bool PetAI::_needToStop() const
 void PetAI::_stopAttack()
 {
     //assert( i_pVictim != NULL );
-	if(!i_pVictim)
-	{
-		i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
-		return;
-	}
+    if(!i_pVictim)
+    {
+        i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
+        return;
+    }
     i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
     i_pet.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
     if( !i_pet.isAlive() )
@@ -92,8 +92,8 @@ void PetAI::_stopAttack()
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
         i_pet.StopMoving();
         i_pet->Idle();
-		i_pVictim = NULL;
-		return;
+        i_pVictim = NULL;
+        return;
     }
     else if( !i_pVictim->isAlive() )
     {
@@ -109,17 +109,17 @@ void PetAI::_stopAttack()
     }
     i_pVictim = NULL;
     if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
-	{
-		i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
-		i_pet.addUnitState(UNIT_STAT_FOLLOW);
+    {
+        i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
+        i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
-	}
+    }
     else
-	{
-		i_pet.clearUnitState(UNIT_STAT_IN_COMBAT | UNIT_STAT_FOLLOW);
-		i_pet.addUnitState(UNIT_STAT_STOPPED);
+    {
+        i_pet.clearUnitState(UNIT_STAT_IN_COMBAT | UNIT_STAT_FOLLOW);
+        i_pet.addUnitState(UNIT_STAT_STOPPED);
         i_pet->Idle();
-	}
+    }
 }
 
 void PetAI::UpdateAI(const uint32 diff)
@@ -133,32 +133,32 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if( i_pet.IsStopped() )
         {
-			SpellEntry *spellInfo;
+            SpellEntry *spellInfo;
             if ( i_pet.m_currentSpell )
-			{
-				if( i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
-					i_pet.m_currentSpell = NULL;
-				else
-					return;
-			}
+            {
+                if( i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
+                    i_pet.m_currentSpell = NULL;
+                else
+                    return;
+            }
             else if( !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack(i_pVictim)))
             {
-				Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-				spell->SetAutoRepeat(true);
+                Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+                spell->SetAutoRepeat(true);
                 SpellCastTargets targets;
                 targets.setUnitTarget( i_pVictim );
                 spell->prepare(&targets);
                 i_pet.m_canMove = false;
                 DEBUG_LOG("Spell Attack.");
             }
-			else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pVictim) )
-			{
+            else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pVictim) )
+            {
                 i_pet.AttackerStateUpdate(i_pVictim, 0);
                 i_pet.setAttackTimer(0);
 
                 if( !i_pet.isAlive() || !i_pVictim->isAlive() )
-				    _stopAttack();
-			}
+                    _stopAttack();
+            }
         }
     }
     else
@@ -170,13 +170,13 @@ void PetAI::UpdateAI(const uint32 diff)
 
 bool PetAI::_isVisible(Unit *u) const
 {
-    return false;//( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
+    return false;                                           //( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
 }
 
 void PetAI::_taggedToKill(Unit *u)
 {
     if( i_pVictim || !u)
-		return;
+        return;
     i_pet.addUnitState(UNIT_STAT_ATTACKING);
     i_pet.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     i_pet->Mutate(new TargetedMovementGenerator(*u));
@@ -185,7 +185,7 @@ void PetAI::_taggedToKill(Unit *u)
     if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack( u )))
     {
         Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-		spell->SetAutoRepeat(true);
+        spell->SetAutoRepeat(true);
         SpellCastTargets targets;
         targets.setUnitTarget( u );
         spell->prepare(&targets);

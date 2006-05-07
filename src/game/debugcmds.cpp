@@ -58,18 +58,18 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 {
     WorldPacket data;
 
-	if(!args || args ==" ")
-		return false;
+    if(!args || args ==" ")
+        return false;
     char* px = strtok((char*)args, " ");
 
-    uint8 failnum = (uint8)atoi(px);    
+    uint8 failnum = (uint8)atoi(px);
 
-	data.Initialize(SMSG_CAST_RESULT);
+    data.Initialize(SMSG_CAST_RESULT);
     data << (uint32)133;
     data << uint8(2);
     data << failnum;
 
-	m_session->SendPacket(&data);
+    m_session->SendPacket(&data);
     //char buf[256];
     //FillSystemMessageData(&data, m_session, buf);
 

@@ -204,7 +204,7 @@ bool GuardAI::IsVisible(Unit *pl) const
 void GuardAI::AttackStart(Unit *u)
 {
     if( i_pVictim || !u )
-		return;
+        return;
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     i_creature.addUnitState(UNIT_STAT_ATTACKING);
     i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);

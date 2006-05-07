@@ -90,14 +90,14 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         return;
     }
 
-	if (pQuest->GetQuestInfo()->SrcItemId>0)
-	{
-		if ( !_player->AddNewItem(pQuest->GetQuestInfo()->SrcItemId,pQuest->GetQuestInfo()->SrcItemCount,false) )
-		{
-			_player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
-			return; 
-		}
-	}
+    if (pQuest->GetQuestInfo()->SrcItemId>0)
+    {
+        if ( !_player->AddNewItem(pQuest->GetQuestInfo()->SrcItemId,pQuest->GetQuestInfo()->SrcItemCount,false) )
+        {
+            _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+            return;
+        }
+    }
     if(_player->getQuestStatus(pQuest->GetQuestInfo()->QuestId)==QUEST_STATUS_NONE)
         _player->addNewQuest(pQuest,QUEST_STATUS_INCOMPLETE);
     uint16 log_slot = _player->getOpenQuestSlot();
@@ -295,7 +295,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     {
         if(!(Script->ChooseReward( _player, pCreature, pQuest, rewardid )))
         {
-			pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
+            pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
             Quest* nextquest;
             if(nextquest=pCreature->getNextAvailableQuest(_player,pQuest))
                 _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
