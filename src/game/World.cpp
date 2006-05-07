@@ -62,11 +62,15 @@ Player* World::FindPlayerInZone(uint32 zone)
     {
         next = itr;
         next++;
-
+		
+		if(!itr->second)
+			continue;
         Player *player = itr->second->GetPlayer();
-        if(player->GetZoneId() == zone && player->IsInWorld())
+		if(!player)
+			continue;
+        if( player->IsInWorld() && player->GetZoneId() == zone )
         {
-            return itr->second->GetPlayer();
+            return player;
         }
     }
     return NULL;
