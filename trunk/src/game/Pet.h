@@ -55,7 +55,7 @@ class Pet : public Creature
         bool LoadPetFromDB( Unit* owner );
         void DeletePetFromDB();
 
-    protected:
+	protected:
         std::string m_name;
         uint32 m_actState;
         uint32 m_fealty;

@@ -62,7 +62,12 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     *data >> m_targetMask;
 
     if(m_targetMask == TARGET_FLAG_SELF)
-		setUnitTarget(caster);
+    {
+        m_destX = caster->GetPositionX();
+        m_destY = caster->GetPositionY();
+        m_destZ = caster->GetPositionZ();
+        m_unitTarget = caster;
+	}
 
     if(m_targetMask & TARGET_FLAG_UNIT)
         m_unitTarget = ObjectAccessor::Instance().GetUnit(*caster, readGUID(data));
@@ -409,7 +414,7 @@ void Spell::cancel()
     if(m_spellState == SPELL_STATE_PREPARING)
     {
         SendInterrupted(0);
-        SendCastResult(0x20);
+        SendCastResult(CAST_FAIL_YOUR_TARGET_IS_DEAD);
     }
     else if(m_spellState == SPELL_STATE_CASTING)
     {
@@ -638,11 +643,7 @@ void Spell::SendSpellGo()
 {
 
     WorldPacket data;
-    uint16 flags;
 
-    flags = m_targets.m_targetMask;
-    if(flags == 0)
-        flags = 2;
 	Unit * target;
 	if(!unitTarget)
 		target = m_caster;

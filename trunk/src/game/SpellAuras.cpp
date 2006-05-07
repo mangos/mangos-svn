@@ -203,7 +203,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_spellId(spellproto->Id), m_caster(caster), m_target(target), m_effIndex(eff),
-m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_procSpell(NULL)
+m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_procSpell(NULL),  m_isTrigger(false)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -294,10 +294,17 @@ void Aura::Update(uint32 diff)
         }
         if(m_periodicTimer == 0)
         {
-            if(!m_caster)
-                m_target->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
-            else
-                m_caster->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+			if(m_isTrigger)
+			{
+				TriggerSpell();
+			}
+			else
+			{
+				if(!m_caster)
+					m_target->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+				else
+					m_caster->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+			}
             m_periodicTimer = m_modifier->periodictime;
         }
     }
@@ -517,24 +524,24 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 void HandleTriggerSpellEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
-    /* 
-        SpellEntry *spellInfo = sSpellStore.LookupEntry( Aur->GetSpellPerTick() );
+	if(!Aur)
+		return;
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( Aur->GetModifier()->m_miscvalue );
 
-        if(!spellInfo)
-        {
-            sLog.outError("WORLD: unknown spell id %i\n", Aur->GetSpellPerTick());
-            return;
-        }
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %i\n",  Aur->GetModifier()->m_miscvalue);
+        return;
+    }
 
-        Spell *spell = new Spell(Aur->GetTarget(), spellInfo, true, aff);
-        SpellCastTargets targets;
-        WorldPacket dump;
-        dump.Initialize(0);
-        dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
-        targets.read(&dump,this);
-
-        spell->prepare(&targets);
-    }*/
+    Spell *spell = new Spell(Aur->GetTarget(), spellInfo, true, Aur);
+    SpellCastTargets targets;
+	targets.setUnitTarget(Aur->GetTarget());
+    //WorldPacket dump;
+    //dump.Initialize(0);
+    //dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
+    //targets.read(&dump,this);
+    spell->prepare(&targets);
 
     /*else if(m_spellProto->EffectApplyAuraName[i] == 23)
     {
@@ -542,9 +549,38 @@ void HandleTriggerSpellEvent(void *obj)
     }*/
 }
 
+void Aura::TriggerSpell()
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( m_modifier->m_miscvalue );
+
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %i\n",  m_modifier->m_miscvalue);
+        return;
+    }
+
+    Spell *spell = new Spell(m_target, spellInfo, true, this);
+    SpellCastTargets targets;
+	targets.setUnitTarget(m_target);
+    spell->prepare(&targets);
+}
+
 void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
-    AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+	if(apply)
+	{
+        m_isPeriodic = true;
+		m_isTrigger = true;
+        m_periodicTimer = m_modifier->periodictime;
+		//m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+	}
+	else
+    {
+        //RemoveEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+		m_isTrigger = false;
+        m_duration = 0;
+    }
 }
 
 void Aura::HandleAuraModResistanceExclusive(bool apply)

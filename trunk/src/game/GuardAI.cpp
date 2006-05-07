@@ -198,7 +198,7 @@ void GuardAI::UpdateAI(const uint32 diff)
 
 bool GuardAI::IsVisible(Unit *pl) const
 {
-    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0<= IN_LINE_OF_SIGHT && !pl->m_stealth && pl->isAlive() );
+    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !pl->m_stealth && pl->isAlive() );
 }
 
 void GuardAI::AttackStart(Unit *u)

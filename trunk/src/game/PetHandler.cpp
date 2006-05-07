@@ -43,8 +43,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     recv_data >> spellid;
     recv_data >> flag;                                      //delete = 0x0700 CastSpell = C100
     recv_data >> guid2;                                     //tag guid
-    Player *pl=GetPlayer();
-    Creature* pet=ObjectAccessor::Instance().GetCreature(*pl,guid1);
+
+	Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid1);
     sLog.outString( "HandlePetAction.Pet %u flag is %u, spellid is %u, tanget %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
     if(!pet)
     {
@@ -65,14 +65,15 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 0x0001:                                //spellid=1792  //FOLLOW
 					pet->clearUnitState(UNIT_STAT_IN_COMBAT);
 					pet->addUnitState(UNIT_STAT_FOLLOW);
-                    (*pet)->Mutate(new TargetedMovementGenerator(*pl));
+                    (*pet)->Mutate(new TargetedMovementGenerator(*_player));
                     ((Pet*)pet)->AddActState( STATE_RA_FOLLOW );
                     ((Pet*)pet)->ClearActState( STATE_RA_STAY );
                     break;
                 case 0x0002:                                //spellid=1792  //ATTACK
                 {
-                    uint64 selguid = pl->GetSelection();
-                    Unit *TargetUnit = ObjectAccessor::Instance().GetCreature(*pl, selguid);
+					pet->clearUnitState(UNIT_STAT_FOLLOW);
+                    uint64 selguid = _player->GetSelection();
+                    Unit *TargetUnit = ObjectAccessor::Instance().GetCreature(*_player, selguid);
                     if(!TargetUnit)
                         TargetUnit=ObjectAccessor::Instance().FindPlayer(selguid);
                     if(TargetUnit == NULL) return;
@@ -85,16 +86,16 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 3:
                     if(pet)
                     {
-                        if( pl->getClass() == WARLOCK )
+                        if( _player->getClass() == WARLOCK )
                             ((Pet*)pet)->SavePetToDB();
-                        pl->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+                        _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
                         data.Initialize(SMSG_DESTROY_OBJECT);
                         data << pet->GetGUID();
-                        pl->SendMessageToSet (&data, true);
+                        _player->SendMessageToSet (&data, true);
                         MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
                         data.Initialize(SMSG_PET_SPELLS);
                         data << uint64(0);
-                        pl->GetSession()->SendPacket(&data);
+                        _player->GetSession()->SendPacket(&data);
                     }
                     break;
                 default:
@@ -120,6 +121,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             break;
         case 49408:                                         //0xc100	spell
         {
+			pet->clearUnitState(UNIT_STAT_FOLLOW);
             SpellEntry *spellInfo = sSpellStore.LookupEntry(spellid );
             if(!spellInfo)
             {
@@ -129,13 +131,13 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
             Spell *spell = new Spell(pet, spellInfo, false, 0);
             WPAssert(spell);
-            uint64 selectguid = pl->GetSelection();
-            Unit* unit_target=ObjectAccessor::Instance().GetCreature(*pl,selectguid);
+            uint64 selectguid = _player->GetSelection();
+            Unit* unit_target=ObjectAccessor::Instance().GetCreature(*_player,selectguid);
             if(!unit_target)
                 unit_target=ObjectAccessor::Instance().FindPlayer(selectguid);
-            //guid2 = pl->GetGUID();
+            if(unit_target == NULL) return;
             SpellCastTargets targets;
-            targets.setUnitTarget( unit_target );           //(Unit*)pl;
+            targets.setUnitTarget( unit_target );           //(Unit*)_player;
             spell->prepare(&targets);
             break;
         }
@@ -156,11 +158,10 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     recv_data >> state2;
     recv_data >> guid;
 
-    Player *pl=GetPlayer();
-    Creature* pet=ObjectAccessor::Instance().GetCreature(*pl,guid);
+    Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid);
     if(pet)
     {
-        name = pl->GetName();                               //pet->GetCreatureInfo()->Name;
+        name = _player->GetName();                               //pet->GetCreatureInfo()->Name;
         name.append("\'s Pet");
         state3=pet->GetUInt32Value(UNIT_FIELD_STAT3);
     }
@@ -169,10 +170,37 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     data << uint32(0x18088);
     data << name;
     data << uint32(0x426D3DC6);
-    pl->GetSession()->SendPacket(&data);
+    _player->GetSession()->SendPacket(&data);
 }
 
 void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 {
-    sLog.outString( "HandlePetSetAction.\n" );
+    sLog.outString( "HandlePetSetAction. CMSG_PET_SET_ACTION\n" );
+}
+
+void WorldSession::HandlePetRename( WorldPacket & recv_data )
+{
+    sLog.outString( "HandlePetRename. CMSG_PET_RENAME\n" );
+}
+
+void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
+{
+    uint64 guid;
+    recv_data >> guid;                                     //pet guid
+    sLog.outString( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
+    Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if(pet)
+    {
+		if( _player->getClass() == WARLOCK )
+			((Pet*)pet)->SavePetToDB();
+		_player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+		WorldPacket data;
+		data.Initialize(SMSG_DESTROY_OBJECT);
+		data << pet->GetGUID();
+		_player->SendMessageToSet (&data, true);
+		MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
+		data.Initialize(SMSG_PET_SPELLS);
+		data << uint64(0);
+		_player->GetSession()->SendPacket(&data);
+	}
 }

@@ -28,7 +28,6 @@ class Unit;
 class Creature;
 
 #define TIME_INTERVAL_LOOK   5000
-#define IN_LINE_OF_SIGHT     625
 #define VISIBILITY_RANGE    10000
 
 class MANGOS_DLL_DECL CreatureAI

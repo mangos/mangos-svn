@@ -79,8 +79,13 @@ bool PetAI::_needToStop() const
 
 void PetAI::_stopAttack()
 {
-    assert( i_pVictim != NULL );
-    i_pet.clearUnitState(UNIT_STAT_ATTACKING);
+    //assert( i_pVictim != NULL );
+	if(!i_pVictim)
+	{
+		i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
+		return;
+	}
+    i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
     i_pet.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
     if( !i_pet.isAlive() )
     {
@@ -119,11 +124,11 @@ void PetAI::_stopAttack()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
-    if( i_pVictim != NULL && i_pet.hasUnitState(UNIT_STAT_IN_COMBAT))
+    if( i_pVictim && i_pet.hasUnitState(UNIT_STAT_IN_COMBAT))
     {
         if( _needToStop() )
         {
-            DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_pet.GetGUIDLow());
+            DEBUG_LOG("Pet AI stoped attacking [guid=%u]", i_pet.GetGUIDLow());
             _stopAttack();
         }
         else if( i_pet.IsStopped() )
@@ -165,7 +170,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
 bool PetAI::_isVisible(Unit *u) const
 {
-    return ( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= IN_LINE_OF_SIGHT && !u->m_stealth && u->isAlive());
+    return false;//( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
 }
 
 void PetAI::_taggedToKill(Unit *u)

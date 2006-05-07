@@ -312,6 +312,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             if ( pPlayer->isQuestComplete(pQuest ) )
             {
                 //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 4, 6, 30, questinfo->Title);
+				SetFlag(UNIT_DYNAMIC_FLAGS, 2);
                 wasReward = true;
             }
             else
@@ -324,6 +325,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             else if( !pPlayer->getQuestRewardStatus(questinfo->QuestId))
             {
                 //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
+				SetFlag(UNIT_DYNAMIC_FLAGS, 2);
                 wasReward = true;
             }
         }

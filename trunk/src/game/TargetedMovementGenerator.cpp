@@ -103,7 +103,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     SpellEntry* spellInfo;
     if( owner.IsStopped() && i_target.isAlive())
     { 
-		if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && !owner.m_currentSpell)
+		if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT))
 		{
 			if( spellInfo = owner.reachWithSpellAttack( &i_target))
 			{

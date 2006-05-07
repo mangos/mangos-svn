@@ -150,7 +150,6 @@ ReactorAI::stopAttack()
         else if( i_pVictim->m_stealth )
         {
             DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
-            i_pVictim = NULL;
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
         else
