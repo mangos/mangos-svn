@@ -30,23 +30,7 @@ class Item;
 class GameObject;
 class Group;
 class Aura;
-/*
-//SKILL_ID
-#define SKILL_TAILORING         197
-#define SKILL_ALCHEMY           171
-#define SKILL_LEATHERWORKING    165
-#define SKILL_ENGINERING        202
-#define SKILL_FIRST_AID         129
-#define SKILL_MINING            186
-#define SKILL_COOKING           185
-#define SKILL_POISONS           40
-#define SKILL_SKINNING          393
-#define SKILL_ENCHANTING        333
-#define SKILL_BLACKSMITHING     164
-#define SKILL_HERBALISM         182
-#define SKILL_FISHING           356
-#define SKILL_OPENLOCK          242
-*/
+
 enum SpellCastTargetFlags
 {
     TARGET_FLAG_SELF             = 0x0000,
