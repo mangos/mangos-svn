@@ -32,7 +32,7 @@ class Bag : public Item
         Bag();
         ~Bag();
 
-        void Create(uint32 guidlow, uint32 itemid, Player* owner);
+        bool Create(uint32 guidlow, uint32 itemid, Player* owner);
 
         void Clear();
         uint8 AddItemToBag(uint8 slot, Item *item);

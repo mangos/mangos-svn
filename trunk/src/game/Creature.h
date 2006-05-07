@@ -296,7 +296,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         };
 
         void SaveToDB();
-        void LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
         uint32 getFaction()

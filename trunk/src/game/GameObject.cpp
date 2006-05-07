@@ -40,12 +40,12 @@ GameObject::GameObject() : Object()
     lootid=0;
 }
 
-void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
 {
     GameObjectInfo*  goinfo = objmgr.GetGameObjectInfo(name_id);
 
     if (!goinfo)
-        return;
+        return false;
 
     Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
 
@@ -78,6 +78,7 @@ void GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetFloatValue (GAMEOBJECT_ROTATION+1, rotation1);
     SetFloatValue (GAMEOBJECT_ROTATION+2, rotation2);
     SetFloatValue (GAMEOBJECT_ROTATION+3, rotation3);
+	return true;
 }
 
 void GameObject::Update(uint32 p_time)
@@ -149,14 +150,14 @@ void GameObject::SaveToDB()
     sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
-void GameObject::LoadFromDB(uint32 guid)
+bool GameObject::LoadFromDB(uint32 guid)
 {
     float rotation0, rotation1, rotation2, rotation3;
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject` WHERE `guid` = '%u';", guid);
 
     if( ! result )
-        return;
+        return false;
 
     Field *fields = result->Fetch();
     uint32 entry = fields[1].GetUInt32();
@@ -172,8 +173,8 @@ void GameObject::LoadFromDB(uint32 guid)
     rotation3 = fields[10].GetFloat();
     lootid=fields[11].GetUInt32();
     m_respawnTimer=fields[11].GetUInt32();
-    Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
     delete result;
+	return Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
 }
 
 void GameObject::DeleteFromDB()

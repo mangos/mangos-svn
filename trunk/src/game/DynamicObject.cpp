@@ -38,7 +38,7 @@ DynamicObject::DynamicObject() : Object()
     m_valuesCount = DYNAMICOBJECT_END;
 }
 
-void DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, float x, float y, float z, uint32 duration )
+bool DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, float x, float y, float z, uint32 duration )
 {
     Object::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
     m_spell = spell;
@@ -56,6 +56,7 @@ void DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, fl
 
     m_aliveDuration = duration;
     deleteThis = false;
+	return true;
 }
 
 void DynamicObject::Update(uint32 p_time)

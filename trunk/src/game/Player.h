@@ -558,7 +558,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSheath (uint32 sheathed);
 
         void SaveToDB();
-        void LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid);
         void DeleteFromDB();
         void DeleteCorpse();
 

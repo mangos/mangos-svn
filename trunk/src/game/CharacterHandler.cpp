@@ -61,7 +61,8 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
             sLog.outError("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
-            plr->LoadFromDB( (*result)[0].GetUInt32() );
+            if(!plr->LoadFromDB( (*result)[0].GetUInt32() ))
+				continue;
 
             plr->BuildEnumData( &data );
 
@@ -160,7 +161,8 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     Player* plr = new Player(this);
     ASSERT(plr);
 
-    plr->LoadFromDB( GUID_LOPART(guid) );
+    if(!plr->LoadFromDB( GUID_LOPART(guid) ))
+		return;
     plr->DeleteFromDB();
 
     delete plr;
@@ -183,7 +185,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ASSERT(plr);
 
     plr->SetSession(this);
-    plr->LoadFromDB(GUID_LOPART(playerGuid));
+    if(!plr->LoadFromDB(GUID_LOPART(playerGuid)))
+		return;
     //plr->_RemoveAllItemMods();
 
     SetPlayer(plr);

@@ -43,12 +43,12 @@ Bag::~Bag()
     }
 }
 
-void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
+bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 {
     ItemPrototype *m_itemProto = objmgr.GetItemPrototype(itemid);
 
-    ASSERT(m_itemProto);
-    ASSERT(m_itemProto->ContainerSlots <= 20);
+    if(!m_itemProto || m_itemProto->ContainerSlots > 20)
+		return false;
 
     Object::_Create( guidlow, HIGHGUID_CONTAINER );
 
@@ -74,6 +74,7 @@ void Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
     }
 
     m_owner = owner;
+	return true;
 }
 
 void Bag::SaveToDB()

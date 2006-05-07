@@ -63,7 +63,8 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             Field *fields = result->Fetch();
             T *obj = new T;
             uint32 guid = fields[0].GetUInt32();
-            obj->LoadFromDB(guid);
+            if(!obj->LoadFromDB(guid))
+				continue;
             m[obj->GetGUID()] = obj;
 
             addUnitState(obj);
