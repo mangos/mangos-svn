@@ -44,6 +44,9 @@
 
 #include <cmath>
 
+uint8 b_HP=0, b_Spirit=0, b_Stamina=0, b_IQ=0, b_Agility=0, b_Strength=0, b_Weaps;
+uint8 exHP=0, exSpirit=0, exStamina=0, exIQ=0, exAgility=0, exStrangth=0;
+
 Player::Player (WorldSession *session): Unit()
 {
     m_objectType |= TYPE_PLAYER;
@@ -333,6 +336,57 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     m_highest_rank = 0;
     m_last_week_rank = 0;
+
+    // Skill spec +5 
+    if (Player::HasSpell(20597))
+    {
+	SetSkill(43,1 ,10);
+	SetSkill(55,1 ,10);
+    }
+    if (Player::HasSpell(20864))
+    {
+	SetSkill(54,1 ,10);
+	SetSkill(160,1 ,10);
+    }
+    if (Player::HasSpell(20574))
+    {
+	SetSkill(44,1 ,10);
+	SetSkill(172,1 ,10);
+    }
+    if (Player::HasSpell(20558))
+    {
+	SetSkill(176,1 ,10);
+    }
+    if (Player::HasSpell(26290))
+    {
+	SetSkill(45,1 ,10);
+	SetSkill(226,1 ,10);
+    }
+
+    //+5% HP if has skill Endurance
+    if (Player::HasSpell(20550))
+    {
+	b_HP = uint32(GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.05);
+	SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH) + b_HP);
+    }
+
+    // school resistances
+    if (Player::HasSpell(20596))
+    {
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_04, 10);
+    }
+    if (Player::HasSpell(20583))
+    {
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_03, 10);
+    }
+    if (Player::HasSpell(20579))
+    {
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_05, 10);
+    }
+    if (Player::HasSpell(20592))
+    {
+	SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
+    }
     return true;
 }
 
@@ -1114,9 +1168,15 @@ void Player::RegenerateAll()
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
         Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
-        // removed 5 seconds regenerate after using skill
-        //Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
     }
+
+    else
+    {
+	if (Player::HasSpell(20555))
+	{
+	    Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
+	} 
+    } 
 
     Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
     Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
@@ -1168,6 +1228,16 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
                 case DRUID:   addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
             }
+		    if (Player::HasSpell(20555))
+		    {
+			if (Player::inCombat)
+			{ 
+			    addvalue*=uint32(0.10);
+			}
+			else
+			{
+			    addvalue*=uint32(1.10);
+			}
         }break;
         case UNIT_FIELD_POWER1:
         {
@@ -1181,6 +1251,7 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
                 case DRUID:   addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
             }
+		    }
         }break;
         case UNIT_FIELD_POWER2:
         {
@@ -1283,6 +1354,25 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
             SetUInt32Value(UNIT_FIELD_POWER1, newMP);
             SetUInt32Value(UNIT_FIELD_MAXPOWER1, newMP);
         }
+
+	    if (Player::HasSpell(20550))    //endurance skill support (+5% to total health)
+	    {
+		(uint32)exHP = newHP / 1.05;            //must remove previous bonus, so stat wouldn't grow toomuch
+		b_HP = uint8(exHP * 0.05);
+		newHP += b_HP;
+	    } 
+	    if (Player::HasSpell(20598))    //Human Spirit skill support (+5% to total spirit)
+	    {
+		(uint32)exSpirit = newSPI / 1.05;//must remove previous bonus, so stat wouldn't grow toomuch
+		b_Spirit = uint8(exSpirit * 0.05);
+		newSPI += b_Spirit;
+	    }
+	    if (Player::HasSpell(20591))    //Expansive mind support (+5% to total Intellect)
+	    { 
+		(uint32)exIQ = newINT / 1.05;           //must remove previous bonus, so stat wouldn't grow toomuch
+		b_IQ = uint8(exIQ * 0.05); 
+		newINT += b_IQ; 
+	    } 
 
         SetUInt32Value(UNIT_FIELD_HEALTH, newHP);
         SetUInt32Value(UNIT_FIELD_MAXHEALTH, newHP);
@@ -2972,8 +3062,46 @@ void Player::UpdateMaxSkills()
     {
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max=data>>16;
+	uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;
         if(max!=1 && max != 300)
-            SetUInt32Value(PLAYER_SKILL(i)+1,data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000);
+	{
+	    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
+		if (Player::HasSpell(20597))
+		{
+		    if (GetUInt32Value(PLAYER_SKILL(i)) == 43 || GetUInt32Value(PLAYER_SKILL(i)) == 55)
+		    {
+			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+		    }
+		}
+		if (Player::HasSpell(20864))
+		{
+		    if (GetUInt32Value(PLAYER_SKILL(i))==54 || GetUInt32Value(PLAYER_SKILL(i))==160)
+		    {
+			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+		    }
+		}
+		if (Player::HasSpell(20574))
+		{
+		    if (GetUInt32Value(PLAYER_SKILL(i))==44 || GetUInt32Value(PLAYER_SKILL(i))==172)
+		    {
+			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+		    }
+		}
+		if (Player::HasSpell(20558))
+		{
+		    if (GetUInt32Value(PLAYER_SKILL(i))==176)
+		    {
+			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+		    }
+		}
+		if (Player::HasSpell(26290))
+		{
+		    if (GetUInt32Value(PLAYER_SKILL(i))==45 || GetUInt32Value(PLAYER_SKILL(i))==226)
+		    {
+			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+		    } 
+		} 
+	} 
     }
 }
 
