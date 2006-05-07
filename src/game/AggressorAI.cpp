@@ -87,11 +87,12 @@ void AggressorAI::_stopAttack()
     assert( i_pVictim != NULL );
     i_creature.clearUnitState(UNIT_STAT_IN_COMBAT);
     i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
-    i_pVictim = NULL;
 
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
+		i_pVictim = NULL;
+		return;
     }
     else if( !i_pVictim->isAlive() )
     {
@@ -109,6 +110,7 @@ void AggressorAI::_stopAttack()
     }
     //i_creature.StopMoving();
     //i_creature->Idle();
+    i_pVictim = NULL;
     static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 }
 
@@ -197,7 +199,7 @@ bool
 AggressorAI::IsVisible(Unit *pl) const
 {
                                                             // offset=1.0
-    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0 <= IN_LINE_OF_SIGHT && !pl->m_stealth && pl->isAlive() );
+    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_MONSTER) && !pl->m_stealth && pl->isAlive() );
 }
 
 void

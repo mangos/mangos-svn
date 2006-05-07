@@ -282,7 +282,7 @@ class Aura
         void HandleModPercentStat(bool Apply);
         void HandleModResistancePercent(bool Apply);
 
-        Aura() : m_spellId(0), m_effIndex(0), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_positive(false), m_permanent(false), m_isPeriodic(false), m_procSpell(NULL) {}
+        Aura() : m_spellId(0), m_effIndex(0), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_positive(false), m_permanent(false), m_isPeriodic(false), m_procSpell(NULL), m_isTrigger(false) {}
         Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target);
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
@@ -319,6 +319,7 @@ class Aura
         uint32 CalculateDamage(SpellEntry* spellproto, uint8 i);
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
+        void TriggerSpell();
 
     private:
 
@@ -336,6 +337,8 @@ class Aura
         bool m_positive;
         bool m_permanent;
         bool m_isPeriodic;
+		bool m_isTrigger;
+
         uint32 m_periodicTimer;
         uint32 m_PeriodicEventId;
 };

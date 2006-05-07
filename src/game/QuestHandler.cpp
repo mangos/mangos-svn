@@ -295,6 +295,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     {
         if(!(Script->ChooseReward( _player, pCreature, pQuest, rewardid )))
         {
+			pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
             Quest* nextquest;
             if(nextquest=pCreature->getNextAvailableQuest(_player,pQuest))
                 _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);

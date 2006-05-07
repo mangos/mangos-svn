@@ -76,7 +76,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
-    float dist = ((dx*dx) + (dy*dy) + (dz*dz)) - offset;
+    float dist = ((dx*dx) + (dy*dy) + (dz*dz));// - offset;
     if(dist<0)
         dist = 0;
     else

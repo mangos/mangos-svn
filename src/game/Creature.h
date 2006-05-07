@@ -232,7 +232,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline bool getMoveRandomFlag() { return m_moveRandom; }
         inline bool getMoveRunFlag() { return m_moveRun; }
         inline bool IsStopped(void) const { return !(hasUnitState(UNIT_STAT_MOVING)); }
-        inline void StopMoving(void) { clearUnitState(UNIT_STAT_MOVING); }
+        inline void StopMoving(void) 
+		{ 
+			clearUnitState(UNIT_STAT_MOVING); 
+			AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true);
+		}
 
         void setItemId(int slot, uint32 tempitemid);
         void setItemAmount(int slot, int tempamount);

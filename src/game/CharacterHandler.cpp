@@ -184,7 +184,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     plr->SetSession(this);
     plr->LoadFromDB(GUID_LOPART(playerGuid));
-    plr->_RemoveAllItemMods();
+    //plr->_RemoveAllItemMods();
 
     SetPlayer(plr);
 

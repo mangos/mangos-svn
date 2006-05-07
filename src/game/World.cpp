@@ -170,8 +170,10 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
     m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
     m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10) * 1000;
-    m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 75);
+    m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 5500);
     m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
+    m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 400);
+    m_configs[CONFIG_SIGHT_GUARDER] = sConfig.GetIntDefault("GuarderSight", 500);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 

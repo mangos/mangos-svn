@@ -151,6 +151,7 @@ class SpellCastTargets
             m_destY = target->GetPositionY();
             m_destZ = target->GetPositionZ();
             m_unitTarget = target;
+			m_targetMask |= TARGET_FLAG_UNIT | TARGET_FLAG_DEST_LOCATION;
         }
 
         Item *m_itemTarget;
