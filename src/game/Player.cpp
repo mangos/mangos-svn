@@ -2908,13 +2908,15 @@ void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
     if ((!max) || (!value) || (value >= max)) return;
 	if(value >= maxValue+25 )
 		return;
-	else if(value >= maxValue && urand(0,100) <30)
+	else if(value >= maxValue)
 	{
-		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+		if(urand(0,100) <30)
+			SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
 		return;
 	}
-	else if(value >= minValue && urand(0,100) <70)
+	else if(value >= minValue)
 	{
+		if(urand(0,100) <70)
 		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
 		return;
 	}
