@@ -594,7 +594,10 @@ void Spell::finish()
     m_dynObjToDel.clear();
     m_ObjToDel.clear();
 
-    ((Player*)m_caster)->setRegenTimer(5000);
+	if (!POWER_ENERGY) 
+	{ 
+	    ((Player*)m_caster)->setRegenTimer(5000); 
+	} 
 	if(m_TriggerSpell)
 		TriggerSpell();
 }
