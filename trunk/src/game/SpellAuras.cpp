@@ -326,7 +326,7 @@ void Aura::_AddAura()
     ApplyModifier(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
 	bool samespell = false;
-    uint8 slot, i;
+    uint8 slot = 0xFF, i;
 	uint32 maxduration = m_duration;
     Aura* aura = NULL;
 	for(i = 0; i< 3; i++)
@@ -336,23 +336,20 @@ void Aura::_AddAura()
         aura = m_target->GetAura(m_spellId, i);
 		if(aura)
 		{
+			slot = aura->GetAuraSlot();
+			SetAuraSlot( slot );
+			samespell = true;
 			maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
 		}
 	}
-	if(aura)
+	if(m_duration <= maxduration && slot != 0xFF)
 	{
-		slot = aura->GetAuraSlot();
-        SetAuraSlot( slot );
-		if(m_duration <= maxduration)
-	        return;
-		samespell = true;
-    }
+		return;
+	}
     WorldPacket data;
 
 	if(!samespell)
 	{
-		slot = 0xFF;
-
 		if (!IsPositive())
 		{
 			for (i = 0; i < MAX_NEGATIVE_AURAS; i++)
@@ -394,7 +391,7 @@ void Aura::_AddAura()
     {
         data.Initialize(SMSG_UPDATE_AURA_DURATION);
         data << (uint8)slot << (uint32)maxduration;
-        ((Player*)m_target)->GetSession()->SendPacket(&data);
+        ((Player*)m_target)->SendMessageToSet(&data, true);//GetSession()->SendPacket(&data);
     }
 
     SetAuraSlot( slot );
