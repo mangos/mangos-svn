@@ -1630,9 +1630,6 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     newspell->spellId = spell_id;
 
 	WorldPacket data;
-	data.Initialize(SMSG_LEARNED_SPELL);
-	data <<uint32(spell_id);
-	m_session->SendPacket(&data);
 
     uint8 op;
     uint16 tmpslot=slot_id,val=0;
@@ -1707,7 +1704,17 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     newspell->slotId = tmpslot;
     m_spells.push_back(newspell);
 }
+void Player::learnSpell(uint16 spell_id)
+{
 
+	WorldPacket data;
+	data.Initialize(SMSG_LEARNED_SPELL);
+	data <<uint32(spell_id);
+	m_session->SendPacket(&data);
+
+	addSpell(spell_id);
+
+}
 bool Player::removeSpell(uint16 spell_id)
 {
     std::list<Playerspell*>::iterator itr;

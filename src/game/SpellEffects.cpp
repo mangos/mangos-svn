@@ -582,79 +582,79 @@ void Spell::EffectLearnSpell(uint32 i)
     //data.Initialize(SMSG_LEARNED_SPELL);
     //data << spellToLearn;
     //((Player*)unitTarget)->GetSession()->SendPacket(&data);
-    ((Player*)unitTarget)->addSpell((uint16)spellToLearn);
+    ((Player*)unitTarget)->learnSpell((uint16)spellToLearn);
 	//some addspell isn't needed if you have a good DB,FISHING && MINING && HERBALISM have to be needed.
 	switch(spellToLearn)
 	{
 		case 4036://SKILL_ENGINERING
 		{
-			((Player*)unitTarget)->addSpell(3918);
-			((Player*)unitTarget)->addSpell(3919);
-			((Player*)unitTarget)->addSpell(3920);
+			((Player*)unitTarget)->learnSpell(3918);
+			((Player*)unitTarget)->learnSpell(3919);
+			((Player*)unitTarget)->learnSpell(3920);
 			break;
 		}
 		case 3908://SKILL_TAILORING
 		{
-			((Player*)unitTarget)->addSpell(2387);
-			((Player*)unitTarget)->addSpell(2963);
+			((Player*)unitTarget)->learnSpell(2387);
+			((Player*)unitTarget)->learnSpell(2963);
 			break;
 		}
 		case 7411://SKILL_ENCHANTING
 		{
-			((Player*)unitTarget)->addSpell(7418);
-			((Player*)unitTarget)->addSpell(7421);
-			((Player*)unitTarget)->addSpell(13262);
+			((Player*)unitTarget)->learnSpell(7418);
+			((Player*)unitTarget)->learnSpell(7421);
+			((Player*)unitTarget)->learnSpell(13262);
 			break;
 		}
 		case 2259://SKILL_ALCHEMY
 		{
-			((Player*)unitTarget)->addSpell(2329);
-			((Player*)unitTarget)->addSpell(7183);
-			((Player*)unitTarget)->addSpell(2330);
+			((Player*)unitTarget)->learnSpell(2329);
+			((Player*)unitTarget)->learnSpell(7183);
+			((Player*)unitTarget)->learnSpell(2330);
 			break;
 		}
 		case 2018://SKILL_BLACKSMITHING
 		{
-			((Player*)unitTarget)->addSpell(2663);
-			((Player*)unitTarget)->addSpell(12260);
-			((Player*)unitTarget)->addSpell(2660);
-			((Player*)unitTarget)->addSpell(3115);
+			((Player*)unitTarget)->learnSpell(2663);
+			((Player*)unitTarget)->learnSpell(12260);
+			((Player*)unitTarget)->learnSpell(2660);
+			((Player*)unitTarget)->learnSpell(3115);
 			break;
 		}
 		case 2108://SKILL_LEATHERWORKING
 		{
-			((Player*)unitTarget)->addSpell(2152);
-			((Player*)unitTarget)->addSpell(9058);
-			((Player*)unitTarget)->addSpell(9059);
-			((Player*)unitTarget)->addSpell(2149);
-			((Player*)unitTarget)->addSpell(7126);
-			((Player*)unitTarget)->addSpell(2881);
+			((Player*)unitTarget)->learnSpell(2152);
+			((Player*)unitTarget)->learnSpell(9058);
+			((Player*)unitTarget)->learnSpell(9059);
+			((Player*)unitTarget)->learnSpell(2149);
+			((Player*)unitTarget)->learnSpell(7126);
+			((Player*)unitTarget)->learnSpell(2881);
 			break;
 		}
 		case 2550://SKILL_COOKING
 		{
-			((Player*)unitTarget)->addSpell(2540);
-			((Player*)unitTarget)->addSpell(2538);
+			((Player*)unitTarget)->learnSpell(2540);
+			((Player*)unitTarget)->learnSpell(2538);
 			break;
 		}
 		case 3273://SKILL_FIRST_AID
 		{
-			((Player*)unitTarget)->addSpell(3275);
+			((Player*)unitTarget)->learnSpell(3275);
 			break;
 		}
 		case 7620://SKILL_FISHING
 		{
-			((Player*)unitTarget)->addSpell(7738);
+			((Player*)unitTarget)->learnSpell(7738);
 			break;
 		}
 		case 2575://SKILL_MINING
 		{
-			((Player*)unitTarget)->addSpell(2580);
+			((Player*)unitTarget)->learnSpell(2580);
 			break;
 		}
 		case 2366://SKILL_HERBALISM
 		{
-			((Player*)unitTarget)->addSpell(2383);
+			((Player*)unitTarget)->learnSpell(2383);
 			break;
 		}
 		default:break;
