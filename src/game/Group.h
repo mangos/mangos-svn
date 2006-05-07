@@ -37,12 +37,13 @@ class Group
         {
         }
 
-        void Create(const uint64 &guid, const char * name)
+        bool Create(const uint64 &guid, const char * name)
         {
             AddMember(guid, name);
 
             m_leaderGuid = guid;
             m_leaderName = name;
+			return true;
         }
 
         void AddMember(uint64 guid, const char* name)

@@ -912,16 +912,18 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     return true;
 }
 
-void Creature::LoadFromDB(uint32 guid)
+bool Creature::LoadFromDB(uint32 guid)
 {
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u';", guid);
-    ASSERT(result);
+    if(!result)
+		return false;
 
     Field *fields = result->Fetch();
 
-    Create(guid,fields[2].GetUInt32(),fields[3].GetFloat(),fields[4].GetFloat(),
-        fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32());
+    if(!Create(guid,fields[2].GetUInt32(),fields[3].GetFloat(),fields[4].GetFloat(),
+        fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32()))
+		return false;
 
     SetUInt32Value(UNIT_FIELD_HEALTH,fields[15].GetUInt32());
     //fix me current mana
@@ -949,6 +951,7 @@ void Creature::LoadFromDB(uint32 guid)
         _LoadQuests();
 
     AIM_Initialize();
+	return true;
 }
 
 void Creature::_LoadGoods()

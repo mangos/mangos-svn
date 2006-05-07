@@ -56,12 +56,12 @@ class MANGOS_DLL_SPEC GameObject : public Object
     public:
         GameObject();
 
-        void Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3);
+        bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3);
         void Update(uint32 p_time);
         GameObjectInfo* GetGOInfo();
 
         void SaveToDB();
-        void LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid);
         void DeleteFromDB();
         void generateLoot();
         void setLootState(LootState s) { m_lootState = s; }

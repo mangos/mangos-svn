@@ -28,7 +28,7 @@ class DynamicObject : public Object
     public:
         DynamicObject( );
 
-        void Create( uint32 guidlow, Unit * caster, SpellEntry * spell, float x, float y, float z, uint32 duration );
+        bool Create( uint32 guidlow, Unit * caster, SpellEntry * spell, float x, float y, float z, uint32 duration );
         void Update(uint32 p_time);
         void DealWithSpellDamage(Player &);
         void DealWithSpellDamage(Unit &);

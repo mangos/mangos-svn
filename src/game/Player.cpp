@@ -2100,12 +2100,13 @@ void Player::_SaveAuras()
     }
 }
 
-void Player::LoadFromDB( uint32 guid )
+bool Player::LoadFromDB( uint32 guid )
 {
 
     QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
 
-    ASSERT(result);
+    if(!result)
+		return false;
 
     Field *fields = result->Fetch();
 
@@ -2191,7 +2192,7 @@ void Player::LoadFromDB( uint32 guid )
 	sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
     //_ApplyAllAuraMods();
     //_ApplyAllItemMods();
-
+	return true;
 }
 
 void Player::_LoadInventory()
@@ -2687,8 +2688,9 @@ void Player::CreateCorpse()
     }
 
     m_pCorpse = new Corpse();
-    m_pCorpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
-        GetPositionY(), GetPositionZ(), GetOrientation());
+    if(!m_pCorpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
+        GetPositionY(), GetPositionZ(), GetOrientation()))
+		return;
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
     _pb = GetUInt32Value(PLAYER_BYTES);
@@ -3834,7 +3836,8 @@ bool Player::CanUseItem(ItemPrototype * proto)
     {
         WorldPacket data;
         Item* pItem = NewItemOrBag(proto);
-        pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this);
+        if(!pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this))
+			return false;
 
         data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
 
@@ -4253,7 +4256,8 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
     if (!error_code)
     {
         dstItem = new Item;                                 // Don't think there are stackable bags
-        dstItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),srcItem->GetEntry(),this);
+        if(!dstItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),srcItem->GetEntry(),this))
+			return false;
         dstItem->SetCount(count);
         error_code = CanEquipItemInSlot(dstBag, dstSlot, dstItem, srcItem);
     }
@@ -4385,7 +4389,8 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
     Item *pItem = NewItemOrBag(proto);
     if (count > proto->MaxCount) { count = proto->MaxCount; }
     if (count < 1) { count = 1; }
-    pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this);
+    if(!pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this))
+		return NULL;
     pItem->SetCount (count);
     return pItem;
 }

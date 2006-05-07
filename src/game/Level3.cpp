@@ -1195,7 +1195,8 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     float o = chr->GetOrientation();
 
     GameObject* pGameObj = new GameObject();
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0);
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
+		return false;
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     sLog.outError("AddObject at Level3.cpp line 1176");
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
@@ -1320,7 +1321,8 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     GameObject* pGameObj = new GameObject();
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0);
+    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
+		return false;
     //    pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
     //	pGameObj->SetNameId(id);

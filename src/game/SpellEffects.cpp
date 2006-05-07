@@ -366,7 +366,8 @@ void Spell::EffectPresistentAA(uint32 i)
     m_AreaAura = true;
 
     DynamicObject* dynObj = new DynamicObject();
-    dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo, i));
+    if(dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo, i)))
+		return;
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
@@ -1129,11 +1130,12 @@ void Spell::EffectDuel(uint32 i)
 
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
 
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetMapId(),
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetMapId(),
         m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
         m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0, 0, 0, 0);
+        m_caster->GetOrientation(), 0, 0, 0, 0))
+		return;
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
     pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
@@ -1331,7 +1333,8 @@ void Spell::EffectSummonObject(uint32 i)
     GameObject* pGameObj = new GameObject();
     uint32 display_id = m_spellInfo->EffectMiscValue[i];
 
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, 0, 0);
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, 0, 0))
+		return;
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i]);
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
@@ -1443,9 +1446,10 @@ void Spell::EffectTransmitted(uint32 i)
     GameObject* pGameObj = new GameObject();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
 
-    pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
         fx, fy, m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0, 0, 0, 0);
+        m_caster->GetOrientation(), 0, 0, 0, 0))
+		return;
 
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );

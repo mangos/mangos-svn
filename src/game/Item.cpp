@@ -392,7 +392,7 @@ break;
 return itemIcon;
 }
 */
-void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
+bool Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
 {
     Object::_Create( guidlow, HIGHGUID_ITEM );
 
@@ -403,7 +403,8 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner->GetGUID());
 
     ItemPrototype *m_itemProto = objmgr.GetItemPrototype(itemid);
-    ASSERT(m_itemProto);
+    if(!m_itemProto)
+		return false;
 
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);              //this seems to be wrong (c) Phantomas
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
@@ -417,6 +418,7 @@ void Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
     SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
     SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay);
     m_owner = owner;
+	return true;
 }
 
 void Item::SaveToDB()

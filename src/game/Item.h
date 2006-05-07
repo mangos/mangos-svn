@@ -108,7 +108,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         Item ( );
 
-        virtual void Create( uint32 guidlow, uint32 itemid, Player* owner);
+        virtual bool Create( uint32 guidlow, uint32 itemid, Player* owner);
 
         ItemPrototype* GetProto() const;
 
