@@ -298,18 +298,18 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
 
 void Object::BuildHeartBeatMsg(WorldPacket *data) const
 {
-    data->Initialize(MSG_MOVE_HEARTBEAT);
+    data->Initialize(MSG_MOVE_HEARTBEAT); //2
 
-    *data << GetGUID();
+    *data << GetGUID(); //8
 
-    *data << uint32(0);
-    *data << uint32(0);
+    *data << uint32(0); //4
+    *data << uint32(0); //4
 
-    *data << m_positionX;
-    *data << m_positionY;
-    *data << m_positionZ;
+    *data << m_positionX; //4
+    *data << m_positionY; //4
+    *data << m_positionZ; //4
 
-    *data << m_orientation;
+    *data << m_orientation; //4
 }
 
 void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
@@ -525,10 +525,10 @@ float Object::GetAngle(const Object* obj) const
 {
     if(!obj) return 0;
 
-    float dx = obj->GetPositionX() - m_positionX;
-    float dy = obj->GetPositionY() - m_positionY;
+    double dx = obj->GetPositionX() - m_positionX;
+    double dy = obj->GetPositionY() - m_positionY;
 
-    float ang = (float)atan2((double)dy, (double)dx);
+    float ang = (float)atan2(dy,dx);
     ang = (ang >= 0) ? ang : 2 * M_PI + ang;
     return ang;
 }

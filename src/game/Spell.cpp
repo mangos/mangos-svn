@@ -594,10 +594,11 @@ void Spell::finish()
     m_dynObjToDel.clear();
     m_ObjToDel.clear();
 
-	if (!POWER_ENERGY) 
+	uint8 powerType = (uint8)(m_caster->GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24);
+	if (powerType != POWER_ENERGY) 
 	{ 
 	    ((Player*)m_caster)->setRegenTimer(5000); 
-	} 
+	}
 	if(m_TriggerSpell)
 		TriggerSpell();
 }
