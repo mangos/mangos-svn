@@ -2840,6 +2840,39 @@ void Player::UpdateSkill(uint32 skill_id)
     }
 
 }
+void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
+{
+	if(!skill_id)return;
+    uint16 i=0;
+    for (; i < PLAYER_MAX_SKILLS; i++)
+        if (GetUInt32Value(PLAYER_SKILL(i)) == skill_id) break;
+    if(i>=PLAYER_MAX_SKILLS) return;
+
+    uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
+    uint16 value = SKILL_VALUE(data);
+    uint16 max = SKILL_MAX(data);
+
+    if ((!max) || (!value) || (value >= max)) return;
+	if(value >= maxValue+25 )
+		return;
+	else if(value >= maxValue && urand(0,100) <30)
+	{
+		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+		return;
+	}
+	else if(value >= (maxValue + minValue)/2 && urand(0,100) <70)
+	{
+		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+		return;
+	}
+	else if(value >= minValue)
+	{
+		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+		return;
+	}
+	else return;
+
+}
 
 void Player::UpdateSkillWeapon()
 {

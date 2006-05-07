@@ -102,4 +102,5 @@ extern DBCStorage <SpellDuration> sSpellDuration;
 extern DBCStorage <FactionEntry> sFactionStore;
 extern DBCStorage <ItemSetEntry> sItemSetStore;
 extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
+extern DBCStorage <SkillLineAbility> sSkillLineAbilityStore;
 #endif

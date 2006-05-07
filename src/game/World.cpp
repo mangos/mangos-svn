@@ -245,8 +245,13 @@ void World::SetInitialWorldSettings()
     tmpPath.append("dbc/AreaTable.dbc");
     sAreaStore.Load((char *)(tmpPath.c_str()));
 
+	tmpPath=dataPath;
+    tmpPath.append("dbc/SkillLineAbility.dbc");
+    sSkillLineAbilityStore.Load((char *)(tmpPath.c_str()));
+    bar.step();
+
     sLog.outString( "" );
-    sLog.outString( ">> Loaded 12 data stores" );
+    sLog.outString( ">> Loaded 13 data stores" );
     sLog.outString( "" );
 
     sLog.outString( "Loading Quests..." );
