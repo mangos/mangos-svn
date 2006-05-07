@@ -337,7 +337,7 @@ class Aura
         bool m_positive;
         bool m_permanent;
         bool m_isPeriodic;
-		bool m_isTrigger;
+        bool m_isTrigger;
 
         uint32 m_periodicTimer;
         uint32 m_PeriodicEventId;

@@ -394,7 +394,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
-		void learnSpell(uint16 spell_id);
+        void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
         inline std::list<Playerspell*> getSpellList() { return m_spells; };
@@ -510,7 +510,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             return (Bag *)m_items[slot];
         }
         void UpdateSkill(uint32 skill_id);
-		void UpdateSkillPro(uint32 skill_id,uint32 min_value,uint32 max_value);
+        void UpdateSkillPro(uint32 skill_id,uint32 min_value,uint32 max_value);
         uint32 GetSkillByProto(ItemPrototype *proto);
         uint32 GetSpellByProto(ItemPrototype *proto);
         void GetSlotByItem(uint32 type, uint8 slots[4]);

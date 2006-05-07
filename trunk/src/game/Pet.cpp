@@ -82,7 +82,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     owner->GetClosePoint(NULL, px, py, pz);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), fields[1].GetUInt32()))
-		return false;
+        return false;
 
     uint32 petlevel=fields[3].GetUInt32();
     SetUInt32Value(UNIT_FIELD_LEVEL, petlevel);
@@ -156,11 +156,11 @@ void Pet::DeletePetFromDB()
 
 /*void Pet::SendPetQuery()
 {
-	Unit *player = GetOwner();
-	if(player->GetTypeId() != TYPEID_PLAYER)
-		return;
-	char *subname = "Pet";
-	CreatureInfo *ci = objmgr.GetCreatureTemplate(GetEntry());
+    Unit *player = GetOwner();
+    if(player->GetTypeId() != TYPEID_PLAYER)
+        return;
+    char *subname = "Pet";
+    CreatureInfo *ci = objmgr.GetCreatureTemplate(GetEntry());
 
     WorldPacket data;
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );

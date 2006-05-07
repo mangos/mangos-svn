@@ -134,14 +134,14 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
     data << (uint32)entry;
-	data << ((unit->isPet()) ? ((Pet*)unit)->GetName().c_str() : ci->Name);
+    data << ((unit->isPet()) ? ((Pet*)unit)->GetName().c_str() : ci->Name);
     data << uint8(0) << uint8(0) << uint8(0);
     data << ((unit->isPet()) ? "Pet" : ci->SubName);
 
     uint32 wdbFeild11=0,wdbFeild12=0;
 
     data << ci->flag1;                                      //flag1          wdbFeild7=wad flags1
-	data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
+    data << (uint32)((unit->isPet()) ? 0 : ci->type);       //creatureType   wdbFeild8
     data << (uint32)ci->family;                             //family         wdbFeild9
     data << (uint32)ci->rank;                               //rank           wdbFeild10
     data << (uint32)wdbFeild11;                             //unknow         wdbFeild11

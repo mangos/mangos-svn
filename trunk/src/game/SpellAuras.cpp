@@ -207,8 +207,8 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
-	m_duration = GetDuration(spellproto, eff);
-	if(m_duration == -1)
+    m_duration = GetDuration(spellproto, eff);
+    if(m_duration == -1)
         m_permanent = true;
     if(spellproto->EffectBasePoints[eff] < 0)
         m_positive = false;
@@ -294,17 +294,17 @@ void Aura::Update(uint32 diff)
         }
         if(m_periodicTimer == 0)
         {
-			if(m_isTrigger)
-			{
-				TriggerSpell();
-			}
-			else
-			{
-				if(!m_caster)
-					m_target->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
-				else
-					m_caster->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
-			}
+            if(m_isTrigger)
+            {
+                TriggerSpell();
+            }
+            else
+            {
+                if(!m_caster)
+                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+                else
+                    m_caster->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+            }
             m_periodicTimer = m_modifier->periodictime;
         }
     }
@@ -325,59 +325,59 @@ void Aura::_AddAura()
 
     ApplyModifier(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-	bool samespell = false;
+    bool samespell = false;
     uint8 slot = 0xFF, i;
-	uint32 maxduration = m_duration;
+    uint32 maxduration = m_duration;
     Aura* aura = NULL;
-	for(i = 0; i< 3; i++)
-	{
-		if(i == m_effIndex)
-			continue;
+    for(i = 0; i< 3; i++)
+    {
+        if(i == m_effIndex)
+            continue;
         aura = m_target->GetAura(m_spellId, i);
-		if(aura)
-		{
-			slot = aura->GetAuraSlot();
-			SetAuraSlot( slot );
-			samespell = true;
-			maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
-		}
-	}
-	if(m_duration <= maxduration && slot != 0xFF)
-	{
-		return;
-	}
+        if(aura)
+        {
+            slot = aura->GetAuraSlot();
+            SetAuraSlot( slot );
+            samespell = true;
+            maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
+        }
+    }
+    if(m_duration <= maxduration && slot != 0xFF)
+    {
+        return;
+    }
     WorldPacket data;
 
-	if(!samespell)
-	{
-		if (!IsPositive())
-		{
-			for (i = 0; i < MAX_NEGATIVE_AURAS; i++)
-			{
-				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
-				{
-					slot = i;
-					break;
-				}
-			}
-		}
-		else
-		{
-			for (i = MAX_NEGATIVE_AURAS; i < MAX_AURAS; i++)
-			{
-				if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
-				{
-					slot = i;
-					break;
-				}
-			}
-		}
+    if(!samespell)
+    {
+        if (!IsPositive())
+        {
+            for (i = 0; i < MAX_NEGATIVE_AURAS; i++)
+            {
+                if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+                {
+                    slot = i;
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for (i = MAX_NEGATIVE_AURAS; i < MAX_AURAS; i++)
+            {
+                if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+                {
+                    slot = i;
+                    break;
+                }
+            }
+        }
 
-		if (slot == 0xFF)
-		{
-			return;
-		}
-	}
+        if (slot == 0xFF)
+        {
+            return;
+        }
+    }
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
     uint8 flagslot = slot >> 3;
@@ -391,7 +391,7 @@ void Aura::_AddAura()
     {
         data.Initialize(SMSG_UPDATE_AURA_DURATION);
         data << (uint8)slot << (uint32)maxduration;
-        ((Player*)m_target)->SendMessageToSet(&data, true);//GetSession()->SendPacket(&data);
+        ((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
     }
 
     SetAuraSlot( slot );
@@ -402,18 +402,18 @@ void Aura::_RemoveAura()
     sLog.outDebug("Aura %u now is remove", m_modifier->m_auraname);
     ApplyModifier(false);
 
-	uint8 slot = GetAuraSlot();
+    uint8 slot = GetAuraSlot();
     SetAuraSlot(0);
     Aura* aura = NULL;
-	for(uint8 i = 0; i< 3; i++)
-	{
-		if(i == m_effIndex)
-			continue;
+    for(uint8 i = 0; i< 3; i++)
+    {
+        if(i == m_effIndex)
+            continue;
         aura = m_target->GetAura(m_spellId, i);
-		if(aura)
-			return;
-	}
-	
+        if(aura)
+            return;
+    }
+
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
     {
         return;
@@ -521,8 +521,8 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 void HandleTriggerSpellEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
-	if(!Aur)
-		return;
+    if(!Aur)
+        return;
     SpellEntry *spellInfo = sSpellStore.LookupEntry( Aur->GetModifier()->m_miscvalue );
 
     if(!spellInfo)
@@ -533,7 +533,7 @@ void HandleTriggerSpellEvent(void *obj)
 
     Spell *spell = new Spell(Aur->GetTarget(), spellInfo, true, Aur);
     SpellCastTargets targets;
-	targets.setUnitTarget(Aur->GetTarget());
+    targets.setUnitTarget(Aur->GetTarget());
     //WorldPacket dump;
     //dump.Initialize(0);
     //dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
@@ -558,24 +558,24 @@ void Aura::TriggerSpell()
 
     Spell *spell = new Spell(m_target, spellInfo, true, this);
     SpellCastTargets targets;
-	targets.setUnitTarget(m_target);
+    targets.setUnitTarget(m_target);
     spell->prepare(&targets);
 }
 
 void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
-	if(apply)
-	{
+    if(apply)
+    {
         m_isPeriodic = true;
-		m_isTrigger = true;
+        m_isTrigger = true;
         m_periodicTimer = m_modifier->periodictime;
-		//m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
-	}
-	else
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+    }
+    else
     {
         //RemoveEvent(m_PeriodicEventId);
         m_isPeriodic = false;
-		m_isTrigger = false;
+        m_isTrigger = false;
         m_duration = 0;
     }
 }
@@ -1162,12 +1162,12 @@ void Aura::HandleChannelDeathItem(bool apply)
 {
     if(!apply)
     {
-		if(m_caster->GetTypeId() != TYPEID_PLAYER || m_target->isAlive())
-			return;
-		SpellEntry *spellInfo = GetSpellProto();
+        if(m_caster->GetTypeId() != TYPEID_PLAYER || m_target->isAlive())
+            return;
+        SpellEntry *spellInfo = GetSpellProto();
         if(spellInfo->EffectItemType[m_effIndex] == 0)
-           return;
-		((Player*)m_caster)->AddNewItem(spellInfo->EffectItemType[m_effIndex], 1, true);
+            return;
+        ((Player*)m_caster)->AddNewItem(spellInfo->EffectItemType[m_effIndex], 1, true);
     }
 }
 
@@ -1282,7 +1282,7 @@ void Aura::HandleModDamagePercentDone(bool apply)
     if(m_modifier->m_miscvalue == 1)
     {
         m_target->SetFloatValue(UNIT_FIELD_MINDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-		m_target->SetFloatValue(UNIT_FIELD_MAXDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MAXDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->SetFloatValue(UNIT_FIELD_MAXDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MAXDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
     }
     if(m_modifier->m_miscvalue == 126)
     {

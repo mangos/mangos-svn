@@ -56,7 +56,7 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, SpellEntry * spell, fl
 
     m_aliveDuration = duration;
     deleteThis = false;
-	return true;
+    return true;
 }
 
 void DynamicObject::Update(uint32 p_time)

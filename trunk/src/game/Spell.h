@@ -135,7 +135,7 @@ class SpellCastTargets
             m_destY = target->GetPositionY();
             m_destZ = target->GetPositionZ();
             m_unitTarget = target;
-			m_targetMask |= TARGET_FLAG_UNIT | TARGET_FLAG_DEST_LOCATION;
+            m_targetMask |= TARGET_FLAG_UNIT | TARGET_FLAG_DEST_LOCATION;
         }
 
         Item *m_itemTarget;
@@ -191,8 +191,8 @@ enum SpellFailedReason
     CAST_FAIL_NO_TARGET = 9,
     CAST_FAIL_INVALID_TARGET = 10,
     CAST_FAIL_CANT_BE_CHARMED = 11,
-    CAST_FAIL_CANT_BE_DISENCHANTED = 12,	//decompose
-	//CAST_FAIL_IN_COMBAT							= 14,
+    CAST_FAIL_CANT_BE_DISENCHANTED = 12,                    //decompose
+    //CAST_FAIL_IN_COMBAT							= 14,
     CAST_FAIL_TARGET_IS_TAPPED = 13,
     CAST_FAIL_CANT_START_DUEL_INVISIBLE = 14,
     CAST_FAIL_CANT_START_DUEL_STEALTHED = 15,
@@ -212,7 +212,7 @@ enum SpellFailedReason
     CAST_FAIL_TARGET_IS_TOO_HIGH = 30,
     CAST_FAIL_IMMUNE = 32,                                  // was 31 in pre 1.7
     CAST_FAIL_INTERRUPTED = 33,                             // was 32 in pre 1.7
-    CAST_FAIL_INTERRUPTED1 = 34,                             // was 32 in pre 1.7
+    CAST_FAIL_INTERRUPTED1 = 34,                            // was 32 in pre 1.7
     //CAST_FAIL_INTERRUPTED_COMBAT = 31,
     CAST_FAIL_ITEM_ALREADY_ENCHANTED = 35,
     CAST_FAIL_ITEM_NOT_EXIST = 36,
@@ -243,11 +243,11 @@ enum SpellFailedReason
     CAST_FAIL_CAN_USE_ONLY_ON_OWN_OBJECT = 61,              // rogues trying "enchant" other's weapon with poison
     CAST_FAIL_ALREADY_OPEN1 = 62,
     //CAST_FAIL_CANT_ENCHANT_TRADE_ITEM = 61,
-    CAST_FAIL_HAVE_TO_BE_UNSHEATHED = 63,                 // yellow text
+    CAST_FAIL_HAVE_TO_BE_UNSHEATHED = 63,                   // yellow text
     CAST_FAIL_CANT_CAST_AS_GHOST = 64,
     CAST_FAIL_NO_AMMO = 65,
     CAST_FAIL_NO_CHARGES_REMAIN = 66,
-	CAST_FAIL_NOT_SELECT = 67,
+    CAST_FAIL_NOT_SELECT = 67,
     CAST_FAIL_COMBO_POINTS_REQUIRED = 68,
     CAST_FAIL_NO_DUELING_HERE = 69,
     CAST_FAIL_NOT_ENOUGH_ENDURANCE = 70,
@@ -256,7 +256,7 @@ enum SpellFailedReason
     CAST_FAIL_CANT_MOUNT_HERE = 73,
     CAST_FAIL_YOU_DO_NOT_HAVE_PET = 74,
     CAST_FAIL_NOT_ENOUGH_MANA = 75,
-	CAST_FAIL_NOT_AURA_TO_QUSHAN = 76,
+    CAST_FAIL_NOT_AURA_TO_QUSHAN = 76,
     CAST_FAIL_CANT_USE_WHILE_SWIMMING = 77,
     CAST_FAIL_CAN_ONLY_USE_AT_DAY = 78,
     CAST_FAIL_CAN_ONLY_USE_INDOORS = 79,
@@ -289,8 +289,8 @@ enum SpellFailedReason
     CAST_FAIL_TARGET_IS_ALIVE = 107,
     CAST_FAIL_TARGET_NOT_IN_YOUR_PARTY = 108,
     CAST_FAIL_CREATURE_MUST_BE_LOOTED_FIRST = 109,
-	CAST_FAIL_AUCTION_HAVE_CANCEL = 110,
-	CAST_FAIL_NOT_ITEM_TO_STEAL = 111,
+    CAST_FAIL_AUCTION_HAVE_CANCEL = 110,
+    CAST_FAIL_NOT_ITEM_TO_STEAL = 111,
     //CAST_FAIL_TARGET_IS_NOT_A_PLAYER = 107,
     //CAST_FAIL_NO_POCKETS_TO_PICK = 108,
     CAST_FAIL_TARGET_HAS_NO_WEAPONS_EQUIPPED = 112,
@@ -310,15 +310,15 @@ enum SpellFailedReason
     CAST_FAIL_TARGET_IS_IN_FFA_PVP_COMBAT = 128,
     CAST_FAIL_NO_NEARBY_CORPSES_TO_EAT = 129,
     CAST_FAIL_CAN_ONLY_USE_IN_BATTLEGROUNDS = 130,
-	CAST_FAIL_CANT_EQUIP_ON_LOW_RANK = 131,
+    CAST_FAIL_CANT_EQUIP_ON_LOW_RANK = 131,
     //CAST_FAIL_TARGET_IS_NOT_A_GHOST = 128,
     CAST_FAIL_YOUR_PET_CANT_LEARN_MORE_SKILLS = 132,
-	CAST_FAIL_CANT_USE_NEW_ITEM = 133,
-	CAST_FAIL_CANT_DO_IN_THIS_WEATHER = 134,
-	CAST_FAIL_CANT_DO_IN_IMMUNE = 135,
-	CAST_FAIL_CANT_DO_IN_XXX = 136,
-	CAST_FAIL_GAME_TIME_OVER = 137,
-	CAST_FAIL_NOT_ENOUGH_RANK = 138,
+    CAST_FAIL_CANT_USE_NEW_ITEM = 133,
+    CAST_FAIL_CANT_DO_IN_THIS_WEATHER = 134,
+    CAST_FAIL_CANT_DO_IN_IMMUNE = 135,
+    CAST_FAIL_CANT_DO_IN_XXX = 136,
+    CAST_FAIL_GAME_TIME_OVER = 137,
+    CAST_FAIL_NOT_ENOUGH_RANK = 138,
     CAST_FAIL_UNKNOWN_REASON = 139,
     CAST_FAIL_NUMREASONS
 };
@@ -357,8 +357,8 @@ class Spell
         void EffectWeaponDmgPerc(uint32 i);
         void EffectHealMaxHealth(uint32 i);
         void EffectInterruptCast(uint32 i);
-		void EffectScriptEffect(uint32 i);
-		void EffectAddComboPoints(uint32 i);
+        void EffectScriptEffect(uint32 i);
+        void EffectAddComboPoints(uint32 i);
         void EffectDuel(uint32 i);
         void EffectSummonTotem(uint32 i);
         void EffectEnchantHeldItem(uint32 i);
@@ -411,14 +411,14 @@ class Spell
         SpellCastTargets m_targets;
 
         int32 casttime;
-		bool IsAutoRepeat() { return m_autoRepeat; }
-		void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
-		void ReSetTimer() { m_timer = casttime<0?0:casttime;}
+        bool IsAutoRepeat() { return m_autoRepeat; }
+        void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
+        void ReSetTimer() { m_timer = casttime<0?0:casttime;}
 
     protected:
 
         Unit* m_caster;
-		bool m_autoRepeat;
+        bool m_autoRepeat;
 
         // Current targets, to be used in SpellEffects
         Unit* unitTarget;

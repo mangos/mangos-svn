@@ -298,18 +298,18 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
 
 void Object::BuildHeartBeatMsg(WorldPacket *data) const
 {
-    data->Initialize(MSG_MOVE_HEARTBEAT); //2
+    data->Initialize(MSG_MOVE_HEARTBEAT);                   //2
 
-    *data << GetGUID(); //8
+    *data << GetGUID();                                     //8
 
-    *data << uint32(0); //4
-    *data << uint32(0); //4
+    *data << uint32(0);                                     //4
+    *data << uint32(0);                                     //4
 
-    *data << m_positionX; //4
-    *data << m_positionY; //4
-    *data << m_positionZ; //4
+    *data << m_positionX;                                   //4
+    *data << m_positionY;                                   //4
+    *data << m_positionZ;                                   //4
 
-    *data << m_orientation; //4
+    *data << m_orientation;                                 //4
 }
 
 void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const

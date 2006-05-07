@@ -43,7 +43,7 @@ class Group
 
             m_leaderGuid = guid;
             m_leaderName = name;
-			return true;
+            return true;
         }
 
         void AddMember(uint64 guid, const char* name)

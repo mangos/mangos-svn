@@ -472,7 +472,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     Item *item = new Item();
 
     if(!item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, _player))
-		return;
+        return;
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
     _player->AddItemToInventory(item, true);

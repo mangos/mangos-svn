@@ -337,55 +337,55 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_highest_rank = 0;
     m_last_week_rank = 0;
 
-    // Skill spec +5 
+    // Skill spec +5
     if (Player::HasSpell(20597))
     {
-	SetSkill(43,1 ,10);
-	SetSkill(55,1 ,10);
+        SetSkill(43,1 ,10);
+        SetSkill(55,1 ,10);
     }
     if (Player::HasSpell(20864))
     {
-	SetSkill(54,1 ,10);
-	SetSkill(160,1 ,10);
+        SetSkill(54,1 ,10);
+        SetSkill(160,1 ,10);
     }
     if (Player::HasSpell(20574))
     {
-	SetSkill(44,1 ,10);
-	SetSkill(172,1 ,10);
+        SetSkill(44,1 ,10);
+        SetSkill(172,1 ,10);
     }
     if (Player::HasSpell(20558))
     {
-	SetSkill(176,1 ,10);
+        SetSkill(176,1 ,10);
     }
     if (Player::HasSpell(26290))
     {
-	SetSkill(45,1 ,10);
-	SetSkill(226,1 ,10);
+        SetSkill(45,1 ,10);
+        SetSkill(226,1 ,10);
     }
 
     //+5% HP if has skill Endurance
     if (Player::HasSpell(20550))
     {
-	b_HP = uint32(GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.05);
-	SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH) + b_HP);
+        b_HP = uint32(GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.05);
+        SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH) + b_HP);
     }
 
     // school resistances
     if (Player::HasSpell(20596))
     {
-	SetUInt32Value(UNIT_FIELD_RESISTANCES_04, 10);
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_04, 10);
     }
     if (Player::HasSpell(20583))
     {
-	SetUInt32Value(UNIT_FIELD_RESISTANCES_03, 10);
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_03, 10);
     }
     if (Player::HasSpell(20579))
     {
-	SetUInt32Value(UNIT_FIELD_RESISTANCES_05, 10);
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_05, 10);
     }
     if (Player::HasSpell(20592))
     {
-	SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
     }
     return true;
 }
@@ -1172,11 +1172,11 @@ void Player::RegenerateAll()
 
     else
     {
-	if (Player::HasSpell(20555))
-	{
-	    Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
-	} 
-    } 
+        if (Player::HasSpell(20555))
+        {
+            Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
+        }
+    }
 
     Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
     Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
@@ -1228,30 +1228,30 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
                 case DRUID:   addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
             }
-		    if (Player::HasSpell(20555))
-		    {
-			if (Player::inCombat)
-			{ 
-			    addvalue*=uint32(0.10);
-			}
-			else
-			{
-			    addvalue*=uint32(1.10);
-			}
-        }break;
-        case UNIT_FIELD_POWER1:
-        {
-            switch (Class)
+            if (Player::HasSpell(20555))
             {
-                case PALADIN: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
-                case HUNTER:  addvalue = uint32((Spirit/4 + 11) * ManaIncreaseRate); break;
-                case PRIEST:  addvalue = uint32((Spirit/4 + 13) * ManaIncreaseRate); break;
-                case SHAMAN:  addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); break;
-                case MAGE:    addvalue = uint32((Spirit/4 + 11) * ManaIncreaseRate); break;
-                case WARLOCK: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
-                case DRUID:   addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
+                if (Player::inCombat)
+                {
+                    addvalue*=uint32(0.10);
+                }
+                else
+                {
+                    addvalue*=uint32(1.10);
+                }
+            }break;
+            case UNIT_FIELD_POWER1:
+            {
+                switch (Class)
+                {
+                    case PALADIN: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
+                    case HUNTER:  addvalue = uint32((Spirit/4 + 11) * ManaIncreaseRate); break;
+                    case PRIEST:  addvalue = uint32((Spirit/4 + 13) * ManaIncreaseRate); break;
+                    case SHAMAN:  addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); break;
+                    case MAGE:    addvalue = uint32((Spirit/4 + 11) * ManaIncreaseRate); break;
+                    case WARLOCK: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
+                    case DRUID:   addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
+                }
             }
-		    }
         }break;
         case UNIT_FIELD_POWER2:
         {
@@ -1355,24 +1355,24 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
             SetUInt32Value(UNIT_FIELD_MAXPOWER1, newMP);
         }
 
-	    if (Player::HasSpell(20550))    //endurance skill support (+5% to total health)
-	    {
-		     exHP = (uint32)newHP / 1.05;            //must remove previous bonus, so stat wouldn't grow toomuch
-		     b_HP = uint8(exHP * 0.05);
-		     newHP += b_HP;
-	    } 
-	    if (Player::HasSpell(20598))    //Human Spirit skill support (+5% to total spirit)
-	    {
-		     exSpirit = (uint32)newSPI / 1.05;//must remove previous bonus, so stat wouldn't grow toomuch
-		     b_Spirit = uint8(exSpirit * 0.05);
-		     newSPI += b_Spirit;
-	    }
-	    if (Player::HasSpell(20591))    //Expansive mind support (+5% to total Intellect)
-	    { 
-		     exIQ = (uint32)newINT / 1.05;           //must remove previous bonus, so stat wouldn't grow toomuch
-		     b_IQ = uint8(exIQ * 0.05); 
-		     newINT += b_IQ; 
-	    } 
+        if (Player::HasSpell(20550))                        //endurance skill support (+5% to total health)
+        {
+            exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
+            b_HP = uint8(exHP * 0.05);
+            newHP += b_HP;
+        }
+        if (Player::HasSpell(20598))                        //Human Spirit skill support (+5% to total spirit)
+        {
+            exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
+            b_Spirit = uint8(exSpirit * 0.05);
+            newSPI += b_Spirit;
+        }
+        if (Player::HasSpell(20591))                        //Expansive mind support (+5% to total Intellect)
+        {
+            exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
+            b_IQ = uint8(exIQ * 0.05);
+            newINT += b_IQ;
+        }
 
         SetUInt32Value(UNIT_FIELD_HEALTH, newHP);
         SetUInt32Value(UNIT_FIELD_MAXHEALTH, newHP);
@@ -1719,7 +1719,7 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     newspell = new Playerspell;
     newspell->spellId = spell_id;
 
-	WorldPacket data;
+    WorldPacket data;
 
     uint8 op;
     uint16 tmpslot=slot_id,val=0;
@@ -1794,17 +1794,19 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     newspell->slotId = tmpslot;
     m_spells.push_back(newspell);
 }
+
 void Player::learnSpell(uint16 spell_id)
 {
 
-	WorldPacket data;
-	data.Initialize(SMSG_LEARNED_SPELL);
-	data <<uint32(spell_id);
-	m_session->SendPacket(&data);
+    WorldPacket data;
+    data.Initialize(SMSG_LEARNED_SPELL);
+    data <<uint32(spell_id);
+    m_session->SendPacket(&data);
 
-	addSpell(spell_id);
+    addSpell(spell_id);
 
 }
+
 bool Player::removeSpell(uint16 spell_id)
 {
     std::list<Playerspell*>::iterator itr;
@@ -2015,19 +2017,19 @@ void Player::SaveToDB()
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
     RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
 
-	sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
-	sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-	sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-	sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-	sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-	sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-	sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-	sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-	sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-	sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-	sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
     //_RemoveStatsMods();
     _RemoveAllItemMods();
     _RemoveAllAuraMods();
@@ -2103,19 +2105,19 @@ void Player::SaveToDB()
         }
     }
 
-	sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
-	sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-	sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-	sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-	sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-	sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-	sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-	sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-	sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-	sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-	sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
     //_ApplyStatsMods();
@@ -2196,7 +2198,7 @@ bool Player::LoadFromDB( uint32 guid )
     QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
 
     if(!result)
-		return false;
+        return false;
 
     Field *fields = result->Fetch();
 
@@ -2205,21 +2207,21 @@ bool Player::LoadFromDB( uint32 guid )
     LoadValues( fields[3].GetString() );
 
     m_name = fields[4].GetString();
-	sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
-	sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-	sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-	sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-	sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-	sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-	sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-	sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-	sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-	sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-	sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
 
-	m_race = fields[5].GetUInt8();
+    m_race = fields[5].GetUInt8();
     //Need to call it to initialize m_team (m_team can be calculated from m_race)
     //Other way is to saves m_team into characters table.
     setFaction(m_race, 0);
@@ -2267,22 +2269,22 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadCorpse();
 
-	sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
-	sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-	sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-	sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-	sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-	sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-	sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-	sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-	sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-	sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-	sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-	sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t\t%u\t\tRANGE_ATTACK_TIME is: \t\t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
     //_ApplyAllAuraMods();
     //_ApplyAllItemMods();
-	return true;
+    return true;
 }
 
 void Player::_LoadInventory()
@@ -2481,10 +2483,10 @@ void Player::_LoadAuras()
 {
     m_Auras.clear();
 
-	for(uint8 i = 0; i < 48; i++)
-	    SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
-	for(uint8 j = 0; j < 6; j++)
-		SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
+    for(uint8 i = 0; i < 48; i++)
+        SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
+    for(uint8 j = 0; j < 6; j++)
+        SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u';",GetGUIDLow());
 
@@ -2501,7 +2503,7 @@ void Player::_LoadAuras()
             assert(spellproto);
 
             Aura* aura = new Aura(spellproto, effindex, this, this);
-			aura->SetAuraDuration(remaintime);
+            aura->SetAuraDuration(remaintime);
             AddAura(aura);
         }
         while( result->NextRow() );
@@ -2780,7 +2782,7 @@ void Player::CreateCorpse()
     m_pCorpse = new Corpse();
     if(!m_pCorpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
-		return;
+        return;
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
     _pb = GetUInt32Value(PLAYER_BYTES);
@@ -2995,9 +2997,10 @@ void Player::UpdateSkill(uint32 skill_id)
     }
 
 }
+
 void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
 {
-	if(!skill_id)return;
+    if(!skill_id)return;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)) == skill_id) break;
@@ -3008,26 +3011,26 @@ void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
     uint16 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max)) return;
-	if(value >= maxValue+25 )
-		return;
-	else if(value >= maxValue)
-	{
-		if(urand(0,100) <30)
-			SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-		return;
-	}
-	else if(value >= minValue)
-	{
-		if(urand(0,100) <70)
-		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-		return;
-	}
-	else if(value >= 1)
-	{
-		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-		return;
-	}
-	else return;
+    if(value >= maxValue+25 )
+        return;
+    else if(value >= maxValue)
+    {
+        if(urand(0,100) <30)
+            SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+        return;
+    }
+    else if(value >= minValue)
+    {
+        if(urand(0,100) <70)
+            SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+        return;
+    }
+    else if(value >= 1)
+    {
+        SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+        return;
+    }
+    else return;
 
 }
 
@@ -3062,46 +3065,46 @@ void Player::UpdateMaxSkills()
     {
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max=data>>16;
-	uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;
+        uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;
         if(max!=1 && max != 300)
-	{
-	    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
-		if (Player::HasSpell(20597))
-		{
-		    if (GetUInt32Value(PLAYER_SKILL(i)) == 43 || GetUInt32Value(PLAYER_SKILL(i)) == 55)
-		    {
-			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-		    }
-		}
-		if (Player::HasSpell(20864))
-		{
-		    if (GetUInt32Value(PLAYER_SKILL(i))==54 || GetUInt32Value(PLAYER_SKILL(i))==160)
-		    {
-			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-		    }
-		}
-		if (Player::HasSpell(20574))
-		{
-		    if (GetUInt32Value(PLAYER_SKILL(i))==44 || GetUInt32Value(PLAYER_SKILL(i))==172)
-		    {
-			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-		    }
-		}
-		if (Player::HasSpell(20558))
-		{
-		    if (GetUInt32Value(PLAYER_SKILL(i))==176)
-		    {
-			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-		    }
-		}
-		if (Player::HasSpell(26290))
-		{
-		    if (GetUInt32Value(PLAYER_SKILL(i))==45 || GetUInt32Value(PLAYER_SKILL(i))==226)
-		    {
-			SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
-		    } 
-		} 
-	} 
+        {
+            SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
+            if (Player::HasSpell(20597))
+            {
+                if (GetUInt32Value(PLAYER_SKILL(i)) == 43 || GetUInt32Value(PLAYER_SKILL(i)) == 55)
+                {
+                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+                }
+            }
+            if (Player::HasSpell(20864))
+            {
+                if (GetUInt32Value(PLAYER_SKILL(i))==54 || GetUInt32Value(PLAYER_SKILL(i))==160)
+                {
+                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+                }
+            }
+            if (Player::HasSpell(20574))
+            {
+                if (GetUInt32Value(PLAYER_SKILL(i))==44 || GetUInt32Value(PLAYER_SKILL(i))==172)
+                {
+                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+                }
+            }
+            if (Player::HasSpell(20558))
+            {
+                if (GetUInt32Value(PLAYER_SKILL(i))==176)
+                {
+                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+                }
+            }
+            if (Player::HasSpell(26290))
+            {
+                if (GetUInt32Value(PLAYER_SKILL(i))==45 || GetUInt32Value(PLAYER_SKILL(i))==226)
+                {
+                    SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
+                }
+            }
+        }
     }
 }
 
@@ -3965,7 +3968,7 @@ bool Player::CanUseItem(ItemPrototype * proto)
         WorldPacket data;
         Item* pItem = NewItemOrBag(proto);
         if(!pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), proto->ItemId, this))
-			return false;
+            return false;
 
         data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
 
@@ -4385,7 +4388,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
     {
         dstItem = new Item;                                 // Don't think there are stackable bags
         if(!dstItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM),srcItem->GetEntry(),this))
-			return false;
+            return false;
         dstItem->SetCount(count);
         error_code = CanEquipItemInSlot(dstBag, dstSlot, dstItem, srcItem);
     }
@@ -4518,7 +4521,7 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
     if (count > proto->MaxCount) { count = proto->MaxCount; }
     if (count < 1) { count = 1; }
     if(!pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this))
-		return NULL;
+        return NULL;
     pItem->SetCount (count);
     return pItem;
 }
@@ -5508,162 +5511,162 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     int32 val;
-	std::string typestr;
-	std::string applystr = "Add";
-	if(!apply)
-		applystr = "Remove";
+    std::string typestr;
+    std::string applystr = "Add";
+    if(!apply)
+        applystr = "Remove";
     for (int i = 0; i < 10; i++)
     {
         val = proto->ItemStat[i].ItemStatValue ;
-		
+
         switch (proto->ItemStat[i].ItemStatType)
         {
             case POWER:                                     // modify MP
                 SetUInt32Value(UNIT_FIELD_MAXPOWER1, GetUInt32Value(UNIT_FIELD_MAXPOWER1)+(apply? val:-val));
-				typestr = "Mana";
+                typestr = "Mana";
                 break;
             case HEALTH:                                    // modify HP
                 SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH)+(apply? val:-val));
-				typestr = "Health";
+                typestr = "Health";
                 break;
             case AGILITY:                                   // modify agility
                 SetUInt32Value(UNIT_FIELD_AGILITY,GetUInt32Value(UNIT_FIELD_AGILITY)+(apply? val:-val));
                 SetUInt32Value(PLAYER_FIELD_POSSTAT1,GetUInt32Value(PLAYER_FIELD_POSSTAT1)+(apply? val:-val));
-				typestr = "AGILITY";
+                typestr = "AGILITY";
                 break;
             case STRENGHT:                                  //modify strength
                 SetUInt32Value(UNIT_FIELD_STR,GetUInt32Value(UNIT_FIELD_STR)+(apply? val:-val));
                 SetUInt32Value(PLAYER_FIELD_POSSTAT0,GetUInt32Value(PLAYER_FIELD_POSSTAT0)+(apply? val:-val));
-				typestr = "STRENGHT";
+                typestr = "STRENGHT";
                 break;
             case INTELLECT:                                 //modify intellect
                 SetUInt32Value(UNIT_FIELD_IQ,GetUInt32Value(UNIT_FIELD_IQ)+(apply? val:-val));
                 SetUInt32Value(PLAYER_FIELD_POSSTAT3,GetUInt32Value(PLAYER_FIELD_POSSTAT3)+(apply? val:-val));
                 SetUInt32Value(UNIT_FIELD_MAXPOWER1, GetUInt32Value(UNIT_FIELD_MAXPOWER1)+(apply? val:-val)*15);
-				typestr = "INTELLECT";
+                typestr = "INTELLECT";
                 break;
             case SPIRIT:                                    //modify spirit
                 SetUInt32Value(UNIT_FIELD_SPIRIT,GetUInt32Value(UNIT_FIELD_SPIRIT)+(apply? val:-val));
                 SetUInt32Value(PLAYER_FIELD_POSSTAT4,GetUInt32Value(PLAYER_FIELD_POSSTAT4)+(apply? val:-val));
-				typestr = "SPIRIT";
+                typestr = "SPIRIT";
                 break;
             case STAMINA:                                   //modify stamina
                 SetUInt32Value(UNIT_FIELD_STAMINA,GetUInt32Value(UNIT_FIELD_STAMINA)+(apply? val:-val));
                 SetUInt32Value(PLAYER_FIELD_POSSTAT2,GetUInt32Value(PLAYER_FIELD_POSSTAT2)+(apply? val:-val));
                 SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH)+(apply? val:-val)*10);
-				typestr = "STAMINA";
+                typestr = "STAMINA";
                 break;
         }
-		if(val > 0)
-			sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
+        if(val > 0)
+            sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
 
     }
 
     if (proto->Armor)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) + (apply ? proto->Armor : -(int32)proto->Armor));
-		sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
-	}
+        sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
+    }
 
     if (proto->Block)
-	{
+    {
         SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE) + (apply ? proto->Block : -(float)proto->Block));
-		sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
-	}
+        sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
+    }
 
     if (proto->HolyRes)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) + (apply ? proto->HolyRes : -(int32)proto->HolyRes));
-		sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
-	}
+        sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
+    }
 
     if (proto->FireRes)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_02, GetUInt32Value(UNIT_FIELD_RESISTANCES_02) + (apply ? proto->FireRes : -(int32)proto->FireRes));
-		sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
-	}
+        sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
+    }
 
     if (proto->NatureRes)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_03, GetUInt32Value(UNIT_FIELD_RESISTANCES_03) + (apply ? proto->NatureRes : -(int32)proto->NatureRes));
-		sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
-	}
+        sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
+    }
 
     if (proto->FrostRes)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_04, GetUInt32Value(UNIT_FIELD_RESISTANCES_04) + (apply ? proto->FrostRes : -(int32)proto->FrostRes));
-		sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
-	}
+        sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
+    }
 
     if (proto->ShadowRes)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_05, GetUInt32Value(UNIT_FIELD_RESISTANCES_05) + (apply ? proto->ShadowRes : -(int32)proto->ShadowRes));
-		sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
-	}
+        sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
+    }
 
     if (proto->ArcaneRes)
-	{
+    {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_06, GetUInt32Value(UNIT_FIELD_RESISTANCES_06) + (apply ? proto->ArcaneRes : -(int32)proto->ArcaneRes));
-		sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
-	}
+        sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
+    }
 
     uint8 MINDAMAGEFIELD = 0;
     uint8 MAXDAMAGEFIELD = 0;
 
-    if( slot == EQUIPMENT_SLOT_RANGED && ( proto->InventoryType == INVTYPE_RANGED || 
-		proto->InventoryType == INVTYPE_THROWN || proto->InventoryType == INVTYPE_RANGEDRIGHT))
+    if( slot == EQUIPMENT_SLOT_RANGED && ( proto->InventoryType == INVTYPE_RANGED ||
+        proto->InventoryType == INVTYPE_THROWN || proto->InventoryType == INVTYPE_RANGEDRIGHT))
     {
         MINDAMAGEFIELD = UNIT_FIELD_MINRANGEDDAMAGE;
         MAXDAMAGEFIELD = UNIT_FIELD_MAXRANGEDDAMAGE;
-		typestr = "Ranged";
+        typestr = "Ranged";
     }
     else if(slot==EQUIPMENT_SLOT_MAINHAND)
     {
         MINDAMAGEFIELD = UNIT_FIELD_MINDAMAGE;
         MAXDAMAGEFIELD = UNIT_FIELD_MAXDAMAGE;
-		typestr = "Mainhand";
+        typestr = "Mainhand";
     }
-	else if(slot==EQUIPMENT_SLOT_OFFHAND)
-	{
-		MINDAMAGEFIELD = UNIT_FIELD_MINOFFHANDDAMAGE;
-		MAXDAMAGEFIELD = UNIT_FIELD_MAXOFFHANDDAMAGE;
-		typestr = "Offhand";
-	}
+    else if(slot==EQUIPMENT_SLOT_OFFHAND)
+    {
+        MINDAMAGEFIELD = UNIT_FIELD_MINOFFHANDDAMAGE;
+        MAXDAMAGEFIELD = UNIT_FIELD_MAXOFFHANDDAMAGE;
+        typestr = "Offhand";
+    }
 
     if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
     {
         SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMin : -proto->Damage[0].DamageMin));
-		sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
+        sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
     }
 
     if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
     {
         SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMax : -proto->Damage[0].DamageMax));
-		sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
+        sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
     }
 
     if (proto->Delay)
     {
-		if(slot == EQUIPMENT_SLOT_RANGED)
-		{
-			SetUInt32Value(UNIT_FIELD_BASEATTACKTIME + 1, apply ? proto->Delay : 2000);
-			typestr = "Range";
-			sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
-		}
-		else if(slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND)
-		{
+        if(slot == EQUIPMENT_SLOT_RANGED)
+        {
+            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME + 1, apply ? proto->Delay : 2000);
+            typestr = "Range";
+            sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
+        }
+        else if(slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND)
+        {
             SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, apply ? proto->Delay : 2000);
-			typestr = "Mainhand";
-			sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
-		}
+            typestr = "Mainhand";
+            sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
+        }
     }
 
     if(apply)
         CastItemSpell(item,(Unit*)this);
-    else 
-		for (int i = 0; i < 5; i++)
-			if(proto->Spells[i].SpellId)
-				RemoveAura(proto->Spells[i].SpellId );
+    else
+        for (int i = 0; i < 5; i++)
+            if(proto->Spells[i].SpellId)
+                RemoveAura(proto->Spells[i].SpellId );
     sLog.outDebug("_ApplyItemMods complete.");
     _ApplyStatsMods();
 }

@@ -404,7 +404,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
 
     ItemPrototype *m_itemProto = objmgr.GetItemPrototype(itemid);
     if(!m_itemProto)
-		return false;
+        return false;
 
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);              //this seems to be wrong (c) Phantomas
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
@@ -418,7 +418,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
     SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
     SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay);
     m_owner = owner;
-	return true;
+    return true;
 }
 
 void Item::SaveToDB()

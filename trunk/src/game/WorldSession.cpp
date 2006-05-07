@@ -433,9 +433,9 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_PET_ACTION,               STATUS_LOGGEDIN, &WorldSession::HandlePetAction                     },
         { CMSG_PET_NAME_QUERY,           STATUS_LOGGEDIN, &WorldSession::HandlePetNameQuery                  },
 
-        { CMSG_PET_ABANDON,				 STATUS_LOGGEDIN, &WorldSession::HandlePetAbandon                    },
+        { CMSG_PET_ABANDON,              STATUS_LOGGEDIN, &WorldSession::HandlePetAbandon                    },
         { CMSG_PET_SET_ACTION,           STATUS_LOGGEDIN, &WorldSession::HandlePetSetAction                  },
-        { CMSG_PET_RENAME,				 STATUS_LOGGEDIN, &WorldSession::HandlePetRename                     },
+        { CMSG_PET_RENAME,               STATUS_LOGGEDIN, &WorldSession::HandlePetRename                     },
 
         { CMSG_CANCEL_CHANNELLING ,      STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              },
 

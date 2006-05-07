@@ -103,22 +103,22 @@ void Unit::Update( uint32 p_time )
 
 void Unit::SendMoveToPacket(float x, float y, float z, bool run)
 {
-	float dx = x - GetPositionX();
-	float dy = y - GetPositionY();
-	float dz = z - GetPositionZ();
+    float dx = x - GetPositionX();
+    float dy = y - GetPositionY();
+    float dz = z - GetPositionZ();
     float dist = ((dx*dx) + (dy*dy) + (dz*dz));
     if(dist<0)
         dist = 0;
     else
         dist = ::sqrt(dist);
-	double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
+    double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
     if(speed<=0)
         speed = 2.5f;
     speed *= 0.001f;
     uint32 time = static_cast<uint32>(dist / speed + 0.5);
     float orientation = (float)atan2((double)dy, (double)dx);
 
-	WorldPacket data;
+    WorldPacket data;
     data.Initialize( SMSG_MONSTER_MOVE );
     data << uint8(0xFF);
     data << GetGUID();
@@ -167,8 +167,8 @@ void Unit::setAttackTimer(uint32 time, bool rangeattack)
 
 SpellEntry *Unit::reachWithSpellAttack(Unit *pVictim)
 {
-	if(!pVictim)
-		return NULL;
+    if(!pVictim)
+        return NULL;
     SpellEntry *spellInfo;
     for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
     {
@@ -190,18 +190,18 @@ SpellEntry *Unit::reachWithSpellAttack(Unit *pVictim)
         }*/
         if(spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
             continue;
-	    SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
-		float range = GetMaxRange(srange);
-		float minrange = GetMinRange(srange);
-		float dist = GetDistanceSq(pVictim);
-		//if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
-		//	continue;
-		if( dist > range * range || dist < minrange * minrange )
-			continue;
-		if(m_silenced)
-			continue;
-		return spellInfo;
-	}
+        SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+        float range = GetMaxRange(srange);
+        float minrange = GetMinRange(srange);
+        float dist = GetDistanceSq(pVictim);
+        //if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
+        //	continue;
+        if( dist > range * range || dist < minrange * minrange )
+            continue;
+        if(m_silenced)
+            continue;
+        return spellInfo;
+    }
     return NULL;
 }
 
@@ -254,8 +254,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         DEBUG_LOG("DealDamageAura");
         pVictim->setDeathState(JUST_DIED);
         pVictim->RemoveAllAuras();
-		if(m_currentSpell && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
-			m_currentSpell->cancel();
+        if(m_currentSpell && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
+            m_currentSpell->cancel();
 
         uint64 attackerGuid, victimGuid;
         attackerGuid = GetGUID();
@@ -843,22 +843,23 @@ void Unit::_UpdateSpells( uint32 time )
     if(m_currentSpell != NULL)
     {
         m_currentSpell->update(time);
-		if(m_currentSpell->IsAutoRepeat())
-		{
+        if(m_currentSpell->IsAutoRepeat())
+        {
             if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
             {
-				if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )	//Auto shot
-					setAttackTimer( 0, true );
-				else
-					setAttackTimer(m_currentSpell->m_spellInfo->RecoveryTime);
-                                                
+                                                            //Auto shot
+                if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )
+                    setAttackTimer( 0, true );
+                else
+                    setAttackTimer(m_currentSpell->m_spellInfo->RecoveryTime);
+
                 m_currentSpell->setState(SPELL_STATE_IDLE);
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
-			{
+            {
                 m_currentSpell->setState(SPELL_STATE_PREPARING);
-				m_currentSpell->ReSetTimer();
-			}
+                m_currentSpell->ReSetTimer();
+            }
         }
         else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
         {

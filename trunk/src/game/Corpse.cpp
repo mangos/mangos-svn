@@ -37,7 +37,7 @@ Corpse::Corpse() : Object()
 bool Corpse::Create( uint32 guidlow )
 {
     Object::_Create(guidlow, HIGHGUID_CORPSE);
-	return true;
+    return true;
 }
 
 bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang )
@@ -50,7 +50,7 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     SetFloatValue( CORPSE_FIELD_POS_Z, z );
     SetFloatValue( CORPSE_FIELD_FACING, ang );
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
-	return true;
+    return true;
 }
 
 void Corpse::SaveToDB(bool bones)

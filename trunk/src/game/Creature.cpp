@@ -86,14 +86,15 @@ void Creature::CreateTrainerSpells()
         tspell->spell = spellinfo;
         tspell->spellcost = fields[3].GetUInt32();
         tspell->reqspell = fields[4].GetUInt32();
-		tspell->reqskill = fields[5].GetUInt32();
-		tspell->reqskillvalue = fields[6].GetUInt32();
+        tspell->reqskill = fields[5].GetUInt32();
+        tspell->reqskillvalue = fields[6].GetUInt32();
 
         m_tspells.push_back(tspell);
 
     } while( result->NextRow() );
 
 }
+
 //---------------------------------------------------------------//
 /* with compiler optimzation, switch statement differs
  * from if statement.  Going to a switch statement can
@@ -312,7 +313,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             if ( pPlayer->isQuestComplete(pQuest ) )
             {
                 //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 4, 6, 30, questinfo->Title);
-				SetFlag(UNIT_DYNAMIC_FLAGS, 2);
+                SetFlag(UNIT_DYNAMIC_FLAGS, 2);
                 wasReward = true;
             }
             else
@@ -325,7 +326,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             else if( !pPlayer->getQuestRewardStatus(questinfo->QuestId))
             {
                 //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
-				SetFlag(UNIT_DYNAMIC_FLAGS, 2);
+                SetFlag(UNIT_DYNAMIC_FLAGS, 2);
                 wasReward = true;
             }
         }
@@ -917,13 +918,13 @@ bool Creature::LoadFromDB(uint32 guid)
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u';", guid);
     if(!result)
-		return false;
+        return false;
 
     Field *fields = result->Fetch();
 
     if(!Create(guid,fields[2].GetUInt32(),fields[3].GetFloat(),fields[4].GetFloat(),
         fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32()))
-		return false;
+        return false;
 
     SetUInt32Value(UNIT_FIELD_HEALTH,fields[15].GetUInt32());
     //fix me current mana
@@ -951,7 +952,7 @@ bool Creature::LoadFromDB(uint32 guid)
         _LoadQuests();
 
     AIM_Initialize();
-	return true;
+    return true;
 }
 
 void Creature::_LoadGoods()
@@ -1030,7 +1031,7 @@ void Creature::DeleteFromDB()
 
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
-    sDatabase.PExecute("DELETE FROM `npc_trainer` WHERE `entry` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `npc_trainer` WHERE `entry` = '%u'", GetEntry());
     sDatabase.PExecute("DELETE FROM `creature_questrelation WHERE `id` = '%u'", GetGUIDLow());
 }
 

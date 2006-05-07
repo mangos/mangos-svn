@@ -78,24 +78,24 @@ int32 GetDuration(SpellEntry *spellInfo, uint8 effindex)
 {
     if(!spellInfo || effindex >= 3)
         return 0;
-	SpellDuration *du = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
-	if(!du)
-		return 0;
-	return (du->Duration[effindex] == -1) ? -1 : abs(du->Duration[effindex]);
+    SpellDuration *du = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
+    if(!du)
+        return 0;
+    return (du->Duration[effindex] == -1) ? -1 : abs(du->Duration[effindex]);
 }
 
 int32 GetMaxDuration(SpellEntry *spellInfo)
 {
     if(!spellInfo)
         return 0;
-	SpellDuration *du = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
-	if(!du)
-		return 0;
-	int32 maxdu = -2147483646;
-	for(uint8 i = 0; i < 3; i++)
-	{
-		if(du->Duration[i] > maxdu)
-			maxdu = du->Duration[i];
-	}
+    SpellDuration *du = sSpellDuration.LookupEntry(spellInfo->DurationIndex);
+    if(!du)
+        return 0;
+    int32 maxdu = -2147483646;
+    for(uint8 i = 0; i < 3; i++)
+    {
+        if(du->Duration[i] > maxdu)
+            maxdu = du->Duration[i];
+    }
     return maxdu;
 }
