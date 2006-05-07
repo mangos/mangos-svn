@@ -182,8 +182,8 @@ ChatCommand * ChatHandler::getCommandTable()
 
                     if (result)
                     {
-                        ptable[i].SecurityLevel = (uint16)(*result)[1].GetUInt16();
-                        ptable[i].Help = (*result)[1].GetString();
+                        ptable[j].SecurityLevel = (uint16)(*result)[1].GetUInt16();
+                        ptable[j].Help = (*result)[1].GetString();
                         delete result;
                     }
                 }
