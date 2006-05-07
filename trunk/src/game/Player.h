@@ -394,6 +394,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasSpell(uint32 spell);
         void smsg_InitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
+		void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
         inline std::list<Playerspell*> getSpellList() { return m_spells; };
