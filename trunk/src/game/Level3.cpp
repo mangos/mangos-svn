@@ -1399,19 +1399,6 @@ bool ChatHandler::HandleReviveCommand(const char* args)
         SelectedPlayer = m_session->GetPlayer();
     }
 
-    SelectedPlayer->SetMovement(MOVE_LAND_WALK);
-    SelectedPlayer->SetMovement(MOVE_UNROOT);
-
-    SelectedPlayer->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
-    SelectedPlayer->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
-
-    SelectedPlayer->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
-
     SelectedPlayer->ResurrectPlayer();
     SelectedPlayer->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(SelectedPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
     SelectedPlayer->SpawnCorpseBones();
