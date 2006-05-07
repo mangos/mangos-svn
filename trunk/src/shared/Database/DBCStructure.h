@@ -34,6 +34,21 @@ struct emoteentry
     uint32    Id;
     uint32      textid;
 };
+struct SkillLineAbility
+{
+    uint32    learnid;
+    uint32    miscid;
+	uint32    spellid;
+	uint32    unkown1;
+	uint32    unkown2;
+	uint32    unkown3;
+	uint32    unkown4;
+	uint32    req_skill_value;//for trade skill.not for training.
+	uint32    forward_spellid;
+	uint32    unkown5;
+	uint32    max_value;
+	uint32    min_value;
+};
 struct SpellEntry
 {
     uint32    Id;

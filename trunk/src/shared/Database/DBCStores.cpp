@@ -40,6 +40,8 @@ DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTemplateEntryfmt);
 
+DBCStorage <SkillLineAbility> sSkillLineAbilityStore(SkillLineAbilityfmt);
+
 float GetRadius(SpellRadius *radius)
 {
     if(radius)

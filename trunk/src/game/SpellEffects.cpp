@@ -350,55 +350,12 @@ void Spell::EffectCreateItem(uint32 i)
         SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
         return;
     }
-    switch(m_spellInfo->SpellVisual)
-    {
-        case 1168:
-            player->UpdateSkill(SKILL_TAILORING);
-            break;
-        case 92:
-        {
-            if(m_spellInfo->SpellIconID == 1)
-                player->UpdateSkill(SKILL_ALCHEMY);
-            break;
-            if(m_spellInfo->SpellIconID == 513 || m_spellInfo->SpellIconID == 248
-                || m_spellInfo->SpellIconID == 247 || m_spellInfo->SpellIconID == 163
-                || m_spellInfo->SpellIconID == 264 || m_spellInfo->SpellIconID == 351
-                || m_spellInfo->SpellIconID == 1496)
-                player->UpdateSkill(SKILL_POISONS);
-            break;
-        }
-        case 4439:
-            player->UpdateSkill(SKILL_LEATHERWORKING);
-            break;
-        case 5499:
-            player->UpdateSkill(SKILL_FIRST_AID);
-            break;
-        case 3881:
-            player->UpdateSkill(SKILL_COOKING);
-            break;
-        case 1008:
-            player->UpdateSkill(SKILL_SKINNING);
-            break;
-        case 3182:
-            player->UpdateSkill(SKILL_ENCHANTING);
-            break;
-        case 2641:
-            player->UpdateSkill(SKILL_ENGINERING);
-            break;
-        case 215:
-            player->UpdateSkill(SKILL_BLACKSMITHING);
-            break;
-        case 395:
-        {
-            if(m_spellInfo->SpellIconID == 1)
-                player->UpdateSkill(SKILL_ENGINERING);
-            break;
-            if(m_spellInfo->SpellIconID == 140)
-                player->UpdateSkill(SKILL_BLACKSMITHING);
-            break;
-        }
-        default:break;
-    }
+	SkillLineAbility *pSkill;
+	pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+	uint32 minValue = pSkill->min_value;
+	uint32 maxValue = pSkill->max_value;
+	uint32 skill_id = pSkill->miscid;
+	player->UpdateSkillPro(skill_id,minValue,maxValue);
 }
 
 void Spell::EffectPresistentAA(uint32 i)
@@ -1421,7 +1378,14 @@ void Spell::EffectTransmitted(uint32 i)
 
 void Spell::EffectSkill(uint32)
 {
+	Player *player = (Player*)m_caster;
+	SkillLineAbility *pSkill;
+	pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+	uint32 minValue = pSkill->min_value;
+	uint32 maxValue = pSkill->max_value;
+	uint32 skill_id = pSkill->miscid;
+	player->UpdateSkillPro(skill_id,minValue,maxValue);
 
-    ((Player*)m_caster)->UpdateSkill(m_spellInfo->EffectMiscValue[1]);
+    //((Player*)m_caster)->UpdateSkill(m_spellInfo->EffectMiscValue[1]);
 
 }

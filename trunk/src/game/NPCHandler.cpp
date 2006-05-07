@@ -111,14 +111,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     {
         if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
             continue;
-		if(!(*itr)->reqspell)
+		if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
 			Tspells.push_back(*itr);
-        else 
-		{
-			ReqSpellInfo = sSpellStore.LookupEntry((*itr)->reqspell);
-			if(_player->HasSpell(ReqSpellInfo->EffectTriggerSpell[0]))
-				Tspells.push_back(*itr);
-		}
 	}
 
     data.Initialize( SMSG_TRAINER_LIST );
@@ -126,7 +120,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     data << uint32(0) << uint32(Tspells.size());
 
     SpellEntry *spellInfo;
-	bool ReqspellFlag = false;
 	bool ReqskillValueFlag = false;
 	bool LevelFlag = false;
 
@@ -138,14 +131,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 		if(!spellInfo) 
 			continue;
 
-		if((*itr)->reqspell)
-		{
-			ReqSpellInfo = sSpellStore.LookupEntry((*itr)->reqspell);
-			if(_player->HasSpell(ReqSpellInfo->EffectTriggerSpell[0]))
-				ReqspellFlag = true;
-		}
-		else ReqspellFlag = true;
-
 		if((*itr)->reqskill)
 		{	if(_player->GetSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
 				ReqskillValueFlag = true;
@@ -155,7 +140,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 		if(_player->getLevel() >= spellInfo->spellLevel)
 			LevelFlag = true;
 
-		if(ReqspellFlag && ReqskillValueFlag && LevelFlag)
+		if(ReqskillValueFlag && LevelFlag)
 			canlearnflag = 0;
 		else canlearnflag =1;
 
