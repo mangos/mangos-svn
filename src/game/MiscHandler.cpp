@@ -227,8 +227,9 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                     pCreature->SetFlag(UNIT_FIELD_FLAGS, 0x4000000);
             }
 
-            remove_if(loot->items.begin(), loot->items.end(),
-                LootItem::looted);
+	    i = remove_if(loot->items.begin(), loot->items.end(),
+	    LootItem::looted);
+	    loot->items.erase(i, loot->items.end());
         }
     }
 }
