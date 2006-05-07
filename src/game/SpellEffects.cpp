@@ -323,8 +323,7 @@ void Spell::EffectCreateItem(uint32 i)
 	uint32 newitemid, itemid, itemcount;
     if((newitemid = m_spellInfo->EffectItemType[i]) == 0)
         return;
-    //Fix by Ant009,code is poor,and run slowly,hope someone make it better.
-    //reduce items that need for spell
+
     for(uint32 x=0;x<8;x++)
     {
         if(m_spellInfo->Reagent[x] == 0)
@@ -546,7 +545,7 @@ void Spell::EffectOpenLock(uint32 i)
         loottype=2;
     }else loottype=1;
     if(loottype == 1)
-        ((Player*)m_caster)->UpdateSkill(SKILL_OPENLOCK);
+        ((Player*)m_caster)->UpdateSkill(SKILL_LOCKPICKING);
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
 }
@@ -584,6 +583,82 @@ void Spell::EffectLearnSpell(uint32 i)
     data << spellToLearn;
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
     ((Player*)unitTarget)->addSpell((uint16)spellToLearn);
+	//some addspell isn't needed if you have a good DB,FISHING && MINING && HERBALISM have to be needed.
+	switch(spellToLearn)
+	{
+		case 4036://SKILL_ENGINERING
+		{
+			((Player*)unitTarget)->addSpell(3918);
+			((Player*)unitTarget)->addSpell(3919);
+			((Player*)unitTarget)->addSpell(3920);
+			break;
+		}
+		case 3908://SKILL_TAILORING
+		{
+			((Player*)unitTarget)->addSpell(2387);
+			((Player*)unitTarget)->addSpell(2963);
+			break;
+		}
+		case 7411://SKILL_ENCHANTING
+		{
+			((Player*)unitTarget)->addSpell(7418);
+			((Player*)unitTarget)->addSpell(7421);
+			((Player*)unitTarget)->addSpell(13262);
+			break;
+		}
+		case 2259://SKILL_ALCHEMY
+		{
+			((Player*)unitTarget)->addSpell(2329);
+			((Player*)unitTarget)->addSpell(7183);
+			((Player*)unitTarget)->addSpell(2330);
+			break;
+		}
+		case 2018://SKILL_BLACKSMITHING
+		{
+			((Player*)unitTarget)->addSpell(2663);
+			((Player*)unitTarget)->addSpell(12260);
+			((Player*)unitTarget)->addSpell(2660);
+			((Player*)unitTarget)->addSpell(3115);
+			break;
+		}
+		case 2108://SKILL_LEATHERWORKING
+		{
+			((Player*)unitTarget)->addSpell(2152);
+			((Player*)unitTarget)->addSpell(9058);
+			((Player*)unitTarget)->addSpell(9059);
+			((Player*)unitTarget)->addSpell(2149);
+			((Player*)unitTarget)->addSpell(7126);
+			((Player*)unitTarget)->addSpell(2881);
+			break;
+		}
+		case 2550://SKILL_COOKING
+		{
+			((Player*)unitTarget)->addSpell(2540);
+			((Player*)unitTarget)->addSpell(2538);
+			break;
+		}
+		case 3273://SKILL_FIRST_AID
+		{
+			((Player*)unitTarget)->addSpell(3275);
+			break;
+		}
+		case 7620://SKILL_FISHING
+		{
+			((Player*)unitTarget)->addSpell(7738);
+			break;
+		}
+		case 2575://SKILL_MINING
+		{
+			((Player*)unitTarget)->addSpell(2580);
+			break;
+		}
+		case 2366://SKILL_HERBALISM
+		{
+			((Player*)unitTarget)->addSpell(2383);
+			break;
+		}
+		default:break;
+	}
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", ((Player*)unitTarget)->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
@@ -662,7 +737,14 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
         p_caster->ApplyItemMods( m_CastItem, item_slot, true );
         m_CastItem->SendUpdateToPlayer((Player *)p_caster);
-        ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
+
+        Player *player = (Player*)m_caster;
+		SkillLineAbility *pSkill;
+		pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+		uint32 minValue = pSkill->min_value;
+		uint32 maxValue = pSkill->max_value;
+		uint32 skill_id = pSkill->miscid;
+		player->UpdateSkillPro(skill_id,minValue,maxValue);
     }
 
 }
@@ -701,7 +783,14 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
         p_caster->ApplyItemMods( m_CastItem, item_slot, true );
         m_CastItem->SendUpdateToPlayer((Player *)p_caster);
-        ((Player*)m_caster)->UpdateSkill(SKILL_ENCHANTING);
+
+        Player *player = (Player*)m_caster;
+		SkillLineAbility *pSkill;
+		pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+		uint32 minValue = pSkill->min_value;
+		uint32 maxValue = pSkill->max_value;
+		uint32 skill_id = pSkill->miscid;
+		player->UpdateSkillPro(skill_id,minValue,maxValue);
     }
 }
 

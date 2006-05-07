@@ -2860,12 +2860,12 @@ void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
 		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
 		return;
 	}
-	else if(value >= (maxValue + minValue)/2 && urand(0,100) <70)
+	else if(value >= minValue && urand(0,100) <70)
 	{
 		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
 		return;
 	}
-	else if(value >= minValue)
+	else if(value >= 1)
 	{
 		SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
 		return;

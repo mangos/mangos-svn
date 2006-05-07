@@ -104,8 +104,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     std::list<TrainerSpell*> Tspells;
     std::list<TrainerSpell*>::iterator itr;
-	SpellEntry *ReqSpellInfo;
-
 
     for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
     {
