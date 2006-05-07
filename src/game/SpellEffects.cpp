@@ -579,9 +579,9 @@ void Spell::EffectLearnSpell(uint32 i)
         unitTarget = m_targets.getUnitTarget();
 
     uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
-    data.Initialize(SMSG_LEARNED_SPELL);
-    data << spellToLearn;
-    ((Player*)unitTarget)->GetSession()->SendPacket(&data);
+    //data.Initialize(SMSG_LEARNED_SPELL);
+    //data << spellToLearn;
+    //((Player*)unitTarget)->GetSession()->SendPacket(&data);
     ((Player*)unitTarget)->addSpell((uint16)spellToLearn);
 	//some addspell isn't needed if you have a good DB,FISHING && MINING && HERBALISM have to be needed.
 	switch(spellToLearn)
