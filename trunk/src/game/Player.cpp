@@ -1629,6 +1629,11 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     newspell = new Playerspell;
     newspell->spellId = spell_id;
 
+	WorldPacket data;
+	data.Initialize(SMSG_LEARNED_SPELL);
+	data <<uint32(spell_id);
+	m_session->SendPacket(&data);
+
     uint8 op;
     uint16 tmpslot=slot_id,val=0;
     int16 tmpval=0;
@@ -1637,8 +1642,6 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     uint8  FlatId=0;
     uint32 EffectVal;
     uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-
-    WorldPacket data;
 
     if (tmpslot == 0xffff)
     {
