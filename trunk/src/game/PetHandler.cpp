@@ -159,10 +159,9 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     recv_data >> guid;
 
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid);
-    if(pet)
+    if(pet && pet->isPet())
     {
-        name = _player->GetName();                          //pet->GetCreatureInfo()->Name;
-        name.append("\'s Pet");
+        name = ((Pet*)pet)->GetName();
         state3=pet->GetUInt32Value(UNIT_FIELD_STAT3);
     }
     WorldPacket data;

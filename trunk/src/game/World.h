@@ -109,6 +109,8 @@ class World
 
         void SendWorldText(const char *text, WorldSession *self = 0);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0);
+        void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0);
+        void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0);
 
         void Update(time_t diff);
 

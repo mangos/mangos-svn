@@ -464,7 +464,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     if (option != 0 && option != 1)
     {
-        m_session->GetPlayer( )->SendMessageToSet( &data, true );
+        //m_session->GetPlayer( )->SendMessageToSet( &data, true );
         FillSystemMessageData(&data, m_session, "Incorrect value, use 0 or 1");
         m_session->SendPacket( &data );
         return true;
