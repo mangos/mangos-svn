@@ -514,3 +514,23 @@ void World::SendWorldText(const char* text, WorldSession *self)
     sChatHandler.FillSystemMessageData(&data, 0, text);
     SendGlobalMessage(&data, self);
 }
+
+void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self)
+{
+    SessionMap::iterator itr;
+    for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
+    {
+		Player *player = itr->second->GetPlayer();
+        if ( player && player->IsInWorld() && player->GetZoneId() == zone && itr->second != self)
+        {
+            itr->second->SendPacket(packet);
+        }
+    }
+}
+
+void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
+{
+    WorldPacket data;
+    sChatHandler.FillSystemMessageData(&data, 0, text);
+    SendZoneMessage(zone, &data, self);
+}

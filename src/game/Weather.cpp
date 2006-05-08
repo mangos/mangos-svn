@@ -23,6 +23,7 @@
 #include "Weather.h"
 #include "EventSystem.h"
 #include "Config/ConfigEnv.h"
+#include "Chat.h"
 
 /*void HandleWeather(void *weather)
 {
@@ -51,7 +52,7 @@ uint32 Weather::GetSound()
             else
                 sound = WEATHER_SNOWHEAVY;
             break;
-        case 3:                                             //snow
+        case 3:                                             //storm
             if(m_grade<0.33333334f)
                 sound = WEATHER_SANDSTORMLIGHT;
             else if(m_grade<0.6666667f)
@@ -104,7 +105,7 @@ void Weather::ReGenerate()
     m_grade = (float)rand() / (float)RAND_MAX;
     uint32 gtime = sWorld.GetGameTime();
     uint32 season = (gtime / (91 * 360)) % 4;
-    sLog.outDebug("Generate random weather for season %u.", season);
+    sLog.outDebug("Generate random weather for season %u of zone %u.", season, m_zone);
     QueryResult *result;
     result = sDatabase.PQuery("SELECT * FROM `game_weather` WHERE `zone` = '%u';", m_zone);
     if (!result)
@@ -189,5 +190,8 @@ void Weather::ChangeWeather()
             wthstr = "fine";
             break;
     }
-    sLog.outString("Change the weather of zone %u to %s.", m_zone, wthstr);
+	char buf[256];
+	sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
+    sLog.outString(buf);
+	sWorld.SendZoneText(m_zone, buf);
 }
