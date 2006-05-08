@@ -347,22 +347,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Pet.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\Pet.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\PetAI.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\PetAI.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\PetHandler.cpp"
 				>
 			</File>
@@ -667,6 +651,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\Pet.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Pet.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\PetAI.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Player.cpp"
 				>
 			</File>
@@ -759,10 +759,12 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GlobalEvents.cpp">
+				RelativePath="..\..\src\game\GlobalEvents.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GlobalEvents.h">
+				RelativePath="..\..\src\game\GlobalEvents.h"
+				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\Mthread.cpp"
