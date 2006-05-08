@@ -549,7 +549,6 @@
 					Name="VCCustomBuildTool"
 					Description="Performing Build SystemConfig.h"
 					CommandLine="copy ..\..\src\shared\SystemConfig.h.in ..\..\src\shared\SystemConfig.h&#x0D;&#x0A;"
-					AdditionalDependencies=""
 					Outputs="..\..\src\shared\SystemConfig.h"
 				/>
 			</FileConfiguration>
