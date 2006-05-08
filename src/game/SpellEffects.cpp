@@ -349,6 +349,7 @@ void Spell::EffectCreateItem(uint32 i)
         SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
         return;
     }
+	//should send message "create item" to client.-FIX ME
     SkillLineAbility *pSkill;
     pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
     uint32 minValue = pSkill->min_value;
@@ -546,7 +547,14 @@ void Spell::EffectOpenLock(uint32 i)
         loottype=2;
     }else loottype=1;
     if(loottype == 1)
-        ((Player*)m_caster)->UpdateSkill(SKILL_LOCKPICKING);
+	{
+		SkillLineAbility *pSkill;
+		pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+		uint32 minValue = pSkill->min_value;
+		uint32 maxValue = pSkill->max_value;
+		uint32 skill_id = pSkill->miscid;
+		((Player*)m_caster)->UpdateSkillPro(skill_id,minValue,maxValue);
+	}
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
 }
@@ -651,6 +659,8 @@ void Spell::EffectLearnSpell(uint32 i)
         case 2575:                                          //SKILL_MINING
         {
             ((Player*)unitTarget)->learnSpell(2580);
+			((Player*)unitTarget)->learnSpell(2656);
+			((Player*)unitTarget)->learnSpell(2657);
             break;
         }
         case 2366:                                          //SKILL_HERBALISM
@@ -725,6 +735,12 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             item_slot = i;
         }
     }
+	if(m_CastItem->GetProto()->Class != m_spellInfo->EquippedItemClass || m_CastItem->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+	{
+		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+		return;
+	}
+	
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
         if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -771,6 +787,11 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             item_slot = i;
         }
     }
+	if(m_CastItem->GetProto()->Class != m_spellInfo->EquippedItemClass || m_CastItem->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+	{
+		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+		return;
+	}
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
         if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
