@@ -446,6 +446,12 @@ void Object::SetFlag( const uint16 &index, uint32 newFlag )
     }
 }
 
+bool Object::GetFlag( const uint16 &index, uint32 checkFlag )
+{
+    ASSERT( index < m_valuesCount );
+    return m_uint32Values[ index ] & checkFlag;
+}
+
 void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
 {
     ASSERT( index < m_valuesCount );

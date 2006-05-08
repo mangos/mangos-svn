@@ -45,11 +45,9 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
 {
-
-    // TODO Add Watercheck when fall into water no damage
-
     uint32 flags, time;
     float x, y, z, orientation;
+    Player *Target = GetPlayer(); 
 
     uint32 FallTime;
 
@@ -57,25 +55,38 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     //    uint8 type;
     uint32 damage;
 
-    if(GetPlayer()->GetDontMove())
+    if(Target->GetDontMove())
         return;
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
     recv_data >> FallTime;
-    if ( FallTime > 1100 && !GetPlayer()->isDead())
+    if ( FallTime > 1100 && !Target->isDead())
     {
-        uint32 MapID = GetPlayer()->GetMapId();
+        uint32 MapID = Target->GetMapId();
         Map* Map = MapManager::Instance().GetMap(MapID);
         float posz = Map->GetWaterLevel(x,y);
         if (z < (posz - (float) 1))
         {
-            guid = GetPlayer()->GetGUID();
+            guid = Target->GetGUID();
             damage = (uint32)((FallTime - 1100)/100)+1;
-            GetPlayer()->EnvironmentalDamage(guid,DAMAGE_FALL, damage);
+            Target->EnvironmentalDamage(guid,DAMAGE_FALL, damage);
         }
 
     }
+
+    //handle fall and logout at the sametime
+    if (Target->GetFlag(UNIT_FIELD_FLAGS, 0x40000))
+    {
+            Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+            // Can't move
+            WorldPacket data;
+            data.Initialize( SMSG_FORCE_MOVE_ROOT );
+            data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+            SendPacket( &data );
+     }
+
+
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
@@ -118,6 +129,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
     //CMSG_SET_ACTIVE_MOVER
+	sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
 
     uint32 guild, time;
     recv_data >> guild >> time;
