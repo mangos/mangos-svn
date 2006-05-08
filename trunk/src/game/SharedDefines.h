@@ -875,6 +875,7 @@
 #define SKILL_DEFENSIVE_TALENTS             234
 #define SKILL_PET_SCORPID               236
 #define SKILL_ARCANE                    237
+#define SKILL_OPEN_LOCK                 242
 #define SKILL_PET_TURTLE                251
 #define SKILL_FURY                  256
 #define SKILL_PROTECTION                257
