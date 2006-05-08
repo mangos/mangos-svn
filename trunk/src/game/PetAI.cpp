@@ -109,11 +109,11 @@ void PetAI::_stopAttack()
     }
     i_pVictim = NULL;
     if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
-	{
-		i_pet.addUnitState(UNIT_STAT_FOLLOW);
+    {
+        i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
-		i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
-	}
+        i_pet.clearUnitState(UNIT_STAT_IN_COMBAT);
+    }
     else
     {
         i_pet.clearUnitState(UNIT_STAT_IN_COMBAT | UNIT_STAT_FOLLOW);
@@ -177,7 +177,7 @@ void PetAI::_taggedToKill(Unit *u)
 {
     if( i_pVictim || !u)
         return;
-	i_pet.clearUnitState(UNIT_STAT_FOLLOW);
+    i_pet.clearUnitState(UNIT_STAT_FOLLOW);
     i_pet.addUnitState(UNIT_STAT_ATTACKING);
     i_pet.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     i_pet->Mutate(new TargetedMovementGenerator(*u));

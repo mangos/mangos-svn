@@ -520,7 +520,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
     SessionMap::iterator itr;
     for (itr = m_sessions.begin(); itr != m_sessions.end(); itr++)
     {
-		Player *player = itr->second->GetPlayer();
+        Player *player = itr->second->GetPlayer();
         if ( player && player->IsInWorld() && player->GetZoneId() == zone && itr->second != self)
         {
             itr->second->SendPacket(packet);
