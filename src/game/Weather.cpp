@@ -190,8 +190,8 @@ void Weather::ChangeWeather()
             wthstr = "fine";
             break;
     }
-	char buf[256];
-	sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
+    char buf[256];
+    sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
     sLog.outString(buf);
-	sWorld.SendZoneText(m_zone, buf);
+    sWorld.SendZoneText(m_zone, buf);
 }
