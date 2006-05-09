@@ -4601,8 +4601,8 @@ uint32 Player::CanAddItemCount(Item* item, uint32 where)
     uint32 count = 0;
     Item *pItem;
     Bag *pBag;
-	if(GetItemCount(item->GetEntry(),true) && item->GetProto()->Stackable == 1)
-		return 0;
+    if(GetItemCount(item->GetEntry(),true) && item->GetProto()->Stackable == 1)
+        return 0;
 
     if(where & 1)
     {
@@ -4858,11 +4858,11 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
         return 0;
     }
     uint32 count = item->GetCount();
-	if(CanAddItemCount(item, 1) < count && proto->Stackable ==1)
-	{
-		sLog.outError("AddItemToInventory: Can't add, item is unique.");
-		return 0;
-	}
+    if(CanAddItemCount(item, 1) < count && proto->Stackable ==1)
+    {
+        sLog.outError("AddItemToInventory: Can't add, item is unique.");
+        return 0;
+    }
     if(CanAddItemCount(item, 1) < count && !addmaxpossible)
     {
         sLog.outError("AddItemToInventory: Can't add, Bag is full.");

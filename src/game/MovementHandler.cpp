@@ -47,7 +47,7 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
 {
     uint32 flags, time;
     float x, y, z, orientation;
-    Player *Target = GetPlayer(); 
+    Player *Target = GetPlayer();
 
     uint32 FallTime;
 
@@ -78,14 +78,13 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     //handle fall and logout at the sametime
     if (Target->GetFlag(UNIT_FIELD_FLAGS, 0x40000))
     {
-            Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-            // Can't move
-            WorldPacket data;
-            data.Initialize( SMSG_FORCE_MOVE_ROOT );
-            data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
-            SendPacket( &data );
-     }
-
+        Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+        // Can't move
+        WorldPacket data;
+        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+        SendPacket( &data );
+    }
 
 }
 
@@ -129,7 +128,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 {
     //CMSG_SET_ACTIVE_MOVER
-	sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
+    sLog.outDebug("WORLD: Recvd CMSG_SET_ACTIVE_MOVER");
 
     uint32 guild, time;
     recv_data >> guild >> time;

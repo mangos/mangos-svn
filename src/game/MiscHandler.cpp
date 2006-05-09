@@ -292,23 +292,22 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
         LogoutRequest(time(NULL));
 
-
-		//! Set the flag so player sits and the player is NOT falling
-		Player* Target = GetPlayer();
-		uint32 MapID = Target->GetMapId();
+        //! Set the flag so player sits and the player is NOT falling
+        Player* Target = GetPlayer();
+        uint32 MapID = Target->GetMapId();
         Map* Map = MapManager::Instance().GetMap(MapID);
-		float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
-		if (!(Target->GetPositionZ() > posz))
-		{
-			Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-			// Can't move
-			data.Initialize( SMSG_FORCE_MOVE_ROOT );
-			data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
-			SendPacket( &data );
-		}
-		//! DISABLE_ROTATE = 0x40000;
+        float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
+        if (!(Target->GetPositionZ() > posz))
+        {
+            Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+            // Can't move
+            data.Initialize( SMSG_FORCE_MOVE_ROOT );
+            data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+            SendPacket( &data );
+        }
+        //! DISABLE_ROTATE = 0x40000;
         Target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
-		
+
     }
     else
     {

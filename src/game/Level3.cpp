@@ -39,10 +39,10 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
     Unit* target = ObjectAccessor::Instance().GetCreature(*pPlayer, pPlayer->GetSelection());
     if(!target)
     {
-	WorldPacket data;
-	FillSystemMessageData(&data, m_session, "You should select a creature.");
-	m_session->SendPacket( &data );
-	return true;
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        m_session->SendPacket( &data );
+        return true;
     }
     uint32 icon = atol((char*)args);
     if ( icon < 0 )
