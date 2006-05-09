@@ -2011,11 +2011,15 @@ void Player::SaveToDB()
         RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
         RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
     }
-    RemoveFlag( UNIT_FIELD_FLAGS, 0x40000 );
-
+    
     // Set player sit state to standing on save
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
     RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+
+	//remove restflag when save
+	//this is becouse of the rename char stuff
+	RemoveFlag(PLAYER_FLAGS, 0x20);
+
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
