@@ -189,7 +189,7 @@ void World::SetInitialWorldSettings()
     new ChannelMgr;
 
     sLog.outString("Initialize data stores...");
-    barGoLink bar( 12 );
+    barGoLink bar( 13 );
     bar.step();
 
     tmpPath=dataPath;

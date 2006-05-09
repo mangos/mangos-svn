@@ -141,7 +141,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_CRITTER
     &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISENCHANT
+    &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT
     &Spell::EffectNULL,                                     //SPELL_EFFECT_INEBRIATE
     &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_FEED_PET
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISMISS_PET
@@ -721,38 +721,39 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     uint8 item_slot = 0;
 
     uint32 field = 99;
-    if(m_CastItem)
+    if(itemTarget)
         field = 1;
     else
         field = 3;
 
-    if(!m_CastItem)
+    if(!itemTarget)
     {
-        for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
-            if(p_caster->GetItemBySlot(i) != 0 && p_caster->GetItemBySlot(i)->GetProto()->ItemId == itemTarget->GetGUID())
+        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
+			if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
         {
-            m_CastItem = p_caster->GetItemBySlot(i);
-            item_slot = i;
+            itemTarget = p_caster->GetItemBySlot(j);
+            item_slot = j;
         }
     }
-    if(m_CastItem->GetProto()->Class != m_spellInfo->EquippedItemClass || m_CastItem->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
+	if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+	{
+		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+		return;
+	}
+	
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
-        if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
+        if (!itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
             break;
 
     if (add_slot < 32)
     {
-        for(uint8 i=0;i<3;i++)
-            if (m_spellInfo->EffectMiscValue[i])
-                m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+        for(uint8 j=0;j<3;j++)
+            if (m_spellInfo->EffectMiscValue[j])
+                itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j), m_spellInfo->EffectMiscValue[j]);
 
-        p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-        m_CastItem->SendUpdateToPlayer((Player *)p_caster);
+        p_caster->ApplyItemMods( itemTarget, item_slot, true );
+        itemTarget->SendUpdateToPlayer((Player *)p_caster);
 
         Player *player = (Player*)m_caster;
         SkillLineAbility *pSkill;
@@ -772,25 +773,25 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     uint8 item_slot = 0;
 
     uint32 field = 99;
-    if(m_CastItem)
+    if(itemTarget)
         field = 1;
     else
         field = 3;
 
-    if(!m_CastItem)
+    if(!itemTarget)
     {
-        for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
-            if(p_caster->GetItemBySlot(i) != 0 && p_caster->GetItemBySlot(i)->GetProto()->ItemId == itemTarget->GetGUID())
+        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
+			if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
         {
-            m_CastItem = p_caster->GetItemBySlot(i);
-            item_slot = i;
+            itemTarget = p_caster->GetItemBySlot(j);
+            item_slot = j;
         }
     }
-    if(m_CastItem->GetProto()->Class != m_spellInfo->EquippedItemClass || m_CastItem->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
+	if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+	{
+		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+		return;
+	}
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
         if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -798,12 +799,12 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     if (add_slot < 32)
     {
-        for(uint8 i=0;i<3;i++)
-            if (m_spellInfo->EffectMiscValue[i])
-                m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+        for(uint8 j=0;j<3;j++)
+            if (m_spellInfo->EffectMiscValue[j])
+                itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j), m_spellInfo->EffectMiscValue[j]);
 
-        p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-        m_CastItem->SendUpdateToPlayer((Player *)p_caster);
+        p_caster->ApplyItemMods( itemTarget, item_slot, true );
+        itemTarget->SendUpdateToPlayer((Player *)p_caster);
 
         Player *player = (Player*)m_caster;
         SkillLineAbility *pSkill;
@@ -1275,39 +1276,274 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     uint8 item_slot = 0;
 
     uint32 field = 99;
-    if(m_CastItem)
+    if(itemTarget)
         field = 1;
     else
         field = 3;
 
-    if(!m_CastItem)
+    if(!itemTarget)
     {
-        for(uint8 i=0;i<INVENTORY_SLOT_ITEM_END;i++)
-            if(p_caster->GetItemBySlot(i) != 0 && p_caster->GetItemBySlot(i)->GetProto()->ItemId == itemTarget->GetGUID())
+        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
+			if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
         {
-            m_CastItem = p_caster->GetItemBySlot(i);
-            item_slot = i;
+            itemTarget = p_caster->GetItemBySlot(j);
+            item_slot = j;
         }
     }
+	if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+	{
+		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+		return;
+	}
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
     {
-        if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
+        if (!itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
             break;
     }
 
     if (add_slot < 32)
     {
-        for(uint8 i=0;i<3;i++)
-            if (m_spellInfo->EffectMiscValue[i])
-                m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+i), m_spellInfo->EffectMiscValue[i]);
+        for(uint8 j=0;j<3;j++)
+            if (m_spellInfo->EffectMiscValue[j])
+                m_CastItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j), m_spellInfo->EffectMiscValue[j]);
 
-        p_caster->ApplyItemMods( m_CastItem, item_slot, true );
-        m_CastItem->SendUpdateToPlayer((Player *)p_caster);
+        p_caster->ApplyItemMods( itemTarget, item_slot, true );
+        itemTarget->SendUpdateToPlayer((Player *)p_caster);
     }
 
 }
+void Spell::EffectDisEnchant(uint32 i)
+{
+	Player* p_caster = (Player*)m_caster;
+	if(!itemTarget)
+		return;
+	p_caster->RemoveItemFromInventory(itemTarget->GetEntry(),1);
 
+	uint32 item_level = itemTarget->GetProto()->ItemLevel;
+	uint32 item_quality = itemTarget->GetProto()->Quality;
+	if(item_level >= 51 && item_level <= 60)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(14344,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(14344,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(16204,urand(1,(item_level/10)),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(16203,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+		
+	}
+	else if(item_level >= 46 && item_level <= 50)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(14343,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(14343,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{			
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(11176,urand(1,(item_level/10)),false);
+				return;
+			}
+			else 
+			{
+				p_caster->AddNewItem(16202,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+		
+	}
+	else if(item_level >= 41 && item_level <= 45)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(11178,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(11178,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(11176,urand(1,(item_level/10)),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(11175,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+	}
+	else if(item_level >= 36 && item_level <= 40)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(11177,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(11177,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(11137,urand(1,(item_level/10)),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(11174,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+	}
+	else if(item_level >= 31 && item_level <= 35)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(11139,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(11139,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(11137,urand(1,(item_level/10)),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(11135,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+	}
+	else if(item_level >= 25 && item_level <= 30)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(11138,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(11138,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(11083,urand(1,(item_level/10)),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(11134,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+	}
+	else if(item_level >= 21 && item_level <= 25)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(11084,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3)
+		{
+			p_caster->AddNewItem(11084,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 85)
+			{
+				p_caster->AddNewItem(11083,urand(1,(item_level/10)),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(11082,urand(1,(item_level/10)),false);
+				return;
+			}
+		}
+	}
+	else if(item_level >= 1 && item_level <= 20)
+	{
+		if(item_quality == 4)
+		{
+			p_caster->AddNewItem(10978,urand(3,5),false);
+			return;
+		}
+		else if(item_quality == 3 && item_level >=16)
+		{
+			p_caster->AddNewItem(10978,1,false);
+			return;
+		}
+		else if(item_quality == 2)
+		{
+			if(urand(1,100)< 70)
+			{
+				p_caster->AddNewItem(10940,urand(1,3),false);
+				return;
+			}
+			else if(item_level <=15 && urand(1,100)< 70 )
+			{
+				p_caster->AddNewItem(10938,urand(1,3),false);
+				return;
+			}
+			else if(urand(1,100)< 50)
+			{
+				p_caster->AddNewItem(10939,urand(1,3),false);
+				return;
+			}
+			else
+			{
+				p_caster->AddNewItem(10998,urand(1,3),false);
+				return;
+			}
+		}
+	}
+	return ;
+}
 void Spell::EffectSummonObject(uint32 i)
 {
     WorldPacket data;

@@ -65,8 +65,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             return;
         }
     }
-
-    Spell *spell = new Spell(pUser, spellInfo, false, 0);
+	Spell *spell = new Spell(pUser, spellInfo, false, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
@@ -165,7 +164,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Spell *spell = new Spell(_player, spellInfo, false, 0);
+    Spell *spell ;
+	spell = new Spell(_player, spellInfo, false, 0);
+	//if(spellInfo->Id == 13262)
+	//	spell = new Spell(_player, spellInfo, true, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
