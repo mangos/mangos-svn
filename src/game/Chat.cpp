@@ -360,6 +360,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level)
 {
     /*
+	//SpawnCreature is invallid, remains for educatial reasons
     Temp. disabled (c) Phantomas
         WorldPacket data;
 
