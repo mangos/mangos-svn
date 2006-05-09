@@ -4601,6 +4601,9 @@ uint32 Player::CanAddItemCount(Item* item, uint32 where)
     uint32 count = 0;
     Item *pItem;
     Bag *pBag;
+	if(GetItemCount(item->GetEntry(),true) && item->GetProto()->Stackable == 1)
+		return 0;
+
     if(where & 1)
     {
         for (i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
@@ -4708,7 +4711,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
     uint32 stack = item->GetMaxStackCount();
     uint32 count = item->GetCount();
 
-    if(stack > 1 && allowstack)
+    if(stack > 1 && allowstack == 0)
     {
         switch(bagIndex)
         {
