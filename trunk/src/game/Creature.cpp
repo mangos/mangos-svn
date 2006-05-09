@@ -824,24 +824,27 @@ void Creature::SaveToDB()
         << m_positionY << ","
         << m_positionZ << ","
         << m_orientation << ","
-        << m_respawnDelay << ","                            // fix me: store x-y delay but not 1
-        << m_respawnDelay << ","
-        << (float) 0  << ","
-        << (uint32) (0) << ","
-        << respawn_cord[0] << ","
-        << respawn_cord[1] << ","
-        << respawn_cord[2] << ","
-        << (float)(0) << ","
-        << GetUInt32Value(UNIT_FIELD_HEALTH) << ","
-        << (uint32)(0) << ","                               // should contain current mana
-        << m_respawnTimer << ","
-        << (uint32)(m_deathState) << ","                    // is it really death state or just state?
-        << GetUInt32Value(UNIT_NPC_FLAGS) << ","
+        << m_respawnDelay << ","                          //spawn time min                          // fix me: store x-y delay but not 1
+        << m_respawnDelay << ","                          //spawn time max
+        << (float) 0  << ","                              //spawn distance (float)
+        << (uint32) (0) << ","                            //currentwaypoint
+        << respawn_cord[0] << ","                         //spawn_position_x
+        << respawn_cord[1] << ","                         //spawn_position_y
+        << respawn_cord[2] << ","                         //spawn_position_z
+        << (float)(0) << ","                              //spawn_orientation
+        << GetUInt32Value(UNIT_FIELD_HEALTH) << ","       //curhealth
+        << GetUInt32Value(UNIT_FIELD_POWER2) << ","       //curmana
+		<< m_respawnTimer << ","                          //respawntimer
+
+        << (uint32)(m_deathState) << ","                  // is it really death state or just state?
+		//or
+		//<< (uint32)(m_state) << ","                     // is it really death state or just state?
+	
+        << GetUInt32Value(UNIT_NPC_FLAGS) << ","          //npcflags
         << GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) << ","
-        << "'')";                                           // should save auras
+        << "'')";                                         // should save auras
 
-    sDatabase.Execute( ss.str( ).c_str( ) );
-
+	sDatabase.Execute( ss.str( ).c_str( ) );
 }
 
 bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
@@ -860,8 +863,9 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_MAXHEALTH,cinfo->maxhealth );
     SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
 
-    SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
-    //fix me : max mana
+	SetUInt32Value(UNIT_FIELD_MAXPOWER2, cinfo->maxmana); //MAX Mana
+	SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
+    
     SetUInt32Value(UNIT_FIELD_LEVEL,cinfo->level);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
@@ -1032,7 +1036,7 @@ void Creature::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
     sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
     sDatabase.PExecute("DELETE FROM `npc_trainer` WHERE `entry` = '%u'", GetEntry());
-    sDatabase.PExecute("DELETE FROM `creature_questrelation WHERE `id` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `creature_involvedrelation WHERE `id` = '%u'", GetGUIDLow());
 }
 
 float Creature::GetAttackDistance(Unit *pl)
