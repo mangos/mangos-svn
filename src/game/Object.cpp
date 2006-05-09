@@ -320,11 +320,11 @@ void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, f
     *data << uint32(0x800000);
     *data << uint16(0x67EE);
     *data << uint16(0xD1EB);
-    *data<< ang;
-    *data<< x;
-    *data<< y;
-    *data<< z;
-    *data<< uint32(0x0);
+    *data << ang; // instead of *data << z;
+    *data << x;
+    *data << y;
+    *data << z; // instead of *data << ang;
+    *data << uint32(0x0);
 }
 
 void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
