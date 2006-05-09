@@ -382,7 +382,10 @@ void Aura::_AddAura()
 
     uint8 flagslot = slot >> 3;
     uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
-    value |= 0xFFFFFFFF & (AFLAG_SET << ((slot & 7) << 2));
+    
+	uint8 value1 = (slot & 7) << 2;
+	value |= ((uint32)AFLAG_SET << value1);
+
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
 
     uint8 appslot = slot >> 1;
@@ -423,7 +426,11 @@ void Aura::_RemoveAura()
     uint8 flagslot = slot >> 3;
 
     uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
-    value &= 0xFFFFFFFF ^ (0xF << ((slot & 7) << 2));
+    
+	uint8 aurapos = (slot & 7) << 2;
+	uint32 value1 = ~( AFLAG_SET << aurapos );
+	value &= value1;
+
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
 }
 
