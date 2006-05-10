@@ -1320,6 +1320,14 @@ void Spell::EffectDisEnchant(uint32 i)
 		return;
 	p_caster->RemoveItemFromInventory(itemTarget->GetEntry(),1);
 
+	Player *player = (Player*)m_caster;
+	SkillLineAbility *pSkill;
+	pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+	uint32 minValue = pSkill->min_value;
+	uint32 maxValue = pSkill->max_value;
+	uint32 skill_id = pSkill->miscid;
+	player->UpdateSkillPro(skill_id,minValue,maxValue);
+
 	uint32 item_level = itemTarget->GetProto()->ItemLevel;
 	uint32 item_quality = itemTarget->GetProto()->Quality;
 	if(item_level >= 51 && item_level <= 60)

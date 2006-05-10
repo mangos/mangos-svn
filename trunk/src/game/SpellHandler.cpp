@@ -166,8 +166,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     Spell *spell ;
 	spell = new Spell(_player, spellInfo, false, 0);
-	//if(spellInfo->Id == 13262)
-	//	spell = new Spell(_player, spellInfo, true, 0);
+
     WPAssert(spell);
 
     SpellCastTargets targets;

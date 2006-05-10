@@ -458,19 +458,14 @@ void Spell::cast()
             else
                 needspelllog = false;
 			
-			if(unitTarget)
-				HandleEffects(unitTarget,NULL,NULL,j);
-			if(itemTarget)
-				HandleEffects(NULL,itemTarget,NULL,j);
-			if(gameObjTarget)
-				HandleEffects(NULL,NULL,gameObjTarget,j);
-				
             for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
                 HandleEffects((*iunit),NULL,NULL,j);
             for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
                 HandleEffects(NULL,(*iitem),NULL,j);
             for(igo= m_targetGOs[j].begin();igo != m_targetGOs[j].end();igo++)
                 HandleEffects(NULL,NULL,(*igo),j);
+			if(m_spellInfo->Effect[j] == 99 && itemTarget)  //its template,need fix target system.  
+				HandleEffects(NULL,itemTarget,NULL,j);
         }
 
         if(needspelllog) SendLogExecute();

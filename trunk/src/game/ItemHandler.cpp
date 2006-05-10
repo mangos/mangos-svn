@@ -181,8 +181,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->RequiredCityRank;
     data << itemProto->RequiredReputationFaction;
     data << itemProto->RequiredRaputationRank;
-    data << itemProto->Stackable;
     data << itemProto->MaxCount;
+    data << itemProto->Stackable;
     data << itemProto->ContainerSlots;;
     for(int i = 0; i < 10; i++)
     {
