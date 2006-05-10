@@ -4522,7 +4522,7 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
         return NULL;
     }
     Item *pItem = NewItemOrBag(proto);
-    if (count > proto->MaxCount) { count = proto->MaxCount; }
+    if (count > proto->Stackable) { count = proto->Stackable; }
     if (count < 1) { count = 1; }
     if(!pItem->Create (objmgr.GenerateLowGuid (HIGHGUID_ITEM), itemId, this))
         return NULL;
@@ -4531,9 +4531,9 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
 }
 
 // Returns the amount of items that player has (include bank or not)
-int Player::GetItemCount(uint32 itemId, bool includebank)
+uint16 Player::GetItemCount(uint32 itemId, bool includebank)
 {
-    int countitems = 0;
+    uint16 countitems = 0;
     Item* pItem = 0;
     Bag* pBag = 0;
 
@@ -4605,7 +4605,7 @@ uint32 Player::CanAddItemCount(Item* item, uint32 where)
     uint32 count = 0;
     Item *pItem;
     Bag *pBag;
-    if(GetItemCount(item->GetEntry(),true) && item->GetProto()->Stackable == 1)
+    if(GetItemCount(item->GetEntry(),true) >=1 && item->GetProto()->MaxCount == 1)
         return 0;
 
     if(where & 1)
@@ -4715,7 +4715,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
     uint32 stack = item->GetMaxStackCount();
     uint32 count = item->GetCount();
 
-    if(stack > 1 && allowstack == 0)
+    if(stack > 1 && allowstack )
     {
         switch(bagIndex)
         {
@@ -4862,7 +4862,7 @@ uint8 Player::AddItemToInventory(Item *item, bool addmaxpossible)
         return 0;
     }
     uint32 count = item->GetCount();
-    if(CanAddItemCount(item, 1) < count && proto->Stackable ==1)
+    if(CanAddItemCount(item, 1) < count && proto->MaxCount ==1)
     {
         sLog.outError("AddItemToInventory: Can't add, item is unique.");
         return 0;
@@ -4977,6 +4977,11 @@ uint8 Player::AddItemToBank(Item *item, bool addmaxpossible)
         return 0;
     }
     uint32 count = item->GetCount();
+	if(CanAddItemCount(item, 1) < count && proto->MaxCount ==1)
+    {
+        sLog.outError("AddItemToInventory: Can't add, item is unique.");
+        return 0;
+    }
     if(CanAddItemCount(item, 2) < count && !addmaxpossible)
     {
         sLog.outError("AddItemToBank: Can't add, Bank is full.");

@@ -231,7 +231,7 @@ uint8 Bag::AddItemToBag(uint8 slot, Item *item)
     UpdateData upd;
     WorldPacket packet;
     Item *pItem = 0;
-    int stack = (item->GetProto()->MaxCount)?(item->GetProto()->MaxCount):1;
+    int stack = (item->GetProto()->Stackable)?(item->GetProto()->Stackable):1;
     int count = item->GetCount();
     uint8 addtoslot = NULL_SLOT;
     int freespace = 0;
