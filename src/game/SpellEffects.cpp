@@ -729,18 +729,17 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     if(!itemTarget)
     {
         for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-			if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
+            if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
         {
             itemTarget = p_caster->GetItemBySlot(j);
             item_slot = j;
         }
     }
-	if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
-	{
-		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-		return;
-	}
-	
+    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+    {
+        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+        return;
+    }
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
         if (!itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -781,17 +780,17 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     if(!itemTarget)
     {
         for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-			if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
+            if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
         {
             itemTarget = p_caster->GetItemBySlot(j);
             item_slot = j;
         }
     }
-	if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
-	{
-		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-		return;
-	}
+    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+    {
+        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+        return;
+    }
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
         if (!m_CastItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -1284,17 +1283,17 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     if(!itemTarget)
     {
         for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-			if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
+            if(p_caster->GetItemBySlot(j) != 0 && p_caster->GetItemBySlot(j)->GetProto()->ItemId == itemTarget->GetEntry())
         {
             itemTarget = p_caster->GetItemBySlot(j);
             item_slot = j;
         }
     }
-	if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
-	{
-		SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-		return;
-	}
+    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass || itemTarget->GetProto()->SubClass != m_spellInfo->EquippedItemSubClass)
+    {
+        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+        return;
+    }
 
     for(add_slot = 0; add_slot < 22; /*add_slot++*/add_slot+=3)
     {
@@ -1313,245 +1312,247 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     }
 
 }
+
 void Spell::EffectDisEnchant(uint32 i)
 {
-	Player* p_caster = (Player*)m_caster;
-	if(!itemTarget)
-		return;
-	p_caster->RemoveItemFromInventory(itemTarget->GetEntry(),1);
+    Player* p_caster = (Player*)m_caster;
+    if(!itemTarget)
+        return;
+    p_caster->RemoveItemFromInventory(itemTarget->GetEntry(),1);
 
-	Player *player = (Player*)m_caster;
-	SkillLineAbility *pSkill;
-	pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-	uint32 minValue = pSkill->min_value;
-	uint32 maxValue = pSkill->max_value;
-	uint32 skill_id = pSkill->miscid;
-	player->UpdateSkillPro(skill_id,minValue,maxValue);
+    Player *player = (Player*)m_caster;
+    SkillLineAbility *pSkill;
+    pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+    uint32 minValue = pSkill->min_value;
+    uint32 maxValue = pSkill->max_value;
+    uint32 skill_id = pSkill->miscid;
+    player->UpdateSkillPro(skill_id,minValue,maxValue);
 
-	uint32 item_level = itemTarget->GetProto()->ItemLevel;
-	uint32 item_quality = itemTarget->GetProto()->Quality;
-	if(item_level >= 51 && item_level <= 60)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(14344,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(14344,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(16204,urand(1,(item_level/10)),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(16203,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-		
-	}
-	else if(item_level >= 46 && item_level <= 50)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(14343,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(14343,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{			
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(11176,urand(1,(item_level/10)),false);
-				return;
-			}
-			else 
-			{
-				p_caster->AddNewItem(16202,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-		
-	}
-	else if(item_level >= 41 && item_level <= 45)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(11178,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(11178,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(11176,urand(1,(item_level/10)),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(11175,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-	}
-	else if(item_level >= 36 && item_level <= 40)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(11177,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(11177,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(11137,urand(1,(item_level/10)),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(11174,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-	}
-	else if(item_level >= 31 && item_level <= 35)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(11139,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(11139,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(11137,urand(1,(item_level/10)),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(11135,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-	}
-	else if(item_level >= 25 && item_level <= 30)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(11138,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(11138,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(11083,urand(1,(item_level/10)),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(11134,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-	}
-	else if(item_level >= 21 && item_level <= 25)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(11084,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3)
-		{
-			p_caster->AddNewItem(11084,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 85)
-			{
-				p_caster->AddNewItem(11083,urand(1,(item_level/10)),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(11082,urand(1,(item_level/10)),false);
-				return;
-			}
-		}
-	}
-	else if(item_level >= 1 && item_level <= 20)
-	{
-		if(item_quality == 4)
-		{
-			p_caster->AddNewItem(10978,urand(3,5),false);
-			return;
-		}
-		else if(item_quality == 3 && item_level >=16)
-		{
-			p_caster->AddNewItem(10978,1,false);
-			return;
-		}
-		else if(item_quality == 2)
-		{
-			if(urand(1,100)< 70)
-			{
-				p_caster->AddNewItem(10940,urand(1,3),false);
-				return;
-			}
-			else if(item_level <=15 && urand(1,100)< 70 )
-			{
-				p_caster->AddNewItem(10938,urand(1,3),false);
-				return;
-			}
-			else if(urand(1,100)< 50)
-			{
-				p_caster->AddNewItem(10939,urand(1,3),false);
-				return;
-			}
-			else
-			{
-				p_caster->AddNewItem(10998,urand(1,3),false);
-				return;
-			}
-		}
-	}
-	return ;
+    uint32 item_level = itemTarget->GetProto()->ItemLevel;
+    uint32 item_quality = itemTarget->GetProto()->Quality;
+    if(item_level >= 51 && item_level <= 60)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(14344,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(14344,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(16204,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(16203,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+
+    }
+    else if(item_level >= 46 && item_level <= 50)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(14343,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(14343,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(11176,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(16202,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+
+    }
+    else if(item_level >= 41 && item_level <= 45)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(11178,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(11178,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(11176,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(11175,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+    }
+    else if(item_level >= 36 && item_level <= 40)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(11177,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(11177,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(11137,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(11174,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+    }
+    else if(item_level >= 31 && item_level <= 35)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(11139,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(11139,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(11137,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(11135,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+    }
+    else if(item_level >= 25 && item_level <= 30)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(11138,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(11138,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(11083,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(11134,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+    }
+    else if(item_level >= 21 && item_level <= 25)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(11084,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3)
+        {
+            p_caster->AddNewItem(11084,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 85)
+            {
+                p_caster->AddNewItem(11083,urand(1,(item_level/10)),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(11082,urand(1,(item_level/10)),false);
+                return;
+            }
+        }
+    }
+    else if(item_level >= 1 && item_level <= 20)
+    {
+        if(item_quality == 4)
+        {
+            p_caster->AddNewItem(10978,urand(3,5),false);
+            return;
+        }
+        else if(item_quality == 3 && item_level >=16)
+        {
+            p_caster->AddNewItem(10978,1,false);
+            return;
+        }
+        else if(item_quality == 2)
+        {
+            if(urand(1,100)< 70)
+            {
+                p_caster->AddNewItem(10940,urand(1,3),false);
+                return;
+            }
+            else if(item_level <=15 && urand(1,100)< 70 )
+            {
+                p_caster->AddNewItem(10938,urand(1,3),false);
+                return;
+            }
+            else if(urand(1,100)< 50)
+            {
+                p_caster->AddNewItem(10939,urand(1,3),false);
+                return;
+            }
+            else
+            {
+                p_caster->AddNewItem(10998,urand(1,3),false);
+                return;
+            }
+        }
+    }
+    return ;
 }
+
 void Spell::EffectSummonObject(uint32 i)
 {
     WorldPacket data;
