@@ -41,6 +41,7 @@ DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTemplateEntryfmt);
 
 DBCStorage <SkillLineAbility> sSkillLineAbilityStore(SkillLineAbilityfmt);
+DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
 
 float GetRadius(SpellRadius *radius)
 {

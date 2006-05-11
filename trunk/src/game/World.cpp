@@ -189,7 +189,7 @@ void World::SetInitialWorldSettings()
     new ChannelMgr;
 
     sLog.outString("Initialize data stores...");
-    barGoLink bar( 13 );
+    barGoLink bar( 14 );
     bar.step();
 
     tmpPath=dataPath;
@@ -256,8 +256,13 @@ void World::SetInitialWorldSettings()
     sSkillLineAbilityStore.Load((char *)(tmpPath.c_str()));
     bar.step();
 
+	tmpPath=dataPath;
+    tmpPath.append("dbc/SpellItemEnchantment.dbc");
+    sSpellItemEnchantmentStore.Load((char *)(tmpPath.c_str()));
+    bar.step();
+
     sLog.outString( "" );
-    sLog.outString( ">> Loaded 13 data stores" );
+    sLog.outString( ">> Loaded 14 data stores" );
     sLog.outString( "" );
 
     sLog.outString( "Loading Quests..." );

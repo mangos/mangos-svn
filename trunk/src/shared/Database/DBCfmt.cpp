@@ -26,6 +26,7 @@ const char SkillLineAbilityfmt[]="iiniiiiiiiiixxx";
 const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
 const char SpellEntryfmt[]="nixxixiixxxiiixiiiiiiiiiiiiiiiiiiiifixiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifffixiiixxxxxxxxxiiiiiiiiixxxxxxxxxxxxxxxxxxiiiixixxxxxxxxxxx";
+const char SpellItemEnchantmentfmt[]="niixixxixxiixxxxxixxxxii";
 const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
 const char TalentEntryfmt[]="nixxiiiiixxxxxxxxxxxx";

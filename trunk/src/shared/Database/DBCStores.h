@@ -103,4 +103,5 @@ extern DBCStorage <FactionEntry> sFactionStore;
 extern DBCStorage <ItemSetEntry> sItemSetStore;
 extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
 extern DBCStorage <SkillLineAbility> sSkillLineAbilityStore;
+extern DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore;
 #endif
