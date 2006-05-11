@@ -261,31 +261,30 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     //if(result)
     //{
-        //Field *fields = result->Fetch();
+    //Field *fields = result->Fetch();
 
-        //WorldPacket data;
+    //WorldPacket data;
 
-        Player *chr = m_session->GetPlayer();
-        float x = chr->GetPositionX();
-        float y = chr->GetPositionY();
-        float z = chr->GetPositionZ();
-        float o = chr->GetOrientation();
+    Player *chr = m_session->GetPlayer();
+    float x = chr->GetPositionX();
+    float y = chr->GetPositionY();
+    float z = chr->GetPositionZ();
+    float o = chr->GetOrientation();
 
-        Creature* pCreature = new Creature;
-		if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
-			return false;
+    Creature* pCreature = new Creature;
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+        return false;
 
-		
-		pCreature->AIM_Initialize();
-		//pCreature->SetUInt32Value(UNIT_FIELD_HEALTH , 1); // temp set on 1 HP needs to be MAX HP (strange error)
-			
-		sLog.outError("AddObject at Chat.cpp");
+    pCreature->AIM_Initialize();
+    //pCreature->SetUInt32Value(UNIT_FIELD_HEALTH , 1); // temp set on 1 HP needs to be MAX HP (strange error)
 
-        MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
-        pCreature->SaveToDB();
+    sLog.outError("AddObject at Chat.cpp");
 
-        //delete result;
-        return true;
+    MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
+    pCreature->SaveToDB();
+
+    //delete result;
+    return true;
     //}
     //else
     //    delete result;

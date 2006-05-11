@@ -457,15 +457,15 @@ void Spell::cast()
                 needspelllog = true;
             else
                 needspelllog = false;
-			
+
             for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
                 HandleEffects((*iunit),NULL,NULL,j);
             for(iitem= m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
                 HandleEffects(NULL,(*iitem),NULL,j);
             for(igo= m_targetGOs[j].begin();igo != m_targetGOs[j].end();igo++)
                 HandleEffects(NULL,NULL,(*igo),j);
-			if(m_spellInfo->Effect[j] == 99 && itemTarget)  //its template,need fix target system.  
-				HandleEffects(NULL,itemTarget,NULL,j);
+            if(m_spellInfo->Effect[j] == 99 && itemTarget)  //its template,need fix target system.
+                HandleEffects(NULL,itemTarget,NULL,j);
         }
 
         if(needspelllog) SendLogExecute();
@@ -850,7 +850,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     if(eff<TOTAL_SPELL_EFFECTS)
         (*this.*SpellEffects[eff])(i);
-	/*
+    /*
     else
     {
         if (m_CastItem)
@@ -861,7 +861,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
                 eff, m_spellInfo->Id);
         }
     }
-	*/
+    */
 }
 
 /*void Spell::HandleAddAura(Unit* Target)
@@ -946,18 +946,18 @@ uint8 Spell::CheckItems()
 
     uint32 itemid, itemcount;
     Player* p_caster = (Player*)m_caster;
-	if (itemTarget)
-	{
-		if(p_caster->GetItemCount(itemTarget->GetEntry()) < 1)
+    if (itemTarget)
+    {
+        if(p_caster->GetItemCount(itemTarget->GetEntry()) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
-		else return uint8(0);
-	}
-	if(m_CastItem)
-	{
-		if(p_caster->GetItemCount(m_CastItem->GetEntry()) < 1)
+        else return uint8(0);
+    }
+    if(m_CastItem)
+    {
+        if(p_caster->GetItemCount(m_CastItem->GetEntry()) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
-		else return uint8(0);
-	}
+        else return uint8(0);
+    }
 
     for(uint32 i=0;i<8;i++)
     {
