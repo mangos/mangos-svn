@@ -256,7 +256,7 @@ void World::SetInitialWorldSettings()
     sSkillLineAbilityStore.Load((char *)(tmpPath.c_str()));
     bar.step();
 
-	tmpPath=dataPath;
+    tmpPath=dataPath;
     tmpPath.append("dbc/SpellItemEnchantment.dbc");
     sSpellItemEnchantmentStore.Load((char *)(tmpPath.c_str()));
     bar.step();

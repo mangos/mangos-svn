@@ -182,14 +182,14 @@ struct ItemDisplayTemplateEntry
 };
 struct SpellItemEnchantment
 {
-	uint32		ID;
-	uint32		display_type;
-	uint32		unkown1;
-	uint32		value1;
-	uint32		value2;
-	uint32		spellid;
-	uint32		unkown2;
-	uint32		description;
-	uint32		aura_id;
-	uint32		unkown4;
+    uint32      ID;
+    uint32      display_type;
+    uint32      unkown1;
+    uint32      value1;
+    uint32      value2;
+    uint32      spellid;
+    uint32      unkown2;
+    uint32      description;
+    uint32      aura_id;
+    uint32      unkown4;
 };
