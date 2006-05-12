@@ -118,13 +118,12 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     data << uint32(0) << uint32(Tspells.size());
 
     SpellEntry *spellInfo;
-    bool ReqskillValueFlag = false;
-    bool LevelFlag = false;
 
     for (itr = Tspells.begin(); itr != Tspells.end();itr++)
     {
-
         uint8 canlearnflag = 1;
+		bool ReqskillValueFlag = false;
+		bool LevelFlag = false;
         spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
         if(!spellInfo)
             continue;
