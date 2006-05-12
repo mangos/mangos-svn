@@ -908,6 +908,11 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg);
 
+    if (cinfo->mount != 0)
+    {
+        SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, cinfo->mount);
+    }
+
     m_spells[0] = cinfo->spell1;
     m_spells[1] = cinfo->spell2;
     m_spells[2] = cinfo->spell3;

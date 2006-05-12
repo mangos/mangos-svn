@@ -195,14 +195,14 @@ void Spell::FillTargetMap()
             else if(m_spellInfo->Effect[i] == 44) tmpUnitMap.push_back(m_targets.getUnitTarget());
                                                             // Execute Skill
             else if(m_spellInfo->Effect[i] == 118) tmpUnitMap.push_back(m_caster);
-															// DisEnchant
-			else if(m_spellInfo->Effect[i] == 99) tmpItemMap.push_back(itemTarget);
-															// EnchantPem
-			else if(m_spellInfo->Effect[i] == 53) tmpItemMap.push_back(itemTarget);
-															// EnchantTmp
-			else if(m_spellInfo->Effect[i] == 54) tmpItemMap.push_back(itemTarget);
-															// EnchantHeldItem
-			else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
+                                                            // DisEnchant
+            else if(m_spellInfo->Effect[i] == 99) tmpItemMap.push_back(itemTarget);
+                                                            // EnchantPem
+            else if(m_spellInfo->Effect[i] == 53) tmpItemMap.push_back(itemTarget);
+                                                            // EnchantTmp
+            else if(m_spellInfo->Effect[i] == 54) tmpItemMap.push_back(itemTarget);
+                                                            // EnchantHeldItem
+            else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
         }
 
         m_targetUnits[i] = tmpUnitMap;
