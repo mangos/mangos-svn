@@ -735,7 +735,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         }
     }
 
-    if(!(itemTarget->GetProto()->Class & m_spellInfo->EquippedItemClass)
+    if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
         || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
@@ -780,8 +780,8 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             if (m_spellInfo->EffectMiscValue[j])
                 itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j*3), m_spellInfo->EffectMiscValue[0]);
 
-        p_caster->ApplyItemMods( itemTarget, item_slot, true );
-        itemTarget->SendUpdateToPlayer((Player *)p_caster);
+        //p_caster->ApplyItemMods( itemTarget, item_slot, true );
+        //itemTarget->SendUpdateToPlayer((Player *)p_caster);
 
         SkillLineAbility *pSkill;
         pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
@@ -814,7 +814,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             item_slot = j;
         }
     }
-    if(!(itemTarget->GetProto()->Class & m_spellInfo->EquippedItemClass)
+    if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
         || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
@@ -859,8 +859,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             if (m_spellInfo->EffectMiscValue[j])
                 itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j*3), m_spellInfo->EffectMiscValue[j]);
 
-        p_caster->ApplyItemMods( itemTarget, item_slot, true );
-        itemTarget->SendUpdateToPlayer((Player *)p_caster);
+        //p_caster->ApplyItemMods( itemTarget, item_slot, true );
+        //itemTarget->SendUpdateToPlayer((Player *)p_caster);
 
         SkillLineAbility *pSkill;
         pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
@@ -1345,7 +1345,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             item_slot = j;
         }
     }
-    if(!(itemTarget->GetProto()->Class & m_spellInfo->EquippedItemClass)
+    if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
         || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
@@ -1407,6 +1407,13 @@ void Spell::EffectDisEnchant(uint32 i)
     Player* p_caster = (Player*)m_caster;
     if(!itemTarget)
         return;
+	uint32 item_level = itemTarget->GetProto()->ItemLevel;
+    uint32 item_quality = itemTarget->GetProto()->Quality;
+	if(item_quality > 4 || item_quality < 2)
+	{
+		SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
+		return;
+	}
     if(itemTarget->GetProto()->Class != 2 || itemTarget->GetProto()->Class != 4)
     {
         SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
@@ -1422,8 +1429,6 @@ void Spell::EffectDisEnchant(uint32 i)
     uint32 skill_id = pSkill->miscid;
     player->UpdateSkillPro(skill_id,minValue,maxValue);
 
-    uint32 item_level = itemTarget->GetProto()->ItemLevel;
-    uint32 item_quality = itemTarget->GetProto()->Quality;
     if(item_level >= 51 && item_level <= 60)
     {
         if(item_quality == 4)
@@ -1798,9 +1803,10 @@ void Spell::EffectTransmitted(uint32 i)
     float fx,fy;
     WorldPacket data;
 
-    float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-    fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
-    fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+	//float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+	//float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+    fx = m_caster->GetPositionX() + irand(10,20) * cos(m_caster->GetOrientation());
+    fy = m_caster->GetPositionY() + irand(10,20) * sin(m_caster->GetOrientation());
 
     GameObject* pGameObj = new GameObject();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];

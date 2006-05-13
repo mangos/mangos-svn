@@ -4587,6 +4587,75 @@ uint16 Player::GetItemCount(uint32 itemId, bool includebank)
     }
     return countitems;
 }
+uint16 Player::GetItemCountAll(uint32 itemId, bool includeEquipment,bool includebank)
+{
+    uint16 countitems = 0;
+    Item* pItem = 0;
+    Bag* pBag = 0;
+
+	for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemBySlot(i);
+        if (pItem)
+        {
+            if (pItem->GetEntry() == itemId) { countitems += pItem->GetCount(); }
+        }
+    }
+    for (uint8 bagIndex = CLIENT_SLOT_01; bagIndex <= CLIENT_SLOT_04; bagIndex++)
+    {
+        pBag = GetBagBySlot(bagIndex);
+        if (pBag)
+        {
+            for (uint8 slot=0; slot < pBag->GetProto()->ContainerSlots; slot++)
+            {
+                pItem = pBag->GetItemFromBag(slot);
+                if (pItem)
+                {
+                    if (pItem->GetEntry() == itemId) { countitems += pItem->GetCount(); }
+                }
+            }
+        }
+    }
+	if(!includeEquipment)
+		return countitems;
+
+	for (uint8 i = 0; i < EQUIPMENT_SLOT_END; i++)
+    {
+        pItem = GetItemBySlot(i);
+        if (pItem)
+        {
+            if (pItem->GetEntry() == itemId) { countitems += pItem->GetCount(); }
+        }
+    }
+
+    if(!includebank)
+        return countitems;
+
+    for (uint8 i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemBySlot(i);
+        if (pItem)
+        {
+            if (pItem->GetEntry() == itemId) { countitems += pItem->GetCount(); }
+        }
+    }
+    for (uint8 bagIndex = BANK_SLOT_BAG_START; bagIndex <= BANK_SLOT_BAG_END; bagIndex++)
+    {
+        pBag = GetBagBySlot(bagIndex);
+        if (pBag)
+        {
+            for (uint8 slot=0; slot<pBag->GetProto()->ContainerSlots; slot++)
+            {
+                pItem = pBag->GetItemFromBag(slot);
+                if (pItem)
+                {
+                    if (pItem->GetEntry() == itemId) { countitems += pItem->GetCount(); }
+                }
+            }
+        }
+    }
+	return countitems;
+}
 
 //where =1 : inventory; =2 : bank; =3 all
 uint32 Player::CanAddItemCount(uint32 itemid, uint32 where)
@@ -4829,6 +4898,36 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
             SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
             _ApplyItemMods(item, slot, true);
+			for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+			{
+				uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
+				if( Enchant_id)
+				{
+					SpellItemEnchantment *pEnchant;
+					pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+					uint32 enchant_display = pEnchant->display_type;
+					uint32 enchant_value1 = pEnchant->value1;
+					uint32 enchant_value2 = pEnchant->value2;
+					uint32 enchant_spell_id = pEnchant->spellid;
+					uint32 enchant_aura_id = pEnchant->aura_id;
+					uint32 enchant_description = pEnchant->description;
+					Spell *pEnchantSpell;
+					SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+					if(enchant_aura_id)
+					{
+						Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,this,this);
+						pEnchantSpell = new Spell(this,enchantSpell_info,false,pAura);
+					}
+					else pEnchantSpell = new Spell(this,enchantSpell_info,false,0);
+
+					WPAssert(pEnchantSpell);
+
+					SpellCastTargets targets;
+					targets.setUnitTarget(this);
+					//pEnchantSpell->m_CastItem = item;
+					pEnchantSpell->prepare(&targets);
+				}
+			}
         }
         if (IsInWorld())
         {
@@ -5195,7 +5294,28 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
             if (slot < EQUIPMENT_SLOT_END)
             {
                 _ApplyItemMods(pItem, slot, false);
-                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+				for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+				{
+					uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
+					if( Enchant_id)
+					{
+						SpellItemEnchantment *pEnchant;
+						pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+						uint32 enchant_display = pEnchant->display_type;
+						uint32 enchant_value1 = pEnchant->value1;
+						uint32 enchant_value2 = pEnchant->value2;
+						uint32 enchant_spell_id = pEnchant->spellid;
+						uint32 enchant_aura_id = pEnchant->aura_id;
+						uint32 enchant_description = pEnchant->description;
+						//SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+						if(enchant_aura_id)
+						{
+							RemoveAura(enchant_spell_id,enchant_aura_id);
+						}
+						RemoveAura(enchant_spell_id);
+					}
+				}
                 for (int i = VisibleBase; i < VisibleBase + 12; ++i)
                 {
                     SetUInt32Value(i, 0);
