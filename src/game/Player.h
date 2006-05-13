@@ -526,6 +526,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         Item* CreateNewItem (uint32 itemId, uint8 count = 1);
         uint16 GetItemCount(uint32 itemId, bool includebank = false);
+		uint16 GetItemCountAll(uint32 itemId, bool includeEquipment , bool includebank = false);
         uint8 AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible);
         uint8 AddItem(uint8 bagIndex, uint8 slot, Item *item, bool allowstack);
         uint8 AddItemToInventory(Item *item, bool addmaxpossible = false);

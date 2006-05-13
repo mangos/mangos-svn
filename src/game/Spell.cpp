@@ -954,13 +954,14 @@ uint8 Spell::CheckItems()
     Player* p_caster = (Player*)m_caster;
     if (itemTarget)
     {
-        if(p_caster->GetItemCount(itemTarget->GetEntry()) < 1)
+        if(p_caster->GetItemCountAll(itemTarget->GetEntry(),true,false) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
     }
     if(m_CastItem)
     {
-        if(p_caster->GetItemCount(m_CastItem->GetEntry()) < 1)
+		itemid = m_CastItem->GetEntry();
+        if(p_caster->GetItemCountAll(itemid,true,false) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
     }
@@ -974,28 +975,21 @@ uint8 Spell::CheckItems()
             return (uint8)CAST_FAIL_ITEM_NOT_READY;         //0x54
     }
 
-    /*    uint32 totems = 2;
-        for(uint32 i=0;i<2;i++)
+        uint32 totems = 2;
+        for(int i=0;i<2;i++)
         {
             if(m_spellInfo->Totem[i] != 0)
             {
-                if(p_caster->GetSlotByItemID(m_spellInfo->Totem[i], bagIndex, curSlot,true,false))
+                if(p_caster->GetItemCountAll(itemTarget->GetEntry(),true,false) > 1)
                 {
-                    itm = p_caster->GetItemBySlot(bagIndex,curSlot);
-                    if(!itm)continue;
-                    if(itm->GetProto()->ItemId == m_spellInfo->Totem[i])
-                    {
                         totems -= 1;
                         continue;
-                    }
                 }
             }else
             totems -= 1;
         }
-        itm = NULL;
         if(totems != 0)
             return uint8(0x70);
-    */
     return uint8(0);
 }
 
