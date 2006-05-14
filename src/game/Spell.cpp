@@ -67,6 +67,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_destY = caster->GetPositionY();
         m_destZ = caster->GetPositionZ();
         m_unitTarget = caster;
+		return;
     }
 
     if(m_targetMask & TARGET_FLAG_UNIT)
@@ -418,7 +419,7 @@ void Spell::prepare(SpellCastTargets * targets)
 void Spell::cancel()
 {
     WorldPacket data;
-
+	m_autoRepeat = false;
     if(m_spellState == SPELL_STATE_PREPARING)
     {
         SendInterrupted(0);
@@ -609,6 +610,25 @@ void Spell::finish()
     }
     if(m_TriggerSpell)
         TriggerSpell();
+
+	if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
+		return;
+    ItemPrototype *proto = m_CastItem->GetProto();
+    uint32 ItemCount = m_CastItem->GetCount();
+    uint32 ItemClass = proto->Class;
+    uint32 ItemId = proto->ItemId;
+
+	if (ItemClass == ITEM_CLASS_CONSUMABLE)
+    {
+        ((Player*)m_caster)->RemoveItemFromInventory(proto->ItemId, 1);
+        if(ItemCount<=1)
+        {
+            //pItem->DeleteFromDB();
+            //delete m_CastItem;
+			m_CastItem = NULL;
+        }
+    }
+
 }
 
 void Spell::SendCastResult(uint8 result)

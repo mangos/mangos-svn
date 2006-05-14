@@ -73,23 +73,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     spell->m_CastItem = pItem;
     spell->prepare(&targets);
 
-    uint32 ItemCount = pItem->GetCount();
-    uint32 ItemClass = proto->Class;
-    uint32 ItemId = proto->ItemId;
-
-    if (ItemClass == ITEM_CLASS_CONSUMABLE)
-    {
-        if (ItemCount > 1)
-        {
-            pItem->SetCount(ItemCount-1);
-        }
-        else
-        {
-            pUser->RemoveItemFromSlot(bagIndex , slot);
-            //pItem->DeleteFromDB();
-            delete pItem;
-        }
-    }
 }
 
 #define OPEN_CHEST 11437
