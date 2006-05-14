@@ -510,7 +510,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             return (Bag *)m_items[slot];
         }
         void UpdateSkill(uint32 skill_id);
-        void UpdateSkillPro(uint32 skill_id,uint32 min_value,uint32 max_value);
+        void UpdateSkillPro(uint32 spellid);
         uint32 GetSkillByProto(ItemPrototype *proto);
         uint32 GetSpellByProto(ItemPrototype *proto);
         void GetSlotByItem(uint32 type, uint8 slots[4]);
