@@ -3001,8 +3001,13 @@ void Player::UpdateSkill(uint32 skill_id)
 
 }
 
-void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
+void Player::UpdateSkillPro(uint32 spellid)
 {
+	SkillLineAbility *pSkill = sSkillLineAbilityStore.LookupEntry(spellid);
+    uint32 minValue = pSkill->min_value;
+    uint32 maxValue = pSkill->max_value;
+    uint32 skill_id = pSkill->miscid;
+
     if(!skill_id)return;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
@@ -3028,7 +3033,7 @@ void Player::UpdateSkillPro(uint32 skill_id,uint32 minValue,uint32 maxValue)
             SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         return;
     }
-    else if(value >= 1)
+    else if(value >= minValue-25)
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         return;
@@ -3066,6 +3071,12 @@ void Player::UpdateMaxSkills()
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
+		uint32 pskill = GetUInt32Value(PLAYER_SKILL(i));
+		if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
+			|| pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
+			|| pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
+			|| pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING)
+			continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max=data>>16;
         uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;

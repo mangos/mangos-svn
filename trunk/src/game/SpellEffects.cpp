@@ -350,12 +350,7 @@ void Spell::EffectCreateItem(uint32 i)
         return;
     }
     //should send message "create item" to client.-FIX ME
-    SkillLineAbility *pSkill;
-    pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-    uint32 minValue = pSkill->min_value;
-    uint32 maxValue = pSkill->max_value;
-    uint32 skill_id = pSkill->miscid;
-    player->UpdateSkillPro(skill_id,minValue,maxValue);
+    player->UpdateSkillPro(m_spellInfo->Id);
 }
 
 void Spell::EffectPresistentAA(uint32 i)
@@ -548,12 +543,7 @@ void Spell::EffectOpenLock(uint32 i)
     }else loottype=1;
     if(loottype == 1)
     {
-        SkillLineAbility *pSkill;
-        pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-        uint32 minValue = pSkill->min_value;
-        uint32 maxValue = pSkill->max_value;
-        uint32 skill_id = pSkill->miscid;
-        ((Player*)m_caster)->UpdateSkillPro(skill_id,minValue,maxValue);
+        ((Player*)m_caster)->UpdateSkillPro(m_spellInfo->Id);
     }
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
@@ -586,91 +576,92 @@ void Spell::EffectLearnSpell(uint32 i)
         return;
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         unitTarget = m_targets.getUnitTarget();
+	Player *player = (Player*)unitTarget;
 
     uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
     //data.Initialize(SMSG_LEARNED_SPELL);
     //data << spellToLearn;
     //((Player*)unitTarget)->GetSession()->SendPacket(&data);
-    ((Player*)unitTarget)->learnSpell((uint16)spellToLearn);
+    player->learnSpell((uint16)spellToLearn);
     //some addspell isn't needed if you have a good DB,FISHING && MINING && HERBALISM have to be needed.
     switch(spellToLearn)
     {
         case 4036:                                          //SKILL_ENGINERING
         {
-            ((Player*)unitTarget)->learnSpell(3918);
-            ((Player*)unitTarget)->learnSpell(3919);
-            ((Player*)unitTarget)->learnSpell(3920);
+            player->learnSpell(3918);
+            player->learnSpell(3919);
+            player->learnSpell(3920);
             break;
         }
         case 3908:                                          //SKILL_TAILORING
         {
-            ((Player*)unitTarget)->learnSpell(2387);
-            ((Player*)unitTarget)->learnSpell(2963);
+            player->learnSpell(2387);
+            player->learnSpell(2963);
             break;
         }
         case 7411:                                          //SKILL_ENCHANTING
         {
-            ((Player*)unitTarget)->learnSpell(7418);
-            ((Player*)unitTarget)->learnSpell(7421);
-            ((Player*)unitTarget)->learnSpell(13262);
+            player->learnSpell(7418);
+            player->learnSpell(7421);
+            player->learnSpell(13262);
             break;
         }
         case 2259:                                          //SKILL_ALCHEMY
         {
-            ((Player*)unitTarget)->learnSpell(2329);
-            ((Player*)unitTarget)->learnSpell(7183);
-            ((Player*)unitTarget)->learnSpell(2330);
+            player->learnSpell(2329);
+            player->learnSpell(7183);
+            player->learnSpell(2330);
             break;
         }
         case 2018:                                          //SKILL_BLACKSMITHING
         {
-            ((Player*)unitTarget)->learnSpell(2663);
-            ((Player*)unitTarget)->learnSpell(12260);
-            ((Player*)unitTarget)->learnSpell(2660);
-            ((Player*)unitTarget)->learnSpell(3115);
+            player->learnSpell(2663);
+            player->learnSpell(12260);
+            player->learnSpell(2660);
+            player->learnSpell(3115);
             break;
         }
         case 2108:                                          //SKILL_LEATHERWORKING
         {
-            ((Player*)unitTarget)->learnSpell(2152);
-            ((Player*)unitTarget)->learnSpell(9058);
-            ((Player*)unitTarget)->learnSpell(9059);
-            ((Player*)unitTarget)->learnSpell(2149);
-            ((Player*)unitTarget)->learnSpell(7126);
-            ((Player*)unitTarget)->learnSpell(2881);
+            player->learnSpell(2152);
+            player->learnSpell(9058);
+            player->learnSpell(9059);
+            player->learnSpell(2149);
+            player->learnSpell(7126);
+            player->learnSpell(2881);
             break;
         }
         case 2550:                                          //SKILL_COOKING
         {
-            ((Player*)unitTarget)->learnSpell(2540);
-            ((Player*)unitTarget)->learnSpell(2538);
+            player->learnSpell(2540);
+            player->learnSpell(2538);
             break;
         }
         case 3273:                                          //SKILL_FIRST_AID
         {
-            ((Player*)unitTarget)->learnSpell(3275);
+            player->learnSpell(3275);
             break;
         }
         case 7620:                                          //SKILL_FISHING
         {
-            ((Player*)unitTarget)->learnSpell(7738);
+            player->learnSpell(7738);
             break;
         }
         case 2575:                                          //SKILL_MINING
         {
-            ((Player*)unitTarget)->learnSpell(2580);
-            ((Player*)unitTarget)->learnSpell(2656);
-            ((Player*)unitTarget)->learnSpell(2657);
+            player->learnSpell(2580);
+            player->learnSpell(2656);
+            player->learnSpell(2657);
             break;
         }
         case 2366:                                          //SKILL_HERBALISM
         {
-            ((Player*)unitTarget)->learnSpell(2383);
+            player->learnSpell(2383);
             break;
         }
         default:break;
     }
-    sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", ((Player*)unitTarget)->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
+    sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
 void Spell::EffectDispel(uint32 i)
@@ -734,7 +725,11 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             item_slot = j;
         }
     }
-
+	if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+	{
+        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+        return;
+    }
     if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
         || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
     {
@@ -766,6 +761,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
     SpellItemEnchantment *pEnchant;
     pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
+	/*
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
     uint32 enchant_value2 = pEnchant->value2;
@@ -773,8 +769,8 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     uint32 enchant_aura_id = pEnchant->aura_id;
     uint32 enchant_description = pEnchant->description;
     //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-
-    if (add_slot < 32)
+	*/
+    if (add_slot < 21)
     {
         for(uint8 j=0;j<3;j++)
             if (m_spellInfo->EffectMiscValue[j])
@@ -782,13 +778,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
         //p_caster->ApplyItemMods( itemTarget, item_slot, true );
         //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-
-        SkillLineAbility *pSkill;
-        pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-        uint32 minValue = pSkill->min_value;
-        uint32 maxValue = pSkill->max_value;
-        uint32 skill_id = pSkill->miscid;
-        p_caster->UpdateSkillPro(skill_id,minValue,maxValue);
+		p_caster->UpdateSkillPro(m_spellInfo->Id);
     }
 
 }
@@ -814,6 +804,11 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             item_slot = j;
         }
     }
+	if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+	{
+        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+        return;
+    }
     if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
         || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
     {
@@ -845,6 +840,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     SpellItemEnchantment *pEnchant;
     pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
+	/*
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
     uint32 enchant_value2 = pEnchant->value2;
@@ -852,8 +848,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     uint32 enchant_aura_id = pEnchant->aura_id;
     uint32 enchant_description = pEnchant->description;
     //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-
-    if (add_slot < 32)
+	*/
+    if (add_slot < 21)
     {
         for(uint8 j=0;j<3;j++)
             if (m_spellInfo->EffectMiscValue[j])
@@ -861,13 +857,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
         //p_caster->ApplyItemMods( itemTarget, item_slot, true );
         //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-
-        SkillLineAbility *pSkill;
-        pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-        uint32 minValue = pSkill->min_value;
-        uint32 maxValue = pSkill->max_value;
-        uint32 skill_id = pSkill->miscid;
-        p_caster->UpdateSkillPro(skill_id,minValue,maxValue);
+        p_caster->UpdateSkillPro(m_spellInfo->Id);
     }
 }
 
@@ -1345,6 +1335,11 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             item_slot = j;
         }
     }
+	if(itemTarget->GetSlot() > EQUIPMENT_SLOT_END)
+	{
+        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
+        return;
+    }
     if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
         || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
     {
@@ -1384,22 +1379,41 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     uint32 enchant_description = pEnchant->description;
     //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
 
-    if (add_slot < 32)
+    if (add_slot < 21)
     {
         for(uint8 j=0;j<3;j++)
             if (m_spellInfo->EffectMiscValue[j])
                 itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j*3), m_spellInfo->EffectMiscValue[0]);
 
-        p_caster->ApplyItemMods( itemTarget, item_slot, true );
-        itemTarget->SendUpdateToPlayer((Player *)p_caster);
+        //p_caster->ApplyItemMods( itemTarget, item_slot, true );
+        //itemTarget->SendUpdateToPlayer((Player *)p_caster);
+		if(enchant_display ==4)
+			p_caster->SetUInt32Value(UNIT_FIELD_ARMOR,p_caster->GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
+		else if(enchant_display ==2)
+		{
+			p_caster->SetUInt32Value(UNIT_FIELD_MINDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
+			p_caster->SetUInt32Value(UNIT_FIELD_MAXDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
+		}
+		else 
+		{
+			Spell *pEnchantSpell;
+			SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+			if(enchant_aura_id)
+			{
+				Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,p_caster,p_caster);
+				pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,pAura);
+			}
+			else pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,0);
 
-        SkillLineAbility *pSkill;
-        pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-        uint32 minValue = pSkill->min_value;
-        uint32 maxValue = pSkill->max_value;
-        uint32 skill_id = pSkill->miscid;
-        p_caster->UpdateSkillPro(skill_id,minValue,maxValue);
-    }
+			WPAssert(pEnchantSpell);
+
+			SpellCastTargets targets;
+			targets.setUnitTarget(p_caster);
+			//pEnchantSpell->m_CastItem = item;
+			pEnchantSpell->prepare(&targets);
+		}
+		p_caster->UpdateSkillPro(m_spellInfo->Id);
+	}
 }
 
 void Spell::EffectDisEnchant(uint32 i)
@@ -1422,12 +1436,7 @@ void Spell::EffectDisEnchant(uint32 i)
     p_caster->RemoveItemFromInventory(itemTarget->GetEntry(),1);
 
     Player *player = (Player*)m_caster;
-    SkillLineAbility *pSkill;
-    pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-    uint32 minValue = pSkill->min_value;
-    uint32 maxValue = pSkill->max_value;
-    uint32 skill_id = pSkill->miscid;
-    player->UpdateSkillPro(skill_id,minValue,maxValue);
+	p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     if(item_level >= 51 && item_level <= 60)
     {
@@ -1837,13 +1846,5 @@ void Spell::EffectTransmitted(uint32 i)
 void Spell::EffectSkill(uint32)
 {
     Player *player = (Player*)m_caster;
-    SkillLineAbility *pSkill;
-    pSkill = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-    uint32 minValue = pSkill->min_value;
-    uint32 maxValue = pSkill->max_value;
-    uint32 skill_id = pSkill->miscid;
-    player->UpdateSkillPro(skill_id,minValue,maxValue);
-
-    //((Player*)m_caster)->UpdateSkill(m_spellInfo->EffectMiscValue[1]);
-
+	player->UpdateSkillPro(m_spellInfo->Id);
 }
