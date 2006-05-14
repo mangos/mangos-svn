@@ -3033,7 +3033,7 @@ void Player::UpdateSkillPro(uint32 spellid)
             SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         return;
     }
-    else if(value >= minValue-25)
+    else if(value >= 1)
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
         return;
