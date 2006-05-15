@@ -244,6 +244,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraList GetAuras( ) {return m_Auras;}
         void SendMoveToPacket(float x, float y, float z, bool run);
+		void AddItemEnchant(uint32 enchant_id);
 
     protected:
         Unit ( );
