@@ -52,7 +52,6 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     uint32 FallTime;
 
     uint64 guid;
-    //    uint8 type;
     uint32 damage;
 
     if(Target->GetDontMove())
@@ -66,13 +65,13 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
         uint32 MapID = Target->GetMapId();
         Map* Map = MapManager::Instance().GetMap(MapID);
         float posz = Map->GetWaterLevel(x,y);
-        if (z < (posz - (float) 1))
+
+        if (z > (posz - (float) 1))
         {
             guid = Target->GetGUID();
             damage = (uint32)((FallTime - 1100)/100)+1;
             Target->EnvironmentalDamage(guid,DAMAGE_FALL, damage);
         }
-
     }
 
     //handle fall and logout at the sametime
@@ -85,7 +84,6 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
         data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
         SendPacket( &data );
     }
-
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
@@ -121,7 +119,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     else if (z > (posz - (float)2))
         GetPlayer()->m_isunderwater&= 0x7A;
     //!in lava check
-    if ((z < (posz - (float)2)) && (flag1 & 0x02))
+    if ((z < (posz - (float)0)) && (flag1 & 0x02))
         GetPlayer()->m_isunderwater|= 0x80;
 }
 
