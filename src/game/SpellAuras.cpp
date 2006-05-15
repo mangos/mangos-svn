@@ -701,7 +701,7 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-                                                            // stealth state
+    m_permanent = true;                                                        // stealth state
     apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x21E0000 );
     apply ? m_target->m_stealth = GetId() :  m_target->m_stealth = 0;
 }
@@ -1013,6 +1013,15 @@ void Aura::HandleAuraModShapeshift(bool apply)
         sLog.outError("WORLD: unknown spell id %i\n", spellId);
         return;
     }
+	if(apply)
+	{
+		Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+		WPAssert(p_spell);
+		SpellCastTargets targets;
+		targets.setUnitTarget(m_target);
+		p_spell->prepare(&targets);
+	}
+	else m_target->RemoveAura(spellId);
 
     /*tmpAff = new Affect(spellInfo,GetDuration(),GetCaster());
 

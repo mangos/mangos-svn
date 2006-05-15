@@ -344,11 +344,15 @@ void Spell::EffectCreateItem(uint32 i)
     //   num_to_add = 1;
     //   if(num_to_add > m_itemProto->MaxCount)
     //       num_to_add = m_itemProto->MaxCount;
-    if(! player->AddNewItem(newitemid, 1, false))
+	Item *pItem = player->CreateNewItem(newitemid,1);
+	player->AddItemToInventory(pItem,false);
+	if(!pItem)
     {
         SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
         return;
     }
+	if(!pItem->GetUInt32Value(ITEM_CLASS_CONSUMABLE))
+		pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
     //should send message "create item" to client.-FIX ME
     player->UpdateSkillPro(m_spellInfo->Id);
 }
@@ -725,13 +729,8 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             item_slot = j;
         }
     }
-    if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
-    if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
-        || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
+    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass
+        /*|| !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass)*/)
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
@@ -759,28 +758,19 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     }
     add_slot = 0;
 
-    SpellItemEnchantment *pEnchant;
-    pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
-    /*
-    uint32 enchant_display = pEnchant->display_type;
-    uint32 enchant_value1 = pEnchant->value1;
-    uint32 enchant_value2 = pEnchant->value2;
-    uint32 enchant_spell_id = pEnchant->spellid;
-    uint32 enchant_aura_id = pEnchant->aura_id;
-    uint32 enchant_description = pEnchant->description;
-    //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-    */
+	p_caster->UpdateSkillPro(m_spellInfo->Id);
+
     if (add_slot < 21)
     {
-        for(uint8 j=0;j<3;j++)
-            if (m_spellInfo->EffectMiscValue[j])
-                itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j*3), m_spellInfo->EffectMiscValue[0]);
-
-        //p_caster->ApplyItemMods( itemTarget, item_slot, true );
-        //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-        p_caster->UpdateSkillPro(m_spellInfo->Id);
+		for(int j = 0;j < 3; j++)
+		if (m_spellInfo->EffectMiscValue[j])
+		{
+			uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+			itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+			if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+				p_caster->AddItemEnchant(enchant_id);
+		}
     }
-
 }
 
 void Spell::EffectEnchantItemTmp(uint32 i)
@@ -804,13 +794,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             item_slot = j;
         }
     }
-    if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
-    if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
-        || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
+    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass
+        /*|| !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass)*/)
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
@@ -838,26 +823,16 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     }
     add_slot = 0;
 
-    SpellItemEnchantment *pEnchant;
-    pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
-    /*
-    uint32 enchant_display = pEnchant->display_type;
-    uint32 enchant_value1 = pEnchant->value1;
-    uint32 enchant_value2 = pEnchant->value2;
-    uint32 enchant_spell_id = pEnchant->spellid;
-    uint32 enchant_aura_id = pEnchant->aura_id;
-    uint32 enchant_description = pEnchant->description;
-    //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-    */
     if (add_slot < 21)
     {
-        for(uint8 j=0;j<3;j++)
-            if (m_spellInfo->EffectMiscValue[j])
-                itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j*3), m_spellInfo->EffectMiscValue[j]);
-
-        //p_caster->ApplyItemMods( itemTarget, item_slot, true );
-        //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-        p_caster->UpdateSkillPro(m_spellInfo->Id);
+		for(int j = 0;j < 3; j++)
+		if (m_spellInfo->EffectMiscValue[j])
+		{
+			uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+			itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+			if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+				p_caster->AddItemEnchant(enchant_id);
+		}
     }
 }
 
@@ -1335,13 +1310,12 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             item_slot = j;
         }
     }
-    if(itemTarget->GetSlot() > EQUIPMENT_SLOT_END)
+    if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
     }
-    if((itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
-        || !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
+    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
     {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
@@ -1362,57 +1336,16 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         }
     }
 
-    for(add_slot = 0; add_slot < 21; add_slot ++)
-        if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
-    {
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot,0);
-    }
-    add_slot = 0;
-
-    SpellItemEnchantment *pEnchant;
-    pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
-    uint32 enchant_display = pEnchant->display_type;
-    uint32 enchant_value1 = pEnchant->value1;
-    uint32 enchant_value2 = pEnchant->value2;
-    uint32 enchant_spell_id = pEnchant->spellid;
-    uint32 enchant_aura_id = pEnchant->aura_id;
-    uint32 enchant_description = pEnchant->description;
-    //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-
     if (add_slot < 21)
     {
-        for(uint8 j=0;j<3;j++)
-            if (m_spellInfo->EffectMiscValue[j])
-                itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+j*3), m_spellInfo->EffectMiscValue[0]);
-
-        //p_caster->ApplyItemMods( itemTarget, item_slot, true );
-        //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-        if(enchant_display ==4)
-            p_caster->SetUInt32Value(UNIT_FIELD_ARMOR,p_caster->GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
-        else if(enchant_display ==2)
-        {
-            p_caster->SetUInt32Value(UNIT_FIELD_MINDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
-            p_caster->SetUInt32Value(UNIT_FIELD_MAXDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
-        }
-        else
-        {
-            Spell *pEnchantSpell;
-            SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-            if(enchant_aura_id)
-            {
-                Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,p_caster,p_caster);
-                pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,pAura);
-            }
-            else pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,0);
-
-            WPAssert(pEnchantSpell);
-
-            SpellCastTargets targets;
-            targets.setUnitTarget(p_caster);
-            //pEnchantSpell->m_CastItem = item;
-            pEnchantSpell->prepare(&targets);
-        }
-        p_caster->UpdateSkillPro(m_spellInfo->Id);
+		for(int j = 0;j < 3; j++)
+		if (m_spellInfo->EffectMiscValue[j])
+		{
+			uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+			itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+			if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+				p_caster->AddItemEnchant(enchant_id);
+		}
     }
 }
 

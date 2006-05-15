@@ -1342,3 +1342,36 @@ void Unit::AddHostil(uint64 guid, float hostility)
     uh->Hostility=hostility;
     m_hostilList.push_back(uh);
 }
+void Unit::AddItemEnchant(uint32 enchant_id)
+{
+	SpellItemEnchantment *pEnchant;
+	Aura *pAura;
+	pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+	if(!pEnchant)
+		return;
+	uint32 enchant_display = pEnchant->display_type;
+	uint32 enchant_value1 = pEnchant->value1;
+	uint32 enchant_value2 = pEnchant->value2;
+	uint32 enchant_spell_id = pEnchant->spellid;
+	uint32 enchant_aura_id = pEnchant->aura_id;
+	uint32 enchant_description = pEnchant->description;
+	SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+
+	if(enchant_display ==4)
+		SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
+	else if(enchant_display ==2)
+	{
+		SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
+		SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
+	}
+	else 
+	{
+		for(int x = 0;x < 3;x++)
+			if(enchantSpell_info->Effect[x])
+		{
+			//uint32 pAura_id = enchantSpell_info->Effect[x];
+			pAura = new Aura(enchantSpell_info,x,this,this);
+			AddAura(pAura);
+		}
+	}
+}
