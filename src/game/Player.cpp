@@ -3003,7 +3003,7 @@ void Player::UpdateSkill(uint32 skill_id)
 
 void Player::UpdateSkillPro(uint32 spellid)
 {
-	SkillLineAbility *pSkill = sSkillLineAbilityStore.LookupEntry(spellid);
+    SkillLineAbility *pSkill = sSkillLineAbilityStore.LookupEntry(spellid);
     uint32 minValue = pSkill->min_value;
     uint32 maxValue = pSkill->max_value;
     uint32 skill_id = pSkill->miscid;
@@ -3071,12 +3071,12 @@ void Player::UpdateMaxSkills()
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
-		uint32 pskill = GetUInt32Value(PLAYER_SKILL(i));
-		if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
-			|| pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
-			|| pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
-			|| pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING)
-			continue;
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i));
+        if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
+            || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
+            || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
+            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING)
+            continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max=data>>16;
         uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;
@@ -4598,13 +4598,14 @@ uint16 Player::GetItemCount(uint32 itemId, bool includebank)
     }
     return countitems;
 }
+
 uint16 Player::GetItemCountAll(uint32 itemId, bool includeEquipment,bool includebank)
 {
     uint16 countitems = 0;
     Item* pItem = 0;
     Bag* pBag = 0;
 
-	for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         pItem = GetItemBySlot(i);
         if (pItem)
@@ -4627,10 +4628,10 @@ uint16 Player::GetItemCountAll(uint32 itemId, bool includeEquipment,bool include
             }
         }
     }
-	if(!includeEquipment)
-		return countitems;
+    if(!includeEquipment)
+        return countitems;
 
-	for (uint8 i = 0; i < EQUIPMENT_SLOT_END; i++)
+    for (uint8 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         pItem = GetItemBySlot(i);
         if (pItem)
@@ -4665,7 +4666,7 @@ uint16 Player::GetItemCountAll(uint32 itemId, bool includeEquipment,bool include
             }
         }
     }
-	return countitems;
+    return countitems;
 }
 
 //where =1 : inventory; =2 : bank; =3 all
@@ -4909,46 +4910,46 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
             SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
             _ApplyItemMods(item, slot, true);
-			for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
-			{
-				uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
-				if( Enchant_id)
-				{
-					SpellItemEnchantment *pEnchant;
-					pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
-					uint32 enchant_display = pEnchant->display_type;
-					uint32 enchant_value1 = pEnchant->value1;
-					uint32 enchant_value2 = pEnchant->value2;
-					uint32 enchant_spell_id = pEnchant->spellid;
-					uint32 enchant_aura_id = pEnchant->aura_id;
-					uint32 enchant_description = pEnchant->description;
-					if(enchant_display ==4)
-						SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
-					else if(enchant_display ==2)
-					{
-						SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
-						SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
-					}
-					else 
-					{
-						Spell *pEnchantSpell;
-						SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-						if(enchant_aura_id)
-						{
-							Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,this,this);
-							pEnchantSpell = new Spell(this,enchantSpell_info,false,pAura);
-						}
-						else pEnchantSpell = new Spell(this,enchantSpell_info,false,0);
+            for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+            {
+                uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+                if( Enchant_id)
+                {
+                    SpellItemEnchantment *pEnchant;
+                    pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+                    uint32 enchant_display = pEnchant->display_type;
+                    uint32 enchant_value1 = pEnchant->value1;
+                    uint32 enchant_value2 = pEnchant->value2;
+                    uint32 enchant_spell_id = pEnchant->spellid;
+                    uint32 enchant_aura_id = pEnchant->aura_id;
+                    uint32 enchant_description = pEnchant->description;
+                    if(enchant_display ==4)
+                        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
+                    else if(enchant_display ==2)
+                    {
+                        SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
+                        SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
+                    }
+                    else
+                    {
+                        Spell *pEnchantSpell;
+                        SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+                        if(enchant_aura_id)
+                        {
+                            Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,this,this);
+                            pEnchantSpell = new Spell(this,enchantSpell_info,false,pAura);
+                        }
+                        else pEnchantSpell = new Spell(this,enchantSpell_info,false,0);
 
-						WPAssert(pEnchantSpell);
+                        WPAssert(pEnchantSpell);
 
-						SpellCastTargets targets;
-						targets.setUnitTarget(this);
-						//pEnchantSpell->m_CastItem = item;
-						pEnchantSpell->prepare(&targets);
-					}
-				}
-			}
+                        SpellCastTargets targets;
+                        targets.setUnitTarget(this);
+                        //pEnchantSpell->m_CastItem = item;
+                        pEnchantSpell->prepare(&targets);
+                    }
+                }
+            }
         }
         if (IsInWorld())
         {
@@ -5315,42 +5316,42 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
             if (slot < EQUIPMENT_SLOT_END)
             {
                 _ApplyItemMods(pItem, slot, false);
-				int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
                 for (int i = VisibleBase; i < VisibleBase + 12; ++i)
                 {
                     SetUInt32Value(i, 0);
                 }
-				for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
-				{
-					uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
-					if( Enchant_id)
-					{
-						SpellItemEnchantment *pEnchant;
-						pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
-						uint32 enchant_display = pEnchant->display_type;
-						uint32 enchant_value1 = pEnchant->value1;
-						uint32 enchant_value2 = pEnchant->value2;
-						uint32 enchant_spell_id = pEnchant->spellid;
-						uint32 enchant_aura_id = pEnchant->aura_id;
-						uint32 enchant_description = pEnchant->description;
-						//SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-						if(enchant_display ==4)
-							SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
-						else if(enchant_display ==2)
-						{
-							SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
-							SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
-						}
-						else 
-						{
-							if(enchant_aura_id)
-							{
-								RemoveAura(enchant_spell_id,enchant_aura_id);
-							}
-							RemoveAura(enchant_spell_id);
-						}
-					}
-				}
+                for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+                {
+                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+                    if( Enchant_id)
+                    {
+                        SpellItemEnchantment *pEnchant;
+                        pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+                        uint32 enchant_display = pEnchant->display_type;
+                        uint32 enchant_value1 = pEnchant->value1;
+                        uint32 enchant_value2 = pEnchant->value2;
+                        uint32 enchant_spell_id = pEnchant->spellid;
+                        uint32 enchant_aura_id = pEnchant->aura_id;
+                        uint32 enchant_description = pEnchant->description;
+                        //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+                        if(enchant_display ==4)
+                            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
+                        else if(enchant_display ==2)
+                        {
+                            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
+                            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
+                        }
+                        else
+                        {
+                            if(enchant_aura_id)
+                            {
+                                RemoveAura(enchant_spell_id,enchant_aura_id);
+                            }
+                            RemoveAura(enchant_spell_id);
+                        }
+                    }
+                }
             }
             if (client_remove)
             {

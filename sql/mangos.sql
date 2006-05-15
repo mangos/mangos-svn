@@ -1202,7 +1202,7 @@ CREATE TABLE `item_template` (
   `requiredhonorrank` int(30) unsigned NOT NULL default '0',
   `RequiredCityRank` int(30) unsigned NOT NULL default '0',
   `RequiredReputationFaction` int(30) unsigned NOT NULL default '0',
-  `RequiredRaputationRank` int(30) unsigned NOT NULL default '0',
+  `RequiredReputationRank` int(30) unsigned NOT NULL default '0',
   `maxcount` int(30) unsigned NOT NULL default '0',
   `stackable` int(30) unsigned NOT NULL default '0',
   `ContainerSlots` int(30) unsigned NOT NULL default '0',

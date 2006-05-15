@@ -180,7 +180,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->RequiredHonorRank;
     data << itemProto->RequiredCityRank;
     data << itemProto->RequiredReputationFaction;
-    data << itemProto->RequiredRaputationRank;
+    data << itemProto->RequiredReputationRank;
     data << itemProto->MaxCount;
     data << itemProto->Stackable;
     data << itemProto->ContainerSlots;;
