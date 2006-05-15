@@ -67,7 +67,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_destY = caster->GetPositionY();
         m_destZ = caster->GetPositionZ();
         m_unitTarget = caster;
-		return;
+        return;
     }
 
     if(m_targetMask & TARGET_FLAG_UNIT)
@@ -419,7 +419,7 @@ void Spell::prepare(SpellCastTargets * targets)
 void Spell::cancel()
 {
     WorldPacket data;
-	m_autoRepeat = false;
+    m_autoRepeat = false;
     if(m_spellState == SPELL_STATE_PREPARING)
     {
         SendInterrupted(0);
@@ -611,21 +611,21 @@ void Spell::finish()
     if(m_TriggerSpell)
         TriggerSpell();
 
-	if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
-		return;
+    if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
     ItemPrototype *proto = m_CastItem->GetProto();
     uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
     uint32 ItemId = proto->ItemId;
 
-	if (ItemClass == ITEM_CLASS_CONSUMABLE)
+    if (ItemClass == ITEM_CLASS_CONSUMABLE)
     {
         ((Player*)m_caster)->RemoveItemFromInventory(proto->ItemId, 1);
         if(ItemCount<=1)
         {
             //pItem->DeleteFromDB();
             //delete m_CastItem;
-			m_CastItem = NULL;
+            m_CastItem = NULL;
         }
     }
 
@@ -980,7 +980,7 @@ uint8 Spell::CheckItems()
     }
     if(m_CastItem)
     {
-		itemid = m_CastItem->GetEntry();
+        itemid = m_CastItem->GetEntry();
         if(p_caster->GetItemCountAll(itemid,true,false) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
@@ -995,21 +995,21 @@ uint8 Spell::CheckItems()
             return (uint8)CAST_FAIL_ITEM_NOT_READY;         //0x54
     }
 
-        uint32 totems = 2;
-        for(int i=0;i<2;i++)
+    uint32 totems = 2;
+    for(int i=0;i<2;i++)
+    {
+        if(m_spellInfo->Totem[i] != 0)
         {
-            if(m_spellInfo->Totem[i] != 0)
+            if(p_caster->GetItemCountAll(itemTarget->GetEntry(),true,false) > 1)
             {
-                if(p_caster->GetItemCountAll(itemTarget->GetEntry(),true,false) > 1)
-                {
-                        totems -= 1;
-                        continue;
-                }
-            }else
-            totems -= 1;
-        }
-        if(totems != 0)
-            return uint8(0x70);
+                totems -= 1;
+                continue;
+            }
+        }else
+        totems -= 1;
+    }
+    if(totems != 0)
+        return uint8(0x70);
     return uint8(0);
 }
 

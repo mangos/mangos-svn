@@ -209,7 +209,7 @@ struct ItemPrototype
     uint32 RequiredHonorRank;
     uint32 RequiredCityRank;
     uint32 RequiredReputationFaction;
-    uint32 RequiredRaputationRank;
+    uint32 RequiredReputationRank;
     uint32 MaxCount;
     uint32 Stackable;
     uint32 ContainerSlots;

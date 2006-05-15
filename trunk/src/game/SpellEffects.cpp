@@ -576,7 +576,7 @@ void Spell::EffectLearnSpell(uint32 i)
         return;
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         unitTarget = m_targets.getUnitTarget();
-	Player *player = (Player*)unitTarget;
+    Player *player = (Player*)unitTarget;
 
     uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
     //data.Initialize(SMSG_LEARNED_SPELL);
@@ -725,8 +725,8 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             item_slot = j;
         }
     }
-	if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-	{
+    if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+    {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
     }
@@ -761,7 +761,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
     SpellItemEnchantment *pEnchant;
     pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
-	/*
+    /*
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
     uint32 enchant_value2 = pEnchant->value2;
@@ -769,7 +769,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     uint32 enchant_aura_id = pEnchant->aura_id;
     uint32 enchant_description = pEnchant->description;
     //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-	*/
+    */
     if (add_slot < 21)
     {
         for(uint8 j=0;j<3;j++)
@@ -778,7 +778,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
         //p_caster->ApplyItemMods( itemTarget, item_slot, true );
         //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-		p_caster->UpdateSkillPro(m_spellInfo->Id);
+        p_caster->UpdateSkillPro(m_spellInfo->Id);
     }
 
 }
@@ -804,8 +804,8 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             item_slot = j;
         }
     }
-	if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-	{
+    if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+    {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
     }
@@ -840,7 +840,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     SpellItemEnchantment *pEnchant;
     pEnchant = sSpellItemEnchantmentStore.LookupEntry(m_spellInfo->EffectMiscValue[0]);
-	/*
+    /*
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
     uint32 enchant_value2 = pEnchant->value2;
@@ -848,7 +848,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     uint32 enchant_aura_id = pEnchant->aura_id;
     uint32 enchant_description = pEnchant->description;
     //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-	*/
+    */
     if (add_slot < 21)
     {
         for(uint8 j=0;j<3;j++)
@@ -1335,8 +1335,8 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             item_slot = j;
         }
     }
-	if(itemTarget->GetSlot() > EQUIPMENT_SLOT_END)
-	{
+    if(itemTarget->GetSlot() > EQUIPMENT_SLOT_END)
+    {
         SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
         return;
     }
@@ -1387,33 +1387,33 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 
         //p_caster->ApplyItemMods( itemTarget, item_slot, true );
         //itemTarget->SendUpdateToPlayer((Player *)p_caster);
-		if(enchant_display ==4)
-			p_caster->SetUInt32Value(UNIT_FIELD_ARMOR,p_caster->GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
-		else if(enchant_display ==2)
-		{
-			p_caster->SetUInt32Value(UNIT_FIELD_MINDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
-			p_caster->SetUInt32Value(UNIT_FIELD_MAXDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
-		}
-		else 
-		{
-			Spell *pEnchantSpell;
-			SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-			if(enchant_aura_id)
-			{
-				Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,p_caster,p_caster);
-				pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,pAura);
-			}
-			else pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,0);
+        if(enchant_display ==4)
+            p_caster->SetUInt32Value(UNIT_FIELD_ARMOR,p_caster->GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
+        else if(enchant_display ==2)
+        {
+            p_caster->SetUInt32Value(UNIT_FIELD_MINDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
+            p_caster->SetUInt32Value(UNIT_FIELD_MAXDAMAGE,p_caster->GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
+        }
+        else
+        {
+            Spell *pEnchantSpell;
+            SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+            if(enchant_aura_id)
+            {
+                Aura *pAura = new Aura(enchantSpell_info,enchant_aura_id,p_caster,p_caster);
+                pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,pAura);
+            }
+            else pEnchantSpell = new Spell(p_caster,enchantSpell_info,false,0);
 
-			WPAssert(pEnchantSpell);
+            WPAssert(pEnchantSpell);
 
-			SpellCastTargets targets;
-			targets.setUnitTarget(p_caster);
-			//pEnchantSpell->m_CastItem = item;
-			pEnchantSpell->prepare(&targets);
-		}
-		p_caster->UpdateSkillPro(m_spellInfo->Id);
-	}
+            SpellCastTargets targets;
+            targets.setUnitTarget(p_caster);
+            //pEnchantSpell->m_CastItem = item;
+            pEnchantSpell->prepare(&targets);
+        }
+        p_caster->UpdateSkillPro(m_spellInfo->Id);
+    }
 }
 
 void Spell::EffectDisEnchant(uint32 i)
@@ -1421,13 +1421,13 @@ void Spell::EffectDisEnchant(uint32 i)
     Player* p_caster = (Player*)m_caster;
     if(!itemTarget)
         return;
-	uint32 item_level = itemTarget->GetProto()->ItemLevel;
+    uint32 item_level = itemTarget->GetProto()->ItemLevel;
     uint32 item_quality = itemTarget->GetProto()->Quality;
-	if(item_quality > 4 || item_quality < 2)
-	{
-		SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
-		return;
-	}
+    if(item_quality > 4 || item_quality < 2)
+    {
+        SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
+        return;
+    }
     if(itemTarget->GetProto()->Class != 2 || itemTarget->GetProto()->Class != 4)
     {
         SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
@@ -1436,7 +1436,7 @@ void Spell::EffectDisEnchant(uint32 i)
     p_caster->RemoveItemFromInventory(itemTarget->GetEntry(),1);
 
     Player *player = (Player*)m_caster;
-	p_caster->UpdateSkillPro(m_spellInfo->Id);
+    p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     if(item_level >= 51 && item_level <= 60)
     {
@@ -1812,8 +1812,8 @@ void Spell::EffectTransmitted(uint32 i)
     float fx,fy;
     WorldPacket data;
 
-	//float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-	//float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+    //float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+    //float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
     fx = m_caster->GetPositionX() + irand(10,20) * cos(m_caster->GetOrientation());
     fy = m_caster->GetPositionY() + irand(10,20) * sin(m_caster->GetOrientation());
 
@@ -1846,5 +1846,5 @@ void Spell::EffectTransmitted(uint32 i)
 void Spell::EffectSkill(uint32)
 {
     Player *player = (Player*)m_caster;
-	player->UpdateSkillPro(m_spellInfo->Id);
+    player->UpdateSkillPro(m_spellInfo->Id);
 }

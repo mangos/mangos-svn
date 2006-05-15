@@ -130,7 +130,7 @@ void PetAI::UpdateAI(const uint32 diff)
         {
             DEBUG_LOG("Pet AI stoped attacking [guid=%u]", i_pet.GetGUIDLow());
             _stopAttack();
-			return;
+            return;
         }
         else if( i_pet.IsStopped() )
         {
