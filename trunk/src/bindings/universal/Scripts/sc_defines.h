@@ -82,7 +82,7 @@ extern uint32 GetSkillLevel(Player *player,uint32 skill);
 
 // Defined fuctions to use with player.
 
-#define ADD_GOSSIP_ITEM(a,b,c,d)   PlayerTalkClass->GetGossipMenu()->MenuItem(a,b,c,d)
+#define ADD_GOSSIP_ITEM(a,b,c,d)   PlayerTalkClass->GetGossipMenu()->AddMenuItem(a,b,c,d)
 #define SEND_GOSSIP_MENU(a,b)      PlayerTalkClass->SendGossipMenu(a,b)
 #define SEND_POI(a,b,c,d,e,f)      PlayerTalkClass->SendPointOfInterest(a,b,c,d,e,f)
 #define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip();
