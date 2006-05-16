@@ -66,6 +66,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
+    m_flags = goinfo->flags;
 
     SetUInt32Value (OBJECT_FIELD_ENTRY, goinfo->id);
 
@@ -100,12 +101,14 @@ void GameObject::Update(uint32 p_time)
                     data << GetGUID();
                     SendMessageToSet(&data, true);
                     SetUInt32Value(GAMEOBJECT_STATE, 1);
+                    SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
+                    //TODO: set timestamp
                     m_respawnTimer = 0;
                 }
             }
             break;
         case LOOTED:
-            setLootState(CLOSED);
+            SetLootState(CLOSED);
 
             data.Initialize(SMSG_DESTROY_OBJECT);
             data << GetGUID();

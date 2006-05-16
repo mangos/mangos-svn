@@ -199,7 +199,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         if (!go)
             return;
 
-        go->setLootState(LOOTED);
+        go->SetLootState(LOOTED);
     }
     else
     {
@@ -1163,12 +1163,14 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
     // set run speed ? received data is more
     sLog.outDebug("CMSG_FORCE_RUN_SPEED_CHANGE_ACK");
+	recv_data.hexlike();
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
 {
     // set swim speed ? received data is more
     sLog.outDebug("CMSG_FORCE_SWIM_SPEED_CHANGE_ACK");
+	recv_data.hexlike();
 
 }
 

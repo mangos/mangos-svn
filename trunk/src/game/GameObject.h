@@ -64,7 +64,9 @@ class MANGOS_DLL_SPEC GameObject : public Object
         bool LoadFromDB(uint32 guid);
         void DeleteFromDB();
         void generateLoot();
-        void setLootState(LootState s) { m_lootState = s; }
+        void SetLootState(LootState s) { m_lootState = s; }
+        void SetSespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
+
         LootState getLootState() { return m_lootState; }
 
         Loot        loot;
@@ -73,6 +75,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
 
         uint32      m_respawnTimer;
         uint32      m_respawnDelayTimer;
+        uint32      m_flags;
         LootState   m_lootState;
 };
 #endif

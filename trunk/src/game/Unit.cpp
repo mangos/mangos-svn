@@ -195,7 +195,7 @@ SpellEntry *Unit::reachWithSpellAttack(Unit *pVictim)
         float minrange = GetMinRange(srange);
         float dist = GetDistanceSq(pVictim);
         //if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
-        //	continue;
+        //    continue;
         if( dist > range * range || dist < minrange * minrange )
             continue;
         if(m_silenced)
@@ -465,6 +465,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     if( (damage-absorb)==0 )
     {
+
         data.Initialize(SMSG_ATTACKERSTATEUPDATE);
         data << (uint32)0x00010020;
         data << uint8(0xFF) << GetGUID();
@@ -802,7 +803,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     if(AbsorbDamage==0)
         data << (uint32)0;
     else
-        data << (uint32)0xFFFFFFFF;
+        data << (uint32)-1; //default value
 
     data << (uint32)0;
     data << (uint32)blocked_amount;
@@ -1220,9 +1221,9 @@ void Unit::_RemoveAllAuraMods()
         (*i)->_RemoveAura();
         //RemoveAura(i);
         //if(m_Auras.empty())
-        //	break;
+        //    break;
         //else
-        //	i = m_Auras.begin();
+        //    i = m_Auras.begin();
     }
 
     //_ApplyStatsMods();
@@ -1344,34 +1345,34 @@ void Unit::AddHostil(uint64 guid, float hostility)
 }
 void Unit::AddItemEnchant(uint32 enchant_id)
 {
-	SpellItemEnchantment *pEnchant;
-	Aura *pAura;
-	pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-	if(!pEnchant)
-		return;
-	uint32 enchant_display = pEnchant->display_type;
-	uint32 enchant_value1 = pEnchant->value1;
-	uint32 enchant_value2 = pEnchant->value2;
-	uint32 enchant_spell_id = pEnchant->spellid;
-	uint32 enchant_aura_id = pEnchant->aura_id;
-	uint32 enchant_description = pEnchant->description;
-	SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+    SpellItemEnchantment *pEnchant;
+    Aura *pAura;
+    pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    if(!pEnchant)
+        return;
+    uint32 enchant_display = pEnchant->display_type;
+    uint32 enchant_value1 = pEnchant->value1;
+    uint32 enchant_value2 = pEnchant->value2;
+    uint32 enchant_spell_id = pEnchant->spellid;
+    uint32 enchant_aura_id = pEnchant->aura_id;
+    uint32 enchant_description = pEnchant->description;
+    SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
 
-	if(enchant_display ==4)
-		SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
-	else if(enchant_display ==2)
-	{
-		SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
-		SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
-	}
-	else 
-	{
-		for(int x = 0;x < 3;x++)
-			if(enchantSpell_info->Effect[x])
-		{
-			//uint32 pAura_id = enchantSpell_info->Effect[x];
-			pAura = new Aura(enchantSpell_info,x,this,this);
-			AddAura(pAura);
-		}
-	}
+    if(enchant_display ==4)
+        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
+    else if(enchant_display ==2)
+    {
+        SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
+        SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
+    }
+    else 
+    {
+        for(int x = 0;x < 3;x++)
+            if(enchantSpell_info->Effect[x])
+        {
+            //uint32 pAura_id = enchantSpell_info->Effect[x];
+            pAura = new Aura(enchantSpell_info,x,this,this);
+            AddAura(pAura);
+        }
+    }
 }
