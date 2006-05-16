@@ -2822,6 +2822,8 @@ void Player::CreateCorpse()
     }
 
     MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
+	m_name.append(" corpse.");
+	this->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, m_name.c_str());
 }
 
 void Player::SpawnCorpseBones()

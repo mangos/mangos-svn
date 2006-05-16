@@ -934,7 +934,6 @@ uint8 Spell::CanCast()
     if(target)
     {
         if(!m_caster->isInFront( target, range ) && m_spellInfo->AttributesEx && m_caster->GetGUID() != target->GetGUID())
-                                                            //121
             castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
         if(m_caster->GetDistanceSq(target) > range * range )
             castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;
