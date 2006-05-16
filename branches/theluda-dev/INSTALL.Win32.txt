@@ -1,0 +1,65 @@
+= MaNGOS -- Installation =
+
+Copyright (c) 2005,2006 MaNGOS <http://www.mangosproject.org/>
+
+See the COPYING file for copying conditions.
+
+== Installation Instructions ==
+This documents describes the installation process for MaNGOS on Windows using
+Visual C++. This includes Visual C++ 2003 and Visual C++ 2005 (Express Edition
+working, too).
+
+=== Configuring ===
+MaNGOS uses the Visual C++ compiler to build the binaries. If you do not have
+Visual C++, a free Express Edition of Visual C++ 2005 is availaable at
+http://msdn.microsoft.com/vstudio/express/visualc/.
+
+Optional packages to enhance the functionality of MaNGOS are:
+
+ * Python 2.4 development package (headers) are required to build the Python
+   scripting library if you want to script the MaNGOS world daemon using Python.
+   This will also require the included PyCXX package.
+
+Optional packages included in MaNGOS as they are not installed or available on
+several systems include:
+
+ * LUA and tolua++ package are not required, but highly recommended if you want
+   to build and use the LUA scripting library and create .lua scripts for the
+   world daemon.
+ * PyCXX package is not required, but highly recommended if you want to build
+   and use the the Python scripting library.
+
+There are two build configurations available for MaNGOS.
+
+ Release (Win32)
+   
+   This will build MaNGOS and all its' dependencies in Release mode, thus all
+   information output useful to developers will be removed as well as debug
+   data will not be included in the resulting binaries.
+
+ Debug (Win32)
+   If you use this option, the DEBUG_PRINTF macro and some other debugging
+   macros will be enabled. This means you will get much more information about
+   what goes on, so use this option if something doesn't work and you don't
+   understand what happens.
+
+=== Compiling ===
+Well, it should be fairly simple if you got all the pre-requisites. Open the
+"Build" menu and select "Batch Build". In the dialog, either select all build
+configurations for "Release (Win32)" to build binaries for running MaNGOS or
+select all build configurations for "Debug (Win32) to build binaries suitable
+for running debug sessions.
+
+If you have a problem during compilation, we can't tell you what to do. Figure
+it out yourself. If we would know in advance what problems you would encounter,
+we would fix it in advance, or put a warning message in configure at least.
+
+Until this development branch will be merged into the trunk of our SubVersion
+repository, no support will be provided.
+
+Thank you for understanding.
+
+=== Installing ===
+Since there is nothing installable yet, there are no instructions available.
+
+Makes sense, doesn't it?

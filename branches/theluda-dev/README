@@ -22,8 +22,7 @@ make sure you as well take a look at the SQL files in the sql/updates/ sub-
 directory.
 
 In order to build and install MaNGOS under Linux, follow the instructions
-described in the INSTALL file. To build MaNGOS on Windows, please see the
-win/ subdirectory. A project workspace for Visual C++ 2003 is included.
+described in the INSTALL file.
 
 In case you have checked out MaNGOS from the SubVersion repository, please run
 ./reconf prior to building, as you may otherwise not be able to run a build.
