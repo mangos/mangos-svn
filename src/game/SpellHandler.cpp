@@ -58,7 +58,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
             data << uint8(EQUIP_ERR_CANT_DO_IN_COMBAT);
             data << (pItem ? pItem->GetGUID() : uint64(0));
-            //			data << (pItem ? pItem->GetGUID() : uint64(0));
+            //            data << (pItem ? pItem->GetGUID() : uint64(0));
             data << uint64(0);
             data << uint8(0);
             SendPacket(&data);
@@ -93,14 +93,59 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", guid);
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
+    
     if(!obj) return;
-    uint32 t=obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-    obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
-    obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
-    switch(obj->GetUInt32Value(GAMEOBJECT_TYPE_ID))
+    
+    uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
+    
+    switch(t)
     {
-        case 22:
+        //door
+        case 0:
+        break;
+
+        //Sitting: Wooden bench, chairs enzz
+        case 7:
+            
             info = obj->GetGOInfo();
+            if(info)
+            {
+                spellId = info->sound0;
+                                
+                _player->BuildTeleportAckMsg(&data, obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+                _player->GetSession()->SendPacket(&data);
+
+                _player->SetPosition( obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
+                _player->BuildHeartBeatMsg(&data);
+                _player->SendMessageToSet(&data, true);
+                
+                _player->SetUInt32Value(UNIT_FIELD_BYTES_1, 3 + spellId ); //offset 3 is related to the DB
+                
+                return;
+            }
+            break;
+
+        //big gun, its a spell/aura
+        case 10:
+
+        //chest locked
+        case 22:
+            
+            obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                spellId = info->sound0;
+                if (spellId == 0)
+                    spellId = info->sound3;
+
+                guid=_player->GetGUID();
+            }
+            break;
+
+        case 24:
+            //GB flag
             if(info)
             {
                 spellId = info->sound0;
@@ -108,7 +153,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
         default:
-            sLog.outDebug( "Unkonw Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
+            sLog.outDebug( "Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
             break;
     }
 
@@ -127,7 +172,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     targets.setUnitTarget( _player );
     targets.m_GOTarget = obj;
     spell->prepare(&targets);
-
 }
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
