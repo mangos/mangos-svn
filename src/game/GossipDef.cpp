@@ -45,7 +45,7 @@ void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, 
     m_gItemsCount++;
     ASSERT( m_gItemsCount < GOSSIP_MAX_MENU_ITEMS  );
 
-    m_gItems[m_gItemsCount - 1].m_gIcon       = Icon;
+    m_gItems[m_gItemsCount - 1].m_gIcon     = Icon;
     m_gItems[m_gItemsCount - 1].m_gMessage  = Text;
     m_gItems[m_gItemsCount - 1].m_gCoded    = Coded;
     m_gItems[m_gItemsCount - 1].m_gSender   = dtSender;

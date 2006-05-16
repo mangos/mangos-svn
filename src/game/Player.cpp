@@ -156,9 +156,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     for(int j = 0; j < BUYBACK_SLOT_END; j++)
     {
         m_buybackitems[j] = NULL;
-        //	    SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1+j*2,0);
-        //	    SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+j,0);
-        //	    SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+j,0);
+        //        SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1+j*2,0);
+        //        SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+j,0);
+        //        SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+j,0);
     }
 
     m_race = race;
@@ -250,7 +250,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_GUILD_TIMESTAMP, 0);
 
         SetUInt32Value(PLAYER_FIELD_HONOR_RANK, 0);
-        SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);	SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);	SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);	SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);	SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);	SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);	SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);	SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);	SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);	SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
+        SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
 
     _ApplyStatsMods();
@@ -436,7 +436,9 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     data << Amount;
     data << (uint32)0;
     data << (uint32)0;
-    m_session->SendPacket(&data);
+    //m_session->SendPacket(&data);
+    //Let other players see that you get damage
+    SendMessageToSet(&data, true);
     DealDamage((Unit*)this, Amount, 0);
 }
 
@@ -476,10 +478,11 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
         //continius trigger drowning "Damage"
         if ((m_breathTimer == 0) && (m_isunderwater & 0x01))
         {
-            uint64 guid;
-            guid = GetGUID();
+            //TODO: Check this formula
+            uint64 guid = GetGUID();
+            uint32 damage = (GetUInt32Value(UNIT_FIELD_MAXHEALTH) / 5) + rand()%GetUInt32Value(UNIT_FIELD_LEVEL);
 
-            EnvironmentalDamage(guid, DAMAGE_DROWNING,10);
+            EnvironmentalDamage(guid, DAMAGE_DROWNING,damage);
             m_breathTimer = 2000;
         }
     }
@@ -518,7 +521,8 @@ void Player::HandleLava()
         if (!m_breathTimer)
         {
             uint64 guid;
-            uint32 damage = 10;
+            //uint32 damage = 10;
+            uint32 damage = (GetUInt32Value(UNIT_FIELD_MAXHEALTH) / 3) + rand()%GetUInt32Value(UNIT_FIELD_LEVEL);
 
             guid = GetGUID();
             EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
@@ -619,7 +623,7 @@ void Player::Update( uint32 p_time )
                 GetSession()->SendPacket(&data);
             }
             //120 degreas of radiant range
-            //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551	//1,57079633-1,047197551   //1,57079633+1,047197551
+            //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
             else if( !IsInArc( 2.0943951024, pVictim ))
             {
                 setAttackTimer(uint32(1000));
@@ -723,7 +727,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
 
     *p_data << GetUInt32Value(PLAYER_GUILDID);              //probebly wrong
 
-    //*p_data << GetUInt32Value(PLAYER_GUILDRANK);	//this was
+    //*p_data << GetUInt32Value(PLAYER_GUILDRANK);    //this was
     *p_data << uint8(0x0);
     *p_data << uint8(GetUInt32Value(PLAYER_FLAGS) << 1);
     *p_data << uint8(0x0);                                  //Bit 4 is something dono
@@ -2016,7 +2020,6 @@ void Player::DestroyForPlayer( Player *target ) const
 
 void Player::SaveToDB()
 {
-
     if (hasUnitState(UNIT_STAT_IN_FLIGHT))
     {
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
@@ -2683,9 +2686,15 @@ void Player::BuildPlayerRepop()
     data << (uint32)30000;
     GetSession()->SendPacket( &data );
 
+    //TODO: Check/research this
     data.Initialize(SMSG_SPELL_START );
-    data << uint8(0xFF) << GetGUID() << uint8(0xFF) << GetGUID() << uint16(8326);
-    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+    data << uint8(0xFF) << GetGUID() //9
+         << uint8(0xFF) << GetGUID() //9
+         //<< uint16(8326); //2
+         << uint32(20305) //2
+         << uint16(0x02)
+
+         << uint32(0x00)<< uint16(0x00); //6
     GetSession()->SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
@@ -2704,7 +2713,6 @@ void Player::BuildPlayerRepop()
     StopMirrorTimer(2);
 
     SetUInt32Value(UNIT_FIELD_FLAGS, 0x08);
-    //	if (getRace() != RACE_NIGHT_ELF)	// only when not elf
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
 
     SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
@@ -2834,8 +2842,8 @@ void Player::CreateCorpse()
     }
 
     MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
-	m_name.append(" corpse.");
-	this->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, m_name.c_str());
+    m_name.append(" corpse.");
+    this->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, m_name.c_str());
 }
 
 void Player::SpawnCorpseBones()
@@ -2891,7 +2899,7 @@ void Player::DeathDurabilityLoss(double percent)
                 m_items[i]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
 
                 // we have durability 25% or 0 we should modify item stats
-                //		if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
+                //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
                 if ( pNewDurability == 0 )
                 {
                     _ApplyItemMods(m_items[i],i, false);
@@ -3018,8 +3026,8 @@ void Player::UpdateSkill(uint32 skill_id)
 void Player::UpdateSkillPro(uint32 spellid)
 {
     SkillLineAbility *pSkill = sSkillLineAbilityStore.LookupEntry(spellid);
-	if(!pSkill)
-		return;
+    if(!pSkill)
+        return;
     uint32 minValue = pSkill->min_value;
     uint32 maxValue = pSkill->max_value;
     uint32 skill_id = pSkill->miscid;
@@ -3898,14 +3906,14 @@ void Player::smsg_AttackStart(Unit* pVictim)
     {
         setAttackTimer(uint32(0));
     }
-	if(getClass() == CLASS_ROGUE)
-	{
-		uint32 spellid;
-		for(spellid = 1784;spellid <1787;spellid++)
-		{
-			RemoveAura(spellid);
-		}
-	}
+    if(getClass() == CLASS_ROGUE)
+    {
+        uint32 spellid;
+        for(spellid = 1784;spellid <1787;spellid++)
+        {
+            RemoveAura(spellid);
+        }
+    }
 
     data.Initialize( SMSG_ATTACKSTART );
     data << GetGUID();
@@ -4801,7 +4809,7 @@ uint8 Player::AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible)
 //                  2 - item added to a stack (item should be deleted)
 uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
 {
-	uint32 additemcount = 0;
+    uint32 additemcount = 0;
     if (!item)
     {
         sLog.outError("AddItem: No item provided");
@@ -4878,7 +4886,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             }
             else
             {
-				additemcount = ((pItem->GetCount() + count) <= stack) ? count : (stack - pItem->GetCount());
+                additemcount = ((pItem->GetCount() + count) <= stack) ? count : (stack - pItem->GetCount());
                 if ( additemcount > 0 )
                 {
                     pItem->SetCount(pItem->GetCount() + additemcount);
@@ -4934,12 +4942,12 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             SetUInt32Value(VisibleBase + 7, item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
             SetUInt32Value(VisibleBase + 8, item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
             _ApplyItemMods(item, slot, true);
-			for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
-			{
-				uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
-				if(Enchant_id)
-					AddItemEnchant(Enchant_id);
-			}
+            for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+            {
+                uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+                if(Enchant_id)
+                    AddItemEnchant(Enchant_id);
+            }
         }
         if (IsInWorld())
         {
@@ -5310,35 +5318,35 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                 {
                     SetUInt32Value(i, 0);
                 }
-				for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
-				{
-					uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
-					if( Enchant_id)
-					{
-						SpellItemEnchantment *pEnchant;
-						pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
-						if(!pEnchant)
-							continue;
-						uint32 enchant_display = pEnchant->display_type;
-						uint32 enchant_value1 = pEnchant->value1;
-						uint32 enchant_value2 = pEnchant->value2;
-						uint32 enchant_spell_id = pEnchant->spellid;
-						uint32 enchant_aura_id = pEnchant->aura_id;
-						uint32 enchant_description = pEnchant->description;
-						//SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-						if(enchant_display ==4)
-							SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
-						else if(enchant_display ==2)
-						{
-							SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
-							SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
-						}
-						else 
-						{
-							RemoveAura(enchant_spell_id);
-						}
-					}
-				}
+                for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+                {
+                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
+                    if( Enchant_id)
+                    {
+                        SpellItemEnchantment *pEnchant;
+                        pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+                        if(!pEnchant)
+                            continue;
+                        uint32 enchant_display = pEnchant->display_type;
+                        uint32 enchant_value1 = pEnchant->value1;
+                        uint32 enchant_value2 = pEnchant->value2;
+                        uint32 enchant_spell_id = pEnchant->spellid;
+                        uint32 enchant_aura_id = pEnchant->aura_id;
+                        uint32 enchant_description = pEnchant->description;
+                        //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+                        if(enchant_display ==4)
+                            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
+                        else if(enchant_display ==2)
+                        {
+                            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
+                            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
+                        }
+                        else 
+                        {
+                            RemoveAura(enchant_spell_id);
+                        }
+                    }
+                }
             }
             if (client_remove)
             {

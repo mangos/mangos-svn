@@ -101,7 +101,14 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     {
         //door
         case GAMEOBJECT_TYPE_DOOR: //0
+            obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+            obj->SetUInt32Value(GAMEOBJECT_STATE,0); //open
+            //obj->SetUInt32Value(GAMEOBJECT_TIMESTAMP,0x465EE6D2); //load timestamp
 
+            obj->SetLootState((LootState)0);
+            obj->SetSespawnTimer(5000); //close door in 5 seconds
+
+            return;
         break;
 
         //Sitting: Wooden bench, chairs enzz
@@ -232,3 +239,4 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
     if(_player->m_currentSpell)
         _player->m_currentSpell->cancel();
 }
+

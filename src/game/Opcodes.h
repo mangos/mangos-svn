@@ -808,7 +808,6 @@ enum OpCodes
     SMSG_MINIGAME_MOVE_FAILED                       = 763-2,
     CMSG_GUILD_CHANGEINFO                           = 764-2,
 
-    //newfound *NEW VERSION 2-4-2006*
     CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
 };
