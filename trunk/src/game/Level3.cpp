@@ -1461,7 +1461,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
 
-    sDatabase.PExecute("INSERT INTO `game_graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%u');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
+    sDatabase.PExecute("INSERT INTO `areatrigger_graveyard` ( `position_x`,`position_y`,`position_z`,`map`) VALUES ('%f', '%f', '%f', '%u');", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId() );
 
     return true;
 }

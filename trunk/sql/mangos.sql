@@ -51,6 +51,33 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 
 --
+-- Table structure for table `areatrigger_graveyard`
+--
+
+DROP TABLE IF EXISTS `areatrigger_graveyard`;
+CREATE TABLE `areatrigger_graveyard` (
+  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `zone` int(11) unsigned NOT NULL default '0' COMMENT 'Zone Identifier',
+  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `faction` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
+
+--
+-- Dumping data for table `areatrigger_graveyard`
+--
+
+
+/*!40000 ALTER TABLE `areatrigger_graveyard` DISABLE KEYS */;
+LOCK TABLES `areatrigger_graveyard` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `areatrigger_graveyard` ENABLE KEYS */;
+
+--
 -- Table structure for table `areatrigger_involvedrelation`
 --
 
@@ -78,11 +105,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `areatrigger_tavern`;
 CREATE TABLE `areatrigger_tavern` (
-  `triggerid` int(20) NOT NULL auto_increment,
-  `Triggername` text NOT NULL,
-  PRIMARY KEY  (`triggerid`),
-  UNIQUE KEY `acct` (`triggerid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 11264 kB; InnoDB free: 18432 kB';
+  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `name` text,
+  PRIMARY KEY  (`id`),
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
 --
 -- Dumping data for table `areatrigger_tavern`
@@ -823,33 +849,6 @@ CREATE TABLE `game_corpse` (
 LOCK TABLES `game_corpse` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `game_corpse` ENABLE KEYS */;
-
---
--- Table structure for table `game_graveyard`
---
-
-DROP TABLE IF EXISTS `game_graveyard`;
-CREATE TABLE `game_graveyard` (
-  `id` int(60) NOT NULL auto_increment,
-  `position_x` float default NULL,
-  `position_y` float default NULL,
-  `position_z` float default NULL,
-  `orientation` float default NULL,
-  `zone` int(16) default NULL,
-  `map` int(16) default NULL,
-  `faction` int(32) unsigned default NULL,
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `game_graveyard`
---
-
-
-/*!40000 ALTER TABLE `game_graveyard` DISABLE KEYS */;
-LOCK TABLES `game_graveyard` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `game_graveyard` ENABLE KEYS */;
 
 --
 -- Table structure for table `game_spell`

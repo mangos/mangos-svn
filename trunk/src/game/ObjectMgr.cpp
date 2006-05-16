@@ -607,7 +607,7 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `game_graveyard` WHERE `map` = '%u' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
+    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `areatrigger_graveyard` WHERE `map` = '%u' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
 
     if( ! result )
         return NULL;
