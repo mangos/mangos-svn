@@ -45,7 +45,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_BIND_SIGHT
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
-    &Aura::HandleNULL,                                      ////missing 4
+    &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY	//missing 4
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CONFUSE = 5,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_FEAR = 7,
@@ -555,17 +555,25 @@ void HandleTriggerSpellEvent(void *obj)
 
 void Aura::TriggerSpell()
 {
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( m_modifier->m_miscvalue );
+    //SpellEntry *spellInfo = sSpellStore.LookupEntry( m_modifier->m_miscvalue );
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( GetSpellProto()->EffectTriggerSpell[m_effIndex] );
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n",  m_modifier->m_miscvalue);
+        sLog.outError("WORLD: unknown spell id %i\n",  GetSpellProto()->EffectTriggerSpell[m_effIndex]);
         return;
     }
 
     Spell *spell = new Spell(m_target, spellInfo, true, this);
+	Unit* target = NULL;
+	if(m_caster->GetTypeId() == TYPEID_PLAYER)
+	{
+		target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+	}
+	if(!target)
+		return;
     SpellCastTargets targets;
-    targets.setUnitTarget(m_target);
+    targets.setUnitTarget(target);
     spell->prepare(&targets);
 }
 
@@ -782,8 +790,8 @@ void Aura::HandleAuraModResistance(bool apply)
 void Aura::HandleAuraModRoot(bool apply)
 {
     WorldPacket data;
-    apply ? data.Initialize(MSG_MOVE_ROOT) : data.Initialize(MSG_MOVE_UNROOT);
-    data << m_target->GetGUID();
+    apply ? data.Initialize(SMSG_FORCE_MOVE_ROOT) : data.Initialize(SMSG_FORCE_MOVE_UNROOT);//MSG_MOVE_ROOT
+    data << uint8(0xFF)<< m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -796,6 +804,7 @@ void Aura::HandleAuraModStat(bool apply)
 {
     uint16 index = 0;
     uint16 index2 = 0;
+    uint16 index3 = 0;
     switch(m_modifier->m_miscvalue)
     {
         case 0:
@@ -809,11 +818,13 @@ void Aura::HandleAuraModStat(bool apply)
         case 2:
             index = UNIT_FIELD_STAMINA;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
+            index3 = UNIT_FIELD_MAXHEALTH;
             break;
         case 3:
             index = UNIT_FIELD_IQ;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
-            break;
+            index3 = UNIT_FIELD_MAXPOWER1;
+           break;
         case 4:
             index = UNIT_FIELD_SPIRIT;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
@@ -846,12 +857,16 @@ void Aura::HandleAuraModStat(bool apply)
     if(apply)
     {
         m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
+		if(index3)
+			m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? m_modifier->m_amount:-m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
         if(m_target->GetTypeId() == TYPEID_PLAYER)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
     }
     else
     {
         m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
+		if(index3)
+            m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? -m_modifier->m_amount:m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
         if(m_target->GetTypeId() == TYPEID_PLAYER)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
     }

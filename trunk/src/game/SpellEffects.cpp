@@ -103,7 +103,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE
     &Spell::EffectOpenSecretSafe,                           //SPELL_EFFECT_OPEN_LOCK_ITEM
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PROFICIENCY
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SEND_EVENT
+    &Spell::EffectSendEvent,                                     //SPELL_EFFECT_SEND_EVENT
     &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN
     &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT
     &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL
@@ -256,6 +256,10 @@ void Spell::EffectManaDrain(uint32 i)
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
     else
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
+}
+
+void Spell::EffectSendEvent(uint32 i)
+{
 }
 
 void Spell::EffectPowerDrain(uint32 i)
