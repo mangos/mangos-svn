@@ -201,6 +201,8 @@ class Quest
         bool CanShowUnsatified( Player *_Player );
         bool PreReqSatisfied( Player *_Player );
         bool RewardIsTaken( Player *_Player );
+        bool AddSrcItem( Player *_Player );
+        bool RemSrcItem( Player *_Player );
         bool HasSpecialFlag( uint32 Flag )  { return (( m_quest->SpecialFlags & Flag ) == Flag); }
     private:
         QuestInfo *m_quest;
