@@ -999,7 +999,7 @@ uint8 Spell::CheckItems()
     {
         if(m_spellInfo->Totem[i] != 0)
         {
-            if(p_caster->GetItemCountAll(itemTarget->GetEntry(),true,false) > 1)
+            if(p_caster->GetItemCountAll(m_spellInfo->Totem[i],true,false) >= 1)
             {
                 totems -= 1;
                 continue;
