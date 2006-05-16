@@ -1714,8 +1714,17 @@ void Spell::EffectMomentMove(uint32 i)
 
 void Spell::EffectSkinning(uint32 i)
 {
-    assert(unitTarget);
-    assert(m_caster);
+	if(unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->isAlive())
+		return;
+    if(!m_caster)
+		return;
+	CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
+
+	if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
+	{
+		SendCastResult(CAST_FAIL_INVALID_TARGET);
+		return;
+	}
 
     if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= (unitTarget->getLevel()-1)*5)
     {
@@ -1723,7 +1732,7 @@ void Spell::EffectSkinning(uint32 i)
     }else
     {
         SendCastResult(CAST_FAIL_FAILED);
-
+		return;
     }
 
 }
