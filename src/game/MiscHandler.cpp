@@ -1005,7 +1005,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     // set resting flag we are in the inn
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `areatrigger_tavern` WHERE `triggerid` = '%u';", Trigger_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `areatrigger_tavern` WHERE `id` = '%u';", Trigger_ID);
     if(result)
     {
         int cnt;
