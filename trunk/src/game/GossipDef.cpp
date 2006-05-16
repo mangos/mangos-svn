@@ -358,17 +358,25 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
     if ( !Completable )
     {
         if ( strlen(pQuest->GetQuestInfo()->IncompleteText)>0 )
-            data << pQuest->GetQuestInfo()->IncompleteText; else
+            data << pQuest->GetQuestInfo()->IncompleteText;
+        else
             data << pQuest->GetQuestInfo()->Details;
-    } else
+    }
+    else
     {
         if ( strlen(pQuest->GetQuestInfo()->CompletionText)>0 )
-            data << pQuest->GetQuestInfo()->CompletionText; else
+            data << pQuest->GetQuestInfo()->CompletionText;
+        else
             data << pQuest->GetQuestInfo()->Details;
     }
 
-    data << uint32(0x00) << uint32(0x01);
-    data << uint32(0x01) << uint32(0x00);
+    data << uint32(0x00);
+    // Emote
+    data << uint32(0x01);
+    // Close Window after cancel
+    data << uint32(0x00);
+    // Req Gold
+    data << uint32(0x00);
 
     data << uint32( pQuest->m_qReqItemsCount );
 
@@ -382,11 +390,16 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
         data << uint32(pQuest->GetQuestInfo()->ReqItemCount[i]);
 
         if ( pItem )
-            data << uint32(pItem->DisplayInfoID); else
+            data << uint32(pItem->DisplayInfoID);
+        else
             data << uint32(0);
     }
 
-    data << uint32(0x02) << uint32(0x00);
+    data << uint32(0x02);
+    if ( !Completable )
+        data << uint32(0x00);
+    else
+        data << uint32(0x03);
     data << uint32(0x04) << uint32(0x08) << uint32(0x10);
 
     pSession->SendPacket( &data );

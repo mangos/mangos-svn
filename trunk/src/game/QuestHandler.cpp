@@ -84,38 +84,38 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     if (!pQuest)
         return;
 
-    if ( (_player->m_timedQuest) && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
-    {
-        _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
-        return;
-    }
-
-    if (pQuest->GetQuestInfo()->SrcItemId>0)
-    {
-        if ( !_player->AddNewItem(pQuest->GetQuestInfo()->SrcItemId,pQuest->GetQuestInfo()->SrcItemCount,false) )
-        {
-            _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
-            return;
-        }
-    }
-    if(_player->getQuestStatus(pQuest->GetQuestInfo()->QuestId)==QUEST_STATUS_NONE)
-        _player->addNewQuest(pQuest,QUEST_STATUS_INCOMPLETE);
     uint16 log_slot = _player->getOpenQuestSlot();
     if (log_slot == 0)
     {
         _player->PlayerTalkClass->SendQuestLogFull();
         return;
     }
+    
+    if ( (_player->m_timedQuest) && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
+    {
+        _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
+        return;
+    }
+
+    if ( !pQuest->AddSrcItem( _player ) )
+    {
+        _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+        return;
+    }
+	
+	_player->addNewQuest(pQuest,QUEST_STATUS_INCOMPLETE);
+
     _player->SetUInt32Value(log_slot + 0, quest_id);
     _player->SetUInt32Value(log_slot + 1, 0);
     _player->SetUInt32Value(log_slot + 2, 0);
 
     sLog.outDebug( "WORLD: Sent Quest Acceptance" );
 
-    _player->setQuestStatus(quest_id, QUEST_STATUS_INCOMPLETE, false);
-
     if ( _player->isQuestComplete(pQuest) )
+    {
         _player->PlayerTalkClass->SendQuestCompleteToLog( pQuest );
+        _player->setQuestStatus( pQuest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false);
+    }
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
@@ -139,12 +139,6 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     else
         Script->QuestAccept(_player, pCreature, pQuest );
     _player->PlayerTalkClass->CloseGossip();
-    if(!(Script->GossipHello( _player, pCreature )))
-    {
-        pCreature->prepareQuestMenu( _player );
-        pCreature->sendPreparedQuest( _player );
-    }
-    //_player->SaveToDB();
 }
 
 void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
@@ -282,11 +276,18 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     _player->SetUInt32Value(log_slot+0, 0);
     _player->SetUInt32Value(log_slot+1, 0);
     _player->SetUInt32Value(log_slot+2, 0);
-    _player->GiveXP( pQuest->XPValue( _player ), guid1 );
-    _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
+    if ( _player->getLevel() < 60 )
+    {
+        _player->GiveXP( pQuest->XPValue( _player ), guid1 );
+        _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
+    }
+    else
+        _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( _player ) );
 
-    _player->setQuestStatus(quest_id, QUEST_STATUS_COMPLETE, true);
-    //_player->SaveToDB();
+    if ( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+        _player->setQuestStatus(quest_id, QUEST_STATUS_COMPLETE, true);
+    else
+        _player->setQuestStatus(quest_id, QUEST_STATUS_NONE, false);
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid1);
     GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid1);
@@ -376,19 +377,19 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     uint16 log_slot = _player->getQuestSlotById( slot_id );
     quest_id = _player->GetUInt32Value(log_slot + 0);
 
-    if ( ( _player->getQuestStatus(quest_id) != QUEST_STATUS_COMPLETE ) &&
-        ( _player->getQuestStatus(quest_id) != QUEST_STATUS_INCOMPLETE ) )
+	_player->SetUInt32Value(log_slot + 0, 0);
+	_player->SetUInt32Value(log_slot + 1, 0);
+	_player->SetUInt32Value(log_slot + 2, 0);
+
+	if ( ( _player->getQuestStatus(quest_id) != QUEST_STATUS_COMPLETE ) && ( _player->getQuestStatus(quest_id) != QUEST_STATUS_INCOMPLETE ) )
     {
-        _player->SetUInt32Value(log_slot + 0, 0);
-        _player->SetUInt32Value(log_slot + 1, 0);
-        _player->SetUInt32Value(log_slot + 2, 0);
+
         sLog.outError("Trying to remove an invalid quest '%u' from log.", quest_id);
         return;
     }
-    _player->SetUInt32Value(log_slot + 0, 0);
-    _player->SetUInt32Value(log_slot + 1, 0);
-    _player->SetUInt32Value(log_slot + 2, 0);
-    _player->setQuestStatus( quest_id, QUEST_STATUS_AVAILABLE, false);
+	Quest *pQuest = objmgr.GetQuest(quest_id);
+	pQuest->RemSrcItem(_player);
+	_player->setQuestStatus( quest_id, QUEST_STATUS_NONE, false);
 
     //_player->SaveToDB();
 }
@@ -424,53 +425,10 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
         sLog.outError("Invalid Quest ID (or not in the ObjMgr) '%u' received from _player.", quest_id);
         return;
     }
-    if(_player->getQuestStatus(quest_id)!=QUEST_STATUS_COMPLETE)
-    {
-        _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
-        return;
-    }
-
-    int points = 0;
-    if( _player->getLevel() < pQuest->GetQuestInfo()->MinLevel + 6 )
-    {
-        points = 25;
-    }
-    else
-    {
-        int diff = _player->getLevel() - pQuest->GetQuestInfo()->MinLevel;
-        points = 25 - (5*(diff-5));
-        if(points < 5) points = 5;
-    }
-    _player->SetStanding(pCreature->getFaction(), points);
-
-    if(!(Script->QuestComplete(_player, pCreature, pQuest )))
-    {
-        _player->PlayerTalkClass->SendQuestComplete(pQuest);
-        _player->setQuestStatus(quest_id, QUEST_STATUS_COMPLETE, true);
-        _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
-        _player->GiveXP( pQuest->XPValue( _player ), guid );
-        if ( pQuest->GetQuestInfo()->RewSpell > 0 )
-        {
-            WorldPacket sdata;
-
-            _player->addSpell( pQuest->GetQuestInfo()->RewSpell );
-
-            sdata.Initialize (SMSG_LEARNED_SPELL);
-            sdata << pQuest->GetQuestInfo()->RewSpell;
-            SendPacket( &sdata );
-        }
-
-        uint16 log_slot = _player->getQuestSlot(quest_id);
-        _player->SetUInt32Value(log_slot+0, 0);
-        _player->SetUInt32Value(log_slot+1, 0);
-        _player->SetUInt32Value(log_slot+2, 0);
-        //_player->SaveToDB();
-        Quest* nextquest;
-        if(nextquest=pCreature->getNextAvailableQuest(_player,pQuest))
-            _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
-        else
-            _player->PlayerTalkClass->CloseGossip();
-    }
+    if( _player->getQuestStatus(quest_id) != QUEST_STATUS_COMPLETE )
+		_player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false);
+	else
+		_player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true);
 }
 
 void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)

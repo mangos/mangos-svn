@@ -239,219 +239,154 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
 uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 {
-    bool wasReward  = false;
-    bool wasRewardRep  = false;
-    bool wasAvail   = false;
-    bool wasIncompl = false;
-
-    bool wasAvailShow   = false;
-    bool wasUnavailShow = false;
-
+    uint32 result = DIALOG_STATUS_NONE;
     uint32 status;
-    QuestInfo *questinfo;
-    Quest *pQuest;
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        pQuest=*i;
-        questinfo = pQuest->GetQuestInfo();
-        if ( pQuest == NULL ) continue;
-        status = pPlayer->getQuestStatus(questinfo->QuestId);
-
-        if ( !pQuest->PreReqSatisfied( pPlayer ) ||
-            !pQuest->IsCompatible( pPlayer ) ||
-            pQuest->RewardIsTaken( pPlayer )
-            ) continue;
-        if ( status == QUEST_STATUS_AVAILABLE )
-        {
-            if ( pQuest->LevelSatisfied( pPlayer ) )
-            {
-                //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
-                wasAvailShow = true;
-            }
-            wasAvail   = true;
-        }
-
-        if ( status == QUEST_STATUS_UNAVAILABLE )
-        {
-            if ( pQuest->CanShowUnsatified( pPlayer ) )
-                wasUnavailShow = true;
-        }
-
-        if ( status == QUEST_STATUS_NONE )
-        {
-            if ( pQuest->PreReqSatisfied( pPlayer ) && pQuest->IsCompatible( pPlayer ) && !pQuest->RewardIsTaken( pPlayer ))
-            {
-                if ( pQuest->LevelSatisfied( pPlayer ) )
-                {
-                    pPlayer->addNewQuest(pQuest, QUEST_STATUS_AVAILABLE );
-                    wasAvailShow = true;
-                }
-                else if(pQuest->CanShowUnsatified( pPlayer ))
-                {
-                    pPlayer->addNewQuest(pQuest, QUEST_STATUS_UNAVAILABLE );
-                    wasUnavailShow = true;
-                }
-                //wasAvail = true;
-            }
-            else if (pQuest->IsCompatible( pPlayer ) && pQuest->CanShowUnsatified( pPlayer ) )
-            {
-                pPlayer->addNewQuest(pQuest, QUEST_STATUS_UNAVAILABLE );
-                wasUnavailShow = true;
-            }
-        }
-    }
+    uint32 quest_id;
+    Quest *pQuest; 
 
     for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
-        pQuest=*i;
-        questinfo = pQuest->GetQuestInfo();
-        if ( pQuest == NULL ) continue;
-        status = pPlayer->getQuestStatus(questinfo->QuestId);
+        pQuest = *i;
+        if ( !pQuest )
+            continue;
 
-        if ( status == QUEST_STATUS_INCOMPLETE )
+        quest_id = pQuest->GetQuestInfo()->QuestId;
+        status = pPlayer->getQuestStatus(quest_id);
+        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->getQuestRewardStatus(quest_id) )
         {
-            if ( pPlayer->isQuestComplete(pQuest ) )
-            {
-                //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 4, 6, 30, questinfo->Title);
-                SetFlag(UNIT_DYNAMIC_FLAGS, 2);
-                wasReward = true;
-            }
+            // POI finish quest here 
+            if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+                return DIALOG_STATUS_REWARD_REP;
             else
-                wasIncompl = true;
+                return DIALOG_STATUS_REWARD;
         }
-        if ( status == QUEST_STATUS_COMPLETE)
-        {
-            if (pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ))
-                wasRewardRep = true;
-            else if( !pPlayer->getQuestRewardStatus(questinfo->QuestId))
-            {
-                //pPlayer->PlayerTalkClass->SendPointOfInterest(GetPositionX(), GetPositionY(), 6, 6, 30, questinfo->Title);
-                SetFlag(UNIT_DYNAMIC_FLAGS, 2);
-                wasReward = true;
-            }
-        }
+        else if ( status == QUEST_STATUS_INCOMPLETE )
+            result = DIALOG_STATUS_INCOMPLETE;
     }
 
-    if (wasReward) return DIALOG_STATUS_REWARD;
-    if (wasRewardRep) return DIALOG_STATUS_REWARD_REP;
+    if ( result == DIALOG_STATUS_INCOMPLETE )
+        return result;
 
-    if (wasAvail)
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ ) 
     {
-        if (wasAvailShow)
-            return DIALOG_STATUS_AVAILABLE; else
-            return DIALOG_STATUS_CHAT;
+        pQuest = *i;
+        if ( !pQuest )
+            continue;
+
+        quest_id = pQuest->GetQuestInfo()->QuestId;
+        status = pPlayer->getQuestStatus(quest_id); 
+        if ( status == QUEST_STATUS_NONE && pQuest->PreReqSatisfied( pPlayer ) && pQuest->IsCompatible( pPlayer ) )
+        {
+            if ( pQuest->LevelSatisfied( pPlayer ) )
+                return DIALOG_STATUS_AVAILABLE;
+            else if ( pQuest->CanShowUnsatified( pPlayer ) )
+                result = DIALOG_STATUS_UNAVAILABLE;
+        }
     }
 
-    if (wasIncompl)  return DIALOG_STATUS_INCOMPLETE;
+    if ( result == DIALOG_STATUS_UNAVAILABLE )
+        return result;
 
-    if ( defstatus != DIALOG_STATUS_NONE )
-        return defstatus;
-
-    //if (wasAnavail)
-    //{
-    if (wasUnavailShow)
-        return DIALOG_STATUS_UNAVAILABLE;
-    //}
-
-    return DIALOG_STATUS_NONE;
+    if ( defstatus == DIALOG_STATUS_NONE )
+        return DIALOG_STATUS_NONE;
+    else
+        return DIALOG_STATUS_CHAT;
 }
 
 Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
 {
-    uint32 qid=prevQuest->GetQuestInfo()->NextQuestId;
-    if(qid<=0)
+    if ( !prevQuest )
         return NULL;
+    uint32 quest_id = prevQuest->GetQuestInfo()->NextQuestId; 
+    Quest *pQuest;
+
+    if( quest_id <= 0 )
+        return NULL;
+
     for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
-        Quest* nextquest=*i;
-        if(nextquest->GetQuestInfo()->QuestId==qid)
-            if( nextquest->CanBeTaken(pPlayer))
-                return nextquest;
+        pQuest = *i;
+        if( pQuest->GetQuestInfo()->QuestId == quest_id )
+        {
+            if ( pQuest->CanBeTaken( pPlayer ) )
+                return pQuest;
+            else
+                return NULL;
+        }
     }
     return NULL;
 }
 
 void Creature::prepareQuestMenu( Player *pPlayer )
 {
-    uint32 quest_id;
+    uint32 result = DIALOG_STATUS_NONE; 
     uint32 status;
+    uint32 quest_id;
     Quest *pQuest;
-    QuestMenu *qm=pPlayer->PlayerTalkClass->GetQuestMenu();
+    QuestMenu *qm = pPlayer->PlayerTalkClass->GetQuestMenu();
     qm->ClearMenu();
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        pQuest = *i;
-        quest_id=pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->getQuestStatus(quest_id);
-        if ( ( status == QUEST_STATUS_AVAILABLE ) && ( pQuest->CanBeTaken(pPlayer) ) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
-    }
 
     for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
         pQuest = *i;
-        quest_id=pQuest->GetQuestInfo()->QuestId;
+        if ( !pQuest )
+            continue; 
+
+        quest_id = pQuest->GetQuestInfo()->QuestId;
         status = pPlayer->getQuestStatus(quest_id);
-        if(qm->HasItem(quest_id))
-            continue;
-        if ( status == QUEST_STATUS_INCOMPLETE )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
-        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->getQuestRewardStatus(quest_id))
-        {
+        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->getQuestRewardStatus(quest_id) )
             qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, false );
-            float x,y,z;
-            GetRespawnCoord(x,y,z);
-            std::string mapname=pQuest->GetQuestInfo()->Title;
-            //pPlayer->PlayerTalkClass->SendPointOfInterest(x, y, 4, 2, 30, mapname.c_str());
-            //player->PlayerTalkClass->SendGossipMenu(gossip->TextId, GetGUID());
-        }
+        else if ( status == QUEST_STATUS_INCOMPLETE )
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
+    }
+
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ ) 
+    {
+        pQuest = *i;
+        if ( !pQuest )
+            continue;
+
+        quest_id = pQuest->GetQuestInfo()->QuestId;
+        status = pPlayer->getQuestStatus(quest_id);
+        if ( status == QUEST_STATUS_NONE && pQuest->CanBeTaken( pPlayer ) )
+            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
     }
 }
 
 void Creature::sendPreparedQuest(Player *player)
 {
-    QuestMenu* _QuestMenu   = player->PlayerTalkClass->GetQuestMenu();
-    if( !_QuestMenu || _QuestMenu->MenuItemCount() <1 )
+    QuestMenu* pQuestMenu = player->PlayerTalkClass->GetQuestMenu();
+    if( !pQuestMenu || pQuestMenu->MenuItemCount() < 1 )
         return;
-    uint64 guid=GetGUID();
-    if ( _QuestMenu->MenuItemCount() == 1 )
+
+    uint64 guid = GetGUID();
+    uint32 status = pQuestMenu->GetItem(0).m_qIcon;
+    if ( pQuestMenu->MenuItemCount() == 1 && status == DIALOG_STATUS_AVAILABLE )
     {
-        Quest *pQuest = objmgr.GetQuest( _QuestMenu->GetItem(0).m_qId );
-        if (pQuest)
-        {
-            if ( _QuestMenu->GetItem(0).m_qIcon == DIALOG_STATUS_REWARD )
-                player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0 );
+        Quest *pQuest = objmgr.GetQuest( pQuestMenu->GetItem(0).m_qId ); 
+        if (!pQuest)
+            return;
 
-            if ( _QuestMenu->GetItem(0).m_qIcon == DIALOG_STATUS_AVAILABLE )
-                player->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
-
-            if ( _QuestMenu->GetItem(0).m_qIcon == DIALOG_STATUS_INCOMPLETE )
-            {
-                if ( player->isQuestComplete( pQuest ) )
-                    player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
-                else
-                    player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false);
-            }
-        }
+        player->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
     }
-    else if (_QuestMenu->MenuItemCount() > 1 )
+    else
     {
         QEmote qe;
-        std::string title="";
-        uint32 textid=GetNpcTextId();
+        std::string title = "";
+        uint32 textid = GetNpcTextId();
         GossipText * gossiptext=objmgr.GetGossipText(textid);
-        if(!gossiptext)
+        if( !gossiptext )
         {
-            qe._Delay=TEXTEMOTE_MASSAGE;                    //zyg: player emote
-            qe._Emote=TEXTEMOTE_HELLO;                      //zyg: NPC emote
-            title="Do Quest?";
+            qe._Delay = TEXTEMOTE_MASSAGE;                    //zyg: player emote
+            qe._Emote = TEXTEMOTE_HELLO;                      //zyg: NPC emote
+            title = "Do Quest ?";
         }
         else
         {
-            qe=gossiptext->Options[0].Emotes[0];
-            title=gossiptext->Options[0].Text_0;
-            if(&title==NULL)
-                title="";
+            qe = gossiptext->Options[0].Emotes[0];
+            title = gossiptext->Options[0].Text_0;
+            if( &title == NULL )
+                title = "";
         }
         player->PlayerTalkClass->SendQuestMenu( qe, title, guid );
     }

@@ -51,6 +51,22 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
     pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), icon, 6, 30, "Test POI");
     return true;
 }
+bool ChatHandler::HandleSendItemErrorMsg(const char* args)
+{
+    uint8 error_msg = atol((char*)args);
+    if ( error_msg >= 0 )
+    {
+        WorldPacket data;
+        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+        data << error_msg;
+        data << uint64(0);
+        data << uint64(0);
+        data << uint8(0);
+        m_session->SendPacket( &data );
+        return true;
+    }
+    return false;
+}
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {

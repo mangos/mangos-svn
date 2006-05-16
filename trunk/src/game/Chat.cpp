@@ -76,6 +76,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand commandTable[] =
     {
         { "setpoi",  3, &ChatHandler::HandleSetPoiCommand,       "",   NULL },
+        { "itemmsg",  3, &ChatHandler::HandleSendItemErrorMsg,       "",   NULL },
         { "acct",        0, &ChatHandler::HandleAcctCommand,             "",   NULL },
         { "addmove",     2, &ChatHandler::HandleAddMoveCommand,          "",   NULL },
         { "addspirit",   3, &ChatHandler::HandleAddSpiritCommand,        "",   NULL },
