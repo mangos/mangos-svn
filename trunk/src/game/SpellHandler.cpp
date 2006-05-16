@@ -93,43 +93,43 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", guid);
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
-    
     if(!obj) return;
-    
+
     uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-    
+
     switch(t)
     {
         //door
-        case 0:
+        case GAMEOBJECT_TYPE_DOOR: //0
+
         break;
 
         //Sitting: Wooden bench, chairs enzz
-        case 7:
-            
+        case GAMEOBJECT_TYPE_CHAIR: //7
+
             info = obj->GetGOInfo();
             if(info)
             {
                 spellId = info->sound0;
-                                
+
                 _player->BuildTeleportAckMsg(&data, obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
                 _player->GetSession()->SendPacket(&data);
 
                 _player->SetPosition( obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
                 _player->BuildHeartBeatMsg(&data);
                 _player->SendMessageToSet(&data, true);
-                
-                _player->SetUInt32Value(UNIT_FIELD_BYTES_1, 3 + spellId ); //offset 3 is related to the DB
-                
+
+                _player->SetUInt32Value(UNIT_FIELD_BYTES_1, _player->GetUInt32Value(UNIT_FIELD_BYTES_1) | (3 + spellId) ); //offset 3 is related to the DB
+         
                 return;
             }
             break;
 
         //big gun, its a spell/aura
-        case 10:
+        case GAMEOBJECT_TYPE_GOOBER: //10
 
         //chest locked
-        case 22:
+        case GAMEOBJECT_TYPE_SPELLCASTER: //22
             
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 
@@ -144,14 +144,26 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-        case 24:
+        case GAMEOBJECT_TYPE_FLAGSTAND: //24
             //GB flag
+            info = obj->GetGOInfo();
             if(info)
             {
                 spellId = info->sound0;
                 guid=_player->GetGUID();
             }
             break;
+        
+        case GAMEOBJECT_TYPE_FLAGDROP: //26
+            //GB flag dropped
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                spellId = info->sound0;
+                guid=_player->GetGUID();
+            }
+            break;
+
         default:
             sLog.outDebug( "Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
             break;
