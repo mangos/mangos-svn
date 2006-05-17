@@ -388,6 +388,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_AUCTION_LIST_ITEMS,       STATUS_LOGGEDIN, &WorldSession::HandleAuctionListItems              },
         { CMSG_AUCTION_LIST_BIDDER_ITEMS,STATUS_LOGGEDIN, &WorldSession::HandleAuctionListBidderItems        },
         { CMSG_AUCTION_SELL_ITEM,        STATUS_LOGGEDIN, &WorldSession::HandleAuctionSellItem               },
+        { CMSG_AUCTION_REMOVE_ITEM,      STATUS_LOGGEDIN, &WorldSession::HandleAuctionRemoveItem               },
         { CMSG_AUCTION_LIST_OWNER_ITEMS, STATUS_LOGGEDIN, &WorldSession::HandleAuctionListOwnerItems         },
         { CMSG_AUCTION_PLACE_BID,        STATUS_LOGGEDIN, &WorldSession::HandleAuctionPlaceBid               },
 

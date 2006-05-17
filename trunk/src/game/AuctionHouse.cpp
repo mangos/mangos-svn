@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -359,6 +359,15 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     SendPacket(&data);
 
 }
+void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
+{
+	uint64 auctioneer;
+	uint32 auctionid;
+	recv_data >> auctioneer >> auctionid;
+	WorldPacket data;
+	data << auctionid << auctionid;
+	SendPacket(&data);
+}
 
 void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 {
@@ -418,127 +427,79 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 
 void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 {
-    std::string auctionString;
-    uint8 levelRange1, levelRange2, usableCheck;
-    uint32 cnt, guidhigh, guidlow, unk1, auctionSlotID, auctionMainCatagory, auctionSubCatagory, rarityCheck;
+    std::string searchedname, name;
+    uint8 levelmin, levelmax, usable;
+    uint32 count, guidhigh, guidlow, unk1, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
 
     recv_data >> guidhigh >> guidlow;
     recv_data >> unk1;
-    recv_data >> auctionString;
-    recv_data >> levelRange1 >> levelRange2;
-    recv_data >> auctionSlotID >> auctionMainCatagory >> auctionSubCatagory;
-    recv_data >> rarityCheck >> usableCheck;
-
-    sLog.outBasic("%s",auctionString.c_str( ) );
-    sLog.outBasic("\n unkAuction = %u\n Level Start = %u\n Level End = %u\n auctionSlotID = %u\n auctionMainCatagory = %u\n auctionSubCatagory = %u\n rarityCheck = %u\n usableCheck = %u\n", unk1, levelRange1, levelRange2, auctionSlotID, auctionMainCatagory, auctionSubCatagory, rarityCheck, usableCheck);
+    recv_data >> searchedname;
+    recv_data >> levelmin >> levelmax;
+    recv_data >> auctionSlotID >> auctionMainCategory >> auctionSubCategory;
+    recv_data >> quality >> usable;
 
     WorldPacket data;
-    ObjectMgr::AuctionEntryMap::iterator itr;
-    cnt = 0;
-    if (levelRange2 == 0)
-    {
-        levelRange2 = 100;
-    }
-    uint32 tempcat1, tempcat2, temprarity, tempslot;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        AuctionEntry *Aentry = itr->second;
-        Item *it = objmgr.GetAItem(Aentry->item);
-        tempcat1 = auctionMainCatagory;
-        tempcat2 = auctionSubCatagory;
-        temprarity = rarityCheck;
-        tempslot = auctionSlotID;
-        if (auctionMainCatagory == (0xffffffff))
-        {
-            auctionMainCatagory = it->GetProto()->Class;
-        }
-        if (auctionSlotID == (0xffffffff))
-        {
-            auctionSlotID = it->GetProto()->InventoryType;
-        }
-        if (rarityCheck == (0xffffffff))
-        {
-            rarityCheck = it->GetProto()->Quality;
-        }
-        if (auctionSubCatagory == (0xffffffff))
-        {
-            auctionSubCatagory = it->GetProto()->SubClass;
-        }
-        if ((it->GetProto()->InventoryType == auctionSlotID) &&(it->GetProto()->Quality == rarityCheck) && (it->GetProto()->ItemLevel >= levelRange1) && (it->GetProto()->ItemLevel <= levelRange2) && (it->GetProto()->Class == auctionMainCatagory) && (it->GetProto()->SubClass == auctionSubCatagory))
-        {
-            cnt++;
-        }
-        auctionMainCatagory = tempcat1;
-        auctionSubCatagory = tempcat2;
-        rarityCheck = temprarity;
-        auctionSlotID = tempslot;
-        tempcat1 = 0;
-        tempcat2 = 0;
-        temprarity = 0;
-        tempslot = 0;
-    }
     data.Initialize( SMSG_AUCTION_LIST_RESULT );
-    if (cnt < 33)
-    {
-        data << uint32(cnt);
-    }
-    else
-    {
-        data << uint32(32);
-    }
-    uint32 cnter = 1;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+    count = 0;
+    data << uint32(0);
+    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
         AuctionEntry *Aentry = itr->second;
-        Item *it = objmgr.GetAItem(Aentry->item);
-        tempcat1 = auctionMainCatagory;
-        tempcat2 = auctionSubCatagory;
-        temprarity = rarityCheck;
-        tempslot = auctionSlotID;
-        if (auctionMainCatagory == (0xffffffff))
+        if( Aentry )
         {
-            auctionMainCatagory = it->GetProto()->Class;
+            Item *item = objmgr.GetAItem(Aentry->item);
+            if( item )
+            {
+                ItemPrototype *proto = item->GetProto();
+                if( proto )
+                {
+                    if( auctionMainCategory == (0xffffffff) || proto->Class == auctionMainCategory )
+                    {
+                        if( auctionSubCategory == (0xffffffff) || proto->SubClass == auctionSubCategory )
+                        {
+                            if( auctionSlotID == (0xffffffff) || proto->InventoryType == auctionSlotID )
+                            {
+                                if( quality == (0xffffffff) || proto->Quality == quality )
+                                {
+                                    if( usable == (0x00) || _player->CanUseItem( proto ) )
+                                    {
+                                        if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
+                                        {
+                                            name = proto->Name1;
+                                            std::transform( name.begin(), name.end(), name.begin(), tolower );
+                                            std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), tolower );
+                                            if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
+                                            {
+                                                count++;
+                                                data << Aentry->Id;
+                                                data << proto->ItemId;
+                                                data << uint32(0);
+                                                data << uint32(0);
+                                                data << uint32(0);
+                                                data << uint32(1);
+                                                data << uint32(0);
+                                                data << item->GetUInt64Value(ITEM_FIELD_OWNER);
+                                                data << Aentry->bid;
+                                                data << uint32(0);
+                                                data << Aentry->buyout;
+                                                data << uint32((Aentry->time - time(NULL)) * 1000);
+                                                data << uint32(Aentry->bidder);
+                                                data << uint32(0);
+                                                data << Aentry->bid;
+                                                if( count == 32 )
+                                                    break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
-        if (auctionSubCatagory == (0xffffffff))
-        {
-            auctionSubCatagory = it->GetProto()->SubClass;
-        }
-        if (rarityCheck == (0xffffffff))
-        {
-            rarityCheck = it->GetProto()->Quality;
-        }
-        if (auctionSlotID == (0xffffffff))
-        {
-            auctionSlotID = it->GetProto()->InventoryType;
-        }
-        if ((cnter < 33) && (it->GetProto()->InventoryType == auctionSlotID) &&(it->GetProto()->Quality == rarityCheck) && (it->GetProto()->ItemLevel >= levelRange1) && (it->GetProto()->ItemLevel <= levelRange2) && (it->GetProto()->Class == auctionMainCatagory) && (it->GetProto()->SubClass == auctionSubCatagory))
-        {
-            data << Aentry->Id;
-            data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(1);
-            data << uint32(0);
-            data << it->GetUInt64Value(ITEM_FIELD_OWNER);
-            data << Aentry->bid;
-            data << uint32(0);
-            data << Aentry->buyout;
-            data << uint32((Aentry->time - time(NULL)) * 1000);
-            data << uint32(Aentry->bidder);
-            data << uint32(0);
-            data << Aentry->bid;
-            cnter++;
-        }
-        auctionMainCatagory = tempcat1;
-        auctionSubCatagory = tempcat2;
-        rarityCheck = temprarity;
-        auctionSlotID = tempslot;
-        tempcat1 = 0;
-        tempcat2 = 0;
-        temprarity = 0;
-        tempslot = 0;
     }
-    data << uint32(cnt);
+    data.put<uint32>(0, count);
+    data << uint32(count);
     SendPacket(&data);
 }
