@@ -71,6 +71,8 @@ RandomMovementGenerator::Reset(Creature &creature)
 void
 RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
+	if(creature.hasUnitState(UNIT_STAT_ROOT))
+		return;
     i_nextMoveTime.Update(diff);
     if( i_nextMoveTime.Passed() )
     {

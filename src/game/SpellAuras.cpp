@@ -46,7 +46,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
     &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY	//missing 4
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CONFUSE = 5,
+    &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_FEAR = 7,
     &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
@@ -207,7 +207,7 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
-    m_duration = GetDuration(spellproto, eff);
+    m_duration = GetMaxDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
     if(spellproto->EffectBasePoints[eff] < 0)
@@ -459,6 +459,14 @@ void Aura::HandlePeriodicDamage(bool apply)
         m_isPeriodic = false;
         m_duration = 0;
     }
+}
+
+void Aura::HandleModConfuse(bool apply)
+{
+    if( apply )
+		m_target->addUnitState(UNIT_STAT_CONFUSED);
+    else
+		m_target->clearUnitState(UNIT_STAT_CONFUSED);
 }
 
 void HandleHealEvent(void *obj)
@@ -790,9 +798,10 @@ void Aura::HandleAuraModResistance(bool apply)
 void Aura::HandleAuraModRoot(bool apply)
 {
     WorldPacket data;
-    apply ? data.Initialize(SMSG_FORCE_MOVE_ROOT) : data.Initialize(SMSG_FORCE_MOVE_UNROOT);//MSG_MOVE_ROOT
-    data << uint8(0xFF)<< m_target->GetGUID();
+    apply ? data.Initialize(MSG_MOVE_ROOT) : data.Initialize(MSG_MOVE_UNROOT);//MSG_MOVE_ROOT
+    data << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
+	apply ? m_target->addUnitState(UNIT_STAT_ROOT) : m_target->clearUnitState(UNIT_STAT_ROOT);
 }
 
 void Aura::HandleAuraModSilence(bool apply)
@@ -1209,7 +1218,21 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-    uint32 id=GetId();
+    if (apply)
+	{
+        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);
+        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
+		m_target->setTransForm(GetSpellProto()->Id);
+	}
+    else
+	{
+        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+		m_target->setTransForm(0);
+	}
+	if(m_caster->GetTypeId() == TYPEID_PLAYER)
+		m_target->SendUpdateToPlayer((Player*)m_caster);
+
+    /*uint32 id=GetId();
     switch (id)
     {
         case 118:
@@ -1245,7 +1268,7 @@ void Aura::HandleAuraTransform(bool apply)
                 m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
             break;
 
-    }
+    }*/
 }
 
 // FIX-ME PLS!!!
