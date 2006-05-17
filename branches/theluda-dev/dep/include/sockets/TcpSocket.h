@@ -122,7 +122,7 @@ public:
 		\param f Dummy flags -- not used */
 	void Send(const std::string &s,int f = 0);
 	/** Send string using printf formatting. */
-	void Sendf(char *format, ...);
+	void Sendf(char const *format, ...);
 	/** Send buffer of bytes.
 		\param buf Buffer pointer
 		\param len Length of data
