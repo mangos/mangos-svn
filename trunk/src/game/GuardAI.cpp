@@ -169,6 +169,8 @@ void GuardAI::UpdateAI(const uint32 diff)
                                 }
                             }
                         }
+						if(!i_creature.canReachWithAttack(i_pVictim))
+							return;
                         i_creature.AttackerStateUpdate(i_pVictim, 0);
                         i_creature.setAttackTimer(0);
 

@@ -90,7 +90,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP
     &Spell::EffectNULL,                                     //unknown45
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRADE_SKILL
+    &Spell::EffectTradeSkill,                               //SPELL_EFFECT_TRADE_SKILL
     &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT
     &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR
@@ -371,7 +371,7 @@ void Spell::EffectPresistentAA(uint32 i)
     m_AreaAura = true;
 
     DynamicObject* dynObj = new DynamicObject();
-    if(dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo, i)))
+    if(dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetMaxDuration(m_spellInfo)))
         return;
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
@@ -711,6 +711,15 @@ void Spell::EffectLearnSkill(uint32 i)
     uint32 skillid =  m_spellInfo->EffectMiscValue[i];
     uint16 skillval = ((Player*)unitTarget)->GetSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
+}
+
+void Spell::EffectTradeSkill(uint32 i)
+{
+	if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+		return;
+   // uint32 skillid =  m_spellInfo->EffectMiscValue[i];
+   // uint16 skillmax = ((Player*)unitTarget)->(skillid);
+   // ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,skillmax+75);
 }
 
 void Spell::EffectEnchantItemPerm(uint32 i)

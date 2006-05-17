@@ -85,6 +85,8 @@ enum UnitState
     UNIT_STAT_MOVING        = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
     UNIT_STAT_IN_FLIGHT     = 256,                          // player is i n flight mode
     UNIT_STAT_FOLLOW        = 512,
+	UNIT_STAT_ROOT			= 1024,
+	UNIT_STAT_CONFUSED		= 2048,
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
@@ -245,6 +247,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraList GetAuras( ) {return m_Auras;}
         void SendMoveToPacket(float x, float y, float z, bool run);
 		void AddItemEnchant(uint32 enchant_id);
+		void setTransForm(uint32 spellid) { m_transform = spellid;}
+		uint32 getTransForm() { return m_transform;}
 
     protected:
         Unit ( );
@@ -272,6 +276,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraList m_Auras;
 
         std::list<Hostil*> m_hostilList;
+		uint32 m_transform;
 
 };
 #endif

@@ -87,6 +87,8 @@ WaypointMovementGenerator::Permissible(const Creature *c)
 void
 WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
+	if(i_creature.hasUnitState(UNIT_STAT_ROOT))
+		return;
     i_nextMoveTime.Update(diff);
     if( i_nextMoveTime.Passed() )
     {

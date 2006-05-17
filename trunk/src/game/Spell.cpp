@@ -451,7 +451,7 @@ void Spell::cast()
         if(m_spellInfo->ChannelInterruptFlags != 0)
         {
             m_spellState = SPELL_STATE_CASTING;
-            SendChannelStart(GetDuration(m_spellInfo, 0));
+            SendChannelStart(GetMaxDuration(m_spellInfo));
         }
 
         std::list<Unit*>::iterator iunit;
@@ -933,7 +933,9 @@ uint8 Spell::CanCast()
     float range = GetMaxRange(srange);
     if(target)
     {
-        if(!m_caster->isInFront( target, range ) && m_spellInfo->AttributesEx && m_caster->GetGUID() != target->GetGUID())
+		if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
+			castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
+        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())// && m_spellInfo->AttributesEx
             castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
         if(m_caster->GetDistanceSq(target) > range * range )
             castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;

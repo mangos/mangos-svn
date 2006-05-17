@@ -74,6 +74,7 @@ Unit::Unit() : Object()
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
+	m_transform = 0;
 }
 
 Unit::~Unit()
@@ -394,6 +395,12 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
         pVictim->addUnitState(UNIT_STAT_ATTACK_BY);
         pVictim->addAttacker(this);
+
+		if(pVictim->getTransForm())
+		{
+			pVictim->RemoveAura(pVictim->getTransForm());
+			pVictim->setTransForm(0);
+		}
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
@@ -734,6 +741,8 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
 void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
 {
+	if(hasUnitState(UNIT_STAT_CONFUSED))
+		return;
     WorldPacket data;
     uint32    hitInfo = 0x22;
     uint32    damageType = 0;
@@ -869,9 +878,11 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-    AuraList::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    AuraList::iterator i, next;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
+		next = i;
+		next++;
         (*i)->Update( time );
         if(m_Auras.empty())
             break;
@@ -883,7 +894,7 @@ void Unit::_UpdateSpells( uint32 time )
             if(m_Auras.empty())
                 break;
             else
-                i = m_Auras.begin();
+                next = m_Auras.begin();
         }
     }
 }
@@ -1009,16 +1020,18 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 
 void Unit::RemoveAura(uint32 spellId)
 {
-    AuraList::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    AuraList::iterator i, next;
+    for (i = m_Auras.begin(); i != m_Auras.end();  i = next)
     {
+        next = i;
+        next++;
         if ((*i)->GetId() == spellId )
         {
             RemoveAura(i);
             if(m_Auras.empty())
                 break;
             else
-                i = m_Auras.begin();
+                next = m_Auras.begin();
         }
     }
 }

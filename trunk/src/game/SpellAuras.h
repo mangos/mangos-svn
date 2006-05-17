@@ -230,6 +230,7 @@ class Aura
         //aura handlers
         void HandleNULL(bool Apply);
         void HandlePeriodicDamage(bool apply);
+        void HandleModConfuse(bool apply);
         void HandlePeriodicHeal(bool apply);
         void HandleAuraWaterWalk(bool Apply);
         void HandleAuraFeatherFall(bool Apply);
