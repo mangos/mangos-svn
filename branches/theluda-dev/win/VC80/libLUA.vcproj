@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)\..\..\dep\include\lua"
-				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;LUA_SHARED"
+				PreprocessorDefinitions="WIN32;_DEBUG;_USRDLL;DLL_EXPORTS;_CRT_SECURE_NO_DEPRECATE;LUA_BUILD_AS_DLL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -114,7 +114,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(SolutionDir)\..\..\dep\include\lua"
-				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;LUA_SHARED"
+				PreprocessorDefinitions="WIN32;NDEBUG;_USRDLL;DLL_EXPORTS;_CRT_SECURE_NO_DEPRECATE;LUA_BUILD_AS_DLL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -173,7 +173,19 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\dep\src\lua\lauxlib.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lbaselib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\dep\src\lua\lcode.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\ldblib.c"
 				>
 			</File>
 			<File
@@ -197,11 +209,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\dep\src\lua\linit.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\liolib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\dep\src\lua\llex.c"
 				>
 			</File>
 			<File
+				RelativePath="..\..\dep\src\lua\lmathlib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\dep\src\lua\lmem.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\loadlib.c"
 				>
 			</File>
 			<File
@@ -210,6 +238,10 @@
 			</File>
 			<File
 				RelativePath="..\..\dep\src\lua\lopcodes.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\loslib.c"
 				>
 			</File>
 			<File
@@ -225,7 +257,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\dep\src\lua\lstrlib.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\dep\src\lua\ltable.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\ltablib.c"
 				>
 			</File>
 			<File
@@ -251,47 +291,7 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\dep\include\lua\lapi.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\ldebug.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\ldo.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lfunc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lgc.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lmem.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lobject.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lstate.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lstring.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\ltable.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\ltm.h"
+				RelativePath="..\..\dep\include\lua\lauxlib.h"
 				>
 			</File>
 			<File
@@ -303,11 +303,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\include\lua\lundump.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\lua\lvm.h"
+				RelativePath="..\..\dep\include\lua\lualib.h"
 				>
 			</File>
 		</Filter>
