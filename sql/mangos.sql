@@ -200,7 +200,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `auctionhouse_item`;
 CREATE TABLE `auctionhouse_item` (
   `guid` bigint(20) NOT NULL default '0',
-  `data` longtext NOT NULL,
+  `data` longtext,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -591,7 +591,7 @@ DROP TABLE IF EXISTS `command`;
 CREATE TABLE `command` (
   `name` varchar(100) NOT NULL default '',
   `security` int(11) unsigned NOT NULL default '0',
-  `help` longtext NOT NULL,
+  `help` longtext,
   PRIMARY KEY  (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Chat System';
 
@@ -633,7 +633,7 @@ CREATE TABLE `creature` (
   `state` int(11) unsigned NOT NULL default '0',
   `npcflags` int(11) unsigned NOT NULL default '0',
   `faction` int(11) unsigned NOT NULL default '0',
-  `auras` longtext NOT NULL,
+  `auras` longtext,
   PRIMARY KEY  (`guid`),
   KEY `idx_map` (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System';
@@ -832,7 +832,7 @@ CREATE TABLE `game_corpse` (
   `orientation` float NOT NULL default '0',
   `zone` int(11) unsigned NOT NULL default '38' COMMENT 'Zone Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `data` longtext NOT NULL,
+  `data` longtext,
   `time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `bones_flag` tinyint(3) NOT NULL default '0',
   PRIMARY KEY  (`guid`),
@@ -888,11 +888,11 @@ CREATE TABLE `game_talent` (
   `t_id` int(10) NOT NULL default '0',
   `maxrank` int(7) NOT NULL default '0',
   `class` int(10) NOT NULL default '0',
-  `rank1` longtext NOT NULL,
-  `rank2` longtext NOT NULL,
-  `rank3` longtext NOT NULL,
-  `rank4` longtext NOT NULL,
-  `rank5` longtext NOT NULL,
+  `rank1` longtext,
+  `rank2` longtext,
+  `rank3` longtext,
+  `rank4` longtext,
+  `rank5` longtext,
   PRIMARY KEY  (`id`),
   KEY `talents_index` (`t_id`,`maxrank`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -1135,7 +1135,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_instance`;
 CREATE TABLE `item_instance` (
   `guid` bigint(20) NOT NULL default '0',
-  `data` longtext NOT NULL,
+  `data` longtext,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1156,7 +1156,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `item_page`;
 CREATE TABLE `item_page` (
   `id` int(11) NOT NULL default '0',
-  `text` longtext NOT NULL,
+  `text` longtext,
   `next_page` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `item_pages_index` (`id`)
@@ -1369,7 +1369,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `mail_item`;
 CREATE TABLE `mail_item` (
   `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `data` longtext NOT NULL,
+  `data` longtext,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Mail System';
 
@@ -1440,7 +1440,7 @@ CREATE TABLE `npc_option` (
   `npcflag` int(11) unsigned NOT NULL default '0',
   `icon` int(11) unsigned NOT NULL default '0',
   `action` int(11) unsigned NOT NULL default '0',
-  `option` text NOT NULL,
+  `option` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1487,8 +1487,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `npc_text`;
 CREATE TABLE `npc_text` (
   `ID` int(11) NOT NULL default '0',
-  `text0_0` longtext NOT NULL,
-  `text0_1` longtext NOT NULL,
+  `text0_0` longtext,
+  `text0_1` longtext,
   `lang0` bigint(20) unsigned NOT NULL default '0',
   `prob0` float NOT NULL default '0',
   `em0_0` bigint(20) unsigned NOT NULL default '0',
@@ -1497,8 +1497,8 @@ CREATE TABLE `npc_text` (
   `em0_3` bigint(20) unsigned NOT NULL default '0',
   `em0_4` bigint(20) unsigned NOT NULL default '0',
   `em0_5` bigint(20) unsigned NOT NULL default '0',
-  `text1_0` longtext NOT NULL,
-  `text1_1` longtext NOT NULL,
+  `text1_0` longtext,
+  `text1_1` longtext,
   `lang1` bigint(20) unsigned NOT NULL default '0',
   `prob1` float NOT NULL default '0',
   `em1_0` bigint(20) unsigned NOT NULL default '0',
@@ -1507,8 +1507,8 @@ CREATE TABLE `npc_text` (
   `em1_3` bigint(20) unsigned NOT NULL default '0',
   `em1_4` bigint(20) unsigned NOT NULL default '0',
   `em1_5` bigint(20) unsigned NOT NULL default '0',
-  `text2_0` longtext NOT NULL,
-  `text2_1` longtext NOT NULL,
+  `text2_0` longtext,
+  `text2_1` longtext,
   `lang2` bigint(20) unsigned NOT NULL default '0',
   `prob2` float NOT NULL default '0',
   `em2_0` bigint(20) unsigned NOT NULL default '0',
@@ -1517,8 +1517,8 @@ CREATE TABLE `npc_text` (
   `em2_3` bigint(20) unsigned NOT NULL default '0',
   `em2_4` bigint(20) unsigned NOT NULL default '0',
   `em2_5` bigint(20) unsigned NOT NULL default '0',
-  `text3_0` longtext NOT NULL,
-  `text3_1` longtext NOT NULL,
+  `text3_0` longtext,
+  `text3_1` longtext,
   `lang3` bigint(20) unsigned NOT NULL default '0',
   `prob3` float NOT NULL default '0',
   `em3_0` bigint(20) unsigned NOT NULL default '0',
@@ -1527,8 +1527,8 @@ CREATE TABLE `npc_text` (
   `em3_3` bigint(20) unsigned NOT NULL default '0',
   `em3_4` bigint(20) unsigned NOT NULL default '0',
   `em3_5` bigint(20) unsigned NOT NULL default '0',
-  `text4_0` longtext NOT NULL,
-  `text4_1` longtext NOT NULL,
+  `text4_0` longtext,
+  `text4_1` longtext,
   `lang4` bigint(20) unsigned NOT NULL default '0',
   `prob4` float NOT NULL default '0',
   `em4_0` bigint(20) unsigned NOT NULL default '0',
@@ -1537,8 +1537,8 @@ CREATE TABLE `npc_text` (
   `em4_3` bigint(20) unsigned NOT NULL default '0',
   `em4_4` bigint(20) unsigned NOT NULL default '0',
   `em4_5` bigint(20) unsigned NOT NULL default '0',
-  `text5_0` longtext NOT NULL,
-  `text5_1` longtext NOT NULL,
+  `text5_0` longtext,
+  `text5_1` longtext,
   `lang5` bigint(20) unsigned NOT NULL default '0',
   `prob5` float NOT NULL default '0',
   `em5_0` bigint(20) unsigned NOT NULL default '0',
@@ -1547,8 +1547,8 @@ CREATE TABLE `npc_text` (
   `em5_3` bigint(20) unsigned NOT NULL default '0',
   `em5_4` bigint(20) unsigned NOT NULL default '0',
   `em5_5` bigint(20) unsigned NOT NULL default '0',
-  `text6_0` longtext NOT NULL,
-  `text6_1` longtext NOT NULL,
+  `text6_0` longtext,
+  `text6_1` longtext,
   `lang6` bigint(20) unsigned NOT NULL default '0',
   `prob6` float NOT NULL default '0',
   `em6_0` bigint(20) unsigned NOT NULL default '0',
@@ -1557,8 +1557,8 @@ CREATE TABLE `npc_text` (
   `em6_3` bigint(20) unsigned NOT NULL default '0',
   `em6_4` bigint(20) unsigned NOT NULL default '0',
   `em6_5` bigint(20) unsigned NOT NULL default '0',
-  `text7_0` longtext NOT NULL,
-  `text7_1` longtext NOT NULL,
+  `text7_0` longtext,
+  `text7_1` longtext,
   `lang7` bigint(20) unsigned NOT NULL default '0',
   `prob7` float NOT NULL default '0',
   `em7_0` bigint(20) unsigned NOT NULL default '0',
