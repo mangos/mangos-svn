@@ -283,6 +283,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void addGossipOption(GossipOption *gso) { m_goptions.push_back(gso); }
 
         void generateLoot();
+		void getSkinLoot();
 
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
 
@@ -304,6 +305,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return m_faction;
         };
         Loot loot;
+		//Loot Skinloot;
 
     protected:
         void _LoadGoods();

@@ -5973,7 +5973,10 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
 
         loot = &creature->loot;
         if (loot_type == 2)
-            FillLoot(loot, creature->GetCreatureInfo()->SkinLootId);
+		{
+			creature->getSkinLoot();
+			loot = &creature->loot;
+		}
     }
 
     m_lootGuid = guid;

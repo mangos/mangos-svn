@@ -64,6 +64,7 @@ struct Loot
 };
 
 void FillLoot(Loot *loot, uint32 loot_id);
+void FillSkinLoot(Loot *Skinloot,uint32 itemid);
 void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance);
 void LoadCreaturesLootTables();
 

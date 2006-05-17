@@ -39,6 +39,7 @@
 #include "CellImpl.h"
 #include "SharedDefines.h"
 #include "Pet.h"
+#include "GameObject.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -1726,7 +1727,7 @@ void Spell::EffectSkinning(uint32 i)
 		return;
 	}
 
-    if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= (unitTarget->getLevel()-1)*5)
+    if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= (unitTarget->getLevel()-1)*5 || unitTarget->getLevel() < 10)
     {
         ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
     }else
@@ -1770,6 +1771,7 @@ void Spell::EffectTransmitted(uint32 i)
         fx, fy, m_caster->GetPositionZ(),
         m_caster->GetOrientation(), 0, 0, 0, 0))
         return;
+	GameObjectInfo *goInfo = objmgr.GetGameObjectInfo(name_id); 
 
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
@@ -1777,6 +1779,10 @@ void Spell::EffectTransmitted(uint32 i)
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
     pGameObj->SetUInt32Value(13, 0xBEE9E017 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
+	pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, goInfo->displayId);
+	pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, goInfo->type);
+	pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS, goInfo->flags);
+	pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, goInfo->faction);
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");
     m_ObjToDel.push_back(pGameObj);
@@ -1787,6 +1793,11 @@ void Spell::EffectTransmitted(uint32 i)
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << (uint64)pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
+
+	if(m_spellInfo->EffectMiscValue[i] == 35591)
+	{
+		((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
+	}
 }
 
 void Spell::EffectSkill(uint32)
