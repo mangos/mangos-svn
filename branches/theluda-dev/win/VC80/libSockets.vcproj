@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\sockets"
+				AdditionalIncludeDirectories="$(SolutionDir)\..\..\dep\include;$(SolutionDir)\..\..\dep\include\sockets"
 				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;HAVE_OPENSSL"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -61,8 +61,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\Sockets.lib"
-				AdditionalLibraryDirectories="..\..\dep\lib\debug"
+				AdditionalLibraryDirectories="$(SolutionDir)\..\..\dep\lib\debug"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -105,7 +106,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\sockets"
+				AdditionalIncludeDirectories="$(SolutionDir)\..\..\dep\include;$(SolutionDir)\..\..\dep\include\sockets"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE;HAVE_OPENSSL"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
@@ -124,8 +125,9 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="libeay32.lib ssleay32.lib"
 				OutputFile="$(OutDir)\Sockets.lib"
-				AdditionalLibraryDirectories="..\..\dep\lib\release"
+				AdditionalLibraryDirectories="$(SolutionDir)\..\..\dep\lib\release"
 			/>
 			<Tool
 				Name="VCALinkTool"
