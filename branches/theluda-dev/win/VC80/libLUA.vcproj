@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)\..\..\build\$(ProjectName)___$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)\..\..\build\$(ProjectName)___$(PlatformName)_$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			>
 			<Tool
@@ -41,7 +41,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="$(SolutionDir)\..\..\dep\include\lua"
-				PreprocessorDefinitions="WIN32;_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;LUA_SHARED"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -60,11 +60,14 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lualib.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\lua.dll"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -76,6 +79,12 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
+			/>
+			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -83,7 +92,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)\..\..\build\$(ProjectName)___$(PlatformName)_$(ConfigurationName)"
 			IntermediateDirectory="$(SolutionDir)\..\..\build\$(ProjectName)___$(PlatformName)_$(ConfigurationName)"
-			ConfigurationType="4"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -105,7 +114,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalIncludeDirectories="$(SolutionDir)\..\..\dep\include\lua"
-				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
+				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;_CRT_SECURE_NO_DEPRECATE;LUA_SHARED"
 				RuntimeLibrary="2"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
@@ -122,11 +131,14 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)\lualib.lib"
+				Name="VCLinkerTool"
+				OutputFile="$(OutDir)\lua.dll"
 			/>
 			<Tool
 				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -136,6 +148,12 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCWebDeploymentTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -151,35 +169,79 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\..\dep\src\lua\lauxlib.c"
+				RelativePath="..\..\dep\src\lua\lapi.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\lbaselib.c"
+				RelativePath="..\..\dep\src\lua\lcode.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\ldblib.c"
+				RelativePath="..\..\dep\src\lua\ldebug.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\liolib.c"
+				RelativePath="..\..\dep\src\lua\ldo.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\lmathlib.c"
+				RelativePath="..\..\dep\src\lua\ldump.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\loadlib.c"
+				RelativePath="..\..\dep\src\lua\lfunc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\lstrlib.c"
+				RelativePath="..\..\dep\src\lua\lgc.c"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\lua\ltablib.c"
+				RelativePath="..\..\dep\src\lua\llex.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lmem.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lobject.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lopcodes.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lparser.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lstate.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lstring.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\ltable.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\ltm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lundump.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lvm.c"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\lua\lzio.c"
 				>
 			</File>
 		</Filter>
@@ -189,15 +251,47 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\..\dep\include\lua\lauxlib.h"
+				RelativePath="..\..\dep\include\lua\lapi.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\include\lua\llimits.h"
+				RelativePath="..\..\dep\include\lua\ldebug.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\ldo.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\lfunc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\lgc.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\lmem.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\dep\include\lua\lobject.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\lstate.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\lstring.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\ltable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\ltm.h"
 				>
 			</File>
 			<File
@@ -209,7 +303,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\include\lua\lualib.h"
+				RelativePath="..\..\dep\include\lua\lundump.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\lua\lvm.h"
 				>
 			</File>
 		</Filter>
