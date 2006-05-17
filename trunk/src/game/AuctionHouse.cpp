@@ -371,57 +371,54 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 
 void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 {
-    WorldPacket data;
-    uint64 auctioneer;
-    recv_data >> auctioneer;
-    ObjectMgr::AuctionEntryMap::iterator itr;
-    uint32 cnt = 0;
-    Player *pl = GetPlayer();
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        if ((itr->second->auctioneer == GUID_LOPART(auctioneer)) && (itr->second->owner == pl->GetGUIDLow()))
-        {
-            cnt++;
-        }
-    }
+    uint32 count;
+    uint64 guid;
 
-    sLog.outString("sending owner list with %u items",cnt);
+    recv_data >> guid;
+
+    WorldPacket data;
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-    if (cnt < 51)
+    
+    count = 0;
+    data << uint32(0);
+    for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
     {
-        data << uint32(cnt);
-    }
-    else
-    {
-        data << uint32(50);
-    }
-    uint32 cnter = 1;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        if ((itr->second->auctioneer == GUID_LOPART(auctioneer)) && (itr->second->owner == pl->GetGUIDLow()) && (cnter < 51))
+        AuctionEntry *Aentry = itr->second;
+        if( Aentry )
         {
-            AuctionEntry *Aentry = itr->second;
-            data << Aentry->Id;
-            sLog.outString("getting item with id %u",Aentry->item);
-            Item *it = objmgr.GetAItem(Aentry->item);
-            data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(1);
-            data << uint32(0);
-            data << it->GetUInt64Value(ITEM_FIELD_OWNER);
-            data << Aentry->bid;
-            data << uint32(0);
-            data << Aentry->buyout;
-            data << uint32((Aentry->time - time(NULL)) * 1000);
-            data << uint32(Aentry->bidder);
-            data << uint32(0);
-            data << Aentry->bid;
-            cnter++;
+            if( Aentry->owner == _player->GetGUIDLow() )
+            {
+                Item *item = objmgr.GetAItem(Aentry->item);
+                if( item )
+                {
+                    ItemPrototype *proto = item->GetProto();
+                    if( proto )
+                    {
+                        count++;
+                        data << Aentry->Id;
+                        data << proto->ItemId;
+                        data << uint32(0);
+                        data << uint32(0);
+                        data << uint32(0);
+                        data << uint32(1);
+                        data << uint32(0);
+                        data << item->GetUInt64Value(ITEM_FIELD_OWNER);
+                        data << Aentry->bid;
+                        data << uint32(0);
+                        data << Aentry->buyout;
+                        data << uint32((Aentry->time - time(NULL)) * 1000);
+                        data << uint32(Aentry->bidder);
+                        data << uint32(0);
+                        data << Aentry->bid;
+                        if( count == 50 )
+                            break;
+                    }
+                }
+            }
         }
     }
-    data << cnt;
+    data.put<uint32>(0, count);
+    data << uint32(count);
     SendPacket(&data);
 }
 
@@ -429,9 +426,10 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
 {
     std::string searchedname, name;
     uint8 levelmin, levelmax, usable;
-    uint32 count, guidhigh, guidlow, unk1, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
+    uint32 count, unk1, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
+	uint64 guid;
 
-    recv_data >> guidhigh >> guidlow;
+    recv_data >> guid;
     recv_data >> unk1;
     recv_data >> searchedname;
     recv_data >> levelmin >> levelmax;
