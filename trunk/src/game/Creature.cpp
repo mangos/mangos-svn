@@ -744,7 +744,28 @@ int Creature::getItemSlotById(uint32 itemid)
     }
     return -1;
 }
+void Creature::getSkinLoot()
+{
+	CreatureInfo *cinfo = GetCreatureInfo();
 
+	if(cinfo->type == CREATURE_TYPE_DRAGON)
+		FillSkinLoot(&loot,8165);
+	if(cinfo->family ==CREATURE_FAMILY_TURTLE)
+		FillSkinLoot(&loot,8167);
+	uint32 level = getLevel();
+	if(level > 48)
+		FillSkinLoot(&loot,(urand(0,10)<8 ? 8170 :8171));
+	else if(level > 36)
+		FillSkinLoot(&loot,(urand(0,10)<8 ? 4304 :8169));
+	else if(level > 25)
+		FillSkinLoot(&loot,(urand(0,10)<8 ? 4234 :4235));
+	else if(level > 15)
+		FillSkinLoot(&loot,(urand(0,10)<8 ? 2319 :4232));
+	else if(level > 3)
+		FillSkinLoot(&loot,(urand(0,10)<8 ? 2318 :2934));
+	else if(level <= 3)
+		FillSkinLoot(&loot,2934);
+}
 void Creature::SaveToDB()
 {
     std::stringstream ss;
