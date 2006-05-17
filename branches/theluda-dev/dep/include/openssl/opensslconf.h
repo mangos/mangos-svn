@@ -24,9 +24,6 @@
 #ifndef OPENSSL_THREADS
 # define OPENSSL_THREADS
 #endif
-#ifndef OPENSSL_NO_DYNAMIC_ENGINE
-# define OPENSSL_NO_DYNAMIC_ENGINE
-#endif
 
 /* The OPENSSL_NO_* macros are also defined as NO_* if the application
    asks for it.  This is a transient feature that is provided for those
