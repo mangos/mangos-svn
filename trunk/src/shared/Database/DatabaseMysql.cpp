@@ -93,7 +93,7 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
 
     if(mysql_query(mMysql, szQuery))
     {
-        DEBUG_LOG( "query = %s\n", szQuery );
+		DEBUG_LOG( "SQL: %s\n", szQuery );
         DEBUG_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
         return NULL;
     }
@@ -112,7 +112,7 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
 
     queryResult->NextRow();
 
-    DEBUG_LOG( "query = %s\n", szQuery );
+	DEBUG_LOG( "SQL: %s\n", szQuery );
     return queryResult;
 }
 
@@ -123,7 +123,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     if(mysql_query(mMysql, sql))
     {
-        DEBUG_LOG( "query = %s\n", sql );
+		DEBUG_LOG( "SQL: %s\n", sql );
         DEBUG_LOG( (std::string("query ERROR: ") + mysql_error(mMysql)).c_str() );
         return NULL;
     }

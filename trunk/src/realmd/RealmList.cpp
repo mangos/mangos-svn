@@ -42,48 +42,46 @@ RealmList::~RealmList( )
 
 int RealmList::GetAndAddRealms()
 {
-
-    QueryResult *result = sDatabase.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist`;" );
+    int count = 0;
+    QueryResult *result = sDatabase.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
     if(result)
     {
-        Field *fields = result->Fetch();
-        AddRealm(fields[0].GetString(),fields[1].GetString(),fields[2].GetUInt8(), fields[3].GetUInt8(), fields[4].GetUInt8());
-
-        while( result->NextRow() )
+        do
         {
             Field *fields = result->Fetch();
-
             AddRealm(fields[0].GetString(),fields[1].GetString(),fields[2].GetUInt8(), fields[3].GetUInt8(), fields[4].GetUInt8());
-        }
+            count++;
+        } while( result->NextRow() );
         delete result;
-        return 1;
     }
     else
     {
         sLog.outString( "Realm:***There is no realm defined in database!Working at localhost mode!***" );
         AddRealm("localhost","127.0.0.1",1,0,1);
-        return 0;
     }
+    return count;
 }
 
 void RealmList::AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone )
 {
-    RemoveRealm( name );
+	if( _realms.find( name ) == _realms.end() )
+	{
+		_realms[name] = new Realm(name, address, icon, color, timezone);
 
-    _realms[ name ] = new Realm( name, address, icon, color , timezone);
+		std::string addr(address);
+		
+		if( addr.find(':', 0) == std::string::npos )
+		{
+			std::stringstream ss;
+			ss << addr << ":" << i_serverPort;
+			addr = ss.str();
+		}
 
-    std::string addr(address);
-    if( addr.find(':', 0) == std::string::npos )
-    {
-        std::stringstream ss;
-        ss << addr << ":" << i_serverPort;
-        addr = ss.str();
-    }
-
-    _realms[ name ]->address = addr;
-    _realms[ name ]->icon = icon;
-    _realms[ name ]->color = color;
-    _realms[ name ]->timezone = timezone;
+		_realms[ name ]->address = addr;
+		_realms[ name ]->icon = icon;
+		_realms[ name ]->color = color;
+		_realms[ name ]->timezone = timezone;
+	}
 }
 
 void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone )
@@ -93,14 +91,5 @@ void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timez
         _realms[ name ]->icon = icon;
         _realms[ name ]->color = color;
         _realms[ name ]->timezone = timezone;
-    }
-}
-
-void RealmList::RemoveRealm( const char *name )
-{
-    if( _realms.find( name ) != _realms.end( ) )
-    {
-        delete _realms[ name ];
-        _realms.erase( name );
     }
 }
