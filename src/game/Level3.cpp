@@ -1869,6 +1869,9 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     char* py = strtok(NULL, " ");
     char* pz = strtok(NULL, " ");
 
+    if (!px || !py)
+        return false;
+    
     uint32 type = (uint32)atoi(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
     float value = (float)atof(py);                          //0 to 1, sending -1 is instand good weather
     uint32 sound = 0;
