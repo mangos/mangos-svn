@@ -174,15 +174,15 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint32 unitfield = 0;
     switch(class_)
     {
-        case WARRIOR : powertype = 1; unitfield = 0x11000000; break;
-        case PALADIN : powertype = 0; unitfield = 0x0000EE00; break;
-        case HUNTER  : powertype = 0; unitfield = 0x0000EE00; break;
-        case ROGUE   : powertype = 3; unitfield = 0x0000EE00; break;
-        case PRIEST  : powertype = 0; unitfield = 0x0000EE00; break;
-        case SHAMAN  : powertype = 0; unitfield = 0x0000EE00; break;
-        case MAGE    : powertype = 0; unitfield = 0x0000EE00; break;
-        case WARLOCK : powertype = 0; unitfield = 0x0000EE00; break;
-        case DRUID   : powertype = 0; unitfield = 0x0000EE00; break;
+        case WARRIOR: powertype = 1; unitfield = 0x11000000; break;
+        case PALADIN: powertype = 0; unitfield = 0x0000EE00; break;
+        case HUNTER: powertype = 0; unitfield = 0x0000EE00; break;
+        case ROGUE: powertype = 3; unitfield = 0x0000EE00; break;
+        case PRIEST: powertype = 0; unitfield = 0x0000EE00; break;
+        case SHAMAN: powertype = 0; unitfield = 0x0000EE00; break;
+        case MAGE: powertype = 0; unitfield = 0x0000EE00; break;
+        case WARLOCK: powertype = 0; unitfield = 0x0000EE00; break;
+        case DRUID: powertype = 0; unitfield = 0x0000EE00; break;
     }
 
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
@@ -1035,7 +1035,7 @@ void Player::ItemAdded(uint32 entry, uint32 count)
                     curitemcount = GetItemCount(entry, true);
                     if ( curitemcount < reqitemcount )
                     {
-                        additemcount = (curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
+                        additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
                         mQuestStatus[i->first].m_questItemCount[j] += additemcount;
                         PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, additemcount);
                     }
@@ -1441,81 +1441,81 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
         case WARRIOR:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 23 ? 2 : (lvl > 1  ? 1 : 0));
-            *STA += (lvl > 23 ? 2 : (lvl > 1  ? 1 : 0));
-            *AGI += (lvl > 36 ? 1 : (lvl > 6 && (lvl%2) ? 1 : 0));
-            *INT += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            *SPI += (lvl > 9 && !(lvl%2) ? 1 : 0);
+            *STR += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+            *STA += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
+            *AGI += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+            *INT += (lvl > 9 && !(lvl%2) ? 1: 0);
+            *SPI += (lvl > 9 && !(lvl%2) ? 1: 0);
             break;
         case PALADIN:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 3  ? 1 : 0);
-            *STA += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
-            *AGI += (lvl > 38 ? 1 : (lvl > 7 && !(lvl%2) ? 1 : 0));
-            *INT += (lvl > 6 && (lvl%2) ? 1 : 0);
-            *SPI += (lvl > 7 ? 1 : 0);
+            *STR += (lvl > 3  ? 1: 0);
+            *STA += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+            *AGI += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
+            *INT += (lvl > 6 && (lvl%2) ? 1: 0);
+            *SPI += (lvl > 7 ? 1: 0);
             break;
         case HUNTER:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 4  ? 1 : 0);
-            *STA += (lvl > 4  ? 1 : 0);
-            *AGI += (lvl > 33 ? 2 : (lvl > 1 ? 1 : 0));
-            *INT += (lvl > 8 && (lvl%2) ? 1 : 0);
-            *SPI += (lvl > 38 ? 1 : (lvl > 9 && !(lvl%2) ? 1 : 0));
+            *STR += (lvl > 4  ? 1: 0);
+            *STA += (lvl > 4  ? 1: 0);
+            *AGI += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
+            *INT += (lvl > 8 && (lvl%2) ? 1: 0);
+            *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
             break;
         case ROGUE:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 5  ? 1 : 0);
-            *STA += (lvl > 4  ? 1 : 0);
-            *AGI += (lvl > 16 ? 2 : (lvl > 1 ? 1 : 0));
-            *INT += (lvl > 8 && !(lvl%2) ? 1 : 0);
-            *SPI += (lvl > 38 ? 1 : (lvl > 9 && !(lvl%2) ? 1 : 0));
+            *STR += (lvl > 5  ? 1: 0);
+            *STA += (lvl > 4  ? 1: 0);
+            *AGI += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
+            *INT += (lvl > 8 && !(lvl%2) ? 1: 0);
+            *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
             break;
         case PRIEST:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            *STA += (lvl > 5  ? 1 : 0);
-            *AGI += (lvl > 38 ? 1 : (lvl > 8 && (lvl%2) ? 1 : 0));
-            *INT += (lvl > 22 ? 2 : (lvl > 1 ? 1 : 0));
-            *SPI += (lvl > 3  ? 1 : 0);
+            *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
+            *STA += (lvl > 5  ? 1: 0);
+            *AGI += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
+            *INT += (lvl > 22 ? 2: (lvl > 1 ? 1: 0));
+            *SPI += (lvl > 3  ? 1: 0);
             break;
         case SHAMAN:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 34 ? 1 : (lvl > 6 && (lvl%2) ? 1 : 0));
-            *STA += (lvl > 4 ? 1 : 0);
-            *AGI += (lvl > 7 && !(lvl%2) ? 1 : 0);
-            *INT += (lvl > 5 ? 1 : 0);
-            *SPI += (lvl > 4 ? 1 : 0);
+            *STR += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
+            *STA += (lvl > 4 ? 1: 0);
+            *AGI += (lvl > 7 && !(lvl%2) ? 1: 0);
+            *INT += (lvl > 5 ? 1: 0);
+            *SPI += (lvl > 4 ? 1: 0);
             break;
         case MAGE:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            *STA += (lvl > 5  ? 1 : 0);
-            *AGI += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            *INT += (lvl > 24 ? 2 : (lvl > 1 ? 1 : 0));
-            *SPI += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
+            *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
+            *STA += (lvl > 5  ? 1: 0);
+            *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
+            *INT += (lvl > 24 ? 2: (lvl > 1 ? 1: 0));
+            *SPI += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
             break;
         case WARLOCK:
             //*HP +=
             //*MP +=
-            *STR += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            *STA += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
-            *AGI += (lvl > 9 && !(lvl%2) ? 1 : 0);
-            *INT += (lvl > 33 ? 2 : (lvl > 2 ? 1 : 0));
-            *SPI += (lvl > 38 ? 2 : (lvl > 3 ? 1 : 0));
+            *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
+            *STA += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
+            *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
+            *INT += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
+            *SPI += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
             break;
         case DRUID:
-            *STR += (lvl > 38 ? 2 : (lvl > 6 && (lvl%2) ? 1 : 0));
-            *STA += (lvl > 32 ? 2 : (lvl > 4 ? 1 : 0));
-            *AGI += (lvl > 38 ? 2 : (lvl > 8 && (lvl%2) ? 1 : 0));
-            *INT += (lvl > 38 ? 3 : (lvl > 4 ? 1 : 0));
-            *SPI += (lvl > 38 ? 3 : (lvl > 5 ? 1 : 0));
+            *STR += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
+            *STA += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
+            *AGI += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
+            *INT += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
+            *SPI += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
     }
 
 }
@@ -2090,7 +2090,7 @@ void Player::SaveToDB()
         ss << m_taximask[i] << " ";
 
     ss << "', ";
-    inworld ? ss << 1 : ss << 0;
+    inworld ? ss << 1: ss << 0;
 
     ss << ", ";
     ss << m_highest_rank;
@@ -3601,7 +3601,7 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
         {
             if(itr->ReputationListID == fac->reputationListID)
             {
-                itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing : 0);
+                itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
                 itr->Flags = (itr->Flags | 1);
                 UpdateReputation();
                 return true;
@@ -3724,7 +3724,7 @@ void Player::UpdateHonor(void)
 
     //TODO Fix next rank bar... it is not working fine!
     //NEXT RANK BAR //Total honor points
-    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0 : total_honor) );
+    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0: total_honor) );
 
     if( CalculateHonorRank(total_honor) )
         SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) );
@@ -4031,7 +4031,7 @@ bool Player::CanUseItem(ItemPrototype * proto)
         {
             data << proto->RequiredLevel;
         }
-        data << (pItem ? pItem->GetGUID() : uint64(0));
+        data << (pItem ? pItem->GetGUID(): uint64(0));
         data << uint64(0);
         data << uint8(0);
 
@@ -4468,8 +4468,8 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
                 if (dstItem->GetProto()->RequiredLevel > getLevel()) reqlevel = dstItem->GetProto()->RequiredLevel;
             data << reqlevel;
         }
-        data << uint64((srcItem ? srcItem->GetGUID() : 0));
-        data << uint64((dstItem ? dstItem->GetGUID() : 0));
+        data << uint64((srcItem ? srcItem->GetGUID(): 0));
+        data << uint64((dstItem ? dstItem->GetGUID(): 0));
         data << uint8(0);
         m_session->SendPacket(&data);
         return false;
@@ -4553,8 +4553,8 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
                 if (dstItem->GetProto()->RequiredLevel > getLevel()) reqlevel = dstItem->GetProto()->RequiredLevel;
             data << reqlevel;
         }
-        data << uint64((srcItem ? srcItem->GetGUID() : 0));
-        data << uint64((dstItem ? dstItem->GetGUID() : 0));
+        data << uint64((srcItem ? srcItem->GetGUID(): 0));
+        data << uint64((dstItem ? dstItem->GetGUID(): 0));
         data << uint8(0);
         m_session->SendPacket(&data);
         return false;
@@ -4568,7 +4568,7 @@ Item* Player::CreateNewItem (uint32 itemId, uint8 count)
     ItemPrototype *proto = objmgr.GetItemPrototype(itemId);
     if(!proto)
     {
-        sLog.outError("CreateNewItem : Unknown itemId, itemId = %i", itemId);
+        sLog.outError("CreateNewItem: Unknown itemId, itemId = %i", itemId);
         return NULL;
     }
     Item *pItem = NewItemOrBag(proto);
@@ -4709,13 +4709,13 @@ uint16 Player::GetItemCountAll(uint32 itemId, bool includeEquipment,bool include
     return countitems;
 }
 
-//where =1 : inventory; =2 : bank; =3 all
+//where =1: inventory; =2: bank; =3 all
 uint32 Player::CanAddItemCount(uint32 itemid, uint32 where)
 {
     return CanAddItemCount(CreateNewItem(itemid, 1), where);
 }
 
-//where =1 : inventory; =2 : bank; =3 all
+//where =1: inventory; =2: bank; =3 all
 uint32 Player::CanAddItemCount(Item* item, uint32 where)
 {
     if(!item)
@@ -4797,7 +4797,7 @@ uint8 Player::AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible)
 {
     if (!itemId)
     {
-        sLog.outError("AddNewItem : No itemId provided");
+        sLog.outError("AddNewItem: No itemId provided");
         return 0;
     }
     Item *pItem = CreateNewItem(itemId, count);
@@ -4844,12 +4844,12 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             case CLIENT_SLOT_BACK:
                 if (slot >= BANK_SLOT_BAG_END)
                 {
-                    sLog.outError("AddItem : Invalid slot, slot = %i", slot);
+                    sLog.outError("AddItem: Invalid slot, slot = %i", slot);
                     return 0;
                 }
                 else if ((((slot >= INVENTORY_SLOT_BAG_START) && (slot < INVENTORY_SLOT_BAG_END)) || ((slot >= BANK_SLOT_BAG_START) && (slot < BANK_SLOT_BAG_END))) && (item->GetProto()->InventoryType != INVTYPE_BAG))
                 {
-                    sLog.outError("AddItem : Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
+                    sLog.outError("AddItem: Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
                     return 0;
                 }
                 pItem = GetItemBySlot(slot);
@@ -4889,23 +4889,23 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
         {
             if (pItem->GetEntry() != item->GetEntry())
             {
-                sLog.outError("AddItem : Player slot already has another item" );
+                sLog.outError("AddItem: Player slot already has another item" );
                 return 0;
             }
             else
             {
-                additemcount = ((pItem->GetCount() + count) <= stack) ? count : (stack - pItem->GetCount());
+                additemcount = ((pItem->GetCount() + count) <= stack) ? count: (stack - pItem->GetCount());
                 if ( additemcount > 0 )
                 {
                     pItem->SetCount(pItem->GetCount() + additemcount);
                     ItemAdded(pItem->GetEntry(), additemcount);
                     pItem->SendUpdateToPlayer(this);
-                    sLog.outDetail("AddItem : Item %i added to bag %i - slot %i (stacked)",  pItem->GetEntry(), bagIndex, slot);
+                    sLog.outDetail("AddItem: Item %i added to bag %i - slot %i (stacked)",  pItem->GetEntry(), bagIndex, slot);
                     return 2;
                 }
                 else
                 {
-                    sLog.outError("AddItem : Player slot is full" );
+                    sLog.outError("AddItem: Player slot is full" );
                     return 0;
                 }
             }
@@ -4918,7 +4918,7 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
         pBag = GetBagBySlot(bagIndex);
         if(!pBag)
         {
-            sLog.outError("AddItem : Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
+            sLog.outError("AddItem: Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
             return 0;
         }
         pBag->AddItemToBag(slot, item);
@@ -5223,7 +5223,7 @@ void Player::RemoveItemFromInventory(uint32 itemId,uint32 itemcount)
             {
                 m_items[i]->SetCount(oldcnt-itemcount);
                 removed+=itemcount;
-                sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i, count = %u", i, removed);
+                sLog.outDetail("RemoveItemFromSlot: Item removed,slot = %i, count = %u", i, removed);
                 return;
             }
             else
@@ -5249,7 +5249,7 @@ void Player::RemoveItemFromInventory(uint32 itemId,uint32 itemcount)
             }
             if(removed>=itemcount)
             {
-                sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i, count = %u", i, removed);
+                sLog.outDetail("RemoveItemFromSlot: Item removed,slot = %i, count = %u", i, removed);
                 return;
             }
         }
@@ -5280,7 +5280,7 @@ void Player::RemoveItemFromInventory(uint32 itemId,uint32 itemcount)
 
                     if(removed>=itemcount)
                     {
-                        sLog.outDetail("RemoveItemFromSlot : Item removed,slot = %i, count = %u", i, removed);
+                        sLog.outDetail("RemoveItemFromSlot: Item removed,slot = %i, count = %u", i, removed);
                         return;
                     }
                 }
@@ -5306,13 +5306,13 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
         case CLIENT_SLOT_BACK:
             if (slot >= BANK_SLOT_BAG_END)
             {
-                sLog.outError("RemoveItemFromSlot : Invalid slot, slot = %i", slot);
+                sLog.outError("RemoveItemFromSlot: Invalid slot, slot = %i", slot);
                 return 0;
             }
             pItem = m_items[slot];
             if (!pItem)
             {
-                sLog.outError("RemoveItemFromSlot : No item found in that slot, slot = %i", slot);
+                sLog.outError("RemoveItemFromSlot: No item found in that slot, slot = %i", slot);
                 return 0;
             }
             pretItem = pItem;
@@ -5365,7 +5365,7 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                     pItem->DestroyForPlayer(this);
                 }
             }
-            sLog.outDetail("RemoveItemFromSlot : Item removed, slot = %i", slot);
+            sLog.outDetail("RemoveItemFromSlot: Item removed, slot = %i", slot);
             break;
         case CLIENT_SLOT_01:
         case CLIENT_SLOT_02:
@@ -5395,23 +5395,23 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                     }
 
                     pBag->SendUpdateToPlayer(this);
-                    sLog.outDetail("RemoveItemFromSlot : Item removed, bagIndex = %i, slot = %i", bagIndex, slot);
+                    sLog.outDetail("RemoveItemFromSlot: Item removed, bagIndex = %i, slot = %i", bagIndex, slot);
                     break;
                 }
                 else
                 {
-                    sLog.outError("RemoveItemFromSlot : No item found, bagIndex = %i, slot = %i", bagIndex, slot);
+                    sLog.outError("RemoveItemFromSlot: No item found, bagIndex = %i, slot = %i", bagIndex, slot);
                     return 0;
                 }
             }
             else
             {
-                sLog.outError("RemoveItemFromSlot : No bag in that bagIndex, bagIndex = %i", bagIndex);
+                sLog.outError("RemoveItemFromSlot: No bag in that bagIndex, bagIndex = %i", bagIndex);
                 return 0;
             }
             break;
         default:
-            sLog.outError("RemoveItemFromSlot : Unknow bagIndex, bagIndex = %i", bagIndex);
+            sLog.outError("RemoveItemFromSlot: Unknow bagIndex, bagIndex = %i", bagIndex);
             return 0;
     }
     return pretItem;
@@ -5444,7 +5444,7 @@ Item* Player::GetItemBySlot(uint8 bagIndex,uint8 slot) const
             }
             break;
         default:
-            sLog.outDetail("GetItemBySlot : unknow bagIndex, bagIndex = %i\n", bagIndex);
+            sLog.outDetail("GetItemBySlot: unknow bagIndex, bagIndex = %i\n", bagIndex);
             break;
     }
     return 0;
@@ -5735,49 +5735,49 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Armor)
     {
-        SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) + (apply ? proto->Armor : -(int32)proto->Armor));
+        SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) + (apply ? proto->Armor: -(int32)proto->Armor));
         sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
     }
 
     if (proto->Block)
     {
-        SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE) + (apply ? proto->Block : -(float)proto->Block));
+        SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE) + (apply ? proto->Block: -(float)proto->Block));
         sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
     }
 
     if (proto->HolyRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) + (apply ? proto->HolyRes : -(int32)proto->HolyRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) + (apply ? proto->HolyRes: -(int32)proto->HolyRes));
         sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
     }
 
     if (proto->FireRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_02, GetUInt32Value(UNIT_FIELD_RESISTANCES_02) + (apply ? proto->FireRes : -(int32)proto->FireRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_02, GetUInt32Value(UNIT_FIELD_RESISTANCES_02) + (apply ? proto->FireRes: -(int32)proto->FireRes));
         sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
     if (proto->NatureRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_03, GetUInt32Value(UNIT_FIELD_RESISTANCES_03) + (apply ? proto->NatureRes : -(int32)proto->NatureRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_03, GetUInt32Value(UNIT_FIELD_RESISTANCES_03) + (apply ? proto->NatureRes: -(int32)proto->NatureRes));
         sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
     }
 
     if (proto->FrostRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_04, GetUInt32Value(UNIT_FIELD_RESISTANCES_04) + (apply ? proto->FrostRes : -(int32)proto->FrostRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_04, GetUInt32Value(UNIT_FIELD_RESISTANCES_04) + (apply ? proto->FrostRes: -(int32)proto->FrostRes));
         sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
     }
 
     if (proto->ShadowRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_05, GetUInt32Value(UNIT_FIELD_RESISTANCES_05) + (apply ? proto->ShadowRes : -(int32)proto->ShadowRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_05, GetUInt32Value(UNIT_FIELD_RESISTANCES_05) + (apply ? proto->ShadowRes: -(int32)proto->ShadowRes));
         sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
     }
 
     if (proto->ArcaneRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_06, GetUInt32Value(UNIT_FIELD_RESISTANCES_06) + (apply ? proto->ArcaneRes : -(int32)proto->ArcaneRes));
+        SetUInt32Value(UNIT_FIELD_RESISTANCES_06, GetUInt32Value(UNIT_FIELD_RESISTANCES_06) + (apply ? proto->ArcaneRes: -(int32)proto->ArcaneRes));
         sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
@@ -5806,13 +5806,13 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
     {
-        SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMin : -proto->Damage[0].DamageMin));
+        SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMin: -proto->Damage[0].DamageMin));
         sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
     }
 
     if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
     {
-        SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMax : -proto->Damage[0].DamageMax));
+        SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMax: -proto->Damage[0].DamageMax));
         sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
     }
 
@@ -5820,13 +5820,13 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         if(slot == EQUIPMENT_SLOT_RANGED)
         {
-            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME + 1, apply ? proto->Delay : 2000);
+            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME + 1, apply ? proto->Delay: 2000);
             typestr = "Range";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND)
         {
-            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, apply ? proto->Delay : 2000);
+            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, apply ? proto->Delay: 2000);
             typestr = "Mainhand";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
@@ -5968,7 +5968,15 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
         if (!go)
             return;
 
-        go->generateLoot();
+		go->generateLoot();
+		if(loot_type == 3)
+		{
+			loot = &go->loot;
+			uint32 zone = GetZoneId();
+			uint32 lootid = 30000 + zone;
+			//in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
+			go->getFishLoot(loot,lootid);
+		}
         loot = &go->loot;
     }
     else
@@ -6287,4 +6295,1011 @@ uint32 Player::ApplyRestBonus(uint32 xp)
     else
         m_restTime -= bonus * 1000;
     return bonus * xp;
+}
+uint8 Player::CheckFishingAble()
+{
+	uint32 zone = GetZoneId();
+	uint32 fish_value = GetSkillValue(SKILL_FISHING);
+	uint32 ZoneMaxSkill;
+	switch(zone) {
+	case 1:
+		ZoneMaxSkill=50;
+		break;
+	case 2:
+		ZoneMaxSkill=100;
+		break;
+	case 8:
+		ZoneMaxSkill=225;
+		break;
+	case 9:
+		ZoneMaxSkill=50;
+		break;
+	case 10:
+		ZoneMaxSkill=50;
+		break;
+	case 11:
+		ZoneMaxSkill=150;
+		break;
+	case 12:
+		ZoneMaxSkill=50;
+		break;
+	case 14:
+		ZoneMaxSkill=50;
+		break;
+	case 15:
+		ZoneMaxSkill=225;
+		break;
+	case 16:
+		ZoneMaxSkill=275;
+		break;
+	case 17:
+		ZoneMaxSkill=275;
+		break;
+	case 18:
+		ZoneMaxSkill=50;
+		break;
+	case 28:
+		ZoneMaxSkill=290;
+		break;
+	case 33:
+		ZoneMaxSkill=225;
+		break;
+	case 35:
+		ZoneMaxSkill=225;
+		break;
+	case 37:
+		ZoneMaxSkill=225;
+		break;
+	case 38:
+		ZoneMaxSkill=100;
+		break;
+	case 40:
+		ZoneMaxSkill=100;
+		break;
+	case 43:
+		ZoneMaxSkill=225;
+		break;
+	case 44:
+		ZoneMaxSkill=125;
+		break;
+	case 45:
+		ZoneMaxSkill=200;
+		break;
+	case 47:
+		ZoneMaxSkill=250;
+		break;
+	case 55:
+		ZoneMaxSkill=200;
+		break;
+	case 57:
+		ZoneMaxSkill=50;
+		break;
+	case 60:
+		ZoneMaxSkill=50;
+		break;
+	case 61:
+		ZoneMaxSkill=50;
+		break;
+	case 62:
+		ZoneMaxSkill=50;
+		break;
+	case 63:
+		ZoneMaxSkill=50;
+		break;
+	case 64:
+		ZoneMaxSkill=50;
+		break;
+	case 68:
+		ZoneMaxSkill=150;
+		break;
+	case 69:
+		ZoneMaxSkill=125;
+		break;
+	case 71:
+		ZoneMaxSkill=225;
+		break;
+	case 74:
+		ZoneMaxSkill=225;
+		break;
+	case 75:
+		ZoneMaxSkill=225;
+		break;
+	case 76:
+		ZoneMaxSkill=225;
+		break;
+	case 85:
+		ZoneMaxSkill=50;
+		break;
+	case 86:
+		ZoneMaxSkill=50;
+		break;
+	case 87:
+		ZoneMaxSkill=50;
+		break;
+	case 88:
+		ZoneMaxSkill=50;
+		break;
+	case 89:
+		ZoneMaxSkill=50;
+		break;
+	case 92:
+		ZoneMaxSkill=50;
+		break;
+	case 100:
+		ZoneMaxSkill=225;
+		break;
+	case 102:
+		ZoneMaxSkill=225;
+		break;
+	case 104:
+		ZoneMaxSkill=225;
+		break;
+	case 115:
+		ZoneMaxSkill=100;
+		break;
+	case 116:
+		ZoneMaxSkill=225;
+		break;
+	case 117:
+		ZoneMaxSkill=225;
+		break;
+	case 122:
+		ZoneMaxSkill=225;
+		break;
+	case 129:
+		ZoneMaxSkill=225;
+		break;
+	case 130:
+		ZoneMaxSkill=100;
+		break;
+	case 139:
+		ZoneMaxSkill=300;
+		break;
+	case 141:
+		ZoneMaxSkill=50;
+		break;
+	case 146:
+		ZoneMaxSkill=50;
+		break;
+	case 150:
+		ZoneMaxSkill=150;
+		break;
+	case 162:
+		ZoneMaxSkill=50;
+		break;
+	case 163:
+		ZoneMaxSkill=50;
+		break;
+	case 168:
+		ZoneMaxSkill=50;
+		break;
+	case 169:
+		ZoneMaxSkill=50;
+		break;
+	case 172:
+		ZoneMaxSkill=100;
+		break;
+	case 187:
+		ZoneMaxSkill=50;
+		break;
+	case 188:
+		ZoneMaxSkill=50;
+		break;
+	case 193:
+		ZoneMaxSkill=290;
+		break;
+	case 202:
+		ZoneMaxSkill=290;
+		break;
+	case 211:
+		ZoneMaxSkill=50;
+		break;
+	case 221:
+		ZoneMaxSkill=50;
+		break;
+	case 223:
+		ZoneMaxSkill=50;
+		break;
+	case 226:
+		ZoneMaxSkill=100;
+		break;
+	case 227:
+		ZoneMaxSkill=100;
+		break;
+	case 237:
+		ZoneMaxSkill=100;
+		break;
+	case 249:
+		ZoneMaxSkill=280;
+		break;
+	case 256:
+		ZoneMaxSkill=50;
+		break;
+	case 258:
+		ZoneMaxSkill=50;
+		break;
+	case 259:
+		ZoneMaxSkill=50;
+		break;
+	case 265:
+		ZoneMaxSkill=50;
+		break;
+	case 266:
+		ZoneMaxSkill=50;
+		break;
+	case 267:
+		ZoneMaxSkill=150;
+		break;
+	case 271:
+		ZoneMaxSkill=150;
+		break;
+	case 272:
+		ZoneMaxSkill=150;
+		break;
+	case 279:
+		ZoneMaxSkill=200;
+		break;
+	case 284:
+		ZoneMaxSkill=200;
+		break;
+	case 295:
+		ZoneMaxSkill=150;
+		break;
+	case 297:
+		ZoneMaxSkill=225;
+		break;
+	case 298:
+		ZoneMaxSkill=150;
+		break;
+	case 299:
+		ZoneMaxSkill=150;
+		break;
+	case 300:
+		ZoneMaxSkill=225;
+		break;
+	case 301:
+		ZoneMaxSkill=225;
+		break;
+	case 302:
+		ZoneMaxSkill=225;
+		break;
+	case 305:
+		ZoneMaxSkill=100;
+		break;
+	case 306:
+		ZoneMaxSkill=100;
+		break;
+	case 307:
+		ZoneMaxSkill=250;
+		break;
+	case 309:
+		ZoneMaxSkill=100;
+		break;
+	case 310:
+		ZoneMaxSkill=225;
+		break;
+	case 311:
+		ZoneMaxSkill=225;
+		break;
+	case 312:
+		ZoneMaxSkill=225;
+		break;
+	case 314:
+		ZoneMaxSkill=200;
+		break;
+	case 317:
+		ZoneMaxSkill=200;
+		break;
+	case 323:
+		ZoneMaxSkill=100;
+		break;
+	case 324:
+		ZoneMaxSkill=200;
+		break;
+	case 327:
+		ZoneMaxSkill=200;
+		break;
+	case 328:
+		ZoneMaxSkill=200;
+		break;
+	case 331:
+		ZoneMaxSkill=150;
+		break;
+	case 350:
+		ZoneMaxSkill=250;
+		break;
+	case 351:
+		ZoneMaxSkill=250;
+		break;
+	case 353:
+		ZoneMaxSkill=250;
+		break;
+	case 356:
+		ZoneMaxSkill=250;
+		break;
+	case 361:
+		ZoneMaxSkill=250;
+		break;
+	case 363:
+		ZoneMaxSkill=50;
+		break;
+	case 367:
+		ZoneMaxSkill=50;
+		break;
+	case 368:
+		ZoneMaxSkill=50;
+		break;
+	case 373:
+		ZoneMaxSkill=50;
+		break;
+	case 374:
+		ZoneMaxSkill=50;
+		break;
+	case 375:
+		ZoneMaxSkill=300;
+		break;
+	case 382:
+		ZoneMaxSkill=125;
+		break;
+	case 384:
+		ZoneMaxSkill=125;
+		break;
+	case 385:
+		ZoneMaxSkill=125;
+		break;
+	case 386:
+		ZoneMaxSkill=125;
+		break;
+	case 387:
+		ZoneMaxSkill=125;
+		break;
+	case 388:
+		ZoneMaxSkill=125;
+		break;
+	case 391:
+		ZoneMaxSkill=125;
+		break;
+	case 392:
+		ZoneMaxSkill=125;
+		break;
+	case 393:
+		ZoneMaxSkill=50;
+		break;
+	case 401:
+		ZoneMaxSkill=125;
+		break;
+	case 405:
+		ZoneMaxSkill=200;
+		break;
+	case 406:
+		ZoneMaxSkill=135;
+		break;
+	case 414:
+		ZoneMaxSkill=150;
+		break;
+	case 415:
+		ZoneMaxSkill=150;
+		break;
+	case 416:
+		ZoneMaxSkill=150;
+		break;
+	case 418:
+		ZoneMaxSkill=150;
+		break;
+	case 420:
+		ZoneMaxSkill=150;
+		break;
+	case 421:
+		ZoneMaxSkill=150;
+		break;
+	case 422:
+		ZoneMaxSkill=150;
+		break;
+	case 424:
+		ZoneMaxSkill=150;
+		break;
+	case 429:
+		ZoneMaxSkill=150;
+		break;
+	case 433:
+		ZoneMaxSkill=150;
+		break;
+	case 434:
+		ZoneMaxSkill=150;
+		break;
+	case 437:
+		ZoneMaxSkill=150;
+		break;
+	case 441:
+		ZoneMaxSkill=150;
+		break;
+	case 442:
+		ZoneMaxSkill=100;
+		break;
+	case 443:
+		ZoneMaxSkill=100;
+		break;
+	case 445:
+		ZoneMaxSkill=100;
+		break;
+	case 448:
+		ZoneMaxSkill=100;
+		break;
+	case 449:
+		ZoneMaxSkill=100;
+		break;
+	case 452:
+		ZoneMaxSkill=100;
+		break;
+	case 453:
+		ZoneMaxSkill=100;
+		break;
+	case 454:
+		ZoneMaxSkill=100;
+		break;
+	case 456:
+		ZoneMaxSkill=100;
+		break;
+	case 460:
+		ZoneMaxSkill=135;
+		break;
+	case 463:
+		ZoneMaxSkill=275;
+		break;
+	case 464:
+		ZoneMaxSkill=135;
+		break;
+	case 478:
+		ZoneMaxSkill=50;
+		break;
+	case 490:
+		ZoneMaxSkill=275;
+		break;
+	case 493:
+		ZoneMaxSkill=300;
+		break;
+	case 496:
+		ZoneMaxSkill=225;
+		break;
+	case 497:
+		ZoneMaxSkill=225;
+		break;
+	case 501:
+		ZoneMaxSkill=225;
+		break;
+	case 502:
+		ZoneMaxSkill=225;
+		break;
+	case 504:
+		ZoneMaxSkill=225;
+		break;
+	case 508:
+		ZoneMaxSkill=225;
+		break;
+	case 509:
+		ZoneMaxSkill=225;
+		break;
+	case 510:
+		ZoneMaxSkill=225;
+		break;
+	case 511:
+		ZoneMaxSkill=225;
+		break;
+	case 513:
+		ZoneMaxSkill=225;
+		break;
+	case 516:
+		ZoneMaxSkill=225;
+		break;
+	case 517:
+		ZoneMaxSkill=225;
+		break;
+	case 518:
+		ZoneMaxSkill=200;
+		break;
+	case 537:
+		ZoneMaxSkill=250;
+		break;
+	case 538:
+		ZoneMaxSkill=250;
+		break;
+	case 542:
+		ZoneMaxSkill=250;
+		break;
+	case 543:
+		ZoneMaxSkill=250;
+		break;
+	case 556:
+		ZoneMaxSkill=50;
+		break;
+	case 576:
+		ZoneMaxSkill=150;
+		break;
+	case 598:
+		ZoneMaxSkill=200;
+		break;
+	case 602:
+		ZoneMaxSkill=200;
+		break;
+	case 604:
+		ZoneMaxSkill=200;
+		break;
+	case 618:
+		ZoneMaxSkill=300;
+		break;
+	case 636:
+		ZoneMaxSkill=135;
+		break;
+	case 656:
+		ZoneMaxSkill=300;
+		break;
+	case 657:
+		ZoneMaxSkill=225;
+		break;
+	case 702:
+		ZoneMaxSkill=50;
+		break;
+	case 719:
+		ZoneMaxSkill=135;
+		break;
+	case 720:
+		ZoneMaxSkill=135;
+		break;
+	case 797:
+		ZoneMaxSkill=225;
+		break;
+	case 799:
+		ZoneMaxSkill=150;
+		break;
+	case 810:
+		ZoneMaxSkill=50;
+		break;
+	case 814:
+		ZoneMaxSkill=50;
+		break;
+	case 815:
+		ZoneMaxSkill=125;
+		break;
+	case 818:
+		ZoneMaxSkill=50;
+		break;
+	case 878:
+		ZoneMaxSkill=275;
+		break;
+	case 879:
+		ZoneMaxSkill=150;
+		break;
+	case 896:
+		ZoneMaxSkill=150;
+		break;
+	case 917:
+		ZoneMaxSkill=100;
+		break;
+	case 919:
+		ZoneMaxSkill=100;
+		break;
+	case 922:
+		ZoneMaxSkill=100;
+		break;
+	case 923:
+		ZoneMaxSkill=50;
+		break;
+	case 927:
+		ZoneMaxSkill=50;
+		break;
+	case 968:
+		ZoneMaxSkill=250;
+		break;
+	case 977:
+		ZoneMaxSkill=250;
+		break;
+	case 978:
+		ZoneMaxSkill=250;
+		break;
+	case 979:
+		ZoneMaxSkill=250;
+		break;
+	case 983:
+		ZoneMaxSkill=250;
+		break;
+	case 988:
+		ZoneMaxSkill=250;
+		break;
+	case 997:
+		ZoneMaxSkill=125;
+		break;
+	case 998:
+		ZoneMaxSkill=125;
+		break;
+	case 1001:
+		ZoneMaxSkill=125;
+		break;
+	case 1002:
+		ZoneMaxSkill=125;
+		break;
+	case 1008:
+		ZoneMaxSkill=250;
+		break;
+	case 1017:
+		ZoneMaxSkill=150;
+		break;
+	case 1018:
+		ZoneMaxSkill=150;
+		break;
+	case 1020:
+		ZoneMaxSkill=150;
+		break;
+	case 1021:
+		ZoneMaxSkill=150;
+		break;
+	case 1022:
+		ZoneMaxSkill=150;
+		break;
+	case 1023:
+		ZoneMaxSkill=150;
+		break;
+	case 1024:
+		ZoneMaxSkill=150;
+		break;
+	case 1025:
+		ZoneMaxSkill=150;
+		break;
+	case 1039:
+		ZoneMaxSkill=150;
+		break;
+	case 1056:
+		ZoneMaxSkill=290;
+		break;
+	case 1097:
+		ZoneMaxSkill=150;
+		break;
+	case 1099:
+		ZoneMaxSkill=300;
+		break;
+	case 1101:
+		ZoneMaxSkill=250;
+		break;
+	case 1102:
+		ZoneMaxSkill=250;
+		break;
+	case 1106:
+		ZoneMaxSkill=250;
+		break;
+	case 1112:
+		ZoneMaxSkill=250;
+		break;
+	case 1116:
+		ZoneMaxSkill=250;
+		break;
+	case 1117:
+		ZoneMaxSkill=250;
+		break;
+	case 1119:
+		ZoneMaxSkill=250;
+		break;
+	case 1120:
+		ZoneMaxSkill=250;
+		break;
+	case 1121:
+		ZoneMaxSkill=250;
+		break;
+	case 1126:
+		ZoneMaxSkill=225;
+		break;
+	case 1136:
+		ZoneMaxSkill=250;
+		break;
+	case 1156:
+		ZoneMaxSkill=225;
+		break;
+	case 1176:
+		ZoneMaxSkill=250;
+		break;
+	case 1222:
+		ZoneMaxSkill=275;
+		break;
+	case 1227:
+		ZoneMaxSkill=275;
+		break;
+	case 1228:
+		ZoneMaxSkill=275;
+		break;
+	case 1229:
+		ZoneMaxSkill=275;
+		break;
+	case 1230:
+		ZoneMaxSkill=275;
+		break;
+	case 1231:
+		ZoneMaxSkill=275;
+		break;
+	case 1234:
+		ZoneMaxSkill=275;
+		break;
+	case 1256:
+		ZoneMaxSkill=275;
+		break;
+	case 1296:
+		ZoneMaxSkill=50;
+		break;
+	case 1297:
+		ZoneMaxSkill=50;
+		break;
+	case 1336:
+		ZoneMaxSkill=250;
+		break;
+	case 1337:
+		ZoneMaxSkill=250;
+		break;
+	case 1338:
+		ZoneMaxSkill=100;
+		break;
+	case 1339:
+		ZoneMaxSkill=200;
+		break;
+	case 1477:
+		ZoneMaxSkill=275;
+		break;
+	case 1519:
+		ZoneMaxSkill=50;
+		break;
+	case 1557:
+		ZoneMaxSkill=175;
+		break;
+	case 1577:
+		ZoneMaxSkill=225;
+		break;
+	case 1578:
+		ZoneMaxSkill=225;
+		break;
+	case 1581:
+		ZoneMaxSkill=100;
+		break;
+	case 1617:
+		ZoneMaxSkill=50;
+		break;
+	case 1638:
+		ZoneMaxSkill=50;
+		break;
+	case 1662:
+		ZoneMaxSkill=50;
+		break;
+	case 1681:
+		ZoneMaxSkill=200;
+		break;
+	case 1682:
+		ZoneMaxSkill=200;
+		break;
+	case 1684:
+		ZoneMaxSkill=200;
+		break;
+	case 1701:
+		ZoneMaxSkill=125;
+		break;
+	case 1738:
+		ZoneMaxSkill=225;
+		break;
+	case 1739:
+		ZoneMaxSkill=225;
+		break;
+	case 1740:
+		ZoneMaxSkill=225;
+		break;
+	case 1760:
+		ZoneMaxSkill=225;
+		break;
+	case 1762:
+		ZoneMaxSkill=250;
+		break;
+	case 1764:
+		ZoneMaxSkill=225;
+		break;
+	case 1765:
+		ZoneMaxSkill=225;
+		break;
+	case 1767:
+		ZoneMaxSkill=275;
+		break;
+	case 1770:
+		ZoneMaxSkill=275;
+		break;
+	case 1777:
+		ZoneMaxSkill=225;
+		break;
+	case 1778:
+		ZoneMaxSkill=225;
+		break;
+	case 1780:
+		ZoneMaxSkill=225;
+		break;
+	case 1797:
+		ZoneMaxSkill=225;
+		break;
+	case 1798:
+		ZoneMaxSkill=225;
+		break;
+	case 1883:
+		ZoneMaxSkill=250;
+		break;
+	case 1884:
+		ZoneMaxSkill=250;
+		break;
+	case 1939:
+		ZoneMaxSkill=250;
+		break;
+	case 1940:
+		ZoneMaxSkill=250;
+		break;
+	case 1942:
+		ZoneMaxSkill=250;
+		break;
+	case 1977:
+		ZoneMaxSkill=225;
+		break;
+	case 1997:
+		ZoneMaxSkill=275;
+		break;
+	case 1998:
+		ZoneMaxSkill=275;
+		break;
+	case 2017:
+		ZoneMaxSkill=300;
+		break;
+	case 2077:
+		ZoneMaxSkill=100;
+		break;
+	case 2078:
+		ZoneMaxSkill=100;
+		break;
+	case 2079:
+		ZoneMaxSkill=225;
+		break;
+	case 2097:
+		ZoneMaxSkill=175;
+		break;
+	case 2100:
+		ZoneMaxSkill=245;
+		break;
+	case 2158:
+		ZoneMaxSkill=250;
+		break;
+	case 2246:
+		ZoneMaxSkill=300;
+		break;
+	case 2256:
+		ZoneMaxSkill=300;
+		break;
+	case 2270:
+		ZoneMaxSkill=300;
+		break;
+	case 2272:
+		ZoneMaxSkill=300;
+		break;
+	case 2277:
+		ZoneMaxSkill=300;
+		break;
+	case 2279:
+		ZoneMaxSkill=300;
+		break;
+	case 2298:
+		ZoneMaxSkill=300;
+		break;
+	case 2302:
+		ZoneMaxSkill=225;
+		break;
+	case 2317:
+		ZoneMaxSkill=250;
+		break;
+	case 2318:
+		ZoneMaxSkill=225;
+		break;
+	case 2321:
+		ZoneMaxSkill=275;
+		break;
+	case 2322:
+		ZoneMaxSkill=50;
+		break;
+	case 2323:
+		ZoneMaxSkill=250;
+		break;
+	case 2324:
+		ZoneMaxSkill=200;
+		break;
+	case 2325:
+		ZoneMaxSkill=150;
+		break;
+	case 2326:
+		ZoneMaxSkill=100;
+		break;
+	case 2364:
+		ZoneMaxSkill=100;
+		break;
+	case 2365:
+		ZoneMaxSkill=150;
+		break;
+	case 2398:
+		ZoneMaxSkill=100;
+		break;
+	case 2399:
+		ZoneMaxSkill=50;
+		break;
+	case 2400:
+		ZoneMaxSkill=250;
+		break;
+	case 2401:
+		ZoneMaxSkill=200;
+		break;
+	case 2402:
+		ZoneMaxSkill=100;
+		break;
+	case 2403:
+		ZoneMaxSkill=225;
+		break;
+	case 2405:
+		ZoneMaxSkill=200;
+		break;
+	case 2408:
+		ZoneMaxSkill=200;
+		break;
+	case 2457:
+		ZoneMaxSkill=150;
+		break;
+	case 2477:
+		ZoneMaxSkill=300;
+		break;
+	case 2481:
+		ZoneMaxSkill=275;
+		break;
+	case 2521:
+		ZoneMaxSkill=250;
+		break;
+	case 2522:
+		ZoneMaxSkill=250;
+		break;
+	case 2558:
+		ZoneMaxSkill=300;
+		break;
+	case 2562:
+		ZoneMaxSkill=300;
+		break;
+	case 2597:
+		ZoneMaxSkill=300;
+		break;
+	case 2618:
+		ZoneMaxSkill=275;
+		break;
+	case 2619:
+		ZoneMaxSkill=300;
+		break;
+	case 2620:
+		ZoneMaxSkill=290;
+		break;
+	case 2624:
+		ZoneMaxSkill=300;
+		break;
+	case 2631:
+		ZoneMaxSkill=300;
+		break;
+	case 2797:
+		ZoneMaxSkill=150;
+		break;
+	case 2837:
+		ZoneMaxSkill=300;
+		break;
+	case 2897:
+		ZoneMaxSkill=150;
+		break;
+	default:
+		ZoneMaxSkill=50;
+		break;
+	}
+	if((ZoneMaxSkill-50) > fish_value )
+		return 0;
+	else if(ZoneMaxSkill-50 <= fish_value && fish_value < ZoneMaxSkill-25)
+		return 1;
+	else if(ZoneMaxSkill-25 <= fish_value && fish_value < ZoneMaxSkill)
+		return 2;
+	else if(ZoneMaxSkill <= fish_value && fish_value < ZoneMaxSkill + 25)
+		return 3;
+	else return 4;
 }
