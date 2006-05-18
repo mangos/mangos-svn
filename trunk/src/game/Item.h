@@ -98,8 +98,8 @@ enum InventoryChangeFailure
     EQUIP_CANT_DO_WHILE_DISARMED                 = 61,
     EQUIP_ERR_BAG_FULL6                          = 62,
     EQUIP_ITEM_RANK_NOT_ENOUGH                   = 63,
-    EQUIP_ITEM_REPUTATION_NOT_ENOUGH             = 63,
-    EQUIP_MORE_THAN1_SPECIAL_BAG                 = 64
+    EQUIP_ITEM_REPUTATION_NOT_ENOUGH             = 64,
+    EQUIP_MORE_THAN1_SPECIAL_BAG                 = 65
 };
 
 class MANGOS_DLL_SPEC Item : public Object
