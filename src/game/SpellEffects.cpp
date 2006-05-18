@@ -504,6 +504,15 @@ void Spell::EffectOpenLock(uint32 i)
             SendCastResult(CAST_FAIL_FAILED);
             return;
         }
+		if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill +75 )
+			up_skillvalue = 4;
+		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill +50 )
+			up_skillvalue = 3;
+		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill +25 )
+			up_skillvalue = 2;
+		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill)
+			up_skillvalue = 1;
+		else up_skillvalue = 0;
         loottype=2;
 
     }else if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_MINING)
@@ -1744,6 +1753,15 @@ void Spell::EffectSkinning(uint32 i)
         SendCastResult(CAST_FAIL_FAILED);
         return;
     }
+	if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel() +15 )
+		up_skillvalue = 4;
+	else if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel() +10 )
+		up_skillvalue = 3;
+	else if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel() +5 )
+		up_skillvalue = 2;
+	else if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel())
+		up_skillvalue = 1;
+	else up_skillvalue = 0;
 
 }
 
@@ -1768,10 +1786,11 @@ void Spell::EffectTransmitted(uint32 i)
     float fx,fy;
     WorldPacket data;
 
-    //float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-    //float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-    fx = m_caster->GetPositionX() + irand(10,20) * cos(m_caster->GetOrientation());
-    fy = m_caster->GetPositionY() + irand(10,20) * sin(m_caster->GetOrientation());
+    float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+    float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
+	float dis = irand(int(min_dis),int(max_dis));
+    fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
+    fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
 
     GameObject* pGameObj = new GameObject();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
@@ -1803,14 +1822,50 @@ void Spell::EffectTransmitted(uint32 i)
     data << (uint64)pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
 
-    if(m_spellInfo->EffectMiscValue[i] == 35591)
-    {
-        ((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
-    }
+	if(m_spellInfo->EffectMiscValue[i] == 35591)
+	{
+		if(((Player*)m_caster)->CheckFishingAble() > 0)
+		{
+			//pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
+			//need fixed produre of fishing.
+			((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
+			SendChannelUpdate(0);
+		}
+	}
 }
 
-void Spell::EffectSkill(uint32)
+void Spell::EffectSkill(uint32 i)
 {
-    Player *player = (Player*)m_caster;
+	Player *player = (Player*)m_caster;
+
+	uint32 skill_id = m_spellInfo->EffectMiscValue[1];
+	if(skill_id == SKILL_FISHING)
+		up_skillvalue = player->CheckFishingAble();
+	if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING || SKILL_HERBALISM)
+	{
+		switch(up_skillvalue)
+		{
+			case 0:
+				return;
+			case 1:
+				break;
+			case 2:
+			{
+				if(urand(1,10) >= 7)
+					return;
+				else break;
+			}
+			case 3:
+			{
+				if(urand(1,10) >= 3)
+					return;
+				else break;
+			}
+			case 4:
+			default:return;
+		}
+	
+		player->UpdateSkill(skill_id);
+	}else 
     player->UpdateSkillPro(m_spellInfo->Id);
 }

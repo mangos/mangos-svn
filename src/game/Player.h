@@ -637,6 +637,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
         void SendLoot(uint64 guid,uint8 loot_type);
+		uint8 CheckFishingAble();
 
         uint32 m_bgBattleGroundID;
         bool m_bgInBattleGround;

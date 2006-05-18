@@ -372,7 +372,7 @@ class Spell
         void EffectTriggerSpell(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
-        void EffectSkill(uint32);
+        void EffectSkill(uint32 i);
         void EffectAttackMe(uint32 i);
 
         Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur );
@@ -459,6 +459,7 @@ class Spell
         std::list<DynamicObject*> m_dynObjToDel;
         std::list<GameObject*> m_ObjToDel;
         // -------------------------------------------
+		uint8 up_skillvalue;
 };
 
 enum ReplenishType
