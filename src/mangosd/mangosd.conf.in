@@ -6,8 +6,8 @@
 DataDir = "@MANGOSD_DATA@"
 
 # Database connection settings.
-# Default: hostname,username,password,database
-DatabaseInfo = "127.0.0.1;mangos;mangos;mangos"
+# Default: hostname;port;username;password;database
+DatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
 
 # IP or DNS of the server (both realm and world).
 # You need to set this to your external IP.

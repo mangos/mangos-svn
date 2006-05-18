@@ -74,7 +74,7 @@ Unit::Unit() : Object()
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
-	m_transform = 0;
+    m_transform = 0;
 }
 
 Unit::~Unit()
@@ -396,11 +396,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         pVictim->addUnitState(UNIT_STAT_ATTACK_BY);
         pVictim->addAttacker(this);
 
-		if(pVictim->getTransForm())
-		{
-			pVictim->RemoveAura(pVictim->getTransForm());
-			pVictim->setTransForm(0);
-		}
+        if(pVictim->getTransForm())
+        {
+            pVictim->RemoveAura(pVictim->getTransForm());
+            pVictim->setTransForm(0);
+        }
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
@@ -741,8 +741,8 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
 void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
 {
-	if(hasUnitState(UNIT_STAT_CONFUSED))
-		return;
+    if(hasUnitState(UNIT_STAT_CONFUSED))
+        return;
     WorldPacket data;
     uint32    hitInfo = 0x22;
     uint32    damageType = 0;
@@ -812,7 +812,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     if(AbsorbDamage==0)
         data << (uint32)0;
     else
-        data << (uint32)-1; //default value
+        data << (uint32)-1;                                 //default value
 
     data << (uint32)0;
     data << (uint32)blocked_amount;
@@ -881,8 +881,8 @@ void Unit::_UpdateSpells( uint32 time )
     AuraList::iterator i, next;
     for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
-		next = i;
-		next++;
+        next = i;
+        next++;
         (*i)->Update( time );
         if(m_Auras.empty())
             break;
@@ -1356,6 +1356,7 @@ void Unit::AddHostil(uint64 guid, float hostility)
     uh->Hostility=hostility;
     m_hostilList.push_back(uh);
 }
+
 void Unit::AddItemEnchant(uint32 enchant_id)
 {
     SpellItemEnchantment *pEnchant;
@@ -1378,7 +1379,7 @@ void Unit::AddItemEnchant(uint32 enchant_id)
         SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
         SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
     }
-    else 
+    else
     {
         for(int x = 0;x < 3;x++)
             if(enchantSpell_info->Effect[x])

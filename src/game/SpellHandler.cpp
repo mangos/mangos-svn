@@ -100,19 +100,19 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     switch(t)
     {
         //door
-        case GAMEOBJECT_TYPE_DOOR: //0
+        case GAMEOBJECT_TYPE_DOOR:                          //0
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
-            obj->SetUInt32Value(GAMEOBJECT_STATE,0); //open
+            obj->SetUInt32Value(GAMEOBJECT_STATE,0);        //open
             //obj->SetUInt32Value(GAMEOBJECT_TIMESTAMP,0x465EE6D2); //load timestamp
 
             obj->SetLootState((LootState)0);
-            obj->SetSespawnTimer(5000); //close door in 5 seconds
+            obj->SetSespawnTimer(5000);                     //close door in 5 seconds
 
             return;
-        break;
+            break;
 
-        //Sitting: Wooden bench, chairs enzz
-        case GAMEOBJECT_TYPE_CHAIR: //7
+            //Sitting: Wooden bench, chairs enzz
+        case GAMEOBJECT_TYPE_CHAIR:                         //7
 
             info = obj->GetGOInfo();
             if(info)
@@ -126,18 +126,19 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 _player->BuildHeartBeatMsg(&data);
                 _player->SendMessageToSet(&data, true);
 
-                _player->SetUInt32Value(UNIT_FIELD_BYTES_1, _player->GetUInt32Value(UNIT_FIELD_BYTES_1) | (3 + spellId) ); //offset 3 is related to the DB
-         
+                                                            //offset 3 is related to the DB
+                _player->SetUInt32Value(UNIT_FIELD_BYTES_1, _player->GetUInt32Value(UNIT_FIELD_BYTES_1) | (3 + spellId) );
+
                 return;
             }
             break;
 
-        //big gun, its a spell/aura
-        case GAMEOBJECT_TYPE_GOOBER: //10
+            //big gun, its a spell/aura
+        case GAMEOBJECT_TYPE_GOOBER:                        //10
 
-        //chest locked
-        case GAMEOBJECT_TYPE_SPELLCASTER: //22
-            
+            //chest locked
+        case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
+
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 
             info = obj->GetGOInfo();
@@ -151,7 +152,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-        case GAMEOBJECT_TYPE_FLAGSTAND: //24
+        case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
             //GB flag
             info = obj->GetGOInfo();
             if(info)
@@ -160,8 +161,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 guid=_player->GetGUID();
             }
             break;
-        
-        case GAMEOBJECT_TYPE_FLAGDROP: //26
+
+        case GAMEOBJECT_TYPE_FLAGDROP:                      //26
             //GB flag dropped
             info = obj->GetGOInfo();
             if(info)
@@ -239,4 +240,3 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
     if(_player->m_currentSpell)
         _player->m_currentSpell->cancel();
 }
-

@@ -242,7 +242,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     uint32 result = DIALOG_STATUS_NONE;
     uint32 status;
     uint32 quest_id;
-    Quest *pQuest; 
+    Quest *pQuest;
 
     for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
     {
@@ -254,7 +254,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         status = pPlayer->getQuestStatus(quest_id);
         if ( status == QUEST_STATUS_COMPLETE && !pPlayer->getQuestRewardStatus(quest_id) )
         {
-            // POI finish quest here 
+            // POI finish quest here
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
                 return DIALOG_STATUS_REWARD_REP;
             else
@@ -267,14 +267,14 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     if ( result == DIALOG_STATUS_INCOMPLETE )
         return result;
 
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ ) 
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
         pQuest = *i;
         if ( !pQuest )
             continue;
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->getQuestStatus(quest_id); 
+        status = pPlayer->getQuestStatus(quest_id);
         if ( status == QUEST_STATUS_NONE && pQuest->PreReqSatisfied( pPlayer ) && pQuest->IsCompatible( pPlayer ) )
         {
             if ( pQuest->LevelSatisfied( pPlayer ) )
@@ -297,7 +297,7 @@ Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
 {
     if ( !prevQuest )
         return NULL;
-    uint32 quest_id = prevQuest->GetQuestInfo()->NextQuestId; 
+    uint32 quest_id = prevQuest->GetQuestInfo()->NextQuestId;
     Quest *pQuest;
 
     if( quest_id <= 0 )
@@ -319,7 +319,7 @@ Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
 
 void Creature::prepareQuestMenu( Player *pPlayer )
 {
-    uint32 result = DIALOG_STATUS_NONE; 
+    uint32 result = DIALOG_STATUS_NONE;
     uint32 status;
     uint32 quest_id;
     Quest *pQuest;
@@ -330,7 +330,7 @@ void Creature::prepareQuestMenu( Player *pPlayer )
     {
         pQuest = *i;
         if ( !pQuest )
-            continue; 
+            continue;
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
         status = pPlayer->getQuestStatus(quest_id);
@@ -340,7 +340,7 @@ void Creature::prepareQuestMenu( Player *pPlayer )
             qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
     }
 
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ ) 
+    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
     {
         pQuest = *i;
         if ( !pQuest )
@@ -363,7 +363,7 @@ void Creature::sendPreparedQuest(Player *player)
     uint32 status = pQuestMenu->GetItem(0).m_qIcon;
     if ( pQuestMenu->MenuItemCount() == 1 && status == DIALOG_STATUS_AVAILABLE )
     {
-        Quest *pQuest = objmgr.GetQuest( pQuestMenu->GetItem(0).m_qId ); 
+        Quest *pQuest = objmgr.GetQuest( pQuestMenu->GetItem(0).m_qId );
         if (!pQuest)
             return;
 
@@ -377,8 +377,8 @@ void Creature::sendPreparedQuest(Player *player)
         GossipText * gossiptext=objmgr.GetGossipText(textid);
         if( !gossiptext )
         {
-            qe._Delay = TEXTEMOTE_MASSAGE;                    //zyg: player emote
-            qe._Emote = TEXTEMOTE_HELLO;                      //zyg: NPC emote
+            qe._Delay = TEXTEMOTE_MASSAGE;                  //zyg: player emote
+            qe._Emote = TEXTEMOTE_HELLO;                    //zyg: NPC emote
             title = "Do Quest ?";
         }
         else
@@ -744,28 +744,30 @@ int Creature::getItemSlotById(uint32 itemid)
     }
     return -1;
 }
+
 void Creature::getSkinLoot()
 {
-	CreatureInfo *cinfo = GetCreatureInfo();
+    CreatureInfo *cinfo = GetCreatureInfo();
 
-	if(cinfo->type == CREATURE_TYPE_DRAGON)
-		FillSkinLoot(&loot,8165);
-	if(cinfo->family ==CREATURE_FAMILY_TURTLE)
-		FillSkinLoot(&loot,8167);
-	uint32 level = getLevel();
-	if(level > 48)
-		FillSkinLoot(&loot,(urand(0,10)<8 ? 8170 :8171));
-	else if(level > 36)
-		FillSkinLoot(&loot,(urand(0,10)<8 ? 4304 :8169));
-	else if(level > 25)
-		FillSkinLoot(&loot,(urand(0,10)<8 ? 4234 :4235));
-	else if(level > 15)
-		FillSkinLoot(&loot,(urand(0,10)<8 ? 2319 :4232));
-	else if(level > 3)
-		FillSkinLoot(&loot,(urand(0,10)<8 ? 2318 :2934));
-	else if(level <= 3)
-		FillSkinLoot(&loot,2934);
+    if(cinfo->type == CREATURE_TYPE_DRAGON)
+        FillSkinLoot(&loot,8165);
+    if(cinfo->family ==CREATURE_FAMILY_TURTLE)
+        FillSkinLoot(&loot,8167);
+    uint32 level = getLevel();
+    if(level > 48)
+        FillSkinLoot(&loot,(urand(0,10)<8 ? 8170 :8171));
+    else if(level > 36)
+        FillSkinLoot(&loot,(urand(0,10)<8 ? 4304 :8169));
+    else if(level > 25)
+        FillSkinLoot(&loot,(urand(0,10)<8 ? 4234 :4235));
+    else if(level > 15)
+        FillSkinLoot(&loot,(urand(0,10)<8 ? 2319 :4232));
+    else if(level > 3)
+        FillSkinLoot(&loot,(urand(0,10)<8 ? 2318 :2934));
+    else if(level <= 3)
+        FillSkinLoot(&loot,2934);
 }
+
 void Creature::SaveToDB()
 {
     std::stringstream ss;

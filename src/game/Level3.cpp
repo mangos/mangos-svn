@@ -51,6 +51,7 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
     pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), icon, 6, 30, "Test POI");
     return true;
 }
+
 bool ChatHandler::HandleSendItemErrorMsg(const char* args)
 {
     uint8 error_msg = atol((char*)args);

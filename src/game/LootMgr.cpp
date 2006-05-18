@@ -96,11 +96,12 @@ void FillLoot(Loot *loot, uint32 loot_id)
 
 void FillSkinLoot(Loot *Skinloot,uint32 itemid)
 {
-	//Skinloot->items.clear();
-	ItemPrototype *proto = objmgr.GetItemPrototype(itemid);
-	uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
-	Skinloot->items.push_back(LootItem(itemid,displayid,99));
+    //Skinloot->items.clear();
+    ItemPrototype *proto = objmgr.GetItemPrototype(itemid);
+    uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
+    Skinloot->items.push_back(LootItem(itemid,displayid,99));
 }
+
 void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance)
 {
     LootStore::iterator tab =CreatureLoot.find(loot_id);

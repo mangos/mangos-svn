@@ -951,7 +951,7 @@ void Player::setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarde
         mQuestStatus[quest_id].m_questMobCount[2] = 0;
         mQuestStatus[quest_id].m_questMobCount[3] = 0;
         mQuestStatus[quest_id].m_explored = false;
-        
+
         Quest *pQuest = mQuestStatus[quest_id].m_quest;
         if ( pQuest )
         {
@@ -971,7 +971,7 @@ void Player::setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarde
 
     mQuestStatus[quest_id].status     = new_status;
     mQuestStatus[quest_id].rewarded   = new_rewarded;
-    
+
     if ( new_status == QUEST_STATUS_NONE )
         mQuestStatus.erase(quest_id);
 }
@@ -1020,10 +1020,10 @@ void Player::ItemAdded(uint32 entry, uint32 count)
     uint32 reqitem;
     uint32 reqitemcount;
     uint32 curitemcount;
-    uint32 additemcount; 
+    uint32 additemcount;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        qs = i->second; 
+        qs = i->second;
         if ( qs.status == QUEST_STATUS_INCOMPLETE )
         {
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
@@ -1061,7 +1061,7 @@ void Player::ItemRemoved(uint32 entry)
     uint32 count = 1;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        qs = i->second; 
+        qs = i->second;
         if ( qs.status == QUEST_STATUS_COMPLETE )
         {
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
@@ -1073,7 +1073,7 @@ void Player::ItemRemoved(uint32 entry)
                     curitemcount = GetItemCount(entry, true);
                     if ( curitemcount - count < reqitemcount )
                     {
-                        remitemcount = reqitemcount - curitemcount + count; 
+                        remitemcount = reqitemcount - curitemcount + count;
                         mQuestStatus[i->first].m_questItemCount[j] = curitemcount - remitemcount;
                         PlayerTalkClass->SendQuestIncompleteToLog(qs.m_quest);
                         setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_INCOMPLETE, false);
@@ -1104,10 +1104,10 @@ void Player::KilledMonster(uint32 entry, uint64 guid)
     uint32 reqkill;
     uint32 reqkillcount;
     uint32 curkillcount;
-    uint32 addkillcount = 1; 
+    uint32 addkillcount = 1;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        qs = i->second; 
+        qs = i->second;
         if ( qs.status == QUEST_STATUS_INCOMPLETE )
         {
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
@@ -1116,7 +1116,7 @@ void Player::KilledMonster(uint32 entry, uint64 guid)
                 if ( reqkill == entry )
                 {
                     reqkillcount = qs.m_quest->GetQuestInfo()->ReqKillMobCount[j];
-                    curkillcount = qs.m_questMobCount[j]; 
+                    curkillcount = qs.m_questMobCount[j];
                     if ( curkillcount < reqkillcount )
                     {
                         mQuestStatus[i->first].m_questMobCount[j] = curkillcount + addkillcount;
@@ -2688,13 +2688,13 @@ void Player::BuildPlayerRepop()
 
     //TODO: Check/research this
     data.Initialize(SMSG_SPELL_START );
-    data << uint8(0xFF) << GetGUID() //9
-         << uint8(0xFF) << GetGUID() //9
-         //<< uint16(8326); //2
-         << uint32(20305) //2
-         << uint16(0x02)
+    data << uint8(0xFF) << GetGUID()                        //9
+        << uint8(0xFF) << GetGUID()                         //9
+    //<< uint16(8326); //2
+        << uint32(20305)                                    //2
+        << uint16(0x02)
 
-         << uint32(0x00)<< uint16(0x00); //6
+        << uint32(0x00)<< uint16(0x00);                     //6
     GetSession()->SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO);
@@ -2843,9 +2843,9 @@ void Player::CreateCorpse()
 
     MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
 
-	std::string corpsename = m_name;
-	corpsename.append(" corpse.");
-    
+    std::string corpsename = m_name;
+    corpsename.append(" corpse.");
+
     this->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, corpsename.c_str());
 }
 
@@ -5323,7 +5323,7 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                 }
                 for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
                 {
-                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt); 
+                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
                     if( Enchant_id)
                     {
                         SpellItemEnchantment *pEnchant;
@@ -5344,7 +5344,7 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                             SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
                             SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
                         }
-                        else 
+                        else
                         {
                             RemoveAura(enchant_spell_id);
                         }
@@ -5976,10 +5976,10 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
 
         loot = &creature->loot;
         if (loot_type == 2)
-		{
-			creature->getSkinLoot();
-			loot = &creature->loot;
-		}
+        {
+            creature->getSkinLoot();
+            loot = &creature->loot;
+        }
     }
 
     m_lootGuid = guid;
