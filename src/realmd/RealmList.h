@@ -62,7 +62,6 @@ class RealmList
         void AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone );
         int GetAndAddRealms();
         void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
-        void RemoveRealm (const char *name );
         inline void setServerPort(port_t p) { i_serverPort = p; }
 
         RealmMap::const_iterator begin() const { return _realms.begin(); }

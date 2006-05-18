@@ -126,7 +126,7 @@ void AuthSocket::_HandleLogonChallenge()
     sAuthLogonChallenge_C *ch = (sAuthLogonChallenge_C*)&buf[0];
     ibuf.Read((char *)&buf[4], remaining);
     DEBUG_LOG("[AuthChallenge] got full packet, %#04x bytes", ch->size);
-    DEBUG_LOG("    I(%d): '%s'", ch->I_len, ch->I);
+    DEBUG_LOG("[AuthChallenge] name(%d): '%s'", ch->I_len, ch->I);
 
     ByteBuffer pkt;
 
@@ -166,7 +166,7 @@ void AuthSocket::_HandleLogonChallenge()
         if(result)
         {
             pkt << (uint8)CE_IPBAN;
-            sLog.outBasic("Banned ip %s try to login!",GetRemoteAddress().c_str ());
+            sLog.outBasic("[AuthChallenge] Banned ip %s try to login!",GetRemoteAddress().c_str ());
             delete result;
         }
         else
@@ -176,28 +176,28 @@ void AuthSocket::_HandleLogonChallenge()
             {
                 if((*result)[3].GetUInt8() == 1)            // if ip is locked
                 {
-                    DEBUG_LOG("Account '%s' is locked to IP - '%s'", _login.c_str(), (*result)[4].GetString());
-                    DEBUG_LOG("Player address is '%s'", GetRemoteAddress().c_str());
+                    DEBUG_LOG("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), (*result)[4].GetString());
+                    DEBUG_LOG("[AuthChallenge] Player address is '%s'", GetRemoteAddress().c_str());
                     if ( strcmp((*result)[4].GetString(),GetRemoteAddress().c_str()) )
                     {
-                        DEBUG_LOG("Account IP differs");
+                        DEBUG_LOG("[AuthChallenge] Account IP differs");
                         pkt << (uint8) CE_ACCOUNT_CLOSED;
                     }
                     else
                     {
-                        DEBUG_LOG("Account IP matches");
+                        DEBUG_LOG("[AuthChallenge] Account IP matches");
                     }
 
                 }
                 else
                 {
-                    DEBUG_LOG("Account '%s' is not locked to ip", _login.c_str());
+                    DEBUG_LOG("[AuthChallenge] Account '%s' is not locked to ip", _login.c_str());
                 }
 
                 if((*result)[2].GetUInt8())                 //if banned
                 {
                     pkt << (uint8) CE_ACCOUNT_CLOSED;
-                    sLog.outBasic("Banned account %s try to login!",_login.c_str ());
+                    sLog.outBasic("[AuthChallenge] Banned account %s try to login!",_login.c_str ());
 
                 }
                 else
@@ -304,12 +304,12 @@ void AuthSocket::_HandleLogonChallenge()
 
             if(PatchesCache .GetHash(tmp,(uint8*)&xferh .md5 ))
             {
-                DEBUG_LOG("\nFound precached patch info.");
+                DEBUG_LOG("\n[AuthChallenge] Found precached patch info.");
 
             }
             else
             {                                               //calculate patch md5
-                printf("\nPatch info for %s was not cached.",tmp);
+                printf("\n[AuthChallenge] Patch info for %s was not cached.",tmp);
                 PatchesCache.LoadPatchMD5(tmp);
                 PatchesCache.GetHash(tmp,(uint8*)&xferh .md5 );
             }
