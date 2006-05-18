@@ -216,7 +216,7 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
     return ( distance <= reach * reach );
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
 
     uint32 crtype = 0;
@@ -276,7 +276,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag)
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
             DEBUG_LOG("We are dead, loosing 10 percents durability");
-            ((Player*)pVictim)->DeathDurabilityLoss(0.10);
+            if (durabilityLoss)
+            {
+                ((Player*)pVictim)->DeathDurabilityLoss(0.10);
+            }
             std::list<Hostil*>::iterator i;
             for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
             {
@@ -507,7 +510,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     data << uint32(0);
     data << uint32(0);
     SendMessageToSet(&data,true);
-    DealDamage(pVictim, damage,0);
+    DealDamage(pVictim, damage, 0, true);
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
@@ -546,7 +549,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         data << uint32(0);
         SendMessageToSet(&data,true);
 
-        DealDamage(pVictim, mod->m_amount, procFlag);
+        DealDamage(pVictim, mod->m_amount, procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
@@ -826,7 +829,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
         DEBUG_LOG("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg.",
             GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
 
-    DealDamage(pVictim, damage-AbsorbDamage, 0);
+    DealDamage(pVictim, damage-AbsorbDamage, 0, true);
 }
 
 void Unit::smsg_AttackStop(uint64 victimGuid)

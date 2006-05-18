@@ -141,7 +141,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         inline uint8 getGender() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
         inline uint8 getStandState() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
-        void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag);
+        void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *turn);
         uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage);
         void HandleEmoteCommand(uint32 anim_id);

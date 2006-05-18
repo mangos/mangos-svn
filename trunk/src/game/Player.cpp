@@ -439,7 +439,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage((Unit*)this, Amount, 0);
+    DealDamage((Unit*)this, Amount, 0, true);
 }
 
 void Player::HandleDrowing(uint32 UnderWaterTime)

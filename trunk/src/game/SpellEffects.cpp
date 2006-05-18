@@ -176,7 +176,7 @@ void Spell::EffectInstaKill(uint32 i)
     if(!unitTarget) return;
     if(!unitTarget->isAlive()) return;
     uint32 health = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-    m_caster->DealDamage(unitTarget, health, 0);
+    m_caster->DealDamage(unitTarget, health, 0, false);
 }
 
 void Spell::EffectSchoolDMG(uint32 i)
