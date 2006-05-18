@@ -90,7 +90,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         _player->PlayerTalkClass->SendQuestLogFull();
         return;
     }
-    
+
     if ( (_player->m_timedQuest) && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
     {
         _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
@@ -102,8 +102,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
         return;
     }
-	
-	_player->addNewQuest(pQuest,QUEST_STATUS_INCOMPLETE);
+
+    _player->addNewQuest(pQuest,QUEST_STATUS_INCOMPLETE);
 
     _player->SetUInt32Value(log_slot + 0, quest_id);
     _player->SetUInt32Value(log_slot + 1, 0);
@@ -377,19 +377,19 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     uint16 log_slot = _player->getQuestSlotById( slot_id );
     quest_id = _player->GetUInt32Value(log_slot + 0);
 
-	_player->SetUInt32Value(log_slot + 0, 0);
-	_player->SetUInt32Value(log_slot + 1, 0);
-	_player->SetUInt32Value(log_slot + 2, 0);
+    _player->SetUInt32Value(log_slot + 0, 0);
+    _player->SetUInt32Value(log_slot + 1, 0);
+    _player->SetUInt32Value(log_slot + 2, 0);
 
-	if ( ( _player->getQuestStatus(quest_id) != QUEST_STATUS_COMPLETE ) && ( _player->getQuestStatus(quest_id) != QUEST_STATUS_INCOMPLETE ) )
+    if ( ( _player->getQuestStatus(quest_id) != QUEST_STATUS_COMPLETE ) && ( _player->getQuestStatus(quest_id) != QUEST_STATUS_INCOMPLETE ) )
     {
 
         sLog.outError("Trying to remove an invalid quest '%u' from log.", quest_id);
         return;
     }
-	Quest *pQuest = objmgr.GetQuest(quest_id);
-	pQuest->RemSrcItem(_player);
-	_player->setQuestStatus( quest_id, QUEST_STATUS_NONE, false);
+    Quest *pQuest = objmgr.GetQuest(quest_id);
+    pQuest->RemSrcItem(_player);
+    _player->setQuestStatus( quest_id, QUEST_STATUS_NONE, false);
 
     //_player->SaveToDB();
 }
@@ -426,9 +426,9 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
         return;
     }
     if( _player->getQuestStatus(quest_id) != QUEST_STATUS_COMPLETE )
-		_player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false);
-	else
-		_player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true);
+        _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false);
+    else
+        _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true);
 }
 
 void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)

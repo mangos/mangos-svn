@@ -91,7 +91,7 @@ bool Quest::CanBeTaken( Player *_Player )
 
 bool Quest::RewardIsTaken( Player *_Player )
 {
-	return _Player->getQuestRewardStatus( GetQuestInfo()->QuestId );
+    return _Player->getQuestRewardStatus( GetQuestInfo()->QuestId );
 }
 
 bool Quest::IsCompatible( Player *_Player )
@@ -112,14 +112,14 @@ bool Quest::TradeSkillSatisfied( Player *_Player )
 bool Quest::RaceSatisfied( Player *_Player )
 {
     if ( GetQuestInfo()->RequiredRaces == QUEST_RACE_NONE )
-		return true;
+        return true;
     return (((GetQuestInfo()->RequiredRaces >> (_Player->getRace() - 1)) & 0x01) == 0x01);
 }
 
 bool Quest::ClassSatisfied( Player *_Player )
 {
     if ( GetQuestInfo()->RequiredClass == QUEST_CLASS_NONE )
-		return true;
+        return true;
     return (GetQuestInfo()->RequiredClass == _Player->getClass());
 }
 
@@ -141,16 +141,18 @@ bool Quest::PreReqSatisfied( Player *_Player )
         return false;
     return true;
 }
+
 bool Quest::AddSrcItem( Player *_Player )
 {
     uint32 srcitem = GetQuestInfo()->SrcItemId;
     if ( srcitem )
         if ( _Player->AddNewItem(srcitem,GetQuestInfo()->SrcItemCount,false) == 0 )
             return false;
-        else
-            return true;
+    else
+        return true;
     return true;
 }
+
 bool Quest::RemSrcItem( Player *_Player )
 {
     uint32 srcitem = GetQuestInfo()->SrcItemId;

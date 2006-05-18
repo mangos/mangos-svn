@@ -464,9 +464,9 @@ void Aura::HandlePeriodicDamage(bool apply)
 void Aura::HandleModConfuse(bool apply)
 {
     if( apply )
-		m_target->addUnitState(UNIT_STAT_CONFUSED);
+        m_target->addUnitState(UNIT_STAT_CONFUSED);
     else
-		m_target->clearUnitState(UNIT_STAT_CONFUSED);
+        m_target->clearUnitState(UNIT_STAT_CONFUSED);
 }
 
 void HandleHealEvent(void *obj)
@@ -573,13 +573,13 @@ void Aura::TriggerSpell()
     }
 
     Spell *spell = new Spell(m_target, spellInfo, true, this);
-	Unit* target = NULL;
-	if(m_caster->GetTypeId() == TYPEID_PLAYER)
-	{
-		target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-	}
-	if(!target)
-		return;
+    Unit* target = NULL;
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+    }
+    if(!target)
+        return;
     SpellCastTargets targets;
     targets.setUnitTarget(target);
     spell->prepare(&targets);
@@ -717,7 +717,7 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-    m_permanent = true;                                                        // stealth state
+    m_permanent = true;                                     // stealth state
     apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x21E0000 );
     apply ? m_target->m_stealth = GetId() :  m_target->m_stealth = 0;
 }
@@ -798,10 +798,11 @@ void Aura::HandleAuraModResistance(bool apply)
 void Aura::HandleAuraModRoot(bool apply)
 {
     WorldPacket data;
-    apply ? data.Initialize(MSG_MOVE_ROOT) : data.Initialize(MSG_MOVE_UNROOT);//MSG_MOVE_ROOT
+                                                            //MSG_MOVE_ROOT
+    apply ? data.Initialize(MSG_MOVE_ROOT) : data.Initialize(MSG_MOVE_UNROOT);
     data << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
-	apply ? m_target->addUnitState(UNIT_STAT_ROOT) : m_target->clearUnitState(UNIT_STAT_ROOT);
+    apply ? m_target->addUnitState(UNIT_STAT_ROOT) : m_target->clearUnitState(UNIT_STAT_ROOT);
 }
 
 void Aura::HandleAuraModSilence(bool apply)
@@ -833,7 +834,7 @@ void Aura::HandleAuraModStat(bool apply)
             index = UNIT_FIELD_IQ;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
             index3 = UNIT_FIELD_MAXPOWER1;
-           break;
+            break;
         case 4:
             index = UNIT_FIELD_SPIRIT;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
@@ -866,15 +867,15 @@ void Aura::HandleAuraModStat(bool apply)
     if(apply)
     {
         m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
-		if(index3)
-			m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? m_modifier->m_amount:-m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
+        if(index3)
+            m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? m_modifier->m_amount:-m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
         if(m_target->GetTypeId() == TYPEID_PLAYER)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
     }
     else
     {
         m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
-		if(index3)
+        if(index3)
             m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? -m_modifier->m_amount:m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
         if(m_target->GetTypeId() == TYPEID_PLAYER)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
@@ -1037,15 +1038,15 @@ void Aura::HandleAuraModShapeshift(bool apply)
         sLog.outError("WORLD: unknown spell id %i\n", spellId);
         return;
     }
-	if(apply)
-	{
-		Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
-		WPAssert(p_spell);
-		SpellCastTargets targets;
-		targets.setUnitTarget(m_target);
-		p_spell->prepare(&targets);
-	}
-	else m_target->RemoveAura(spellId);
+    if(apply)
+    {
+        Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+        WPAssert(p_spell);
+        SpellCastTargets targets;
+        targets.setUnitTarget(m_target);
+        p_spell->prepare(&targets);
+    }
+    else m_target->RemoveAura(spellId);
 
     /*tmpAff = new Affect(spellInfo,GetDuration(),GetCaster());
 
@@ -1219,18 +1220,18 @@ void Aura::HandleAuraModAttackPower(bool apply)
 void Aura::HandleAuraTransform(bool apply)
 {
     if (apply)
-	{
+    {
         CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);
         m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
-		m_target->setTransForm(GetSpellProto()->Id);
-	}
+        m_target->setTransForm(GetSpellProto()->Id);
+    }
     else
-	{
+    {
         m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-		m_target->setTransForm(0);
-	}
-	if(m_caster->GetTypeId() == TYPEID_PLAYER)
-		m_target->SendUpdateToPlayer((Player*)m_caster);
+        m_target->setTransForm(0);
+    }
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_caster);
 
     /*uint32 id=GetId();
     switch (id)

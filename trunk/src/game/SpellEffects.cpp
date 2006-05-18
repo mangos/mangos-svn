@@ -104,7 +104,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE
     &Spell::EffectOpenSecretSafe,                           //SPELL_EFFECT_OPEN_LOCK_ITEM
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PROFICIENCY
-    &Spell::EffectSendEvent,                                     //SPELL_EFFECT_SEND_EVENT
+    &Spell::EffectSendEvent,                                //SPELL_EFFECT_SEND_EVENT
     &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN
     &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT
     &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL
@@ -349,15 +349,15 @@ void Spell::EffectCreateItem(uint32 i)
     //   num_to_add = 1;
     //   if(num_to_add > m_itemProto->MaxCount)
     //       num_to_add = m_itemProto->MaxCount;
-	Item *pItem = player->CreateNewItem(newitemid,1);
-	player->AddItemToInventory(pItem,false);
-	if(!pItem)
+    Item *pItem = player->CreateNewItem(newitemid,1);
+    player->AddItemToInventory(pItem,false);
+    if(!pItem)
     {
         SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
         return;
     }
-	if(!pItem->GetUInt32Value(ITEM_CLASS_CONSUMABLE))
-		pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+    if(!pItem->GetUInt32Value(ITEM_CLASS_CONSUMABLE))
+        pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
     //should send message "create item" to client.-FIX ME
     player->UpdateSkillPro(m_spellInfo->Id);
 }
@@ -715,11 +715,11 @@ void Spell::EffectLearnSkill(uint32 i)
 
 void Spell::EffectTradeSkill(uint32 i)
 {
-	if(unitTarget->GetTypeId() != TYPEID_PLAYER)
-		return;
-   // uint32 skillid =  m_spellInfo->EffectMiscValue[i];
-   // uint16 skillmax = ((Player*)unitTarget)->(skillid);
-   // ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,skillmax+75);
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+    // uint32 skillid =  m_spellInfo->EffectMiscValue[i];
+    // uint16 skillmax = ((Player*)unitTarget)->(skillid);
+    // ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,skillmax+75);
 }
 
 void Spell::EffectEnchantItemPerm(uint32 i)
@@ -772,18 +772,18 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     }
     add_slot = 0;
 
-	p_caster->UpdateSkillPro(m_spellInfo->Id);
+    p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     if (add_slot < 21)
     {
-		for(int j = 0;j < 3; j++)
-		if (m_spellInfo->EffectMiscValue[j])
-		{
-			uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
-			itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
-			if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-				p_caster->AddItemEnchant(enchant_id);
-		}
+        for(int j = 0;j < 3; j++)
+            if (m_spellInfo->EffectMiscValue[j])
+        {
+            uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+            if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+                p_caster->AddItemEnchant(enchant_id);
+        }
     }
 }
 
@@ -839,14 +839,14 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     if (add_slot < 21)
     {
-		for(int j = 0;j < 3; j++)
-		if (m_spellInfo->EffectMiscValue[j])
-		{
-			uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
-			itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
-			if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-				p_caster->AddItemEnchant(enchant_id);
-		}
+        for(int j = 0;j < 3; j++)
+            if (m_spellInfo->EffectMiscValue[j])
+        {
+            uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+            if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+                p_caster->AddItemEnchant(enchant_id);
+        }
     }
 }
 
@@ -1352,14 +1352,14 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 
     if (add_slot < 21)
     {
-		for(int j = 0;j < 3; j++)
-		if (m_spellInfo->EffectMiscValue[j])
-		{
-			uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
-			itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
-			if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-				p_caster->AddItemEnchant(enchant_id);
-		}
+        for(int j = 0;j < 3; j++)
+            if (m_spellInfo->EffectMiscValue[j])
+        {
+            uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+            if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+                p_caster->AddItemEnchant(enchant_id);
+        }
     }
 }
 
@@ -1724,17 +1724,17 @@ void Spell::EffectMomentMove(uint32 i)
 
 void Spell::EffectSkinning(uint32 i)
 {
-	if(unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->isAlive())
-		return;
+    if(unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->isAlive())
+        return;
     if(!m_caster)
-		return;
-	CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
+        return;
+    CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
 
-	if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
-	{
-		SendCastResult(CAST_FAIL_INVALID_TARGET);
-		return;
-	}
+    if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
+    {
+        SendCastResult(CAST_FAIL_INVALID_TARGET);
+        return;
+    }
 
     if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= (unitTarget->getLevel()-1)*5 || unitTarget->getLevel() < 10)
     {
@@ -1742,7 +1742,7 @@ void Spell::EffectSkinning(uint32 i)
     }else
     {
         SendCastResult(CAST_FAIL_FAILED);
-		return;
+        return;
     }
 
 }
@@ -1780,7 +1780,7 @@ void Spell::EffectTransmitted(uint32 i)
         fx, fy, m_caster->GetPositionZ(),
         m_caster->GetOrientation(), 0, 0, 0, 0))
         return;
-	GameObjectInfo *goInfo = objmgr.GetGameObjectInfo(name_id); 
+    GameObjectInfo *goInfo = objmgr.GetGameObjectInfo(name_id);
 
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
@@ -1788,10 +1788,10 @@ void Spell::EffectTransmitted(uint32 i)
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
     pGameObj->SetUInt32Value(13, 0xBEE9E017 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
-	pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, goInfo->displayId);
-	pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, goInfo->type);
-	pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS, goInfo->flags);
-	pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, goInfo->faction);
+    pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, goInfo->displayId);
+    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, goInfo->type);
+    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS, goInfo->flags);
+    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, goInfo->faction);
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");
     m_ObjToDel.push_back(pGameObj);
@@ -1803,10 +1803,10 @@ void Spell::EffectTransmitted(uint32 i)
     data << (uint64)pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
 
-	if(m_spellInfo->EffectMiscValue[i] == 35591)
-	{
-		((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
-	}
+    if(m_spellInfo->EffectMiscValue[i] == 35591)
+    {
+        ((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
+    }
 }
 
 void Spell::EffectSkill(uint32)

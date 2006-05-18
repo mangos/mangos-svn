@@ -46,15 +46,17 @@ bool DatabaseMysql::Initialize(const char *infoString)
     }
 
     vector<string> tokens = StrSplit(infoString, ";");
-    std::string params[4] = { "", "", "", "" };
+    std::string params[5] = { "", "", "", "", "" };
 
     vector<string>::iterator iter;
 
-    std::string host, user, password, database;
+    std::string host, port, user, password, database;
     iter = tokens.begin();
 
     if(iter != tokens.end())
         host = *iter++;
+    if(iter != tokens.end())
+        port = *iter++;
     if(iter != tokens.end())
         user = *iter++;
     if(iter != tokens.end())
@@ -64,7 +66,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
     mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
     mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
-        password.c_str(), database.c_str(), 0, 0, 0);
+        password.c_str(), database.c_str(), atoi(port.c_str()), 0, 0);
 
     if (mMysql)
         sLog.outDetail( "Connected to MySQL database at %s\n",

@@ -33,8 +33,8 @@ MotionMaster::Initialize(Creature *creature)
 void
 MotionMaster::UpdateMotion(const uint32 &diff)
 {
-	if(i_owner->hasUnitState(UNIT_STAT_ROOT))
-		return;
+    if(i_owner->hasUnitState(UNIT_STAT_ROOT))
+        return;
     assert( !empty() );
     top()->Update(*i_owner, diff);
 }

@@ -359,14 +359,15 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     SendPacket(&data);
 
 }
+
 void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 {
-	uint64 auctioneer;
-	uint32 auctionid;
-	recv_data >> auctioneer >> auctionid;
-	WorldPacket data;
-	data << auctionid << auctionid;
-	SendPacket(&data);
+    uint64 auctioneer;
+    uint32 auctionid;
+    recv_data >> auctioneer >> auctionid;
+    WorldPacket data;
+    data << auctionid << auctionid;
+    SendPacket(&data);
 }
 
 void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
@@ -378,7 +379,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 
     WorldPacket data;
     data.Initialize( SMSG_AUCTION_OWNER_LIST_RESULT );
-    
+
     count = 0;
     data << uint32(0);
     for (ObjectMgr::AuctionEntryMap::iterator itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
@@ -427,7 +428,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     std::string searchedname, name;
     uint8 levelmin, levelmax, usable;
     uint32 count, unk1, auctionSlotID, auctionMainCategory, auctionSubCategory, quality;
-	uint64 guid;
+    uint64 guid;
 
     recv_data >> guid;
     recv_data >> unk1;
