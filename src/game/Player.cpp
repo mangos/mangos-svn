@@ -1326,7 +1326,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     uint32 newXP = curXP + xp;
 
-    if (newXP >= nextLvlXP)
+    while (newXP >= nextLvlXP)
     {
         uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
 
@@ -1362,6 +1362,8 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         SetUInt32Value(UNIT_FIELD_LEVEL, level);
         SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
+        nextLvlXP = MaNGOS::XP::xp_to_level(level);
+
         UpdateMaxSkills ();
 
         //fill new stats
@@ -1418,6 +1420,9 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         WPAssert(data.size() == 48);
         GetSession()->SendPacket(&data);
+
+        SetUInt32Value(PLAYER_XP, newXP);
+        uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     }
 
     SetUInt32Value(PLAYER_XP, newXP);
