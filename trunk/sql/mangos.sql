@@ -417,7 +417,7 @@ CREATE TABLE `character_pet` (
   `current` tinyint(1) unsigned NOT NULL default '1',
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_pet`
@@ -451,7 +451,7 @@ CREATE TABLE `character_queststatus` (
   `explored` bigint(20) unsigned NOT NULL default '0',
   `id` int(11) NOT NULL auto_increment,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_queststatus`
@@ -543,7 +543,7 @@ CREATE TABLE `character_ticket` (
   `ticket_text` varchar(255) NOT NULL default '',
   `ticket_category` int(1) NOT NULL default '0',
   PRIMARY KEY  (`ticket_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
 -- Dumping data for table `character_ticket`
@@ -806,7 +806,7 @@ CREATE TABLE `creature_template` (
   `MoveName` varchar(128) NOT NULL default '',
   `ScriptName` varchar(128) NOT NULL default '',
   UNIQUE KEY `entry` (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
 --
 -- Dumping data for table `creature_template`
@@ -838,7 +838,7 @@ CREATE TABLE `game_corpse` (
   PRIMARY KEY  (`guid`),
   UNIQUE KEY `idx_player` (`player`),
   KEY `idx_bones_flag` (`bones_flag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 
 --
 -- Dumping data for table `game_corpse`
@@ -866,7 +866,7 @@ CREATE TABLE `game_spell` (
   `description` char(255) default NULL,
   PRIMARY KEY  (`Id`),
   KEY `spell_index` (`name`,`rank`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell System';
 
 --
 -- Dumping data for table `game_spell`
@@ -895,7 +895,7 @@ CREATE TABLE `game_talent` (
   `rank5` longtext,
   PRIMARY KEY  (`id`),
   KEY `talents_index` (`t_id`,`maxrank`,`class`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell System';
 
 --
 -- Dumping data for table `game_talent`
@@ -927,7 +927,7 @@ CREATE TABLE `game_weather` (
   `winter_snow_chance` tinyint(3) unsigned NOT NULL default '25',
   `winter_storm_chance` tinyint(3) unsigned NOT NULL default '25',
   PRIMARY KEY  (`zone`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Game System';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Weather System';
 
 --
 -- Dumping data for table `game_weather`
@@ -1023,7 +1023,7 @@ CREATE TABLE `gameobject_template` (
   `sound9` int(11) unsigned NOT NULL default '0',
   `ScriptName` varchar(100) NOT NULL default '',
   UNIQUE KEY `id` (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 
 --
 -- Dumping data for table `gameobject_template`
@@ -1052,7 +1052,7 @@ CREATE TABLE `guild` (
   `MOTD` varchar(255) NOT NULL default '',
   `createdate` datetime default NULL,
   PRIMARY KEY  (`guildid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild`
@@ -1075,7 +1075,7 @@ CREATE TABLE `guild_member` (
   `rank` tinyint(2) unsigned NOT NULL default '0',
   `Pnote` varchar(255) NOT NULL default '',
   `OFFnote` varchar(255) NOT NULL default ''
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild_member`
@@ -1096,7 +1096,7 @@ CREATE TABLE `guild_rank` (
   `guildid` int(6) unsigned NOT NULL default '0',
   `rname` varchar(255) NOT NULL default '',
   `rights` int(3) unsigned NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `guild_rank`
@@ -1137,7 +1137,7 @@ CREATE TABLE `item_instance` (
   `guid` bigint(20) NOT NULL default '0',
   `data` longtext,
   PRIMARY KEY  (`guid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
 
 --
 -- Dumping data for table `item_instance`
@@ -1160,7 +1160,7 @@ CREATE TABLE `item_page` (
   `next_page` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   KEY `item_pages_index` (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
 
 --
 -- Dumping data for table `item_page`
@@ -1296,7 +1296,7 @@ CREATE TABLE `item_template` (
   `ScriptName` varchar(100) NOT NULL default '',
   PRIMARY KEY  (`entry`),
   KEY `items_index` (`class`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
 
 --
 -- Dumping data for table `item_template`
@@ -1320,7 +1320,7 @@ CREATE TABLE `loot_template` (
   `percentchance` float NOT NULL default '100',
   KEY `i_creature_loot_creatureid` (`entry`),
   KEY `creatureloot_index` (`itemid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
 -- Dumping data for table `loot_template`
