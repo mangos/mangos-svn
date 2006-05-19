@@ -153,7 +153,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "wchange",     3, &ChatHandler::HandleChangeWeather,           "",   NULL },
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
-		{ "sendp",       3, &ChatHandler::HandleSendProficiencyCommand,      "",   NULL },
+		//{ "sendp",       3, &ChatHandler::HandleSendProficiencyCommand,      "",   NULL },
 
 		
 
