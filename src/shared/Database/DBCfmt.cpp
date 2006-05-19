@@ -29,4 +29,4 @@ const char SpellEntryfmt[]="nixxixiixxxiiixiiiiiiiiiiiiiiiiiiiifixiiiiiiiiiiiiii
 const char SpellItemEnchantmentfmt[]="niixixxixxiixxxxxixxxxii";
 const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
-const char TalentEntryfmt[]="nixxiiiiixxxxxxxxxxxx";
+const char TalentEntryfmt[]="niiiiiiiixxxxixxixxxx"; //"nixxiiiiixxxxxxxxxxxx"

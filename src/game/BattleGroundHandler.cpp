@@ -204,7 +204,7 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
     uint32 NumberOfInstances;
     WorldPacket data;
 
-    recv_data.hexlike();
+    //recv_data.hexlike();
 
     recv_data >> MapID;
 
