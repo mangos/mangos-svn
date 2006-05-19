@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -328,19 +328,19 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool CanSeeQuest( Quest *pQuest );
         bool CanTakeQuest( Quest *pQuest );
-		bool SatisfyQuestClass( Quest *pQuest );
+        bool SatisfyQuestClass( Quest *pQuest );
         bool SatisfyQuestLevel( Quest *pQuest );
         bool SatisfyQuestPreviousQuest( Quest *pQuest );
         bool SatisfyQuestRace( Quest *pQuest );
         bool SatisfyQuestReputation( Quest *pQuest );
         bool SatisfyQuestSkill( Quest *pQuest );
-		void GiveQuestSourceItem( Quest *pQuest );
+        void GiveQuestSourceItem( Quest *pQuest );
         void TakeQuestSourceItem( Quest *pQuest );
-		bool GetQuestRewardStatus( Quest *pQuest );
-		uint32 GetQuestStatus( Quest *pQuest );
-		void SetQuestStatus( Quest *pQuest, uint32 status );
-		bool IsQuestComplete( Quest *pQuest );
-		void AddQuest( Quest *pQuest );
+        bool GetQuestRewardStatus( Quest *pQuest );
+        uint32 GetQuestStatus( Quest *pQuest );
+        void SetQuestStatus( Quest *pQuest, uint32 status );
+        bool IsQuestComplete( Quest *pQuest );
+        void AddQuest( Quest *pQuest );
 
         void finishExplorationQuest( Quest *pQuest );
 
@@ -646,7 +646,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
         void SendLoot(uint64 guid,uint8 loot_type);
-		uint8 CheckFishingAble();
+        uint8 CheckFishingAble();
 
         uint32 m_bgBattleGroundID;
         bool m_bgInBattleGround;
