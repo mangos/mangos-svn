@@ -1316,10 +1316,9 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `loot_template`;
 CREATE TABLE `loot_template` (
   `entry` int(11) unsigned NOT NULL default '0',
-  `itemid` int(11) unsigned NOT NULL default '0',
-  `percentchance` float NOT NULL default '100',
-  KEY `i_creature_loot_creatureid` (`entry`),
-  KEY `creatureloot_index` (`itemid`)
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
