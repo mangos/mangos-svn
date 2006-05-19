@@ -251,8 +251,8 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             continue;
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->getQuestStatus(quest_id);
-        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->getQuestRewardStatus(quest_id) )
+        status = pPlayer->GetQuestStatus( pQuest );
+        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( pQuest ) )
         {
             // POI finish quest here
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
@@ -274,7 +274,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             continue;
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->getQuestStatus(quest_id);
+        status = pPlayer->GetQuestStatus( pQuest );
         if ( status == QUEST_STATUS_NONE )
         {
             if ( pPlayer->CanSeeQuest(pQuest) )
@@ -323,7 +323,6 @@ void Creature::prepareQuestMenu( Player *pPlayer )
 {
     uint32 result = DIALOG_STATUS_NONE;
     uint32 status;
-    uint32 quest_id;
     Quest *pQuest;
     QuestMenu *qm = pPlayer->PlayerTalkClass->GetQuestMenu();
     qm->ClearMenu();
@@ -334,12 +333,11 @@ void Creature::prepareQuestMenu( Player *pPlayer )
         if ( !pQuest )
             continue;
 
-        quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->getQuestStatus(quest_id);
-        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->getQuestRewardStatus(quest_id) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_REWARD, false );
+        status = pPlayer->GetQuestStatus( pQuest );
+        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( pQuest ) )
+            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_REWARD, false );
         else if ( status == QUEST_STATUS_INCOMPLETE )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_INCOMPLETE, false );
+            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_INCOMPLETE, false );
     }
 
     for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
@@ -348,10 +346,9 @@ void Creature::prepareQuestMenu( Player *pPlayer )
         if ( !pQuest )
             continue;
 
-        quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->getQuestStatus(quest_id);
+        status = pPlayer->GetQuestStatus( pQuest );
         if ( status == QUEST_STATUS_NONE && pPlayer->CanTakeQuest(pQuest) )
-            qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
+            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_AVAILABLE, true );
     }
 }
 

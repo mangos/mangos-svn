@@ -43,7 +43,7 @@ void Quest::LoadQuest( QuestInfo *pQuestInfo )
         m_qReqItemsCount = 0;
         m_qReqMobsCount = 0;
         m_qRewItemsCount = 0;
-        m_qRewChoiceItemsCount=0;
+        m_qRewChoiceItemsCount = 0;
 
         for (int i=0; i < QUEST_OBJECTIVES_COUNT; i++)
         {

@@ -211,7 +211,7 @@ struct quest_status
     uint32 status;
     bool rewarded;
     uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 m_questMobCount [ QUEST_OBJECTIVES_COUNT ];
+    uint32 m_questMobCount[ QUEST_OBJECTIVES_COUNT ];
 
     uint32  m_timer;
     uint32  m_timerrel;

@@ -328,23 +328,19 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool CanSeeQuest( Quest *pQuest );
         bool CanTakeQuest( Quest *pQuest );
-        bool SatisfyQuestClass( Quest *pQuest );
+		bool SatisfyQuestClass( Quest *pQuest );
         bool SatisfyQuestLevel( Quest *pQuest );
         bool SatisfyQuestPreviousQuest( Quest *pQuest );
         bool SatisfyQuestRace( Quest *pQuest );
         bool SatisfyQuestReputation( Quest *pQuest );
         bool SatisfyQuestSkill( Quest *pQuest );
-        void GiveQuestSourceItem( Quest *pQuest );
+		void GiveQuestSourceItem( Quest *pQuest );
         void TakeQuestSourceItem( Quest *pQuest );
-
-        uint32 getQuestStatus(uint32 quest_id);
-        bool getQuestRewardStatus(uint32 quest_id);
-        uint32 addNewQuest(uint32 quest_id, uint32 status = QUEST_STATUS_AVAILABLE);
-        uint32 addNewQuest(Quest *quest, uint32 status = QUEST_STATUS_AVAILABLE);
-        void loadExistingQuest(struct quest_status qs);
-        void setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded);
-        bool isQuestComplete(Quest *pQuest);
-        quest_status getQuestStatusStruct(uint32 quest_id);
+		bool GetQuestRewardStatus( Quest *pQuest );
+		uint32 GetQuestStatus( Quest *pQuest );
+		void SetQuestStatus( Quest *pQuest, uint32 status );
+		bool IsQuestComplete( Quest *pQuest );
+		void AddQuest( Quest *pQuest );
 
         void finishExplorationQuest( Quest *pQuest );
 
