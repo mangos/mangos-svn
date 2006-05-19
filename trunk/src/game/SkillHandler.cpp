@@ -42,13 +42,59 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     }
     else
     {
+        if (requested_rank > 4) {
+            return;
+        }
+        
+        Player * player = GetPlayer();
+        
+        // Check if it requires another talent
+        if (talentInfo->DependsOn > 0) {
+            TalentEntry *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
+            bool hasEnoughRank = false;
+            for (int i = talentInfo->DependsOnRank; i <= 4; i++) {
+                if (depTalentInfo->RankID[i] != 0)
+                    if (player->HasSpell(depTalentInfo->RankID[i]))
+                        hasEnoughRank = true;
+            }
+            if (!hasEnoughRank)
+                return;
+        }
+
+        // Find out how many points we have in this field
+        int spentPoints = 0;
+
+        int tTree = talentInfo->TalentTree;
+
+        if (talentInfo->Row > 0) {
+            unsigned int numRows = sTalentStore.GetNumRows();
+            for (unsigned int i = 0; i < numRows; i++) {            // Loop through all talents.
+                TalentEntry *tmpTalent = sTalentStore.data[i];      // Someday, someone needs to revamp
+                if (tmpTalent) {                                    // the way talents are tracked
+                    if (tmpTalent->TalentTree == tTree) {
+                        for (int j = 0; j <= 4; j++) {
+                            if (tmpTalent->RankID[j] != 0) {
+                                if (player->HasSpell(tmpTalent->RankID[j])) {
+                                    spentPoints += j + 1;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         uint32 spellid = talentInfo->RankID[requested_rank];
-        if( spellid == 0 || requested_rank > 4)
+        if( spellid == 0 )
         {
             sLog.outDetail("Talent: %u Rank: %u = 0", talent_id, requested_rank);
         }
         else
         {
+            if(spentPoints < (talentInfo->Row * 5)) {   // Min points spent
+                return;
+            }
+
             if(!(GetPlayer( )->HasSpell(spellid)))
             {
 
@@ -66,9 +112,8 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                     GetPlayer( )->GetSession()->SendPacket(&data);
                     GetPlayer( )->removeSpell((uint16)respellid);
                 }
+                GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
             }
-
-            GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
         }
     }
 }
