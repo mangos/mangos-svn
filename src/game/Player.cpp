@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -241,7 +241,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
 
-    /* 
+    /*
         SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
         SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
@@ -571,7 +571,7 @@ void Player::Update( uint32 p_time )
                 mQuestStatus[m_timedQuest].m_timer = 0;
                 mQuestStatus[m_timedQuest].m_timerrel = 0;
             }
-			else
+            else
             {
                 mQuestStatus[m_timedQuest].m_timer -= p_time;
             }
@@ -4928,15 +4928,15 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
         if (!go)
             return;
 
-		go->generateLoot();
-		if(loot_type == 3)
-		{
-			loot = &go->loot;
-			uint32 zone = GetZoneId();
-			uint32 lootid = 30000 + zone;
-			//in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
-			go->getFishLoot(loot,lootid);
-		}
+        go->generateLoot();
+        if(loot_type == 3)
+        {
+            loot = &go->loot;
+            uint32 zone = GetZoneId();
+            uint32 lootid = 30000 + zone;
+            //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
+            go->getFishLoot(loot,lootid);
+        }
         loot = &go->loot;
     }
     else
@@ -5258,1010 +5258,1010 @@ uint32 Player::ApplyRestBonus(uint32 xp)
 }
 uint8 Player::CheckFishingAble()
 {
-	uint32 zone = GetZoneId();
-	uint32 fish_value = GetSkillValue(SKILL_FISHING);
-	uint32 ZoneMaxSkill;
-	switch(zone) {
-	case 1:
-		ZoneMaxSkill=50;
-		break;
-	case 2:
-		ZoneMaxSkill=100;
-		break;
-	case 8:
-		ZoneMaxSkill=225;
-		break;
-	case 9:
-		ZoneMaxSkill=50;
-		break;
-	case 10:
-		ZoneMaxSkill=50;
-		break;
-	case 11:
-		ZoneMaxSkill=150;
-		break;
-	case 12:
-		ZoneMaxSkill=50;
-		break;
-	case 14:
-		ZoneMaxSkill=50;
-		break;
-	case 15:
-		ZoneMaxSkill=225;
-		break;
-	case 16:
-		ZoneMaxSkill=275;
-		break;
-	case 17:
-		ZoneMaxSkill=275;
-		break;
-	case 18:
-		ZoneMaxSkill=50;
-		break;
-	case 28:
-		ZoneMaxSkill=290;
-		break;
-	case 33:
-		ZoneMaxSkill=225;
-		break;
-	case 35:
-		ZoneMaxSkill=225;
-		break;
-	case 37:
-		ZoneMaxSkill=225;
-		break;
-	case 38:
-		ZoneMaxSkill=100;
-		break;
-	case 40:
-		ZoneMaxSkill=100;
-		break;
-	case 43:
-		ZoneMaxSkill=225;
-		break;
-	case 44:
-		ZoneMaxSkill=125;
-		break;
-	case 45:
-		ZoneMaxSkill=200;
-		break;
-	case 47:
-		ZoneMaxSkill=250;
-		break;
-	case 55:
-		ZoneMaxSkill=200;
-		break;
-	case 57:
-		ZoneMaxSkill=50;
-		break;
-	case 60:
-		ZoneMaxSkill=50;
-		break;
-	case 61:
-		ZoneMaxSkill=50;
-		break;
-	case 62:
-		ZoneMaxSkill=50;
-		break;
-	case 63:
-		ZoneMaxSkill=50;
-		break;
-	case 64:
-		ZoneMaxSkill=50;
-		break;
-	case 68:
-		ZoneMaxSkill=150;
-		break;
-	case 69:
-		ZoneMaxSkill=125;
-		break;
-	case 71:
-		ZoneMaxSkill=225;
-		break;
-	case 74:
-		ZoneMaxSkill=225;
-		break;
-	case 75:
-		ZoneMaxSkill=225;
-		break;
-	case 76:
-		ZoneMaxSkill=225;
-		break;
-	case 85:
-		ZoneMaxSkill=50;
-		break;
-	case 86:
-		ZoneMaxSkill=50;
-		break;
-	case 87:
-		ZoneMaxSkill=50;
-		break;
-	case 88:
-		ZoneMaxSkill=50;
-		break;
-	case 89:
-		ZoneMaxSkill=50;
-		break;
-	case 92:
-		ZoneMaxSkill=50;
-		break;
-	case 100:
-		ZoneMaxSkill=225;
-		break;
-	case 102:
-		ZoneMaxSkill=225;
-		break;
-	case 104:
-		ZoneMaxSkill=225;
-		break;
-	case 115:
-		ZoneMaxSkill=100;
-		break;
-	case 116:
-		ZoneMaxSkill=225;
-		break;
-	case 117:
-		ZoneMaxSkill=225;
-		break;
-	case 122:
-		ZoneMaxSkill=225;
-		break;
-	case 129:
-		ZoneMaxSkill=225;
-		break;
-	case 130:
-		ZoneMaxSkill=100;
-		break;
-	case 139:
-		ZoneMaxSkill=300;
-		break;
-	case 141:
-		ZoneMaxSkill=50;
-		break;
-	case 146:
-		ZoneMaxSkill=50;
-		break;
-	case 150:
-		ZoneMaxSkill=150;
-		break;
-	case 162:
-		ZoneMaxSkill=50;
-		break;
-	case 163:
-		ZoneMaxSkill=50;
-		break;
-	case 168:
-		ZoneMaxSkill=50;
-		break;
-	case 169:
-		ZoneMaxSkill=50;
-		break;
-	case 172:
-		ZoneMaxSkill=100;
-		break;
-	case 187:
-		ZoneMaxSkill=50;
-		break;
-	case 188:
-		ZoneMaxSkill=50;
-		break;
-	case 193:
-		ZoneMaxSkill=290;
-		break;
-	case 202:
-		ZoneMaxSkill=290;
-		break;
-	case 211:
-		ZoneMaxSkill=50;
-		break;
-	case 221:
-		ZoneMaxSkill=50;
-		break;
-	case 223:
-		ZoneMaxSkill=50;
-		break;
-	case 226:
-		ZoneMaxSkill=100;
-		break;
-	case 227:
-		ZoneMaxSkill=100;
-		break;
-	case 237:
-		ZoneMaxSkill=100;
-		break;
-	case 249:
-		ZoneMaxSkill=280;
-		break;
-	case 256:
-		ZoneMaxSkill=50;
-		break;
-	case 258:
-		ZoneMaxSkill=50;
-		break;
-	case 259:
-		ZoneMaxSkill=50;
-		break;
-	case 265:
-		ZoneMaxSkill=50;
-		break;
-	case 266:
-		ZoneMaxSkill=50;
-		break;
-	case 267:
-		ZoneMaxSkill=150;
-		break;
-	case 271:
-		ZoneMaxSkill=150;
-		break;
-	case 272:
-		ZoneMaxSkill=150;
-		break;
-	case 279:
-		ZoneMaxSkill=200;
-		break;
-	case 284:
-		ZoneMaxSkill=200;
-		break;
-	case 295:
-		ZoneMaxSkill=150;
-		break;
-	case 297:
-		ZoneMaxSkill=225;
-		break;
-	case 298:
-		ZoneMaxSkill=150;
-		break;
-	case 299:
-		ZoneMaxSkill=150;
-		break;
-	case 300:
-		ZoneMaxSkill=225;
-		break;
-	case 301:
-		ZoneMaxSkill=225;
-		break;
-	case 302:
-		ZoneMaxSkill=225;
-		break;
-	case 305:
-		ZoneMaxSkill=100;
-		break;
-	case 306:
-		ZoneMaxSkill=100;
-		break;
-	case 307:
-		ZoneMaxSkill=250;
-		break;
-	case 309:
-		ZoneMaxSkill=100;
-		break;
-	case 310:
-		ZoneMaxSkill=225;
-		break;
-	case 311:
-		ZoneMaxSkill=225;
-		break;
-	case 312:
-		ZoneMaxSkill=225;
-		break;
-	case 314:
-		ZoneMaxSkill=200;
-		break;
-	case 317:
-		ZoneMaxSkill=200;
-		break;
-	case 323:
-		ZoneMaxSkill=100;
-		break;
-	case 324:
-		ZoneMaxSkill=200;
-		break;
-	case 327:
-		ZoneMaxSkill=200;
-		break;
-	case 328:
-		ZoneMaxSkill=200;
-		break;
-	case 331:
-		ZoneMaxSkill=150;
-		break;
-	case 350:
-		ZoneMaxSkill=250;
-		break;
-	case 351:
-		ZoneMaxSkill=250;
-		break;
-	case 353:
-		ZoneMaxSkill=250;
-		break;
-	case 356:
-		ZoneMaxSkill=250;
-		break;
-	case 361:
-		ZoneMaxSkill=250;
-		break;
-	case 363:
-		ZoneMaxSkill=50;
-		break;
-	case 367:
-		ZoneMaxSkill=50;
-		break;
-	case 368:
-		ZoneMaxSkill=50;
-		break;
-	case 373:
-		ZoneMaxSkill=50;
-		break;
-	case 374:
-		ZoneMaxSkill=50;
-		break;
-	case 375:
-		ZoneMaxSkill=300;
-		break;
-	case 382:
-		ZoneMaxSkill=125;
-		break;
-	case 384:
-		ZoneMaxSkill=125;
-		break;
-	case 385:
-		ZoneMaxSkill=125;
-		break;
-	case 386:
-		ZoneMaxSkill=125;
-		break;
-	case 387:
-		ZoneMaxSkill=125;
-		break;
-	case 388:
-		ZoneMaxSkill=125;
-		break;
-	case 391:
-		ZoneMaxSkill=125;
-		break;
-	case 392:
-		ZoneMaxSkill=125;
-		break;
-	case 393:
-		ZoneMaxSkill=50;
-		break;
-	case 401:
-		ZoneMaxSkill=125;
-		break;
-	case 405:
-		ZoneMaxSkill=200;
-		break;
-	case 406:
-		ZoneMaxSkill=135;
-		break;
-	case 414:
-		ZoneMaxSkill=150;
-		break;
-	case 415:
-		ZoneMaxSkill=150;
-		break;
-	case 416:
-		ZoneMaxSkill=150;
-		break;
-	case 418:
-		ZoneMaxSkill=150;
-		break;
-	case 420:
-		ZoneMaxSkill=150;
-		break;
-	case 421:
-		ZoneMaxSkill=150;
-		break;
-	case 422:
-		ZoneMaxSkill=150;
-		break;
-	case 424:
-		ZoneMaxSkill=150;
-		break;
-	case 429:
-		ZoneMaxSkill=150;
-		break;
-	case 433:
-		ZoneMaxSkill=150;
-		break;
-	case 434:
-		ZoneMaxSkill=150;
-		break;
-	case 437:
-		ZoneMaxSkill=150;
-		break;
-	case 441:
-		ZoneMaxSkill=150;
-		break;
-	case 442:
-		ZoneMaxSkill=100;
-		break;
-	case 443:
-		ZoneMaxSkill=100;
-		break;
-	case 445:
-		ZoneMaxSkill=100;
-		break;
-	case 448:
-		ZoneMaxSkill=100;
-		break;
-	case 449:
-		ZoneMaxSkill=100;
-		break;
-	case 452:
-		ZoneMaxSkill=100;
-		break;
-	case 453:
-		ZoneMaxSkill=100;
-		break;
-	case 454:
-		ZoneMaxSkill=100;
-		break;
-	case 456:
-		ZoneMaxSkill=100;
-		break;
-	case 460:
-		ZoneMaxSkill=135;
-		break;
-	case 463:
-		ZoneMaxSkill=275;
-		break;
-	case 464:
-		ZoneMaxSkill=135;
-		break;
-	case 478:
-		ZoneMaxSkill=50;
-		break;
-	case 490:
-		ZoneMaxSkill=275;
-		break;
-	case 493:
-		ZoneMaxSkill=300;
-		break;
-	case 496:
-		ZoneMaxSkill=225;
-		break;
-	case 497:
-		ZoneMaxSkill=225;
-		break;
-	case 501:
-		ZoneMaxSkill=225;
-		break;
-	case 502:
-		ZoneMaxSkill=225;
-		break;
-	case 504:
-		ZoneMaxSkill=225;
-		break;
-	case 508:
-		ZoneMaxSkill=225;
-		break;
-	case 509:
-		ZoneMaxSkill=225;
-		break;
-	case 510:
-		ZoneMaxSkill=225;
-		break;
-	case 511:
-		ZoneMaxSkill=225;
-		break;
-	case 513:
-		ZoneMaxSkill=225;
-		break;
-	case 516:
-		ZoneMaxSkill=225;
-		break;
-	case 517:
-		ZoneMaxSkill=225;
-		break;
-	case 518:
-		ZoneMaxSkill=200;
-		break;
-	case 537:
-		ZoneMaxSkill=250;
-		break;
-	case 538:
-		ZoneMaxSkill=250;
-		break;
-	case 542:
-		ZoneMaxSkill=250;
-		break;
-	case 543:
-		ZoneMaxSkill=250;
-		break;
-	case 556:
-		ZoneMaxSkill=50;
-		break;
-	case 576:
-		ZoneMaxSkill=150;
-		break;
-	case 598:
-		ZoneMaxSkill=200;
-		break;
-	case 602:
-		ZoneMaxSkill=200;
-		break;
-	case 604:
-		ZoneMaxSkill=200;
-		break;
-	case 618:
-		ZoneMaxSkill=300;
-		break;
-	case 636:
-		ZoneMaxSkill=135;
-		break;
-	case 656:
-		ZoneMaxSkill=300;
-		break;
-	case 657:
-		ZoneMaxSkill=225;
-		break;
-	case 702:
-		ZoneMaxSkill=50;
-		break;
-	case 719:
-		ZoneMaxSkill=135;
-		break;
-	case 720:
-		ZoneMaxSkill=135;
-		break;
-	case 797:
-		ZoneMaxSkill=225;
-		break;
-	case 799:
-		ZoneMaxSkill=150;
-		break;
-	case 810:
-		ZoneMaxSkill=50;
-		break;
-	case 814:
-		ZoneMaxSkill=50;
-		break;
-	case 815:
-		ZoneMaxSkill=125;
-		break;
-	case 818:
-		ZoneMaxSkill=50;
-		break;
-	case 878:
-		ZoneMaxSkill=275;
-		break;
-	case 879:
-		ZoneMaxSkill=150;
-		break;
-	case 896:
-		ZoneMaxSkill=150;
-		break;
-	case 917:
-		ZoneMaxSkill=100;
-		break;
-	case 919:
-		ZoneMaxSkill=100;
-		break;
-	case 922:
-		ZoneMaxSkill=100;
-		break;
-	case 923:
-		ZoneMaxSkill=50;
-		break;
-	case 927:
-		ZoneMaxSkill=50;
-		break;
-	case 968:
-		ZoneMaxSkill=250;
-		break;
-	case 977:
-		ZoneMaxSkill=250;
-		break;
-	case 978:
-		ZoneMaxSkill=250;
-		break;
-	case 979:
-		ZoneMaxSkill=250;
-		break;
-	case 983:
-		ZoneMaxSkill=250;
-		break;
-	case 988:
-		ZoneMaxSkill=250;
-		break;
-	case 997:
-		ZoneMaxSkill=125;
-		break;
-	case 998:
-		ZoneMaxSkill=125;
-		break;
-	case 1001:
-		ZoneMaxSkill=125;
-		break;
-	case 1002:
-		ZoneMaxSkill=125;
-		break;
-	case 1008:
-		ZoneMaxSkill=250;
-		break;
-	case 1017:
-		ZoneMaxSkill=150;
-		break;
-	case 1018:
-		ZoneMaxSkill=150;
-		break;
-	case 1020:
-		ZoneMaxSkill=150;
-		break;
-	case 1021:
-		ZoneMaxSkill=150;
-		break;
-	case 1022:
-		ZoneMaxSkill=150;
-		break;
-	case 1023:
-		ZoneMaxSkill=150;
-		break;
-	case 1024:
-		ZoneMaxSkill=150;
-		break;
-	case 1025:
-		ZoneMaxSkill=150;
-		break;
-	case 1039:
-		ZoneMaxSkill=150;
-		break;
-	case 1056:
-		ZoneMaxSkill=290;
-		break;
-	case 1097:
-		ZoneMaxSkill=150;
-		break;
-	case 1099:
-		ZoneMaxSkill=300;
-		break;
-	case 1101:
-		ZoneMaxSkill=250;
-		break;
-	case 1102:
-		ZoneMaxSkill=250;
-		break;
-	case 1106:
-		ZoneMaxSkill=250;
-		break;
-	case 1112:
-		ZoneMaxSkill=250;
-		break;
-	case 1116:
-		ZoneMaxSkill=250;
-		break;
-	case 1117:
-		ZoneMaxSkill=250;
-		break;
-	case 1119:
-		ZoneMaxSkill=250;
-		break;
-	case 1120:
-		ZoneMaxSkill=250;
-		break;
-	case 1121:
-		ZoneMaxSkill=250;
-		break;
-	case 1126:
-		ZoneMaxSkill=225;
-		break;
-	case 1136:
-		ZoneMaxSkill=250;
-		break;
-	case 1156:
-		ZoneMaxSkill=225;
-		break;
-	case 1176:
-		ZoneMaxSkill=250;
-		break;
-	case 1222:
-		ZoneMaxSkill=275;
-		break;
-	case 1227:
-		ZoneMaxSkill=275;
-		break;
-	case 1228:
-		ZoneMaxSkill=275;
-		break;
-	case 1229:
-		ZoneMaxSkill=275;
-		break;
-	case 1230:
-		ZoneMaxSkill=275;
-		break;
-	case 1231:
-		ZoneMaxSkill=275;
-		break;
-	case 1234:
-		ZoneMaxSkill=275;
-		break;
-	case 1256:
-		ZoneMaxSkill=275;
-		break;
-	case 1296:
-		ZoneMaxSkill=50;
-		break;
-	case 1297:
-		ZoneMaxSkill=50;
-		break;
-	case 1336:
-		ZoneMaxSkill=250;
-		break;
-	case 1337:
-		ZoneMaxSkill=250;
-		break;
-	case 1338:
-		ZoneMaxSkill=100;
-		break;
-	case 1339:
-		ZoneMaxSkill=200;
-		break;
-	case 1477:
-		ZoneMaxSkill=275;
-		break;
-	case 1519:
-		ZoneMaxSkill=50;
-		break;
-	case 1557:
-		ZoneMaxSkill=175;
-		break;
-	case 1577:
-		ZoneMaxSkill=225;
-		break;
-	case 1578:
-		ZoneMaxSkill=225;
-		break;
-	case 1581:
-		ZoneMaxSkill=100;
-		break;
-	case 1617:
-		ZoneMaxSkill=50;
-		break;
-	case 1638:
-		ZoneMaxSkill=50;
-		break;
-	case 1662:
-		ZoneMaxSkill=50;
-		break;
-	case 1681:
-		ZoneMaxSkill=200;
-		break;
-	case 1682:
-		ZoneMaxSkill=200;
-		break;
-	case 1684:
-		ZoneMaxSkill=200;
-		break;
-	case 1701:
-		ZoneMaxSkill=125;
-		break;
-	case 1738:
-		ZoneMaxSkill=225;
-		break;
-	case 1739:
-		ZoneMaxSkill=225;
-		break;
-	case 1740:
-		ZoneMaxSkill=225;
-		break;
-	case 1760:
-		ZoneMaxSkill=225;
-		break;
-	case 1762:
-		ZoneMaxSkill=250;
-		break;
-	case 1764:
-		ZoneMaxSkill=225;
-		break;
-	case 1765:
-		ZoneMaxSkill=225;
-		break;
-	case 1767:
-		ZoneMaxSkill=275;
-		break;
-	case 1770:
-		ZoneMaxSkill=275;
-		break;
-	case 1777:
-		ZoneMaxSkill=225;
-		break;
-	case 1778:
-		ZoneMaxSkill=225;
-		break;
-	case 1780:
-		ZoneMaxSkill=225;
-		break;
-	case 1797:
-		ZoneMaxSkill=225;
-		break;
-	case 1798:
-		ZoneMaxSkill=225;
-		break;
-	case 1883:
-		ZoneMaxSkill=250;
-		break;
-	case 1884:
-		ZoneMaxSkill=250;
-		break;
-	case 1939:
-		ZoneMaxSkill=250;
-		break;
-	case 1940:
-		ZoneMaxSkill=250;
-		break;
-	case 1942:
-		ZoneMaxSkill=250;
-		break;
-	case 1977:
-		ZoneMaxSkill=225;
-		break;
-	case 1997:
-		ZoneMaxSkill=275;
-		break;
-	case 1998:
-		ZoneMaxSkill=275;
-		break;
-	case 2017:
-		ZoneMaxSkill=300;
-		break;
-	case 2077:
-		ZoneMaxSkill=100;
-		break;
-	case 2078:
-		ZoneMaxSkill=100;
-		break;
-	case 2079:
-		ZoneMaxSkill=225;
-		break;
-	case 2097:
-		ZoneMaxSkill=175;
-		break;
-	case 2100:
-		ZoneMaxSkill=245;
-		break;
-	case 2158:
-		ZoneMaxSkill=250;
-		break;
-	case 2246:
-		ZoneMaxSkill=300;
-		break;
-	case 2256:
-		ZoneMaxSkill=300;
-		break;
-	case 2270:
-		ZoneMaxSkill=300;
-		break;
-	case 2272:
-		ZoneMaxSkill=300;
-		break;
-	case 2277:
-		ZoneMaxSkill=300;
-		break;
-	case 2279:
-		ZoneMaxSkill=300;
-		break;
-	case 2298:
-		ZoneMaxSkill=300;
-		break;
-	case 2302:
-		ZoneMaxSkill=225;
-		break;
-	case 2317:
-		ZoneMaxSkill=250;
-		break;
-	case 2318:
-		ZoneMaxSkill=225;
-		break;
-	case 2321:
-		ZoneMaxSkill=275;
-		break;
-	case 2322:
-		ZoneMaxSkill=50;
-		break;
-	case 2323:
-		ZoneMaxSkill=250;
-		break;
-	case 2324:
-		ZoneMaxSkill=200;
-		break;
-	case 2325:
-		ZoneMaxSkill=150;
-		break;
-	case 2326:
-		ZoneMaxSkill=100;
-		break;
-	case 2364:
-		ZoneMaxSkill=100;
-		break;
-	case 2365:
-		ZoneMaxSkill=150;
-		break;
-	case 2398:
-		ZoneMaxSkill=100;
-		break;
-	case 2399:
-		ZoneMaxSkill=50;
-		break;
-	case 2400:
-		ZoneMaxSkill=250;
-		break;
-	case 2401:
-		ZoneMaxSkill=200;
-		break;
-	case 2402:
-		ZoneMaxSkill=100;
-		break;
-	case 2403:
-		ZoneMaxSkill=225;
-		break;
-	case 2405:
-		ZoneMaxSkill=200;
-		break;
-	case 2408:
-		ZoneMaxSkill=200;
-		break;
-	case 2457:
-		ZoneMaxSkill=150;
-		break;
-	case 2477:
-		ZoneMaxSkill=300;
-		break;
-	case 2481:
-		ZoneMaxSkill=275;
-		break;
-	case 2521:
-		ZoneMaxSkill=250;
-		break;
-	case 2522:
-		ZoneMaxSkill=250;
-		break;
-	case 2558:
-		ZoneMaxSkill=300;
-		break;
-	case 2562:
-		ZoneMaxSkill=300;
-		break;
-	case 2597:
-		ZoneMaxSkill=300;
-		break;
-	case 2618:
-		ZoneMaxSkill=275;
-		break;
-	case 2619:
-		ZoneMaxSkill=300;
-		break;
-	case 2620:
-		ZoneMaxSkill=290;
-		break;
-	case 2624:
-		ZoneMaxSkill=300;
-		break;
-	case 2631:
-		ZoneMaxSkill=300;
-		break;
-	case 2797:
-		ZoneMaxSkill=150;
-		break;
-	case 2837:
-		ZoneMaxSkill=300;
-		break;
-	case 2897:
-		ZoneMaxSkill=150;
-		break;
-	default:
-		ZoneMaxSkill=50;
-		break;
-	}
-	if((ZoneMaxSkill-50) > fish_value )
-		return 0;
-	else if(ZoneMaxSkill-50 <= fish_value && fish_value < ZoneMaxSkill-25)
-		return 1;
-	else if(ZoneMaxSkill-25 <= fish_value && fish_value < ZoneMaxSkill)
-		return 2;
-	else if(ZoneMaxSkill <= fish_value && fish_value < ZoneMaxSkill + 25)
-		return 3;
-	else return 4;
+    uint32 zone = GetZoneId();
+    uint32 fish_value = GetSkillValue(SKILL_FISHING);
+    uint32 ZoneMaxSkill;
+    switch(zone) {
+    case 1:
+        ZoneMaxSkill=50;
+        break;
+    case 2:
+        ZoneMaxSkill=100;
+        break;
+    case 8:
+        ZoneMaxSkill=225;
+        break;
+    case 9:
+        ZoneMaxSkill=50;
+        break;
+    case 10:
+        ZoneMaxSkill=50;
+        break;
+    case 11:
+        ZoneMaxSkill=150;
+        break;
+    case 12:
+        ZoneMaxSkill=50;
+        break;
+    case 14:
+        ZoneMaxSkill=50;
+        break;
+    case 15:
+        ZoneMaxSkill=225;
+        break;
+    case 16:
+        ZoneMaxSkill=275;
+        break;
+    case 17:
+        ZoneMaxSkill=275;
+        break;
+    case 18:
+        ZoneMaxSkill=50;
+        break;
+    case 28:
+        ZoneMaxSkill=290;
+        break;
+    case 33:
+        ZoneMaxSkill=225;
+        break;
+    case 35:
+        ZoneMaxSkill=225;
+        break;
+    case 37:
+        ZoneMaxSkill=225;
+        break;
+    case 38:
+        ZoneMaxSkill=100;
+        break;
+    case 40:
+        ZoneMaxSkill=100;
+        break;
+    case 43:
+        ZoneMaxSkill=225;
+        break;
+    case 44:
+        ZoneMaxSkill=125;
+        break;
+    case 45:
+        ZoneMaxSkill=200;
+        break;
+    case 47:
+        ZoneMaxSkill=250;
+        break;
+    case 55:
+        ZoneMaxSkill=200;
+        break;
+    case 57:
+        ZoneMaxSkill=50;
+        break;
+    case 60:
+        ZoneMaxSkill=50;
+        break;
+    case 61:
+        ZoneMaxSkill=50;
+        break;
+    case 62:
+        ZoneMaxSkill=50;
+        break;
+    case 63:
+        ZoneMaxSkill=50;
+        break;
+    case 64:
+        ZoneMaxSkill=50;
+        break;
+    case 68:
+        ZoneMaxSkill=150;
+        break;
+    case 69:
+        ZoneMaxSkill=125;
+        break;
+    case 71:
+        ZoneMaxSkill=225;
+        break;
+    case 74:
+        ZoneMaxSkill=225;
+        break;
+    case 75:
+        ZoneMaxSkill=225;
+        break;
+    case 76:
+        ZoneMaxSkill=225;
+        break;
+    case 85:
+        ZoneMaxSkill=50;
+        break;
+    case 86:
+        ZoneMaxSkill=50;
+        break;
+    case 87:
+        ZoneMaxSkill=50;
+        break;
+    case 88:
+        ZoneMaxSkill=50;
+        break;
+    case 89:
+        ZoneMaxSkill=50;
+        break;
+    case 92:
+        ZoneMaxSkill=50;
+        break;
+    case 100:
+        ZoneMaxSkill=225;
+        break;
+    case 102:
+        ZoneMaxSkill=225;
+        break;
+    case 104:
+        ZoneMaxSkill=225;
+        break;
+    case 115:
+        ZoneMaxSkill=100;
+        break;
+    case 116:
+        ZoneMaxSkill=225;
+        break;
+    case 117:
+        ZoneMaxSkill=225;
+        break;
+    case 122:
+        ZoneMaxSkill=225;
+        break;
+    case 129:
+        ZoneMaxSkill=225;
+        break;
+    case 130:
+        ZoneMaxSkill=100;
+        break;
+    case 139:
+        ZoneMaxSkill=300;
+        break;
+    case 141:
+        ZoneMaxSkill=50;
+        break;
+    case 146:
+        ZoneMaxSkill=50;
+        break;
+    case 150:
+        ZoneMaxSkill=150;
+        break;
+    case 162:
+        ZoneMaxSkill=50;
+        break;
+    case 163:
+        ZoneMaxSkill=50;
+        break;
+    case 168:
+        ZoneMaxSkill=50;
+        break;
+    case 169:
+        ZoneMaxSkill=50;
+        break;
+    case 172:
+        ZoneMaxSkill=100;
+        break;
+    case 187:
+        ZoneMaxSkill=50;
+        break;
+    case 188:
+        ZoneMaxSkill=50;
+        break;
+    case 193:
+        ZoneMaxSkill=290;
+        break;
+    case 202:
+        ZoneMaxSkill=290;
+        break;
+    case 211:
+        ZoneMaxSkill=50;
+        break;
+    case 221:
+        ZoneMaxSkill=50;
+        break;
+    case 223:
+        ZoneMaxSkill=50;
+        break;
+    case 226:
+        ZoneMaxSkill=100;
+        break;
+    case 227:
+        ZoneMaxSkill=100;
+        break;
+    case 237:
+        ZoneMaxSkill=100;
+        break;
+    case 249:
+        ZoneMaxSkill=280;
+        break;
+    case 256:
+        ZoneMaxSkill=50;
+        break;
+    case 258:
+        ZoneMaxSkill=50;
+        break;
+    case 259:
+        ZoneMaxSkill=50;
+        break;
+    case 265:
+        ZoneMaxSkill=50;
+        break;
+    case 266:
+        ZoneMaxSkill=50;
+        break;
+    case 267:
+        ZoneMaxSkill=150;
+        break;
+    case 271:
+        ZoneMaxSkill=150;
+        break;
+    case 272:
+        ZoneMaxSkill=150;
+        break;
+    case 279:
+        ZoneMaxSkill=200;
+        break;
+    case 284:
+        ZoneMaxSkill=200;
+        break;
+    case 295:
+        ZoneMaxSkill=150;
+        break;
+    case 297:
+        ZoneMaxSkill=225;
+        break;
+    case 298:
+        ZoneMaxSkill=150;
+        break;
+    case 299:
+        ZoneMaxSkill=150;
+        break;
+    case 300:
+        ZoneMaxSkill=225;
+        break;
+    case 301:
+        ZoneMaxSkill=225;
+        break;
+    case 302:
+        ZoneMaxSkill=225;
+        break;
+    case 305:
+        ZoneMaxSkill=100;
+        break;
+    case 306:
+        ZoneMaxSkill=100;
+        break;
+    case 307:
+        ZoneMaxSkill=250;
+        break;
+    case 309:
+        ZoneMaxSkill=100;
+        break;
+    case 310:
+        ZoneMaxSkill=225;
+        break;
+    case 311:
+        ZoneMaxSkill=225;
+        break;
+    case 312:
+        ZoneMaxSkill=225;
+        break;
+    case 314:
+        ZoneMaxSkill=200;
+        break;
+    case 317:
+        ZoneMaxSkill=200;
+        break;
+    case 323:
+        ZoneMaxSkill=100;
+        break;
+    case 324:
+        ZoneMaxSkill=200;
+        break;
+    case 327:
+        ZoneMaxSkill=200;
+        break;
+    case 328:
+        ZoneMaxSkill=200;
+        break;
+    case 331:
+        ZoneMaxSkill=150;
+        break;
+    case 350:
+        ZoneMaxSkill=250;
+        break;
+    case 351:
+        ZoneMaxSkill=250;
+        break;
+    case 353:
+        ZoneMaxSkill=250;
+        break;
+    case 356:
+        ZoneMaxSkill=250;
+        break;
+    case 361:
+        ZoneMaxSkill=250;
+        break;
+    case 363:
+        ZoneMaxSkill=50;
+        break;
+    case 367:
+        ZoneMaxSkill=50;
+        break;
+    case 368:
+        ZoneMaxSkill=50;
+        break;
+    case 373:
+        ZoneMaxSkill=50;
+        break;
+    case 374:
+        ZoneMaxSkill=50;
+        break;
+    case 375:
+        ZoneMaxSkill=300;
+        break;
+    case 382:
+        ZoneMaxSkill=125;
+        break;
+    case 384:
+        ZoneMaxSkill=125;
+        break;
+    case 385:
+        ZoneMaxSkill=125;
+        break;
+    case 386:
+        ZoneMaxSkill=125;
+        break;
+    case 387:
+        ZoneMaxSkill=125;
+        break;
+    case 388:
+        ZoneMaxSkill=125;
+        break;
+    case 391:
+        ZoneMaxSkill=125;
+        break;
+    case 392:
+        ZoneMaxSkill=125;
+        break;
+    case 393:
+        ZoneMaxSkill=50;
+        break;
+    case 401:
+        ZoneMaxSkill=125;
+        break;
+    case 405:
+        ZoneMaxSkill=200;
+        break;
+    case 406:
+        ZoneMaxSkill=135;
+        break;
+    case 414:
+        ZoneMaxSkill=150;
+        break;
+    case 415:
+        ZoneMaxSkill=150;
+        break;
+    case 416:
+        ZoneMaxSkill=150;
+        break;
+    case 418:
+        ZoneMaxSkill=150;
+        break;
+    case 420:
+        ZoneMaxSkill=150;
+        break;
+    case 421:
+        ZoneMaxSkill=150;
+        break;
+    case 422:
+        ZoneMaxSkill=150;
+        break;
+    case 424:
+        ZoneMaxSkill=150;
+        break;
+    case 429:
+        ZoneMaxSkill=150;
+        break;
+    case 433:
+        ZoneMaxSkill=150;
+        break;
+    case 434:
+        ZoneMaxSkill=150;
+        break;
+    case 437:
+        ZoneMaxSkill=150;
+        break;
+    case 441:
+        ZoneMaxSkill=150;
+        break;
+    case 442:
+        ZoneMaxSkill=100;
+        break;
+    case 443:
+        ZoneMaxSkill=100;
+        break;
+    case 445:
+        ZoneMaxSkill=100;
+        break;
+    case 448:
+        ZoneMaxSkill=100;
+        break;
+    case 449:
+        ZoneMaxSkill=100;
+        break;
+    case 452:
+        ZoneMaxSkill=100;
+        break;
+    case 453:
+        ZoneMaxSkill=100;
+        break;
+    case 454:
+        ZoneMaxSkill=100;
+        break;
+    case 456:
+        ZoneMaxSkill=100;
+        break;
+    case 460:
+        ZoneMaxSkill=135;
+        break;
+    case 463:
+        ZoneMaxSkill=275;
+        break;
+    case 464:
+        ZoneMaxSkill=135;
+        break;
+    case 478:
+        ZoneMaxSkill=50;
+        break;
+    case 490:
+        ZoneMaxSkill=275;
+        break;
+    case 493:
+        ZoneMaxSkill=300;
+        break;
+    case 496:
+        ZoneMaxSkill=225;
+        break;
+    case 497:
+        ZoneMaxSkill=225;
+        break;
+    case 501:
+        ZoneMaxSkill=225;
+        break;
+    case 502:
+        ZoneMaxSkill=225;
+        break;
+    case 504:
+        ZoneMaxSkill=225;
+        break;
+    case 508:
+        ZoneMaxSkill=225;
+        break;
+    case 509:
+        ZoneMaxSkill=225;
+        break;
+    case 510:
+        ZoneMaxSkill=225;
+        break;
+    case 511:
+        ZoneMaxSkill=225;
+        break;
+    case 513:
+        ZoneMaxSkill=225;
+        break;
+    case 516:
+        ZoneMaxSkill=225;
+        break;
+    case 517:
+        ZoneMaxSkill=225;
+        break;
+    case 518:
+        ZoneMaxSkill=200;
+        break;
+    case 537:
+        ZoneMaxSkill=250;
+        break;
+    case 538:
+        ZoneMaxSkill=250;
+        break;
+    case 542:
+        ZoneMaxSkill=250;
+        break;
+    case 543:
+        ZoneMaxSkill=250;
+        break;
+    case 556:
+        ZoneMaxSkill=50;
+        break;
+    case 576:
+        ZoneMaxSkill=150;
+        break;
+    case 598:
+        ZoneMaxSkill=200;
+        break;
+    case 602:
+        ZoneMaxSkill=200;
+        break;
+    case 604:
+        ZoneMaxSkill=200;
+        break;
+    case 618:
+        ZoneMaxSkill=300;
+        break;
+    case 636:
+        ZoneMaxSkill=135;
+        break;
+    case 656:
+        ZoneMaxSkill=300;
+        break;
+    case 657:
+        ZoneMaxSkill=225;
+        break;
+    case 702:
+        ZoneMaxSkill=50;
+        break;
+    case 719:
+        ZoneMaxSkill=135;
+        break;
+    case 720:
+        ZoneMaxSkill=135;
+        break;
+    case 797:
+        ZoneMaxSkill=225;
+        break;
+    case 799:
+        ZoneMaxSkill=150;
+        break;
+    case 810:
+        ZoneMaxSkill=50;
+        break;
+    case 814:
+        ZoneMaxSkill=50;
+        break;
+    case 815:
+        ZoneMaxSkill=125;
+        break;
+    case 818:
+        ZoneMaxSkill=50;
+        break;
+    case 878:
+        ZoneMaxSkill=275;
+        break;
+    case 879:
+        ZoneMaxSkill=150;
+        break;
+    case 896:
+        ZoneMaxSkill=150;
+        break;
+    case 917:
+        ZoneMaxSkill=100;
+        break;
+    case 919:
+        ZoneMaxSkill=100;
+        break;
+    case 922:
+        ZoneMaxSkill=100;
+        break;
+    case 923:
+        ZoneMaxSkill=50;
+        break;
+    case 927:
+        ZoneMaxSkill=50;
+        break;
+    case 968:
+        ZoneMaxSkill=250;
+        break;
+    case 977:
+        ZoneMaxSkill=250;
+        break;
+    case 978:
+        ZoneMaxSkill=250;
+        break;
+    case 979:
+        ZoneMaxSkill=250;
+        break;
+    case 983:
+        ZoneMaxSkill=250;
+        break;
+    case 988:
+        ZoneMaxSkill=250;
+        break;
+    case 997:
+        ZoneMaxSkill=125;
+        break;
+    case 998:
+        ZoneMaxSkill=125;
+        break;
+    case 1001:
+        ZoneMaxSkill=125;
+        break;
+    case 1002:
+        ZoneMaxSkill=125;
+        break;
+    case 1008:
+        ZoneMaxSkill=250;
+        break;
+    case 1017:
+        ZoneMaxSkill=150;
+        break;
+    case 1018:
+        ZoneMaxSkill=150;
+        break;
+    case 1020:
+        ZoneMaxSkill=150;
+        break;
+    case 1021:
+        ZoneMaxSkill=150;
+        break;
+    case 1022:
+        ZoneMaxSkill=150;
+        break;
+    case 1023:
+        ZoneMaxSkill=150;
+        break;
+    case 1024:
+        ZoneMaxSkill=150;
+        break;
+    case 1025:
+        ZoneMaxSkill=150;
+        break;
+    case 1039:
+        ZoneMaxSkill=150;
+        break;
+    case 1056:
+        ZoneMaxSkill=290;
+        break;
+    case 1097:
+        ZoneMaxSkill=150;
+        break;
+    case 1099:
+        ZoneMaxSkill=300;
+        break;
+    case 1101:
+        ZoneMaxSkill=250;
+        break;
+    case 1102:
+        ZoneMaxSkill=250;
+        break;
+    case 1106:
+        ZoneMaxSkill=250;
+        break;
+    case 1112:
+        ZoneMaxSkill=250;
+        break;
+    case 1116:
+        ZoneMaxSkill=250;
+        break;
+    case 1117:
+        ZoneMaxSkill=250;
+        break;
+    case 1119:
+        ZoneMaxSkill=250;
+        break;
+    case 1120:
+        ZoneMaxSkill=250;
+        break;
+    case 1121:
+        ZoneMaxSkill=250;
+        break;
+    case 1126:
+        ZoneMaxSkill=225;
+        break;
+    case 1136:
+        ZoneMaxSkill=250;
+        break;
+    case 1156:
+        ZoneMaxSkill=225;
+        break;
+    case 1176:
+        ZoneMaxSkill=250;
+        break;
+    case 1222:
+        ZoneMaxSkill=275;
+        break;
+    case 1227:
+        ZoneMaxSkill=275;
+        break;
+    case 1228:
+        ZoneMaxSkill=275;
+        break;
+    case 1229:
+        ZoneMaxSkill=275;
+        break;
+    case 1230:
+        ZoneMaxSkill=275;
+        break;
+    case 1231:
+        ZoneMaxSkill=275;
+        break;
+    case 1234:
+        ZoneMaxSkill=275;
+        break;
+    case 1256:
+        ZoneMaxSkill=275;
+        break;
+    case 1296:
+        ZoneMaxSkill=50;
+        break;
+    case 1297:
+        ZoneMaxSkill=50;
+        break;
+    case 1336:
+        ZoneMaxSkill=250;
+        break;
+    case 1337:
+        ZoneMaxSkill=250;
+        break;
+    case 1338:
+        ZoneMaxSkill=100;
+        break;
+    case 1339:
+        ZoneMaxSkill=200;
+        break;
+    case 1477:
+        ZoneMaxSkill=275;
+        break;
+    case 1519:
+        ZoneMaxSkill=50;
+        break;
+    case 1557:
+        ZoneMaxSkill=175;
+        break;
+    case 1577:
+        ZoneMaxSkill=225;
+        break;
+    case 1578:
+        ZoneMaxSkill=225;
+        break;
+    case 1581:
+        ZoneMaxSkill=100;
+        break;
+    case 1617:
+        ZoneMaxSkill=50;
+        break;
+    case 1638:
+        ZoneMaxSkill=50;
+        break;
+    case 1662:
+        ZoneMaxSkill=50;
+        break;
+    case 1681:
+        ZoneMaxSkill=200;
+        break;
+    case 1682:
+        ZoneMaxSkill=200;
+        break;
+    case 1684:
+        ZoneMaxSkill=200;
+        break;
+    case 1701:
+        ZoneMaxSkill=125;
+        break;
+    case 1738:
+        ZoneMaxSkill=225;
+        break;
+    case 1739:
+        ZoneMaxSkill=225;
+        break;
+    case 1740:
+        ZoneMaxSkill=225;
+        break;
+    case 1760:
+        ZoneMaxSkill=225;
+        break;
+    case 1762:
+        ZoneMaxSkill=250;
+        break;
+    case 1764:
+        ZoneMaxSkill=225;
+        break;
+    case 1765:
+        ZoneMaxSkill=225;
+        break;
+    case 1767:
+        ZoneMaxSkill=275;
+        break;
+    case 1770:
+        ZoneMaxSkill=275;
+        break;
+    case 1777:
+        ZoneMaxSkill=225;
+        break;
+    case 1778:
+        ZoneMaxSkill=225;
+        break;
+    case 1780:
+        ZoneMaxSkill=225;
+        break;
+    case 1797:
+        ZoneMaxSkill=225;
+        break;
+    case 1798:
+        ZoneMaxSkill=225;
+        break;
+    case 1883:
+        ZoneMaxSkill=250;
+        break;
+    case 1884:
+        ZoneMaxSkill=250;
+        break;
+    case 1939:
+        ZoneMaxSkill=250;
+        break;
+    case 1940:
+        ZoneMaxSkill=250;
+        break;
+    case 1942:
+        ZoneMaxSkill=250;
+        break;
+    case 1977:
+        ZoneMaxSkill=225;
+        break;
+    case 1997:
+        ZoneMaxSkill=275;
+        break;
+    case 1998:
+        ZoneMaxSkill=275;
+        break;
+    case 2017:
+        ZoneMaxSkill=300;
+        break;
+    case 2077:
+        ZoneMaxSkill=100;
+        break;
+    case 2078:
+        ZoneMaxSkill=100;
+        break;
+    case 2079:
+        ZoneMaxSkill=225;
+        break;
+    case 2097:
+        ZoneMaxSkill=175;
+        break;
+    case 2100:
+        ZoneMaxSkill=245;
+        break;
+    case 2158:
+        ZoneMaxSkill=250;
+        break;
+    case 2246:
+        ZoneMaxSkill=300;
+        break;
+    case 2256:
+        ZoneMaxSkill=300;
+        break;
+    case 2270:
+        ZoneMaxSkill=300;
+        break;
+    case 2272:
+        ZoneMaxSkill=300;
+        break;
+    case 2277:
+        ZoneMaxSkill=300;
+        break;
+    case 2279:
+        ZoneMaxSkill=300;
+        break;
+    case 2298:
+        ZoneMaxSkill=300;
+        break;
+    case 2302:
+        ZoneMaxSkill=225;
+        break;
+    case 2317:
+        ZoneMaxSkill=250;
+        break;
+    case 2318:
+        ZoneMaxSkill=225;
+        break;
+    case 2321:
+        ZoneMaxSkill=275;
+        break;
+    case 2322:
+        ZoneMaxSkill=50;
+        break;
+    case 2323:
+        ZoneMaxSkill=250;
+        break;
+    case 2324:
+        ZoneMaxSkill=200;
+        break;
+    case 2325:
+        ZoneMaxSkill=150;
+        break;
+    case 2326:
+        ZoneMaxSkill=100;
+        break;
+    case 2364:
+        ZoneMaxSkill=100;
+        break;
+    case 2365:
+        ZoneMaxSkill=150;
+        break;
+    case 2398:
+        ZoneMaxSkill=100;
+        break;
+    case 2399:
+        ZoneMaxSkill=50;
+        break;
+    case 2400:
+        ZoneMaxSkill=250;
+        break;
+    case 2401:
+        ZoneMaxSkill=200;
+        break;
+    case 2402:
+        ZoneMaxSkill=100;
+        break;
+    case 2403:
+        ZoneMaxSkill=225;
+        break;
+    case 2405:
+        ZoneMaxSkill=200;
+        break;
+    case 2408:
+        ZoneMaxSkill=200;
+        break;
+    case 2457:
+        ZoneMaxSkill=150;
+        break;
+    case 2477:
+        ZoneMaxSkill=300;
+        break;
+    case 2481:
+        ZoneMaxSkill=275;
+        break;
+    case 2521:
+        ZoneMaxSkill=250;
+        break;
+    case 2522:
+        ZoneMaxSkill=250;
+        break;
+    case 2558:
+        ZoneMaxSkill=300;
+        break;
+    case 2562:
+        ZoneMaxSkill=300;
+        break;
+    case 2597:
+        ZoneMaxSkill=300;
+        break;
+    case 2618:
+        ZoneMaxSkill=275;
+        break;
+    case 2619:
+        ZoneMaxSkill=300;
+        break;
+    case 2620:
+        ZoneMaxSkill=290;
+        break;
+    case 2624:
+        ZoneMaxSkill=300;
+        break;
+    case 2631:
+        ZoneMaxSkill=300;
+        break;
+    case 2797:
+        ZoneMaxSkill=150;
+        break;
+    case 2837:
+        ZoneMaxSkill=300;
+        break;
+    case 2897:
+        ZoneMaxSkill=150;
+        break;
+    default:
+        ZoneMaxSkill=50;
+        break;
+    }
+    if((ZoneMaxSkill-50) > fish_value )
+        return 0;
+    else if(ZoneMaxSkill-50 <= fish_value && fish_value < ZoneMaxSkill-25)
+        return 1;
+    else if(ZoneMaxSkill-25 <= fish_value && fish_value < ZoneMaxSkill)
+        return 2;
+    else if(ZoneMaxSkill <= fish_value && fish_value < ZoneMaxSkill + 25)
+        return 3;
+    else return 4;
 }
 
 /*********************************************************/
@@ -6269,7 +6269,7 @@ uint8 Player::CheckFishingAble()
 /*********************************************************/
 bool Player::CanSeeQuest( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: CanSeeQuest" );
+    sLog.outDebug( "QUEST: CanSeeQuest" );
     if( pQuest )
     {
         if( SatisfyQuestRace(pQuest) && SatisfyQuestClass(pQuest) && SatisfyQuestSkill(pQuest) && SatisfyQuestReputation(pQuest) && SatisfyQuestPreviousQuest(pQuest) )
@@ -6280,7 +6280,7 @@ bool Player::CanSeeQuest( Quest *pQuest )
 
 bool Player::CanTakeQuest( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: CanTakeQuest" );
+    sLog.outDebug( "QUEST: CanTakeQuest" );
     if( pQuest )
         return ( SatisfyQuestRace(pQuest) && SatisfyQuestClass(pQuest) && SatisfyQuestLevel(pQuest) && SatisfyQuestSkill(pQuest) && SatisfyQuestReputation(pQuest) && SatisfyQuestPreviousQuest(pQuest) );
     return false;
@@ -6288,7 +6288,7 @@ bool Player::CanTakeQuest( Quest *pQuest )
 
 bool Player::SatisfyQuestClass( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: SatisfyQuestClass" );
+    sLog.outDebug( "QUEST: SatisfyQuestClass" );
     if( pQuest )
     {
         uint32 reqclasses = pQuest->GetQuestInfo()->RequiredClass;
@@ -6302,7 +6302,7 @@ bool Player::SatisfyQuestClass( Quest *pQuest )
 
 bool Player::SatisfyQuestLevel( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: SatisfyQuestLevel" );
+    sLog.outDebug( "QUEST: SatisfyQuestLevel" );
     if( pQuest )
         return( getLevel() >= pQuest->GetQuestInfo()->MinLevel );
     return false;
@@ -6310,22 +6310,22 @@ bool Player::SatisfyQuestLevel( Quest *pQuest )
 
 bool Player::SatisfyQuestPreviousQuest( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: SatisfyQuestPreviousQuest" );
+    sLog.outDebug( "QUEST: SatisfyQuestPreviousQuest" );
     if( pQuest )
     {
         uint32 previousquest = pQuest->GetQuestInfo()->PrevQuestId;
-		if( previousquest == 0 )
-			return true;
-		if( mQuestStatus.find( previousquest ) == mQuestStatus.end() )
-			return false;
-		return mQuestStatus[previousquest].rewarded;
+        if( previousquest == 0 )
+            return true;
+        if( mQuestStatus.find( previousquest ) == mQuestStatus.end() )
+            return false;
+        return mQuestStatus[previousquest].rewarded;
     }
     return false;
 }
 
 bool Player::SatisfyQuestRace( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: SatisfyQuestRace" );
+    sLog.outDebug( "QUEST: SatisfyQuestRace" );
     if( pQuest )
     {
         uint32 reqraces = pQuest->GetQuestInfo()->RequiredRaces;
@@ -6334,12 +6334,12 @@ bool Player::SatisfyQuestRace( Quest *pQuest )
         uint32 binrace = 1 << (getRace() - 1);
         return( (reqraces & binrace) != 0 );
     }
-    return false;    
+    return false;
 }
 
 bool Player::SatisfyQuestReputation( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: SatisfyQuestReputation" );
+    sLog.outDebug( "QUEST: SatisfyQuestReputation" );
     if( pQuest )
         return true;
     return false;
@@ -6347,7 +6347,7 @@ bool Player::SatisfyQuestReputation( Quest *pQuest )
 
 bool Player::SatisfyQuestSkill( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: SatisfyQuestSkill" );
+    sLog.outDebug( "QUEST: SatisfyQuestSkill" );
     if( pQuest )
     {
         uint32 reqskill = pQuest->GetQuestInfo()->RequiredTradeskill;
@@ -6360,7 +6360,7 @@ bool Player::SatisfyQuestSkill( Quest *pQuest )
 
 void Player::GiveQuestSourceItem( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: GiveQuestSourceItem" );
+    sLog.outDebug( "QUEST: GiveQuestSourceItem" );
     if( pQuest )
     {
         uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
@@ -6376,7 +6376,7 @@ void Player::GiveQuestSourceItem( Quest *pQuest )
 
 void Player::TakeQuestSourceItem( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: TakeQuestSourceItem" );
+    sLog.outDebug( "QUEST: TakeQuestSourceItem" );
     if( pQuest )
     {
         uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
@@ -6392,24 +6392,24 @@ void Player::TakeQuestSourceItem( Quest *pQuest )
 
 bool Player::GetQuestRewardStatus( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: GetQuestRewardStatus" );
-	if( pQuest )
-	{
-		uint32 quest = pQuest->GetQuestInfo()->QuestId;
-		if  ( mQuestStatus.find( quest ) == mQuestStatus.end() )
-			return false;
-		return mQuestStatus[quest].rewarded;
-	}
-	return false;
+    sLog.outDebug( "QUEST: GetQuestRewardStatus" );
+    if( pQuest )
+    {
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        if  ( mQuestStatus.find( quest ) == mQuestStatus.end() )
+            return false;
+        return mQuestStatus[quest].rewarded;
+    }
+    return false;
 }
 
 uint32 Player::GetQuestStatus( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: GetQuestStatus" );
+    sLog.outDebug( "QUEST: GetQuestStatus" );
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
-        if  ( mQuestStatus.find( quest ) != mQuestStatus.end() ) 
+        if  ( mQuestStatus.find( quest ) != mQuestStatus.end() )
             return mQuestStatus[quest].status;
     }
     return QUEST_STATUS_NONE;
@@ -6417,20 +6417,20 @@ uint32 Player::GetQuestStatus( Quest *pQuest )
 
 void Player::SetQuestStatus( Quest *pQuest, uint32 status )
 {
-	sLog.outDebug( "QUEST: SetQuestStatus" );
+    sLog.outDebug( "QUEST: SetQuestStatus" );
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
         if ( status == QUEST_STATUS_NONE )
             mQuestStatus.erase( quest );
-		else
+        else
             mQuestStatus[quest].status = status;
     }
 }
 
 bool Player::IsQuestComplete( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: IsQuestComplete" );
+    sLog.outDebug( "QUEST: IsQuestComplete" );
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -6457,10 +6457,10 @@ bool Player::IsQuestComplete( Quest *pQuest )
                         return false;
                 }
             }
-            
+
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_EXPLORATION ) && !mQuestStatus[quest].m_explored )
                 return false;
-            
+
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && (mQuestStatus[quest].m_timer <= 0) )
                 return false;
 
@@ -6472,17 +6472,17 @@ bool Player::IsQuestComplete( Quest *pQuest )
 
 void Player::AddQuest( Quest *pQuest )
 {
-	sLog.outDebug( "QUEST: AddQuest" );
-	if( pQuest )
-	{
-		uint32 quest = pQuest->GetQuestInfo()->QuestId;
-		if  ( mQuestStatus.find( quest ) == mQuestStatus.end() )
-		{
-			mQuestStatus[quest].m_quest = pQuest;
-			mQuestStatus[quest].status = QUEST_STATUS_INCOMPLETE;
-			mQuestStatus[quest].rewarded = false;
-		}
-	}
+    sLog.outDebug( "QUEST: AddQuest" );
+    if( pQuest )
+    {
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        if  ( mQuestStatus.find( quest ) == mQuestStatus.end() )
+        {
+            mQuestStatus[quest].m_quest = pQuest;
+            mQuestStatus[quest].status = QUEST_STATUS_INCOMPLETE;
+            mQuestStatus[quest].rewarded = false;
+        }
+    }
 }
 
 void Player::finishExplorationQuest( Quest *pQuest )
@@ -6619,7 +6619,7 @@ void Player::ItemRemoved(uint32 entry)
 
 void Player::SetBindPoint(uint64 guid)
 {
-	WorldPacket data;
+    WorldPacket data;
     data.Initialize( SMSG_BINDER_CONFIRM );
     data << guid;
     GetSession()->SendPacket( &data );
@@ -6960,10 +6960,10 @@ void Player::_LoadMail()
 
 void Player::_LoadQuestStatus()
 {
-	mQuestStatus.clear();
+    mQuestStatus.clear();
 
     Quest *pQuest;
-	uint32 quest;
+    uint32 quest;
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_queststatus` WHERE `playerid` = '%u';", GetGUIDLow());
 
@@ -6973,8 +6973,8 @@ void Player::_LoadQuestStatus()
         {
             Field *fields = result->Fetch();
 
-			pQuest = objmgr.GetQuest(fields[1].GetUInt32());
-			quest = pQuest->GetQuestInfo()->QuestId;
+            pQuest = objmgr.GetQuest(fields[1].GetUInt32());
+            quest = pQuest->GetQuestInfo()->QuestId;
 
             mQuestStatus[quest].m_quest = pQuest;
             mQuestStatus[quest].status = fields[2].GetUInt32();
@@ -6991,8 +6991,8 @@ void Player::_LoadQuestStatus()
             mQuestStatus[quest].m_explored          = ( fields[13].GetUInt32() > 0 );
 
             time_t q_abs = time(NULL);
-            
-            
+
+
 
             if (pQuest && (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED)) )
             {
@@ -7004,7 +7004,7 @@ void Player::_LoadQuestStatus()
                     m_timedQuest = quest;
                     continue;
                 }
-				else
+                else
                 {
                     sLog.outDebug("Timer expired for quest {%u}!", quest);
                     mQuestStatus[quest].m_timer    = 0;
@@ -7017,7 +7017,7 @@ void Player::_LoadQuestStatus()
             }
 
             sLog.outDebug("Quest status is {%u} for quest {%u}", mQuestStatus[quest].status, quest);
-            
+
 
         }
         while( result->NextRow() );

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -45,7 +45,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
             uint32 defstatus = DIALOG_STATUS_NONE;
             questStatus = pCreature->getDialogStatus(_player, defstatus);
         }
-		_player->PlayerTalkClass->SendQuestStatus(questStatus, guid);
+        _player->PlayerTalkClass->SendQuestStatus(questStatus, guid);
     }
 }
 void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
@@ -70,9 +70,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     uint64 guid;
     uint32 quest_id;
     recv_data >> guid >> quest_id;
-    
+
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST creature = %u, quest = %u",uint32(GUID_LOPART(guid)),quest_id );
-    
+
     Quest *pQuest = objmgr.GetQuest(quest_id);
     if ( pQuest )
     {
@@ -85,9 +85,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                 return;
             }
 
-			_player->GiveQuestSourceItem( pQuest );
+            _player->GiveQuestSourceItem( pQuest );
             _player->AddQuest( pQuest );
-            
+
             _player->SetUInt32Value(log_slot + 0, quest_id);
             _player->SetUInt32Value(log_slot + 1, 0);
             _player->SetUInt32Value(log_slot + 2, 0);
@@ -126,9 +126,9 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
     uint64 guid;
     uint32 quest_id;
     recv_data >> guid >> quest_id;
-    
+
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST guid = %u, quest = %u",uint32(GUID_LOPART(guid)),quest_id );
-    
+
     Quest *pQuest = objmgr.GetQuest(quest_id);
     if ( pQuest )
     {
@@ -152,7 +152,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
             uint32 slot = _player->GetSlotByItemGUID( guid );
             if ( slot )
                 pItem = _player->GetItemBySlot( (uint8)slot );
-            
+
             if( pItem )
             {
                 if( !Script->ItemQuestAccept(_player, pItem, pQuest ) )
@@ -240,30 +240,30 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                 return;
             }
         }
-        
+
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
             if ( pQuest->GetQuestInfo()->ReqItemId[i] )
                 _player->RemoveItemFromInventory( pQuest->GetQuestInfo()->ReqItemId[i], pQuest->GetQuestInfo()->ReqItemCount[i]);
         }
-        
+
         if ( pQuest->GetQuestInfo()->RewSpell > 0 )
         {
             WorldPacket sdata;
-            
+
             sdata.Initialize (SMSG_LEARNED_SPELL);
             sdata << pQuest->GetQuestInfo()->RewSpell;
             SendPacket( &sdata );
             _player->addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell );
         }
-        
+
         _player->PlayerTalkClass->SendQuestUpdateComplete( pQuest );
         _player->PlayerTalkClass->SendQuestComplete( pQuest );
         uint16 log_slot = _player->getQuestSlot(quest_id);
         _player->SetUInt32Value(log_slot+0, 0);
         _player->SetUInt32Value(log_slot+1, 0);
         _player->SetUInt32Value(log_slot+2, 0);
-        
+
         if ( _player->getLevel() < 60 )
         {
             _player->GiveXP( pQuest->XPValue( _player ), guid1 );
@@ -271,7 +271,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         }
         else
             _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( _player ) );
-         
+
         if ( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
             _player->mQuestStatus[quest_id].rewarded = true;
         else
@@ -369,10 +369,10 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
         Quest *pQuest = objmgr.GetQuest( quest_id );
         if( pQuest )
-		{
-			_player->SetQuestStatus( pQuest, QUEST_STATUS_NONE);
+        {
+            _player->SetQuestStatus( pQuest, QUEST_STATUS_NONE);
             _player->TakeQuestSourceItem( pQuest );
-		}
+        }
     }
 }
 void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
