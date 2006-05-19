@@ -800,363 +800,6 @@ void Player::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
-void Player::finishExplorationQuest( Quest *pQuest )
-{
-    if(!pQuest) return;
-
-    if ( getQuestStatus( pQuest->GetQuestInfo()->QuestId ) == QUEST_STATUS_INCOMPLETE )
-    {
-        quest_status qs = getQuestStatusStruct( pQuest->GetQuestInfo()->QuestId );
-
-        if ( !qs.m_explored )
-        {
-            PlayerTalkClass->SendQuestUpdateComplete( pQuest );
-            qs.m_explored = true;
-            loadExistingQuest( qs );
-        }
-
-        if ( isQuestComplete( pQuest ) )
-        {
-            setQuestStatus( pQuest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false );
-            PlayerTalkClass->SendQuestCompleteToLog( pQuest );
-        }
-    }
-}
-
-bool Player::isQuestComplete(Quest *pQuest )
-{
-    quest_status qs = mQuestStatus[pQuest->GetQuestInfo()->QuestId];
-    if(qs.status==QUEST_STATUS_COMPLETE)
-        return true;
-    if((pQuest->GetQuestInfo()->Flags & 0xffff)==0)
-        return false;
-    bool Result = true;
-
-    if (qs.status==QUEST_STATUS_INCOMPLETE)
-    {
-        if(pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO))
-            Result &=true;
-
-        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_EXPLORATION))
-            Result &= qs.m_explored;
-
-        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
-            Result &= (qs.m_timer > 0);
-
-        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
-        {
-            Result &=(GetItemCount( pQuest->GetQuestInfo()->ReqItemId[0], false) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
-                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[1], false)>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
-                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[2], false)>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
-                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[3], false)>= pQuest->GetQuestInfo()->ReqItemCount[3]);
-        }
-        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL))
-        {
-            Result &= (qs.m_questMobCount[0] >= pQuest->GetQuestInfo()->ReqKillMobCount[0] &&
-                qs.m_questMobCount[1] >= pQuest->GetQuestInfo()->ReqKillMobCount[1] &&
-                qs.m_questMobCount[2] >= pQuest->GetQuestInfo()->ReqKillMobCount[2] &&
-                qs.m_questMobCount[3] >= pQuest->GetQuestInfo()->ReqKillMobCount[3]);
-        }
-    }
-    else
-        return false;
-    return Result;
-}
-
-bool Player::isQuestTakable(Quest *quest)
-{
-    if (!quest) return false;
-
-    uint32 status = getQuestStatus(quest->GetQuestInfo()->QuestId);
-
-    if ( quest->CanBeTaken( this ) )
-    {
-        if ( status == QUEST_STATUS_NONE )
-        {
-            status = addNewQuest( quest );
-        }
-
-        if (status == QUEST_STATUS_AVAILABLE)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool Player::isQuestTakable(uint32 quest_id)
-{
-    if (!quest_id) return false;
-    Quest *quest=objmgr.GetQuest(quest_id);
-    uint32 status = getQuestStatus(quest_id);
-
-    if ( quest->CanBeTaken( this ) )
-    {
-        if ( status == QUEST_STATUS_NONE )
-        {
-            status = addNewQuest( quest );
-        }
-
-        if (status == QUEST_STATUS_AVAILABLE)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-quest_status Player::getQuestStatusStruct(uint32 quest_id)
-{
-    return mQuestStatus[quest_id];
-}
-
-uint32 Player::getQuestStatus(uint32 quest_id)
-{
-    if  ( mQuestStatus.find( quest_id ) == mQuestStatus.end( ) ) return QUEST_STATUS_NONE;
-    return mQuestStatus[quest_id].status;
-}
-
-bool Player::getQuestRewardStatus(uint32 quest_id)
-{
-    if  ( mQuestStatus.find( quest_id ) == mQuestStatus.end( ) ) return false;
-    return mQuestStatus[quest_id].rewarded;
-}
-
-uint32 Player::addNewQuest(Quest *quest, uint32 status)
-{
-    quest_status qs;
-    qs.m_quest = quest;
-    qs.status   = status;
-    qs.rewarded = false;
-
-    mQuestStatus[quest->GetQuestInfo()->QuestId] = qs;
-    return status;
-};
-
-void Player::loadExistingQuest(quest_status qs)
-{
-    mQuestStatus[qs.m_quest->GetQuestInfo()->QuestId] = qs;
-}
-
-void Player::setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded)
-{
-    if ( new_status == QUEST_STATUS_INCOMPLETE )
-    {
-        m_timedQuest = 0;
-
-        mQuestStatus[quest_id].m_questMobCount[0] = 0;
-        mQuestStatus[quest_id].m_questMobCount[1] = 0;
-        mQuestStatus[quest_id].m_questMobCount[2] = 0;
-        mQuestStatus[quest_id].m_questMobCount[3] = 0;
-        mQuestStatus[quest_id].m_explored = false;
-
-        Quest *pQuest = mQuestStatus[quest_id].m_quest;
-        if ( pQuest )
-        {
-            if ( pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
-            {
-                time_t kk = time(NULL);
-                kk += pQuest->GetQuestInfo()->LimitTime * 60;
-
-                mQuestStatus[quest_id].m_timerrel = (int32)kk;
-                mQuestStatus[quest_id].m_timer = pQuest->GetQuestInfo()->LimitTime * 60 * 1000;
-
-                m_timedQuest = quest_id;
-                PlayerTalkClass->SendQuestUpdateSetTimer( pQuest, pQuest->GetQuestInfo()->LimitTime );
-            }
-        }
-    }
-
-    mQuestStatus[quest_id].status     = new_status;
-    mQuestStatus[quest_id].rewarded   = new_rewarded;
-
-    if ( new_status == QUEST_STATUS_NONE )
-        mQuestStatus.erase(quest_id);
-}
-
-uint16 Player::getOpenQuestSlot()
-{
-    uint16 start = PLAYER_QUEST_LOG_1_1;
-    uint16 end = PLAYER_QUEST_LOG_1_1 + 60;
-    for (uint16 i = start; i <= end; i+=3)
-        if (GetUInt32Value(i) == 0)
-            return i;
-
-    return 0;
-}
-
-uint16 Player::getQuestSlot(uint32 quest_id)
-{
-    uint16 start = PLAYER_QUEST_LOG_1_1;
-    uint16 end = PLAYER_QUEST_LOG_1_1 + 60;
-    for (uint16 i = start; i <= end; i+=3)
-        if (GetUInt32Value(i) == quest_id)
-            return i;
-
-    return 0;
-}
-
-uint16 Player::getQuestSlotById(uint32 slot_id)
-{
-    uint16 start = PLAYER_QUEST_LOG_1_1;
-    uint16 end   = PLAYER_QUEST_LOG_1_1 + 60;
-    uint16 idx   = 0;
-
-    for (uint16 i = start; i <= end; i+=3)
-    {
-        idx++;
-        if ( idx == slot_id )
-            return i;
-    }
-
-    return 0;
-}
-
-void Player::ItemAdded(uint32 entry, uint32 count)
-{
-    quest_status qs;
-    uint32 reqitem;
-    uint32 reqitemcount;
-    uint32 curitemcount;
-    uint32 additemcount;
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
-    {
-        qs = i->second;
-        if ( qs.status == QUEST_STATUS_INCOMPLETE )
-        {
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                reqitem = qs.m_quest->GetQuestInfo()->ReqItemId[j];
-                if ( reqitem == entry )
-                {
-                    reqitemcount = qs.m_quest->GetQuestInfo()->ReqItemCount[j];
-                    curitemcount = GetItemCount(entry, true);
-                    if ( curitemcount < reqitemcount )
-                    {
-                        additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
-                        mQuestStatus[i->first].m_questItemCount[j] += additemcount;
-                        PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, additemcount);
-                    }
-                    if ( isQuestComplete(qs.m_quest) )
-                    {
-                        PlayerTalkClass->SendQuestCompleteToLog( qs.m_quest );
-                        setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false);
-                    }
-                    return;
-                }
-            }
-        }
-    }
-}
-
-void Player::ItemRemoved(uint32 entry)
-{
-    quest_status qs;
-    uint32 reqitem;
-    uint32 reqitemcount;
-    uint32 curitemcount;
-    uint32 remitemcount;
-    uint32 count = 1;
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
-    {
-        qs = i->second;
-        if ( qs.status == QUEST_STATUS_COMPLETE )
-        {
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                reqitem = qs.m_quest->GetQuestInfo()->ReqItemId[j];
-                if ( reqitem == entry )
-                {
-                    reqitemcount = qs.m_quest->GetQuestInfo()->ReqItemCount[j];
-                    curitemcount = GetItemCount(entry, true);
-                    if ( curitemcount - count < reqitemcount )
-                    {
-                        remitemcount = reqitemcount - curitemcount + count;
-                        mQuestStatus[i->first].m_questItemCount[j] = curitemcount - remitemcount;
-                        PlayerTalkClass->SendQuestIncompleteToLog(qs.m_quest);
-                        setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_INCOMPLETE, false);
-                    }
-                    return;
-                }
-            }
-        }
-    }
-}
-
-void Player::SetBindPoint(uint64 guid)
-{
-
-    // end gossip
-    WorldPacket data;
-    data.Initialize( SMSG_GOSSIP_COMPLETE );
-    GetSession()->SendPacket( &data );
-
-    data.Initialize( SMSG_BINDER_CONFIRM );
-    data << guid;
-    GetSession()->SendPacket( &data );
-}
-
-void Player::KilledMonster(uint32 entry, uint64 guid)
-{
-    quest_status qs;
-    uint32 reqkill;
-    uint32 reqkillcount;
-    uint32 curkillcount;
-    uint32 addkillcount = 1;
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
-    {
-        qs = i->second;
-        if ( qs.status == QUEST_STATUS_INCOMPLETE )
-        {
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                reqkill = qs.m_quest->GetQuestInfo()->ReqKillMobId[j];
-                if ( reqkill == entry )
-                {
-                    reqkillcount = qs.m_quest->GetQuestInfo()->ReqKillMobCount[j];
-                    curkillcount = qs.m_questMobCount[j];
-                    if ( curkillcount < reqkillcount )
-                    {
-                        mQuestStatus[i->first].m_questMobCount[j] = curkillcount + addkillcount;
-                        PlayerTalkClass->SendQuestUpdateAddKill(qs.m_quest, guid, curkillcount + addkillcount, j);
-                    }
-                    if ( isQuestComplete(qs.m_quest) )
-                    {
-                        PlayerTalkClass->SendQuestCompleteToLog( qs.m_quest );
-                        setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false);
-                    }
-                    return;
-                }
-            }
-        }
-    }
-}
-
-void Player::AddQuestsLoot(Creature* creature)
-{
-    quest_status qs;
-    uint32 itemid=0;
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
-    {
-        qs=i->second;
-        if (qs.status == QUEST_STATUS_INCOMPLETE)
-        {
-            if (!qs.m_quest) continue;
-
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                itemid=qs.m_quest->GetQuestInfo()->ReqItemId[j];
-                if ( itemid>0 )
-                {
-                    ChangeLoot(&(creature->loot),creature->GetCreatureInfo()->lootid,itemid,70.0f);
-                }
-            }
-        }
-    }
-}
-
 void Player::CalcRage( uint32 damage,bool attacker )
 {
 
@@ -1615,121 +1258,6 @@ void Player::AddMail(Mail *m)
     m_mail.push_back(m);
 }
 
-void Player::_SaveAuctions()
-{
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",GetGUIDLow());
-
-    ObjectMgr::AuctionEntryMap::iterator itr;
-    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
-    {
-        AuctionEntry *Aentry = itr->second;
-        if ((Aentry) && (Aentry->owner == GetGUIDLow()))
-        {
-            Item *it = objmgr.GetAItem(Aentry->item);
-
-            sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
-
-            std::stringstream ss;
-            ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
-                << it->GetGUIDLow() << ", '";
-            for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-            {
-                ss << it->GetUInt32Value(i) << " ";
-            }
-            ss << "' )";
-            sDatabase.Execute( ss.str().c_str() );
-        }
-    }
-}
-
-void Player::_SaveMail()
-{
-
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
-
-    std::list<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
-    {
-        Mail *m = (*itr);
-
-        QueryResult *result = sDatabase.PQuery("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
-        delete result;
-    }
-}
-
-void Player::_SaveBids()
-{
-    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%u'",GetGUIDLow());
-
-    std::list<bidentry*>::iterator itr;
-    for (itr = m_bids.begin(); itr != m_bids.end(); itr++)
-    {
-        AuctionEntry *a = objmgr.GetAuction((*itr)->AuctionID);
-        if (a)
-        {
-            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
-        }
-    }
-
-}
-
-void Player::_LoadMail()
-{
-
-    m_mail.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `mail` WHERE `receiver` = '%u';",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            Mail *be = new Mail;
-            be->messageID = fields[0].GetUInt32();
-            be->sender = fields[1].GetUInt32();
-            be->receiver = fields[2].GetUInt32();
-            be->subject = fields[3].GetString();
-            be->body = fields[4].GetString();
-            be->item = fields[5].GetUInt32();
-            be->time = fields[6].GetUInt32();
-            be->money = fields[7].GetUInt32();
-            be->COD = fields[8].GetUInt32();
-            be->checked = fields[9].GetUInt32();
-            m_mail.push_back(be);
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-
-}
-
-void Player::_LoadBids()
-{
-
-    m_bids.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%u';",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            bidentry *be = new bidentry;
-            be->AuctionID = fields[0].GetUInt32();
-            be->amt = fields[1].GetUInt32();
-            m_bids.push_back(be);
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-
-}
-
 void Player::addSpell(uint16 spell_id, uint16 slot_id)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
@@ -2023,330 +1551,6 @@ void Player::DestroyForPlayer( Player *target ) const
     }
 }
 
-void Player::SaveToDB()
-{
-    if (hasUnitState(UNIT_STAT_IN_FLIGHT))
-    {
-        SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-        RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
-        RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
-    }
-
-    // Set player sit state to standing on save
-    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-    RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
-
-    //remove restflag when save
-    //this is becouse of the rename char stuff
-    RemoveFlag(PLAYER_FLAGS, 0x20);
-
-    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
-    //_RemoveStatsMods();
-    _RemoveAllItemMods();
-    _RemoveAllAuraMods();
-
-    bool inworld = IsInWorld();
-    if (inworld)
-        RemoveFromWorld();
-
-    std::stringstream ss;
-
-    sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
-
-    ss.rdbuf()->str("");
-    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic`) VALUES ("
-        << GetGUIDLow() << ", "
-        << GetSession()->GetAccountId() << ", '"
-        << m_name << "', "
-        << m_race << ", "
-        << m_class << ", "
-        << m_mapId << ", "
-        << m_positionX << ", "
-        << m_positionY << ", "
-        << m_positionZ << ", "
-        << m_orientation << ", '";
-
-    uint16 i;
-    for( i = 0; i < m_valuesCount; i++ )
-    {
-        ss << GetUInt32Value(i) << " ";
-    }
-
-    ss << "', '";
-
-    for( i = 0; i < 8; i++ )
-        ss << m_taximask[i] << " ";
-
-    ss << "', ";
-    inworld ? ss << 1: ss << 0;
-
-    ss << ", ";
-    ss << m_highest_rank;
-
-    ss << ", ";
-    ss << m_last_week_rank;
-
-    ss << ", ";
-    ss << m_cinematic;
-
-    ss << " )";
-
-    sDatabase.Execute( ss.str().c_str() );
-
-    _SaveMail();
-    _SaveBids();
-    _SaveAuctions();
-    _SaveInventory();
-    _SaveQuestStatus();
-    _SaveTutorials();
-    _SaveSpells();
-    _SaveActions();
-    _SaveAuras();
-    _SaveReputation();
-
-    if(m_pCorpse) m_pCorpse->SaveToDB(false);
-
-    uint64 petguid;
-    if((petguid=GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
-    {
-        Creature *OldSummon = ObjectAccessor::Instance().GetCreature(*this, petguid);
-        if(OldSummon && OldSummon->isPet())
-        {
-            ((Pet*)OldSummon)->SavePetToDB();
-        }
-    }
-
-    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
-    _ApplyAllAuraMods();
-    _ApplyAllItemMods();
-    //_ApplyStatsMods();
-    //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
-
-    if (inworld)
-        AddToWorld();
-}
-
-void Player::_SaveQuestStatus()
-{
-    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",GetGUIDLow());
-
-    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
-    {
-        sDatabase.PExecute("INSERT INTO `character_queststatus` (`playerid`,`questid`,`status`,`rewarded`,`questMobCount1`,`questMobCount2`,`questMobCount3`,`questMobCount4`,`questItemCount1`,`questItemCount2`,`questItemCount3`,`questItemCount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u','%u');", GetGUIDLow(), i->first, i->second.status, i->second.rewarded, i->second.m_questMobCount[0], i->second.m_questMobCount[1], i->second.m_questMobCount[2], i->second.m_questMobCount[3], i->second.m_questItemCount[0], i->second.m_questItemCount[1], i->second.m_questItemCount[2], i->second.m_questItemCount[3]);
-    }
-}
-
-void Player::_SaveInventory()
-{
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0';",GetGUIDLow());
-
-    for(uint8 i = 0; i < BANK_SLOT_BAG_END; i++)
-    {
-        if (m_items[i] != 0)
-        {
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', 0, '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
-            m_items[i]->SaveToDB();
-        }
-    }
-}
-
-void Player::_SaveSpells()
-{
-    sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
-
-    std::list<Playerspell*>::iterator itr;
-    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-    {
-        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId);
-    }
-}
-
-void Player::_SaveTutorials()
-{
-    sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
-    sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
-}
-
-void Player::_SaveActions()
-{
-    std::stringstream query;
-    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
-
-    std::list<struct actions>::iterator itr;
-    for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
-    {
-        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
-    }
-}
-
-void Player::_SaveAuras()
-{
-    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
-
-    AuraList auras = GetAuras();
-    AuraList::iterator itr;
-    for (itr = auras.begin(); itr != auras.end(); ++itr)
-    {
-        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr)->GetId(), (uint32)(*itr)->GetEffIndex(), int((*itr)->GetAuraDuration()));
-    }
-}
-
-bool Player::LoadFromDB( uint32 guid )
-{
-
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
-
-    if(!result)
-        return false;
-
-    Field *fields = result->Fetch();
-
-    Object::_Create( guid, HIGHGUID_PLAYER );
-
-    LoadValues( fields[3].GetString() );
-
-    m_name = fields[4].GetString();
-    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
-
-    m_race = fields[5].GetUInt8();
-    //Need to call it to initialize m_team (m_team can be calculated from m_race)
-    //Other way is to saves m_team into characters table.
-    setFaction(m_race, 0);
-
-    m_class = fields[6].GetUInt8();
-
-    info = objmgr.GetPlayerCreateInfo(m_race, m_class);
-
-    m_positionX = fields[7].GetFloat();
-    m_positionY = fields[8].GetFloat();
-    m_positionZ = fields[9].GetFloat();
-    m_mapId = fields[10].GetUInt32();
-    m_orientation = fields[11].GetFloat();
-    m_highest_rank = fields[14].GetUInt32();
-    m_last_week_rank = fields[15].GetUInt32();
-    m_cinematic = fields[16].GetUInt32();
-
-    if( HasFlag(PLAYER_FLAGS, 8) )
-        SetUInt32Value(PLAYER_FLAGS, 0);
-
-    if( HasFlag(PLAYER_FLAGS, 0x11) )
-        m_deathState = DEAD;
-
-    LoadTaxiMask( fields[12].GetString() );
-
-    delete result;
-
-    _LoadMail();
-
-    _LoadInventory();
-
-    _LoadSpells();
-
-    _LoadActions();
-
-    _LoadQuestStatus();
-
-    _LoadTutorials();
-
-    _LoadBids();
-
-    _LoadAuras();
-
-    _LoadReputation();
-
-    _LoadCorpse();
-
-    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
-    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
-    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
-    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
-    //_ApplyAllAuraMods();
-    //_ApplyAllItemMods();
-    return true;
-}
-
-void Player::_LoadInventory()
-{
-    for(uint16 i = 0; i < BANK_SLOT_BAG_END; i++)
-    {
-        if(m_items[i])
-        {
-            delete m_items[i];
-            SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2), 0);
-            m_items[i] = 0;
-        }
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0';",GetGUIDLow());
-
-    if (result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            uint8  slot      = fields[2].GetUInt8();
-            uint32 item_guid = fields[3].GetUInt32();
-            uint32 item_id   = fields[4].GetUInt32();
-
-            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
-
-            Item *item = NewItemOrBag(proto);
-            item->SetOwner(this);
-            item->SetSlot(slot);
-            if(!item->LoadFromDB(item_guid, 1))
-                continue;
-            AddItem(0, slot, item, true);
-        } while (result->NextRow());
-
-        delete result;
-    }
-}
-
 bool Player::HasSpell(uint32 spell)
 {
     std::list<Playerspell*>::iterator itr;
@@ -2372,167 +1576,6 @@ bool Player::HasSpell(uint32 spell)
     }
 
     return false;
-}
-
-void Player::_LoadSpells()
-{
-
-    m_spells.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot` FROM `character_spell` WHERE `guid` = '%u';",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            addSpell(fields[0].GetUInt16(), fields[1].GetUInt16());
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-}
-
-void Player::_LoadTutorials()
-{
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_tutorial` WHERE `guid` = '%u';",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            for (int iI=0; iI<8; iI++)
-                m_Tutorials[iI] = fields[iI + 1].GetUInt32();
-
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-}
-
-void Player::_LoadActions()
-{
-
-    m_actions.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`;",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            addAction(fields[1].GetUInt8(), fields[2].GetUInt16(), fields[3].GetUInt8(), fields[4].GetUInt8());
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-}
-
-void Player::_LoadQuestStatus()
-{
-
-    mQuestStatus.clear();
-
-    Quest *pQuest;
-
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_queststatus` WHERE `playerid` = '%u';", GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            quest_status qs;
-            qs.status              = fields[2].GetUInt32();
-            qs.rewarded            = ( fields[3].GetUInt32() > 0 );
-            qs.m_questMobCount[0]  = fields[4].GetUInt32();
-            qs.m_questMobCount[1]  = fields[5].GetUInt32();
-            qs.m_questMobCount[2]  = fields[6].GetUInt32();
-            qs.m_questMobCount[3]  = fields[7].GetUInt32();
-            qs.m_questItemCount[0] = fields[8].GetUInt32();
-            qs.m_questItemCount[1] = fields[9].GetUInt32();
-            qs.m_questItemCount[2] = fields[10].GetUInt32();
-            qs.m_questItemCount[3] = fields[11].GetUInt32();
-            qs.m_timerrel          = fields[12].GetUInt32();
-            qs.m_explored          = ( fields[13].GetUInt32() > 0 );
-
-            time_t q_abs = time(NULL);
-            pQuest = objmgr.GetQuest(fields[1].GetUInt32());
-            qs.m_quest = pQuest;
-
-            if (pQuest && (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED)) )
-            {
-                sLog.outDebug("Time now {%u}, then {%u} in quest {%u}!", q_abs, qs.m_timerrel, qs.m_quest->GetQuestInfo()->QuestId);
-                if  ( qs.m_timerrel > q_abs )
-                {
-                    qs.m_timer = (qs.m_timerrel - q_abs) * 1000;
-                    sLog.outDebug("Setup timer at {%u}msec. for quest {%u}!", qs.m_timer, qs.m_quest->GetQuestInfo()->QuestId);
-                    loadExistingQuest(qs);
-                    m_timedQuest = qs.m_quest->GetQuestInfo()->QuestId;
-
-                    continue;
-                } else
-                {
-                    sLog.outDebug("Timer expired for quest {%u}!", qs.m_quest->GetQuestInfo()->QuestId);
-                    qs.m_timer    = 0;
-
-                    if ( qs.status == QUEST_STATUS_COMPLETE )
-                        qs.status     = QUEST_STATUS_INCOMPLETE;
-
-                    qs.m_timerrel = 0;
-                }
-            }
-
-            sLog.outDebug("Quest status is {%u} for quest {%u}", qs.status, qs.m_quest->GetQuestInfo()->QuestId);
-            loadExistingQuest(qs);
-
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-}
-
-void Player::_LoadAuras()
-{
-    m_Auras.clear();
-
-    for(uint8 i = 0; i < 48; i++)
-        SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
-    for(uint8 j = 0; j < 6; j++)
-        SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
-
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u';",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            uint32 spellid = fields[1].GetUInt32();
-            uint32 effindex = fields[2].GetUInt32();
-            int32 remaintime = (int32)fields[3].GetUInt32();
-
-            SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
-            assert(spellproto);
-
-            Aura* aura = new Aura(spellproto, effindex, this, this);
-            aura->SetAuraDuration(remaintime);
-            AddAura(aura);
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
 }
 
 void Player::DeleteFromDB()
@@ -3295,14 +2338,12 @@ bool Player::IsGroupMember(Player *plyr)
     return false;
 }
 
-void
-Player::DealWithSpellDamage(DynamicObject &obj)
+void Player::DealWithSpellDamage(DynamicObject &obj)
 {
     obj.DealWithSpellDamage(*this);
 }
 
-bool
-Player::SetPosition(const float &x, const float &y, const float &z, const float &orientation)
+bool Player::SetPosition(const float &x, const float &y, const float &z, const float &orientation)
 {
     Map *m = MapManager::Instance().GetMap(m_mapId);
 
@@ -3318,8 +2359,7 @@ Player::SetPosition(const float &x, const float &y, const float &z, const float 
     return true;
 }
 
-void
-Player::SendMessageToSet(WorldPacket *data, bool self)
+void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self);
 }
@@ -3507,82 +2547,6 @@ void Player::LoadReputationFromDBC(void)
             }
             factions.push_back(newFaction);
         }
-    }
-}
-
-void Player::_LoadReputation()
-{
-    Factions newFaction;
-
-    factions.clear();
-
-    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u';",GetGUIDLow());
-
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            newFaction.ID               = fields[0].GetUInt32();
-            newFaction.ReputationListID = fields[1].GetUInt32();
-            newFaction.Standing         = fields[2].GetUInt32();
-            newFaction.Flags            = fields[3].GetUInt32();
-
-            factions.push_back(newFaction);
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
-    else
-    {
-        LoadReputationFromDBC();
-    }
-}
-
-void Player::_LoadCorpse()
-{
-    // TODO do we need to load all corpses ?
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE `player` = '%u' AND `bones_flag` = '0';",GetGUIDLow());
-
-    if(!result) return;
-
-    Field *fields = result->Fetch();
-
-    DeleteCorpse();
-    m_pCorpse = new Corpse();
-
-    float positionX = fields[2].GetFloat();
-    float positionY = fields[3].GetFloat();
-    float positionZ = fields[4].GetFloat();
-    float ort       = fields[5].GetFloat();
-    //uint32 zoneid   = fields[6].GetUInt32();
-    uint32 mapid    = fields[7].GetUInt32();
-
-    m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
-    m_pCorpse->SetMapId(mapid);
-    //m_pCorpse->SetZoneId(zoneid);
-    m_pCorpse->LoadValues( fields[8].GetString() );
-
-    MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
-
-    delete result;
-}
-
-void Player::_SaveReputation()
-{
-    std::list<Factions>::iterator itr;
-
-    std::stringstream ss;
-
-    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
-
-    for(itr = factions.begin(); itr != factions.end(); ++itr)
-    {
-
-        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u');", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
-
     }
 }
 
@@ -3944,10 +2908,9 @@ void Player::FlightComplete()
         RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
 }
 
-/**********************************************************
- ***                    STORAGE SYSTEM                   ***
- ***********************************************************/
-
+/*********************************************************/
+/***                   STORAGE SYSTEM                  ***/
+/*********************************************************/
 void Player::SetSheath(uint32 sheathed)
 {
     if (sheathed)
@@ -7302,4 +6265,1041 @@ uint8 Player::CheckFishingAble()
 	else if(ZoneMaxSkill <= fish_value && fish_value < ZoneMaxSkill + 25)
 		return 3;
 	else return 4;
+}
+
+/*********************************************************/
+/***                    QUEST SYSTEM                   ***/
+/*********************************************************/
+void Player::finishExplorationQuest( Quest *pQuest )
+{
+    if(!pQuest) return;
+
+    if ( getQuestStatus( pQuest->GetQuestInfo()->QuestId ) == QUEST_STATUS_INCOMPLETE )
+    {
+        quest_status qs = getQuestStatusStruct( pQuest->GetQuestInfo()->QuestId );
+
+        if ( !qs.m_explored )
+        {
+            PlayerTalkClass->SendQuestUpdateComplete( pQuest );
+            qs.m_explored = true;
+            loadExistingQuest( qs );
+        }
+
+        if ( isQuestComplete( pQuest ) )
+        {
+            setQuestStatus( pQuest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false );
+            PlayerTalkClass->SendQuestCompleteToLog( pQuest );
+        }
+    }
+}
+
+bool Player::isQuestComplete(Quest *pQuest )
+{
+    quest_status qs = mQuestStatus[pQuest->GetQuestInfo()->QuestId];
+    if(qs.status==QUEST_STATUS_COMPLETE)
+        return true;
+    if((pQuest->GetQuestInfo()->Flags & 0xffff)==0)
+        return false;
+    bool Result = true;
+
+    if (qs.status==QUEST_STATUS_INCOMPLETE)
+    {
+        if(pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO))
+            Result &=true;
+
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_EXPLORATION))
+            Result &= qs.m_explored;
+
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED))
+            Result &= (qs.m_timer > 0);
+
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_DELIVER))
+        {
+            Result &=(GetItemCount( pQuest->GetQuestInfo()->ReqItemId[0], false) >= pQuest->GetQuestInfo()->ReqItemCount[0] &&
+                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[1], false)>= pQuest->GetQuestInfo()->ReqItemCount[1] &&
+                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[2], false)>= pQuest->GetQuestInfo()->ReqItemCount[2] &&
+                GetItemCount( pQuest->GetQuestInfo()->ReqItemId[3], false)>= pQuest->GetQuestInfo()->ReqItemCount[3]);
+        }
+        if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL))
+        {
+            Result &= (qs.m_questMobCount[0] >= pQuest->GetQuestInfo()->ReqKillMobCount[0] &&
+                qs.m_questMobCount[1] >= pQuest->GetQuestInfo()->ReqKillMobCount[1] &&
+                qs.m_questMobCount[2] >= pQuest->GetQuestInfo()->ReqKillMobCount[2] &&
+                qs.m_questMobCount[3] >= pQuest->GetQuestInfo()->ReqKillMobCount[3]);
+        }
+    }
+    else
+        return false;
+    return Result;
+}
+
+bool Player::isQuestTakable(Quest *quest)
+{
+    if (!quest) return false;
+
+    uint32 status = getQuestStatus(quest->GetQuestInfo()->QuestId);
+
+    if ( quest->CanBeTaken( this ) )
+    {
+        if ( status == QUEST_STATUS_NONE )
+        {
+            status = addNewQuest( quest );
+        }
+
+        if (status == QUEST_STATUS_AVAILABLE)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Player::isQuestTakable(uint32 quest_id)
+{
+    if (!quest_id) return false;
+    Quest *quest=objmgr.GetQuest(quest_id);
+    uint32 status = getQuestStatus(quest_id);
+
+    if ( quest->CanBeTaken( this ) )
+    {
+        if ( status == QUEST_STATUS_NONE )
+        {
+            status = addNewQuest( quest );
+        }
+
+        if (status == QUEST_STATUS_AVAILABLE)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+quest_status Player::getQuestStatusStruct(uint32 quest_id)
+{
+    return mQuestStatus[quest_id];
+}
+
+uint32 Player::getQuestStatus(uint32 quest_id)
+{
+    if  ( mQuestStatus.find( quest_id ) == mQuestStatus.end( ) ) return QUEST_STATUS_NONE;
+    return mQuestStatus[quest_id].status;
+}
+
+bool Player::getQuestRewardStatus(uint32 quest_id)
+{
+    if  ( mQuestStatus.find( quest_id ) == mQuestStatus.end( ) ) return false;
+    return mQuestStatus[quest_id].rewarded;
+}
+
+uint32 Player::addNewQuest(Quest *quest, uint32 status)
+{
+    quest_status qs;
+    qs.m_quest = quest;
+    qs.status   = status;
+    qs.rewarded = false;
+
+    mQuestStatus[quest->GetQuestInfo()->QuestId] = qs;
+    return status;
+};
+
+void Player::loadExistingQuest(quest_status qs)
+{
+    mQuestStatus[qs.m_quest->GetQuestInfo()->QuestId] = qs;
+}
+
+void Player::setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded)
+{
+    if ( new_status == QUEST_STATUS_INCOMPLETE )
+    {
+        m_timedQuest = 0;
+
+        mQuestStatus[quest_id].m_questMobCount[0] = 0;
+        mQuestStatus[quest_id].m_questMobCount[1] = 0;
+        mQuestStatus[quest_id].m_questMobCount[2] = 0;
+        mQuestStatus[quest_id].m_questMobCount[3] = 0;
+        mQuestStatus[quest_id].m_explored = false;
+
+        Quest *pQuest = mQuestStatus[quest_id].m_quest;
+        if ( pQuest )
+        {
+            if ( pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+            {
+                time_t kk = time(NULL);
+                kk += pQuest->GetQuestInfo()->LimitTime * 60;
+
+                mQuestStatus[quest_id].m_timerrel = (int32)kk;
+                mQuestStatus[quest_id].m_timer = pQuest->GetQuestInfo()->LimitTime * 60 * 1000;
+
+                m_timedQuest = quest_id;
+                PlayerTalkClass->SendQuestUpdateSetTimer( pQuest, pQuest->GetQuestInfo()->LimitTime );
+            }
+        }
+    }
+
+    mQuestStatus[quest_id].status     = new_status;
+    mQuestStatus[quest_id].rewarded   = new_rewarded;
+
+    if ( new_status == QUEST_STATUS_NONE )
+        mQuestStatus.erase(quest_id);
+}
+
+uint16 Player::getOpenQuestSlot()
+{
+    uint16 start = PLAYER_QUEST_LOG_1_1;
+    uint16 end = PLAYER_QUEST_LOG_1_1 + 60;
+    for (uint16 i = start; i <= end; i+=3)
+        if (GetUInt32Value(i) == 0)
+            return i;
+
+    return 0;
+}
+
+uint16 Player::getQuestSlot(uint32 quest_id)
+{
+    uint16 start = PLAYER_QUEST_LOG_1_1;
+    uint16 end = PLAYER_QUEST_LOG_1_1 + 60;
+    for (uint16 i = start; i <= end; i+=3)
+        if (GetUInt32Value(i) == quest_id)
+            return i;
+
+    return 0;
+}
+
+uint16 Player::getQuestSlotById(uint32 slot_id)
+{
+    uint16 start = PLAYER_QUEST_LOG_1_1;
+    uint16 end   = PLAYER_QUEST_LOG_1_1 + 60;
+    uint16 idx   = 0;
+
+    for (uint16 i = start; i <= end; i+=3)
+    {
+        idx++;
+        if ( idx == slot_id )
+            return i;
+    }
+
+    return 0;
+}
+
+void Player::ItemAdded(uint32 entry, uint32 count)
+{
+    quest_status qs;
+    uint32 reqitem;
+    uint32 reqitemcount;
+    uint32 curitemcount;
+    uint32 additemcount;
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        qs = i->second;
+        if ( qs.status == QUEST_STATUS_INCOMPLETE )
+        {
+            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+            {
+                reqitem = qs.m_quest->GetQuestInfo()->ReqItemId[j];
+                if ( reqitem == entry )
+                {
+                    reqitemcount = qs.m_quest->GetQuestInfo()->ReqItemCount[j];
+                    curitemcount = GetItemCount(entry, true);
+                    if ( curitemcount < reqitemcount )
+                    {
+                        additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
+                        mQuestStatus[i->first].m_questItemCount[j] += additemcount;
+                        PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, additemcount);
+                    }
+                    if ( isQuestComplete(qs.m_quest) )
+                    {
+                        PlayerTalkClass->SendQuestCompleteToLog( qs.m_quest );
+                        setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void Player::ItemRemoved(uint32 entry)
+{
+    quest_status qs;
+    uint32 reqitem;
+    uint32 reqitemcount;
+    uint32 curitemcount;
+    uint32 remitemcount;
+    uint32 count = 1;
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        qs = i->second;
+        if ( qs.status == QUEST_STATUS_COMPLETE )
+        {
+            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+            {
+                reqitem = qs.m_quest->GetQuestInfo()->ReqItemId[j];
+                if ( reqitem == entry )
+                {
+                    reqitemcount = qs.m_quest->GetQuestInfo()->ReqItemCount[j];
+                    curitemcount = GetItemCount(entry, true);
+                    if ( curitemcount - count < reqitemcount )
+                    {
+                        remitemcount = reqitemcount - curitemcount + count;
+                        mQuestStatus[i->first].m_questItemCount[j] = curitemcount - remitemcount;
+                        PlayerTalkClass->SendQuestIncompleteToLog(qs.m_quest);
+                        setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_INCOMPLETE, false);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void Player::SetBindPoint(uint64 guid)
+{
+	WorldPacket data;
+    data.Initialize( SMSG_BINDER_CONFIRM );
+    data << guid;
+    GetSession()->SendPacket( &data );
+}
+
+void Player::KilledMonster(uint32 entry, uint64 guid)
+{
+    quest_status qs;
+    uint32 reqkill;
+    uint32 reqkillcount;
+    uint32 curkillcount;
+    uint32 addkillcount = 1;
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        qs = i->second;
+        if ( qs.status == QUEST_STATUS_INCOMPLETE )
+        {
+            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+            {
+                reqkill = qs.m_quest->GetQuestInfo()->ReqKillMobId[j];
+                if ( reqkill == entry )
+                {
+                    reqkillcount = qs.m_quest->GetQuestInfo()->ReqKillMobCount[j];
+                    curkillcount = qs.m_questMobCount[j];
+                    if ( curkillcount < reqkillcount )
+                    {
+                        mQuestStatus[i->first].m_questMobCount[j] = curkillcount + addkillcount;
+                        PlayerTalkClass->SendQuestUpdateAddKill(qs.m_quest, guid, curkillcount + addkillcount, j);
+                    }
+                    if ( isQuestComplete(qs.m_quest) )
+                    {
+                        PlayerTalkClass->SendQuestCompleteToLog( qs.m_quest );
+                        setQuestStatus(qs.m_quest->GetQuestInfo()->QuestId, QUEST_STATUS_COMPLETE, false);
+                    }
+                    return;
+                }
+            }
+        }
+    }
+}
+
+void Player::AddQuestsLoot(Creature* creature)
+{
+    quest_status qs;
+    uint32 itemid=0;
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        qs=i->second;
+        if (qs.status == QUEST_STATUS_INCOMPLETE)
+        {
+            if (!qs.m_quest) continue;
+
+            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+            {
+                itemid=qs.m_quest->GetQuestInfo()->ReqItemId[j];
+                if ( itemid>0 )
+                {
+                    ChangeLoot(&(creature->loot),creature->GetCreatureInfo()->lootid,itemid,70.0f);
+                }
+            }
+        }
+    }
+}
+
+/*********************************************************/
+/***                   LOAD SYSTEM                     ***/
+/*********************************************************/
+bool Player::LoadFromDB( uint32 guid )
+{
+
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
+
+    if(!result)
+        return false;
+
+    Field *fields = result->Fetch();
+
+    Object::_Create( guid, HIGHGUID_PLAYER );
+
+    LoadValues( fields[3].GetString() );
+
+    m_name = fields[4].GetString();
+    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+
+    m_race = fields[5].GetUInt8();
+    //Need to call it to initialize m_team (m_team can be calculated from m_race)
+    //Other way is to saves m_team into characters table.
+    setFaction(m_race, 0);
+
+    m_class = fields[6].GetUInt8();
+
+    info = objmgr.GetPlayerCreateInfo(m_race, m_class);
+
+    m_positionX = fields[7].GetFloat();
+    m_positionY = fields[8].GetFloat();
+    m_positionZ = fields[9].GetFloat();
+    m_mapId = fields[10].GetUInt32();
+    m_orientation = fields[11].GetFloat();
+    m_highest_rank = fields[14].GetUInt32();
+    m_last_week_rank = fields[15].GetUInt32();
+    m_cinematic = fields[16].GetUInt32();
+
+    if( HasFlag(PLAYER_FLAGS, 8) )
+        SetUInt32Value(PLAYER_FLAGS, 0);
+
+    if( HasFlag(PLAYER_FLAGS, 0x11) )
+        m_deathState = DEAD;
+
+    LoadTaxiMask( fields[12].GetString() );
+
+    delete result;
+
+    _LoadMail();
+
+    _LoadInventory();
+
+    _LoadSpells();
+
+    _LoadActions();
+
+    _LoadQuestStatus();
+
+    _LoadTutorials();
+
+    _LoadBids();
+
+    _LoadAuras();
+
+    _LoadReputation();
+
+    _LoadCorpse();
+
+    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    //_ApplyAllAuraMods();
+    //_ApplyAllItemMods();
+    return true;
+}
+
+void Player::_LoadActions()
+{
+
+    m_actions.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`;",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            addAction(fields[1].GetUInt8(), fields[2].GetUInt16(), fields[3].GetUInt8(), fields[4].GetUInt8());
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadAuras()
+{
+    m_Auras.clear();
+
+    for(uint8 i = 0; i < 48; i++)
+        SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
+    for(uint8 j = 0; j < 6; j++)
+        SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u';",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint32 spellid = fields[1].GetUInt32();
+            uint32 effindex = fields[2].GetUInt32();
+            int32 remaintime = (int32)fields[3].GetUInt32();
+
+            SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
+            assert(spellproto);
+
+            Aura* aura = new Aura(spellproto, effindex, this, this);
+            aura->SetAuraDuration(remaintime);
+            AddAura(aura);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadBids()
+{
+
+    m_bids.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%u';",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            bidentry *be = new bidentry;
+            be->AuctionID = fields[0].GetUInt32();
+            be->amt = fields[1].GetUInt32();
+            m_bids.push_back(be);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+
+}
+
+void Player::_LoadCorpse()
+{
+    // TODO do we need to load all corpses ?
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE `player` = '%u' AND `bones_flag` = '0';",GetGUIDLow());
+
+    if(!result) return;
+
+    Field *fields = result->Fetch();
+
+    DeleteCorpse();
+    m_pCorpse = new Corpse();
+
+    float positionX = fields[2].GetFloat();
+    float positionY = fields[3].GetFloat();
+    float positionZ = fields[4].GetFloat();
+    float ort       = fields[5].GetFloat();
+    //uint32 zoneid   = fields[6].GetUInt32();
+    uint32 mapid    = fields[7].GetUInt32();
+
+    m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
+    m_pCorpse->SetMapId(mapid);
+    //m_pCorpse->SetZoneId(zoneid);
+    m_pCorpse->LoadValues( fields[8].GetString() );
+
+    MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
+
+    delete result;
+}
+
+void Player::_LoadInventory()
+{
+    for(uint16 i = 0; i < BANK_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+        {
+            delete m_items[i];
+            SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2), 0);
+            m_items[i] = 0;
+        }
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0';",GetGUIDLow());
+
+    if (result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            uint8  slot      = fields[2].GetUInt8();
+            uint32 item_guid = fields[3].GetUInt32();
+            uint32 item_id   = fields[4].GetUInt32();
+
+            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
+
+            Item *item = NewItemOrBag(proto);
+            item->SetOwner(this);
+            item->SetSlot(slot);
+            if(!item->LoadFromDB(item_guid, 1))
+                continue;
+            AddItem(0, slot, item, true);
+        } while (result->NextRow());
+
+        delete result;
+    }
+}
+
+void Player::_LoadMail()
+{
+
+    m_mail.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `mail` WHERE `receiver` = '%u';",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            Mail *be = new Mail;
+            be->messageID = fields[0].GetUInt32();
+            be->sender = fields[1].GetUInt32();
+            be->receiver = fields[2].GetUInt32();
+            be->subject = fields[3].GetString();
+            be->body = fields[4].GetString();
+            be->item = fields[5].GetUInt32();
+            be->time = fields[6].GetUInt32();
+            be->money = fields[7].GetUInt32();
+            be->COD = fields[8].GetUInt32();
+            be->checked = fields[9].GetUInt32();
+            m_mail.push_back(be);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+
+}
+
+void Player::_LoadQuestStatus()
+{
+
+    mQuestStatus.clear();
+
+    Quest *pQuest;
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_queststatus` WHERE `playerid` = '%u';", GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            quest_status qs;
+            qs.status              = fields[2].GetUInt32();
+            qs.rewarded            = ( fields[3].GetUInt32() > 0 );
+            qs.m_questMobCount[0]  = fields[4].GetUInt32();
+            qs.m_questMobCount[1]  = fields[5].GetUInt32();
+            qs.m_questMobCount[2]  = fields[6].GetUInt32();
+            qs.m_questMobCount[3]  = fields[7].GetUInt32();
+            qs.m_questItemCount[0] = fields[8].GetUInt32();
+            qs.m_questItemCount[1] = fields[9].GetUInt32();
+            qs.m_questItemCount[2] = fields[10].GetUInt32();
+            qs.m_questItemCount[3] = fields[11].GetUInt32();
+            qs.m_timerrel          = fields[12].GetUInt32();
+            qs.m_explored          = ( fields[13].GetUInt32() > 0 );
+
+            time_t q_abs = time(NULL);
+            pQuest = objmgr.GetQuest(fields[1].GetUInt32());
+            qs.m_quest = pQuest;
+
+            if (pQuest && (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED)) )
+            {
+                sLog.outDebug("Time now {%u}, then {%u} in quest {%u}!", q_abs, qs.m_timerrel, qs.m_quest->GetQuestInfo()->QuestId);
+                if  ( qs.m_timerrel > q_abs )
+                {
+                    qs.m_timer = (qs.m_timerrel - q_abs) * 1000;
+                    sLog.outDebug("Setup timer at {%u}msec. for quest {%u}!", qs.m_timer, qs.m_quest->GetQuestInfo()->QuestId);
+                    loadExistingQuest(qs);
+                    m_timedQuest = qs.m_quest->GetQuestInfo()->QuestId;
+
+                    continue;
+                } else
+                {
+                    sLog.outDebug("Timer expired for quest {%u}!", qs.m_quest->GetQuestInfo()->QuestId);
+                    qs.m_timer    = 0;
+
+                    if ( qs.status == QUEST_STATUS_COMPLETE )
+                        qs.status     = QUEST_STATUS_INCOMPLETE;
+
+                    qs.m_timerrel = 0;
+                }
+            }
+
+            sLog.outDebug("Quest status is {%u} for quest {%u}", qs.status, qs.m_quest->GetQuestInfo()->QuestId);
+            loadExistingQuest(qs);
+
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadReputation()
+{
+    Factions newFaction;
+
+    factions.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u';",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            newFaction.ID               = fields[0].GetUInt32();
+            newFaction.ReputationListID = fields[1].GetUInt32();
+            newFaction.Standing         = fields[2].GetUInt32();
+            newFaction.Flags            = fields[3].GetUInt32();
+
+            factions.push_back(newFaction);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+    else
+    {
+        LoadReputationFromDBC();
+    }
+}
+
+void Player::_LoadSpells()
+{
+
+    m_spells.clear();
+
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot` FROM `character_spell` WHERE `guid` = '%u';",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            addSpell(fields[0].GetUInt16(), fields[1].GetUInt16());
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+void Player::_LoadTutorials()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_tutorial` WHERE `guid` = '%u';",GetGUIDLow());
+
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            for (int iI=0; iI<8; iI++)
+                m_Tutorials[iI] = fields[iI + 1].GetUInt32();
+
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+}
+
+/*********************************************************/
+/***                   SAVE SYSTEM                     ***/
+/*********************************************************/
+void Player::SaveToDB()
+{
+    if (hasUnitState(UNIT_STAT_IN_FLIGHT))
+    {
+        SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
+        RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
+        RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
+    }
+
+    // Set player sit state to standing on save
+    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+
+    //remove restflag when save
+    //this is becouse of the rename char stuff
+    RemoveFlag(PLAYER_FLAGS, 0x20);
+
+    sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    //_RemoveStatsMods();
+    _RemoveAllItemMods();
+    _RemoveAllAuraMods();
+
+    bool inworld = IsInWorld();
+    if (inworld)
+        RemoveFromWorld();
+
+    std::stringstream ss;
+
+    sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
+
+    ss.rdbuf()->str("");
+    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic`) VALUES ("
+        << GetGUIDLow() << ", "
+        << GetSession()->GetAccountId() << ", '"
+        << m_name << "', "
+        << m_race << ", "
+        << m_class << ", "
+        << m_mapId << ", "
+        << m_positionX << ", "
+        << m_positionY << ", "
+        << m_positionZ << ", "
+        << m_orientation << ", '";
+
+    uint16 i;
+    for( i = 0; i < m_valuesCount; i++ )
+    {
+        ss << GetUInt32Value(i) << " ";
+    }
+
+    ss << "', '";
+
+    for( i = 0; i < 8; i++ )
+        ss << m_taximask[i] << " ";
+
+    ss << "', ";
+    inworld ? ss << 1: ss << 0;
+
+    ss << ", ";
+    ss << m_highest_rank;
+
+    ss << ", ";
+    ss << m_last_week_rank;
+
+    ss << ", ";
+    ss << m_cinematic;
+
+    ss << " )";
+
+    sDatabase.Execute( ss.str().c_str() );
+
+    _SaveMail();
+    _SaveBids();
+    _SaveAuctions();
+    _SaveInventory();
+    _SaveQuestStatus();
+    _SaveTutorials();
+    _SaveSpells();
+    _SaveActions();
+    _SaveAuras();
+    _SaveReputation();
+
+    if(m_pCorpse) m_pCorpse->SaveToDB(false);
+
+    uint64 petguid;
+    if((petguid=GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+    {
+        Creature *OldSummon = ObjectAccessor::Instance().GetCreature(*this, petguid);
+        if(OldSummon && OldSummon->isPet())
+        {
+            ((Pet*)OldSummon)->SavePetToDB();
+        }
+    }
+
+    sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%u",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
+    sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
+    sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    _ApplyAllAuraMods();
+    _ApplyAllItemMods();
+    //_ApplyStatsMods();
+    //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
+
+    if (inworld)
+        AddToWorld();
+}
+
+void Player::_SaveActions()
+{
+    std::stringstream query;
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
+
+    std::list<struct actions>::iterator itr;
+    for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
+    {
+        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
+    }
+}
+
+void Player::_SaveAuctions()
+{
+    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",GetGUIDLow());
+
+    ObjectMgr::AuctionEntryMap::iterator itr;
+    for (itr = objmgr.GetAuctionsBegin();itr != objmgr.GetAuctionsEnd();itr++)
+    {
+        AuctionEntry *Aentry = itr->second;
+        if ((Aentry) && (Aentry->owner == GetGUIDLow()))
+        {
+            Item *it = objmgr.GetAItem(Aentry->item);
+
+            sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
+            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+
+            std::stringstream ss;
+            ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
+                << it->GetGUIDLow() << ", '";
+            for(uint16 i = 0; i < it->GetValuesCount(); i++ )
+            {
+                ss << it->GetUInt32Value(i) << " ";
+            }
+            ss << "' )";
+            sDatabase.Execute( ss.str().c_str() );
+        }
+    }
+}
+
+void Player::_SaveAuras()
+{
+    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+
+    AuraList auras = GetAuras();
+    AuraList::iterator itr;
+    for (itr = auras.begin(); itr != auras.end(); ++itr)
+    {
+        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr)->GetId(), (uint32)(*itr)->GetEffIndex(), int((*itr)->GetAuraDuration()));
+    }
+}
+
+void Player::_SaveBids()
+{
+    sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `bidder` = '%u'",GetGUIDLow());
+
+    std::list<bidentry*>::iterator itr;
+    for (itr = m_bids.begin(); itr != m_bids.end(); itr++)
+    {
+        AuctionEntry *a = objmgr.GetAuction((*itr)->AuctionID);
+        if (a)
+        {
+            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
+        }
+    }
+
+}
+
+void Player::_SaveInventory()
+{
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0';",GetGUIDLow());
+
+    for(uint8 i = 0; i < BANK_SLOT_BAG_END; i++)
+    {
+        if (m_items[i] != 0)
+        {
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', 0, '%u', '%u', '%u');", GetGUIDLow(), i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
+            m_items[i]->SaveToDB();
+        }
+    }
+}
+
+void Player::_SaveMail()
+{
+
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
+
+    std::list<Mail*>::iterator itr;
+    for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
+    {
+        Mail *m = (*itr);
+
+        QueryResult *result = sDatabase.PQuery("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
+        delete result;
+    }
+}
+
+void Player::_SaveQuestStatus()
+{
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `playerid` = '%u'",GetGUIDLow());
+
+    for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
+    {
+        sDatabase.PExecute("INSERT INTO `character_queststatus` (`playerid`,`questid`,`status`,`rewarded`,`questMobCount1`,`questMobCount2`,`questMobCount3`,`questMobCount4`,`questItemCount1`,`questItemCount2`,`questItemCount3`,`questItemCount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u','%u');", GetGUIDLow(), i->first, i->second.status, i->second.rewarded, i->second.m_questMobCount[0], i->second.m_questMobCount[1], i->second.m_questMobCount[2], i->second.m_questMobCount[3], i->second.m_questItemCount[0], i->second.m_questItemCount[1], i->second.m_questItemCount[2], i->second.m_questItemCount[3]);
+    }
+}
+
+void Player::_SaveReputation()
+{
+    std::list<Factions>::iterator itr;
+
+    std::stringstream ss;
+
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
+
+    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    {
+
+        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u');", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+
+    }
+}
+
+void Player::_SaveSpells()
+{
+    sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
+
+    std::list<Playerspell*>::iterator itr;
+    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    {
+        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId);
+    }
+}
+
+void Player::_SaveTutorials()
+{
+    sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
 }
