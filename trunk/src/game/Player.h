@@ -322,6 +322,21 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
+/*********************************************************/
+/***                    QUEST SYSTEM                   ***/
+/*********************************************************/
+
+        bool CanSeeQuest( Quest *pQuest );
+        bool CanTakeQuest( Quest *pQuest );
+        bool SatisfyQuestClass( Quest *pQuest );
+        bool SatisfyQuestLevel( Quest *pQuest );
+        bool SatisfyQuestPreviousQuest( Quest *pQuest );
+        bool SatisfyQuestRace( Quest *pQuest );
+        bool SatisfyQuestReputation( Quest *pQuest );
+        bool SatisfyQuestSkill( Quest *pQuest );
+        void GiveQuestSourceItem( Quest *pQuest );
+        void TakeQuestSourceItem( Quest *pQuest );
+
         uint32 getQuestStatus(uint32 quest_id);
         bool getQuestRewardStatus(uint32 quest_id);
         uint32 addNewQuest(uint32 quest_id, uint32 status = QUEST_STATUS_AVAILABLE);
@@ -330,8 +345,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setQuestStatus(uint32 quest_id, uint32 new_status, bool new_rewarded);
         bool isQuestComplete(Quest *pQuest);
         quest_status getQuestStatusStruct(uint32 quest_id);
-        bool isQuestTakable(Quest *pQuest);
-        bool isQuestTakable(uint32 quest_id);
 
         void finishExplorationQuest( Quest *pQuest );
 
