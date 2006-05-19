@@ -212,6 +212,9 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
         m_permanent = true;
     if(spellproto->EffectBasePoints[eff] < 0)
         m_positive = false;
+	else
+        m_positive = true;
+
     uint32 type = 0;
     if(!m_positive)
         type = 1;

@@ -77,35 +77,33 @@ void DynamicObject::Update(uint32 p_time)
         }
     }
 
-    if(GetUInt32Value(OBJECT_FIELD_TYPE ) == 65)
+    if(m_PeriodicDamageCurrentTick > p_time)
+		m_PeriodicDamageCurrentTick -= p_time;
+    else
     {
-        if(m_PeriodicDamageCurrentTick > p_time)
-            m_PeriodicDamageCurrentTick -= p_time;
-        else
-        {
-            m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
-            m_caster->DealWithSpellDamage(*this);
-        }
+		m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
+       //m_caster->DealWithSpellDamage(*this);
+		DealWithSpellDamage(*m_caster);
     }
 
-    if(deleteThis)
-    {
-        Delete();
-    }
+    //if(deleteThis)
+    //{
+    //    Delete();
+    //}
 }
 
-void DynamicObject::DealWithSpellDamage(Player &caster)
+/*void DynamicObject::DealWithSpellDamage(Player &caster)
 {
-    uint32 runtimes=1;
-    if(deleteThis)
-        runtimes=m_DamageMaxTimes-m_DamageCurTimes;
+    //uint32 runtimes=1;
+    //if(deleteThis)
+    //    runtimes=m_DamageMaxTimes-m_DamageCurTimes;
 
     Modifier mod;
     mod.m_auraname = 3;
     mod.m_amount = m_PeriodicDamage;
 
-    for(int i=0;i<runtimes;i++)
-    {
+    //for(int i=0;i<runtimes;i++)
+    //{
         UnitList.clear();
         MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
         for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
@@ -121,20 +119,35 @@ void DynamicObject::DealWithSpellDamage(Player &caster)
                 }
             }
         }
-        m_DamageCurTimes++;
-    }
+    //    m_DamageCurTimes++;
+    //}
 }
-
+*/
 void DynamicObject::DealWithSpellDamage(Unit &caster)
 {
+    Modifier mod;
+    mod.m_auraname = 3;
+    mod.m_amount = m_PeriodicDamage;
+
+    UnitList.clear();
+	MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
+	for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
+	{
+		if((*iter) )
+		{
+			if((*iter)->isAlive() )
+			{
+				if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+				{
+					caster.PeriodicAuraLog((*iter),m_spell,&mod);
+				}
+			}
+		}
+	}
 }
 
 void DynamicObject::Delete()
 {
-
-    m_PeriodicDamage = 0;
-    m_PeriodicDamageTick = 0;
-
     WorldPacket data;
 
     data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
@@ -145,9 +158,10 @@ void DynamicObject::Delete()
     data << GetGUID();
     SendMessageToSet(&data,true);
 
-    //FIX ME ,NEED TO DELETE
-    //MapManager::Instance().GetMap(GetMapId())->Remove(this, true);
-    //Log::getSingleton( ).outError("Don't Forget FIX ME at DynamicObject.cpp \n");
+    m_PeriodicDamage = 0;
+    m_PeriodicDamageTick = 0;
     RemoveFromWorld();
-
+    //FIX ME ,NEED TO DELETE
+    MapManager::Instance().GetMap(GetMapId())->Remove(this, true);
+    //Log::getSingleton( ).outError("Don't Forget FIX ME at DynamicObject.cpp \n");
 }

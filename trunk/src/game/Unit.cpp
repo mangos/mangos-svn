@@ -255,7 +255,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         DEBUG_LOG("DealDamageAura");
         pVictim->setDeathState(JUST_DIED);
         pVictim->RemoveAllAuras();
-        if(m_currentSpell && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
+        if(m_currentSpell && !m_currentSpell->IsAreaAura() && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
             m_currentSpell->cancel();
 
         uint64 attackerGuid, victimGuid;
@@ -900,6 +900,24 @@ void Unit::_UpdateSpells( uint32 time )
                 next = m_Auras.begin();
         }
     }
+	if(m_dynObj.empty())
+		return;
+	std::list<DynamicObject*>::iterator ite, dnext;
+	for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
+    {
+        dnext = ite;
+        dnext++;
+        //(*i)->Update( difftime );
+		if( (*ite)->isFinished() )
+		{
+			(*ite)->Delete();
+			m_dynObj.erase(ite);
+			if(m_dynObj.empty())
+				break;
+			else
+				dnext = m_dynObj.begin();
+		}
+	}
 }
 
 void Unit::_UpdateHostil( uint32 time )
@@ -1392,4 +1410,30 @@ void Unit::AddItemEnchant(uint32 enchant_id)
             AddAura(pAura);
         }
     }
+}
+
+void Unit::AddDynObject(DynamicObject* dynObj)
+{
+	m_dynObj.push_back(dynObj);
+}
+
+void Unit::RemoveDynObject(uint32 spellid)
+{
+	if(m_dynObj.empty())
+		return;
+	std::list<DynamicObject*>::iterator i, next;
+	for (i = m_dynObj.begin(); i != m_dynObj.end(); i = next)
+    {
+        next = i;
+        next++;
+		if(spellid == 0 || (*i)->GetSpellId() == spellid)
+		{
+			(*i)->Delete();
+			m_dynObj.erase(i);
+			if(m_dynObj.empty())
+				break;
+			else
+				next = m_dynObj.begin();
+		}
+	}
 }

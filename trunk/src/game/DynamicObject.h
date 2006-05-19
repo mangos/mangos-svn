@@ -30,9 +30,10 @@ class DynamicObject : public Object
 
         bool Create( uint32 guidlow, Unit * caster, SpellEntry * spell, float x, float y, float z, uint32 duration );
         void Update(uint32 p_time);
-        void DealWithSpellDamage(Player &);
+        //void DealWithSpellDamage(Player &);
         void DealWithSpellDamage(Unit &);
         void Delete();
+		bool isFinished() {return deleteThis;}
 
         void PeriodicTriggerDamage(uint32 damage, uint32 tick, float radius)
         {
@@ -47,6 +48,7 @@ class DynamicObject : public Object
             else
                 m_DamageCurTimes = 0;
         }
+		uint32 GetSpellId() { return m_spell->Id;}
 
     protected:
 

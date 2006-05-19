@@ -417,6 +417,8 @@ class Spell
         bool IsAutoRepeat() { return m_autoRepeat; }
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = casttime<0?0:casttime;}
+		bool IsAreaAura() { return m_spellInfo->Effect[0] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[1] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[2] ==SPELL_EFFECT_PERSISTENT_AREA_AURA;}
+		//void SetArearAura(bool value) {m_AreaAura = value;}
 
     protected:
 
@@ -445,7 +447,6 @@ class Spell
 
         uint32 m_spellState;
         int32 m_timer;
-        uint32 m_intervalTimer;
         SpellEntry * m_TriggerSpell;
 
         float m_castPositionX;
@@ -453,10 +454,10 @@ class Spell
         float m_castPositionZ;
         bool m_Istriggeredpell;
         Aura* m_triggeredByAura;
-        bool m_AreaAura;
+        //bool m_AreaAura;
 
         // List of all Objects to be Deleted in spell Finish
-        std::list<DynamicObject*> m_dynObjToDel;
+        //std::list<DynamicObject*> m_dynObjToDel;
         std::list<GameObject*> m_ObjToDel;
         // -------------------------------------------
 		uint8 up_skillvalue;

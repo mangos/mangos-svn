@@ -365,20 +365,21 @@ void Spell::EffectCreateItem(uint32 i)
 void Spell::EffectPresistentAA(uint32 i)
 {
 
-    if(m_AreaAura == true)
-        return;
+    //if(m_AreaAura == true)
+    //    return;
 
-    m_AreaAura = true;
+    //m_AreaAura = true;
 
     DynamicObject* dynObj = new DynamicObject();
-    if(dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetMaxDuration(m_spellInfo)))
+    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetMaxDuration(m_spellInfo)))
         return;
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
     dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
-    m_dynObjToDel.push_back(dynObj);
-    dynObj->AddToWorld();
+    //m_dynObjToDel.push_back(dynObj);
+    m_caster->AddDynObject(dynObj);
+	dynObj->AddToWorld();
     MapManager::Instance().GetMap(dynObj->GetMapId())->Add(dynObj);
 
 }
