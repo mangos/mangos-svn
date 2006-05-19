@@ -249,6 +249,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddItemEnchant(uint32 enchant_id);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() { return m_transform;}
+		void AddDynObject(DynamicObject* dynObj);
+		void RemoveDynObject(uint32 spellid);
 
     protected:
         Unit ( );
@@ -275,6 +277,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         AuraList m_Auras;
 
+        std::list<DynamicObject*> m_dynObj;
         std::list<Hostil*> m_hostilList;
         uint32 m_transform;
 

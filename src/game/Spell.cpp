@@ -137,7 +137,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     m_TriggerSpell = NULL;
     m_targetCount = 0;
     m_Istriggeredpell = triggered;
-    m_AreaAura = false;
+    //m_AreaAura = false;
     m_CastItem = NULL;
 
     unitTarget = NULL;
@@ -265,6 +265,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             else
                 TagUnitMap.push_back(m_caster);
         }break;
+        case TARGET_S_F:
         case TARGET_S_F_2:
         {
             TagUnitMap.push_back(m_targets.getUnitTarget());
@@ -423,7 +424,7 @@ void Spell::cancel()
     if(m_spellState == SPELL_STATE_PREPARING)
     {
         SendInterrupted(0);
-        SendCastResult(CAST_FAIL_YOUR_TARGET_IS_DEAD);
+        SendCastResult(CAST_FAIL_AUCTION_HAVE_CANCEL);
     }
     else if(m_spellState == SPELL_STATE_CASTING)
     {
@@ -432,7 +433,7 @@ void Spell::cancel()
     }
 
     finish();
-    m_spellState = SPELL_STATE_FINISHED;
+	m_caster->RemoveDynObject(m_spellInfo->Id);
 }
 
 void Spell::cast()
@@ -545,8 +546,6 @@ void Spell::update(uint32 difftime)
                     m_timer = 0;
                 else
                     m_timer -= difftime;
-                m_intervalTimer += difftime;
-
             }
 
             if(m_timer == 0)
@@ -559,7 +558,6 @@ void Spell::update(uint32 difftime)
         {
         }break;
     }
-
 }
 
 void Spell::finish()
@@ -571,11 +569,10 @@ void Spell::finish()
     m_caster->m_meleeSpell = false;
     m_caster->m_canMove = true;
 
-    std::list<DynamicObject*>::iterator i;
-    std::list<GameObject*>::iterator k;
 
     WorldPacket data;
 
+    /*std::list<DynamicObject*>::iterator i;
     for(i = m_dynObjToDel.begin() ; i != m_dynObjToDel.end() ; i++)
     {
         data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
@@ -586,8 +583,11 @@ void Spell::finish()
         data << (*i)->GetGUID();
         m_caster->SendMessageToSet(&data, true);
         MapManager::Instance().GetMap((*i)->GetMapId())->Remove((*i), true);
+		m_AreaAura = false;
     }
+    m_dynObjToDel.clear();*/
 
+    std::list<GameObject*>::iterator k;
     for(k = m_ObjToDel.begin() ; k != m_ObjToDel.end() ; k++)
     {
         data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
@@ -600,7 +600,6 @@ void Spell::finish()
         MapManager::Instance().GetMap((*k)->GetMapId())->Remove((*k), true);
     }
 
-    m_dynObjToDel.clear();
     m_ObjToDel.clear();
 
     uint8 powerType = (uint8)(m_caster->GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24);
