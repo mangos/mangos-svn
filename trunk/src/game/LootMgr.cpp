@@ -41,11 +41,11 @@ void LoadCreaturesLootTables()
 {
     uint32 curId = 0;
     LootStore::iterator tab;
-    uint32 itemid, displayid, entry_id;
+    uint32 item, displayid, entry;
     uint32 count = 0;
     float chance;
 
-    QueryResult *result = sDatabase.Query("SELECT * FROM `loot_template`;");
+    QueryResult *result = sDatabase.Query("SELECT `entry`, `item`, `chance` FROM `loot_template`;");
 
     if (result)
     {
@@ -55,16 +55,15 @@ void LoadCreaturesLootTables()
             Field *fields = result->Fetch();
             bar.step();
 
-            entry_id = fields[0].GetUInt32();
-            itemid = fields[1].GetUInt32();;
+            entry = fields[0].GetUInt32();
+            item = fields[1].GetUInt32();;
             chance = fields[2].GetFloat();
 
-            ItemPrototype *proto = objmgr.GetItemPrototype(itemid);
+            ItemPrototype *proto = objmgr.GetItemPrototype(item);
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
-            CreatureLoot[entry_id].push_back(
-                LootItem(itemid, displayid, chance));
+            CreatureLoot[entry].push_back( LootItem(item, displayid, chance) );
 
             count++;
         } while (result->NextRow());
