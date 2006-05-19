@@ -6270,6 +6270,115 @@ uint8 Player::CheckFishingAble()
 /*********************************************************/
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
+bool Player::CanSeeQuest( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        if( SatisfyQuestRace(pQuest) && SatisfyQuestClass(pQuest) && SatisfyQuestSkill(pQuest) && SatisfyQuestReputation(pQuest) )
+            return ( (int32)getLevel() >= (int32)pQuest->GetQuestInfo()->MinLevel - (int32)7 );
+    }
+    return false;
+}
+
+bool Player::CanTakeQuest( Quest *pQuest )
+{
+    if( pQuest )
+        return ( SatisfyQuestRace(pQuest) && SatisfyQuestClass(pQuest) && SatisfyQuestLevel(pQuest) && SatisfyQuestSkill(pQuest) && SatisfyQuestReputation(pQuest) && SatisfyQuestPreviousQuest(pQuest) );
+    return false;
+}
+
+bool Player::SatisfyQuestClass( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 reqclasses = pQuest->GetQuestInfo()->RequiredClass;
+        if ( reqclasses == QUEST_CLASS_NONE )
+            return true;
+        uint32 binclass = 1 << (getClass() - 1);
+        return( (reqclasses & binclass) != 0 );
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestLevel( Quest *pQuest )
+{
+    if( pQuest )
+        return( getLevel() >= pQuest->GetQuestInfo()->MinLevel );
+    return false;
+}
+
+bool Player::SatisfyQuestPreviousQuest( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 prevquest = pQuest->GetQuestInfo()->PrevQuestId;
+        return ( prevquest <= 0 || getQuestRewardStatus(prevquest) );
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestRace( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 reqraces = pQuest->GetQuestInfo()->RequiredRaces;
+        if ( reqraces == QUEST_RACE_NONE )
+            return true;
+        uint32 binrace = 1 << (getRace() - 1);
+        return( (reqraces & binrace) != 0 );
+    }
+    return false;    
+}
+
+bool Player::SatisfyQuestReputation( Quest *pQuest )
+{
+    if( pQuest )
+        return true;
+    return false;
+}
+
+bool Player::SatisfyQuestSkill( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 reqskill = pQuest->GetQuestInfo()->RequiredTradeskill;
+        if( reqskill == QUEST_TRSKILL_NONE )
+            return true;
+        return( GetSkillValue( reqskill ) != 0 );
+    }
+    return false;
+}
+
+void Player::GiveQuestSourceItem( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
+        if( srcitem > 0 )
+        {
+            uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
+            if( count <= 0 )
+                count = 1;
+            AddNewItem(srcitem, count, false);
+        }
+    }
+}
+
+void Player::TakeQuestSourceItem( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
+        if( srcitem > 0 )
+        {
+            uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
+            if( count <= 0 )
+                count = 1;
+            RemoveItemFromInventory(srcitem, count);;
+        }
+    }
+}
+
 void Player::finishExplorationQuest( Quest *pQuest )
 {
     if(!pQuest) return;
@@ -6333,49 +6442,6 @@ bool Player::isQuestComplete(Quest *pQuest )
     return Result;
 }
 
-bool Player::isQuestTakable(Quest *quest)
-{
-    if (!quest) return false;
-
-    uint32 status = getQuestStatus(quest->GetQuestInfo()->QuestId);
-
-    if ( quest->CanBeTaken( this ) )
-    {
-        if ( status == QUEST_STATUS_NONE )
-        {
-            status = addNewQuest( quest );
-        }
-
-        if (status == QUEST_STATUS_AVAILABLE)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool Player::isQuestTakable(uint32 quest_id)
-{
-    if (!quest_id) return false;
-    Quest *quest=objmgr.GetQuest(quest_id);
-    uint32 status = getQuestStatus(quest_id);
-
-    if ( quest->CanBeTaken( this ) )
-    {
-        if ( status == QUEST_STATUS_NONE )
-        {
-            status = addNewQuest( quest );
-        }
-
-        if (status == QUEST_STATUS_AVAILABLE)
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 quest_status Player::getQuestStatusStruct(uint32 quest_id)
 {

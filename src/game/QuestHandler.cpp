@@ -45,8 +45,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
             uint32 defstatus = DIALOG_STATUS_NONE;
             questStatus = pCreature->getDialogStatus(_player, defstatus);
         }
-        if( questStatus <= 6 )
-            _player->PlayerTalkClass->SendQuestStatus(questStatus, guid);
+		_player->PlayerTalkClass->SendQuestStatus(questStatus, guid);
     }
 }
 void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
@@ -85,11 +84,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                 _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
                 return;
             }
-            if ( !pQuest->AddSrcItem( _player ) )
-            {
-                _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
-                return;
-            }
+
+			_player->GiveQuestSourceItem( pQuest );
             _player->addNewQuest(pQuest, QUEST_STATUS_INCOMPLETE);
             
             _player->SetUInt32Value(log_slot + 0, quest_id);
@@ -373,9 +369,9 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
         _player->setQuestStatus( quest_id, QUEST_STATUS_NONE, false);
 
-        Quest *pQuest = objmgr.GetQuest(quest_id);
+        Quest *pQuest = objmgr.GetQuest( quest_id );
         if( pQuest )
-            pQuest->RemSrcItem(_player);
+            _player->TakeQuestSourceItem( pQuest );
     }
 }
 void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)

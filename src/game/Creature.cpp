@@ -275,12 +275,14 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
         status = pPlayer->getQuestStatus(quest_id);
-        if ( status == QUEST_STATUS_NONE && pQuest->PreReqSatisfied( pPlayer ) && pQuest->IsCompatible( pPlayer ) )
+        if ( status == QUEST_STATUS_NONE )
         {
-            if ( pQuest->LevelSatisfied( pPlayer ) )
-                return DIALOG_STATUS_AVAILABLE;
-            else if ( pQuest->CanShowUnsatified( pPlayer ) )
+            if ( pPlayer->CanSeeQuest(pQuest) )
+            {
+                if ( pPlayer->SatisfyQuestLevel(pQuest) )
+                    return DIALOG_STATUS_AVAILABLE;
                 result = DIALOG_STATUS_UNAVAILABLE;
+            }
         }
     }
 
@@ -308,7 +310,7 @@ Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
         pQuest = *i;
         if( pQuest->GetQuestInfo()->QuestId == quest_id )
         {
-            if ( pQuest->CanBeTaken( pPlayer ) )
+            if ( pPlayer->CanTakeQuest(pQuest) )
                 return pQuest;
             else
                 return NULL;
@@ -348,7 +350,7 @@ void Creature::prepareQuestMenu( Player *pPlayer )
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
         status = pPlayer->getQuestStatus(quest_id);
-        if ( status == QUEST_STATUS_NONE && pQuest->CanBeTaken( pPlayer ) )
+        if ( status == QUEST_STATUS_NONE && pPlayer->CanTakeQuest(pQuest) )
             qm->AddMenuItem( quest_id, DIALOG_STATUS_AVAILABLE, true );
     }
 }

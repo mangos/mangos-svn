@@ -177,41 +177,29 @@ struct QuestInfo
     float PointY;
     uint32 PointOpt;
 };
+
 class Quest
 {
     public:
         Quest();
 
-        QuestInfo *GetQuestInfo() {return m_quest;}
+        QuestInfo *GetQuestInfo() { return m_quest; }
         uint32 m_qReqItemsCount;
         uint32 m_qReqMobsCount;
         uint32 m_qRewChoiceItemsCount;
         uint32 m_qRewItemsCount;
 
-        uint32 XPValue(Player* _Player);
-        void LoadQuest(QuestInfo *questinfo);
-        void LoadQuest(uint32 quest_id);
-        bool CanBeTaken( Player *_Player );
-        bool IsCompatible( Player *_Player );
-        bool ReputationSatisfied( Player *_Player );
-        bool TradeSkillSatisfied( Player *_Player );
-        bool RaceSatisfied( Player *_Player );
-        bool ClassSatisfied( Player *_Player );
-        bool LevelSatisfied( Player *_Player );
-        bool CanShowUnsatified( Player *_Player );
-        bool PreReqSatisfied( Player *_Player );
-        bool RewardIsTaken( Player *_Player );
-        bool AddSrcItem( Player *_Player );
-        bool RemSrcItem( Player *_Player );
+        void LoadQuest( uint32 quest );
+        void LoadQuest( QuestInfo *pQuestInfo );
+        uint32 XPValue( Player *pPlayer );
+
         bool HasSpecialFlag( uint32 Flag )  { return (( m_quest->SpecialFlags & Flag ) == Flag); }
     private:
         QuestInfo *m_quest;
-
 };
 
 struct quest_status
 {
-
     quest_status()
     {
         memset(m_questItemCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
