@@ -127,7 +127,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 }
 void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
 {
-    uint64 guid, guid1;
+    uint64 guid;
     uint32 quest_id;
     recv_data >> guid >> quest_id;
     
