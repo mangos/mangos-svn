@@ -76,12 +76,12 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     Quest *pQuest = objmgr.GetQuest(quest);
     if ( pQuest )
     {
-		if( _player->CanAddQuest( pQuest ) )
-		{
-			_player->AddQuest( pQuest );
-			
-			if ( _player->IsQuestComplete(pQuest) )
-				_player->CompleteQuest(pQuest);
+        if( _player->CanAddQuest( pQuest ) )
+        {
+            _player->AddQuest( pQuest );
+            
+            if ( _player->IsQuestComplete(pQuest) )
+                _player->CompleteQuest(pQuest);
 
 
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
@@ -176,7 +176,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     Quest *pQuest = objmgr.GetQuest(quest);
 
     if ( pQuest )
-		_player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+        _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
 }
 void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 {

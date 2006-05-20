@@ -37,7 +37,7 @@ GossipMenu::~GossipMenu()
 
 void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, uint32 dtAction, bool Coded)
 {
-    //	uint64 gtData;
+    //    uint64 gtData;
 
     char* Text = new char[strlen(Message) + 1];
     strcpy( Text, Message );

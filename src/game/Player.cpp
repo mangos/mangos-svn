@@ -3858,8 +3858,8 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
                 if ( additemcount > 0 )
                 {
                     pItem->SetCount(pItem->GetCount() + additemcount);
-					if( pItem->GetProto()->Class == ITEM_CLASS_QUEST )
-						ItemAdded(pItem->GetEntry(), additemcount);
+                    if( pItem->GetProto()->Class == ITEM_CLASS_QUEST )
+                        ItemAdded(pItem->GetEntry(), additemcount);
                     pItem->SendUpdateToPlayer(this);
                     sLog.outDetail("AddItem: Item %i added to bag %i - slot %i (stacked)",  pItem->GetEntry(), bagIndex, slot);
                     return 2;
@@ -3926,8 +3926,8 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
         }
         m_items[slot] = item;
     }
-	if( item->GetProto()->Class == ITEM_CLASS_QUEST )
-		ItemAdded(item->GetEntry(), count);
+    if( item->GetProto()->Class == ITEM_CLASS_QUEST )
+        ItemAdded(item->GetEntry(), count);
     return 1;
 }
 
@@ -6364,12 +6364,12 @@ bool Player::GiveQuestSourceItem( Quest *pQuest )
             if( count <= 0 )
                 count = 1;
             if( count == AddNewItem(srcitem, count, false))
-				return true;
-			return false;
+                return true;
+            return false;
         }
-		return true;
+        return true;
     }
-	return false;
+    return false;
 }
 
 void Player::TakeQuestSourceItem( Quest *pQuest )
@@ -6465,58 +6465,58 @@ bool Player::IsQuestComplete( Quest *pQuest )
 
 bool Player::CanAddQuest( Quest *pQuest )
 {
-	if( pQuest )
-	{
-		uint32 quest = pQuest->GetQuestInfo()->QuestId;
-		if  ( mQuestStatus.find( quest ) != mQuestStatus.end() )
-		{
-			PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_QUEST );
-			return false;
-		}
+    if( pQuest )
+    {
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        if  ( mQuestStatus.find( quest ) != mQuestStatus.end() )
+        {
+            PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_QUEST );
+            return false;
+        }
 
-		uint16 log_slot = getOpenQuestSlot();
-		if( log_slot == 0 )
-		{
-			PlayerTalkClass->SendQuestFailed( FAILEDREASON_FAILED );
-			return false;
-		}
+        uint16 log_slot = getOpenQuestSlot();
+        if( log_slot == 0 )
+        {
+            PlayerTalkClass->SendQuestFailed( FAILEDREASON_FAILED );
+            return false;
+        }
 
-		if( !GiveQuestSourceItem( pQuest ) )
-		{
-			PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
-			return false;
-		}
-		
-		if ( m_timedQuest && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
-		{
-			PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
-			return false;
-		}
+        if( !GiveQuestSourceItem( pQuest ) )
+        {
+            PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+            return false;
+        }
+        
+        if ( m_timedQuest && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+        {
+            PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
+            return false;
+        }
 
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 void Player::AddQuest( Quest *pQuest )
 {
     if( pQuest )
     {
-		uint16 log_slot = getOpenQuestSlot();
-		if( log_slot != 0 )
-		{
-			uint32 quest = pQuest->GetQuestInfo()->QuestId;
-			
-			SetUInt32Value(log_slot + 0, quest);
-			SetUInt32Value(log_slot + 1, 0);
-			SetUInt32Value(log_slot + 2, 0);
-			
-			mQuestStatus[quest].m_quest = pQuest;
+        uint16 log_slot = getOpenQuestSlot();
+        if( log_slot != 0 )
+        {
+            uint32 quest = pQuest->GetQuestInfo()->QuestId;
+            
+            SetUInt32Value(log_slot + 0, quest);
+            SetUInt32Value(log_slot + 1, 0);
+            SetUInt32Value(log_slot + 2, 0);
+            
+            mQuestStatus[quest].m_quest = pQuest;
             mQuestStatus[quest].status = QUEST_STATUS_INCOMPLETE;
             mQuestStatus[quest].rewarded = false;
-			
-			GiveQuestSourceItem( pQuest );
-			AdjustQuestReqItemCount( pQuest );
-		}
+            
+            GiveQuestSourceItem( pQuest );
+            AdjustQuestReqItemCount( pQuest );
+        }
     }
 }
 
@@ -6524,28 +6524,28 @@ void Player::AdjustQuestReqItemCount( Quest *pQuest )
 {
     if( pQuest )
     {
-		if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
-		{
-			uint32 quest = pQuest->GetQuestInfo()->QuestId;
-			uint32 reqitemcount;
-			uint32 curitemcount;
-			for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-			{
-				reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[i];
-				curitemcount = GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i], false);
-				mQuestStatus[quest].m_questItemCount[i] = min(curitemcount, reqitemcount);
-			}
-		}
+        if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+        {
+            uint32 quest = pQuest->GetQuestInfo()->QuestId;
+            uint32 reqitemcount;
+            uint32 curitemcount;
+            for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            {
+                reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[i];
+                curitemcount = GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i], false);
+                mQuestStatus[quest].m_questItemCount[i] = min(curitemcount, reqitemcount);
+            }
+        }
     }
 }
 
 void Player::CompleteQuest( Quest *pQuest )
 {
-	if( pQuest )
-	{
-		PlayerTalkClass->SendQuestCompleteToLog( pQuest );
-		SetQuestStatus( pQuest, QUEST_STATUS_COMPLETE);
-	}
+    if( pQuest )
+    {
+        PlayerTalkClass->SendQuestCompleteToLog( pQuest );
+        SetQuestStatus( pQuest, QUEST_STATUS_COMPLETE);
+    }
 }
 
 void Player::finishExplorationQuest( Quest *pQuest )
@@ -6561,7 +6561,7 @@ void Player::finishExplorationQuest( Quest *pQuest )
         }
 
         if ( IsQuestComplete( pQuest ) )
-			CompleteQuest( pQuest );
+            CompleteQuest( pQuest );
     }
 }
 
@@ -6632,10 +6632,10 @@ void Player::ItemAdded(uint32 entry, uint32 count)
                         PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, additemcount);
                     }
                     if ( IsQuestComplete(qs.m_quest) )
-					{
-						CompleteQuest( qs.m_quest );
-						PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
-					}
+                    {
+                        CompleteQuest( qs.m_quest );
+                        PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
+                    }
                     return;
                 }
             }
@@ -6709,10 +6709,10 @@ void Player::KilledMonster(uint32 entry, uint64 guid)
                         PlayerTalkClass->SendQuestUpdateAddKill(qs.m_quest, guid, curkillcount + addkillcount, j);
                     }
                     if ( IsQuestComplete(qs.m_quest) )
-					{
-						CompleteQuest( qs.m_quest );
-						PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
-					}
+                    {
+                        CompleteQuest( qs.m_quest );
+                        PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
+                    }
                     return;
                 }
             }
