@@ -135,11 +135,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         inline bool hasUnitState(const uint32 f) const { return (m_state & f); }
         inline void clearUnitState(uint32 f) { m_state &= ~f; };
 
-        inline uint32 getLevel() { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
-        inline uint8 getRace() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
-        inline uint8 getClass() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
-        inline uint8 getGender() { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
-        inline uint8 getStandState() { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
+        inline uint32 getLevel() const { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
+        inline uint8 getRace() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
+        inline uint32 getRaceMask() const { return 1 << (getRace()-1); };
+        inline uint8 getClass() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
+        inline uint32 getClassMask() const { return 1 << (getClass()-1); };
+        inline uint8 getGender() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
+        inline uint8 getPowerType() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF; };
+        inline uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *turn);
