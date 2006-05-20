@@ -6294,30 +6294,30 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
         if  ( mQuestStatus.find( quest ) != mQuestStatus.end() )
         {
-			if( msg )
-				PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_QUEST );
+            if( msg )
+                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_QUEST );
             return false;
         }
 
         uint16 log_slot = getOpenQuestSlot();
         if( log_slot == 0 )
         {
-			if( msg )
-				PlayerTalkClass->SendQuestFailed( FAILEDREASON_FAILED );
+            if( msg )
+                PlayerTalkClass->SendQuestFailed( FAILEDREASON_FAILED );
             return false;
         }
 
         if( !GiveQuestSourceItem( pQuest ) )
         {
-			if( msg )
-				PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+            if( msg )
+                PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
             return false;
         }
         
         if ( m_timedQuest && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
         {
-			if( msg )
-				PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
+            if( msg )
+                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
             return false;
         }
         return true;
@@ -6341,11 +6341,11 @@ bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
                     if( mQuestStatus[quest].m_questItemCount[i] < pQuest->GetQuestInfo()->ReqItemCount[i] )
-					{
-						if( msg )
-							PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_ITEMS );
+                    {
+                        if( msg )
+                            PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_ITEMS );
                         return false;
-					}
+                    }
                 }
             }
 
@@ -6363,17 +6363,17 @@ bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
 
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && (mQuestStatus[quest].m_timer <= 0) )
                 return false;
-			
-			if ( pQuest->GetQuestInfo()->RewMoney < 0 )
-			{
-				if ( GetMoney() - pQuest->GetQuestInfo()->RewMoney < 0 )
-				{
-					if( msg )
-						PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_MONEY );
-					return false;
-				}
-			}
-			return true;
+            
+            if ( pQuest->GetQuestInfo()->RewMoney < 0 )
+            {
+                if ( GetMoney() - pQuest->GetQuestInfo()->RewMoney < 0 )
+                {
+                    if( msg )
+                        PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_MONEY );
+                    return false;
+                }
+            }
+            return true;
         }
     }
     return false;
@@ -6381,36 +6381,36 @@ bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
 
 bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
-	if( pQuest )
-	{
-		uint32 count;
-		if ( pQuest->m_qRewChoiceItemsCount > 0 )
-		{
-			count = CanAddItemCount(pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward]);
-			if  ( count < pQuest->GetQuestInfo()->RewChoiceItemCount[reward] )
-			{
-				if( msg )
-					PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+    if( pQuest )
+    {
+        uint32 count;
+        if ( pQuest->m_qRewChoiceItemsCount > 0 )
+        {
+            count = CanAddItemCount(pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward]);
+            if  ( count < pQuest->GetQuestInfo()->RewChoiceItemCount[reward] )
+            {
+                if( msg )
+                    PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
                 return false;
             }
-		}
+        }
 
-		if ( pQuest->m_qRewItemsCount > 0 )
-		{
-			for (int i=0; i < QUEST_REWARDS_COUNT; i++)
-			{
-				count = CanAddItemCount(pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i]);
-				if  (  count < pQuest->GetQuestInfo()->RewItemCount[i] )
-				{
-					if( msg )
-						PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-	return false;
+        if ( pQuest->m_qRewItemsCount > 0 )
+        {
+            for (int i=0; i < QUEST_REWARDS_COUNT; i++)
+            {
+                count = CanAddItemCount(pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i]);
+                if  (  count < pQuest->GetQuestInfo()->RewItemCount[i] )
+                {
+                    if( msg )
+                        PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+    return false;
 }
 
 void Player::AddQuest( Quest *pQuest )
@@ -6440,22 +6440,22 @@ void Player::CompleteQuest( Quest *pQuest )
 {
     if( pQuest )
     {
-		SetQuestStatus( pQuest, QUEST_STATUS_COMPLETE);
+        SetQuestStatus( pQuest, QUEST_STATUS_COMPLETE);
         PlayerTalkClass->SendQuestCompleteToLog( pQuest );
     }
 }
 
 void Player::RewardQuest( Quest *pQuest )
 {
-	if( pQuest )
-	{
-		for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
+    if( pQuest )
+    {
+        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
             if ( pQuest->GetQuestInfo()->ReqItemId[i] )
                 RemoveItemFromInventory( pQuest->GetQuestInfo()->ReqItemId[i], pQuest->GetQuestInfo()->ReqItemCount[i]);
         }
-		
-		if ( pQuest->GetQuestInfo()->RewSpell > 0 )
+        
+        if ( pQuest->GetQuestInfo()->RewSpell > 0 )
         {
             WorldPacket sdata;
 
@@ -6465,19 +6465,19 @@ void Player::RewardQuest( Quest *pQuest )
             addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell );
         }
 
-		uint32 quest = pQuest->GetQuestInfo()->QuestId;
-		
-		//PlayerTalkClass->SendQuestUpdateComplete( pQuest );
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        
+        //PlayerTalkClass->SendQuestUpdateComplete( pQuest );
         PlayerTalkClass->SendQuestComplete( pQuest );
         uint16 log_slot = getQuestSlot(quest);
         SetUInt32Value(log_slot+0, 0);
         SetUInt32Value(log_slot+1, 0);
-		SetUInt32Value(log_slot+2, 0);
-		
-		if ( getLevel() < 60 )
+        SetUInt32Value(log_slot+2, 0);
+        
+        if ( getLevel() < 60 )
         {
-			GiveXP( pQuest->XPValue( this ), this->GetGUID() );
-			ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
+            GiveXP( pQuest->XPValue( this ), this->GetGUID() );
+            ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
         }
         else
             ModifyMoney( pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( this ) );
@@ -6486,7 +6486,7 @@ void Player::RewardQuest( Quest *pQuest )
             mQuestStatus[quest].rewarded = true;
         else
             SetQuestStatus(pQuest, QUEST_STATUS_NONE);
-	}
+    }
 }
 
 bool Player::SatisfyQuestClass( Quest *pQuest, bool msg )
@@ -6505,15 +6505,15 @@ bool Player::SatisfyQuestClass( Quest *pQuest, bool msg )
 bool Player::SatisfyQuestLevel( Quest *pQuest, bool msg )
 {
     if( pQuest )
-	{
-		if( getLevel() < pQuest->GetQuestInfo()->MinLevel )
-		{
-			if( msg )
-				PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_LEVEL );
-			return false;
-		}
-		return true;
-	}
+    {
+        if( getLevel() < pQuest->GetQuestInfo()->MinLevel )
+        {
+            if( msg )
+                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_LEVEL );
+            return false;
+        }
+        return true;
+    }
     return false;
 }
 
@@ -6539,12 +6539,12 @@ bool Player::SatisfyQuestRace( Quest *pQuest, bool msg )
         if ( reqraces == QUEST_RACE_NONE )
             return true;
         uint32 binrace = 1 << (getRace() - 1);
-		if( (reqraces & binrace) == 0 )
-		{
-			if( msg )
-				PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_RACE );
-			return false;
-		}
+        if( (reqraces & binrace) == 0 )
+        {
+            if( msg )
+                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_RACE );
+            return false;
+        }
         return true;
     }
     return false;

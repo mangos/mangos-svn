@@ -264,8 +264,8 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             result = DIALOG_STATUS_INCOMPLETE;
     }
 
-	if( GetFlag(UNIT_DYNAMIC_FLAGS, 2) )
-		RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
+    if( GetFlag(UNIT_DYNAMIC_FLAGS, 2) )
+        RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
 
     if ( result == DIALOG_STATUS_INCOMPLETE )
         return result;

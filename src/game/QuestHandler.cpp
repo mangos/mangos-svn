@@ -188,29 +188,29 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     Quest *pQuest = objmgr.GetQuest(quest);
     if( pQuest )
     {
-		if( _player->CanRewardQuest( pQuest, reward, true ) )
-		{
-			_player->RewardQuest( pQuest );
-			
-			Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-			if( pCreature )
-			{
-				if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
-				{
-					Quest* nextquest;
-					if( nextquest = pCreature->getNextAvailableQuest(_player,pQuest) )
-						_player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
-					else
-						_player->PlayerTalkClass->CloseGossip();
-				}
-			}
-			else
-			{
-				GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid);
-				if ( pGameObject )
-					Script->GOChooseReward( _player, pGameObject, pQuest, reward );
-			}
-		}
+        if( _player->CanRewardQuest( pQuest, reward, true ) )
+        {
+            _player->RewardQuest( pQuest );
+            
+            Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+            if( pCreature )
+            {
+                if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
+                {
+                    Quest* nextquest;
+                    if( nextquest = pCreature->getNextAvailableQuest(_player,pQuest) )
+                        _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
+                    else
+                        _player->PlayerTalkClass->CloseGossip();
+                }
+            }
+            else
+            {
+                GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid);
+                if ( pGameObject )
+                    Script->GOChooseReward( _player, pGameObject, pQuest, reward );
+            }
+        }
     }
 }
 void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data )

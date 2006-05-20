@@ -344,18 +344,18 @@ class MANGOS_DLL_SPEC Player : public Unit
         void TakeQuestSourceItem( Quest *pQuest );
         bool GetQuestRewardStatus( Quest *pQuest );
         uint32 GetQuestStatus( Quest *pQuest );
-		void SetQuestStatus( Quest *pQuest, uint32 status );
-		void AdjustQuestReqItemCount( Quest *pQuest );
+        void SetQuestStatus( Quest *pQuest, uint32 status );
+        void AdjustQuestReqItemCount( Quest *pQuest );
 
-		void finishExplorationQuest( Quest *pQuest );
-		uint16 getOpenQuestSlot();
-		uint16 getQuestSlot(uint32 quest_id);
-		uint16 getQuestSlotById(uint32 slot_id);
-		void ItemAdded(uint32 entry, uint32 count);
-		void ItemRemoved(uint32 entry, uint32 count);
-		void SetBindPoint(uint64 guid);
-		void KilledMonster(uint32 entry, uint64 guid);
-		void AddQuestsLoot(Creature* creature);
+        void finishExplorationQuest( Quest *pQuest );
+        uint16 getOpenQuestSlot();
+        uint16 getQuestSlot(uint32 quest_id);
+        uint16 getQuestSlotById(uint32 slot_id);
+        void ItemAdded(uint32 entry, uint32 count);
+        void ItemRemoved(uint32 entry, uint32 count);
+        void SetBindPoint(uint64 guid);
+        void KilledMonster(uint32 entry, uint64 guid);
+        void AddQuestsLoot(Creature* creature);
 
 /*********************************************************/
 
