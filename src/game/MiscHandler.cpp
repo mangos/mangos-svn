@@ -1198,3 +1198,11 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     // TODO
     // need to be written
 }
+
+void WorldSession::HandleWarendDataOpcode(WorldPacket& recv_data)
+{
+	uint8 tmp;
+	recv_data>>tmp;
+    sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
+	sLog.outDebug("Posible auto shot need this data.");
+}

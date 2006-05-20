@@ -521,16 +521,20 @@ void ObjectMgr::LoadAreaTriggerPoints()
 bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' ORDER BY `destination` LIMIT 1;", curloc);
+    QueryResult *result = sDatabase.PQuery("SELECT `taxi_path`.`destination` FROM `taxi_path` WHERE `taxi_path`.`source` = '%u' ORDER BY `destination`;", curloc);
 
     if( ! result )
     {
         return 1;
     }
-    Field *fields = result->Fetch();
-    uint8 destination = fields[0].GetUInt8();
-    uint8 field = (uint8)((destination - 1) / 32);
-    Mask[field] |= 1 << ( (destination - 1 ) % 32 );
+	
+    do
+    {
+	    Field *fields = result->Fetch();
+		uint8 destination = fields[0].GetUInt8();
+		uint8 field = (uint8)((destination - 1) / 32);
+		Mask[field] |= 1 << ( (destination - 1 ) % 32 );
+	}while( result->NextRow() );
 
     return 1;
 }
