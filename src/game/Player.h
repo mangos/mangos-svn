@@ -334,13 +334,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestRace( Quest *pQuest );
         bool SatisfyQuestReputation( Quest *pQuest );
         bool SatisfyQuestSkill( Quest *pQuest );
-        void GiveQuestSourceItem( Quest *pQuest );
+        bool GiveQuestSourceItem( Quest *pQuest );
         void TakeQuestSourceItem( Quest *pQuest );
         bool GetQuestRewardStatus( Quest *pQuest );
         uint32 GetQuestStatus( Quest *pQuest );
         void SetQuestStatus( Quest *pQuest, uint32 status );
         bool IsQuestComplete( Quest *pQuest );
+		bool CanAddQuest( Quest *pQuest );
         void AddQuest( Quest *pQuest );
+		void AdjustQuestReqItemCount( Quest *pQuest );
+		void CompleteQuest( Quest *pQuest );
 
         void finishExplorationQuest( Quest *pQuest );
 
@@ -350,8 +353,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddQuestsLoot(Creature* creature);
 
         void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
-        void ItemRemoved(uint32 entry);
-        void ItemAdded(uint32 entry, uint32 count);
+        void ItemRemoved(uint32 entry, uint32 count = 1);
+        void ItemAdded(uint32 entry, uint32 count = 1);
         void KilledMonster(uint32 entry, uint64 guid);
         void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
