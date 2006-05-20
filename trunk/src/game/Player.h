@@ -340,10 +340,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetQuestStatus( Quest *pQuest );
         void SetQuestStatus( Quest *pQuest, uint32 status );
         bool IsQuestComplete( Quest *pQuest );
-		bool CanAddQuest( Quest *pQuest );
+        bool CanAddQuest( Quest *pQuest );
         void AddQuest( Quest *pQuest );
-		void AdjustQuestReqItemCount( Quest *pQuest );
-		void CompleteQuest( Quest *pQuest );
+        void AdjustQuestReqItemCount( Quest *pQuest );
+        void CompleteQuest( Quest *pQuest );
 
         void finishExplorationQuest( Quest *pQuest );
 
