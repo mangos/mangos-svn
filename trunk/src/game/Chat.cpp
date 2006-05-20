@@ -174,7 +174,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
             if (result)
             {
-                commandTable[i].SecurityLevel = (uint16)(*result)[1].GetUInt16();
+                commandTable[i].SecurityLevel = (uint16)(*result)[0].GetUInt16();
                 commandTable[i].Help = (*result)[1].GetString();
                 delete result;
             }
@@ -187,7 +187,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
                     if (result)
                     {
-                        ptable[j].SecurityLevel = (uint16)(*result)[1].GetUInt16();
+                        ptable[j].SecurityLevel = (uint16)(*result)[0].GetUInt16();
                         ptable[j].Help = (*result)[1].GetString();
                         delete result;
                     }
