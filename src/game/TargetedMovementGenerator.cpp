@@ -102,6 +102,9 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     if(owner.hasUnitState(UNIT_STAT_ROOT))
         return;
 
+    if(!owner.isAlive())
+        return;
+
     SpellEntry* spellInfo;
     if( owner.IsStopped() && i_target.isAlive())
     {

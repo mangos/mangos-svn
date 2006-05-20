@@ -246,6 +246,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         DEBUG_LOG("DealDamage: victim just died");
         if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
         {
+            ((Creature*)pVictim)->StopMoving();
             ((Creature*)pVictim)->generateLoot();
         }
 
