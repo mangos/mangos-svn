@@ -76,13 +76,12 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     Quest *pQuest = objmgr.GetQuest(quest);
     if ( pQuest )
     {
-        if( _player->CanAddQuest( pQuest ) )
+        if( _player->CanAddQuest( pQuest, true ) )
         {
             _player->AddQuest( pQuest );
             
-            if ( _player->IsQuestComplete(pQuest) )
-                _player->CompleteQuest(pQuest);
-
+            if ( _player->CanCompleteQuest( pQuest, false ) )
+                _player->CompleteQuest( pQuest );
 
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
             if( pCreature )
@@ -143,7 +142,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
             {
                 if( !Script->ItemQuestAccept(_player, pItem, pQuest ) )
                 {
-                    if( status == QUEST_STATUS_NONE )
+                    if( status == QUEST_STATUS_NONE && _player->CanTakeQuest( pQuest, true ) )
                         _player->PlayerTalkClass->SendQuestDetails(pQuest, pItem->GetGUID(), true);
                 }
             }
@@ -189,99 +188,29 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     Quest *pQuest = objmgr.GetQuest(quest);
     if( pQuest )
     {
-        if ( pQuest->GetQuestInfo()->RewMoney < 0 )
-        {
-            if ( _player->GetMoney() - pQuest->GetQuestInfo()->RewMoney < 0 )
-            {
-                _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_MONEY );
-                return;
-            }
-        }
-
-        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
-        {
-            if ( pQuest->GetQuestInfo()->ReqItemId[i] > 0 )
-            {
-                if ( _player->GetItemCount( pQuest->GetQuestInfo()->ReqItemId[i], false) < pQuest->GetQuestInfo()->ReqItemCount[i] )
-                {
-                    _player->PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_ITEMS );
-                    return;
-                }
-            }
-        }
-
-        if ( pQuest->m_qRewChoiceItemsCount > 0 && reward >= pQuest->m_qRewChoiceItemsCount )
-        {
-            sLog.outString("WORLD: Attempt to select an unexisting rewardid !");
-            return;
-        }
-
-        if ( pQuest->m_qRewChoiceItemsCount > 0 )
-        {
-            if  ( _player->CanAddItemCount(pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward]) >= (int)pQuest->m_qRewChoiceItemsCount )
-                _player->AddNewItem(pQuest->GetQuestInfo()->RewChoiceItemId[reward],pQuest->GetQuestInfo()->RewChoiceItemCount[reward], true);
-            else
-            {
-                _player->PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
-                return;
-            }
-        }
-
-        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
-        {
-            if ( pQuest->GetQuestInfo()->ReqItemId[i] )
-                _player->RemoveItemFromInventory( pQuest->GetQuestInfo()->ReqItemId[i], pQuest->GetQuestInfo()->ReqItemCount[i]);
-        }
-
-        if ( pQuest->GetQuestInfo()->RewSpell > 0 )
-        {
-            WorldPacket sdata;
-
-            sdata.Initialize (SMSG_LEARNED_SPELL);
-            sdata << pQuest->GetQuestInfo()->RewSpell;
-            SendPacket( &sdata );
-            _player->addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell );
-        }
-
-        _player->PlayerTalkClass->SendQuestUpdateComplete( pQuest );
-        _player->PlayerTalkClass->SendQuestComplete( pQuest );
-        uint16 log_slot = _player->getQuestSlot(quest);
-        _player->SetUInt32Value(log_slot+0, 0);
-        _player->SetUInt32Value(log_slot+1, 0);
-        _player->SetUInt32Value(log_slot+2, 0);
-
-        if ( _player->getLevel() < 60 )
-        {
-            _player->GiveXP( pQuest->XPValue( _player ), guid );
-            _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
-        }
-        else
-            _player->ModifyMoney( pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( _player ) );
-
-        if ( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
-            _player->mQuestStatus[quest].rewarded = true;
-        else
-            _player->SetQuestStatus(pQuest, QUEST_STATUS_NONE);
-
-        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-        if( pCreature )
-        {
-            if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
-            {
-                pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
-                Quest* nextquest;
-                if( nextquest = pCreature->getNextAvailableQuest(_player,pQuest) )
-                    _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
-                else
-                    _player->PlayerTalkClass->CloseGossip();
-            }
-        }
-        else
-        {
-            GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid);
-            if (pGameObject)
-                Script->GOChooseReward( _player, pGameObject, pQuest, reward );
-        }
+		if( _player->CanRewardQuest( pQuest, reward, true ) )
+		{
+			_player->RewardQuest( pQuest );
+			
+			Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+			if( pCreature )
+			{
+				if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
+				{
+					Quest* nextquest;
+					if( nextquest = pCreature->getNextAvailableQuest(_player,pQuest) )
+						_player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
+					else
+						_player->PlayerTalkClass->CloseGossip();
+				}
+			}
+			else
+			{
+				GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid);
+				if ( pGameObject )
+					Script->GOChooseReward( _player, pGameObject, pQuest, reward );
+			}
+		}
     }
 }
 void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data )
@@ -298,7 +227,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
         if( pCreature )
         {
-            if ( _player->IsQuestComplete( pQuest ) )
+            if ( _player->CanCompleteQuest( pQuest, true ) )
                 _player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
         }
     }

@@ -254,7 +254,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         status = pPlayer->GetQuestStatus( pQuest );
         if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( pQuest ) )
         {
-            // POI finish quest here
+            SetFlag(UNIT_DYNAMIC_FLAGS ,2);
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
                 return DIALOG_STATUS_REWARD_REP;
             else
@@ -263,6 +263,9 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         else if ( status == QUEST_STATUS_INCOMPLETE )
             result = DIALOG_STATUS_INCOMPLETE;
     }
+
+	if( GetFlag(UNIT_DYNAMIC_FLAGS, 2) )
+		RemoveFlag(UNIT_DYNAMIC_FLAGS, 2);
 
     if ( result == DIALOG_STATUS_INCOMPLETE )
         return result;
@@ -277,9 +280,9 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         status = pPlayer->GetQuestStatus( pQuest );
         if ( status == QUEST_STATUS_NONE )
         {
-            if ( pPlayer->CanSeeQuest(pQuest) )
+            if ( pPlayer->CanSeeQuest( pQuest, false ) )
             {
-                if ( pPlayer->SatisfyQuestLevel(pQuest) )
+                if ( pPlayer->SatisfyQuestLevel(pQuest, false) )
                     return DIALOG_STATUS_AVAILABLE;
                 result = DIALOG_STATUS_UNAVAILABLE;
             }
@@ -310,7 +313,7 @@ Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
         pQuest = *i;
         if( pQuest->GetQuestInfo()->QuestId == quest_id )
         {
-            if ( pPlayer->CanTakeQuest(pQuest) )
+            if ( pPlayer->CanTakeQuest( pQuest, false ) )
                 return pQuest;
             else
                 return NULL;
@@ -347,7 +350,7 @@ void Creature::prepareQuestMenu( Player *pPlayer )
             continue;
 
         status = pPlayer->GetQuestStatus( pQuest );
-        if ( status == QUEST_STATUS_NONE && pPlayer->CanTakeQuest(pQuest) )
+        if ( status == QUEST_STATUS_NONE && pPlayer->CanTakeQuest( pQuest, false ) )
             qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_AVAILABLE, true );
     }
 }

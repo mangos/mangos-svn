@@ -326,37 +326,40 @@ class MANGOS_DLL_SPEC Player : public Unit
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 
-        bool CanSeeQuest( Quest *pQuest );
-        bool CanTakeQuest( Quest *pQuest );
-        bool SatisfyQuestClass( Quest *pQuest );
-        bool SatisfyQuestLevel( Quest *pQuest );
-        bool SatisfyQuestPreviousQuest( Quest *pQuest );
-        bool SatisfyQuestRace( Quest *pQuest );
-        bool SatisfyQuestReputation( Quest *pQuest );
-        bool SatisfyQuestSkill( Quest *pQuest );
+        bool CanSeeQuest( Quest *pQuest, bool msg );
+        bool CanTakeQuest( Quest *pQuest, bool msg );
+        bool CanAddQuest( Quest *pQuest, bool msg );
+        bool CanCompleteQuest( Quest *pQuest, bool msg );
+        bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
+        void AddQuest( Quest *pQuest );
+        void CompleteQuest( Quest *pQuest );
+        void RewardQuest( Quest *pQuest );
+        bool SatisfyQuestClass( Quest *pQuest, bool msg );
+        bool SatisfyQuestLevel( Quest *pQuest, bool msg );
+        bool SatisfyQuestPreviousQuest( Quest *pQuest, bool msg );
+        bool SatisfyQuestRace( Quest *pQuest, bool msg );
+        bool SatisfyQuestReputation( Quest *pQuest, bool msg );
+        bool SatisfyQuestSkill( Quest *pQuest, bool msg );
         bool GiveQuestSourceItem( Quest *pQuest );
         void TakeQuestSourceItem( Quest *pQuest );
         bool GetQuestRewardStatus( Quest *pQuest );
         uint32 GetQuestStatus( Quest *pQuest );
-        void SetQuestStatus( Quest *pQuest, uint32 status );
-        bool IsQuestComplete( Quest *pQuest );
-        bool CanAddQuest( Quest *pQuest );
-        void AddQuest( Quest *pQuest );
-        void AdjustQuestReqItemCount( Quest *pQuest );
-        void CompleteQuest( Quest *pQuest );
+		void SetQuestStatus( Quest *pQuest, uint32 status );
+		void AdjustQuestReqItemCount( Quest *pQuest );
 
-        void finishExplorationQuest( Quest *pQuest );
+		void finishExplorationQuest( Quest *pQuest );
+		uint16 getOpenQuestSlot();
+		uint16 getQuestSlot(uint32 quest_id);
+		uint16 getQuestSlotById(uint32 slot_id);
+		void ItemAdded(uint32 entry, uint32 count);
+		void ItemRemoved(uint32 entry, uint32 count);
+		void SetBindPoint(uint64 guid);
+		void KilledMonster(uint32 entry, uint64 guid);
+		void AddQuestsLoot(Creature* creature);
 
-        uint16 getOpenQuestSlot();
-        uint16 getQuestSlot(uint32 quest_id);
-        uint16 getQuestSlotById(uint32 slot_id);
-        void AddQuestsLoot(Creature* creature);
+/*********************************************************/
 
         void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
-        void ItemRemoved(uint32 entry, uint32 count = 1);
-        void ItemAdded(uint32 entry, uint32 count = 1);
-        void KilledMonster(uint32 entry, uint64 guid);
-        void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
         void Regenerate(uint16 field_cur, uint16 field_max);
