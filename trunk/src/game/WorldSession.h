@@ -359,6 +359,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleBattleGroundListOpcode( WorldPacket &recv_data );
         void HandleBattleGroundLeaveOpcode( WorldPacket &recv_data );
 
+        void HandleWarendDataOpcode(WorldPacket& recv_data);
+
         OpcodeHandler* _GetOpcodeHandlerTable() const;
 
     private:
