@@ -1719,15 +1719,14 @@ void Spell::EffectMomentMove(uint32 i)
 {
     if( m_spellInfo->rangeIndex== 1)                        //self range
     {
-        float fx,fy;
         WorldPacket data;
 
         float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-        fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
-        fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+        float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
+        float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+        float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
 
-        //TODO:Use client Height map fix Z position
-        m_caster->BuildTeleportAckMsg(&data,fx,fy, m_caster->GetPositionZ()+10,m_caster->GetOrientation());
+        m_caster->BuildTeleportAckMsg(&data,fx,fy,fz,m_caster->GetOrientation());
         m_caster->SendMessageToSet( &data, true );
     }
 }
