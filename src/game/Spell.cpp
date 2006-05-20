@@ -602,7 +602,7 @@ void Spell::finish()
 
     m_ObjToDel.clear();
 
-    uint8 powerType = (uint8)(m_caster->GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24);
+    uint8 powerType = m_caster->getPowerType();
     if (powerType != POWER_ENERGY)
     {
         ((Player*)m_caster)->setRegenTimer(5000);
@@ -843,17 +843,21 @@ void Spell::SendResurrectRequest(Player* target)
 void Spell::TakePower()
 {
     uint16 powerField;
-    uint32 currentPower;
 
-    uint8 powerType = (uint8)(m_caster->GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24);
+    uint8 powerType = m_caster->getPowerType();
     if(powerType == 0)
         powerField = UNIT_FIELD_POWER1;
     else if(powerType == 1)
         powerField = UNIT_FIELD_POWER2;
     else if(powerType == 3)
         powerField = UNIT_FIELD_POWER4;
+    else
+    {
+        powerField = UNIT_FIELD_POWER1;
+        sLog.outError("SPELL: unknown power type %i spell id %u\n",(int)powerType, m_spellInfo->Id);
+    }
 
-    currentPower = m_caster->GetUInt32Value(powerField);
+    uint32 currentPower = m_caster->GetUInt32Value(powerField);
 
     if(currentPower < m_spellInfo->manaCost)
         m_caster->SetUInt32Value(powerField, 0);

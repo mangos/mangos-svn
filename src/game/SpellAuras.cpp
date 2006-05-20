@@ -964,13 +964,18 @@ void Aura::HandleAuraModIncreaseHealth(bool apply)
 void Aura::HandleAuraModIncreaseEnergy(bool apply)
 {
     uint32 powerField = 23;
-    uint8 powerType = (uint8)(m_target->GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24);
+    uint8 powerType = m_target->getPowerType();
     if(powerType == 0)
         powerField = UNIT_FIELD_POWER1;
     else if(powerType == 1)
         powerField = UNIT_FIELD_POWER2;
     else if(powerType == 3)
         powerField = UNIT_FIELD_POWER4;
+    else
+    {
+        powerField = UNIT_FIELD_POWER1;
+        sLog.outError("AURA: unknown power type %i spell id %u\n",(int)powerType, m_spellId);
+    }
 
     uint32 newValue = m_target->GetUInt32Value(powerType);
     apply ? newValue += m_modifier->m_amount : newValue -= m_modifier->m_amount;

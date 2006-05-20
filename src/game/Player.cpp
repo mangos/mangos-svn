@@ -3247,9 +3247,9 @@ uint8 Player::CanEquipItemInSlot(uint8 bagIndex, uint8 slot, Item* item, Item* s
         if (slot < EQUIPMENT_SLOT_END)
         {                                                   // Equiping item
 
-            if (!(proto->AllowableRace & getRace()))
+            if (!(proto->AllowableRace & getRaceMask()))
                 return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
-            if (!(proto->AllowableClass & getClass()))
+            if (!(proto->AllowableClass & getClassMask()))
                 return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
             if (proto->RequiredLevel > getLevel())
                 return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
@@ -6496,8 +6496,7 @@ bool Player::SatisfyQuestClass( Quest *pQuest, bool msg )
         uint32 reqclasses = pQuest->GetQuestInfo()->RequiredClass;
         if ( reqclasses == QUEST_CLASS_NONE )
             return true;
-        uint32 binclass = 1 << (getClass() - 1);
-        return( (reqclasses & binclass) != 0 );
+        return( (reqclasses & getClassMask()) != 0 );
     }
     return false;
 }
@@ -6538,8 +6537,7 @@ bool Player::SatisfyQuestRace( Quest *pQuest, bool msg )
         uint32 reqraces = pQuest->GetQuestInfo()->RequiredRaces;
         if ( reqraces == QUEST_RACE_NONE )
             return true;
-        uint32 binrace = 1 << (getRace() - 1);
-        if( (reqraces & binrace) == 0 )
+        if( !(reqraces & getRaceMask()) )
         {
             if( msg )
                 PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_RACE );
