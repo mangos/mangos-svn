@@ -33,6 +33,8 @@
 #include "SpellAuras.h"
 #include "ScriptCalls.h"
 
+WorldPacket SendAttackStateUpdate(uint32 HitInfo, uint64 sourceGUID, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
+
 bool ChatHandler::HandleSetPoiCommand(const char* args)
 {
     Player *  pPlayer = m_session->GetPlayer();
@@ -1443,18 +1445,25 @@ bool ChatHandler::HandleMorphCommand(const char* args)
 
 bool ChatHandler::HandleAuraCommand(const char* args)
 {
-    if (!*args)
+    char* px = strtok((char*)args, " ");
+    if (!px)
         return false;
 
-    uint32 aura_id = atoi((char*)args);
-
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURA, aura_id );
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURAFLAGS, 0x0000000d );
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURA+32, aura_id );
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURALEVELS+8, 0xeeeeee00 );
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeee00 );
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURAFLAGS+4, 0x0000000d );
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_FIELD_AURASTATE, 0x00000002 );
+    uint32 spellID = (uint32)atoi(px);
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellID );
+    if(spellInfo)
+    {
+        for(uint32 i = 0;i<3;i++)
+        {
+            uint8 eff = spellInfo->Effect[i];
+            if (eff>=TOTAL_SPELL_EFFECTS)
+                continue;
+			if (eff == 6) {
+				Aura *Aur = new Aura(spellInfo, i, NULL, m_session->GetPlayer());
+				m_session->GetPlayer()->AddAura(Aur);
+			}
+        }
+    }
 
     return true;
 }
@@ -1860,10 +1869,43 @@ bool ChatHandler::HandleBankCommand(const char* args)
     return true;
 }
 
+WorldPacket SendAttackStateUpdate(uint32 HitInfo, uint64 sourceGUID, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount)
+{
+	sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
+
+	//TODO: FIX THIS BECOUSE THIS IS SLOW
+	WorldPacket data;
+	data.Initialize(SMSG_ATTACKERSTATEUPDATE);    //opcode   //2
+	data << (uint32)HitInfo;                      //hit info //4
+    data << uint8(0xFF)<< sourceGUID;             //source //8+1
+    data << uint8(0xFF)<< targetGUID;             //target //8+1
+    data << (uint32)(Damage-AbsorbDamage);        //Delta AbsorbDamage //4 //28
+
+    data << (uint8)SwingType;                     //no action=0 Short sword=1 2handed weapon=2
+    data << (uint32)DamageType;                   //damage type //4
+
+    data << (float)Damage;                        //damage //4
+	data << (uint32)Damage;                       //damage //4
+    data << (uint32)AbsorbDamage;                 //obsorbed damage //4
+    data << (uint32)Resist;                       //resist damage
+    data << (uint32)TargetState;                  //victum state?:S //4
+
+	if( AbsorbDamage == 0 )                           //also 0x3E8 = 0x3E8
+        data << (uint32)0;					      //4
+    else
+        data << (uint32)-1;                       //default value //4
+	
+    data << (uint32)0;                            //4
+    data << (uint32)BlockedAmount;
+
+	return data;
+}
+	
+
 bool ChatHandler::HandleChangeWeather(const char* args)
 {
     //*Change the weather of a cell
-    WorldPacket data;
+    /*WorldPacket data;
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
@@ -1883,7 +1925,199 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     data.Initialize( SMSG_WEATHER );
     data << (uint32)type << (float)value << (uint32)sound;
     //!this should send the packed to all players in the cell.
-    m_session->GetPlayer()->SendMessageToSet(&data, true);
+    m_session->GetPlayer()->SendMessageToSet(&data, true);*/
+
+
+	//void CreateAttackStateUpdate(uint32 hitinfo, uint64 Source, uint64 Target,uint32 blockdamage,uint8 SubBlocks,uint32 damagetype, uint32 damage, uint32 AbsorbDamage, uint32 turn, uint32 victimState, uint32 AbsorbDamage, uint32 blocked_amount);
+
+	WorldPacket data;
+
+	Unit* chr =NULL;
+    chr = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+
+    if (chr == NULL)
+    {
+        FillSystemMessageData(&data, m_session, "No character selected.");
+        m_session->SendPacket( &data );
+        return true;
+    }
+
+
+
+    uint32    hitInfo = 0x28102; //experiment with this 0x22 = orginal
+	
+    uint32    damageType = 0;
+	uint32    damage = 10; //constante damage
+
+    uint32    blocked_amount = 0;
+    uint32    victimState = 1;
+//    int32    attackerSkill = GetUnitMeleeSkill();
+//    int32    victimSkill = pVictim->GetUnitMeleeSkill();
+    //float    chanceToHit = 100.0f;
+    uint32   AbsorbDamage = 5;
+    uint32   Resist=0;
+	uint8	 SwingType = 1;
+	uint32	testje = 0;
+	
+
+	char* px = strtok((char*)args, " ");
+    //char* py = strtok(NULL, " ");
+    //char* pz = strtok(NULL, " ");
+
+	//damageType = (uint32)atoi(px);
+	//SwingType = (uint32)atoi(px);
+	hitInfo = atoi(px);
+
+	
+	/*
+	damage types:
+	0:Normal
+	1:Holy damage
+	2:Fire damage
+	3:Nature Damage
+	4:Frost damage
+	5:Shadow damage
+	6:Acane damage
+
+	SwingType
+	0: no swing
+	1: single handed weapon
+	2: 2handed weapon
+
+	victimState
+	0:?? No idea
+	1:normal
+	2:Dodge
+	3:parrie
+	4:?? no idea
+	5:blocks
+	6:evades
+	7:is immune
+	8:deflects
+
+	hitInfo: (I think bitwise)
+	0: right swing
+	1: right swing
+	2: right swing
+	4: leftside swing
+	8:
+	16:
+	32:
+	64:
+	128:
+	256:
+	512:
+	1024:
+	2048:
+	4096:
+	8192:
+	16384:
+	32768:
+	65536:
+	131072:
+
+
+	164098 = 0x28102 = 0b101000000100000010: Right swing (crushing)
+
+	00 1000 0001 0000 0010 = right swing (crushing)
+	00 0000 0001 0000 0010 = right swing
+	00 0001 0001 0000 0010 = right swing
+	      1 0010 0000 1110 = left swing
+		  1 0010 0010 1110 = left swing
+  
+  
+  0000 0000 0000 0000 0000 0000 0000 0000 = Normal Swing
+  0000 0000 0000 0000 0000 0000 0000 0001 = 
+  0000 0000 0000 0000 0000 0000 0000 0010 = 
+  0000 0000 0000 0000 0000 0000 0000 0100 = 
+  0000 0000 0000 0000 0000 0000 0000 1000 = 
+  0000 0000 0000 0000 0000 0000 0001 0000 = 
+  0000 0000 0000 0000 0000 0000 0010 0000 = 
+  0000 0000 0000 0000 0000 0000 0100 0000 = 
+  0000 0000 0000 0000 0000 0000 x000 0000 = Crital Hit
+  0000 0000 0000 0000 0x00 0000 0000 0000 = normal swing (glancing) can be orred with crushing
+  0000 0000 0000 0000 x000 0000 0000 0000 = normal swing (crushing hit) can be orred with glancing
+  0000 0000 0000 000x 0000 0000 0000 0000 = no action
+  0000 0000 0000 x000 0000 0000 0000 0000 = swing NO HIT sound (like miss)
+
+
+
+
+	   0100 0000 0000 0000 = right swing (glancing) can be orred with crushing
+	   1000 0000 0000 0000 = right swing (crushing hit) can be orred with glancing
+	 1 0000 0000 0000 0000 = no action
+    10 0000 0000 0000 0000
+   100 0000 0000 0000 0000
+  1000 0000 0000 0000 0000 = swing NO HIT sound
+  0001 0000 0000 0000 0000 0000
+  0010 0000 0000 0000 0000 0000
+  0100 0000 0000 0000 0000 0000
+  1000 0000 0000 0000 0000 0000
+  0001 0000 0000 0000 0000 0000 0000
+  ~~~~~~
+  1000 0000 0000 0000 0000 0000 0000
+
+
+
+
+
+	
+
+
+
+	*/
+
+	sLog.outDebug("ATTACK: damagetype: %x",damageType);
+
+	data.Initialize(SMSG_ATTACKERSTATEUPDATE); //2
+    data << (uint32)hitInfo; //hit info //4 I think 1x a uint8 and 3x a uint8 :S not sure
+    data << uint8(0xFF)<< m_session->GetPlayer()->GetGUID(); //source //8+1
+    data << uint8(0xFF)<< chr->GetGUID(); //target //8+1
+    data << (uint32)(damage-AbsorbDamage); //AbsorbDamage //4 //28
+
+    data << (uint8)SwingType;              //no action=0 Short sword=1 2handed weapon=2
+    data << (uint32)damageType;            //damage type //4
+
+    data << (float)damage;                 //damage //4
+	data << (uint32)damage;                //damage //4
+    data << (uint32)AbsorbDamage;          //obsorbed damage //4
+    data << (uint32)Resist;                //resist damage
+    data << (uint32)victimState;           //victum state?:S //4
+
+	//also 0x3E8 = 0x3E8
+    if(AbsorbDamage==0)
+        data << (uint32)0;					//4
+    else
+        data << (uint32)-1; //default value //4
+	
+
+    data << (uint32)0;                      //4
+    data << (uint32)blocked_amount;         //blocked amount of damage //4
+
+
+
+/*	5:54:28 - SERVER >>> OpCode=0x14A SMSG_ATTACKERSTATEUPDATE, size=60
+
+      0- 1- 2- 3- 4- 5- 6- 7- | 8- 9- A- B- C- D- E- F- | 01234567 89ABCDEF
+0000: 00#3A#4A#01 02 81 02 00 | A3 79 93 70 F0 A7 76 1B | .:J..... .y.p..v.
+0010: 08 A0 F0 7C 00 00 00 01 | 00 00 00 00 00 00 F8 42 | ...|.... .......B
+0020: 7C 00 00 00 00 00 00 00 | 00 00 00 00 01 00 00 00 | |....... ........
+0030: E8 03 00 00 00 00 00 00 | 00 00 00 00             | ........ ....
+
+5:54:27 - SERVER >>> OpCode=0x14A SMSG_ATTACKERSTATEUPDATE, size=60
+
+      0- 1- 2- 3- 4- 5- 6- 7- | 8- 9- A- B- C- D- E- F- | 01234567 89ABCDEF
+0000: 00#3A#4A#01 02 81 00 00 | A3 0C 43 70 F0 A7 76 1B | .:J..... ..Cp..v.
+0010: 08 A0 F0 6C 00 00 00 01 | 00 00 00 00 00 00 D8 42 | ...l.... .......B
+0020: 6C 00 00 00 00 00 00 00 | 00 00 00 00 01 00 00 00 | l....... ........
+0030: FF FF FF FF 00 00 00 00 | 00 00 00 00             | ........ ....
+
+
+*/
+
+
+
+	m_session->GetPlayer()->SendMessageToSet(&data, true);
 
     return true;
 }

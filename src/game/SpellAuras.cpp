@@ -210,7 +210,8 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
     m_duration = GetDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
-    if(spellproto->EffectBasePoints[eff] < 0)
+    //if(spellproto->EffectBasePoints[eff] <= 0)
+	if (spellproto->EffectImplicitTargetA[eff] >= 10)
         m_positive = false;
 	else
         m_positive = true;
@@ -1406,6 +1407,8 @@ void Aura::HandleAuraModSkill(bool apply)
 
 void Aura::HandleModDamagePercentDone(bool apply)
 {
+	sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier->m_miscvalue, m_modifier->m_miscvalue2);
+	
     if(m_modifier->m_miscvalue == 1)
     {
         m_target->SetFloatValue(UNIT_FIELD_MINDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
