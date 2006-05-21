@@ -210,7 +210,7 @@ void Spell::EffectTepeportUnits(uint32 i)
 {
     if(!unitTarget)
         return;
-    HandleTeleport(m_spellInfo->Id,unitTarget, i);
+    HandleTeleport(m_spellInfo->Id,unitTarget);
 }
 
 void Spell::EffectApplyAura(uint32 i)
