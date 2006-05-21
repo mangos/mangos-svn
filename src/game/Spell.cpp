@@ -513,16 +513,8 @@ void Spell::update(uint32 difftime)
         m_castPositionY != m_caster->GetPositionY() ||
         m_castPositionZ != m_caster->GetPositionZ() ) )
     {
-        SendInterrupted(0);
-        SendCastResult(0x20);
-        if(m_spellState == SPELL_STATE_CASTING)
-        {
-            m_caster->RemoveAura(m_spellInfo->Id);
-            SendChannelUpdate(0);
-        }
-        finish();
-        m_spellState = SPELL_STATE_FINISHED;
-    }
+		cancel();
+	}
     switch(m_spellState)
     {
         case SPELL_STATE_PREPARING:

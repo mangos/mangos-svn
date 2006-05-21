@@ -960,7 +960,7 @@ void Unit::InterruptSpell()
 {
     if(m_currentSpell)
     {
-        m_currentSpell->SendInterrupted(0x20);
+        //m_currentSpell->SendInterrupted(0x20);
         m_currentSpell->cancel();
         m_currentSpell = NULL;
     }
