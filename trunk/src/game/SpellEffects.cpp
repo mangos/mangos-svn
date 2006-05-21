@@ -371,7 +371,7 @@ void Spell::EffectPresistentAA(uint32 i)
     //m_AreaAura = true;
 
     DynamicObject* dynObj = new DynamicObject();
-    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetMaxDuration(m_spellInfo)))
+    if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo)))
         return;
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
@@ -416,7 +416,7 @@ void Spell::EffectEnergize(uint32 i)
         }break;
     }
     if(POWER_TYPE == UNIT_FIELD_POWER2)
-        damage = damage*10;
+        damage = damage;
 
     uint32 curEnergy = unitTarget->GetUInt32Value(POWER_TYPE);
     uint32 maxEnergy = unitTarget->GetUInt32Value(POWER_TYPE+6);
@@ -1838,7 +1838,7 @@ void Spell::EffectSkill(uint32 i)
 {
 	Player *player = (Player*)m_caster;
 
-	uint32 skill_id = m_spellInfo->EffectMiscValue[1];
+	uint32 skill_id = m_spellInfo->EffectMiscValue[i];
 	if(skill_id == SKILL_FISHING)
 		up_skillvalue = player->CheckFishingAble();
 	if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING || SKILL_HERBALISM)
