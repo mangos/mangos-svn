@@ -280,7 +280,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         status = pPlayer->GetQuestStatus( pQuest );
         if ( status == QUEST_STATUS_NONE )
         {
-            if ( pPlayer->CanSeeQuest( pQuest, false ) )
+            if ( pPlayer->CanSeeStartQuest( pQuest ) )
             {
                 if ( pPlayer->SatisfyQuestLevel(pQuest, false) )
                     return DIALOG_STATUS_AVAILABLE;

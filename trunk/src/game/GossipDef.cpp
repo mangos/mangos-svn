@@ -506,7 +506,7 @@ void PlayerMenu::SendQuestUpdateComplete( Quest *pQuest )
 
 void PlayerMenu::SendQuestCompleteToLog( Quest *pQuest )
 {
-    uint16 log_slot   = pSession->GetPlayer()->getQuestSlot( pQuest->GetQuestInfo()->QuestId );
+    uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
     uint32 updt       = pSession->GetPlayer()->GetUInt32Value( log_slot + 1 );
     updt             |= 0x01000000;
 
@@ -515,7 +515,7 @@ void PlayerMenu::SendQuestCompleteToLog( Quest *pQuest )
 
 void PlayerMenu::SendQuestIncompleteToLog( Quest *pQuest )
 {
-    uint16 log_slot   = pSession->GetPlayer()->getQuestSlot( pQuest->GetQuestInfo()->QuestId );
+    uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
     uint32 vle1       = pSession->GetPlayer()->GetUInt32Value( log_slot + 0 );
 
     pSession->GetPlayer()->SetUInt32Value( log_slot + 0 , vle1 );
@@ -562,7 +562,7 @@ void PlayerMenu::SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 i
 
     if (pSession->GetPlayer() != NULL)
     {
-        uint16 log_slot   = pSession->GetPlayer()->getQuestSlot( pQuest->GetQuestInfo()->QuestId );
+        uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
         uint32 kills      = pSession->GetPlayer()->GetUInt32Value( log_slot + 1 );
         kills             = kills + (1 << ( 6 * iLogMob ));
         pSession->GetPlayer()->SetUInt32Value( log_slot + 1, kills );
@@ -571,7 +571,7 @@ void PlayerMenu::SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 i
 
 void PlayerMenu::SendQuestUpdateSetTimer( Quest *pQuest, uint32 TimerValue)
 {
-    uint16 log_slot   = pSession->GetPlayer()->getQuestSlot( pQuest->GetQuestInfo()->QuestId );
+    uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
     time_t pk         = time(NULL);
     pk += (TimerValue * 60);
     pSession->GetPlayer()->SetUInt32Value( log_slot + 2, pk );

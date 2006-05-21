@@ -57,6 +57,7 @@ Player::Player (WorldSession *session): Unit()
     m_session = session;
 
     info = NULL;
+	m_divider = NULL;
 
     m_afk = 0;
     m_curTarget = 0;
@@ -100,7 +101,7 @@ Player::Player (WorldSession *session): Unit()
     m_cinematic = 0;
 
     PlayerTalkClass = new PlayerMenu( GetSession() );
-    m_timedQuest = 0;
+    m_timedquest = 0;
     m_currentBuybackSlot = 0;
 
     for ( int aX = 0 ; aX < 8 ; aX++ )
@@ -551,29 +552,29 @@ void Player::Update( uint32 p_time )
 
     Quest *pQuest;
 
-    if ( m_timedQuest > 0 )
+    if ( m_timedquest > 0 )
     {
-        pQuest = objmgr.GetQuest( m_timedQuest );
+        pQuest = objmgr.GetQuest( m_timedquest );
 
         if (pQuest)
             if ( !pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) ) pQuest = NULL;
 
         if (pQuest)
         {
-            if ( mQuestStatus[m_timedQuest].m_timer <= p_time)
+            if ( mQuestStatus[m_timedquest].m_timer <= p_time)
             {
 
                 PlayerTalkClass->SendQuestIncompleteToLog( pQuest );
                 PlayerTalkClass->SendQuestUpdateFailedTimer( pQuest );
 
-                mQuestStatus[m_timedQuest].status = QUEST_STATUS_INCOMPLETE;
-                m_timedQuest = 0;
-                mQuestStatus[m_timedQuest].m_timer = 0;
-                mQuestStatus[m_timedQuest].m_timerrel = 0;
+                mQuestStatus[m_timedquest].status = QUEST_STATUS_INCOMPLETE;
+                m_timedquest = 0;
+                mQuestStatus[m_timedquest].m_timer = 0;
+                mQuestStatus[m_timedquest].m_timerrel = 0;
             }
             else
             {
-                mQuestStatus[m_timedQuest].m_timer -= p_time;
+                mQuestStatus[m_timedquest].m_timer -= p_time;
             }
         }
     }
@@ -6267,14 +6268,22 @@ uint8 Player::CheckFishingAble()
     else return 4;
 }
 
+void Player::SetBindPoint(uint64 guid)
+{
+    WorldPacket data;
+    data.Initialize( SMSG_BINDER_CONFIRM );
+    data << guid;
+    GetSession()->SendPacket( &data );
+}
 /*********************************************************/
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
-bool Player::CanSeeQuest( Quest *pQuest, bool msg )
+bool Player::CanSeeStartQuest( Quest *pQuest )
 {
+    sLog.outString( "QUEST: CanSeeQuest");
     if( pQuest )
     {
-        if( SatisfyQuestRace( pQuest, msg ) && SatisfyQuestClass( pQuest, msg ) && SatisfyQuestSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg ) && SatisfyQuestPreviousQuest( pQuest, msg ) )
+        if( SatisfyQuestRace( pQuest, false ) && SatisfyQuestClass( pQuest, false ) && SatisfyQuestSkill( pQuest, false ) && SatisfyQuestReputation( pQuest, false ) && SatisfyQuestPreviousQuest( pQuest, false ) )
             return ( (int32)getLevel() >= (int32)pQuest->GetQuestInfo()->MinLevel - (int32)7 );
     }
     return false;
@@ -6282,51 +6291,43 @@ bool Player::CanSeeQuest( Quest *pQuest, bool msg )
 
 bool Player::CanTakeQuest( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: CanTakeQuest");
     if( pQuest )
-        return ( SatisfyQuestRace( pQuest, msg ) && SatisfyQuestClass( pQuest, msg ) && SatisfyQuestLevel( pQuest, msg ) && SatisfyQuestSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg ) && SatisfyQuestPreviousQuest( pQuest, msg ) );
+        return ( SatisfyQuestStatus( pQuest, msg ) && SatisfyQuestRace( pQuest, msg ) && SatisfyQuestLevel( pQuest, msg ) && SatisfyQuestClass( pQuest, msg ) && SatisfyQuestSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg ) && SatisfyQuestPreviousQuest( pQuest, msg ) && SatisfyQuestTimed( pQuest, msg ) );
     return false;
 }
 
 bool Player::CanAddQuest( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: CanAddQuest");
     if( pQuest )
     {
-        uint32 quest = pQuest->GetQuestInfo()->QuestId;
-        if  ( mQuestStatus.find( quest ) != mQuestStatus.end() )
+		if( !SatisfyQuestLog( msg ) )
+			return false;
+		
+		if( !GiveQuestSourceItem( pQuest ) )
         {
             if( msg )
-                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_QUEST );
-            return false;
-        }
-
-        uint16 log_slot = getOpenQuestSlot();
-        if( log_slot == 0 )
-        {
-            if( msg )
-                PlayerTalkClass->SendQuestFailed( FAILEDREASON_FAILED );
-            return false;
-        }
-
-        if( !GiveQuestSourceItem( pQuest ) )
-        {
-            if( msg )
-                PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+			{
+				WorldPacket data;
+				data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+				data << uint8(EQUIP_ERR_BAG_FULL);
+				data << uint64(0);
+				data << uint64(0);
+				data << uint8(0);
+				GetSession()->SendPacket(&data);
+			}
             return false;
         }
         
-        if ( m_timedQuest && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
-        {
-            if( msg )
-                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_HAVE_TIMED_QUEST );
-            return false;
-        }
         return true;
     }
     return false;
 }
 
-bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
+bool Player::CanCompleteQuest( Quest *pQuest )
 {
+    sLog.outString( "QUEST: CanCompleteQuest");
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -6341,11 +6342,7 @@ bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
                     if( mQuestStatus[quest].m_questItemCount[i] < pQuest->GetQuestInfo()->ReqItemCount[i] )
-                    {
-                        if( msg )
-                            PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_ITEMS );
                         return false;
-                    }
                 }
             }
 
@@ -6366,12 +6363,8 @@ bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
             
             if ( pQuest->GetQuestInfo()->RewMoney < 0 )
             {
-                if ( GetMoney() - pQuest->GetQuestInfo()->RewMoney < 0 )
-                {
-                    if( msg )
-                        PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_REQ_MONEY );
-                    return false;
-                }
+                if ( GetMoney() + pQuest->GetQuestInfo()->RewMoney < 0 )
+					return false;
             }
             return true;
         }
@@ -6381,8 +6374,10 @@ bool Player::CanCompleteQuest( Quest *pQuest, bool msg )
 
 bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
+    sLog.outString( "QUEST: CanRewardQuest");
     if( pQuest )
     {
+		WorldPacket data;
         uint32 count;
         if ( pQuest->m_qRewChoiceItemsCount > 0 )
         {
@@ -6390,7 +6385,15 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
             if  ( count < pQuest->GetQuestInfo()->RewChoiceItemCount[reward] )
             {
                 if( msg )
-                    PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+				{
+					data.clear();
+					data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+					data << uint8(EQUIP_ERR_BAG_FULL);
+					data << uint64(0);
+					data << uint64(0);
+					data << uint8(0);
+					GetSession()->SendPacket(&data);
+				}
                 return false;
             }
         }
@@ -6403,7 +6406,15 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
                 if  (  count < pQuest->GetQuestInfo()->RewItemCount[i] )
                 {
                     if( msg )
-                        PlayerTalkClass->SendQuestFailed( FAILEDREASON_INV_FULL );
+					{
+						data.clear();
+						data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+						data << uint8(EQUIP_ERR_BAG_FULL);
+						data << uint64(0);
+						data << uint64(0);
+						data << uint8(0);
+						GetSession()->SendPacket(&data);
+					}
                     return false;
                 }
             }
@@ -6415,10 +6426,11 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 
 void Player::AddQuest( Quest *pQuest )
 {
+    sLog.outString( "QUEST: AddQuest");
     if( pQuest )
     {
-        uint16 log_slot = getOpenQuestSlot();
-        if( log_slot != 0 )
+        uint16 log_slot = GetQuestSlot( NULL );
+        if( log_slot )
         {
             uint32 quest = pQuest->GetQuestInfo()->QuestId;
             
@@ -6438,6 +6450,7 @@ void Player::AddQuest( Quest *pQuest )
 
 void Player::CompleteQuest( Quest *pQuest )
 {
+    sLog.outString( "QUEST: CompleteQuest");
     if( pQuest )
     {
         SetQuestStatus( pQuest, QUEST_STATUS_COMPLETE);
@@ -6445,14 +6458,30 @@ void Player::CompleteQuest( Quest *pQuest )
     }
 }
 
-void Player::RewardQuest( Quest *pQuest )
+void Player::RewardQuest( Quest *pQuest, uint32 reward )
 {
+    sLog.outString( "QUEST: RewardQuest");
     if( pQuest )
     {
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
             if ( pQuest->GetQuestInfo()->ReqItemId[i] )
                 RemoveItemFromInventory( pQuest->GetQuestInfo()->ReqItemId[i], pQuest->GetQuestInfo()->ReqItemCount[i]);
+        }
+
+        if ( pQuest->m_qRewChoiceItemsCount > 0 )
+        {
+            if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
+                AddNewItem(pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false);
+        }
+        
+        if ( pQuest->m_qRewItemsCount > 0 )
+        {
+            for (int i=0; i < QUEST_REWARDS_COUNT; i++)
+            {
+                if( pQuest->GetQuestInfo()->RewItemId[i] )
+                    AddNewItem(pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false);
+            }
         }
         
         if ( pQuest->GetQuestInfo()->RewSpell > 0 )
@@ -6467,12 +6496,11 @@ void Player::RewardQuest( Quest *pQuest )
 
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
         
-        //PlayerTalkClass->SendQuestUpdateComplete( pQuest );
         PlayerTalkClass->SendQuestComplete( pQuest );
-        uint16 log_slot = getQuestSlot(quest);
-        SetUInt32Value(log_slot+0, 0);
-        SetUInt32Value(log_slot+1, 0);
-        SetUInt32Value(log_slot+2, 0);
+        uint16 log_slot = GetQuestSlot( pQuest );
+        SetUInt32Value(log_slot + 0, 0);
+        SetUInt32Value(log_slot + 1, 0);
+        SetUInt32Value(log_slot + 2, 0);
         
         if ( getLevel() < 60 )
         {
@@ -6491,24 +6519,31 @@ void Player::RewardQuest( Quest *pQuest )
 
 bool Player::SatisfyQuestClass( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: SatisfyQuestClass");
     if( pQuest )
     {
         uint32 reqclasses = pQuest->GetQuestInfo()->RequiredClass;
         if ( reqclasses == QUEST_CLASS_NONE )
             return true;
-        return( (reqclasses & getClassMask()) != 0 );
+        if( (reqclasses & getClassMask()) == 0 )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
     }
     return false;
 }
 
 bool Player::SatisfyQuestLevel( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: SatisfyQuestLevel");
     if( pQuest )
     {
         if( getLevel() < pQuest->GetQuestInfo()->MinLevel )
         {
             if( msg )
-                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_LEVEL );
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
         }
         return true;
@@ -6516,31 +6551,50 @@ bool Player::SatisfyQuestLevel( Quest *pQuest, bool msg )
     return false;
 }
 
+bool Player::SatisfyQuestLog( bool msg )
+{
+	uint16 log_slot = GetQuestSlot( NULL );
+	if( log_slot )
+		return true;
+	else
+	{
+		if( msg )
+			PlayerTalkClass->SendQuestLogFull();
+		return false;
+	}
+}
+
 bool Player::SatisfyQuestPreviousQuest( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: SatisfyQuestPreviousQuest");
     if( pQuest )
     {
         uint32 previousquest = pQuest->GetQuestInfo()->PrevQuestId;
         if( previousquest == 0 )
             return true;
-        if( mQuestStatus.find( previousquest ) == mQuestStatus.end() )
+        if( mQuestStatus.find( previousquest ) == mQuestStatus.end() || !mQuestStatus[previousquest].rewarded )
+		{
+			if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
-        return mQuestStatus[previousquest].rewarded;
+		}
+        return true;
     }
     return false;
 }
 
 bool Player::SatisfyQuestRace( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: SatisfyQuestRace");
     if( pQuest )
     {
         uint32 reqraces = pQuest->GetQuestInfo()->RequiredRaces;
         if ( reqraces == QUEST_RACE_NONE )
             return true;
-        if( !(reqraces & getRaceMask()) )
+        if( (reqraces & getRace()) == 0 )
         {
             if( msg )
-                PlayerTalkClass->SendQuestInvalid( INVALIDREASON_DONT_HAVE_RACE );
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_RACE );
             return false;
         }
         return true;
@@ -6550,6 +6604,7 @@ bool Player::SatisfyQuestRace( Quest *pQuest, bool msg )
 
 bool Player::SatisfyQuestReputation( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: SatisfyQuestReputation");
     if( pQuest )
         return true;
     return false;
@@ -6557,18 +6612,58 @@ bool Player::SatisfyQuestReputation( Quest *pQuest, bool msg )
 
 bool Player::SatisfyQuestSkill( Quest *pQuest, bool msg )
 {
+    sLog.outString( "QUEST: SatisfyQuestSkill");
     if( pQuest )
     {
         uint32 reqskill = pQuest->GetQuestInfo()->RequiredTradeskill;
         if( reqskill == QUEST_TRSKILL_NONE )
             return true;
-        return( GetSkillValue( reqskill ) != 0 );
+        if( GetSkillValue( reqskill ) == 0 )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
+        return true;
     }
     return false;
 }
 
+bool Player::SatisfyQuestStatus( Quest *pQuest, bool msg )
+{
+    sLog.outString( "QUEST: SatisfyQuestStatus");
+    if( pQuest )
+    {
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        if  ( mQuestStatus.find( quest ) != mQuestStatus.end() )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_HAVE_QUEST );
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool Player::SatisfyQuestTimed( Quest *pQuest, bool msg )
+{
+	if( pQuest )
+	{
+		if ( GetTimedQuest() && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
+            return false;
+        }
+		return true;
+	}
+	return false;
+}
+
 bool Player::GiveQuestSourceItem( Quest *pQuest )
 {
+    sLog.outString( "QUEST: GiveQuestSourceItem");
     if( pQuest )
     {
         uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
@@ -6588,6 +6683,7 @@ bool Player::GiveQuestSourceItem( Quest *pQuest )
 
 void Player::TakeQuestSourceItem( Quest *pQuest )
 {
+    sLog.outString( "QUEST: TakeQuestSourceItem");
     if( pQuest )
     {
         uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
@@ -6603,6 +6699,7 @@ void Player::TakeQuestSourceItem( Quest *pQuest )
 
 bool Player::GetQuestRewardStatus( Quest *pQuest )
 {
+    sLog.outString( "QUEST: GetQuestRewardStatus");
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -6615,6 +6712,7 @@ bool Player::GetQuestRewardStatus( Quest *pQuest )
 
 uint32 Player::GetQuestStatus( Quest *pQuest )
 {
+    sLog.outString( "QUEST: GetQuestStatus");
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -6626,6 +6724,7 @@ uint32 Player::GetQuestStatus( Quest *pQuest )
 
 void Player::SetQuestStatus( Quest *pQuest, uint32 status )
 {
+    sLog.outString( "QUEST: SetQuestStatus");
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -6638,6 +6737,7 @@ void Player::SetQuestStatus( Quest *pQuest, uint32 status )
 
 void Player::AdjustQuestReqItemCount( Quest *pQuest )
 {
+    sLog.outString( "QUEST: AdjustQuestReqItemCount");
     if( pQuest )
     {
         if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
@@ -6655,67 +6755,21 @@ void Player::AdjustQuestReqItemCount( Quest *pQuest )
     }
 }
 
-
-
-void Player::finishExplorationQuest( Quest *pQuest )
+uint16 Player::GetQuestSlot( Quest *pQuest )
 {
-    if(!pQuest) return;
-
-    if ( GetQuestStatus( pQuest ) == QUEST_STATUS_INCOMPLETE )
+    uint32 quest = 0;
+    if( pQuest )
+        quest = pQuest->GetQuestInfo()->QuestId;
+    
+    for ( uint16 i = 0; i < 20; i++ )
     {
-        if ( !mQuestStatus[ pQuest->GetQuestInfo()->QuestId ].m_explored )
-        {
-            PlayerTalkClass->SendQuestUpdateComplete( pQuest );
-            mQuestStatus[ pQuest->GetQuestInfo()->QuestId ].m_explored = true;
-        }
-
-        if ( CanCompleteQuest( pQuest, false ) )
-            CompleteQuest( pQuest );
+        if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
+                return PLAYER_QUEST_LOG_1_1 + 3*i;
     }
-}
-
-
-
-
-uint16 Player::getOpenQuestSlot()
-{
-    uint16 start = PLAYER_QUEST_LOG_1_1;
-    uint16 end = PLAYER_QUEST_LOG_1_1 + 60;
-    for (uint16 i = start; i <= end; i+=3)
-        if (GetUInt32Value(i) == 0)
-            return i;
-
     return 0;
 }
 
-uint16 Player::getQuestSlot(uint32 quest_id)
-{
-    uint16 start = PLAYER_QUEST_LOG_1_1;
-    uint16 end = PLAYER_QUEST_LOG_1_1 + 60;
-    for (uint16 i = start; i <= end; i+=3)
-        if (GetUInt32Value(i) == quest_id)
-            return i;
-
-    return 0;
-}
-
-uint16 Player::getQuestSlotById(uint32 slot_id)
-{
-    uint16 start = PLAYER_QUEST_LOG_1_1;
-    uint16 end   = PLAYER_QUEST_LOG_1_1 + 60;
-    uint16 idx   = 0;
-
-    for (uint16 i = start; i <= end; i+=3)
-    {
-        idx++;
-        if ( idx == slot_id )
-            return i;
-    }
-
-    return 0;
-}
-
-void Player::ItemAdded(uint32 entry, uint32 count)
+void Player::ItemAdded( uint32 entry, uint32 count )
 {
     quest_status qs;
     uint32 reqitem;
@@ -6740,7 +6794,7 @@ void Player::ItemAdded(uint32 entry, uint32 count)
                         mQuestStatus[i->first].m_questItemCount[j] += additemcount;
                         PlayerTalkClass->SendQuestUpdateAddItem(qs.m_quest, j, additemcount);
                     }
-                    if ( CanCompleteQuest( qs.m_quest, false ) )
+                    if ( CanCompleteQuest( qs.m_quest ) )
                     {
                         CompleteQuest( qs.m_quest );
                         PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
@@ -6752,7 +6806,7 @@ void Player::ItemAdded(uint32 entry, uint32 count)
     }
 }
 
-void Player::ItemRemoved(uint32 entry, uint32 count)
+void Player::ItemRemoved( uint32 entry, uint32 count )
 {
     quest_status qs;
     uint32 reqitem;
@@ -6785,15 +6839,7 @@ void Player::ItemRemoved(uint32 entry, uint32 count)
     }
 }
 
-void Player::SetBindPoint(uint64 guid)
-{
-    WorldPacket data;
-    data.Initialize( SMSG_BINDER_CONFIRM );
-    data << guid;
-    GetSession()->SendPacket( &data );
-}
-
-void Player::KilledMonster(uint32 entry, uint64 guid)
+void Player::KilledMonster( uint32 entry, uint64 guid )
 {
     quest_status qs;
     uint32 reqkill;
@@ -6817,7 +6863,7 @@ void Player::KilledMonster(uint32 entry, uint64 guid)
                         mQuestStatus[i->first].m_questMobCount[j] = curkillcount + addkillcount;
                         PlayerTalkClass->SendQuestUpdateAddKill(qs.m_quest, guid, curkillcount + addkillcount, j);
                     }
-                    if ( CanCompleteQuest( qs.m_quest, false ) )
+                    if ( CanCompleteQuest( qs.m_quest ) )
                     {
                         CompleteQuest( qs.m_quest );
                         PlayerTalkClass->SendQuestUpdateComplete( qs.m_quest );
@@ -6829,7 +6875,7 @@ void Player::KilledMonster(uint32 entry, uint64 guid)
     }
 }
 
-void Player::AddQuestsLoot(Creature* creature)
+void Player::AddQuestsLoot( Creature* creature )
 {
     quest_status qs;
     uint32 itemid=0;
@@ -6850,6 +6896,42 @@ void Player::AddQuestsLoot(Creature* creature)
             }
         }
     }
+}
+
+void Player::SendQuestFailed( Quest *pQuest )
+{
+	if( pQuest )
+	{
+		uint32 quest = pQuest->GetQuestInfo()->QuestId;
+		WorldPacket data;
+		data.Initialize( SMSG_QUESTGIVER_QUEST_FAILED );
+		data << quest;
+		GetSession()->SendPacket( &data );
+		sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_FAILED");
+	}
+}
+
+void Player::SendCanTakeQuestResponse( uint32 msg )
+{
+	WorldPacket data;
+	data.Initialize( SMSG_QUESTGIVER_QUEST_INVALID );
+    data << msg;
+	GetSession()->SendPacket( &data );
+	sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
+}
+
+void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
+{
+	if( pPlayer )
+	{
+		WorldPacket data;
+		data.Initialize( MSG_QUEST_PUSH_RESULT );
+		data << pPlayer->GetGUID();
+		data << msg;
+		data << uint8(0);
+		GetSession()->SendPacket( &data );
+		sLog.outDebug("WORLD: Sent MSG_QUEST_PUSH_RESULT");
+	}
 }
 
 /*********************************************************/
@@ -7169,7 +7251,7 @@ void Player::_LoadQuestStatus()
                 {
                     mQuestStatus[quest].m_timer = (mQuestStatus[quest].m_timerrel - q_abs) * 1000;
                     sLog.outDebug("Setup timer at {%u}msec. for quest {%u}!", mQuestStatus[quest].m_timer, quest);
-                    m_timedQuest = quest;
+                    m_timedquest = quest;
                     continue;
                 }
                 else

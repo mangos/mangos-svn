@@ -43,7 +43,7 @@ enum OpCodes
     CMSG_CREATEITEM                                 = 19,
     CMSG_CREATEGAMEOBJECT                           = 20,
 
-    //CMSG_MAKEMONSTERATTACKME						= 21, //OBSOLETE
+    //CMSG_MAKEMONSTERATTACKME                        = 21, //OBSOLETE
     CMSG_MAKEMONSTERATTACKME_OBSOLETE               = 21,
     CMSG_MAKEMONSTERATTACKGUID                      = 22,
     CMSG_ENABLEDEBUGCOMBATLOGGING_OBSOLETE          = 23,
@@ -342,7 +342,7 @@ enum OpCodes
     SMSG_AI_REACTION                                = 316,
     CMSG_SET_SELECTION                              = 317,
 
-    //CMSG_SET_TARGET								= 318, //OBSOLETE
+    //CMSG_SET_TARGET                                = 318, //OBSOLETE
     CMSG_SET_TARGET_OBSOLETE                        = 318,
     CMSG_UNUSED                                     = 319,
     CMSG_UNUSED2                                    = 320,
@@ -404,7 +404,7 @@ enum OpCodes
     SMSG_PET_NAME_INVALID                           = 376,
     SMSG_PET_SPELLS                                 = 377,
 
-    //CMSG_PET_CAST_SPELL_OBSOLETE					= 378, //OBSOLETE
+    //CMSG_PET_CAST_SPELL_OBSOLETE                    = 378, //OBSOLETE
     SMSG_PET_MODE                                   = 378,
     CMSG_GOSSIP_HELLO                               = 379,
     CMSG_GOSSIP_SELECT_OPTION                       = 380,
@@ -515,7 +515,7 @@ enum OpCodes
     CMSG_GHOST                                      = 485,
     CMSG_GM_INVIS                                   = 486,
 
-    //CMSG_SCREENSHOT								= 487, //OBSOLETE
+    //CMSG_SCREENSHOT                                = 487, //OBSOLETE
     SMSG_INVALID_PROMOTION_CODE                     = 487,
     MSG_GM_BIND_OTHER                               = 488,
     MSG_GM_SUMMON                                   = 489,
@@ -526,7 +526,7 @@ enum OpCodes
     SMSG_AUTH_RESPONSE                              = 494,
     MSG_GM_SHOWLABEL                                = 495,
 
-    //MSG_ADD_DYNAMIC_TARGET						= 496, //OBSOLETE
+    //MSG_ADD_DYNAMIC_TARGET                        = 496, //OBSOLETE
     MSG_ADD_DYNAMIC_TARGET_OBSOLETE                 = 496,
     MSG_SAVE_GUILD_EMBLEM                           = 497,
     MSG_TABARDVENDOR_ACTIVATE                       = 498,
@@ -627,7 +627,7 @@ enum OpCodes
     CMSG_LEARN_TALENT                               = 593,
     SMSG_RESURRECT_FAILED                           = 594,
 
-    //CMSG_ENABLE_PVP								= 595, //OBSOLETE
+    //CMSG_ENABLE_PVP                                = 595, //OBSOLETE
     CMSG_TOGGLE_PVP                                 = 595,
     SMSG_ZONE_UNDER_ATTACK                          = 596,
     MSG_AUCTION_HELLO                               = 597,
@@ -673,7 +673,7 @@ enum OpCodes
     CMSG_ENABLE_DAMAGE_LOG                          = 637,
     CMSG_GROUP_CHANGE_SUB_GROUP                     = 638,
 
-    //SMSG_RAID_MEMBER_STATS						= 639, //OBSOLETE
+    //SMSG_RAID_MEMBER_STATS                        = 639, //OBSOLETE
     CMSG_REQUEST_PARTY_MEMBER_STATS                 = 639,
     CMSG_GROUP_SWAP_SUB_GROUP                       = 640,
     CMSG_RESET_FACTION_CHEAT                        = 641,
@@ -735,7 +735,7 @@ enum OpCodes
     CMSG_TOGGLE_HELM                                = 697,
     CMSG_TOGGLE_CLOAK                               = 698,
 
-    //SMSG_SPELL_REFLECTED							= 699, //OBSOLETE
+    //SMSG_SPELL_REFLECTED                            = 699, //OBSOLETE
     SMSG_MEETINGSTONE_JOINFAILED                    = 699,
     SMSG_PLAYER_SKINNED                             = 700,
     SMSG_DURABILITY_DAMAGE_DEATH                    = 701,

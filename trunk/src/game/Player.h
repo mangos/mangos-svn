@@ -326,39 +326,54 @@ class MANGOS_DLL_SPEC Player : public Unit
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 
-        bool CanSeeQuest( Quest *pQuest, bool msg );
+        bool CanSeeStartQuest( Quest *pQuest );
         bool CanTakeQuest( Quest *pQuest, bool msg );
         bool CanAddQuest( Quest *pQuest, bool msg );
-        bool CanCompleteQuest( Quest *pQuest, bool msg );
+        bool CanCompleteQuest( Quest *pQuest );
         bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
         void AddQuest( Quest *pQuest );
         void CompleteQuest( Quest *pQuest );
-        void RewardQuest( Quest *pQuest );
+        void RewardQuest( Quest *pQuest, uint32 reward );
         bool SatisfyQuestClass( Quest *pQuest, bool msg );
         bool SatisfyQuestLevel( Quest *pQuest, bool msg );
+		bool SatisfyQuestLog( bool msg );
         bool SatisfyQuestPreviousQuest( Quest *pQuest, bool msg );
         bool SatisfyQuestRace( Quest *pQuest, bool msg );
         bool SatisfyQuestReputation( Quest *pQuest, bool msg );
         bool SatisfyQuestSkill( Quest *pQuest, bool msg );
+        bool SatisfyQuestStatus( Quest *pQuest, bool msg );
+		bool SatisfyQuestTimed( Quest *pQuest, bool msg );
         bool GiveQuestSourceItem( Quest *pQuest );
         void TakeQuestSourceItem( Quest *pQuest );
         bool GetQuestRewardStatus( Quest *pQuest );
         uint32 GetQuestStatus( Quest *pQuest );
         void SetQuestStatus( Quest *pQuest, uint32 status );
         void AdjustQuestReqItemCount( Quest *pQuest );
+        uint16 GetQuestSlot( Quest *pQuest );
+        void ItemAdded( uint32 entry, uint32 count );
+        void ItemRemoved( uint32 entry, uint32 count );
+        void KilledMonster( uint32 entry, uint64 guid );
+        void AddQuestsLoot( Creature* creature );
 
-        void finishExplorationQuest( Quest *pQuest );
-        uint16 getOpenQuestSlot();
-        uint16 getQuestSlot(uint32 quest_id);
-        uint16 getQuestSlotById(uint32 slot_id);
-        void ItemAdded(uint32 entry, uint32 count);
-        void ItemRemoved(uint32 entry, uint32 count);
-        void SetBindPoint(uint64 guid);
-        void KilledMonster(uint32 entry, uint64 guid);
-        void AddQuestsLoot(Creature* creature);
+		void SendQuestFailed( Quest *pQuest );
+		void SendCanTakeQuestResponse( uint32 msg );
+		void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
+
+        uint64 GetDivideState() { return m_divider; };
+        void SetDivideState( uint64 guid ) { m_divider = guid; };
+
+		uint32 GetTimedQuest() { return m_timedquest; };
+		void SetTimedQuest( Quest *pQuest ) {
+			if( pQuest )
+			{
+				uint32 quest = pQuest->GetQuestInfo()->PrevQuestId;
+				m_timedquest = quest;
+			}
+		};
 
 /*********************************************************/
 
+        void SetBindPoint(uint64 guid);
         void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
@@ -667,6 +682,15 @@ class MANGOS_DLL_SPEC Player : public Unit
 
     protected:
 
+/*********************************************************/
+/***                    QUEST SYSTEM                   ***/
+/*********************************************************/
+
+		uint32 m_timedquest;
+        uint64 m_divider;
+
+/*********************************************************/
+
         void AddWeather();
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -777,7 +801,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         Player *m_pDuelSender;
 
         time_t m_nextThinkTime;
-        uint32 m_timedQuest;
         uint32 m_Tutorials[8];
         uint32 m_regenTimer;
         uint32 m_breathTimer;

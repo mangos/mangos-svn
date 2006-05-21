@@ -33,42 +33,6 @@
 #include "SpellAuras.h"
 #include "ScriptCalls.h"
 
-bool ChatHandler::HandleSetPoiCommand(const char* args)
-{
-    Player *  pPlayer = m_session->GetPlayer();
-    Unit* target = ObjectAccessor::Instance().GetCreature(*pPlayer, pPlayer->GetSelection());
-    if(!target)
-    {
-        WorldPacket data;
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
-        m_session->SendPacket( &data );
-        return true;
-    }
-    uint32 icon = atol((char*)args);
-    if ( icon < 0 )
-        icon = 0;
-    sLog.outDetail("Command : POI, NPC = %u, icon = %u", target->GetGUID(), icon);
-    pPlayer->PlayerTalkClass->SendPointOfInterest(target->GetPositionX(), target->GetPositionY(), icon, 6, 30, "Test POI");
-    return true;
-}
-
-bool ChatHandler::HandleSendItemErrorMsg(const char* args)
-{
-    uint8 error_msg = atol((char*)args);
-    if ( error_msg >= 0 )
-    {
-        WorldPacket data;
-        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-        data << error_msg;
-        data << uint64(0);
-        data << uint64(0);
-        data << uint8(0);
-        m_session->SendPacket( &data );
-        return true;
-    }
-    return false;
-}
-
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
     return true;
