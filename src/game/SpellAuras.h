@@ -234,6 +234,7 @@ class Aura
         void HandlePeriodicHeal(bool apply);
         void HandleAuraWaterWalk(bool Apply);
         void HandleAuraFeatherFall(bool Apply);
+        void HandleAddModifier(bool Apply);
         void HandleAuraModStun(bool Apply);
         void HandleAuraModRangedAttackPower(bool Apply);
         void HandleAuraModIncreaseSpeedAlways(bool Apply);

@@ -60,7 +60,6 @@ struct SpellEntry
     uint32    Category;
     uint32    Attributes;
     uint32    AttributesEx;
-	uint32	  Requirement;
     uint32    Targets;
     uint32    TargetCreatureType;
     uint32    RequiresSpellFocus;
