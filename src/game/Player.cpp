@@ -57,7 +57,7 @@ Player::Player (WorldSession *session): Unit()
     m_session = session;
 
     info = NULL;
-	m_divider = NULL;
+    m_divider = NULL;
 
     m_afk = 0;
     m_curTarget = 0;
@@ -6302,21 +6302,21 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
     sLog.outString( "QUEST: CanAddQuest");
     if( pQuest )
     {
-		if( !SatisfyQuestLog( msg ) )
-			return false;
-		
-		if( !GiveQuestSourceItem( pQuest ) )
+        if( !SatisfyQuestLog( msg ) )
+            return false;
+        
+        if( !GiveQuestSourceItem( pQuest ) )
         {
             if( msg )
-			{
-				WorldPacket data;
-				data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-				data << uint8(EQUIP_ERR_BAG_FULL);
-				data << uint64(0);
-				data << uint64(0);
-				data << uint8(0);
-				GetSession()->SendPacket(&data);
-			}
+            {
+                WorldPacket data;
+                data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+                data << uint8(EQUIP_ERR_BAG_FULL);
+                data << uint64(0);
+                data << uint64(0);
+                data << uint8(0);
+                GetSession()->SendPacket(&data);
+            }
             return false;
         }
         
@@ -6364,7 +6364,7 @@ bool Player::CanCompleteQuest( Quest *pQuest )
             if ( pQuest->GetQuestInfo()->RewMoney < 0 )
             {
                 if ( GetMoney() + pQuest->GetQuestInfo()->RewMoney < 0 )
-					return false;
+                    return false;
             }
             return true;
         }
@@ -6377,7 +6377,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
     sLog.outString( "QUEST: CanRewardQuest");
     if( pQuest )
     {
-		WorldPacket data;
+        WorldPacket data;
         uint32 count;
         if ( pQuest->m_qRewChoiceItemsCount > 0 )
         {
@@ -6385,15 +6385,15 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
             if  ( count < pQuest->GetQuestInfo()->RewChoiceItemCount[reward] )
             {
                 if( msg )
-				{
-					data.clear();
-					data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-					data << uint8(EQUIP_ERR_BAG_FULL);
-					data << uint64(0);
-					data << uint64(0);
-					data << uint8(0);
-					GetSession()->SendPacket(&data);
-				}
+                {
+                    data.clear();
+                    data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+                    data << uint8(EQUIP_ERR_BAG_FULL);
+                    data << uint64(0);
+                    data << uint64(0);
+                    data << uint8(0);
+                    GetSession()->SendPacket(&data);
+                }
                 return false;
             }
         }
@@ -6406,15 +6406,15 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
                 if  (  count < pQuest->GetQuestInfo()->RewItemCount[i] )
                 {
                     if( msg )
-					{
-						data.clear();
-						data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-						data << uint8(EQUIP_ERR_BAG_FULL);
-						data << uint64(0);
-						data << uint64(0);
-						data << uint8(0);
-						GetSession()->SendPacket(&data);
-					}
+                    {
+                        data.clear();
+                        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+                        data << uint8(EQUIP_ERR_BAG_FULL);
+                        data << uint64(0);
+                        data << uint64(0);
+                        data << uint8(0);
+                        GetSession()->SendPacket(&data);
+                    }
                     return false;
                 }
             }
@@ -6553,15 +6553,15 @@ bool Player::SatisfyQuestLevel( Quest *pQuest, bool msg )
 
 bool Player::SatisfyQuestLog( bool msg )
 {
-	uint16 log_slot = GetQuestSlot( NULL );
-	if( log_slot )
-		return true;
-	else
-	{
-		if( msg )
-			PlayerTalkClass->SendQuestLogFull();
-		return false;
-	}
+    uint16 log_slot = GetQuestSlot( NULL );
+    if( log_slot )
+        return true;
+    else
+    {
+        if( msg )
+            PlayerTalkClass->SendQuestLogFull();
+        return false;
+    }
 }
 
 bool Player::SatisfyQuestPreviousQuest( Quest *pQuest, bool msg )
@@ -6573,11 +6573,11 @@ bool Player::SatisfyQuestPreviousQuest( Quest *pQuest, bool msg )
         if( previousquest == 0 )
             return true;
         if( mQuestStatus.find( previousquest ) == mQuestStatus.end() || !mQuestStatus[previousquest].rewarded )
-		{
-			if( msg )
+        {
+            if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
-		}
+        }
         return true;
     }
     return false;
@@ -6648,17 +6648,17 @@ bool Player::SatisfyQuestStatus( Quest *pQuest, bool msg )
 
 bool Player::SatisfyQuestTimed( Quest *pQuest, bool msg )
 {
-	if( pQuest )
-	{
-		if ( GetTimedQuest() && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+    if( pQuest )
+    {
+        if ( GetTimedQuest() && pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
             return false;
         }
-		return true;
-	}
-	return false;
+        return true;
+    }
+    return false;
 }
 
 bool Player::GiveQuestSourceItem( Quest *pQuest )
@@ -6900,38 +6900,38 @@ void Player::AddQuestsLoot( Creature* creature )
 
 void Player::SendQuestFailed( Quest *pQuest )
 {
-	if( pQuest )
-	{
-		uint32 quest = pQuest->GetQuestInfo()->QuestId;
-		WorldPacket data;
-		data.Initialize( SMSG_QUESTGIVER_QUEST_FAILED );
-		data << quest;
-		GetSession()->SendPacket( &data );
-		sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_FAILED");
-	}
+    if( pQuest )
+    {
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTGIVER_QUEST_FAILED );
+        data << quest;
+        GetSession()->SendPacket( &data );
+        sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_FAILED");
+    }
 }
 
 void Player::SendCanTakeQuestResponse( uint32 msg )
 {
-	WorldPacket data;
-	data.Initialize( SMSG_QUESTGIVER_QUEST_INVALID );
+    WorldPacket data;
+    data.Initialize( SMSG_QUESTGIVER_QUEST_INVALID );
     data << msg;
-	GetSession()->SendPacket( &data );
-	sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
+    GetSession()->SendPacket( &data );
+    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
 
 void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
 {
-	if( pPlayer )
-	{
-		WorldPacket data;
-		data.Initialize( MSG_QUEST_PUSH_RESULT );
-		data << pPlayer->GetGUID();
-		data << msg;
-		data << uint8(0);
-		GetSession()->SendPacket( &data );
-		sLog.outDebug("WORLD: Sent MSG_QUEST_PUSH_RESULT");
-	}
+    if( pPlayer )
+    {
+        WorldPacket data;
+        data.Initialize( MSG_QUEST_PUSH_RESULT );
+        data << pPlayer->GetGUID();
+        data << msg;
+        data << uint8(0);
+        GetSession()->SendPacket( &data );
+        sLog.outDebug("WORLD: Sent MSG_QUEST_PUSH_RESULT");
+    }
 }
 
 /*********************************************************/

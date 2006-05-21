@@ -266,8 +266,8 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     sLog.outString( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
-	if( slot >= 0 && slot <= 20 )
-	{
+    if( slot >= 0 && slot <= 20 )
+    {
         quest = _player->GetUInt32Value(3*slot + 200 + 0);
 
         _player->SetUInt32Value(3*slot + 200 + 0, 0);
@@ -328,7 +328,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
             Group *pGroup = objmgr.GetGroupByLeader(_player->GetGroupLeader());
             if( pGroup )
             {
-				uint32 pguid = _player->GetGUID();
+                uint32 pguid = _player->GetGUID();
                 uint32 memberscount = pGroup->GetMembersCount();
                 for (int i = 0; i < memberscount; i++)
                 {
@@ -338,53 +338,53 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                         Player *pPlayer = ObjectAccessor::Instance().FindPlayer(guid);
                         if( pPlayer )
                         {
-							data.clear();
-							data.Initialize( MSG_QUEST_PUSH_RESULT );
-							data << guid;
-							data << uint32( QUEST_PARTY_MSG_SHARRING_QUEST );
-							data << uint8(0);
-							_player->GetSession()->SendPacket(&data);
+                            data.clear();
+                            data.Initialize( MSG_QUEST_PUSH_RESULT );
+                            data << guid;
+                            data << uint32( QUEST_PARTY_MSG_SHARRING_QUEST );
+                            data << uint8(0);
+                            _player->GetSession()->SendPacket(&data);
 
-							if( _player->GetDistanceSq( pPlayer ) > 100 )
-							{
-								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_TO_FAR );
-								continue;
-							}
+                            if( _player->GetDistanceSq( pPlayer ) > 100 )
+                            {
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_TO_FAR );
+                                continue;
+                            }
 
-							if( !pPlayer->SatisfyQuestStatus( pQuest, false ) )
-							{
-								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_HAVE_QUEST );
-								continue;
-							}
+                            if( !pPlayer->SatisfyQuestStatus( pQuest, false ) )
+                            {
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_HAVE_QUEST );
+                                continue;
+                            }
 
-							if( pPlayer->GetQuestStatus( pQuest ) == QUEST_STATUS_COMPLETE )
-							{
-								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_FINISH_QUEST );
-								continue;
-							}
+                            if( pPlayer->GetQuestStatus( pQuest ) == QUEST_STATUS_COMPLETE )
+                            {
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_FINISH_QUEST );
+                                continue;
+                            }
 
-							if( !pPlayer->CanTakeQuest( pQuest, false ) )
-							{
-								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_CANT_TAKE_QUEST );
-								continue;
-							}
+                            if( !pPlayer->CanTakeQuest( pQuest, false ) )
+                            {
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_CANT_TAKE_QUEST );
+                                continue;
+                            }
 
-							if( !pPlayer->SatisfyQuestLog( false ) )
-							{
-								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_LOG_FULL );
-								continue;
-							}
+                            if( !pPlayer->SatisfyQuestLog( false ) )
+                            {
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_LOG_FULL );
+                                continue;
+                            }
 
-							if( pPlayer->GetDivideState()  )
-							{
-								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_BUSY );
-								continue;
-							}
-							
-							pPlayer->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
-						}
-					}
-				}
+                            if( pPlayer->GetDivideState()  )
+                            {
+                                _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_BUSY );
+                                continue;
+                            }
+                            
+                            pPlayer->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
+                        }
+                    }
+                }
             }
         }
     }
