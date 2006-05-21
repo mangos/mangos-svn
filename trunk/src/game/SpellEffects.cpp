@@ -415,8 +415,8 @@ void Spell::EffectEnergize(uint32 i)
             POWER_TYPE = UNIT_FIELD_POWER5;
         }break;
     }
-    if(POWER_TYPE == UNIT_FIELD_POWER2)
-        damage = damage;
+    //if(POWER_TYPE == UNIT_FIELD_POWER2)
+    //    damage = damage;
 
     uint32 curEnergy = unitTarget->GetUInt32Value(POWER_TYPE);
     uint32 maxEnergy = unitTarget->GetUInt32Value(POWER_TYPE+6);
