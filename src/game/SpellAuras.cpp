@@ -207,7 +207,7 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
-    m_duration = GetMaxDuration(spellproto);
+    m_duration = GetDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
     if(spellproto->EffectBasePoints[eff] < 0)
@@ -925,9 +925,9 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * m_modifier->m_amount/100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier->m_amount + 100.0f ) / 100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier->m_amount );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier->m_amount + 100.0f ) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
@@ -1180,7 +1180,9 @@ void Aura::HandleAuraMounted(bool apply)
         if(displayId != 0)
         {
             m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , displayId);
-            m_target->SetUInt32Value( UNIT_FIELD_FLAGS , 0x002000 );
+            //m_target->SetUInt32Value( UNIT_FIELD_FLAGS , 0x002000 );
+			//m_target->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
+			m_target->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
         }
     }else
     {
