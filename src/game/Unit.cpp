@@ -231,7 +231,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     {
         crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
         //pVictim->Relocate(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), pVictim->GetAngle( this ));
-		pVictim->setInFront(this);
+        pVictim->setInFront(this);
         ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
@@ -386,7 +386,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 player->GiveXP(xp, victimGuid);
 
                 if (pVictim->GetTypeId() != TYPEID_PLAYER)
-                    player->KilledMonster(entry, victimGuid);
+                    player->KilledMonster(entry,victimGuid);
             }
         }
         else
@@ -905,24 +905,24 @@ void Unit::_UpdateSpells( uint32 time )
                 next = m_Auras.begin();
         }
     }
-	if(m_dynObj.empty())
-		return;
-	std::list<DynamicObject*>::iterator ite, dnext;
-	for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
+    if(m_dynObj.empty())
+        return;
+    std::list<DynamicObject*>::iterator ite, dnext;
+    for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
     {
         dnext = ite;
         dnext++;
         //(*i)->Update( difftime );
-		if( (*ite)->isFinished() )
-		{
-			(*ite)->Delete();
-			m_dynObj.erase(ite);
-			if(m_dynObj.empty())
-				break;
-			else
-				dnext = m_dynObj.begin();
-		}
-	}
+        if( (*ite)->isFinished() )
+        {
+            (*ite)->Delete();
+            m_dynObj.erase(ite);
+            if(m_dynObj.empty())
+                break;
+            else
+                dnext = m_dynObj.begin();
+        }
+    }
 }
 
 void Unit::_UpdateHostil( uint32 time )
@@ -1419,26 +1419,26 @@ void Unit::AddItemEnchant(uint32 enchant_id)
 
 void Unit::AddDynObject(DynamicObject* dynObj)
 {
-	m_dynObj.push_back(dynObj);
+    m_dynObj.push_back(dynObj);
 }
 
 void Unit::RemoveDynObject(uint32 spellid)
 {
-	if(m_dynObj.empty())
-		return;
-	std::list<DynamicObject*>::iterator i, next;
-	for (i = m_dynObj.begin(); i != m_dynObj.end(); i = next)
+    if(m_dynObj.empty())
+        return;
+    std::list<DynamicObject*>::iterator i, next;
+    for (i = m_dynObj.begin(); i != m_dynObj.end(); i = next)
     {
         next = i;
         next++;
-		if(spellid == 0 || (*i)->GetSpellId() == spellid)
-		{
-			(*i)->Delete();
-			m_dynObj.erase(i);
-			if(m_dynObj.empty())
-				break;
-			else
-				next = m_dynObj.begin();
-		}
-	}
+        if(spellid == 0 || (*i)->GetSpellId() == spellid)
+        {
+            (*i)->Delete();
+            m_dynObj.erase(i);
+            if(m_dynObj.empty())
+                break;
+            else
+                next = m_dynObj.begin();
+        }
+    }
 }

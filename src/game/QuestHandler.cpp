@@ -27,6 +27,7 @@
 #include "QuestDef.h"
 #include "ObjectAccessor.h"
 #include "ScriptCalls.h"
+#include "Group.h"
 
 void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 {
@@ -80,7 +81,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         {
             _player->AddQuest( pQuest );
             
-            if ( _player->CanCompleteQuest( pQuest, false ) )
+            if ( _player->CanCompleteQuest( pQuest ) )
                 _player->CompleteQuest( pQuest );
 
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
@@ -88,7 +89,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                 Script->QuestAccept(_player, pCreature, pQuest );
             else
             {
-                Item *pItem;
+                Item *pItem = 0;
                 uint32 slot = _player->GetSlotByItemGUID( guid );
                 if ( slot )
                     pItem = _player->GetItemBySlot( (uint8)slot );
@@ -190,7 +191,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     {
         if( _player->CanRewardQuest( pQuest, reward, true ) )
         {
-            _player->RewardQuest( pQuest );
+            _player->RewardQuest( pQuest, reward );
             
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
             if( pCreature )
@@ -200,8 +201,6 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                     Quest* nextquest;
                     if( nextquest = pCreature->getNextAvailableQuest(_player,pQuest) )
                         _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
-                    else
-                        _player->PlayerTalkClass->CloseGossip();
                 }
             }
             else
@@ -227,7 +226,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
         if( pCreature )
         {
-            if ( _player->CanCompleteQuest( pQuest, true ) )
+            if ( _player->CanCompleteQuest( pQuest ) )
                 _player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
         }
     }
@@ -240,27 +239,22 @@ void WorldSession::HandleQuestgiverCancel(WorldPacket& recv_data )
 }
 void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
 {
-    uint8 slot_id1, slot_id2;
-    recv_data >> slot_id1 >> slot_id2;
+    uint8 slot1, slot2;
+    recv_data >> slot1 >> slot2;
 
-    sLog.outString( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot_id1,slot_id2 );
+    sLog.outString( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
 
-    uint16 log_slot1 = _player->getQuestSlotById( slot_id1 );
-    if( log_slot1 )
+    if( slot1 || slot2 )
     {
-        uint16 log_slot2 = _player->getQuestSlotById( slot_id2 );
-        if( log_slot2 )
+        uint32 temp1;
+        uint32 temp2;
+        for (int i = 0; i < 3; i++ )
         {
-            uint32 temp1, temp2;
-
-            for (int iCx = 0; iCx < 3; iCx++ )
-            {
-                temp1 = _player->GetUInt32Value(log_slot1 + iCx);
-                temp2 = _player->GetUInt32Value(log_slot2 + iCx);
-
-                _player->SetUInt32Value(log_slot1 + iCx, temp2);
-                _player->SetUInt32Value(log_slot2 + iCx, temp1);
-            }
+            temp1 = _player->GetUInt32Value(3*slot1 + PLAYER_QUEST_LOG_1_1 + i);
+            temp2 = _player->GetUInt32Value(3*slot2 + PLAYER_QUEST_LOG_1_1 + i);
+            
+            _player->SetUInt32Value(3*slot1 + PLAYER_QUEST_LOG_1_1 + i, temp2);
+            _player->SetUInt32Value(3*slot2 + PLAYER_QUEST_LOG_1_1 + i, temp1);
         }
     }
 }
@@ -272,15 +266,13 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     sLog.outString( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
-    slot++;
-    uint16 log_slot = _player->getQuestSlotById( slot );
-    if( log_slot )
-    {
-        quest = _player->GetUInt32Value(log_slot + 0);
+	if( slot >= 0 && slot <= 20 )
+	{
+        quest = _player->GetUInt32Value(3*slot + 200 + 0);
 
-        _player->SetUInt32Value(log_slot + 0, 0);
-        _player->SetUInt32Value(log_slot + 1, 0);
-        _player->SetUInt32Value(log_slot + 2, 0);
+        _player->SetUInt32Value(3*slot + 200 + 0, 0);
+        _player->SetUInt32Value(3*slot + 200 + 1, 0);
+        _player->SetUInt32Value(3*slot + 200 + 2, 0);
 
         Quest *pQuest = objmgr.GetQuest( quest );
         if( pQuest )
@@ -316,5 +308,90 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 }
 void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)
 {
-    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Unhandled!)" );
+    sLog.outString( "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
+}
+void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
+{
+    uint64 guid;
+    uint32 quest;
+    recvPacket >> quest;
+
+    WorldPacket data;
+    
+    sLog.outString( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
+
+    Quest *pQuest = objmgr.GetQuest( quest );
+    if( pQuest )
+    {
+        if( _player->IsInGroup() )
+        {
+            Group *pGroup = objmgr.GetGroupByLeader(_player->GetGroupLeader());
+            if( pGroup )
+            {
+				uint32 pguid = _player->GetGUID();
+                uint32 memberscount = pGroup->GetMembersCount();
+                for (int i = 0; i < memberscount; i++)
+                {
+                    guid = pGroup->GetMemberGUID(i);
+                    if( guid !=  pguid )
+                    {
+                        Player *pPlayer = ObjectAccessor::Instance().FindPlayer(guid);
+                        if( pPlayer )
+                        {
+							data.clear();
+							data.Initialize( MSG_QUEST_PUSH_RESULT );
+							data << guid;
+							data << uint32( QUEST_PARTY_MSG_SHARRING_QUEST );
+							data << uint8(0);
+							_player->GetSession()->SendPacket(&data);
+
+							if( _player->GetDistanceSq( pPlayer ) > 100 )
+							{
+								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_TO_FAR );
+								continue;
+							}
+
+							if( !pPlayer->SatisfyQuestStatus( pQuest, false ) )
+							{
+								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_HAVE_QUEST );
+								continue;
+							}
+
+							if( pPlayer->GetQuestStatus( pQuest ) == QUEST_STATUS_COMPLETE )
+							{
+								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_FINISH_QUEST );
+								continue;
+							}
+
+							if( !pPlayer->CanTakeQuest( pQuest, false ) )
+							{
+								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_CANT_TAKE_QUEST );
+								continue;
+							}
+
+							if( !pPlayer->SatisfyQuestLog( false ) )
+							{
+								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_LOG_FULL );
+								continue;
+							}
+
+							if( pPlayer->GetDivideState()  )
+							{
+								_player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_BUSY );
+								continue;
+							}
+							
+							pPlayer->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
+						}
+					}
+				}
+            }
+        }
+    }
+}
+
+void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
+{
+    recvPacket.hexlike();
+    sLog.outString( "WORLD: Received MSG_QUEST_PUSH_RESULT " );
 }

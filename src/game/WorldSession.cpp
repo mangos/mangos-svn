@@ -374,6 +374,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_QUESTGIVER_CANCEL,               STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverCancel       },
         { CMSG_QUESTGIVER_COMPLETE_QUEST,       STATUS_LOGGEDIN, &WorldSession::HandleQuestComplete          },
         { CMSG_QUESTGIVER_QUEST_AUTOLAUNCH,     STATUS_LOGGEDIN, &WorldSession::HandleQuestAutoLaunch        },
+        { CMSG_PUSHQUESTTOPARTY,                STATUS_LOGGEDIN, &WorldSession::HandleQuestPushToParty       },
+        { MSG_QUEST_PUSH_RESULT,                STATUS_LOGGEDIN, &WorldSession::HandleQuestPushResult        },
 
         { CMSG_TUTORIAL_FLAG,            STATUS_LOGGEDIN, &WorldSession::HandleTutorialFlag                  },
         { CMSG_TUTORIAL_CLEAR,           STATUS_LOGGEDIN, &WorldSession::HandleTutorialClear                 },

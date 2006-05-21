@@ -68,15 +68,18 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand debugCommandTable[] =
     {
-        { "inarc",       1, &ChatHandler::HandleDebugInArcCommand,       "",   NULL },
-        { "spellfail",   1, &ChatHandler::HandleDebugSpellFailCommand,   "",   NULL },
-        { NULL,          0, NULL,                                        "",   NULL }
+        { "inarc",       3, &ChatHandler::HandleDebugInArcCommand,         "",   NULL },
+        { "spellfail",   3, &ChatHandler::HandleDebugSpellFailCommand,     "",   NULL },
+        { "setpoi",      3, &ChatHandler::HandleSetPoiCommand,             "",   NULL },
+        { "qpartymsg",   3, &ChatHandler::HandleSendQuestPartyMsgCommand,  "",   NULL },
+        { "qinvalidmsg", 3, &ChatHandler::HandleSendQuestInvalidMsgCommand,"",   NULL },
+        { "qerrormsg",   3, &ChatHandler::HandleSendQuestErrorMsgCommand,  "",   NULL },
+        { "itemmsg",     3, &ChatHandler::HandleSendItemErrorMsg,          "",   NULL },
+        { NULL,          0, NULL,                                          "",   NULL }
     };
 
     static ChatCommand commandTable[] =
     {
-        { "setpoi",  3, &ChatHandler::HandleSetPoiCommand,       "",   NULL },
-        { "itemmsg",  3, &ChatHandler::HandleSendItemErrorMsg,       "",   NULL },
         { "acct",        0, &ChatHandler::HandleAcctCommand,             "",   NULL },
         { "addmove",     2, &ChatHandler::HandleAddMoveCommand,          "",   NULL },
         { "addspirit",   3, &ChatHandler::HandleAddSpiritCommand,        "",   NULL },
@@ -153,9 +156,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "wchange",     3, &ChatHandler::HandleChangeWeather,           "",   NULL },
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
-		//{ "sendp",       3, &ChatHandler::HandleSendProficiencyCommand,      "",   NULL },
+        //{ "sendp",       3, &ChatHandler::HandleSendProficiencyCommand,      "",   NULL },
 
-		
+        
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
