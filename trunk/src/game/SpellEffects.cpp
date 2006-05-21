@@ -210,7 +210,7 @@ void Spell::EffectTepeportUnits(uint32 i)
 {
     if(!unitTarget)
         return;
-    HandleTeleport(m_spellInfo->Id,unitTarget);
+    HandleTeleport(m_spellInfo->Id,unitTarget, i);
 }
 
 void Spell::EffectApplyAura(uint32 i)
@@ -585,6 +585,7 @@ void Spell::EffectApplyAA(uint32 i)
     //Aur->SetModifier(m_spellInfo->EffectApplyAuraName[i],m_spellInfo->EffectBasePoints[i]+rand()%m_spellInfo->EffectDieSides[i]+1,0,m_spellInfo->EffectMiscValue[i],0);
     unitTarget->AddAura(Aur);
     //unitTarget->SetAura(aff); FIX-ME!
+
 }
 
 void Spell::EffectLearnSpell(uint32 i)
