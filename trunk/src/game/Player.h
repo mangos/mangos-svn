@@ -336,13 +336,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RewardQuest( Quest *pQuest, uint32 reward );
         bool SatisfyQuestClass( Quest *pQuest, bool msg );
         bool SatisfyQuestLevel( Quest *pQuest, bool msg );
-		bool SatisfyQuestLog( bool msg );
+        bool SatisfyQuestLog( bool msg );
         bool SatisfyQuestPreviousQuest( Quest *pQuest, bool msg );
         bool SatisfyQuestRace( Quest *pQuest, bool msg );
         bool SatisfyQuestReputation( Quest *pQuest, bool msg );
         bool SatisfyQuestSkill( Quest *pQuest, bool msg );
         bool SatisfyQuestStatus( Quest *pQuest, bool msg );
-		bool SatisfyQuestTimed( Quest *pQuest, bool msg );
+        bool SatisfyQuestTimed( Quest *pQuest, bool msg );
         bool GiveQuestSourceItem( Quest *pQuest );
         void TakeQuestSourceItem( Quest *pQuest );
         bool GetQuestRewardStatus( Quest *pQuest );
@@ -355,21 +355,21 @@ class MANGOS_DLL_SPEC Player : public Unit
         void KilledMonster( uint32 entry, uint64 guid );
         void AddQuestsLoot( Creature* creature );
 
-		void SendQuestFailed( Quest *pQuest );
-		void SendCanTakeQuestResponse( uint32 msg );
-		void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
+        void SendQuestFailed( Quest *pQuest );
+        void SendCanTakeQuestResponse( uint32 msg );
+        void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
 
         uint64 GetDivideState() { return m_divider; };
         void SetDivideState( uint64 guid ) { m_divider = guid; };
 
-		uint32 GetTimedQuest() { return m_timedquest; };
-		void SetTimedQuest( Quest *pQuest ) {
-			if( pQuest )
-			{
-				uint32 quest = pQuest->GetQuestInfo()->PrevQuestId;
-				m_timedquest = quest;
-			}
-		};
+        uint32 GetTimedQuest() { return m_timedquest; };
+        void SetTimedQuest( Quest *pQuest ) {
+            if( pQuest )
+            {
+                uint32 quest = pQuest->GetQuestInfo()->PrevQuestId;
+                m_timedquest = quest;
+            }
+        };
 
 /*********************************************************/
 
@@ -686,7 +686,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 
-		uint32 m_timedquest;
+        uint32 m_timedquest;
         uint64 m_divider;
 
 /*********************************************************/
