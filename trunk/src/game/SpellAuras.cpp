@@ -148,8 +148,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraWaterWalk,                             //SPELL_AURA_WATER_WALK = 104,
     &Aura::HandleAuraFeatherFall,                           //SPELL_AURA_FEATHER_FALL = 105,
     &Aura::HandleNULL,                                      //SPELL_AURA_HOVER = 106,
-    &Aura::HandleNULL,                                      //SPELL_AURA_ADD_FLAT_MODIFIER = 107,
-    &Aura::HandleNULL,                                      //SPELL_AURA_ADD_PCT_MODIFIER = 108,
+    &Aura::HandleAddModifier,                               //SPELL_AURA_ADD_FLAT_MODIFIER = 107,
+    &Aura::HandleAddModifier,                               //SPELL_AURA_ADD_PCT_MODIFIER = 108,
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_TARGET_TRIGGER = 109,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_REGEN_PERCENT = 110,
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CASTER_HIT_TRIGGER = 111,
@@ -508,6 +508,68 @@ void Aura::HandleAuraFeatherFall(bool apply)
     apply ? data.Initialize(SMSG_MOVE_FEATHER_FALL)  : data.Initialize(SMSG_MOVE_NORMAL_FALL);
     data << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
+}
+
+void Aura::HandleAddModifier(bool apply)
+{
+    WorldPacket data;
+
+    SpellEntry *spellInfo = GetSpellProto();
+    if(!spellInfo) return;
+    uint8 op;
+    uint16 val=0;
+    int16 tmpval=0;
+    uint16 mark=0;
+    uint32 shiftdata=0x01;
+    uint8  FlatId=0;
+    uint32 EffectVal;
+    uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
+
+    if(spellInfo->EffectItemType[m_effIndex])
+	{
+		EffectVal=spellInfo->EffectItemType[m_effIndex];
+		op=spellInfo->EffectMiscValue[m_effIndex];
+		tmpval = spellInfo->EffectBasePoints[m_effIndex];
+
+		if(tmpval != 0)
+		{
+			if(tmpval > 0)
+			{
+				val =  tmpval+1;
+                mark = 0x0;
+            }
+            else
+            {
+                val  = 0xFFFF + (tmpval+2);
+                mark = 0xFFFF;
+            }
+        }
+
+        switch(spellInfo->EffectApplyAuraName[m_effIndex])
+        {
+            case 107:
+                Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
+                break;
+            case 108:
+                Opcode=SMSG_SET_PCT_SPELL_MODIFIER;
+                break;
+        }
+
+        for(int m_effIndex=0;m_effIndex<32;m_effIndex++)
+        {
+            if ( EffectVal&shiftdata )
+            {
+                FlatId=m_effIndex;
+                data.Initialize(Opcode);
+                data << uint8(FlatId);
+                data << uint8(op);
+                data << uint16(val);
+                data << uint16(mark);
+				m_target->SendMessageToSet(&data,true);
+            }
+            shiftdata=shiftdata<<1;
+        }
+    }
 }
 
 void Aura::HandleAuraModStun(bool apply)

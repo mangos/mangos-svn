@@ -424,7 +424,7 @@ void Spell::cancel()
     if(m_spellState == SPELL_STATE_PREPARING)
     {
         SendInterrupted(0);
-        SendCastResult(CAST_FAIL_AUCTION_HAVE_CANCEL);
+        SendCastResult(CAST_FAIL_INTERRUPTED);
     }
     else if(m_spellState == SPELL_STATE_CASTING)
     {
@@ -931,22 +931,14 @@ uint8 Spell::CanCast()
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
                                                             
-        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID() && m_spellInfo->Requirement)
+        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
             castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
-        if(m_caster->GetDistanceSq(target) > range * range )
+        if(m_caster->GetDistanceSq(target) > range * range && m_caster->GetTypeId() != TYPEID_PLAYER)
             castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;
     }
 
-    //if(m_targets.m_destX != 0 && m_targets.m_destY != 0  && m_targets.m_destZ != 0 )
-    //{
-    //    if(m_caster->GetDistanceSq( m_targets.m_destX,m_targets.m_destY,m_targets.m_destZ) > range * range )
-    //        castResult = CAST_FAIL_OUT_OF_RANGE;	//0x56;
-    //}
-
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
-    //if(m_spellInfo->Id == 100 && m_caster->hasUnitState(UNIT_STAT_IN_COMBAT))		//charge
-    //    castResult = CAST_FAIL_TARGET_IS_IN_COMBAT;
     if( castResult != 0 )
     {
         SendCastResult(castResult);
