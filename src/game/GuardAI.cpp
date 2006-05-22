@@ -112,7 +112,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         if( _needToStop() )
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            _stopAttack();
+            _stopAttack(); // i_pVictim == NULL now
         }
         switch( i_state )
         {
@@ -158,8 +158,8 @@ void GuardAI::UpdateAI(const uint32 diff)
                         {
                             hostillist.sort();
                             hostillist.reverse();
-                            uint64 guid;
-                            if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
+                            uint64 guid = (*hostillist.begin())->UnitGuid;
+                            if(!i_pVictim || guid != i_pVictim->GetGUID())
                             {
                                 Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
                                 if(newtarget)
@@ -169,7 +169,7 @@ void GuardAI::UpdateAI(const uint32 diff)
                                 }
                             }
                         }
-                        if(!i_creature.canReachWithAttack(i_pVictim))
+                        if(!i_pVictim || !i_creature.canReachWithAttack(i_pVictim))
                             return;
                         i_creature.AttackerStateUpdate(i_pVictim, 0);
                         i_creature.setAttackTimer(0);
