@@ -505,13 +505,13 @@ void Spell::EffectOpenLock(uint32 i)
             SendCastResult(CAST_FAIL_FAILED);
             return;
         }
-		if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill +75 )
+		if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +75 )
 			up_skillvalue = 4;
-		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill +50 )
+		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +50 )
 			up_skillvalue = 3;
-		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill +25 )
+		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +25 )
 			up_skillvalue = 2;
-		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) > requiredskill)
+		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill)
 			up_skillvalue = 1;
 		else up_skillvalue = 0;
         loottype=2;
@@ -1745,8 +1745,9 @@ void Spell::EffectSkinning(uint32 i)
         SendCastResult(CAST_FAIL_INVALID_TARGET);
         return;
     }
-
-    if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) >= (unitTarget->getLevel()-1)*5 || unitTarget->getLevel() < 10)
+    int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
+	int32 targetlevel = unitTarget->getLevel();
+    if(fishvalue >= (targetlevel-5)*5)
     {
         ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
     }else
@@ -1754,13 +1755,13 @@ void Spell::EffectSkinning(uint32 i)
         SendCastResult(CAST_FAIL_FAILED);
         return;
     }
-	if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel() +15 )
+	if(fishvalue> (targetlevel +15)*5 )
 		up_skillvalue = 4;
-	else if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel() +10 )
+	else if(fishvalue>= (targetlevel +10)*5 )
 		up_skillvalue = 3;
-	else if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel() +5 )
+	else if(fishvalue >= (targetlevel +5)*5 )
 		up_skillvalue = 2;
-	else if(((Player*)m_caster)->GetSkillValue(SKILL_SKINNING) > unitTarget->getLevel())
+	else if(fishvalue >= (targetlevel <= 5?(targetlevel-5)*5:targetlevel*5))
 		up_skillvalue = 1;
 	else up_skillvalue = 0;
 
@@ -1820,7 +1821,7 @@ void Spell::EffectTransmitted(uint32 i)
     pGameObj->AddToWorld();
 
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-    data << (uint64)pGameObj->GetGUID();
+    data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
 
 	if(m_spellInfo->EffectMiscValue[i] == 35591)
@@ -1828,45 +1829,49 @@ void Spell::EffectTransmitted(uint32 i)
 		if(((Player*)m_caster)->CheckFishingAble() > 0)
 		{
 			//pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
-			//need fixed produre of fishing.
-			((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
-			SendChannelUpdate(0);
-		}
-	}
+            data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
+            data<<uint64(pGameObj->GetGUID());
+            data<<uint8(0);
+            ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            //need fixed produre of fishing.
+            ((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
+            SendChannelUpdate(0);
+        }
+    }
 }
 
 void Spell::EffectSkill(uint32 i)
 {
-	Player *player = (Player*)m_caster;
+    Player *player = (Player*)m_caster;
 
-	uint32 skill_id = m_spellInfo->EffectMiscValue[i];
-	if(skill_id == SKILL_FISHING)
-		up_skillvalue = player->CheckFishingAble();
-	if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING || SKILL_HERBALISM)
-	{
-		switch(up_skillvalue)
-		{
-			case 0:
-				return;
-			case 1:
-				break;
-			case 2:
-			{
-				if(urand(1,10) >= 7)
-					return;
-				else break;
-			}
-			case 3:
-			{
-				if(urand(1,10) >= 3)
-					return;
-				else break;
-			}
-			case 4:
-			default:return;
-		}
-	
-		player->UpdateSkill(skill_id);
-	}else 
+    uint32 skill_id = m_spellInfo->EffectMiscValue[i];
+    if(skill_id == SKILL_FISHING)
+        up_skillvalue = player->CheckFishingAble();
+    if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING || SKILL_HERBALISM)
+    {
+        switch(up_skillvalue)
+        {
+            case 0:
+                return;
+            case 1:
+                break;
+            case 2:
+            {
+                if(urand(1,10) >= 3)
+                    return;
+                else break;
+            }
+            case 3:
+            {
+                if(urand(1,10) >= 7)
+                    return;
+                else break;
+            }
+            case 4:
+            default:return;
+        }
+    
+        player->UpdateSkill(skill_id);
+    }else 
     player->UpdateSkillPro(m_spellInfo->Id);
 }
