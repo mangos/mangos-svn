@@ -1043,30 +1043,9 @@ void Spell::EffectWeaponDmg(uint32 i)
             else
                 stackitem = ammoitem;
 
-            slot = ((Player*)m_caster)->GetSlotByItemGUID(stackitem->GetGUID());
             if(stackitem)
             {
-                uint32 ItemCount = stackitem->GetCount();
-                uint32 ItemId = stackitem->GetProto()->ItemId;
-
-                if (ItemCount > 1)
-                {
-                    stackitem->SetCount(ItemCount-1);
-                    //m_TriggerSpell = m_spellInfo;
-                }
-                else
-                {
-                    ((Player*)m_caster)->RemoveItemFromSlot(0,slot);
-                    //stackitem->DeleteFromDB();
-                    //if(equipInvType == INVTYPE_THROWN)
-                    //	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_THROWN)
-                    //else
-                    //	stackitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_AMMO)
-                    //if(!stackitem)
-                    //{
-                    delete stackitem;
-                    //}
-                }
+                ((Player*)m_caster)->RemoveItemFromInventory(stackitem->GetProto()->ItemId, 1);
             }
         }
     }

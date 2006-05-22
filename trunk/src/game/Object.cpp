@@ -324,7 +324,7 @@ void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, f
     *data << x;
     *data << y;
     *data << z;                                             // instead of *data << ang;
-    *data << ang;
+    //*data << ang;
     *data << uint32(0x0);
 }
 

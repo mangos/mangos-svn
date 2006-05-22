@@ -204,7 +204,11 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
     data << itemProto->Ammo_type;
-    data << uint32(0);                                      //new 2 fields socalled (uint16)field70 and (uint16)field71: usess unknown
+	//Temply fix the range attack, perhaps need add a field to table item_template for this new data.(perhaps just range weapon use)
+	if(itemProto->Class = ITEM_CLASS_WEAPON && (itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN))
+		data << uint32(1120403456);
+	else
+		data << uint32(0);                                      //new 2 fields socalled (uint16)field70 and (uint16)field71: usess unknown
     for(int s = 0; s < 5; s++)
     {
         data << itemProto->Spells[s].SpellId;
