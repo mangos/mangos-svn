@@ -560,7 +560,8 @@ void Aura::HandleAddModifier(bool apply)
                 data << uint8(op);
                 data << uint16(val);
                 data << uint16(mark);
-                m_target->SendMessageToSet(&data,true);
+                //m_target->SendMessageToSet(&data,true);
+                ((Player *)m_target)->SendDirectMessage(&data);
             }
             shiftdata=shiftdata<<1;
         }

@@ -89,6 +89,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "goname",      1, &ChatHandler::HandleGonameCommand,           "",   NULL },
         { "namego",      1, &ChatHandler::HandleNamegoCommand,           "",   NULL },
         { "aura",        3, &ChatHandler::HandleAuraCommand,             "",   NULL },
+        { "unaura",      3, &ChatHandler::HandleUnAuraCommand,           "",   NULL },
         { "changelevel", 2, &ChatHandler::HandleChangeLevelCommand,      "",   NULL },
         { "commands",    0, &ChatHandler::HandleCommandsCommand,         "",   NULL },
         { "delete",      2, &ChatHandler::HandleDeleteCommand,           "",   NULL },

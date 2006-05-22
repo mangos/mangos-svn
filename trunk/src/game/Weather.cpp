@@ -138,10 +138,10 @@ void Weather::ReGenerate()
         m_type = 3;
     else
         m_type =0;
-    ChangeWeather();
+    UpdateWeather();
 }
 
-void Weather::ChangeWeather()
+void Weather::UpdateWeather()
 {
     //if(!m_player || !m_player->IsInWorld() || m_player->GetZoneId() != m_zone)
     //{
@@ -194,4 +194,10 @@ void Weather::ChangeWeather()
     sprintf((char*)buf, "Change the weather of zone %u to %s.", m_zone, wthstr);
     sLog.outString(buf);
     sWorld.SendZoneText(m_zone, buf);
+}
+
+void Weather::SetWeather(uint32 type, float grade) {
+    m_type = type;
+    m_grade = grade;
+    UpdateWeather();
 }
