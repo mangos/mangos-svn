@@ -304,7 +304,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleQuestComplete(WorldPacket& recv_data);
         void HandleQuestAutoLaunch(WorldPacket& recvPacket);
         void HandleQuestPushToParty(WorldPacket& recvPacket);
-		void HandleQuestPushResult(WorldPacket& recvPacket);
+        void HandleQuestPushResult(WorldPacket& recvPacket);
 
         void HandleMessagechatOpcode(WorldPacket& recvPacket);
         void HandleTextEmoteOpcode(WorldPacket& recvPacket);

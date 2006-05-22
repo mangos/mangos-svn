@@ -193,7 +193,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void setDeathState(DeathState s)
         {
             m_deathState = s;
-            if (m_deathState == JUST_DIED) {
+            if (m_deathState == JUST_DIED)
+            {
                 RemoveAllAuras();
             }
         };
@@ -255,8 +256,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddItemEnchant(uint32 enchant_id);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() { return m_transform;}
-		void AddDynObject(DynamicObject* dynObj);
-		void RemoveDynObject(uint32 spellid);
+        void AddDynObject(DynamicObject* dynObj);
+        void RemoveDynObject(uint32 spellid);
 
     protected:
         Unit ( );

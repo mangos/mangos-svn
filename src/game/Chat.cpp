@@ -159,8 +159,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         //{ "sendp",       3, &ChatHandler::HandleSendProficiencyCommand,      "",   NULL },
 
-        
-
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },

@@ -1403,7 +1403,7 @@ void Aura::HandleAuraModSkill(bool apply)
 void Aura::HandleModDamagePercentDone(bool apply)
 {
     sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier->m_miscvalue, m_modifier->m_miscvalue2);
-    
+
     if(m_modifier->m_miscvalue == 1)
     {
         m_target->SetFloatValue(UNIT_FIELD_MINDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );

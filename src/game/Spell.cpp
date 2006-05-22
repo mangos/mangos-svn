@@ -433,7 +433,7 @@ void Spell::cancel()
     }
 
     finish();
-	m_caster->RemoveDynObject(m_spellInfo->Id);
+    m_caster->RemoveDynObject(m_spellInfo->Id);
 }
 
 void Spell::cast()
@@ -513,8 +513,8 @@ void Spell::update(uint32 difftime)
         m_castPositionY != m_caster->GetPositionY() ||
         m_castPositionZ != m_caster->GetPositionZ() ) )
     {
-		cancel();
-	}
+        cancel();
+    }
     switch(m_spellState)
     {
         case SPELL_STATE_PREPARING:
@@ -561,7 +561,6 @@ void Spell::finish()
     m_caster->m_meleeSpell = false;
     m_caster->m_canMove = true;
 
-
     WorldPacket data;
 
     /*std::list<DynamicObject*>::iterator i;
@@ -575,7 +574,7 @@ void Spell::finish()
         data << (*i)->GetGUID();
         m_caster->SendMessageToSet(&data, true);
         MapManager::Instance().GetMap((*i)->GetMapId())->Remove((*i), true);
-		m_AreaAura = false;
+        m_AreaAura = false;
     }
     m_dynObjToDel.clear();*/
 
@@ -930,7 +929,7 @@ uint8 Spell::CanCast()
     {
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
-                                                            
+
         if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
             castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
         if(m_caster->GetDistanceSq(target) > range * range && m_caster->GetTypeId() != TYPEID_PLAYER)

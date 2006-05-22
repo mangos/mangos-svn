@@ -42,17 +42,20 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     }
     else
     {
-        if (requested_rank > 4) {
+        if (requested_rank > 4)
+        {
             return;
         }
-        
+
         Player * player = GetPlayer();
-        
+
         // Check if it requires another talent
-        if (talentInfo->DependsOn > 0) {
+        if (talentInfo->DependsOn > 0)
+        {
             TalentEntry *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
             bool hasEnoughRank = false;
-            for (int i = talentInfo->DependsOnRank; i <= 4; i++) {
+            for (int i = talentInfo->DependsOnRank; i <= 4; i++)
+            {
                 if (depTalentInfo->RankID[i] != 0)
                     if (player->HasSpell(depTalentInfo->RankID[i]))
                         hasEnoughRank = true;
@@ -66,15 +69,23 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 
         int tTree = talentInfo->TalentTree;
 
-        if (talentInfo->Row > 0) {
+        if (talentInfo->Row > 0)
+        {
             unsigned int numRows = sTalentStore.GetNumRows();
-            for (unsigned int i = 0; i < numRows; i++) {            // Loop through all talents.
-                TalentEntry *tmpTalent = sTalentStore.data[i];      // Someday, someone needs to revamp
-                if (tmpTalent) {                                    // the way talents are tracked
-                    if (tmpTalent->TalentTree == tTree) {
-                        for (int j = 0; j <= 4; j++) {
-                            if (tmpTalent->RankID[j] != 0) {
-                                if (player->HasSpell(tmpTalent->RankID[j])) {
+            for (unsigned int i = 0; i < numRows; i++)      // Loop through all talents.
+            {
+                                                            // Someday, someone needs to revamp
+                TalentEntry *tmpTalent = sTalentStore.data[i];
+                if (tmpTalent)                              // the way talents are tracked
+                {
+                    if (tmpTalent->TalentTree == tTree)
+                    {
+                        for (int j = 0; j <= 4; j++)
+                        {
+                            if (tmpTalent->RankID[j] != 0)
+                            {
+                                if (player->HasSpell(tmpTalent->RankID[j]))
+                                {
                                     spentPoints += j + 1;
                                 }
                             }
@@ -91,7 +102,8 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
         }
         else
         {
-            if(spentPoints < (talentInfo->Row * 5)) {   // Min points spent
+            if(spentPoints < (talentInfo->Row * 5))         // Min points spent
+            {
                 return;
             }
 

@@ -305,10 +305,11 @@ void WorldSession::SendSpiritRessurect()
             uint8 eff = spellInfo->Effect[i];
             if(eff>=TOTAL_SPELL_EFFECTS)
                 continue;
-			if(eff==6) {
-				Aura *Aur = new Aura(spellInfo, i, _player, _player);
-				_player->AddAura(Aur);
-			}
+            if(eff==6)
+            {
+                Aura *Aur = new Aura(spellInfo, i, _player, _player);
+                _player->AddAura(Aur);
+            }
         }
     }
 

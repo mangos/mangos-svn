@@ -527,14 +527,14 @@ bool ObjectMgr::GetGlobalTaxiNodeMask( uint32 curloc, uint32 *Mask )
     {
         return 1;
     }
-	
+
     do
     {
-	    Field *fields = result->Fetch();
-		uint8 destination = fields[0].GetUInt8();
-		uint8 field = (uint8)((destination - 1) / 32);
-		Mask[field] |= 1 << ( (destination - 1 ) % 32 );
-	}while( result->NextRow() );
+        Field *fields = result->Fetch();
+        uint8 destination = fields[0].GetUInt8();
+        uint8 field = (uint8)((destination - 1) / 32);
+        Mask[field] |= 1 << ( (destination - 1 ) % 32 );
+    }while( result->NextRow() );
 
     return 1;
 }

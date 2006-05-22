@@ -417,8 +417,8 @@ class Spell
         bool IsAutoRepeat() { return m_autoRepeat; }
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = casttime<0?0:casttime;}
-		bool IsAreaAura() { return m_spellInfo->Effect[0] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[1] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[2] ==SPELL_EFFECT_PERSISTENT_AREA_AURA;}
-		//void SetArearAura(bool value) {m_AreaAura = value;}
+        bool IsAreaAura() { return m_spellInfo->Effect[0] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[1] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[2] ==SPELL_EFFECT_PERSISTENT_AREA_AURA;}
+        //void SetArearAura(bool value) {m_AreaAura = value;}
 
     protected:
 
@@ -460,7 +460,7 @@ class Spell
         //std::list<DynamicObject*> m_dynObjToDel;
         std::list<GameObject*> m_ObjToDel;
         // -------------------------------------------
-		uint8 up_skillvalue;
+        uint8 up_skillvalue;
 };
 
 enum ReplenishType
