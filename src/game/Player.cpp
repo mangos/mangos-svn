@@ -2362,6 +2362,11 @@ void Player::SendMessageToSet(WorldPacket *data, bool self)
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data, self);
 }
 
+void Player::SendDirectMessage(WorldPacket *data)
+{
+    m_session->SendPacket(data);
+}
+
 void Player::CheckExploreSystem()
 {
 
