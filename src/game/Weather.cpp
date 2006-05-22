@@ -105,7 +105,7 @@ void Weather::ReGenerate()
     // 30% - weather worsens
     // 30% - weather gets better
     // 10% - radical change 
-    int u = (double)rand() / (RAND_MAX + 1) * (100);
+    int u = uint32((double)rand() / (RAND_MAX + 1) * (100));
 
     if (u < 30)
         return;
@@ -154,7 +154,7 @@ void Weather::ReGenerate()
             return;
         } else {
             if (m_grade > 0.6666667f) {
-                uint32 rnd = (double)rand() / (RAND_MAX + 1) * (100); // Severe change, but how severe?
+                uint32 rnd = uint32((double)rand() / (RAND_MAX + 1) * (100)); // Severe change, but how severe?
                 if (rnd < 50) {
                     m_grade -= 0.6666667;
                     UpdateWeather();
@@ -188,7 +188,7 @@ void Weather::ReGenerate()
     chance2 = chance1 + chance2;
     chance3 = chance2 + chance3;
 
-    uint32 rnd = (double)rand() / (RAND_MAX + 1) * (100);
+    uint32 rnd = uint32((double)rand() / (RAND_MAX + 1) * (100));
     if(rnd <= chance1)
         m_type = 1;
     else if(rnd <= chance2)
@@ -201,7 +201,7 @@ void Weather::ReGenerate()
     if (u < 90) {
         m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000;
     } else {
-        rnd = (double)rand() / (RAND_MAX + 1) * (100); // Severe change, but how severe?
+        rnd = uint32((double)rand() / (RAND_MAX + 1) * (100)); // Severe change, but how severe?
         if (rnd < 50)
             m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.3334;
         else

@@ -38,7 +38,9 @@ void Log::outString( const char * str, ... )
     va_list ap;
     va_start(ap, str);
     vprintf( str, ap );
+    va_end(ap);
     printf( "\n" );
+    va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
     va_end(ap);
@@ -67,12 +69,14 @@ void Log::outBasic( const char * str, ... )
     va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
+    va_end(ap);
     if( m_logLevel > 0 )
     {
+        va_start(ap, str);
         vprintf( str, ap );
+        va_end(ap);
         printf( "\n" );
     }
-    va_end(ap);
     fflush(stdout);
     fflush(logfile);
 }
@@ -84,12 +88,15 @@ void Log::outDetail( const char * str, ... )
     va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
+    va_end(ap);
+    
     if( m_logLevel > 1 )
     {
+        va_start(ap, str);
         vprintf( str, ap );
+        va_end(ap);
         printf( "\n" );
     }
-    va_end(ap);
     fflush(stdout);
     fflush(logfile);
 }
@@ -101,12 +108,14 @@ void Log::outDebug( const char * str, ... )
     va_start(ap, str);
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
+    va_end(ap);
     if( m_logLevel > 2 )
     {
+        va_start(ap, str);
         vprintf( str, ap );
+        va_end(ap);
         printf( "\n" );
     }
-    va_end(ap);
     fflush(stdout);
     fflush(logfile);
 }

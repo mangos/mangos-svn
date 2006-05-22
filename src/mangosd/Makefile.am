@@ -35,7 +35,8 @@ mangosd_LDADD = $(top_builddir)/src/game/libgame.a $(top_builddir)/src/shared/li
 
 mangosd_LDFLAGS = -L$(top_builddir)/dep/src/zthread \
                -L$(top_builddir)/dep/src/zlib \
-	       -L$(top_builddir)/src/bindings/universal
+	       -L$(top_builddir)/src/bindings/universal \
+	       -export-dynamic
 
 # install mangosd.conf to $(sysconfdir)
 sysconf_DATA = \
