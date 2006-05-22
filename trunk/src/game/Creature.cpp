@@ -765,7 +765,7 @@ void Creature::getSkinLoot()
     else if(level > 15)
         FillSkinLoot(&loot,(urand(0,10)<8 ? 2319 :4232));
     else if(level > 3)
-        FillSkinLoot(&loot,(urand(0,10)<8 ? 2318 :2934));
+        FillSkinLoot(&loot,(urand(0,10)<8 ? 2318 :783));
     else if(level <= 3)
         FillSkinLoot(&loot,2934);
 }

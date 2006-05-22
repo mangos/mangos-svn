@@ -45,7 +45,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_BIND_SIGHT
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
-    &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY	//missing 4
+    &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY    //missing 4
     &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_FEAR = 7,
@@ -190,15 +190,15 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_PERSUADED = 146,
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CREATURE_IMMUNITY = 147,
     &Aura::HandleNULL,                                      //SPELL_AURA_RETAIN_COMBO_POINTS = 148,
-    &Aura::HandleNULL,                                      //SPELL_AURA_RESIST_PUSHBACK	=	149	,//	Resist Pushback
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SHIELD_BLOCK	=	150	,//	Mod Shield Block %
-    &Aura::HandleNULL,                                      //SPELL_AURA_TRACK_STEALTHED	=	151	,//	Track Stealthed
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECTED_RANGE	=	152	,//	Mod Detected Range
-    &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT	=	153	,//	Split Damage Flat
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL	=	154	,//	Stealth Level Modifier
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING	=	155	,//	Mod Water Breathing
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_REPUTATION_ADJUST	=	156	,//	Mod Reputation Gain
-    &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI	=	157	,//	Mod Pet Damage
+    &Aura::HandleNULL,                                      //SPELL_AURA_RESIST_PUSHBACK    =    149    ,//    Resist Pushback
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SHIELD_BLOCK    =    150    ,//    Mod Shield Block %
+    &Aura::HandleNULL,                                      //SPELL_AURA_TRACK_STEALTHED    =    151    ,//    Track Stealthed
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECTED_RANGE    =    152    ,//    Mod Detected Range
+    &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STEALTH_LEVEL    =    154    ,//    Stealth Level Modifier
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_WATER_BREATHING    =    155    ,//    Mod Water Breathing
+    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_REPUTATION_ADJUST    =    156    ,//    Mod Reputation Gain
+    &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI    =    157    ,//    Mod Pet Damage
 };
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
@@ -211,9 +211,9 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
     if(m_duration == -1)
         m_permanent = true;
     //if(spellproto->EffectBasePoints[eff] <= 0)
-	if (spellproto->EffectImplicitTargetA[eff] >= 10)
+    if (spellproto->EffectImplicitTargetA[eff] >= 10)
         m_positive = false;
-	else
+    else
         m_positive = true;
 
     uint32 type = 0;
@@ -521,16 +521,16 @@ void Aura::HandleAddModifier(bool apply)
     uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
     if(spellInfo->EffectItemType[m_effIndex])
-	{
-		EffectVal=spellInfo->EffectItemType[m_effIndex];
-		op=spellInfo->EffectMiscValue[m_effIndex];
-		tmpval = spellInfo->EffectBasePoints[m_effIndex];
+    {
+        EffectVal=spellInfo->EffectItemType[m_effIndex];
+        op=spellInfo->EffectMiscValue[m_effIndex];
+        tmpval = spellInfo->EffectBasePoints[m_effIndex];
 
-		if(tmpval != 0)
-		{
-			if(tmpval > 0)
-			{
-				val =  tmpval+1;
+        if(tmpval != 0)
+        {
+            if(tmpval > 0)
+            {
+                val =  tmpval+1;
                 mark = 0x0;
             }
             else
@@ -560,7 +560,7 @@ void Aura::HandleAddModifier(bool apply)
                 data << uint8(op);
                 data << uint16(val);
                 data << uint16(mark);
-				m_target->SendMessageToSet(&data,true);
+                m_target->SendMessageToSet(&data,true);
             }
             shiftdata=shiftdata<<1;
         }
@@ -1238,8 +1238,8 @@ void Aura::HandleAuraMounted(bool apply)
         {
             m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , displayId);
             //m_target->SetUInt32Value( UNIT_FIELD_FLAGS , 0x002000 );
-			//m_target->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
-			m_target->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
+            //m_target->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
+            m_target->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
         }
     }else
     {
@@ -1342,7 +1342,7 @@ void Aura::HandleAuraTransform(bool apply)
 // FIX-ME PLS!!!
 void Aura::HandleAuraManaShield(bool apply)
 {
-    /*	if(apply)
+    /*    if(apply)
         {
             if(m_damageManaShield){
                 delete m_damageManaShield;
@@ -1401,8 +1401,8 @@ void Aura::HandleAuraModSkill(bool apply)
 
 void Aura::HandleModDamagePercentDone(bool apply)
 {
-	sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier->m_miscvalue, m_modifier->m_miscvalue2);
-	
+    sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier->m_miscvalue, m_modifier->m_miscvalue2);
+    
     if(m_modifier->m_miscvalue == 1)
     {
         m_target->SetFloatValue(UNIT_FIELD_MINDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
