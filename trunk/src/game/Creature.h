@@ -289,10 +289,13 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         virtual void setDeathState(DeathState s)
         {
-            m_deathState = s;
+            Unit::setDeathState(s);
+
             if(s == JUST_DIED)
             {
                 m_deathTimer = m_corpseDelay;
+
+                if(!IsStopped()) StopMoving();
             }
         };
 
