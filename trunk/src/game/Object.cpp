@@ -168,7 +168,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
 void Object::SendUpdateToPlayer(Player* player) const
 {
-    if (!player->IsInWorld()) return;
+    //if (!player->IsInWorld()) return;
 
     UpdateData upd;
     WorldPacket packet;
@@ -324,6 +324,7 @@ void Object::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, f
     *data << x;
     *data << y;
     *data << z;                                             // instead of *data << ang;
+    *data << ang;
     *data << uint32(0x0);
 }
 

@@ -37,6 +37,6 @@ struct AreaTrigger
     float X;
     float Y;
     float Z;
-
+    float Orientation;
 };
 #endif

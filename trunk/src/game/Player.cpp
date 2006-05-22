@@ -1273,7 +1273,6 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
     int16 tmpval=0;
     uint16 mark=0;
     uint32 shiftdata=0x01;
-    uint8  FlatId=0;
     uint32 EffectVal;
     uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
@@ -1288,7 +1287,7 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
         tmpslot = maxid + 1;
     }
 
-    for(int i=0;i<3;i++)
+	for(int i=0;i<3;i++)
     {
         if(spellInfo->EffectItemType[i])
         {
@@ -1320,14 +1319,12 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
                     break;
             }
 
-            for(int i=0;i<32;i++)
+            for(uint8 i=0;i<32;i++)
             {
                 if ( EffectVal&shiftdata )
                 {
-                    FlatId=i;
-
                     data.Initialize(Opcode);
-                    data << uint8(FlatId);
+                    data << uint8(i);
                     data << uint8(op);
                     data << uint16(val);
                     data << uint16(mark);
