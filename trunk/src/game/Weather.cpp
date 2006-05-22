@@ -71,6 +71,8 @@ uint32 Weather::GetSound()
 Weather::Weather(Player *player) : m_player(player), m_zone( player->GetZoneId())
 {
     m_interval = sWorld.getConfig(CONFIG_INTERVAL_CHANGEWEATHER);
+    m_type = 0;
+    m_grade = 0;
     ReGenerate();
     sLog.outString( "WORLD: Starting weather system(change per %u minutes).", (uint32)(m_interval / 60000) );
     m_timer = m_interval;
@@ -98,21 +100,78 @@ bool Weather::Update(uint32 diff)
 
 void Weather::ReGenerate()
 {
-    bool notchange = !(rand() % 30);
-    if(notchange)
+    // Weather statistics:
+    // 30% - no change
+    // 30% - weather worsens
+    // 30% - weather gets better
+    // 10% - radical change 
+    int u = (double)rand() / (RAND_MAX + 1) * (100);
+
+    if (u < 30)
         return;
-    m_type = 0;
+
     m_grade = (float)rand() / (float)RAND_MAX;
     uint32 gtime = sWorld.GetGameTime();
     uint32 season = (gtime / (91 * 360)) % 4;
-    sLog.outDebug("Generate random weather for season %u of zone %u.", season, m_zone);
-    QueryResult *result;
-    result = sDatabase.PQuery("SELECT * FROM `game_weather` WHERE `zone` = '%u';", m_zone);
-    if (!result)
-    {
+    char seasonName[7];
+    switch (season) {
+        case 0:
+            strcpy(seasonName, "spring");
+            break;
+        case 1:
+            strcpy(seasonName, "summer");
+            break;
+        case 2:
+            strcpy(seasonName, "fall");
+            break;
+        default:
+            strcpy(seasonName, "winter");
+    }
+
+    sLog.outDebug("Generating a change in %s weather for zone %u.", seasonName, m_zone);
+    
+    if ((u < 60) && (m_grade < 0.33333334f)) { // Get fair
+        m_type = 0;
+    } 
+    
+    if ((u < 60) && (m_type != 0)) { // Get better
+        m_grade -= 0.33333334f;
+        UpdateWeather();
+        return;
+    }
+    
+    if ((u < 90) && (m_type != 0)) { // Get worse
+        m_grade += 0.33333334f;
+        UpdateWeather();
         return;
     }
 
+    if (m_type != 0) {
+        // Severe change, and already doing something
+        if (m_grade < 0.33333334f) {
+            m_grade = 0.9999; // go nuts
+            UpdateWeather();
+            return;
+        } else {
+            if (m_grade > 0.6666667f) {
+                uint32 rnd = (double)rand() / (RAND_MAX + 1) * (100); // Severe change, but how severe?
+                if (rnd < 50) {
+                    m_grade -= 0.6666667;
+                    UpdateWeather();
+                    return;
+                }
+            }
+            m_type = 0; // clear up
+            m_grade = 0;
+        }
+    } 
+
+    // At this point, only weather that isn't doing anything remains
+    QueryResult *result;
+    result = sDatabase.PQuery("SELECT * FROM `game_weather` WHERE `zone` = '%u';", m_zone);
+    if (!result)
+        return;
+    
     uint32 chance1, chance2, chance3;
     Field *fields = result->Fetch();
     chance1 = fields[season+1].GetUInt32();
@@ -129,15 +188,26 @@ void Weather::ReGenerate()
     chance2 = chance1 + chance2;
     chance3 = chance2 + chance3;
 
-    uint32 rnd = rand() % 100;
-    if(rnd < chance1)
+    uint32 rnd = (double)rand() / (RAND_MAX + 1) * (100);
+    if(rnd <= chance1)
         m_type = 1;
-    else if(rnd < chance2)
+    else if(rnd <= chance2)
         m_type = 2;
-    else if(rnd < chance3)
+    else if(rnd <= chance3)
         m_type = 3;
-    else
-        m_type =0;
+    else 
+        m_type = 0;
+    
+    if (u < 90) {
+        m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000;
+    } else {
+        rnd = (double)rand() / (RAND_MAX + 1) * (100); // Severe change, but how severe?
+        if (rnd < 50)
+            m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.3334;
+        else
+            m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.6667;
+    }
+    
     UpdateWeather();
 }
 
@@ -153,6 +223,11 @@ void Weather::UpdateWeather()
     WorldPacket data;
     uint32 sound = GetSound();
     data.Initialize( SMSG_WEATHER );
+    if (m_grade >= 1)
+        m_grade = 0.9999;
+    else if (m_grade < 0)
+        m_grade = 0.0001;
+    
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
     m_player->SendMessageToSet( &data, true );
     char* wthstr;
