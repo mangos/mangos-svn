@@ -632,7 +632,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 {
     if( !Trigger_ID )
         return NULL;
-    QueryResult *result = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z` FROM `areatrigger_template` WHERE `id` = '%u';", Trigger_ID);
+    QueryResult *result = sDatabase.PQuery("SELECT `target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template` WHERE `id` = '%u';", Trigger_ID); 
     if ( !result )
         return NULL;
     Field *fields = result->Fetch();
@@ -642,6 +642,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
     at->X = fields[1].GetFloat();
     at->Y = fields[2].GetFloat();
     at->Z = fields[3].GetFloat();
+	at->Orientation = fields[4].GetFloat(); 
 
     delete result;
     return at;
