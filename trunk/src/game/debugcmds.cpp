@@ -99,7 +99,7 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
 bool ChatHandler::HandleSendItemErrorMsg(const char* args)
 {
     uint8 error_msg = atol((char*)args);
-    if ( error_msg >= 0 )
+    if ( error_msg > 0 )
     {
         WorldPacket data;
         data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);

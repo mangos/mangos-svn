@@ -275,7 +275,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     sLog.outString( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
-    if( slot >= 0 && slot <= 20 )
+    if( slot > 0 && slot <= 20 )
     {
         quest = _player->GetUInt32Value(3*slot + 200 + 0);
 

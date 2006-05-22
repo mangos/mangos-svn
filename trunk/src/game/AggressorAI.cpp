@@ -85,6 +85,7 @@ void AggressorAI::AttackStop(Unit *)
 void AggressorAI::_stopAttack()
 {
     assert( i_pVictim != NULL );
+    i_pVictim->clearUnitState(UNIT_STAT_IN_COMBAT);
     i_creature.clearUnitState(UNIT_STAT_IN_COMBAT);
     i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
 

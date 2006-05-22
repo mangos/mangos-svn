@@ -60,18 +60,20 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
     recv_data >> FallTime;
-    if ( FallTime > 1100 && !Target->isDead())
-    {
-        uint32 MapID = Target->GetMapId();
-        Map* Map = MapManager::Instance().GetMap(MapID);
-        float posz = Map->GetWaterLevel(x,y);
 
-        if (z > (posz - (float) 1))
-        {
-            guid = Target->GetGUID();
-            damage = (uint32)((FallTime - 1100)/100)+1;
-            Target->EnvironmentalDamage(guid,DAMAGE_FALL, damage);
-        }
+
+    if ( FallTime > 1100 && !Target->isDead()) 
+    { 
+	uint32 MapID = Target->GetMapId(); 
+	Map* Map = MapManager::Instance().GetMap(MapID); 
+	float posz = Map->GetWaterLevel(x,y); 
+	guid = Target->GetGUID(); 
+	float predamage = (float)((((float(FallTime)*10/11000)*(float(FallTime)*10/11000)) - 1) /6 ) * ( Target->GetUInt32Value(UNIT_FIELD_MAXHEALTH)); 
+	damage = (uint32)predamage; 
+
+	if (damage > 0 && damage < 2*( Target->GetUInt32Value(UNIT_FIELD_MAXHEALTH))) 
+	    Target->EnvironmentalDamage(guid,DAMAGE_FALL, damage); 
+	    DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , z, Target->GetPositionZ(),FallTime, posz,damage); 
     }
 
     //handle fall and logout at the sametime
