@@ -41,7 +41,8 @@ class Weather
         Weather(Player *player);
         ~Weather() { m_player = NULL;};
         void ReGenerate();
-        void ChangeWeather();
+        void UpdateWeather();
+        void SetWeather(uint32 type, float grade);
         uint32 GetZone() { return m_zone; };
         bool Update(uint32 diff);
     private:
