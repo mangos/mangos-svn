@@ -196,7 +196,8 @@ void Weather::UpdateWeather()
     sWorld.SendZoneText(m_zone, buf);
 }
 
-void Weather::SetWeather(uint32 type, float grade) {
+void Weather::SetWeather(uint32 type, float grade)
+{
     m_type = type;
     m_grade = grade;
     UpdateWeather();

@@ -49,6 +49,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
         _player->PlayerTalkClass->SendQuestStatus(questStatus, guid);
     }
 }
+
 void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
@@ -66,6 +67,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
         }
     }
 }
+
 void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
@@ -80,7 +82,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         if( _player->CanAddQuest( pQuest, true ) )
         {
             _player->AddQuest( pQuest );
-            
+
             if ( _player->CanCompleteQuest( pQuest ) )
                 _player->CompleteQuest( pQuest );
 
@@ -107,6 +109,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     }
     _player->PlayerTalkClass->CloseGossip();
 }
+
 void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
 {
     uint64 guid;
@@ -167,6 +170,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
     }
     _player->PlayerTalkClass->CloseGossip();
 }
+
 void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
 {
     uint32 quest;
@@ -178,6 +182,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     if ( pQuest )
         _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
 }
+
 void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 {
     uint32 quest, reward;
@@ -192,7 +197,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         if( _player->CanRewardQuest( pQuest, reward, true ) )
         {
             _player->RewardQuest( pQuest, reward );
-            
+
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
             if( pCreature )
             {
@@ -212,6 +217,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         }
     }
 }
+
 void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data )
 {
     uint32 quest;
@@ -231,12 +237,14 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
         }
     }
 }
+
 void WorldSession::HandleQuestgiverCancel(WorldPacket& recv_data )
 {
     sLog.outString( "WORLD: Received CMSG_QUESTGIVER_CANCEL" );
 
     _player->PlayerTalkClass->CloseGossip();
 }
+
 void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
 {
     uint8 slot1, slot2;
@@ -252,12 +260,13 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
         {
             temp1 = _player->GetUInt32Value(3*slot1 + PLAYER_QUEST_LOG_1_1 + i);
             temp2 = _player->GetUInt32Value(3*slot2 + PLAYER_QUEST_LOG_1_1 + i);
-            
+
             _player->SetUInt32Value(3*slot1 + PLAYER_QUEST_LOG_1_1 + i, temp2);
             _player->SetUInt32Value(3*slot2 + PLAYER_QUEST_LOG_1_1 + i, temp1);
         }
     }
 }
+
 void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 {
     uint8 slot;
@@ -282,6 +291,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
         }
     }
 }
+
 void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
 {
     uint32 quest;
@@ -289,6 +299,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
 
     sLog.outString( "WORLD: Received CMSG_QUEST_CONFIRM_ACCEPT quest = %u",quest );
 }
+
 void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 {
     uint32 quest;
@@ -306,10 +317,12 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true);
     }
 }
+
 void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)
 {
     sLog.outString( "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
 }
+
 void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 {
     uint64 guid;
@@ -317,7 +330,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
     recvPacket >> quest;
 
     WorldPacket data;
-    
+
     sLog.outString( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
     Quest *pQuest = objmgr.GetQuest( quest );
@@ -380,7 +393,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                                 _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_BUSY );
                                 continue;
                             }
-                            
+
                             pPlayer->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
                         }
                     }

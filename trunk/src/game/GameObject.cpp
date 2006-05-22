@@ -125,13 +125,15 @@ void GameObject::generateLoot()
     if(lootid)
         FillLoot(&loot,lootid);
 }
+
 void GameObject::getFishLoot(Loot *fishloot,uint32 lootid)
 {
-	uint32 zone = GetZoneId();
-	lootid = 30000 + zone;
-	//in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
-	FillLoot(fishloot,lootid);
+    uint32 zone = GetZoneId();
+    lootid = 30000 + zone;
+    //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
+    FillLoot(fishloot,lootid);
 }
+
 void GameObject::SaveToDB()
 {
     std::stringstream ss;

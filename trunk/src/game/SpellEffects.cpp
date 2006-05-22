@@ -379,7 +379,7 @@ void Spell::EffectPresistentAA(uint32 i)
     dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
     //m_dynObjToDel.push_back(dynObj);
     m_caster->AddDynObject(dynObj);
-	dynObj->AddToWorld();
+    dynObj->AddToWorld();
     MapManager::Instance().GetMap(dynObj->GetMapId())->Add(dynObj);
 
 }
@@ -505,15 +505,15 @@ void Spell::EffectOpenLock(uint32 i)
             SendCastResult(CAST_FAIL_FAILED);
             return;
         }
-		if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +75 )
-			up_skillvalue = 4;
-		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +50 )
-			up_skillvalue = 3;
-		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +25 )
-			up_skillvalue = 2;
-		else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill)
-			up_skillvalue = 1;
-		else up_skillvalue = 0;
+        if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +75 )
+            up_skillvalue = 4;
+        else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +50 )
+            up_skillvalue = 3;
+        else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill +25 )
+            up_skillvalue = 2;
+        else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill)
+            up_skillvalue = 1;
+        else up_skillvalue = 0;
         loottype=2;
 
     }else if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_MINING)
@@ -1746,7 +1746,7 @@ void Spell::EffectSkinning(uint32 i)
         return;
     }
     int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
-	int32 targetlevel = unitTarget->getLevel();
+    int32 targetlevel = unitTarget->getLevel();
     if(fishvalue >= (targetlevel-5)*5)
     {
         ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
@@ -1755,15 +1755,15 @@ void Spell::EffectSkinning(uint32 i)
         SendCastResult(CAST_FAIL_FAILED);
         return;
     }
-	if(fishvalue> (targetlevel +15)*5 )
-		up_skillvalue = 4;
-	else if(fishvalue>= (targetlevel +10)*5 )
-		up_skillvalue = 3;
-	else if(fishvalue >= (targetlevel +5)*5 )
-		up_skillvalue = 2;
-	else if(fishvalue >= (targetlevel <= 5?(targetlevel-5)*5:targetlevel*5))
-		up_skillvalue = 1;
-	else up_skillvalue = 0;
+    if(fishvalue> (targetlevel +15)*5 )
+        up_skillvalue = 4;
+    else if(fishvalue>= (targetlevel +10)*5 )
+        up_skillvalue = 3;
+    else if(fishvalue >= (targetlevel +5)*5 )
+        up_skillvalue = 2;
+    else if(fishvalue >= (targetlevel <= 5?(targetlevel-5)*5:targetlevel*5))
+        up_skillvalue = 1;
+    else up_skillvalue = 0;
 
 }
 
@@ -1790,7 +1790,7 @@ void Spell::EffectTransmitted(uint32 i)
 
     float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-	float dis = irand(int(min_dis),int(max_dis));
+    float dis = irand(int(min_dis),int(max_dis));
     fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
     fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
 
@@ -1824,11 +1824,11 @@ void Spell::EffectTransmitted(uint32 i)
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
 
-	if(m_spellInfo->EffectMiscValue[i] == 35591)
-	{
-		if(((Player*)m_caster)->CheckFishingAble() > 0)
-		{
-			//pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
+    if(m_spellInfo->EffectMiscValue[i] == 35591)
+    {
+        if(((Player*)m_caster)->CheckFishingAble() > 0)
+        {
+            //pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
             data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
             data<<uint64(pGameObj->GetGUID());
             data<<uint8(0);
@@ -1870,8 +1870,8 @@ void Spell::EffectSkill(uint32 i)
             case 4:
             default:return;
         }
-    
+
         player->UpdateSkill(skill_id);
-    }else 
+    }else
     player->UpdateSkillPro(m_spellInfo->Id);
 }

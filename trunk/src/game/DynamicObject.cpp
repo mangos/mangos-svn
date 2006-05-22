@@ -78,12 +78,12 @@ void DynamicObject::Update(uint32 p_time)
     }
 
     if(m_PeriodicDamageCurrentTick > p_time)
-		m_PeriodicDamageCurrentTick -= p_time;
+        m_PeriodicDamageCurrentTick -= p_time;
     else
     {
-		m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
-       //m_caster->DealWithSpellDamage(*this);
-		DealWithSpellDamage(*m_caster);
+        m_PeriodicDamageCurrentTick = m_PeriodicDamageTick;
+        //m_caster->DealWithSpellDamage(*this);
+        DealWithSpellDamage(*m_caster);
     }
 
     //if(deleteThis)
@@ -130,20 +130,20 @@ void DynamicObject::DealWithSpellDamage(Unit &caster)
     mod.m_amount = m_PeriodicDamage;
 
     UnitList.clear();
-	MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
-	for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
-	{
-		if((*iter) )
-		{
-			if((*iter)->isAlive() )
-			{
-				if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-				{
-					caster.PeriodicAuraLog((*iter),m_spell,&mod);
-				}
-			}
-		}
-	}
+    MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
+    for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
+    {
+        if((*iter) )
+        {
+            if((*iter)->isAlive() )
+            {
+                if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+                {
+                    caster.PeriodicAuraLog((*iter),m_spell,&mod);
+                }
+            }
+        }
+    }
 }
 
 void DynamicObject::Delete()

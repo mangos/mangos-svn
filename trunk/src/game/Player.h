@@ -322,9 +322,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
-/*********************************************************/
-/***                    QUEST SYSTEM                   ***/
-/*********************************************************/
+        /*********************************************************/
+        /***                    QUEST SYSTEM                   ***/
+        /*********************************************************/
 
         bool CanSeeStartQuest( Quest *pQuest );
         bool CanTakeQuest( Quest *pQuest, bool msg );
@@ -363,7 +363,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDivideState( uint64 guid ) { m_divider = guid; };
 
         uint32 GetTimedQuest() { return m_timedquest; };
-        void SetTimedQuest( Quest *pQuest ) {
+        void SetTimedQuest( Quest *pQuest )
+        {
             if( pQuest )
             {
                 uint32 quest = pQuest->GetQuestInfo()->PrevQuestId;
@@ -371,7 +372,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             }
         };
 
-/*********************************************************/
+        /*********************************************************/
 
         void SetBindPoint(uint64 guid);
         void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
@@ -683,14 +684,14 @@ class MANGOS_DLL_SPEC Player : public Unit
 
     protected:
 
-/*********************************************************/
-/***                    QUEST SYSTEM                   ***/
-/*********************************************************/
+        /*********************************************************/
+        /***                    QUEST SYSTEM                   ***/
+        /*********************************************************/
 
         uint32 m_timedquest;
         uint64 m_divider;
 
-/*********************************************************/
+        /*********************************************************/
 
         void AddWeather();
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;

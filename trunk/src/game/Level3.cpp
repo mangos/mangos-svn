@@ -1420,10 +1420,11 @@ bool ChatHandler::HandleAuraCommand(const char* args)
             uint8 eff = spellInfo->Effect[i];
             if (eff>=TOTAL_SPELL_EFFECTS)
                 continue;
-			if (eff == 6) {
-				Aura *Aur = new Aura(spellInfo, i, NULL, m_session->GetPlayer());
-				m_session->GetPlayer()->AddAura(Aur);
-			}
+            if (eff == 6)
+            {
+                Aura *Aur = new Aura(spellInfo, i, NULL, m_session->GetPlayer());
+                m_session->GetPlayer()->AddAura(Aur);
+            }
         }
     }
 
@@ -1438,7 +1439,7 @@ bool ChatHandler::HandleUnAuraCommand(const char* args)
 
     uint32 spellID = (uint32)atoi(px);
     m_session->GetPlayer()->RemoveAura(spellID);
-    
+
     return true;
 }
 
@@ -1853,10 +1854,10 @@ bool ChatHandler::HandleChangeWeather(const char* args)
 
     if (!px || !py)
         return false;
-    
+
     uint32 type = (uint32)atoi(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
     float grade = (float)atof(py);                          //0 to 1, sending -1 is instand good weather
-    
+
     Player *player = m_session->GetPlayer();
     uint32 zoneid = player->GetZoneId();
     Weather *wth = sWorld.FindWeather(zoneid);

@@ -64,24 +64,24 @@ int RealmList::GetAndAddRealms()
 
 void RealmList::AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone )
 {
-	if( _realms.find( name ) == _realms.end() )
-	{
-		_realms[name] = new Realm(name, address, icon, color, timezone);
+    if( _realms.find( name ) == _realms.end() )
+    {
+        _realms[name] = new Realm(name, address, icon, color, timezone);
 
-		std::string addr(address);
-		
-		if( addr.find(':', 0) == std::string::npos )
-		{
-			std::stringstream ss;
-			ss << addr << ":" << i_serverPort;
-			addr = ss.str();
-		}
+        std::string addr(address);
 
-		_realms[ name ]->address = addr;
-		_realms[ name ]->icon = icon;
-		_realms[ name ]->color = color;
-		_realms[ name ]->timezone = timezone;
-	}
+        if( addr.find(':', 0) == std::string::npos )
+        {
+            std::stringstream ss;
+            ss << addr << ":" << i_serverPort;
+            addr = ss.str();
+        }
+
+        _realms[ name ]->address = addr;
+        _realms[ name ]->icon = icon;
+        _realms[ name ]->color = color;
+        _realms[ name ]->timezone = timezone;
+    }
 }
 
 void RealmList::SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone )

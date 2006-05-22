@@ -66,7 +66,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
         void generateLoot();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetSespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
-		void getFishLoot(Loot *loot,uint32 lootid);
+        void getFishLoot(Loot *loot,uint32 lootid);
 
         LootState getLootState() { return m_lootState; }
 
