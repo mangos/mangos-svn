@@ -662,6 +662,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendInitWorldStates(uint32 MapID);
         void SendUpdateWordState(uint16 Field, uint16 Value);
+        void SendDirectMessage(WorldPacket *data);
 
         PlayerMenu* PlayerTalkClass;
         ItemsSetEffect * ItemsSetEff[3];

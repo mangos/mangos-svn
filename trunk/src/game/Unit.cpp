@@ -259,7 +259,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
         DEBUG_LOG("DealDamageAura");
         pVictim->setDeathState(JUST_DIED);
-        pVictim->RemoveAllAuras();
         if(m_currentSpell && !m_currentSpell->IsAreaAura() && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
             m_currentSpell->cancel();
 
@@ -301,7 +300,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 pet = ObjectAccessor::Instance().GetCreature(*pVictim, petguid);
                 if(pet && pet->isPet())
                 {
-                    pet->RemoveAllAuras();
                     pet->setDeathState(JUST_DIED);
                     pet->smsg_AttackStop(attackerGuid);
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);

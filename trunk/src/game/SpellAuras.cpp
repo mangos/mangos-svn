@@ -228,6 +228,7 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
     else
         damage = CalculateDamage(spellproto, eff);
 
+    m_effIndex = eff;
     m_modifier = new Modifier;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
 }
@@ -398,7 +399,8 @@ void Aura::_AddAura()
     {
         data.Initialize(SMSG_UPDATE_AURA_DURATION);
         data << (uint8)slot << (uint32)maxduration;
-        ((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
+        //((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
+        ((Player *)m_target)->SendDirectMessage(&data);
     }
 
     SetAuraSlot( slot );
@@ -410,21 +412,13 @@ void Aura::_RemoveAura()
     ApplyModifier(false);
 
     uint8 slot = GetAuraSlot();
-    SetAuraSlot(0);
-    Aura* aura = NULL;
-    for(uint8 i = 0; i< 3; i++)
-    {
-        if(i == m_effIndex)
-            continue;
-        aura = m_target->GetAura(m_spellId, i);
-        if(aura)
-            return;
-    }
+    Aura* aura = m_target->GetAura(m_spellId, m_effIndex);
+    if(!aura)
+        return;
 
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
-    {
         return;
-    }
+
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
 
     uint8 flagslot = slot >> 3;
