@@ -665,6 +665,9 @@ void Player::Update( uint32 p_time )
         inCombat = false;
     }
 
+	if(HasFlag(PLAYER_FLAGS, 0x20))
+		m_restTime ++;
+
     if(m_regenTimer > 0)
     {
         if(p_time >= m_regenTimer)

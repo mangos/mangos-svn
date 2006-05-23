@@ -685,6 +685,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 ApplyRestBonus(uint32 xp);
 		void SendEquipError(uint8 error);
+		uint32 GetRestTime() { return m_restTime;}
+		void SetRestTime(uint32 v) { m_restTime = v;}
 
     protected:
 
