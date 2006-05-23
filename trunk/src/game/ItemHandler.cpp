@@ -181,9 +181,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->RequiredCityRank;
     data << itemProto->RequiredReputationFaction;
     data << itemProto->RequiredReputationRank;
+    data << itemProto->Unique;
     data << itemProto->MaxCount;
-    data << itemProto->Stackable;
-    data << itemProto->ContainerSlots;;
+    data << itemProto->ContainerSlots;
     for(int i = 0; i < 10; i++)
     {
         data << itemProto->ItemStat[i].ItemStatType;
@@ -204,11 +204,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ArcaneRes;
     data << itemProto->Delay;
     data << itemProto->Ammo_type;
-    //Temply fix the range attack, perhaps need add a field to table item_template for this new data.(perhaps just range weapon use)
-    if(itemProto->Class = ITEM_CLASS_WEAPON && (itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_THROWN))
-        data << uint32(1120403456);
-    else
-        data << uint32(0);                                  //new 2 fields socalled (uint16)field70 and (uint16)field71: usess unknown
+
+	data << (float)itemProto->RangedModRange;
+
     for(int s = 0; s < 5; s++)
     {
         data << itemProto->Spells[s].SpellId;
@@ -232,9 +230,11 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ItemSet;
     data << itemProto->MaxDurability;
     data << itemProto->Area;
-    data << uint32(0);
+    data << uint32(0); //unknown1
 
-    WPAssert(data.size() == 453 + strlen(itemProto->Name1) + strlen(itemProto->Name2) + strlen(itemProto->Name3) + strlen(itemProto->Name4) + strlen(itemProto->Description));
+
+	//TODO FIX THIS
+    //WPAssert(data.size() == 454 + strlen(itemProto->Name1) + strlen(itemProto->Name2) + strlen(itemProto->Name3) + strlen(itemProto->Name4) + strlen(itemProto->Description));
     SendPacket( &data );
 }
 
