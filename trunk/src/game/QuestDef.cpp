@@ -22,10 +22,10 @@
 Quest::Quest()
 {
     m_quest = new QuestInfo;
-    m_qReqItemsCount = 0;
-    m_qReqMobsCount = 0;
-    m_qRewChoiceItemsCount = 0;
-    m_qRewItemsCount = 0;
+    m_reqitemscount = 0;
+    m_reqmobscount = 0;
+    m_rewchoiceitemscount = 0;
+    m_rewitemscount = 0;
 }
 
 void Quest::LoadQuest( uint32 quest )
@@ -40,29 +40,29 @@ void Quest::LoadQuest( QuestInfo *pQuestInfo )
     if( pQuestInfo )
     {
         m_quest = pQuestInfo;
-        m_qReqItemsCount = 0;
-        m_qReqMobsCount = 0;
-        m_qRewItemsCount = 0;
-        m_qRewChoiceItemsCount = 0;
+        m_reqitemscount = 0;
+        m_reqmobscount = 0;
+        m_rewitemscount = 0;
+        m_rewchoiceitemscount = 0;
 
         for (int i=0; i < QUEST_OBJECTIVES_COUNT; i++)
         {
             if ( pQuestInfo->ReqItemId[i] )
-                m_qReqItemsCount++;
+                m_reqitemscount++;
             if ( pQuestInfo->ReqKillMobId[i] )
-                m_qReqMobsCount++;
+                m_reqmobscount++;
         }
 
         for (int i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)
         {
             if ( pQuestInfo->RewChoiceItemId[i] )
-                m_qRewChoiceItemsCount++;
+                m_rewchoiceitemscount++;
         }
 
         for (int i=0; i < QUEST_REWARDS_COUNT; i++)
         {
             if ( pQuestInfo->RewItemId[i] )
-                m_qRewItemsCount++;
+                m_rewitemscount++;
         }
     }
 }

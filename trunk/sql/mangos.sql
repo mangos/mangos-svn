@@ -435,22 +435,21 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_queststatus`;
 CREATE TABLE `character_queststatus` (
-  `playerid` bigint(20) unsigned NOT NULL default '0',
-  `questid` bigint(22) unsigned NOT NULL default '0',
-  `status` bigint(20) unsigned NOT NULL default '0',
-  `rewarded` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount1` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount2` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount3` bigint(20) unsigned NOT NULL default '0',
-  `questMobCount4` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount1` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount2` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount3` bigint(20) unsigned NOT NULL default '0',
-  `questItemCount4` bigint(20) unsigned NOT NULL default '0',
+  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `status` int(11) unsigned NOT NULL default '0',
+  `rewarded` int(11) unsigned NOT NULL default '0',
+  `explored` int(11) unsigned NOT NULL default '0',
   `timer` bigint(20) unsigned NOT NULL default '0',
-  `explored` bigint(20) unsigned NOT NULL default '0',
-  `id` int(11) NOT NULL auto_increment,
-  PRIMARY KEY  (`id`)
+  `mobcount1` int(11) unsigned NOT NULL default '0',
+  `mobcount2` int(11) unsigned NOT NULL default '0',
+  `mobcount3` int(11) unsigned NOT NULL default '0',
+  `mobcount4` int(11) unsigned NOT NULL default '0',
+  `itemcount1` int(11) unsigned NOT NULL default '0',
+  `itemcount2` int(11) unsigned NOT NULL default '0',
+  `itemcount3` int(11) unsigned NOT NULL default '0',
+  `itemcount4` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --

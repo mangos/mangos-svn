@@ -79,6 +79,21 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     Quest *pQuest = objmgr.GetQuest(quest);
     if ( pQuest )
     {
+        if( _player->GetDivider() != 0 )
+        {
+            Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
+            if( pPlayer )
+            {
+                WorldPacket data;
+                data.Initialize( MSG_QUEST_PUSH_RESULT );
+                data << _player->GetGUID();
+                data << uint32( QUEST_PARTY_MSG_ACCEPT_QUEST );
+                data << uint8(0);
+                pPlayer->GetSession()->SendPacket(&data);
+                _player->SetDivider( 0 );
+            }
+        }
+
         if( _player->CanAddQuest( pQuest, true ) )
         {
             _player->AddQuest( pQuest );
@@ -275,7 +290,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     sLog.outString( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
-    if( slot > 0 && slot <= 20 )
+    if( slot >= 0 && slot < 20 )
     {
         quest = _player->GetUInt32Value(3*slot + 200 + 0);
 
@@ -388,13 +403,14 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                                 continue;
                             }
 
-                            if( pPlayer->GetDivideState()  )
+                            if( pPlayer->GetDivider() != 0  )
                             {
                                 _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_BUSY );
                                 continue;
                             }
 
                             pPlayer->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
+                            pPlayer->SetDivider( pguid );
                         }
                     }
                 }
@@ -405,6 +421,24 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 
 void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 {
-    recvPacket.hexlike();
+    uint64 guid;
+    uint8 msg;
+    recvPacket >> guid >> msg;
+
     sLog.outString( "WORLD: Received MSG_QUEST_PUSH_RESULT " );
+
+    if( _player->GetDivider() != 0 )
+    {
+        Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
+        if( pPlayer )
+        {
+            WorldPacket data;
+            data.Initialize( MSG_QUEST_PUSH_RESULT );
+            data << guid;
+            data << uint32( msg );
+            data << uint8(0);
+            pPlayer->GetSession()->SendPacket(&data);
+            _player->SetDivider( 0 );
+        }
+    }
 }

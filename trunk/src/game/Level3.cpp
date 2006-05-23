@@ -1313,7 +1313,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
         return false;
     //    pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
-    //	pGameObj->SetNameId(id);
+    //    pGameObj->SetNameId(id);
     sLog.outError(">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f.", goI->name, lowGUID, x, y, z, o);
 
     pGameObj->SaveToDB();
