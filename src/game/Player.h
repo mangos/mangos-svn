@@ -333,6 +333,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
         void AddQuest( Quest *pQuest );
         void CompleteQuest( Quest *pQuest );
+        void IncompleteQuest( Quest *pQuest );
         void RewardQuest( Quest *pQuest, uint32 reward );
         void FailQuest( Quest *pQuest );
         void FailTimedQuest( Quest *pQuest );
@@ -357,6 +358,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void KilledMonster( uint32 entry, uint64 guid );
         void AddQuestsLoot( Creature* creature );
 
+        void SendQuestComplete( Quest *pQuest );
+        void SendQuestReward( Quest *pQuest );
         void SendQuestFailed( Quest *pQuest );
         void SendQuestTimerFailed( Quest *pQuest );
         void SendCanTakeQuestResponse( uint32 msg );
@@ -368,10 +371,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetTimedQuest() { return m_timedquest; };
         void SetTimedQuest( Quest *pQuest ) {
             if( pQuest )
-            {
                 m_timedquest = pQuest->GetQuestInfo()->QuestId;
-                mQuestStatus[m_timedquest].m_timer = pQuest->GetQuestInfo()->LimitTime;
-            }
             else
                 m_timedquest = 0;
         }
@@ -689,8 +689,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 ApplyRestBonus(uint32 xp);
         void SendEquipError(uint8 error);
-		uint32 GetRestTime() { return m_restTime;}
-		void SetRestTime(uint32 v) { m_restTime = v;}
+        uint32 GetRestTime() { return m_restTime;}
+        void SetRestTime(uint32 v) { m_restTime = v;}
 
     protected:
 

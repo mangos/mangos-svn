@@ -133,15 +133,6 @@ bool ChatHandler::HandleSendQuestInvalidMsgCommand(const char* args)
     Player *  pPlayer = m_session->GetPlayer();
     uint32 msg = atol((char*)args);
     if ( msg >= 0 )
-        pPlayer->PlayerTalkClass->SendQuestInvalid( msg );
-    return true;
-}
-
-bool ChatHandler::HandleSendQuestErrorMsgCommand(const char* args)
-{
-    Player *  pPlayer = m_session->GetPlayer();
-    uint32 msg = atol((char*)args);
-    if ( msg >= 0 )
-        pPlayer->PlayerTalkClass->SendQuestFailed( msg );
+        pPlayer->SendCanTakeQuestResponse( msg );
     return true;
 }

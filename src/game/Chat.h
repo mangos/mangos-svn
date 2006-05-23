@@ -130,7 +130,6 @@ class ChatHandler
         bool HandleLoadScriptsCommand(const char* args);
         bool HandleSendQuestPartyMsgCommand(const char* args);
         bool HandleSendQuestInvalidMsgCommand(const char* args);
-        bool HandleSendQuestErrorMsgCommand(const char* args);
 
         bool HandleDebugInArcCommand(const char* args);
         bool HandleDebugSpellFailCommand(const char* args);
