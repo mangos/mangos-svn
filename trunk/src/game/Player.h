@@ -649,6 +649,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         int  GetHonorLastWeekRank(void) { return m_last_week_rank; };
         //End of Honor System
 
+        void SetDrunkValue(uint16 newDrunkValue);
+        uint16 GetDrunkValue() { return m_drunk; }
+
         void ApplyItemMods(Item *item,uint8 slot,bool apply)
         {
             _ApplyItemMods(item, slot, apply);
@@ -725,6 +728,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void HandleDrowing (uint32 UnderWaterTime);
         void HandleLava();
+        void HandleSobering();
 
         void StartMirrorTimer(uint8 Type, uint32 MaxValue);
         void ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen);
@@ -807,6 +811,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_Tutorials[8];
         uint32 m_regenTimer;
         uint32 m_breathTimer;
+        uint32 m_drunkTimer;
+        uint16 m_drunk;
+
         uint8 m_isunderwater;
 
         uint32 m_restTime;

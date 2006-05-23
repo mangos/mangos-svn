@@ -369,6 +369,7 @@ class Spell
         void EffectMomentMove(uint32 i);                    //by vendy
         void EffectTransmitted(uint32 i);
         void EffectDisEnchant(uint32 i);
+        void EffectInebriate(uint32 i);
         void EffectTriggerSpell(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
