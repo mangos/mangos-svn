@@ -189,16 +189,17 @@ class Quest
         Quest();
 
         QuestInfo *GetQuestInfo() { return m_quest; }
-        uint32 m_qReqItemsCount;
-        uint32 m_qReqMobsCount;
-        uint32 m_qRewChoiceItemsCount;
-        uint32 m_qRewItemsCount;
+
+        uint32 m_reqitemscount;
+        uint32 m_reqmobscount;
+        uint32 m_rewchoiceitemscount;
+        uint32 m_rewitemscount;
 
         void LoadQuest( uint32 quest );
         void LoadQuest( QuestInfo *pQuestInfo );
         uint32 XPValue( Player *pPlayer );
 
-        bool HasSpecialFlag( uint32 Flag )  { return (( m_quest->SpecialFlags & Flag ) == Flag); }
+        bool HasSpecialFlag( uint32 flag )  { return (( m_quest->SpecialFlags & flag ) != 0); }
     private:
         QuestInfo *m_quest;
 };
@@ -207,19 +208,18 @@ struct quest_status
 {
     quest_status()
     {
-        memset(m_questItemCount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
-        memset(m_questMobCount , 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
-        m_timerrel = 0;
+        memset(m_itemcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
+        memset(m_mobcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
     }
 
     Quest *m_quest;
-    uint32 status;
-    bool rewarded;
-    uint32 m_questItemCount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 m_questMobCount[ QUEST_OBJECTIVES_COUNT ];
 
-    uint32  m_timer;
-    uint32  m_timerrel;
-    bool    m_explored;
+    uint32 m_status;
+    bool m_rewarded;
+    bool m_explored;
+    uint32 m_timer;
+
+    uint32 m_itemcount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 m_mobcount[ QUEST_OBJECTIVES_COUNT ];
 };
 #endif
