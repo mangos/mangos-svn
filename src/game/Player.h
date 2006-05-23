@@ -681,6 +681,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_bgEntryPointZ;
 
         uint32 ApplyRestBonus(uint32 xp);
+		void SendEquipError(uint8 error);
 
     protected:
 
