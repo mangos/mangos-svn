@@ -143,7 +143,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_CRITTER
     &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK
     &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_INEBRIATE
+    &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE
     &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_FEED_PET
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISMISS_PET
     &Spell::EffectNULL,                                     //SPELL_EFFECT_REPUTATION
@@ -1609,6 +1609,17 @@ void Spell::EffectDisEnchant(uint32 i)
         }
     }
     return ;
+}
+
+void Spell::EffectInebriate(uint32 i) {
+    Player *player = (Player*)m_caster;
+    uint16 currentDrunk = player->GetDrunkValue();
+    uint16 drunkMod = m_spellInfo->EffectBasePoints[i] * 0xFFFF / 100;
+    if (currentDrunk + drunkMod > 0xFFFF)
+        currentDrunk = 0xFFFF;
+    else
+        currentDrunk += drunkMod;
+    player->SetDrunkValue(currentDrunk);
 }
 
 void Spell::EffectSummonObject(uint32 i)

@@ -112,6 +112,8 @@ Player::Player (WorldSession *session): Unit()
     m_regenTimer = 0;
     m_breathTimer = 0;
     m_isunderwater = 0;
+    m_drunkTimer = 0;
+    m_drunk = 0;
     m_restTime = 0;
 }
 
@@ -539,6 +541,27 @@ void Player::HandleLava()
     }
 }
 
+void Player::HandleSobering() {
+    m_drunkTimer = 0;
+    // According to blizzard, you go from totally drunk to sober in 15 minutes.
+    // This means you need to update the drunken value from 65535 -> 0 in 15 minutes.
+    // 15 minutes = 30 30-second updates
+    // 65535 / 30 = 2186 each update
+    if (m_drunk <= (0xFFFF / 30)) {
+        m_drunk = 0;
+    } else {
+        m_drunk -= (0xFFFF / 30);
+    }
+    m_session->GetPlayer()->SetUInt32Value(PLAYER_BYTES_3,
+        (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+}
+
+void Player::SetDrunkValue(uint16 newDrunkValue) {
+    m_drunk = newDrunkValue;
+    m_session->GetPlayer()->SetUInt32Value(PLAYER_BYTES_3,
+    (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+}
+
 void Player::Update( uint32 p_time )
 {
     if(!IsInWorld())
@@ -692,6 +715,13 @@ void Player::Update( uint32 p_time )
 
     //Handle lava
     HandleLava();
+
+    if (m_drunk) {
+        m_drunkTimer += p_time;
+        
+        if (m_drunkTimer > 30000)
+            HandleSobering();
+    }
 }
 
 void Player::BuildEnumData( WorldPacket * p_data )
@@ -2691,9 +2721,9 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0: total_honor) );
 
     if( CalculateHonorRank(total_honor) )
-        SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) );
+        SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
     else
-        SetUInt32Value(PLAYER_BYTES_3, 0);
+        SetUInt32Value(PLAYER_BYTES_3, m_drunk);
 
     //LIFE TIME
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
@@ -6960,6 +6990,7 @@ bool Player::LoadFromDB( uint32 guid )
     Object::_Create( guid, HIGHGUID_PLAYER );
 
     LoadValues( fields[3].GetString() );
+    m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
 
     m_name = fields[4].GetString();
     sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
