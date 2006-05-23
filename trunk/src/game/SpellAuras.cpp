@@ -1458,10 +1458,9 @@ void Aura::HandleModResistancePercent(bool apply)
 
 void Aura::HandleRangedAmmoHaste(bool apply)
 {
-	if(m_target->GetTypeId() != TYPEID_PLAYER)
-		return;
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
     uint32 percent = m_modifier->m_amount;
     uint32 current = m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
     apply ? m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current-(current*100)/(100+percent));
 }
-

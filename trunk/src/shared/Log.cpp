@@ -89,7 +89,7 @@ void Log::outDetail( const char * str, ... )
     vfprintf(logfile, str, ap);
     fprintf(logfile, "\n" );
     va_end(ap);
-    
+
     if( m_logLevel > 1 )
     {
         va_start(ap, str);

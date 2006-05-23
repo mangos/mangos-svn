@@ -1287,7 +1287,7 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
         tmpslot = maxid + 1;
     }
 
-	for(int i=0;i<3;i++)
+    for(int i=0;i<3;i++)
     {
         if(spellInfo->EffectItemType[i])
         {

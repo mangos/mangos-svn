@@ -994,7 +994,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         if(at->mapId == GetPlayer()->GetMapId() )
         {
             WorldPacket movedata;
-            _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation ); 
+            _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
             _player->SendMessageToSet(&movedata,true);
         }
         else
