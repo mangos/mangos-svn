@@ -543,10 +543,6 @@ void Player::HandleLava()
 
 void Player::HandleSobering() {
     m_drunkTimer = 0;
-    // According to blizzard, you go from totally drunk to sober in 15 minutes.
-    // This means you need to update the drunken value from 65535 -> 0 in 15 minutes.
-    // 15 minutes = 30 30-second updates
-    // 65535 / 30 = 2186 each update
     if (m_drunk <= (0xFFFF / 30)) {
         m_drunk = 0;
     } else {
