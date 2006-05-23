@@ -3902,9 +3902,9 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             sLog.outError("AddItem: Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
             return 0;
         }
-        if(pBag->GetProto()->Class == ITEM_CLASS_QUIVER && item->GetProto()->SubClass != ITEM_SUBCLASS_AMMO_POUCH)
-        {
-            SendEquipError(EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE);
+		if(pBag->GetProto()->Class == ITEM_CLASS_QUIVER && item->GetProto()->Class != ITEM_CLASS_PROJECTILE)
+		{
+			SendEquipError(EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE);
             return 0;
         }
         pBag->AddItemToBag(slot, item);
