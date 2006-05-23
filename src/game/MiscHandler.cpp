@@ -1012,7 +1012,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
                 GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
         }
     }
-    if(cnt!=0 && at)
+    if(cnt == 0 && at)
     {
         if(at->mapId == GetPlayer()->GetMapId() )
         {
