@@ -283,6 +283,7 @@ class Aura
         void HandleModDamagePercentDone(bool Apply);
         void HandleModPercentStat(bool Apply);
         void HandleModResistancePercent(bool Apply);
+        void HandleRangedAmmoHaste(bool Apply);
 
         Aura() : m_spellId(0), m_effIndex(0), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0), m_positive(false), m_permanent(false), m_isPeriodic(false), m_procSpell(NULL), m_isTrigger(false) {}
         Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target);

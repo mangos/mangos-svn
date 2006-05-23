@@ -182,7 +182,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HASTE = 138,
     &Aura::HandleNULL,                                      //SPELL_AURA_FORCE_REACTION = 139,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_HASTE = 140,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
+    &Aura::HandleRangedAmmoHaste,                           //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_BASE_RESISTANCE_PCT = 142,
     &Aura::HandleAuraModResistanceExclusive,                //SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE = 143,
     &Aura::HandleAuraSafeFall,                              //SPELL_AURA_SAFE_FALL = 144,
@@ -1455,3 +1455,13 @@ void Aura::HandleModResistancePercent(bool apply)
         m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_06, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_06) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
     }
 }
+
+void Aura::HandleRangedAmmoHaste(bool apply)
+{
+	if(m_target->GetTypeId() != TYPEID_PLAYER)
+		return;
+    uint32 percent = m_modifier->m_amount;
+    uint32 current = m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
+    apply ? m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current-(current*100)/(100+percent));
+}
+

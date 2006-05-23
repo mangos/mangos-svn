@@ -144,25 +144,17 @@ void Unit::setAttackTimer(uint32 time, bool rangeattack)
         {
             if (GetTypeId() == TYPEID_PLAYER)
             {
-                Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_RANGED);
-                if(!weapon)
-                    m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
-                else
-                    m_attackTimer = weapon->GetProto()->Delay;
+                m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
             }
         }
         else
         {
             if (GetTypeId() == TYPEID_PLAYER)
             {
-                Item* weapon = ((Player*)this)->GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
-                if(!weapon)
-                    m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
-                else
-                    m_attackTimer = weapon->GetProto()->Delay;
+                m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
             }
         }
-        m_attackTimer = (m_attackTimer >= 500) ? m_attackTimer : 2000;
+        m_attackTimer = (m_attackTimer >= 200) ? m_attackTimer : 2000;
     }
 }
 
@@ -781,7 +773,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
             chanceToHit = 15.0f;
     }
 
-    if(!damage) damage = CalculateDamage (this);
+    if(!damage) damage = CalculateDamage (false);
 
     if((chanceToHit/100) * 512 >= urand(0, 512) )
     {
@@ -830,6 +822,46 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
 
     DealDamage(pVictim, damage-AbsorbDamage, 0, true);
 }
+
+uint32 Unit::CalculateDamage(bool ranged)
+{
+    uint32 attack_power;
+
+    float min_damage, max_damage, dmg;
+	if(ranged)
+	{
+		if(getClass() == HUNTER)
+			attack_power = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+		else
+			attack_power = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+
+		dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME);
+		min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
+		max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+	}
+	else
+	{
+		attack_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
+		dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_BASEATTACKTIME);
+		min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
+		max_damage =GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
+	}
+    if (min_damage > max_damage)
+    {
+        float temp = max_damage;
+        max_damage = min_damage;
+        min_damage = temp;
+    }
+
+    if(max_damage==0)
+        max_damage=5;
+
+    float diff = max_damage - min_damage + 1;
+     
+	dmg += float (rand()%(uint32)diff + (uint32)min_damage);
+    return (uint32)dmg;
+}
+
 
 void Unit::smsg_AttackStop(uint64 victimGuid)
 {
