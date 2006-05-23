@@ -1016,19 +1016,19 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         if (Player::HasSpell(20550))                        //endurance skill support (+5% to total health)
         {
-            (uint32)exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
+            exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
             b_HP = uint8(exHP * 0.05);
             newHP += b_HP;
         }
         if (Player::HasSpell(20598))                        //Human Spirit skill support (+5% to total spirit)
         {
-            (uint32)exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
+            exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
             b_Spirit = uint8(exSpirit * 0.05);
             newSPI += b_Spirit;
         }
         if (Player::HasSpell(20591))                        //Expansive mind support (+5% to total Intellect)
         {
-            (uint32)exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
+            exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
             b_IQ = uint8(exIQ * 0.05);
             newINT += b_IQ;
         }

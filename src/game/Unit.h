@@ -258,6 +258,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 getTransForm() { return m_transform;}
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
+        uint32 CalculateDamage(bool ranged);
 
     protected:
         Unit ( );

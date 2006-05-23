@@ -1009,22 +1009,29 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    float minDmg,maxDmg;
-    minDmg = maxDmg = 0;
+    float    chanceToHit = 100.0f;
+    int32    attackerSkill = m_caster->GetUnitMeleeSkill();
+    int32    victimSkill = unitTarget->GetUnitMeleeSkill();
+    if (m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
+    {
+        if (attackerSkill <= victimSkill - 24)
+            chanceToHit = 0;
+        else if (attackerSkill <= victimSkill)
+            chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
 
+        if (chanceToHit < 15.0f)
+            chanceToHit = 15.0f;
+    }
+
+    float damage;
     if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
     {
-        minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE);
-        maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+        damage = m_caster->CalculateDamage(false);
     }
     else
     {
-        if(m_caster->GetTypeId() != TYPEID_PLAYER)
-        {
-            minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-            maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-        }
-        else
+        damage = m_caster->CalculateDamage(true);
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             uint8 slot=EQUIPMENT_SLOT_RANGED;
             Item *equipitem = ((Player*)m_caster)->GetItemBySlot(slot);
@@ -1035,28 +1042,34 @@ void Spell::EffectWeaponDmg(uint32 i)
 
             uint32 equipInvType = equipitem->GetProto()->InventoryType;
 
-            minDmg = equipitem->GetProto()->Damage[0].DamageMin;
-            maxDmg = equipitem->GetProto()->Damage[0].DamageMax;
-
             if(equipInvType == INVTYPE_THROWN)
                 stackitem = equipitem;
             else
                 stackitem = ammoitem;
 
             if(stackitem)
-            {
                 ((Player*)m_caster)->RemoveItemFromInventory(stackitem->GetProto()->ItemId, 1);
-            }
+			else
+			{
+				SendCastResult(CAST_FAIL_NO_AMMO);
+				return;
+			}
         }
     }
 
-    uint32 randDmg = (uint32)(maxDmg-minDmg);
-    uint32 dmg = (uint32)minDmg;
-    if(randDmg > 1)
-        dmg += rand()%randDmg;
-    dmg += damage;
+    if((chanceToHit/100) * 512 >= urand(0, 512) )
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
+        {
+            if (attackerSkill < victimSkill - 20)
+                damage = (damage * 30) / 100;
+            else if (attackerSkill < victimSkill - 10)
+                damage = (damage * 60) / 100;
+        }
+    }
+    else damage = 0;
 
-    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,dmg);
+    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,damage);
 
 }
 
