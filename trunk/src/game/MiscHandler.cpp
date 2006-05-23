@@ -997,7 +997,22 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID );
 
-    if(at)
+    Field *fields;
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `areatrigger_tavern` WHERE `id` = '%u';", Trigger_ID);
+    int cnt = 0;
+    if(result)
+    {
+        fields = result->Fetch();
+        cnt = fields[0].GetUInt32();
+
+        // player flag 0x20 - resting
+        if ( cnt > 0 )
+        {
+            if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
+                GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
+        }
+    }
+    if(cnt!=0 && at)
     {
         if(at->mapId == GetPlayer()->GetMapId() )
         {
@@ -1011,24 +1026,9 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
         delete at;
     }
+    delete result;
 
     // set resting flag we are in the inn
-    Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `areatrigger_tavern` WHERE `id` = '%u';", Trigger_ID);
-    if(result)
-    {
-        int cnt;
-        fields = result->Fetch();
-        cnt = fields[0].GetUInt32();
-
-        // player flag 0x20 - resting
-        if ( cnt > 0 )
-        {
-            if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-                GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
-        }
-    }
-    delete result;
 
 }
 

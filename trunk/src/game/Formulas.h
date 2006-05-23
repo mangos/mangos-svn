@@ -160,8 +160,18 @@ namespace MaNGOS
                 return 0;
 
             xp_gain = pl->ApplyRestBonus(xp_gain);
-            if( false )
-                xp_gain *= 2;                               //*= u->GetEliteLevel()/2 + 1
+            if( pl->GetRestTime() > 10000 )
+			{
+				uint32 rate = pl->GetRestTime() / 600000;
+				if(rate <= 1)
+					rate = 2;
+				if(rate >= 3)
+					rate = 3;
+                xp_gain *= rate;                               //*= u->GetEliteLevel()/2 + 1
+				pl->SetRestTime( (pl->GetRestTime() > rate * 600000) ? pl->GetRestTime() - rate * 600000 : 0 );
+				if(pl->GetRestTime() <=0)
+					pl->RemoveFlag(PLAYER_FLAGS, 0x20);
+			}
 
             return (uint32)(xp_gain*sWorld.getRate(RATE_XP));
         }
