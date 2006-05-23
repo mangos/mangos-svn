@@ -244,11 +244,14 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
 
     uint32 team = this->_player->GetTeam();
+    uint32 security = this->GetSecurity();
 
     ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
-        if ( itr->second->GetName() && itr->second->GetTeam() == team )
+        // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+        if ( itr->second->GetName() && ( security > 0 || itr->second->GetTeam() == team && itr->second->GetSession()->GetSecurity() == 0 ) )
         {
             clientcount++;
 
@@ -262,7 +265,12 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
-        if ( itr->second->GetName() && itr->second->GetTeam() == team && (countcheck  < clientcount))
+
+        if( countcheck >= clientcount) break;
+
+        // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+        if ( itr->second->GetName() && ( security > 0 || itr->second->GetTeam() == team && itr->second->GetSession()->GetSecurity() == 0 ) )
         {
             countcheck++;
 
