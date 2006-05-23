@@ -3885,6 +3885,11 @@ uint8 Player::AddItem(uint8 bagIndex,uint8 slot, Item *item, bool allowstack)
             sLog.outError("AddItem: Non-bag item in bag slot, itemId = %i, slot = %i", item->GetEntry(), slot);
             return 0;
         }
+		if(pBag->GetProto()->Class == ITEM_CLASS_QUIVER && item->GetProto()->SubClass != ITEM_SUBCLASS_AMMO_POUCH)
+		{
+			SendEquipError(EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE);
+            return 0;
+		}
         pBag->AddItemToBag(slot, item);
         if (IsInWorld())
         {
@@ -7618,4 +7623,15 @@ void Player::_SaveTutorials()
 {
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
     sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+}
+
+void Player::SendEquipError(uint8 error)
+{
+	WorldPacket data;
+	data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
+	data << uint8(error);
+	data << uint64(0);
+	data << uint64(0);
+	data << uint8(0);
+	GetSession()->SendPacket(&data);
 }
