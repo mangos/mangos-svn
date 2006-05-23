@@ -20,7 +20,7 @@
 #include "../game/EventSystem.h"
 #include "../game/ProgressBar.hpp"
 
-const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffffffiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiis";
+const char ItemPrototypefmt[]="iiissssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffffffiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiis";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiis";
 const char CreatureInfofmt[]="iissiiiiiififfiiiiiiififiiffifiiiiiiiiiiiiiiiiiiiiiiiisss";
 const char Questsfmt[]="iiiiiiiiiiiiiiissssssssssiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffi";
