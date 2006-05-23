@@ -210,6 +210,7 @@ struct ItemPrototype
     uint32 RequiredCityRank;
     uint32 RequiredReputationFaction;
     uint32 RequiredReputationRank;
+    uint32 Unique;
     uint32 MaxCount;
     uint32 Stackable;
     uint32 ContainerSlots;
@@ -224,6 +225,8 @@ struct ItemPrototype
     uint32 ArcaneRes;
     uint32 Delay;
     uint32 Ammo_type;
+    float  RangedModRange;
+
     _Spell Spells[5];
     uint32 Bonding;
     char* Description;
