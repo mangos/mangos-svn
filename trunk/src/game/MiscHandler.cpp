@@ -243,10 +243,12 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
 
+    uint32 team = this->_player->GetTeam();
+
     ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
-        if ( itr->second->GetName() )
+        if ( itr->second->GetName() && itr->second->GetTeam() == team )
         {
             clientcount++;
 
@@ -260,7 +262,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
-        if ( itr->second->GetName() && (countcheck  < clientcount))
+        if ( itr->second->GetName() && itr->second->GetTeam() == team && (countcheck  < clientcount))
         {
             countcheck++;
 
