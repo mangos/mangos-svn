@@ -73,7 +73,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setpoi",      3, &ChatHandler::HandleSetPoiCommand,             "",   NULL },
         { "qpartymsg",   3, &ChatHandler::HandleSendQuestPartyMsgCommand,  "",   NULL },
         { "qinvalidmsg", 3, &ChatHandler::HandleSendQuestInvalidMsgCommand,"",   NULL },
-        { "qerrormsg",   3, &ChatHandler::HandleSendQuestErrorMsgCommand,  "",   NULL },
         { "itemmsg",     3, &ChatHandler::HandleSendItemErrorMsg,          "",   NULL },
         { NULL,          0, NULL,                                          "",   NULL }
     };

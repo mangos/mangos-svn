@@ -471,68 +471,6 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
     sLog.outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u",pQuest->GetQuestInfo()->QuestId );
 }
 
-void PlayerMenu::SendQuestComplete( Quest *pQuest )
-{
-    WorldPacket data;
-
-    data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
-    data << pQuest->GetQuestInfo()->QuestId;
-    data << uint32(0x03);
-    data << pQuest->XPValue( pSession->GetPlayer() );
-    data << pQuest->GetQuestInfo()->RewMoney;
-
-    data << uint32( pQuest->m_rewitemscount );
-
-    for (int iI = 0; iI < QUEST_REWARDS_COUNT; iI++)
-        if (pQuest->GetQuestInfo()->RewItemId[iI] > 0)
-    {
-        data << pQuest->GetQuestInfo()->RewItemId[iI] << pQuest->GetQuestInfo()->RewItemCount[iI];
-    }
-
-    pSession->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE questid=%u",pQuest->GetQuestInfo()->QuestId );
-}
-
-void PlayerMenu::SendQuestUpdateComplete( Quest *pQuest )
-{
-    WorldPacket data;
-    data.Initialize( SMSG_QUESTUPDATE_COMPLETE );
-
-    data << pQuest->GetQuestInfo()->QuestId;
-    pSession->SendPacket( &data );
-
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_COMPLETE questid=%u",pQuest->GetQuestInfo()->QuestId);
-}
-
-void PlayerMenu::SendQuestCompleteToLog( Quest *pQuest )
-{
-    uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
-    uint32 updt       = pSession->GetPlayer()->GetUInt32Value( log_slot + 1 );
-    updt             |= 0x01000000;
-
-    pSession->GetPlayer()->SetUInt32Value( log_slot + 1, updt );
-}
-
-void PlayerMenu::SendQuestIncompleteToLog( Quest *pQuest )
-{
-    uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
-    uint32 vle1       = pSession->GetPlayer()->GetUInt32Value( log_slot + 0 );
-
-    pSession->GetPlayer()->SetUInt32Value( log_slot + 0 , vle1 );
-    pSession->GetPlayer()->SetUInt32Value( log_slot + 1 , 0 );
-    pSession->GetPlayer()->SetUInt32Value( log_slot + 2 , 0 );
-}
-
-void PlayerMenu::SendQuestLogFull()
-{
-    WorldPacket data;
-
-    data.Initialize( SMSG_QUESTLOG_FULL );
-    pSession->SendPacket( &data );
-
-    sLog.outDebug( "WORLD: Sent QUEST_LOG_FULL_MESSAGE" );
-}
-
 void PlayerMenu::SendQuestUpdateAddItem( Quest *pQuest, uint32 iLogItem, uint32 iLogNr)
 {
     WorldPacket data;
@@ -543,6 +481,10 @@ void PlayerMenu::SendQuestUpdateAddItem( Quest *pQuest, uint32 iLogItem, uint32 
     data << uint32(iLogNr);
 
     pSession->SendPacket( &data );
+
+    uint16 log_slot = pSession->GetPlayer()->GetQuestSlot( pQuest );
+    uint32 kills = pSession->GetPlayer()->GetUInt32Value( log_slot + 1 );
+    pSession->GetPlayer()->SetUInt32Value( log_slot + 1, kills );
 }
 
 void PlayerMenu::SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 iNrMob, uint32 iLogMob )
@@ -569,38 +511,6 @@ void PlayerMenu::SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 i
     }
 }
 
-void PlayerMenu::SendQuestUpdateSetTimer( Quest *pQuest, uint32 TimerValue)
-{
-    uint16 log_slot   = pSession->GetPlayer()->GetQuestSlot( pQuest );
-    time_t pk         = time(NULL);
-    pk += (TimerValue * 60);
-    pSession->GetPlayer()->SetUInt32Value( log_slot + 2, pk );
-}
-
-void PlayerMenu::SendQuestUpdateFailed( Quest *pQuest )
-{
-    WorldPacket data;
-    data.Initialize( SMSG_QUESTUPDATE_FAILED );
-
-    data << uint32(pQuest->GetQuestInfo()->QuestId);
-    pSession->SendPacket( &data );
-
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_FAILED" );
-}
-
-void PlayerMenu::SendQuestUpdateFailedTimer( Quest *pQuest )
-{
-    WorldPacket data;
-
-    data.Initialize( SMSG_QUESTUPDATE_FAILEDTIMER );
-
-    data << uint32(pQuest->GetQuestInfo()->QuestId);
-    pSession->SendPacket( &data );
-
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_FAILEDTIMER" );
-
-}
-
 void PlayerMenu::SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, char const * locName )
 {
     WorldPacket data;
@@ -614,30 +524,6 @@ void PlayerMenu::SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flag
 
     pSession->SendPacket( &data );
     sLog.outDebug("WORLD: Sent SMSG_GOSSIP_POI");
-}
-
-void PlayerMenu::SendQuestFailed( uint32 iReason )
-{
-    WorldPacket data;
-
-    data.Initialize( SMSG_QUESTGIVER_QUEST_FAILED );
-    data << iReason;
-
-    pSession->SendPacket( &data );
-
-    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_FAILED");
-}
-
-void PlayerMenu::SendQuestInvalid( uint32 iReason )
-{
-    WorldPacket data;
-
-    data.Initialize( SMSG_QUESTGIVER_QUEST_INVALID );
-    data << iReason;
-
-    pSession->SendPacket( &data );
-
-    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
 
 void PlayerMenu::SendTalking( uint32 textID )

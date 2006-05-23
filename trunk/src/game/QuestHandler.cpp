@@ -84,12 +84,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
             if( pPlayer )
             {
-                WorldPacket data;
-                data.Initialize( MSG_QUEST_PUSH_RESULT );
-                data << _player->GetGUID();
-                data << uint32( QUEST_PARTY_MSG_ACCEPT_QUEST );
-                data << uint8(0);
-                pPlayer->GetSession()->SendPacket(&data);
+                pPlayer->SendPushToPartyResponse( _player, QUEST_PARTY_MSG_ACCEPT_QUEST );
                 _player->SetDivider( 0 );
             }
         }
