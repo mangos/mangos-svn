@@ -104,7 +104,7 @@ void Weather::ReGenerate()
     // 30% - no change
     // 30% - weather worsens
     // 30% - weather gets better
-    // 10% - radical change 
+    // 10% - radical change
     int u = uint32((double)rand() / (RAND_MAX + 1) * (100));
 
     if (u < 30)
@@ -114,7 +114,8 @@ void Weather::ReGenerate()
     uint32 gtime = sWorld.GetGameTime();
     uint32 season = (gtime / (91 * 360)) % 4;
     char seasonName[7];
-    switch (season) {
+    switch (season)
+    {
         case 0:
             strcpy(seasonName, "spring");
             break;
@@ -129,49 +130,59 @@ void Weather::ReGenerate()
     }
 
     sLog.outDebug("Generating a change in %s weather for zone %u.", seasonName, m_zone);
-    
-    if ((u < 60) && (m_grade < 0.33333334f)) { // Get fair
+
+    if ((u < 60) && (m_grade < 0.33333334f))                // Get fair
+    {
         m_type = 0;
-    } 
-    
-    if ((u < 60) && (m_type != 0)) { // Get better
+    }
+
+    if ((u < 60) && (m_type != 0))                          // Get better
+    {
         m_grade -= 0.33333334f;
         UpdateWeather();
         return;
     }
-    
-    if ((u < 90) && (m_type != 0)) { // Get worse
+
+    if ((u < 90) && (m_type != 0))                          // Get worse
+    {
         m_grade += 0.33333334f;
         UpdateWeather();
         return;
     }
 
-    if (m_type != 0) {
+    if (m_type != 0)
+    {
         // Severe change, and already doing something
-        if (m_grade < 0.33333334f) {
-            m_grade = 0.9999; // go nuts
+        if (m_grade < 0.33333334f)
+        {
+            m_grade = 0.9999;                               // go nuts
             UpdateWeather();
             return;
-        } else {
-            if (m_grade > 0.6666667f) {
-                uint32 rnd = uint32((double)rand() / (RAND_MAX + 1) * (100)); // Severe change, but how severe?
-                if (rnd < 50) {
+        }
+        else
+        {
+            if (m_grade > 0.6666667f)
+            {
+                                                            // Severe change, but how severe?
+                uint32 rnd = uint32((double)rand() / (RAND_MAX + 1) * (100));
+                if (rnd < 50)
+                {
                     m_grade -= 0.6666667;
                     UpdateWeather();
                     return;
                 }
             }
-            m_type = 0; // clear up
+            m_type = 0;                                     // clear up
             m_grade = 0;
         }
-    } 
+    }
 
     // At this point, only weather that isn't doing anything remains
     QueryResult *result;
     result = sDatabase.PQuery("SELECT * FROM `game_weather` WHERE `zone` = '%u';", m_zone);
     if (!result)
         return;
-    
+
     uint32 chance1, chance2, chance3;
     Field *fields = result->Fetch();
     chance1 = fields[season+1].GetUInt32();
@@ -195,19 +206,23 @@ void Weather::ReGenerate()
         m_type = 2;
     else if(rnd <= chance3)
         m_type = 3;
-    else 
+    else
         m_type = 0;
-    
-    if (u < 90) {
+
+    if (u < 90)
+    {
         m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000;
-    } else {
-        rnd = uint32((double)rand() / (RAND_MAX + 1) * (100)); // Severe change, but how severe?
+    }
+    else
+    {
+                                                            // Severe change, but how severe?
+        rnd = uint32((double)rand() / (RAND_MAX + 1) * (100));
         if (rnd < 50)
             m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.3334;
         else
             m_grade = ((int)(double)rand() / (RAND_MAX + 1) * (3333))/10000 + 0.6667;
     }
-    
+
     UpdateWeather();
 }
 
@@ -227,7 +242,7 @@ void Weather::UpdateWeather()
         m_grade = 0.9999;
     else if (m_grade < 0)
         m_grade = 0.0001;
-    
+
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
     m_player->SendMessageToSet( &data, true );
     char* wthstr;

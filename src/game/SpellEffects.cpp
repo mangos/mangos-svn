@@ -1049,11 +1049,11 @@ void Spell::EffectWeaponDmg(uint32 i)
 
             if(stackitem)
                 ((Player*)m_caster)->RemoveItemFromInventory(stackitem->GetProto()->ItemId, 1);
-			else
-			{
-				SendCastResult(CAST_FAIL_NO_AMMO);
-				return;
-			}
+            else
+            {
+                SendCastResult(CAST_FAIL_NO_AMMO);
+                return;
+            }
         }
     }
 

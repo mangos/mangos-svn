@@ -376,9 +376,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->smsg_InitialActions();
 
-	/*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
-	{	
-		uint32 shiftdata=0x01;
+    /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
+    {
+        uint32 shiftdata=0x01;
         for(uint8 i=0;i<32;i++)
         {
             if ( 522753 & shiftdata )
@@ -392,8 +392,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             }
             shiftdata=shiftdata<<1;
         }
-	}*/
-	
+    }*/
+
     data.Initialize(SMSG_INITIALIZE_FACTIONS);
     data << uint32 (0x00000040);
     for(int a=0; a<64; a++)

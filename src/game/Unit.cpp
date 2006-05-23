@@ -828,24 +828,24 @@ uint32 Unit::CalculateDamage(bool ranged)
     uint32 attack_power;
 
     float min_damage, max_damage, dmg;
-	if(ranged)
-	{
-		if(getClass() == HUNTER)
-			attack_power = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
-		else
-			attack_power = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+    if(ranged)
+    {
+        if(getClass() == HUNTER)
+            attack_power = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+        else
+            attack_power = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
 
-		dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME);
-		min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-		max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-	}
-	else
-	{
-		attack_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
-		dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_BASEATTACKTIME);
-		min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
-		max_damage =GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
-	}
+        dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME);
+        min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
+        max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+    }
+    else
+    {
+        attack_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
+        dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_BASEATTACKTIME);
+        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
+        max_damage =GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
+    }
     if (min_damage > max_damage)
     {
         float temp = max_damage;
@@ -857,11 +857,10 @@ uint32 Unit::CalculateDamage(bool ranged)
         max_damage=5;
 
     float diff = max_damage - min_damage + 1;
-     
-	dmg += float (rand()%(uint32)diff + (uint32)min_damage);
+
+    dmg += float (rand()%(uint32)diff + (uint32)min_damage);
     return (uint32)dmg;
 }
-
 
 void Unit::smsg_AttackStop(uint64 victimGuid)
 {

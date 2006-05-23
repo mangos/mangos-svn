@@ -112,7 +112,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         if( _needToStop() )
         {
             DEBUG_LOG("Guard AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            _stopAttack(); // i_pVictim == NULL now
+            _stopAttack();                                  // i_pVictim == NULL now
         }
         switch( i_state )
         {
