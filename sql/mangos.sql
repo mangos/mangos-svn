@@ -51,6 +51,27 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 
 --
+-- Table structure for table `areatrigger_city`
+--
+
+DROP TABLE IF EXISTS `areatrigger_city`;
+CREATE TABLE `areatrigger_city` (
+  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `name` text,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
+
+--
+-- Dumping data for table `areatrigger_city`
+--
+
+
+/*!40000 ALTER TABLE `areatrigger_city` DISABLE KEYS */;
+LOCK TABLES `areatrigger_city` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `areatrigger_city` ENABLE KEYS */;
+
+--
 -- Table structure for table `areatrigger_graveyard`
 --
 
