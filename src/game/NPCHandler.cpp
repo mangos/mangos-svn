@@ -150,7 +150,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(spellInfo->spellLevel);
         data << uint32((*itr)->reqskill);
         data << uint32((*itr)->reqskillvalue);
-        data << uint32((*itr)->reqspell); 
+        data << uint32((*itr)->reqspell);
         data<< uint32(0);
         data << uint32(0);
     }

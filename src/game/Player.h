@@ -369,7 +369,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDivider( uint64 guid ) { m_divider = guid; };
 
         uint32 GetTimedQuest() { return m_timedquest; };
-        void SetTimedQuest( Quest *pQuest ) {
+        void SetTimedQuest( Quest *pQuest )
+        {
             if( pQuest )
                 m_timedquest = pQuest->GetQuestInfo()->QuestId;
             else
