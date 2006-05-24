@@ -541,21 +541,26 @@ void Player::HandleLava()
     }
 }
 
-void Player::HandleSobering() {
+void Player::HandleSobering()
+{
     m_drunkTimer = 0;
-    if (m_drunk <= (0xFFFF / 30)) {
+    if (m_drunk <= (0xFFFF / 30))
+    {
         m_drunk = 0;
-    } else {
+    }
+    else
+    {
         m_drunk -= (0xFFFF / 30);
     }
     m_session->GetPlayer()->SetUInt32Value(PLAYER_BYTES_3,
         (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
 }
 
-void Player::SetDrunkValue(uint16 newDrunkValue) {
+void Player::SetDrunkValue(uint16 newDrunkValue)
+{
     m_drunk = newDrunkValue;
     m_session->GetPlayer()->SetUInt32Value(PLAYER_BYTES_3,
-    (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+        (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
 }
 
 void Player::Update( uint32 p_time )
@@ -706,9 +711,10 @@ void Player::Update( uint32 p_time )
     //Handle lava
     HandleLava();
 
-    if (m_drunk) {
+    if (m_drunk)
+    {
         m_drunkTimer += p_time;
-        
+
         if (m_drunkTimer > 30000)
             HandleSobering();
     }
@@ -6456,7 +6462,7 @@ void Player::AddQuest( Quest *pQuest )
 
             GiveQuestSourceItem( pQuest );
             AdjustQuestReqItemCount( pQuest );
-            
+
             SetUInt32Value(log_slot + 0, quest);
             SetUInt32Value(log_slot + 1, 0);
 
@@ -6484,7 +6490,7 @@ void Player::CompleteQuest( Quest *pQuest )
 
         if( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO ) )
             SendQuestComplete( pQuest );
-        
+
         uint16 log_slot = GetQuestSlot( pQuest );
         uint32 state = GetUInt32Value( log_slot + 1 );
         state |= 1 << 24;
@@ -6560,7 +6566,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             mQuestStatus[quest].m_rewarded = true;
         else
             SetQuestStatus(pQuest, QUEST_STATUS_NONE);
-        
+
         if( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
             SetTimedQuest( 0 );
     }
@@ -6570,7 +6576,7 @@ void Player::FailQuest( Quest *pQuest )
 {
     if( pQuest )
     {
-		IncompleteQuest( pQuest );
+        IncompleteQuest( pQuest );
         SendQuestFailed( pQuest );
     }
 }
@@ -6582,8 +6588,8 @@ void Player::FailTimedQuest( Quest *pQuest )
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
 
         mQuestStatus[quest].m_timer = 0;
-        
-		IncompleteQuest( pQuest );
+
+        IncompleteQuest( pQuest );
         SendQuestTimerFailed( pQuest );
     }
 }
@@ -6987,13 +6993,13 @@ void Player::SendQuestReward( Quest *pQuest )
         data << pQuest->XPValue( this );
         data << pQuest->GetQuestInfo()->RewMoney;
         data << uint32( pQuest->m_rewitemscount );
-        
+
         for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
         {
             if ( pQuest->GetQuestInfo()->RewItemId[i] > 0 )
                 data << pQuest->GetQuestInfo()->RewItemId[i] << pQuest->GetQuestInfo()->RewItemCount[i];
         }
-        
+
         GetSession()->SendPacket( &data );
         sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", quest );
     }
@@ -7341,7 +7347,7 @@ void Player::_LoadQuestStatus()
             if( pQuest )
             {
                 quest = pQuest->GetQuestInfo()->QuestId;
-                
+
                 mQuestStatus[quest].m_quest = pQuest;
                 mQuestStatus[quest].m_status = fields[1].GetUInt32();
                 mQuestStatus[quest].m_rewarded = ( fields[2].GetUInt32() > 0 );

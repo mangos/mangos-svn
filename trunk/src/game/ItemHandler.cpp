@@ -205,7 +205,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->Delay;
     data << itemProto->Ammo_type;
 
-	data << (float)itemProto->RangedModRange;
+    data << (float)itemProto->RangedModRange;
 
     for(int s = 0; s < 5; s++)
     {
@@ -230,10 +230,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     data << itemProto->ItemSet;
     data << itemProto->MaxDurability;
     data << itemProto->Area;
-    data << uint32(0); //unknown1
+    data << uint32(0);                                      //unknown1
 
-
-	//TODO FIX THIS
+    //TODO FIX THIS
     //WPAssert(data.size() == 454 + strlen(itemProto->Name1) + strlen(itemProto->Name2) + strlen(itemProto->Name3) + strlen(itemProto->Name4) + strlen(itemProto->Description));
     SendPacket( &data );
 }

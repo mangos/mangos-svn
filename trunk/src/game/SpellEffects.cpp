@@ -1611,7 +1611,8 @@ void Spell::EffectDisEnchant(uint32 i)
     return ;
 }
 
-void Spell::EffectInebriate(uint32 i) {
+void Spell::EffectInebriate(uint32 i)
+{
     Player *player = (Player*)m_caster;
     uint16 currentDrunk = player->GetDrunkValue();
     uint16 drunkMod = m_spellInfo->EffectBasePoints[i] * 0xFFFF / 100;
