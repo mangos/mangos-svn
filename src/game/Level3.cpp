@@ -2015,21 +2015,14 @@ bool ChatHandler::HandleMod32Value(const char* args)
         return false;
 
     uint32 Opcode = (uint32)atoi(px);
-    uint32 Value = (uint32)atoi(py);
+    int Value = atoi(py);
 
-    sLog.outDebug( ".Mod32Value:[OPCODE]:%u [VALUE]:%u" , Opcode, Value);
+    sLog.outDebug( ".Mod32Value:[OPCODE]:%u [VALUE]:%i" , Opcode, Value);
 
-    uint32 CurrentValue = m_session->GetPlayer( )->GetUInt32Value( Opcode );
-
-    if ((int)Value < 0)
-    {
-        CurrentValue-=Value;
-    }
-    else
-    {
-        CurrentValue+=Value;
-    }
-    m_session->GetPlayer( )->SetUInt32Value( Opcode , CurrentValue );
+    int CurrentValue = (int)m_session->GetPlayer( )->GetUInt32Value( Opcode );
+    
+    CurrentValue += Value;
+    m_session->GetPlayer( )->SetUInt32Value( Opcode , (uint32)CurrentValue );
 
     sprintf((char*)buf,"You modified the value of Field:%u to Value: %u", Opcode,CurrentValue);
     FillSystemMessageData(&data, m_session, buf);
