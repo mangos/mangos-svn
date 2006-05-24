@@ -1013,7 +1013,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             WorldPacket movedata;
             _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
             _player->SendMessageToSet(&movedata,true);
-			_player->SetPosition( closestX, closestY, closestZ, 0.0);
+			_player->SetPosition( at->X, at->Y, at->Z, at->Orientation);
 			_player->BuildHeartBeatMsg(&data); 
 			_player->SendMessageToSet(&data, true);
         }
