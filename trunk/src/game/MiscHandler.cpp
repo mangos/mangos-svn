@@ -997,28 +997,25 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID );
 
-    Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `areatrigger_tavern` WHERE `id` = '%u';", Trigger_ID);
-    int cnt = 0;
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `areatrigger_tavern` WHERE `id` = '%u';", Trigger_ID);
+	if(!result)
+		result = sDatabase.PQuery("SELECT * FROM `areatrigger_city` WHERE `id` = '%u';", Trigger_ID);
     if(result)
     {
-        fields = result->Fetch();
-        cnt = fields[0].GetUInt32();
-
         // player flag 0x20 - resting
-        if ( cnt > 0 )
-        {
-            if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-                GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
-        }
+        if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
+            GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
     }
-    if(cnt == 0 && at)
+    else if(at)
     {
         if(at->mapId == GetPlayer()->GetMapId() )
         {
             WorldPacket movedata;
             _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
             _player->SendMessageToSet(&movedata,true);
+			_player->SetPosition( closestX, closestY, closestZ, 0.0);
+			_player->BuildHeartBeatMsg(&data); 
+			_player->SendMessageToSet(&data, true);
         }
         else
         {
