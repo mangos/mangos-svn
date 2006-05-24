@@ -391,16 +391,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
 
         /*********************************************************/
-		/***                   LOAD SYSTEM                     ***/
-		/*********************************************************/
+        /***                   LOAD SYSTEM                     ***/
+        /*********************************************************/
 
-		bool LoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid);
 
-		/*********************************************************/
-		/***                   SAVE SYSTEM                     ***/
-		/*********************************************************/
+        /*********************************************************/
+        /***                   SAVE SYSTEM                     ***/
+        /*********************************************************/
 
-		void SaveToDB();
+        void SaveToDB();
 
         void SetBindPoint(uint64 guid);
         void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
@@ -726,34 +726,34 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_divider;
 
         /*********************************************************/
-		/***                   LOAD SYSTEM                     ***/
-		/*********************************************************/
+        /***                   LOAD SYSTEM                     ***/
+        /*********************************************************/
 
-		void _LoadActions();
-		void _LoadAuras();
-		void _LoadBids();
-		void _LoadCorpse();
-		void _LoadInventory();
-		void _LoadMail();
-		void _LoadQuestStatus();
-		void _LoadReputation();
-		void _LoadSpells();
-		void _LoadTutorials();
+        void _LoadActions();
+        void _LoadAuras();
+        void _LoadBids();
+        void _LoadCorpse();
+        void _LoadInventory();
+        void _LoadMail();
+        void _LoadQuestStatus();
+        void _LoadReputation();
+        void _LoadSpells();
+        void _LoadTutorials();
 
-		/*********************************************************/
-		/***                   SAVE SYSTEM                     ***/
-		/*********************************************************/
+        /*********************************************************/
+        /***                   SAVE SYSTEM                     ***/
+        /*********************************************************/
 
-		void _SaveActions();
-		void _SaveAuctions();
-		void _SaveAuras();
-		void _SaveBids();
-		void _SaveInventory();
-		void _SaveMail();
-		void _SaveQuestStatus();
-		void _SaveReputation();
-		void _SaveSpells();
-		void _SaveTutorials();
+        void _SaveActions();
+        void _SaveAuctions();
+        void _SaveAuras();
+        void _SaveBids();
+        void _SaveInventory();
+        void _SaveMail();
+        void _SaveQuestStatus();
+        void _SaveReputation();
+        void _SaveSpells();
+        void _SaveTutorials();
 
         void AddWeather();
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;

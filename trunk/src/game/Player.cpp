@@ -6503,7 +6503,7 @@ void Player::IncompleteQuest( Quest *pQuest )
         uint32 state = GetUInt32Value( log_slot + 1 );
         state &= ~(1 << 24);
         SetUInt32Value( log_slot + 1, state );
-		SetUInt32Value( log_slot + 2, 0 );
+        SetUInt32Value( log_slot + 2, 0 );
     }
 }
 
