@@ -6466,13 +6466,13 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-				time_t tt = time(NULL);
-				sLog.outDebug("WORLD: Current UTC Time    : %u", (uint32)tt);
-				sLog.outDebug("WORLD: Current UTC Years   : %u", (uint32)tt/(60*60*24*365));
-				sLog.outDebug("WORLD: Current UTC Days    : %u", (uint32)tt/(60*60*24));
-				sLog.outDebug("WORLD: Current UTC Hours   : %u", (uint32)tt/(60*60));
-				sLog.outDebug("WORLD: Current UTC Minutes : %u", (uint32)tt/60);
-				sLog.outDebug("WORLD: Current UTC Seconds : %u", (uint32)tt);
+                time_t tt = time(NULL);
+                sLog.outDebug("WORLD: Current UTC Time    : %u", (uint32)tt);
+                sLog.outDebug("WORLD: Current UTC Years   : %u", (uint32)tt/(60*60*24*365));
+                sLog.outDebug("WORLD: Current UTC Days    : %u", (uint32)tt/(60*60*24));
+                sLog.outDebug("WORLD: Current UTC Hours   : %u", (uint32)tt/(60*60));
+                sLog.outDebug("WORLD: Current UTC Minutes : %u", (uint32)tt/60);
+                sLog.outDebug("WORLD: Current UTC Seconds : %u", (uint32)tt);
                 SetUInt32Value( log_slot + 2, (uint32)tt + limittime * 60 );
             }
             else
