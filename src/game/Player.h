@@ -292,6 +292,19 @@ class WorldSession;
 #define BANK_SLOT_BAG_6              68
 #define BANK_SLOT_BAG_END            69
 
+#define BUYBACK_SLOT_START           0
+#define BUYBACK_SLOT_1               0
+#define BUYBACK_SLOT_2               1
+#define BUYBACK_SLOT_3               2
+#define BUYBACK_SLOT_4               3
+#define BUYBACK_SLOT_5               4
+#define BUYBACK_SLOT_6               5
+#define BUYBACK_SLOT_7               6
+#define BUYBACK_SLOT_8               7
+#define BUYBACK_SLOT_9               8
+#define BUYBACK_SLOT_10              9
+#define BUYBACK_SLOT_11              10
+#define BUYBACK_SLOT_12              11
 #define BUYBACK_SLOT_END             12
 
 class MANGOS_DLL_SPEC Player : public Unit
@@ -378,6 +391,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
 
         /*********************************************************/
+		/***                   LOAD SYSTEM                     ***/
+		/*********************************************************/
+
+		bool LoadFromDB(uint32 guid);
+
+		/*********************************************************/
+		/***                   SAVE SYSTEM                     ***/
+		/*********************************************************/
+
+		void SaveToDB();
 
         void SetBindPoint(uint64 guid);
         void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
@@ -573,7 +596,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void AddItemToBuyBackSlot(uint32 slot,Item *item);
         Item* GetItemFromBuyBackSlot(uint32 slot);
-        Item* RemoveItemFromBuyBackSlot(uint32 slot);
+        void RemoveItemFromBuyBackSlot(uint32 slot);
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
@@ -594,8 +617,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendMessageToSet(WorldPacket *data, bool self);
         void SetSheath (uint32 sheathed);
 
-        void SaveToDB();
-        bool LoadFromDB(uint32 guid);
+        
+        
         void DeleteFromDB();
         void DeleteCorpse();
 
@@ -703,33 +726,39 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_divider;
 
         /*********************************************************/
+		/***                   LOAD SYSTEM                     ***/
+		/*********************************************************/
+
+		void _LoadActions();
+		void _LoadAuras();
+		void _LoadBids();
+		void _LoadCorpse();
+		void _LoadInventory();
+		void _LoadMail();
+		void _LoadQuestStatus();
+		void _LoadReputation();
+		void _LoadSpells();
+		void _LoadTutorials();
+
+		/*********************************************************/
+		/***                   SAVE SYSTEM                     ***/
+		/*********************************************************/
+
+		void _SaveActions();
+		void _SaveAuctions();
+		void _SaveAuras();
+		void _SaveBids();
+		void _SaveInventory();
+		void _SaveMail();
+		void _SaveQuestStatus();
+		void _SaveReputation();
+		void _SaveSpells();
+		void _SaveTutorials();
 
         void AddWeather();
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
-
-        void _SaveMail();
-        void _SaveInventory();
-        void _SaveSpells();
-        void _SaveActions();
-        void _SaveTutorials();
-        void _SaveQuestStatus();
-        void _SaveAuras();
-        void _SaveBids();
-        void _SaveAuctions();
-        void _SaveReputation();
-
-        void _LoadMail();
-        void _LoadInventory();
-        void _LoadSpells();
-        void _LoadActions();
-        void _LoadTutorials();
-        void _LoadQuestStatus();
-        void _LoadAuras();
-        void _LoadBids();
-        void _LoadReputation();
-        void _LoadCorpse();
 
         bool FactionIsInTheList(uint32 faction);
 
