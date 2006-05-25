@@ -1467,3 +1467,8 @@ void Unit::RemoveDynObject(uint32 spellid)
         }
     }
 }
+
+void Unit::setShapeShiftForm(uint32 modelid)
+{
+	SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid); 
+}

@@ -1111,8 +1111,80 @@ void Aura::HandleAuraModShapeshift(bool apply)
         SpellCastTargets targets;
         targets.setUnitTarget(m_target);
         p_spell->prepare(&targets);
+		switch(m_modifier->m_miscvalue){
+        case FORM_CAT:
+			if(m_target->getRace() == RACE_NIGHT_ELF)
+				m_target->setShapeShiftForm(1231);
+			else if(m_target->getRace() == RACE_TAUREN)
+				m_target->setShapeShiftForm(1232);
+            break;
+        case FORM_TREE:
+            break;
+        case FORM_TRAVEL:
+			if(m_target->getRace() == RACE_NIGHT_ELF)
+				m_target->setShapeShiftForm(1231);
+			else if(m_target->getRace() == RACE_TAUREN)
+				m_target->setShapeShiftForm(1232);
+            break;
+        case FORM_AQUA:
+			if(m_target->getRace() == RACE_NIGHT_ELF)
+				m_target->setShapeShiftForm(223);
+			else if(m_target->getRace() == RACE_TAUREN)
+				m_target->setShapeShiftForm(224);
+            break;
+        case FORM_BEAR:
+			if(m_target->getRace() == RACE_NIGHT_ELF)
+				m_target->setShapeShiftForm(213);
+			else if(m_target->getRace() == RACE_TAUREN)
+				m_target->setShapeShiftForm(214);
+            break;
+        case FORM_AMBIENT:
+            break;
+        case FORM_GHOUL:
+            break;
+        case FORM_DIREBEAR:
+			if(m_target->getRace() == RACE_NIGHT_ELF)
+				m_target->setShapeShiftForm(2199);
+			else if(m_target->getRace() == RACE_TAUREN)
+				m_target->setShapeShiftForm(2200);
+            break;
+        case FORM_CREATUREBEAR:
+            break;
+        case FORM_GHOSTWOLF:
+            break;
+        case FORM_BATTLESTANCE:
+            break;
+        case FORM_DEFENSIVESTANCE:
+            break;
+        case FORM_BERSERKERSTANCE:
+            break;
+        case FORM_SHADOW:
+            break;
+        case FORM_STEALTH:
+            break;
+        default:
+            sLog.outString("Unknown Shapeshift Type");
+            break;
+		}
     }
-    else m_target->RemoveAura(spellId);
+    else 
+	{
+		if(m_target->getRace() == RACE_NIGHT_ELF)
+		{
+			if(m_target->getGender() == GENDER_MALE)
+				m_target->setShapeShiftForm(55);
+			else if(m_target->getGender() == GENDER_FEMALE)
+				m_target->setShapeShiftForm(56);
+		}
+		else if(m_target->getRace() == RACE_TAUREN)
+		{
+			if(m_target->getGender() == GENDER_MALE)
+				m_target->setShapeShiftForm(59);
+			else if(m_target->getGender() == GENDER_FEMALE)
+				m_target->setShapeShiftForm(60);
+		}
+		m_target->RemoveAura(spellId);
+	}
 
     /*tmpAff = new Affect(spellInfo,GetDuration(),GetCaster());
 
