@@ -162,8 +162,8 @@ enum ITEM_SUBCLASS_PROJECTILE
 
 struct _Damage
 {
-    float DamageMin;
-    float DamageMax;
+    uint32 DamageMin;
+    uint32 DamageMax;
     uint32 DamageType;
 
 };
