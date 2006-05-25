@@ -163,7 +163,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
         { "Set32Bit",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
-
+        { "NewMail",     3, &ChatHandler::HandleSendMailNotice,          "",   NULL },
+        { "QNM",         3, &ChatHandler::HandleQueryNextMailTime,       "",   NULL },
         { NULL,          0, NULL,                                        "",   NULL }
     };
 
