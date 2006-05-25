@@ -481,10 +481,6 @@ void PlayerMenu::SendQuestUpdateAddItem( Quest *pQuest, uint32 iLogItem, uint32 
     data << uint32(iLogNr);
 
     pSession->SendPacket( &data );
-
-    uint16 log_slot = pSession->GetPlayer()->GetQuestSlot( pQuest );
-    uint32 kills = pSession->GetPlayer()->GetUInt32Value( log_slot + 1 );
-    pSession->GetPlayer()->SetUInt32Value( log_slot + 1, kills );
 }
 
 void PlayerMenu::SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 iNrMob, uint32 iLogMob )

@@ -1472,3 +1472,45 @@ void Unit::setShapeShiftForm(uint32 modelid)
 {
 	SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid); 
 }
+/*********************************************************/
+/***                    SPELL SYSTEM                   ***/
+/*********************************************************/
+void Unit::SendDamageToLog( Unit *pUnit, Spell *pSpell, uint32 damage )
+{
+    if( pUnit && pSpell )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_SPELLNONMELEEDAMAGELOG );
+        data << uint8(0xFF);
+        data << pUnit->GetGUID();
+        data << uint8(0xFF);
+        data << GetGUID();
+        data << pSpell->m_spellInfo->Id;
+        data << damage;
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        SendMessageToSet( &data, true );
+    }
+}
+
+void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
+{
+    if( pUnit && pSpell )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_SPELLNONMELEEDAMAGELOG );
+        data << uint8(0xFF);
+        data << pUnit->GetGUID();
+        data << uint8(0xFF);
+        data << GetGUID();
+        data << pSpell->m_spellInfo->Id;
+        data << heal;
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        SendMessageToSet( &data, true );
+    }
+}

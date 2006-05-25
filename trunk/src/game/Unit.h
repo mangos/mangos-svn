@@ -261,6 +261,13 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveDynObject(uint32 spellid);
         uint32 CalculateDamage(bool ranged);
 
+        /*********************************************************/
+        /***                    SPELL SYSTEM                   ***/
+        /*********************************************************/
+
+        void SendDamageToLog( Unit *pUnit, Spell *pSpell, uint32 damage );
+        void SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal );
+
     protected:
         Unit ( );
 
