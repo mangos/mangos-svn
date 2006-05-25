@@ -106,7 +106,6 @@ DROP TABLE IF EXISTS `areatrigger_involvedrelation`;
 CREATE TABLE `areatrigger_involvedrelation` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
-  `creature` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
@@ -330,7 +329,7 @@ CREATE TABLE `character_aura` (
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
-  KEY `guid` (`guid`,`spell`)
+  PRIMARY KEY  (`guid`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
@@ -379,7 +378,7 @@ CREATE TABLE `character_inventory` (
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `item` bigint(20) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  KEY `idx_guid` (`guid`,`bag`)
+  PRIMARY KEY  (`guid`,`bag`,`slot`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
@@ -825,7 +824,7 @@ CREATE TABLE `creature_template` (
   `AIName` varchar(128) NOT NULL default '',
   `MoveName` varchar(128) NOT NULL default '',
   `ScriptName` varchar(128) NOT NULL default '',
-  UNIQUE KEY `entry` (`entry`)
+  PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
 --
@@ -1042,7 +1041,7 @@ CREATE TABLE `gameobject_template` (
   `sound8` int(11) unsigned NOT NULL default '0',
   `sound9` int(11) unsigned NOT NULL default '0',
   `ScriptName` varchar(100) NOT NULL default '',
-  UNIQUE KEY `id` (`entry`)
+  PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 
 --
