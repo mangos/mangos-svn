@@ -280,20 +280,16 @@ void Spell::EffectPowerDrain(uint32 i)
 
 }
 
-void Spell::EffectHeal(uint32 i)
+void Spell::EffectHeal( uint32 i )
 {
-    if(!unitTarget)
-        return;
-    if(!unitTarget->isAlive())
-        return;
-
-    uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-    uint32 maxHealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-    if(curHealth+damage > maxHealth)
-        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
-    else
-        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth+damage);
-
+    if( unitTarget && unitTarget->isAlive() )
+    {
+        uint32 curhealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+        uint32 maxhealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+        uint32 addhealth = ( curhealth + damage < maxhealth ? damage : maxhealth - curhealth );
+        unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
+        //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
+    }
 }
 
 void Spell::EffectHealthLeach(uint32 i)

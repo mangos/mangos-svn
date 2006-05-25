@@ -6862,7 +6862,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                     {
                         additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
                         mQuestStatus[quest].m_itemcount[j] += additemcount;
-                        PlayerTalkClass->SendQuestUpdateAddItem(mQuestStatus[quest].m_quest, j, additemcount);
+                        PlayerTalkClass->SendQuestUpdateAddItem(mQuestStatus[quest].m_quest, j, mQuestStatus[quest].m_itemcount[j]);
                     }
                     if ( CanCompleteQuest( mQuestStatus[quest].m_quest ) )
                         CompleteQuest( mQuestStatus[quest].m_quest );
@@ -6986,17 +6986,17 @@ void Player::SendQuestReward( Quest *pQuest )
         data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
         data << quest;
         data << uint32(0x03);
-		if ( getLevel() < 60 )
-		{
-			data << pQuest->XPValue( this );
-			data << pQuest->GetQuestInfo()->RewMoney;
-		}
-		else
-		{
-			data << uint32(0);
-			data << pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( this );
-		}
-		data << uint32( pQuest->m_rewitemscount );
+        if ( getLevel() < 60 )
+        {
+            data << pQuest->XPValue( this );
+            data << pQuest->GetQuestInfo()->RewMoney;
+        }
+        else
+        {
+            data << uint32(0);
+            data << pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( this );
+        }
+        data << uint32( pQuest->m_rewitemscount );
 
         for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
         {
