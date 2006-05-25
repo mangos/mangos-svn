@@ -192,13 +192,15 @@ class ChatHandler
         bool HandleUpdate(const char* args);
         bool HandleBankCommand(const char* args);
         bool HandleChangeWeather(const char* args);
-
+        
         //! Development Commands
         bool HandleSetValue(const char* args);
         bool HandleGetValue(const char* args);
         bool HandleSet32Bit(const char* args);
         bool HandleMod32Value(const char* args);
-
+        bool HandleSendMailNotice(const char* args);
+        bool HandleQueryNextMailTime(const char * args);
+        
         Player* getSelectedChar(WorldSession *client);
 
         WorldSession *m_session;

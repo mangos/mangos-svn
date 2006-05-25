@@ -2031,5 +2031,40 @@ bool ChatHandler::HandleMod32Value(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleSendMailNotice(const char* args) {
+    WorldPacket data;
+    
+    char* px = strtok((char*)args, " ");
+    uint32 flag;
+    if (!px)
+        flag = 0;
+    else
+        flag = atoi(px);
+    
+    data.Initialize(SMSG_RECEIVED_MAIL);
+    
+    data << uint32(flag);
+    m_session->SendPacket(&data);
+    return true;
+}
+
+bool ChatHandler::HandleQueryNextMailTime(const char* args) {
+    WorldPacket Data;
+    bool checkmail=false;
+
+    char* px = strtok((char*)args, " ");
+    uint32 flag;
+    if (!px)
+        flag = 0;
+    else
+        flag = atoi(px);
+
+    Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
+    Data << uint32(flag);
+    m_session->SendPacket(&Data);
+    return true;
+}
+
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
+
