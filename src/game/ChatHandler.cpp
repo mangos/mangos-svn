@@ -109,6 +109,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                     group->BroadcastToGroup(this, msg);
             }
         }
+		break;
         case CHAT_MSG_GUILD:
         {
             std::string msg = "";
