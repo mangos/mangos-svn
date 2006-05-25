@@ -390,6 +390,9 @@ class MANGOS_DLL_SPEC Player : public Unit
                 m_timedquest = 0;
         }
 
+		uint32 GetInGameTime() { return m_ingametime; };
+		void SetInGameTime( uint32 time ) { m_ingametime = time; };
+
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
@@ -724,6 +727,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_timedquest;
         uint64 m_divider;
+		uint32 m_ingametime;
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
