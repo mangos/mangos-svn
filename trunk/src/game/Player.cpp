@@ -3083,13 +3083,20 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
     {
-        SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMin: -proto->Damage[0].DamageMin));
+		if(apply)
+			SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) + proto->Damage[0].DamageMin);
+		else
+			SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) - proto->Damage[0].DamageMin);
+
         sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
     }
 
     if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
     {
-        SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMax: -proto->Damage[0].DamageMax));
+		if(apply)
+			SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) + proto->Damage[0].DamageMax);
+		else
+			SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) - proto->Damage[0].DamageMax);
         sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
     }
 
