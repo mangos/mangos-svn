@@ -6466,14 +6466,7 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-                time_t tt = time(NULL);
-                sLog.outDebug("WORLD: Current UTC Time    : %u", (uint32)tt);
-                sLog.outDebug("WORLD: Current UTC Years   : %u", (uint32)tt/(60*60*24*365));
-                sLog.outDebug("WORLD: Current UTC Days    : %u", (uint32)tt/(60*60*24));
-                sLog.outDebug("WORLD: Current UTC Hours   : %u", (uint32)tt/(60*60));
-                sLog.outDebug("WORLD: Current UTC Minutes : %u", (uint32)tt/60);
-                sLog.outDebug("WORLD: Current UTC Seconds : %u", (uint32)tt);
-                SetUInt32Value( log_slot + 2, (uint32)tt + limittime * 60 );
+                SetUInt32Value( log_slot + 2, GetInGameTime() + limittime * 60000 );
             }
             else
             {
@@ -6993,9 +6986,17 @@ void Player::SendQuestReward( Quest *pQuest )
         data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
         data << quest;
         data << uint32(0x03);
-        data << pQuest->XPValue( this );
-        data << pQuest->GetQuestInfo()->RewMoney;
-        data << uint32( pQuest->m_rewitemscount );
+		if ( getLevel() < 60 )
+		{
+			data << pQuest->XPValue( this );
+			data << pQuest->GetQuestInfo()->RewMoney;
+		}
+		else
+		{
+			data << uint32(0);
+			data << pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( this );
+		}
+		data << uint32( pQuest->m_rewitemscount );
 
         for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
         {

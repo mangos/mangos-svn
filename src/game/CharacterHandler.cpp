@@ -468,6 +468,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u';", pCurrChar->GetGUID());
+    plr->SetInGameTime( getMSTime() );
 
     std::string outstring = pCurrChar->GetName();
     outstring.append( " has come online." );
