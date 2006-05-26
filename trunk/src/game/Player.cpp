@@ -115,6 +115,7 @@ Player::Player (WorldSession *session): Unit()
     m_drunkTimer = 0;
     m_drunk = 0;
     m_restTime = 0;
+    m_lastManaUse = 0;
 }
 
 Player::~Player ()
@@ -625,7 +626,6 @@ void Player::Update( uint32 p_time )
             if (!pVictim)
             {
                 sLog.outDetail("Player::Update:  No valid current selection to attack, stopping attack\n");
-                this->setRegenTimer(5000);
                 clearUnitState(UNIT_STAT_IN_COMBAT);
                 smsg_AttackStop(m_curSelection);
             }
@@ -651,6 +651,10 @@ void Player::Update( uint32 p_time )
                 AttackerStateUpdate(pVictim, dmg);
             }
         }
+    }
+    else if (m_state & UNIT_STAT_ATTACK_BY)
+    {
+        inCombat = true;
     }
     else
     {
@@ -847,22 +851,15 @@ void Player::RegenerateAll()
         return;
     uint32 regenDelay = 2000;
 
-    if (!(m_state & UNIT_STAT_ATTACKING))
+    // Not in combat or they have regeneration
+    if (!(m_state & UNIT_STAT_IN_COMBAT) || Player::HasSpell(20555))
     {
-        Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
-        Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
+        Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);  //health
+        Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);  //rage
     }
 
-    else
-    {
-        if (Player::HasSpell(20555))
-        {
-            Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
-        }
-    }
-
-    Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);
-    Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
+    Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4); //energy
+    Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1); //mana
 
     m_regenTimer = regenDelay;
 
@@ -883,33 +880,30 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
     float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);
     float RageIncreaseRate = sWorld.getRate(RATE_POWER2);
-    float EnergyIncreaseRate = sWorld.getRate(RATE_POWER3);
-
+    
     uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
     uint16 Class = getClass();
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
     if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
-    if( EnergyIncreaseRate <= 0 ) EnergyIncreaseRate = 1;
 
     uint32 addvalue = 0;
 
     switch (field_cur)
     {
         case UNIT_FIELD_HEALTH:
-        {
             switch (Class)
             {
-                case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
-                case PALADIN: addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
+                case DRUID:   addvalue = uint32((Spirit*0.09 + 6.5) * HealthIncreaseRate); break;
                 case HUNTER:  addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
-                case ROGUE:   addvalue = uint32((Spirit*0.50+2) * HealthIncreaseRate); break;
-                case PRIEST:  addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
-                case SHAMAN:  addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
                 case MAGE:    addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
-                case WARLOCK: addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
-                case DRUID:   addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
+                case PALADIN: addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
+                case PRIEST:  addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
+                case ROGUE:   addvalue = uint32((Spirit*0.50 + 2.0) * HealthIncreaseRate); break;
+                case SHAMAN:  addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
+                case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
+                case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
             }
             if (Player::HasSpell(20555))
             {
@@ -921,29 +915,43 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 {
                     addvalue*=uint32(1.10);
                 }
-            }break;
-            case UNIT_FIELD_POWER1:
+            }
+            break;
+        case UNIT_FIELD_POWER1:
+            // If < 5s after previous cast which used mana, no regeneration unless
+            // we happen to have a modifer that adds it back
+            // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
+            uint32 msecSinceLastCast;
+            msecSinceLastCast = ((uint32)getMSTime() - m_lastManaUse);
+            if (msecSinceLastCast < 5000)
             {
-                switch (Class)
-                {
-                    case PALADIN: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
-                    case HUNTER:  addvalue = uint32((Spirit/4 + 11) * ManaIncreaseRate); break;
-                    case PRIEST:  addvalue = uint32((Spirit/4 + 13) * ManaIncreaseRate); break;
-                    case SHAMAN:  addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); break;
-                    case MAGE:    addvalue = uint32((Spirit/4 + 11) * ManaIncreaseRate); break;
-                    case WARLOCK: addvalue = uint32((Spirit/4 + 8)  * ManaIncreaseRate); break;
-                    case DRUID:   addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
+                ManaIncreaseRate = 0;
+            }
+            else
+            {
+                msecSinceLastCast -= 5000;
+                if (msecSinceLastCast < 2000) {
+                    ManaIncreaseRate *= msecSinceLastCast/2000;
                 }
             }
-        }break;
-        case UNIT_FIELD_POWER2:
-        {
+
+            switch (Class)
+            {
+                case DRUID:   addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
+                case HUNTER:  addvalue = uint32((Spirit/5 + 15) * ManaIncreaseRate); break;
+                case MAGE:    addvalue = uint32((Spirit/4 + 12.5) * ManaIncreaseRate); break;
+                case PALADIN: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
+                case PRIEST:  addvalue = uint32((Spirit/4 + 12.5) * ManaIncreaseRate); break;
+                case SHAMAN:  addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate); break;
+                case WARLOCK: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
+            }
+            break;
+        case UNIT_FIELD_POWER2:     // Regenerate rage
             addvalue = uint32(1.66 * RageIncreaseRate);
-        }break;
-        case UNIT_FIELD_POWER4:
-        {
+            break;
+        case UNIT_FIELD_POWER4:     // Regenerate energy (rogue)
             addvalue = uint32(20);
-        }break;
+            break;
     }
 
     if (field_cur != UNIT_FIELD_POWER2)

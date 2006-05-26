@@ -662,7 +662,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             return (GetUInt32Value(UNIT_FIELD_LEVEL));
         }
-
+        void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         bool SetStanding(uint32 FTemplate, int standing);
         void LoadReputationFromDBC(void);
         void UpdateReputation(void);
@@ -853,6 +853,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_breathTimer;
         uint32 m_drunkTimer;
         uint16 m_drunk;
+        time_t m_lastManaUse;
 
         uint8 m_isunderwater;
 

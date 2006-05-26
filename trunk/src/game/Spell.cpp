@@ -594,10 +594,6 @@ void Spell::finish()
     m_ObjToDel.clear();
 
     uint8 powerType = m_caster->getPowerType();
-    if (powerType != POWER_ENERGY)
-    {
-        ((Player*)m_caster)->setRegenTimer(5000);
-    }
     if(m_TriggerSpell)
         TriggerSpell();
 
@@ -618,7 +614,6 @@ void Spell::finish()
             m_CastItem = NULL;
         }
     }
-
 }
 
 void Spell::SendCastResult(uint8 result)
@@ -852,8 +847,15 @@ void Spell::TakePower()
 
     if(currentPower < m_spellInfo->manaCost)
         m_caster->SetUInt32Value(powerField, 0);
-    else
+    else {
         m_caster->SetUInt32Value(powerField, currentPower - m_spellInfo->manaCost);
+        if (powerField == UNIT_FIELD_POWER1) {
+            // Set the five second timer
+            if (m_caster->GetTypeId() == TYPEID_PLAYER) {
+                ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
+            }
+        }
+    }
 }
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
