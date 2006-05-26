@@ -441,6 +441,8 @@ void Spell::cast()
     WorldPacket data;
 
     uint8 castResult = 0;
+	if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
+		m_caster->SetInFront(unitTarget);
     castResult = CanCast();
     if(castResult == 0)
     {
@@ -932,8 +934,8 @@ uint8 Spell::CanCast()
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
 
-        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
-            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
+        //if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
+        //    castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
         if(m_caster->GetDistanceSq(target) > range * range && m_caster->GetTypeId() != TYPEID_PLAYER)
             castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;
     }

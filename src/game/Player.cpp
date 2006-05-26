@@ -2952,16 +2952,12 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     _RemoveStatsMods();
 
-    if (apply)
+    sLog.outString("applying mods for item %u ",item->GetGUIDLow());
+    if(proto->ItemSet)
     {
-        sLog.outString("applying mods for item %u ",item->GetGUIDLow());
-        if(proto->ItemSet)
-            AddItemsSetItem(this,proto->ItemSet);
-    }
-    else
-    {
-        sLog.outString("removing mods for item %u ",item->GetGUIDLow());
-        if(proto->ItemSet)
+        if (apply)
+           AddItemsSetItem(this,proto->ItemSet);
+		else
             RemoveItemsSetItem(this,proto->ItemSet);
     }
 
