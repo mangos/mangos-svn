@@ -335,6 +335,20 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
+		/*********************************************************/
+        /***                    STORAGE SYSTEM                 ***/
+        /*********************************************************/
+
+		
+		bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
+        bool RemoveItemFromBackpack (uint32 itemId, uint32 count = 1) { return false; }
+
+		
+        void AddItemToBuyBackSlot( uint32 slot, Item *pItem );
+        Item* GetItemFromBuyBackSlot( uint32 slot );
+        void RemoveItemFromBuyBackSlot( uint32 slot );
+		void SendEquipError( uint8 msg );
+
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
@@ -380,6 +394,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };
+		
+		uint32 GetInGameTime() { return m_ingametime; };
+        void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
         uint32 GetTimedQuest() { return m_timedquest; };
         void SetTimedQuest( Quest *pQuest )
@@ -389,9 +406,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             else
                 m_timedquest = 0;
         }
-
-        uint32 GetInGameTime() { return m_ingametime; };
-        void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -428,8 +442,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_Tutorials[intId] = value;
         }
 
-        bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
-        bool RemoveItemFromBackpack (uint32 itemId, uint32 count = 1) { return false; }
+
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
 
@@ -597,9 +610,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove=true);
         int CountFreeBagSlot();
 
-        void AddItemToBuyBackSlot(uint32 slot,Item *item);
-        Item* GetItemFromBuyBackSlot(uint32 slot);
-        void RemoveItemFromBuyBackSlot(uint32 slot);
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
@@ -715,7 +725,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_bgEntryPointZ;
 
         uint32 ApplyRestBonus(uint32 xp);
-        void SendEquipError(uint8 error);
         uint32 GetRestTime() { return m_restTime;}
         void SetRestTime(uint32 v) { m_restTime = v;}
 
