@@ -222,8 +222,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
         crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
-        pVictim->Relocate(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), pVictim->GetAngle( this ));
-        //pVictim->setInFront(this);
+        pVictim->SetInFront(this);
         ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
@@ -992,15 +991,14 @@ void Unit::InterruptSpell()
     }
 }
 
-bool Unit::isInFront(Unit* target, float radius)
+bool Unit::isInFront(Unit const* target, float radius)
 {
     return GetDistanceSq(target)<=radius * radius && IsInArc( M_PI, target );
 }
 
-bool Unit::setInFront(Unit* target)
+void Unit::SetInFront(Unit const* target)
 {
     m_orientation = GetAngle(target);
-    return true;
 }
 
 void Unit::DeMorph()

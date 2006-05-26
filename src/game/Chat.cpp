@@ -304,8 +304,8 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     ASSERT(text);
     ASSERT(*text);
 
-    if(m_session->GetSecurity() == 0)
-        return 0;
+    //if(m_session->GetSecurity() == 0)
+    //    return 0;
 
     if(text[0] != '!' && text[0] != '.')
         return 0;
