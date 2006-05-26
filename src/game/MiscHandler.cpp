@@ -165,6 +165,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
     player->ModifyMoney(loot->gold);
 
+    WorldPacket data; 
     data.Initialize( SMSG_LOOT_CLEAR_MONEY ); 
     SendPacket( &data ); 
 
