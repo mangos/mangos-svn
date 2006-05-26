@@ -852,6 +852,7 @@ void Player::RegenerateAll()
     uint32 regenDelay = 2000;
 
     // Not in combat or they have regeneration
+    // TODO: Replace the 20555 with test for if they have an aura of regeneration
     if (!(m_state & UNIT_STAT_IN_COMBAT) || Player::HasSpell(20555))
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);  //health
@@ -923,17 +924,22 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
             // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
             uint32 msecSinceLastCast;
             msecSinceLastCast = ((uint32)getMSTime() - m_lastManaUse);
-            if (msecSinceLastCast < 5000)
-            {
-                ManaIncreaseRate = 0;
-            }
-            else
-            {
-                msecSinceLastCast -= 5000;
-                if (msecSinceLastCast < 2000) {
-                    ManaIncreaseRate *= msecSinceLastCast/2000;
+            if (msecSinceLastCast >= 7000) {
+                ManaIncreaseRate *= 1;
+            } else {
+                long regenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
+                if (msecSinceLastCast < 5000)
+                {
+                    ManaIncreaseRate *= (float)regenInterrupt / 100;
+                }
+                else
+                {
+                    ManaIncreaseRate =  (((1 - (float)msecSinceLastCast/2000)) * regenInterrupt)
+                                        + (((float)msecSinceLastCast/2000) * ManaIncreaseRate * 100);
+                    ManaIncreaseRate /= 100;
                 }
             }
+            ManaIncreaseRate = (ManaIncreaseRate * 100 + GetTotalAuraModifier(SPELL_AURA_MOD_POWER_REGEN_PERCENT)) / 100;
 
             switch (Class)
             {
@@ -1329,20 +1335,17 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
             op=spellInfo->EffectMiscValue[i];
             tmpval = spellInfo->EffectBasePoints[i];
 
-            if(tmpval != 0)
+            if(tmpval > 0)
             {
-                if(tmpval > 0)
-                {
-                    val =  tmpval+1;
-                    mark = 0x0;
-                }
-                else
-                {
-                    val  = 0xFFFF + (tmpval+2);
-                    mark = 0xFFFF;
-                }
+                val =  tmpval+1;
+                mark = 0x0;
             }
-
+            else
+            {
+                val  = 0xFFFF + (tmpval+2);
+                mark = 0xFFFF;
+            }
+        
             switch(spellInfo->EffectApplyAuraName[i])
             {
                 case 107:

@@ -1013,6 +1013,23 @@ void Unit::DealWithSpellDamage(DynamicObject &obj)
     obj.DealWithSpellDamage(*this);
 }
 
+long Unit::GetTotalAuraModifier(uint32 ModifierID) {
+    uint32 modifier = 0;
+    bool auraFound = false;
+    
+    AuraList::const_iterator i;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i++) {
+        if ((*i)->GetModifier()->m_auraname == ModifierID) {
+            auraFound = true;
+            modifier += (*i)->GetModifier()->m_amount;
+        }
+    }
+    if (auraFound)
+        modifier++;
+
+    return modifier;
+}
+
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
     AuraList::const_iterator i;

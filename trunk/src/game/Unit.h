@@ -252,6 +252,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraList GetAuras( ) {return m_Auras;}
+        long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
         void AddItemEnchant(uint32 enchant_id);
         void setTransForm(uint32 spellid) { m_transform = spellid;}

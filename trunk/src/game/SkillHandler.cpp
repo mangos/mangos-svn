@@ -26,6 +26,7 @@
 #include "WorldSession.h"
 #include "ObjectMgr.h"
 #include "UpdateMask.h"
+#include "SpellAuras.h"
 
 void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 {
@@ -116,6 +117,24 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                 GetPlayer( )->GetSession()->SendPacket(&data);
                 GetPlayer( )->addSpell((uint16)spellid);
 
+                SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
+                if(spellInfo)
+                {
+                    for(uint32 i = 0;i<3;i++)
+                    {
+                        uint8 eff = spellInfo->Effect[i];
+                        if (eff>=TOTAL_SPELL_EFFECTS)
+                            continue;
+
+                        // Duration 21 = permanent
+                        if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
+                        {
+                            Aura *Aur = new Aura(spellInfo, i, NULL, GetPlayer());
+                            GetPlayer()->AddAura(Aur);
+                        }
+                    }
+                }
+
                 if(requested_rank > 0 )
                 {
                     uint32 respellid = talentInfo->RankID[requested_rank-1];
@@ -123,6 +142,8 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                     data << respellid;
                     GetPlayer( )->GetSession()->SendPacket(&data);
                     GetPlayer( )->removeSpell((uint16)respellid);
+
+                    GetPlayer()->RemoveAura(respellid);
                 }
                 GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
             }
