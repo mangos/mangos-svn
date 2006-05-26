@@ -934,8 +934,8 @@ uint8 Spell::CanCast()
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
 
-        //if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
-        //    castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
+        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
+            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
         if(m_caster->GetDistanceSq(target) > range * range && m_caster->GetTypeId() != TYPEID_PLAYER)
             castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;
     }

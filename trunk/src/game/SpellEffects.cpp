@@ -185,11 +185,7 @@ void Spell::EffectSchoolDMG(uint32 i)
     if(!unitTarget) return;
     if(!unitTarget->isAlive()) return;
 
-    uint32 baseDamage = m_spellInfo->EffectBasePoints[i];
-
-    uint32 randomDamage = rand()%m_spellInfo->EffectDieSides[i];
-    uint32 damage = baseDamage+randomDamage;
-
+	uint32 damage = CalculateDamage(i);
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
 }
 
