@@ -2406,7 +2406,7 @@ void Player::CheckExploreSystem()
 
     if (m_deathState & DEAD)
         return;
-     if (hasUnitState(UNIT_STAT_IN_FLIGHT))
+     if (isInFlight())
          return;
 
     WorldPacket data;
@@ -7469,7 +7469,7 @@ void Player::_LoadTutorials()
 
 void Player::SaveToDB()
 {
-    if (hasUnitState(UNIT_STAT_IN_FLIGHT))
+    if (isInFlight())
     {
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
         RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );

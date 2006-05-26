@@ -188,23 +188,27 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 GetUnitStrength() { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
         uint32 GetUnitMeleeSkill(){ return (uint32)m_uint32Values[ UNIT_FIELD_ATTACK_POWER ]; }
 
-        bool isVendor()       { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
-        bool isTrainer()      { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }
-        bool isQuestGiver()   { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ); }
-        bool isGossip()       { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP ); }
-        bool isTaxi()         { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR ); }
-        bool isGuildMaster()  { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER ); }
-        bool isBattleMaster() { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEFIELDPERSON ); }
-        bool isBanker()       { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER ); }
-        bool isInnkeeper()    { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER ); }
-        bool isSpiritHealer() { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER ); }
-        bool isTabardVendor() { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR ); }
-        bool isAuctioner()    { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER ); }
-        bool isArmorer()      { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ); }
+        bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
+        bool isTrainer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }
+        bool isQuestGiver()   const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER ); }
+        bool isGossip()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP ); }
+        bool isTaxi()         const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR ); }
+        bool isGuildMaster()  const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER ); }
+        bool isBattleMaster() const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BATTLEFIELDPERSON ); }
+        bool isBanker()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER ); }
+        bool isInnkeeper()    const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_INNKEEPER ); }
+        bool isSpiritHealer() const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER ); }
+        bool isTabardVendor() const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR ); }
+        bool isAuctioner()    const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_AUCTIONEER ); }
+        bool isArmorer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ); }
         //Need fix or use this
         bool isGuard() const  { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD); }
 
-        bool isStunned() { return m_attackTimer == 0;};
+        bool isStunned() const { return m_attackTimer == 0;};
+
+        bool isInFlight() const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
+
+        bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !m_stealth; }
 
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
@@ -221,8 +225,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void DealWithSpellDamage(DynamicObject &);
         virtual void MoveOutOfRange(Player &) {  }
 
-        bool isAlive() { return (m_deathState == ALIVE); };
-        bool isDead() { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
+        bool isAlive() const { return (m_deathState == ALIVE); };
+        bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         virtual void setDeathState(DeathState s)
         {
             m_deathState = s;

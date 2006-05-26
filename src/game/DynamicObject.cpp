@@ -135,7 +135,7 @@ void DynamicObject::DealWithSpellDamage(Unit &caster)
     {
         if((*iter) )
         {
-            if((*iter)->isAlive() )
+            if((*iter)->isAlive()&& !(*iter)->isInFlight() )
             {
                 if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius && (*iter)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != caster.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
                 {

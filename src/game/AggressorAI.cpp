@@ -44,7 +44,7 @@ AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFact
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_pVictim == NULL && !u->m_stealth && u->isAlive())
+    if( i_pVictim == NULL && u->isTargetableForAttack() )
     {
         FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
         if( i_myFaction.IsHostileTo( your_faction ) )
@@ -65,7 +65,7 @@ AggressorAI::DamageInflict(Unit *healer, uint32 amount_healed)
 bool
 AggressorAI::_needToStop() const
 {
-    if( !i_pVictim->isAlive() || !i_creature.isAlive() || i_pVictim->m_stealth)
+    if( !i_pVictim->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
@@ -102,6 +102,10 @@ void AggressorAI::_stopAttack()
     else if( i_pVictim->m_stealth )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
+    }
+    else if( i_pVictim->isInFlight() )
+    {
+        DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
     }
     else
     {
@@ -186,7 +190,7 @@ AggressorAI::UpdateAI(const uint32 diff)
                 i_creature.AttackerStateUpdate(i_pVictim, 0);
                 i_creature.setAttackTimer(0);
 
-                if( !i_creature.isAlive() || !i_pVictim->isAlive() )
+                if( _needToStop() )
                     _stopAttack();
             }
         }
@@ -202,7 +206,7 @@ bool
 AggressorAI::IsVisible(Unit *pl) const
 {
                                                             // offset=1.0
-    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_MONSTER) && !pl->m_stealth && pl->isAlive() );
+    return pl->isTargetableForAttack() && (i_creature.GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_MONSTER)) ;
 }
 
 void
