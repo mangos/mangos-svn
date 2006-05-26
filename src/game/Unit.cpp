@@ -474,16 +474,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID);
 
-    data.Initialize(SMSG_SPELLNONMELEEDAMAGELOG);
-    data << uint8(0xFF) << pVictim->GetGUID();
-    data << uint8(0xFF) << this->GetGUID();
-    data << spellID;
-    data << damage;
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
-    SendMessageToSet(&data,true);
+    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, damage, NORMAL_DAMAGE, 0,0,false,0);
     DealDamage(pVictim, damage, 0, true);
 }
 
@@ -512,15 +503,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        data.Initialize(SMSG_SPELLNONMELEEDAMAGELOG);
-        data << uint8(0xFF) << pVictim->GetGUID();
-        data << uint8(0xFF) << this->GetGUID();
-        data << uint32(spellProto->Id);
-        data << uint32(mod->m_amount);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
+        SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, NORMAL_DAMAGE, 0,0,false,0);
         SendMessageToSet(&data,true);
 
         DealDamage(pVictim, mod->m_amount, procFlag, true);
@@ -1474,6 +1457,25 @@ void Unit::RemoveDynObject(uint32 spellid)
     }
 }
 
+void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_SPELLNONMELEEDAMAGELOG);
+    data << uint8(0xFF) << targetGUID;
+    data << uint8(0xFF) << GetGUID();
+    data << SpellID;
+    data << Damage;
+    data << DamageType;//damagetype
+    data << AbsorbedDamage; //AbsorbedDamage
+    data << Resist; //resist
+    data << (uint8)PhysicalDamage;
+    data << uint8(0);
+    data << Blocked; //blocked
+    data << uint8(0);
+    SendMessageToSet( &data, true );
+}
+
+
 void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount)
 {
     sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
@@ -1535,19 +1537,7 @@ void Unit::SendDamageToLog( Unit *pUnit, Spell *pSpell, uint32 damage )
 {
     if( pUnit && pSpell )
     {
-        WorldPacket data;
-        data.Initialize( SMSG_SPELLNONMELEEDAMAGELOG );
-        data << uint8(0xFF);
-        data << pUnit->GetGUID();
-        data << uint8(0xFF);
-        data << GetGUID();
-        data << pSpell->m_spellInfo->Id;
-        data << damage;
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        SendMessageToSet( &data, true );
+        SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, damage, NORMAL_DAMAGE, 0,0,false,0);
     }
 }
 
@@ -1555,18 +1545,6 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
 {
     if( pUnit && pSpell )
     {
-        WorldPacket data;
-        data.Initialize( SMSG_SPELLNONMELEEDAMAGELOG );
-        data << uint8(0xFF);
-        data << pUnit->GetGUID();
-        data << uint8(0xFF);
-        data << GetGUID();
-        data << pSpell->m_spellInfo->Id;
-        data << heal;
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        SendMessageToSet( &data, true );
+        SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, heal, NORMAL_DAMAGE, 0,0,false,0);
     }
 }
