@@ -221,6 +221,7 @@ void Spell::EffectApplyAura(uint32 i)
         return;
 
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
+    //unitTarget->RemoveAuraRank(m_spellInfo->Id);
 
     if(m_spellInfo->Id == 2457)
     {
@@ -1133,19 +1134,19 @@ void Spell::EffectScriptEffect(uint32 i)
         switch(m_spellInfo->Id)
         {
             case 6201:
-                m_spellInfo->EffectItemType[0] = 5512;      //spell 6261;	//primary healstone
+                m_spellInfo->EffectItemType[0] = 5512;      //spell 6261;    //primary healstone
                 break;
             case 6202:
-                m_spellInfo->EffectItemType[0] = 5511;      //spell 6262;	//inferior healstone
+                m_spellInfo->EffectItemType[0] = 5511;      //spell 6262;    //inferior healstone
                 break;
             case 5699:
-                m_spellInfo->EffectItemType[0] = 5509;      //spell 5720;	//healstone
+                m_spellInfo->EffectItemType[0] = 5509;      //spell 5720;    //healstone
                 break;
             case 11729:
-                m_spellInfo->EffectItemType[0] = 5510;      //spell 5723;	//strong healstone
+                m_spellInfo->EffectItemType[0] = 5510;      //spell 5723;    //strong healstone
                 break;
             case 11730:
-                m_spellInfo->EffectItemType[0] = 9421;      //spell 11732;	//super healstone
+                m_spellInfo->EffectItemType[0] = 9421;      //spell 11732;    //super healstone
                 break;
             default:
                 return;

@@ -171,6 +171,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         inline uint8 getPowerType() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF; };
         inline uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
+        void setPowerType(uint8 PowerType);
+
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *turn);
         uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage);
@@ -236,6 +238,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAura(AuraList::iterator i);
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAura(uint32 spellId);
+        void RemoveAuraRank(uint32 spellId);
 
         void RemoveAllAuras();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
@@ -263,6 +266,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_ReflectSpellSchool;
         uint32 m_ReflectSpellPerc;
         float m_speed;
+        uint32 m_ShapeShiftForm;
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
@@ -287,7 +291,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddItemEnchant(uint32 enchant_id);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() { return m_transform;}
-		void setShapeShiftForm(uint32 modelid);
+        void setShapeShiftForm(uint32 modelid);
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
         uint32 CalculateDamage(bool ranged);
