@@ -1058,15 +1058,15 @@ void Aura::HandleAuraModShapeshift(bool apply)
 {
     //Aura* tmpAur;
     uint32 spellId = 0;
-    uint32 modleid = 0;
+    uint32 modelid = 0;
     uint8 PowerType = 0;
     switch(m_modifier->m_miscvalue)
     {
         case FORM_CAT:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modleid = 1231;
+                modelid = 1231;
             else if(m_target->getRace() == RACE_TAUREN)
-                modleid = 1232;
+                modelid = 1232;
             PowerType = 3;
             //spellId = 3025;
             break;
@@ -1075,23 +1075,23 @@ void Aura::HandleAuraModShapeshift(bool apply)
             break;
         case FORM_TRAVEL:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modleid = 1231;
+                modelid = 1231;
             else if(m_target->getRace() == RACE_TAUREN)
-                modleid = 1232;
+                modelid = 1232;
             //spellId = 5419;
             break;
         case FORM_AQUA:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modleid = 223;
+                modelid = 223;
             else if(m_target->getRace() == RACE_TAUREN)
-                modleid = 224;
+                modelid = 224;
             //spellId = 5421;
             break;
         case FORM_BEAR:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modleid = 213;
+                modelid = 213;
             else if(m_target->getRace() == RACE_TAUREN)
-                modleid = 214;
+                modelid = 214;
             PowerType = 1;
             //spellId = 1178;
             break;
@@ -1103,9 +1103,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
             break;
         case FORM_DIREBEAR:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modleid = 2199;
+                modelid = 2199;
             else if(m_target->getRace() == RACE_TAUREN)
-                modleid = 2200;
+                modelid = 2200;
             PowerType = 1;
             //spellId = 9635;
             break;
@@ -1146,9 +1146,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
     {
         if(m_target->m_ShapeShiftForm)
             m_target->RemoveAura(m_target->m_ShapeShiftForm);
-        if(modleid > 0)
+        if(modelid > 0)
         {
-            m_target->setShapeShiftForm(modleid);
+            m_target->setShapeShiftForm(modelid);
         }
         if(PowerType > 0)
         {
@@ -1187,14 +1187,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);
-
-    /*tmpAff = new Affect(spellInfo,GetDuration(),GetCaster());
-
-            if(tmpAff)
-            {
-                SetCoAffect(tmpAff);
-                AddAffect(tmpAff);
-            }*/
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
