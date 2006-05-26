@@ -1012,11 +1012,12 @@ uint32 Spell::CalculateDamage(uint8 i)
     float randomPointsPerLevel = m_spellInfo->EffectDicePerLevel[i];
     uint32 basePoints = uint32(m_spellInfo->EffectBasePoints[i]+m_caster->getLevel()*basePointsPerLevel);
     uint32 randomPoints = uint32(m_spellInfo->EffectDieSides[i]+m_caster->getLevel()*randomPointsPerLevel);
-    uint32 comboDamage = uint32(m_spellInfo->EffectPointsPerComboPoint[i]);
+    float comboDamage = m_spellInfo->EffectPointsPerComboPoint[i];
     uint8 comboPoints=0;
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        comboPoints = ((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
+        comboPoints = (uint8)((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
+	value += m_spellInfo->EffectBaseDice[i];
     if(randomPoints <= 1)
         value = basePoints+1;
     else
@@ -1024,8 +1025,7 @@ uint32 Spell::CalculateDamage(uint8 i)
 
     if(comboDamage > 0)
     {
-        for(uint32 j=0;j<comboPoints;j++)
-            value += comboDamage;
+        value += (uint32)(comboDamage * comboPoints);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
             m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
