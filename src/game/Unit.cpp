@@ -465,24 +465,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     if( (damage-absorb)==0 )
     {
-
-        data.Initialize(SMSG_ATTACKERSTATEUPDATE);
-        data << (uint32)0x00010020;
-        data << uint8(0xFF) << GetGUID();
-        data << uint8(0xFF) << pVictim->GetGUID();
-        data << (uint32)0;
-
-        data << (uint8)1;                                   // SubBlocks
-        data << (uint32)0;
-        data << (float)damage;
-        data << (uint32)damage;
-        data <<  absorb;
-        data << (uint32)0;
-        data << (uint32)1;
-        data << (uint32)0xFFFFFFFF;
-        data << (uint32)0;
-        data << (uint32)0;
-        SendMessageToSet(&data, true);
+            SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, 0, damage, absorb,0,1,0);
         return;
     }
     else damage=damage-absorb;
@@ -737,10 +720,10 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     if(hasUnitState(UNIT_STAT_CONFUSED))
         return;
     WorldPacket data;
-    uint32    hitInfo = 0x22;
-    uint32    damageType = 0;
-    uint32    blocked_amount = 0;
-    uint32    victimState = 1;
+    uint32   hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;
+    uint32   damageType = NORMAL_DAMAGE;
+    uint32   blocked_amount = 0;
+    uint32   victimState = VICTIMSTATE_NORMAL;
     int32    attackerSkill = GetUnitMeleeSkill();
     int32    victimSkill = pVictim->GetUnitMeleeSkill();
     float    chanceToHit = 100.0f;
@@ -787,30 +770,16 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     else damage = 0;
 
     if (damage)
+    {
         DoAttackDamage(pVictim, &damage, &blocked_amount, &damageType, &hitInfo, &victimState,&AbsorbDamage,&Turn);
-
-    data.Initialize(SMSG_ATTACKERSTATEUPDATE);
-    data << (uint32)hitInfo;
-    data << uint8(0xFF)<< GetGUID();
-    data << uint8(0xFF)<< pVictim->GetGUID();
-    data << (uint32)(damage-AbsorbDamage);
-
-    data << (uint8)1;                                       // SubBlocks
-    data << damageType;
-    data << (float)damage;
-    data << (uint32)damage;
-    data <<  AbsorbDamage;
-    data <<  Turn;
-    data << (uint32)victimState;
-    if(AbsorbDamage==0)
-        data << (uint32)0;
+        //do animation
+        SendAttackStateUpdate(hitInfo, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
+        DealDamage(pVictim, damage-AbsorbDamage, 0, true);
+    }
     else
-        data << (uint32)-1;                                 //default value
-
-    data << (uint32)0;
-    data << (uint32)blocked_amount;
-
-    SendMessageToSet(&data, true);
+        //send miss
+        SendAttackStateUpdate(hitInfo|HITINFO_MISS, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
+    
 
     if (GetTypeId() == TYPEID_PLAYER)
         DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg.",
@@ -818,8 +787,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     else
         DEBUG_LOG("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg.",
             GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
-
-    DealDamage(pVictim, damage-AbsorbDamage, 0, true);
 }
 
 uint32 Unit::CalculateDamage(bool ranged)
@@ -1483,9 +1450,41 @@ void Unit::RemoveDynObject(uint32 spellid)
     }
 }
 
+void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount)
+{
+    sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
+
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKERSTATEUPDATE);      
+    data << (uint32)HitInfo;                        
+    data << uint8(0xFF) << GetGUID();               //source GUID
+    data << uint8(0xFF) << targetGUID;               //Target GUID
+    data << (uint32)(Damage-AbsorbDamage);        
+
+    data << (uint8)SwingType;                     
+    data << (uint32)DamageType;                   
+
+    data << (float)Damage;                        //
+    data << (uint32)Damage;                       // still need to double check damaga
+    data << (uint32)AbsorbDamage;                 
+    data << (uint32)Resist;                       
+    data << (uint32)TargetState;                  
+
+    if( AbsorbDamage == 0 )                       //also 0x3E8 = 0x3E8, check when that happens
+        data << (uint32)0;                          
+    else
+        data << (uint32)-1;                       
+    
+    data << (uint32)0;                            
+    data << (uint32)BlockedAmount;
+
+    SendMessageToSet( &data, true );
+}
+
+
 void Unit::setShapeShiftForm(uint32 modelid)
 {
-	SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid); 
+    SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid); 
 }
 /*********************************************************/
 /***                    SPELL SYSTEM                   ***/
@@ -1529,3 +1528,4 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
         SendMessageToSet( &data, true );
     }
 }
+

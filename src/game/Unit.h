@@ -35,7 +35,34 @@
 #define SKILL_MAX(x)            uint16((uint32(x) >> 16))
 #define MAKE_SKILL_VALUE(v, m) ((uint32)(((uint16)(v)) | (((uint32)((uint16)(m))) << 16)))
 
-#define NULL_SLOT 255
+#define NOSWING                     0
+#define SINGLEHANDEDSWING           1
+#define TWOHANDEDSWING              2
+
+#define VICTIMSTATE_UNKNOWN1        0
+#define VICTIMSTATE_NORMAL          1
+#define VICTIMSTATE_DODGE           2
+#define VICTIMSTATE_PARRIE          3
+#define VICTIMSTATE_UNKNOWN2        4
+#define VICTIMSTATE_BLOCKS          5
+#define VICTIMSTATE_EVADES          6
+#define VICTIMSTATE_IS_IMMUNE       7
+#define VICTIMSTATE_DEFLECTS        8
+
+#define HITINFO_NORMALSWING         0x00
+#define HITINFO_NORMALSWING2        0x02
+#define HITINFO_LEFTSWING           0x04
+#define HITINFO_MISS                0x10
+#define HITINFO_HITSTRANGESOUND1    0x20 //maybe linked to critical hit
+#define HITINFO_HITSTRANGESOUND2    0x40 //maybe linked to critical hit
+#define HITINFO_CRITICALHIT         0x80
+#define HITINFO_GLANSING            0x4000
+#define HITINFO_CRUSHING            0x8000
+#define HITINFO_NOACTION            0x10000
+#define HITINFO_SWINGNOHITSOUND     0x80000
+
+
+#define NULL_SLOT                   255
 
 struct SpellEntry;
 struct Modifier;
@@ -184,6 +211,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         void DeMorph();
 
         void smsg_AttackStop(uint64 victimGuid);
+
+        void SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
+
 
         virtual void DealWithSpellDamage(DynamicObject &);
         virtual void MoveOutOfRange(Player &) {  }
