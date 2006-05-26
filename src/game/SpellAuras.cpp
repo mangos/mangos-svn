@@ -210,11 +210,25 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
     m_duration = GetDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
-    //if(spellproto->EffectBasePoints[eff] <= 0)
-    if (spellproto->EffectImplicitTargetA[eff] >= 10)
-        m_positive = false;
-    else
-        m_positive = true;
+    
+    // Formula not done.  We will define some auras as being positive in nature
+    // and some as negative in nature, and if the base points are opposing, it is
+    // the opposite.
+    if ((spellproto->EffectApplyAuraName[eff] == SPELL_AURA_MOD_MANA_REGEN_INTERRUPT) ||
+        (spellproto->EffectApplyAuraName[eff] == SPELL_AURA_MOD_POWER_REGEN_PERCENT))
+    {
+        // Positive if base points are positive
+        m_positive = (spellproto->EffectBasePoints[eff] >= 0);
+    } else if (1 == 0) { // fill in with the appropriate buffs
+        // Positive if base points are negative
+        m_positive = (spellproto->EffectBasePoints[eff] < 0);
+    } else {
+        // Fall through to a (pretty decent) heuristic
+        if (spellproto->EffectImplicitTargetA[eff] >= 10)
+            m_positive = false;
+        else
+            m_positive = true;
+    }
 
     uint32 type = 0;
     if(!m_positive)
@@ -336,7 +350,7 @@ void Aura::_AddAura()
     Aura* aura = NULL;
     for(i = 0; i< 3; i++)
     {
-        if(i == m_effIndex)
+        if(i != m_effIndex)
             continue;
         aura = m_target->GetAura(m_spellId, i);
         if(aura)
