@@ -45,6 +45,8 @@ void AddItemsSetItem(Player*player,uint32 setid)
 
     ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
     assert(set);
+    if(set->required_skill_id )
+        if(player->GetSkillValue(set->required_skill_id) < set->required_skill_value) return;
 
     ItemsSetEffect *eff=NULL;
 
@@ -72,8 +74,6 @@ void AddItemsSetItem(Player*player,uint32 setid)
 
     eff->item_count++;
 
-    if(set->required_skill_id )
-        if(player->GetSkillValue(set->required_skill_id) < set->required_skill_value) return;
 
     for(uint32 x=0;x<8;x++)
         if(set->spells [x])
