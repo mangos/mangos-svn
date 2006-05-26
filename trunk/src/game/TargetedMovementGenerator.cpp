@@ -43,7 +43,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
 {
     if(!&i_target || !&owner)
         return;
-    owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
+    owner.SetInFront(&i_target);
     float x, y, z;
     i_target.GetClosePoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
@@ -138,7 +138,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         {
             if( owner.canReachWithAttack(&i_target) )
             {
-                owner.Relocate(owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ(), owner.GetAngle( &i_target ));
+                owner.SetInFront(&i_target);
                 owner.StopMoving();
                 if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
                     owner.addUnitState(UNIT_STAT_ATTACKING);

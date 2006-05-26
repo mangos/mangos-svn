@@ -234,8 +234,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_ReflectSpellPerc;
         float m_speed;
 
-        bool isInFront(Unit* target,float distance);
-        bool setInFront(Unit* target);
+        bool isInFront(Unit const* target,float distance);
+        void SetInFront(Unit const* target);
 
         bool m_silenced;
         bool waterbreath;

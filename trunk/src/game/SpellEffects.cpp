@@ -993,7 +993,7 @@ void Spell::EffectAttackMe(uint32 i)
 {
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
-        unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetAngle(m_caster));
+        unitTarget->SetInFront(m_caster);
         ((Creature*)unitTarget)->AI().AttackStart(m_caster);
     }
 }
