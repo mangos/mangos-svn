@@ -6271,61 +6271,57 @@ bool Player::GetSlotByItemGUID(uint64 guid,uint8 &bagIndex,uint8 &slot)
     return false;
 }
 
-void Player::AddItemToBuyBackSlot(uint32 slot,Item *item)
+void Player::AddItemToBuyBackSlot( uint32 slot, Item *pItem )
 {
-    if (item && item->GetProto())
-        sLog.outError("AddItemtoBuyBackSlot Item: \"%s\" [%u] Slot: [%u]", item->GetProto()->Name1, item->GetProto()->ItemId, slot);
-    else
-    {
-        sLog.outError("AddItemtoBuyBackSlot Unknown Item! Slot: [%u]", slot);
-        return;
-    }
+	if( pItem )
+	{
+		if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
+		{
+			RemoveItemFromBuyBackSlot( slot );
 
-    if (slot >= BUYBACK_SLOT_END)
-        return;
+			m_buybackitems[slot] = pItem;
+			time_t base = time(NULL);
+			time_t etime = base + (30 * 3600);
 
-    RemoveItemFromBuyBackSlot(slot);
+			SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + slot * 2, pItem->GetGUID() );
+			SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + slot, (uint32)etime );
 
-    m_buybackitems[slot] = item;
-    time_t base = time(NULL);
-    time_t etime = base + (30 * 3600);
-
-    SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1+slot*2,item->GetGUID());
-    SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+slot,(item->GetProto()->SellPrice) * item->GetCount());
-    SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+slot,(uint32)etime);
+			ItemPrototype *pProto = pItem->GetProto();
+			if( pProto )
+				SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot, (pProto->SellPrice) * pItem->GetCount() );
+			else
+				SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot, 0 );
+		}
+	}
 }
 
-Item* Player::GetItemFromBuyBackSlot(uint32 slot)
+Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 {
-    if (slot >= BUYBACK_SLOT_END)
-        return NULL;
-
-    return m_buybackitems[slot];
+    if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
+		return m_buybackitems[slot];
+	return NULL;;
 }
 
 void Player::RemoveItemFromBuyBackSlot( uint32 slot )
 {
-    if (slot >= BUYBACK_SLOT_END)
-        return;
-
-    Item *pItem = m_buybackitems[slot];
-    if(m_buybackitems[slot])
-    {
-        //m_buybackitems[slot]->DeleteFromDB();
-        m_buybackitems[slot]->RemoveFromWorld();
-    }
-
-    m_buybackitems[slot] = NULL;
-    SetUInt64Value(PLAYER_FIELD_VENDORBUYBACK_SLOT_1+slot*2,0);
-    SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+slot,0);
-    SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+slot,0);
+	if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
+	{
+		Item *pItem = m_buybackitems[slot];
+		if( pItem )
+			pItem->RemoveFromWorld();
+		
+		m_buybackitems[slot] = NULL;
+		SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + slot * 2, 0 );
+		SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot, 0 );
+		SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + slot, 0 );
+	}
 }
 
-void Player::SendEquipError( uint8 error )
+void Player::SendEquipError( uint8 msg )
 {
     WorldPacket data;
-    data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-    data << uint8(error);
+    data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
+    data << msg;
     data << uint64(0);
     data << uint64(0);
     data << uint8(0);
@@ -6862,22 +6858,26 @@ void Player::ItemAdded( uint32 entry, uint32 count )
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
         {
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                reqitem = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqItemId[j];
-                if ( reqitem == entry )
-                {
-                    reqitemcount = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqItemCount[j];
-                    curitemcount = mQuestStatus[quest].m_itemcount[j];
-                    if ( curitemcount < reqitemcount )
-                    {
-                        additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
-                        mQuestStatus[quest].m_itemcount[j] += additemcount;
-                        PlayerTalkClass->SendQuestUpdateAddItem(mQuestStatus[quest].m_quest, j, mQuestStatus[quest].m_itemcount[j]);
-                    }
-                    if ( CanCompleteQuest( mQuestStatus[quest].m_quest ) )
-                        CompleteQuest( mQuestStatus[quest].m_quest );
-                    return;
+			Quest *pQuest = mQuestStatus[quest].m_quest;
+			if( pQuest && pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+			{
+				for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+				{
+					reqitem = pQuest->GetQuestInfo()->ReqItemId[j];
+					if ( reqitem == entry )
+					{
+						reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[j];
+						curitemcount = mQuestStatus[quest].m_itemcount[j];
+						if ( curitemcount < reqitemcount )
+						{
+							additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
+							mQuestStatus[quest].m_itemcount[j] += additemcount;
+							PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, mQuestStatus[quest].m_itemcount[j] );
+						}
+						if ( CanCompleteQuest( pQuest ) )
+							CompleteQuest( pQuest );
+						return;
+					}
                 }
             }
         }
@@ -6896,23 +6896,27 @@ void Player::ItemRemoved( uint32 entry, uint32 count )
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 )
         {
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                reqitem = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqItemId[j];
-                if ( reqitem == entry )
-                {
-                    reqitemcount = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqItemCount[j];
-                    if( mQuestStatus[quest].m_status != QUEST_STATUS_COMPLETE )
-                        curitemcount = mQuestStatus[quest].m_itemcount[j];
-                    else
-                        curitemcount = GetItemCount(entry, true);
-                    if ( curitemcount - count < reqitemcount )
-                    {
-                        remitemcount = reqitemcount - curitemcount + count;
-                        mQuestStatus[quest].m_itemcount[j] = curitemcount - remitemcount;
-                        IncompleteQuest( mQuestStatus[quest].m_quest );
-                    }
-                    return;
+			Quest *pQuest = mQuestStatus[quest].m_quest;
+			if( pQuest && pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+			{
+				for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+				{
+					reqitem = pQuest->GetQuestInfo()->ReqItemId[j];
+					if ( reqitem == entry )
+					{
+						reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[j];
+						if( mQuestStatus[quest].m_status != QUEST_STATUS_COMPLETE )
+							curitemcount = mQuestStatus[quest].m_itemcount[j];
+						else
+							curitemcount = GetItemCount(entry, true);
+						if ( curitemcount - count < reqitemcount )
+						{
+							remitemcount = reqitemcount - curitemcount + count;
+							mQuestStatus[quest].m_itemcount[j] = curitemcount - remitemcount;
+							IncompleteQuest( pQuest );
+						}
+						return;
+					}
                 }
             }
         }
@@ -6931,21 +6935,25 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
         {
-            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
-            {
-                reqkill = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqKillMobId[j];
-                if ( reqkill == entry )
-                {
-                    reqkillcount = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqKillMobCount[j];
-                    curkillcount = mQuestStatus[quest].m_mobcount[j];
-                    if ( curkillcount < reqkillcount )
-                    {
-                        mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
-                        PlayerTalkClass->SendQuestUpdateAddKill(mQuestStatus[quest].m_quest, guid, curkillcount + addkillcount, j);
-                    }
-                    if ( CanCompleteQuest( mQuestStatus[quest].m_quest ) )
-                        CompleteQuest( mQuestStatus[quest].m_quest );
-                    return;
+			Quest *pQuest = mQuestStatus[quest].m_quest;
+			if( pQuest && pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+			{
+				for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+				{
+					reqkill = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqKillMobId[j];
+					if ( reqkill == entry )
+					{
+						reqkillcount = pQuest->GetQuestInfo()->ReqKillMobCount[j];
+						curkillcount = mQuestStatus[quest].m_mobcount[j];
+						if ( curkillcount < reqkillcount )
+						{
+							mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
+							PlayerTalkClass->SendQuestUpdateAddKill( pQuest, guid, curkillcount + addkillcount, j);
+						}
+						if ( CanCompleteQuest( pQuest ) )
+							CompleteQuest( pQuest );
+						return;
+					}
                 }
             }
         }
