@@ -72,9 +72,7 @@ bool PetAI::IsVisible(Unit *pl) const
 
 bool PetAI::_needToStop() const
 {
-    if( !i_pVictim->isAlive() || !i_pet.isAlive() || i_pVictim->m_stealth)
-        return true;
-    return false;
+    return !i_pVictim->isTargetableForAttack() || !i_pet.isAlive();
 }
 
 void PetAI::_stopAttack()
@@ -102,6 +100,10 @@ void PetAI::_stopAttack()
     else if( i_pVictim->m_stealth )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_pet.GetGUIDLow());
+    }
+    else if( i_pVictim->isInFlight() )
+    {
+        DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_pet.GetGUIDLow());
     }
     else
     {
@@ -157,7 +159,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 i_pet.AttackerStateUpdate(i_pVictim, 0);
                 i_pet.setAttackTimer(0);
 
-                if( !i_pet.isAlive() || !i_pVictim->isAlive() )
+                if( _needToStop() )
                     _stopAttack();
             }
         }

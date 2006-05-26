@@ -992,6 +992,13 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     recv_data >> Trigger_ID;
     sLog.outDebug("Trigger ID:%u",Trigger_ID);
+
+    if(GetPlayer()->isInFlight()) 
+    {
+        sLog.outDebug("Player '%s' in flight, ignore Area Trigger ID:%u",GetPlayer()->GetName(),Trigger_ID);
+        return;
+    }
+
     AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID);
 
     AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );

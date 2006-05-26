@@ -38,7 +38,7 @@ GuardAI::GuardAI(Creature &c) : i_creature(c), i_pVictim(NULL), i_myFaction(sFac
 
 void GuardAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_pVictim == NULL && !u->m_stealth && u->isAlive())
+    if( i_pVictim == NULL && u->isTargetableForAttack())
     {
         FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
         //Need add code to let guard suport player
@@ -57,7 +57,7 @@ void GuardAI::DamageInflict(Unit *healer, uint32 amount_healed)
 
 bool GuardAI::_needToStop() const
 {
-    if( !i_pVictim->isAlive() || !i_creature.isAlive() || i_pVictim->m_stealth)
+    if( !i_pVictim->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
@@ -94,6 +94,11 @@ void GuardAI::_stopAttack()
     else if( i_pVictim->m_stealth )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+    }
+    else if( i_pVictim->isInFlight() )
+    {
+        DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     else
@@ -174,7 +179,7 @@ void GuardAI::UpdateAI(const uint32 diff)
                         i_creature.AttackerStateUpdate(i_pVictim, 0);
                         i_creature.setAttackTimer(0);
 
-                        if( !i_creature.isAlive() || !i_pVictim->isAlive() )
+                        if( _needToStop() )
                             _stopAttack();
                     }
                 }
@@ -190,7 +195,7 @@ void GuardAI::UpdateAI(const uint32 diff)
         MapManager::Instance().GetMap(i_creature.GetMapId())->GetUnitList(i_creature.GetPositionX(), i_creature.GetPositionY(),unitlist);
         for(std::list<Unit*>::iterator iter=unitlist.begin();iter!=unitlist.end();iter++)
         {
-            if((*iter) && (*iter)->isAlive() && !(*iter)->hasUnitState(UNIT_STAT_IN_FLIGHT) && IsVisible( *iter ) )
+            if((*iter) && (*iter)->isAlive() && !(*iter)->isInFlight() && IsVisible( *iter ) )
             {
                 MoveInLineOfSight(*iter);
             }
@@ -200,7 +205,8 @@ void GuardAI::UpdateAI(const uint32 diff)
 
 bool GuardAI::IsVisible(Unit *pl) const
 {
-    return ( ((Creature*)&i_creature)->GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !pl->m_stealth && pl->isAlive() );
+    return pl->isTargetableForAttack() && 
+        i_creature.GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_GUARDER);
 }
 
 void GuardAI::AttackStart(Unit *u)

@@ -113,7 +113,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
                 i_creature.AttackerStateUpdate(i_pVictim, 0);
                 i_creature.setAttackTimer(0);
 
-                if( !i_creature.isAlive() || !i_pVictim->isAlive() )
+                if( needToStop() )
                     stopAttack();
             }
         }
@@ -123,7 +123,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
 bool
 ReactorAI::needToStop() const
 {
-    if( !i_pVictim->isAlive() || !i_creature.isAlive()  || i_pVictim->m_stealth)
+    if( !i_pVictim->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
@@ -152,6 +152,11 @@ ReactorAI::stopAttack()
         else if( i_pVictim->m_stealth )
         {
             DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
+            static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+        }
+        else if( i_pVictim->isInFlight() )
+        {
+            DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
         else
