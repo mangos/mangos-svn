@@ -793,7 +793,6 @@ void Aura::HandleAuraDamageShield(bool apply)
 void Aura::HandleModStealth(bool apply)
 {
     m_permanent = true;                                     // stealth state
-    apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x21E0000 );
     apply ? m_target->m_stealth = GetId() :  m_target->m_stealth = 0;
 }
 
@@ -1049,156 +1048,145 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
         sLog.outError("AURA: unknown power type %i spell id %u\n",(int)powerType, m_spellId);
     }
 
-    uint32 newValue = m_target->GetUInt32Value(powerType);
+    uint32 newValue = m_target->GetUInt32Value(powerField);
     apply ? newValue += m_modifier->m_amount : newValue -= m_modifier->m_amount;
-    m_target->SetUInt32Value(powerType,newValue);
+    m_target->SetUInt32Value(powerField,newValue);
 }
 
 // FIX-ME PWEEZEE!!
 void Aura::HandleAuraModShapeshift(bool apply)
 {
     //Aura* tmpAur;
-    uint32 spellId;
+    uint32 spellId = 0;
+    uint32 modleid = 0;
+    uint8 PowerType = 0;
     switch(m_modifier->m_miscvalue)
     {
         case FORM_CAT:
-            spellId = 3025;
+            if(m_target->getRace() == RACE_NIGHT_ELF)
+                modleid = 1231;
+            else if(m_target->getRace() == RACE_TAUREN)
+                modleid = 1232;
+            PowerType = 3;
+            //spellId = 3025;
             break;
         case FORM_TREE:
-            spellId = 3122;
+            //spellId = 3122;
             break;
         case FORM_TRAVEL:
-            spellId = 5419;
+            if(m_target->getRace() == RACE_NIGHT_ELF)
+                modleid = 1231;
+            else if(m_target->getRace() == RACE_TAUREN)
+                modleid = 1232;
+            //spellId = 5419;
             break;
         case FORM_AQUA:
-            spellId = 5421;
+            if(m_target->getRace() == RACE_NIGHT_ELF)
+                modleid = 223;
+            else if(m_target->getRace() == RACE_TAUREN)
+                modleid = 224;
+            //spellId = 5421;
             break;
         case FORM_BEAR:
-            spellId = 1178;
+            if(m_target->getRace() == RACE_NIGHT_ELF)
+                modleid = 213;
+            else if(m_target->getRace() == RACE_TAUREN)
+                modleid = 214;
+            PowerType = 1;
+            //spellId = 1178;
             break;
         case FORM_AMBIENT:
-            spellId = 0;
+            //spellId = 0;
             break;
         case FORM_GHOUL:
-            spellId = 0;
+            //spellId = 0;
             break;
         case FORM_DIREBEAR:
-            spellId = 9635;
+            if(m_target->getRace() == RACE_NIGHT_ELF)
+                modleid = 2199;
+            else if(m_target->getRace() == RACE_TAUREN)
+                modleid = 2200;
+            PowerType = 1;
+            //spellId = 9635;
             break;
         case FORM_CREATUREBEAR:
-            spellId = 2882;
+            //spellId = 2882;
             break;
         case FORM_GHOSTWOLF:
-            spellId = 0;
+            //spellId = 0;
             break;
         case FORM_BATTLESTANCE:
-            spellId = 0;
+            //spellId = 0;
             break;
         case FORM_DEFENSIVESTANCE:
-            spellId = 7376;
+            //spellId = 7376;
             break;
         case FORM_BERSERKERSTANCE:
-            spellId = 7381;
+            //spellId = 7381;
             break;
         case FORM_SHADOW:
-            spellId = 0;
+            //spellId = 0;
             break;
         case FORM_STEALTH:
-            spellId = 3025;
+            //spellId = 3025;
             break;
         default:
             sLog.outString("Unknown Shapeshift Type");
             break;
     }
-
+    /*
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
 
     if(!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %i\n", spellId);
         return;
-    }
+    }*/
     if(apply)
     {
+        if(m_target->m_ShapeShiftForm)
+            m_target->RemoveAura(m_target->m_ShapeShiftForm);
+        if(modleid > 0)
+        {
+            m_target->setShapeShiftForm(modleid);
+        }
+        if(PowerType > 0)
+        {
+            m_target->setPowerType(PowerType);
+        }
+        m_target->m_ShapeShiftForm = m_spellId;
+        /*
         Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
         WPAssert(p_spell);
         SpellCastTargets targets;
         targets.setUnitTarget(m_target);
         p_spell->prepare(&targets);
-		switch(m_modifier->m_miscvalue){
-        case FORM_CAT:
-			if(m_target->getRace() == RACE_NIGHT_ELF)
-				m_target->setShapeShiftForm(1231);
-			else if(m_target->getRace() == RACE_TAUREN)
-				m_target->setShapeShiftForm(1232);
-            break;
-        case FORM_TREE:
-            break;
-        case FORM_TRAVEL:
-			if(m_target->getRace() == RACE_NIGHT_ELF)
-				m_target->setShapeShiftForm(1231);
-			else if(m_target->getRace() == RACE_TAUREN)
-				m_target->setShapeShiftForm(1232);
-            break;
-        case FORM_AQUA:
-			if(m_target->getRace() == RACE_NIGHT_ELF)
-				m_target->setShapeShiftForm(223);
-			else if(m_target->getRace() == RACE_TAUREN)
-				m_target->setShapeShiftForm(224);
-            break;
-        case FORM_BEAR:
-			if(m_target->getRace() == RACE_NIGHT_ELF)
-				m_target->setShapeShiftForm(213);
-			else if(m_target->getRace() == RACE_TAUREN)
-				m_target->setShapeShiftForm(214);
-            break;
-        case FORM_AMBIENT:
-            break;
-        case FORM_GHOUL:
-            break;
-        case FORM_DIREBEAR:
-			if(m_target->getRace() == RACE_NIGHT_ELF)
-				m_target->setShapeShiftForm(2199);
-			else if(m_target->getRace() == RACE_TAUREN)
-				m_target->setShapeShiftForm(2200);
-            break;
-        case FORM_CREATUREBEAR:
-            break;
-        case FORM_GHOSTWOLF:
-            break;
-        case FORM_BATTLESTANCE:
-            break;
-        case FORM_DEFENSIVESTANCE:
-            break;
-        case FORM_BERSERKERSTANCE:
-            break;
-        case FORM_SHADOW:
-            break;
-        case FORM_STEALTH:
-            break;
-        default:
-            sLog.outString("Unknown Shapeshift Type");
-            break;
-		}
+        */
     }
     else 
-	{
-		if(m_target->getRace() == RACE_NIGHT_ELF)
-		{
-			if(m_target->getGender() == GENDER_MALE)
-				m_target->setShapeShiftForm(55);
-			else if(m_target->getGender() == GENDER_FEMALE)
-				m_target->setShapeShiftForm(56);
-		}
-		else if(m_target->getRace() == RACE_TAUREN)
-		{
-			if(m_target->getGender() == GENDER_MALE)
-				m_target->setShapeShiftForm(59);
-			else if(m_target->getGender() == GENDER_FEMALE)
-				m_target->setShapeShiftForm(60);
-		}
-		m_target->RemoveAura(spellId);
-	}
+    {
+        m_target->setShapeShiftForm(m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+        if(m_target->getClass() == CLASS_DRUID)
+            m_target->setPowerType(0);
+        //m_target->RemoveAura(spellId);
+    }
+    switch(m_modifier->m_miscvalue)
+    {
+        case FORM_CAT:
+            apply ? m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x10501 ) : m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0xEE00 );
+            break;
+        case FORM_BEAR:
+        case FORM_DIREBEAR:
+            apply ? m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x10B04 ) : m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0xEE00 );
+            break;
+        case FORM_STEALTH:
+            //apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x21E0000 );
+            apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0xEE00 );
+            break;
+        default:break;
+    }
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_target);
 
     /*tmpAff = new Affect(spellInfo,GetDuration(),GetCaster());
 

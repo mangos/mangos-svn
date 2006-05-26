@@ -75,6 +75,7 @@ Unit::Unit() : Object()
     m_spells[2] = 0;
     m_spells[3] = 0;
     m_transform = 0;
+    m_ShapeShiftForm = 0;
 }
 
 Unit::~Unit()
@@ -1082,6 +1083,29 @@ void Unit::RemoveAura(AuraList::iterator i)
     //_ApplyStatsMods();
 }
 
+void Unit::RemoveAuraRank(uint32 spellId)
+{
+    SpellEntry *i_spellInfo;
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    AuraList::iterator i, next;
+    for (i = m_Auras.begin(); i != m_Auras.end();  i = next)
+    {
+        next = i;
+        next++;
+        i_spellInfo =(*i)->GetSpellProto();
+        uint8 j=(*i)->GetEffIndex();
+        for(uint8 k=0;k<3;k++)
+        if (i_spellInfo->EffectApplyAuraName[j] == spellInfo->EffectApplyAuraName[k] )
+        {
+            RemoveAura(i);
+            if(m_Auras.empty())
+                break;
+            else
+                next = m_Auras.begin();
+        }
+    }
+}
+
 bool Unit::SetAurDuration(uint32 spellId,Unit* caster,uint32 duration)
 {
     AuraList::iterator i;
@@ -1484,8 +1508,26 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingT
 
 void Unit::setShapeShiftForm(uint32 modelid)
 {
-    SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid); 
+    SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid);
 }
+
+void Unit::setPowerType(uint8 PowerType)
+{
+    uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
+    SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(PowerType)<<24));
+    uint8 new_powertype = getPowerType();
+    if(new_powertype == 3)
+    {
+        SetUInt32Value(UNIT_FIELD_MAXPOWER4,100);
+        SetUInt32Value(UNIT_FIELD_POWER4,100);
+    }
+    if(new_powertype == 1)
+    {
+        SetUInt32Value(UNIT_FIELD_MAXPOWER2,1000);
+        SetUInt32Value(UNIT_FIELD_POWER2,1);
+    }
+}
+
 /*********************************************************/
 /***                    SPELL SYSTEM                   ***/
 /*********************************************************/
@@ -1528,4 +1570,3 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
         SendMessageToSet( &data, true );
     }
 }
-
