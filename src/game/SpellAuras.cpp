@@ -797,16 +797,13 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-	if(apply)
-	{
-		m_target->m_stealth = GetId();
+    if(apply) {
 		m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
 	}
 	else
 	{
 		SendCoolDownEvent();
-		m_target->m_stealth = 0;
 		m_target->m_stealthvalue = 0;
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
 	}
@@ -1170,7 +1167,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     if(apply)
     {
         if(m_target->m_ShapeShiftForm)
-            m_target->RemoveAura(m_target->m_ShapeShiftForm);
+            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
 
         if(m_modifier->m_miscvalue == FORM_STEALTH)
 			m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1E0000 );
@@ -1203,7 +1200,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(0);
         m_target->m_ShapeShiftForm = 0;
-        m_target->RemoveAura(spellId);
+        m_target->RemoveAurasDueToSpell(spellId);
     }
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);

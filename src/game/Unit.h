@@ -252,6 +252,12 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void setDeathState(DeathState s)
         {
             m_deathState = s;
+            if (m_deathState != ALIVE) {
+                if (isInCombat()) {
+                    m_attackers.clear(); // Perhaps notify them that we've died?
+                    AttackStop();
+                }
+            }
             if (m_deathState == JUST_DIED)
             {
                 RemoveAllAuras();
@@ -362,6 +368,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<DynamicObject*> m_dynObj;
         std::list<Hostil*> m_hostilList;
         uint32 m_transform;
+
+        long m_AuraModifiers[TOTAL_AURAS];
+        //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
+
     private:
         uint32 m_state;     // Even derived shouldn't modify
 };

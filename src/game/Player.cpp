@@ -599,10 +599,10 @@ void Player::Update( uint32 p_time )
         if (isAttackReady())
         {
             Unit *pVictim = getVictim();
-            if(!pVictim) {
-                Attack((Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection));
-                Unit *pVictim = getVictim();
-            }
+            //if(!pVictim) {
+            //    Attack((Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection));
+            //    Unit *pVictim = getVictim();
+            //}
             
             // default combat reach 10
             // TODO add weapon,skill check

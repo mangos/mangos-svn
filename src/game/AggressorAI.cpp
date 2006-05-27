@@ -80,6 +80,7 @@ AggressorAI::_needToStop() const
 
 void AggressorAI::AttackStop(Unit *)
 {
+    i_creature.AttackStop();
 }
 
 void AggressorAI::_stopAttack()
@@ -89,7 +90,7 @@ void AggressorAI::_stopAttack()
     
     if( !i_creature.isAlive() )
     {
-        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         return;
     }
     else if( !i_creature.getVictim()->isAlive() )

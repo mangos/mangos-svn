@@ -79,6 +79,9 @@ Unit::Unit() : Object()
     m_transform = 0;
     m_ShapeShiftForm = 0;
 
+    for (int i = 0; i < TOTAL_AURAS; i++)
+        m_AuraModifiers[i] = -1;
+
     m_attacking = NULL;
 }
 
@@ -214,19 +217,19 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 }
 
 void Unit::RemoveSpellsCausingAura(uint32 auraType) {
-    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); iter++)
-        if (((*iter).second)->GetModifier()->m_auraname == auraType)
-        {
-            uint32 spellId = ((*iter).second)->GetId();
-            RemoveAurasDueToSpell(spellId);
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); iter++) {
+        if ((*iter).second) {
+            if (((*iter).second)->GetModifier()->m_auraname == auraType)
+            {
+                uint32 spellId = ((*iter).second)->GetId();
+                RemoveAurasDueToSpell(spellId);
+            }
         }
+    }
 }
 
 bool Unit::HasAuraType(uint32 auraType) const {
-    for (AuraMap::const_iterator iter = m_Auras.begin(); iter != m_Auras.end(); iter++)
-        if (((*iter).second)->GetModifier()->m_auraname == auraType)
-            return true;
-    return false;
+    return (m_AuraModifiers[auraType] != -1);
 }
 
 
@@ -1002,6 +1005,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     else
     {
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
+        m_AuraModifiers[Aur->GetModifier()->m_auraname] += ((*i).second->GetModifier()->m_amount + 1);
         Aur->_AddAura();
     }
     //_ApplyStatsMods();
@@ -1042,6 +1046,7 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
 void Unit::RemoveAura(AuraMap::iterator &i)
 {
     //_RemoveStatsMods();
+    m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
     (*i).second->_RemoveAura();
     delete (*i).second;
     m_Auras.erase(i++);
@@ -1502,6 +1507,7 @@ void Unit::AttackStop() {
         return;
 
     m_attacking->removeAttacker(this);
+    m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
     RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
 }
