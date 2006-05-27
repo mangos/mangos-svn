@@ -77,7 +77,6 @@ void GuardAI::AttackStop(Unit *)
 void GuardAI::_stopAttack()
 {
     assert( i_creature.getVictim() != NULL );
-    i_creature.AttackStop();
     
     if( !i_creature.isAlive() )
     {
@@ -106,6 +105,8 @@ void GuardAI::_stopAttack()
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
     i_state = STATE_NORMAL;
+
+    i_creature.AttackStop();
 }
 
 void GuardAI::UpdateAI(const uint32 diff)

@@ -136,8 +136,6 @@ ReactorAI::stopAttack()
 {
     if( i_creature.getVictim() != NULL )
     {
-        i_creature.AttackStop();
-        
         if( !i_creature.isAlive() )
         {
             DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
@@ -158,5 +156,6 @@ ReactorAI::stopAttack()
             DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", i_creature.getVictim()->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
+        i_creature.AttackStop();
     }
 }
