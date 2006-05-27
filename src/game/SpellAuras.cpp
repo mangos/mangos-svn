@@ -313,6 +313,9 @@ void Aura::Update(uint32 diff)
         }
         if(m_periodicTimer == 0)
         {
+            // update before applying (aura can be removed in TriggerSpell or PeriodicAuraLog calls)
+            m_periodicTimer = m_modifier->periodictime;
+
             if(m_isTrigger)
             {
                 TriggerSpell();
@@ -324,7 +327,6 @@ void Aura::Update(uint32 diff)
                 else
                     m_caster->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
             }
-            m_periodicTimer = m_modifier->periodictime;
         }
     }
 }

@@ -7638,9 +7638,8 @@ void Player::_SaveAuras()
 {
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
-    AuraList auras = GetAuras();
-    AuraList::iterator itr;
-    for (itr = auras.begin(); itr != auras.end(); ++itr)
+    AuraList const& auras = GetAuras();
+    for(AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
         sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr)->GetId(), (uint32)(*itr)->GetEffIndex(), int((*itr)->GetAuraDuration()));
     }
