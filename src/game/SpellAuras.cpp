@@ -796,8 +796,8 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-    m_permanent = true;                                     // stealth state
     apply ? m_target->m_stealth = GetId() :  m_target->m_stealth = 0;
+	apply ? m_target->m_stealthvalue = m_target->getLevel()*5;
 }
 
 void Aura::HandleAuraModResistance(bool apply)
@@ -1060,7 +1060,6 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
 // FIX-ME PWEEZEE!!
 void Aura::HandleAuraModShapeshift(bool apply)
 {
-    //Aura* tmpAur;
     uint32 spellId = 0;
     uint32 modelid = 0;
     uint8 PowerType = 0;
@@ -1073,24 +1072,24 @@ void Aura::HandleAuraModShapeshift(bool apply)
             else if(m_target->getRace() == RACE_TAUREN)
                 modelid = 1232;
             PowerType = 3;
-            //spellId = 3025;
+            spellId = 3025;
             break;
         case FORM_TREE:
-            //spellId = 3122;
+            spellId = 3122;
             break;
         case FORM_TRAVEL:
             if(m_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 1231;
             else if(m_target->getRace() == RACE_TAUREN)
                 modelid = 1232;
-            //spellId = 5419;
+            spellId = 5419;
             break;
         case FORM_AQUA:
             if(m_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 223;
             else if(m_target->getRace() == RACE_TAUREN)
                 modelid = 224;
-            //spellId = 5421;
+            spellId = 5421;
             break;
         case FORM_BEAR:
             if(m_target->getRace() == RACE_NIGHT_ELF)
@@ -1098,13 +1097,13 @@ void Aura::HandleAuraModShapeshift(bool apply)
             else if(m_target->getRace() == RACE_TAUREN)
                 modelid = 214;
             PowerType = 1;
-            //spellId = 1178;
+            spellId = 1178;
             break;
         case FORM_AMBIENT:
-            //spellId = 0;
+            spellId = 0;
             break;
         case FORM_GHOUL:
-            //spellId = 0;
+            spellId = 0;
             break;
         case FORM_DIREBEAR:
             if(m_target->getRace() == RACE_NIGHT_ELF)
@@ -1112,41 +1111,36 @@ void Aura::HandleAuraModShapeshift(bool apply)
             else if(m_target->getRace() == RACE_TAUREN)
                 modelid = 2200;
             PowerType = 1;
-            //spellId = 9635;
+            spellId = 9635;
             break;
         case FORM_CREATUREBEAR:
-            //spellId = 2882;
+            spellId = 2882;
             break;
         case FORM_GHOSTWOLF:
-            //spellId = 0;
+            spellId = 0;
             break;
         case FORM_BATTLESTANCE:
-            //spellId = 0;
+            spellId = 0;
             break;
         case FORM_DEFENSIVESTANCE:
-            //spellId = 7376;
+            spellId = 7376;
             break;
         case FORM_BERSERKERSTANCE:
-            //spellId = 7381;
+            spellId = 7381;
             break;
         case FORM_SHADOW:
-            //spellId = 0;
+            spellId = 0;
             break;
         case FORM_STEALTH:
-            //spellId = 3025;
+            spellId = 3025;
             break;
         default:
             sLog.outString("Unknown Shapeshift Type");
             break;
     }
-    /*
+
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
 
-    if(!spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
-        return;
-    }*/
     if(apply)
     {
         if(m_target->m_ShapeShiftForm)
@@ -1161,13 +1155,16 @@ void Aura::HandleAuraModShapeshift(bool apply)
             m_target->setPowerType(PowerType);
         }
         m_target->m_ShapeShiftForm = m_spellId;
-        /*
-        Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
-        WPAssert(p_spell);
-        SpellCastTargets targets;
-        targets.setUnitTarget(m_target);
-        p_spell->prepare(&targets);
-        */
+		m_target->m_form = m_modifier->m_miscvalue;
+        
+        if(spellInfo)
+        {
+		    Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+            WPAssert(p_spell);
+            SpellCastTargets targets;
+            targets.setUnitTarget(m_target);
+            p_spell->prepare(&targets);
+        }
     }
     else 
     {
@@ -1176,7 +1173,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
 		if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(0);
         m_target->m_ShapeShiftForm = 0;
-        //m_target->RemoveAura(spellId);
+        m_target->RemoveAura(spellId);
     }
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);

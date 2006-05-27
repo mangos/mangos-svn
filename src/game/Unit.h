@@ -268,11 +268,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_immuneToSchool;
         uint32 m_immuneToDmg;
         uint32 m_immuneToDispel;
+		uint32 m_immuneToStealth;
         uint32 m_stealth;
+		uint32 m_stealthvalue;
         uint32 m_ReflectSpellSchool;
         uint32 m_ReflectSpellPerc;
         float m_speed;
         uint32 m_ShapeShiftForm;
+		uint32 m_form;
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
