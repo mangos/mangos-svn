@@ -801,12 +801,17 @@ void Aura::HandleModStealth(bool apply)
 	{
 		m_target->m_stealth = GetId();
 		m_target->m_stealthvalue = CalculateDamage();
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
 	}
 	else
 	{
+		SendCoolDownEvent();
 		m_target->m_stealth = 0;
 		m_target->m_stealthvalue = 0;
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
 	}
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_target);
 }
 
 void Aura::HandleModDetect(bool apply)
@@ -988,9 +993,9 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * m_modifier->m_amount/100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier->m_amount );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
     data.Initialize(MSG_MOVE_SET_RUN_SPEED);
     data << m_target->GetGUID();
     data << m_target->GetSpeed( MOVE_RUN );
@@ -1003,9 +1008,9 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * m_modifier->m_amount/100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier->m_amount );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
@@ -1166,7 +1171,11 @@ void Aura::HandleAuraModShapeshift(bool apply)
     {
         if(m_target->m_ShapeShiftForm)
             m_target->RemoveAura(m_target->m_ShapeShiftForm);
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+
+        if(m_modifier->m_miscvalue == FORM_STEALTH)
+			m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1E0000 );
+		else
+			m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
             m_target->setShapeShiftForm(modelid);
@@ -1547,4 +1556,14 @@ void Aura::HandleRangedAmmoHaste(bool apply)
     uint32 percent = m_modifier->m_amount;
     uint32 current = m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
     apply ? m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current-(current*100)/(100+percent));
+}
+
+
+void Aura::SendCoolDownEvent()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_COOLDOWN_EVENT);
+    data << uint32(m_spellId) << m_caster->GetGUID();
+    data << uint32(0);	//CoolDown Time ?
+    m_caster->SendMessageToSet(&data,true);
 }
