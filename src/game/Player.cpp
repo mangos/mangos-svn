@@ -96,7 +96,6 @@ Player::Player (WorldSession *session): Unit()
 
     m_total_honor_points = 0;
 
-    inCombat = false;
     pTrader = NULL;
 
     m_cinematic = 0;
@@ -595,14 +594,11 @@ void Player::Update( uint32 p_time )
         }
     }
 
-    if (m_state & UNIT_STAT_ATTACKING)
+    if (isAttacking())
     {
-        inCombat = true;
-
         if (isAttackReady())
         {
-            Unit *pVictim = NULL;
-            pVictim = ObjectAccessor::Instance().GetCreature(*this, m_curSelection);
+            Unit *pVictim = getVictim();
             if(!pVictim)
                 pVictim = (Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection);
 
@@ -623,42 +619,39 @@ void Player::Update( uint32 p_time )
                 pldistance = pldistance + 3;
             }
 
-            if (!pVictim)
-            {
-                sLog.outDetail("Player::Update:  No valid current selection to attack, stopping attack\n");
-                clearUnitState(UNIT_STAT_IN_COMBAT);
-                smsg_AttackStop(m_curSelection);
-            }
-            else if( GetDistanceSq(pVictim) > pldistance )
-            {
-                setAttackTimer(uint32(1000));
-                data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
-                GetSession()->SendPacket(&data);
-            }
-            //120 degreas of radiant range
-            //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
-            else if( !IsInArc( 2.0943951024, pVictim ))
-            {
-                setAttackTimer(uint32(1000));
-                data.Initialize(SMSG_ATTACKSWING_BADFACING);
-                GetSession()->SendPacket(&data);
-            }
-            else
-            {
-                setAttackTimer(0);
-                uint32 dmg;
-                dmg = CalculateDamage (this);
-                AttackerStateUpdate(pVictim, dmg);
+            if (pVictim) {
+                if( GetDistanceSq(pVictim) > pldistance )
+                {
+                    setAttackTimer(uint32(1000));
+                    data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
+                    GetSession()->SendPacket(&data);
+                    AttackStop();
+                }
+                //120 degreas of radiant range
+                //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
+                else if( !IsInArc( 2.0943951024, pVictim ))
+                {
+                    setAttackTimer(uint32(1000));
+                    data.Initialize(SMSG_ATTACKSWING_BADFACING);
+                    GetSession()->SendPacket(&data);
+                }
+                else
+                {
+                    setAttackTimer(0);
+                    uint32 dmg;
+                    dmg = CalculateDamage (this);
+                    AttackerStateUpdate(pVictim, dmg);
+                }
             }
         }
     }
-    else if (m_state & UNIT_STAT_ATTACK_BY)
+    else if (isAttacked())
     {
-        inCombat = true;
+        // Leave here so we don't forget this case
     }
     else
     {
-        inCombat = false;
+        // Leave here so we don't forget this case
     }
 
     if(HasFlag(PLAYER_FLAGS, 0x20))
@@ -853,10 +846,11 @@ void Player::RegenerateAll()
 
     // Not in combat or they have regeneration
     // TODO: Replace the 20555 with test for if they have an aura of regeneration
-    if (!(m_state & UNIT_STAT_IN_COMBAT) || Player::HasSpell(20555))
+    if (!isInCombat() || Player::HasSpell(20555))
     {
         Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);  //health
-        Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);  //rage
+        if (!isInCombat())
+            Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);  //rage
     }
 
     Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4); //energy
@@ -906,9 +900,9 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
                 case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
             }
-            if (Player::HasSpell(20555))
+            if (HasSpell(20555))  // TODO: Should be aura controlled
             {
-                if (Player::inCombat)
+                if (isInCombat())
                 {
                     addvalue*=uint32(0.10);
                 }

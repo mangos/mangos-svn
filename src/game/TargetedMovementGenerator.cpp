@@ -108,7 +108,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     SpellEntry* spellInfo;
     if( owner.IsStopped() && i_target.isAlive())
     {
-        if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT))
+        if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat())
         {
             if( spellInfo = owner.reachWithSpellAttack( &i_target))
             {
@@ -129,7 +129,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
         if(i_targetedHome)
             return;
-        else if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.hasUnitState(UNIT_STAT_IN_COMBAT) && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
+        else if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat() && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
         {
             _spellAtack(owner, spellInfo);
             return;
@@ -140,8 +140,10 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             {
                 owner.SetInFront(&i_target);
                 owner.StopMoving();
-                if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
-                    owner.addUnitState(UNIT_STAT_ATTACKING);
+                if(!owner.hasUnitState(UNIT_STAT_FOLLOW)) {
+                    //owner.addUnitState(UNIT_STAT_ATTACKING);
+                    owner.Attack(&i_target); //??
+                }
                 owner.clearUnitState(UNIT_STAT_CHASE);
                 DEBUG_LOG("UNIT IS THERE");
             }
@@ -172,7 +174,8 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
     }
     Spell *spell = new Spell(&owner, spellInfo, false, 0);
     spell->SetAutoRepeat(true);
-    owner.addUnitState(UNIT_STAT_ATTACKING);
+    //owner.addUnitState(UNIT_STAT_ATTACKING);
+    owner.Attack(&owner); //??
     owner.clearUnitState(UNIT_STAT_CHASE);
     SpellCastTargets targets;
     targets.setUnitTarget( &i_target );

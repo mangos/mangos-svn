@@ -1776,8 +1776,7 @@ void Spell::EffectCharge(uint32 i)
     float oldspeed = m_caster->GetSpeed();
     m_caster->SetSpeed(oldspeed * 3.5);
     m_caster->SendMoveToPacket(x, y, z, true);
-    m_caster->addUnitState(UNIT_STAT_ATTACKING);
-    m_caster->addAttacker(unitTarget);
+    m_caster->Attack(unitTarget);
     m_caster->SetSpeed(oldspeed);
     //m_caster->smsg_AttackStart(pEnemy);
 }

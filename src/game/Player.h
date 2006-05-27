@@ -820,8 +820,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_currentBuybackSlot;                        //0~11
 
-        bool inCombat;
-
         std::list<struct Factions> factions;
         std::list<bidentry*> m_bids;
         std::list<Mail*> m_mail;

@@ -79,6 +79,8 @@ Unit::Unit() : Object()
     m_spells[3] = 0;
     m_transform = 0;
     m_ShapeShiftForm = 0;
+
+    m_attacking = NULL;
 }
 
 Unit::~Unit()
@@ -244,7 +246,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             ((Creature*)pVictim)->generateLoot();
         }
-
+        
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
 
@@ -382,15 +384,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             DEBUG_LOG("DealDamageIsCreature");
             smsg_AttackStop(victimGuid);
-            RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
             addUnitState(UNIT_STAT_DIED);
         }
+        AttackStop();
     }
     else
     {
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
-        pVictim->addUnitState(UNIT_STAT_ATTACK_BY);
         pVictim->addAttacker(this);
 
         if(pVictim->getTransForm())
@@ -915,7 +916,7 @@ void Unit::_UpdateSpells( uint32 time )
 
 void Unit::_UpdateHostil( uint32 time )
 {
-    if(!hasUnitState(UNIT_STAT_IN_COMBAT) && m_hostilList.size() )
+    if(!isInCombat() && m_hostilList.size() )
     {
         std::list<Hostil*>::iterator iter;
         for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); iter++)
@@ -1533,6 +1534,23 @@ void Unit::setPowerType(uint8 PowerType)
     }
 }
 
+void Unit::Attack(Unit *victim) {
+    if (m_attacking)
+        AttackStop();
+    addUnitState(UNIT_STAT_ATTACKING);
+    SetFlag(UNIT_FIELD_FLAGS, 0x80000);
+    m_attacking = victim;
+}
+
+void Unit::AttackStop() {
+    if (!m_attacking)
+        return;
+
+    m_attacking->removeAttacker(this);
+    clearUnitState(UNIT_STAT_ATTACKING);
+    RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
+}
+
 /*********************************************************/
 /***                    SPELL SYSTEM                   ***/
 /*********************************************************/
@@ -1551,3 +1569,4 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
         SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, heal, NORMAL_DAMAGE, 0,0,false,0);
     }
 }
+

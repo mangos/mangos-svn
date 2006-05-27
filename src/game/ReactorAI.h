@@ -27,7 +27,7 @@ class MANGOS_DLL_DECL ReactorAI : public CreatureAI
 {
     public:
 
-        ReactorAI(Creature &c) : i_creature(c), i_pVictim(NULL) {}
+        ReactorAI(Creature &c) : i_creature(c) {}
 
         void MoveInLineOfSight(Unit *);
         void AttackStart(Unit *);
@@ -45,6 +45,5 @@ class MANGOS_DLL_DECL ReactorAI : public CreatureAI
         void stopAttack(void);
 
         Creature &i_creature;
-        Unit *i_pVictim;
 };
 #endif

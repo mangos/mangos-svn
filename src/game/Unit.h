@@ -144,19 +144,34 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool canReachWithAttack(Unit *pVictim) const;
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
 
-        inline AttackerSet getAttackerSet( ) {  return m_attackers; }
         inline void addAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
+            addUnitState(UNIT_STAT_ATTACK_BY);
         }
         inline void removeAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
                 m_attackers.erase(itr);
+
+            if (m_attackers.size() == 0)
+                clearUnitState(UNIT_STAT_ATTACK_BY);
         }
+        Unit * getAttackerForHelper() {    // If someone wants to help, who to give them
+            if (getVictim() != NULL)
+                return getVictim();
+
+            if (m_attackers.size() > 0)
+                return *(m_attackers.begin());
+
+            return NULL;
+        }
+        void Attack(Unit *victim);
+        void AttackStop();
+        Unit * getVictim() { return m_attacking; } 
 
         inline void addUnitState(uint32 f) { m_state |= f; };
         inline bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -207,6 +222,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isStunned() const { return m_attackTimer == 0;};
 
         bool isInFlight() const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
+
+        bool isInCombat() { return (m_state & UNIT_STAT_IN_COMBAT); }
+        bool isAttacking() { return (m_state & UNIT_STAT_ATTACKING); }
+        bool isAttacked() { return (m_state & UNIT_STAT_ATTACK_BY); }
 
         bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !m_stealth; }
 
@@ -329,10 +348,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         //Aura* m_aura;
         //uint32 m_auraCheck, m_removeAuraTimer;
 
-        uint32 m_state;
         uint32 m_attackTimer;
 
         AttackerSet m_attackers;
+        Unit* m_attacking;
+
         DeathState m_deathState;
 
         AuraList m_Auras;
@@ -340,6 +360,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<DynamicObject*> m_dynObj;
         std::list<Hostil*> m_hostilList;
         uint32 m_transform;
-
+    private:
+        uint32 m_state;     // Even derived shouldn't modify
 };
 #endif

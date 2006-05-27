@@ -48,7 +48,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     if (!pUser->CanUseItem(proto)) return;
 
-    if (pUser->inCombat)
+    if (pUser->isInCombat())
     {
         if (proto->Class == ITEM_CLASS_CONSUMABLE || proto->Class == ITEM_CLASS_TRADE_GOODS ||
             proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_JUNK)
