@@ -1095,6 +1095,8 @@ void Spell::EffectHealMaxHealth(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
+	if(unitTarget->m_immuneToMechanic == 16)
+		return;
 
     uint32 heal;
     heal = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);

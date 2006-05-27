@@ -176,8 +176,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     if(!unit) return;
 
-    playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
-
     std::list<TrainerSpell*>::iterator titr;
 
     for (titr = unit->GetTspellsBegin(); titr != unit->GetTspellsEnd();titr++)
@@ -189,6 +187,12 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         }
     }
 
+	if(!proto)
+	{
+		sLog.outError("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
+		return;
+	}
+    playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
     if( playerGold >= proto->spellcost )
     {
         SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
@@ -203,15 +207,15 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         _player->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - proto->spellcost );
 
-        Spell *spell = new Spell(unit, proto->spell, false, NULL);
+        Spell *spell;
+        if(proto->spell->SpellVisual == 222)
+            spell = new Spell(_player, proto->spell, false, NULL);
+		else
+            spell = new Spell(unit, proto->spell, false, NULL);
 
         SpellCastTargets targets;
         targets.setUnitTarget( _player );
-        if(proto->spell->SpellVisual == 222)
-            spell = new Spell(_player, proto->spell, false, NULL);
-
         spell->prepare(&targets);
-
         SendTrainerList( guid );
     }
 }

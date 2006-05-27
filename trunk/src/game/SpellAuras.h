@@ -279,6 +279,7 @@ class Aura
         void HandleAuraManaShield(bool Apply);
         void HandleAuraSchoolAbsorb(bool Apply);
         void HandleReflectSpellsSchool(bool Apply);
+        void HandleModMechanicImmunity(bool Apply);
         void HandleAuraModSkill(bool Apply);
         void HandleModDamagePercentDone(bool Apply);
         void HandleModPercentStat(bool Apply);
