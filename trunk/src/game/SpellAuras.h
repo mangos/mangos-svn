@@ -325,6 +325,7 @@ class Aura
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
         void TriggerSpell();
+		void SendCoolDownEvent();
 
     private:
 
