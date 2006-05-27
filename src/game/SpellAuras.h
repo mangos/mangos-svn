@@ -320,7 +320,7 @@ class Aura
 
         void _AddAura();
         void _RemoveAura();
-        uint32 CalculateDamage(SpellEntry* spellproto, uint8 i);
+        uint32 CalculateDamage();
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
         void TriggerSpell();

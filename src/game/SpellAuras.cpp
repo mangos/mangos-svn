@@ -240,15 +240,16 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
         damage = spellproto->EffectBasePoints[eff];
     }
     else
-        damage = CalculateDamage(spellproto, eff);
+        damage = CalculateDamage();
 
     m_effIndex = eff;
     m_modifier = new Modifier;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
 }
 
-uint32 Aura::CalculateDamage(SpellEntry* spellproto, uint8 i)
+uint32 Aura::CalculateDamage()
 {
+	SpellEntry* spellproto = GetSpellProto();
     uint32 value = 0;
     uint32 level;
     if(!m_target)
@@ -258,16 +259,16 @@ uint32 Aura::CalculateDamage(SpellEntry* spellproto, uint8 i)
         caster = m_target;
     level= caster->getLevel();
 
-    float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[i];
-    float randomPointsPerLevel = spellproto->EffectDicePerLevel[i];
-    uint32 basePoints = uint32(spellproto->EffectBasePoints[i] + level * basePointsPerLevel);
-    uint32 randomPoints = uint32(spellproto->EffectDieSides[i] + level * randomPointsPerLevel);
-    float comboDamage = spellproto->EffectPointsPerComboPoint[i];
+    float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
+    float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
+    uint32 basePoints = uint32(spellproto->EffectBasePoints[m_effIndex] + level * basePointsPerLevel);
+    uint32 randomPoints = uint32(spellproto->EffectDieSides[m_effIndex] + level * randomPointsPerLevel);
+    float comboDamage = spellproto->EffectPointsPerComboPoint[m_effIndex];
     uint8 comboPoints=0;
     if(caster->GetTypeId() == TYPEID_PLAYER)
         comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
-    value += spellproto->EffectBaseDice[i];
+    value += spellproto->EffectBaseDice[m_effIndex];
     if(randomPoints <= 1)
         value = basePoints+1;
     else
@@ -796,8 +797,17 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-    apply ? m_target->m_stealth = GetId() :  m_target->m_stealth = 0;
-    apply ? m_target->m_stealthvalue = m_target->getLevel()*5 : 0;
+	SpellEntry* spellInfo = GetSpellProto();
+	if(apply)
+	{
+		m_target->m_stealth = GetId();
+		m_target->m_stealthvalue = CalculateDamage();
+	}
+	else
+	{
+		m_target->m_stealth = 0;
+		m_target->m_stealthvalue = 0;
+	}
 }
 
 void Aura::HandleAuraModResistance(bool apply)
