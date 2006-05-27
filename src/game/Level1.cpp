@@ -62,7 +62,6 @@ bool ChatHandler::HandleGMOffCommand(const char* args)
 
 bool ChatHandler::HandleGPSCommand(const char* args)
 {
-    WorldPacket data;
     Object *obj;
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
@@ -70,6 +69,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     {
         if(!(obj = (Object*)ObjectAccessor::Instance().FindPlayer(guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
         {
+            WorldPacket data;
+
             FillSystemMessageData(&data, m_session, "You should select a character or a creature.");
             m_session->SendPacket( &data );
             return true;
@@ -79,12 +80,11 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         obj = (Object*)m_session->GetPlayer();
 
     char buf[256];
-    sprintf((char*)buf, "X: %f Y: %f Z: %f Orientation: %f",
-        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+    sprintf((char*)buf, "Map: %u\nX: %f Y: %f Z: %f Orientation: %f",
+        obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), 
         obj->GetOrientation());
 
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
+    SendMultilineMessage(buf);
 
     return true;
 }
