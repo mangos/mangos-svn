@@ -158,7 +158,7 @@ void Creature::AIM_Update(const uint32 &diff)
             }
             if (m_regenTimer != 0)
                 break;
-            if (!hasUnitState( UNIT_STAT_ATTACKING))
+            if (!isInCombat())
                 Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH );
             Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
             m_regenTimer = 2000;

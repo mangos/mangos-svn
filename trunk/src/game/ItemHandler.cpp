@@ -253,7 +253,7 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
 
     if (pItem)
     {
-        if ((!pItem->GetProto()->PageText) || (_player->inCombat) || (_player->isDead()))
+        if ((!pItem->GetProto()->PageText) || (_player->isInCombat()) || (_player->isDead()))
         {
             data.Initialize( SMSG_READ_ITEM_FAILED );
             sLog.outDetail("ITEM: Unable to read item");

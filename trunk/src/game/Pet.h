@@ -44,7 +44,7 @@ class Pet : public Creature
         uint32 GetActState() { return m_actState; }
         void SetActState(uint32 st) { m_actState=st; }
         void AddActState(uint32 st) { m_actState |= st; }
-        void ClearActState(uint32 st) { m_state &= ~st; };
+        void ClearActState(uint32 st) { m_actState &= ~st; };
         bool HasActState(uint32 st) { return m_actState & st;};
         uint32 GetFealty() { return m_fealty; }
         void SetFealty(uint32 fealty) { m_fealty=fealty; }

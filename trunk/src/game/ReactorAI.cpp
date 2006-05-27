@@ -45,13 +45,11 @@ ReactorAI::MoveInLineOfSight(Unit *)
 void
 ReactorAI::AttackStart(Unit *p)
 {
-    if( i_pVictim == NULL )
+    if( i_creature.getVictim() == NULL )
     {
         DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
-        i_creature.addUnitState(UNIT_STAT_ATTACKING);
-        i_creature.SetFlag(UNIT_FIELD_FLAGS, 0x80000);
+        i_creature.Attack(p);
         i_creature->Mutate(new TargetedMovementGenerator(*p));
-        i_pVictim = p;
     }
 }
 
@@ -81,7 +79,7 @@ void
 ReactorAI::UpdateAI(const uint32 time_diff)
 {
 
-    if( i_pVictim != NULL )
+    if( i_creature.getVictim() != NULL )
     {
         if( needToStop() )
         {
@@ -98,19 +96,16 @@ ReactorAI::UpdateAI(const uint32 time_diff)
                     hostillist.sort();
                     hostillist.reverse();
                     uint64 guid;
-                    if((guid = (*hostillist.begin())->UnitGuid) != i_pVictim->GetGUID())
+                    if((guid = (*hostillist.begin())->UnitGuid) != i_creature.getVictim()->GetGUID())
                     {
                         Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
                         if(newtarget)
-                        {
-                            i_pVictim = NULL;
                             AttackStart(newtarget);
-                        }
                     }
                 }
-                if(!i_creature.canReachWithAttack(i_pVictim))
+                if(!i_creature.canReachWithAttack(i_creature.getVictim()))
                     return;
-                i_creature.AttackerStateUpdate(i_pVictim, 0);
+                i_creature.AttackerStateUpdate(i_creature.getVictim(), 0);
                 i_creature.setAttackTimer(0);
 
                 if( needToStop() )
@@ -123,14 +118,14 @@ ReactorAI::UpdateAI(const uint32 time_diff)
 bool
 ReactorAI::needToStop() const
 {
-    if( !i_pVictim->isTargetableForAttack() || !i_creature.isAlive() )
+    if( !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
     i_creature.GetRespawnCoord(rx, ry, rz);
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
-    float length = i_creature.GetDistanceSq(i_pVictim);
-    float hostillen=i_creature.GetHostility( i_pVictim->GetGUID())/(2.5f * i_creature.getLevel()+1.0f);
+    float length = i_creature.GetDistanceSq(i_creature.getVictim());
+    float hostillen=i_creature.GetHostility( i_creature.getVictim()->GetGUID())/(2.5f * i_creature.getLevel()+1.0f);
     return (( length > (10.0f + hostillen) * (10.0f + hostillen) && spawndist > 6400.0f )
         || ( length > (20.0f + hostillen) * (20.0f + hostillen) && spawndist > 2500.0f )
         || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
@@ -139,32 +134,29 @@ ReactorAI::needToStop() const
 void
 ReactorAI::stopAttack()
 {
-    if( i_pVictim != NULL )
+    if( i_creature.getVictim() != NULL )
     {
-        i_creature.clearUnitState(UNIT_STAT_IN_COMBAT);
-        i_creature.RemoveFlag(UNIT_FIELD_FLAGS, 0x80000 );
-
+        i_creature.AttackStop();
+        
         if( !i_creature.isAlive() )
         {
             DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
             i_creature->Idle();
         }
-        else if( i_pVictim->m_stealth )
+        else if( i_creature.getVictim()->m_stealth )
         {
             DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
-        else if( i_pVictim->isInFlight() )
+        else if( i_creature.getVictim()->isInFlight() )
         {
             DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
         else
         {
-            DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", i_pVictim->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
+            DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", i_creature.getVictim()->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
             static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
         }
-
-        i_pVictim = NULL;
     }
 }

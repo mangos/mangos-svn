@@ -53,7 +53,6 @@ class MANGOS_DLL_DECL AggressorAI : public CreatureAI
 
         Creature &i_creature;
         FactionTemplateResolver i_myFaction;
-        Unit *i_pVictim;
         AggressorState i_state;
         TimeTracker i_tracker;
 };
