@@ -666,11 +666,12 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     }
 
     // proc trigger aura
-    AuraList::iterator i;
-    for (i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); i++)
+    for (AuraList::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
     {
-        ProcTriggerSpell *procspell;
-        if((procspell = (*i)->GetProcSpell()))
+        if(!(*i))
+            continue;
+
+        if(ProcTriggerSpell* procspell = (*i)->GetProcSpell())
         {
             if(procspell->procFlags == 40 && procspell->procChance * 1000 > rand() % 100000)
             {
@@ -861,25 +862,33 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-    AuraList::iterator i, next;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
+    // update aura (may set some pointer in iterators to NULL
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        next = i;
-        next++;
-        (*i)->Update( time );
-        if(m_Auras.empty())
-            break;
-        else if(!(*i))
+        if(!(*i))
             continue;
-        else if ( !(*i)->GetAuraDuration() && !(*i)->IsPermanent() )
+
+        (*i)->Update( time );
+        
+        if(!(*i))
+            continue;
+        
+        if ( !(*i)->GetAuraDuration() && !(*i)->IsPermanent() )
         {
             RemoveAura(i);
-            if(m_Auras.empty())
-                break;
-            else
-                next = m_Auras.begin();
         }
     }
+
+    // remove from list NULL auras (this single place for removing)
+    AuraList::iterator next;
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end(); i = next)
+    {
+        next = i;
+        ++next;
+        if(!(*i)) 
+            m_Auras.erase(i);
+    }
+
     if(m_dynObj.empty())
         return;
     std::list<DynamicObject*>::iterator ite, dnext;
@@ -969,8 +978,8 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID) {
     bool auraFound = false;
     
     AuraList::const_iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++) {
-        if ((*i)->GetModifier()->m_auraname == ModifierID) {
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i) {
+        if ((*i) && (*i)->GetModifier()->m_auraname == ModifierID) {
             auraFound = true;
             modifier += (*i)->GetModifier()->m_amount;
         }
@@ -987,9 +996,9 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
     //_RemoveStatsMods();
 
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        if ((*i)->GetId() == Aur->GetId() && (*i)->GetEffIndex() == Aur->GetEffIndex())
+        if ((*i) && (*i)->GetId() == Aur->GetId() && (*i)->GetEffIndex() == Aur->GetEffIndex())
         {
             break;
         }
@@ -1010,9 +1019,9 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 void Unit::RemoveFirstAuraByCategory(uint32 category)
 {
     AuraList::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        if ((*i)->GetSpellProto()->Category == category)
+        if ((*i) && (*i)->GetSpellProto()->Category == category)
             break;
     }
 
@@ -1024,9 +1033,9 @@ void Unit::RemoveFirstAuraByCategory(uint32 category)
 void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 {
     AuraList::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        if ((*i)->GetId() == spellId && (*i)->GetEffIndex() == effindex)
+        if ((*i) && (*i)->GetId() == spellId && (*i)->GetEffIndex() == effindex)
             break;
     }
 
@@ -1037,18 +1046,11 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 
 void Unit::RemoveAura(uint32 spellId)
 {
-    AuraList::iterator i, next;
-    for (i = m_Auras.begin(); i != m_Auras.end();  i = next)
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end();  ++i)
     {
-        next = i;
-        next++;
-        if ((*i)->GetId() == spellId )
+        if ((*i) && (*i)->GetId() == spellId )
         {
             RemoveAura(i);
-            if(m_Auras.empty())
-                break;
-            else
-                next = m_Auras.begin();
         }
     }
 }
@@ -1061,7 +1063,12 @@ void Unit::RemoveAura(AuraList::iterator i)
     (*i)->_RemoveAura();
 
     delete *i;
-    m_Auras.erase(i);
+
+    // With recursive call aura removing in some situation we can't correct iterate aura update.
+    // Some iterator (not only current) to invalidate if use List::erase(iterator) at aura removing
+    // Solution: not erase list element at aura remove but assign NULL to it instead, and check at existence before access 
+    // Erase elements from list only in Unit::_UpdateSpells (non recurcive call) or Unit destructor
+    *i = NULL;
 
     //_ApplyStatsMods();
 }
@@ -1070,21 +1077,17 @@ void Unit::RemoveAuraRank(uint32 spellId)
 {
     SpellEntry *i_spellInfo;
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
-    AuraList::iterator i, next;
-    for (i = m_Auras.begin(); i != m_Auras.end();  i = next)
+    for(AuraList::iterator i = m_Auras.begin(); i != m_Auras.end();  ++i)
     {
-        next = i;
-        next++;
+        if(!(*i))
+            continue;
+
         i_spellInfo =(*i)->GetSpellProto();
         uint8 j=(*i)->GetEffIndex();
         for(uint8 k=0;k<3;k++)
         if (i_spellInfo->EffectApplyAuraName[j] == spellInfo->EffectApplyAuraName[k] )
         {
             RemoveAura(i);
-            if(m_Auras.empty())
-                break;
-            else
-                next = m_Auras.begin();
         }
     }
 }
@@ -1093,11 +1096,13 @@ bool Unit::SetAurDuration(uint32 spellId,Unit* caster,uint32 duration)
 {
     AuraList::iterator i;
 
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
-        if ((*i)->GetId() == spellId && (*i)->GetCaster() == caster)
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        (*i)->SetAuraDuration(duration);
-        return true;
+        if ((*i) && (*i)->GetId() == spellId && (*i)->GetCaster() == caster)
+        {
+            (*i)->SetAuraDuration(duration);
+            return true;
+        }
     }
 
     return false;
@@ -1107,8 +1112,8 @@ uint32 Unit::GetAurDuration(uint32 spellId,Unit* caster)
 {
     AuraList::iterator i;
 
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
-        if ((*i)->GetId() == spellId && (*i)->GetCaster() == caster)
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
+        if ((*i) && (*i)->GetId() == spellId && (*i)->GetCaster() == caster)
             return (*i)->GetAuraDuration();
 
     return 0;
@@ -1117,17 +1122,14 @@ uint32 Unit::GetAurDuration(uint32 spellId,Unit* caster)
 void Unit::RemoveAllAuras()
 {
 
-    AuraList::iterator i;
-
     //_RemoveStatsMods();
 
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         //(*i)->ApplyModifier(false);
         (*i)->_RemoveAura();
+        RemoveAura(i); 
     }
-
-    m_Auras.clear();
 
     //_ApplyStatsMods();
 }
@@ -1268,7 +1270,7 @@ void Unit::_RemoveAllAuraMods()
 
     //_RemoveStatsMods();
 
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         //(*i)->ApplyModifier(false);
         (*i)->_RemoveAura();
@@ -1284,11 +1286,9 @@ void Unit::_RemoveAllAuraMods()
 
 void Unit::_ApplyAllAuraMods()
 {
-    AuraList::iterator i;
-
     //_RemoveStatsMods();
 
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         //(*i)->ApplyModifier(true);
         //(*i)->_RemoveAura();
@@ -1353,9 +1353,8 @@ void Unit::_ApplyAllAuraMods()
 
 Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
 {
-    AuraList::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
-        if((*i)->GetId() == spellId && (*i)->GetEffIndex() == effindex)
+    for (AuraList::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+        if((*i) && (*i)->GetId() == spellId && (*i)->GetEffIndex() == effindex)
             return (*i);
     return NULL;
 }

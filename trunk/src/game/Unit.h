@@ -290,7 +290,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<Hostil*> GetHostilList() { return m_hostilList; }
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId, uint32 effindex);
-        AuraList GetAuras( ) {return m_Auras;}
+        AuraList const& GetAuras( ) {return m_Auras;}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
         void AddItemEnchant(uint32 enchant_id);
