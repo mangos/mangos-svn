@@ -47,7 +47,7 @@ Unit::Unit() : Object()
     m_attackTimer = 0;
 
     m_state = 0;
-	m_form = 0;
+    m_form = 0;
     m_deathState = ALIVE;
     m_currentSpell = NULL;
     m_meleeSpell = false;
@@ -66,8 +66,8 @@ Unit::Unit() : Object()
     m_immuneToDmg    = 0;
     m_immuneToDispel = 0;
     m_stealth        = 0;
-	m_immuneToStealth = 0;
-	m_stealthvalue = 0;
+    m_immuneToStealth = 0;
+    m_stealthvalue = 0;
 
     m_ReflectSpellSchool = 0;
     m_ReflectSpellPerc   = 0;
@@ -404,7 +404,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
             if( GetTypeId() == TYPEID_PLAYER 
-				&& getClass() == WARRIOR || m_form == 5 || m_form == 8)
+                && getClass() == WARRIOR || m_form == 5 || m_form == 8)
                 ((Player*)this)->CalcRage(damage,true);
         }
         else
