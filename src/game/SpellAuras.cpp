@@ -267,7 +267,7 @@ uint32 Aura::CalculateDamage(SpellEntry* spellproto, uint8 i)
     if(caster->GetTypeId() == TYPEID_PLAYER)
         comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
-	value += spellproto->EffectBaseDice[i];
+    value += spellproto->EffectBaseDice[i];
     if(randomPoints <= 1)
         value = basePoints+1;
     else
@@ -1062,6 +1062,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     uint32 spellId = 0;
     uint32 modelid = 0;
     uint8 PowerType = 0;
+    uint32 new_bytes_1 = m_modifier->m_miscvalue;
     switch(m_modifier->m_miscvalue)
     {
         case FORM_CAT:
@@ -1170,23 +1171,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
         m_target->setShapeShiftForm(m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(0);
+        m_target->m_ShapeShiftForm = 0;
         //m_target->RemoveAura(spellId);
     }
-    switch(m_modifier->m_miscvalue)
-    {
-        case FORM_CAT:
-            apply ? m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x10501 ) : m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0xEE00 );
-            break;
-        case FORM_BEAR:
-        case FORM_DIREBEAR:
-            apply ? m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x10B04 ) : m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0xEE00 );
-            break;
-        case FORM_STEALTH:
-            //apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, 0x21E0000 );
-            apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, 0x21E0000 ) : m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0xEE00 );
-            break;
-        default:break;
-    }
+    apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);
 }
