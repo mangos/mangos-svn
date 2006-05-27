@@ -196,14 +196,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, uint32 damage);
 
-        float GetUnitDodgeChance(){ return m_floatValues[ PLAYER_DODGE_PERCENTAGE ]; }
-        float GetUnitParryChance(){ return m_floatValues[ PLAYER_PARRY_PERCENTAGE ]; }
-        float GetUnitBlockChance(){ return m_floatValues[ PLAYER_BLOCK_PERCENTAGE ]; }
-        float GetUnitCriticalChance(){ return m_floatValues[ PLAYER_CRIT_PERCENTAGE ]; }
+        float GetUnitDodgeChance()    const { return m_floatValues[ PLAYER_DODGE_PERCENTAGE ]; }
+        float GetUnitParryChance()    const { return m_floatValues[ PLAYER_PARRY_PERCENTAGE ]; }
+        float GetUnitBlockChance()    const { return m_floatValues[ PLAYER_BLOCK_PERCENTAGE ]; }
+        float GetUnitCriticalChance() const { return m_floatValues[ PLAYER_CRIT_PERCENTAGE  ]; }
 
-        uint32 GetUnitBlockValue() { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
-        uint32 GetUnitStrength() { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
-        uint32 GetUnitMeleeSkill(){ return (uint32)m_uint32Values[ UNIT_FIELD_ATTACK_POWER ]; }
+        uint32 GetUnitBlockValue() const { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
+        uint32 GetUnitStrength()   const { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
+        uint32 GetUnitMeleeSkill() const { return (uint32)m_uint32Values[ UNIT_FIELD_ATTACK_POWER ]; }
 
         bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
         bool isTrainer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }
@@ -225,9 +225,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         bool isInFlight() const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
 
-        bool isInCombat() { return (m_state & UNIT_STAT_IN_COMBAT); }
-        bool isAttacking() { return (m_state & UNIT_STAT_ATTACKING); }
-        bool isAttacked() { return (m_state & UNIT_STAT_ATTACK_BY); }
+        bool isInCombat()  const { return (m_state & UNIT_STAT_IN_COMBAT); }
+        bool isAttacking() const { return (m_state & UNIT_STAT_ATTACKING); }
+        bool isAttacked()  const { return (m_state & UNIT_STAT_ATTACK_BY); }
         bool HasAuraType(uint32 auraType) const;
         bool isStealth() const { return HasAuraType(SPELL_AURA_MOD_STEALTH); } // cache this in a bool someday
         bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !isStealth(); }
