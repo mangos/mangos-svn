@@ -118,7 +118,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleReflectSpellsSchool,                       //SPELL_AURA_REFLECT_SPELLS_SCHOOL = 74,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_LANGUAGE = 75,
     &Aura::HandleNULL,                                      //SPELL_AURA_FAR_SIGHT = 76,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MECHANIC_IMMUNITY = 77,
+    &Aura::HandleModMechanicImmunity,                       //SPELL_AURA_MECHANIC_IMMUNITY = 77,
     &Aura::HandleAuraMounted,                               //SPELL_AURA_MOUNTED = 78,
     &Aura::HandleModDamagePercentDone,                      //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE = 79,
     &Aura::HandleModPercentStat,                            //SPELL_AURA_MOD_PERCENT_STAT = 80,
@@ -491,7 +491,9 @@ void HandleHealEvent(void *obj)
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-    if(apply)
+	if(!m_target || m_target->m_immuneToMechanic == 16)	//Can't heal
+		return;
+	if(apply)
     {
         //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
@@ -1149,7 +1151,8 @@ void Aura::HandleAuraModShapeshift(bool apply)
     {
         if(m_target->m_ShapeShiftForm)
             m_target->RemoveAura(m_target->m_ShapeShiftForm);
-        if(modelid > 0)
+		m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+		if(modelid > 0)
         {
             m_target->setShapeShiftForm(modelid);
         }
@@ -1169,14 +1172,19 @@ void Aura::HandleAuraModShapeshift(bool apply)
     else 
     {
         m_target->setShapeShiftForm(m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-        if(m_target->getClass() == CLASS_DRUID)
+		m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+		if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(0);
         m_target->m_ShapeShiftForm = 0;
         //m_target->RemoveAura(spellId);
     }
-    apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) ) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);
+}
+
+void Aura::HandleModMechanicImmunity(bool apply)
+{
+    apply ? m_target->m_immuneToMechanic = m_modifier->m_miscvalue : m_target->m_immuneToMechanic = 0;
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
@@ -1343,6 +1351,8 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
+	if(!m_target || m_target->m_immuneToMechanic == 17)	//Can't transform
+		return;
     if (apply)
     {
         CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);

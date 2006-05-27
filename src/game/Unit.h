@@ -262,6 +262,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_triggerSpell;
         uint32 m_triggerDamage;
         uint32 m_canMove;
+        uint32 m_immuneToMechanic;
         uint32 m_immuneToEffect;
         uint32 m_immuneToState;
         uint32 m_immuneToSchool;
