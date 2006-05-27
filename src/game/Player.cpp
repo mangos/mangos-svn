@@ -599,9 +599,11 @@ void Player::Update( uint32 p_time )
         if (isAttackReady())
         {
             Unit *pVictim = getVictim();
-            if(!pVictim)
-                pVictim = (Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection);
-
+            if(!pVictim) {
+                Attack((Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection));
+                Unit *pVictim = getVictim();
+            }
+            
             // default combat reach 10
             // TODO add weapon,skill check
 
@@ -625,7 +627,6 @@ void Player::Update( uint32 p_time )
                     setAttackTimer(uint32(1000));
                     data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
                     GetSession()->SendPacket(&data);
-                    AttackStop();
                 }
                 //120 degreas of radiant range
                 //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
@@ -648,10 +649,12 @@ void Player::Update( uint32 p_time )
     else if (isAttacked())
     {
         // Leave here so we don't forget this case
+        // Attacked, but not necessarily attacking
     }
     else
     {
         // Leave here so we don't forget this case
+        // Not attacking or attacked
     }
 
     if(HasFlag(PLAYER_FLAGS, 0x20))
@@ -2911,8 +2914,8 @@ void Player::smsg_AttackStart(Unit* pVictim)
     {
         setAttackTimer(uint32(0));
     }
-    if(m_stealth)
-        RemoveAura(m_stealth);
+    if(isStealth())
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     data.Initialize( SMSG_ATTACKSTART );
     data << GetGUID();
@@ -3111,7 +3114,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     else
         for (int i = 0; i < 5; i++)
             if(proto->Spells[i].SpellId)
-                RemoveAura(proto->Spells[i].SpellId );
+                RemoveAurasDueToSpell(proto->Spells[i].SpellId );
     sLog.outDebug("_ApplyItemMods complete.");
     _ApplyStatsMods();
 }
@@ -6003,7 +6006,7 @@ Item* Player::RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove)
                         }
                         else
                         {
-                            RemoveAura(enchant_spell_id);
+                            RemoveAurasDueToSpell(enchant_spell_id);
                         }
                     }
                 }
@@ -7632,10 +7635,10 @@ void Player::_SaveAuras()
 {
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
-    AuraList const& auras = GetAuras();
-    for(AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+    AuraMap const& auras = GetAuras();
+    for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr)->GetId(), (uint32)(*itr)->GetEffIndex(), int((*itr)->GetAuraDuration()));
+        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
     }
 }
 

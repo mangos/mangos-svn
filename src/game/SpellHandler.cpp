@@ -232,7 +232,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 {
     uint32 spellId;
     recvPacket >> spellId;
-    _player->RemoveAura(spellId);
+    _player->RemoveAurasDueToSpell(spellId);
 }
 
 void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)

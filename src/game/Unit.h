@@ -24,6 +24,7 @@
 #include "ObjectAccessor.h"
 #include "Opcodes.h"
 #include "Mthread.h"
+#include "SpellAuraDefines.h"
 
 #include <list>
 
@@ -134,7 +135,8 @@ class MANGOS_DLL_SPEC Unit : public Object
 {
     public:
         typedef std::set<Unit*> AttackerSet;
-        typedef std::list<Aura*> AuraList;
+        typedef std::pair<uint32, uint32> spellEffectPair;
+        typedef std::map< spellEffectPair, Aura*> AuraMap;
         virtual ~Unit ( );
 
         virtual void Update( uint32 time );
@@ -226,8 +228,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isInCombat() { return (m_state & UNIT_STAT_IN_COMBAT); }
         bool isAttacking() { return (m_state & UNIT_STAT_ATTACKING); }
         bool isAttacked() { return (m_state & UNIT_STAT_ATTACK_BY); }
-
-        bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !m_stealth; }
+        bool HasAuraType(uint32 auraType) const;
+        bool isStealth() const { return HasAuraType(SPELL_AURA_MOD_STEALTH); } // cache this in a bool someday
+        bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !isStealth(); }
 
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
@@ -259,16 +262,16 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool AddAura(Aura *aur, bool uniq = false);
 
         void RemoveFirstAuraByCategory(uint32 category);
-        void RemoveAura(AuraList::iterator i);
+        void RemoveAura(AuraMap::iterator &i);
         void RemoveAura(uint32 spellId, uint32 effindex);
-        void RemoveAura(uint32 spellId);
+        void RemoveAurasDueToSpell(uint32 spellId);
         void RemoveAuraRank(uint32 spellId);
-
+        void RemoveSpellsCausingAura(uint32 auraType);
+        
         void RemoveAllAuras();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
-        bool SetAurDuration(uint32 spellId,Unit* caster,uint32 duration);
-        uint32 GetAurDuration(uint32 spellId,Unit* caster);
-        Aura* tmpAura;
+        bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
+        uint32 GetAurDuration(uint32 spellId, uint32 effindex);
 
         void castSpell(Spell * pSpell);
         void InterruptSpell();
@@ -288,7 +291,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_immuneToDmg;
         uint32 m_immuneToDispel;
         uint32 m_immuneToStealth;
-        uint32 m_stealth;
         uint32 m_stealthvalue;
         uint32 m_ReflectSpellSchool;
         uint32 m_ReflectSpellPerc;
@@ -313,7 +315,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<Hostil*> GetHostilList() { return m_hostilList; }
         void AddHostil(uint64 guid, float hostility);
         Aura* GetAura(uint32 spellId, uint32 effindex);
-        AuraList const& GetAuras( ) {return m_Auras;}
+        AuraMap const& GetAuras( ) {return m_Auras;}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
         void AddItemEnchant(uint32 enchant_id);
@@ -355,7 +357,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         DeathState m_deathState;
 
-        AuraList m_Auras;
+        AuraMap m_Auras;
 
         std::list<DynamicObject*> m_dynObj;
         std::list<Hostil*> m_hostilList;
