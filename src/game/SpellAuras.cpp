@@ -491,9 +491,9 @@ void HandleHealEvent(void *obj)
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-	if(!m_target || m_target->m_immuneToMechanic == 16)	//Can't heal
-		return;
-	if(apply)
+    if(!m_target || m_target->m_immuneToMechanic == 16)    //Can't heal
+        return;
+    if(apply)
     {
         //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
@@ -797,7 +797,7 @@ void Aura::HandleAuraDamageShield(bool apply)
 void Aura::HandleModStealth(bool apply)
 {
     apply ? m_target->m_stealth = GetId() :  m_target->m_stealth = 0;
-	apply ? m_target->m_stealthvalue = m_target->getLevel()*5;
+    apply ? m_target->m_stealthvalue = m_target->getLevel()*5 : 0;
 }
 
 void Aura::HandleAuraModResistance(bool apply)
@@ -1145,8 +1145,8 @@ void Aura::HandleAuraModShapeshift(bool apply)
     {
         if(m_target->m_ShapeShiftForm)
             m_target->RemoveAura(m_target->m_ShapeShiftForm);
-		m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
-		if(modelid > 0)
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        if(modelid > 0)
         {
             m_target->setShapeShiftForm(modelid);
         }
@@ -1155,11 +1155,11 @@ void Aura::HandleAuraModShapeshift(bool apply)
             m_target->setPowerType(PowerType);
         }
         m_target->m_ShapeShiftForm = m_spellId;
-		m_target->m_form = m_modifier->m_miscvalue;
+        m_target->m_form = m_modifier->m_miscvalue;
         
         if(spellInfo)
         {
-		    Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+            Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
             WPAssert(p_spell);
             SpellCastTargets targets;
             targets.setUnitTarget(m_target);
@@ -1169,8 +1169,8 @@ void Aura::HandleAuraModShapeshift(bool apply)
     else 
     {
         m_target->setShapeShiftForm(m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-		m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
-		if(m_target->getClass() == CLASS_DRUID)
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(0);
         m_target->m_ShapeShiftForm = 0;
         m_target->RemoveAura(spellId);
@@ -1348,8 +1348,8 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-	if(!m_target || m_target->m_immuneToMechanic == 17)	//Can't transform
-		return;
+    if(!m_target || m_target->m_immuneToMechanic == 17)    //Can't transform
+        return;
     if (apply)
     {
         CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);

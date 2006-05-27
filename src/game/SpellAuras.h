@@ -186,15 +186,15 @@ enum MOD_TYPES
     SPELL_AURA_PERSUADED = 146,
     SPELL_AURA_ADD_CREATURE_IMMUNITY = 147,
     SPELL_AURA_RETAIN_COMBO_POINTS = 148,
-    SPELL_AURA_RESIST_PUSHBACK  =   149 ,                   //	Resist Pushback
-    SPELL_AURA_MOD_SHIELD_BLOCK =   150 ,                   //	Mod Shield Block %
-    SPELL_AURA_TRACK_STEALTHED  =   151 ,                   //	Track Stealthed
-    SPELL_AURA_MOD_DETECTED_RANGE   =   152 ,               //	Mod Detected Range
-    SPELL_AURA_SPLIT_DAMAGE_FLAT    =   153 ,               //	Split Damage Flat
-    SPELL_AURA_MOD_STEALTH_LEVEL    =   154 ,               //	Stealth Level Modifier
-    SPELL_AURA_MOD_WATER_BREATHING  =   155 ,               //	Mod Water Breathing
-    SPELL_AURA_MOD_REPUTATION_ADJUST    =   156 ,           //	Mod Reputation Gain
-    SPELL_AURA_PET_DAMAGE_MULTI =   157 ,                   //	Mod Pet Damage
+    SPELL_AURA_RESIST_PUSHBACK  =   149 ,                   //    Resist Pushback
+    SPELL_AURA_MOD_SHIELD_BLOCK =   150 ,                   //    Mod Shield Block %
+    SPELL_AURA_TRACK_STEALTHED  =   151 ,                   //    Track Stealthed
+    SPELL_AURA_MOD_DETECTED_RANGE   =   152 ,               //    Mod Detected Range
+    SPELL_AURA_SPLIT_DAMAGE_FLAT    =   153 ,               //    Split Damage Flat
+    SPELL_AURA_MOD_STEALTH_LEVEL    =   154 ,               //    Stealth Level Modifier
+    SPELL_AURA_MOD_WATER_BREATHING  =   155 ,               //    Mod Water Breathing
+    SPELL_AURA_MOD_REPUTATION_ADJUST    =   156 ,           //    Mod Reputation Gain
+    SPELL_AURA_PET_DAMAGE_MULTI =   157 ,                   //    Mod Pet Damage
 
     TOTAL_AURAS=158
 
