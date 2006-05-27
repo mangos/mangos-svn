@@ -198,8 +198,16 @@ AggressorAI::UpdateAI(const uint32 diff)
 bool
 AggressorAI::IsVisible(Unit *pl) const
 {
+	bool seestealth = true;
+	uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
+	float dist = i_creature.GetDistanceSq(pl);
+	if(pl->m_stealth)
+	{
+		int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
+		seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_immuneToStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);
+	}
                                                             // offset=1.0
-    return pl->isTargetableForAttack() && (i_creature.GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_MONSTER)) ;
+    return pl->isTargetableForAttack() && seestealth && (dist * 1.0 <= sight) ;
 }
 
 void

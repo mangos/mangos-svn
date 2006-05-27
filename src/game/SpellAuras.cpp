@@ -58,7 +58,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
     &Aura::HandleAuraDamageShield,                          //SPELL_AURA_DAMAGE_SHIELD = 15,
     &Aura::HandleModStealth,                                //SPELL_AURA_MOD_STEALTH = 16,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECT = 17,
+    &Aura::HandleModDetect,                                 //SPELL_AURA_MOD_DETECT = 17,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_INVISIBILITY = 18,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
     &Aura::HandleNULL,                                      //missing 20,
@@ -797,7 +797,6 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-	SpellEntry* spellInfo = GetSpellProto();
 	if(apply)
 	{
 		m_target->m_stealth = GetId();
@@ -807,6 +806,18 @@ void Aura::HandleModStealth(bool apply)
 	{
 		m_target->m_stealth = 0;
 		m_target->m_stealthvalue = 0;
+	}
+}
+
+void Aura::HandleModDetect(bool apply)
+{
+	if(apply)
+	{
+		m_target->m_immuneToStealth = CalculateDamage();
+	}
+	else
+	{
+		m_target->m_immuneToStealth = 0;
 	}
 }
 
@@ -1142,7 +1153,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             spellId = 0;
             break;
         case FORM_STEALTH:
-            spellId = 3025;
+            spellId = 0;
             break;
         default:
             sLog.outString("Unknown Shapeshift Type");
