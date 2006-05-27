@@ -6661,7 +6661,7 @@ bool Player::SatisfyQuestRace( Quest *pQuest, bool msg )
         uint32 reqraces = pQuest->GetQuestInfo()->RequiredRaces;
         if ( reqraces == QUEST_RACE_NONE )
             return true;
-        if( (reqraces & getRace()) == 0 )
+        if( (reqraces & getRaceMask()) == 0 )
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_RACE );
