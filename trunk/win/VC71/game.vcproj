@@ -289,6 +289,9 @@
 				RelativePath="..\..\src\game\SpellAuras.cpp">
 			</File>
 			<File
+			        RelativePath="..\..\src\game\SpellAuraDefines.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\SpellAuras.h">
 			</File>
 			<File

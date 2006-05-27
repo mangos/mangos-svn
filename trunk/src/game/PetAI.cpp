@@ -90,7 +90,7 @@ void PetAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_pet.GetGUIDLow());
     }
-    else if( i_pet.getVictim()->m_stealth )
+    else if( i_pet.getVictim()->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_pet.GetGUIDLow());
     }

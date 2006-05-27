@@ -1438,7 +1438,7 @@ bool ChatHandler::HandleUnAuraCommand(const char* args)
         return false;
 
     uint32 spellID = (uint32)atoi(px);
-    m_session->GetPlayer()->RemoveAura(spellID);
+    m_session->GetPlayer()->RemoveAurasDueToSpell(spellID);
 
     return true;
 }

@@ -428,7 +428,7 @@ void Spell::cancel()
     }
     else if(m_spellState == SPELL_STATE_CASTING)
     {
-        m_caster->RemoveAura(m_spellInfo->Id);
+        m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);
     }
 

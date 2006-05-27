@@ -96,7 +96,7 @@ void AggressorAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_creature.GetGUIDLow());
     }
-    else if( i_creature.getVictim()->m_stealth )
+    else if( i_creature.getVictim()->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
     }
@@ -201,7 +201,7 @@ AggressorAI::IsVisible(Unit *pl) const
 	bool seestealth = true;
 	uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
 	float dist = i_creature.GetDistanceSq(pl);
-	if(pl->m_stealth)
+	if(pl->isStealth())
 	{
 		int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
 		seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_immuneToStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);

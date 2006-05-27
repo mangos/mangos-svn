@@ -90,7 +90,7 @@ void GuardAI::_stopAttack()
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_creature.GetGUIDLow());
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
     }
-    else if( i_creature.getVictim()->m_stealth )
+    else if( i_creature.getVictim()->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
         static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);

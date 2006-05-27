@@ -143,7 +143,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                     GetPlayer( )->GetSession()->SendPacket(&data);
                     GetPlayer( )->removeSpell((uint16)respellid);
 
-                    GetPlayer()->RemoveAura(respellid);
+                    GetPlayer()->RemoveAurasDueToSpell(respellid);
                 }
                 GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
             }
