@@ -5096,9 +5096,9 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
 
     if (!error_code)
     {
-        AddItem(dstBag, dstSlot, dstItem, true);
         srcItem->SetCount(srcItem->GetCount() - count);
         srcItem->SendUpdateToPlayer(this);
+        AddItem(dstBag, dstSlot, dstItem, true);
         //_SaveInventory();
         return true;
     }
@@ -6855,6 +6855,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
     uint32 reqitem;
     uint32 reqitemcount;
     uint32 curitemcount;
+    uint32 invitemcount;
     uint32 additemcount;
     for( int16 i = 0; i < 20; i++ )
     {
@@ -6871,9 +6872,13 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                     {
                         reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[j];
                         curitemcount = mQuestStatus[quest].m_itemcount[j];
-                        if ( curitemcount < reqitemcount )
+                        invitemcount = GetItemCount(reqitem,true);
+
+                        // if can growth and real growth
+                        if ( curitemcount < reqitemcount && curitemcount < invitemcount )
                         {
-                            additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
+                            // real growth
+                            additemcount = min(reqitemcount,invitemcount) - curitemcount;
                             mQuestStatus[quest].m_itemcount[j] += additemcount;
                             PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, additemcount );
                         }
