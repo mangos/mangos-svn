@@ -1860,11 +1860,6 @@ void Player::KillPlayer()
     SetFlag( UNIT_FIELD_FLAGS, 0x08 );
 
     SetFlag( UNIT_DYNAMIC_FLAGS, 0x00 );
-
-    if(getRace() == NIGHTELF)
-    {
-        this->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);
-    }
 }
 
 void Player::CreateCorpse()
