@@ -1075,14 +1075,14 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     Player* pl = m_session->GetPlayer();
 
     sLog.outDetail("Command : Additem, itemId = %i, amount = %i", itemId, count);
-    uint32 result = pl->AddNewItem(itemId, count, true);
-    if (!result)
+    uint32 created_count = pl->AddNewItem(itemId, count, true);
+    if (!created_count)
     {
         FillSystemMessageData(&data, m_session, fmtstring("Cannot create item '%i' (amount: %i)", itemId, count));
     }
     else
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Item '%i' created (amount: %i)", itemId, result));
+        FillSystemMessageData(&data, m_session, fmtstring("Item '%i' created (amount: %i)", itemId, created_count));
     }
     m_session->SendPacket(&data);
 

@@ -5440,16 +5440,30 @@ uint32 Player::CanAddItemCount(Item* item, uint32 where)
 // - if addmaxpossible = false, items will be added just if user has enough space to put all the amount (count)
 // search for other slots and count will be limited to max stack
 // - Return value is the amount of items created
-uint8 Player::AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible)
+uint32 Player::AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible)
 {
     if (!itemId)
     {
         sLog.outError("AddNewItem: No itemId provided");
         return 0;
     }
+
     Item *pItem = CreateNewItem(itemId, count);
     if(pItem)
-        return AddItemToInventory(pItem, addmaxpossible);
+    {
+        uint32 count2 = pItem->GetCount();
+        uint8 res =AddItemToInventory(pItem, addmaxpossible);
+
+        // partly added
+        if(res==3)
+            count2 -= pItem->GetCount();
+
+        // stacked
+        if(res==2) 
+            delete pItem;
+
+        return res ? count2 : 0;
+    }
     return 0;
 }
 
