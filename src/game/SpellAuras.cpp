@@ -1169,10 +1169,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         if(m_target->m_ShapeShiftForm)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
 
-        if(m_modifier->m_miscvalue == FORM_STEALTH)
-			m_target->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1E0000 );
-		else
-			m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+		m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
             m_target->setShapeShiftForm(modelid);

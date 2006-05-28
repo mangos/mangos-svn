@@ -219,7 +219,7 @@ void Spell::EffectApplyAura(uint32 i)
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
     //unitTarget->RemoveAuraRank(m_spellInfo->Id);
 
-    if(m_spellInfo->Id == 2457)
+    /*if(m_spellInfo->Id == 2457)
     {
         unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
         return;
@@ -235,7 +235,7 @@ void Spell::EffectApplyAura(uint32 i)
     {
         unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0013EE00 );
         return;
-    }
+    }*/
 
     //int32 duration = GetDuration(m_spellInfo, i);
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
