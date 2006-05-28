@@ -1006,7 +1006,6 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     {
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += ((*i).second->GetModifier()->m_amount + 1);
-        Aur->_AddAura();
     }
     //_ApplyStatsMods();
 

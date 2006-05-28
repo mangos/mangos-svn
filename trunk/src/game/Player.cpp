@@ -177,10 +177,10 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint32 unitfield = 0;
     switch(class_)
     {
-        case WARRIOR: powertype = 1; unitfield = 0x11000000; break;
+        case WARRIOR: powertype = 1; unitfield = 0x1100EE00; break;
         case PALADIN: powertype = 0; unitfield = 0x0000EE00; break;
         case HUNTER: powertype = 0; unitfield = 0x0000EE00; break;
-        case ROGUE: powertype = 3; unitfield = 0x0000EE00; break;
+        case ROGUE: powertype = 3; unitfield = 0x00000000; break;
         case PRIEST: powertype = 0; unitfield = 0x0000EE00; break;
         case SHAMAN: powertype = 0; unitfield = 0x0000EE00; break;
         case MAGE: powertype = 0; unitfield = 0x0000EE00; break;
