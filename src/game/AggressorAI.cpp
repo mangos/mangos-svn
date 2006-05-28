@@ -86,7 +86,6 @@ void AggressorAI::AttackStop(Unit *)
 void AggressorAI::_stopAttack()
 {
     assert( i_creature.getVictim() != NULL );
-    i_creature.AttackStop();
     
     if( !i_creature.isAlive() )
     {
@@ -113,6 +112,7 @@ void AggressorAI::_stopAttack()
     }
     //i_creature.StopMoving();
     //i_creature->Idle();
+    i_creature.AttackStop();
     static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 }
 
