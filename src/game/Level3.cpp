@@ -110,7 +110,7 @@ bool ChatHandler::HandleWorldPortCommand(const char* args)
     if (!px || !py || !pz)
         return false;
 
-    m_session->GetPlayer()->smsg_NewWorld(atoi(pContinent), (float)atof(px), (float)atof(py), (float)atof(pz),0.0f);
+    m_session->GetPlayer()->SendNewWorld(atoi(pContinent), (float)atof(px), (float)atof(py), (float)atof(pz),0.0f);
 
     return true;
 }
@@ -212,7 +212,7 @@ bool ChatHandler::HandleGoCommand(const char* args)
     float z = (float)atof(pz);
     uint32 mapid = (uint32)atoi(pmapid);
 
-    m_session->GetPlayer()->smsg_NewWorld(mapid, x, y, z,0.0f);
+    m_session->GetPlayer()->SendNewWorld(mapid, x, y, z,0.0f);
 
     return true;
 }
