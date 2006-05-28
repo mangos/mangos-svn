@@ -1253,9 +1253,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
     {
         case FORM_CAT:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 1231;
+                modelid = 892;
             else if(m_target->getRace() == RACE_TAUREN)
-                modelid = 1232;
+                modelid = 8571;
             PowerType = 3;
             spellId = 3025;
             break;
@@ -1264,23 +1264,23 @@ void Aura::HandleAuraModShapeshift(bool apply)
             break;
         case FORM_TRAVEL:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 1231;
+                modelid = 892;
             else if(m_target->getRace() == RACE_TAUREN)
-                modelid = 1232;
+                modelid = 8571;
             spellId = 5419;
             break;
         case FORM_AQUA:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 223;
+                modelid = 2428;
             else if(m_target->getRace() == RACE_TAUREN)
-                modelid = 224;
+                modelid = 2428;
             spellId = 5421;
             break;
         case FORM_BEAR:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 213;
+                modelid = 2281;
             else if(m_target->getRace() == RACE_TAUREN)
-                modelid = 214;
+                modelid = 2289;
             PowerType = 1;
             spellId = 1178;
             break;
@@ -1288,20 +1288,24 @@ void Aura::HandleAuraModShapeshift(bool apply)
             spellId = 0;
             break;
         case FORM_GHOUL:
+            if(m_target->getRace() == RACE_NIGHT_ELF)
+                modelid = 10045;
             spellId = 0;
             break;
         case FORM_DIREBEAR:
             if(m_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 2199;
+                modelid = 15374;
             else if(m_target->getRace() == RACE_TAUREN)
-                modelid = 2200;
+                modelid = 15375;
             PowerType = 1;
             spellId = 9635;
             break;
         case FORM_CREATUREBEAR:
+            modelid = 902;
             spellId = 2882;
             break;
         case FORM_GHOSTWOLF:
+            modelid = 1236;
             spellId = 0;
             break;
         case FORM_BATTLESTANCE:
@@ -1334,7 +1338,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
 		m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
-            m_target->setShapeShiftForm(modelid);
+            m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
         }
         if(PowerType > 0)
         {
@@ -1354,7 +1358,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
     else 
     {
-        m_target->setShapeShiftForm(m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+        m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(0);

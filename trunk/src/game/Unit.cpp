@@ -1056,20 +1056,6 @@ void Unit::RemoveAura(AuraMap::iterator &i)
     //_ApplyStatsMods();
 }
 
-void Unit::RemoveAuraRank(uint32 spellId)
-{
-    SpellEntry *i_spellInfo;
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
-    for(AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();  ++i)
-    {
-        i_spellInfo =(*i).second->GetSpellProto();
-        uint8 j=(*i).second->GetEffIndex();
-        for(uint8 k=0;k<3;k++)
-        if (i_spellInfo->EffectApplyAuraName[j] == spellInfo->EffectApplyAuraName[k] )
-            RemoveAura(i);
-    }
-}
-
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
 {
     AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
@@ -1475,12 +1461,6 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingT
     SendMessageToSet( &data, true );
 }
 
-
-void Unit::setShapeShiftForm(uint32 modelid)
-{
-    SetUInt32Value(GetUInt32Value(UNIT_FIELD_DISPLAYID),modelid);
-}
-
 void Unit::setPowerType(uint8 PowerType)
 {
     uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
@@ -1494,7 +1474,7 @@ void Unit::setPowerType(uint8 PowerType)
     if(new_powertype == 1)
     {
         SetUInt32Value(UNIT_FIELD_MAXPOWER2,1000);
-        SetUInt32Value(UNIT_FIELD_POWER2,1);
+        SetUInt32Value(UNIT_FIELD_POWER2,0);
     }
 }
 
