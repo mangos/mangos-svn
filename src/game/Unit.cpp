@@ -880,12 +880,15 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-    // update aura (may set some pointer in iterators to NULL
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
     {
-        (*i).second->Update( time );
-        if ( !(*i).second->GetAuraDuration() && !(*i).second->IsPermanent() ) {
-            RemoveAura(i);
+        if ((*i).second) {
+            (*i).second->Update( time );
+            if ( !(*i).second->GetAuraDuration() && !(*i).second->IsPermanent() ) {
+                RemoveAura(i);
+            } else {
+                ++i;
+            }
         } else {
             ++i;
         }
@@ -1092,7 +1095,8 @@ void Unit::RemoveAllAuras()
     //_RemoveStatsMods();
 
     while (!m_Auras.empty()) {
-        RemoveAura(m_Auras.begin()); 
+        AuraMap::iterator iter = m_Auras.begin();
+        RemoveAura(iter); 
     }
 
     //_ApplyStatsMods();
