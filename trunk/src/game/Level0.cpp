@@ -127,7 +127,7 @@ bool ChatHandler::HandleStartCommand(const char* args)
         m_session->GetPlayer()->getRace(), m_session->GetPlayer()->getClass());
     ASSERT(info);
 
-    m_session->GetPlayer()->smsg_NewWorld(info->mapId, info->positionX, info->positionY,info->positionZ,0.0f);
+    m_session->GetPlayer()->SendNewWorld(info->mapId, info->positionX, info->positionY,info->positionZ,0.0f);
 
     return true;
 }

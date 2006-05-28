@@ -317,7 +317,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void smsg_NewWorld(uint32 mapid, float x, float y, float z, float orientation);
+        void SendNewWorld(uint32 mapid, float x, float y, float z, float orientation);
 
         bool Create ( uint32 guidlow, WorldPacket &data );
 
@@ -467,7 +467,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
 
         bool HasSpell(uint32 spell);
-        void smsg_InitialSpells();
+        void SendInitialSpells();
         void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
@@ -518,8 +518,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         inline std::list<struct actions> getActionList() { return m_actions; };
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
         void removeAction(uint8 button);
-        void smsg_InitialActions();
-
+        void SendInitialActions();
+        
         void SetInvited() { m_isInvited = true; }
         void SetInGroup() { m_isInGroup = true; }
         void SetLeader(const uint64 &guid) { m_groupLeader = guid; }

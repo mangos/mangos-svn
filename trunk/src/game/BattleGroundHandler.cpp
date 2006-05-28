@@ -261,7 +261,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
             //Map* Map = MapManager::Instance().GetMap(GetPlayer()->GetInstanceMapId());
             Map* Map = MapManager::Instance().GetMap(MapID);
             float posz = Map->GetHeight(1021.24,1418.05);
-            GetPlayer()->smsg_NewWorld(MapID, 1021.24, 1418.05,posz+0.5,0.0);
+            GetPlayer()->SendNewWorld(MapID, 1021.24, 1418.05,posz+0.5,0.0);
 
             SendBattleFieldStatus(GetPlayer(),MapID, Instance, 3, 0);
             //GetPlayer()->SendInitWorldStates(MapID);
@@ -310,7 +310,7 @@ void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket &recv_data )
     /* Send Back to old xyz
     Map* Map = MapManager::Instance().GetMap(GetPlayer()->GetInstanceMapId());
     float posz = Map->GetHeight(1021.24,1418.05);
-    GetPlayer()->smsg_NewWorld(MapID, 1021.24, 1418.05,posz+0.5,0.0);
+    GetPlayer()->SendNewWorld(MapID, 1021.24, 1418.05,posz+0.5,0.0);
     */
 
 }

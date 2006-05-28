@@ -238,8 +238,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void DeMorph();
 
-        void smsg_AttackStop(uint64 victimGuid);
-
+        void SendAttackStop(uint64 victimGuid);
         void SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked);
 

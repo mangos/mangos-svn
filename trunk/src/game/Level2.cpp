@@ -173,7 +173,7 @@ bool ChatHandler::HandleNYICommand(const char* args)
 
 bool ChatHandler::HandleProgCommand(const char* args)
 {
-    m_session->GetPlayer()->smsg_NewWorld(451, 16391.80f, 16341.20f, 69.44f,0.0f);
+    m_session->GetPlayer()->SendNewWorld(451, 16391.80f, 16341.20f, 69.44f,0.0f);
 
     return true;
 }

@@ -354,7 +354,7 @@ enum EUnitFields
     PLAYER_FIELD_VENDORBUYBACK_SLOT_1         = 0x1B6 + UNIT_END,
 
     PLAYER_FARSIGHT                           = 0x1CE + UNIT_END,
-    PLAYER_FIELD_COMBO_TARGET                = 0x1D0 + UNIT_END,
+    PLAYER_FIELD_COMBO_TARGET                 = 0x1D0 + UNIT_END,
     PLAYER_XP                                 = 0x1D2 + UNIT_END,
     PLAYER_NEXT_LEVEL_XP                      = 0x1D3 + UNIT_END,
     PLAYER_SKILL_INFO_START                   = 0x1D4 + UNIT_END,

@@ -133,7 +133,7 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     {
         // Needs vars added to player class and I'm too lazy to rebuild..
 
-        plr->smsg_NewWorld(plr->m_bgEntryPointMap, plr->m_bgEntryPointX, plr->m_bgEntryPointY, plr->m_bgEntryPointZ, plr->m_bgEntryPointO);
+        plr->SendNewWorld(plr->m_bgEntryPointMap, plr->m_bgEntryPointX, plr->m_bgEntryPointY, plr->m_bgEntryPointZ, plr->m_bgEntryPointO);
     }
 
     if(SendPacket)

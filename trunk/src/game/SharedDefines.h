@@ -56,6 +56,7 @@
 #define POWER_ENERGY                        3
 #define POWER_HAPPINESS                     4
 
+#define SPELL_SCHOOL_NORMAL                 0
 #define SPELL_SCHOOL_HOLY                   1
 #define SPELL_SCHOOL_FIRE                   2
 #define SPELL_SCHOOL_NATURE                 3
