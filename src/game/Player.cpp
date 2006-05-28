@@ -6875,7 +6875,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                         {
                             additemcount = (curitemcount + count <= reqitemcount ? count: reqitemcount - curitemcount);
                             mQuestStatus[quest].m_itemcount[j] += additemcount;
-                            PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, mQuestStatus[quest].m_itemcount[j] );
+                            PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, additemcount );
                         }
                         if ( CanCompleteQuest( pQuest ) )
                             CompleteQuest( pQuest );
