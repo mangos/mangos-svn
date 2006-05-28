@@ -77,9 +77,9 @@ class MANGOS_DLL_SPEC WorldSession
         bool Update(uint32 diff);
 
         void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
-
-        void SendCreatureQuery( uint32 entry, uint64 guid );
+        
         void SendProficiency (uint8 pr1, uint8 pr2=0, uint8 pr3=0, uint8 pr4=0, uint8 pr5=0);
+        void SendCreatureQuery( uint32 entry, uint64 guid );
         void SendTrainerList( uint64 guid );
         void SendTrainerList( uint64 guid,std::string strTitle );
         void SendListInventory( uint64 guid );
@@ -89,6 +89,9 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiStatus( uint64 guid );
         void SendSpiritRessurect();
         void SendBindPoint();
+
+        //Item Enchantement
+        void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
 
     protected:
 

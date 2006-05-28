@@ -276,7 +276,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         victimGuid = pVictim->GetGUID();
 
         DEBUG_LOG("DealDamageAttackStop");
-        pVictim->smsg_AttackStop(attackerGuid);
+        pVictim->SendAttackStop(attackerGuid);
 
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
@@ -310,7 +310,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 if(pet && pet->isPet())
                 {
                     pet->setDeathState(JUST_DIED);
-                    pet->smsg_AttackStop(attackerGuid);
+                    pet->SendAttackStop(attackerGuid);
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
@@ -399,7 +399,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         else
         {
             DEBUG_LOG("DealDamageIsCreature");
-            smsg_AttackStop(victimGuid);
+            SendAttackStop(victimGuid);
             addUnitState(UNIT_STAT_DIED);
         }
         AttackStop();
@@ -738,7 +738,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
 
     if (pVictim->isDead())
     {
-        smsg_AttackStop(pVictim->GetGUID());
+        SendAttackStop(pVictim->GetGUID());
         return;
     }
 
@@ -831,7 +831,7 @@ uint32 Unit::CalculateDamage(bool ranged)
     return (uint32)dmg;
 }
 
-void Unit::smsg_AttackStop(uint64 victimGuid)
+void Unit::SendAttackStop(uint64 victimGuid)
 {
     WorldPacket data;
     data.Initialize( SMSG_ATTACKSTOP );

@@ -808,6 +808,8 @@ enum OpCodes
     SMSG_MINIGAME_MOVE_FAILED                       = 763-2,
     CMSG_GUILD_CHANGEINFO                           = 764-2,
 
+    //griphon related = 786
+
     CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
 };

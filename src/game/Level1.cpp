@@ -117,7 +117,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         FillSystemMessageData(&data, m_session, buf0);
         chr->GetSession()->SendPacket( &data );
 
-        chr->smsg_NewWorld(m_session->GetPlayer()->GetMapId(),
+        chr->SendNewWorld(m_session->GetPlayer()->GetMapId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
             m_session->GetPlayer()->GetPositionZ()
@@ -162,7 +162,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
         chr->GetSession()->SendPacket(&data);
 
-        m_session->GetPlayer()->smsg_NewWorld(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),0.0f);
+        m_session->GetPlayer()->SendNewWorld(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),0.0f);
     }
     else
     {
@@ -181,25 +181,25 @@ bool ChatHandler::HandleRecallCommand(const char* args)
         return false;
 
     if (strncmp((char*)args,"sunr",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(1, -180.949f, -296.467f, 11.5384f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(1, -180.949f, -296.467f, 11.5384f,0.0f);
     else if (strncmp((char*)args,"thun",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(1, -1196.22f, 29.0941f, 176.949f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(1, -1196.22f, 29.0941f, 176.949f,0.0f);
     else if (strncmp((char*)args,"cross",6)==0)
-        m_session->GetPlayer()->smsg_NewWorld(1, -443.128f, -2598.87f, 96.2114f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(1, -443.128f, -2598.87f, 96.2114f,0.0f);
     else if (strncmp((char*)args,"ogri",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(1, 1676.21f, -4315.29f, 61.5293f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(1, 1676.21f, -4315.29f, 61.5293f,0.0f);
     else if (strncmp((char*)args,"neth",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(0, -10996.9f, -3427.67f, 61.996f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(0, -10996.9f, -3427.67f, 61.996f,0.0f);
     else if (strncmp((char*)args,"thel",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(0, -5395.57f, -3015.79f, 327.58f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(0, -5395.57f, -3015.79f, 327.58f,0.0f);
     else if (strncmp((char*)args,"storm",6)==0)
-        m_session->GetPlayer()->smsg_NewWorld(0, -8913.23f, 554.633f, 93.7944f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(0, -8913.23f, 554.633f, 93.7944f,0.0f);
     else if (strncmp((char*)args,"iron",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(0, -4981.25f, -881.542f, 501.66f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(0, -4981.25f, -881.542f, 501.66f,0.0f);
     else if (strncmp((char*)args,"under",6)==0)
-        m_session->GetPlayer()->smsg_NewWorld(0, 1586.48f, 239.562f, -52.149f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(0, 1586.48f, 239.562f, -52.149f,0.0f);
     else if (strncmp((char*)args,"darr",5)==0)
-        m_session->GetPlayer()->smsg_NewWorld(1, 10037.6f, 2496.8f, 1318.4f,0.0f);
+        m_session->GetPlayer()->SendNewWorld(1, 10037.6f, 2496.8f, 1318.4f,0.0f);
     else
         return false;
 

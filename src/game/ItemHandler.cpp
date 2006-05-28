@@ -940,3 +940,15 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     }
     //_player->_SaveInventory();
 }
+
+void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ENCHANTMENTLOG);
+    data << Target;
+    data << Caster;
+    data << ItemID;
+    data << SpellID;
+    data << uint8(0);
+    SendPacket(&data);
+}

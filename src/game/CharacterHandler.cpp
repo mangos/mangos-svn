@@ -35,14 +35,6 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-    /*// uknown opcode ?
-    WorldPacket packet;
-    packet.Initialize(SMSG_AUTH_RESPONSE2_UNKNOWN180);
-    packet << uint8(10);
-    for (int i=0; i<10; i++)
-    packet << uint8(0x02) << uint8(0x01) << uint16(0) << uint32(0);
-    SendPacket(&packet);*/
-
     data.Initialize(SMSG_CHAR_ENUM);
 
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu';", (unsigned long)GetAccountId());
@@ -372,9 +364,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             break;
     }
 
-    GetPlayer()->smsg_InitialSpells();
+    GetPlayer()->SendInitialSpells();
 
-    GetPlayer()->smsg_InitialActions();
+    GetPlayer()->SendInitialActions();
+
 
     /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
     {

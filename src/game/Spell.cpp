@@ -1061,7 +1061,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         }
     }
 
-    ((Player*)Target)->smsg_NewWorld(TC->mapId,TC->x,TC->y,TC->z,0.0f);
+    ((Player*)Target)->SendNewWorld(TC->mapId,TC->x,TC->y,TC->z,0.0f);
 
 }
 

@@ -50,7 +50,7 @@ void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint64 guid = GetPlayer()->GetSelection();
 
-    GetPlayer()->smsg_AttackStop(guid);
+    GetPlayer()->SendAttackStop(guid);
     GetPlayer()->AttackStop();
 }
 

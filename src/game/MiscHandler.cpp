@@ -1031,7 +1031,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
         else
         {
-            GetPlayer()->smsg_NewWorld(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
+            GetPlayer()->SendNewWorld(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
         }
         delete at;
     }

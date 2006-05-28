@@ -405,12 +405,12 @@ void Player::StartMirrorTimer(uint8 Type, uint32 MaxValue)
     data << BreathRegen;
     data << (uint32)0;
     data << (uint8)0;
-    m_session->SendPacket(&data);
+    GetSession()->SendPacket(&data);
 }
 
 void Player::ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen)
 {
-    //TYPE: 0 = fartigua 1 = breath 2 = fire
+    //TYPE: 0 = fatigue 1 = breath 2 = fire
     WorldPacket data;
     data.Initialize(SMSG_START_MIRROR_TIMER);
     data << (uint32)Type;
@@ -552,15 +552,14 @@ void Player::HandleSobering()
     {
         m_drunk -= (0xFFFF / 30);
     }
-    m_session->GetPlayer()->SetUInt32Value(PLAYER_BYTES_3,
-        (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+    SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
 }
 
 void Player::SetDrunkValue(uint16 newDrunkValue)
 {
     m_drunk = newDrunkValue;
-    m_session->GetPlayer()->SetUInt32Value(PLAYER_BYTES_3,
-        (m_session->GetPlayer()->GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
+    SetUInt32Value(PLAYER_BYTES_3,
+        (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0000) | m_drunk);
 }
 
 void Player::Update( uint32 p_time )
@@ -779,7 +778,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
 
 }
 
-void Player::smsg_NewWorld(uint32 mapid, float x, float y, float z, float orientation)
+void Player::SendNewWorld(uint32 mapid, float x, float y, float z, float orientation)
 {
     MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
@@ -1198,7 +1197,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
 
 }
 
-void Player::smsg_InitialSpells()
+void Player::SendInitialSpells()
 {
     WorldPacket data;
     uint16 spellCount = m_spells.size();
@@ -1362,7 +1361,7 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
                     data << uint8(op);
                     data << uint16(val);
                     data << uint16(mark);
-                    m_session->SendPacket(&data);
+                    GetSession()->SendPacket(&data);
                 }
                 shiftdata=shiftdata<<1;
             }
@@ -1379,7 +1378,7 @@ void Player::learnSpell(uint16 spell_id)
     WorldPacket data;
     data.Initialize(SMSG_LEARNED_SPELL);
     data <<uint32(spell_id);
-    m_session->SendPacket(&data);
+    GetSession()->SendPacket(&data);
 
     addSpell(spell_id);
 
@@ -1739,6 +1738,7 @@ void Player::SetPlayerSpeed(uint8 SpeedType, float value, bool forced)
 
 void Player::BuildPlayerRepop()
 {
+
     WorldPacket data;
 
     SetUInt32Value( UNIT_FIELD_HEALTH, 1 );
@@ -1791,7 +1791,6 @@ void Player::BuildPlayerRepop()
 
     SetUInt32Value(UNIT_FIELD_FLAGS, 0x08);
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
-
     SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
 
     SetUInt32Value(UNIT_FIELD_AURAFLAGS + 4, 0xEE);
@@ -1811,7 +1810,6 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 {
     WorldPacket data;
     data.Initialize( SMSG_QUERY_TIME_RESPONSE );
-    //data << (uint32)ml_seconds;
     data << (uint32)getMSTime();
     GetSession()->SendPacket( &data );
 }
@@ -2028,7 +2026,7 @@ void Player::RepopAtGraveyard()
         //SaveToDB();
 
         // teleport far
-        //smsg_NewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
+        //SendNewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
 
     }
 
@@ -2272,7 +2270,7 @@ uint16 Player::GetSkillValue(uint32 skill)
     return 0;
 }
 
-void Player::smsg_InitialActions()
+void Player::SendInitialActions()
 {
     sLog.outString( "Initializing Action Buttons for '%u'", GetGUIDLow() );
     WorldPacket data;
@@ -2395,7 +2393,7 @@ void Player::SendMessageToSet(WorldPacket *data, bool self)
 
 void Player::SendDirectMessage(WorldPacket *data)
 {
-    m_session->SendPacket(data);
+    GetSession()->SendPacket(data);
 }
 
 void Player::CheckExploreSystem()
@@ -2426,7 +2424,7 @@ void Player::CheckExploreSystem()
             data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
             data << area;
             data << XP;
-            m_session->SendPacket(&data);
+            GetSession()->SendPacket(&data);            
 
             sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), area);
         }
@@ -5118,7 +5116,7 @@ bool Player::SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot,
         data << uint64((srcItem ? srcItem->GetGUID(): 0));
         data << uint64((dstItem ? dstItem->GetGUID(): 0));
         data << uint8(0);
-        m_session->SendPacket(&data);
+        GetSession()->SendPacket(&data);
         return false;
     }
 }
@@ -5203,7 +5201,7 @@ bool Player::SwapItem(uint8 dstBag, uint8 dstSlot, uint8 srcBag, uint8 srcSlot)
         data << uint64((srcItem ? srcItem->GetGUID(): 0));
         data << uint64((dstItem ? dstItem->GetGUID(): 0));
         data << uint8(0);
-        m_session->SendPacket(&data);
+        GetSession()->SendPacket(&data);
         return false;
     }
 }
@@ -6548,7 +6546,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
 
             sdata.Initialize (SMSG_LEARNED_SPELL);
             sdata << pQuest->GetQuestInfo()->RewSpell;
-            m_session->SendPacket( &sdata );
+            GetSession()->SendPacket( &sdata );
             addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell );
         }
 
