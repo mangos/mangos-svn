@@ -1004,8 +1004,9 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     else
     {
+        Aur->_AddAura();
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
-        m_AuraModifiers[Aur->GetModifier()->m_auraname] += ((*i).second->GetModifier()->m_amount + 1);
+        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount + 1);
     }
     //_ApplyStatsMods();
 

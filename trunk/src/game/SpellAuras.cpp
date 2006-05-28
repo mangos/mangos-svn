@@ -353,15 +353,14 @@ void Aura::_AddAura()
     Aura* aura = NULL;
     for(i = 0; i< 3; i++)
     {
-        if(i != m_effIndex)
-            continue;
         aura = m_target->GetAura(m_spellId, i);
         if(aura)
         {
-            slot = aura->GetAuraSlot();
-            SetAuraSlot( slot );
             samespell = true;
-            maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
+            if(i == m_effIndex) {
+                slot = aura->GetAuraSlot();
+                maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
+            }
         }
     }
     if(m_duration <= maxduration && slot != 0xFF)
