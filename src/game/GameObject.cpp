@@ -98,7 +98,6 @@ void GameObject::Update(uint32 p_time)
                 }
                 else
                 {
-					Delete();
 					m_respawnTimer = 0;
                 }
             }
