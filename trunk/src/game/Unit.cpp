@@ -912,6 +912,23 @@ void Unit::_UpdateSpells( uint32 time )
                 dnext = m_dynObj.begin();
         }
     }
+    if(m_gameObj.empty())
+        return;
+    std::list<GameObject*>::iterator ite1, dnext1;
+    for (ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
+    {
+        dnext1 = ite1;
+        dnext1++;
+        //(*i)->Update( difftime );
+        if( (*ite1)->isFinished() )
+        {
+            m_gameObj.erase(ite1);
+            if(m_gameObj.empty())
+                break;
+            else
+                dnext1 = m_gameObj.begin();
+        }
+    }
 }
 
 void Unit::_UpdateHostil( uint32 time )
@@ -1389,7 +1406,6 @@ void Unit::AddDynObject(DynamicObject* dynObj)
 {
     m_dynObj.push_back(dynObj);
 }
-
 void Unit::RemoveDynObject(uint32 spellid)
 {
     if(m_dynObj.empty())
@@ -1410,6 +1426,33 @@ void Unit::RemoveDynObject(uint32 spellid)
         }
     }
 }
+
+void Unit::AddGameObject(GameObject* gameObj)
+{
+    m_gameObj.push_back(gameObj);
+}
+
+void Unit::RemoveGameObject(uint32 spellid)
+{
+    if(m_gameObj.empty())
+        return;
+    std::list<GameObject*>::iterator i, next;
+    for (i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
+    {
+        next = i;
+        next++;
+        if(spellid == 0 || (*i)->GetSpellId() == spellid)
+        {
+            (*i)->Delete();
+            m_gameObj.erase(i);
+            if(m_gameObj.empty())
+                break;
+            else
+                next = m_gameObj.begin();
+        }
+    }
+}
+
 
 void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked)
 {

@@ -434,6 +434,7 @@ void Spell::cancel()
 
     finish();
     m_caster->RemoveDynObject(m_spellInfo->Id);
+    m_caster->RemoveGameObject(m_spellInfo->Id);
 }
 
 void Spell::cast()
@@ -578,7 +579,7 @@ void Spell::finish()
         MapManager::Instance().GetMap((*i)->GetMapId())->Remove((*i), true);
         m_AreaAura = false;
     }
-    m_dynObjToDel.clear();*/
+    m_dynObjToDel.clear();
 
     std::list<GameObject*>::iterator k;
     for(k = m_ObjToDel.begin() ; k != m_ObjToDel.end() ; k++)
@@ -593,7 +594,7 @@ void Spell::finish()
         MapManager::Instance().GetMap((*k)->GetMapId())->Remove((*k), true);
     }
 
-    m_ObjToDel.clear();
+    m_ObjToDel.clear();*/
 
     uint8 powerType = m_caster->getPowerType();
     if(m_TriggerSpell)

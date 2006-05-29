@@ -459,7 +459,7 @@ class Spell
 
         // List of all Objects to be Deleted in spell Finish
         //std::list<DynamicObject*> m_dynObjToDel;
-        std::list<GameObject*> m_ObjToDel;
+        //std::list<GameObject*> m_ObjToDel;
         // -------------------------------------------
         uint8 up_skillvalue;
 };
