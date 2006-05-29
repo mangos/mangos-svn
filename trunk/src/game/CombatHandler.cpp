@@ -38,7 +38,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     if(pEnemy)
     {
         _player->Attack(pEnemy);
-        _player->smsg_AttackStart(pEnemy);
+        _player->SendAttackStart(pEnemy);
         return;
     }
 

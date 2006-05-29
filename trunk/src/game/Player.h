@@ -331,6 +331,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void Die();
         void GiveXP(uint32 xp, const uint64 &guid);
+        
         void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
@@ -623,8 +624,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void DestroyForPlayer( Player *target ) const;
         void SendDelayResponse(const uint32);
+        void SendLogXPGain(uint64 GUID,uint32 GivenXP,bool Type, bool Rested);
 
-        void smsg_AttackStart(Unit* pVictim);
+        void SendAttackStart(Unit* pVictim);
+
+
+        //Low Level Packets
+        void PlaySound(uint32 Sound, bool OnlySelf);
+            //notifiers
+        void SendAttackSwingCantAttack();
+        void SendAttackSwingCancelAttack();
+        void SendAttackSwingDeadTarget();
+        void SendAttackSwingNotStanding();
+        void SendAttackSwingNotInRange();
+        void SendAttackSwingBadFacingAttack();
+
+
 
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
         void SendMessageToSet(WorldPacket *data, bool self);
