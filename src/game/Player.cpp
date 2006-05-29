@@ -624,16 +624,14 @@ void Player::Update( uint32 p_time )
                 if( GetDistanceSq(pVictim) > pldistance )
                 {
                     setAttackTimer(uint32(1000));
-                    data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
-                    GetSession()->SendPacket(&data);
+                    SendAttackSwingNotInRange();
                 }
                 //120 degreas of radiant range
                 //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
                 else if( !IsInArc( 2.0943951024, pVictim ))
                 {
                     setAttackTimer(uint32(1000));
-                    data.Initialize(SMSG_ATTACKSWING_BADFACING);
-                    GetSession()->SendPacket(&data);
+                    SendAttackSwingBadFacingAttack();
                 }
                 else
                 {
@@ -980,24 +978,28 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     }
 }
 
+inline void Player::SendLogXPGain(uint64 GUID,uint32 GivenXP,bool Type, bool Rested)
+{
+    WorldPacket data;
+    data.Initialize( SMSG_LOG_XPGAIN );
+    data << GUID;
+    data << GivenXP;                                 // given experience
+    data << (uint8)Type;                                    // 00-kill_xp type, 01-non_kill_xp type
+    if (Rested)
+        data << GivenXP;                             // rested given experience
+    else
+        data << (GivenXP/2);                         // unrested given experience
+            
+    data << float(1);                                //still a unknown static
+    GetSession()->SendPacket(&data);
+}
 void Player::GiveXP(uint32 xp, const uint64 &guid)
 {
     if ( xp < 1 )
         return;
 
-    WorldPacket data;
     if (guid != 0)
-    {
-        data.Initialize( SMSG_LOG_XPGAIN );
-        data << guid;
-        data << uint32(xp);                                 // given experience
-        data << uint8(0);                                   // 00-kill_xp type, 01-non_kill_xp type
-        uint32 xpunrested = xp/2;
-        data << uint32(xpunrested);                         // unrested given experience
-                                                            // unknown (static.. it was same at 4 different killed creatures!)
-        data << uint8(0) << uint8(0) << uint8(0x80) << uint8(0x3f);
-        GetSession()->SendPacket(&data);
-    }
+        SendLogXPGain(guid,xp,0,false);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -1080,6 +1082,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         //_ApplyStatsMods();
 
+        WorldPacket data;
         data.Initialize(SMSG_LEVELUP_INFO);
         data << uint32(level);
         data << uint32(HPGain);
@@ -2899,7 +2902,7 @@ uint32 urand(uint32 min, uint32 max)
     return result;
 }
 
-void Player::smsg_AttackStart(Unit* pVictim)
+void Player::SendAttackStart(Unit* pVictim)
 {
     WorldPacket data;
 
@@ -2913,6 +2916,7 @@ void Player::smsg_AttackStart(Unit* pVictim)
     data.Initialize( SMSG_ATTACKSTART );
     data << GetGUID();
     data << pVictim->GetGUID();
+
     SendMessageToSet(&data, true);
     DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
 }
@@ -7740,4 +7744,63 @@ void Player::_SaveTutorials()
 {
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
     sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+}
+
+
+
+/*********************************************************/
+/***              LOW LEVEL FUNCTIONS:Notifiers        ***/
+/*********************************************************/
+
+inline void Player::SendAttackSwingNotInRange()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_NOTINRANGE);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingNotStanding()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_NOTSTANDING);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingDeadTarget()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_DEADTARGET);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingCantAttack()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_CANT_ATTACK);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingCancelAttack()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_CANCEL_COMBAT);
+    GetSession()->SendPacket( &data );
+}
+
+inline void Player::SendAttackSwingBadFacingAttack()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_ATTACKSWING_BADFACING);
+    GetSession()->SendPacket( &data );
+}
+
+void Player::PlaySound(uint32 Sound, bool OnlySelf)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_PLAY_SOUND);
+    data << Sound;
+    if (OnlySelf)
+        GetSession()->SendPacket( &data );
+    else
+        SendMessageToSet( &data, true );
 }

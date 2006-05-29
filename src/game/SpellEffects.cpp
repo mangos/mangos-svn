@@ -1783,7 +1783,7 @@ void Spell::EffectCharge(uint32 i)
     m_caster->SendMoveToPacket(x, y, z, true);
     m_caster->Attack(unitTarget);
     m_caster->SetSpeed(oldspeed);
-    //m_caster->smsg_AttackStart(pEnemy);
+    //m_caster->SendAttackStart(pEnemy);
 }
 
 void Spell::EffectTransmitted(uint32 i)
