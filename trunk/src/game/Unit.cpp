@@ -922,6 +922,7 @@ void Unit::_UpdateSpells( uint32 time )
         //(*i)->Update( difftime );
         if( (*ite1)->isFinished() )
         {
+            (*ite1)->Delete();
             m_gameObj.erase(ite1);
             if(m_gameObj.empty())
                 break;
