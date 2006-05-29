@@ -1196,6 +1196,7 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, ((Player*)m_caster)->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
+	pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
 
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
@@ -1668,6 +1669,7 @@ void Spell::EffectSummonObject(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
+	pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
 
     sLog.outError("AddObject at Spell.cpp 1100");
 
@@ -1810,6 +1812,7 @@ void Spell::EffectTransmitted(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, goInfo->type);
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS, goInfo->flags);
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, goInfo->faction);
+	pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");
     m_ObjToDel.push_back(pGameObj);
