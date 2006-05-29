@@ -98,13 +98,8 @@ void GameObject::Update(uint32 p_time)
                 }
                 else
                 {
-                    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-                    data << GetGUID();
-                    SendMessageToSet(&data, true);
-                    SetUInt32Value(GAMEOBJECT_STATE, 1);
-                    SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
-                    //TODO: set timestamp
-                    m_respawnTimer = 0;
+					Delete();
+					m_respawnTimer = 0;
                 }
             }
             break;
@@ -118,6 +113,22 @@ void GameObject::Update(uint32 p_time)
             m_respawnTimer = m_respawnDelayTimer;
             break;
     }
+}
+
+void GameObject::Delete()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
+    data << GetGUID();
+	SendMessageToSet(&data, true);
+	SetUInt32Value(GAMEOBJECT_STATE, 1);
+	SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
+	data.Initialize(SMSG_DESTROY_OBJECT);
+	data << GetGUID();
+	SendMessageToSet(&data,true);
+	//TODO: set timestamp
+	RemoveFromWorld();
+	MapManager::Instance().GetMap(GetMapId())->Remove(this, true);
 }
 
 void GameObject::generateLoot()
