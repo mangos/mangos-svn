@@ -86,9 +86,14 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     }
 
     WorldPacket data;
-    LootItem &item = loot->items[lootSlot];
+	LootItem *item = NULL;
+	if (loot->items.size() > lootSlot) {
+		item = &(loot->items[lootSlot]);
+		if (item->is_looted)
+			item = NULL;
+	}
 
-    if (item.is_looted)
+    if (item == NULL)
     {
         data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
         data << uint8(EQUIP_ERR_ALREADY_LOOTED);
@@ -99,9 +104,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (player->AddNewItem(item.itemid, 1, false))
+    if (player->AddNewItem(item->itemid, 1, false))
     {
-        item.is_looted = true;
+        item->is_looted = true;
 
         data.Initialize( SMSG_LOOT_REMOVED );
         data << uint8(lootSlot);
@@ -115,7 +120,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint8(0x00);
         data << uint8(0x00);
         data << uint8(0xFF);
-        data << uint32(item.itemid);
+        data << uint32(item->itemid);
         data << uint64(0);
 
         /*data << uint8(0x00);
