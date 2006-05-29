@@ -185,7 +185,6 @@ void Spell::EffectSchoolDMG(uint32 i)
     if(!unitTarget) return;
     if(!unitTarget->isAlive()) return;
 
-	uint32 damage = CalculateDamage(i);
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
 }
 
@@ -1016,14 +1015,14 @@ void Spell::EffectWeaponDmg(uint32 i)
             chanceToHit = 15.0f;
     }
 
-    float damage;
+    float fdamage;
     if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
     {
-        damage = m_caster->CalculateDamage(false);
+        fdamage = m_caster->CalculateDamage(false);
     }
     else
     {
-        damage = m_caster->CalculateDamage(true);
+        fdamage = m_caster->CalculateDamage(true);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             uint8 slot=EQUIPMENT_SLOT_RANGED;
@@ -1055,14 +1054,14 @@ void Spell::EffectWeaponDmg(uint32 i)
         if(m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
         {
             if (attackerSkill < victimSkill - 20)
-                damage = (damage * 30) / 100;
+                fdamage = (fdamage * 30) / 100;
             else if (attackerSkill < victimSkill - 10)
-                damage = (damage * 60) / 100;
+                fdamage = (fdamage * 60) / 100;
         }
     }
-    else damage = 0;
+    else fdamage = 0;
 
-    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,damage);
+    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,fdamage);
 
 }
 
