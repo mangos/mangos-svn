@@ -867,7 +867,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
 
-    //damage = CalculateDamage((uint8)i);
+    damage = CalculateDamage((uint8)i);
     uint8 eff = m_spellInfo->Effect[i];
 
     sLog.outDebug( "WORLD: Spell FX id is %u", eff);
