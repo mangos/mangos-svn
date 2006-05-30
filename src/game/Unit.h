@@ -258,8 +258,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         DeathState getDeathState() { return m_deathState; }
 		void Unit::setDeathState(DeathState s) {
-			m_deathState = s;
-			if (m_deathState != ALIVE) {
+			if (s != ALIVE) {
 				if (isInCombat()) {
 					while (m_attackers.size() != 0) {
 						AttackerSet::iterator iter = m_attackers.begin();
@@ -269,10 +268,11 @@ class MANGOS_DLL_SPEC Unit : public Object
 					AttackStop();
 				}
 			}
-			if (m_deathState == JUST_DIED)
+			if (s == JUST_DIED)
 			{
 				RemoveAllAuras();
 			}
+			m_deathState = s;
 		}
 		        
         bool AddAura(Aura *aur, bool uniq = false);

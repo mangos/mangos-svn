@@ -1529,8 +1529,11 @@ void Unit::setPowerType(uint8 PowerType)
 }
 
 void Unit::Attack(Unit *victim) {
-    if (m_attacking)
+	if (m_attacking) {
+		if (m_attacking == victim)
+			return;
         AttackStop();
+	}
     addUnitState(UNIT_STAT_ATTACKING);
     SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     m_attacking = victim;
