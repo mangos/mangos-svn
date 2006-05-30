@@ -432,8 +432,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
         else
         {
-            ((Player*)pVictim)->addUnitState(UNIT_STAT_ATTACKING);
-
             if( (((Player*)pVictim)->getClass()) == WARRIOR )
                 ((Player*)pVictim)->CalcRage(damage,false);
 
