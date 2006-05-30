@@ -324,7 +324,11 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
         if( _player->GetQuestStatus( pQuest ) != QUEST_STATUS_COMPLETE )
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false);
         else
+		{
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true);
+			_player->CalculateReputation(pQuest, guid);
+
+		}
     }
 }
 

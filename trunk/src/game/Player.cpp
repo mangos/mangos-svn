@@ -2607,6 +2607,32 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
     return false;
 }
+//Calculates how many reputation points player gains in wich victim's enemy factions
+void Player::CalculateReputation(Unit *pVictim)
+{
+	if( !pVictim ) return;
+
+	if( pVictim->GetTypeId() != TYPEID_PLAYER )
+	{
+		//SetStanding( FactionTemplate, RepPoints );
+	}    
+}
+
+//Calculate how many reputation points player gain with the quest
+void Player::CalculateReputation(Quest *pQuest, uint64 guid)
+{
+
+	Creature *qGiver = ObjectAccessor::Instance().GetCreature(*this, guid);
+
+	int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
+	
+	if(dif < 0) dif = 0;
+	else if(dif > 5) dif = 5;
+
+	int RepPoints = ((6-dif)*0.20)*100;
+
+	SetStanding(qGiver->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), RepPoints);
+}
 
 //Update honor fields
 void Player::UpdateHonor(void)
