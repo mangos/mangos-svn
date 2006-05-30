@@ -207,6 +207,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         if( _player->CanRewardQuest( pQuest, reward, true ) )
         {
             _player->RewardQuest( pQuest, reward );
+            _player->CalculateReputation( pQuest, guid );
 
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
             if( pCreature )
@@ -324,11 +325,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
         if( _player->GetQuestStatus( pQuest ) != QUEST_STATUS_COMPLETE )
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false);
         else
-		{
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true);
-			_player->CalculateReputation(pQuest, guid);
-
-		}
     }
 }
 
