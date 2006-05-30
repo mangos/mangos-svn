@@ -241,6 +241,7 @@ struct ItemPrototype
     uint32 ItemSet;
     uint32 MaxDurability;
     uint32 Area;
+    uint32 Unknown1;
     char* ScriptName;
 };
 #endif
