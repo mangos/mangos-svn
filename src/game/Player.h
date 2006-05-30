@@ -689,6 +689,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         bool SetStanding(uint32 FTemplate, int standing);
+		void CalculateReputation(Unit *pVictim);
+		void CalculateReputation(Quest *pQuest, uint64 guid);
         void LoadReputationFromDBC(void);
         void UpdateReputation(void);
         void UpdateMaxSkills();

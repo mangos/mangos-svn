@@ -359,8 +359,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             if(pVictim->GetTypeId() != TYPEID_PLAYER)
                 player->AddQuestsLoot((Creature*)pVictim);
-            player->CalculateHonor(pVictim);
-            DEBUG_LOG("DealDamageIsPlayer");
+            
+			//Calculate honor points from this kill
+			player->CalculateHonor(pVictim);
+			//Calculate reputation points from this kill to wich victim's enemy faction
+			player->CalculateReputation(pVictim);
+            
+
+			DEBUG_LOG("DealDamageIsPlayer");
             uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
             uint32 entry = 0;
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
