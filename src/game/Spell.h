@@ -334,7 +334,7 @@ class Spell
         void EffectNULL(uint32 );
         void EffectSchoolDMG(uint32 i);
         void EffectInstaKill(uint32 i);
-        void EffectTepeportUnits(uint32 i);
+        void EffectTeleportUnits(uint32 i);
         void EffectApplyAura(uint32 i);
         void EffectSendEvent(uint32 i);
         void EffectPowerDrain(uint32 i);

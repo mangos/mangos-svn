@@ -83,6 +83,7 @@ void PetAI::_stopAttack()
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
         i_pet.StopMoving();
         i_pet->Idle();
+		i_pet.AttackStop();
         return;
     }
     else if( !i_pet.getVictim()->isAlive() )

@@ -883,7 +883,13 @@ void Unit::_UpdateSpells( uint32 time )
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
     {
         if ((*i).second) {
-            (*i).second->Update( time );
+            (*(i++)).second->Update( time );
+		}
+	}
+
+	for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
+    {
+        if ((*i).second) {
             if ( !(*i).second->GetAuraDuration() && !(*i).second->IsPermanent() ) {
                 RemoveAura(i);
             } else {
@@ -1559,3 +1565,19 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
     }
 }
 
+void Unit::setDeathState(DeathState s) {
+    m_deathState = s;
+    if (m_deathState != ALIVE) {
+        if (isInCombat()) {
+			for (AttackerSet::iterator iter = m_attackers.begin(); iter != m_attackers.end(); iter++)
+				(*iter)->removeAttackee(this);
+			m_attackers.clear();
+            AttackStop();
+        }
+    }
+    if (m_deathState == JUST_DIED)
+    {
+        RemoveAllAuras();
+    }
+}
+        
