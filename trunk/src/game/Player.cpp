@@ -6878,7 +6878,6 @@ void Player::ItemAdded( uint32 entry, uint32 count )
     uint32 reqitem;
     uint32 reqitemcount;
     uint32 curitemcount;
-    uint32 invitemcount;
     uint32 additemcount;
     for( int16 i = 0; i < 20; i++ )
     {
@@ -6895,7 +6894,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                     {
                         reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[j];
                         curitemcount = mQuestStatus[quest].m_itemcount[j];
-                        if ( curitemcount < reqitemcount && curitemcount < invitemcount )
+                        if ( curitemcount < reqitemcount )
                         {
                             additemcount = reqitemcount - curitemcount;
                             mQuestStatus[quest].m_itemcount[j] += additemcount;
