@@ -90,7 +90,8 @@ void AggressorAI::_stopAttack()
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
-        return;
+        i_creature.AttackStop();
+		return;
     }
     else if( !i_creature.getVictim()->isAlive() )
     {
@@ -107,12 +108,13 @@ void AggressorAI::_stopAttack()
     else
     {
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_creature.GetGUIDLow());
-        //i_state = STATE_LOOK_AT_VICTIM;
+		//i_state = STATE_LOOK_AT_VICTIM;
         //i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
-    //i_creature.StopMoving();
-    //i_creature->Idle();
     i_creature.AttackStop();
+    
+	//i_creature.StopMoving();
+    //i_creature->Idle();
     static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 }
 

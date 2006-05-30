@@ -162,6 +162,12 @@ class MANGOS_DLL_SPEC Unit : public Object
             if (m_attackers.size() == 0)
                 clearUnitState(UNIT_STAT_ATTACK_BY);
         }
+        inline void removeAttackee(Unit *pAttacker)
+        {
+			if (pAttacker == getVictim()) {
+				AttackStop();
+			}
+        }
         Unit * getAttackerForHelper() {    // If someone wants to help, who to give them
             if (getVictim() != NULL)
                 return getVictim();
@@ -248,22 +254,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
-        virtual void setDeathState(DeathState s)
-        {
-            m_deathState = s;
-            if (m_deathState != ALIVE) {
-                if (isInCombat()) {
-                    m_attackers.clear(); // Perhaps notify them that we've died?
-                    AttackStop();
-                }
-            }
-            if (m_deathState == JUST_DIED)
-            {
-                RemoveAllAuras();
-            }
-        };
         DeathState getDeathState() { return m_deathState; }
-
+		void setDeathState(DeathState s);
+        
         bool AddAura(Aura *aur, bool uniq = false);
 
         void RemoveFirstAuraByCategory(uint32 category);

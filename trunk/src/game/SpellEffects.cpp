@@ -48,7 +48,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DUMMY
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT
-    &Spell::EffectTepeportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS
+    &Spell::EffectTeleportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS
     &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA
     &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
     &Spell::EffectManaDrain,                                //SPELL_EFFECT_MANA_DRAIN
@@ -201,7 +201,7 @@ void Spell::EffectTriggerSpell(uint32 i)
     m_TriggerSpell = spellInfo;
 }
 
-void Spell::EffectTepeportUnits(uint32 i)
+void Spell::EffectTeleportUnits(uint32 i)
 {
     if(!unitTarget)
         return;
