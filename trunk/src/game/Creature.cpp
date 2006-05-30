@@ -107,9 +107,8 @@ void Creature::AIM_Update(const uint32 &diff)
     {
         case JUST_DIED:
         {
-            SetUInt32Value(UNIT_NPC_FLAGS, 0);
-            setDeathState( CORPSE );
-
+            setDeathState( JUST_DIED );
+			SetUInt32Value(UNIT_NPC_FLAGS, 0);
             i_AI->UpdateAI(diff);
             break;
         }
@@ -134,7 +133,8 @@ void Creature::AIM_Update(const uint32 &diff)
         {
             if( m_deathTimer <= diff )
             {
-                DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
+
+				DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
