@@ -884,6 +884,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
 int irand(int min, int max);
 uint32 urand(uint32 min, uint32 max);
-void AddItemsSetItem(Player*player,uint32 setid);
-void RemoveItemsSetItem(Player*player,uint32 setid);
+void AddItemsSetItem(Player*player,ItemPrototype *proto);
+void RemoveItemsSetItem(Player*player,ItemPrototype *proto);
 #endif

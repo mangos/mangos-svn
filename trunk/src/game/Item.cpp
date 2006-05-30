@@ -40,11 +40,18 @@ Spell* Cast(Player*player,uint32 spellId)
 
 }
 
-void AddItemsSetItem(Player*player,uint32 setid)
+void AddItemsSetItem(Player*player,ItemPrototype *proto)
 {
+    uint32 setid = proto->ItemSet;
 
     ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
-    assert(set);
+
+    if(!set)
+    {
+        sLog.outError("Item set %u for item (id %u) not found, mods not applied.",setid,proto->ItemId);
+        return;
+    }
+
     if(set->required_skill_id )
         if(player->GetSkillValue(set->required_skill_id) < set->required_skill_value) return;
 
@@ -96,10 +103,17 @@ void AddItemsSetItem(Player*player,uint32 setid)
 
 }
 
-void RemoveItemsSetItem(Player*player,uint32 setid)
+void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
 {
+    uint32 setid = proto->ItemSet;
+
     ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
-    assert(set);
+
+    if(!set)
+    {
+        sLog.outError("Item set %u for item (id %u) not found, mods not removed.",setid,proto->ItemId);
+        return;
+    }
 
     ItemsSetEffect *eff=NULL;
     uint32 setindex=0;
