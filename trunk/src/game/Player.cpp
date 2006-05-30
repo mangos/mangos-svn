@@ -2610,28 +2610,28 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 //Calculates how many reputation points player gains in wich victim's enemy factions
 void Player::CalculateReputation(Unit *pVictim)
 {
-	if( !pVictim ) return;
+    if( !pVictim ) return;
 
-	if( pVictim->GetTypeId() != TYPEID_PLAYER )
-	{
-		//SetStanding( FactionTemplate, RepPoints );
-	}    
+    if( pVictim->GetTypeId() != TYPEID_PLAYER )
+    {
+        //SetStanding( FactionTemplate, RepPoints );
+    }    
 }
 
 //Calculate how many reputation points player gain with the quest
 void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 {
 
-	Creature *qGiver = ObjectAccessor::Instance().GetCreature(*this, guid);
+    Creature *qGiver = ObjectAccessor::Instance().GetCreature(*this, guid);
 
-	int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
-	
-	if(dif < 0) dif = 0;
-	else if(dif > 5) dif = 5;
+    int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
+    
+    if(dif < 0) dif = 0;
+    else if(dif > 5) dif = 5;
 
-	int RepPoints = ((6-dif)*0.20)*100;
+    int RepPoints = ((6-dif)*0.20)*100;
 
-	SetStanding(qGiver->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), RepPoints);
+    SetStanding(qGiver->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), RepPoints);
 }
 
 //Update honor fields
@@ -2977,7 +2977,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         if (apply)
            AddItemsSetItem(this,proto);
-		else
+        else
             RemoveItemsSetItem(this,proto);
     }
 
@@ -6895,13 +6895,9 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                     {
                         reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[j];
                         curitemcount = mQuestStatus[quest].m_itemcount[j];
-                        invitemcount = GetItemCount(reqitem,true);
-
-                        // if can growth and real growth
                         if ( curitemcount < reqitemcount && curitemcount < invitemcount )
                         {
-                            // real growth
-                            additemcount = min(reqitemcount,invitemcount) - curitemcount;
+                            additemcount = reqitemcount - curitemcount;
                             mQuestStatus[quest].m_itemcount[j] += additemcount;
                             PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, additemcount );
                         }
