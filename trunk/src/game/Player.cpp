@@ -928,8 +928,8 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 }
                 else
                 {
-                    ManaIncreaseRate =  (((1 - (float)msecSinceLastCast/2000)) * regenInterrupt)
-                                        + (((float)msecSinceLastCast/2000) * ManaIncreaseRate * 100);
+                    ManaIncreaseRate =  (((1 - (float)(msecSinceLastCast - 5000)/2000)) * regenInterrupt)
+                                        + (((float)(msecSinceLastCast - 5000)/2000) * ManaIncreaseRate * 100);
                     ManaIncreaseRate /= 100;
                 }
             }
