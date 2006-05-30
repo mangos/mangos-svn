@@ -1565,19 +1565,3 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
     }
 }
 
-void Unit::setDeathState(DeathState s) {
-    m_deathState = s;
-    if (m_deathState != ALIVE) {
-        if (isInCombat()) {
-			for (AttackerSet::iterator iter = m_attackers.begin(); iter != m_attackers.end(); iter++)
-				(*iter)->removeAttackee(this);
-			m_attackers.clear();
-            AttackStop();
-        }
-    }
-    if (m_deathState == JUST_DIED)
-    {
-        RemoveAllAuras();
-    }
-}
-        

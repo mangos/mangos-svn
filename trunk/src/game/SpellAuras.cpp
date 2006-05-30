@@ -527,11 +527,9 @@ void Aura::_AddAura()
         }
     }
     if(m_duration <= maxduration && slot != 0xFF)
-    {
         return;
-    }
-    WorldPacket data;
-
+    
+	WorldPacket data;
     if(!samespell)
     {
         if (IsPositive())
@@ -556,11 +554,10 @@ void Aura::_AddAura()
                 }
             }
         }
-
-        if (slot == 0xFF)
-        {
-            return;
-        }
+	}
+	if (slot == 0xFF)
+    {
+        return;
     }
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
