@@ -2950,9 +2950,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if(proto->ItemSet)
     {
         if (apply)
-           AddItemsSetItem(this,proto->ItemSet);
+           AddItemsSetItem(this,proto);
 		else
-            RemoveItemsSetItem(this,proto->ItemSet);
+            RemoveItemsSetItem(this,proto);
     }
 
     int32 val;
