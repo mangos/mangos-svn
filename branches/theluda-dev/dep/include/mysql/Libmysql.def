@@ -1,5 +1,5 @@
 LIBRARY		LIBMYSQL
-DESCRIPTION	'MySQL 4.1 Client Library'
+DESCRIPTION	'MySQL 5.0 Client Library'
 VERSION		6.0
 EXPORTS
 	_dig_vec_lower
@@ -146,7 +146,9 @@ EXPORTS
 	mysql_rpl_query_type
 	mysql_slave_query
 	mysql_embedded
-	mysql_set_character_set
 	mysql_server_init
 	mysql_server_end
-	get_defaults_files
+	mysql_set_character_set
+	mysql_get_character_set_info
+	get_defaults_options
+	modify_defaults_file

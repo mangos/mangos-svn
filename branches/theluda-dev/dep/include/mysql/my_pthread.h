@@ -25,7 +25,10 @@
 #endif
 
 #ifdef  __cplusplus
+#define EXTERNC extern "C"
 extern "C" {
+#else
+#define EXTERNC
 #endif /* __cplusplus */ 
 
 #if defined(__WIN__) || defined(OS2)
@@ -77,10 +80,10 @@ struct timespec {		/* For pthread_cond_timedwait() */
 typedef int pthread_mutexattr_t;
 #define win_pthread_self my_thread_var->pthread_self
 #ifdef OS2
-#define pthread_handler_decl(A,B) void * _Optlink A(void *B)
+#define pthread_handler_t EXTERNC void * _Optlink
 typedef void * (_Optlink *pthread_handler)(void *);
 #else
-#define pthread_handler_decl(A,B) void * __cdecl A(void *B)
+#define pthread_handler_t EXTERNC void * __cdecl
 typedef void * (__cdecl *pthread_handler)(void *);
 #endif
 
@@ -144,7 +147,7 @@ extern int pthread_mutex_destroy (pthread_mutex_t *);
 #define pthread_kill(A,B) raise(B)
 #define pthread_exit(A) pthread_dummy()
 #else
-#define pthread_mutex_init(A,B)  InitializeCriticalSection(A)
+#define pthread_mutex_init(A,B)  (InitializeCriticalSection(A),0)
 #define pthread_mutex_lock(A)	 (EnterCriticalSection(A),0)
 #define pthread_mutex_trylock(A) (WaitForSingleObject((A), 0) == WAIT_TIMEOUT)
 #define pthread_mutex_unlock(A)  LeaveCriticalSection(A)
@@ -184,7 +187,7 @@ typedef int pthread_attr_t;			/* Needed by Unixware 7.0.0 */
 #define pthread_key_create(A,B) thr_keycreate((A),(B))
 #define pthread_key_delete(A) thr_keydelete(A)
 
-#define pthread_handler_decl(A,B) void *A(void *B)
+#define pthread_handler_t EXTERNC void *
 #define pthread_key(T,V) pthread_key_t V
 
 void *	my_pthread_getspecific_imp(pthread_key_t key);
@@ -262,7 +265,7 @@ extern int my_pthread_getprio(pthread_t thread_id);
 #define my_pthread_getspecific_ptr(T,V) my_pthread_getspecific(T,(V))
 #define my_pthread_setspecific_ptr(T,V) pthread_setspecific(T,(void*) (V))
 #define pthread_detach_this_thread()
-#define pthread_handler_decl(A,B) void *A(void *B)
+#define pthread_handler_t EXTERNC void *
 typedef void *(* pthread_handler)(void *);
 
 /* Test first for RTS or FSU threads */
@@ -533,9 +536,15 @@ void safe_mutex_end(FILE *file);
 #define pthread_cond_timedwait(A,B,C) safe_cond_timedwait((A),(B),(C),__FILE__,__LINE__)
 #define pthread_mutex_trylock(A) pthread_mutex_lock(A)
 #define pthread_mutex_t safe_mutex_t
-#define safe_mutex_assert_owner(mp) DBUG_ASSERT((mp)->count > 0 && pthread_equal(pthread_self(),(mp)->thread))
+#define safe_mutex_assert_owner(mp) \
+          DBUG_ASSERT((mp)->count > 0 && \
+                      pthread_equal(pthread_self(), (mp)->thread))
+#define safe_mutex_assert_not_owner(mp) \
+          DBUG_ASSERT(! (mp)->count || \
+                      ! pthread_equal(pthread_self(), (mp)->thread))
 #else
 #define safe_mutex_assert_owner(mp)
+#define safe_mutex_assert_not_owner(mp)
 #endif /* SAFE_MUTEX */
 
 	/* READ-WRITE thread locking */
@@ -634,10 +643,10 @@ extern int pthread_dummy(int);
 
 #define THREAD_NAME_SIZE 10
 #ifndef DEFAULT_THREAD_STACK
-#if defined(__ia64__)
+#if SIZEOF_CHARP > 4
 /*
   MySQL can survive with 32K, but some glibc libraries require > 128K stack
-  To resolve hostnames
+  To resolve hostnames. Also recursive stored procedures needs stack.
 */
 #define DEFAULT_THREAD_STACK	(256*1024L)
 #else
@@ -678,21 +687,25 @@ extern pthread_t shutdown_th, main_th, signal_th;
 
 #ifndef thread_safe_increment
 #ifdef HAVE_ATOMIC_ADD
-#define thread_safe_increment(V,L) atomic_add(1,(atomic_t*) &V);
-#define thread_safe_add(V,C,L)     atomic_add((C),(atomic_t*) &V);
-#define thread_safe_sub(V,C,L)     atomic_sub((C),(atomic_t*) &V);
+#define thread_safe_increment(V,L) atomic_inc((atomic_t*) &V)
+#define thread_safe_decrement(V,L) atomic_dec((atomic_t*) &V)
+#define thread_safe_add(V,C,L)     atomic_add((C),(atomic_t*) &V)
+#define thread_safe_sub(V,C,L)     atomic_sub((C),(atomic_t*) &V)
 #else
 #define thread_safe_increment(V,L) \
-	pthread_mutex_lock((L)); (V)++; pthread_mutex_unlock((L));
-#define thread_safe_add(V,C,L) \
-	pthread_mutex_lock((L)); (V)+=(C); pthread_mutex_unlock((L));
+        (pthread_mutex_lock((L)), (V)++, pthread_mutex_unlock((L)))
+#define thread_safe_decrement(V,L) \
+        (pthread_mutex_lock((L)), (V)--, pthread_mutex_unlock((L)))
+#define thread_safe_add(V,C,L) (pthread_mutex_lock((L)), (V)+=(C), pthread_mutex_unlock((L)))
 #define thread_safe_sub(V,C,L) \
-	pthread_mutex_lock((L)); (V)-=(C); pthread_mutex_unlock((L));
+        (pthread_mutex_lock((L)), (V)-=(C), pthread_mutex_unlock((L)))
 #endif /* HAVE_ATOMIC_ADD */
 #ifdef SAFE_STATISTICS
 #define statistic_increment(V,L)   thread_safe_increment((V),(L))
+#define statistic_decrement(V,L)   thread_safe_decrement((V),(L))
 #define statistic_add(V,C,L)       thread_safe_add((V),(C),(L))
 #else
+#define statistic_decrement(V,L) (V)--
 #define statistic_increment(V,L) (V)++
 #define statistic_add(V,C,L)     (V)+=(C)
 #endif /* SAFE_STATISTICS */

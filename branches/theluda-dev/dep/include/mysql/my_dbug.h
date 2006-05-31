@@ -25,6 +25,7 @@ extern	int _db_on_,_no_db_;
 extern	FILE *_db_fp_;
 extern	char *_db_process_;
 extern	int _db_keyword_(const char *keyword);
+extern  int _db_strict_keyword_(const char *keyword);
 extern	void _db_setjmp_(void);
 extern	void _db_longjmp_(void);
 extern	void _db_push_(const char *control);
@@ -38,9 +39,9 @@ extern	void _db_pargs_(uint _line_,const char *keyword);
 extern	void _db_doprnt_ _VARARGS((const char *format,...));
 extern	void _db_dump_(uint _line_,const char *keyword,const char *memory,
 		       uint length);
-extern	void _db_output_();
-extern	void _db_lock_file();
-extern	void _db_unlock_file();
+extern	void _db_output_(uint flag);
+extern	void _db_lock_file(void);
+extern	void _db_unlock_file(void);
 
 #define DBUG_ENTER(a) const char *_db_func_, *_db_file_; uint _db_level_; \
 	char **_db_framep_; \
@@ -69,12 +70,15 @@ extern	void _db_unlock_file();
 #define DBUG_UNLOCK_FILE { _db_unlock_file(); }
 #define DBUG_OUTPUT(A) { _db_output_(A); }
 #define DBUG_ASSERT(A) assert(A)
+#define DBUG_EXECUTE_IF(keyword,a1) \
+        {if (_db_on_) {if (_db_strict_keyword_ (keyword)) { a1 }}}
 #else						/* No debugger */
 
 #define DBUG_ENTER(a1)
 #define DBUG_RETURN(a1) return(a1)
 #define DBUG_VOID_RETURN return
 #define DBUG_EXECUTE(keyword,a1) {}
+#define DBUG_EXECUTE_IF(keyword,a1) {}
 #define DBUG_PRINT(keyword,arglist) {}
 #define DBUG_PUSH(a1) {}
 #define DBUG_POP() {}

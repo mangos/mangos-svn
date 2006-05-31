@@ -43,8 +43,6 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MYSYS_PROGRAM_DONT_USE_CURSES()  { error_handler_hook = my_message_no_curses; mysys_uses_curses=0;}
 #define MY_INIT(name);		{ my_progname= name; my_init(); }
 
-#define MAXMAPS		(4)	/* Number of error message maps */
-#define ERRMOD		(1000)	/* Max number of errors in a map */
 #define ERRMSGSIZE	(SC_MAXWIDTH)	/* Max length of a error message */
 #define NRERRBUFFS	(2)	/* Buffers for parameters */
 #define MY_FILE_ERROR	((uint) ~0)
@@ -56,11 +54,10 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_FAE		8	/* Fatal if any error */
 #define MY_WME		16	/* Write message on error */
 #define MY_WAIT_IF_FULL 32	/* Wait and try again if disk full error */
-#define MY_RAID         64      /* Support for RAID (not the "Johnson&Johnson"-s one ;) */
-#define MY_FULL_IO     512      /* For my_read - loop intil I/O
-				   is complete
-				*/
-#define MY_DONT_CHECK_FILESIZE 128	/* Option to init_io_cache() */
+#define MY_IGNORE_BADFD 32      /* my_sync: ignore 'bad descriptor' errors */
+#define MY_RAID         64      /* Support for RAID */
+#define MY_FULL_IO     512      /* For my_read - loop intil I/O is complete */
+#define MY_DONT_CHECK_FILESIZE 128 /* Option to init_io_cache() */
 #define MY_LINK_WARNING 32	/* my_redel() gives warning if links */
 #define MY_COPYTIME	64	/* my_redel() copys time */
 #define MY_DELETE_OLD	256	/* my_create_with_symlink() */
@@ -74,7 +71,7 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_FREE_ON_ERROR 128	/* my_realloc() ; Free old ptr on error */
 #define MY_HOLD_ON_ERROR 256	/* my_realloc() ; Return old ptr on error */
 #define MY_THREADSAFE	128	/* pread/pwrite:  Don't allow interrupts */
-#define MY_DONT_OVERWRITE_FILE 1024	/* my_copy; Don't overwrite file */
+#define MY_DONT_OVERWRITE_FILE 1024	/* my_copy: Don't overwrite file */
 
 #define MY_CHECK_ERROR	1	/* Params to my_end; Check open-close */
 #define MY_GIVE_INFO	2	/* Give time info about process*/
@@ -121,6 +118,13 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define MY_ERRNO_EDOM		33
 #define MY_ERRNO_ERANGE		34
 
+	/* Bits for get_date timeflag */
+#define GETDATE_DATE_TIME	1
+#define GETDATE_SHORT_DATE	2
+#define GETDATE_HHMMSSTIME	4
+#define GETDATE_GMT		8
+#define GETDATE_FIXEDLENGTH	16
+
 	/* defines when allocating data */
 #ifdef SAFEMALLOC
 #define my_malloc(SZ,FLAG) _mymalloc((SZ), __FILE__, __LINE__, FLAG )
@@ -131,6 +135,7 @@ extern int NEAR my_errno;		/* Last error in mysys */
 #define my_memdup(A,B,C) _my_memdup((A),(B), __FILE__,__LINE__,C)
 #define my_strdup(A,C) _my_strdup((A), __FILE__,__LINE__,C)
 #define my_strdup_with_length(A,B,C) _my_strdup_with_length((A),(B),__FILE__,__LINE__,C)
+#define TRASH(A,B) bfill(A, B, 0x8F)
 #define QUICK_SAFEMALLOC sf_malloc_quick=1
 #define NORMAL_SAFEMALLOC sf_malloc_quick=0
 extern uint sf_malloc_prehunc,sf_malloc_endhunc,sf_malloc_quick;
@@ -153,11 +158,23 @@ extern gptr my_memdup(const byte *from,uint length,myf MyFlags);
 extern char *my_strdup(const char *from,myf MyFlags);
 extern char *my_strdup_with_length(const byte *from, uint length,
 				   myf MyFlags);
-#define my_free(PTR,FG) my_no_flags_free(PTR)
+/* we do use FG (as a no-op) in below so that a typo on FG is caught */
+#define my_free(PTR,FG) ((void)FG,my_no_flags_free(PTR))
 #define CALLER_INFO_PROTO   /* nothing */
 #define CALLER_INFO         /* nothing */
 #define ORIG_CALLER_INFO    /* nothing */
+#define TRASH(A,B) /* nothing */
 #endif
+
+#ifdef HAVE_LARGE_PAGES
+extern uint my_get_large_page_size(void);
+extern gptr my_large_malloc(uint size, myf my_flags);
+extern void my_large_free(gptr ptr, myf my_flags);
+#else
+#define my_get_large_page_size() (0)
+#define my_large_malloc(A,B) my_malloc_lock((A),(B))
+#define my_large_free(A,B) my_free_lock((A),(B))
+#endif /* HAVE_LARGE_PAGES */
 
 #ifdef HAVE_ALLOCA
 #if defined(_AIX) && !defined(__GNUC__) && !defined(_AIX43)
@@ -200,15 +217,19 @@ void   __CDECL hfree(void *ptr);
 extern int errno;			/* declare errno */
 #endif
 #endif					/* #ifndef errno */
-extern const char ** NEAR my_errmsg[];
 extern char NEAR errbuff[NRERRBUFFS][ERRMSGSIZE];
 extern char *home_dir;			/* Home directory for user */
-extern char *my_progname;		/* program-name (printed in errors) */
+extern const char *my_progname;		/* program-name (printed in errors) */
 extern char NEAR curr_dir[];		/* Current directory for user */
 extern int (*error_handler_hook)(uint my_err, const char *str,myf MyFlags);
 extern int (*fatal_error_handler_hook)(uint my_err, const char *str,
 				       myf MyFlags);
 extern uint my_file_limit;
+
+#ifdef HAVE_LARGE_PAGES
+extern my_bool my_use_large_pages;
+extern uint    my_large_page_size;
+#endif
 
 /* charsets */
 extern CHARSET_INFO *default_charset_info;
@@ -240,6 +261,10 @@ extern my_bool NEAR my_disable_locking,NEAR my_disable_async_io,
 extern char	wild_many,wild_one,wild_prefix;
 extern const char *charsets_dir;
 extern char *defaults_extra_file;
+extern const char *defaults_group_suffix;
+extern const char *defaults_file;
+
+extern my_bool timed_mutexes;
 
 typedef struct wild_file_pack	/* Struct to hold info when selecting files */
 {
@@ -256,7 +281,7 @@ enum loglevel {
 
 enum cache_type
 {
-  READ_CACHE,WRITE_CACHE,
+  TYPE_NOT_SET= 0, READ_CACHE, WRITE_CACHE,
   SEQ_READ_APPEND		/* sequential read or append */,
   READ_FIFO, READ_NET,WRITE_NET};
 
@@ -502,11 +527,16 @@ typedef int (*qsort2_cmp)(const void *, const void *, const void *);
 
 /* tell write offset in the SEQ_APPEND cache */
 my_off_t my_b_append_tell(IO_CACHE* info);
+my_off_t my_b_safe_tell(IO_CACHE* info); /* picks the correct tell() */
 
 #define my_b_bytes_in_cache(info) (uint) (*(info)->current_end - \
 					  *(info)->current_pos)
 
 typedef uint32 ha_checksum;
+
+/* Define the type of function to be passed to process_default_option_files */
+typedef int (*Process_option_func)(void *ctx, const char *group_name,
+                                   const char *option);
 
 #include <my_alloc.h>
 
@@ -522,7 +552,6 @@ extern gptr my_once_alloc(uint Size,myf MyFlags);
 extern void my_once_free(void);
 extern char *my_once_strdup(const char *src,myf myflags);
 extern char *my_once_memdup(const char *src, uint len, myf myflags);
-extern my_string my_tempnam(const char *dir,const char *pfx,myf MyFlags);
 extern File my_open(const char *FileName,int Flags,myf MyFlags);
 extern File my_register_filename(File fd, const char *FileName,
 				 enum file_type type_of_file,
@@ -572,6 +601,7 @@ extern char *_my_strdup_with_length(const byte *from, uint length,
 
 #ifdef __WIN__
 extern int my_access(const char *path, int amode);
+extern File my_sopen(const char *path, int oflag, int shflag, int pmode);
 #else
 #define my_access access
 #endif
@@ -590,6 +620,8 @@ extern int my_error _VARARGS((int nr,myf MyFlags, ...));
 extern int my_printf_error _VARARGS((uint my_err, const char *format,
 				     myf MyFlags, ...)
 				    __attribute__ ((format (printf, 2, 4))));
+extern int my_error_register(const char **errmsgs, int first, int last);
+extern const char **my_error_unregister(int first, int last);
 extern int my_message(uint my_err, const char *str,myf MyFlags);
 extern int my_message_no_curses(uint my_err, const char *str,myf MyFlags);
 extern int my_message_curses(uint my_err, const char *str,myf MyFlags);
@@ -662,6 +694,8 @@ extern void radixsort_for_str_ptr(uchar* base[], uint number_of_elements,
 extern qsort_t qsort2(void *base_ptr, size_t total_elems, size_t size,
 		      qsort2_cmp cmp, void *cmp_argument);
 extern qsort2_cmp get_ptr_compare(uint);
+void my_store_ptr(byte *buff, uint pack_length, my_off_t pos);
+my_off_t my_get_ptr(byte *ptr, uint pack_length);
 extern int init_io_cache(IO_CACHE *info,File file,uint cachesize,
 			 enum cache_type type,my_off_t seek_offset,
 			 pbool use_async_io, myf cache_myflags);
@@ -707,7 +741,8 @@ File create_temp_file(char *to, const char *dir, const char *pfx,
 #define my_init_dynamic_array(A,B,C,D) init_dynamic_array(A,B,C,D CALLER_INFO)
 #define my_init_dynamic_array_ci(A,B,C,D) init_dynamic_array(A,B,C,D ORIG_CALLER_INFO)
 extern my_bool init_dynamic_array(DYNAMIC_ARRAY *array,uint element_size,
-	  uint init_alloc,uint alloc_increment CALLER_INFO_PROTO);
+                                  uint init_alloc,uint alloc_increment
+                                  CALLER_INFO_PROTO);
 extern my_bool insert_dynamic(DYNAMIC_ARRAY *array,gptr element);
 extern byte *alloc_dynamic(DYNAMIC_ARRAY *array);
 extern byte *pop_dynamic(DYNAMIC_ARRAY*);
@@ -742,6 +777,7 @@ extern void my_free_lock(byte *ptr,myf flags);
 extern void init_alloc_root(MEM_ROOT *mem_root, uint block_size,
 			    uint pre_alloc_size);
 extern gptr alloc_root(MEM_ROOT *mem_root,unsigned int Size);
+extern gptr multi_alloc_root(MEM_ROOT *mem_root, ...);
 extern void free_root(MEM_ROOT *root, myf MyFLAGS);
 extern void set_prealloc_root(MEM_ROOT *root, char *ptr);
 extern void reset_root_defaults(MEM_ROOT *mem_root, uint block_size,
@@ -749,11 +785,19 @@ extern void reset_root_defaults(MEM_ROOT *mem_root, uint block_size,
 extern char *strdup_root(MEM_ROOT *root,const char *str);
 extern char *strmake_root(MEM_ROOT *root,const char *str,uint len);
 extern char *memdup_root(MEM_ROOT *root,const char *str,uint len);
-extern void get_defaults_files(int argc, char **argv,
-                               char **defaults, char **extra_defaults);
+extern int get_defaults_options(int argc, char **argv,
+                                char **defaults, char **extra_defaults,
+                                char **group_suffix);
 extern int load_defaults(const char *conf_file, const char **groups,
 			 int *argc, char ***argv);
+extern int modify_defaults_file(const char *file_location, const char *option,
+                                const char *option_value,
+                                const char *section_name, int remove_option);
+extern int my_search_option_files(const char *conf_file, int *argc,
+                                  char ***argv, uint *args_used,
+                                  Process_option_func func, void *func_ctx);
 extern void free_defaults(char **argv);
+extern void my_print_default_files(const char *conf_file);
 extern void print_defaults(const char *conf_file, const char **groups);
 extern my_bool my_compress(byte *, ulong *, ulong *);
 extern my_bool my_uncompress(byte *, ulong *, ulong *);
@@ -761,6 +805,7 @@ extern byte *my_compress_alloc(const byte *packet, ulong *len, ulong *complen);
 extern ha_checksum my_checksum(ha_checksum crc, const byte *mem, uint count);
 extern uint my_bit_log2(ulong value);
 extern uint my_count_bits(ulonglong v);
+extern uint my_count_bits_ushort(ushort v);
 extern void my_sleep(ulong m_seconds);
 extern ulong crc32(ulong crc, const uchar *buf, uint len);
 extern uint my_set_max_open_files(uint files);
@@ -768,6 +813,42 @@ void my_free_open_file_info(void);
 
 ulonglong my_getsystime(void);
 my_bool my_gethwaddr(uchar *to);
+
+#ifdef HAVE_SYS_MMAN_H
+#include <sys/mman.h>
+
+#ifndef MAP_NOSYNC
+#define MAP_NOSYNC      0
+#endif
+
+#define my_mmap(a,b,c,d,e,f)    mmap(a,b,c,d,e,f)
+#ifdef HAVE_GETPAGESIZE
+#define my_getpagesize()        getpagesize()
+#else
+/* qnx ? */
+#define my_getpagesize()        8192
+#endif
+#define my_munmap(a,b)          munmap((a),(b))
+
+#else
+/* not a complete set of mmap() flags, but only those that nesessary */
+#define PROT_READ        1
+#define PROT_WRITE       2
+#define MAP_SHARED       0x0001
+#define MAP_NOSYNC       0x0800
+#define MAP_FAILED       ((void *)-1)
+#define MS_SYNC          0x0000
+
+#ifndef __NETWARE__
+#define HAVE_MMAP
+#endif
+
+int my_getpagesize(void);
+void *my_mmap(void *, size_t, int, int, int, my_off_t);
+int my_munmap(void *, size_t);
+#endif
+
+int my_msync(int, void *, size_t, int);
 
 /* character sets */
 extern uint get_charset_number(const char *cs_name, uint cs_flags);
@@ -783,13 +864,21 @@ extern char *get_charsets_dir(char *buf);
 extern my_bool my_charset_same(CHARSET_INFO *cs1, CHARSET_INFO *cs2);
 extern my_bool init_compiled_charsets(myf flags);
 extern void add_compiled_collation(CHARSET_INFO *cs);
-extern ulong escape_string_for_mysql(CHARSET_INFO *charset_info, char *to,
+extern ulong escape_string_for_mysql(CHARSET_INFO *charset_info,
+                                     char *to, ulong to_length,
                                      const char *from, ulong length);
 #ifdef __WIN__
 #define BACKSLASH_MBTAIL
 /* File system character set */
 extern CHARSET_INFO *fs_character_set(void);
 #endif
+extern ulong escape_quotes_for_mysql(CHARSET_INFO *charset_info,
+                                     char *to, ulong to_length,
+                                     const char *from, ulong length);
+
+extern void thd_increment_bytes_sent(ulong length);
+extern void thd_increment_bytes_received(ulong length);
+extern void thd_increment_net_big_packet_count(ulong length);
 
 #ifdef __WIN__
 extern my_bool have_tcpip;		/* Is set if tcpip is used */

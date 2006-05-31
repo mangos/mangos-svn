@@ -27,6 +27,14 @@
 #define SERVER_VERSION_LENGTH 60
 #define SQLSTATE_LENGTH 5
 
+/*
+  USER_HOST_BUFF_SIZE -- length of string buffer, that is enough to contain
+  username and hostname parts of the user identifier with trailing zero in
+  MySQL standard format:
+  user_name_part@host_name_part\0
+*/
+#define USER_HOST_BUFF_SIZE HOSTNAME_LENGTH + USERNAME_LENGTH + 2
+
 #define LOCAL_HOST	"localhost"
 #define LOCAL_HOST_NAMEDPIPE "."
 
@@ -36,6 +44,11 @@
 #define MYSQL_SERVICENAME "MySQL"
 #endif /* __WIN__ */
 
+/*
+  You should add new commands to the end of this list, otherwise old
+  servers won't be able to handle them as 'unsupported'.
+*/
+
 enum enum_server_command
 {
   COM_SLEEP, COM_QUIT, COM_INIT_DB, COM_QUERY, COM_FIELD_LIST,
@@ -43,8 +56,8 @@ enum enum_server_command
   COM_PROCESS_INFO, COM_CONNECT, COM_PROCESS_KILL, COM_DEBUG, COM_PING,
   COM_TIME, COM_DELAYED_INSERT, COM_CHANGE_USER, COM_BINLOG_DUMP,
   COM_TABLE_DUMP, COM_CONNECT_OUT, COM_REGISTER_SLAVE,
-  COM_PREPARE, COM_EXECUTE, COM_LONG_DATA, COM_CLOSE_STMT,
-  COM_RESET_STMT, COM_SET_OPTION,
+  COM_STMT_PREPARE, COM_STMT_EXECUTE, COM_STMT_SEND_LONG_DATA, COM_STMT_CLOSE,
+  COM_STMT_RESET, COM_SET_OPTION, COM_STMT_FETCH,
   /* don't forget to update const char *command_name[] in sql_parse.cc */
 
   /* Must be last */
@@ -77,6 +90,7 @@ enum enum_server_command
 #define AUTO_INCREMENT_FLAG 512		/* field is a autoincrement field */
 #define TIMESTAMP_FLAG	1024		/* Field is a timestamp */
 #define SET_FLAG	2048		/* field is a set */
+#define NO_DEFAULT_VALUE_FLAG 4096	/* Field doesn't have default value */
 #define NUM_FLAG	32768		/* Field is num (for clients) */
 #define PART_KEY_FLAG	16384		/* Intern; Part of some key */
 #define GROUP_FLAG	32768		/* Intern: Group field */
@@ -130,12 +144,26 @@ enum enum_server_command
 #define SERVER_MORE_RESULTS_EXISTS 8    /* Multi query - next query exists */
 #define SERVER_QUERY_NO_GOOD_INDEX_USED 16
 #define SERVER_QUERY_NO_INDEX_USED      32
+/*
+  The server was able to fulfill the clients request and opened a
+  read-only non-scrollable cursor for a query. This flag comes
+  in reply to COM_STMT_EXECUTE and COM_STMT_FETCH commands.
+*/
+#define SERVER_STATUS_CURSOR_EXISTS 64
+/*
+  This flag is sent when a read-only cursor is exhausted, in reply to
+  COM_STMT_FETCH command.
+*/
+#define SERVER_STATUS_LAST_ROW_SENT 128
 #define SERVER_STATUS_DB_DROPPED        256 /* A database was dropped */
+#define SERVER_STATUS_NO_BACKSLASH_ESCAPES 512
 
 #define MYSQL_ERRMSG_SIZE	512
 #define NET_READ_TIMEOUT	30		/* Timeout on read */
 #define NET_WRITE_TIMEOUT	60		/* Timeout on write */
 #define NET_WAIT_TIMEOUT	8*60*60		/* Wait for new query */
+
+#define ONLY_KILL_QUERY         1
 
 struct st_vio;					/* Only C */
 typedef struct st_vio Vio;
@@ -167,7 +195,13 @@ typedef struct st_net {
   unsigned int *return_status;
   unsigned char reading_or_writing;
   char save_char;
-  my_bool no_send_ok;
+  my_bool no_send_ok;  /* For SPs and other things that do multiple stmts */
+  my_bool no_send_eof; /* For SPs' first version read-only cursors */
+  /*
+    Set if OK packet is already sent, and we do not need to send error
+    messages
+  */
+  my_bool no_send_error;
   /*
     Pointer to query object in query cache, do not equal NULL (0) for
     queries in cache that have not stored its results yet
@@ -190,7 +224,9 @@ enum enum_field_types { MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
 			MYSQL_TYPE_LONGLONG,MYSQL_TYPE_INT24,
 			MYSQL_TYPE_DATE,   MYSQL_TYPE_TIME,
 			MYSQL_TYPE_DATETIME, MYSQL_TYPE_YEAR,
-			MYSQL_TYPE_NEWDATE,
+			MYSQL_TYPE_NEWDATE, MYSQL_TYPE_VARCHAR,
+			MYSQL_TYPE_BIT,
+                        MYSQL_TYPE_NEWDECIMAL=246,
 			MYSQL_TYPE_ENUM=247,
 			MYSQL_TYPE_SET=248,
 			MYSQL_TYPE_TINY_BLOB=249,
@@ -206,6 +242,7 @@ enum enum_field_types { MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
 /* For backward compatibility */
 #define CLIENT_MULTI_QUERIES    CLIENT_MULTI_STATEMENTS    
 #define FIELD_TYPE_DECIMAL     MYSQL_TYPE_DECIMAL
+#define FIELD_TYPE_NEWDECIMAL  MYSQL_TYPE_NEWDECIMAL
 #define FIELD_TYPE_TINY        MYSQL_TYPE_TINY
 #define FIELD_TYPE_SHORT       MYSQL_TYPE_SHORT
 #define FIELD_TYPE_LONG        MYSQL_TYPE_LONG
@@ -231,6 +268,7 @@ enum enum_field_types { MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
 #define FIELD_TYPE_CHAR        MYSQL_TYPE_TINY
 #define FIELD_TYPE_INTERVAL    MYSQL_TYPE_ENUM
 #define FIELD_TYPE_GEOMETRY    MYSQL_TYPE_GEOMETRY
+#define FIELD_TYPE_BIT         MYSQL_TYPE_BIT
 
 
 /* Shutdown/kill enums and constants */ 
@@ -264,6 +302,16 @@ enum mysql_enum_shutdown_level {
 #endif
   KILL_CONNECTION= 255
 };
+
+
+enum enum_cursor_type
+{
+  CURSOR_TYPE_NO_CURSOR= 0,
+  CURSOR_TYPE_READ_ONLY= 1,
+  CURSOR_TYPE_FOR_UPDATE= 2,
+  CURSOR_TYPE_SCROLLABLE= 4
+};
+
 
 /* options for mysql_set_option */
 enum enum_mysql_set_option
@@ -310,7 +358,8 @@ struct rand_struct {
 
   /* The following is for user defined functions */
 
-enum Item_result {STRING_RESULT, REAL_RESULT, INT_RESULT, ROW_RESULT};
+enum Item_result {STRING_RESULT=0, REAL_RESULT, INT_RESULT, ROW_RESULT,
+                  DECIMAL_RESULT};
 
 typedef struct st_udf_args
 {
@@ -319,6 +368,8 @@ typedef struct st_udf_args
   char **args;				/* Pointer to argument */
   unsigned long *lengths;		/* Length of string arguments */
   char *maybe_null;			/* Set to 1 for all maybe_null args */
+  char **attributes;                    /* Pointer to attribute name */
+  unsigned long *attribute_lengths;     /* Length of attribute arguments */
 } UDF_ARGS;
 
   /* This holds information about the result */
@@ -366,6 +417,7 @@ my_bool check_scramble(const char *reply, const char *message,
                        const unsigned char *hash_stage2);
 void get_salt_from_password(unsigned char *res, const char *password);
 void make_password_from_salt(char *to, const unsigned char *hash_stage2);
+char *octet2hex(char *to, const char *str, unsigned int len);
 
 /* end of password.c */
 
@@ -375,6 +427,9 @@ const char *mysql_errno_to_sqlstate(unsigned int mysql_errno);
 /* Some other useful functions */
 
 my_bool my_init(void);
+extern int modify_defaults_file(const char *file_location, const char *option,
+                                const char *option_value,
+                                const char *section_name, int remove_option);
 int load_defaults(const char *conf_file, const char **groups,
 		  int *argc, char ***argv);
 my_bool my_thread_init(void);

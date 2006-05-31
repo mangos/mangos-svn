@@ -22,6 +22,11 @@ functions */
 #define _WIN32_WINNT     0x0500
 #endif
 
+#if defined(_MSC_VER) && _MSC_VER >= 1400
+/* Avoid endless warnings about sprintf() etc. being unsafe. */
+#define _CRT_SECURE_NO_DEPRECATE 1
+#endif
+
 #include <sys/locking.h>
 #include <windows.h>
 #include <math.h>			/* Because of rint() */
@@ -61,6 +66,10 @@ functions */
 #define __WIN__			      /* To make it easier in VC++ */
 #endif
 
+#ifndef MAX_INDEXES
+#define MAX_INDEXES 64
+#endif
+
 /* File and lock constants */
 #define O_SHARE		0x1000		/* Open file in sharing mode */
 #ifdef __BORLANDC__
@@ -76,6 +85,7 @@ functions */
 #define F_EXCLUSIVE	1		/* We have only exclusive locking */
 #define F_TO_EOF	(INT_MAX32/2)	/* size for lock of all file */
 #define F_OK		0		/* parameter to access() */
+#define W_OK		2
 
 #define S_IROTH		S_IREAD		/* for my_lib */
 
@@ -98,11 +108,17 @@ functions */
 #undef _REENTRANT			/* Crashes something for win32 */
 #undef SAFE_MUTEX			/* Can't be used on windows */
 
-#define LONGLONG_MIN	((__int64) 0x8000000000000000)
-#define LONGLONG_MAX	((__int64) 0x7FFFFFFFFFFFFFFF)
-#define ULONGLONG_MAX	((unsigned __int64) 0xFFFFFFFFFFFFFFFF)
-#define LL(A)		((__int64) A)
-#define ULL(A)		((unsigned __int64) A)
+#if defined(_MSC_VER) && _MSC_VER >= 1310
+#define LL(A)           A##ll
+#define ULL(A)          A##ull
+#else
+#define LL(A)           ((__int64) A)
+#define ULL(A)          ((unsigned __int64) A)
+#endif
+
+#define LONGLONG_MIN	LL(0x8000000000000000)
+#define LONGLONG_MAX	LL(0x7FFFFFFFFFFFFFFF)
+#define ULONGLONG_MAX	ULL(0xFFFFFFFFFFFFFFFF)
 
 /* Type information */
 
@@ -195,7 +211,7 @@ typedef uint rf_SetTimer;
 #define my_sigset(A,B) signal((A),(B))
 #define finite(A) _finite(A)
 #define sleep(A)  Sleep((A)*1000)
-#define popen(A) popen(A,B) _popen((A),(B))
+#define popen(A,B) _popen((A),(B))
 #define pclose(A) _pclose(A)
 
 #ifndef __BORLANDC__
@@ -283,8 +299,8 @@ inline double ulonglong2double(ulonglong value)
 #define doublestore(T,V) do { *((long *) T) = *((long*) &V); \
 			      *(((long *) T)+1) = *(((long*) &V)+1); } while(0)
 #define float4get(V,M) { *((long *) &(V)) = *((long*) (M)); }
-#define floatget(V,M) memcpy((byte*) &V,(byte*) (M),sizeof(float))
 #define floatstore(T,V) memcpy((byte*)(T), (byte*)(&V), sizeof(float))
+#define floatget(V,M)   memcpy((byte*)(&V), (byte*)(M), sizeof(float))
 #define float8get(V,M) doubleget((V),(M))
 #define float4store(V,M) memcpy((byte*) V,(byte*) (&M),sizeof(float))
 #define float8store(V,M) doublestore((V),(M))
@@ -322,7 +338,13 @@ inline double ulonglong2double(ulonglong value)
 #define HAVE_QUERY_CACHE
 #define SPRINTF_RETURNS_INT
 #define HAVE_SETFILEPOINTER
-#define HAVE_VIO
+#define HAVE_VIO_READ_BUFF
+#define HAVE_STRNLEN
+
+#ifndef __NT__
+#undef FILE_SHARE_DELETE
+#define FILE_SHARE_DELETE 0     /* Not implemented on Win 98/ME */
+#endif
 
 #ifdef NOT_USED
 #define HAVE_SNPRINTF		/* Gave link error */
@@ -350,6 +372,12 @@ inline double ulonglong2double(ulonglong value)
 #define SHAREDIR		"share"
 #define DEFAULT_CHARSET_HOME	"C:/mysql/"
 #endif
+#ifndef DEFAULT_HOME_ENV
+#define DEFAULT_HOME_ENV MYSQL_HOME
+#endif
+#ifndef DEFAULT_GROUP_SUFFIX_ENV
+#define DEFAULT_GROUP_SUFFIX_ENV MYSQL_GROUP_SUFFIX
+#endif
 
 /* File name handling */
 
@@ -361,6 +389,7 @@ inline double ulonglong2double(ulonglong value)
 
 #define DO_NOT_REMOVE_THREAD_WRAPPERS
 #define thread_safe_increment(V,L) InterlockedIncrement((long*) &(V))
+#define thread_safe_decrement(V,L) InterlockedDecrement((long*) &(V))
 /* The following is only used for statistics, so it should be good enough */
 #ifdef __NT__  /* This should also work on Win98 but .. */
 #define thread_safe_add(V,C,L) InterlockedExchangeAdd((long*) &(V),(C))
@@ -374,20 +403,33 @@ inline double ulonglong2double(ulonglong value)
 #define statistic_add(V,C,L)	 (V)+=(C)
 #endif
 #define statistic_increment(V,L) thread_safe_increment((V),(L))
+#define statistic_decrement(V,L) thread_safe_decrement((V),(L))
 
 #define shared_memory_buffer_length 16000
 #define default_shared_memory_base_name "MYSQL"
+
+#ifdef CYBOZU
+#define MYSQL_DEFAULT_CHARSET_NAME "utf8"
+#define MYSQL_DEFAULT_COLLATION_NAME "utf8_general_cs"
+#define HAVE_UTF8_GENERAL_CS 1
+#else
 #define MYSQL_DEFAULT_CHARSET_NAME "latin1"
 #define MYSQL_DEFAULT_COLLATION_NAME "latin1_swedish_ci"
+#endif
 
 #define HAVE_SPATIAL 1
 #define HAVE_RTREE_KEYS 1
 
+#define HAVE_OPENSSL 1
+#define HAVE_YASSL 1
+
 /* Define charsets you want */
 /* #undef HAVE_CHARSET_armscii8 */
 /* #undef HAVE_CHARSET_ascii */
+#ifndef CYBOZU
 #define HAVE_CHARSET_big5 1
 #define HAVE_CHARSET_cp1250 1
+#endif
 /* #undef HAVE_CHARSET_cp1251 */
 /* #undef HAVE_CHARSET_cp1256 */
 /* #undef HAVE_CHARSET_cp1257 */
@@ -396,26 +438,33 @@ inline double ulonglong2double(ulonglong value)
 /* #undef HAVE_CHARSET_cp866 */
 #define HAVE_CHARSET_cp932 1
 /* #undef HAVE_CHARSET_dec8 */
+#ifndef CYBOZU
+#define HAVE_CHARSET_eucjpms 1
 #define HAVE_CHARSET_euckr 1
 #define HAVE_CHARSET_gb2312 1
 #define HAVE_CHARSET_gbk 1
+#endif
 /* #undef HAVE_CHARSET_greek */
 /* #undef HAVE_CHARSET_hebrew */
 /* #undef HAVE_CHARSET_hp8 */
 /* #undef HAVE_CHARSET_keybcs2 */
 /* #undef HAVE_CHARSET_koi8r */
 /* #undef HAVE_CHARSET_koi8u */
+#ifndef CYBOZU
 #define HAVE_CHARSET_latin1 1
 #define HAVE_CHARSET_latin2 1
+#endif
 /* #undef HAVE_CHARSET_latin5 */
 /* #undef HAVE_CHARSET_latin7 */
 /* #undef HAVE_CHARSET_macce */
 /* #undef HAVE_CHARSET_macroman */
 #define HAVE_CHARSET_sjis 1
 /* #undef HAVE_CHARSET_swe7 */
+#ifndef CYBOZU
 #define HAVE_CHARSET_tis620 1
 #define HAVE_CHARSET_ucs2 1
 #define HAVE_CHARSET_ujis 1
+#endif
 #define HAVE_CHARSET_utf8 1
 #define HAVE_UCA_COLLATIONS 1
 
