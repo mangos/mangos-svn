@@ -1677,15 +1677,35 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 {
     WorldPacket data;
 
+	char* px = strtok((char*)args, " ");
+    uint32 flag;
+    if (!px)
+        flag = 1;
+    else
+        flag = atoi(px);
+
     //SMSG_MOVE_UNSET_HOVER
 
-    data.Initialize(SMSG_MOVE_SET_HOVER);
-    data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+	if (flag)
+	{
+		data.Initialize(SMSG_MOVE_SET_HOVER);
+		data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+	}
+	else
+	{
+		data.Initialize(SMSG_MOVE_UNSET_HOVER);
+		data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+	}
+
     m_session->SendPacket( &data );
 
     WorldPacket data1;
     std::stringstream sstext;
-    sstext << "Hover Enabled" << '\0';
+    if (flag)
+		sstext << "Hover Enabled" << '\0';
+	else
+		sstext << "Hover Disabled" << '\0';
+
     FillSystemMessageData(&data1, m_session, sstext.str().c_str());
     m_session->SendPacket( &data1 );
 
