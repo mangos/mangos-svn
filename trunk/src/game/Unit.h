@@ -164,11 +164,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         }
         inline bool removeAttackee(Unit *pAttacker)
         {
-			if (pAttacker == getVictim()) {
-				AttackStop();
-				return true;
-			}
-			return false;
+            if (pAttacker == getVictim()) {
+                AttackStop();
+                return true;
+            }
+            return false;
         }
         Unit * getAttackerForHelper() {    // If someone wants to help, who to give them
             if (getVictim() != NULL)
@@ -257,24 +257,24 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         DeathState getDeathState() { return m_deathState; }
-		void setDeathState(DeathState s) {
-			if (s != ALIVE) {
-				if (isInCombat()) {
-					while (m_attackers.size() != 0) {
-						AttackerSet::iterator iter = m_attackers.begin();
-						if (!((*iter)->removeAttackee(this)))
-							m_attackers.erase(iter);
-					}
-					AttackStop();
-				}
-			}
-			if (s == JUST_DIED)
-			{
-				RemoveAllAuras();
-			}
-			m_deathState = s;
-		}
-		        
+        void setDeathState(DeathState s) {
+            if (s != ALIVE) {
+                if (isInCombat()) {
+                    while (m_attackers.size() != 0) {
+                        AttackerSet::iterator iter = m_attackers.begin();
+                        if (!((*iter)->removeAttackee(this)))
+                            m_attackers.erase(iter);
+                    }
+                    AttackStop();
+                }
+            }
+            if (s == JUST_DIED)
+            {
+                RemoveAllAuras();
+            }
+            m_deathState = s;
+        }
+                
         bool AddAura(Aura *aur, bool uniq = false);
 
         void RemoveFirstAuraByCategory(uint32 category);
