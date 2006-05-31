@@ -48,9 +48,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY    //missing 4
     &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_FEAR = 7,
+    &Aura::HandleFear,                                      //SPELL_AURA_MOD_FEAR = 7,
     &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_ATTACKSPEED = 9,
+    &Aura::HandleModAttackSpeed,                            //SPELL_AURA_MOD_ATTACKSPEED = 9,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_THREAT = 10,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TAUNT = 11,
     &Aura::HandleAuraModStun,                               //SPELL_AURA_MOD_STUN = 12,
@@ -183,7 +183,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_FORCE_REACTION = 139,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_HASTE = 140,
     &Aura::HandleRangedAmmoHaste,                           //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_BASE_RESISTANCE_PCT = 142,
+    &Aura::HandleAuraModBaseResistancePCT,                  //SPELL_AURA_MOD_BASE_RESISTANCE_PCT = 142,
     &Aura::HandleAuraModResistanceExclusive,                //SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE = 143,
     &Aura::HandleAuraSafeFall,                              //SPELL_AURA_SAFE_FALL = 144,
     &Aura::HandleNULL,                                      //SPELL_AURA_CHARISMA = 145,
@@ -642,7 +642,13 @@ void Aura::HandleModConfuse(bool apply)
     else
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
 }
-
+void Aura::HandleFear(bool Apply)
+{
+	if( Apply )
+		m_target->addUnitState(UNIT_STAT_FLEEING);
+	else
+		m_target->clearUnitState(UNIT_STAT_FLEEING);
+}
 void HandleHealEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
@@ -667,6 +673,14 @@ void Aura::HandlePeriodicHeal(bool apply)
     }
 }
 
+void Aura::HandleModAttackSpeed(bool apply)
+{
+	int percent = m_modifier->m_amount;
+	uint32 curattcktime =  m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+	if(apply)
+		m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime/(1+percent/100)));
+	else m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime*(1+percent/100)));
+}
 void Aura::HandleAuraWaterWalk(bool apply)
 {
     WorldPacket data;
@@ -1704,6 +1718,10 @@ void Aura::HandleModResistancePercent(bool apply)
         m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_05, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_05) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
         m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_06, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_06) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
     }
+}
+void Aura::HandleAuraModBaseResistancePCT(bool apply)
+{
+    HandleModResistancePercent(apply);
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply)
