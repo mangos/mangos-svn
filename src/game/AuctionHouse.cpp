@@ -465,8 +465,8 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                         if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
                                         {
                                             name = proto->Name1;
-                                            std::transform( name.begin(), name.end(), name.begin(), tolower );
-                                            std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), tolower );
+											std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+											std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
                                             if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
                                             {
                                                 count++;
