@@ -210,187 +210,187 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
     m_duration = GetDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
-    
+
     // Formula not done.  We will define some auras as being positive in nature
     // and some as negative in nature, and if the base points are opposing, it is
     // the opposite.
-    
+
     long basePoints = spellproto->EffectBasePoints[eff];
     switch(spellproto->EffectApplyAuraName[eff])
     {
         case SPELL_AURA_MOD_THREAT:
         case SPELL_AURA_PERIODIC_DAMAGE:
-        // Below are guesses
-        case SPELL_AURA_PERIODIC_TRIGGER_SPELL:         // Probably you need to look at the
-                                                        // triggered spell
+            // Below are guesses
+        case SPELL_AURA_PERIODIC_TRIGGER_SPELL:             // Probably you need to look at the
+            // triggered spell
         case SPELL_AURA_MOD_TOTAL_THREAT:
             // Positive if base points are negative
             m_positive = (basePoints < 0);
             break;
-        /*
-        case SPELL_AURA_BIND_SIGHT:     
-        case SPELL_AURA_DUMMY:
-        case SPELL_AURA_MOD_MANA_REGEN_INTERRUPT:
-        case SPELL_AURA_MOD_POWER_REGEN_PERCENT:
-        case SPELL_AURA_MOD_STEALTH:// Above and including this line is certain, below are guesses
-        case SPELL_AURA_NONE:
-        case SPELL_AURA_PERIODIC_HEAL:
-        case SPELL_AURA_MOD_ATTACKSPEED:
-        case SPELL_AURA_MOD_DAMAGE_DONE:
-        case SPELL_AURA_MOD_DETECT:
-        case SPELL_AURA_MOD_INVISIBILITY:
-        case SPELL_AURA_MOD_INVISIBILITY_DETECTION:
-        case SPELL_AURA_OBS_MOD_SPIRIT:
-        case SPELL_AURA_MOD_RESISTANCE:
-        case SPELL_AURA_PERIODIC_ENERGIZE:
-        case SPELL_AURA_REFLECT_SPELLS:
-        case SPELL_AURA_MOD_STAT:
-        case SPELL_AURA_MOD_SKILL:
-        case SPELL_AURA_MOD_INCREASE_SPEED:
-        case SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED:
-        case SPELL_AURA_MOD_DECREASE_SPEED:
-        case SPELL_AURA_MOD_INCREASE_HEALTH:
-        case SPELL_AURA_MOD_INCREASE_ENERGY:
-        case SPELL_AURA_MOD_SHAPESHIFT:
-        case SPELL_AURA_EFFECT_IMMUNITY:
-        case SPELL_AURA_STATE_IMMUNITY:
-        case SPELL_AURA_SCHOOL_IMMUNITY:
-        case SPELL_AURA_DAMAGE_IMMUNITY:
-        case SPELL_AURA_DISPEL_IMMUNITY:
-        case SPELL_AURA_PROC_TRIGGER_SPELL:
-        case SPELL_AURA_TRACK_CREATURES:
-        case SPELL_AURA_TRACK_RESOURCES:
-        case SPELL_AURA_MOD_PARRY_SKILL:
-        case SPELL_AURA_MOD_PARRY_PERCENT:
-        case SPELL_AURA_MOD_DODGE_SKILL:
-        case SPELL_AURA_MOD_DODGE_PERCENT:
-        case SPELL_AURA_MOD_BLOCK_SKILL:
-        case SPELL_AURA_MOD_BLOCK_PERCENT:
-        case SPELL_AURA_MOD_CRIT_PERCENT:
-        case SPELL_AURA_MOD_HIT_CHANCE:
-        case SPELL_AURA_MOD_SPELL_HIT_CHANCE:
-        case SPELL_AURA_TRANSFORM:
-        case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
-        case SPELL_AURA_MOD_INCREASE_SWIM_SPEED:
-        case SPELL_AURA_MOD_DAMAGE_DONE_CREATURE:
-        case SPELL_AURA_MOD_SCALE:
-        case SPELL_AURA_MOD_CASTING_SPEED:
-        case SPELL_AURA_FEIGN_DEATH:
-        case SPELL_AURA_MOD_DISARM:
-        case SPELL_AURA_MOD_STALKED:
-        case SPELL_AURA_SCHOOL_ABSORB:
-        case SPELL_AURA_EXTRA_ATTACKS:
-        case SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL:
-        case SPELL_AURA_MOD_POWER_COST:
-        case SPELL_AURA_MOD_POWER_COST_SCHOOL:
-        case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
-        case SPELL_AURA_MOD_LANGUAGE:
-        case SPELL_AURA_FAR_SIGHT:
-        case SPELL_AURA_MECHANIC_IMMUNITY:
-        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
-        case SPELL_AURA_MOD_PERCENT_STAT:
-        case SPELL_AURA_SPLIT_DAMAGE:
-        case SPELL_AURA_WATER_BREATHING:
-        case SPELL_AURA_MOD_BASE_RESISTANCE:
-        case SPELL_AURA_MOD_REGEN:
-        case SPELL_AURA_MOD_POWER_REGEN:
-        case SPELL_AURA_CHANNEL_DEATH_ITEM:
-        case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
-        case SPELL_AURA_MOD_PERCENT_REGEN:
-        case SPELL_AURA_MOD_RESIST_CHANCE:
-        case SPELL_AURA_MOD_DETECT_RANGE:
-        case SPELL_AURA_MOD_UNATTACKABLE:
-        case SPELL_AURA_MANA_SHIELD:
-        case SPELL_AURA_MOD_SKILL_TALENT:
-        case SPELL_AURA_MOD_ATTACK_POWER:
-        case SPELL_AURA_AURAS_VISIBLE:
-        case SPELL_AURA_MOD_RESISTANCE_PCT:
-        case SPELL_AURA_MOD_CREATURE_ATTACK_POWER:
-        case SPELL_AURA_WATER_WALK:
-        case SPELL_AURA_FEATHER_FALL:
-        case SPELL_AURA_HOVER:
-        case SPELL_AURA_ADD_FLAT_MODIFIER:
-        case SPELL_AURA_ADD_PCT_MODIFIER:
-        case SPELL_AURA_ADD_TARGET_TRIGGER:
-        case SPELL_AURA_ADD_CASTER_HIT_TRIGGER:
-        case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
-        case SPELL_AURA_MOD_HEALING:
-        case SPELL_AURA_IGNORE_REGEN_INTERRUPT:
-        case SPELL_AURA_MOD_MECHANIC_RESISTANCE:
-        case SPELL_AURA_MOD_HEALING_PCT:
-        case SPELL_AURA_SHARE_PET_TRACKING:
-        case SPELL_AURA_UNTRACKABLE:
-        case SPELL_AURA_EMPATHY:
-        case SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT:
-        case SPELL_AURA_MOD_POWER_COST_PCT:
-        case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
-        case SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN:
-        case SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT:
-        case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
-        case SPELL_AURA_MOD_POSSESS_PET:
-        case SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS:
-        case SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS:
-        case SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER:
-        case SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT:
-        case SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT:
-        case SPELL_AURA_MOD_HEALING_DONE:
-        case SPELL_AURA_MOD_HEALING_DONE_PERCENT:
-        case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
-        case SPELL_AURA_MOD_HASTE:
-        case SPELL_AURA_FORCE_REACTION:
-        case SPELL_AURA_MOD_RANGED_HASTE:
-        case SPELL_AURA_MOD_RANGED_AMMO_HASTE:
-        case SPELL_AURA_MOD_BASE_RESISTANCE_PCT:
-        case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
-        case SPELL_AURA_SAFE_FALL:
-        case SPELL_AURA_CHARISMA:
-        case SPELL_AURA_ADD_CREATURE_IMMUNITY:
-        case SPELL_AURA_RETAIN_COMBO_POINTS:
-        case SPELL_AURA_RESIST_PUSHBACK:
-        case SPELL_AURA_MOD_SHIELD_BLOCK:
-        case SPELL_AURA_TRACK_STEALTHED:
-        case SPELL_AURA_MOD_DETECTED_RANGE:
-        case SPELL_AURA_SPLIT_DAMAGE_FLAT:
-        case SPELL_AURA_MOD_STEALTH_LEVEL:
-        case SPELL_AURA_MOD_WATER_BREATHING:
-        case SPELL_AURA_MOD_REPUTATION_ADJUST:
-        case SPELL_AURA_MOD_POSSESS:
-        case SPELL_AURA_MOD_CONFUSE:
-        case SPELL_AURA_MOD_CHARM:
-        case SPELL_AURA_MOD_FEAR:
-        case SPELL_AURA_MOD_TAUNT:
-        case SPELL_AURA_MOD_STUN:
-        case SPELL_AURA_MOD_DAMAGE_TAKEN:
-        case SPELL_AURA_DAMAGE_SHIELD:
-        case SPELL_AURA_MOD_PACIFY:
-        case SPELL_AURA_MOD_ROOT:
-        case SPELL_AURA_MOD_SILENCE:
-        case SPELL_AURA_PROC_TRIGGER_DAMAGE:
-        case SPELL_AURA_PERIODIC_LEECH:
-        case SPELL_AURA_MOD_PACIFY_SILENCE:
-        case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
-        case SPELL_AURA_PERIODIC_MANA_FUNNEL:
-        case SPELL_AURA_PERIODIC_MANA_LEECH:
-        case SPELL_AURA_MOUNTED:
-        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-        case SPELL_AURA_PREVENTS_FLEEING:
-        case SPELL_AURA_INTERRUPT_REGEN:
-        case SPELL_AURA_GHOST:
-        case SPELL_AURA_SPELL_MAGNET:
-        case SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN:
-        case SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT:
-        case SPELL_AURA_PERSUADED:
-        case SPELL_AURA_PET_DAMAGE_MULTI:       */
+            /*
+            case SPELL_AURA_BIND_SIGHT:
+            case SPELL_AURA_DUMMY:
+            case SPELL_AURA_MOD_MANA_REGEN_INTERRUPT:
+            case SPELL_AURA_MOD_POWER_REGEN_PERCENT:
+            case SPELL_AURA_MOD_STEALTH:// Above and including this line is certain, below are guesses
+            case SPELL_AURA_NONE:
+            case SPELL_AURA_PERIODIC_HEAL:
+            case SPELL_AURA_MOD_ATTACKSPEED:
+            case SPELL_AURA_MOD_DAMAGE_DONE:
+            case SPELL_AURA_MOD_DETECT:
+            case SPELL_AURA_MOD_INVISIBILITY:
+            case SPELL_AURA_MOD_INVISIBILITY_DETECTION:
+            case SPELL_AURA_OBS_MOD_SPIRIT:
+            case SPELL_AURA_MOD_RESISTANCE:
+            case SPELL_AURA_PERIODIC_ENERGIZE:
+            case SPELL_AURA_REFLECT_SPELLS:
+            case SPELL_AURA_MOD_STAT:
+            case SPELL_AURA_MOD_SKILL:
+            case SPELL_AURA_MOD_INCREASE_SPEED:
+            case SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED:
+            case SPELL_AURA_MOD_DECREASE_SPEED:
+            case SPELL_AURA_MOD_INCREASE_HEALTH:
+            case SPELL_AURA_MOD_INCREASE_ENERGY:
+            case SPELL_AURA_MOD_SHAPESHIFT:
+            case SPELL_AURA_EFFECT_IMMUNITY:
+            case SPELL_AURA_STATE_IMMUNITY:
+            case SPELL_AURA_SCHOOL_IMMUNITY:
+            case SPELL_AURA_DAMAGE_IMMUNITY:
+            case SPELL_AURA_DISPEL_IMMUNITY:
+            case SPELL_AURA_PROC_TRIGGER_SPELL:
+            case SPELL_AURA_TRACK_CREATURES:
+            case SPELL_AURA_TRACK_RESOURCES:
+            case SPELL_AURA_MOD_PARRY_SKILL:
+            case SPELL_AURA_MOD_PARRY_PERCENT:
+            case SPELL_AURA_MOD_DODGE_SKILL:
+            case SPELL_AURA_MOD_DODGE_PERCENT:
+            case SPELL_AURA_MOD_BLOCK_SKILL:
+            case SPELL_AURA_MOD_BLOCK_PERCENT:
+            case SPELL_AURA_MOD_CRIT_PERCENT:
+            case SPELL_AURA_MOD_HIT_CHANCE:
+            case SPELL_AURA_MOD_SPELL_HIT_CHANCE:
+            case SPELL_AURA_TRANSFORM:
+            case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
+            case SPELL_AURA_MOD_INCREASE_SWIM_SPEED:
+            case SPELL_AURA_MOD_DAMAGE_DONE_CREATURE:
+            case SPELL_AURA_MOD_SCALE:
+            case SPELL_AURA_MOD_CASTING_SPEED:
+            case SPELL_AURA_FEIGN_DEATH:
+            case SPELL_AURA_MOD_DISARM:
+            case SPELL_AURA_MOD_STALKED:
+            case SPELL_AURA_SCHOOL_ABSORB:
+            case SPELL_AURA_EXTRA_ATTACKS:
+            case SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL:
+            case SPELL_AURA_MOD_POWER_COST:
+            case SPELL_AURA_MOD_POWER_COST_SCHOOL:
+            case SPELL_AURA_REFLECT_SPELLS_SCHOOL:
+            case SPELL_AURA_MOD_LANGUAGE:
+            case SPELL_AURA_FAR_SIGHT:
+            case SPELL_AURA_MECHANIC_IMMUNITY:
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
+            case SPELL_AURA_MOD_PERCENT_STAT:
+            case SPELL_AURA_SPLIT_DAMAGE:
+            case SPELL_AURA_WATER_BREATHING:
+            case SPELL_AURA_MOD_BASE_RESISTANCE:
+            case SPELL_AURA_MOD_REGEN:
+            case SPELL_AURA_MOD_POWER_REGEN:
+            case SPELL_AURA_CHANNEL_DEATH_ITEM:
+            case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
+            case SPELL_AURA_MOD_PERCENT_REGEN:
+            case SPELL_AURA_MOD_RESIST_CHANCE:
+            case SPELL_AURA_MOD_DETECT_RANGE:
+            case SPELL_AURA_MOD_UNATTACKABLE:
+            case SPELL_AURA_MANA_SHIELD:
+            case SPELL_AURA_MOD_SKILL_TALENT:
+            case SPELL_AURA_MOD_ATTACK_POWER:
+            case SPELL_AURA_AURAS_VISIBLE:
+            case SPELL_AURA_MOD_RESISTANCE_PCT:
+            case SPELL_AURA_MOD_CREATURE_ATTACK_POWER:
+            case SPELL_AURA_WATER_WALK:
+            case SPELL_AURA_FEATHER_FALL:
+            case SPELL_AURA_HOVER:
+            case SPELL_AURA_ADD_FLAT_MODIFIER:
+            case SPELL_AURA_ADD_PCT_MODIFIER:
+            case SPELL_AURA_ADD_TARGET_TRIGGER:
+            case SPELL_AURA_ADD_CASTER_HIT_TRIGGER:
+            case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
+            case SPELL_AURA_MOD_HEALING:
+            case SPELL_AURA_IGNORE_REGEN_INTERRUPT:
+            case SPELL_AURA_MOD_MECHANIC_RESISTANCE:
+            case SPELL_AURA_MOD_HEALING_PCT:
+            case SPELL_AURA_SHARE_PET_TRACKING:
+            case SPELL_AURA_UNTRACKABLE:
+            case SPELL_AURA_EMPATHY:
+            case SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT:
+            case SPELL_AURA_MOD_POWER_COST_PCT:
+            case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
+            case SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN:
+            case SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT:
+            case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
+            case SPELL_AURA_MOD_POSSESS_PET:
+            case SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS:
+            case SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS:
+            case SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER:
+            case SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT:
+            case SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT:
+            case SPELL_AURA_MOD_HEALING_DONE:
+            case SPELL_AURA_MOD_HEALING_DONE_PERCENT:
+            case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+            case SPELL_AURA_MOD_HASTE:
+            case SPELL_AURA_FORCE_REACTION:
+            case SPELL_AURA_MOD_RANGED_HASTE:
+            case SPELL_AURA_MOD_RANGED_AMMO_HASTE:
+            case SPELL_AURA_MOD_BASE_RESISTANCE_PCT:
+            case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
+            case SPELL_AURA_SAFE_FALL:
+            case SPELL_AURA_CHARISMA:
+            case SPELL_AURA_ADD_CREATURE_IMMUNITY:
+            case SPELL_AURA_RETAIN_COMBO_POINTS:
+            case SPELL_AURA_RESIST_PUSHBACK:
+            case SPELL_AURA_MOD_SHIELD_BLOCK:
+            case SPELL_AURA_TRACK_STEALTHED:
+            case SPELL_AURA_MOD_DETECTED_RANGE:
+            case SPELL_AURA_SPLIT_DAMAGE_FLAT:
+            case SPELL_AURA_MOD_STEALTH_LEVEL:
+            case SPELL_AURA_MOD_WATER_BREATHING:
+            case SPELL_AURA_MOD_REPUTATION_ADJUST:
+            case SPELL_AURA_MOD_POSSESS:
+            case SPELL_AURA_MOD_CONFUSE:
+            case SPELL_AURA_MOD_CHARM:
+            case SPELL_AURA_MOD_FEAR:
+            case SPELL_AURA_MOD_TAUNT:
+            case SPELL_AURA_MOD_STUN:
+            case SPELL_AURA_MOD_DAMAGE_TAKEN:
+            case SPELL_AURA_DAMAGE_SHIELD:
+            case SPELL_AURA_MOD_PACIFY:
+            case SPELL_AURA_MOD_ROOT:
+            case SPELL_AURA_MOD_SILENCE:
+            case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+            case SPELL_AURA_PERIODIC_LEECH:
+            case SPELL_AURA_MOD_PACIFY_SILENCE:
+            case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
+            case SPELL_AURA_PERIODIC_MANA_FUNNEL:
+            case SPELL_AURA_PERIODIC_MANA_LEECH:
+            case SPELL_AURA_MOUNTED:
+            case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+            case SPELL_AURA_PREVENTS_FLEEING:
+            case SPELL_AURA_INTERRUPT_REGEN:
+            case SPELL_AURA_GHOST:
+            case SPELL_AURA_SPELL_MAGNET:
+            case SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN:
+            case SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT:
+            case SPELL_AURA_PERSUADED:
+            case SPELL_AURA_PET_DAMAGE_MULTI:       */
         default:
             m_positive = (basePoints >= 0);
             break;
-        // This heuristic is pretty good, might be part of the whole formula
-        // leave it in in case the above doesn't work out.
-        //// Fall through to a (pretty decent) heuristic
-        //if (spellproto->EffectImplicitTargetA[eff] >= 10)
-        //    m_positive = false;
-        //else
-        //    m_positive = true;
+            // This heuristic is pretty good, might be part of the whole formula
+            // leave it in in case the above doesn't work out.
+            //// Fall through to a (pretty decent) heuristic
+            //if (spellproto->EffectImplicitTargetA[eff] >= 10)
+            //    m_positive = false;
+            //else
+            //    m_positive = true;
     }
 
     uint32 type = 0;
@@ -412,7 +412,7 @@ m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_pro
 
 uint32 Aura::CalculateDamage()
 {
-	SpellEntry* spellproto = GetSpellProto();
+    SpellEntry* spellproto = GetSpellProto();
     uint32 value = 0;
     uint32 level;
     if(!m_target)
@@ -520,7 +520,8 @@ void Aura::_AddAura()
         if(aura)
         {
             samespell = true;
-            if(i == m_effIndex) {
+            if(i == m_effIndex)
+            {
                 slot = aura->GetAuraSlot();
                 maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
             }
@@ -528,8 +529,8 @@ void Aura::_AddAura()
     }
     if(m_duration <= maxduration && slot != 0xFF)
         return;
-    
-	WorldPacket data;
+
+    WorldPacket data;
     if(!samespell)
     {
         if (IsPositive())
@@ -554,8 +555,8 @@ void Aura::_AddAura()
                 }
             }
         }
-	}
-	if (slot == 0xFF)
+    }
+    if (slot == 0xFF)
     {
         return;
     }
@@ -642,13 +643,15 @@ void Aura::HandleModConfuse(bool apply)
     else
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
 }
+
 void Aura::HandleFear(bool Apply)
 {
-	if( Apply )
-		m_target->addUnitState(UNIT_STAT_FLEEING);
-	else
-		m_target->clearUnitState(UNIT_STAT_FLEEING);
+    if( Apply )
+        m_target->addUnitState(UNIT_STAT_FLEEING);
+    else
+        m_target->clearUnitState(UNIT_STAT_FLEEING);
 }
+
 void HandleHealEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
@@ -657,7 +660,7 @@ void HandleHealEvent(void *obj)
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-    if(!m_target || m_target->m_immuneToMechanic == 16)    //Can't heal
+    if(!m_target || m_target->m_immuneToMechanic == 16)     //Can't heal
         return;
     if(apply)
     {
@@ -675,12 +678,13 @@ void Aura::HandlePeriodicHeal(bool apply)
 
 void Aura::HandleModAttackSpeed(bool apply)
 {
-	int percent = m_modifier->m_amount;
-	uint32 curattcktime =  m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
-	if(apply)
-		m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime/(1+percent/100)));
-	else m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime*(1+percent/100)));
+    int percent = m_modifier->m_amount;
+    uint32 curattcktime =  m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+    if(apply)
+        m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime/(1+percent/100)));
+    else m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime*(1+percent/100)));
 }
+
 void Aura::HandleAuraWaterWalk(bool apply)
 {
     WorldPacket data;
@@ -970,30 +974,31 @@ void Aura::HandleAuraDamageShield(bool apply)
 
 void Aura::HandleModStealth(bool apply)
 {
-    if(apply) {
-		m_target->m_stealthvalue = CalculateDamage();
+    if(apply)
+    {
+        m_target->m_stealthvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-	}
-	else
-	{
-		SendCoolDownEvent();
-		m_target->m_stealthvalue = 0;
+    }
+    else
+    {
+        SendCoolDownEvent();
+        m_target->m_stealthvalue = 0;
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-	}
+    }
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->SendUpdateToPlayer((Player*)m_target);
 }
 
 void Aura::HandleModDetect(bool apply)
 {
-	if(apply)
-	{
-		m_target->m_immuneToStealth = CalculateDamage();
-	}
-	else
-	{
-		m_target->m_immuneToStealth = 0;
-	}
+    if(apply)
+    {
+        m_target->m_immuneToStealth = CalculateDamage();
+    }
+    else
+    {
+        m_target->m_immuneToStealth = 0;
+    }
 }
 
 void Aura::HandleAuraModResistance(bool apply)
@@ -1346,7 +1351,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         if(m_target->m_ShapeShiftForm)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
 
-		m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
             m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
@@ -1357,7 +1362,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         }
         m_target->m_ShapeShiftForm = m_spellId;
         m_target->m_form = m_modifier->m_miscvalue;
-        
+
         if(spellInfo)
         {
             Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
@@ -1367,7 +1372,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             p_spell->prepare(&targets);
         }
     }
-    else 
+    else
     {
         m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
@@ -1549,7 +1554,7 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-    if(!m_target || m_target->m_immuneToMechanic == 17)    //Can't transform
+    if(!m_target || m_target->m_immuneToMechanic == 17)     //Can't transform
         return;
     if (apply)
     {
@@ -1719,6 +1724,7 @@ void Aura::HandleModResistancePercent(bool apply)
         m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_06, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_06) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
     }
 }
+
 void Aura::HandleAuraModBaseResistancePCT(bool apply)
 {
     HandleModResistancePercent(apply);
@@ -1733,12 +1739,11 @@ void Aura::HandleRangedAmmoHaste(bool apply)
     apply ? m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current-(current*100)/(100+percent));
 }
 
-
 void Aura::SendCoolDownEvent()
 {
     WorldPacket data;
     data.Initialize(SMSG_COOLDOWN_EVENT);
     data << uint32(m_spellId) << m_caster->GetGUID();
-    data << uint32(0);	//CoolDown Time ?
+    data << uint32(0);                                      //CoolDown Time ?
     m_caster->SendMessageToSet(&data,true);
 }

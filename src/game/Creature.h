@@ -294,9 +294,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
                 m_deathTimer = m_corpseDelay;
 
                 if(!IsStopped()) StopMoving();
-				s = CORPSE;
+                s = CORPSE;
             }
-			Unit::setDeathState(s);
+            Unit::setDeathState(s);
         };
 
         void SaveToDB();

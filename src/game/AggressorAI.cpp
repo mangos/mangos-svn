@@ -86,12 +86,12 @@ void AggressorAI::AttackStop(Unit *)
 void AggressorAI::_stopAttack()
 {
     assert( i_creature.getVictim() != NULL );
-    
+
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature.AttackStop();
-		return;
+        return;
     }
     else if( !i_creature.getVictim()->isAlive() )
     {
@@ -108,12 +108,12 @@ void AggressorAI::_stopAttack()
     else
     {
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_creature.GetGUIDLow());
-		//i_state = STATE_LOOK_AT_VICTIM;
+        //i_state = STATE_LOOK_AT_VICTIM;
         //i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
     i_creature.AttackStop();
-    
-	//i_creature.StopMoving();
+
+    //i_creature.StopMoving();
     //i_creature->Idle();
     static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
 }
@@ -201,14 +201,14 @@ AggressorAI::UpdateAI(const uint32 diff)
 bool
 AggressorAI::IsVisible(Unit *pl) const
 {
-	bool seestealth = true;
-	uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
-	float dist = i_creature.GetDistanceSq(pl);
-	if(pl->isStealth())
-	{
-		int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
-		seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_immuneToStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);
-	}
+    bool seestealth = true;
+    uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
+    float dist = i_creature.GetDistanceSq(pl);
+    if(pl->isStealth())
+    {
+        int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
+        seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_immuneToStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);
+    }
                                                             // offset=1.0
     return pl->isTargetableForAttack() && seestealth && (dist * 1.0 <= sight) ;
 }

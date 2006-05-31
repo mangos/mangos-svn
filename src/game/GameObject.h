@@ -66,8 +66,8 @@ class MANGOS_DLL_SPEC GameObject : public Object
         void generateLoot();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetSespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
-		bool isFinished() { return m_respawnTimer == 0;}
-		void Delete();
+        bool isFinished() { return m_respawnTimer == 0;}
+        void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}
         uint32 GetSpellId() { return m_spellId;}
         void getFishLoot(Loot *loot,uint32 lootid);
@@ -78,7 +78,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
         uint32      lootid;
     protected:
 
-		uint32      m_spellId;
+        uint32      m_spellId;
         uint32      m_respawnTimer;
         uint32      m_respawnDelayTimer;
         uint32      m_flags;

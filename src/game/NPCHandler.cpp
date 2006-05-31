@@ -187,11 +187,11 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         }
     }
 
-	if(!proto)
-	{
-		sLog.outError("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
-		return;
-	}
+    if(!proto)
+    {
+        sLog.outError("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
+        return;
+    }
     playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
     if( playerGold >= proto->spellcost )
     {
@@ -210,7 +210,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         Spell *spell;
         if(proto->spell->SpellVisual == 222)
             spell = new Spell(_player, proto->spell, false, NULL);
-		else
+        else
             spell = new Spell(unit, proto->spell, false, NULL);
 
         SpellCastTargets targets;

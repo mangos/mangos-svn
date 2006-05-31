@@ -77,13 +77,13 @@ void PetAI::_stopAttack()
 {
     if(!i_pet.getVictim())
         return;
-    
+
     if( !i_pet.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
         i_pet.StopMoving();
         i_pet->Idle();
-		i_pet.AttackStop();
+        i_pet.AttackStop();
         return;
     }
     else if( !i_pet.getVictim()->isAlive() )
@@ -102,7 +102,7 @@ void PetAI::_stopAttack()
     {
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_pet.GetGUIDLow());
     }
-    
+
     if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
@@ -159,9 +159,10 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else
     {
-        if(i_owner->isInCombat()) {
+        if(i_owner->isInCombat())
+        {
             AttackStart(i_owner->getAttackerForHelper());
-        }   
+        }
     }
 }
 
@@ -177,7 +178,7 @@ void PetAI::_taggedToKill(Unit *u)
     i_pet.clearUnitState(UNIT_STAT_FOLLOW);
     i_pet.Attack(u);
     i_pet->Mutate(new TargetedMovementGenerator(*u));
-    
+
     /*SpellEntry *spellInfo;
     if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack( u )))
     {

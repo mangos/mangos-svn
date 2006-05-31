@@ -54,14 +54,13 @@
 #define HITINFO_NORMALSWING2        0x02
 #define HITINFO_LEFTSWING           0x04
 #define HITINFO_MISS                0x10
-#define HITINFO_HITSTRANGESOUND1    0x20 //maybe linked to critical hit
-#define HITINFO_HITSTRANGESOUND2    0x40 //maybe linked to critical hit
+#define HITINFO_HITSTRANGESOUND1    0x20                    //maybe linked to critical hit
+#define HITINFO_HITSTRANGESOUND2    0x40                    //maybe linked to critical hit
 #define HITINFO_CRITICALHIT         0x80
 #define HITINFO_GLANSING            0x4000
 #define HITINFO_CRUSHING            0x8000
 #define HITINFO_NOACTION            0x10000
 #define HITINFO_SWINGNOHITSOUND     0x80000
-
 
 #define NULL_SLOT                   255
 
@@ -164,13 +163,15 @@ class MANGOS_DLL_SPEC Unit : public Object
         }
         inline bool removeAttackee(Unit *pAttacker)
         {
-            if (pAttacker == getVictim()) {
+            if (pAttacker == getVictim())
+            {
                 AttackStop();
                 return true;
             }
             return false;
         }
-        Unit * getAttackerForHelper() {    // If someone wants to help, who to give them
+        Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
+        {
             if (getVictim() != NULL)
                 return getVictim();
 
@@ -181,7 +182,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         }
         void Attack(Unit *victim);
         void AttackStop();
-        Unit * getVictim() { return m_attacking; } 
+        Unit * getVictim() { return m_attacking; }
 
         inline void addUnitState(uint32 f) { m_state |= f; };
         inline bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -237,7 +238,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttacking() const { return (m_state & UNIT_STAT_ATTACKING); }
         bool isAttacked()  const { return (m_state & UNIT_STAT_ATTACK_BY); }
         bool HasAuraType(uint32 auraType) const;
-        bool isStealth() const { return HasAuraType(SPELL_AURA_MOD_STEALTH); } // cache this in a bool someday
+        bool isStealth() const                              // cache this in a bool someday
+        {
+            return HasAuraType(SPELL_AURA_MOD_STEALTH);
+        }
         bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !isStealth(); }
 
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
@@ -250,17 +254,20 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked);
 
-
         virtual void DealWithSpellDamage(DynamicObject &);
         virtual void MoveOutOfRange(Player &) {  }
 
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
         DeathState getDeathState() { return m_deathState; }
-        void setDeathState(DeathState s) {
-            if (s != ALIVE) {
-                if (isInCombat()) {
-                    while (m_attackers.size() != 0) {
+        void setDeathState(DeathState s)
+        {
+            if (s != ALIVE)
+            {
+                if (isInCombat())
+                {
+                    while (m_attackers.size() != 0)
+                    {
                         AttackerSet::iterator iter = m_attackers.begin();
                         if (!((*iter)->removeAttackee(this)))
                             m_attackers.erase(iter);
@@ -274,7 +281,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             }
             m_deathState = s;
         }
-                
+
         bool AddAura(Aura *aur, bool uniq = false);
 
         void RemoveFirstAuraByCategory(uint32 category);
@@ -282,7 +289,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
         void RemoveSpellsCausingAura(uint32 auraType);
-        
+
         void RemoveAllAuras();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
@@ -384,6 +391,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
     private:
-        uint32 m_state;     // Even derived shouldn't modify
+        uint32 m_state;                                     // Even derived shouldn't modify
 };
 #endif

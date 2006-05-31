@@ -1094,8 +1094,8 @@ void Spell::EffectHealMaxHealth(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
-	if(unitTarget->m_immuneToMechanic == 16)
-		return;
+    if(unitTarget->m_immuneToMechanic == 16)
+        return;
 
     uint32 heal;
     heal = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
@@ -1196,10 +1196,10 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, ((Player*)m_caster)->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
-	pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
 
-	m_caster->AddGameObject(pGameObj);
+    m_caster->AddGameObject(pGameObj);
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     Player *caster = (Player*)m_caster;
@@ -1671,9 +1671,9 @@ void Spell::EffectSummonObject(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-	pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
-	m_caster->AddGameObject(pGameObj);
+    m_caster->AddGameObject(pGameObj);
 
     sLog.outError("AddObject at Spell.cpp 1100");
 
@@ -1816,7 +1816,7 @@ void Spell::EffectTransmitted(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, goInfo->type);
     pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS, goInfo->flags);
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, goInfo->faction);
-	pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");

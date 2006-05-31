@@ -442,8 +442,8 @@ void Spell::cast()
     WorldPacket data;
 
     uint8 castResult = 0;
-	if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
-		m_caster->SetInFront(unitTarget);
+    if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
+        m_caster->SetInFront(unitTarget);
     castResult = CanCast();
     if(castResult == 0)
     {
@@ -850,11 +850,14 @@ void Spell::TakePower()
 
     if(currentPower < m_spellInfo->manaCost)
         m_caster->SetUInt32Value(powerField, 0);
-    else {
+    else
+    {
         m_caster->SetUInt32Value(powerField, currentPower - m_spellInfo->manaCost);
-        if (powerField == UNIT_FIELD_POWER1) {
+        if (powerField == UNIT_FIELD_POWER1)
+        {
             // Set the five second timer
-            if (m_caster->GetTypeId() == TYPEID_PLAYER) {
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
                 ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
             }
         }
@@ -1018,7 +1021,7 @@ uint32 Spell::CalculateDamage(uint8 i)
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         comboPoints = (uint8)((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
-	value += m_spellInfo->EffectBaseDice[i];
+    value += m_spellInfo->EffectBaseDice[i];
     if(randomPoints <= 1)
         value = basePoints+1;
     else
