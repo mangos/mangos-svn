@@ -208,7 +208,8 @@ SpellEntry *Unit::reachWithSpellAttack(Unit *pVictim)
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
 {
-    float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
+    assert(pVictim);
+	float reach = GetFloatValue(UNIT_FIELD_COMBATREACH);
     if( reach <= 0.0f )
         reach = 1.0f;
     float distance = GetDistanceSq(pVictim);

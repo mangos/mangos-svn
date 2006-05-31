@@ -174,6 +174,9 @@ void GuardAI::UpdateAI(const uint32 diff)
                         i_creature.AttackerStateUpdate(i_creature.getVictim(), 0);
                         i_creature.setAttackTimer(0);
 
+						if ( !i_creature.getVictim() )
+							return;
+
                         if( _needToStop() )
                             _stopAttack();
                     }

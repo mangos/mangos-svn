@@ -152,6 +152,9 @@ void PetAI::UpdateAI(const uint32 diff)
                 i_pet.AttackerStateUpdate(i_pet.getVictim(), 0);
                 i_pet.setAttackTimer(0);
 
+				if ( !i_pet.getVictim() )
+					return;
+
                 if( _needToStop() )
                     _stopAttack();
             }
