@@ -140,9 +140,10 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             {
                 owner.SetInFront(&i_target);
                 owner.StopMoving();
-                if(!owner.hasUnitState(UNIT_STAT_FOLLOW)) {
+                if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
+                {
                     //owner.addUnitState(UNIT_STAT_ATTACKING);
-                    owner.Attack(&i_target); //??
+                    owner.Attack(&i_target);                //??
                 }
                 owner.clearUnitState(UNIT_STAT_CHASE);
                 DEBUG_LOG("UNIT IS THERE");
@@ -175,7 +176,7 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
     Spell *spell = new Spell(&owner, spellInfo, false, 0);
     spell->SetAutoRepeat(true);
     //owner.addUnitState(UNIT_STAT_ATTACKING);
-    owner.Attack(&owner); //??
+    owner.Attack(&owner);                                   //??
     owner.clearUnitState(UNIT_STAT_CHASE);
     SpellCastTargets targets;
     targets.setUnitTarget( &i_target );

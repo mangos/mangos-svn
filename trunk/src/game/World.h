@@ -143,7 +143,7 @@ class World
                 return 0;
         }
 
-		void KickPlayer(char * playerName);
+        void KickPlayer(char * playerName);
 
     protected:
 

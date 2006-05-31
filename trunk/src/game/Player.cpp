@@ -602,7 +602,7 @@ void Player::Update( uint32 p_time )
             //    Attack((Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection));
             //    Unit *pVictim = getVictim();
             //}
-            
+
             // default combat reach 10
             // TODO add weapon,skill check
 
@@ -620,7 +620,8 @@ void Player::Update( uint32 p_time )
                 pldistance = pldistance + 3;
             }
 
-            if (pVictim) {
+            if (pVictim)
+            {
                 if( GetDistanceSq(pVictim) > pldistance )
                 {
                     setAttackTimer(uint32(1000));
@@ -848,13 +849,15 @@ void Player::RegenerateAll()
     // TODO: Replace the 20555 with test for if they have an aura of regeneration
     if (!isInCombat() || Player::HasSpell(20555))
     {
-        Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);  //health
+                                                            //health
+        Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
         if (!isInCombat())
-            Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);  //rage
+                                                            //rage
+            Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
     }
 
-    Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4); //energy
-    Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1); //mana
+    Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);   //energy
+    Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);   //mana
 
     m_regenTimer = regenDelay;
 
@@ -875,7 +878,7 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
     float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);
     float RageIncreaseRate = sWorld.getRate(RATE_POWER2);
-    
+
     uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
     uint16 Class = getClass();
 
@@ -900,7 +903,7 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
                 case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
             }
-            if (HasSpell(20555))  // TODO: Should be aura controlled
+            if (HasSpell(20555))                            // TODO: Should be aura controlled
             {
                 if (isInCombat())
                 {
@@ -918,9 +921,12 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
             // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
             uint32 msecSinceLastCast;
             msecSinceLastCast = ((uint32)getMSTime() - m_lastManaUse);
-            if (msecSinceLastCast >= 7000) {
+            if (msecSinceLastCast >= 7000)
+            {
                 ManaIncreaseRate *= 1;
-            } else {
+            }
+            else
+            {
                 long regenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
                 if (msecSinceLastCast < 5000)
                 {
@@ -929,7 +935,7 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 else
                 {
                     ManaIncreaseRate =  (((1 - (float)(msecSinceLastCast - 5000)/2000)) * regenInterrupt)
-                                        + (((float)(msecSinceLastCast - 5000)/2000) * ManaIncreaseRate * 100);
+                        + (((float)(msecSinceLastCast - 5000)/2000) * ManaIncreaseRate * 100);
                     ManaIncreaseRate /= 100;
                 }
             }
@@ -946,10 +952,10 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
             }
             break;
-        case UNIT_FIELD_POWER2:     // Regenerate rage
+        case UNIT_FIELD_POWER2:                             // Regenerate rage
             addvalue = uint32(1.66 * RageIncreaseRate);
             break;
-        case UNIT_FIELD_POWER4:     // Regenerate energy (rogue)
+        case UNIT_FIELD_POWER4:                             // Regenerate energy (rogue)
             addvalue = uint32(20);
             break;
     }
@@ -983,16 +989,17 @@ inline void Player::SendLogXPGain(uint64 GUID,uint32 GivenXP,bool Type, bool Res
     WorldPacket data;
     data.Initialize( SMSG_LOG_XPGAIN );
     data << GUID;
-    data << GivenXP;                                 // given experience
+    data << GivenXP;                                        // given experience
     data << (uint8)Type;                                    // 00-kill_xp type, 01-non_kill_xp type
     if (Rested)
-        data << GivenXP;                             // rested given experience
+        data << GivenXP;                                    // rested given experience
     else
-        data << (GivenXP/2);                         // unrested given experience
-            
-    data << float(1);                                //still a unknown static
+        data << (GivenXP/2);                                // unrested given experience
+
+    data << float(1);                                       //still a unknown static
     GetSession()->SendPacket(&data);
 }
+
 void Player::GiveXP(uint32 xp, const uint64 &guid)
 {
     if ( xp < 1 )
@@ -1344,7 +1351,7 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
                 val  = 0xFFFF + (tmpval+2);
                 mark = 0xFFFF;
             }
-        
+
             switch(spellInfo->EffectApplyAuraName[i])
             {
                 case 107:
@@ -2399,8 +2406,8 @@ void Player::CheckExploreSystem()
 
     if (m_deathState & DEAD)
         return;
-     if (isInFlight())
-         return;
+    if (isInFlight())
+        return;
 
     WorldPacket data;
     uint16 areaFlag=MapManager::Instance().GetMap(GetMapId())->GetAreaFlag(m_positionX,m_positionY);
@@ -2422,7 +2429,7 @@ void Player::CheckExploreSystem()
             data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
             data << area;
             data << XP;
-            GetSession()->SendPacket(&data);            
+            GetSession()->SendPacket(&data);
 
             sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), area);
         }
@@ -2607,6 +2614,7 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
     return false;
 }
+
 //Calculates how many reputation points player gains in wich victim's enemy factions
 void Player::CalculateReputation(Unit *pVictim)
 {
@@ -2615,7 +2623,7 @@ void Player::CalculateReputation(Unit *pVictim)
     if( pVictim->GetTypeId() != TYPEID_PLAYER )
     {
         //SetStanding( FactionTemplate, RepPoints );
-    }    
+    }
 }
 
 //Calculate how many reputation points player gain with the quest
@@ -2625,7 +2633,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
     Creature *qGiver = ObjectAccessor::Instance().GetCreature(*this, guid);
 
     int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
-    
+
     if(dif < 0) dif = 0;
     else if(dif > 5) dif = 5;
 
@@ -2976,7 +2984,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if(proto->ItemSet)
     {
         if (apply)
-           AddItemsSetItem(this,proto);
+            AddItemsSetItem(this,proto);
         else
             RemoveItemsSetItem(this,proto);
     }
@@ -5482,7 +5490,7 @@ uint32 Player::AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible)
             count2 -= pItem->GetCount();
 
         // stacked
-        if(res==2) 
+        if(res==2)
             delete pItem;
 
         return res ? count2 : 0;
@@ -6335,7 +6343,7 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot )
         Item *pItem = m_buybackitems[slot];
         if( pItem )
             pItem->RemoveFromWorld();
-        
+
         m_buybackitems[slot] = NULL;
         SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + slot * 2, 0 );
         SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot, 0 );
@@ -7766,8 +7774,6 @@ void Player::_SaveTutorials()
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
     sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
 }
-
-
 
 /*********************************************************/
 /***              LOW LEVEL FUNCTIONS:Notifiers        ***/

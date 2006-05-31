@@ -368,7 +368,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->SendInitialActions();
 
-
     /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
     {
         uint32 shiftdata=0x01;

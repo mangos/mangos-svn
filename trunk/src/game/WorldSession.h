@@ -77,7 +77,7 @@ class MANGOS_DLL_SPEC WorldSession
         bool Update(uint32 diff);
 
         void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
-        
+
         void SendProficiency (uint8 pr1, uint8 pr2=0, uint8 pr3=0, uint8 pr4=0, uint8 pr5=0);
         void SendCreatureQuery( uint32 entry, uint64 guid );
         void SendTrainerList( uint64 guid );

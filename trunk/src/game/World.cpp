@@ -540,41 +540,46 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
     SendZoneMessage(zone, &data, self);
 }
 
-void World::KickPlayer(char* playerName) {
+void World::KickPlayer(char* playerName)
+{
     SessionMap::iterator itr, next;
-	WorldSession *playerToKick = 0;
+    WorldSession *playerToKick = 0;
 
-	int y = 0;
-	while (!playerName[y] == 0) {
-		if ((playerName[y] >= 'a') && (playerName[y] <= 'z'))
-			playerName[y] -= 'a' - 'A';
-		y++;
-	}
+    int y = 0;
+    while (!playerName[y] == 0)
+    {
+        if ((playerName[y] >= 'a') && (playerName[y] <= 'z'))
+            playerName[y] -= 'a' - 'A';
+        y++;
+    }
 
-	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
-	{
-		next = itr;
-		next++;
-		if(!itr->second)
-			continue;
-		Player *player = itr->second->GetPlayer();
-		if(!player)
-			continue;
-		if( player->IsInWorld() ) {
-			char *tmpPlayerName = new char[strlen(player->GetName()) + 1];
-			strcpy(tmpPlayerName, player->GetName());
-			y = 0;
-			while (!tmpPlayerName[y] == 0) {
-				if ((tmpPlayerName[y] >= 'a') && (tmpPlayerName[y] <= 'z'))
-					tmpPlayerName[y] -= 'a' - 'A';
-				y++;
-			}
-			if (strcmp(playerName, tmpPlayerName) == 0)
-				playerToKick = itr->second;
-			delete tmpPlayerName;
-		}
-	}
-	if (playerToKick) {
-		playerToKick->LogoutPlayer(true);
+    for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+    {
+        next = itr;
+        next++;
+        if(!itr->second)
+            continue;
+        Player *player = itr->second->GetPlayer();
+        if(!player)
+            continue;
+        if( player->IsInWorld() )
+        {
+            char *tmpPlayerName = new char[strlen(player->GetName()) + 1];
+            strcpy(tmpPlayerName, player->GetName());
+            y = 0;
+            while (!tmpPlayerName[y] == 0)
+            {
+                if ((tmpPlayerName[y] >= 'a') && (tmpPlayerName[y] <= 'z'))
+                    tmpPlayerName[y] -= 'a' - 'A';
+                y++;
+            }
+            if (strcmp(playerName, tmpPlayerName) == 0)
+                playerToKick = itr->second;
+            delete tmpPlayerName;
+        }
+    }
+    if (playerToKick)
+    {
+        playerToKick->LogoutPlayer(true);
     }
 }

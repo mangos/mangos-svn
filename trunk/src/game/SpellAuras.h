@@ -52,9 +52,9 @@ class Aura
         void HandleNULL(bool Apply);
         void HandlePeriodicDamage(bool apply);
         void HandleModConfuse(bool apply);
-		void HandleFear(bool Apply);
+        void HandleFear(bool Apply);
         void HandlePeriodicHeal(bool apply);
-		void HandleModAttackSpeed(bool apply);
+        void HandleModAttackSpeed(bool apply);
         void HandleAuraWaterWalk(bool Apply);
         void HandleAuraFeatherFall(bool Apply);
         void HandleAddModifier(bool Apply);
@@ -108,7 +108,7 @@ class Aura
         void HandleModDamagePercentDone(bool Apply);
         void HandleModPercentStat(bool Apply);
         void HandleModResistancePercent(bool Apply);
-		void HandleAuraModBaseResistancePCT(bool Apply);
+        void HandleAuraModBaseResistancePCT(bool Apply);
         void HandleRangedAmmoHaste(bool Apply);
 
         Aura() : m_spellId(0), m_effIndex(0xFFFF), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0xFF), m_positive(false), m_permanent(false), m_isPeriodic(false), m_procSpell(NULL), m_isTrigger(false) {}
@@ -149,7 +149,7 @@ class Aura
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
         void TriggerSpell();
-		void SendCoolDownEvent();
+        void SendCoolDownEvent();
 
     private:
 

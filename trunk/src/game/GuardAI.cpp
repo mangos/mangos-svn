@@ -77,7 +77,7 @@ void GuardAI::AttackStop(Unit *)
 void GuardAI::_stopAttack()
 {
     assert( i_creature.getVictim() != NULL );
-    
+
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
@@ -200,7 +200,7 @@ void GuardAI::UpdateAI(const uint32 diff)
 
 bool GuardAI::IsVisible(Unit *pl) const
 {
-    return pl->isTargetableForAttack() && 
+    return pl->isTargetableForAttack() &&
         i_creature.GetDistanceSq(pl) * 1.0 <= sWorld.getConfig(CONFIG_SIGHT_GUARDER);
 }
 

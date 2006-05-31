@@ -81,7 +81,6 @@ void AddItemsSetItem(Player*player,ItemPrototype *proto)
 
     eff->item_count++;
 
-
     for(uint32 x=0;x<8;x++)
         if(set->spells [x])
                                                             //enough for  spell

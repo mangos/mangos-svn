@@ -331,24 +331,22 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void Die();
         void GiveXP(uint32 xp, const uint64 &guid);
-        
+
         void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
-		/*********************************************************/
+        /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
 
-		
-		bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
+        bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool RemoveItemFromBackpack (uint32 itemId, uint32 count = 1) { return false; }
 
-		
         void AddItemToBuyBackSlot( uint32 slot, Item *pItem );
         Item* GetItemFromBuyBackSlot( uint32 slot );
         void RemoveItemFromBuyBackSlot( uint32 slot );
-		void SendEquipError( uint8 msg );
+        void SendEquipError( uint8 msg );
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -395,8 +393,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };
-		
-		uint32 GetInGameTime() { return m_ingametime; };
+
+        uint32 GetInGameTime() { return m_ingametime; };
         void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
         uint32 GetTimedQuest() { return m_timedquest; };
@@ -442,7 +440,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             ASSERT( (intId < 8) );
             m_Tutorials[intId] = value;
         }
-
 
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
@@ -520,7 +517,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
         void removeAction(uint8 button);
         void SendInitialActions();
-        
+
         void SetInvited() { m_isInvited = true; }
         void SetInGroup() { m_isInGroup = true; }
         void SetLeader(const uint64 &guid) { m_groupLeader = guid; }
@@ -611,7 +608,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove=true);
         int CountFreeBagSlot();
 
-
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
 
@@ -628,10 +624,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendAttackStart(Unit* pVictim);
 
-
         //Low Level Packets
         void PlaySound(uint32 Sound, bool OnlySelf);
-            //notifiers
+        //notifiers
         void SendAttackSwingCantAttack();
         void SendAttackSwingCancelAttack();
         void SendAttackSwingDeadTarget();
@@ -639,14 +634,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
 
-
-
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
         void SendMessageToSet(WorldPacket *data, bool self);
         void SetSheath (uint32 sheathed);
 
-        
-        
         void DeleteFromDB();
         void DeleteCorpse();
 
@@ -689,8 +680,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         bool SetStanding(uint32 FTemplate, int standing);
-		void CalculateReputation(Unit *pVictim);
-		void CalculateReputation(Quest *pQuest, uint64 guid);
+        void CalculateReputation(Unit *pVictim);
+        void CalculateReputation(Quest *pQuest, uint64 guid);
         void LoadReputationFromDBC(void);
         void UpdateReputation(void);
         void UpdateMaxSkills();

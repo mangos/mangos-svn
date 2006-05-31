@@ -86,12 +86,13 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     }
 
     WorldPacket data;
-	LootItem *item = NULL;
-	if (loot->items.size() > lootSlot) {
-		item = &(loot->items[lootSlot]);
-		if (item->is_looted)
-			item = NULL;
-	}
+    LootItem *item = NULL;
+    if (loot->items.size() > lootSlot)
+    {
+        item = &(loot->items[lootSlot]);
+        if (item->is_looted)
+            item = NULL;
+    }
 
     if (item == NULL)
     {
@@ -170,9 +171,9 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
     player->ModifyMoney(loot->gold);
 
-    WorldPacket data; 
-    data.Initialize( SMSG_LOOT_CLEAR_MONEY ); 
-    SendPacket( &data ); 
+    WorldPacket data;
+    data.Initialize( SMSG_LOOT_CLEAR_MONEY );
+    SendPacket( &data );
 
     loot->gold = 0;
 }
@@ -998,7 +999,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     recv_data >> Trigger_ID;
     sLog.outDebug("Trigger ID:%u",Trigger_ID);
 
-    if(GetPlayer()->isInFlight()) 
+    if(GetPlayer()->isInFlight())
     {
         sLog.outDebug("Player '%s' in flight, ignore Area Trigger ID:%u",GetPlayer()->GetName(),Trigger_ID);
         return;

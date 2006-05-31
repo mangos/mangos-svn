@@ -216,9 +216,12 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
     return ( distance <= reach * reach );
 }
 
-void Unit::RemoveSpellsCausingAura(uint32 auraType) {
-    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); iter++) {
-        if ((*iter).second) {
+void Unit::RemoveSpellsCausingAura(uint32 auraType)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); iter++)
+    {
+        if ((*iter).second)
+        {
             if (((*iter).second)->GetModifier()->m_auraname == auraType)
             {
                 uint32 spellId = ((*iter).second)->GetId();
@@ -228,10 +231,10 @@ void Unit::RemoveSpellsCausingAura(uint32 auraType) {
     }
 }
 
-bool Unit::HasAuraType(uint32 auraType) const {
+bool Unit::HasAuraType(uint32 auraType) const
+{
     return (m_AuraModifiers[auraType] != -1);
 }
-
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
@@ -240,7 +243,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    
+
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
         crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
@@ -262,7 +265,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             ((Creature*)pVictim)->generateLoot();
         }
-        
+
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
 
@@ -359,14 +362,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             if(pVictim->GetTypeId() != TYPEID_PLAYER)
                 player->AddQuestsLoot((Creature*)pVictim);
-            
-			//Calculate honor points from this kill
-			player->CalculateHonor(pVictim);
-			//Calculate reputation points from this kill to wich victim's enemy faction
-			player->CalculateReputation(pVictim);
-            
 
-			DEBUG_LOG("DealDamageIsPlayer");
+            //Calculate honor points from this kill
+            player->CalculateHonor(pVictim);
+            //Calculate reputation points from this kill to wich victim's enemy faction
+            player->CalculateReputation(pVictim);
+
+            DEBUG_LOG("DealDamageIsPlayer");
             uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
             uint32 entry = 0;
             if (pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -426,7 +428,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
-            if( GetTypeId() == TYPEID_PLAYER 
+            if( GetTypeId() == TYPEID_PLAYER
                 && getClass() == WARRIOR || m_form == 5 || m_form == 8)
                 ((Player*)this)->CalcRage(damage,true);
         }
@@ -491,7 +493,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     if( (damage-absorb)==0 )
     {
-            SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, 0, damage, absorb,0,1,0);
+        SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, 0, damage, absorb,0,1,0);
         return;
     }
     else damage=damage-absorb;
@@ -786,7 +788,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
     else
         //send miss
         SendAttackStateUpdate(hitInfo|HITINFO_MISS, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
-    
 
     if (GetTypeId() == TYPEID_PLAYER)
         DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg.",
@@ -886,20 +887,27 @@ void Unit::_UpdateSpells( uint32 time )
 
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
     {
-        if ((*i).second) {
+        if ((*i).second)
+        {
             (*(i++)).second->Update( time );
-		}
-	}
+        }
+    }
 
-	for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
     {
-        if ((*i).second) {
-            if ( !(*i).second->GetAuraDuration() && !(*i).second->IsPermanent() ) {
+        if ((*i).second)
+        {
+            if ( !(*i).second->GetAuraDuration() && !(*i).second->IsPermanent() )
+            {
                 RemoveAura(i);
-            } else {
+            }
+            else
+            {
                 ++i;
             }
-        } else {
+        }
+        else
+        {
             ++i;
         }
     }
@@ -1006,13 +1014,16 @@ void Unit::DealWithSpellDamage(DynamicObject &obj)
     obj.DealWithSpellDamage(*this);
 }
 
-long Unit::GetTotalAuraModifier(uint32 ModifierID) {
+long Unit::GetTotalAuraModifier(uint32 ModifierID)
+{
     uint32 modifier = 0;
     bool auraFound = false;
-    
+
     AuraMap::const_iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++) {
-        if ((*i).second && (*i).second->GetModifier()->m_auraname == ModifierID) {
+    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
+    {
+        if ((*i).second && (*i).second->GetModifier()->m_auraname == ModifierID)
+        {
             auraFound = true;
             modifier += (*i).second->GetModifier()->m_amount;
         }
@@ -1029,7 +1040,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     //_RemoveStatsMods();
 
     // take out same spell
-    if (i != m_Auras.end()) {
+    if (i != m_Auras.end())
+    {
         (*i).second->SetAuraDuration(Aur->GetAuraDuration());
         delete Aur;
     }
@@ -1067,7 +1079,8 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 
 void Unit::RemoveAurasDueToSpell(uint32 spellId)
 {
-    for (int i = 0; i < 3; i++) {
+    for (int i = 0; i < 3; i++)
+    {
         AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, i));
         if (iter != m_Auras.end())
             RemoveAura(iter);
@@ -1087,7 +1100,8 @@ void Unit::RemoveAura(AuraMap::iterator &i)
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
 {
     AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
-    if (iter != m_Auras.end()) {
+    if (iter != m_Auras.end())
+    {
         (*iter).second->SetAuraDuration(duration);
         return true;
     }
@@ -1097,7 +1111,8 @@ bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
 uint32 Unit::GetAurDuration(uint32 spellId, uint32 effindex)
 {
     AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
-    if (iter != m_Auras.end()) {
+    if (iter != m_Auras.end())
+    {
         return (*iter).second->GetAuraDuration();
     }
     return 0;
@@ -1108,9 +1123,10 @@ void Unit::RemoveAllAuras()
 
     //_RemoveStatsMods();
 
-    while (!m_Auras.empty()) {
+    while (!m_Auras.empty())
+    {
         AuraMap::iterator iter = m_Auras.begin();
-        RemoveAura(iter); 
+        RemoveAura(iter);
     }
 
     //_ApplyStatsMods();
@@ -1280,7 +1296,6 @@ void Unit::_ApplyAllAuraMods()
     //_ApplyStatsMods();
 }
 
-
 // TODO: FIX-ME!!!
 /*void Unit::_UpdateAura()
 {
@@ -1417,6 +1432,7 @@ void Unit::AddDynObject(DynamicObject* dynObj)
 {
     m_dynObj.push_back(dynObj);
 }
+
 void Unit::RemoveDynObject(uint32 spellid)
 {
     if(m_dynObj.empty())
@@ -1464,7 +1480,6 @@ void Unit::RemoveGameObject(uint32 spellid)
     }
 }
 
-
 void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked)
 {
     WorldPacket data;
@@ -1473,43 +1488,42 @@ void Unit::SendSpellNonMeleeDamageLog(uint64 targetGUID,uint32 SpellID,uint32 Da
     data << uint8(0xFF) << GetGUID();
     data << SpellID;
     data << Damage;
-    data << DamageType;//damagetype
-    data << AbsorbedDamage; //AbsorbedDamage
-    data << Resist; //resist
+    data << DamageType;                                     //damagetype
+    data << AbsorbedDamage;                                 //AbsorbedDamage
+    data << Resist;                                         //resist
     data << (uint8)PhysicalDamage;
     data << uint8(0);
-    data << Blocked; //blocked
+    data << Blocked;                                        //blocked
     data << uint8(0);
     SendMessageToSet( &data, true );
 }
-
 
 void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount)
 {
     sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
     WorldPacket data;
-    data.Initialize(SMSG_ATTACKERSTATEUPDATE);      
-    data << (uint32)HitInfo;                        
-    data << uint8(0xFF) << GetGUID();               //source GUID
-    data << uint8(0xFF) << targetGUID;               //Target GUID
-    data << (uint32)(Damage-AbsorbDamage);        
+    data.Initialize(SMSG_ATTACKERSTATEUPDATE);
+    data << (uint32)HitInfo;
+    data << uint8(0xFF) << GetGUID();                       //source GUID
+    data << uint8(0xFF) << targetGUID;                      //Target GUID
+    data << (uint32)(Damage-AbsorbDamage);
 
-    data << (uint8)SwingType;                     
-    data << (uint32)DamageType;                   
+    data << (uint8)SwingType;
+    data << (uint32)DamageType;
 
-    data << (float)Damage;                        //
-    data << (uint32)Damage;                       // still need to double check damaga
-    data << (uint32)AbsorbDamage;                 
-    data << (uint32)Resist;                       
-    data << (uint32)TargetState;                  
+    data << (float)Damage;                                  //
+    data << (uint32)Damage;                                 // still need to double check damaga
+    data << (uint32)AbsorbDamage;
+    data << (uint32)Resist;
+    data << (uint32)TargetState;
 
-    if( AbsorbDamage == 0 )                       //also 0x3E8 = 0x3E8, check when that happens
-        data << (uint32)0;                          
+    if( AbsorbDamage == 0 )                                 //also 0x3E8 = 0x3E8, check when that happens
+        data << (uint32)0;
     else
-        data << (uint32)-1;                       
-    
-    data << (uint32)0;                            
+        data << (uint32)-1;
+
+    data << (uint32)0;
     data << (uint32)BlockedAmount;
 
     SendMessageToSet( &data, true );
@@ -1532,18 +1546,21 @@ void Unit::setPowerType(uint8 PowerType)
     }
 }
 
-void Unit::Attack(Unit *victim) {
-	if (m_attacking) {
-		if (m_attacking == victim)
-			return;
+void Unit::Attack(Unit *victim)
+{
+    if (m_attacking)
+    {
+        if (m_attacking == victim)
+            return;
         AttackStop();
-	}
+    }
     addUnitState(UNIT_STAT_ATTACKING);
     SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     m_attacking = victim;
 }
 
-void Unit::AttackStop() {
+void Unit::AttackStop()
+{
     if (!m_attacking)
         return;
 
@@ -1571,4 +1588,3 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
         SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, heal, NORMAL_DAMAGE, 0,0,false,0);
     }
 }
-

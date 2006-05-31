@@ -192,7 +192,7 @@ class ChatHandler
         bool HandleUpdate(const char* args);
         bool HandleBankCommand(const char* args);
         bool HandleChangeWeather(const char* args);
-		bool HandleKickPlayerCommand(const char * args);
+        bool HandleKickPlayerCommand(const char * args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);
@@ -201,7 +201,7 @@ class ChatHandler
         bool HandleMod32Value(const char* args);
         bool HandleSendMailNotice(const char* args);
         bool HandleQueryNextMailTime(const char * args);
-        
+
         Player* getSelectedChar(WorldSession *client);
 
         WorldSession *m_session;

@@ -156,14 +156,14 @@ ChatCommand * ChatHandler::getCommandTable()
         { "wchange",     3, &ChatHandler::HandleChangeWeather,           "",   NULL },
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
-		
+
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
         { "NewMail",     3, &ChatHandler::HandleSendMailNotice,          "",   NULL },
         { "QNM",         3, &ChatHandler::HandleQueryNextMailTime,       "",   NULL },
-		{ NULL,          0, NULL,                                        "",   NULL }
+        { NULL,          0, NULL,                                        "",   NULL }
     };
 
     if(first_call)

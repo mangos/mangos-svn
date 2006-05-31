@@ -73,7 +73,7 @@ const CliCommand Commands[]=
     {CMD("exit"), & CliExit,"Shutdown server"},
     {CMD("version"), & CliVersion,"Display server version"},
     {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
-	{CMD("kick"), & CliKick,"Kick user"}
+    {CMD("kick"), & CliKick,"Kick user"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
@@ -486,18 +486,18 @@ void CliRunnable::run()
 
 void CliKick(char*command,pPrintf zprintf)
 {
-	char *kickName;
+    char *kickName;
     int x=0;
     while(command[x]==' ')
         x++;
     kickName=&command[x];
-    
-	if (strlen(kickName) == 0) {
-		zprintf("Syntax is: kick playername\x0d\x0a");
-		return;
-	}
 
-	sWorld.KickPlayer(kickName);
+    if (strlen(kickName) == 0)
+    {
+        zprintf("Syntax is: kick playername\x0d\x0a");
+        return;
+    }
+
+    sWorld.KickPlayer(kickName);
 }
-
 #endif
