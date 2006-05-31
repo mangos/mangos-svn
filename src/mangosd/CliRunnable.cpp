@@ -54,6 +54,7 @@ void CliBroadcast(char*,pPrintf);
 void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
 void CliLoadScripts(char*,pPrintf);
+void CliKick(char*,pPrintf);
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -71,7 +72,8 @@ const CliCommand Commands[]=
     {CMD("delete"), & CliDelete,"Delete account and characters"},
     {CMD("exit"), & CliExit,"Shutdown server"},
     {CMD("version"), & CliVersion,"Display server version"},
-    {CMD("loadscripts"), & CliLoadScripts,"Load script library"}
+    {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
+	{CMD("kick"), & CliKick,"Kick user"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
@@ -481,4 +483,17 @@ void CliRunnable::run()
     }
 
 }
+
+void CliKick(char*command,pPrintf zprintf)
+{
+	char *kickName;
+    int x=0;
+    while(command[x]==' ')
+        x++;
+    kickName=&command[x];
+    
+	string userToKick = kickName;
+	sWorld.KickPlayer(userToKick);
+}
+
 #endif
