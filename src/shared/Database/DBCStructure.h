@@ -168,7 +168,7 @@ struct FactionEntry
     uint32      something7;
     uint32      something8;
     uint32      something9;
-    uint32      faction;
+    uint32      team;
 };
 struct FactionTemplateEntry
 {

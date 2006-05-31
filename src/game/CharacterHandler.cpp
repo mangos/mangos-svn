@@ -512,10 +512,11 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
     }
 }
 
+//I think this function is never used :/ I dunno, but i guess this opcode not exists
 void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD SESSION: HandleSetFactionCheat");
-
+/*
     uint32 FactionID;
     uint32 Standing;
 
@@ -533,7 +534,7 @@ void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
             break;
         }
     }
-
+*/
     GetPlayer()->UpdateReputation();
 }
 
