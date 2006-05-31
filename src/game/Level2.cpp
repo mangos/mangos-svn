@@ -709,3 +709,25 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
 
     return true;
 }
+
+
+bool ChatHandler::HandleKickPlayerCommand(const char *args) {
+	char *kickName;
+    
+	char* px = strtok((char*)args, " ");
+    if (!px)
+		return false;
+    
+	int x=0;
+	while(px[x]==' ')
+        x++;
+    kickName=&px[x];
+    
+	if (strlen(kickName) == 0) {
+		return false;
+	}
+
+	sWorld.KickPlayer(kickName);
+	return true;
+}
+

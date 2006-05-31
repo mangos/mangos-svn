@@ -540,13 +540,17 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
     SendZoneMessage(zone, &data, self);
 }
 
-void World::KickPlayer(string playerName) {
-    // Just a quick job; maybe needs some cleanup
-	// TODO: add case insensitivity
-	//       add ability to kick account name as well?
-	SessionMap::iterator itr, next;
-	SessionMap::iterator itr2;
+void World::KickPlayer(char* playerName) {
+    SessionMap::iterator itr, next;
 	WorldSession *playerToKick = 0;
+
+	int y = 0;
+	while (!playerName[y] == 0) {
+		if ((playerName[y] >= 'a') && (playerName[y] <= 'z'))
+			playerName[y] -= 'a' - 'A';
+		y++;
+	}
+
 	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
 	{
 		next = itr;
@@ -556,10 +560,18 @@ void World::KickPlayer(string playerName) {
 		Player *player = itr->second->GetPlayer();
 		if(!player)
 			continue;
-		if( player->IsInWorld() && (strcmp(player->GetName(), playerName.c_str()) == 0 ))
-		{
-			playerToKick = itr->second;	
-			itr2 = itr;
+		if( player->IsInWorld() ) {
+			char *tmpPlayerName = new char[strlen(player->GetName()) + 1];
+			strcpy(tmpPlayerName, player->GetName());
+			y = 0;
+			while (!tmpPlayerName[y] == 0) {
+				if ((tmpPlayerName[y] >= 'a') && (tmpPlayerName[y] <= 'z'))
+					tmpPlayerName[y] -= 'a' - 'A';
+				y++;
+			}
+			if (strcmp(playerName, tmpPlayerName) == 0)
+				playerToKick = itr->second;
+			delete tmpPlayerName;
 		}
 	}
 	if (playerToKick) {
