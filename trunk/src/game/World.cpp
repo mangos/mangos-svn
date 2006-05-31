@@ -539,3 +539,30 @@ void World::SendZoneText(uint32 zone, const char* text, WorldSession *self)
     sChatHandler.FillSystemMessageData(&data, 0, text);
     SendZoneMessage(zone, &data, self);
 }
+
+void World::KickPlayer(string playerName) {
+    // Just a quick job; maybe needs some cleanup
+	// TODO: add case insensitivity
+	//       add ability to kick account name as well?
+	SessionMap::iterator itr, next;
+	SessionMap::iterator itr2;
+	WorldSession *playerToKick = 0;
+	for (itr = m_sessions.begin(); itr != m_sessions.end(); itr = next)
+	{
+		next = itr;
+		next++;
+		if(!itr->second)
+			continue;
+		Player *player = itr->second->GetPlayer();
+		if(!player)
+			continue;
+		if( player->IsInWorld() && (strcmp(player->GetName(), playerName.c_str()) == 0 ))
+		{
+			playerToKick = itr->second;	
+			itr2 = itr;
+		}
+	}
+	if (playerToKick) {
+		playerToKick->LogoutPlayer(true);
+    }
+}

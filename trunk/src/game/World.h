@@ -22,6 +22,8 @@
 #include "Timer.h"
 #include "Policies/Singleton.h"
 #include "SharedDefines.h"
+#include <string>
+using namespace std;
 
 class Object;
 class WorldPacket;
@@ -140,6 +142,8 @@ class World
             else
                 return 0;
         }
+
+		void KickPlayer(string playerName);
 
     protected:
 
