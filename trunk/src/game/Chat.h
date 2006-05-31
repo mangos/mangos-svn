@@ -192,7 +192,7 @@ class ChatHandler
         bool HandleUpdate(const char* args);
         bool HandleBankCommand(const char* args);
         bool HandleChangeWeather(const char* args);
-
+		bool HandleKickPlayerCommand(const char * args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);

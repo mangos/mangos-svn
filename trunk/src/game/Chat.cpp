@@ -110,7 +110,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "item",        2, &ChatHandler::HandleItemCommand,             "",   NULL },
         { "itemrmv",     2, &ChatHandler::HandleItemRemoveCommand,       "",   NULL },
         { "itemmove",    2, &ChatHandler::HandleItemMoveCommand,         "",   NULL },
-        { "kick",        2, &ChatHandler::HandleNYICommand,              "",   NULL },
+        { "kick",        2, &ChatHandler::HandleKickPlayerCommand,       "",   NULL },
         { "learn",       3, &ChatHandler::HandleLearnCommand,            "",   NULL },
         { "unlearn",     3, &ChatHandler::HandleUnLearnCommand,          "",   NULL },
         { "learnsk",     3, &ChatHandler::HandleLearnSkillCommand,       "",   NULL },
@@ -157,14 +157,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
 		
-
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
         { "NewMail",     3, &ChatHandler::HandleSendMailNotice,          "",   NULL },
         { "QNM",         3, &ChatHandler::HandleQueryNextMailTime,       "",   NULL },
-        { NULL,          0, NULL,                                        "",   NULL }
+		{ NULL,          0, NULL,                                        "",   NULL }
     };
 
     if(first_call)

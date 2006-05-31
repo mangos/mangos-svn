@@ -492,8 +492,12 @@ void CliKick(char*command,pPrintf zprintf)
         x++;
     kickName=&command[x];
     
-	string userToKick = kickName;
-	sWorld.KickPlayer(userToKick);
+	if (strlen(kickName) == 0) {
+		zprintf("Syntax is: kick playername\x0d\x0a");
+		return;
+	}
+
+	sWorld.KickPlayer(kickName);
 }
 
 #endif
