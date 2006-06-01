@@ -132,3 +132,18 @@ void Log::outMenu( const char * str, ... )
     fflush(stdout);
     fflush(logfile);
 }
+
+
+void debug_log(const char * str, ...)
+{
+    if( !str ) return;
+
+#define buf_size 100
+
+    char buf[100];
+    va_list ap;
+    va_start(ap, str);
+    vsnprintf(buf,100, str, ap);
+
+    MaNGOS::Singleton<Log>::Instance().outDebug(buf);
+}

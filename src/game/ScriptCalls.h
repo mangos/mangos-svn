@@ -47,6 +47,8 @@ typedef bool(MANGOS_IMPORT * scriptCallGOQuestAccept)(Player *player, GameObject
 typedef bool(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *,
 uint32 opt );
 
+typedef CreatureAI* (MANGOS_IMPORT * scriptCallGetAI)  ( Creature *_Creature );
+
 typedef struct
 {
     scriptCallScriptsInit ScriptsInit;
@@ -66,6 +68,8 @@ typedef struct
     scriptCallAreaTrigger scriptAreaTrigger;
     scriptCallItemQuestAccept ItemQuestAccept;
     scriptCallGOQuestAccept GOQuestAccept;
+    scriptCallGetAI GetAI;
+
     MANGOS_LIBRARY_HANDLE hScriptsLib;
 }_ScriptSet,*ScriptsSet;
 

@@ -57,3 +57,6 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
 #define DEBUG_LOG
 #endif
 #endif
+
+// primary for script library
+void MANGOS_DLL_SPEC debug_log(const char * str, ...);

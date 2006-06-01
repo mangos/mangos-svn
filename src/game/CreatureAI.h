@@ -19,6 +19,7 @@
 #ifndef MANGOS_CREATUREAI_H
 #define MANGOS_CREATUREAI_H
 
+#include "Common.h"
 #include "Platform/Define.h"
 #include "Policies/Singleton.h"
 #include "Dynamic/ObjectRegistry.h"
@@ -30,7 +31,7 @@ class Creature;
 #define TIME_INTERVAL_LOOK   5000
 #define VISIBILITY_RANGE    10000
 
-class MANGOS_DLL_DECL CreatureAI
+class MANGOS_DLL_SPEC CreatureAI
 {
     public:
 
