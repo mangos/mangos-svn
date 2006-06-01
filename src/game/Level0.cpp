@@ -27,6 +27,7 @@
 #include "Chat.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "Language.h"
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
@@ -48,7 +49,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
         if(table[i].Help == "")
         {
             WorldPacket data;
-            FillSystemMessageData(&data, m_session, "There is no help for that command");
+            FillSystemMessageData(&data, m_session, LANG_NO_HELP_CMD);
             m_session->SendPacket(&data);
             return true;
         }
@@ -75,7 +76,7 @@ bool ChatHandler::HandleHelpCommand(const char* args)
 
     if(!ShowHelpForCommand(getCommandTable(), cmd))
     {
-        FillSystemMessageData(&data, m_session, "There is no such command");
+        FillSystemMessageData(&data, m_session, LANG_NO_CMD);
         m_session->SendPacket( &data );
     }
 
@@ -87,7 +88,7 @@ bool ChatHandler::HandleCommandsCommand(const char* args)
     ChatCommand *table = getCommandTable();
     WorldPacket data;
 
-    FillSystemMessageData(&data, m_session, "Commands aviable to you:");
+    FillSystemMessageData(&data, m_session, LANG_AVIABLE_CMD);
     m_session->SendPacket(&data);
 
     for(uint32 i = 0; table[i].Name != NULL; i++)
@@ -111,7 +112,7 @@ bool ChatHandler::HandleAcctCommand(const char* args)
 
     uint32 gmlevel = m_session->GetSecurity();
     char buf[256];
-    sprintf(buf, "Your account level is: %i", gmlevel);
+    sprintf(buf, LANG_ACCOUNT_LEVEL, gmlevel);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
@@ -139,7 +140,7 @@ bool ChatHandler::HandleInfoCommand(const char* args)
     uint32 clientsNum = sWorld.GetSessionCount();
     char buf[256];
 
-    sprintf((char*)buf,"Number of users connected: %i", (int) clientsNum);
+    sprintf((char*)buf,LANG_CONNECTED_USERS, (int) clientsNum);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
@@ -165,7 +166,7 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     WorldPacket data;
 
     m_session->GetPlayer()->SaveToDB();
-    FillSystemMessageData(&data, m_session, "Player saved.");
+    FillSystemMessageData(&data, m_session, LANG_PLAYER_SAVED);
     m_session->SendPacket( &data );
     return true;
 }
@@ -182,7 +183,7 @@ bool ChatHandler::HandleGMListCommand(const char* args)
         {
             if(first)
             {
-                FillSystemMessageData(&data, m_session, "There are following active GMs on this server:");
+                FillSystemMessageData(&data, m_session, LANG_GMS_ON_SRV);
                 m_session->SendPacket( &data );
             }
 
@@ -195,7 +196,7 @@ bool ChatHandler::HandleGMListCommand(const char* args)
 
     if(first)
     {
-        FillSystemMessageData(&data, m_session, "There are no GMs currently logged in on this server.");
+        FillSystemMessageData(&data, m_session, LANG_GMS_NOT_LOGGED);
         m_session->SendPacket( &data );
     }
 
@@ -219,8 +220,38 @@ bool ChatHandler::HandleShowHonor(const char* args)
     uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
     uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
 
-    std::string alliance_ranks[] = {"", "Private ", "Corporal ", "Sergeant ", "Master Sergeant ", "Sergeant Major ", "Knight ", "Knight-Lieutenant ", "Knight-Captain ", "Knight-Champion ", "Lieutenant Commander ", "Commander ", "Marshal ", "Field Marshal ", "Grand Marshal ", "Game Master "};
-    std::string horde_ranks[] = {"", "Scout ", "Grunt ", "Sergeant ", "Senior Sergeant ", "First Sergeant ", "Stone Guard ", "Blood Guard ", "Legionnare ", "Centurion ", "Champion ", "Lieutenant General ", "General ", "Warlord ", "High Warlord ", "Game Master "};
+    std::string alliance_ranks[] = {"", 
+        LANG_ALI_PRIVATE, 
+        LANG_ALI_CORPORAL, 
+        LANG_ALI_SERGEANT, 
+        LANG_ALI_MASTER_SERGEANT, 
+        LANG_ALI_SERGEANT_MAJOR, 
+        LANG_ALI_KNIGHT, 
+        LANG_ALI_KNIGHT_LIEUTENANT, 
+        LANG_ALI_KNIGHT_CAPTAIN, 
+        LANG_ALI_KNIGHT_CHAMPION, 
+        LANG_ALI_LIEUTENANT_COMMANDER, 
+        LANG_ALI_COMMANDER, 
+        LANG_ALI_MARSHAL, 
+        LANG_ALI_FIELD_MARSHAL, 
+        LANG_ALI_GRAND_MARSHAL, 
+        LANG_ALI_GAME_MASTER};
+    std::string horde_ranks[] = {"", 
+        LANG_HRD_SCOUT, 
+        LANG_HRD_GRUNT, 
+        LANG_HRD_SERGEANT, 
+        LANG_HRD_SENIOR_SERGEANT, 
+        LANG_HRD_FIRST_SERGEANT, 
+        LANG_HRD_STONE_GUARD, 
+        LANG_HRD_BLOOD_GUARD, 
+        LANG_HRD_LEGIONNARE, 
+        LANG_HRD_CENTURION, 
+        LANG_HRD_CHAMPION, 
+        LANG_HRD_LIEUTENANT_GENERAL, 
+        LANG_HRD_GENERAL, 
+        LANG_HRD_WARLORD, 
+        LANG_HRD_HIGH_WARLORD, 
+        LANG_HRD_GAME_MASTER};
     std::string rank_name;
 
     if ( m_session->GetPlayer()->GetTeam() == ALLIANCE )
@@ -234,31 +265,31 @@ bool ChatHandler::HandleShowHonor(const char* args)
     }
     else
     {
-        rank_name = "No Rank ";
+        rank_name = LANG_NO_RANK;
     }
 
     char msg[256];
-    sprintf(msg, "%s%s (Rank %u)", rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
+    sprintf(msg, LANG_RANK, rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data );
 
-    sprintf(msg, "Today: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r]", today_honorable_kills, today_dishonorable_kills);
+    sprintf(msg, LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data );
 
-    sprintf(msg, "Yestarday: [Kills: |c0000ff00%u|r] [Honor: %u]", yestarday_kills, yestarday_honor);
+    sprintf(msg, LANG_HONOR_YESTERDAY, yestarday_kills, yestarday_honor);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data );
 
-    sprintf(msg, "This Week: [Kills: |c0000ff00%u|r] [Honor: %u]", this_week_kills, this_week_honor);
+    sprintf(msg, LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data );
 
-    sprintf(msg, "Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]", last_week_kills, last_week_honor, last_week_standing);
+    sprintf(msg, LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data );
 
-    sprintf(msg, "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank: %u]", honorable_kills, dishonorable_kills, highest_rank);
+    sprintf(msg, LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank);
     FillSystemMessageData(&data, m_session, msg);
     m_session->SendPacket( &data );
 

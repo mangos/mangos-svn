@@ -29,6 +29,7 @@
 #include "Chat.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
+#include "Language.h"
 
 bool ChatHandler::HandleGUIDCommand(const char* args)
 {
@@ -38,13 +39,13 @@ bool ChatHandler::HandleGUIDCommand(const char* args)
     guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
-    sprintf((char*)buf,"Object guid is: lowpart %u highpart %X", GUID_LOPART(guid), GUID_HIPART(guid));
+    sprintf((char*)buf,LANG_OBJECT_GUID, GUID_LOPART(guid), GUID_HIPART(guid));
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
@@ -62,7 +63,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         {
 
             char buf[256];
-            sprintf((char*)buf,"The name was too long by %i", strlen((char*)args)-75);
+            sprintf((char*)buf,LANG_TOO_LONG_NAME, strlen((char*)args)-75);
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
             return true;
@@ -72,7 +73,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         {
             if(!isalpha(args[i]) && args[i]!=' ')
             {
-                FillSystemMessageData(&data, m_session, "Error, name can only contain chars A-Z and a-z.");
+                FillSystemMessageData(&data, m_session, LANG_CHARS_ONLY);
                 m_session->SendPacket( &data );
                 return false;
             }
@@ -82,7 +83,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         guid = m_session->GetPlayer()->GetSelection();
         if (guid == 0)
         {
-            FillSystemMessageData(&data, m_session, "No selection.");
+            FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
             m_session->SendPacket( &data );
             return true;
         }
@@ -91,7 +92,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
 
         if(!pCreature)
         {
-            FillSystemMessageData(&data, m_session, "You should select a creature.");
+            FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
             m_session->SendPacket( &data );
             return true;
         }
@@ -118,7 +119,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     {
 
         char buf[256];
-        sprintf((char*)buf,"The subname was too long by %i", strlen((char*)args)-75);
+        sprintf((char*)buf,LANG_TOO_LONG_SUBNAME, strlen((char*)args)-75);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
         return true;
@@ -128,7 +129,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     {
         if(!isalpha(args[i]) && args[i]!=' ')
         {
-            FillSystemMessageData(&data, m_session, "Error, name can only contain chars A-Z and a-z.");
+            FillSystemMessageData(&data, m_session, LANG_CHARS_ONLY);
             m_session->SendPacket( &data );
             return false;
         }
@@ -137,7 +138,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -146,7 +147,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -164,7 +165,7 @@ bool ChatHandler::HandleNYICommand(const char* args)
     WorldPacket data;
     char buf[256];
 
-    sprintf((char*)buf,"Not yet implemented");
+    sprintf((char*)buf,LANG_NOT_IMPLEMENTED);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
@@ -237,7 +238,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     {
         if(!isalpha(pName[i]) && pName[i]!=' ')
         {
-            FillSystemMessageData(&data, m_session, "Error, name can only contain chars A-Z and a-z.");
+            FillSystemMessageData(&data, m_session, LANG_CHARS_ONLY);
             m_session->SendPacket( &data );
             return false;
         }
@@ -278,7 +279,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     pCreature->AIM_Initialize();
     //pCreature->SetUInt32Value(UNIT_FIELD_HEALTH , 1); // temp set on 1 HP needs to be MAX HP (strange error)
 
-    sLog.outError("AddObject at Chat.cpp");
+    sLog.outError(LANG_ADD_OBJ);
 
     MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
     pCreature->SaveToDB();
@@ -298,7 +299,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -307,7 +308,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
     if(!unit)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -320,7 +321,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
 bool ChatHandler::HandleDeMorphCommand(const char* args)
 {
-    sLog.outError("Demorphed %s",m_session->GetPlayer()->GetName());
+    sLog.outError(LANG_DEMORPHED,m_session->GetPlayer()->GetName());
     m_session->GetPlayer()->DeMorph();
     return true;
 }
@@ -336,7 +337,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -345,7 +346,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -369,12 +370,12 @@ bool ChatHandler::HandleItemCommand(const char* args)
         pCreature->setItemAmount(itemscount , amount);
         pCreature->increaseItemCount();
 
-        sstext << "Item '" << item << "' '" << tmpItem->Name1 << "' Added to list" << '\0';
+        sstext << LANG_ITEM << item << "' '" << tmpItem->Name1 << LANG_ITEM_ADDED_TO_LIST << '\0';
         delete result;
     }
     else
     {
-        sstext << "Item '" << item << "' Not Found in Database." << '\0';
+        sstext << LANG_ITEM << item << LANG_ITEM_NOT_FOUND << '\0';
     }
 
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
@@ -393,7 +394,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -402,7 +403,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -422,17 +423,17 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
         ItemPrototype* tmpItem = objmgr.GetItemPrototype(itemguid);
         if(tmpItem)
         {
-            sstext << "Item '" << itemguid << "' '" << tmpItem->Name1 << "' Deleted from list" << '\0';
+            sstext << LANG_ITEM << itemguid << "' '" << tmpItem->Name1 << LANG_ITEM_DELETED_FROM_LIST << '\0';
         }
         else
         {
-            sstext << "Item '" << itemguid << "' Deleted from list" << '\0';
+            sstext << LANG_ITEM << itemguid << LANG_ITEM_DELETED_FROM_LIST << '\0';
         }
 
     }
     else
     {
-        sstext << "Item '" << itemguid << "' Not Found in List." << '\0';
+        sstext << LANG_ITEM << itemguid << LANG_ITEM_NOT_IN_LIST << '\0';
     }
 
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
@@ -448,7 +449,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -457,7 +458,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -466,7 +467,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     // changed 'X', 'y', 'Z' to 'positionx', 'positiony', 'positionz'
     sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f');", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
 
-    FillSystemMessageData(&data, m_session, "Waypoint added.");
+    FillSystemMessageData(&data, m_session, LANG_WAYPOINT_ADDED);
     m_session->SendPacket( &data );
 
     return true;
@@ -484,7 +485,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
     if (option != 0 && option != 1)
     {
         //m_session->GetPlayer( )->SendMessageToSet( &data, true );
-        FillSystemMessageData(&data, m_session, "Incorrect value, use 0 or 1");
+        FillSystemMessageData(&data, m_session, LANG_USE_BOL);
         m_session->SendPacket( &data );
         return true;
     }
@@ -492,7 +493,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -501,7 +502,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -512,7 +513,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     pCreature->setMoveRandomFlag(option > 0);
 
-    FillSystemMessageData(&data, m_session, "Value saved.");
+    FillSystemMessageData(&data, m_session, LANG_VALUE_SAVED);
     m_session->SendPacket( &data );
 
     return true;
@@ -530,7 +531,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
     if(option != 0 && option != 1)
     {
         m_session->GetPlayer( )->SendMessageToSet( &data, true );
-        FillSystemMessageData(&data, m_session, "Incorrect value, use 0 or 1");
+        FillSystemMessageData(&data, m_session, LANG_USE_BOL);
         m_session->SendPacket( &data );
         return true;
     }
@@ -538,7 +539,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -547,7 +548,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -558,7 +559,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     pCreature->setMoveRunFlag(option > 0);
 
-    FillSystemMessageData(&data, m_session, "Value saved.");
+    FillSystemMessageData(&data, m_session, LANG_VALUE_SAVED);
     m_session->SendPacket( &data );
 
     return true;
@@ -574,7 +575,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
     uint8 lvl = (uint8) atoi((char*)args);
     if ( lvl < 1 || lvl > 63)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -582,7 +583,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -591,7 +592,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -617,7 +618,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -626,7 +627,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -635,7 +636,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     pCreature->SaveToDB();
 
-    FillSystemMessageData(&data, m_session, "Value saved, you may need to rejoin or clean your client cache.");
+    FillSystemMessageData(&data, m_session, LANG_VALUE_SAVED_REJOIN);
     m_session->SendPacket( &data );
 
     uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
@@ -656,7 +657,7 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -665,7 +666,7 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -689,7 +690,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -698,7 +699,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -710,24 +711,24 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleKickPlayerCommand(const char *args)
-{
-    char *kickName;
 
-    char* px = strtok((char*)args, " ");
+bool ChatHandler::HandleKickPlayerCommand(const char *args) {
+	char *kickName;
+    
+	char* px = strtok((char*)args, " ");
     if (!px)
-        return false;
-
-    int x=0;
-    while(px[x]==' ')
+		return false;
+    
+	int x=0;
+	while(px[x]==' ')
         x++;
     kickName=&px[x];
+    
+	if (strlen(kickName) == 0) {
+		return false;
+	}
 
-    if (strlen(kickName) == 0)
-    {
-        return false;
-    }
-
-    sWorld.KickPlayer(kickName);
-    return true;
+	sWorld.KickPlayer(kickName);
+	return true;
 }
+

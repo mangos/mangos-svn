@@ -32,6 +32,7 @@
 #include "MapManager.h"
 #include "SpellAuras.h"
 #include "ScriptCalls.h"
+#include "Language.h"
 
 bool ChatHandler::HandleReloadCommand(const char* args)
 {
@@ -42,7 +43,7 @@ bool ChatHandler::HandleLoadScriptsCommand(const char* args)
 {
     if(!LoadScriptingModule(args)) return true;
 
-    sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
+    sWorld.SendWorldText(LANG_SCRITPS_RELOADED, NULL);
 
     return true;
 }
@@ -62,7 +63,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     int8 gm = (uint8) atoi(pgm);
     if ( gm < 0 || gm > 5)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -74,11 +75,11 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     if (chr)
     {
 
-        sprintf((char*)buf,"You change security level of %s to %i.", chr->GetName(), gm);
+        sprintf((char*)buf,LANG_YOU_CHANGE_SECURITY, chr->GetName(), gm);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
-        sprintf((char*)buf,"%s changed your security level to %i.", m_session->GetPlayer()->GetName(), gm);
+        sprintf((char*)buf,LANG_YOURS_SECURITY_CHANGED, m_session->GetPlayer()->GetName(), gm);
         FillSystemMessageData(&data, m_session, buf);
 
         chr->GetSession()->SendPacket(&data);
@@ -89,7 +90,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     }
     else
     {
-        sprintf((char*)buf,"Player (%s) does not exist or is not logged in.", pName);
+        sprintf((char*)buf,LANG_NO_PLAYER, pName);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
     }
@@ -121,13 +122,13 @@ bool ChatHandler::HandleAllowMovementCommand(const char* args)
     if(sWorld.getAllowMovement())
     {
         sWorld.SetAllowMovement(false);
-        FillSystemMessageData(&data, m_session, "Creature Movement Disabled.");
+        FillSystemMessageData(&data, m_session, LANG_CREATURE_MOVE_DISABLED);
     }
     else
     {
 
         sWorld.SetAllowMovement(true);
-        FillSystemMessageData(&data, m_session, "Creature Movement Enabled.");
+        FillSystemMessageData(&data, m_session, LANG_CREATURE_MOVE_ENABLED);
     }
 
     m_session->SendPacket( &data );
@@ -136,7 +137,7 @@ bool ChatHandler::HandleAllowMovementCommand(const char* args)
 
 bool ChatHandler::HandleAddSpiritCommand(const char* args)
 {
-    sLog.outDetail("Spawning Spirit Healers\n");
+    sLog.outDetail(LANG_SPAWNING_SPIRIT_HEAL);
     /*
         Creature* pCreature;
         UpdateMask unitMask;
@@ -146,7 +147,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
 
         if(!result)
         {
-            FillSystemMessageData(&data, m_session, "No spirit healers in db, exiting.");
+            FillSystemMessageData(&data, m_session, LANG_NO_SPIRIT_HEAL_DB);
             m_session->SendPacket( &data );
 
             return true;
@@ -263,7 +264,7 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
 
     if (syntax_error)
     {
-        FillSystemMessageData(&data, m_session, "Syntax: .learnsk skillId level max");
+        FillSystemMessageData(&data, m_session, LANG_LEARNSK_SYNTAX);
         m_session->SendPacket(&data);
         return true;
     }
@@ -276,11 +277,11 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
     if (skill > 0)
     {
         target->SetSkill(skill, level, max);
-        FillSystemMessageData(&data, m_session, fmtstring("You've learned skill %u", skill));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_LEARNED_SKILL, skill));
         m_session->SendPacket(&data);
     } else
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Invalid skill id (%u)", skill));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_INVALID_SKILL_ID, skill));
         m_session->SendPacket(&data);
     }
     return true;
@@ -292,7 +293,7 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
 
     if (!*args)
     {
-        FillSystemMessageData(&data, m_session, "Syntax: .unlearnsk skillId");
+        FillSystemMessageData(&data, m_session, LANG_UNLEARNSK_SYNTAX);
         m_session->SendPacket(&data);
         return true;
     }
@@ -306,7 +307,7 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
 
     if (skill <= 0)
     {
-        FillSystemMessageData(&data, m_session, "Invalid skill id");
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_INVALID_SKILL_ID, skill));
         m_session->SendPacket(&data);
         return true;
     }
@@ -319,11 +320,11 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
     if (target->GetSkillValue(skill))
     {
         target->SetSkill(skill, 0, 0);
-        FillSystemMessageData(&data, m_session, fmtstring("You've unlearned skill %u", skill));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_UNLEARNED_SKILL, skill));
         m_session->SendPacket(&data);
     } else
     {
-        FillSystemMessageData(&data, m_session, "You don't know that skill.");
+        FillSystemMessageData(&data, m_session, LANG_UNKNOWN_SKILL);
         m_session->SendPacket(&data);
     }
     return true;
@@ -958,7 +959,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     {
         int loop = 0;
 
-        FillSystemMessageData(&data, m_session, fmtstring("%s - Learning default GM spells/skills.", m_session->GetPlayer()->GetName()));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_LEARNING_GM_SKILLS, m_session->GetPlayer()->GetName()));
         m_session->SendPacket(&data);
 
         while (strcmp(gmSpellList[loop], "0"))
@@ -986,7 +987,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
 
     if (m_session->GetPlayer()->HasSpell(spell))
     {
-        FillSystemMessageData(&data, m_session, "You already know that spell.");
+        FillSystemMessageData(&data, m_session, LANG_KNOWN_SPELL);
         m_session->SendPacket(&data);
         return true;
     }
@@ -1045,7 +1046,7 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
         }
         else
         {
-            FillSystemMessageData(&data, m_session, "You already forget that spell.");
+            FillSystemMessageData(&data, m_session, LANG_FORGET_SPELL);
             m_session->SendPacket(&data);
         }
     }
@@ -1059,7 +1060,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     if (!*args)
     {
-        FillSystemMessageData(&data, m_session, "Sintax: .additem itemId <amount>");
+        FillSystemMessageData(&data, m_session, LANG_ADDITEM_SYNTAX);
         m_session->SendPacket(&data);
         return true;
     }
@@ -1074,15 +1075,15 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     Player* pl = m_session->GetPlayer();
 
-    sLog.outDetail("Command : Additem, itemId = %i, amount = %i", itemId, count);
+    sLog.outDetail(LANG_ADDITEM, itemId, count);
     uint32 created_count = pl->AddNewItem(itemId, count, true);
     if (!created_count)
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Cannot create item '%i' (amount: %i)", itemId, count));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CANNOT_CREATE, itemId, count));
     }
     else
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Item '%i' created (amount: %i)", itemId, created_count));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CREATED, itemId, created_count));
     }
     m_session->SendPacket(&data);
 
@@ -1106,7 +1107,7 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
         return false;
     else if(!gname)
     {
-        FillSystemMessageData(&data, m_session, fmtstring("You need to insert a Guild Name!"));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_INSERT_GUILD_NAME));
         m_session->SendPacket(&data);
         return true;
     }
@@ -1116,7 +1117,7 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
 
     if(!player)
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Player not found!"));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_PLAYER_NOT_FOUND));
         m_session->SendPacket(&data);
         return true;
     }
@@ -1129,7 +1130,7 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
     }
     else
     {
-        FillSystemMessageData(&data, m_session, fmtstring("Player already have a guild!"));
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_PLAYER_IN_GUILD));
         m_session->SendPacket(&data);
     }
 
@@ -1145,7 +1146,7 @@ bool ChatHandler::HandleGetDistanceCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1154,12 +1155,12 @@ bool ChatHandler::HandleGetDistanceCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
 
-    FillSystemMessageData(&data, m_session, fmtstring("The distance(sqr) is: %f.", m_session->GetPlayer()->GetDistanceSq(pCreature)));
+    FillSystemMessageData(&data, m_session, fmtstring(LANG_DISTANCE, m_session->GetPlayer()->GetDistanceSq(pCreature)));
     m_session->SendPacket(&data);
 
     return true;
@@ -1186,7 +1187,7 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
         return false;
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
-    sLog.outError("AddObject at Level3.cpp line 1176");
+    sLog.outError(LANG_ADD_OBJ_LV3);
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
     if(strcmp(safe,"true") == 0)
@@ -1207,7 +1208,7 @@ bool ChatHandler::HandleAddWeaponCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, "No selection.");
+        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1216,7 +1217,7 @@ bool ChatHandler::HandleAddWeaponCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1253,18 +1254,18 @@ bool ChatHandler::HandleAddWeaponCommand(const char* args)
                 added = true;
                 break;
             default:
-                sstext << "Item Slot '" << SlotID << "' doesn't exist." << '\0';
+                sstext << LANG_ITEM_SLOT << SlotID << LANG_ITEM_SLOT_NOT_EXIST << '\0';
                 added = false;
                 break;
         }
         if(added)
         {
-            sstext << "Item '" << ItemID << "' '" << tmpItem->Name1 << "' Added to Slot " << SlotID << '\0';
+            sstext << LANG_ITEM << ItemID << "' '" << tmpItem->Name1 << LANG_ITEM_ADDED_TO_SLOT << SlotID << '\0';
         }
     }
     else
     {
-        sstext << "Item '" << ItemID << "' Not Found in Database." << '\0';
+        sstext << LANG_ITEM << ItemID << LANG_ITEM_NOT_FOUND << '\0';
         return true;
     }
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
@@ -1284,7 +1285,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     uint32 id = atoi((char*)args);
     if(!id)
     {
-        sstext << "Usage: .gameobject <id>" << '\0';
+        sstext << LANG_GAMEOBJECT_SYNTAX << '\0';
         FillSystemMessageData(&data, m_session, sstext.str().c_str());
         m_session->SendPacket( &data );
         return false;
@@ -1294,7 +1295,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
     if (!goI)
     {
-        sstext << "Game Object '" << id << "' doesn't exist." << '\0';
+        sstext << LANG_GAMEOBJECT << id << LANG_GAMEOBJECT_NOT_EXIST << '\0';
         FillSystemMessageData(&data, m_session, sstext.str().c_str());
         m_session->SendPacket( &data );
         return false;
@@ -1314,12 +1315,12 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     //    pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
     //    pGameObj->SetNameId(id);
-    sLog.outError(">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f.", goI->name, lowGUID, x, y, z, o);
+    sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
 
     pGameObj->SaveToDB();
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
 
-    sstext << ">> Add Game Object '" << id << "' (" << goI->name << ") added at '" << x << " " << y << " " << z <<"'." << '\0';
+    sstext << LANG_GAMEOBJECT_ADD << id << "' (" << goI->name << LANG_GAMEOBJECT_ADD_AT << x << " " << y << " " << z <<"'." << '\0';
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
     m_session->SendPacket( &data );
 
@@ -1555,7 +1556,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     if(!target)
     {
-        sChatHandler.FillSystemMessageData(&data, m_session, "Select something first.");
+        sChatHandler.FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket(&data);
         return true;
     }
@@ -1570,20 +1571,20 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     Field *fields = result->Fetch();
 
-    sprintf(buf,"Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nNameID: %u.\nSkinID: %u.", GUID_LOPART(guid), faction, npcflags, Entry, skinid);
-    sprintf(buf,"%s\nLevel: %u.", buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
-    sprintf(buf,"%s\nHealth (base): %u. (max): %u. (current): %u.", buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
-    sprintf(buf,"%s\nField Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u.", buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    sprintf(buf,LANG_NPCINFO_CHAR, GUID_LOPART(guid), faction, npcflags, Entry, skinid);
+    sprintf(buf,LANG_NPCINFO_LEVEL, buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
+    sprintf(buf,LANG_NPCINFO_HEALTH, buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
+    sprintf(buf,LANG_NPCINFO_FLAGS, buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
-    sprintf(buf,"%s\nPosition: %f %f %f.", buf, float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
+    sprintf(buf,LANG_NPCINFO_POSITION, buf, float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
 
     if ((npcflags & UNIT_NPC_FLAG_VENDOR) )
     {
-        sprintf(buf,"%s\n*** Is a vendor!", buf);
+        sprintf(buf,LANG_NPCINFO_VENDOR, buf);
     }
     if ((npcflags & UNIT_NPC_FLAG_TRAINER) )
     {
-        sprintf(buf,"%s\n*** Is a trainer!", buf);
+        sprintf(buf,LANG_NPCINFO_TRAINER, buf);
     }
 
     sChatHandler.FillSystemMessageData(&data, m_session, buf);
@@ -1627,7 +1628,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1636,23 +1637,23 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
 
     if (flag != 0)
     {
-        sprintf((char*)buf,"%s has explored all zones now.", chr->GetName());
+        sprintf((char*)buf,LANG_YOU_SET_EXPLORE_ALL, chr->GetName());
     }
     else
     {
-        sprintf((char*)buf,"%s has no more explored zones.", chr->GetName());
+        sprintf((char*)buf,LANG_YOU_SET_EXPLORE_NOTHING, chr->GetName());
     }
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
     if (flag != 0)
     {
-        sprintf((char*)buf,"%s has explored all zones for you.",
+        sprintf((char*)buf,LANG_YOURS_EXPLORE_SET_ALL,
             m_session->GetPlayer()->GetName());
     }
     else
     {
-        sprintf((char*)buf,"%s has hidden all zones from you.",
+        sprintf((char*)buf,LANG_YOURS_EXPLORE_SET_NOTHING,
             m_session->GetPlayer()->GetName());
     }
     FillSystemMessageData(&data, m_session, buf);
@@ -1677,7 +1678,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 {
     WorldPacket data;
 
-    char* px = strtok((char*)args, " ");
+	char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
         flag = 1;
@@ -1686,25 +1687,25 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 
     //SMSG_MOVE_UNSET_HOVER
 
-    if (flag)
-    {
-        data.Initialize(SMSG_MOVE_SET_HOVER);
-        data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
-    }
-    else
-    {
-        data.Initialize(SMSG_MOVE_UNSET_HOVER);
-        data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
-    }
+	if (flag)
+	{
+		data.Initialize(SMSG_MOVE_SET_HOVER);
+		data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+	}
+	else
+	{
+		data.Initialize(SMSG_MOVE_UNSET_HOVER);
+		data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+	}
 
     m_session->SendPacket( &data );
 
     WorldPacket data1;
     std::stringstream sstext;
     if (flag)
-        sstext << "Hover Enabled" << '\0';
-    else
-        sstext << "Hover Disabled" << '\0';
+		sstext << LANG_HOVER_ENABLED << '\0';
+	else
+		sstext << LANG_HOVER_DISABLED << '\0';
 
     FillSystemMessageData(&data1, m_session, sstext.str().c_str());
     m_session->SendPacket( &data1 );
@@ -1730,7 +1731,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
         WorldPacket data;
         std::stringstream sstext;
-        sstext << "You have been leveled Up" << '\0';
+        sstext << LANG_YOURS_LEVEL_UP << '\0';
         FillSystemMessageData(&data, m_session, sstext.str().c_str());
         m_session->SendPacket( &data );
     }
@@ -1749,7 +1750,7 @@ bool ChatHandler::HandleShowAreaCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1760,7 +1761,7 @@ bool ChatHandler::HandleShowAreaCommand(const char* args)
     uint32 currFields = chr->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
     chr->SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
-    FillSystemMessageData(&data, m_session, "The area has been set as explored.");
+    FillSystemMessageData(&data, m_session, LANG_EXPLORE_AREA);
     m_session->SendPacket( &data );
     return true;
 }
@@ -1777,7 +1778,7 @@ bool ChatHandler::HandleHideAreaCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1788,7 +1789,7 @@ bool ChatHandler::HandleHideAreaCommand(const char* args)
     uint32 currFields = chr->GetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset);
     chr->SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields ^ val));
 
-    FillSystemMessageData(&data, m_session, "The area has been set as not explored.");
+    FillSystemMessageData(&data, m_session, LANG_UNEXPLORE_AREA);
     m_session->SendPacket( &data );
     return true;
 }
@@ -1807,7 +1808,7 @@ bool ChatHandler::HandleUpdate(const char* args)
 
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1832,7 +1833,7 @@ bool ChatHandler::HandleUpdate(const char* args)
     {
         value=chr->GetUInt32Value(updateIndex);
 
-        sprintf((char*)buf,"GUID=%i 's updateIndex: %i ,value:  %i.", chr->GetGUIDLow(),updateIndex,value);
+        sprintf((char*)buf,LANG_UPDATE, chr->GetGUIDLow(),updateIndex,value);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
@@ -1841,7 +1842,7 @@ bool ChatHandler::HandleUpdate(const char* args)
 
     value=atoi(pvalue);
 
-    sprintf((char*)buf,"You change GUID=%i 's UpdateIndex: %i value to %i.", chr->GetGUIDLow(),updateIndex,value);
+    sprintf((char*)buf,LANG_UPDATE_CHANGE, chr->GetGUIDLow(),updateIndex,value);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
@@ -1915,7 +1916,7 @@ bool ChatHandler::HandleSetValue(const char* args)
     uint32 Opcode = (uint32)atoi(px);
     if(Opcode >= target->GetValuesCount())
     {
-        sprintf((char*)buf,"The value index %u is too big to %u(count: %u).", Opcode, GUID_LOPART(guid), target->GetValuesCount());
+        sprintf((char*)buf,LANG_TOO_BIG_INDEX, Opcode, GUID_LOPART(guid), target->GetValuesCount());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
         return false;
@@ -1928,16 +1929,16 @@ bool ChatHandler::HandleSetValue(const char* args)
     if(isint32)
     {
         iValue = (uint32)atoi(py);
-        sLog.outDebug( "Set %u uint32 Value:[OPCODE]:%u [VALUE]:%u", GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug( LANG_SET_UINT, GUID_LOPART(guid), Opcode, iValue);
         target->SetUInt32Value( Opcode , iValue );
-        sprintf((char*)buf,"You Set %u Field:%u to uint32 Value: %u", GUID_LOPART(guid), Opcode,iValue);
+        sprintf((char*)buf,LANG_SET_UINT_FIELD, GUID_LOPART(guid), Opcode,iValue);
     }
     else
     {
         fValue = (float)atof(py);
-        sLog.outDebug( "Set %u float Value:[OPCODE]:%u [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug( LANG_SET_FLOAT, GUID_LOPART(guid), Opcode, fValue);
         target->SetFloatValue( Opcode , fValue );
-        sprintf((char*)buf,"You Set %u Field:%i to float Value: %i", GUID_LOPART(guid), Opcode,fValue);
+        sprintf((char*)buf,LANG_SET_FLOAT_FIELD, GUID_LOPART(guid), Opcode,fValue);
     }
 
     FillSystemMessageData(&data, m_session, buf);
@@ -1968,7 +1969,7 @@ bool ChatHandler::HandleGetValue(const char* args)
     uint32 Opcode = (uint32)atoi(px);
     if(Opcode >= target->GetValuesCount())
     {
-        sprintf((char*)buf,"The value index %u is too big to %u(count: %u).", Opcode, GUID_LOPART(guid), target->GetValuesCount());
+        sprintf((char*)buf,LANG_TOO_BIG_INDEX, Opcode, GUID_LOPART(guid), target->GetValuesCount());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
         return false;
@@ -1982,14 +1983,14 @@ bool ChatHandler::HandleGetValue(const char* args)
     if(isint32)
     {
         iValue = target->GetUInt32Value( Opcode );
-        sLog.outDebug( "Get %u uint32 Value:[OPCODE]:%u [VALUE]:%u", GUID_LOPART(guid), Opcode, iValue);
-        sprintf((char*)buf,"The uint32 value of %u in %u is: %u", GUID_LOPART(guid), Opcode,    iValue);
+        sLog.outDebug( LANG_GET_UINT, GUID_LOPART(guid), Opcode, iValue);
+        sprintf((char*)buf,LANG_GET_UINT_FIELD, GUID_LOPART(guid), Opcode,    iValue);
     }
     else
     {
         fValue = target->GetFloatValue( Opcode );
-        sLog.outDebug( "Get %u float Value:[OPCODE]:%u [VALUE]:%f", GUID_LOPART(guid), Opcode, fValue);
-        sprintf((char*)buf,"The float of %u value in %u is: %f", GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug( LANG_GET_FLOAT, GUID_LOPART(guid), Opcode, fValue);
+        sprintf((char*)buf,LANG_GET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
     }
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
@@ -2013,11 +2014,11 @@ bool ChatHandler::HandleSet32Bit(const char* args)
     if (Value > 32)                                         //uint32 = 32 bits
         return false;
 
-    sLog.outDebug( ".Set32Bit:[OPCODE]:%u [VALUE]:%u" , Opcode, Value);
+    sLog.outDebug( LANG_SET_32BIT , Opcode, Value);
 
     m_session->GetPlayer( )->SetUInt32Value( Opcode , 2^Value );
 
-    sprintf((char*)buf,"You set Bit of Field:%u to Value: %u", Opcode,1);
+    sprintf((char*)buf,LANG_SET_32BIT_FIELD, Opcode,1);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
     return true;
@@ -2037,40 +2038,38 @@ bool ChatHandler::HandleMod32Value(const char* args)
     uint32 Opcode = (uint32)atoi(px);
     int Value = atoi(py);
 
-    sLog.outDebug( ".Mod32Value:[OPCODE]:%u [VALUE]:%i" , Opcode, Value);
+    sLog.outDebug( LANG_CHANGE_32BIT , Opcode, Value);
 
     int CurrentValue = (int)m_session->GetPlayer( )->GetUInt32Value( Opcode );
-
+    
     CurrentValue += Value;
     m_session->GetPlayer( )->SetUInt32Value( Opcode , (uint32)CurrentValue );
 
-    sprintf((char*)buf,"You modified the value of Field:%u to Value: %u", Opcode,CurrentValue);
+    sprintf((char*)buf,LANG_CHANGE_32BIT_FIELD, Opcode,CurrentValue);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
     return true;
 }
 
-bool ChatHandler::HandleSendMailNotice(const char* args)
-{
+bool ChatHandler::HandleSendMailNotice(const char* args) {
     WorldPacket data;
-
+    
     char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
         flag = 0;
     else
         flag = atoi(px);
-
+    
     data.Initialize(SMSG_RECEIVED_MAIL);
-
+    
     data << uint32(flag);
     m_session->SendPacket(&data);
     return true;
 }
 
-bool ChatHandler::HandleQueryNextMailTime(const char* args)
-{
+bool ChatHandler::HandleQueryNextMailTime(const char* args) {
     WorldPacket Data;
     bool checkmail=false;
 
@@ -2089,3 +2088,4 @@ bool ChatHandler::HandleQueryNextMailTime(const char* args)
 
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
+
