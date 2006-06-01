@@ -108,6 +108,9 @@ ReactorAI::UpdateAI(const uint32 time_diff)
                 i_creature.AttackerStateUpdate(i_creature.getVictim(), 0);
                 i_creature.setAttackTimer(0);
 
+                if ( !i_creature.getVictim() )
+                    return;
+
                 if( needToStop() )
                     stopAttack();
             }
