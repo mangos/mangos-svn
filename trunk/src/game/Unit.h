@@ -147,7 +147,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         inline void addAttacker(Unit *pAttacker)
         {
-            AttackerSet::iterator itr = m_attackers.find(pAttacker);
+            if (pAttacker == this)
+	            return;
+			AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
