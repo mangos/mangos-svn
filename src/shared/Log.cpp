@@ -20,6 +20,7 @@
 #include "Log.h"
 #include "Policies/SingletonImp.h"
 #include "Config/ConfigEnv.h"
+#include "Policies/SingletonImp.h"
 
 #include <stdarg.h>
 
@@ -141,7 +142,7 @@ void debug_log(const char * str, ...)
     char buf[100];
     va_list ap;
     va_start(ap, str);
-    _vsnprintf(buf,100, str, ap);
+    vsnprintf(buf,100, str, ap);
     va_end(ap);
 
     MaNGOS::Singleton<Log>::Instance().outDebug(buf);

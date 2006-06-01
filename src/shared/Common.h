@@ -99,6 +99,7 @@
 #define SI64FMTD "%I64d"
 #define snprintf _snprintf
 #define atoll __atoi64
+#define vsnprintf _vsnprintf
 
 #else
 
