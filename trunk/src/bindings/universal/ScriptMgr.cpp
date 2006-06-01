@@ -227,3 +227,14 @@ bool AreaTrigger      ( Player *player, Quest *_Quest, uint32 triggerID )
     player->PlayerTalkClass->ClearMenus();
     return tmpscript->pAreaTrigger(player,_Quest,triggerID);
 }
+
+
+MANGOS_DLL_EXPORT
+CreatureAI* GetAI(Creature *_Creature )
+{
+    Script *tmpscript = GetScriptByName(_Creature->GetCreatureInfo()->ScriptName);
+
+    if(!tmpscript || !tmpscript->GetAI) return NULL;
+
+    return tmpscript->GetAI(_Creature);
+}
