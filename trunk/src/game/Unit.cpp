@@ -435,7 +435,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
         else
         {
-            if( (((Player*)pVictim)->getClass()) == WARRIOR )
+            if( pVictim->getClass() == WARRIOR )
                 ((Player*)pVictim)->CalcRage(damage,false);
 
             // random durability for items (HIT)

@@ -606,7 +606,7 @@ void Player::Update( uint32 p_time )
             // TODO add weapon,skill check
 
             float pldistance = 10.0f;
-            if(getClass() == 1)
+            if(getClass() == WARRIOR)
             {
                 pldistance = pldistance + 1;
             }
@@ -879,7 +879,7 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     float RageIncreaseRate = sWorld.getRate(RATE_POWER2);
 
     uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
-    uint16 Class = getClass();
+    uint8 Class = getClass();
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
