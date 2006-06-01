@@ -94,10 +94,6 @@ bool Master::Run()
 
     //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
-    std::string host;
-    host = sConfig.GetStringDefault( "Host", DEFAULT_HOST );
-    sLog.outString( "Server: %s\n", host.c_str() );
-
     sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
     sWorld.SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
     sWorld.SetInitialWorldSettings();

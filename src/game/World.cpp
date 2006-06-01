@@ -42,6 +42,7 @@
 #include "EventSystem.h"
 #include "GlobalEvents.h"
 #include "BattleGroundMgr.h"
+#include "SystemConfig.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -153,11 +154,33 @@ void World::SetInitialWorldSettings()
         dataPath="./";
     else
     {
-        if(dataPath.at(dataPath.length()-1)!='/')
+        if((dataPath.at(dataPath.length()-1)!='/') && (dataPath.at(dataPath.length()-1)!='\\'))
             dataPath.append("/");
     }
     sLog.outString("Using DataDir %s ...",dataPath.c_str());
 
+    // Non-critical warning about conf file version
+    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    if(!confVersion) {
+        sLog.outString("*****************************************************************************");
+        sLog.outString(" WARNING: mangosd.conf does not include a ConfVersion variable.");
+        sLog.outString("          Your conf file may be out of date!");
+        sLog.outString("*****************************************************************************");
+        clock_t pause = 3000 + clock();
+        while (pause > clock());
+    } else {
+        if (confVersion < _CONFVERSION) {
+            sLog.outString("*****************************************************************************");
+            sLog.outString(" WARNING: Your mangosd.conf version indicates your conf file is out of date!");
+            sLog.outString("          Please check for updates, as your current default values may cause");
+            sLog.outString("          strange behavior.");
+            sLog.outString("*****************************************************************************");
+            clock_t pause = 3000 + clock();
+            while (pause > clock());
+        }
+    }
+
+    
     regen_values[RATE_HEALTH] = sConfig.GetFloatDefault("Rate.Health", 1);
     regen_values[RATE_POWER1] = sConfig.GetFloatDefault("Rate.Power1", 1);
     regen_values[RATE_POWER2] = sConfig.GetFloatDefault("Rate.Power2", 1);
@@ -167,13 +190,13 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
     m_configs[CONFIG_LOG_REALM] = sConfig.GetIntDefault("LogRealm", 0);
-    m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900) * 1000;
-    m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300) * 1000;
+    m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
+    m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
-    m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600)*1000;
+    m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600000);
     m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", 8085);
     m_configs[CONFIG_PORT_REALM] = sConfig.GetIntDefault("RealmServerPort", 3724);
-    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10) * 1000;
+    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", 10000);
     m_configs[CONFIG_GETXP_DISTANCE] = sConfig.GetIntDefault("MaxDistance", 5500);
     m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
     m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 400);
