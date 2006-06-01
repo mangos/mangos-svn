@@ -40,6 +40,9 @@ enum Team
 {
     ALLIANCE = 469,
     HORDE = 67,
+	ALLIANCE_FORCES = 891,
+    HORDE_FORCES = 892,
+	STEAMWHEEDLE_CARTEL = 169,
 };
 
 enum Classes
