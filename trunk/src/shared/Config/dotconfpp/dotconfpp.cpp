@@ -99,7 +99,11 @@ int DOTCONFDocument::cleanupLine(char * line)
         if(*line == '=' && !quoted){ 
             *line = ' ';continue;
         }
-        if(*line == '\\' && (*(line+1) == '"' || *(line+1) == '\'')){
+
+        // Allowing \" in there causes problems with directory paths
+        // like "C:\MaNGOS\"
+        //if(*line == '\\' && (*(line+1) == '"' || *(line+1) == '\'')){
+        if(*line == '\\' && (*(line+1) == '\'')) {
             *bg++ = *(line+1);
             line+=2; continue;
         }

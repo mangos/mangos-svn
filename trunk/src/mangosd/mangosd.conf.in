@@ -1,4 +1,5 @@
 # MaNGOS Configuration file
+ConfVersion=2006060101
 
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
@@ -8,11 +9,6 @@ DataDir = "@MANGOSD_DATA@"
 # Database connection settings.
 # Default: hostname;port;username;password;database
 DatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
-
-# IP or DNS of the server (both realm and world).
-# You need to set this to your external IP.
-# Default: 127.0.0.1 (localhost)
-Host = localhost
 
 # Server console level of logging
 # 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
@@ -60,17 +56,22 @@ Ra.MinLevel = 3
 # Kick client on wrong pass
 Ra.Secure = 1
 
+# All times are in milliseconds.
+
 # Default socket select time
-SocketSelectTime = 10
+SocketSelectTime = 10000
 
-# Default grid clean up delay (seconds)
-GridCleanUpDelay = 300
+# Default grid clean up delay
+GridCleanUpDelay = 300000
 
-# Default map update interval (miliseconds)
+# Default map update interval
 MapUpdateInterval = 100
 
 # Default weather update interval
 ChangeWeatherInterval = 600000
+
+# Default PlayerSaveInterval
+PlayerSaveInterval = 900000
 
 # Default WorldServerPort
 WorldServerPort = 8085
