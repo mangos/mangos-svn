@@ -22,6 +22,7 @@
 #include "ObjectMgr.h"
 #include "Policies/SingletonImp.h"
 #include "MovementGenerator.h"
+#include "ScriptCalls.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
 INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
@@ -30,6 +31,9 @@ namespace FactorySelector
 {
     CreatureAI* selectAI(Creature *creature)
     {
+        if(CreatureAI* scriptedAI = Script->GetAI(creature))
+            return scriptedAI;
+
         CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );
         CreatureInfo* cinfo=creature->GetCreatureInfo();

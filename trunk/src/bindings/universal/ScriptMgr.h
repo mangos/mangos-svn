@@ -24,32 +24,60 @@
 #include "../../game/SharedDefines.h"
 #include "../../game/GossipDef.h"
 #include "../../game/WorldSession.h"
+#include "../../game/CreatureAI.h"
 
 #define MAX_SCRIPTS 1000
 
 struct Script
 {
+    Script() : 
+        pGossipHello(NULL), pQuestAccept(NULL), pGossipSelect(NULL), pGossipSelectWithCode(NULL), 
+        pQuestSelect(NULL), pQuestComplete(NULL), pNPCDialogStatus(NULL), pChooseReward(NULL), 
+        pItemHello(NULL), pGOHello(NULL), pAreaTrigger(NULL), pItemQuestAccept(NULL), pGOQuestAccept(NULL), 
+        pGOChooseReward(NULL), GetAI(NULL) 
+    {}
+
+
     std::string Name;
 
     // -- Quest/gossip Methods to be scripted --
-    bool (*pGossipHello)(Player *player, Creature *_Creature);
-    bool (*pQuestAccept)(Player *player, Creature *_Creature, Quest *_Quest );
-    bool (*pGossipSelect)(Player *player, Creature *_Creature, uint32 sender, uint32 action );
+    bool (*pGossipHello         )(Player *player, Creature *_Creature);
+    bool (*pQuestAccept         )(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pGossipSelect        )(Player *player, Creature *_Creature, uint32 sender, uint32 action );
     bool (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
-    bool (*pQuestSelect)(Player *player, Creature *_Creature, Quest *_Quest );
-    bool (*pQuestComplete)(Player *player, Creature *_Creature, Quest *_Quest );
-    uint32 (*pNPCDialogStatus)(Player *player, Creature *_Creature );
-    bool (*pChooseReward)(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
-    bool (*pItemHello)(Player *player, Item *_Item, Quest *_Quest );
-    bool (*pGOHello)(Player *player, GameObject *_GO );
-    bool (*pAreaTrigger)(Player *player, Quest *_Quest, uint32 triggerID );
-    bool (*pItemQuestAccept)(Player *player, Item *_Item, Quest *_Quest );
-    bool (*pGOQuestAccept)(Player *player, GameObject *_GO, Quest *_Quest );
-    bool (*pGOChooseReward)(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
-    // ----------------------------
+    bool (*pQuestSelect         )(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pQuestComplete       )(Player *player, Creature *_Creature, Quest *_Quest );
+    uint32 (*pNPCDialogStatus   )(Player *player, Creature *_Creature );
+    bool (*pChooseReward        )(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
+    bool (*pItemHello           )(Player *player, Item *_Item, Quest *_Quest );
+    bool (*pGOHello             )(Player *player, GameObject *_GO );
+    bool (*pAreaTrigger         )(Player *player, Quest *_Quest, uint32 triggerID );
+    bool (*pItemQuestAccept     )(Player *player, Item *_Item, Quest *_Quest );
+    bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest *_Quest );
+    bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
+
+    CreatureAI* (*GetAI)(Creature *_Creature);
+    // -----------------------------------------
 
 };
 
 extern int nrscripts;
 extern Script *m_scripts[MAX_SCRIPTS];
+
+struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
+{
+    ScriptedAI(Creature* creature) : m_creature(creature) {}
+    ~ScriptedAI() {}
+
+    void MoveInLineOfSight(Unit *) {}
+    void AttackStart(Unit *) {}
+    void AttackStop(Unit *) {}
+    void HealBy(Unit *healer, uint32 amount_healed) {}
+    void DamageInflict(Unit *healer, uint32 amount_healed) {}
+    bool IsVisible(Unit *who) const { return !who->isStealth();  }
+    void UpdateAI(const uint32) {}
+
+    Creature* m_creature;
+};
+
 #endif
