@@ -2532,17 +2532,30 @@ void Player::SetInitialFactions()
     {
         factionEntry = sFactionStore.LookupEntry(i);
 
-        if( !factionEntry ) continue;
+		if( factionEntry && (factionEntry->reputationListID >= 0))
+		{
+			newFaction.ID = factionEntry->ID;
+			newFaction.ReputationListID = factionEntry->reputationListID;
+			newFaction.Standing = 0;
+			//Set visible to factions of own team
+			if( GetTeam() == factionEntry->team ) newFaction.Flags = 1;
+			else newFaction.Flags = 0;
 
-        if( GetTeam() == factionEntry->team )
-        {
-            newFaction.ID = factionEntry->ID;
-            newFaction.ReputationListID = factionEntry->reputationListID;
-            newFaction.Standing = 0;
-            newFaction.Flags = 1;
-
-            factions.push_back(newFaction);
-        }
+			//If the faction's team is enemy of my one we are at war!
+			if(GetTeam() == ALLIANCE )
+			{
+				if( factionEntry->team == HORDE || factionEntry->team == HORDE_FORCES )
+					newFaction.Flags = (newFaction.Flags | 2);
+			}
+			else
+			if(GetTeam() == HORDE    )
+			{
+				if( factionEntry->team == ALLIANCE || factionEntry->team == ALLIANCE_FORCES )
+					newFaction.Flags = (newFaction.Flags | 2);
+			}
+			
+			factions.push_back(newFaction);
+		}
     }
 }
 
@@ -2572,22 +2585,6 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
     }
 
     assert(factionEntry);
-
-    //If creature's faction is not into the list, add it
-    if( (!FactionIsInTheList(factionEntry->reputationListID))&&(factionEntry->reputationListID >= 0) )
-    {
-        newFaction.ID = factionEntry->ID;
-        newFaction.ReputationListID = factionEntry->reputationListID;
-        newFaction.Standing = 0;
-        newFaction.Flags = 1;
-
-        //TODO, HOW TO KNOW IF THE FACTION IS AT WAR WITH THE PLAYER?
-        /*
-        if (is hostile) newFaction.Flags = 3;
-        */
-
-        factions.push_back(newFaction);
-    }
 
     //Find faction and set the new standing
     for(itr = factions.begin(); itr != factions.end(); ++itr)
