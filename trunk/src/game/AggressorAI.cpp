@@ -65,7 +65,7 @@ AggressorAI::DamageInflict(Unit *healer, uint32 amount_healed)
 bool
 AggressorAI::_needToStop() const
 {
-	if( !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
+    if( !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
@@ -187,9 +187,9 @@ AggressorAI::UpdateAI(const uint32 diff)
                 i_creature.setAttackTimer(0);
 
                 if ( !i_creature.getVictim() )
-					return;
+                    return;
 
-				if( _needToStop() )
+                if( _needToStop() )
                     _stopAttack();
             }
         }

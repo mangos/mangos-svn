@@ -2493,14 +2493,14 @@ void Player::UpdateReputation()
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-		if( itr->Flags & 0x00000001 ) //If faction is visible then update it
-		{
-			data.Initialize(SMSG_SET_FACTION_STANDING);
-			data << (uint32) itr->Flags;
-			data << (uint32) itr->ReputationListID;
-			data << (uint32) itr->Standing;
-			GetSession()->SendPacket(&data);
-		}
+        if( itr->Flags & 0x00000001 )                       //If faction is visible then update it
+        {
+            data.Initialize(SMSG_SET_FACTION_STANDING);
+            data << (uint32) itr->Flags;
+            data << (uint32) itr->ReputationListID;
+            data << (uint32) itr->Standing;
+            GetSession()->SendPacket(&data);
+        }
     }
 }
 
@@ -2517,81 +2517,81 @@ bool Player::FactionIsInTheList(uint32 faction)
 
 void Player::SetInitialFactions()
 {
-	Factions newFaction;
-	FactionEntry *factionEntry = NULL;
+    Factions newFaction;
+    FactionEntry *factionEntry = NULL;
 
-	for(int i = 1; i <= sFactionStore.GetNumRows(); i++)
-	{	
-		factionEntry = sFactionStore.LookupEntry(i);
+    for(int i = 1; i <= sFactionStore.GetNumRows(); i++)
+    {
+        factionEntry = sFactionStore.LookupEntry(i);
 
-		if( !factionEntry ) continue;
+        if( !factionEntry ) continue;
 
-		if( GetTeam() == factionEntry->team )
-		{
-			newFaction.ID = factionEntry->ID;
+        if( GetTeam() == factionEntry->team )
+        {
+            newFaction.ID = factionEntry->ID;
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
             newFaction.Flags = 1;
 
-			factions.push_back(newFaction);
-		}
-	}
+            factions.push_back(newFaction);
+        }
+    }
 }
 
 bool Player::SetStanding(uint32 FTemplate, int standing)
 {
-	Factions newFaction;
+    Factions newFaction;
     FactionEntry *factionEntry = NULL;
     FactionTemplateEntry *factionTemplateEntry = NULL;
     std::list<struct Factions>::iterator itr;
 
-	//Find the Faction Template into the DBC
-	for(int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
-	{
-		factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
-		if( !factionTemplateEntry ) continue;
-		if( factionTemplateEntry->ID == FTemplate ) break;
-	}
+    //Find the Faction Template into the DBC
+    for(int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
+    {
+        factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
+        if( !factionTemplateEntry ) continue;
+        if( factionTemplateEntry->ID == FTemplate ) break;
+    }
 
     assert(factionTemplateEntry);
 
-	//Find faction by faction template
-	for(int i = 1; i <= sFactionStore.GetNumRows(); i++ )
-	{
-		factionEntry = sFactionStore.LookupEntry(i);
-		if( !factionEntry ) continue;
-		if( factionEntry->ID == factionTemplateEntry->faction ) break;
-	}
-	
-	assert(factionEntry);
-
-	//If creature's faction is not into the list, add it
-	if( (!FactionIsInTheList(factionEntry->reputationListID))&&(factionEntry->reputationListID >= 0) )
-	{
-		newFaction.ID = factionEntry->ID;
-		newFaction.ReputationListID = factionEntry->reputationListID;
-		newFaction.Standing = 0;
-		newFaction.Flags = 1;
-		
-		//TODO, HOW TO KNOW IF THE FACTION IS AT WAR WITH THE PLAYER?
-		/*
-		if (is hostile) newFaction.Flags = 3;
-		*/
-
-		factions.push_back(newFaction);
-	}
-
-	//Find faction and set the new standing
-	for(itr = factions.begin(); itr != factions.end(); ++itr)
+    //Find faction by faction template
+    for(int i = 1; i <= sFactionStore.GetNumRows(); i++ )
     {
-		if(itr->ReputationListID == factionEntry->reputationListID)
+        factionEntry = sFactionStore.LookupEntry(i);
+        if( !factionEntry ) continue;
+        if( factionEntry->ID == factionTemplateEntry->faction ) break;
+    }
+
+    assert(factionEntry);
+
+    //If creature's faction is not into the list, add it
+    if( (!FactionIsInTheList(factionEntry->reputationListID))&&(factionEntry->reputationListID >= 0) )
+    {
+        newFaction.ID = factionEntry->ID;
+        newFaction.ReputationListID = factionEntry->reputationListID;
+        newFaction.Standing = 0;
+        newFaction.Flags = 1;
+
+        //TODO, HOW TO KNOW IF THE FACTION IS AT WAR WITH THE PLAYER?
+        /*
+        if (is hostile) newFaction.Flags = 3;
+        */
+
+        factions.push_back(newFaction);
+    }
+
+    //Find faction and set the new standing
+    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    {
+        if(itr->ReputationListID == factionEntry->reputationListID)
         {
-			itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
+            itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
             itr->Flags = (itr->Flags | 0x00000001);
             UpdateReputation();
             return true;
         }
-	}
+    }
 
     return false;
 }
@@ -2619,7 +2619,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 
     int RepPoints = ((5-dif)*0.20)*100;
 
-	SetStanding(qGiver->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
+    SetStanding(qGiver->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
 }
 
 //Update honor fields
@@ -7441,8 +7441,8 @@ void Player::_LoadReputation()
     else
     {
         //LoadReputationFromDBC();
-		//Set initial reputations
-		SetInitialFactions();
+        //Set initial reputations
+        SetInitialFactions();
     }
 }
 
