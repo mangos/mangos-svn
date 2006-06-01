@@ -185,7 +185,6 @@ void Creature::Regenerate(uint16 field_cur, uint16 field_max)
     float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);
 
     uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
-    uint16 Class = getClass();
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
