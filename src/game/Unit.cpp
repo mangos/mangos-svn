@@ -451,6 +451,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
         }
     }
+
     DEBUG_LOG("DealDamageEnd");
 }
 
