@@ -465,6 +465,18 @@ void Aura::Update(uint32 diff)
         m_duration -= diff;
         if (m_duration < 0)
             m_duration = 0;
+        if(m_target->hasUnitState(UNIT_STAT_FLEEING))
+        {
+            float x,y,z,angle,speed;
+            m_target->AttackStop();
+            angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
+            speed = m_target->GetSpeed();
+            x = m_target->GetPositionX() + speed*m_duration * cos(-angle);
+            y = m_target->GetPositionY() + speed*m_duration * sin(-angle);
+            int mapid = m_target->GetMapId();
+            z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+            m_target->SendMoveToPacket(x,y,z,false);
+        }
     }
     if(m_isPeriodic && m_duration > 0)
     {
@@ -646,10 +658,36 @@ void Aura::HandleModConfuse(bool apply)
 
 void Aura::HandleFear(bool Apply)
 {
+    WorldPacket data;
+    data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
     if( Apply )
+    {
         m_target->addUnitState(UNIT_STAT_FLEEING);
+        m_target->AttackStop();
+        m_target->SetFlag(UNIT_FIELD_FLAGS,0x800000);
+        
+        data<<m_target->GetGUIDLow();
+        data<<uint8(0);
+        float x,y,z,angle,speed;
+        angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
+        speed = m_target->GetSpeed();
+        x = m_target->GetPositionX() + speed*m_modifier->periodictime * cos(-angle);
+        y = m_target->GetPositionY() + speed*m_modifier->periodictime * sin(-angle);
+        int mapid = m_target->GetMapId();
+        z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+        m_target->SendMoveToPacket(x,y,z,false);
+    }
     else
+    {
+        data<<m_target->GetGUIDLow();
+        data<<uint8(1);
         m_target->clearUnitState(UNIT_STAT_FLEEING);
+        m_target->SetSpeed(m_target->GetSpeed(MOVE_WALK));
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,0x800000);
+    }
+    m_target->SendMessageToSet(&data,true);
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_target);
 }
 
 void HandleHealEvent(void *obj)
