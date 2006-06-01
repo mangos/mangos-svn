@@ -225,7 +225,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
 
     setFaction(m_race, 0);
-    SetInitialFactions();
 
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
@@ -2521,12 +2520,11 @@ void Player::SetInitialFactions()
 	Factions newFaction;
 	FactionEntry *factionEntry = NULL;
 
-	factions.clear();
-
-	for(int i = 0; i < sFactionStore.GetNumRows(); i++)
-	{
-		
+	for(int i = 1; i <= sFactionStore.GetNumRows(); i++)
+	{	
 		factionEntry = sFactionStore.LookupEntry(i);
+
+		if( !factionEntry ) continue;
 
 		if( GetTeam() == factionEntry->team )
 		{
@@ -2538,7 +2536,6 @@ void Player::SetInitialFactions()
 			factions.push_back(newFaction);
 		}
 	}
-
 }
 
 bool Player::SetStanding(uint32 FTemplate, int standing)
@@ -2549,18 +2546,20 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
     std::list<struct Factions>::iterator itr;
 
 	//Find the Faction Template into the DBC
-	for(int i = 0; i < sFactionTemplateStore.GetNumRows(); i++ )
+	for(int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
 	{
 		factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
+		if( !factionTemplateEntry ) continue;
 		if( factionTemplateEntry->ID == FTemplate ) break;
 	}
 
     assert(factionTemplateEntry);
 
 	//Find faction by faction template
-	for(int i = 0; i < sFactionStore.GetNumRows(); i++ )
+	for(int i = 1; i <= sFactionStore.GetNumRows(); i++ )
 	{
 		factionEntry = sFactionStore.LookupEntry(i);
+		if( !factionEntry ) continue;
 		if( factionEntry->ID == factionTemplateEntry->faction ) break;
 	}
 	
@@ -7443,6 +7442,7 @@ void Player::_LoadReputation()
     {
         //LoadReputationFromDBC();
 		//Set initial reputations
+		SetInitialFactions();
     }
 }
 
