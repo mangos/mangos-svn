@@ -29,6 +29,7 @@
 #include "Unit.h"
 #include "ObjectAccessor.h"
 #include "GossipDef.h"
+#include "Language.h"
 
 bool ChatHandler::HandleDebugInArcCommand(const char* args)
 {
@@ -40,7 +41,7 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
     {
         if(!(obj = (Object*)ObjectAccessor::Instance().GetPlayer(*m_session->GetPlayer(), guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
         {
-            FillSystemMessageData(&data, m_session, "You should select a character or a creature.");
+            FillSystemMessageData(&data, m_session, LANG_SELECT_CHAR_OR_CREATURE);
             m_session->SendPacket( &data );
             return true;
         }
@@ -84,7 +85,7 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
     if(!target)
     {
         WorldPacket data;
-        FillSystemMessageData(&data, m_session, "You should select a creature.");
+        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
         m_session->SendPacket( &data );
         return true;
     }

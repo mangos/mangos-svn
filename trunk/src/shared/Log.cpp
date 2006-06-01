@@ -143,7 +143,7 @@ void debug_log(const char * str, ...)
     char buf[100];
     va_list ap;
     va_start(ap, str);
-    vsnprintf(buf,100, str, ap);
+    _vsnprintf(buf,100, str, ap);
 
     MaNGOS::Singleton<Log>::Instance().outDebug(buf);
 }

@@ -28,6 +28,7 @@
 #include "Log.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "Language.h"
 
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
@@ -38,7 +39,7 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 
     char pAnnounce[256];
 
-    sprintf((char*)pAnnounce, "BROADCAST: %s", args);
+    sprintf((char*)pAnnounce, LANG_BROADCAST, args);
     sWorld.SendWorldText(pAnnounce);
 
     return true;
@@ -71,7 +72,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         {
             WorldPacket data;
 
-            FillSystemMessageData(&data, m_session, "You should select a character or a creature.");
+            FillSystemMessageData(&data, m_session, LANG_SELECT_CHAR_OR_CREATURE);
             m_session->SendPacket( &data );
             return true;
         }
@@ -80,8 +81,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         obj = (Object*)m_session->GetPlayer();
 
     char buf[256];
-    sprintf((char*)buf, "Map: %u\nX: %f Y: %f Z: %f Orientation: %f",
-        obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+    sprintf((char*)buf, LANG_MAP_POSITION,
+        obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), 
         obj->GetOrientation());
 
     SendMultilineMessage(buf);
@@ -104,16 +105,16 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         char buf0[256];
         if(chr->IsBeingTeleported()==true)
         {
-            sprintf((char*)buf,"%s is already being teleported.", chr->GetName());
+            sprintf((char*)buf,LANG_IS_TELEPORTED, chr->GetName());
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
             return true;
         }
-        sprintf((char*)buf,"You are summoning %s.", chr->GetName());
+        sprintf((char*)buf,LANG_SUMMONING, chr->GetName());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
-        sprintf((char*)buf0,"You are being summoned by %s.", m_session->GetPlayer()->GetName());
+        sprintf((char*)buf0,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
         FillSystemMessageData(&data, m_session, buf0);
         chr->GetSession()->SendPacket( &data );
 
@@ -126,7 +127,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
     else
     {
         char buf[256];
-        sprintf((char*)buf,"Player (%s) does not exist or is not logged in.", args);
+        sprintf((char*)buf,LANG_NO_PLAYER, args);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
     }
@@ -146,18 +147,18 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         char buf[256];
         if(chr->IsBeingTeleported()==true)
         {
-            sprintf((char*)buf,"%s is already being teleported.", chr->GetName());
+            sprintf((char*)buf,LANG_IS_TELEPORTED, chr->GetName());
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
             return true;
         }
 
-        sprintf((char*)buf,"Appearing at %s's location.", chr->GetName());
+        sprintf((char*)buf,LANG_APPEARING_AT, chr->GetName());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
         char buf0[256];
-        sprintf((char*)buf0,"%s is appearing to your location.", m_session->GetPlayer()->GetName());
+        sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
         FillSystemMessageData(&data, m_session, buf0);
 
         chr->GetSession()->SendPacket(&data);
@@ -167,7 +168,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     else
     {
         char buf[256];
-        sprintf((char*)buf,"Player (%s) does not exist or is not logged in.", args);
+        sprintf((char*)buf,LANG_NO_PLAYER, args);
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
     }
@@ -226,7 +227,7 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
 
     if (hp <= 0 || hpm <= 0 || hpm < hp)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect values.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -234,18 +235,18 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You change the HP to %i/%i of %s.", hp, hpm, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_HP, hp, hpm, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s changed your HP to %i/%i.", m_session->GetPlayer()->GetName(), hp, hpm);
+    sprintf((char*)buf,LANG_YOURS_HP_CHANGED, m_session->GetPlayer()->GetName(), hp, hpm);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -275,7 +276,7 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect values.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -283,18 +284,18 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You change the MANA to %i/%i of %s.", mana, manam, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_MANA, mana, manam, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s changed your MANA to %i/%i.", m_session->GetPlayer()->GetName(), mana, manam);
+    sprintf((char*)buf,LANG_YOURS_MANA_CHANGED, m_session->GetPlayer()->GetName(), mana, manam);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -324,7 +325,7 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect values.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -332,18 +333,18 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You change the ENERGY to %i/%i of %s.", mana/10, manam/10, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_ENERGY, mana/10, manam/10, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s changed your ENERGY to %i/%i.", m_session->GetPlayer()->GetName(), mana/10, manam/10);
+    sprintf((char*)buf,LANG_YOURS_ENERGY_CHANGED, m_session->GetPlayer()->GetName(), mana/10, manam/10);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -351,7 +352,7 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
     chr->SetUInt32Value( UNIT_FIELD_MAXPOWER4, manam );
     chr->SetUInt32Value( UNIT_FIELD_POWER4, mana );
 
-    sLog.outString("current energy: %u",chr->GetUInt32Value( UNIT_FIELD_MAXPOWER4));
+    sLog.outString(LANG_CURRENT_ENERGY,chr->GetUInt32Value( UNIT_FIELD_MAXPOWER4));
 
     return true;
 }
@@ -375,7 +376,7 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect values.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -383,18 +384,18 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You change the RAGE to %i/%i of %s.", mana/10, manam/10, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_RAGE, mana/10, manam/10, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s changed your RAGE to %i/%i.", m_session->GetPlayer()->GetName(), mana/10, manam/10);
+    sprintf((char*)buf,LANG_YOURS_RAGE_CHANGED, m_session->GetPlayer()->GetName(), mana/10, manam/10);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -416,7 +417,7 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
 
     if(lvl > 99 || lvl < 1)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -424,18 +425,18 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You change the LVL to %i of %s.", lvl, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_LVL, lvl, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s changed your LVL to %i.", m_session->GetPlayer()->GetName(), lvl);
+    sprintf((char*)buf,LANG_YOURS_LVL_CHANGED, m_session->GetPlayer()->GetName(), lvl);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -468,7 +469,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
             flag      = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
             npcflag   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
             dyflag   = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
-            sprintf((char*)buf,"GUID %i,faction is %i,flags is %i,npcflag is %i,DY flag is %i",chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
+            sprintf((char*)buf,LANG_CURRENT_FACTION,chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
         }
@@ -477,7 +478,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -502,7 +503,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     else
         dyflag = atoi(pdyflag);
 
-    sprintf((char*)buf,"You change GUID=%i 's Faction to %i ,flags to %i,npcflag to %i,dyflag to %i.", chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
+    sprintf((char*)buf,LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
@@ -551,18 +552,18 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You change the spellflatid=%i,val= %i ,mark =%i to %s.", spellflatid, val, mark, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_SPELLFLATID, spellflatid, val, mark, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s changed your spellflatid=%i,val= %i ,mark =%i.", m_session->GetPlayer()->GetName(), spellflatid, val, mark);
+    sprintf((char*)buf,LANG_YOURS_SPELLFLATID_CHANGED, m_session->GetPlayer()->GetName(), spellflatid, val, mark);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -589,7 +590,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -598,23 +599,23 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 
     if (flag != 0)
     {
-        sprintf((char*)buf,"%s has all taxi nodes now.", chr->GetName());
+        sprintf((char*)buf,LANG_YOU_GIVE_TAXIS, chr->GetName());
     }
     else
     {
-        sprintf((char*)buf,"%s has no more taxi nodes now.", chr->GetName());
+        sprintf((char*)buf,LANG_YOU_REMOVE_TAXIS, chr->GetName());
     }
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
     if (flag != 0)
     {
-        sprintf((char*)buf,"%s has given you all taxi nodes.",
+        sprintf((char*)buf,LANG_YOURS_TAXIS_ADDED,
             m_session->GetPlayer()->GetName());
     }
     else
     {
-        sprintf((char*)buf,"%s has deleted all your taxi nodes.",
+        sprintf((char*)buf,LANG_YOURS_TAXIS_REMOVED,
             m_session->GetPlayer()->GetName());
     }
     FillSystemMessageData(&data, m_session, buf);
@@ -646,7 +647,7 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
 
     if (ASpeed > 50 || ASpeed <= 0)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -654,18 +655,18 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You set all speeds to %2.2f of %s.", ASpeed, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s set all your speeds to %2.2f.", m_session->GetPlayer()->GetName(), ASpeed);
+    sprintf((char*)buf,LANG_YOURS_ASPEED_CHANGED, m_session->GetPlayer()->GetName(), ASpeed);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -706,7 +707,7 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     if (Speed > 50 || Speed <= 0)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -714,18 +715,18 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You set the speed to %2.2f of %s.", Speed, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_SPEED, Speed, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s set your speed to %2.2f.", m_session->GetPlayer()->GetName(), Speed);
+    sprintf((char*)buf,LANG_YOURS_SPEED_CHANGED, m_session->GetPlayer()->GetName(), Speed);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -753,7 +754,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     if (Swim > 50 || Swim <= 0)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -761,18 +762,18 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You set the swim speed to %2.2f of %s.", Swim, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_SWIM_SPEED, Swim, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s set your swim speed to %2.2f.", m_session->GetPlayer()->GetName(), Swim);
+    sprintf((char*)buf,LANG_YOURS_SWIM_SPEED_CHANGED, m_session->GetPlayer()->GetName(), Swim);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -799,7 +800,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     if (BSpeed > 50 || BSpeed <= 0)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -807,18 +808,18 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You set the backwards run speed to %2.2f of %s.", BSpeed, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_BACK_SPEED, BSpeed, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s set your backwards run speed to %2.2f.", m_session->GetPlayer()->GetName(), BSpeed);
+    sprintf((char*)buf,LANG_YOURS_BACK_SPEED_CHANGED, m_session->GetPlayer()->GetName(), BSpeed);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -844,7 +845,7 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
     float Scale = (float)atof((char*)args);
     if (Scale > 3 || Scale <= 0)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect value.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -852,18 +853,18 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You set the size %2.2f of %s.", Scale, chr->GetName());
+    sprintf((char*)buf,LANG_YOU_CHANGE_SIZE, Scale, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s set your size to %2.2f.", m_session->GetPlayer()->GetName(), Scale);
+    sprintf((char*)buf,LANG_YOURS_SIZE_CHANGED, m_session->GetPlayer()->GetName(), Scale);
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -1096,7 +1097,7 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
             break;
         default:
 
-            FillSystemMessageData(&data, m_session, "There is no such mount.");
+            FillSystemMessageData(&data, m_session, LANG_NO_MOUNT);
             m_session->SendPacket( &data );
 
             return true;
@@ -1105,18 +1106,18 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
 
     char buf[256];
 
-    sprintf((char*)buf,"You give a mount to %s.", chr->GetName());
+    sprintf((char*)buf,LANG_YOU_GIVE_MOUNT, chr->GetName());
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
 
-    sprintf((char*)buf,"%s gave you a mount.", m_session->GetPlayer()->GetName());
+    sprintf((char*)buf,LANG_MOUNT_GIVED, m_session->GetPlayer()->GetName());
     FillSystemMessageData(&data, m_session, buf);
 
     chr->GetSession()->SendPacket(&data);
@@ -1156,7 +1157,7 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1169,15 +1170,15 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     {
         int32 newmoney = moneyuser + gold;
 
-        sLog.outDetail("USER1: %i, ADD: %i, DIF: %i\n", moneyuser, gold, newmoney);
+        sLog.outDetail(LANG_CURRENT_MONEY, moneyuser, gold, newmoney);
         if(newmoney < 0 )
         {
 
-            sprintf((char*)buf,"You take all copper of %s.", chr->GetName());
+            sprintf((char*)buf,LANG_YOU_TAKE_ALL_MONEY, chr->GetName());
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
 
-            sprintf((char*)buf,"%s took you all of your copper.", m_session->GetPlayer()->GetName());
+            sprintf((char*)buf,LANG_YOURS_ALL_MONEY_GONE, m_session->GetPlayer()->GetName());
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
 
@@ -1186,11 +1187,11 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         else
         {
 
-            sprintf((char*)buf,"You take %i copper to %s.", abs(gold), chr->GetName());
+            sprintf((char*)buf,LANG_YOU_TAKE_MONEY, abs(gold), chr->GetName());
             FillSystemMessageData(&data, m_session, buf);
             m_session->SendPacket( &data );
 
-            sprintf((char*)buf,"%s took %i copper from you.", m_session->GetPlayer()->GetName(), abs(gold));
+            sprintf((char*)buf,LANG_YOURS_MONEY_TAKEN, m_session->GetPlayer()->GetName(), abs(gold));
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
         }
@@ -1198,16 +1199,16 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     else
     {
 
-        sprintf((char*)buf,"You give %i copper to %s.", gold, chr->GetName());
+        sprintf((char*)buf,LANG_YOU_GIVE_MONEY, gold, chr->GetName());
         FillSystemMessageData(&data, m_session, buf);
         m_session->SendPacket( &data );
 
-        sprintf((char*)buf,"%s gave you %i copper.", m_session->GetPlayer()->GetName(), gold);
+        sprintf((char*)buf,LANG_YOURS_MONEY_GIVEN, m_session->GetPlayer()->GetName(), gold);
         FillSystemMessageData(&data, m_session, buf);
         chr->GetSession()->SendPacket(&data);
     }
 
-    sLog.outDetail("USER2: %i, ADD: %i, RESULT: %i\n", moneyuser, gold, moneyuser+gold);
+    sLog.outDetail(LANG_NEW_MONEY, moneyuser, gold, moneyuser+gold);
     chr->SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser+gold );
 
     return true;
@@ -1220,7 +1221,7 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, "No character selected.");
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1238,14 +1239,14 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
 
     if (field < 1 || field >= PLAYER_END)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect values.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
 
     if (bit < 1 || bit > 32)
     {
-        FillSystemMessageData(&data, m_session, "Incorrect values.");
+        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
         return true;
     }
@@ -1255,12 +1256,12 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
     if ( chr->HasFlag( field, (1<<(bit-1)) ) )
     {
         chr->RemoveFlag( field, (1<<(bit-1)) );
-        sprintf((char*)buf,"Removed bit %i in field %i.", bit, field);
+        sprintf((char*)buf,LANG_REMOVE_BIT, bit, field);
     }
     else
     {
         chr->SetFlag( field, (1<<(bit-1)) );
-        sprintf((char*)buf,"Set bit %i in field %i.", bit, field);
+        sprintf((char*)buf,LANG_SET_BIT, bit, field);
     }
 
     FillSystemMessageData(&data, m_session, buf);
