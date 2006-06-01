@@ -20,7 +20,6 @@
 #include "Log.h"
 #include "Policies/SingletonImp.h"
 #include "Config/ConfigEnv.h"
-#include "Policies/SingletonImp.h"
 
 #include <stdarg.h>
 
