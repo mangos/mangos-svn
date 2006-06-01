@@ -138,12 +138,11 @@ void debug_log(const char * str, ...)
 {
     if( !str ) return;
 
-#define buf_size 100
-
     char buf[100];
     va_list ap;
     va_start(ap, str);
     _vsnprintf(buf,100, str, ap);
+    va_end(ap);
 
     MaNGOS::Singleton<Log>::Instance().outDebug(buf);
 }
