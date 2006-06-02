@@ -231,7 +231,12 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
     m_positionY=y;
     m_positionZ=z;
     m_orientation=ang;
-
+    oX = x;
+    oY = y;
+    dX = x;
+    dY = y;
+    m_moveTime = 0;
+    m_startMove = 0;
     return  CreateFromProto(guidlow, Entry);
 
 }
@@ -700,11 +705,27 @@ void Creature::generateLoot()
 
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run)
 {
+    uint32 timeElap = getMSTime();
+    if ((timeElap - m_startMove) < m_moveTime) {
+        oX = (dX - oX) * ( (timeElap - m_startMove) / m_moveTime );
+        oY = (dY - oY) * ( (timeElap - m_startMove) / m_moveTime );
+    } else {
+        oX = dX;
+        oY = dY;
+    }
+
+    dX = x;
+    dY = y;
+    m_orientation = atan2((oY - dY), (oX - dX));
+
+    m_startMove = getMSTime();
+    m_moveTime = time;
+
     WorldPacket data;
     data.Initialize( SMSG_MONSTER_MOVE );
     data << uint8(0xFF);
     data << GetGUID();
-    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    data << oX << oY << GetPositionZ();
     data << (uint32)getMSTime();
     data << uint8(0);
     data << uint32(run ? 0x00000100 : 0x00000000);
