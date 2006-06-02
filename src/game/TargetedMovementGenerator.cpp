@@ -124,32 +124,32 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             DEBUG_LOG("restart to chase");
         }
         //if (!owner.IsInArc( 2.0943951024, &i_target )) {
-//        if (!owner.IsInArc( (30/360) * 2 * M_PI, &i_target )) {
-            // adjust facing
-/*        if ((i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
-            _setTargetLocation(owner, 0);
-        }*/
-        //if ((i_target.GetDistance2dSq(&owner) < (owner.GetObjectSize() * 2 + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
-            
-            if (i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize()) + 0.5f)
-                _setTargetLocation(owner, 0);
-//            else  {
-                /*float ang = owner.GetAngle(&i_target);
-                ang -= owner.GetOrientation();
-                if (ang > (2.0f * M_PI))
-                    ang -= 2.0f * M_PI;
-                if (ang < (2.0f * M_PI * -1))
-                    ang += 2.0f * M_PI;
-                if (ang <= M_PI) {
-                    // Facing different directions
-                    ang = ang;
+        //        if (!owner.IsInArc( (30/360) * 2 * M_PI, &i_target )) {
+        // adjust facing
+        /*        if ((i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
+                    _setTargetLocation(owner, 0);
                 }*/
-  //          }
-            //if (i_target.GetDistance2dSq(&owner) == 0)
-            //    _setTargetLocation(owner, -1 * (owner.GetObjectSize() + i_target.GetObjectSize()));
+        //if ((i_target.GetDistance2dSq(&owner) < (owner.GetObjectSize() * 2 + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
+
+        if (i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize()) + 0.5f)
+            _setTargetLocation(owner, 0);
+        //            else  {
+        /*float ang = owner.GetAngle(&i_target);
+        ang -= owner.GetOrientation();
+        if (ang > (2.0f * M_PI))
+            ang -= 2.0f * M_PI;
+        if (ang < (2.0f * M_PI * -1))
+            ang += 2.0f * M_PI;
+        if (ang <= M_PI) {
+            // Facing different directions
+            ang = ang;
+        }*/
+        //          }
+        //if (i_target.GetDistance2dSq(&owner) == 0)
+        //    _setTargetLocation(owner, -1 * (owner.GetObjectSize() + i_target.GetObjectSize()));
 
         //    sLog.outString("try to back up");
-       // }
+        // }
     }
     else
     {

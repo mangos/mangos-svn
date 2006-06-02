@@ -1678,7 +1678,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 {
     WorldPacket data;
 
-	char* px = strtok((char*)args, " ");
+    char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
         flag = 1;
@@ -1687,25 +1687,25 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 
     //SMSG_MOVE_UNSET_HOVER
 
-	if (flag)
-	{
-		data.Initialize(SMSG_MOVE_SET_HOVER);
-		data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
-	}
-	else
-	{
-		data.Initialize(SMSG_MOVE_UNSET_HOVER);
-		data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
-	}
+    if (flag)
+    {
+        data.Initialize(SMSG_MOVE_SET_HOVER);
+        data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+    }
+    else
+    {
+        data.Initialize(SMSG_MOVE_UNSET_HOVER);
+        data << (uint8)0xFF <<m_session->GetPlayer()->GetGUID();
+    }
 
     m_session->SendPacket( &data );
 
     WorldPacket data1;
     std::stringstream sstext;
     if (flag)
-		sstext << LANG_HOVER_ENABLED << '\0';
-	else
-		sstext << LANG_HOVER_DISABLED << '\0';
+        sstext << LANG_HOVER_ENABLED << '\0';
+    else
+        sstext << LANG_HOVER_DISABLED << '\0';
 
     FillSystemMessageData(&data1, m_session, sstext.str().c_str());
     m_session->SendPacket( &data1 );
@@ -2041,7 +2041,7 @@ bool ChatHandler::HandleMod32Value(const char* args)
     sLog.outDebug( LANG_CHANGE_32BIT , Opcode, Value);
 
     int CurrentValue = (int)m_session->GetPlayer( )->GetUInt32Value( Opcode );
-    
+
     CurrentValue += Value;
     m_session->GetPlayer( )->SetUInt32Value( Opcode , (uint32)CurrentValue );
 
@@ -2052,24 +2052,26 @@ bool ChatHandler::HandleMod32Value(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSendMailNotice(const char* args) {
+bool ChatHandler::HandleSendMailNotice(const char* args)
+{
     WorldPacket data;
-    
+
     char* px = strtok((char*)args, " ");
     uint32 flag;
     if (!px)
         flag = 0;
     else
         flag = atoi(px);
-    
+
     data.Initialize(SMSG_RECEIVED_MAIL);
-    
+
     data << uint32(flag);
     m_session->SendPacket(&data);
     return true;
 }
 
-bool ChatHandler::HandleQueryNextMailTime(const char* args) {
+bool ChatHandler::HandleQueryNextMailTime(const char* args)
+{
     WorldPacket Data;
     bool checkmail=false;
 
@@ -2088,4 +2090,3 @@ bool ChatHandler::HandleQueryNextMailTime(const char* args) {
 
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
-

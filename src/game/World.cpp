@@ -161,15 +161,19 @@ void World::SetInitialWorldSettings()
 
     // Non-critical warning about conf file version
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
-    if(!confVersion) {
+    if(!confVersion)
+    {
         sLog.outString("*****************************************************************************");
         sLog.outString(" WARNING: mangosd.conf does not include a ConfVersion variable.");
         sLog.outString("          Your conf file may be out of date!");
         sLog.outString("*****************************************************************************");
         clock_t pause = 3000 + clock();
         while (pause > clock());
-    } else {
-        if (confVersion < _CONFVERSION) {
+    }
+    else
+    {
+        if (confVersion < _CONFVERSION)
+        {
             sLog.outString("*****************************************************************************");
             sLog.outString(" WARNING: Your mangosd.conf version indicates your conf file is out of date!");
             sLog.outString("          Please check for updates, as your current default values may cause");
@@ -180,7 +184,6 @@ void World::SetInitialWorldSettings()
         }
     }
 
-    
     regen_values[RATE_HEALTH] = sConfig.GetFloatDefault("Rate.Health", 1);
     regen_values[RATE_POWER1] = sConfig.GetFloatDefault("Rate.Power1", 1);
     regen_values[RATE_POWER2] = sConfig.GetFloatDefault("Rate.Power2", 1);

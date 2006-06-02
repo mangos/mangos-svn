@@ -220,38 +220,44 @@ bool ChatHandler::HandleShowHonor(const char* args)
     uint32 last_week_honor          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION);
     uint32 last_week_standing       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK);
 
-    std::string alliance_ranks[] = {"", 
-        LANG_ALI_PRIVATE, 
-        LANG_ALI_CORPORAL, 
-        LANG_ALI_SERGEANT, 
-        LANG_ALI_MASTER_SERGEANT, 
-        LANG_ALI_SERGEANT_MAJOR, 
-        LANG_ALI_KNIGHT, 
-        LANG_ALI_KNIGHT_LIEUTENANT, 
-        LANG_ALI_KNIGHT_CAPTAIN, 
-        LANG_ALI_KNIGHT_CHAMPION, 
-        LANG_ALI_LIEUTENANT_COMMANDER, 
-        LANG_ALI_COMMANDER, 
-        LANG_ALI_MARSHAL, 
-        LANG_ALI_FIELD_MARSHAL, 
-        LANG_ALI_GRAND_MARSHAL, 
-        LANG_ALI_GAME_MASTER};
-    std::string horde_ranks[] = {"", 
-        LANG_HRD_SCOUT, 
-        LANG_HRD_GRUNT, 
-        LANG_HRD_SERGEANT, 
-        LANG_HRD_SENIOR_SERGEANT, 
-        LANG_HRD_FIRST_SERGEANT, 
-        LANG_HRD_STONE_GUARD, 
-        LANG_HRD_BLOOD_GUARD, 
-        LANG_HRD_LEGIONNARE, 
-        LANG_HRD_CENTURION, 
-        LANG_HRD_CHAMPION, 
-        LANG_HRD_LIEUTENANT_GENERAL, 
-        LANG_HRD_GENERAL, 
-        LANG_HRD_WARLORD, 
-        LANG_HRD_HIGH_WARLORD, 
-        LANG_HRD_GAME_MASTER};
+    std::string alliance_ranks[] =
+    {
+        "",
+        LANG_ALI_PRIVATE,
+        LANG_ALI_CORPORAL,
+        LANG_ALI_SERGEANT,
+        LANG_ALI_MASTER_SERGEANT,
+        LANG_ALI_SERGEANT_MAJOR,
+        LANG_ALI_KNIGHT,
+        LANG_ALI_KNIGHT_LIEUTENANT,
+        LANG_ALI_KNIGHT_CAPTAIN,
+        LANG_ALI_KNIGHT_CHAMPION,
+        LANG_ALI_LIEUTENANT_COMMANDER,
+        LANG_ALI_COMMANDER,
+        LANG_ALI_MARSHAL,
+        LANG_ALI_FIELD_MARSHAL,
+        LANG_ALI_GRAND_MARSHAL,
+        LANG_ALI_GAME_MASTER
+    };
+    std::string horde_ranks[] =
+    {
+        "",
+        LANG_HRD_SCOUT,
+        LANG_HRD_GRUNT,
+        LANG_HRD_SERGEANT,
+        LANG_HRD_SENIOR_SERGEANT,
+        LANG_HRD_FIRST_SERGEANT,
+        LANG_HRD_STONE_GUARD,
+        LANG_HRD_BLOOD_GUARD,
+        LANG_HRD_LEGIONNARE,
+        LANG_HRD_CENTURION,
+        LANG_HRD_CHAMPION,
+        LANG_HRD_LIEUTENANT_GENERAL,
+        LANG_HRD_GENERAL,
+        LANG_HRD_WARLORD,
+        LANG_HRD_HIGH_WARLORD,
+        LANG_HRD_GAME_MASTER
+    };
     std::string rank_name;
 
     if ( m_session->GetPlayer()->GetTeam() == ALLIANCE )

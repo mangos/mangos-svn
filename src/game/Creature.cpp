@@ -706,10 +706,13 @@ void Creature::generateLoot()
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run)
 {
     uint32 timeElap = getMSTime();
-    if ((timeElap - m_startMove) < m_moveTime) {
+    if ((timeElap - m_startMove) < m_moveTime)
+    {
         oX = (dX - oX) * ( (timeElap - m_startMove) / m_moveTime );
         oY = (dY - oY) * ( (timeElap - m_startMove) / m_moveTime );
-    } else {
+    }
+    else
+    {
         oX = dX;
         oY = dY;
     }

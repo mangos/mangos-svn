@@ -665,7 +665,7 @@ void Aura::HandleFear(bool Apply)
         m_target->addUnitState(UNIT_STAT_FLEEING);
         m_target->AttackStop();
         m_target->SetFlag(UNIT_FIELD_FLAGS,0x800000);
-        
+
         data<<m_target->GetGUIDLow();
         data<<uint8(0);
         float x,y,z,angle,speed;
