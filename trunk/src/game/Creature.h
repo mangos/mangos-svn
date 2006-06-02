@@ -310,10 +310,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Loot loot;
         //Loot Skinloot;
 
-        uint32 m_startMove;
-        uint32 m_moveTime;
-        float oX, oY;
-        float dX, dY;
+        //uint32 m_startMove;       // Variables to try to guess orientation
+        //uint32 m_moveTime;        // but this seems impossible/not intended
+        //float oX, oY;             // without a flag on MONSTER_MOVE??
+        //float dX, dY;
 
     protected:
         void _LoadGoods();
