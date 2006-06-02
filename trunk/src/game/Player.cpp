@@ -785,7 +785,7 @@ void Player::SendNewWorld(uint32 mapid, float x, float y, float z, float orienta
         if (!((*iter)->removeAttackee(this)))
             m_attackers.erase(iter);
     }
-    
+
     MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
     data.Initialize(SMSG_TRANSFER_PENDING);
@@ -2532,30 +2532,30 @@ void Player::SetInitialFactions()
     {
         factionEntry = sFactionStore.LookupEntry(i);
 
-		if( factionEntry && (factionEntry->reputationListID >= 0))
-		{
-			newFaction.ID = factionEntry->ID;
-			newFaction.ReputationListID = factionEntry->reputationListID;
-			newFaction.Standing = 0;
-			//Set visible to factions of own team
-			if( GetTeam() == factionEntry->team ) newFaction.Flags = 1;
-			else newFaction.Flags = 0;
+        if( factionEntry && (factionEntry->reputationListID >= 0))
+        {
+            newFaction.ID = factionEntry->ID;
+            newFaction.ReputationListID = factionEntry->reputationListID;
+            newFaction.Standing = 0;
+            //Set visible to factions of own team
+            if( GetTeam() == factionEntry->team ) newFaction.Flags = 1;
+            else newFaction.Flags = 0;
 
-			//If the faction's team is enemy of my one we are at war!
-			if(GetTeam() == ALLIANCE )
-			{
-				if( factionEntry->team == HORDE || factionEntry->team == HORDE_FORCES )
-					newFaction.Flags = (newFaction.Flags | 2);
-			}
-			else
-			if(GetTeam() == HORDE    )
-			{
-				if( factionEntry->team == ALLIANCE || factionEntry->team == ALLIANCE_FORCES )
-					newFaction.Flags = (newFaction.Flags | 2);
-			}
-			
-			factions.push_back(newFaction);
-		}
+            //If the faction's team is enemy of my one we are at war!
+            if(GetTeam() == ALLIANCE )
+            {
+                if( factionEntry->team == HORDE || factionEntry->team == HORDE_FORCES )
+                    newFaction.Flags = (newFaction.Flags | 2);
+            }
+            else
+            if(GetTeam() == HORDE    )
+            {
+                if( factionEntry->team == ALLIANCE || factionEntry->team == ALLIANCE_FORCES )
+                    newFaction.Flags = (newFaction.Flags | 2);
+            }
+
+            factions.push_back(newFaction);
+        }
     }
 }
 

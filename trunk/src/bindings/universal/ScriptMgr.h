@@ -30,13 +30,12 @@
 
 struct Script
 {
-    Script() : 
-        pGossipHello(NULL), pQuestAccept(NULL), pGossipSelect(NULL), pGossipSelectWithCode(NULL), 
-        pQuestSelect(NULL), pQuestComplete(NULL), pNPCDialogStatus(NULL), pChooseReward(NULL), 
-        pItemHello(NULL), pGOHello(NULL), pAreaTrigger(NULL), pItemQuestAccept(NULL), pGOQuestAccept(NULL), 
-        pGOChooseReward(NULL), GetAI(NULL) 
-    {}
-
+    Script() :
+    pGossipHello(NULL), pQuestAccept(NULL), pGossipSelect(NULL), pGossipSelectWithCode(NULL),
+        pQuestSelect(NULL), pQuestComplete(NULL), pNPCDialogStatus(NULL), pChooseReward(NULL),
+        pItemHello(NULL), pGOHello(NULL), pAreaTrigger(NULL), pItemQuestAccept(NULL), pGOQuestAccept(NULL),
+        pGOChooseReward(NULL), GetAI(NULL)
+        {}
 
     std::string Name;
 
@@ -79,5 +78,4 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 
     Creature* m_creature;
 };
-
 #endif

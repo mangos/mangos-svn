@@ -228,7 +228,6 @@ bool AreaTrigger      ( Player *player, Quest *_Quest, uint32 triggerID )
     return tmpscript->pAreaTrigger(player,_Quest,triggerID);
 }
 
-
 MANGOS_DLL_EXPORT
 CreatureAI* GetAI(Creature *_Creature )
 {

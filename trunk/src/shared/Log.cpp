@@ -133,7 +133,6 @@ void Log::outMenu( const char * str, ... )
     fflush(logfile);
 }
 
-
 void debug_log(const char * str, ...)
 {
     if( !str ) return;

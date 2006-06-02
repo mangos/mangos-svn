@@ -82,7 +82,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
     char buf[256];
     sprintf((char*)buf, LANG_MAP_POSITION,
-        obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), 
+        obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation());
 
     SendMultilineMessage(buf);
