@@ -52,8 +52,9 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1,
         }
         else
         {
-            distance_d = ::sqrt(distance_d);
-            double distance_ratio = (double)offset/(double)distance_d;
+            distance_d = ::sqrt(distance_d);    // starting distance
+            double distance_ratio = (double)(distance_d - offset)/(double)distance_d;
+            // line above has revised formula which is more correct, I think
             x = (float)(x1 + (distance_ratio*x_diff));
             y = (float)(y1 + (distance_ratio*y_diff));
         }
@@ -77,20 +78,19 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
     float dist = ((dx*dx) + (dy*dy) + (dz*dz));             // - offset;
-    if(dist<0)
-        dist = 0;
-    else
-        dist = ::sqrt(dist);
+    dist = ::sqrt(dist);
     double speed = traveller.Speed();
     if(speed<=0)
         speed = 2.5f;
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
-    float orientation = (float)atan2((double)dy, (double)dx);
-    traveller.Relocation(i_fromX, i_fromY, i_fromZ, orientation);
+    float orientation = (float)atan2((double)dy, (double)dx) * -1;
+    if (dist > 0.01f) {
+        traveller.Relocation(i_fromX, i_fromY, i_fromZ, orientation);
 
-    // inform traveller move to the actuall position
-    traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
+        // inform traveller move to the actual position
+        traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
+    }
 }
 
 template<typename TRAVELLER>

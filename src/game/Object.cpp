@@ -558,11 +558,15 @@ bool Object::IsInArc(const float arcangle, const Object* obj) const
     if(arcangle>2.0f * M_PI)
         arc=arcangle - 2.0f * M_PI;
     float angle = GetAngle( obj );
-    float lborder = m_orientation - (arc/2.0f);
-    float rborder = m_orientation + (arc/2.0f);
-    if(lborder<0)
-        return ((angle >= 2.0f * M_PI+lborder && angle <= 2.0f * M_PI) || (angle>=0 && angle<=rborder));
-    return ( angle >= lborder ) && ( angle <= rborder );
+    angle -= m_orientation;
+    if (angle > (2.0f * M_PI))
+        angle -= 2.0f * M_PI;
+    if (angle < (2.0f * M_PI * -1))
+        angle += 2.0f * M_PI;
+
+    float lborder =  -1 * (arc/2.0f);
+    float rborder = (arc/2.0f);
+    return (( angle >= lborder ) && ( angle <= rborder ));
 }
 
 void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z ) const
@@ -571,15 +575,19 @@ void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z )
     if(!victim)
     {
         z1 = m_positionZ;
-        angle = m_orientation;
+        //angle = //m_orientation;
+        angle = GetAngle(victim) + (M_PI);
+        if (angle > (2.0f * M_PI))
+            angle -= (2.0f * M_PI);
     }
     else
     {
         z1 = victim->GetPositionZ();
         angle = GetAngle( victim );
     }
-    x = m_positionX + GetObjectSize() * cos(angle);
-    y = m_positionY + GetObjectSize() * sin(angle);
+    x = m_positionX;// + GetObjectSize() * cos(angle);
+    y = m_positionY;// + GetObjectSize() * sin(angle);
+    z1 = m_positionZ;///
     int mapid = GetMapId();
     z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
     if( abs( z - z1 ) > 15.0f )

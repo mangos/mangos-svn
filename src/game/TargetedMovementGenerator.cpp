@@ -39,7 +39,7 @@ struct StackCleaner
 };
 
 void
-TargetedMovementGenerator::_setTargetLocation(Creature &owner)
+TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 {
     if(!&i_target || !&owner)
         return;
@@ -47,7 +47,8 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
     float x, y, z;
     i_target.GetClosePoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
-    i_destinationHolder.SetDestination(traveller, x, y, z, 0);
+    //i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()));
+    i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()) + offset);
 }
 
 void
@@ -69,7 +70,7 @@ TargetedMovementGenerator::Initialize(Creature &owner)
         return;
     owner.setMoveRunFlag(true);
     _setAttackRadius(owner);
-    _setTargetLocation(owner);
+    _setTargetLocation(owner, 0);
     owner.addUnitState(UNIT_STAT_CHASE);
 }
 
@@ -119,9 +120,36 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         if( !owner.canReachWithAttack( &i_target ) )
         {
             owner.addUnitState(UNIT_STAT_CHASE);
-            _setTargetLocation(owner);
+            _setTargetLocation(owner, 0);
             DEBUG_LOG("restart to chase");
         }
+        //if (!owner.IsInArc( 2.0943951024, &i_target )) {
+//        if (!owner.IsInArc( (30/360) * 2 * M_PI, &i_target )) {
+            // adjust facing
+/*        if ((i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
+            _setTargetLocation(owner, 0);
+        }*/
+        //if ((i_target.GetDistance2dSq(&owner) < (owner.GetObjectSize() * 2 + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
+            
+            if (i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize()) + 0.5f)
+                _setTargetLocation(owner, 0);
+//            else  {
+                /*float ang = owner.GetAngle(&i_target);
+                ang -= owner.GetOrientation();
+                if (ang > (2.0f * M_PI))
+                    ang -= 2.0f * M_PI;
+                if (ang < (2.0f * M_PI * -1))
+                    ang += 2.0f * M_PI;
+                if (ang <= M_PI) {
+                    // Facing different directions
+                    ang = ang;
+                }*/
+  //          }
+            //if (i_target.GetDistance2dSq(&owner) == 0)
+            //    _setTargetLocation(owner, -1 * (owner.GetObjectSize() + i_target.GetObjectSize()));
+
+        //    sLog.outString("try to back up");
+       // }
     }
     else
     {
@@ -150,7 +178,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             }
             else
             {
-                _setTargetLocation(owner);
+                _setTargetLocation(owner, 0);
                 DEBUG_LOG("Continue to chase");
             }
         }

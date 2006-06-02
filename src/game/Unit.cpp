@@ -248,7 +248,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
         crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
-        pVictim->SetInFront(this);
+        //pVictim->SetInFront(this);
         ((Creature*)pVictim)->AI().AttackStart(this);
     }
 

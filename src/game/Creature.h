@@ -310,6 +310,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Loot loot;
         //Loot Skinloot;
 
+        uint32 m_startMove;
+        uint32 m_moveTime;
+        float oX, oY;
+        float dX, dY;
+
     protected:
         void _LoadGoods();
         void _LoadQuests();
