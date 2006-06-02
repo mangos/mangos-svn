@@ -85,7 +85,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
     float orientation = (float)atan2((double)dy, (double)dx) * -1;
-    if (dist > 0.01f)
+    if (dist > 0.1f)
     {
         traveller.Relocation(i_fromX, i_fromY, i_fromZ, orientation);
 
