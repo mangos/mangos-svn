@@ -133,7 +133,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     m_spellState = SPELL_STATE_NULL;
 
-    m_castPositionX = m_castPositionY = m_castPositionZ;
+    m_castPositionX = m_castPositionY = m_castPositionZ = 0;
     m_TriggerSpell = NULL;
     m_targetCount = 0;
     m_Istriggeredpell = triggered;

@@ -332,7 +332,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
 
-        void Die();
         void GiveXP(uint32 xp, const uint64 &guid);
 
         void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
