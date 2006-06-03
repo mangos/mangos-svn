@@ -210,33 +210,17 @@ void Spell::EffectTeleportUnits(uint32 i)
 
 void Spell::EffectApplyAura(uint32 i)
 {
+    uint8 castResult = 0;
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
+    //If m_immuneToState type contain this aura type, IMMUNE aura.
+    if(unitTarget->m_immuneToState & m_spellInfo->EffectApplyAuraName[i])
+        return;
 
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
-    //unitTarget->RemoveAuraRank(m_spellInfo->Id);
 
-    /*if(m_spellInfo->Id == 2457)
-    {
-        unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
-        return;
-    }
-
-    else if(m_spellInfo->Id == 71)
-    {
-        unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0012EE00 );
-        return;
-    }
-
-    else if(m_spellInfo->Id == 2458)
-    {
-        unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0013EE00 );
-        return;
-    }*/
-
-    //int32 duration = GetDuration(m_spellInfo, i);
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
     unitTarget->AddAura(Aur);
 }

@@ -866,7 +866,7 @@ void Spell::TakePower()
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
 {
-
+    uint8 castResult = 0;
     unitTarget = pUnitTarget;
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
@@ -875,6 +875,12 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     uint8 eff = m_spellInfo->Effect[i];
 
     sLog.outDebug( "WORLD: Spell FX id is %u", eff);
+    if(unitTarget && (unitTarget->m_immuneToEffect == eff))
+    {
+        castResult = CAST_FAIL_IMMUNE;
+        SendCastResult(castResult);
+        return;
+    }
 
     if(eff<TOTAL_SPELL_EFFECTS)
         (*this.*SpellEffects[eff])(i);
@@ -918,6 +924,7 @@ void Spell::TriggerSpell()
 uint8 Spell::CanCast()
 {
     uint8 castResult = 0;
+    uint32 m_school = 0;
 
     if (m_CastItem || itemTarget)
     {
@@ -928,13 +935,47 @@ uint8 Spell::CanCast()
 
         return castResult;
     }
-
     Unit *target = NULL;
     target = m_targets.getUnitTarget();
     SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
     float range = GetMaxRange(srange);
     if(target)
     {
+        //If m_immuneToDispel type contain this spell type, IMMUNE spell.
+        if(target->m_immuneToDispel & m_spellInfo->Dispel)
+            castResult = CAST_FAIL_IMMUNE;
+        //If m_immuneToMechanic type contain this Mechanic type IMMUNE spell, or it should fit to aura?
+        if(target->m_immuneToMechanic & m_spellInfo->Mechanic)
+            castResult = CAST_FAIL_IMMUNE;
+        //If m_immuneToDamage type contain magic, IMMUNE spell.
+        if(unitTarget->m_immuneToDmg & IMMUNE_DAMAGE_MAGIC)
+            castResult = CAST_FAIL_IMMUNE;
+        //If m_immuneToSchool type contain this school type, IMMUNE spell.
+        switch(m_spellInfo->School)
+        {
+        case 1:
+            m_school = IMMUNE_SCHOOL_HOLY;
+            break;
+        case 2:
+            m_school = IMMUNE_SCHOOL_FIRE;
+            break;
+        case 3:
+            m_school = IMMUNE_SCHOOL_NATURE;
+            break;
+        case 4:
+            m_school = IMMUNE_SCHOOL_FROST;
+            break;
+        case 5:
+            m_school = IMMUNE_SCHOOL_SHADOW;
+            break;
+        case 6:
+            m_school = IMMUNE_SCHOOL_ARCANE;
+            break;
+        default:break;
+        }
+        if(unitTarget->m_immuneToSchool & m_school)
+            castResult = CAST_FAIL_IMMUNE;
+
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
 
@@ -962,7 +1003,6 @@ uint8 Spell::CanCast()
 
 uint8 Spell::CheckItems()
 {
-    //update by Ant009,need more test.
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return uint8(0);
 

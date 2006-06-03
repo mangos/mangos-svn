@@ -65,7 +65,7 @@ Unit::Unit() : Object()
     m_immuneToSchool = 0;
     m_immuneToDmg    = 0;
     m_immuneToDispel = 0;
-    m_immuneToStealth = 0;
+    m_detectStealth = 0;
     m_stealthvalue = 0;
 
     m_ReflectSpellSchool = 0;

@@ -210,7 +210,7 @@ AggressorAI::IsVisible(Unit *pl) const
     if(pl->isStealth())
     {
         int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
-        seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_immuneToStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);
+        seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_detectStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);
     }
                                                             // offset=1.0
     return pl->isTargetableForAttack() && seestealth && (dist * 1.0 <= sight) ;

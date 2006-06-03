@@ -117,6 +117,71 @@ enum UnitState
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
+//To all Immune system,if target has immunes,
+//some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
+//some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
+//some aura(related to ImmuneToMechanic or ImmuneToState<aura>) can't apply to it. 
+enum ImmuneToMechanic
+{
+    IMMUNE_MECHANIC_CHARM            =1,
+    IMMUNE_MECHANIC_CONFUSED         =2,
+    IMMUNE_MECHANIC_DISARM           =3,
+    IMMUNE_MECHANIC_UNKOWN4          =4,
+    IMMUNE_MECHANIC_FEAR             =5,
+    IMMUNE_MECHANIC_UNKOWN6          =6,
+    IMMUNE_MECHANIC_ROOT             =7,
+    IMMUNE_MECHANIC_UNKOWN8          =8,
+    IMMUNE_MECHANIC_UNKOWN9          =9,
+    IMMUNE_MECHANIC_SLEEP            =10,
+    IMMUNE_MECHANIC_CHASE            =11,
+    IMMUNE_MECHANIC_STUNDED          =12,
+    IMMUNE_MECHANIC_FREEZE           =13,
+    IMMUNE_MECHANIC_KNOCKOUT         =14,
+    IMMUNE_MECHANIC_BLEED            =15,
+    IMMUNE_MECHANIC_HEAL             =16,
+    IMMUNE_MECHANIC_PLOYMORPH        =17,
+    IMMUNE_MECHANIC_BANISH           =18,
+    IMMUNE_MECHANIC_SHIELDED         =19,
+    IMMUNE_MECHANIC_UNKOWN20         =20,
+    IMMUNE_MECHANIC_MOUNT            =21,
+    IMMUNE_MECHANIC_UNKOWN22         =22,
+    IMMUNE_MECHANIC_UNKOWN23         =23,
+    IMMUNE_MECHANIC_HORROR           =24,
+    IMMUNE_MECHANIC_INVULNERABILITY  =25,
+    IMMUNE_MECHANIC_UNKOWN26         =26
+};
+enum ImmuneToDispel
+{
+    IMMUNE_DISPEL_MAGIC        =1,
+    IMMUNE_DISPEL_UNKNOWN      =2,
+    IMMUNE_DISPEL_DISEASE      =3,
+    IMMUNE_DISPEL_POIOON       =4,
+    IMMUNE_DISPEL_STEALTH      =5,
+    IMMUNE_DISPEL_INVISIBILITY =6,
+    IMMUNE_DISPEL_ALL          =7,
+    IMMUNE_DISPEL_SPE_NPC_ONLY =8,
+    IMMUNE_DISPEL_CRAZY        =9,
+    IMMUNE_DISPEL_ZG_TICKET    =10
+};
+
+enum ImmuneToDamage
+{
+    IMMUNE_DAMAGE_PHYSICAL     =1,
+    IMMUNE_DAMAGE_MAGIC        =126
+};
+
+enum ImmuneToSchool
+{
+    IMMUNE_SCHOOL_PHYSICAL     =1,
+    IMMUNE_SCHOOL_HOLY         =2,
+    IMMUNE_SCHOOL_FIRE         =4,
+    IMMUNE_SCHOOL_NATURE       =8,
+    IMMUNE_SCHOOL_FROST        =16,
+    IMMUNE_SCHOOL_SHADOW       =32,
+    IMMUNE_SCHOOL_ARCANE       =64,
+    IMMUNE_SCHOOL_MAGIC        =126
+};
+
 struct Hostil
 {
     uint64 UnitGuid;
@@ -314,7 +379,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_immuneToSchool;
         uint32 m_immuneToDmg;
         uint32 m_immuneToDispel;
-        uint32 m_immuneToStealth;
+        uint32 m_detectStealth;
         uint32 m_stealthvalue;
         uint32 m_ReflectSpellSchool;
         uint32 m_ReflectSpellPerc;
