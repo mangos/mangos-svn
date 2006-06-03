@@ -1718,22 +1718,27 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     int nrlvl = atoi((char*)args);
 
+	Player *chr = getSelectedChar(m_session);
+    if (chr == NULL)
+    {
+        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
+        m_session->SendPacket( &data );
+        return true;
+    }
+
     for(int i=0;i<nrlvl || i==0;i++)
     {
-        uint32 curXP = m_session->GetPlayer()->GetUInt32Value(PLAYER_XP);
-        uint32 nextLvlXP = m_session->GetPlayer()->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
+        uint32 curXP = chr->GetUInt32Value(PLAYER_XP);
+        uint32 nextLvlXP = chr->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
         uint32 givexp = nextLvlXP - curXP;
 
-        //        uint32 points2 = m_session->GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS2);
-        //        m_session->GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS2,points2+2);
-
-        m_session->GetPlayer()->GiveXP(givexp,m_session->GetPlayer()->GetGUID());
+        chr->GiveXP(givexp,chr->GetGUID());
 
         WorldPacket data;
         std::stringstream sstext;
         sstext << LANG_YOURS_LEVEL_UP << '\0';
-        FillSystemMessageData(&data, m_session, sstext.str().c_str());
-        m_session->SendPacket( &data );
+        FillSystemMessageData(&data, chr->GetSession(), sstext.str().c_str());
+		chr->GetSession()->SendPacket( &data );
     }
     return true;
 }
