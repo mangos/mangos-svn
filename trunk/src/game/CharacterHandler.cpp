@@ -413,7 +413,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->UpdateHonor();
 
-	GetPlayer()->SetPvP( !GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , 0x08) );
+    GetPlayer()->SetPvP( !GetPlayer()->HasFlag(UNIT_FIELD_FLAGS , 0x08) );
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED);
     time_t minutes = sWorld.GetGameTime( ) / 60;
