@@ -2561,7 +2561,6 @@ void Player::SetInitialFactions()
 
 bool Player::SetStanding(uint32 FTemplate, int standing)
 {
-    Factions newFaction;
     FactionEntry *factionEntry = NULL;
     FactionTemplateEntry *factionTemplateEntry = NULL;
     std::list<struct Factions>::iterator itr;
@@ -7238,7 +7237,11 @@ void Player::_LoadAuras()
             int32 remaintime = (int32)fields[3].GetUInt32();
 
             SpellEntry* spellproto = sSpellStore.LookupEntry(spellid);
-            assert(spellproto);
+            if(!spellproto)
+            {
+                sLog.outError("Unknown aura (spellid %u, effindex %u), ignore.",spellid,effindex);
+                continue;
+            }
 
             Aura* aura = new Aura(spellproto, effindex, this, this);
             aura->SetAuraDuration(remaintime);

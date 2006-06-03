@@ -1054,3 +1054,11 @@ CreatureInfo *Creature::GetCreatureInfo()
 {
     return objmgr.GetCreatureTemplate(GetEntry());
 }
+
+void Creature::Say(char const* message, uint32 language)
+{
+    WorldPacket data;
+
+    sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_SAY, language, NULL, message );
+    SendMessageToSet( &data, false );
+}

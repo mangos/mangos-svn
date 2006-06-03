@@ -299,6 +299,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
             Unit::setDeathState(s);
         };
 
+        void Say(char const* text, uint32 language);
+
         void SaveToDB();
         bool LoadFromDB(uint32 guid);
         void DeleteFromDB();

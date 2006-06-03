@@ -455,7 +455,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     DEBUG_LOG("DealDamageEnd");
 }
 
-void Unit::CastSpell(Unit* caster,Unit* Victim, uint32 spellId, bool triggered)
+void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered)
 {
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId );
@@ -466,7 +466,7 @@ void Unit::CastSpell(Unit* caster,Unit* Victim, uint32 spellId, bool triggered)
         return;
     }
 
-    Spell *spell = new Spell(caster, spellInfo, triggered, 0);
+    Spell *spell = new Spell(this, spellInfo, triggered, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
