@@ -59,8 +59,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraDamageShield,                          //SPELL_AURA_DAMAGE_SHIELD = 15,
     &Aura::HandleModStealth,                                //SPELL_AURA_MOD_STEALTH = 16,
     &Aura::HandleModDetect,                                 //SPELL_AURA_MOD_DETECT = 17,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_INVISIBILITY = 18,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
+    &Aura::HandleInvisibility,                              //SPELL_AURA_MOD_INVISIBILITY = 18,
+    &Aura::HandleInvisibilityDetect,                        //SPELL_AURA_MOD_INVISIBILITY_DETECTION = 19,
     &Aura::HandleNULL,                                      //missing 20,
     &Aura::HandleNULL,                                      //missing 21
     &Aura::HandleAuraModResistance,                         //SPELL_AURA_MOD_RESISTANCE = 22,
@@ -465,7 +465,7 @@ void Aura::Update(uint32 diff)
         m_duration -= diff;
         if (m_duration < 0)
             m_duration = 0;
-        if(m_target->hasUnitState(UNIT_STAT_FLEEING))
+        if(m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))
         {
             float x,y,z,angle,speed;
             m_target->AttackStop();
@@ -475,7 +475,7 @@ void Aura::Update(uint32 diff)
             y = m_target->GetPositionY() + speed*m_duration * sin(-angle);
             int mapid = m_target->GetMapId();
             z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-            m_target->SendMoveToPacket(x,y,z,false);
+            m_target->SendMoveToPacket(x,y,z,true);
         }
     }
     if(m_isPeriodic && m_duration > 0)
@@ -520,8 +520,6 @@ void Aura::_AddAura()
     if (!m_spellId)
         return;
 
-    ApplyModifier(true);
-    sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
     bool samespell = false;
     uint8 slot = 0xFF, i;
     uint32 maxduration = m_duration;
@@ -541,6 +539,11 @@ void Aura::_AddAura()
     }
     if(m_duration <= maxduration && slot != 0xFF)
         return;
+    if(!samespell)
+    {
+        ApplyModifier(true);
+        sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
+    }
 
     WorldPacket data;
     if(!samespell)
@@ -650,40 +653,39 @@ void Aura::HandlePeriodicDamage(bool apply)
 
 void Aura::HandleModConfuse(bool apply)
 {
+    uint32 apply_stat = UNIT_STAT_CONFUSED;
     if( apply )
+    {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
     else
+    {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
 }
 
 void Aura::HandleFear(bool Apply)
 {
+    uint32 apply_stat = UNIT_STAT_FLEEING;
     WorldPacket data;
     data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
         m_target->AttackStop();
-        m_target->SetFlag(UNIT_FIELD_FLAGS,0x800000);
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         data<<m_target->GetGUIDLow();
         data<<uint8(0);
-        float x,y,z,angle,speed;
-        angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
-        speed = m_target->GetSpeed();
-        x = m_target->GetPositionX() + speed*m_modifier->periodictime * cos(-angle);
-        y = m_target->GetPositionY() + speed*m_modifier->periodictime * sin(-angle);
-        int mapid = m_target->GetMapId();
-        z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-        m_target->SendMoveToPacket(x,y,z,false);
     }
     else
     {
         data<<m_target->GetGUIDLow();
         data<<uint8(1);
         m_target->clearUnitState(UNIT_STAT_FLEEING);
-        m_target->SetSpeed(m_target->GetSpeed(MOVE_WALK));
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,0x800000);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
     }
     m_target->SendMessageToSet(&data,true);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -698,7 +700,7 @@ void HandleHealEvent(void *obj)
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-    if(!m_target || m_target->m_immuneToMechanic == 16)     //Can't heal
+    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_HEAL))     //Can't heal
         return;
     if(apply)
     {
@@ -804,7 +806,18 @@ void Aura::HandleAddModifier(bool apply)
 
 void Aura::HandleAuraModStun(bool apply)
 {
-    if (apply) m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+    uint32 apply_stat = UNIT_STAT_STUNDED;
+    if (apply)
+    {
+        m_target->addUnitState(UNIT_STAT_STUNDED);
+        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
+    else 
+    {
+        m_target->clearUnitState(UNIT_STAT_STUNDED);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
 }
 
 void Aura::HandleAuraModRangedAttackPower(bool apply)
@@ -1031,14 +1044,42 @@ void Aura::HandleModDetect(bool apply)
 {
     if(apply)
     {
-        m_target->m_immuneToStealth = CalculateDamage();
+        m_target->m_detectStealth = CalculateDamage();
     }
     else
     {
-        m_target->m_immuneToStealth = 0;
+        m_target->m_detectStealth = 0;
     }
 }
 
+void Aura::HandleInvisibility(bool Apply)
+{
+    if(Apply)
+    {
+        m_target->m_stealthvalue = CalculateDamage();
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+    }
+    else
+    {
+        SendCoolDownEvent();
+        m_target->m_stealthvalue = 0;
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+    }
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_target);
+}
+
+void Aura::HandleInvisibilityDetect(bool Apply)
+{
+    if(Apply)
+    {
+        m_target->m_detectStealth = CalculateDamage();
+    }
+    else
+    {
+        m_target->m_detectStealth = 0;
+    }
+}
 void Aura::HandleAuraModResistance(bool apply)
 {
     uint16 index = 0;
@@ -1115,11 +1156,13 @@ void Aura::HandleAuraModResistance(bool apply)
 void Aura::HandleAuraModRoot(bool apply)
 {
     WorldPacket data;
+    uint32 apply_stat = UNIT_STAT_ROOT;
                                                             //MSG_MOVE_ROOT
     apply ? data.Initialize(MSG_MOVE_ROOT) : data.Initialize(MSG_MOVE_UNROOT);
     data << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
     apply ? m_target->addUnitState(UNIT_STAT_ROOT) : m_target->clearUnitState(UNIT_STAT_ROOT);
+    apply ? m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)) :m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 }
 
 void Aura::HandleAuraModSilence(bool apply)
@@ -1425,32 +1468,32 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
 void Aura::HandleModMechanicImmunity(bool apply)
 {
-    apply ? m_target->m_immuneToMechanic = m_modifier->m_miscvalue : m_target->m_immuneToMechanic = 0;
+    apply ? m_target->SetFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
 {
-    apply ? m_target->m_immuneToEffect = m_modifier->m_miscvalue : m_target->m_immuneToEffect = 0;
+    apply ? m_target->SetFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModStateImmunity(bool apply)
 {
-    apply ? m_target->m_immuneToState = m_modifier->m_miscvalue : m_target->m_immuneToState = 0;
+    apply ? m_target->SetFlag(m_target->m_immuneToState,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToState,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModSchoolImmunity(bool apply)
 {
-    apply ? m_target->m_immuneToSchool = m_modifier->m_miscvalue : m_target->m_immuneToSchool = 0;
+    apply ? m_target->SetFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply)
 {
-    apply ? m_target->m_immuneToDmg = m_modifier->m_miscvalue : m_target->m_immuneToDmg = 0;
+    apply ? m_target->SetFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply)
 {
-    apply ? m_target->m_immuneToDispel = m_modifier->m_miscvalue : m_target->m_immuneToDispel = 0;
+    apply ? m_target->SetFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraProcTriggerSpell(bool apply)

@@ -58,6 +58,8 @@ struct SpellEntry
     uint32    Id;
     uint32    School;
     uint32    Category;
+    uint32    Dispel;
+    uint32    Mechanic;
     uint32    Attributes;
     uint32    AttributesEx;
     uint32    Targets;

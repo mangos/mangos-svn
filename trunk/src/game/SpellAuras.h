@@ -69,6 +69,8 @@ class Aura
         void HandleAuraDamageShield(bool Apply);
         void HandleModStealth(bool Apply);
         void HandleModDetect(bool Apply);
+        void HandleInvisibility(bool Apply);
+        void HandleInvisibilityDetect(bool Apply);
         void HandleAuraModResistance(bool Apply);
         void HandleAuraModRoot(bool Apply);
         void HandleAuraModSilence(bool Apply);
