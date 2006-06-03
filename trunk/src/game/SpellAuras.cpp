@@ -1624,7 +1624,8 @@ void Aura::HandleChannelDeathItem(bool apply)
         SpellEntry *spellInfo = GetSpellProto();
         if(spellInfo->EffectItemType[m_effIndex] == 0)
             return;
-        ((Player*)m_caster)->AddNewItem(spellInfo->EffectItemType[m_effIndex], 1, true);
+        if( uint16 dst = ((Player*)m_caster)->CanStoreNewItem( NULL, NULL_SLOT, spellInfo->EffectItemType[m_effIndex], 1, false, true) )
+            ((Player*)m_caster)->StoreNewItem(dst, spellInfo->EffectItemType[m_effIndex], 1);
     }
 }
 

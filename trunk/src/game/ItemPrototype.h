@@ -61,35 +61,35 @@ enum ITEM_BONDING_TYPE
 
 enum INVENTORY_TYPES
 {
-    INVTYPE_NON_EQUIP      = 0x0,
-    INVTYPE_HEAD           = 0x1,
-    INVTYPE_NECK           = 0x2,
-    INVTYPE_SHOULDERS      = 0x3,
-    INVTYPE_BODY           = 0x4,
-    INVTYPE_CHEST          = 0x5,
-    INVTYPE_WAIST          = 0x6,
-    INVTYPE_LEGS           = 0x7,
-    INVTYPE_FEET           = 0x8,
-    INVTYPE_WRISTS         = 0x9,
-    INVTYPE_HANDS          = 0xa,
-    INVTYPE_FINGER         = 0xb,
-    INVTYPE_TRINKET        = 0xc,
-    INVTYPE_WEAPON         = 0xd,
-    INVTYPE_SHIELD         = 0xe,
-    INVTYPE_RANGED         = 0xf,
-    INVTYPE_CLOAK          = 0x10,
-    INVTYPE_2HWEAPON       = 0x11,
-    INVTYPE_BAG            = 0x12,
-    INVTYPE_TABARD         = 0x13,
-    INVTYPE_ROBE           = 0x14,
-    INVTYPE_WEAPONMAINHAND = 0x15,
-    INVTYPE_WEAPONOFFHAND  = 0x16,
-    INVTYPE_HOLDABLE       = 0x17,
-    INVTYPE_AMMO           = 0x18,
-    INVTYPE_THROWN         = 0x19,
-    INVTYPE_RANGEDRIGHT    = 0x1a,
-    INVTYPE_SLOT_ITEM      = 0x1b,
-    NUM_INVENTORY_TYPES    = 0x1c,
+    INVTYPE_NON_EQUIP      = 0,
+    INVTYPE_HEAD           = 1,
+    INVTYPE_NECK           = 2,
+    INVTYPE_SHOULDERS      = 3,
+    INVTYPE_BODY           = 4,
+    INVTYPE_CHEST          = 5,
+    INVTYPE_WAIST          = 6,
+    INVTYPE_LEGS           = 7,
+    INVTYPE_FEET           = 8,
+    INVTYPE_WRISTS         = 9,
+    INVTYPE_HANDS          = 10,
+    INVTYPE_FINGER         = 11,
+    INVTYPE_TRINKET        = 12,
+    INVTYPE_WEAPON         = 13,
+    INVTYPE_SHIELD         = 14,
+    INVTYPE_RANGED         = 15,
+    INVTYPE_CLOAK          = 16,
+    INVTYPE_2HWEAPON       = 17,
+    INVTYPE_BAG            = 18,
+    INVTYPE_TABARD         = 19,
+    INVTYPE_ROBE           = 20,
+    INVTYPE_WEAPONMAINHAND = 21,
+    INVTYPE_WEAPONOFFHAND  = 22,
+    INVTYPE_HOLDABLE       = 23,
+    INVTYPE_AMMO           = 24,
+    INVTYPE_THROWN         = 25,
+    INVTYPE_RANGEDRIGHT    = 26,
+    INVTYPE_SLOT_ITEM      = 27,
+    NUM_INVENTORY_TYPES    = 28,
 };
 
 enum INVENTORY_CLASS
@@ -110,6 +110,15 @@ enum INVENTORY_CLASS
     ITEM_CLASS_KEY           = 13,
     ITEM_CLASS_PERMANENT     = 14,
     ITEM_CLASS_JUNK          = 15,
+};
+
+enum ITEM_SUBCLASS_CONTAINER
+{
+    ITEM_SUBCLASS_CONTAINER               = 0,
+    ITEM_SUBCLASS_SOUL_CONTAINER          = 1,
+    ITEM_SUBCLASS_HERB_CONTAINER          = 2,
+    ITEM_SUBCLASS_ENCHANTING_CONTAINER    = 3,
+    ITEM_SUBCLASS_ENGINEERING_CONTAINER   = 4,
 };
 
 enum INVENTORY_SUBCLASS_WEAPON
@@ -148,16 +157,29 @@ enum ITEM_SUBCLASS_ARMOR
     ITEM_SUBCLASS_ARMOR_SHIELD      = 6,
 };
 
-enum ITEM_SUBCLASS_QUIVERS
-{
-    ITEM_SUBCLASS_QUIVER            = 2,
-    ITEM_SUBCLASS_AMMO_POUCH        = 3,
-};
-
 enum ITEM_SUBCLASS_PROJECTILE
 {
     ITEM_SUBCLASS_ARROW             = 2,
     ITEM_SUBCLASS_BULLET            = 3,
+};
+
+enum ITEM_SUBCLASS_BOOK
+{
+    ITEM_SUBCLASS_BOOK                  = 0,
+    ITEM_SUBCLASS_LEATHERWORKING_PATERN = 1,
+    ITEM_SUBCLASS_TAILORING_PATERN      = 2,
+    ITEM_SUBCLASS_ENGINEERING_SCHEMATIC = 3,
+    ITEM_SUBCLASS_COOKING_RECIPE        = 5,
+    ITEM_SUBCLASS_ALCHEMY_RECIPE        = 6,
+    ITEM_SUBCLASS_FIRST_AID_MANUAL      = 7,
+    ITEM_SUBCLASS_ENCHANTING_FORMULA    = 8,
+    ITEM_SUBCLASS_FISHING_MANUAL        = 9,
+};
+
+enum ITEM_SUBCLASS_QUIVER
+{
+    ITEM_SUBCLASS_QUIVER            = 2,
+    ITEM_SUBCLASS_AMMO_POUCH        = 3,
 };
 
 struct _Damage

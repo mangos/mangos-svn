@@ -35,7 +35,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> bagIndex >> slot >> tmp3;
 
-    Item *pItem = pUser->GetItemBySlot(bagIndex, slot);
+    Item *pItem = pUser->GetItemByPos(bagIndex, slot);
     ItemPrototype *proto = pItem->GetProto();
     spellId = proto->Spells[0].SpellId;
 
@@ -46,7 +46,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pUser->CanUseItem(proto)) return;
+    if (!pUser->CanUseItem(pItem, true)) return;
 
     if (pUser->isInCombat())
     {

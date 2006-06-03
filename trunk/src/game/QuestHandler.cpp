@@ -102,9 +102,9 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             else
             {
                 Item *pItem = 0;
-                uint32 slot = _player->GetSlotByItemGUID( guid );
-                if ( slot )
-                    pItem = _player->GetItemBySlot( (uint8)slot );
+                //uint32 slot = _player->GetSlotByItemGUID( guid );
+                //if ( slot )
+                    pItem = _player->GetItemByPos( _player->GetPosByGuid( guid ));
 
                 if( pItem )
                     Script->ItemQuestAccept(_player, pItem, pQuest );
@@ -148,9 +148,9 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
         else
         {
             Item *pItem;
-            uint32 slot = _player->GetSlotByItemGUID( guid );
-            if ( slot )
-                pItem = _player->GetItemBySlot( (uint8)slot );
+            //uint32 slot = _player->GetSlotByItemGUID( guid );
+            //if ( slot )
+                pItem = _player->GetItemByPos( _player->GetPosByGuid( guid ));
 
             if( pItem )
             {

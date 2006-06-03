@@ -209,8 +209,8 @@ char *GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
     }
 }
 
-#define ITEM_SUBCLASS_FOOD					1
-#define ITEM_SUBCLASS_LIQUID				2
+#define ITEM_SUBCLASS_FOOD                    1
+#define ITEM_SUBCLASS_LIQUID                2
 
 char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subclassNum, uint32 type, uint32 DisplayID)
 {
@@ -486,4 +486,75 @@ void Item::DeleteFromDB()
 ItemPrototype *Item::GetProto() const
 {
     return objmgr.GetItemPrototype(GetUInt32Value(OBJECT_FIELD_ENTRY));
+}
+
+uint32 Item::GetSkill()
+{
+    const static uint32 item_weapon_skills[]=
+    {
+        SKILL_AXES, SKILL_2H_AXES,SKILL_BOWS, SKILL_GUNS,SKILL_MACES, SKILL_2H_MACES,
+        SKILL_POLEARMS, SKILL_SWORDS,SKILL_2H_SWORDS,0, SKILL_STAVES,0,0,0,0, SKILL_DAGGERS,
+        SKILL_THROWN, SKILL_SPEARS, SKILL_CROSSBOWS, SKILL_WANDS, SKILL_FISHING
+    };
+
+    const static uint32 item_armor_skills[]=
+    {
+        0,SKILL_CLOTH,SKILL_LEATHER,SKILL_MAIL,SKILL_PLATE_MAIL,0,SKILL_SHIELD
+    };
+
+    switch (GetProto()->Class)
+    {
+        case ITEM_CLASS_WEAPON:
+            if( GetProto()->SubClass >= sizeof(item_weapon_skills)/4 )
+                return 0;
+            else
+                return item_weapon_skills[GetProto()->SubClass];
+
+        case ITEM_CLASS_ARMOR:
+            if( GetProto()->SubClass >= sizeof(item_armor_skills)/4 )
+                return 0;
+            else
+                return item_armor_skills[GetProto()->SubClass];
+
+        default:
+            return 0;
+    }
+}
+
+uint32 Item::GetSpell()
+{
+    switch (GetProto()->Class)
+    {
+        case ITEM_CLASS_WEAPON:
+            switch (GetProto()->SubClass)
+            {
+                case ITEM_SUBCLASS_WEAPON_AXE: return 196;
+                case ITEM_SUBCLASS_WEAPON_AXE2: return 197;
+                case ITEM_SUBCLASS_WEAPON_BOW: return 264;
+                case ITEM_SUBCLASS_WEAPON_GUN: return 266;
+                case ITEM_SUBCLASS_WEAPON_MACE: return 198;
+                case ITEM_SUBCLASS_WEAPON_MACE2: return 199;
+                case ITEM_SUBCLASS_WEAPON_POLEARM: return 200;
+                case ITEM_SUBCLASS_WEAPON_SWORD: return 201;
+                case ITEM_SUBCLASS_WEAPON_SWORD2: return 202;
+                case ITEM_SUBCLASS_WEAPON_STAFF: return 227;
+                case ITEM_SUBCLASS_WEAPON_DAGGER: return 1180;
+                case ITEM_SUBCLASS_WEAPON_THROWN: return 2567;
+                case ITEM_SUBCLASS_WEAPON_SPEAR: return 3386;
+                case ITEM_SUBCLASS_WEAPON_CROSSBOW: return 5011;
+                case ITEM_SUBCLASS_WEAPON_WAND: return 5009;
+                default: return 0;
+            }
+        case ITEM_CLASS_ARMOR:
+            switch(GetProto()->SubClass)
+            {
+                case ITEM_SUBCLASS_ARMOR_CLOTH: return 9078;
+                case ITEM_SUBCLASS_ARMOR_LEATHER: return 9077;
+                case ITEM_SUBCLASS_ARMOR_MAIL: return 8737;
+                case ITEM_SUBCLASS_ARMOR_PLATE: return 750;
+                case ITEM_SUBCLASS_ARMOR_SHIELD: return 9116;
+                default: return 0;
+            }
+    }
+    return 0;
 }

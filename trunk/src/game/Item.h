@@ -102,6 +102,25 @@ enum InventoryChangeFailure
     EQUIP_MORE_THAN1_SPECIAL_BAG                 = 65
 };
 
+enum BuyFailure
+{
+    BUY_ERR_CANT_FIND_ITEM                    = 0,
+    BUY_ERR_ITEM_ALREADY_SOLD                 = 1,
+    BUY_ERR_NOT_ENOUGHT_MONEY                 = 2,
+    BUY_ERR_SELLER_DONT_LIKE_YOU              = 4,
+    BUY_ERR_DISTANCE_TOO_FAR                  = 5,
+    BUY_ERR_CANT_CARRY_MORE                   = 8,
+    BUY_ERR_LEVEL_REQUIRE                     = 11,
+    BUY_ERR_REPUTATION_REQUIRE                = 12
+};
+
+enum SellFailure
+{
+    SELL_ERR_CANT_FIND_ITEM                 = 1,
+    SELL_ERR_CANT_SELL_ITEM                 = 2,
+    SELL_ERR_CANT_FIND_VENDOR               = 3
+};
+
 class MANGOS_DLL_SPEC Item : public Object
 {
     public:
@@ -131,6 +150,9 @@ class MANGOS_DLL_SPEC Item : public Object
 
         uint32 GetSlot() const {return m_slot;}
         void SetSlot(uint32 slot) {m_slot = slot;};
+
+        uint32 GetSkill();
+        uint32 GetSpell();
     protected:
         uint32 m_slot;
         Player *m_owner;

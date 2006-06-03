@@ -63,7 +63,7 @@ void WorldSession::UpdateTrade()
     data << (uint32) 0;
     for(int i=0; i<7; i++)
     {
-        item = (pThis->tradeItems[i] >= 0 ? pThis->GetItemBySlot( (uint8) pThis->tradeItems[i] ) : NULL);
+        item = (pThis->tradeItems[i] >= 0 ? pThis->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) pThis->tradeItems[i] ) : NULL);
 
         data << (uint8) i;
         if(item)
@@ -87,11 +87,12 @@ void WorldSession::UpdateTrade()
 }
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
-{
+{/*
     WorldPacket data;
     Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
     Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
     int i, myCount = 0, hisCount = 0, myFreeSlots = 0, hisFreeSlots = 0;
+    uint16 dst;
 
     if ( !GetPlayer()->pTrader ) return;
 
@@ -148,9 +149,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         for(i=0; i<6; i++)
         {
             if(_player->tradeItems[i] >= 0 )
-                myItems[i] =_player->RemoveItemFromSlot(0, (uint8)_player->tradeItems[i],true );
+                myItems[i] =_player->RemoveItem(0, (uint8)_player->tradeItems[i]);
             if(_player->pTrader->tradeItems[i] >= 0)
-                hisItems[i] =_player->pTrader->RemoveItemFromSlot(0, (uint8)_player->pTrader->tradeItems[i], true );
+                hisItems[i] =_player->pTrader->RemoveItem(0, (uint8)_player->pTrader->tradeItems[i]);
         }
 
         for(i=0; i<6; i++)
@@ -160,14 +161,16 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 
                 hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
 
-                _player->AddItemToInventory(hisItems[i], true);
+                if( dst = _player->CanStoreItem( NULL, NULL_SLOT, hisItems[i], false, true ) )
+                    _player->StoreItem( dst, hisItems[i]);
             }
             if(myItems[i])
             {
 
                 myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
 
-                _player->pTrader->AddItemToInventory(myItems[i], true);
+                if( dst = _player->pTrader->CanStoreItem( NULL, NULL_SLOT, myItems[i], false, true ) )
+                    _player->pTrader->StoreItem( dst, myItems[i]);
             }
         }
 
@@ -192,7 +195,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         data << (uint32)4;
         _player->pTrader->GetSession()->SendPacket(&data);
     }
-
+*/
 }
 
 void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)

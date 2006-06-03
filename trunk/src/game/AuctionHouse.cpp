@@ -295,8 +295,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->Id = objmgr.GenerateAuctionID();
     sLog.outString("selling item %u to auctioneer %u with inital bid %u with buyout %u and with time %u (in minutes)",GUID_LOPART(item),GUID_LOPART(auctioneer),bid,buyout,time);
     objmgr.AddAuction(AH);
-    uint32 slot = pl->GetSlotByItemGUID(item);
-    Item *it = pl->GetItemBySlot((uint8)slot);
+    uint16 pos = pl->GetPosByGuid(item);
+    Item *it = pl->GetItemByPos( pos );
     objmgr.AddAItem(it);
 
     std::stringstream ss;
@@ -309,7 +309,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     ss << "' )";
     sDatabase.Execute( ss.str().c_str() );
 
-    pl->RemoveItemFromSlot(0,(uint8)slot,true);
+    pl->RemoveItem( (pos >> 8),(pos & 255));
     WorldPacket data;
     ObjectMgr::AuctionEntryMap::iterator itr;
     uint32 cnt = 0;
@@ -460,7 +460,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                             {
                                 if( quality == (0xffffffff) || proto->Quality == quality )
                                 {
-                                    if( usable == (0x00) || _player->CanUseItem( proto ) )
+                                    if( usable == (0x00) || _player->CanUseItem( item, false ) )
                                     {
                                         if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
                                         {

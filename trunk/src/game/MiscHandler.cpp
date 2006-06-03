@@ -96,17 +96,14 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     if (item == NULL)
     {
-        data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(EQUIP_ERR_ALREADY_LOOTED);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint8(0);
-        SendPacket( &data );
+        player->SendEquipError( EQUIP_ERR_ALREADY_LOOTED, NULL, NULL, 0);
         return;
     }
 
-    if (player->AddNewItem(item->itemid, 1, false))
+    uint16 dest = player->CanStoreNewItem( NULL, NULL_SLOT, item->itemid, 1, false, true );
+    if ( dest )
     {
+        player->StoreNewItem( dest, item->itemid, 1);
         item->is_looted = true;
 
         data.Initialize( SMSG_LOOT_REMOVED );
@@ -129,15 +126,6 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         data << uint8(0x00);
         data << uint32(0x00000000);
         data << uint8(0x00);*/
-        SendPacket( &data );
-    }
-    else
-    {
-        data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-        data << uint8(EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint8(0);
         SendPacket( &data );
     }
 }

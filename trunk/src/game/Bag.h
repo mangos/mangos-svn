@@ -35,11 +35,10 @@ class Bag : public Item
         bool Create(uint32 guidlow, uint32 itemid, Player* owner);
 
         void Clear();
-        uint8 AddItemToBag(uint8 slot, Item *item);
-        Item* RemoveItem(uint8 slot);
-        uint32 RemoveItem(uint8 slot,uint32 count);
+        void StoreItem( uint8 slot, Item *pItem );
+        void RemoveItem( uint8 slot );
 
-        Item* GetItemFromBag(uint8 slot) { return m_bagslot[slot]; }
+        Item* GetItemByPos( uint8 slot );
 
         uint8 FindFreeBagSlot();
         uint8 GetSlotByItemGUID(uint64 guid);
@@ -55,7 +54,7 @@ class Bag : public Item
     protected:
 
         // Bag Storage space
-        Item* m_bagslot[20];
+        Item* m_bagslot[28];
 };
 
 inline Item* NewItemOrBag(ItemPrototype* proto)

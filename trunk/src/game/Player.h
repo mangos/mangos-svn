@@ -189,15 +189,6 @@ enum PlayerStateType
     PLAYER_STATE_KNEEL            = 8
 };
 
-enum CLIENT_CONTAINER_SLOT                                  //add by vendy
-{
-    CLIENT_SLOT_BACK = 0xFF,
-    CLIENT_SLOT_01   = 0x13,
-    CLIENT_SLOT_02   = 0x14,
-    CLIENT_SLOT_03   = 0x15,
-    CLIENT_SLOT_04   = 0x16,
-};
-
 enum TYPE_OF_KILL
 {
     HONORABLE_KILL = 1,
@@ -233,6 +224,7 @@ class WorldSession;
 #define EQUIPMENT_SLOT_TABARD        18
 #define EQUIPMENT_SLOT_END           19
 
+#define INVENTORY_SLOT_BAG_0         255
 #define INVENTORY_SLOT_BAG_START     19
 #define INVENTORY_SLOT_BAG_1         19
 #define INVENTORY_SLOT_BAG_2         20
@@ -295,20 +287,20 @@ class WorldSession;
 #define BANK_SLOT_BAG_6              68
 #define BANK_SLOT_BAG_END            69
 
-#define BUYBACK_SLOT_START           0
-#define BUYBACK_SLOT_1               0
-#define BUYBACK_SLOT_2               1
-#define BUYBACK_SLOT_3               2
-#define BUYBACK_SLOT_4               3
-#define BUYBACK_SLOT_5               4
-#define BUYBACK_SLOT_6               5
-#define BUYBACK_SLOT_7               6
-#define BUYBACK_SLOT_8               7
-#define BUYBACK_SLOT_9               8
-#define BUYBACK_SLOT_10              9
-#define BUYBACK_SLOT_11              10
-#define BUYBACK_SLOT_12              11
-#define BUYBACK_SLOT_END             12
+#define BUYBACK_SLOT_START           69
+#define BUYBACK_SLOT_1               69
+#define BUYBACK_SLOT_2               70
+#define BUYBACK_SLOT_3               71
+#define BUYBACK_SLOT_4               72
+#define BUYBACK_SLOT_5               73
+#define BUYBACK_SLOT_6               74
+#define BUYBACK_SLOT_7               75
+#define BUYBACK_SLOT_8               76
+#define BUYBACK_SLOT_9               77
+#define BUYBACK_SLOT_10              78
+#define BUYBACK_SLOT_11              79
+#define BUYBACK_SLOT_12              80
+#define BUYBACK_SLOT_END             81
 
 class MANGOS_DLL_SPEC Player : public Unit
 {
@@ -342,13 +334,35 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
 
-        bool AddItemToBackpack (uint32 itemId, uint32 count = 1) { return false; }
-        bool RemoveItemFromBackpack (uint32 itemId, uint32 count = 1) { return false; }
-
+        Item* CreateItem( uint32 item, uint32 count );
+        uint32 GetItemCount( uint32 item );
+        uint32 GetBankItemCount( uint32 item );
+        uint16 GetPosByGuid( uint64 guid );
+        Item* GetItemByPos( uint16 pos );
+        Item* GetItemByPos( uint8 bag, uint8 slot );
+        bool HasBankBagSlot( uint8 slot );
+        bool IsInventoryPos( uint16 pos );
+        bool IsEquipmentPos( uint16 pos );
+        bool IsBankPos( uint16 pos );
+        uint16 CanStoreNewItem( uint8 bag, uint8 slot, uint32 item, uint32 count, bool swap, bool msg );
+        uint16 CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
+        uint16 CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg );
+        uint16 CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
+        bool CanUseItem( Item *pItem, bool msg );
+        void StoreNewItem( uint16 pos, uint32 item, uint32 count );
+        void StoreItem( uint16 pos, Item *pItem );
+        void EquipItem( uint16 pos, Item *pItem );
+        void BankItem( uint16 pos, Item *pItem );
+        void RemoveItem( uint8 bag, uint8 slot );
+        void RemoveItemCount( uint32 item, uint32 count );
+        void SplitItem( uint16 src, uint16 dst, uint32 count );
+        void SwapItem( uint16 src, uint16 dst );
         void AddItemToBuyBackSlot( uint32 slot, Item *pItem );
         Item* GetItemFromBuyBackSlot( uint32 slot );
         void RemoveItemFromBuyBackSlot( uint32 slot );
-        void SendEquipError( uint8 msg );
+        void SendEquipError( uint8 msg, Item* pItem, Item *pItem2, uint32 param );
+        void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
+        void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -397,6 +411,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDivider( uint64 guid ) { m_divider = guid; };
 
         uint32 GetInGameTime() { return m_ingametime; };
+
         void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
         uint32 GetTimedQuest() { return m_timedquest; };
@@ -421,7 +436,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SaveToDB();
 
         void SetBindPoint(uint64 guid);
-        void RemoveItemFromInventory(uint32 itemId,uint32 itemcount);
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
         void Regenerate(uint16 field_cur, uint16 field_max);
@@ -560,70 +574,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDuelSender(Player *plyr) { m_pDuelSender = plyr; }
 
         uint32 GetCurrentBuybackSlot() { return m_currentBuybackSlot; }
-        void SetCurrentBuybackSlot(uint32 Slot) { Slot=Slot%12; m_currentBuybackSlot=Slot; }
+        void SetCurrentBuybackSlot( uint32 slot ) {
+            if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
+                m_currentBuybackSlot = slot;
+            else
+                m_currentBuybackSlot = BUYBACK_SLOT_START;
+        }
 
         bool IsGroupMember(Player *plyr);
 
-        void UpdateSlot(uint8 slot)
-        {
-            Item* Up = RemoveItemFromSlot(0, slot);
-            if (Up != NULL) AddItem(0, slot, Up, true);
-        }
-        void UpdateSlot(uint8 bagindex,uint8 slot)
-        {
-            Item* Up = RemoveItemFromSlot(bagindex, slot);
-            if (Up != NULL) AddItem(bagindex,slot, Up, true);
-        }
-
-        Item* GetItemBySlot(uint8 bagIndex,uint8 slot) const;
-        Item* GetItemBySlot(uint8 slot) const
-        {
-            ASSERT(slot < BANK_SLOT_BAG_END);
-            return m_items[slot];
-        }
-        Item* GetItemByGUID(uint64 guid) const
-        {
-            for (int i=0; i < BANK_SLOT_BAG_END; i++)
-            {
-                if (m_items[i])
-                    if (m_items[i]->GetGUID() == guid) return m_items[i];
-            }
-            return NULL;
-        }
-        Item* GetItemByItemType(uint32 type);
-        uint32 GetSlotByItemID(uint32 ID);
-        bool GetSlotByItemID(uint32 ID,uint8 &bagIndex,uint8 &slot,bool CheckInventorySlot,bool additems);
-        uint32 GetSlotByItemGUID(uint64 guid);
-        bool GetSlotByItemGUID(uint64 guid,uint8 &bagIndex,uint8 &slot);
-
-        Bag* GetBagBySlot(uint8 slot) const
-        {
-            return (Bag *)m_items[slot];
-        }
         void UpdateSkill(uint32 skill_id);
         void UpdateSkillPro(uint32 spellid);
-        uint32 GetSkillByProto(ItemPrototype *proto);
         uint32 GetSpellByProto(ItemPrototype *proto);
         void GetSlotByItem(uint32 type, uint8 slots[4]);
         uint8 FindEquipSlot(uint32 type);
         uint8 FindFreeItemSlot(uint32 type);
-        uint32 CanAddItemCount(Item* item, uint32 where = 1);
-        uint32 CanAddItemCount(uint32 itemid, uint32 where = 1);
 
-        uint8 CanEquipItemInSlot(uint8 bag, uint8 slot, Item* item, Item* swapitem);
-        bool CanUseItem (ItemPrototype* proto);
-        bool SplitItem(uint8 srcBag, uint8 srcSlot, uint8 dstBag, uint8 dstSlot, uint8 count);
-        bool SwapItem(uint8 dstBag,uint8 dstSlot,uint8 srcBag,uint8 srcSlot);
-
-        Item* CreateNewItem (uint32 itemId, uint8 count = 1);
-        uint16 GetItemCount(uint32 itemId, bool includebank = false);
-        uint16 GetItemCountAll(uint32 itemId, bool includeEquipment , bool includebank = false);
-        uint32 AddNewItem(uint32 itemId, uint32 count, bool addmaxpossible);
-        uint8 AddItem(uint8 bagIndex, uint8 slot, Item *item, bool allowstack);
-        uint8 AddItemToInventory(Item *item, bool addmaxpossible = false);
-        uint8 AddItemToBank(Item *item, bool addmaxpossible = false);
-
-        Item* RemoveItemFromSlot(uint8 bagIndex, uint8 slot, bool client_remove=true);
         int CountFreeBagSlot();
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
@@ -828,8 +794,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_dismountCost;
         uint32 m_nextSave;
 
-        Item* m_items[BANK_SLOT_BAG_END];
-        Item* m_buybackitems[BUYBACK_SLOT_END];
+        Item* m_items[BUYBACK_SLOT_END];
+        Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
 
         uint8 m_afk;
         uint64 m_curTarget;
@@ -844,7 +810,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_GuildIdInvited;
 
-        uint32 m_currentBuybackSlot;                        //0~11
+        uint32 m_currentBuybackSlot;
 
         std::list<struct Factions> factions;
         std::list<bidentry*> m_bids;
