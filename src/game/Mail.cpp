@@ -75,11 +75,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
             if (item != 0)
             {
-                //uint32 slot = pl->GetSlotByItemGUID(item);
-                uint8 bag,slot;
-                pl->GetSlotByItemGUID(item,bag,slot);
-                //Item *it = pl->GetItemBySlot((uint8)slot);
-                Item *it = pl->GetItemBySlot(bag,(uint8)slot);
+				uint16 pos = pl->GetPosByGuid(item);
+                Item *it = pl->GetItemByPos( pos );
 
                 objmgr.AddMItem(it);
 
@@ -93,8 +90,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 ss << "' )";
                 sDatabase.Execute( ss.str().c_str() );
 
-                //pl->RemoveItemFromSlot((uint8)slot);
-                pl->RemoveItemFromSlot(bag,(uint8)slot);
+                pl->RemoveItem( (pos >> 8), (pos & 255) );
             }
             uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
             pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
@@ -210,6 +206,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 {
     uint64 mailbox;
     uint32 message;
+    uint16 dst;
     WorldPacket data;
     recv_data >> mailbox;
     recv_data >> message;
@@ -217,7 +214,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Mail* m = pl->GetMail(message);
     Item *it = objmgr.GetMItem(m->item);
 
-    _player->AddNewItem(it->GetEntry(),it->GetCount(), true);
+    if( dst = _player->CanStoreItem( NULL, NULL_SLOT, it, false, true ) )
+        _player->StoreItem( dst, it);
     /* still needs some condition so that if item can not be received, both mail and
        mailed_items to stay till delete or return, otherwise it's dumped, also a client message */
 
@@ -229,7 +227,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         pl->AddMail(m);
         for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            if (_player->GetItemBySlot(i) == NULL)
+            if (_player->GetItemByPos(i) == NULL)
             {
                 slot = i;
                 break;
@@ -328,7 +326,7 @@ uint32 GetItemGuidFromDisplayID ( uint32 displayID, Player* pl )
 
     for (i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
     {
-        srcitem = pl->GetItemBySlot(i);
+        srcitem = pl->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
 
         if (srcitem)
         {
@@ -475,12 +473,13 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         return;
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
-    _player->AddItemToInventory(item, true);
+    if( uint16 dest = _player->CanStoreItem( NULL, NULL_SLOT, item, false, true ) )
+        _player->StoreItem(dest, item);
 
     /*
         for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            if (_player->GetItemBySlot(i) == NULL)
+            if (_player->GetItemByPos(i) == NULL)
             {
                 slot = i;
                 slotfree=true;

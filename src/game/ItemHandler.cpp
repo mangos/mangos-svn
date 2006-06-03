@@ -32,103 +32,73 @@
 void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_SPLIT_ITEM");
-    uint8 srcBag, srcSlot, dstBag, dstSlot, count;
+    uint8 srcbag, srcslot, dstbag, dstslot, count;
 
-    recv_data >> srcBag >> srcSlot >> dstBag >> dstSlot >> count;
+    recv_data >> srcbag >> srcslot >> dstbag >> dstslot >> count;
+    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u, count = %u", srcbag, srcslot, dstbag, dstslot, count);
 
-    sLog.outDetail("ITEM: Split item, srcBag = %u, srcSlot = %u, dstBag = %u, dstSlot = %u, count = %u",srcBag, srcSlot, dstBag, dstSlot, count);
+    uint16 src = ( (srcbag << 8) | srcslot );
+    uint16 dst = ( (dstbag << 8) | dstslot );
 
-    _player->SplitItem(srcBag, srcSlot, dstBag, dstSlot, count);
+    _player->SplitItem( src, dst, count );
 }
 
 void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_SWAP_INV_ITEM");
-    WorldPacket data;
-    UpdateData upd;
-    uint8 srcSlot, dstSlot;
+    uint8 srcslot, dstslot;
 
-    recv_data >> srcSlot >> dstSlot;
+    recv_data >> srcslot >> dstslot;
+    sLog.outDebug("STORAGE: receive srcslot = %u, dstslot = %u", srcslot, dstslot);
 
-    sLog.outDetail("ITEM: Swap inventory, srcSlot = %u, dstSlot = %u", (uint32)srcSlot, (uint32)dstSlot);
+    uint16 src = ( (INVENTORY_SLOT_BAG_0 << 8) | srcslot );
+    uint16 dst = ( (INVENTORY_SLOT_BAG_0 << 8) | dstslot );
 
-    _player->SwapItem(0, dstSlot, 0, srcSlot);
+    _player->SwapItem( src, dst );
 }
 
 void WorldSession::HandleSwapItem( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_SWAP_ITEM");
-    WorldPacket data;
-    uint8 dstBag, dstSlot, srcBag, srcSlot;
+    uint8 dstbag, dstslot, srcbag, srcslot;
 
-    recv_data >> dstBag >> dstSlot >> srcBag >> srcSlot ;
-    sLog.outDetail("ITEM: Swap, srcBag = %u, srcSlot = %u, dstBag = %u, dstSlot = %u", srcBag, srcSlot, dstBag, dstSlot);
+    recv_data >> dstbag >> dstslot >> srcbag >> srcslot ;
+    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u, dstslot = %u", srcbag, srcslot, dstbag, dstslot);
 
-    _player->SwapItem(dstBag, dstSlot, srcBag, srcSlot);
+    uint16 src = ( (srcbag << 8) | srcslot );
+    uint16 dst = ( (dstbag << 8) | dstslot );
+
+    _player->SwapItem( src, dst );
 }
 
 void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_AUTOEQUIP_ITEM");
-    WorldPacket data;
-    uint8 srcBag, srcSlot, dstSlot, error_msg = 0;
+    uint8 srcbag, srcslot;
 
-    recv_data >> srcBag >> srcSlot;
-    sLog.outDetail("ITEM: Auto equip, srcBag = %u, srcSlot = %u", srcBag, srcSlot);
-
-    Item *item  = _player->GetItemBySlot(srcBag, srcSlot);
-
-    if (!item) error_msg = EQUIP_ERR_ITEM_NOT_FOUND;
-
-    if (!error_msg)
+    recv_data >> srcbag >> srcslot;
+    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
+    
+    Item *pItem  = _player->GetItemByPos( srcbag, srcslot );
+    if( pItem )
     {
-        dstSlot = _player->FindEquipSlot(item->GetProto()->InventoryType);
-        if (dstSlot == INVENTORY_SLOT_ITEM_END) error_msg = EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+        if( uint16 dest = _player->CanEquipItem( NULL_SLOT, pItem, false, true ) )
+        {
+            _player->RemoveItem(srcbag, srcslot);
+            _player->EquipItem( dest, pItem );
+        }
     }
-
-    if (error_msg)
-    {
-        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-        data << error_msg;
-        data << (item ? item->GetGUID() : uint64(0));
-        data << uint64(0);
-        data << uint8(0);
-        SendPacket( &data );
-        return;
-    }
-
-    _player->SwapItem(CLIENT_SLOT_BACK,dstSlot,srcBag,srcSlot);
 }
 
 void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_DESTROYITEM");
-    WorldPacket data;
-    uint8 bagIndex, slot, count, data1, data2, data3;
+    uint8 bag, slot, count, data1, data2, data3;
 
-    recv_data >> bagIndex >> slot >> count >> data1 >> data2 >> data3;
-
-    sLog.outDetail("ITEM: Destroy, bagIndex = %u, slot = %u, count = %u (Uknown data: %u %u %u)", bagIndex, slot, count, data1, data2, data3);
-
-    Item *item = _player->GetItemBySlot(bagIndex,slot);
-
-    if (!item)
-    {
-        sLog.outDetail("ITEM: Tried to destroy a non-existant item");
-        return;
-    }
-
-    if ((!count) || (count >= item->GetCount()))
-    {
-        _player->RemoveItemFromSlot(bagIndex,slot);
-        //item->DeleteFromDB();
-        delete item;
-    }
-    else
-    {
-        item->SetCount(item->GetCount() - count);
-    }
-    //_player->_SaveInventory();
+    recv_data >> bag >> slot >> count >> data1 >> data2 >> data3;
+    sLog.outDebug("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
+    
+    _player->RemoveItem(bag,slot);
 }
 
 extern void CheckItemDamageValues ( ItemPrototype *itemProto );
@@ -249,7 +219,7 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
     recv_data >> bagIndex >> slot;
 
     sLog.outDetail("ITEM: Read, bagIndex = %u, slot = %u", bagIndex, slot);
-    Item *pItem = _player->GetItemBySlot(bagIndex, slot);
+    Item *pItem = _player->GetItemByPos( bagIndex, slot );
 
     if (pItem)
     {
@@ -283,351 +253,197 @@ void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_SELL_ITEM" );
-
-    WorldPacket data;
     uint64 vendorguid, itemguid;
-    uint8 amount;
-    uint32 newmoney;
-    //uint8 slot = 0xFF;
-    int check = 0;
 
-    recv_data >> vendorguid;
-    recv_data >> itemguid;
-    recv_data >> amount;
+    recv_data >> vendorguid >> itemguid;
 
-    if (itemguid == 0)
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+    if( pCreature )
     {
-        data.Initialize( SMSG_SELL_ITEM );
-        data << vendorguid << itemguid << uint8(0x01);
-        WPAssert(data.size() == 17);
-        SendPacket( &data );
-        return;
-    }
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
-
-    if (unit == NULL)
-    {
-        data.Initialize( SMSG_SELL_ITEM );
-        data << vendorguid << itemguid << uint8(0x03);
-        WPAssert(data.size() == 17);
-        SendPacket( &data );
-        return;
-    }
-
-    Item *item=NULL;
-    uint8 bag,slot;
-    if (_player->GetSlotByItemGUID(itemguid,bag,slot))
-    {
-        item = _player->GetItemBySlot(bag,slot);
-        if (item)
+        uint16 pos = _player->GetPosByGuid(itemguid);
+        Item *pItem = _player->GetItemByPos( pos );
+        if( pItem )
         {
-            if(item->GetProto()->SellPrice !=0)
+            ItemPrototype *pProto = pItem->GetProto();
+            if( pProto )
             {
-                data.Initialize( SMSG_SELL_ITEM );
-                data << vendorguid << itemguid << uint8(0x0);
-                WPAssert(data.size() == 17);
-                SendPacket( &data );
-
-                //if (amount == 0) amount = 1;
-                newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) + (item->GetProto()->SellPrice) * item->GetCount());
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-
-                uint32 buyBackslot=_player->GetCurrentBuybackSlot();
-                _player->AddItemToBuyBackSlot(buyBackslot,item);
-                _player->SetCurrentBuybackSlot(buyBackslot+1);
-                _player->RemoveItemFromSlot(bag,slot,false);
-            }
-            else
-            {
-                data.Initialize( SMSG_SELL_ITEM );
-                data << vendorguid << itemguid << uint8(0x02);
-                WPAssert(data.size() == 17);
-                SendPacket( &data );
+                if( pProto->SellPrice > 0 )
+                {
+                    uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) + pProto->SellPrice * pItem->GetCount();
+                    _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                    uint32 buyBackslot = _player->GetCurrentBuybackSlot();
+                    _player->AddItemToBuyBackSlot( buyBackslot, pItem );
+                    _player->SetCurrentBuybackSlot( buyBackslot + 1 );
+                    _player->RemoveItem( (pos >> 8), (pos & 255));
+                    return;
+                }
+                else
+                    _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+                return;
             }
         }
-    }
-    else
-    {
-        data.Initialize( SMSG_SELL_ITEM );
-        data << vendorguid << itemguid << uint8(0x01);
-        WPAssert(data.size() == 17);
-        SendPacket( &data );
+        _player->SendSellError( SELL_ERR_CANT_FIND_ITEM, pCreature, itemguid, 0);
         return;
     }
-    sLog.outDetail( "WORLD: Sent SMSG_SELL_ITEM" );
+    _player->SendSellError( SELL_ERR_CANT_FIND_VENDOR, pCreature, itemguid, 0);
 }
 
 void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 {
     sLog.outDetail( "WORLD: Received CMSG_BUYBACK_ITEM" );
     uint64 vendorguid;
-    uint32 buybackslot;
-    WorldPacket data;
+    uint32 slot;
 
-    recv_data >> vendorguid;
-    recv_data >> buybackslot;                               //start slot is (69 0x45) end slot is 0x45+12
+    recv_data >> vendorguid >> slot;
 
-    //sLog.outDetail( "Packet Info: vendorguid: %u buybackslot: %u ", vendorguid, buybackslot);
-    Item *buybackItem=NULL;
-    uint32 slot=buybackslot-0x45;
-    buybackItem = _player->GetItemFromBuyBackSlot(slot);
-    if (buybackItem)
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+    Item *pItem = _player->GetItemFromBuyBackSlot( slot );
+    if( pCreature && pItem )
     {
-        int32 newmoney;
-        newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (_player->GetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+slot)));
-        if(newmoney < 0 )
+        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - pItem->GetProto()->BuyPrice;
+        if( newmoney < 0 )
         {
-            data.Initialize( SMSG_BUY_FAILED );
-            data << uint64(buybackItem->GetGUID());
-            data << uint32(buybackItem->GetEntry());
-            data << uint8(2);
-            SendPacket( &data );
+            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
             return;
         }
-        if(_player->CanAddItemCount(buybackItem, 1) >= buybackItem->GetCount())
+        if(uint16 pos = _player->CanStoreItem( NULL, NULL_SLOT, pItem, false, true ) )
         {
-            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-            _player->AddItemToInventory(buybackItem, true);
-            _player->RemoveItemFromBuyBackSlot(slot);
+            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+            _player->RemoveItemFromBuyBackSlot( slot );
+            _player->StoreItem( pos, pItem );
         }
+        return;
     }
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, pItem->GetEntry(), 0);
 }
 
 void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
+    uint64 vendorguid, bagguid;
+    uint32 item;
+    uint8 bag, slot, count, vendorslot = 0;
 
-    WorldPacket data;
-    uint64 srcguid, dstguid;
-    uint32 itemid;
-    uint8 slot, amount;
-    int vendorslot = -1;
-    int32 newmoney;
-    Bag *bag;
-    uint8 slotType=0;
-    bool buyOk = false;
-    UpdateData upd;
-    WorldPacket packet;
+    recv_data >> vendorguid >> item >> bagguid >> slot >> count;
 
-    /*
-    SMSG_BUY_FAILED error
-    0: cant find item
-    1: item already selled
-    2: not enought money
-    4: seller dont like u
-    5: distance too far
-    8: cant carry more
-    11: level require
-    12: reputation require
-    */
-
-    recv_data >> srcguid >> itemid >> dstguid >> slot >> amount;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, srcguid);
-    Player *player = _player;
-
-    if (unit == NULL)
-        return;
-
-    if(dstguid == _player->GetGUID())
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    if( pCreature && pProto )
     {
-        slotType=CLIENT_SLOT_BACK;
-    }
-    else
-    {
-        for (uint8 i=CLIENT_SLOT_01;i<=CLIENT_SLOT_04;i++)
+        for(int i = 0; i < pCreature->getItemCount(); i++)
         {
-            bag=_player->GetBagBySlot(i);
-            if(bag)
+            if ( pCreature->getItemId(i) == item )
             {
-                if( dstguid == bag->GetGUID() )
-                {
-                    slotType = i;
-                    break;
-                }
+                vendorslot = i;
+                break;
             }
         }
-    }
-
-    ItemPrototype *ItemPro = objmgr.GetItemPrototype(itemid);
-    if(ItemPro)
-    {
-        //check money
-        if( slotType>0 )
+        if( !vendorslot || (( pCreature->getItemAmount( vendorslot ) >= 0 ) && ( count > pCreature->getItemAmount( vendorslot ))) )
         {
-            newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (ItemPro->BuyPrice));
-            if(newmoney < 0 )
+            _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
+            return;
+        }
+        if( _player->getLevel() < pProto->RequiredLevel )
+        {
+            _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
+            return;
+        }
+        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - pProto->BuyPrice;
+        if( newmoney < 0 )
+        {
+            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+            return;
+        }
+        Bag *pBag;
+        if( bagguid == _player->GetGUID() )
+            bag = INVENTORY_SLOT_BAG_0;
+        else
+        {
+            for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END;i++)
             {
-                data.Initialize( SMSG_BUY_FAILED );
-                data << uint64(srcguid);
-                data << uint32(itemid);
-                data << uint8(2);
-                SendPacket( &data );
-                return;
-            }
-            //check level
-            if(ItemPro->RequiredLevel> _player->getLevel())
-            {
-                data.Initialize( SMSG_BUY_FAILED );
-                data << uint64(srcguid);
-                data << uint32(itemid);
-                data << uint8(11);
-                SendPacket( &data );
-                return;
-            }
-            // Check if item is usable
-            if( (slot < EQUIPMENT_SLOT_END) && (slotType==CLIENT_SLOT_BACK) )
-            {
-                uint8 error =0;
-                //	            uint8 error = _player->CanEquipItem(ItemPro);
-                if (error)
+                pBag = (Bag*)_player->GetItemByPos(INVENTORY_SLOT_BAG_0,i);
+                if( pBag )
                 {
-                    data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
-                    data << uint8(error);
-                    if (error == EQUIP_ERR_YOU_MUST_REACH_LEVEL_N)
+                    if( bagguid == pBag->GetGUID() )
                     {
-                        data << (uint32)ItemPro->RequiredLevel;
-                        data << uint64(srcguid);
-                        data << uint64(0);
-                        data << uint8(0);
-                        SendPacket( &data );
-                        return;
+                        bag = i;
+                        break;
                     }
                 }
             }
-            //}
-            //check seller
-            for(uint8 i = 0; i < unit->getItemCount(); i++)
+        }
+        Item *pItem = _player->CreateItem( item, count);
+        uint16 pos = ((bag << 8) | slot);
+        if( _player->IsEquipmentPos( pos ) )
+        {
+            if( _player->CanEquipItem( slot, pItem, false, true ) )
             {
-                if (unit->getItemId(i) == itemid)
-                {
-                    amount = unit->getItemAmount(i);
-                    vendorslot = i;
-                    break;
-                }
-            }
-            if(( vendorslot == -1 )||((amount > unit->getItemAmount(vendorslot)) &&
-                (unit->getItemAmount(vendorslot)>=0)))
-            {
-                data.Initialize( SMSG_BUY_FAILED );
-                data << uint64(srcguid);
-                data << uint32(itemid);
-                data << uint8(1);
-                SendPacket( &data );
-                return;
-            }
-            //add to slot
-            if(_player->AddNewItem (itemid,amount,false))
-            {
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-                data.Initialize( SMSG_BUY_ITEM );
-                data << uint64(srcguid);
-                data << uint32(itemid) << uint32(amount);
-                SendPacket( &data );
-                sLog.outDetail( "WORLD: Sent SMSG_BUY_ITEM" );
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                _player->EquipItem( pos, pItem );
             }
             else
-            {
-                data.Initialize( SMSG_BUY_FAILED );
-                data << uint64(srcguid);
-                data<< uint32(itemid);
-                data << uint8(8);
-                SendPacket( &data );
-            }
+                delete pItem;
         }
-    }                                                       //if(!ItemPro)
-    else
-    {
-        data.Initialize( SMSG_BUY_FAILED );
-        data << uint64(srcguid);
-        data<< uint32(itemid);
-        data << uint8(0);
-        SendPacket( &data );
+        else
+        {
+            if( _player->CanStoreItem( bag, slot, pItem, false, true ) )
+            {
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                _player->StoreItem( pos, pItem );
+            }
+            else
+                delete pItem;
+        }
+        return;
     }
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
 }
 
 void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM" );
+    uint64 vendorguid;
+    uint32 item;
+    uint8 slot, count, vendorslot = 0;
 
-    WorldPacket data;
-    uint64 srcguid;
-    uint32 itemid;
-    uint8 amount, slot;
-    uint8 playerslot = 0;
-    int vendorslot = -1;
-    int32 newmoney;
+    recv_data >> vendorguid >> item >> count >> slot;
 
-    recv_data >> srcguid >> itemid;
-    recv_data >> amount >> slot;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, srcguid);
-
-    if (unit == NULL)
-        return;
-    ItemPrototype *ItemPro = objmgr.GetItemPrototype(itemid);
-    if(ItemPro)
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    if( pCreature && pProto )
     {
-        for(uint8 i = 0; i < unit->getItemCount(); i++)
+        for(int i = 0; i < pCreature->getItemCount(); i++)
         {
-            if (unit->getItemId(i) == itemid)
+            if ( pCreature->getItemId(i) == item )
             {
                 vendorslot = i;
-                amount = unit->getItemAmount(i);
                 break;
             }
         }
-
-        if(( vendorslot == -1 )||((amount > unit->getItemAmount(vendorslot)) &&
-            (unit->getItemAmount(vendorslot)>=0)))
+        if( !vendorslot || (( pCreature->getItemAmount( vendorslot ) >= 0 ) && ( count > pCreature->getItemAmount( vendorslot ))) )
         {
-            data.Initialize( SMSG_BUY_FAILED );
-            data << uint64(srcguid);
-            data << uint32(itemid);
-            data << uint8(1);
-            SendPacket( &data );
+            _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
         }
-
-        newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - (objmgr.GetItemPrototype(itemid)->BuyPrice));
-        if(newmoney < 0 )
+        if( _player->getLevel() < pProto->RequiredLevel )
         {
-            data.Initialize( SMSG_BUY_FAILED );
-            data << uint64(srcguid);
-            data << uint32(itemid);
-            data << uint8(2);
-            SendPacket( &data );
+            _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-
-        if (_player->AddNewItem(itemid,amount,false))
+        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - pProto->BuyPrice;
+        if( newmoney < 0 )
         {
-            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
-            data.Initialize( SMSG_BUY_ITEM );
-            data << uint64(srcguid);
-            data << uint32(itemid) << uint32(amount);
-            SendPacket( &data );
-            sLog.outDetail( "WORLD: Sent SMSG_BUY_ITEM" );
+            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
             return;
         }
-        else
+        if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, count, false, true ) )
         {
-            data.Initialize( SMSG_BUY_FAILED );
-            data << uint64(srcguid);
-            data<< uint32(itemid);
-            data << uint8(8);
-            SendPacket( &data );
+            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+            _player->StoreNewItem( pos, item, count );
         }
+        return;
     }
-    else
-    {
-        data.Initialize( SMSG_BUY_FAILED );
-        data << uint64(srcguid);
-        data<< uint32(itemid);
-        data << uint8(0);
-        SendPacket( &data );
-    }
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
 }
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
@@ -770,42 +586,20 @@ void WorldSession::SendListInventory( uint64 guid )
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_AUTOSTORE_BAG_ITEM");
-    WorldPacket data;
-    uint8 srcBag, srcSlot, dstBag, result;
+    uint8 srcbag, srcslot, dstbag;
 
-    recv_data >> srcBag >> srcSlot >> dstBag;
+    recv_data >> srcbag >> srcslot >> dstbag;
+    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u, dstbag = %u", srcbag, srcslot, dstbag);
 
-    sLog.outDetail("ITEM: Autostore item, srcBag = %u, srcSlot = %u, dstBag = %u", srcBag, srcSlot, dstBag);
-
-    Item *pItem = _player->GetItemBySlot(srcBag, srcSlot);
-
-    if (!pItem)
+    Item *pItem = _player->GetItemByPos( srcbag, srcslot );
+    if( pItem )
     {
-        sLog.outDetail("ITEM: The item doesn't exist");
-        return;
+        if( uint16 dest = _player->CanStoreItem( dstbag, NULL_SLOT, pItem, false, true ) )
+        {
+            _player->RemoveItem(srcbag, srcslot);
+            _player->StoreItem( dest, pItem );
+        }
     }
-
-    result = (_player->CanAddItemCount(pItem, 1) >= pItem->GetCount()) ? 1 : 0;
-
-    if (!result)
-    {
-        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-        data << uint8(EQUIP_ERR_BAG_FULL);
-        data << (pItem ? pItem->GetGUID() : uint64(0));
-        data << uint64(0);
-        data << uint8(0);
-        SendPacket(&data);
-        return;
-    }
-
-    _player->RemoveItemFromSlot(srcBag, srcSlot);
-    result = _player->AddItemToInventory(pItem, false);
-    if (result == 2)
-    {
-        //pItem->DeleteFromDB();
-        delete pItem;
-    }
-    //_player->_SaveInventory();
 }
 
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
@@ -864,81 +658,39 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug("WORLD: CMSG_AUTOBANK_ITEM");
-    WorldPacket data;
-    uint8 bagIndex, slot, result;
-    Item *pItem;
+    uint8 srcbag, srcslot;
 
-    recvPacket >> bagIndex >> slot;
+    recvPacket >> srcbag >> srcslot;
+    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
-    pItem = _player->GetItemBySlot(bagIndex, slot);
-
-    if (!pItem)
+    Item *pItem = _player->GetItemByPos( srcbag, srcslot );
+    if( pItem )
     {
-        sLog.outDetail("ITEM: Unknown item");
-        return;
+        if( uint16 dest = _player->CanBankItem( NULL, NULL_SLOT, pItem, false, true ) )
+        {
+            _player->RemoveItem(srcbag, srcslot);
+            _player->BankItem( dest, pItem );
+        }
     }
-
-    result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount()) ? 1 : 0;
-
-    if (!result)
-    {
-        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-        data << uint8(EQUIP_ERR_BANK_FULL);
-        data << (pItem ? pItem->GetGUID() : uint64(0));
-        data << uint64(0);
-        data << uint8(0);
-        SendPacket(&data);
-        return;
-    }
-
-    _player->RemoveItemFromSlot(bagIndex, slot);
-    result = _player->AddItemToBank(pItem, true);
-    if (result == 2)
-    {
-        //pItem->DeleteFromDB();
-        delete pItem;
-    }
-    //_player->_SaveInventory();
 }
 
 void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug("WORLD: CMSG_AUTOSTORE_BANK_ITEM");
-    WorldPacket data;
-    uint8 bagIndex, slot, result;
-    Item *pItem;
+    uint8 srcbag, srcslot;
 
-    recvPacket >> bagIndex >> slot;
+    recvPacket >> srcbag >> srcslot;
+    sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
-    pItem = _player->GetItemBySlot(bagIndex, slot);
-
-    if (!pItem)
+    Item *pItem = _player->GetItemByPos( srcbag, srcslot );
+    if( pItem )
     {
-        sLog.outDetail("ITEM: Unknown item");
-        return;
+        if( uint16 dest = _player->CanBankItem( NULL, NULL_SLOT, pItem, false, true ) )
+        {
+            _player->RemoveItem(srcbag, srcslot);
+            _player->BankItem( dest, pItem );
+        }
     }
-
-    result = (_player->CanAddItemCount(pItem, 2) >= pItem->GetCount())? 1 : 0;
-
-    if (!result)
-    {
-        data.Initialize(SMSG_INVENTORY_CHANGE_FAILURE);
-        data << uint8(EQUIP_ERR_INVENTORY_FULL);
-        data << (pItem ? pItem->GetGUID() : uint64(0));
-        data << uint64(0);
-        data << uint8(0);
-        SendPacket(&data);
-        return;
-    }
-
-    _player->RemoveItemFromSlot(bagIndex, slot);
-    result = _player->AddItemToBank(pItem, true);
-    if (result == 2)
-    {
-        //pItem->DeleteFromDB();
-        delete pItem;
-    }
-    //_player->_SaveInventory();
 }
 
 void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)

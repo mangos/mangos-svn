@@ -77,7 +77,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_GOTarget = ObjectAccessor::Instance().GetGameObject(*caster, readGUID(data));
 
     if(m_targetMask & TARGET_FLAG_ITEM)
-        m_itemTarget = ((Player*)caster)->GetItemByGUID(readGUID(data));
+        m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(readGUID(data)));
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data >> m_srcX >> m_srcY >> m_srcZ;
@@ -609,7 +609,7 @@ void Spell::finish()
 
     if (ItemClass == ITEM_CLASS_CONSUMABLE)
     {
-        ((Player*)m_caster)->RemoveItemFromInventory(proto->ItemId, 1);
+        ((Player*)m_caster)->RemoveItemCount(proto->ItemId, 1);
         if(ItemCount<=1)
         {
             //pItem->DeleteFromDB();
@@ -1010,14 +1010,14 @@ uint8 Spell::CheckItems()
     Player* p_caster = (Player*)m_caster;
     if (itemTarget)
     {
-        if(p_caster->GetItemCountAll(itemTarget->GetEntry(),true,false) < 1)
+        if(p_caster->GetItemCount(itemTarget->GetEntry()) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
     }
     if(m_CastItem)
     {
         itemid = m_CastItem->GetEntry();
-        if(p_caster->GetItemCountAll(itemid,true,false) < 1)
+        if(p_caster->GetItemCount(itemid) < 1)
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
     }
@@ -1036,7 +1036,7 @@ uint8 Spell::CheckItems()
     {
         if(m_spellInfo->Totem[i] != 0)
         {
-            if(p_caster->GetItemCountAll(m_spellInfo->Totem[i],true,false) >= 1)
+            if(p_caster->GetItemCount(m_spellInfo->Totem[i]) >= 1)
             {
                 totems -= 1;
                 continue;

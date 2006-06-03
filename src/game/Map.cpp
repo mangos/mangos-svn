@@ -104,7 +104,7 @@ void Map::InitStateMachine()
 
 Map::Map(uint32 id, time_t expiry) : i_id(id), i_gridExpiry(expiry)
 {
-    //	char tmp[32];
+    //    char tmp[32];
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
         i_gridMask[idx] = 0;

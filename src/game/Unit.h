@@ -62,6 +62,7 @@
 #define HITINFO_NOACTION            0x10000
 #define HITINFO_SWINGNOHITSOUND     0x80000
 
+#define NULL_BAG                    0
 #define NULL_SLOT                   255
 
 struct SpellEntry;

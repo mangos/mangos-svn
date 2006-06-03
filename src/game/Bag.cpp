@@ -81,7 +81,7 @@ void Bag::SaveToDB()
 {
     Item::SaveToDB();
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", m_owner->GetGUIDLow(), GetSlot());
-    for (uint8 i = 0; i < 20; i++)
+    for (uint8 i = 0; i < GetProto()->ContainerSlots; i++)
     {
         if (m_bagslot[i])
         {
@@ -95,7 +95,7 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
     if(!Item::LoadFromDB(guid, auctioncheck))
         return false;
-    for (uint8 i = 0; i < 20; i++)
+    for (int i = 0; i < GetProto()->ContainerSlots; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
         if (m_bagslot[i])
@@ -122,7 +122,7 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
             item->SetSlot(slot);
             if(!item->LoadFromDB(item_guid, 1))
                 continue;
-            AddItemToBag(slot, item);
+            StoreItem( slot, item );
         } while (result->NextRow());
 
         delete result;
@@ -151,40 +151,23 @@ uint8 Bag::FindFreeBagSlot()
     return NULL_SLOT;
 }
 
-Item* Bag::RemoveItem(uint8 slot)
+void Bag::RemoveItem( uint8 slot )
 {
-    Item *pItem = m_bagslot[slot];
-    if(m_bagslot[slot])
-        m_bagslot[slot] = NULL;
-
+    m_bagslot[slot] = NULL;
     SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
-    pItem->SetSlot( 0 );
-    return pItem;
 }
 
-uint32 Bag::RemoveItem(uint8 slot,uint32 count)
+void Bag::StoreItem( uint8 slot, Item *pItem )
 {
-    Item *pItem = m_bagslot[slot];
-    int oldcnt=0,removed=0;
-    if(m_bagslot[slot])
+    if( pItem )
     {
-        if((oldcnt=pItem->GetCount())>count)
-        {
-            m_bagslot[slot]->SetCount(oldcnt-count);
-            removed=count;
-        }
-        else
-        {
-            m_bagslot[slot] = NULL;
-            removed=oldcnt;
-        }
+        sLog.outDebug( "STORAGE : StoreItem bag = %u, slot = %u, item = %u", GetSlot(), slot, pItem->GetEntry());
+        pItem->SetSlot( slot );
+        SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
+        pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
+        m_bagslot[slot] = pItem;
     }
-    if(removed>=oldcnt)
-        SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
-
-    return removed;
 }
-
 void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
 {
     Item::BuildCreateUpdateBlockForPlayer( data, target );
@@ -224,106 +207,13 @@ uint8 Bag::GetSlotByItemGUID(uint64 guid)
 // - Return values: 0 - item not added
 //                  1 - item added to a free slot (and perhaps to a stack)
 //                  2 - item added to a stack (item should be deleted)
-uint8 Bag::AddItemToBag(uint8 slot, Item *item)
+Item* Bag::GetItemByPos( uint8 slot )
 {
-    if (!item) { return false; }
-
-    UpdateData upd;
-    WorldPacket packet;
-    Item *pItem = 0;
-    int stack = (item->GetProto()->Stackable)?(item->GetProto()->Stackable):1;
-    int count = item->GetCount();
-    uint8 addtoslot = NULL_SLOT;
-    int freespace = 0;
-    int freeslots = 0;
-
-    if (slot != NULL_SLOT)
+    ItemPrototype *pBagProto = GetProto();
+    if( pBagProto )
     {
-        if (slot >= GetProto()->ContainerSlots)
-        {
-            return 0;
-        }
-        pItem = m_bagslot[slot];
-        if (pItem)
-        {
-            sLog.outString("item exists");
-            if (pItem->GetEntry() != item->GetEntry()) { return 0; }
-            else
-            {
-                if ((stack - pItem->GetCount()) >= count)
-                {
-                    pItem->SetCount(((pItem->GetCount() + count) > stack)?stack:(pItem->GetCount() + count));
-                    //pItem->SaveToDB();
-
-                    pItem->SendUpdateToPlayer(m_owner);
-                    return 2;
-                }
-                else
-                {
-                    return 0;
-                }
-            }
-        }
-        else
-        {
-            addtoslot = slot;
-        }
+        if( slot >= 0 && slot < pBagProto->ContainerSlots )
+            return m_bagslot[slot];
     }
-    else
-    {
-        // If slot is not specified, check for free slots (and stacks, if allowstack = true)
-        // cycle 0 - searching for stack space
-        // cycle 1 - searching for free slots
-        // cycle 2 - adding to stacks
-        // cycle 3 - adding to free slots
-        for (int cycle=0; cycle <= 3; cycle++)
-        {
-            if ((cycle > 1) && (freespace < count) && (!freeslots)) { return 0; }
-            for (uint8 slot2=0; slot2 < GetProto()->ContainerSlots; slot2++)
-            {
-                pItem = GetItemFromBag(slot2);
-                if (!pItem)
-                {
-                    if (cycle == 1)
-                    {
-                        freeslots++;
-                    }
-                    else if (cycle == 3)
-                    {
-                        if (addtoslot == NULL_SLOT) { addtoslot = slot2; }
-                    }
-                }
-                else
-                {
-                    if ((pItem->GetEntry() == item->GetEntry()) && ((pItem->GetCount() < stack) && (count)))
-                    {
-                        if (cycle == 0)
-                        {
-                            freespace += (stack - pItem->GetCount());
-                        }
-                        else if (cycle == 2)
-                        {
-                            int plus = count;
-                            if ((pItem->GetCount() + count) > stack) { plus = stack - pItem->GetCount(); }
-                            count -= plus;
-                            pItem->SetCount(pItem->GetCount() + plus);
-                            //pItem->SaveToDB();
-                            pItem->SendUpdateToPlayer(m_owner);
-                            if (!count) { return 2; }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    item->SetCount(count);
-    item->SetSlot( addtoslot );
-
-    m_bagslot[addtoslot] = item;
-    SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (addtoslot * 2), item->GetGUID());
-    item->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
-    item->SendUpdateToPlayer(m_owner);
-
-    return 1;
+    return NULL;
 }

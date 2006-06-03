@@ -401,7 +401,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     {
         sLog.outDetail("ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
-        pItem = _player->GetItemByGUID(itemGUID);
+        pItem = _player->GetItemByPos( _player->GetPosByGuid(itemGUID));
 
         if (!pItem)
         {
@@ -436,7 +436,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 
         for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         {
-            pItem = _player->GetItemBySlot(i);
+            pItem = _player->GetItemByPos( INVENTORY_SLOT_BAG_0, i );
             if (pItem)
             {
                 uint32 durability = pItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);

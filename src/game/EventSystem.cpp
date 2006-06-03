@@ -271,7 +271,7 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
 void RemoveEvent(uint32 eventid)
 {
     MThread* tr=new MThread;
-    tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)eventid);
+    tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)&eventid);
 }
 
 void RemovePeriodicEvent(void* etid)
