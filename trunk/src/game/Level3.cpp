@@ -1721,8 +1721,11 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 	Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
+        WorldPacket data;
+
         FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
         m_session->SendPacket( &data );
+
         return true;
     }
 

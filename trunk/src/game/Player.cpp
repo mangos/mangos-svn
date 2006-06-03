@@ -5764,7 +5764,7 @@ bool Player::CanUseItem( Item *pItem, bool msg )
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
-            if( (pProto->AllowableRace & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
+            if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
             {
                 if( msg )
                     SendEquipError( EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, pItem, NULL, 0 );
