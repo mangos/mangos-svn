@@ -115,6 +115,9 @@ Player::Player (WorldSession *session): Unit()
     m_drunk = 0;
     m_restTime = 0;
     m_lastManaUse = 0;
+
+	m_pvp_count = 0;
+	m_pvp_counting = false;
 }
 
 Player::~Player ()
@@ -230,12 +233,11 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
     SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
+
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
                                                             //-1 is default value
     SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
-
-    SetPvP(false);
-
+    
     SetUInt32Value(PLAYER_BYTES, ((skin) | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0xEE << 8) | (0x00 << 16) | (0x02 << 24)));
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
@@ -569,6 +571,8 @@ void Player::Update( uint32 p_time )
     WorldPacket data;
 
     Unit::Update( p_time );
+
+	UpdatePVPFlag(time(NULL));
 
     CheckExploreSystem();
 
@@ -7820,4 +7824,29 @@ void Player::PlaySound(uint32 Sound, bool OnlySelf)
         GetSession()->SendPacket( &data );
     else
         SendMessageToSet( &data, true );
+}
+
+void Player::UpdatePVPFlag(time_t currTime)
+{
+	//Player is counting to set/unset pvp flag
+	if( !m_pvp_counting ) return;
+	
+	//Is player is in a PvP action stop counting
+	if( isInCombat() && getVictim()->GetTypeId() == TYPEID_PLAYER )
+	{
+		m_pvp_counting = false;
+		return;
+	}
+
+	if( GetPvP() )
+    {
+		//Wait 5 min until remove pvp mode
+		if( currTime < m_pvp_count + 300 ) return;
+		
+        SetPvP(false);
+    }
+    else
+    {
+        SetPvP(true);
+    }
 }

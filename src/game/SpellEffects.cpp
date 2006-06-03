@@ -285,6 +285,15 @@ void Spell::EffectHeal( uint32 i )
         uint32 addhealth = ( curhealth + damage < maxhealth ? damage : maxhealth - curhealth );
         unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
+
+		//If the target is in combat, then player is in combat too
+		if( unitTarget->isInCombat() &&
+			unitTarget->GetTypeId() == TYPEID_PLAYER &&
+			unitTarget->getVictim()->GetTypeId() == TYPEID_PLAYER )
+		{
+			((Player*)unitTarget)->SetPvP(true);
+		}
+
     }
 }
 
