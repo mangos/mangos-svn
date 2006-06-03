@@ -497,9 +497,24 @@ class MANGOS_DLL_SPEC Player : public Unit
             return m_faction;
         };
 
+		void UpdatePVPFlag(time_t currTime);
+		
+		void SetPVPCount(time_t count){
+			if(!m_pvp_counting)
+			{
+				m_pvp_count = count;
+				m_pvp_counting = true;
+			}
+		}
+
         void SetPvP(bool b)
         {
             pvpOn = b;
+			
+			if(!b) SetFlag(UNIT_FIELD_FLAGS , 0x08);   //PvP OFF
+			else  RemoveFlag(UNIT_FIELD_FLAGS , 0x08); //PvP ON
+			
+			m_pvp_counting = false;
         };
 
         bool GetPvP()
@@ -875,6 +890,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 m_isunderwater;
 
         uint32 m_restTime;
+		time_t m_pvp_count;
+		bool m_pvp_counting;
 };
 
 int irand(int min, int max);
