@@ -700,24 +700,24 @@ void Creature::generateLoot()
 
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run)
 {
-/*    uint32 timeElap = getMSTime();
-    if ((timeElap - m_startMove) < m_moveTime)
-    {
-        oX = (dX - oX) * ( (timeElap - m_startMove) / m_moveTime );
-        oY = (dY - oY) * ( (timeElap - m_startMove) / m_moveTime );
-    }
-    else
-    {
-        oX = dX;
-        oY = dY;
-    }
+    /*    uint32 timeElap = getMSTime();
+        if ((timeElap - m_startMove) < m_moveTime)
+        {
+            oX = (dX - oX) * ( (timeElap - m_startMove) / m_moveTime );
+            oY = (dY - oY) * ( (timeElap - m_startMove) / m_moveTime );
+        }
+        else
+        {
+            oX = dX;
+            oY = dY;
+        }
 
-    dX = x;
-    dY = y;
-    m_orientation = atan2((oY - dY), (oX - dX));
+        dX = x;
+        dY = y;
+        m_orientation = atan2((oY - dY), (oX - dX));
 
-    m_startMove = getMSTime();
-    m_moveTime = time;*/
+        m_startMove = getMSTime();
+        m_moveTime = time;*/
 
     WorldPacket data;
     data.Initialize( SMSG_MONSTER_MOVE );

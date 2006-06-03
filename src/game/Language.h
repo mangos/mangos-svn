@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 // for chat commands
 #define LANG_SELECT_CHAR_OR_CREATURE     "You should select a character or a creature."
 #define LANG_SELECT_CREATURE             "You should select a creature."
@@ -86,14 +85,14 @@
 #define LANG_BAD_VALUE                   "Incorrect values."
 #define LANG_NO_CHAR_SELECTED            "No character selected."
 
-
 #define LANG_YOU_CHANGE_HP               "You change the HP to %i/%i of %s."
 #define LANG_YOURS_HP_CHANGED            "%s changed your HP to %i/%i."
 #define LANG_YOU_CHANGE_MANA             "You change the MANA to %i/%i of %s."
 #define LANG_YOURS_MANA_CHANGED          "%s changed your MANA to %i/%i."
 #define LANG_YOU_CHANGE_ENERGY           "You change the ENERGY to %i/%i of %s."
 #define LANG_YOURS_ENERGY_CHANGED        "%s changed your ENERGY to %i/%i."
-#define LANG_CURRENT_ENERGY              "current energy: %u" //log
+                                                            //log
+#define LANG_CURRENT_ENERGY              "current energy: %u"
 #define LANG_YOU_CHANGE_RAGE             "You change the RAGE to %i/%i of %s."
 #define LANG_YOURS_RAGE_CHANGED          "%s changed your RAGE to %i/%i."
 #define LANG_YOU_CHANGE_LVL              "You change the LVL to %i of %s."
@@ -122,14 +121,16 @@
 #define LANG_YOU_GIVE_MOUNT              "You give a mount to %s."
 #define LANG_MOUNT_GIVED                 "%s gave you a mount."
 
-#define LANG_CURRENT_MONEY               "USER1: %i, ADD: %i, DIF: %i\n" //log
+                                                            //log
+#define LANG_CURRENT_MONEY               "USER1: %i, ADD: %i, DIF: %i\n"
 #define LANG_YOU_TAKE_ALL_MONEY          "You take all copper of %s."
 #define LANG_YOURS_ALL_MONEY_GONE        "%s took you all of your copper."
 #define LANG_YOU_TAKE_MONEY              "You take %i copper from %s."
 #define LANG_YOURS_MONEY_TAKEN           "%s took %i copper from you."
 #define LANG_YOU_GIVE_MONEY              "You give %i copper to %s."
 #define LANG_YOURS_MONEY_GIVEN           "%s gave you %i copper."
-#define LANG_NEW_MONEY                   "USER2: %i, ADD: %i, RESULT: %i\n" //log
+                                                            //log
+#define LANG_NEW_MONEY                   "USER2: %i, ADD: %i, RESULT: %i\n"
 
 #define LANG_REMOVE_BIT                  "Removed bit %i in field %i."
 #define LANG_SET_BIT                     "Set bit %i in field %i."
@@ -141,8 +142,9 @@
 #define LANG_CHARS_ONLY                  "Error, name can only contain chars A-Z and a-z."
 #define LANG_TOO_LONG_SUBNAME            "The subname was too long by %i"
 #define LANG_NOT_IMPLEMENTED             "Not yet implemented"
-#define LANG_ADD_OBJ                     "AddObject at Chat.cpp" //log
-#define LANG_DEMORPHED                   "Demorphed %s" //log
+                                                            //log
+#define LANG_ADD_OBJ                     "AddObject at Chat.cpp"
+#define LANG_DEMORPHED                   "Demorphed %s"     //log
 
 #define LANG_ITEM                        "Item '"
 #define LANG_ITEM_ADDED_TO_LIST          "' Added to list"
@@ -162,7 +164,8 @@
 #define LANG_CREATURE_MOVE_DISABLED      "Creature Movement Disabled."
 #define LANG_CREATURE_MOVE_ENABLED       "Creature Movement Enabled."
 
-#define LANG_SPAWNING_SPIRIT_HEAL        "Spawning Spirit Healers\n" //log
+                                                            //log
+#define LANG_SPAWNING_SPIRIT_HEAL        "Spawning Spirit Healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in db, exiting."
 
 #define LANG_LEARNSK_SYNTAX              "Syntax: .learnsk skillId level max"
@@ -175,7 +178,8 @@
 #define LANG_KNOWN_SPELL                 "You already know that spell."
 #define LANG_FORGET_SPELL                "You already forget that spell."
 #define LANG_ADDITEM_SYNTAX              "Syntax: .additem itemId <amount>"
-#define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i" //log
+                                                            //log
+#define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i"
 #define LANG_ITEM_CANNOT_CREATE          "Cannot create item '%i' (amount: %i)"
 #define LANG_ITEM_CREATED                "Item '%i' created (amount: %i)"
 #define LANG_INSERT_GUILD_NAME           "You need to insert a Guild Name!"
@@ -183,7 +187,8 @@
 #define LANG_PLAYER_IN_GUILD             "Player already have a guild!"
 
 #define LANG_DISTANCE                    "The distance(sqr) is: %f."
-#define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176" //log
+                                                            //log
+#define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176"
 
 #define LANG_ITEM_SLOT                   "Item Slot '"
 #define LANG_ITEM_SLOT_NOT_EXIST         "' doesn't exist."
@@ -192,7 +197,8 @@
 #define LANG_GAMEOBJECT_SYNTAX           "Usage: .gameobject <id>"
 #define LANG_GAMEOBJECT                  "Game Object '"
 #define LANG_GAMEOBJECT_NOT_EXIST        LANG_ITEM_SLOT_NOT_EXIST
-#define LANG_GAMEOBJECT_CURRENT          ">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f." //log
+                                                            //log
+#define LANG_GAMEOBJECT_CURRENT          ">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f."
 #define LANG_GAMEOBJECT_ADD              ">> Add Game Object '"
 #define LANG_GAMEOBJECT_ADD_AT           ") added at '"
 
@@ -218,19 +224,23 @@
 #define LANG_UPDATE                      "GUID=%i 's updateIndex: %i ,value:  %i."
 #define LANG_UPDATE_CHANGE               "You change GUID=%i 's UpdateIndex: %i value to %i."
 #define LANG_TOO_BIG_INDEX               "The value index %u is too big to %u(count: %u)."
-#define LANG_SET_UINT                    "Set %u uint32 Value:[OPCODE]:%u [VALUE]:%u" //log
+                                                            //log
+#define LANG_SET_UINT                    "Set %u uint32 Value:[OPCODE]:%u [VALUE]:%u"
 #define LANG_SET_UINT_FIELD              "You Set %u Field:%u to uint32 Value: %u"
-#define LANG_SET_FLOAT                   "Set %u float Value:[OPCODE]:%u [VALUE]:%f" //log
+                                                            //log
+#define LANG_SET_FLOAT                   "Set %u float Value:[OPCODE]:%u [VALUE]:%f"
 #define LANG_SET_FLOAT_FIELD             "You Set %u Field:%i to float Value: %i"
-#define LANG_GET_UINT                    "Get %u uint32 Value:[OPCODE]:%u [VALUE]:%u" //log
+                                                            //log
+#define LANG_GET_UINT                    "Get %u uint32 Value:[OPCODE]:%u [VALUE]:%u"
 #define LANG_GET_UINT_FIELD              "The uint32 value of %u in %u is: %u"
-#define LANG_GET_FLOAT                   "Get %u float Value:[OPCODE]:%u [VALUE]:%f" //log
+                                                            //log
+#define LANG_GET_FLOAT                   "Get %u float Value:[OPCODE]:%u [VALUE]:%f"
 #define LANG_GET_FLOAT_FIELD             "The float of %u value in %u is: %f"
 
-#define LANG_SET_32BIT                   ".Set32Bit:[OPCODE]:%u [VALUE]:%u" //log
+                                                            //log
+#define LANG_SET_32BIT                   ".Set32Bit:[OPCODE]:%u [VALUE]:%u"
 #define LANG_SET_32BIT_FIELD             "You set Bit of Field:%u to Value: %u"
 
-#define LANG_CHANGE_32BIT                ".Mod32Value:[OPCODE]:%u [VALUE]:%i" //log
+                                                            //log
+#define LANG_CHANGE_32BIT                ".Mod32Value:[OPCODE]:%u [VALUE]:%i"
 #define LANG_CHANGE_32BIT_FIELD          "You modified the value of Field:%u to Value: %u"
-
-
