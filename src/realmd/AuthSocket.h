@@ -171,9 +171,8 @@ class AuthSocket: public TcpSocket
         void _HandleXferAccept();
         FILE *pPatch;
         bool IsLag();
-
+        
     private:
-
         BigNumber N, s, g, v;
         BigNumber b, B;
         BigNumber rs;
@@ -215,4 +214,7 @@ class Patcher
     private:
         Patches _patches;
 };
+
+extern RealmList m_realmList;
+extern DatabaseMysql dbRealmServer;
 #endif

@@ -1,14 +1,18 @@
 # MaNGOS Configuration file
-ConfVersion=2006060101
+ConfVersion=2006060401
+
+# RealmID must match the realmlist
+RealmID = 1
 
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
 DataDir = "@MANGOSD_DATA@"
 
-# Database connection settings.
+# Database connection settings for the world server.
 # Default: hostname;port;username;password;database
-DatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
+LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
+WorldDatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
 
 # Server console level of logging
 # 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
@@ -19,11 +23,6 @@ LogLevel = 3
 # Default: 0 (false)
 #          1 (true)
 LogWorld = 1
-
-# Packer logging for the realmserver
-# Default: 0 (false)
-#          1 (true)
-LogRealm = 1
 
 # Maximum number of players in the world. Excluding GM's
 # Default: 100
@@ -75,7 +74,4 @@ PlayerSaveInterval = 900000
 
 # Default WorldServerPort
 WorldServerPort = 8085
-
-# Default RealmServerPort
-RealmServerPort = 3724
 

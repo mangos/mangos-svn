@@ -25,6 +25,9 @@
 #include <iostream>
 
 //uint8 loglevel = DEFAULT_LOG_LEVEL;
+DatabaseMysql sDatabase;
+DatabaseMysql loginDatabase;
+uint32 realmID;
 
 int usage(const char *prog)
 {

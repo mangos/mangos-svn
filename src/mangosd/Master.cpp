@@ -193,19 +193,38 @@ bool Master::Run()
 bool Master::_StartDB()
 {
     std::string dbstring;
-    if(!sConfig.GetString("DatabaseInfo", &dbstring))
+    if(!sConfig.GetString("WorldDatabaseInfo", &dbstring))
     {
         sLog.outError("Database not specified");
         exit(1);
 
     }
-
-    sLog.outString("Database: %s", dbstring.c_str() );
-    if(!sMySqlDatabase.Initialize(dbstring.c_str()))
+    sLog.outString("World Database: %s", dbstring.c_str() );
+    if(!sDatabase.Initialize(dbstring.c_str()))
     {
-        sLog.outError("Cannot connect to database");
+        sLog.outError("Cannot connect to world database");
+        exit(1);
+    }
+
+    if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
+    {
+        sLog.outError("Login database not specified");
         exit(1);
 
+    }
+    sLog.outString("Login Database: %s", dbstring.c_str() );
+    if(!loginDatabase.Initialize(dbstring.c_str()))
+    {
+        sLog.outError("Cannot connect to login database");
+        exit(1);
+    }
+
+    realmID = sConfig.GetIntDefault("RealmID", 0);
+    if(!realmID) {
+        sLog.outError("Realm ID not defined");
+        exit(1);
+    } else {
+        sLog.outString("Realm running as realm ID %d", realmID);
     }
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 0;");

@@ -31,10 +31,10 @@
 class DatabaseMysql : public Database
 {
     friend class MaNGOS::OperatorNew<DatabaseMysql>;
-    DatabaseMysql();
-    ~DatabaseMysql();
-
+    
     public:
+        DatabaseMysql();
+        ~DatabaseMysql();
 
         //! Initializes Mysql and connects to a server.
         /*! infoString should be formated like hostname;username;password;database. */

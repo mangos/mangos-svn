@@ -128,14 +128,15 @@ void CliDelete(char*command,pPrintf zprintf)
 
     if (!result)
     {
-        zprintf("User %s not exists\x0d\x0a",del);
+        zprintf("User %s does not exist\x0d\x0a",del);
         return;
     }
 
     fields = result->Fetch();
     int guid = fields[0].GetUInt32();
     sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",guid);
-    sDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",del);
+    loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",del);
+    loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `account` = '%d'",guid);
     delete result;
 
     zprintf("We deleted : %s\x0d\x0a",del);
@@ -248,12 +249,12 @@ void CliBan(char*command,pPrintf zprintf)
     if(IsItIP(banip))
     {
 
-        sDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s')",banip);
+        loginDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s')",banip);
         zprintf("We banned IP: %s\x0d\x0a",banip);
     }
     else
     {
-        sDatabase.PExecute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",banip);
+        loginDatabase.PExecute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",banip);
         zprintf("We banned account (if it exists): %s\x0d\x0a",banip);
     }
 
@@ -278,13 +279,13 @@ void CliRemoveBan(char *command,pPrintf zprintf)
 
     if(IsItIP(banip))
     {
-        sDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",banip);
+        loginDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",banip);
         zprintf("We removed banned IP: %s\x0d\x0a",banip);
     }
 
     else
     {
-        sDatabase.PExecute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",banip);
+        loginDatabase.PExecute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",banip);
         zprintf("We removed ban from account: %s\x0d\x0a",banip);
     }
 
@@ -295,7 +296,7 @@ void CliListGM(char *command,pPrintf zprintf)
 
     Field *fields;
 
-    QueryResult *result = sDatabase.PQuery( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0;" );
+    QueryResult *result = loginDatabase.PQuery( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0;" );
     if(result)
     {
 
@@ -355,11 +356,11 @@ void CliSetGM(char *command,pPrintf zprintf)
     //wow it's ok,let's hope it was integer given
     int lev=atoi(&charcr[x]);                               //get int anyway
 
-    QueryResult *result = sDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `username` = '%s';",szAcc );
+    QueryResult *result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `username` = '%s';",szAcc );
 
     if (result)
     {
-        sDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,szAcc);
+        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,szAcc);
         zprintf("We added %s gmlevel %d\x0d\x0a",szAcc,lev);
 
         delete result;
@@ -407,7 +408,7 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT `username` FROM `account` WHERE `username` = '%s';",szAcc );
+    QueryResult *result1 = loginDatabase.PQuery("SELECT `username` FROM `account` WHERE `username` = '%s';",szAcc );
 
     if (result1)
     {
@@ -416,11 +417,12 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    if(sDatabase.PExecute("INSERT into `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
+    if(loginDatabase.PExecute("INSERT into `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
         zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
     else
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);
-
+    
+    loginDatabase.PExecute("insert into realmcharacters (`realmid`, `acctid`, `numchars`) select realmlist.id, account.id, 0 from account, realmlist where account.id not in (select acctid from realmcharacters)");
 }
 
 void ParseCommand( pPrintf zprintf, char*command)

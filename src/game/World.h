@@ -44,7 +44,6 @@ enum WorldConfigs
 {
     CONFIG_LOG_LEVEL = 0,
     CONFIG_LOG_WORLD,
-    CONFIG_LOG_REALM,
     CONFIG_INTERVAL_SAVE,
     CONFIG_INTERVAL_GRIDCLEAN,
     CONFIG_INTERVAL_MAPUPDATE,
@@ -176,6 +175,8 @@ class World
         time_t m_nextThinkTime;
         uint32 m_configs[CONFIG_VALUE_COUNT];
 };
+
+extern uint32 realmID;
 
 #define sWorld MaNGOS::Singleton<World>::Instance()
 #endif

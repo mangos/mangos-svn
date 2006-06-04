@@ -18,23 +18,26 @@
 
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
+#include "RealmList.h"
+
 #include "Config/ConfigEnv.h"
 #include "Log.h"
 #include "Network/SocketHandler.h"
 #include "Network/ListenSocket.h"
 #include "AuthSocket.h"
-#include "RealmList.h"
 #include "SystemConfig.h"
 
 #include <signal.h>
 #include <iostream>
-
-bool StartDB();
+bool StartDB(std::string &dbstring);
 void UnhookSignals();
 void HookSignals();
 //uint8 loglevel = DEFAULT_LOG_LEVEL;
 
 bool stopEvent = false;
+RealmList m_realmList;
+DatabaseMysql dbRealmServer;
+
 int usage(const char *prog)
 {
     sLog.outString("Usage: \n %s -c config_file [%s]",prog,_MANGOSD_CONFIG);
@@ -43,7 +46,7 @@ int usage(const char *prog)
 
 int main(int argc, char **argv)
 {
-    std::string cfg_file = _MANGOSD_CONFIG;
+    std::string cfg_file = _REALMD_CONFIG;
     int c=1;
     while( c < argc )
     {
@@ -69,31 +72,45 @@ int main(int argc, char **argv)
     if (!sConfig.SetSource(cfg_file.c_str()))
     {
         sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
+    } else {
+        sLog.outString("\nUsing configuration file %s.", cfg_file.c_str());
     }
 
-    sLog.outString( "MaNGOS  daemon %s", _FULLVERSION );
+    // Non-critical warning about conf file version
+    uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
+    if (confVersion < _REALMDCONFVERSION)
+    {
+        sLog.outString("*****************************************************************************");
+        sLog.outString(" WARNING: Your realmd.conf version indicates your conf file is out of date!");
+        sLog.outString("          Please check for updates, as your current default values may cause");
+        sLog.outString("          strange behavior.");
+        sLog.outString("*****************************************************************************");
+        clock_t pause = 3000 + clock();
+        while (pause > clock());
+    }
+
+    sLog.outString( "MaNGOS realm daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
-    StartDB();
+    std::string dbstring;
+    StartDB(dbstring);
 
     //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
-    port_t wsport, rmport;
-    rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    wsport = sConfig.GetIntDefault( "WorldServerPort", DEFAULT_WORLDSERVER_PORT );
-
-    sRealmList.setServerPort(wsport);
-
-    sRealmList.GetAndAddRealms ();
+    port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+    
+    m_realmList.GetAndAddRealms(dbstring);
+    if (m_realmList.size() == 0) {
+        sLog.outError("No valid realms specified.");
+        exit(1);
+    }
 
     SocketHandler h;
     ListenSocket<AuthSocket> authListenSocket(h);
     if ( authListenSocket.Bind(rmport))
     {
-
-        sLog.outString( "MaNGOS can not bind to that port" );
+        sLog.outString( "MaNGOS realmd can not bind to port %d", rmport );
         exit(1);
-
     }
 
     h.Add(&authListenSocket);
@@ -129,25 +146,25 @@ void OnSignal(int s)
     signal(s, OnSignal);
 }
 
-bool StartDB()
+bool StartDB(std::string &dbstring)
 {
-    std::string dbstring;
-    if(!sConfig.GetString("DatabaseInfo", &dbstring))
+    if(!sConfig.GetString("LoginDatabaseInfo", &dbstring))
     {
         sLog.outError("Database not specified");
         exit(1);
-
     }
 
     sLog.outString("Database: %s", dbstring.c_str() );
-    if(!sMySqlDatabase.Initialize(dbstring.c_str()))
+    if(!dbRealmServer.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to database");
         exit(1);
 
     }
-
-    sDatabase.PExecute( "UPDATE `character` SET `online` = 0;" );
+    
+    // Right now we just clear all logged in accounts on boot up
+    // We should query the realms and ask them.
+    dbRealmServer.PExecute( "UPDATE `account` SET `online` = 0;" );
     return true;
 }
 

@@ -172,7 +172,7 @@ void World::SetInitialWorldSettings()
     }
     else
     {
-        if (confVersion < _CONFVERSION)
+        if (confVersion < _MANGOSDCONFVERSION)
         {
             sLog.outString("*****************************************************************************");
             sLog.outString(" WARNING: Your mangosd.conf version indicates your conf file is out of date!");
@@ -192,7 +192,6 @@ void World::SetInitialWorldSettings()
     regen_values[RATE_XP] = sConfig.GetFloatDefault("Rate.XP", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
-    m_configs[CONFIG_LOG_REALM] = sConfig.GetIntDefault("LogRealm", 0);
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
     m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
