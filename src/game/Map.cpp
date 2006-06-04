@@ -64,7 +64,7 @@ GridMap * LoadMAP(int mapid,int x,int y)
 
     if( (oldx!=x) || (oldy!=y) )
     {
-        sLog.outDetail("Loading map %s",tmp);
+        DEBUG_LOG("Loading map %s",tmp);
         oldx =x;
         oldy =y;
         showcheckmapInfo = true;
@@ -76,7 +76,7 @@ GridMap * LoadMAP(int mapid,int x,int y)
     {
         if( showcheckmapInfo )
         {
-            sLog.outDetail("Map file %s does not exist",tmp);
+            DEBUG_LOG("Map file %s does not exist",tmp);
             showcheckmapInfo = false;
         }
         delete [] tmp;
