@@ -1062,12 +1062,12 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     return true;
 }
 
-void Unit::RemoveFirstAuraByCategory(uint32 category)
+void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
 {
     AuraMap::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        if ((*i).second && (*i).second->GetSpellProto()->Category == category)
+		if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
             break;
     }
 
@@ -1576,6 +1576,16 @@ void Unit::AttackStop()
     RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
 }
 
+void Unit::SetStateFlag(uint32 index, uint32 newFlag )
+{
+    ASSERT( index );
+    index |= newFlag;
+}
+void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
+{
+    ASSERT( index );
+    index &= ~ oldFlag;
+}
 /*********************************************************/
 /***                    SPELL SYSTEM                   ***/
 /*********************************************************/

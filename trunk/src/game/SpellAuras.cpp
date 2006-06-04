@@ -1342,6 +1342,9 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
 // FIX-ME PWEEZEE!!
 void Aura::HandleAuraModShapeshift(bool apply)
 {
+	if(!m_target)
+		return;
+	Unit *unit_target = m_target;
     uint32 spellId = 0;
     uint32 modelid = 0;
     uint8 PowerType = 0;
@@ -1349,9 +1352,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
     switch(m_modifier->m_miscvalue)
     {
         case FORM_CAT:
-            if(m_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 892;
-            else if(m_target->getRace() == RACE_TAUREN)
+            else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 8571;
             PowerType = 3;
             spellId = 3025;
@@ -1360,23 +1363,23 @@ void Aura::HandleAuraModShapeshift(bool apply)
             spellId = 3122;
             break;
         case FORM_TRAVEL:
-            if(m_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 892;
-            else if(m_target->getRace() == RACE_TAUREN)
+            else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 8571;
             spellId = 5419;
             break;
         case FORM_AQUA:
-            if(m_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 2428;
-            else if(m_target->getRace() == RACE_TAUREN)
+            else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2428;
             spellId = 5421;
             break;
         case FORM_BEAR:
-            if(m_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 2281;
-            else if(m_target->getRace() == RACE_TAUREN)
+            else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
             PowerType = 1;
             spellId = 1178;
@@ -1385,14 +1388,14 @@ void Aura::HandleAuraModShapeshift(bool apply)
             spellId = 0;
             break;
         case FORM_GHOUL:
-            if(m_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 10045;
             spellId = 0;
             break;
         case FORM_DIREBEAR:
-            if(m_target->getRace() == RACE_NIGHT_ELF)
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 15374;
-            else if(m_target->getRace() == RACE_TAUREN)
+            else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 15375;
             PowerType = 1;
             spellId = 9635;
@@ -1429,71 +1432,71 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
     if(apply)
     {
-        if(m_target->m_ShapeShiftForm)
-            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
+        if(unit_target->m_ShapeShiftForm)
+            unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
 
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
-            m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
+            unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
         }
         if(PowerType > 0)
         {
-            m_target->setPowerType(PowerType);
+            unit_target->setPowerType(PowerType);
         }
-        m_target->m_ShapeShiftForm = m_spellId;
-        m_target->m_form = m_modifier->m_miscvalue;
+        unit_target->m_ShapeShiftForm = m_spellId;
+        unit_target->m_form = m_modifier->m_miscvalue;
 
         if(spellInfo)
         {
             Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
             WPAssert(p_spell);
             SpellCastTargets targets;
-            targets.setUnitTarget(m_target);
+            targets.setUnitTarget(unit_target);
             p_spell->prepare(&targets);
         }
     }
     else
     {
-        m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
-        if(m_target->getClass() == CLASS_DRUID)
-            m_target->setPowerType(0);
-        m_target->m_ShapeShiftForm = 0;
-        m_target->RemoveAurasDueToSpell(spellId);
+        unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+        unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        if(unit_target->getClass() == CLASS_DRUID)
+            unit_target->setPowerType(0);
+        unit_target->m_ShapeShiftForm = 0;
+        unit_target->RemoveAurasDueToSpell(spellId);
     }
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_target);
+    if(unit_target->GetTypeId() == TYPEID_PLAYER)
+        unit_target->SendUpdateToPlayer((Player*)unit_target);
 }
 
 void Aura::HandleModMechanicImmunity(bool apply)
 {
-    apply ? m_target->SetFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
 {
-    apply ? m_target->SetFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModStateImmunity(bool apply)
 {
-    apply ? m_target->SetFlag(m_target->m_immuneToState,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToState,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToState,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToState,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModSchoolImmunity(bool apply)
 {
-    apply ? m_target->SetFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply)
 {
-    apply ? m_target->SetFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply)
 {
-    apply ? m_target->SetFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue) : m_target->RemoveFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue);
 }
 
 void Aura::HandleAuraProcTriggerSpell(bool apply)
@@ -1636,7 +1639,7 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-    if(!m_target || m_target->m_immuneToMechanic == 17)     //Can't transform
+    if(!m_target || (m_target->m_immuneToMechanic & 17))     //Can't transform
         return;
     if (apply)
     {
