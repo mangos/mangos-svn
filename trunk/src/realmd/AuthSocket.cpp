@@ -49,7 +49,6 @@ AuthSocket::AuthSocket(SocketHandler &h) : TcpSocket(h)
     g.SetDword(7);
     _authed = false;
     pPatch=NULL;
-
 }
 
 AuthSocket::~AuthSocket()
@@ -162,7 +161,7 @@ void AuthSocket::_HandleLogonChallenge()
         pkt << (uint8) AUTH_LOGON_CHALLENGE;
         pkt << (uint8) 0x00;
 
-        QueryResult *result = sDatabase.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s'",GetRemoteAddress().c_str());
+        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s'",GetRemoteAddress().c_str());
         if(result)
         {
             pkt << (uint8)CE_IPBAN;
@@ -171,7 +170,7 @@ void AuthSocket::_HandleLogonChallenge()
         }
         else
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `password`,`gmlevel`,`banned`,`locked`,`last_ip` FROM `account` WHERE `username` = '%s'",_login.c_str ());
+            QueryResult *result = dbRealmServer.PQuery("SELECT `password`,`gmlevel`,`banned`,`locked`,`last_ip` FROM `account` WHERE `username` = '%s'",_login.c_str ());
             if( result )
             {
                 if((*result)[3].GetUInt8() == 1)            // if ip is locked
@@ -198,13 +197,11 @@ void AuthSocket::_HandleLogonChallenge()
                 {
                     pkt << (uint8) CE_ACCOUNT_CLOSED;
                     sLog.outBasic("[AuthChallenge] Banned account %s try to login!",_login.c_str ());
-
                 }
                 else
                 {
                     password = (*result)[0].GetString();
-
-                    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character` LEFT JOIN `account` ON `account`.`id` = `character`.`account` WHERE `character`.`online` > 0 AND `account`.`gmlevel` = 0;");
+ /*                   QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
                     uint32 cnt=0;
                     if(result)
                     {
@@ -217,18 +214,18 @@ void AuthSocket::_HandleLogonChallenge()
                     if(cnt>=sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT))
                         pkt << (uint8)CE_SERVER_FULL;
 
-                    else
-                    {                                       //if server is not full
+                    else 
+                    {    */                                   //if server is not full
 
                         uint32 acct;
-                        QueryResult *resultAcct = sDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
+                        QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
                         if(resultAcct)
                         {
                             Field *fields = resultAcct->Fetch();
                             acct=fields[0].GetUInt32();
                             delete resultAcct;
 
-                            QueryResult *result = sDatabase.PQuery("SELECT * FROM `character` WHERE `online` > 0 AND `account` = '%u';",acct);
+                            QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `account` = '%u';",acct);
                             if(result)
                             {
                                 delete result;
@@ -272,7 +269,7 @@ void AuthSocket::_HandleLogonChallenge()
                                 pkt.append(unk3.AsByteArray(), 16);
                             }
                         }
-                    }
+                //    }
                 }
                 delete result;
             }
@@ -410,8 +407,8 @@ void AuthSocket::_HandleLogonProof()
     {
         sLog.outBasic("User '%s' successfully authed", _login.c_str());
 
-        sDatabase.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _login.c_str() );
-
+        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _login.c_str() );
+        
         sha.Initialize();
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
         sha.Finalize();
@@ -446,7 +443,7 @@ void AuthSocket::_HandleRealmList()
 
     ByteBuffer pkt;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",_login.c_str());
+    QueryResult *result = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",_login.c_str());
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cant find him in the database.",_login.c_str());
@@ -460,25 +457,27 @@ void AuthSocket::_HandleRealmList()
 
     uint8 chars = 0;
 
-    result = sDatabase.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
-    if( result )
-    {
-        Field *fields = result->Fetch();
-        chars = fields[0].GetUInt8();
-
-        delete result;
-    }
-
     pkt << (uint32) 0;
-    pkt << (uint8) sRealmList.size();
+    pkt << (uint8) m_realmList.size();
     RealmList::RealmMap::const_iterator i;
-    for( i = sRealmList.begin( ); i != sRealmList.end( ); i++ )
+    for( i = m_realmList.begin( ); i != m_realmList.end( ); i++ )
     {
         pkt << (uint32) i->second->icon;
         pkt << (uint8) i->second->color;
         pkt << i->first;
         pkt << i->second->address;
         pkt << (float) 1.6;
+        //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
+        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `acctid` = %d AND `realmid` = %d",id,i->second->m_ID);
+        if( result )
+        {
+            Field *fields = result->Fetch();
+            chars = fields[0].GetUInt8();
+
+            delete result;
+        } else {
+            chars = 0;
+        }
         pkt << (uint8) chars;
         pkt << (uint8) i->second->timezone;
         pkt << (uint8) 0;

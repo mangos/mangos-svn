@@ -21,11 +21,14 @@
 
 #include "Network/socket_include.h"
 #include "Policies/Singleton.h"
+#include "Database/DatabaseEnv.h"
+#include "SystemConfig.h"
+#include "realmd.h"
 
 struct Realm
 {
 
-    const char *name;
+    std::string name;
 
     std::string address;
 
@@ -34,17 +37,30 @@ struct Realm
     uint8 color;
 
     uint8 timezone;
+    uint32 m_ID;
 
-    Realm (const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone)
+// Leave these db functions commented out in case we need to maintain connections
+// to the realm db's at some point.
+//    std::string m_dbstring;
+
+//    DatabaseMysql dbRealm;
+
+    Realm (uint32 ID, const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone) //, std::string dbstring)
     {
+        m_ID = ID;
         name = Name;
         address = Address;
+//        m_dbstring = dbstring;
 
         icon = Icon;
         color = Color;
         timezone = Timezone;
-
     }
+
+//    int dbinit()
+//    {
+//        return dbRealm.Initialize(m_dbstring.c_str());
+//    }
 
     ~Realm ()
     {
@@ -59,11 +75,10 @@ class RealmList
         RealmList();
         ~RealmList();
 
-        void AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone );
-        int GetAndAddRealms();
+        void AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone); //, const char *dbstring );
+        int GetAndAddRealms(std::string dbstring);
         void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
-        inline void setServerPort(port_t p) { i_serverPort = p; }
-
+        
         RealmMap::const_iterator begin() const { return _realms.begin(); }
         RealmMap::const_iterator end() const { return _realms.end(); }
         uint32 size() const { return _realms.size(); }
@@ -81,8 +96,8 @@ class RealmList
            //     PatchMap _patches;
 
            */
-        port_t i_serverPort;
 };
 
-#define sRealmList MaNGOS::Singleton<RealmList>::Instance()
+//#define sRealmList MaNGOS::Singleton<RealmList>::Instance()
+extern DatabaseMysql dbRealmServer;
 #endif

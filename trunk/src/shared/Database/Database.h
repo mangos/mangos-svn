@@ -48,5 +48,5 @@ class DatabaseRegistry
         static void RegisterDatabase(Database *d) { si_database = d; }
 };
 
-#define sDatabase DatabaseRegistry::GetDatabase()
+//#define sDatabase DatabaseRegistry::GetDatabase()
 #endif

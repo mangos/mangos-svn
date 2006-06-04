@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="realmd"
 	ProjectGUID="{563E9905-3657-460C-AE63-0AC39D162E23}"
 	RootNamespace="realmd"

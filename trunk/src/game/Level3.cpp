@@ -1715,6 +1715,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
 
 bool ChatHandler::HandleLevelUpCommand(const char* args)
 {
+    WorldPacket data;
 
     int nrlvl = atoi((char*)args);
 

@@ -115,6 +115,15 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         // Player create
         pNewChar->SaveToDB();
 
+        QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
+        uint32 charCount = 0;
+        if (resultCount) {
+            Field *fields = resultCount->Fetch();
+            charCount = fields[0].GetUInt32();
+            delete resultCount;
+            loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = %d", charCount, GetAccountId(), realmID, charCount);
+        }
+
         delete pNewChar;
     }
     else
@@ -462,6 +471,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u';", pCurrChar->GetGUID());
+    loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u';", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
     std::string outstring = pCurrChar->GetName();

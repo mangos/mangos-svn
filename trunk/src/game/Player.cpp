@@ -1665,6 +1665,16 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `player` = '%u'",guid);
 
+    //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
+    QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
+    uint32 charCount = 0;
+    if (resultCount) {
+        Field *fields = resultCount->Fetch();
+        charCount = fields[0].GetUInt32();
+        delete resultCount;
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = %d", charCount, GetSession()->GetAccountId(), realmID, charCount);
+    }
+
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
     {
         if(m_items[i] == NULL)
@@ -7600,6 +7610,7 @@ void Player::SaveToDB()
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
+    
     //_ApplyStatsMods();
     //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
 

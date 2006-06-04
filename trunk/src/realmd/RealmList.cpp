@@ -18,7 +18,6 @@
 
 #include "Common.h"
 #include "RealmList.h"
-#include "Database/DatabaseEnv.h"
 #include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1( RealmList );
@@ -40,47 +39,60 @@ RealmList::~RealmList( )
     */
 }
 
-int RealmList::GetAndAddRealms()
+int RealmList::GetAndAddRealms(std::string dbstring)
 {
     int count = 0;
-    QueryResult *result = sDatabase.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
+    //QueryResult *result = dbRealmServer.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone`, `dbstring` FROM `realmlist` ORDER BY `name`;" );
+    QueryResult *result = dbRealmServer.PQuery( "SELECT `id`, `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
     if(result)
     {
         do
         {
             Field *fields = result->Fetch();
-            AddRealm(fields[0].GetString(),fields[1].GetString(),fields[2].GetUInt8(), fields[3].GetUInt8(), fields[4].GetUInt8());
+            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt8(), fields[4].GetUInt8(), fields[5].GetUInt8()); //, fields[5].GetString());
             count++;
         } while( result->NextRow() );
         delete result;
     }
-    else
-    {
-        sLog.outString( "Realm:***There is no realm defined in database!Working at localhost mode!***" );
-        AddRealm("localhost","127.0.0.1",1,0,1);
-    }
+    //if (_realms.size() == 0)
+    //{
+    //    sLog.outString( "Realm:***There are no valid realms specified in the database!  Working in localhost mode!***" );
+    //    //AddRealm("localhost","127.0.0.1",1,0,1,dbstring.c_str());
+    //    AddRealm("localhost","127.0.0.1",1,0,1);
+    //}
     return count;
 }
 
-void RealmList::AddRealm( const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone )
+void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone) //, const char *dbstring )
 {
     if( _realms.find( name ) == _realms.end() )
     {
-        _realms[name] = new Realm(name, address, icon, color, timezone);
+        Realm *newRealm = new Realm(ID, name, address, icon, color, timezone); //, dbstring);
+        
+//        sLog.outString("Realm \"%s\", database \"%s\"", newRealm->name.c_str(), newRealm->m_dbstring.c_str() );
+//        if (dbstring[0] == 0) {
+//            sLog.outError("No dbstring specified, skipping realm \"%s\".", newRealm->name);
+//            return;
+//        }
+//        
+//        if(!newRealm->dbinit())
+//        {
+//            sLog.outError("Cannot connect to database, skipping realm");
+//        }
+//        else
+//        {
+            std::string addr(address);
 
-        std::string addr(address);
-
-        if( addr.find(':', 0) == std::string::npos )
-        {
-            std::stringstream ss;
-            ss << addr << ":" << i_serverPort;
-            addr = ss.str();
-        }
-
-        _realms[ name ]->address = addr;
-        _realms[ name ]->icon = icon;
-        _realms[ name ]->color = color;
-        _realms[ name ]->timezone = timezone;
+            if( addr.find(':', 0) == std::string::npos )
+            {
+                std::stringstream ss;
+                ss << addr << ":" << DEFAULT_WORLDSERVER_PORT;
+                addr = ss.str();
+            }
+            newRealm->address = addr;
+            _realms[name] = newRealm;
+            sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
+//        }
     }
 }
 
