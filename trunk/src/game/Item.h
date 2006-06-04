@@ -23,13 +23,13 @@
 #include "Object.h"
 #include "ItemPrototype.h"
 
-class Spell;
+struct SpellEntry;
 
 typedef struct
 {
     uint32 setid;
     uint32 item_count;
-    Spell *spells[8];
+    SpellEntry *spells[8];
 }ItemsSetEffect;
 
 enum InventoryChangeFailure
