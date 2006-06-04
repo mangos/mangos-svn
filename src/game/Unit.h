@@ -352,7 +352,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         bool AddAura(Aura *aur, bool uniq = false);
 
-        void RemoveFirstAuraByCategory(uint32 category);
+        void RemoveFirstAuraByDispel(uint32 dispel_type);
         void RemoveAura(AuraMap::iterator &i);
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
@@ -416,6 +416,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(uint32 spellid);
         uint32 CalculateDamage(bool ranged);
+		void SetStateFlag(uint32 index, uint32 newFlag );
+		void RemoveStateFlag(uint32 index, uint32 oldFlag );
 
         /*********************************************************/
         /***                    SPELL SYSTEM                   ***/

@@ -210,33 +210,17 @@ void Spell::EffectTeleportUnits(uint32 i)
 
 void Spell::EffectApplyAura(uint32 i)
 {
+    uint8 castResult = 0; 
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
 
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
-    //unitTarget->RemoveAuraRank(m_spellInfo->Id);
+    //If m_immuneToState type contain this aura type, IMMUNE aura.
+    if(unitTarget->m_immuneToState & m_spellInfo->EffectApplyAuraName[i]) 
+        return; 
 
-    /*if(m_spellInfo->Id == 2457)
-    {
-        unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0011EE00 );
-        return;
-    }
-
-    else if(m_spellInfo->Id == 71)
-    {
-        unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0012EE00 );
-        return;
-    }
-
-    else if(m_spellInfo->Id == 2458)
-    {
-        unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_1, 0x0013EE00 );
-        return;
-    }*/
-
-    //int32 duration = GetDuration(m_spellInfo, i);
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
     unitTarget->AddAura(Aur);
 }
@@ -286,14 +270,14 @@ void Spell::EffectHeal( uint32 i )
         unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
 
-		//If the target is in combat, then player is in combat too
-		if( m_caster->GetTypeId() == TYPEID_PLAYER &&
-			unitTarget->isInCombat() &&
-			unitTarget->GetTypeId() == TYPEID_PLAYER &&
-			unitTarget->getVictim()->GetTypeId() == TYPEID_PLAYER )
-		{
-			((Player*)m_caster)->SetPvP(true);
-		}
+        //If the target is in combat, then player is in combat too
+        if( m_caster->GetTypeId() == TYPEID_PLAYER &&
+            unitTarget->isInCombat() &&
+            unitTarget->GetTypeId() == TYPEID_PLAYER &&
+            unitTarget->getVictim()->GetTypeId() == TYPEID_PLAYER )
+        {
+            ((Player*)m_caster)->SetPvP(true);
+        }
 
     }
 }
@@ -683,12 +667,82 @@ void Spell::EffectLearnSpell(uint32 i)
         }
         default:break;
     }
+    switch(spellToLearn)
+    {
+    //Armor
+    case 9078:                                                //Cloth
+        player->SetSkill(415,1,player->getLevel()*5);
+        break;
+    case 9077:                                                //Leather
+        player->SetSkill(414,1,player->getLevel()*5);
+        break;
+    case 8737:                                                //Mail
+        player->SetSkill(413,1,player->getLevel()*5);
+        break;
+    case 750:                                                //Plate Mail
+        player->SetSkill(293,1,player->getLevel()*5);
+        break;
+    case 9116:                                                //Shield
+        player->SetSkill(433,1,player->getLevel()*5);
+        break;
+    //Melee Weapons
+    case 196:                                                //Axes
+        player->SetSkill(44,1,player->getLevel()*5);
+        break;
+    case 197:                                                //Two-Handed Axes
+        player->SetSkill(172,1,player->getLevel()*5);
+        break;
+    case 227:                                                //Staves
+        player->SetSkill(136,1,player->getLevel()*5);
+        break;
+    case 198:                                                //Maces
+        player->SetSkill(54,1,player->getLevel()*5);
+        break;
+    case 199:                                                //Two-Handed Maces
+        player->SetSkill(160,1,player->getLevel()*5);
+        break;
+    case 201:                                                //Swords
+        player->SetSkill(43,1,player->getLevel()*5);
+        break;
+    case 202:                                                //Two-Handed Swords
+        player->SetSkill(55,1,player->getLevel()*5);
+        break;
+    case 1180:                                                //Daggers
+        player->SetSkill(173,1,player->getLevel()*5);
+        break;
+    case 15590:                                                //Fist Weapons
+        player->SetSkill(473,1,player->getLevel()*5);
+        break;
+    case 200:                                                //Polearms
+        player->SetSkill(229,1,player->getLevel()*5);
+        break;
+    case 3386:                                                //Polearms
+        player->SetSkill(227,1,player->getLevel()*5);
+        break;
+    //Range Weapons
+    case 264:                                                //Bows
+        player->SetSkill(45,1,player->getLevel()*5);
+        break;
+    case 5011:                                                //Crossbows
+        player->SetSkill(226,1,player->getLevel()*5);
+        break;
+    case 266:                                                //Guns
+        player->SetSkill(46,1,player->getLevel()*5);
+        break;
+    case 2567:                                                //Thrown
+        player->SetSkill(176,1,player->getLevel()*5);
+        break;
+    case 5009:                                                //Wands
+        player->SetSkill(228,1,player->getLevel()*5);
+        break;
+    default:break;
+    }
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
 void Spell::EffectDispel(uint32 i)
 {
-    m_caster->RemoveFirstAuraByCategory(m_spellInfo->EffectMiscValue[i]);
+    m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i]);
 }
 
 void Spell::EffectSummonWild(uint32 i)
