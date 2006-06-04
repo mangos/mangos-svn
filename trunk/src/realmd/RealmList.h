@@ -23,7 +23,6 @@
 #include "Policies/Singleton.h"
 #include "Database/DatabaseEnv.h"
 #include "SystemConfig.h"
-#include "realmd.h"
 
 struct Realm
 {
