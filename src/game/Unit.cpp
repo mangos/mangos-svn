@@ -646,14 +646,14 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     else
         *damage -= absorb;
 
-	uint16 pos;
+    uint16 pos;
     if(GetTypeId() == TYPEID_PLAYER)
     {
         for(int i = 0; i < EQUIPMENT_SLOT_END; i++)
-		{
-			pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        {
+            pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
             ((Player*)this)->CastItemSpell(((Player*)this)->GetItemByPos(pos),pVictim);
-		}
+        }
     }
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
@@ -1067,7 +1067,7 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
     AuraMap::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-		if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
+        if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
             break;
     }
 

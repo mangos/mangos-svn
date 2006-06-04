@@ -2192,11 +2192,8 @@ void Player::UpdateSkillWeapon()
     if (!tmpitem)
         tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
-    Item *tmpitem = GetItemBySlot(EQUIPMENT_SLOT_MAINHAND);
-    if (!tmpitem) 
-        tmpitem = GetItemBySlot(EQUIPMENT_SLOT_RANGED);
-	  if(tmpitem->GetProto()->SubClass ==20)
-		    return;
+    if(tmpitem->GetProto()->SubClass ==20)
+            return;
 
     if (!tmpitem)
         UpdateSkill(SKILL_UNARMED);

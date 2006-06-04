@@ -416,8 +416,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(uint32 spellid);
         uint32 CalculateDamage(bool ranged);
-		void SetStateFlag(uint32 index, uint32 newFlag );
-		void RemoveStateFlag(uint32 index, uint32 oldFlag );
+        void SetStateFlag(uint32 index, uint32 newFlag );
+        void RemoveStateFlag(uint32 index, uint32 oldFlag );
 
         /*********************************************************/
         /***                    SPELL SYSTEM                   ***/
