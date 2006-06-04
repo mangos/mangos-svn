@@ -1342,9 +1342,9 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
 // FIX-ME PWEEZEE!!
 void Aura::HandleAuraModShapeshift(bool apply)
 {
-	if(!m_target)
-		return;
-	Unit *unit_target = m_target;
+    if(!m_target)
+        return;
+    Unit *unit_target = m_target;
     uint32 spellId = 0;
     uint32 modelid = 0;
     uint8 PowerType = 0;
