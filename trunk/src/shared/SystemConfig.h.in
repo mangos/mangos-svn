@@ -42,7 +42,7 @@
 #else
 # define _FULLVERSION "/" _VERSION " (Unix)"
 # define _MANGOSD_CONFIG  "@MANGOSD_CONFIG@"
-# define _REALMD_CONFIG  "@MANGOSD_CONFIG@"
+# define _REALMD_CONFIG  "@REALMD_CONFIG@"
 # define _MANGOSD_DATA "@MANGOSD_DATA@"
 #endif
 
