@@ -163,7 +163,7 @@ EXTRA_LINKER_OPTIONS = @EXTRA_LINKER_OPTIONS@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 INCLUDES = @INCLUDES@ -I$(srcdir) -I$(srcdir)/../../dep/include \
-	-I$(srcdir)/../shared -I$(srcdir)/../framework
+	-I$(top_builddir)/src/shared -I$(srcdir)/../shared -I$(srcdir)/../framework
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@

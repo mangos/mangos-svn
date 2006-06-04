@@ -68,7 +68,7 @@ uint32 Weather::GetSound()
     return sound;
 }
 
-Weather::Weather(Player *player) : m_player(player), m_zone( player->GetZoneId())
+Weather::Weather(Player *player) : m_zone( player->GetZoneId()), m_player(player)
 {
     m_interval = sWorld.getConfig(CONFIG_INTERVAL_CHANGEWEATHER);
     m_type = 0;
@@ -245,7 +245,7 @@ void Weather::UpdateWeather()
 
     data << (uint32)m_type << (float)m_grade << (uint32)sound;
     m_player->SendMessageToSet( &data, true );
-    char* wthstr;
+    char const* wthstr;
     switch(sound)
     {
         case WEATHER_RAINLIGHT:
