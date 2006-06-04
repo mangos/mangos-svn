@@ -21,7 +21,7 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 
-Spell* Cast(Player*player,uint32 spellId)
+SpellEntry* Cast(Player*player,uint32 spellId)
 {
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -36,7 +36,7 @@ Spell* Cast(Player*player,uint32 spellId)
     SpellCastTargets targets;
     targets.setUnitTarget( player );
     spell->prepare(&targets);
-    return spell;
+    return spellInfo;
 
 }
 
@@ -59,9 +59,9 @@ void AddItemsSetItem(Player*player,ItemPrototype *proto)
 
     for(uint32 x =0;x<3;x++)
         if(player->ItemsSetEff[x])
-            if(((ItemsSetEffect*)player->ItemsSetEff[x])->setid==setid)
+            if(player->ItemsSetEff[x]->setid==setid)
             {
-                eff=(ItemsSetEffect*)player->ItemsSetEff[x];
+                eff=player->ItemsSetEff[x];
                 break;
             }
 
@@ -89,7 +89,7 @@ void AddItemsSetItem(Player*player,ItemPrototype *proto)
                 uint32 z=0;
                 for(;z<8;z++)
                     if(eff->spells[z])
-                        if(eff->spells[z]->m_spellInfo->Id==set->spells[x])break;
+                        if(eff->spells[z]->Id==set->spells[x])break;
 
                 if(z==8)                                    //new spell
                     for(uint32 y=0;y<8;y++)
@@ -118,9 +118,9 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
     uint32 setindex=0;
     for(;setindex<3;setindex++)
         if(player->ItemsSetEff[setindex])
-            if(((ItemsSetEffect*)player->ItemsSetEff[setindex])->setid==setid)
+            if(player->ItemsSetEff[setindex]->setid==setid)
             {
-                eff=(ItemsSetEffect*)player->ItemsSetEff[setindex];
+                eff=player->ItemsSetEff[setindex];
                 break;
             }
 
@@ -134,10 +134,9 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
             {
                 for(uint32 z=0;z<8;z++)
                     if(eff->spells[z])
-                        if(eff->spells[z]->m_spellInfo->Id==set->spells[x])
+                        if(eff->spells[z]->Id==set->spells[x])
                         {
             //fixme: remove spell effect
-                            delete eff->spells[z];
                             eff->spells[z]=NULL;
                             break;
                         }
@@ -146,6 +145,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
 
     if(!eff->item_count)                                    //all items of a set were removed
     {
+        assert(eff==player->ItemsSetEff[setindex]);
         delete eff;
         player->ItemsSetEff[setindex]=NULL;
 
