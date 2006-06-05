@@ -21,6 +21,7 @@
 #include "Database/SQLStorage.h"
 
 #include "Log.h"
+#include "MapManager.h"
 #include "ObjectMgr.h"
 #include "UpdateMask.h"
 #include "World.h"
@@ -608,10 +609,17 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
     delete result;
 }
 
-GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId)
+GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `areatrigger_graveyard` WHERE `map` = '%u' ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId);
+    // search in same zone first
+    uint32 zoneId =  sAreaStore.LookupEntry(MapManager::Instance().GetMap(MapId)->GetAreaFlag(x,y))->zone;
+
+    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `areatrigger_graveyard` WHERE `map` = %u AND `zone` = %u AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, zoneId, team);
+
+    // or in any zone if fail
+    if(! result)
+        result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `areatrigger_graveyard` WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, team);
 
     if( ! result )
         return NULL;
