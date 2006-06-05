@@ -2044,7 +2044,7 @@ void Player::RepopAtGraveyard()
 {
     float closestX = 0, closestY = 0, closestZ = 0;
 
-    GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId() );
+    GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
 
     if(ClosestGrave)
     {
@@ -2202,7 +2202,7 @@ void Player::UpdateSkillWeapon()
     if (!tmpitem)
         tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
-    if(tmpitem->GetProto()->SubClass ==20)
+    if(tmpitem && tmpitem->GetProto()->SubClass ==20)
             return;
 
     if (!tmpitem)
