@@ -131,7 +131,9 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 }*/
         //if ((i_target.GetDistance2dSq(&owner) < (owner.GetObjectSize() * 2 + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
 
-        if ( i_target.GetDistanceSq(&owner) > 0 )
+
+		DEBUG_LOG("GetDistance2dSq = %f", i_target.GetDistance2dSq(&owner));
+        if ( i_target.GetDistance2dSq(&owner) > 0 )
             _setTargetLocation(owner, 0);
         else if ( !i_target.HasInArc( 0.1, &owner ) )
             owner.SetInFront(&i_target);
