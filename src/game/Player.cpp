@@ -5919,7 +5919,6 @@ void Player::StoreItem( uint16 pos, Item *pItem )
             pItem2->SetCount( pItem2->GetCount() + pItem->GetCount() );
             if( IsInWorld() )
                 pItem2->SendUpdateToPlayer( this );
-            delete pItem;
         }
     }
 }
@@ -6675,7 +6674,6 @@ void Player::IncompleteQuest( Quest *pQuest )
         uint32 state = GetUInt32Value( log_slot + 1 );
         state &= ~(1 << 24);
         SetUInt32Value( log_slot + 1, state );
-        SetUInt32Value( log_slot + 2, 1 );
     }
 }
 
@@ -6751,6 +6749,9 @@ void Player::FailQuest( Quest *pQuest )
     if( pQuest )
     {
         IncompleteQuest( pQuest );
+
+        uint16 log_slot = GetQuestSlot( pQuest );
+        SetUInt32Value( log_slot + 2, 1 );
         SendQuestFailed( pQuest );
     }
 }
@@ -6764,6 +6765,9 @@ void Player::FailTimedQuest( Quest *pQuest )
         mQuestStatus[quest].m_timer = 0;
 
         IncompleteQuest( pQuest );
+
+        uint16 log_slot = GetQuestSlot( pQuest );
+        SetUInt32Value( log_slot + 2, 1 );
         SendQuestTimerFailed( pQuest );
     }
 }
@@ -7086,7 +7090,7 @@ void Player::ItemRemoved( uint32 entry, uint32 count )
                             curitemcount = GetItemCount(entry) + GetBankItemCount(entry);
                         if ( curitemcount - count < reqitemcount )
                         {
-                            remitemcount = reqitemcount - curitemcount + count;
+                            remitemcount = ( curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
                             mQuestStatus[quest].m_itemcount[j] = curitemcount - remitemcount;
                             IncompleteQuest( pQuest );
                         }
