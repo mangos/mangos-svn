@@ -519,31 +519,29 @@ void Aura::_AddAura()
 {
     if (!m_spellId)
         return;
+	if(!m_target)
+		return;
+
+    Aura* aura = NULL;
+	SpellEntry* spellproto = GetSpellProto();
 
     bool samespell = false;
     uint8 slot = 0xFF, i;
     uint32 maxduration = m_duration;
-    Aura* aura = NULL;
-    for(i = 0; i< 3; i++)
+
+    aura = m_target->GetAura(m_spellId, spellproto->EffectApplyAuraName[m_effIndex]);
+    if(aura)
     {
-        aura = m_target->GetAura(m_spellId, i);
-        if(aura)
-        {
-            samespell = true;
-            if(i == m_effIndex)
-            {
-                slot = aura->GetAuraSlot();
-                maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
-            }
-        }
+        samespell = true;
+        slot = aura->GetAuraSlot();
+        maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
+
     }
-    if(m_duration <= maxduration && slot != 0xFF)
-        return;
-    if(!samespell)
-    {
-        ApplyModifier(true);
+	if( !samespell )
+	{
+		ApplyModifier(true);
         sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-    }
+	}
 
     WorldPacket data;
     if(!samespell)
