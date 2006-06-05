@@ -1870,7 +1870,7 @@ void Spell::EffectMomentMove(uint32 i)
 
 void Spell::EffectSkinning(uint32 i)
 {
-    if(unitTarget->GetTypeId() != TYPEID_UNIT || unitTarget->isAlive())
+    if(unitTarget->GetTypeId() != TYPEID_UNIT )
         return;
     if(!m_caster)
         return;
@@ -1879,6 +1879,11 @@ void Spell::EffectSkinning(uint32 i)
     if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
     {
         SendCastResult(CAST_FAIL_INVALID_TARGET);
+        return;
+    }
+    if(unitTarget->m_form == 99)
+    {
+        SendCastResult(CAST_FAIL_NOT_SKINNABLE);
         return;
     }
     int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
@@ -1900,7 +1905,7 @@ void Spell::EffectSkinning(uint32 i)
     else if(fishvalue >= (targetlevel <= 5?(targetlevel-5)*5:targetlevel*5))
         up_skillvalue = 1;
     else up_skillvalue = 0;
-
+    unitTarget->m_form = 99;
 }
 
 void Spell::EffectCharge(uint32 i)
