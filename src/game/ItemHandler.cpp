@@ -97,8 +97,8 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 
     recv_data >> bag >> slot >> count >> data1 >> data2 >> data3;
     sLog.outDebug("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
-    
-    _player->RemoveItem(bag,slot);
+
+    _player->DestroyItem( bag, slot );
 }
 
 extern void CheckItemDamageValues ( ItemPrototype *itemProto );
@@ -300,7 +300,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
     Item *pItem = _player->GetItemFromBuyBackSlot( slot );
     if( pCreature && pItem )
     {
-        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - pItem->GetProto()->BuyPrice;
+        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
