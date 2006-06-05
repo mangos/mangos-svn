@@ -1000,7 +1000,7 @@ void Unit::InterruptSpell()
 
 bool Unit::isInFront(Unit const* target, float radius)
 {
-    return GetDistanceSq(target)<=radius * radius && IsInArc( M_PI, target );
+    return GetDistanceSq(target)<=radius * radius && HasInArc( M_PI, target );
 }
 
 void Unit::SetInFront(Unit const* target)
