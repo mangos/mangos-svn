@@ -355,6 +355,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BankItem( uint16 pos, Item *pItem );
         void RemoveItem( uint8 bag, uint8 slot );
         void RemoveItemCount( uint32 item, uint32 count );
+        void DestroyItem( uint8 bag, uint8 slot );
+        void DestroyItemCount( uint32 item, uint32 count );
         void SplitItem( uint16 src, uint16 dst, uint32 count );
         void SwapItem( uint16 src, uint16 dst );
         void AddItemToBuyBackSlot( uint32 slot, Item *pItem );

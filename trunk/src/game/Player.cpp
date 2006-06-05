@@ -5072,6 +5072,12 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
             Bag *pBag;
             ItemPrototype *pBagProto;
             uint16 pos;
+            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+            {
+                if( msg )
+                    SendEquipError( EQUIP_ERR_DONT_OWN_THAT_ITEM, NULL, NULL, 0 );
+                return NULL;
+            }
             if( bag == NULL )
             {
                 if( !swap && pProto->MaxCount > 0 )
@@ -5390,6 +5396,12 @@ uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
+            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+            {
+                if( msg )
+                    SendEquipError( EQUIP_ERR_DONT_OWN_THAT_ITEM, NULL, NULL, 0 );
+                return NULL;
+            }
             uint32 type = pProto->InventoryType;
             uint8 eslot = FindEquipSlot( type );
             if( eslot == NULL_SLOT )
@@ -5467,14 +5479,22 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
             Item *pItem2;
             Bag *pBag;
             ItemPrototype *pBagProto;
+            uint16 pos;
+            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+            {
+                if( msg )
+                    SendEquipError( EQUIP_ERR_DONT_OWN_THAT_ITEM, NULL, NULL, 0 );
+                return NULL;
+            }
             if( bag == NULL )
             {
-                if( pProto->MaxCount > 0 )
+                if( !swap && pProto->MaxCount > 0 )
                 {
                     uint32 curcount = 0;
                     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
                     {
-                        pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pItem2 = GetItemByPos( pos );
                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() )
                         {
                             curcount += pItem2->GetCount();
@@ -5488,7 +5508,8 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                     }
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                     {
-                        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pBag = (Bag*)GetItemByPos( pos );
                         if( pBag )
                         {
                             pBagProto = pBag->GetProto();
@@ -5496,7 +5517,8 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pItem2 = GetItemByPos( i, j );
+                                    pos = ((i << 8) | j );
+                                    pItem2 = GetItemByPos( pos );
                                     if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() )
                                     {
                                         curcount += pItem2->GetCount();
@@ -5513,7 +5535,8 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                     }
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
-                        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pBag = (Bag*)GetItemByPos( pos );
                         if( pBag )
                         {
                             pBagProto = pBag->GetProto();
@@ -5521,7 +5544,8 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pItem2 = GetItemByPos( i, j );
+                                    pos = ((i << 8) | j );
+                                    pItem2 = GetItemByPos( pos );
                                     if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() )
                                     {
                                         curcount += pItem2->GetCount();
@@ -5541,8 +5565,9 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                 {
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
-                        pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                        if( !pItem2 && HasBankBagSlot( i ) )
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pItem2 = GetItemByPos( pos );
+                        if( !pItem2 )
                             return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                     }
                     Bag *pBag = (Bag*)pItem;
@@ -5557,13 +5582,15 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                 {
                     for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
                     {
-                        pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pItem2 = GetItemByPos( pos );
                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                            return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                            return pos;
                     }
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
-                        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pBag = (Bag*)GetItemByPos( pos );
                         if( pBag )
                         {
                             pBagProto = pBag->GetProto();
@@ -5571,9 +5598,10 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pItem2 = GetItemByPos( i, j );
+                                    pos = ((i << 8) | j );
+                                    pItem2 = GetItemByPos( pos );
                                     if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                        return ( (i << 8) | j );
+                                        return pos;
                                 }
                             }
                         }
@@ -5583,6 +5611,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                 {
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
+                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
                         pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                         if( pBag )
                         {
@@ -5591,6 +5620,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
+                                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
                                     pItem2 = GetItemByPos( i, j );
                                     if( !pItem2 )
                                         return ( (i << 8) | j );
@@ -5834,13 +5864,19 @@ void Player::StoreNewItem( uint16 pos, uint32 item, uint32 count )
 {
     Item *pItem = CreateItem( item, count );
     if( pItem )
+    {
+        ItemPrototype *pProto = pItem->GetProto();
+        if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+            ItemAdded( item, count );
         StoreItem( pos, pItem );
+    }
 }
 void Player::StoreItem( uint16 pos, Item *pItem )
 {
     if( pItem )
     {
-        pItem->SetOwner( this );
+        if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
+            pItem->SetOwner( this );
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -5891,7 +5927,8 @@ void Player::EquipItem( uint16 pos, Item *pItem )
 {
     if( pItem )
     {
-        pItem->SetOwner( this );
+        if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED )
+            pItem->SetOwner( this );
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -5940,10 +5977,143 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
     if( pItem )
     {
         sLog.outDebug( "STORAGE : RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
-        pItem->SetOwner(0);
         
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
+            pItem->SetSlot( 0 );
+            SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
+            pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
+
+            if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+            {
+                _ApplyItemMods(pItem, slot, false);
+                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+                for (int i = VisibleBase; i < VisibleBase + 12; ++i)
+                    SetUInt32Value(i, 0);
+                for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+                {
+                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+                    if( Enchant_id)
+                    {
+                        SpellItemEnchantment *pEnchant;
+                        pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
+                        if(!pEnchant)
+                            continue;
+                        uint32 enchant_display = pEnchant->display_type;
+                        uint32 enchant_value1 = pEnchant->value1;
+                        uint32 enchant_value2 = pEnchant->value2;
+                        uint32 enchant_spell_id = pEnchant->spellid;
+                        uint32 enchant_aura_id = pEnchant->aura_id;
+                        uint32 enchant_description = pEnchant->description;
+                        //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+                        if(enchant_display ==4)
+                            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
+                        else if(enchant_display ==2)
+                        {
+                            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
+                            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
+                        }
+                        else
+                        {
+                            RemoveAurasDueToSpell(enchant_spell_id);
+                        }
+                    }
+                }
+            }
+            
+            m_items[slot] = NULL;
+            /*if( IsInWorld() )
+            {
+                pItem->RemoveFromWorld();
+                pItem->DestroyForPlayer( this );
+            }*/
+        }
+        else
+        {
+            Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
+            if( pBag )
+            {
+                pItem->SetSlot( 0 );
+                pBag->RemoveItem(slot);
+
+                /*if( IsInWorld() )
+                {
+                    pItem->RemoveFromWorld();
+                    pItem->DestroyForPlayer(this);
+                }*/
+            }
+        }
+    }
+}
+
+void Player::RemoveItemCount( uint32 item, uint32 count )
+{
+    sLog.outDebug( "STORAGE : RemoveItemCount item = %u, count = %u", item, count);
+    Item *pItem;
+    uint32 remcount = 0;
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            if( pItem->GetCount() + remcount <= count )
+            {
+                remcount += pItem->GetCount();
+                RemoveItem( INVENTORY_SLOT_BAG_0, i );
+            }
+            else
+            {
+                pItem->SetCount( pItem->GetCount() - count + remcount );
+                if( IsInWorld() )
+                    pItem->SendUpdateToPlayer( this );
+                return;
+            }
+        }
+    }
+    Bag *pBag;
+    ItemPrototype *pBagProto;
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                if( pItem && pItem->GetEntry() == item )
+                {
+                    if( pItem->GetCount() + remcount <= count )
+                    {
+                        remcount += pItem->GetCount();
+                        RemoveItem( INVENTORY_SLOT_BAG_0, i );
+                    }
+                    else
+                    {
+                        pItem->SetCount( pItem->GetCount() - count + remcount );
+                        if( IsInWorld() )
+                            pItem->SendUpdateToPlayer( this );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void Player::DestroyItem( uint8 bag, uint8 slot )
+{
+    Item *pItem = GetItemByPos( bag, slot );
+    if( pItem )
+    {
+        sLog.outDebug( "STORAGE : DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        pItem->SetOwner(0);
+        ItemPrototype *pProto = pItem->GetProto();
+
+        if( bag == INVENTORY_SLOT_BAG_0 )
+        {
+            if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+                ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
             pItem->SetSlot( 0 );
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
             pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
@@ -5997,6 +6167,8 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
             Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
             if( pBag )
             {
+                if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+                    ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
                 pItem->SetSlot( 0 );
                 pBag->RemoveItem(slot);
 
@@ -6010,10 +6182,11 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
     }
 }
 
-void Player::RemoveItemCount( uint32 item, uint32 count )
+void Player::DestroyItemCount( uint32 item, uint32 count )
 {
-    sLog.outDebug( "STORAGE : RemoveItemCount item = %u, count = %u", item, count);
+    sLog.outDebug( "STORAGE : DestroyItemCount item = %u, count = %u", item, count);
     Item *pItem;
+    ItemPrototype *pProto;
     uint32 remcount = 0;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
@@ -6023,11 +6196,16 @@ void Player::RemoveItemCount( uint32 item, uint32 count )
             if( pItem->GetCount() + remcount <= count )
             {
                 remcount += pItem->GetCount();
-                RemoveItem( INVENTORY_SLOT_BAG_0, i );
+                DestroyItem( INVENTORY_SLOT_BAG_0, i );
             }
             else
             {
+                pProto = pItem->GetProto();
+                if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+                    ItemRemoved( pItem->GetEntry(), count - remcount );
                 pItem->SetCount( pItem->GetCount() - count + remcount );
+                if( IsInWorld() )
+                    pItem->SendUpdateToPlayer( this );
                 return;
             }
         }
@@ -6048,10 +6226,13 @@ void Player::RemoveItemCount( uint32 item, uint32 count )
                     if( pItem->GetCount() + remcount <= count )
                     {
                         remcount += pItem->GetCount();
-                        RemoveItem( INVENTORY_SLOT_BAG_0, i );
+                        DestroyItem( INVENTORY_SLOT_BAG_0, i );
                     }
                     else
                     {
+                        pProto = pItem->GetProto();
+                        if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+                            ItemRemoved( pItem->GetEntry(), count - remcount );
                         pItem->SetCount( pItem->GetCount() - count + remcount );
                         if( IsInWorld() )
                             pItem->SendUpdateToPlayer( this );
@@ -6239,27 +6420,28 @@ void Player::AddItemToBuyBackSlot( uint32 slot, Item *pItem )
     {
         if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
         {
-            uint32 eslot = slot - BUYBACK_SLOT_START;
             RemoveItemFromBuyBackSlot( slot );
+            sLog.outDebug( "STORAGE : AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
+            uint32 eslot = slot - BUYBACK_SLOT_START;
 
             m_buybackitems[eslot] = pItem;
             time_t base = time(NULL);
             time_t etime = base + (30 * 3600);
 
             SetUInt64Value( PLAYER_FIELD_VENDORBUYBACK_SLOT_1 + eslot * 2, pItem->GetGUID() );
-            SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, (uint32)etime );
-
             ItemPrototype *pProto = pItem->GetProto();
             if( pProto )
                 SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, pProto->SellPrice * pItem->GetCount() );
             else
                 SetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + eslot, 0 );
+            SetUInt32Value( PLAYER_FIELD_BUYBACK_TIMESTAMP_1 + eslot, (uint32)etime );
         }
     }
 }
 
 Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 {
+    sLog.outDebug( "STORAGE : GetItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
         return m_buybackitems[slot - BUYBACK_SLOT_START];
     return NULL;;
@@ -6267,6 +6449,7 @@ Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 
 void Player::RemoveItemFromBuyBackSlot( uint32 slot )
 {
+    sLog.outDebug( "STORAGE : RemoveItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
     {
         uint32 eslot = slot - BUYBACK_SLOT_START;
@@ -6507,6 +6690,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
                 RemoveItemCount( pQuest->GetQuestInfo()->ReqItemId[i], pQuest->GetQuestInfo()->ReqItemCount[i]);
         }
 
+        if( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+            SetTimedQuest( 0 );
         if ( pQuest->m_rewchoiceitemscount > 0 )
         {
             if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
@@ -6548,7 +6733,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
 
         if ( getLevel() < 60 )
         {
-            GiveXP( pQuest->XPValue( this ), this->GetGUID() );
+            GiveXP( pQuest->XPValue( this ), GetGUID() );
             ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
         }
         else
@@ -6558,9 +6743,6 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             mQuestStatus[quest].m_rewarded = true;
         else
             SetQuestStatus(pQuest, QUEST_STATUS_NONE);
-
-        if( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
-            SetTimedQuest( 0 );
     }
 }
 
@@ -6761,7 +6943,7 @@ void Player::TakeQuestSourceItem( Quest *pQuest )
             uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
             if( count <= 0 )
                 count = 1;
-            RemoveItemCount(srcitem, count);;
+            DestroyItemCount(srcitem, count);;
         }
     }
 }
@@ -6846,7 +7028,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
     uint32 reqitemcount;
     uint32 curitemcount;
     uint32 additemcount;
-    for( int16 i = 0; i < 20; i++ )
+    for( int i = 0; i < 20; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
@@ -6863,7 +7045,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                         curitemcount = mQuestStatus[quest].m_itemcount[j];
                         if ( curitemcount < reqitemcount )
                         {
-                            additemcount = reqitemcount - curitemcount;
+                            additemcount = ( curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
                             mQuestStatus[quest].m_itemcount[j] += additemcount;
                             PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, additemcount );
                         }
@@ -6884,7 +7066,7 @@ void Player::ItemRemoved( uint32 entry, uint32 count )
     uint32 reqitemcount;
     uint32 curitemcount;
     uint32 remitemcount;
-    for( int16 i = 0; i < 20; i++ )
+    for( int i = 0; i < 20; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 )
@@ -6923,7 +7105,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     uint32 reqkillcount;
     uint32 curkillcount;
     uint32 addkillcount = 1;
-    for( int16 i = 0; i < 20; i++ )
+    for( int i = 0; i < 20; i++ )
     {
         quest = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( quest != 0 && mQuestStatus[quest].m_status == QUEST_STATUS_INCOMPLETE )
@@ -6994,6 +7176,7 @@ void Player::SendQuestReward( Quest *pQuest )
     if( pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", quest );
         WorldPacket data;
         data.Initialize( SMSG_QUESTGIVER_QUEST_COMPLETE );
         data << quest;
@@ -7017,7 +7200,6 @@ void Player::SendQuestReward( Quest *pQuest )
         }
 
         GetSession()->SendPacket( &data );
-        sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", quest );
     }
 }
 

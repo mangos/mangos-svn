@@ -321,7 +321,7 @@ void Spell::EffectCreateItem(uint32 i)
         itemid = m_spellInfo->Reagent[x];
         itemcount = m_spellInfo->ReagentCount[x];
         if(player->GetItemCount(itemid) >= itemcount && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
-            player->RemoveItemCount(itemid, itemcount);
+            player->DestroyItemCount(itemid, itemcount);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -826,7 +826,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if(p_caster->GetItemCount(itemid) >= itemcount)
-            p_caster->RemoveItemCount(itemid, itemcount);
+            p_caster->DestroyItemCount(itemid, itemcount);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -893,7 +893,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if(p_caster->GetItemCount(itemid) >= itemcount)
-            p_caster->RemoveItemCount(itemid, itemcount);
+            p_caster->DestroyItemCount(itemid, itemcount);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -1108,7 +1108,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 //stackitem = ammoitem;
 
             if(stackitem)
-                ((Player*)m_caster)->RemoveItemCount(stackitem->GetProto()->ItemId, 1);
+                ((Player*)m_caster)->DestroyItemCount(stackitem->GetProto()->ItemId, 1);
             else
             {
                 SendCastResult(CAST_FAIL_NO_AMMO);
@@ -1412,7 +1412,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if(p_caster->GetItemCount(itemid) >= itemcount)
-            p_caster->RemoveItemCount(itemid, itemcount);
+            p_caster->DestroyItemCount(itemid, itemcount);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -1452,7 +1452,7 @@ void Spell::EffectDisEnchant(uint32 i)
         SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
         return;
     }
-    p_caster->RemoveItemCount(itemTarget->GetEntry(),1);
+    p_caster->DestroyItemCount(itemTarget->GetEntry(),1);
 
     Player *player = (Player*)m_caster;
     p_caster->UpdateSkillPro(m_spellInfo->Id);
