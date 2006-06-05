@@ -278,6 +278,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     item_bagIndex_itr = info->item_bagIndex.begin();
     item_slot_itr = info->item_slot.begin();
     item_amount_itr = info->item_amount.begin();
+    spell_itr = info->spell.begin();
 
     for (; spell_itr!=info->spell.end(); spell_itr++)
     {
@@ -415,8 +416,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
             }
         }
     }
-
-    spell_itr = info->spell.begin();
 
     return true;
 }
