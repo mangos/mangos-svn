@@ -74,7 +74,7 @@
 
 // level 1 chat
 #define LANG_BROADCAST                   "BROADCAST: %s"
-#define LANG_MAP_POSITION                "Map: %u\nX: %f Y: %f Z: %f Orientation: %f"
+#define LANG_MAP_POSITION                "Map: %u Zone: %u\nX: %f Y: %f Z: %f Orientation: %f"
 #define LANG_IS_TELEPORTED               "%s is already being teleported."
 #define LANG_SUMMONING                   "You are summoning %s."
 #define LANG_SUMMONED_BY                 "You are being summoned by %s."
