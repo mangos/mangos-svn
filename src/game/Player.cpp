@@ -279,45 +279,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     item_slot_itr = info->item_slot.begin();
     item_amount_itr = info->item_amount.begin();
 
-    uint16 dst;
-    Item *pItem;
-    for (; item_id_itr!=info->item_id.end(); item_id_itr++, item_bagIndex_itr++, item_slot_itr++, item_amount_itr++)
-    {
-        titem_id = (*item_id_itr);
-        titem_bagIndex = (*item_bagIndex_itr);
-        titem_slot = (*item_slot_itr);
-        titem_amount = (*item_amount_itr);
-
-        if (titem_id)
-        {
-            sLog.outDebug("ITEM: Creating initial item, itemId = %u, bagIndex = %u, slot = %u, count = %u",titem_id, titem_bagIndex, titem_slot, titem_amount);
-
-            pItem = CreateItem( titem_id, titem_amount);
-            if( pItem )
-            {
-                dst = ((titem_bagIndex << 8) | titem_slot);
-                if( IsInventoryPos( dst ) )
-                {
-                    if( dst = CanStoreItem( titem_bagIndex, titem_slot, pItem, false, false ) )
-                        StoreItem( dst, pItem);
-                    else
-                        delete pItem;
-                }
-                else if( IsEquipmentPos( dst ) )
-                {
-                    if( dst = CanEquipItem( titem_slot, pItem, false, false ) )
-                        EquipItem( dst, pItem);
-                    else
-                        delete pItem;
-                }
-                else
-                    delete pItem;
-            }
-        }
-    }
-
-    spell_itr = info->spell.begin();
-
     for (; spell_itr!=info->spell.end(); spell_itr++)
     {
         tspell = (*spell_itr);
@@ -417,6 +378,46 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     {
         SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
     }
+
+    uint16 dst;
+    Item *pItem;
+    for (; item_id_itr!=info->item_id.end(); item_id_itr++, item_bagIndex_itr++, item_slot_itr++, item_amount_itr++)
+    {
+        titem_id = (*item_id_itr);
+        titem_bagIndex = (*item_bagIndex_itr);
+        titem_slot = (*item_slot_itr);
+        titem_amount = (*item_amount_itr);
+
+        if (titem_id)
+        {
+            sLog.outDebug("ITEM: Creating initial item, itemId = %u, bagIndex = %u, slot = %u, count = %u",titem_id, titem_bagIndex, titem_slot, titem_amount);
+
+            pItem = CreateItem( titem_id, titem_amount);
+            if( pItem )
+            {
+                dst = ((titem_bagIndex << 8) | titem_slot);
+                if( IsInventoryPos( dst ) )
+                {
+                    if( dst = CanStoreItem( titem_bagIndex, titem_slot, pItem, false, false ) )
+                        StoreItem( dst, pItem);
+                    else
+                        delete pItem;
+                }
+                else if( IsEquipmentPos( dst ) )
+                {
+                    if( dst = CanEquipItem( titem_slot, pItem, false, false ) )
+                        EquipItem( dst, pItem);
+                    else
+                        delete pItem;
+                }
+                else
+                    delete pItem;
+            }
+        }
+    }
+
+    spell_itr = info->spell.begin();
+
     return true;
 }
 
@@ -5854,7 +5855,7 @@ bool Player::CanUseItem( Item *pItem, bool msg )
                 if( msg )
                     SendEquipError( EQUIP_ITEM_REPUTATION_NOT_ENOUGH, pItem, NULL, 0 );
                 return false;
-            } TODO */
+            }*/
             if( getLevel() < pProto->RequiredLevel )
             {
                 if( msg )
