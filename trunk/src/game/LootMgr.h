@@ -49,7 +49,7 @@ struct LootItem
         // rand() result range is 0..RAND_MAX where RAND_MAX is implementation difine (at 32-bit OS in most case RAND_MAX = 32767)
         // this is small number for chances writed like xx.xxx (100000 cases)
         // using combined 2 call rand() instead 
-        return itm.chance < (float(rand() % 100) + float(rand() % 1000)/1000.0);
+        return itm.chance <= (float(rand() % 100) + float(rand() % 1000)/1000.0);
     }
 };
 
