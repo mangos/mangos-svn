@@ -658,7 +658,7 @@ void Player::Update( uint32 p_time )
                 }
                 //120 degreas of radiant range
                 //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
-                else if( !IsInArc( 2.0943951024, pVictim ))
+                else if( !HasInArc( 2.0943951024, pVictim ))
                 {
                     setAttackTimer(uint32(1000));
                     SendAttackSwingBadFacingAttack();
@@ -5812,6 +5812,15 @@ bool Player::CanUseItem( Item *pItem, bool msg )
                 if( msg )
                     SendEquipError( EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, pItem, NULL, 0 );
                 return false;
+            }
+            if( pItem->GetSkill() != 0  )
+            {
+                if( GetSkillValue( pItem->GetSkill() ) == 0 )
+                {
+                    if( msg )
+                        SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, pItem, NULL, 0 );
+                    return false;
+                }
             }
             if( pProto->RequiredSkill != 0  )
             {

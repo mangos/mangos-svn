@@ -45,7 +45,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
         return;
     owner.SetInFront(&i_target);
     float x, y, z;
-    i_target.GetClosePoint( &owner, x, y, z );
+    i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
     //i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()));
     i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()) + offset);
@@ -123,16 +123,18 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             _setTargetLocation(owner, 0);
             DEBUG_LOG("restart to chase");
         }
-        //if (!owner.IsInArc( 2.0943951024, &i_target )) {
-        //        if (!owner.IsInArc( (30/360) * 2 * M_PI, &i_target )) {
+        //if (!owner.HasInArc( 2.0943951024, &i_target )) {
+        //        if (!owner.HasInArc( (30/360) * 2 * M_PI, &i_target )) {
         // adjust facing
         /*        if ((i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
                     _setTargetLocation(owner, 0);
                 }*/
         //if ((i_target.GetDistance2dSq(&owner) < (owner.GetObjectSize() * 2 + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
 
-        if (i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize()) + 0.5f)
+        if ( i_target.GetDistanceSq(&owner) > 0 )
             _setTargetLocation(owner, 0);
+        else if ( !i_target.HasInArc( 0.1, &owner ) )
+            owner.SetInFront(&i_target);
         //            else  {
         /*float ang = owner.GetAngle(&i_target);
         ang -= owner.GetOrientation();

@@ -197,7 +197,8 @@ class MANGOS_DLL_SPEC Object
         float GetDistanceSq(const float x, const float y, const float z) const;
         float GetAngle( const Object* obj ) const;
         float GetAngle( const float x, const float y ) const;
-        bool IsInArc( const float arcangle, const Object* obj ) const;
+        bool HasInArc( const float arcangle, const Object* obj ) const;
+        void GetContactPoint( const Object* obj, float &x, float &y, float &z ) const;
 
         void SendMessageToSet(WorldPacket *data, bool self);
 
