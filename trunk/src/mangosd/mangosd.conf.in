@@ -4,6 +4,9 @@ ConfVersion=2006060401
 # RealmID must match the realmlist
 RealmID = 1
 
+# 0 NORMAL 1 PVP 4 NORMAL 6 RP 8 RPPVP
+GameType = 1
+
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
