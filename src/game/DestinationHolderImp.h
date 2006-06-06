@@ -73,7 +73,6 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     _findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
     UpdateLocation(traveller, dest_x, dest_y, dest_z);
 
-    // now adjust the z scale.. and orientation
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
@@ -84,14 +83,9 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
         speed = 2.5f;
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
-    float orientation = (float)atan2((double)dy, (double)dx) * -1;
+    traveller.Relocation(i_fromX, i_fromY, i_fromZ);
     if (dist > 0.1f)
-    {
-        traveller.Relocation(i_fromX, i_fromY, i_fromZ, orientation);
-
-        // inform traveller move to the actual position
         traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
-    }
 }
 
 template<typename TRAVELLER>
