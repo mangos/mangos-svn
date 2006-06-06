@@ -987,6 +987,8 @@ uint8 Spell::CanCast()
             castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;
     }
 
+    if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
+        castResult = CAST_FAIL_CANT_DO_WHILE_STUNNED;
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
     if( castResult != 0 )
