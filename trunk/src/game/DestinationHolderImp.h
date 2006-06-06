@@ -69,17 +69,14 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     i_fromY = traveller.GetPositionY();
     i_fromZ = traveller.GetPositionZ();
     float dest_x, dest_y;
-    if (offset == -1)
-        _findOffSetPoint(i_fromX, i_fromY, x2, y2, 0, dest_x, dest_y);
-    else
-        _findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
+    _findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
 
     UpdateLocation(traveller, dest_x, dest_y, dest_z);
 
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
-    float dist = ((dx*dx) + (dy*dy) + (dz*dz));             // - offset;
+    float dist = ((dx*dx) + (dy*dy) + (dz*dz));
     dist = ::sqrt(dist);
     double speed = traveller.Speed();
     if(speed<=0)
@@ -87,7 +84,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
     traveller.Relocation(i_fromX, i_fromY, i_fromZ);
-    if (dist > 0.1f && offset != -1)                        // -- IF CANNOT MOVE
+    if (dist > 0.1f)
         traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
 }
 
@@ -117,6 +114,8 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32
     i_tracker.Update(diff);
     float x,y,z;
     GetLocationNow(x, y, z);
+    if( x == -431602080 ) // TODO
+        return false;
     traveller.Relocation(x, y, z);
     if( i_tracker.Passed() || force_update )
     {

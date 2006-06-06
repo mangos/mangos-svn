@@ -68,13 +68,16 @@ RandomMovementGenerator::Reset(Creature &creature)
     creature.StopMoving();
 }
 
-// fix mob real position
 void
 RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
+    if(!&creature)
+        return;
     if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
+    Traveller<Creature> traveller(creature);
+    i_destinationHolder.UpdateTraveller(traveller, diff, false);
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )
@@ -88,17 +91,9 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, x, y, z);
             i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
-            creature.m_startmoveTime=i_destinationHolder.GetStartTravelTime();
-            creature.m_totalmoveTime=i_destinationHolder.GetTotalTravelTime();
-            creature.dX=x;
-            creature.dY=y;
-            creature.dZ=z;
         }
         else
         {
-
-            Traveller<Creature> traveller(creature);
-            i_destinationHolder.UpdateTraveller(traveller, diff, true);
             creature.StopMoving();
             creature.setMoveRunFlag(!urand(0,10));
 
