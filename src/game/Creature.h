@@ -310,38 +310,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return m_faction;
         };
         Loot loot;
-        //Loot Skinloot;
-
-        //uint32 m_startMove;       // Variables to try to guess orientation
-        //uint32 m_moveTime;        // but this seems impossible/not intended
-        //float oX, oY;             // without a flag on MONSTER_MOVE??
-        //float dX, dY;
-
-        //try to solve real position
-        uint32 m_startmoveTime;                     //time of starting to move              
-        uint32 m_totalmoveTime;                     //time of totle
-        float dX;                               //destination X
-        float dY;                               //destination Y
-        float dZ;                               //destination Z
-        inline void GetLocationNow(float fX, float fY, float fZ, float &x, float &y, float &z) const 
-        { 
-            uint32 time_elapsed = getMSTime() - m_startmoveTime;
-
-            if( m_totalmoveTime == 0 || time_elapsed >= m_totalmoveTime )
-            {
-                x = dX;
-                y = dY;
-                z = dZ;
-            }
-            else
-            {
-                // otherwise, the unit only when to a fraction of its original location
-                double percent_passed = (double)((double)time_elapsed / (double)m_totalmoveTime);
-                x = fX + ((dX - fX) * percent_passed);
-                y = fY + ((dY - fY) * percent_passed);
-                z = fZ + ((dZ - fZ) * percent_passed);
-            }
-        };
 
     protected:
         void _LoadGoods();

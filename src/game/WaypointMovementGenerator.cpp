@@ -84,13 +84,16 @@ WaypointMovementGenerator::Permissible(const Creature *c)
     return CANNOT_HANDLE_TYPE;
 }
 
-// fix mob real position
 void
 WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
+    if(!&creature)
+        return;
     if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
+    Traveller<Creature> traveller(creature);
+    i_destinationHolder.UpdateTraveller(traveller, diff, false);
     if( i_nextMoveTime.Passed() )
     {
         if( i_creature.IsStopped() )
@@ -101,16 +104,9 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
             Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
-            creature.m_startmoveTime=i_destinationHolder.GetStartTravelTime();
-            creature.m_totalmoveTime=i_destinationHolder.GetTotalTravelTime();
-            creature.dX=node.x;
-            creature.dY=node.y;
-            creature.dZ=node.z;
         }
         else
         {
-            Traveller<Creature> traveller(creature);
-            i_destinationHolder.UpdateTraveller(traveller, diff, true);
             creature.StopMoving();
             i_nextMoveTime.Reset(i_delays[i_currentNode]);
             ++i_currentNode;
@@ -157,7 +153,7 @@ int ShortenASTARRoute(short int *pathlist, int number)
 {                                                           // Wrote this to make the routes a little smarter (shorter)... No point looping back to the same places... Unique1
     short int temppathlist[MAX_PATHLIST_NODES];
     int count = 0;
-    //	int count2 = 0;
+    //    int count2 = 0;
     int temp, temp2;
     int link;
     int upto = 0;
@@ -173,11 +169,11 @@ int ShortenASTARRoute(short int *pathlist, int number)
                 if (nodes[pathlist[temp]].links[link].flags & PATH_BLOCKED)
                     continue;
 
-                //if ((bot->client->ps.eFlags & EF_TANK) && nodes[bot->current_node].links[link].flags & PATH_NOTANKS)	//if this path is blocked, skip it
-                //	continue;
+                //if ((bot->client->ps.eFlags & EF_TANK) && nodes[bot->current_node].links[link].flags & PATH_NOTANKS)    //if this path is blocked, skip it
+                //    continue;
 
                 //if (nodes[nodes[pathlist[temp]].links[link].targetNode].origin[2] > nodes[pathlist[temp]].origin[2] + 32)
-                //	continue;
+                //    continue;
 
                 if (nodes[pathlist[temp]].links[link].targetNode == pathlist[temp2])
                 {                                           // Found a shorter route...

@@ -38,8 +38,6 @@ struct StackCleaner
     }
 };
 
-// fix mob real position
-//need more fix about offset
 void
 TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 {
@@ -50,17 +48,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
     float x, y, z;
     i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
-    //if target cannot move offset setto -1 not if next step move
-    if(owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED))
-        i_destinationHolder.SetDestination(traveller, x, y, z, -1);
-    else
-        i_destinationHolder.SetDestination(traveller, x, y, z, 0);
-    owner.m_startmoveTime=i_destinationHolder.GetStartTravelTime();
-    owner.m_totalmoveTime=i_destinationHolder.GetTotalTravelTime();
-    owner.dX=x;
-    owner.dY=y;
-    owner.dZ=z;
-    //i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()));
+    i_destinationHolder.SetDestination(traveller, x, y, z, offset);
 }
 
 void

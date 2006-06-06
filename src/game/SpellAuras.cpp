@@ -814,9 +814,6 @@ void Aura::HandleAddModifier(bool apply)
     }
 }
 
-// fix mob real position
-//need fix:
-//target is player or creature
 void Aura::HandleAuraModStun(bool apply)
 {
     uint32 apply_stat = UNIT_STAT_STUNDED;
@@ -825,15 +822,6 @@ void Aura::HandleAuraModStun(bool apply)
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() != TYPEID_PLAYER)
-        {
-            float nX, nY, nZ;
-            float sX = m_target->GetPositionX();
-            float sY = m_target->GetPositionY();
-            float sZ = m_target->GetPositionZ();
-            ((Creature *)m_target)->GetLocationNow(sX, sY, sZ, nX, nY, nZ);
-            m_target->SendMoveToPacket(nX, nY, nZ, false);
-        }
     }
     else 
     {
@@ -1178,9 +1166,6 @@ void Aura::HandleAuraModResistance(bool apply)
     }
 }
 
-// fix mob real position
-//need fix:
-//target is player or creature
 void Aura::HandleAuraModRoot(bool apply)
 {
     uint32 apply_stat = UNIT_STAT_ROOT;
@@ -1189,16 +1174,7 @@ void Aura::HandleAuraModRoot(bool apply)
         m_target->addUnitState(UNIT_STAT_ROOT);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() != TYPEID_PLAYER)
-        {
-            float nX, nY, nZ;
-            float sX = m_target->GetPositionX();
-            float sY = m_target->GetPositionY();
-            float sZ = m_target->GetPositionZ();
-            ((Creature *)m_target)->GetLocationNow(sX, sY, sZ, nX, nY, nZ);
-            m_target->SendMoveToPacket(nX, nY, nZ, false);
-        }
-        else
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
         {   //Need Fix this Packet
             WorldPacket data;
             data.Initialize(MSG_MOVE_ROOT);
