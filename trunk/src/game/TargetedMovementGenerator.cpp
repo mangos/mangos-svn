@@ -44,7 +44,6 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
     if(!&i_target || !&owner)
         return;
     DEBUG_LOG("MOVEMENT : Orientation = %f, Angle = %f", owner.GetOrientation(), owner.GetAngle(&i_target));
-    owner.SetInFront(&i_target);
     float x, y, z;
     i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
@@ -109,6 +108,16 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     SpellEntry* spellInfo;
     Traveller<Creature> traveller(owner);
     bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
+    if( reach )
+    {
+        if ( !owner.HasInArc( 0.1f, &i_target ) )
+        {
+            DEBUG_LOG("MOVEMENT : Orientation = %f",owner.GetAngle(&i_target));
+            owner.SetInFront(&i_target);
+            if( i_target.GetTypeId() == TYPEID_PLAYER )
+                owner.SendUpdateToPlayer( (Player*)&i_target );
+        }
+    }
     if( owner.IsStopped() && i_target.isAlive())
     {
         if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat())
@@ -130,14 +139,6 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
             DEBUG_LOG("MOVEMENT : Distance = %f",owner.GetDistance2dSq( &i_target ));
             _setTargetLocation(owner, 0);
         }
-        else if ( !owner.HasInArc( 0.1f, &i_target ) )
-        {
-            DEBUG_LOG("MOVEMENT : Orientation = %f, Angle = %f", owner.GetOrientation(), owner.GetAngle(&i_target));
-            owner.SetInFront(&i_target);
-            if( i_target.GetTypeId() == TYPEID_PLAYER )
-                owner.SendUpdateToPlayer( (Player*)&i_target );
-        }
-        
     }
     else
     {
@@ -152,7 +153,6 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         {
             if( owner.canReachWithAttack(&i_target) )
             {
-                owner.SetInFront(&i_target);
                 owner.StopMoving();
                 if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
                 {

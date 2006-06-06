@@ -116,6 +116,8 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32
     GetLocationNow(x, y, z);
     if( x == -431602080 ) // TODO
         return false;
+	Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
+	z = Map->GetHeight( x, y);
     traveller.Relocation(x, y, z);
     if( i_tracker.Passed() || force_update )
     {
