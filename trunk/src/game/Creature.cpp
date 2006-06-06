@@ -698,7 +698,7 @@ void Creature::generateLoot()
     loot.gold = rand() % (level * level * 5);
 }
 
-void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run)
+void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack)
 {
     /*    uint32 timeElap = getMSTime();
         if ((timeElap - m_startMove) < m_moveTime)
@@ -724,14 +724,14 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
     data.Initialize( SMSG_MONSTER_MOVE );
     data << uint8(0xFF);
     data << GetGUID();
-    data << GetPositionX() << GetPositionY() << GetPositionZ();
-    data << (uint32)getMSTime();
-    data << uint8(0);
+    data << GetPositionX() << GetPositionY() << GetPositionZ(); //point A
+    data << (uint32)((*((uint32*)&GetOrientation())) & 0x30000000); //little trick related to orientation
+    data << uint8(WalkBack); //run / walk back only when still moving to point B
     data << uint32(run ? 0x00000100 : 0x00000000);
     data << time;
     data << uint32(1);
-    data << x << y << z;
-    //WPAssert( data.size() == 49 );
+    data << x << y << z;  //point B
+    WPAssert( data.size() == 50 );
     SendMessageToSet( &data, false );
 }
 
