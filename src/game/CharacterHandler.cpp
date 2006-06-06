@@ -37,7 +37,7 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 
     data.Initialize(SMSG_CHAR_ENUM);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu';", (unsigned long)GetAccountId());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%lu' ORDER BY `guid`;", (unsigned long)GetAccountId());
 
     uint8 num = 0;
 

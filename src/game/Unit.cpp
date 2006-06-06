@@ -732,7 +732,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
 void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
 {
-    if(hasUnitState(UNIT_STAT_CONFUSED))
+    if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
         return;
     WorldPacket data;
     uint32   hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;

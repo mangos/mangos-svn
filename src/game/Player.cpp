@@ -2994,6 +2994,7 @@ void Player::FlightComplete()
     /* Remove the "player locked" flag, to allow movement */
     if (GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
         RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
+    SaveToDB();
 }
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
@@ -7414,6 +7415,13 @@ void Player::_LoadAuras()
             }
 
             Aura* aura = new Aura(spellproto, effindex, this, this);
+            if (remaintime == -1)
+            {
+                sLog.outDebug("SpellAura (id=%u) has duration:%d ", spellid, remaintime);
+                continue;
+                //temporary disable the Aura with Druation=-1 to avoid spell lost and action lost.
+                //need more fix about Aura Reload.
+            }
             aura->SetAuraDuration(remaintime);
             AddAura(aura);
         }
@@ -7689,6 +7697,7 @@ void Player::SaveToDB()
 {
     if (isInFlight())
     {
+        return;
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
         RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
         RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );

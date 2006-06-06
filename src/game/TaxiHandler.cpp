@@ -132,6 +132,8 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     data << uint32( curloc );
     for (uint8 i=0; i<8; i++)
     {
+        TaxiMask[i] = 4294967295;
+        //sLog.outDebug( "! TaxiMask %d GetTaximask %d",TaxiMask[i],GetPlayer( )->GetTaximask(i) );
         TaxiMask[i] &= GetPlayer( )->GetTaximask(i);
         data << TaxiMask[i];
     }
@@ -153,14 +155,12 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     WorldPacket data;
 
     recv_data >> guid >> sourcenode >> destinationnode;
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,sourcenode ,destinationnode);
 
     if( GetPlayer( )->GetUInt32Value( UNIT_FIELD_FLAGS ) & 0x4 )
         return;
 
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
-    FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
-    Path &pathnodes(flight->GetPath());
-    assert( pathnodes.Size() > 0 );
     MountId = objmgr.GetTaxiMount(sourcenode);
 
     data.Initialize( SMSG_ACTIVATETAXIREPLY );
@@ -179,12 +179,20 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         SendPacket( &data );
         return;
     }
+
+    //CHECK DONE, DO FLIGHT
+
+    GetPlayer( )->SaveToDB();   //For temporary avoid save player on air
+
     GetPlayer( )->setDismountCost( newmoney );
 
     data << uint32( 0 );
 
     SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
+    FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
+    Path &pathnodes(flight->GetPath());
+    assert( pathnodes.Size() > 0 );
 
     GetPlayer( )->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, MountId );
     GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );

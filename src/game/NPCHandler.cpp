@@ -107,10 +107,12 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
     {
-        if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
-            continue;
-        if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
-            Tspells.push_back(*itr);
+        //if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
+        //    continue;
+        //if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
+        //    Tspells.push_back(*itr);
+        if((*itr)->spell)
+               Tspells.push_back(*itr);
     }
 
     data.Initialize( SMSG_TRAINER_LIST );
@@ -124,10 +126,10 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         uint8 canlearnflag = 1;
         bool ReqskillValueFlag = false;
         bool LevelFlag = false;
+        bool ReqspellFlag = false;
         spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
         if(!spellInfo)
             continue;
-
         if((*itr)->reqskill)
         {
             if(_player->GetSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
@@ -137,10 +139,15 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
         if(_player->getLevel() >= spellInfo->spellLevel)
             LevelFlag = true;
+        if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
+            ReqspellFlag = true;
 
-        if(ReqskillValueFlag && LevelFlag)
-            canlearnflag = 0;
-        else canlearnflag =1;
+        if(ReqskillValueFlag && LevelFlag && ReqspellFlag)
+            canlearnflag = 0;    //green, can learn
+        else canlearnflag = 1;   //red, can't learn
+        
+        if(_player->HasSpell(spellInfo->Id))
+            canlearnflag = 2;    //gray, can't learn
 
         data << uint32((*itr)->spell->Id);
         data << uint8(canlearnflag);
@@ -187,6 +194,20 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         }
     }
 
+    if (proto == NULL) return;
+
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
+
+    if(!spellInfo) return;
+    if(_player->HasSpell(spellInfo->Id))
+        return;
+    if(_player->GetUInt32Value( UNIT_FIELD_LEVEL ) < spellInfo->spellLevel)
+        return;
+    if(proto->reqskill && _player->GetSkillValue(proto->reqskill) < proto->reqskillvalue)
+        return;
+    if(proto->reqspell && !_player->HasSpell(proto->reqspell))
+        return;
+ 
     if(!proto)
     {
         sLog.outError("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
@@ -195,12 +216,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
     if( playerGold >= proto->spellcost )
     {
-        SpellEntry *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
-        if(!spellInfo) return;
-
-        if(_player->GetUInt32Value( UNIT_FIELD_LEVEL ) < spellInfo->spellLevel)
-            return;
-
         data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED );
         data << guid << spellId;
         SendPacket( &data );
@@ -216,7 +231,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         SpellCastTargets targets;
         targets.setUnitTarget( _player );
         spell->prepare(&targets);
-        SendTrainerList( guid );
+        //SendTrainerList( guid );
     }
 }
 
