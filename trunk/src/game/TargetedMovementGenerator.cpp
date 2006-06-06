@@ -43,12 +43,12 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 {
     if(!&i_target || !&owner)
         return;
+    DEBUG_LOG("MOVEMENT : Orientation = %f, Angle = %f", owner.GetOrientation(), owner.GetAngle(&i_target));
     owner.SetInFront(&i_target);
     float x, y, z;
     i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
-    //i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()));
-    i_destinationHolder.SetDestination(traveller, x, y, z, (owner.GetObjectSize() + i_target.GetObjectSize()) + offset);
+    i_destinationHolder.SetDestination(traveller, x, y, z, 0);
 }
 
 void
@@ -107,6 +107,8 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         return;
 
     SpellEntry* spellInfo;
+    Traveller<Creature> traveller(owner);
+    bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
     if( owner.IsStopped() && i_target.isAlive())
     {
         if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat())
@@ -121,44 +123,24 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         {
             owner.addUnitState(UNIT_STAT_CHASE);
             _setTargetLocation(owner, 0);
-            DEBUG_LOG("restart to chase");
+            DEBUG_LOG("MOVEMENT : restart to chase");
         }
-        //if (!owner.HasInArc( 2.0943951024, &i_target )) {
-        //        if (!owner.HasInArc( (30/360) * 2 * M_PI, &i_target )) {
-        // adjust facing
-        /*        if ((i_target.GetDistance2dSq(&owner) > (owner.GetObjectSize() + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
-                    _setTargetLocation(owner, 0);
-                }*/
-        //if ((i_target.GetDistance2dSq(&owner) < (owner.GetObjectSize() * 2 + i_target.GetObjectSize())) && (i_destinationHolder.HasArrived())) {
-
-
-		DEBUG_LOG("GetDistance2dSq = %f", i_target.GetDistance2dSq(&owner));
-        if ( i_target.GetDistance2dSq(&owner) > 0 )
+        else if( owner.GetDistance2dSq( &i_target ) > 0.1f )
+        {
+            DEBUG_LOG("MOVEMENT : Distance = %f",owner.GetDistance2dSq( &i_target ));
             _setTargetLocation(owner, 0);
-        else if ( !i_target.HasInArc( 0.1, &owner ) )
+        }
+        else if ( !owner.HasInArc( 0.1f, &i_target ) )
+        {
+            DEBUG_LOG("MOVEMENT : Orientation = %f, Angle = %f", owner.GetOrientation(), owner.GetAngle(&i_target));
             owner.SetInFront(&i_target);
-        //            else  {
-        /*float ang = owner.GetAngle(&i_target);
-        ang -= owner.GetOrientation();
-        if (ang > (2.0f * M_PI))
-            ang -= 2.0f * M_PI;
-        if (ang < (2.0f * M_PI * -1))
-            ang += 2.0f * M_PI;
-        if (ang <= M_PI) {
-            // Facing different directions
-            ang = ang;
-        }*/
-        //          }
-        //if (i_target.GetDistance2dSq(&owner) == 0)
-        //    _setTargetLocation(owner, -1 * (owner.GetObjectSize() + i_target.GetObjectSize()));
-
-        //    sLog.outString("try to back up");
-        // }
+            if( i_target.GetTypeId() == TYPEID_PLAYER )
+                owner.SendUpdateToPlayer( (Player*)&i_target );
+        }
+        
     }
     else
     {
-        Traveller<Creature> traveller(owner);
-        bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
         if(i_targetedHome)
             return;
         else if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat() && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
