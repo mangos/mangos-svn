@@ -124,7 +124,7 @@ void CliDelete(char*command,pPrintf zprintf)
         return;
     }
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';",del);
+    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';",del);
 
     if (!result)
     {
@@ -175,7 +175,7 @@ void CliInfo(char*,pPrintf zprintf)
         if ( cnt > 0 )
         {
             zprintf("Online users: %d\x0d\x0a",cnt);
-            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`account`.`gmlevel`,`account`.`username`,`account`.`last_ip` FROM `character` LEFT JOIN `account` ON `account`.`id` = `character`.`account` WHERE `character`.`online` > 0;" );
+            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`realmd`.`account`.`gmlevel`,`realmd`.`account`.`username`,`realmd`.`account`.`last_ip` FROM `character` LEFT JOIN `realmd`.`account` ON `realmd`.`account`.`id` = `character`.`account` WHERE `character`.`online` > 0;" );
 
             zprintf("========================================================\x0d\x0a");
             zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
@@ -203,7 +203,7 @@ void CliInfo(char*,pPrintf zprintf)
 void CliBanList(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result2 = sDatabase.PQuery( "SELECT `username` FROM `account` WHERE `banned` > 0;" );
+    QueryResult *result2 = loginDatabase.PQuery( "SELECT `username` FROM `account` WHERE `banned` > 0;" );
     if(result2)
     {
         zprintf("Banned Accounts:\x0d\x0a");
@@ -215,7 +215,7 @@ void CliBanList(char*,pPrintf zprintf)
         delete result2;
     }
 
-    QueryResult *result3 = sDatabase.PQuery( "SELECT `ip` FROM `ip_banned`;" );
+    QueryResult *result3 = loginDatabase.PQuery( "SELECT `ip` FROM `ip_banned`;" );
     if(result3)
     {
         zprintf("Banned IPs:\x0d\x0a");
@@ -417,12 +417,13 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    if(loginDatabase.PExecute("INSERT into `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
+    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",szAcc,&ptr[x]))
+    {
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");
         zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
+    }
     else
-        zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);
-    
-    loginDatabase.PExecute("insert into realmcharacters (`realmid`, `acctid`, `numchars`) select realmlist.id, account.id, 0 from account, realmlist where account.id not in (select acctid from realmcharacters)");
+        zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);   
 }
 
 void ParseCommand( pPrintf zprintf, char*command)
