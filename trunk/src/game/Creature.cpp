@@ -718,7 +718,21 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    SendMonsterMove(x,y,z,false,run,time);
+    //SendMonsterMove(x,y,z,false,run,time);
+
+    WorldPacket data;
+    data.Initialize( SMSG_MONSTER_MOVE );
+    data << uint8(0xFF);
+    data << GetGUID();
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    data << (uint32)getMSTime();
+    data << uint8(0);
+    data << uint32(run ? 0x00000100 : 0x00000000);
+    data << time;
+    data << uint32(1);
+    data << x << y << z;
+    //WPAssert( data.size() == 49 );
+    SendMessageToSet( &data, false );
 }
 
 void Creature::setItemId(int slot, uint32 tempitemid) { item_list[slot].ItemId=tempitemid; }
