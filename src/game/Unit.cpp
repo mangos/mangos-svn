@@ -126,19 +126,27 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run)
     speed *= 0.001f;
     uint32 time = static_cast<uint32>(dist / speed + 0.5);
     float orientation = (float)atan2((double)dy, (double)dx);
+    SendMonsterMove(x,y,z,false,run,time);
 
+}
+
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Walkback, bool Run, uint32 Time)
+{
     WorldPacket data;
     data.Initialize( SMSG_MONSTER_MOVE );
     data << uint8(0xFF);
     data << GetGUID();
-    data << GetPositionX() << GetPositionY() << GetPositionZ();
-    data << (uint32)getMSTime();
-    data << uint8(0);
-    data << uint32(run ? 0x00000100 : 0x00000000);
-    data << time;
-    data << uint32(1);
-    data << x << y << z;
-    //WPAssert( data.size() == 49 );
+    data << GetPositionX() << GetPositionY() << GetPositionZ();         // Point A, starting location
+    data << (uint32)((*((uint32*)&GetOrientation())) & 0x30000000);     // little trick related to orientation
+    data << uint8(Walkback);                                            // walkback when walking from A to B
+    data << uint32(Run ? 0x00000100 : 0x00000000);                      // flags
+    /* Flags:
+    512: Floating, moving without walking/running    
+    */
+    data << Time;                                                       // Time in between points
+    data << uint32(1);                                                  // 1 single waypoint 
+    data << NewPosX << NewPosY << NewPosZ;                              // the single waypoint Point B
+    WPAssert( data.size() == 50 );
     SendMessageToSet( &data, true );
 }
 

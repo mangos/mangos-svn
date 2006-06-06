@@ -224,7 +224,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }
 
-        void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run);
+        void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack);
         inline CreatureAI &AI(void) { return *i_AI; }
 
         inline void setMoveRandomFlag(bool f) { m_moveRandom = f; }
@@ -235,7 +235,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         inline void StopMoving(void)
         {
             clearUnitState(UNIT_STAT_MOVING);
-            AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true);
+            AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, false);
         }
 
         void setItemId(int slot, uint32 tempitemid);
