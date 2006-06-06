@@ -203,10 +203,15 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_GETXP_LEVELDIFF] = sConfig.GetIntDefault("MaxLevelDiff", 10);
     m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 400);
     m_configs[CONFIG_SIGHT_GUARDER] = sConfig.GetIntDefault("GuarderSight", 500);
+    m_configs[CONFIG_GAME_TYPE] = sConfig.GetIntDefault("GameType", 0);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
+    //duplicate  
+    //sDatabase.PExecute("UPDATE `character` SET `online` = 0;"); 
+    
+    //Update realm list
+    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = %d;", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 0)); 
 
     // remove bones after restart
     sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `bones_flag` = '1';");

@@ -76,8 +76,10 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 {
     std::string name;
     WorldPacket data;
+    uint8 race_;
 
     recv_data >> name;
+    recv_data >> race_;
     recv_data.rpos(0);
 
     QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s';", name.c_str());
@@ -106,6 +108,88 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             return;
         }
         delete result;
+    }
+
+    uint32 GameType = sWorld.getConfig(CONFIG_GAME_TYPE); 
+    if(GameType == 1 || GameType == 8)
+    {
+        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%lu' LIMIT 1;", (unsigned long)GetAccountId());
+        if(result2)
+        {
+            Field * field = result2->Fetch();  
+            uint8 race = field[0].GetUInt32();  
+            delete result2;
+            uint32 team=0;
+            if(race > 0)
+            {
+                switch(race)
+                {
+                    case HUMAN:
+                        team = (uint32)ALLIANCE;
+                        break;
+                    case DWARF:
+                        team = (uint32)ALLIANCE;
+                        break;
+                    case NIGHTELF:
+                        team = (uint32)ALLIANCE;
+                        break;
+                    case GNOME:
+                        team = (uint32)ALLIANCE;
+                        break;
+                    case ORC:
+                        team = (uint32)HORDE;
+                        break;
+                    case UNDEAD_PLAYER:
+                        team = (uint32)HORDE;
+                        break;
+                    case TAUREN:
+                        team = (uint32)HORDE;
+                        break;
+                    case TROLL:
+                        team = (uint32)HORDE;
+                        break;
+                }
+
+            }
+            uint32 team_=0;
+            if(race_ > 0)
+            {
+                switch(race_)
+                {
+                    case HUMAN:
+                        team_ = (uint32)ALLIANCE;
+                        break;
+                    case DWARF:
+                        team_ = (uint32)ALLIANCE;
+                        break;
+                    case NIGHTELF:
+                        team_ = (uint32)ALLIANCE;
+                        break;
+                    case GNOME:
+                        team_ = (uint32)ALLIANCE;
+                        break;
+                    case ORC:
+                        team_ = (uint32)HORDE;
+                        break;
+                    case UNDEAD_PLAYER:
+                        team_ = (uint32)HORDE;
+                        break;
+                    case TAUREN:
+                        team_ = (uint32)HORDE;
+                        break;
+                    case TROLL:
+                        team_ = (uint32)HORDE;
+                        break;
+                }
+            }
+            if(team != team_)
+            {
+                data.Initialize( SMSG_CHAR_CREATE );  
+                data << (uint8)0x33;  
+                SendPacket( &data );  
+                return;  
+            }
+        }
     }
 
     Player * pNewChar = new Player(this);
