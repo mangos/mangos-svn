@@ -84,10 +84,11 @@ WaypointMovementGenerator::Permissible(const Creature *c)
     return CANNOT_HANDLE_TYPE;
 }
 
+// fix mob real position
 void
 WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
-    if(i_creature.hasUnitState(UNIT_STAT_ROOT))
+    if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
         return;
     i_nextMoveTime.Update(diff);
     if( i_nextMoveTime.Passed() )
@@ -100,6 +101,11 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
             Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+            creature.m_startmoveTime=i_destinationHolder.GetStartTravelTime();
+            creature.m_totalmoveTime=i_destinationHolder.GetTotalTravelTime();
+            creature.dX=node.x;
+            creature.dY=node.y;
+            creature.dZ=node.z;
         }
         else
         {

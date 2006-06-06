@@ -64,7 +64,15 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
             Guard guard(*this);
             for(FlightMapType::iterator iter=i_flights.begin(); iter != i_flights.end();)
             {
-                if( iter->second->CheckFlight(diff) )
+                //DEBUG_LOG("id=%d IsInWorld=%d", iter->first,iter->first->IsInWorld());
+                if( iter->first->IsInWorld() != 1 )
+                {
+                    // do not use any func like "getname()" if player is offline, or it crash server
+                    DEBUG_LOG("Removing player id=%d flight from flight master. (player offline)", iter->first);
+                    delete iter->second;
+                    i_flights.erase(iter++);
+                }
+                else if( iter->second->CheckFlight(diff) )
                 {
                     DEBUG_LOG("Removing player %s flight from flight master.", iter->first->GetName());
                     delete iter->second;

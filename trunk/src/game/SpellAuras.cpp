@@ -519,20 +519,20 @@ void Aura::_AddAura()
 {
     if (!m_spellId)
         return;
-	if(!m_target)
-		return;
+    if(!m_target)
+        return;
 
     bool samespell = false;
     uint8 slot = 0xFF, i;
     uint32 maxduration = m_duration;
     Aura* aura = NULL;
     SpellEntry* spellproto = GetSpellProto();
-	aura = m_target->GetAura(m_spellId,spellproto->EffectApplyAuraName[m_effIndex]);
-	if(!aura)
-	{
-		ApplyModifier(true);
-		sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-	}
+    aura = m_target->GetAura(m_spellId,spellproto->EffectApplyAuraName[m_effIndex]);
+    if(!aura)
+    {
+        ApplyModifier(true);
+        sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
+    }
     for(i = 0; i< 3; i++)
     {
         aura = m_target->GetAura(m_spellId, i);
@@ -732,16 +732,22 @@ void Aura::HandleModAttackSpeed(bool apply)
 void Aura::HandleAuraWaterWalk(bool apply)
 {
     WorldPacket data;
-    apply ? data.Initialize(SMSG_MOVE_WATER_WALK) : data.Initialize(SMSG_MOVE_LAND_WALK);
-    data << m_target->GetGUID();
+    if(apply)
+        data.Initialize(SMSG_MOVE_WATER_WALK); 
+    else
+        data.Initialize(SMSG_MOVE_LAND_WALK);
+    data << uint8(0xFF) << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
 }
 
 void Aura::HandleAuraFeatherFall(bool apply)
 {
     WorldPacket data;
-    apply ? data.Initialize(SMSG_MOVE_FEATHER_FALL)  : data.Initialize(SMSG_MOVE_NORMAL_FALL);
-    data << m_target->GetGUID();
+    if(apply)
+        data.Initialize(SMSG_MOVE_FEATHER_FALL);
+    else
+        data.Initialize(SMSG_MOVE_NORMAL_FALL);
+    data << uint8(0xFF) << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -808,6 +814,9 @@ void Aura::HandleAddModifier(bool apply)
     }
 }
 
+// fix mob real position
+//need fix:
+//target is player or creature
 void Aura::HandleAuraModStun(bool apply)
 {
     uint32 apply_stat = UNIT_STAT_STUNDED;
@@ -816,6 +825,15 @@ void Aura::HandleAuraModStun(bool apply)
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        if(m_target->GetTypeId() != TYPEID_PLAYER)
+        {
+            float nX, nY, nZ;
+            float sX = m_target->GetPositionX();
+            float sY = m_target->GetPositionY();
+            float sZ = m_target->GetPositionZ();
+            ((Creature *)m_target)->GetLocationNow(sX, sY, sZ, nX, nY, nZ);
+            m_target->SendMoveToPacket(nX, nY, nZ, false);
+        }
     }
     else 
     {
@@ -1000,8 +1018,11 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
 void Aura::HandleAuraSafeFall(bool apply)
 {
     WorldPacket data;
-    apply ? data.Initialize(SMSG_MOVE_FEATHER_FALL) : data.Initialize(SMSG_MOVE_NORMAL_FALL);
-    data << m_target->GetGUID();
+    if(apply)
+        data.Initialize(SMSG_MOVE_FEATHER_FALL);
+    else
+        data.Initialize(SMSG_MOVE_NORMAL_FALL);
+    data << uint8(0xFF) << m_target->GetGUID();
     m_target->SendMessageToSet(&data,true);
 }
 
@@ -1157,16 +1178,47 @@ void Aura::HandleAuraModResistance(bool apply)
     }
 }
 
+// fix mob real position
+//need fix:
+//target is player or creature
 void Aura::HandleAuraModRoot(bool apply)
 {
-    WorldPacket data;
     uint32 apply_stat = UNIT_STAT_ROOT;
-                                                            //MSG_MOVE_ROOT
-    apply ? data.Initialize(MSG_MOVE_ROOT) : data.Initialize(MSG_MOVE_UNROOT);
-    data << m_target->GetGUID();
-    m_target->SendMessageToSet(&data,true);
-    apply ? m_target->addUnitState(UNIT_STAT_ROOT) : m_target->clearUnitState(UNIT_STAT_ROOT);
-    apply ? m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16)) :m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    if (apply)
+    {
+        m_target->addUnitState(UNIT_STAT_ROOT);
+        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        if(m_target->GetTypeId() != TYPEID_PLAYER)
+        {
+            float nX, nY, nZ;
+            float sX = m_target->GetPositionX();
+            float sY = m_target->GetPositionY();
+            float sZ = m_target->GetPositionZ();
+            ((Creature *)m_target)->GetLocationNow(sX, sY, sZ, nX, nY, nZ);
+            m_target->SendMoveToPacket(nX, nY, nZ, false);
+        }
+        else
+        {   //Need Fix this Packet
+            WorldPacket data;
+            data.Initialize(MSG_MOVE_ROOT);
+            data << m_target->GetGUIDLow();
+            m_target->SendMessageToSet(&data,true);
+        }
+    }
+    else 
+    {
+        m_target->clearUnitState(UNIT_STAT_ROOT);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        WorldPacket data;
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {   //Need Fix this Packet
+            WorldPacket data;
+            data.Initialize(MSG_MOVE_UNROOT);
+            data << m_target->GetGUIDLow();
+            m_target->SendMessageToSet(&data,true);
+        }
+    }
 }
 
 void Aura::HandleAuraModSilence(bool apply)
@@ -1249,6 +1301,7 @@ void Aura::HandleAuraModStat(bool apply)
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 {
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
@@ -1260,10 +1313,12 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
     data << m_target->GetGUID();
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
 {
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
@@ -1278,10 +1333,12 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
     data << m_target->GetSpeed( MOVE_RUN );
 
     m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 {
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
@@ -1295,10 +1352,12 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
 {
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
@@ -1312,6 +1371,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     data << (uint32)0;
     data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply)
