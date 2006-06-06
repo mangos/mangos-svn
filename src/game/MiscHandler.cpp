@@ -292,51 +292,63 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
-    if( !(GetPlayer()->isInCombat()) )
-    {
-        data.Initialize( SMSG_LOGOUT_RESPONSE );
-        data << uint32(0);
-        data << uint8(0);
-        SendPacket( &data );
-
-        LogoutRequest(time(NULL));
-
-        //! Set the flag so player sits and the player is NOT falling
-        Player* Target = GetPlayer();
-        uint32 MapID = Target->GetMapId();
-        Map* Map = MapManager::Instance().GetMap(MapID);
-        float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
-        if (!(Target->GetPositionZ() > posz))
-        {
-            Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-            // Can't move
-            data.Initialize( SMSG_FORCE_MOVE_ROOT );
-            data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
-            SendPacket( &data );
-        }
-        //! DISABLE_ROTATE = 0x40000;
-        Target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
-
-    }
-    else
+    if( (GetPlayer()->isInCombat()) )
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
         data << uint32(0);
         data << uint8(0);
         SendPacket( &data );
-
         LogoutRequest(0);
+        return;
     }
+
+    Player* Target = GetPlayer();
+    uint32 MapID = Target->GetMapId();
+    Map* Map = MapManager::Instance().GetMap(MapID);
+    float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
+    sLog.outDebug("Current z:%f \tMap Z:%f", Target->GetPositionZ(),posz);
+    //need more judge and handle while jumping and falling
+    if ((Target->GetPositionZ() > posz + 1))
+    {
+        data.Initialize( SMSG_LOGOUT_RESPONSE );
+        data << (uint8)0xC;
+        data << uint32(0);
+        data << uint8(0);
+        SendPacket( &data );
+        LogoutRequest(0);
+        return;
+    }
+
+    Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    
+    if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
+    {   //in city no root no lock rotate
+        data.Initialize( SMSG_FORCE_MOVE_ROOT );
+        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+        SendPacket( &data );
+        //! DISABLE_ROTATE = 0x40000;
+        Target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+    }
+
+    data.Initialize( SMSG_LOGOUT_RESPONSE );
+    data << uint32(0);
+    data << uint8(0);
+    SendPacket( &data );
+    LogoutRequest(time(NULL));
+
 }
 
 void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
+    //WorldPacket data;
 
     sLog.outDebug( "WORLD: Recvd CMSG_PLAYER_LOGOUT Message" );
-    LogoutRequest(0);
-    LogoutPlayer(1);
+    if (GetPlayer()->GetSession()->GetSecurity() > 0)
+    {
+        LogoutRequest(0);
+        LogoutPlayer(1);
+    }
 }
 
 void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
