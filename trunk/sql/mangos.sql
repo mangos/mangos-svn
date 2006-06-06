@@ -16,6 +16,41 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
+-- Table structure for table `account`
+--
+
+DROP TABLE IF EXISTS `account`;
+CREATE TABLE `account` (
+  `id` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Identifier',
+  `username` varchar(16) NOT NULL default '',
+  `password` varchar(28) NOT NULL default '',
+  `gmlevel` tinyint(3) unsigned NOT NULL default '0',
+  `sessionkey` longtext,
+  `email` varchar(50) NOT NULL default '',
+  `joindate` timestamp NOT NULL default CURRENT_TIMESTAMP,
+  `banned` tinyint(3) unsigned NOT NULL default '0',
+  `last_ip` varchar(30) NOT NULL default '127.0.0.1',
+  `failed_logins` int(11) unsigned NOT NULL default '0',
+  `locked` tinyint(3) unsigned NOT NULL default '0',
+  `last_login` timestamp NOT NULL default '0000-00-00 00:00:00',
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `idx_username` (`username`),
+  KEY `idx_banned` (`banned`),
+  KEY `idx_gmlevel` (`gmlevel`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Account System';
+
+--
+-- Dumping data for table `account`
+--
+
+
+/*!40000 ALTER TABLE `account` DISABLE KEYS */;
+LOCK TABLES `account` WRITE;
+INSERT INTO `account` VALUES (1,'administrator','administrator',3,'','','2006-04-25 12:18:56',0,'127.0.0.1',0,0,'0000-00-00 00:00:00'),(2,'gamemaster','gamemaster',2,'','','2006-04-25 12:18:56',0,'127.0.0.1',0,0,'0000-00-00 00:00:00'),(3,'moderator','moderator',1,'','','2006-04-25 12:19:35',0,'127.0.0.1',0,0,'0000-00-00 00:00:00'),(4,'player','player',0,'','','2006-04-25 12:19:35',0,'127.0.0.1',0,0,'0000-00-00 00:00:00');
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `account` ENABLE KEYS */;
+
+--
 -- Table structure for table `areatrigger_city`
 --
 
@@ -1093,6 +1128,26 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `guild_rank` ENABLE KEYS */;
 
 --
+-- Table structure for table `ip_banned`
+--
+
+DROP TABLE IF EXISTS `ip_banned`;
+CREATE TABLE `ip_banned` (
+  `ip` varchar(32) NOT NULL default '127.0.0.1',
+  PRIMARY KEY  (`ip`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm System';
+
+--
+-- Dumping data for table `ip_banned`
+--
+
+
+/*!40000 ALTER TABLE `ip_banned` DISABLE KEYS */;
+LOCK TABLES `ip_banned` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `ip_banned` ENABLE KEYS */;
+
+--
 -- Table structure for table `item_instance`
 --
 
@@ -1896,6 +1951,33 @@ CREATE TABLE `quest_template` (
 LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `quest_template` ENABLE KEYS */;
+
+--
+-- Table structure for table `realmlist`
+--
+
+DROP TABLE IF EXISTS `realmlist`;
+CREATE TABLE `realmlist` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `name` varchar(32) NOT NULL default '',
+  `address` varchar(32) NOT NULL default '127.0.0.1',
+  `icon` tinyint(3) unsigned NOT NULL default '0',
+  `color` tinyint(3) unsigned NOT NULL default '0',
+  `timezone` tinyint(3) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `idx_name` (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm System';
+
+--
+-- Dumping data for table `realmlist`
+--
+
+
+/*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
+LOCK TABLES `realmlist` WRITE;
+INSERT INTO `realmlist` VALUES (1,'MaNGOS','127.0.0.1',1,0,1);
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 
 --
 -- Table structure for table `taxi_node`
