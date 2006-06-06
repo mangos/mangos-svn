@@ -927,6 +927,16 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_RECLAIM_CORPSE");
+    if (GetPlayer()->isAlive())
+        return;
+    if (!GetPlayer()->m_pCorpse)
+        return;
+    sLog.outDebug("Corpse Dis: \t%f",GetPlayer()->m_pCorpse->GetDistanceSq(((Object *)GetPlayer())));
+    if (GetPlayer()->m_pCorpse->GetDistanceSq(((Object *)GetPlayer()))>1470)
+        return;
+    
+    //need a accurate value of Max distance
+    //need to judge Resurrect Time
 
     uint64 guid;
     recv_data >> guid;
