@@ -159,6 +159,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+REALMD_CONFIG = @REALMD_CONFIG@
+REALMD_CONFIGDIR = @REALMD_CONFIGDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@
@@ -541,7 +543,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/dep/include/mysql $(distdir)/dep/include/openssl $(distdir)/dep/include/sqlite $(distdir)/dep/include/zlib $(distdir)/dep/include/zthread $(distdir)/dep/lib $(distdir)/dep/lib/debug $(distdir)/dep/lib/release $(distdir)/doc $(distdir)/src/mangosd $(distdir)/src/shared $(distdir)/win $(distdir)/win/VC71 $(distdir)/win/VC80 $(distdir)/win_intel $(distdir)/win_intel/VC71
+	$(mkdir_p) $(distdir)/dep/include/mysql $(distdir)/dep/include/openssl $(distdir)/dep/include/sqlite $(distdir)/dep/include/zlib $(distdir)/dep/include/zthread $(distdir)/dep/lib $(distdir)/dep/lib/debug $(distdir)/dep/lib/release $(distdir)/doc $(distdir)/src/mangosd $(distdir)/src/realmd $(distdir)/src/shared $(distdir)/win $(distdir)/win/VC71 $(distdir)/win/VC80 $(distdir)/win_intel $(distdir)/win_intel/VC71
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

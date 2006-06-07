@@ -72,7 +72,9 @@ int main(int argc, char **argv)
     if (!sConfig.SetSource(cfg_file.c_str()))
     {
         sLog.outError("\nCould not find configuration file %s.", cfg_file.c_str());
-    } else {
+    }
+    else
+    {
         sLog.outString("\nUsing configuration file %s.", cfg_file.c_str());
     }
 
@@ -98,9 +100,10 @@ int main(int argc, char **argv)
     //loglevel = (uint8)sConfig.GetIntDefault("LogLevel", DEFAULT_LOG_LEVEL);
 
     port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
-    
+
     m_realmList.GetAndAddRealms(dbstring);
-    if (m_realmList.size() == 0) {
+    if (m_realmList.size() == 0)
+    {
         sLog.outError("No valid realms specified.");
         exit(1);
     }
@@ -161,7 +164,7 @@ bool StartDB(std::string &dbstring)
         exit(1);
 
     }
-    
+
     // Right now we just clear all logged in accounts on boot up
     // We should query the realms and ask them.
     dbRealmServer.PExecute( "UPDATE `account` SET `online` = 0;" );

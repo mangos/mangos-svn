@@ -78,7 +78,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
 
     recv_data >> srcbag >> srcslot;
     sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
-    
+
     Item *pItem  = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {

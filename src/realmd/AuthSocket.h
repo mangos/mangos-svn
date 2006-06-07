@@ -171,7 +171,7 @@ class AuthSocket: public TcpSocket
         void _HandleXferAccept();
         FILE *pPatch;
         bool IsLag();
-        
+
     private:
         BigNumber N, s, g, v;
         BigNumber b, B;

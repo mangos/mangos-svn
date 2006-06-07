@@ -182,7 +182,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     //CHECK DONE, DO FLIGHT
 
-    GetPlayer( )->SaveToDB();   //For temporary avoid save player on air
+    GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air
 
     GetPlayer( )->setDismountCost( newmoney );
 

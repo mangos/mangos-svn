@@ -163,7 +163,8 @@ EXTRA_LINKER_OPTIONS = @EXTRA_LINKER_OPTIONS@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 INCLUDES = @INCLUDES@ -I$(srcdir) -I$(srcdir)/../../dep/include \
-	-I$(top_builddir)/src/shared -I$(srcdir)/../shared -I$(srcdir)/../framework
+	-I$(top_builddir)/src/shared -I$(srcdir)/../shared \
+	-I$(srcdir)/../framework
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
@@ -201,6 +202,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 RANLIB = @RANLIB@
+REALMD_CONFIG = @REALMD_CONFIG@
+REALMD_CONFIGDIR = @REALMD_CONFIGDIR@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STRIP = @STRIP@

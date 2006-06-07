@@ -1668,7 +1668,8 @@ void Player::DeleteFromDB()
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
     QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
     uint32 charCount = 0;
-    if (resultCount) {
+    if (resultCount)
+    {
         Field *fields = resultCount->Fetch();
         charCount = fields[0].GetUInt32();
         delete resultCount;
@@ -2203,7 +2204,7 @@ void Player::UpdateSkillWeapon()
         tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
     if(tmpitem && tmpitem->GetProto()->SubClass ==20)
-            return;
+        return;
 
     if (!tmpitem)
         UpdateSkill(SKILL_UNARMED);
@@ -4713,7 +4714,6 @@ void Player::SetSheath(uint32 sheathed)
     }
 }
 
-
 void Player::GetSlotByItem(uint32 type, uint8 slots[4])
 {
     for (int i = 0; i < 4; i++)
@@ -5793,6 +5793,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
         SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
     return NULL;
 }
+
 bool Player::CanUseItem( Item *pItem, bool msg )
 {
     if( pItem )
@@ -5880,6 +5881,7 @@ void Player::StoreNewItem( uint16 pos, uint32 item, uint32 count )
         StoreItem( pos, pItem );
     }
 }
+
 void Player::StoreItem( uint16 pos, Item *pItem )
 {
     if( pItem )
@@ -5931,6 +5933,7 @@ void Player::StoreItem( uint16 pos, Item *pItem )
         }
     }
 }
+
 void Player::EquipItem( uint16 pos, Item *pItem )
 {
     if( pItem )
@@ -5985,7 +5988,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
     if( pItem )
     {
         sLog.outDebug( "STORAGE : RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
-        
+
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
             pItem->SetSlot( 0 );
@@ -6028,7 +6031,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
                     }
                 }
             }
-            
+
             m_items[slot] = NULL;
             /*if( IsInWorld() )
             {
@@ -6162,7 +6165,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot )
                     }
                 }
             }
-            
+
             m_items[slot] = NULL;
             if( IsInWorld() )
             {
@@ -7813,7 +7816,7 @@ void Player::SaveToDB()
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
-    
+
     //_ApplyStatsMods();
     //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
 

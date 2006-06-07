@@ -423,7 +423,7 @@ void CliCreate(char *command,pPrintf zprintf)
         zprintf("User %s with password %s created successfully\x0d\x0a",szAcc,&ptr[x]);
     }
     else
-        zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);   
+        zprintf("User %s with password %s NOT created (probably sql file format was updated)\x0d\x0a",szAcc,&ptr[x]);
 }
 
 void ParseCommand( pPrintf zprintf, char*command)

@@ -465,7 +465,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE RANLIB ac_ct_RANLIB build build_cpu build_vendor build_os host host_cpu host_vendor host_os EGREP LN_S ECHO AR ac_ct_AR CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL __PYTHON INCLUDES LIBOBJS ALLOCA WITH_PYTHON_SUBDIR WITH_PYTHON_SUBPACKAGE WITH_PYTHON_VERSION __DOXYGEN WITH_APIDOCS_TARGET WITH_APIDOCS LINKER_OPTIONS COMPILER_OPTIONS EXTRA_LINKER_OPTIONS EXTRA_COMPILER_OPTIONS MANGOSD_CONFIG MANGOSD_CONFIGDIR MANGOSD_DATA MANGOSD_ENABLE_CLI MANGOSD_ENABLE_RA LT_RELEASE LT_CURRENT LT_AGE LT_REVISION LTMS_RELEASE LTMS_CURRENT LTMS_AGE LTMS_REVISION LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE RANLIB ac_ct_RANLIB build build_cpu build_vendor build_os host host_cpu host_vendor host_os EGREP LN_S ECHO AR ac_ct_AR CPP CXXCPP F77 FFLAGS ac_ct_F77 LIBTOOL __PYTHON INCLUDES LIBOBJS ALLOCA WITH_PYTHON_SUBDIR WITH_PYTHON_SUBPACKAGE WITH_PYTHON_VERSION __DOXYGEN WITH_APIDOCS_TARGET WITH_APIDOCS LINKER_OPTIONS COMPILER_OPTIONS EXTRA_LINKER_OPTIONS EXTRA_COMPILER_OPTIONS MANGOSD_CONFIG MANGOSD_CONFIGDIR REALMD_CONFIG REALMD_CONFIGDIR MANGOSD_DATA MANGOSD_ENABLE_CLI MANGOSD_ENABLE_RA LT_RELEASE LT_CURRENT LT_AGE LT_REVISION LTMS_RELEASE LTMS_CURRENT LTMS_AGE LTMS_REVISION LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -22550,16 +22550,24 @@ echo "${ECHO_T}$MANGOSD_ENABLE_RA" >&6
 
 MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
+REALMD_CONFIG_TEMP="$sysconfdir/realmd.conf"
+REALMD_CONFIGDIR_TEMP="$sysconfdir"
 if test $sysconfdir = '${prefix}/etc'; then
     MANGOSD_CONFIG_TEMP="${prefix}/mangos/mangosd.conf"
     MANGOSD_CONFIGDIR_TEMP="${prefix}/mangos"
+    REALMD_CONFIG_TEMP="${prefix}/mangos/realmd.conf"
+    REALMD_CONFIGDIR_TEMP="${prefix}/mangos"
 else
   if test $sysconfdir = '/'; then
 	MANGOSD_CONFIG_TEMP="/mangosd.conf"
 	MANGOSD_CONFIGDIR_TEMP="/"
+	REALMD_CONFIG_TEMP="/realmd.conf"
+	REALMD_CONFIGDIR_TEMP="/"
   else
 	MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 	MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
+	REALMD_CONFIG_TEMP="$sysconfdir/realmd.conf"
+	REALMD_CONFIGDIR_TEMP="$sysconfdir"
   fi
 fi
 
@@ -22575,6 +22583,8 @@ fi
 
 eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
 eval "MANGOSD_CONFIGDIR=$MANGOSD_CONFIGDIR_TEMP"
+eval "REALMD_CONFIG=$REALMD_CONFIG_TEMP"
+eval "REALMD_CONFIGDIR=$REALMD_CONFIGDIR_TEMP"
 eval "MANGOSD_DATA=$MANGOSD_DATA_TEMP"
 
 COMPILER_OPTIONS="$COMPILER_OPTIONS $CXXFLAGS"
@@ -22601,7 +22611,9 @@ LINKER_OPTIONS="$LINKER_OPTIONS $LDFLAGS"
 
 
 
-                                                                                                                                                                                              ac_config_files="$ac_config_files ./Makefile doc/Doxyfile doc/Makefile sql/Makefile src/Makefile src/shared/Makefile src/shared/SystemConfig.h src/realmd/Makefile src/framework/Makefile src/game/Makefile src/bindings/Makefile src/bindings/python/Makefile src/bindings/universal/Makefile src/mangosd/Makefile src/mangosd/mangosd.conf dep/Makefile dep/src/Makefile dep/src/zlib/Makefile dep/src/zthread/Makefile"
+
+
+                                                                                                                                                                                                        ac_config_files="$ac_config_files ./Makefile doc/Doxyfile doc/Makefile sql/Makefile src/Makefile src/shared/Makefile src/shared/SystemConfig.h src/realmd/Makefile src/realmd/realmd.conf src/framework/Makefile src/game/Makefile src/bindings/Makefile src/bindings/python/Makefile src/bindings/universal/Makefile src/mangosd/Makefile src/mangosd/mangosd.conf dep/Makefile dep/src/Makefile dep/src/zlib/Makefile dep/src/zthread/Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -23175,6 +23187,7 @@ do
   "src/shared/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/shared/Makefile" ;;
   "src/shared/SystemConfig.h" ) CONFIG_FILES="$CONFIG_FILES src/shared/SystemConfig.h" ;;
   "src/realmd/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/realmd/Makefile" ;;
+  "src/realmd/realmd.conf" ) CONFIG_FILES="$CONFIG_FILES src/realmd/realmd.conf" ;;
   "src/framework/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/framework/Makefile" ;;
   "src/game/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/game/Makefile" ;;
   "src/bindings/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/bindings/Makefile" ;;
@@ -23357,6 +23370,8 @@ s,@EXTRA_LINKER_OPTIONS@,$EXTRA_LINKER_OPTIONS,;t t
 s,@EXTRA_COMPILER_OPTIONS@,$EXTRA_COMPILER_OPTIONS,;t t
 s,@MANGOSD_CONFIG@,$MANGOSD_CONFIG,;t t
 s,@MANGOSD_CONFIGDIR@,$MANGOSD_CONFIGDIR,;t t
+s,@REALMD_CONFIG@,$REALMD_CONFIG,;t t
+s,@REALMD_CONFIGDIR@,$REALMD_CONFIGDIR,;t t
 s,@MANGOSD_DATA@,$MANGOSD_DATA,;t t
 s,@MANGOSD_ENABLE_CLI@,$MANGOSD_ENABLE_CLI,;t t
 s,@MANGOSD_ENABLE_RA@,$MANGOSD_ENABLE_RA,;t t

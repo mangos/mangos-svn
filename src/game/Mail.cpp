@@ -75,7 +75,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
             if (item != 0)
             {
-				uint16 pos = pl->GetPosByGuid(item);
+                uint16 pos = pl->GetPosByGuid(item);
                 Item *it = pl->GetItemByPos( pos );
 
                 objmgr.AddMItem(it);

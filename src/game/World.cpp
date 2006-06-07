@@ -207,11 +207,11 @@ void World::SetInitialWorldSettings()
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 
-    //duplicate  
-    //sDatabase.PExecute("UPDATE `character` SET `online` = 0;"); 
-    
+    //duplicate
+    //sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
+
     //Update realm list
-    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = %d;", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 0)); 
+    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = %d;", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 0));
 
     // remove bones after restart
     sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `bones_flag` = '1';");
