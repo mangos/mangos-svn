@@ -2972,8 +2972,6 @@ void Player::SendAttackStart(Unit* pVictim)
     {
         setAttackTimer(uint32(0));
     }
-    if(isStealth())
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     data.Initialize( SMSG_ATTACKSTART );
     data << GetGUID();

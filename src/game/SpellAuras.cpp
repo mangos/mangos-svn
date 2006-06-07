@@ -678,6 +678,7 @@ void Aura::HandleFear(bool Apply)
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
+		m_target->SendAttackStop(m_caster->GetGUID());
         m_target->AttackStop();
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
@@ -1697,7 +1698,7 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-    if(!m_target || (m_target->m_immuneToMechanic & 17))    //Can't transform
+    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_PLOYMORPH))     //Can't transform
         return;
     if (apply)
     {
