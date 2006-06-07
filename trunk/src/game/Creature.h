@@ -46,7 +46,7 @@ enum Gossip_Option
     GOSSIP_OPTION_TAXIVENDOR        = 4,                    //UNIT_NPC_FLAG_TAXIVENDOR        = 8,
     GOSSIP_OPTION_TRAINER           = 5,                    //UNIT_NPC_FLAG_TRAINER           = 16,
     GOSSIP_OPTION_SPIRITHEALER      = 6,                    //UNIT_NPC_FLAG_SPIRITHEALER      = 32,
-    GOSSIP_OPTION_GUARD             = 7,                    //UNIT_NPC_FLAG_GUARD		      = 64,
+    GOSSIP_OPTION_GUARD             = 7,                    //UNIT_NPC_FLAG_GUARD              = 64,
     GOSSIP_OPTION_INNKEEPER         = 8,                    //UNIT_NPC_FLAG_INNKEEPER         = 128,
     GOSSIP_OPTION_BANKER            = 9,                    //UNIT_NPC_FLAG_BANKER            = 256,
     GOSSIP_OPTION_PETITIONER        = 10,                   //UNIT_NPC_FLAG_PETITIONER        = 512,
@@ -264,11 +264,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool hasQuest(uint32 quest_id);
         bool hasInvolvedQuest(uint32 quest_id);
 
-        void addQuest(Quest *quest) { mQuests.push_back(quest); }
-        void addInvolvedQuest(Quest *quest) { mInvolvedQuests.push_back(quest); }
-
-        void prepareQuestMenu( Player *pPlayer );
-        void sendPreparedQuest( Player *player );
         void prepareGossipMenu( Player *pPlayer,uint32 gossipid );
         void sendPreparedGossip( Player* player);
         void OnGossipSelect(Player* player, uint32 option);
@@ -332,8 +327,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint32 mTaxiNode;
 
-        std::list<Quest*> mQuests;
-        std::list<Quest*> mInvolvedQuests;
         std::list<GossipOption*> m_goptions;
 
         float respawn_cord[3];

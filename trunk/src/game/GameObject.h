@@ -76,7 +76,10 @@ class MANGOS_DLL_SPEC GameObject : public Object
 
         Loot        loot;
         uint32      lootid;
+
     protected:
+
+        void _LoadQuests();
 
         uint32      m_spellId;
         uint32      m_respawnTimer;

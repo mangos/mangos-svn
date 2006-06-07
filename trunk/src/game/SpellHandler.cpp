@@ -110,6 +110,11 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             return;
             break;
+        case GAMEOBJECT_TYPE_QUESTGIVER:                    // 2
+            _player->PrepareQuestMenu( guid );
+            _player->SendPreparedQuest( guid );
+            return;
+            break;
 
             //Sitting: Wooden bench, chairs enzz
         case GAMEOBJECT_TYPE_CHAIR:                         //7

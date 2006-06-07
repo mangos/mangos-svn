@@ -1597,48 +1597,46 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_vendor` ENABLE KEYS */;
 
 --
--- Table structure for table `object_involvedrelation`
+-- Table structure for table `gameobject_involvedrelation`
 --
 
-DROP TABLE IF EXISTS `object_involvedrelation`;
-CREATE TABLE `object_involvedrelation` (
-  `Id` int(6) unsigned NOT NULL auto_increment,
-  `questId` bigint(20) unsigned NOT NULL default '0',
-  `objectId` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`Id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `gameobject_involvedrelation`;
+CREATE TABLE `gameobject_involvedrelation` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `quest int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  PRIMARY KEY  (`id`,`quest`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='GameObject System';
 
 --
--- Dumping data for table `object_involvedrelation`
+-- Dumping data for table `gameobject_involvedrelation`
 --
 
 
-/*!40000 ALTER TABLE `object_involvedrelation` DISABLE KEYS */;
-LOCK TABLES `object_involvedrelation` WRITE;
+/*!40000 ALTER TABLE `gameobject_involvedrelation` DISABLE KEYS */;
+LOCK TABLES `gameobject_involvedrelation` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `object_involvedrelation` ENABLE KEYS */;
+/*!40000 ALTER TABLE `gameobject_involvedrelation` ENABLE KEYS */;
 
 --
--- Table structure for table `object_questrelation`
+-- Table structure for table `gameobject_questrelation`
 --
 
-DROP TABLE IF EXISTS `object_questrelation`;
-CREATE TABLE `object_questrelation` (
-  `Id` int(6) unsigned NOT NULL auto_increment,
-  `questId` bigint(20) unsigned NOT NULL default '0',
-  `objectId` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`Id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `gameobject_questrelation`;
+CREATE TABLE `gameobject_questrelation` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `quest int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  PRIMARY KEY  (`id`,`quest`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='GameObject System';
 
 --
--- Dumping data for table `object_questrelation`
+-- Dumping data for table `gameobject_questrelation`
 --
 
 
-/*!40000 ALTER TABLE `object_questrelation` DISABLE KEYS */;
-LOCK TABLES `object_questrelation` WRITE;
+/*!40000 ALTER TABLE `gameobject_questrelation` DISABLE KEYS */;
+LOCK TABLES `gameobject_questrelation` WRITE;
 UNLOCK TABLES;
-/*!40000 ALTER TABLE `object_questrelation` ENABLE KEYS */;
+/*!40000 ALTER TABLE `gameobject_questrelation` ENABLE KEYS */;
 
 --
 -- Table structure for table `playercreateinfo`

@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "QuestDef.h"
 #include "GameObject.h"
 #include "ObjectMgr.h"
 #include "UpdateMask.h"
@@ -196,7 +197,13 @@ bool GameObject::LoadFromDB(uint32 guid)
     lootid=fields[11].GetUInt32();
     m_respawnTimer=fields[11].GetUInt32();
     delete result;
-    return Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
+
+    if (Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3) )
+    {
+        _LoadQuests();
+        return true;
+    }
+    return false;
 }
 
 void GameObject::DeleteFromDB()
@@ -207,4 +214,50 @@ void GameObject::DeleteFromDB()
 GameObjectInfo *GameObject::GetGOInfo()
 {
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
+}
+
+/*********************************************************/
+/***                    QUEST SYSTEM                   ***/
+/*********************************************************/
+
+void GameObject::_LoadQuests()
+{
+    mQuests.clear();
+    mInvolvedQuests.clear();
+
+    Field *fields;
+    Quest *pQuest;
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject_questrelation` WHERE `id` = '%u';", GetEntry ());
+
+    if(result)
+    {
+        do
+        {
+            fields = result->Fetch();
+            pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+            if (!pQuest) continue;
+
+            addQuest(pQuest);
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `gameobject_involvedrelation` WHERE `id` = '%u';", GetEntry ());
+
+    if(!result1) return;
+
+    do
+    {
+        fields = result1->Fetch();
+        pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+        if (!pQuest) continue;
+
+        addInvolvedQuest(pQuest);
+    }
+    while( result1->NextRow() );
+
+    delete result1;
 }

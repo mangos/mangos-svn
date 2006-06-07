@@ -321,78 +321,6 @@ Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
     return NULL;
 }
 
-void Creature::prepareQuestMenu( Player *pPlayer )
-{
-    uint32 result = DIALOG_STATUS_NONE;
-    uint32 status;
-    Quest *pQuest;
-    QuestMenu *qm = pPlayer->PlayerTalkClass->GetQuestMenu();
-    qm->ClearMenu();
-
-    for( std::list<Quest*>::iterator i = mInvolvedQuests.begin( ); i != mInvolvedQuests.end( ); i++ )
-    {
-        pQuest = *i;
-        if ( !pQuest )
-            continue;
-
-        status = pPlayer->GetQuestStatus( pQuest );
-        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( pQuest ) )
-            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_REWARD, false );
-        else if ( status == QUEST_STATUS_INCOMPLETE )
-            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_INCOMPLETE, false );
-    }
-
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        pQuest = *i;
-        if ( !pQuest )
-            continue;
-
-        status = pPlayer->GetQuestStatus( pQuest );
-        if ( status == QUEST_STATUS_NONE && pPlayer->CanTakeQuest( pQuest, false ) )
-            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_AVAILABLE, true );
-    }
-}
-
-void Creature::sendPreparedQuest(Player *player)
-{
-    QuestMenu* pQuestMenu = player->PlayerTalkClass->GetQuestMenu();
-    if( !pQuestMenu || pQuestMenu->MenuItemCount() < 1 )
-        return;
-
-    uint64 guid = GetGUID();
-    uint32 status = pQuestMenu->GetItem(0).m_qIcon;
-    if ( pQuestMenu->MenuItemCount() == 1 && status == DIALOG_STATUS_AVAILABLE )
-    {
-        Quest *pQuest = objmgr.GetQuest( pQuestMenu->GetItem(0).m_qId );
-        if (!pQuest)
-            return;
-
-        player->PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
-    }
-    else
-    {
-        QEmote qe;
-        std::string title = "";
-        uint32 textid = GetNpcTextId();
-        GossipText * gossiptext=objmgr.GetGossipText(textid);
-        if( !gossiptext )
-        {
-            qe._Delay = TEXTEMOTE_MASSAGE;                  //zyg: player emote
-            qe._Emote = TEXTEMOTE_HELLO;                    //zyg: NPC emote
-            title = "Do Quest ?";
-        }
-        else
-        {
-            qe = gossiptext->Options[0].Emotes[0];
-            title = gossiptext->Options[0].Text_0;
-            if( &title == NULL )
-                title = "";
-        }
-        player->PlayerTalkClass->SendQuestMenu( qe, title, guid );
-    }
-}
-
 void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {
     PlayerMenu* pm=pPlayer->PlayerTalkClass;
@@ -479,8 +407,8 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
                 player->GetSession()->SendSpiritRessurect();
             break;
         case GOSSIP_OPTION_QUESTGIVER:
-            prepareQuestMenu( player );
-            sendPreparedQuest( player );
+            player->PrepareQuestMenu( guid );
+            player->SendPreparedQuest( guid );
             break;
         case GOSSIP_OPTION_VENDOR:
         case GOSSIP_OPTION_ARMORER:
@@ -982,7 +910,7 @@ void Creature::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature_questrelation` WHERE `id` = '%u' ORDER BY `quest`;", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature_questrelation` WHERE `id` = '%u';", GetEntry ());
 
     if(result)
     {
@@ -999,7 +927,7 @@ void Creature::_LoadQuests()
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `creature_involvedrelation` WHERE `id` = '%u' ORDER BY `quest`;", GetEntry ());
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `creature_involvedrelation` WHERE `id` = '%u';", GetEntry ());
 
     if(!result1) return;
 
