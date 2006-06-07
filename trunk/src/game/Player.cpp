@@ -6783,6 +6783,8 @@ void Player::AddQuest( Quest *pQuest )
                 mQuestStatus[quest].m_timer = 0;
                 SetUInt32Value( log_slot + 2, 0 );
             }
+            if( CanCompleteQuest( pQuest ) )
+                CompleteQuest( pQuest );
         }
     }
 }
@@ -7172,7 +7174,7 @@ uint16 Player::GetQuestSlot( Quest *pQuest )
             if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
                 return PLAYER_QUEST_LOG_1_1 + 3*i;
         }
-		return 0;
+        return 0;
     }
     return PLAYER_QUEST_LOG_1_1;
 }
