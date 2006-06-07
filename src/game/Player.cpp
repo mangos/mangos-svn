@@ -2664,7 +2664,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
         if(dif < 0) dif = 0;
         else if(dif > 5) dif = 5;
-        
+
         int RepPoints = ((5-dif)*0.20)*100;
         SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
     }
@@ -6577,13 +6577,13 @@ void Player::SendPreparedQuest( uint64 guid )
             if( status == DIALOG_STATUS_REWARD )
                 PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0 );
             else
-                PlayerTalkClass->SendQuestDetails( pQuest, guid, true );                
+                PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
         }
     }
     else
     {
         QEmote qe;
-        qe._Delay = 0; 
+        qe._Delay = 0;
         qe._Emote = 0;
         std::string title = "";
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
@@ -6593,8 +6593,8 @@ void Player::SendPreparedQuest( uint64 guid )
             GossipText * gossiptext = objmgr.GetGossipText(textid);
             if( !gossiptext )
             {
-                qe._Delay = TEXTEMOTE_MASSAGE;                  //zyg: player emote
-                qe._Emote = TEXTEMOTE_HELLO;                    //zyg: NPC emote
+                qe._Delay = TEXTEMOTE_MASSAGE;              //zyg: player emote
+                qe._Emote = TEXTEMOTE_HELLO;                //zyg: NPC emote
                 title = "Do Quest ?";
             }
             else
@@ -6608,7 +6608,6 @@ void Player::SendPreparedQuest( uint64 guid )
         PlayerTalkClass->SendQuestMenu( qe, title, guid );
     }
 }
-
 
 Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
 {
@@ -7451,13 +7450,14 @@ void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature
         data << pQuest->GetQuestInfo()->ReqKillMobCount[ creature ];
         data << guid;
         GetSession()->SendPacket(&data);
-        
+
         uint16 log_slot = GetQuestSlot( pQuest );
         uint32 kills = GetUInt32Value( log_slot + 1 );
         kills = kills + (1 << ( 6 * nb ));
         SetUInt32Value( log_slot + 1, kills );
     }
 }
+
 /*********************************************************/
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/

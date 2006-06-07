@@ -163,7 +163,6 @@ class MANGOS_DLL_SPEC PlayerMenu
         uint32 GossipOptionSender( unsigned int Selection );
         uint32 GossipOptionAction( unsigned int Selection );
 
-        
         void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
         void CloseGossip();
         void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char * locName );

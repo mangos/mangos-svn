@@ -238,7 +238,7 @@ void Unit::RemoveSpellsCausingAura(uint32 auraType)
                 uint32 spellId = ((*iter).second)->GetId();
                 RemoveAurasDueToSpell(spellId);
                 //if spell has more than one aura,iter++ or iter+2 will delete already,so it will crash.
-                //this is temporary fixed,need better one. 
+                //this is temporary fixed,need better one.
                 iter = m_Auras.begin();
                 if(!(*iter).second)
                     return;

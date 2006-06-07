@@ -84,14 +84,14 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 
     // Called at any Damage from any attacker
     void DamageInflict(Unit *healer, uint32 amount_healed) {}
-    
+
     // Is unit visibale for MoveInLineOfSight
-    bool IsVisible(Unit *who) const 
-    { 
-        return !who->isStealth() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE; 
+    bool IsVisible(Unit *who) const
+    {
+        return !who->isStealth() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE;
     }
 
-    // Called at World update tick 
+    // Called at World update tick
     void UpdateAI(const uint32);
 
     Creature* m_creature;
@@ -107,8 +107,8 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     // Stop attack of current victim
     void DoStopAttack();
 
-    // Cast spell 
-    void DoCast(Unit* victim, uint32 spelId) 
+    // Cast spell
+    void DoCast(Unit* victim, uint32 spelId)
     {
         m_creature->CastSpell(victim,spelId,true);
     }
