@@ -6688,7 +6688,6 @@ bool Player::CanCompleteQuest( Quest *pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
 
-        sLog.outDebug("quest status = %u, quest = %u",mQuestStatus[quest].m_status,quest);
         if( mQuestStatus[quest].m_status == QUEST_STATUS_COMPLETE )
             return true;
 
@@ -6713,10 +6712,7 @@ bool Player::CanCompleteQuest( Quest *pQuest )
             }
 
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_EXPLORATION ) && !mQuestStatus[quest].m_explored )
-            {
-                sLog.outDebug("No explored");
                 return false;
-            }
 
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && mQuestStatus[quest].m_timer == 0 )
                 return false;
@@ -7176,8 +7172,9 @@ uint16 Player::GetQuestSlot( Quest *pQuest )
             if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
                 return PLAYER_QUEST_LOG_1_1 + 3*i;
         }
+		return 0;
     }
-    return 0;
+    return PLAYER_QUEST_LOG_1_1;
 }
 
 void Player::AreaExplored( Quest *pQuest )
