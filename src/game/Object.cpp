@@ -481,23 +481,8 @@ float Object::GetDistanceSq(const Object* obj) const
     float dy = GetPositionY() - obj->GetPositionY();
     float dz = GetPositionZ() - obj->GetPositionZ();
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - 2 * sizefactor;
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
     return ( dist > 0 ? dist * dist : 0);
-    /*ASSERT(obj->GetMapId() == m_mapId);
-    //float size = GetObjectSize();
-    float size = obj->GetObjectSize();
-    float x1, y1, z1, x2, y2, z2;
-    GetClosePoint( obj, x1, y1, z1 );
-    obj->GetClosePoint( this, x2, y2, z2 );
-    float dx  = x2 - x1;
-    float dy  = y2 - y1;
-    float dz  = z2 - z1;
-    float rdist = (dx*dx) + (dy*dy) + (dz*dz);
-    dx = obj->GetPositionX() - m_positionX;
-    dy = obj->GetPositionY() - m_positionY;
-    dz = obj->GetPositionZ() - m_positionZ;
-    float realdist = (dx*dx) + (dy*dy) + (dz*dz);
-    return (realdist < size * size) ? 0 : rdist;*/
 }
 
 float Object::GetDistanceSq(const float x, const float y, const float z) const
@@ -506,21 +491,8 @@ float Object::GetDistanceSq(const float x, const float y, const float z) const
     float dy = GetPositionY() - y;
     float dz = GetPositionZ() - z;
     float sizefactor = GetObjectSize();
-    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - 2 * sizefactor;
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
     return ( dist > 0 ? dist * dist : 0);
-   /* float size = GetObjectSize();
-    float x1, y1, z1;
-    GetClosePoint( x, y, z, x1, y1, z1 );
-
-    float dx  = x - x1;
-    float dy  = y - y1;
-    float dz  = z - z1;
-    float rdist = (dx*dx) + (dy*dy) + (dz*dz);
-    dx = x - m_positionX;
-    dy = y - m_positionY;
-    dz = z - m_positionZ;
-    float realdist = (dx*dx) + (dy*dy) + (dz*dz);
-    return (realdist < size * size) ? 0 : rdist;*/
 }
 
 float Object::GetDistance2dSq(const Object* obj) const
@@ -528,21 +500,8 @@ float Object::GetDistance2dSq(const Object* obj) const
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
-    float dist = sqrt((dx*dx) + (dy*dy)) - 2 * sizefactor;
+    float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
     return ( dist > 0 ? dist * dist : 0);
-    /*ASSERT(obj->GetMapId() == m_mapId);
-    //float size = GetObjectSize();
-    float size = obj->GetObjectSize();
-    float x1, y1, z1, x2, y2, z2;
-    GetClosePoint( obj, x1, y1, z1 );
-    obj->GetClosePoint( this, x2, y2, z2 );
-    float dx  = x2 - x1;
-    float dy  = y2 - y1;
-    float rdist = (dx*dx) + (dy*dy);
-    dx = obj->GetPositionX() - m_positionX;
-    dy = obj->GetPositionY() - m_positionY;
-    float realdist = (dx*dx) + (dy*dy);
-    return (realdist < size * size) ? 0 : rdist;*/
 }
 
 float Object::GetAngle(const Object* obj) const
@@ -584,8 +543,8 @@ bool Object::HasInArc(const float arcangle, const Object* obj) const
 void Object::GetContactPoint( const Object* obj, float &x, float &y, float &z ) const
 {
     float angle = GetAngle( obj );
-    x = m_positionX + (GetObjectSize() + obj->GetObjectSize()) * 2 * cos(angle);
-    y = m_positionY + (GetObjectSize() + obj->GetObjectSize()) * 2 * sin(angle);
+    x = m_positionX + (GetObjectSize() + obj->GetObjectSize() + 0.5) * cos(angle);
+    y = m_positionY + (GetObjectSize() + obj->GetObjectSize() + 0.5) * sin(angle);
     z = MapManager::Instance().GetMap(GetMapId())->GetHeight(x,y);
 }
 

@@ -41,9 +41,8 @@ struct StackCleaner
 void
 TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 {
-    if(!&i_target || !&owner)
+    if( !&i_target || !&owner )
         return;
-    DEBUG_LOG("MOVEMENT : Orientation = %f, Angle = %f", owner.GetOrientation(), owner.GetAngle(&i_target));
     float x, y, z;
     i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
@@ -97,68 +96,89 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
 void
 TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
-    if(!&owner || !&i_target)
+    if( !&owner || !owner.isAlive() || !&i_target || i_targetedHome )
         return;
-    if(owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED))
-        return;
-
-    if(!owner.isAlive())
+    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
         return;
 
-    SpellEntry* spellInfo;
     Traveller<Creature> traveller(owner);
     bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
+    if( owner.GetDistance2dSq( &i_target ) > 0.26f )
+    {
+        DEBUG_LOG("MOVEMENT : Distance = %f",owner.GetDistance2dSq( &i_target ));
+        _setTargetLocation(owner, 0);
+    }
+    else if ( !owner.HasInArc( 0.1f, &i_target ) )
+    {
+        DEBUG_LOG("MOVEMENT : Orientation = %f",owner.GetAngle(&i_target));
+        owner.SetInFront(&i_target);
+        if( i_target.GetTypeId() == TYPEID_PLAYER )
+            owner.SendUpdateToPlayer( (Player*)&i_target );
+    }
+    if( !owner.IsStopped() && reach && owner.canReachWithAttack(&i_target) )
+    {
+        owner.StopMoving();
+        if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
+            owner.Attack(&i_target);
+        owner.clearUnitState(UNIT_STAT_CHASE);
+        DEBUG_LOG("UNIT IS THERE");
+    }/*
+
+
+     //SpellEntry* spellInfo;
     if( reach )
     {
-        if ( !owner.HasInArc( 0.1f, &i_target ) )
+        if( owner.GetDistance2dSq( &i_target ) > 0.0f )
+        {
+            DEBUG_LOG("MOVEMENT : Distance = %f",owner.GetDistance2dSq( &i_target ));
+            owner.addUnitState(UNIT_STAT_CHASE);
+            _setTargetLocation(owner, 0);
+        }
+        else if ( !owner.HasInArc( 0.0f, &i_target ) )
         {
             DEBUG_LOG("MOVEMENT : Orientation = %f",owner.GetAngle(&i_target));
             owner.SetInFront(&i_target);
             if( i_target.GetTypeId() == TYPEID_PLAYER )
                 owner.SendUpdateToPlayer( (Player*)&i_target );
         }
-    }
-    if( owner.IsStopped() && i_target.isAlive())
-    {
-        if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat())
+        if( !owner.isInCombat() )
         {
-            if( spellInfo = owner.reachWithSpellAttack( &i_target))
+            owner.AIM_Initialize();
+            return;
+        }
+    }
+    else if( i_target.isAlive() )
+    {
+        if( !owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat() )
+        {
+            if( spellInfo = owner.reachWithSpellAttack( &i_target ) )
             {
                 _spellAtack(owner, spellInfo);
                 return;
             }
         }
-        if( !owner.canReachWithAttack( &i_target ) )
-        {
-            owner.addUnitState(UNIT_STAT_CHASE);
-            _setTargetLocation(owner, 0);
-            DEBUG_LOG("MOVEMENT : restart to chase");
-        }
-        else if( owner.GetDistance2dSq( &i_target ) > 0.1f )
+        if( owner.GetDistance2dSq( &i_target ) > 0.0f )
         {
             DEBUG_LOG("MOVEMENT : Distance = %f",owner.GetDistance2dSq( &i_target ));
+            owner.addUnitState(UNIT_STAT_CHASE);
             _setTargetLocation(owner, 0);
         }
     }
-    else
+    else if( !i_targetedHome )
     {
-        if(i_targetedHome)
-            return;
-        else if(!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat() && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
+        if( !owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.isInCombat() && (spellInfo = owner.reachWithSpellAttack(&i_target)) )
         {
             _spellAtack(owner, spellInfo);
             return;
         }
+        _setTargetLocation(owner, 0);
         if(reach)
         {
-            if( owner.canReachWithAttack(&i_target) )
+            if( reach && owner.canReachWithAttack(&i_target) )
             {
                 owner.StopMoving();
                 if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
-                {
-                    //owner.addUnitState(UNIT_STAT_ATTACKING);
-                    owner.Attack(&i_target);                //??
-                }
+                    owner.Attack(&i_target);
                 owner.clearUnitState(UNIT_STAT_CHASE);
                 DEBUG_LOG("UNIT IS THERE");
             }
@@ -168,7 +188,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 DEBUG_LOG("Continue to chase");
             }
         }
-    }
+    }*/
 }
 
 void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellInfo)

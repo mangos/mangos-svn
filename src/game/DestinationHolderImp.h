@@ -83,9 +83,7 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
         speed = 2.5f;
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
-    traveller.Relocation(i_fromX, i_fromY, i_fromZ);
-    if (dist > 0.1f)
-        traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
+    traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
 }
 
 template<typename TRAVELLER>
@@ -98,7 +96,8 @@ DestinationHolder<TRAVELLER>::UpdateLocation(TRAVELLER &traveller, const float &
 
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
-    double dist = ::sqrt((dx*dx) + (dy*dy));
+    float dz = i_destZ - i_fromZ;
+    double dist = ::sqrt((dx*dx) + (dy*dy) + (dz*dz));
     double speed = traveller.Speed();
     if(speed<=0)
         speed = 2.5f;
@@ -114,11 +113,17 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32
     i_tracker.Update(diff);
     float x,y,z;
     GetLocationNow(x, y, z);
-    if( x == -431602080 ) // TODO
+    if( x == -431602080 )
         return false;
-	Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
-	z = Map->GetHeight( x, y);
-    traveller.Relocation(x, y, z);
+    Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
+    z = Map->GetHeight( x, y);
+    float ori;
+    if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
+        ori = traveller.GetTraveller().GetAngle(x, y);
+    else
+        ori = traveller.GetTraveller().GetOrientation();
+
+    traveller.Relocation(x, y, z, ori);
     if( i_tracker.Passed() || force_update )
     {
         ResetUpdate();
