@@ -375,6 +375,7 @@ class Spell
         void EffectCharge(uint32 i);
         void EffectSkill(uint32 i);
         void EffectAttackMe(uint32 i);
+        void EffectResurrectNew(uint32 i);
 
         Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur );
 
@@ -406,6 +407,8 @@ class Spell
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
+        void SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage);
+        void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);
         //void HandleAddAura(Unit* Target);

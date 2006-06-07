@@ -829,6 +829,27 @@ void Spell::SendResurrectRequest(Player* target)
     target->GetSession()->SendPacket(&data);
 }
 
+void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE);
+    data << uint8(0xFF) << target->GetGUID();
+    data << uint8(0xFF) << m_caster->GetGUID();
+    data << SpellID;
+    data << Damage;
+    data << uint8(0);
+    target->GetSession()->SendPacket(&data);
+}
+
+void Spell::SendPlaySpellVisual(uint32 SpellID)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_PLAY_SPELL_VISUAL);
+    data << m_caster->GetGUID();
+    data << SpellID;
+    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+}
+
 void Spell::TakePower()
 {
     uint16 powerField;
