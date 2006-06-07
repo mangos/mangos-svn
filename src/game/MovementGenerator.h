@@ -23,6 +23,7 @@
 #include "Policies/Singleton.h"
 #include "Dynamic/ObjectRegistry.h"
 #include "Dynamic/FactoryHolder.h"
+#include "Common.h"
 
 class Creature;
 
@@ -34,7 +35,7 @@ typedef enum
     SPECIAL_MOTION_TYPE
 } motion_t;
 
-class MANGOS_DLL_DECL MovementGenerator
+class MANGOS_DLL_SPEC MovementGenerator
 {
     public:
 

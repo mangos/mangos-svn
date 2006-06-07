@@ -18,6 +18,7 @@
 
 #include "config.h"
 #include "ScriptMgr.h"
+#include "../../game/TargetedMovementGenerator.h"
 
 //uint8 loglevel = 0;
 int nrscripts;
@@ -237,3 +238,65 @@ CreatureAI* GetAI(Creature *_Creature )
 
     return tmpscript->GetAI(_Creature);
 }
+
+void ScriptedAI::UpdateAI(const uint32) 
+{
+    if( m_creature->getVictim() != NULL )
+    {
+        if( needToStop() )
+        {
+            DoStopAttack();
+        }
+        else if( m_creature->IsStopped() )
+        {
+            if( m_creature->isAttackReady() )
+            {
+                if(!m_creature->canReachWithAttack(m_creature->getVictim()))
+                    return;
+                m_creature->AttackerStateUpdate(m_creature->getVictim(), 0);
+                m_creature->setAttackTimer(0);
+
+                if ( !m_creature->getVictim() )
+                    return;
+
+                if( needToStop() )
+                    DoStopAttack();
+            }
+        }
+    }
+}
+
+void ScriptedAI::AttackStop(Unit *) 
+{
+    if( m_creature->isAlive() )
+        DoGoHome();
+}
+
+void ScriptedAI::DoStartAttack(Unit* victim)
+{
+    m_creature->Attack(victim);
+    (*m_creature)->Mutate(new TargetedMovementGenerator(*victim));
+}
+
+void ScriptedAI::DoStopAttack()
+{
+    if( m_creature->getVictim() != NULL )
+    {
+        m_creature->AttackStop();
+    }
+}
+
+void ScriptedAI::DoGoHome()
+{
+    if( !m_creature->getVictim() && m_creature->isAlive() )
+    {
+        static_cast<TargetedMovementGenerator *>((*m_creature)->top())->TargetedHome(*m_creature);
+    }
+}
+
+
+bool ScriptedAI::needToStop() const
+{
+    return ( !m_creature->getVictim()->isTargetableForAttack() || !m_creature->isAlive() );
+}
+
