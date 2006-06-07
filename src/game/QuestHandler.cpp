@@ -58,14 +58,10 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_HELLO npc = %u",guid );
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( pCreature )
-    {
-        if( !(Script->GossipHello( _player, pCreature )) )
-        {
-            pCreature->prepareQuestMenu( _player );
-            pCreature->sendPreparedQuest( _player );
-        }
-    }
+    if( pCreature && Script->GossipHello( _player, pCreature ) )
+        return;
+    _player->PrepareQuestMenu( guid );
+    _player->SendPreparedQuest( guid );
 }
 
 void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
@@ -207,23 +203,30 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         if( _player->CanRewardQuest( pQuest, reward, true ) )
         {
             _player->RewardQuest( pQuest, reward );
-            _player->CalculateReputation( pQuest, guid );
 
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
             if( pCreature )
             {
+                _player->CalculateReputation( pQuest, guid );
                 if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
                 {
                     Quest* nextquest;
-                    if( nextquest = pCreature->getNextAvailableQuest(_player,pQuest) )
-                        _player->PlayerTalkClass->SendQuestDetails(nextquest,pCreature->GetGUID(),true);
+                    if( nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                        _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
                 }
             }
             else
             {
                 GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid);
                 if ( pGameObject )
-                    Script->GOChooseReward( _player, pGameObject, pQuest, reward );
+                {
+                    if( !Script->GOChooseReward( _player, pGameObject, pQuest, reward ) )
+                    {
+                        Quest* nextquest;
+                        if( nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                            _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
+                    }
+                }
             }
         }
     }

@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "UpdateMask.h"
 #include "World.h"
+#include "QuestDef.h"
 
 #include <set>
 #define M_PI            3.14159265358979323846
@@ -240,6 +241,11 @@ class MANGOS_DLL_SPEC Object
             return m_speed * DefaultSpeed;
         }
         void SetSpeed(float newspd) { m_speed = newspd; }
+
+        std::list<Quest*> mQuests;
+        std::list<Quest*> mInvolvedQuests;
+        void addQuest(Quest *quest) { mQuests.push_back(quest); }
+        void addInvolvedQuest(Quest *quest) { mInvolvedQuests.push_back(quest); }
 
     protected:
         Object ( );

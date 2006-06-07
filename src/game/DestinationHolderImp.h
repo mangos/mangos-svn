@@ -115,21 +115,18 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32
     GetLocationNow(x, y, z);
     if( x == -431602080 )
         return false;
-    Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
-    z = Map->GetHeight( x, y);
-    float ori;
     if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
-        ori = traveller.GetTraveller().GetAngle(x, y);
-    else
-        ori = traveller.GetTraveller().GetOrientation();
-
-    traveller.Relocation(x, y, z, ori);
+    {
+        Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
+        z = Map->GetHeight( x, y);
+        float ori = traveller.GetTraveller().GetAngle(x, y);
+        traveller.Relocation(x, y, z, ori);
+    }
     if( i_tracker.Passed() || force_update )
     {
         ResetUpdate();
         return true;
     }
-
     return false;
 }
 

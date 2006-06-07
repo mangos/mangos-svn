@@ -109,13 +109,9 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     Traveller<Creature> traveller(owner);
     bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
     if( owner.GetDistance2dSq( &i_target ) > 0.26f )
-    {
-        DEBUG_LOG("MOVEMENT : Distance = %f",owner.GetDistance2dSq( &i_target ));
         _setTargetLocation(owner, 0);
-    }
     else if ( !owner.HasInArc( 0.1f, &i_target ) )
     {
-        DEBUG_LOG("MOVEMENT : Orientation = %f",owner.GetAngle(&i_target));
         owner.SetInFront(&i_target);
         if( i_target.GetTypeId() == TYPEID_PLAYER )
             owner.SendUpdateToPlayer( (Player*)&i_target );
@@ -126,7 +122,6 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         if(!owner.hasUnitState(UNIT_STAT_FOLLOW))
             owner.Attack(&i_target);
         owner.clearUnitState(UNIT_STAT_CHASE);
-        DEBUG_LOG("UNIT IS THERE");
     }
     /*
 

@@ -370,6 +370,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
 
+        void PrepareQuestMenu( uint64 guid );
+        void SendPreparedQuest( uint64 guid );
+        Quest *GetNextQuest( uint64 guid, Quest *pQuest );
         bool CanSeeStartQuest( Quest *pQuest );
         bool CanTakeQuest( Quest *pQuest, bool msg );
         bool CanAddQuest( Quest *pQuest, bool msg );
@@ -408,6 +411,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendQuestTimerFailed( Quest *pQuest );
         void SendCanTakeQuestResponse( uint32 msg );
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
+        void SendQuestUpdateAddItem( Quest *pQuest, uint32 item, uint32 nb );
+        void SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature, uint32 nb );
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };

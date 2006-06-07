@@ -163,18 +163,21 @@ class MANGOS_DLL_SPEC PlayerMenu
         uint32 GossipOptionSender( unsigned int Selection );
         uint32 GossipOptionAction( unsigned int Selection );
 
+        
         void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
-        void SendQuestMenu ( QEmote eEmote, std::string Title, uint64 npcGUID );
-        void SendQuestStatus( uint32 questStatus, uint64 npcGUID );
-        void SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
-        void SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
-        void SendUpdateQuestDetails ( Quest *pQuest );
-        void SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable );
         void CloseGossip();
-        void SendQuestUpdateAddItem( Quest *pQuest, uint32 iLogItem, uint32 iLogNr);
-        void SendQuestUpdateAddKill( Quest *pQuest, uint64 mobGUID, uint32 iNrMob, uint32 iLogMob );
         void SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, const char * locName );
         void SendTalking( uint32 textID );
         void SendTalking( char const * title, char const * text );
+
+        /*********************************************************/
+        /***                    QUEST SYSTEM                   ***/
+        /*********************************************************/
+        void SendQuestMenu ( QEmote eEmote, std::string Title, uint64 npcGUID );
+        void SendQuestStatus( uint32 questStatus, uint64 npcGUID );
+        void SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept);
+        void SendUpdateQuestDetails ( Quest *pQuest );
+        void SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt );
+        void SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable );
 };
 #endif

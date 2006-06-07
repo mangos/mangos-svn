@@ -2658,16 +2658,16 @@ void Player::CalculateReputation(Unit *pVictim)
 //Calculate how many reputation points player gain with the quest
 void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 {
-    Creature *qGiver = ObjectAccessor::Instance().GetCreature(*this, guid);
-
-    int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
-
-    if(dif < 0) dif = 0;
-    else if(dif > 5) dif = 5;
-
-    int RepPoints = ((5-dif)*0.20)*100;
-
-    SetStanding(qGiver->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+    if( pCreature )
+    {
+        int dif = getLevel() - pQuest->GetQuestInfo()->MinLevel;
+        if(dif < 0) dif = 0;
+        else if(dif > 5) dif = 5;
+        
+        int RepPoints = ((5-dif)*0.20)*100;
+        SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
+    }
 }
 
 //Update honor fields
@@ -6517,6 +6517,133 @@ void Player::SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
 
+void Player::PrepareQuestMenu( uint64 guid )
+{
+    Object *pObject;
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+    if( pCreature )
+        pObject = (Object*)pCreature;
+    else
+    {
+        GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
+        if( pGameObject )
+            pObject = (Object*)pGameObject;
+        else
+            return;
+    }
+
+    uint32 status;
+    Quest *pQuest;
+    QuestMenu *qm = PlayerTalkClass->GetQuestMenu();
+    qm->ClearMenu();
+
+    for( std::list<Quest*>::iterator i = pObject->mInvolvedQuests.begin( ); i != pObject->mInvolvedQuests.end( ); i++ )
+    {
+        pQuest = *i;
+        if ( !pQuest )
+            continue;
+
+        status = GetQuestStatus( pQuest );
+        if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( pQuest ) )
+            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_REWARD, false );
+        else if ( status == QUEST_STATUS_INCOMPLETE )
+            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_INCOMPLETE, false );
+    }
+
+    for( std::list<Quest*>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
+    {
+        pQuest = *i;
+        if ( !pQuest )
+            continue;
+
+        status = GetQuestStatus( pQuest );
+        if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
+            qm->AddMenuItem( pQuest->GetQuestInfo()->QuestId, DIALOG_STATUS_AVAILABLE, true );
+    }
+}
+
+void Player::SendPreparedQuest( uint64 guid )
+{
+    QuestMenu* pQuestMenu = PlayerTalkClass->GetQuestMenu();
+    if( !pQuestMenu || pQuestMenu->MenuItemCount() < 1 )
+        return;
+
+    uint32 status = pQuestMenu->GetItem(0).m_qIcon;
+    if ( pQuestMenu->MenuItemCount() == 1 && (status == DIALOG_STATUS_AVAILABLE || status == DIALOG_STATUS_REWARD) )
+    {
+        Quest *pQuest = objmgr.GetQuest( pQuestMenu->GetItem(0).m_qId );
+        if ( pQuest )
+        {
+            if( status == DIALOG_STATUS_REWARD )
+                PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0 );
+            else
+                PlayerTalkClass->SendQuestDetails( pQuest, guid, true );                
+        }
+    }
+    else
+    {
+        QEmote qe;
+        qe._Delay = 0; 
+        qe._Emote = 0;
+        std::string title = "";
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+        if( pCreature )
+        {
+            uint32 textid = pCreature->GetNpcTextId();
+            GossipText * gossiptext = objmgr.GetGossipText(textid);
+            if( !gossiptext )
+            {
+                qe._Delay = TEXTEMOTE_MASSAGE;                  //zyg: player emote
+                qe._Emote = TEXTEMOTE_HELLO;                    //zyg: NPC emote
+                title = "Do Quest ?";
+            }
+            else
+            {
+                qe = gossiptext->Options[0].Emotes[0];
+                title = gossiptext->Options[0].Text_0;
+                if( &title == NULL )
+                    title = "";
+            }
+        }
+        PlayerTalkClass->SendQuestMenu( qe, title, guid );
+    }
+}
+
+
+Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
+{
+    if( pQuest )
+    {
+        Object *pObject;
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+        if( pCreature )
+            pObject = (Object*)pCreature;
+        else
+        {
+            GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
+            if( pGameObject )
+                pObject = (Object*)pGameObject;
+            else
+                return NULL;;
+        }
+
+        Quest *pQuest2;
+        uint32 quest = pQuest->GetQuestInfo()->NextQuestId;
+        for( std::list<Quest*>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
+        {
+            pQuest2 = *i;
+            if( pQuest2->GetQuestInfo()->QuestId == quest )
+            {
+                if ( CanTakeQuest( pQuest2, false ) )
+                    return pQuest2;
+                else
+                    return NULL;
+            }
+        }
+    }
+    return NULL;
+}
+
 bool Player::CanSeeStartQuest( Quest *pQuest )
 {
     if( pQuest )
@@ -6541,13 +6668,15 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
         if( !SatisfyQuestLog( msg ) )
             return false;
 
-        if( !GiveQuestSourceItem( pQuest ) )
+        uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
+        if( srcitem > 0 )
         {
-            if( msg )
-                SendEquipError( EQUIP_ERR_BAG_FULL, NULL, NULL, 0 );
-            return false;
+            uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
+            if( count <= 0 )
+                count = 1;
+            if( !CanStoreNewItem( NULL, NULL_SLOT, srcitem, count, false, true ) )
+                return false;
         }
-
         return true;
     }
     return false;
@@ -6733,7 +6862,6 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
 
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
 
-        SendQuestReward( pQuest );
         uint16 log_slot = GetQuestSlot( pQuest );
         SetUInt32Value(log_slot + 0, 0);
         SetUInt32Value(log_slot + 1, 0);
@@ -6751,6 +6879,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             mQuestStatus[quest].m_rewarded = true;
         else
             SetQuestStatus(pQuest, QUEST_STATUS_NONE);
+
+        SendQuestReward( pQuest );
     }
 }
 
@@ -7061,7 +7191,7 @@ void Player::ItemAdded( uint32 entry, uint32 count )
                         {
                             additemcount = ( curitemcount + count <= reqitemcount ? count : reqitemcount - curitemcount);
                             mQuestStatus[quest].m_itemcount[j] += additemcount;
-                            PlayerTalkClass->SendQuestUpdateAddItem( pQuest, j, additemcount );
+                            SendQuestUpdateAddItem( pQuest, j, additemcount );
                         }
                         if ( CanCompleteQuest( pQuest ) )
                             CompleteQuest( pQuest );
@@ -7137,7 +7267,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                         if ( curkillcount < reqkillcount )
                         {
                             mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
-                            PlayerTalkClass->SendQuestUpdateAddKill( pQuest, guid, curkillcount + addkillcount, j);
+                            SendQuestUpdateAddKill( pQuest, guid, curkillcount + addkillcount, j);
                         }
                         if ( CanCompleteQuest( pQuest ) )
                             CompleteQuest( pQuest );
@@ -7266,6 +7396,39 @@ void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
     }
 }
 
+void Player::SendQuestUpdateAddItem( Quest *pQuest, uint32 item, uint32 nb )
+{
+    if( pQuest )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTUPDATE_ADD_ITEM );
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM" );
+        data << pQuest->GetQuestInfo()->ReqItemId[item];
+        data << nb;
+        GetSession()->SendPacket( &data );
+    }
+}
+
+void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature, uint32 nb )
+{
+    if( pQuest )
+    {
+        WorldPacket data;
+        data.Initialize( SMSG_QUESTUPDATE_ADD_KILL );
+        sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL" );
+        data << pQuest->GetQuestInfo()->QuestId;
+        data << pQuest->GetQuestInfo()->ReqKillMobId[ creature ];
+        data << nb;
+        data << pQuest->GetQuestInfo()->ReqKillMobCount[ creature ];
+        data << guid;
+        GetSession()->SendPacket(&data);
+        
+        uint16 log_slot = GetQuestSlot( pQuest );
+        uint32 kills = GetUInt32Value( log_slot + 1 );
+        kills = kills + (1 << ( 6 * nb ));
+        SetUInt32Value( log_slot + 1, kills );
+    }
+}
 /*********************************************************/
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/
