@@ -25,11 +25,12 @@
 
 class Unit;
 
-class MANGOS_DLL_DECL TargetedMovementGenerator : public MovementGenerator
+class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
 {
     public:
 
         TargetedMovementGenerator(Unit &target) : i_target(target), i_targetedHome(false), i_attackRadius(0) {}
+        ~TargetedMovementGenerator() {}
 
         void Initialize(Creature &);
         void Reset(Creature &);

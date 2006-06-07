@@ -63,19 +63,56 @@ struct Script
 extern int nrscripts;
 extern Script *m_scripts[MAX_SCRIPTS];
 
+#define VISIBLE_RANGE (26.46f)
+
 struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 {
     ScriptedAI(Creature* creature) : m_creature(creature) {}
     ~ScriptedAI() {}
 
+    // Called if IsVisible(Unit *who) is true at each *who move
     void MoveInLineOfSight(Unit *) {}
+
+    // Called at each attack of m_creature by any victim
     void AttackStart(Unit *) {}
-    void AttackStop(Unit *) {}
+
+    // Called at stoing attack by any attacker
+    void AttackStop(Unit *);
+
+    // Called at any heal cast/item used (call non implemented in mangos)
     void HealBy(Unit *healer, uint32 amount_healed) {}
+
+    // Called at any Damage from any attacker
     void DamageInflict(Unit *healer, uint32 amount_healed) {}
-    bool IsVisible(Unit *who) const { return !who->isStealth();  }
-    void UpdateAI(const uint32) {}
+    
+    // Is unit visibale for MoveInLineOfSight
+    bool IsVisible(Unit *who) const 
+    { 
+        return !who->isStealth() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE; 
+    }
+
+    // Called at World update tick 
+    void UpdateAI(const uint32);
 
     Creature* m_creature;
+
+    // Check condition for attack stop
+    virtual bool needToStop() const;
+
+    //= Some useful helpers =========================
+
+    // Start attack of victim and go to him
+    void DoStartAttack(Unit* victim);
+
+    // Stop attack of current victim
+    void DoStopAttack();
+
+    // Cast spell 
+    void DoCast(Unit* victim, uint32 spelId) 
+    {
+        m_creature->CastSpell(victim,spelId,true);
+    }
+
+    void DoGoHome();
 };
 #endif
