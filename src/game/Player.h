@@ -400,6 +400,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetQuestStatus( Quest *pQuest, uint32 status );
         void AdjustQuestReqItemCount( Quest *pQuest );
         uint16 GetQuestSlot( Quest *pQuest );
+        void AreaExplored( Quest *pQuest );
         void ItemAdded( uint32 entry, uint32 count );
         void ItemRemoved( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );

@@ -188,7 +188,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
         data << (uint32)0;//Bonus Honor
         data << (uint32)0;//I think Instance
         data << (uint32)0;
-        data << (uint32)0;			//8*4 = 32+8=40
+        data << (uint32)0;            //8*4 = 32+8=40
 
         //1 player is 40 bytes
     }

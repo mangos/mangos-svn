@@ -29,7 +29,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
     float x,y,z;
     creature.GetRespawnCoord(x, y, z);
     int mapid=creature.GetMapId();
-    z=MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
+    z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
 
     i_nextMove = 1;
     i_waypoints[0][0] = x;
@@ -51,8 +51,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
         {
             i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
             i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
-            i_waypoints[idx][2] =  MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],
-                i_waypoints[idx][1]);
+            i_waypoints[idx][2] =  MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
         }
     }
 

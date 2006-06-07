@@ -1020,12 +1020,15 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID);
 
     AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
-    Quest *pQuest;
-
-    if (pArea) pQuest = objmgr.GetQuest( pArea->Quest_ID ); else
-        pQuest = NULL;
-
-    Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID );
+    if( pArea )
+    {
+        Quest *pQuest = objmgr.GetQuest( pArea->Quest_ID );
+        if( pQuest )
+        {
+            if( !Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID ) )
+                GetPlayer()->AreaExplored( pQuest );
+        }
+    }
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `areatrigger_tavern` WHERE `id` = '%u';", Trigger_ID);
     if(!result)
