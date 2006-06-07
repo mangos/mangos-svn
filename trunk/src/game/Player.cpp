@@ -6696,7 +6696,7 @@ bool Player::CanCompleteQuest( Quest *pQuest )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
-                    if( mQuestStatus[quest].m_itemcount[i] < pQuest->GetQuestInfo()->ReqItemCount[i] )
+                    if( pQuest->GetQuestInfo()->ReqItemCount[i]!= 0 && mQuestStatus[quest].m_itemcount[i] < pQuest->GetQuestInfo()->ReqItemCount[i] )
                         return false;
                 }
             }
@@ -6705,7 +6705,7 @@ bool Player::CanCompleteQuest( Quest *pQuest )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
-                    if( mQuestStatus[quest].m_mobcount[i] < pQuest->GetQuestInfo()->ReqKillMobCount[i] )
+                    if( pQuest->GetQuestInfo()->ReqKillMobCount[i] != 0 && mQuestStatus[quest].m_mobcount[i] < pQuest->GetQuestInfo()->ReqKillMobCount[i] )
                         return false;
                 }
             }
@@ -6764,6 +6764,17 @@ void Player::AddQuest( Quest *pQuest )
             mQuestStatus[quest].m_rewarded = false;
             mQuestStatus[quest].m_explored = false;
 
+            if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            {
+                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                    mQuestStatus[quest].m_itemcount[i] = 0;
+            }
+            if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL ) )
+            {
+                for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+                    mQuestStatus[quest].m_mobcount[i] = 0;
+            }
+
             GiveQuestSourceItem( pQuest );
             AdjustQuestReqItemCount( pQuest );
 
@@ -6782,8 +6793,6 @@ void Player::AddQuest( Quest *pQuest )
                 mQuestStatus[quest].m_timer = 0;
                 SetUInt32Value( log_slot + 2, 0 );
             }
-            if( CanCompleteQuest( pQuest ) )
-                CompleteQuest( pQuest );
         }
     }
 }
@@ -7156,8 +7165,11 @@ void Player::AdjustQuestReqItemCount( Quest *pQuest )
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             {
                 reqitemcount = pQuest->GetQuestInfo()->ReqItemCount[i];
-                curitemcount = GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i]) + GetBankItemCount(pQuest->GetQuestInfo()->ReqItemId[i]);
-                mQuestStatus[quest].m_itemcount[i] = min(curitemcount, reqitemcount);
+                if( reqitemcount != 0 )
+                {
+                    curitemcount = GetItemCount(pQuest->GetQuestInfo()->ReqItemId[i]) + GetBankItemCount(pQuest->GetQuestInfo()->ReqItemId[i]);
+                    mQuestStatus[quest].m_itemcount[i] = min(curitemcount, reqitemcount);
+                }
             }
         }
     }
