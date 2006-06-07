@@ -2994,7 +2994,6 @@ void Player::FlightComplete()
     /* Remove the "player locked" flag, to allow movement */
     if (GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
         RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
-    SaveToDB();
 }
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)

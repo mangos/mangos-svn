@@ -77,7 +77,7 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
         return;
     i_nextMoveTime.Update(diff);
     Traveller<Creature> traveller(creature);
-    i_destinationHolder.UpdateTraveller(traveller, diff, false);
+    i_destinationHolder.UpdateTraveller(traveller, diff,false);
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )
