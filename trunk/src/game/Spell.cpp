@@ -944,7 +944,7 @@ uint8 Spell::CanCast()
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
         if(target->m_immuneToDispel & m_spellInfo->Dispel)
             castResult = CAST_FAIL_IMMUNE;
-		/*
+        /*
         //If m_immuneToMechanic type contain this Mechanic type IMMUNE spell, or it should fit to aura?
         if(target->m_immuneToMechanic & m_spellInfo->Mechanic)
             castResult = CAST_FAIL_IMMUNE;
@@ -976,7 +976,7 @@ uint8 Spell::CanCast()
         }
         if(unitTarget->m_immuneToSchool & m_school)
             castResult = CAST_FAIL_IMMUNE;
-		*/
+        */
 
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;

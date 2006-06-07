@@ -220,10 +220,13 @@ bool Master::_StartDB()
     }
 
     realmID = sConfig.GetIntDefault("RealmID", 0);
-    if(!realmID) {
+    if(!realmID)
+    {
         sLog.outError("Realm ID not defined");
         exit(1);
-    } else {
+    }
+    else
+    {
         sLog.outString("Realm running as realm ID %d", realmID);
     }
 

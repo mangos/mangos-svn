@@ -136,16 +136,18 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
     data.Initialize( SMSG_MONSTER_MOVE );
     data << uint8(0xFF);
     data << GetGUID();
-    data << GetPositionX() << GetPositionY() << GetPositionZ();         // Point A, starting location
-    data << (uint32)((*((uint32*)&GetOrientation())) & 0x30000000);     // little trick related to orientation
-    data << uint8(Walkback);                                            // walkback when walking from A to B
-    data << uint32(Run ? 0x00000100 : 0x00000000);                      // flags
+                                                            // Point A, starting location
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+                                                            // little trick related to orientation
+    data << (uint32)((*((uint32*)&GetOrientation())) & 0x30000000);
+    data << uint8(Walkback);                                // walkback when walking from A to B
+    data << uint32(Run ? 0x00000100 : 0x00000000);          // flags
     /* Flags:
-    512: Floating, moving without walking/running    
+    512: Floating, moving without walking/running
     */
-    data << Time;                                                       // Time in between points
-    data << uint32(1);                                                  // 1 single waypoint 
-    data << NewPosX << NewPosY << NewPosZ;                              // the single waypoint Point B
+    data << Time;                                           // Time in between points
+    data << uint32(1);                                      // 1 single waypoint
+    data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
     WPAssert( data.size() == 50 );
     SendMessageToSet( &data, true );
 }
@@ -1586,10 +1588,12 @@ void Unit::SetStateFlag(uint32 index, uint32 newFlag )
 {
     index |= newFlag;
 }
+
 void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
 {
     index &= ~ oldFlag;
 }
+
 /*********************************************************/
 /***                    SPELL SYSTEM                   ***/
 /*********************************************************/

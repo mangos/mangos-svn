@@ -31,7 +31,7 @@
 class DatabaseMysql : public Database
 {
     friend class MaNGOS::OperatorNew<DatabaseMysql>;
-    
+
     public:
         DatabaseMysql();
         ~DatabaseMysql();

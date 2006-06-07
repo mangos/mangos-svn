@@ -110,14 +110,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         delete result;
     }
 
-    uint32 GameType = sWorld.getConfig(CONFIG_GAME_TYPE); 
+    uint32 GameType = sWorld.getConfig(CONFIG_GAME_TYPE);
     if(GameType == 1 || GameType == 8)
     {
         QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%lu' LIMIT 1;", (unsigned long)GetAccountId());
         if(result2)
         {
-            Field * field = result2->Fetch();  
-            uint8 race = field[0].GetUInt32();  
+            Field * field = result2->Fetch();
+            uint8 race = field[0].GetUInt32();
             delete result2;
             uint32 team=0;
             if(race > 0)
@@ -184,10 +184,10 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
             }
             if(team != team_)
             {
-                data.Initialize( SMSG_CHAR_CREATE );  
-                data << (uint8)0x33;  
-                SendPacket( &data );  
-                return;  
+                data.Initialize( SMSG_CHAR_CREATE );
+                data << (uint8)0x33;
+                SendPacket( &data );
+                return;
             }
         }
     }
@@ -201,7 +201,8 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
         QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
         uint32 charCount = 0;
-        if (resultCount) {
+        if (resultCount)
+        {
             Field *fields = resultCount->Fetch();
             charCount = fields[0].GetUInt32();
             delete resultCount;

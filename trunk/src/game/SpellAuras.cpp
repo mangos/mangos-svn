@@ -704,7 +704,8 @@ void HandleHealEvent(void *obj)
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_HEAL))     //Can't heal
+                                                            //Can't heal
+    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_HEAL))
         return;
     if(apply)
     {
@@ -733,7 +734,7 @@ void Aura::HandleAuraWaterWalk(bool apply)
 {
     WorldPacket data;
     if(apply)
-        data.Initialize(SMSG_MOVE_WATER_WALK); 
+        data.Initialize(SMSG_MOVE_WATER_WALK);
     else
         data.Initialize(SMSG_MOVE_LAND_WALK);
     data << uint8(0xFF) << m_target->GetGUID();
@@ -831,7 +832,7 @@ void Aura::HandleAuraModStun(bool apply)
             m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
         }
     }
-    else 
+    else
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
@@ -843,7 +844,7 @@ void Aura::HandleAuraModStun(bool apply)
             m_target->SendMessageToSet(&data,true);
             m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
         }
-   }
+    }
 }
 
 void Aura::HandleAuraModRangedAttackPower(bool apply)
@@ -1109,6 +1110,7 @@ void Aura::HandleInvisibilityDetect(bool Apply)
         m_target->m_detectStealth = 0;
     }
 }
+
 void Aura::HandleAuraModResistance(bool apply)
 {
     uint16 index = 0;
@@ -1191,14 +1193,14 @@ void Aura::HandleAuraModRoot(bool apply)
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
         if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {   
+        {
             WorldPacket data;
             data.Initialize(SMSG_FORCE_MOVE_ROOT);
             data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
             m_target->SendMessageToSet(&data,true);
         }
     }
-    else 
+    else
     {
         m_target->clearUnitState(UNIT_STAT_ROOT);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
@@ -1695,7 +1697,7 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-    if(!m_target || (m_target->m_immuneToMechanic & 17))     //Can't transform
+    if(!m_target || (m_target->m_immuneToMechanic & 17))    //Can't transform
         return;
     if (apply)
     {

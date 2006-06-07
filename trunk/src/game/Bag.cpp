@@ -168,6 +168,7 @@ void Bag::StoreItem( uint8 slot, Item *pItem )
         m_bagslot[slot] = pItem;
     }
 }
+
 void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const
 {
     Item::BuildCreateUpdateBlockForPlayer( data, target );

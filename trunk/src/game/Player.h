@@ -576,7 +576,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDuelSender(Player *plyr) { m_pDuelSender = plyr; }
 
         uint32 GetCurrentBuybackSlot() { return m_currentBuybackSlot; }
-        void SetCurrentBuybackSlot( uint32 slot ) {
+        void SetCurrentBuybackSlot( uint32 slot )
+        {
             if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
                 m_currentBuybackSlot = slot;
             else

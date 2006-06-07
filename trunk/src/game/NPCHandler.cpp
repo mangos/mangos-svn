@@ -112,7 +112,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         //if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
         //    Tspells.push_back(*itr);
         if((*itr)->spell)
-               Tspells.push_back(*itr);
+            Tspells.push_back(*itr);
     }
 
     data.Initialize( SMSG_TRAINER_LIST );
@@ -143,11 +143,11 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
             ReqspellFlag = true;
 
         if(ReqskillValueFlag && LevelFlag && ReqspellFlag)
-            canlearnflag = 0;    //green, can learn
-        else canlearnflag = 1;   //red, can't learn
-        
+            canlearnflag = 0;                               //green, can learn
+        else canlearnflag = 1;                              //red, can't learn
+
         if(_player->HasSpell(spellInfo->Id))
-            canlearnflag = 2;    //gray, can't learn
+            canlearnflag = 2;                               //gray, can't learn
 
         data << uint32((*itr)->spell->Id);
         data << uint8(canlearnflag);
@@ -207,7 +207,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         return;
     if(proto->reqspell && !_player->HasSpell(proto->reqspell))
         return;
- 
+
     if(!proto)
     {
         sLog.outError("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);

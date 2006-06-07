@@ -321,9 +321,9 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     }
 
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-    
+
     if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-    {   //in city no root no lock rotate
+    {                                                       //in city no root no lock rotate
         data.Initialize( SMSG_FORCE_MOVE_ROOT );
         data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
         SendPacket( &data );
@@ -934,7 +934,7 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     sLog.outDebug("Corpse Dis: \t%f",GetPlayer()->m_pCorpse->GetDistanceSq(((Object *)GetPlayer())));
     if (GetPlayer()->m_pCorpse->GetDistanceSq(((Object *)GetPlayer()))>1470)
         return;
-    
+
     //need a accurate value of Max distance
     //need to judge Resurrect Time
 

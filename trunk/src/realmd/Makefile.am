@@ -32,4 +32,9 @@ realmd_LDADD = $(top_builddir)/src/shared/libdatabase.a $(top_builddir)/src/shar
 realmd_LDFLAGS = -L$(top_builddir)/dep/src/zthread
 
 # use our configured sysconfdir
-sysconfdir = @MANGOSD_CONFIGDIR@
+sysconfdir = @REALMD_CONFIGDIR@
+
+# install realmd.conf to $(sysconfdir)
+sysconf_DATA = \
+    realmd.conf
+

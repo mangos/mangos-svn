@@ -1448,7 +1448,7 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
 
     Player* player = m_session->GetPlayer();
-    sDatabase.PExecute("INSERT INTO `areatrigger_graveyard` ( `position_x`,`position_y`,`position_z`,`zone`,`map`) VALUES ('%f', '%f', '%f', '%u', '%u');", 
+    sDatabase.PExecute("INSERT INTO `areatrigger_graveyard` ( `position_x`,`position_y`,`position_z`,`zone`,`map`) VALUES ('%f', '%f', '%f', '%u', '%u');",
         player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetZoneId(), player->GetMapId() );
 
     return true;
@@ -1721,7 +1721,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     int nrlvl = atoi((char*)args);
 
-	Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
         WorldPacket data;
@@ -1744,7 +1744,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         std::stringstream sstext;
         sstext << LANG_YOURS_LEVEL_UP << '\0';
         FillSystemMessageData(&data, chr->GetSession(), sstext.str().c_str());
-		chr->GetSession()->SendPacket( &data );
+        chr->GetSession()->SendPacket( &data );
     }
     return true;
 }

@@ -49,7 +49,7 @@
 #define DEFAULT_LOOP_TIME 0                                 /* 0 millisecs - instant */
 #define DEFAULT_LOG_LEVEL 0
 #define DEFAULT_PLAYER_LIMIT 100
-#define DEFAULT_WORLDSERVER_PORT 8085 //8129
+#define DEFAULT_WORLDSERVER_PORT 8085                       //8129
 #define DEFAULT_REALMSERVER_PORT 3724
 #define DEFAULT_HOST "127.0.0.1"
 #define DEFAULT_REGEN_RATE 0.15

@@ -313,16 +313,24 @@ AC_MSG_RESULT($MANGOSD_ENABLE_RA)
 
 MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
+REALMD_CONFIG_TEMP="$sysconfdir/realmd.conf"
+REALMD_CONFIGDIR_TEMP="$sysconfdir"
 if test $sysconfdir = '${prefix}/etc'; then
     MANGOSD_CONFIG_TEMP="${prefix}/mangos/mangosd.conf"
     MANGOSD_CONFIGDIR_TEMP="${prefix}/mangos"
+    REALMD_CONFIG_TEMP="${prefix}/mangos/realmd.conf"
+    REALMD_CONFIGDIR_TEMP="${prefix}/mangos"
 else
   if test $sysconfdir = '/'; then
 	MANGOSD_CONFIG_TEMP="/mangosd.conf"
 	MANGOSD_CONFIGDIR_TEMP="/"
+	REALMD_CONFIG_TEMP="/realmd.conf"
+	REALMD_CONFIGDIR_TEMP="/"
   else
 	MANGOSD_CONFIG_TEMP="$sysconfdir/mangosd.conf"
 	MANGOSD_CONFIGDIR_TEMP="$sysconfdir"
+	REALMD_CONFIG_TEMP="$sysconfdir/realmd.conf"
+	REALMD_CONFIGDIR_TEMP="$sysconfdir"
   fi
 fi
 
@@ -338,6 +346,8 @@ fi
 
 eval "MANGOSD_CONFIG=$MANGOSD_CONFIG_TEMP"
 eval "MANGOSD_CONFIGDIR=$MANGOSD_CONFIGDIR_TEMP"
+eval "REALMD_CONFIG=$REALMD_CONFIG_TEMP"
+eval "REALMD_CONFIGDIR=$REALMD_CONFIGDIR_TEMP"
 eval "MANGOSD_DATA=$MANGOSD_DATA_TEMP"
 
 dnl Configure the final compiler & linker options
@@ -355,6 +365,8 @@ AC_SUBST(EXTRA_COMPILER_OPTIONS)
 dnl Configured MaNGOS variables
 AC_SUBST(MANGOSD_CONFIG)
 AC_SUBST(MANGOSD_CONFIGDIR)
+AC_SUBST(REALMD_CONFIG)
+AC_SUBST(REALMD_CONFIGDIR)
 AC_SUBST(MANGOSD_DATA)
 AC_SUBST(MANGOSD_ENABLE_CLI)
 AC_SUBST(MANGOSD_ENABLE_RA)
@@ -377,6 +389,7 @@ AC_CONFIG_FILES([
    src/shared/Makefile
    src/shared/SystemConfig.h
    src/realmd/Makefile
+   src/realmd/realmd.conf
    src/framework/Makefile
    src/game/Makefile
    src/bindings/Makefile

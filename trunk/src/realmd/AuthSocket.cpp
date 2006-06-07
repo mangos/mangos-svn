@@ -201,75 +201,76 @@ void AuthSocket::_HandleLogonChallenge()
                 else
                 {
                     password = (*result)[0].GetString();
- /*                   QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
-                    uint32 cnt=0;
-                    if(result)
+                    /*                   QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
+                                       uint32 cnt=0;
+                                       if(result)
+                                       {
+                                           Field *fields = result->Fetch();
+                                           cnt = fields[0].GetUInt32();
+                                           delete result;
+
+                                       }
+                                                                               //number of not-gm players online
+                                       if(cnt>=sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT))
+                                           pkt << (uint8)CE_SERVER_FULL;
+
+                                       else
+                                       {    */
+                                                            //if server is not full
+
+                    uint32 acct;
+                    QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
+                    if(resultAcct)
                     {
-                        Field *fields = result->Fetch();
-                        cnt = fields[0].GetUInt32();
-                        delete result;
+                        Field *fields = resultAcct->Fetch();
+                        acct=fields[0].GetUInt32();
+                        delete resultAcct;
 
-                    }
-                                                            //number of not-gm players online
-                    if(cnt>=sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT))
-                        pkt << (uint8)CE_SERVER_FULL;
-
-                    else 
-                    {    */                                   //if server is not full
-
-                        uint32 acct;
-                        QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
-                        if(resultAcct)
+                        QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `account` = '%u';",acct);
+                        if(result)
                         {
-                            Field *fields = resultAcct->Fetch();
-                            acct=fields[0].GetUInt32();
-                            delete resultAcct;
+                            delete result;
+                            pkt << (uint8)CE_ACCOUNT_IN_USE;
 
-                            QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `account` = '%u';",acct);
-                            if(result)
-                            {
-                                delete result;
-                                pkt << (uint8)CE_ACCOUNT_IN_USE;
-
-                            }
-                            else
-                            {
-
-                                std::transform(password.begin(), password.end(), password.begin(), std::towupper);
-
-                                Sha1Hash I;
-                                std::string sI = _login + ":" + password;
-                                I.UpdateData(sI);
-                                I.Finalize();
-                                Sha1Hash sha;
-                                sha.UpdateData(s.AsByteArray(), s.GetNumBytes());
-                                sha.UpdateData(I.GetDigest(), 20);
-                                sha.Finalize();
-                                BigNumber x;
-                                x.SetBinary(sha.GetDigest(), sha.GetLength());
-                                v = g.ModExp(x, N);
-                                b.SetRand(19 * 8);
-                                BigNumber gmod=g.ModExp(b, N);
-                                B = ((v * 3) + gmod) % N;
-                                ASSERT(gmod.GetNumBytes() <= 32);
-
-                                BigNumber unk3;
-                                unk3.SetRand(16*8);
-
-                                //pkt << (uint8)0;
-                                pkt << (uint8)0;
-                                pkt.append(B.AsByteArray(), 32);
-                                pkt << (uint8)1;
-                                pkt.append(g.AsByteArray(), 1);
-
-                                pkt << (uint8)32;
-                                pkt.append(N.AsByteArray(), 32);
-
-                                pkt.append(s.AsByteArray(), s.GetNumBytes());
-                                pkt.append(unk3.AsByteArray(), 16);
-                            }
                         }
-                //    }
+                        else
+                        {
+
+                            std::transform(password.begin(), password.end(), password.begin(), std::towupper);
+
+                            Sha1Hash I;
+                            std::string sI = _login + ":" + password;
+                            I.UpdateData(sI);
+                            I.Finalize();
+                            Sha1Hash sha;
+                            sha.UpdateData(s.AsByteArray(), s.GetNumBytes());
+                            sha.UpdateData(I.GetDigest(), 20);
+                            sha.Finalize();
+                            BigNumber x;
+                            x.SetBinary(sha.GetDigest(), sha.GetLength());
+                            v = g.ModExp(x, N);
+                            b.SetRand(19 * 8);
+                            BigNumber gmod=g.ModExp(b, N);
+                            B = ((v * 3) + gmod) % N;
+                            ASSERT(gmod.GetNumBytes() <= 32);
+
+                            BigNumber unk3;
+                            unk3.SetRand(16*8);
+
+                            //pkt << (uint8)0;
+                            pkt << (uint8)0;
+                            pkt.append(B.AsByteArray(), 32);
+                            pkt << (uint8)1;
+                            pkt.append(g.AsByteArray(), 1);
+
+                            pkt << (uint8)32;
+                            pkt.append(N.AsByteArray(), 32);
+
+                            pkt.append(s.AsByteArray(), s.GetNumBytes());
+                            pkt.append(unk3.AsByteArray(), 16);
+                        }
+                    }
+                    //    }
                 }
                 delete result;
             }
@@ -408,7 +409,7 @@ void AuthSocket::_HandleLogonProof()
         sLog.outBasic("User '%s' successfully authed", _login.c_str());
 
         dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _login.c_str() );
-        
+
         sha.Initialize();
         sha.UpdateBigNumbers(&A, &M, &K, NULL);
         sha.Finalize();
@@ -475,7 +476,9 @@ void AuthSocket::_HandleRealmList()
             chars = fields[0].GetUInt8();
 
             delete result;
-        } else {
+        }
+        else
+        {
             chars = 0;
         }
         pkt << (uint8) chars;

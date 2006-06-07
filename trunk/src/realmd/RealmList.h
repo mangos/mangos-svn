@@ -38,28 +38,29 @@ struct Realm
     uint8 timezone;
     uint32 m_ID;
 
-// Leave these db functions commented out in case we need to maintain connections
-// to the realm db's at some point.
-//    std::string m_dbstring;
+    // Leave these db functions commented out in case we need to maintain connections
+    // to the realm db's at some point.
+    //    std::string m_dbstring;
 
-//    DatabaseMysql dbRealm;
+    //    DatabaseMysql dbRealm;
 
-    Realm (uint32 ID, const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone) //, std::string dbstring)
+                                                            //, std::string dbstring)
+    Realm (uint32 ID, const char *Name, std::string Address, uint8 Icon, uint8 Color, uint8 Timezone)
     {
         m_ID = ID;
         name = Name;
         address = Address;
-//        m_dbstring = dbstring;
+        //        m_dbstring = dbstring;
 
         icon = Icon;
         color = Color;
         timezone = Timezone;
     }
 
-//    int dbinit()
-//    {
-//        return dbRealm.Initialize(m_dbstring.c_str());
-//    }
+    //    int dbinit()
+    //    {
+    //        return dbRealm.Initialize(m_dbstring.c_str());
+    //    }
 
     ~Realm ()
     {
@@ -74,10 +75,11 @@ class RealmList
         RealmList();
         ~RealmList();
 
-        void AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone); //, const char *dbstring );
+                                                            //, const char *dbstring );
+        void AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone);
         int GetAndAddRealms(std::string dbstring);
         void SetRealm( const char *name, uint8 icon, uint8 color, uint8 timezone );
-        
+
         RealmMap::const_iterator begin() const { return _realms.begin(); }
         RealmMap::const_iterator end() const { return _realms.end(); }
         uint32 size() const { return _realms.size(); }

@@ -49,7 +49,8 @@ int RealmList::GetAndAddRealms(std::string dbstring)
         do
         {
             Field *fields = result->Fetch();
-            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt8(), fields[4].GetUInt8(), fields[5].GetUInt8()); //, fields[5].GetString());
+                                                            //, fields[5].GetString());
+            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt8(), fields[4].GetUInt8(), fields[5].GetUInt8());
             count++;
         } while( result->NextRow() );
         delete result;
@@ -63,36 +64,38 @@ int RealmList::GetAndAddRealms(std::string dbstring)
     return count;
 }
 
-void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone) //, const char *dbstring )
+                                                            //, const char *dbstring )
+void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint8 icon, uint8 color, uint8 timezone)
 {
     if( _realms.find( name ) == _realms.end() )
     {
-        Realm *newRealm = new Realm(ID, name, address, icon, color, timezone); //, dbstring);
-        
-//        sLog.outString("Realm \"%s\", database \"%s\"", newRealm->name.c_str(), newRealm->m_dbstring.c_str() );
-//        if (dbstring[0] == 0) {
-//            sLog.outError("No dbstring specified, skipping realm \"%s\".", newRealm->name);
-//            return;
-//        }
-//        
-//        if(!newRealm->dbinit())
-//        {
-//            sLog.outError("Cannot connect to database, skipping realm");
-//        }
-//        else
-//        {
-            std::string addr(address);
+                                                            //, dbstring);
+        Realm *newRealm = new Realm(ID, name, address, icon, color, timezone);
 
-            if( addr.find(':', 0) == std::string::npos )
-            {
-                std::stringstream ss;
-                ss << addr << ":" << DEFAULT_WORLDSERVER_PORT;
-                addr = ss.str();
-            }
-            newRealm->address = addr;
-            _realms[name] = newRealm;
-            sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
-//        }
+        //        sLog.outString("Realm \"%s\", database \"%s\"", newRealm->name.c_str(), newRealm->m_dbstring.c_str() );
+        //        if (dbstring[0] == 0) {
+        //            sLog.outError("No dbstring specified, skipping realm \"%s\".", newRealm->name);
+        //            return;
+        //        }
+        //
+        //        if(!newRealm->dbinit())
+        //        {
+        //            sLog.outError("Cannot connect to database, skipping realm");
+        //        }
+        //        else
+        //        {
+        std::string addr(address);
+
+        if( addr.find(':', 0) == std::string::npos )
+        {
+            std::stringstream ss;
+            ss << addr << ":" << DEFAULT_WORLDSERVER_PORT;
+            addr = ss.str();
+        }
+        newRealm->address = addr;
+        _realms[name] = newRealm;
+        sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
+        //        }
     }
 }
 

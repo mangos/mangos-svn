@@ -121,7 +121,7 @@ enum UnitState
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
-//some aura(related to ImmuneToMechanic or ImmuneToState<aura>) can't apply to it. 
+//some aura(related to ImmuneToMechanic or ImmuneToState<aura>) can't apply to it.
 enum ImmuneToMechanic
 {
     IMMUNE_MECHANIC_CHARM            =1,
