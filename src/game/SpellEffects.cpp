@@ -156,7 +156,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DESTROY_ALL_TOTEMS
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEMON
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RESURRECT_NEW
+    &Spell::EffectResurrectNew,                             //SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectAttackMe,                                 //SPELL_EFFECT_ATTACK_ME
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE
@@ -171,6 +171,19 @@ void Spell::EffectNULL(uint32 i)
 {
 }
 
+
+void Spell::EffectResurrectNew(uint32 i)
+{
+	if(!unitTarget) return;
+	if(unitTarget->isAlive()) return;
+	if(!unitTarget->IsInWorld()) return;
+	
+	uint32 health = m_spellInfo->EffectBasePoints[i];
+	uint32 mana = m_spellInfo->EffectMiscValue[i];
+	((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+	SendResurrectRequest((Player*)unitTarget);
+}
+
 void Spell::EffectInstaKill(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive() )
@@ -183,7 +196,7 @@ void Spell::EffectInstaKill(uint32 i)
 void Spell::EffectSchoolDMG(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive() )
-        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);   
+        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
@@ -267,6 +280,7 @@ void Spell::EffectHeal( uint32 i )
         uint32 addhealth = ( curhealth + damage < maxhealth ? damage : maxhealth - curhealth );
         unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
+        SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
 
         //If the target is in combat, then player is in combat too
         if( m_caster->GetTypeId() == TYPEID_PLAYER &&
@@ -293,7 +307,8 @@ void Spell::EffectHealthLeach(uint32 i)
     uint32 dHealth = damage;                                //something like this //maybe some other things are needed
 
     //Please let me know if this is correct
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dHealth);
+    //m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dHealth);
+    SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, dHealth);
 
     uint32 curHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
     uint32 maxHealth = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
@@ -319,7 +334,7 @@ void Spell::EffectCreateItem(uint32 i)
             continue;
         itemid = m_spellInfo->Reagent[x];
         itemcount = m_spellInfo->ReagentCount[x];
-        if(player->GetItemCount(itemid) >= itemcount && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
+       if(player->GetItemCount(itemid) >= itemcount && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
             player->DestroyItemCount(itemid, itemcount);
         else
         {
@@ -1174,6 +1189,7 @@ void Spell::EffectHealMaxHealth(uint32 i)
     else
         unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth+heal);
 
+    SendHealSpellOnPlayer((Player*)m_caster, m_spellInfo->Id, maxHealth - curHealth);
 }
 
 void Spell::EffectInterruptCast(uint32 i)
@@ -1478,6 +1494,7 @@ void Spell::EffectDisEnchant(uint32 i)
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16204, rnd, false, true ) )
                     p_caster->StoreNewItem(dst, 16204, rnd);
+
                 return;
             }
             else
@@ -1485,6 +1502,7 @@ void Spell::EffectDisEnchant(uint32 i)
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16203, rnd, false, true ) )
                     p_caster->StoreNewItem(dst, 16203, rnd);
+
                 return;
             }
         }
@@ -1497,12 +1515,14 @@ void Spell::EffectDisEnchant(uint32 i)
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14343, rnd, false, true ) )
                 p_caster->StoreNewItem(dst, 14343, rnd);
+
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14343, 1, false, true ) )
                 p_caster->StoreNewItem(dst, 14343, 1);
+
             return;
         }
         else if(item_quality == 2)
@@ -1537,6 +1557,7 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11178, 1, false, true ) )
                 p_caster->StoreNewItem(dst, 11178, 1);
+
             return;
         }
         else if(item_quality == 2)
@@ -1546,6 +1567,7 @@ void Spell::EffectDisEnchant(uint32 i)
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11176, rnd, false, true ) )
                     p_caster->StoreNewItem(dst, 11176, rnd);
+
                 return;
             }
             else
@@ -1553,6 +1575,7 @@ void Spell::EffectDisEnchant(uint32 i)
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11175, rnd, false, true ) )
                     p_caster->StoreNewItem(dst, 11175, rnd);
+
                 return;
             }
         }
@@ -1570,6 +1593,7 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11177, 1, false, true ) )
                 p_caster->StoreNewItem(dst, 11177, 1);
+
             return;
         }
         else if(item_quality == 2)
@@ -1603,6 +1627,7 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11139, 1, false, true ) )
                 p_caster->StoreNewItem(dst, 11139, 1);
+
             return;
         }
         else if(item_quality == 2)
@@ -1612,6 +1637,7 @@ void Spell::EffectDisEnchant(uint32 i)
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11137, rnd, false, true ) )
                     p_caster->StoreNewItem(dst, 11137, rnd);
+
                 return;
             }
             else
@@ -1619,6 +1645,7 @@ void Spell::EffectDisEnchant(uint32 i)
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11135, rnd, false, true ) )
                     p_caster->StoreNewItem(dst, 11135, rnd);
+
                 return;
             }
         }
