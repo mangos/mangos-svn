@@ -678,7 +678,7 @@ void Aura::HandleFear(bool Apply)
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
-		m_target->SendAttackStop(m_caster->GetGUID());
+        m_target->SendAttackStop(m_caster->GetGUID());
         m_target->AttackStop();
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 

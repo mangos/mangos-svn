@@ -543,47 +543,27 @@ bool Object::HasInArc(const float arcangle, const Object* obj) const
 void Object::GetContactPoint( const Object* obj, float &x, float &y, float &z ) const
 {
     float angle = GetAngle( obj );
-    x = m_positionX + (GetObjectSize() + obj->GetObjectSize() + 0.5) * cos(angle);
-    y = m_positionY + (GetObjectSize() + obj->GetObjectSize() + 0.5) * sin(angle);
-    z = MapManager::Instance().GetMap(GetMapId())->GetHeight(x,y);
+    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + 0.5) * cos(angle);
+    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + 0.5) * sin(angle);
+    z = GetPositionZ();
 }
 
 void Object::GetClosePoint( const Object* victim, float &x, float &y, float &z ) const
 {
-    float angle, z1;
-    if(!victim)
-    {
-        z1 = m_positionZ;
-        //angle = //m_orientation;
-        angle = GetAngle(victim) + (M_PI);
-        if (angle > (2.0f * M_PI))
-            angle -= (2.0f * M_PI);
-    }
+    if( victim )
+        GetClosePoint( victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ(), x, y, z);
     else
-    {
-        z1 = victim->GetPositionZ();
-        angle = GetAngle( victim );
-    }
-    x = m_positionX;                                        // + GetObjectSize() * cos(angle);
-    y = m_positionY;                                        // + GetObjectSize() * sin(angle);
-    z1 = m_positionZ;                                       ///
-    int mapid = GetMapId();
-    z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-    if( abs( z - z1 ) > 15.0f )
-        z = z1;
+        GetClosePoint( 0, 0, 0, x, y, z);
 }
 
 void Object::GetClosePoint( const float ox, const float oy, const float oz, float &x, float &y, float &z ) const
 {
     float angle;
-    if(ox==0 && oy ==0)
-        angle = m_orientation;
+    if( ox == 0 && oy == 0 )
+        angle = GetOrientation();
     else
         angle = GetAngle( ox, oy );
-    x = m_positionX + GetObjectSize() * cos(angle);
-    y = m_positionY + GetObjectSize() * sin(angle);
-    int mapid = GetMapId();
-    z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-    if( abs( z - oz ) > 15.0f )
-        z = oz;
+    x = GetPositionX() + GetObjectSize() * cos(angle);
+    y = GetPositionY() + GetObjectSize() * sin(angle);
+    z = GetPositionZ();
 }

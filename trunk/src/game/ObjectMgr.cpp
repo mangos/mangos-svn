@@ -508,7 +508,6 @@ void ObjectMgr::LoadAreaTriggerPoints()
 
         pArea->Trigger_ID      = fields[0].GetUInt32();
         pArea->Quest_ID        = fields[1].GetUInt32();
-        pArea->Creature_ID     = fields[2].GetUInt32();
 
         AddAreaTriggerPoint( pArea );
 

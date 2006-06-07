@@ -6688,6 +6688,7 @@ bool Player::CanCompleteQuest( Quest *pQuest )
     {
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
 
+        sLog.outDebug("quest status = %u, quest = %u",mQuestStatus[quest].m_status,quest);
         if( mQuestStatus[quest].m_status == QUEST_STATUS_COMPLETE )
             return true;
 
@@ -6712,9 +6713,12 @@ bool Player::CanCompleteQuest( Quest *pQuest )
             }
 
             if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_EXPLORATION ) && !mQuestStatus[quest].m_explored )
+            {
+                sLog.outDebug("No explored");
                 return false;
+            }
 
-            if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && ( mQuestStatus[quest].m_timer == 0 ) )
+            if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && mQuestStatus[quest].m_timer == 0 )
                 return false;
 
             if ( pQuest->GetQuestInfo()->RewMoney < 0 )
@@ -6797,9 +6801,12 @@ void Player::CompleteQuest( Quest *pQuest )
             SendQuestComplete( pQuest );
 
         uint16 log_slot = GetQuestSlot( pQuest );
-        uint32 state = GetUInt32Value( log_slot + 1 );
-        state |= 1 << 24;
-        SetUInt32Value( log_slot + 1, state );
+        if( log_slot )
+        {
+            uint32 state = GetUInt32Value( log_slot + 1 );
+            state |= 1 << 24;
+            SetUInt32Value( log_slot + 1, state );
+        }
     }
 }
 
@@ -6810,9 +6817,12 @@ void Player::IncompleteQuest( Quest *pQuest )
         SetQuestStatus( pQuest, QUEST_STATUS_INCOMPLETE );
 
         uint16 log_slot = GetQuestSlot( pQuest );
-        uint32 state = GetUInt32Value( log_slot + 1 );
-        state &= ~(1 << 24);
-        SetUInt32Value( log_slot + 1, state );
+        if( log_slot )
+        {
+            uint32 state = GetUInt32Value( log_slot + 1 );
+            state &= ~(1 << 24);
+            SetUInt32Value( log_slot + 1, state );
+        }
     }
 }
 
@@ -6863,9 +6873,12 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
 
         uint16 log_slot = GetQuestSlot( pQuest );
-        SetUInt32Value(log_slot + 0, 0);
-        SetUInt32Value(log_slot + 1, 0);
-        SetUInt32Value(log_slot + 2, 0);
+        if( log_slot )
+        {
+            SetUInt32Value(log_slot + 0, 0);
+            SetUInt32Value(log_slot + 1, 0);
+            SetUInt32Value(log_slot + 2, 0);
+        }
 
         if ( getLevel() < 60 )
         {
@@ -6891,7 +6904,8 @@ void Player::FailQuest( Quest *pQuest )
         IncompleteQuest( pQuest );
 
         uint16 log_slot = GetQuestSlot( pQuest );
-        SetUInt32Value( log_slot + 2, 1 );
+        if( log_slot )
+            SetUInt32Value( log_slot + 2, 1 );
         SendQuestFailed( pQuest );
     }
 }
@@ -6907,7 +6921,8 @@ void Player::FailTimedQuest( Quest *pQuest )
         IncompleteQuest( pQuest );
 
         uint16 log_slot = GetQuestSlot( pQuest );
-        SetUInt32Value( log_slot + 2, 1 );
+        if( log_slot )
+            SetUInt32Value( log_slot + 2, 1 );
         SendQuestTimerFailed( pQuest );
     }
 }
@@ -7153,16 +7168,31 @@ void Player::AdjustQuestReqItemCount( Quest *pQuest )
 
 uint16 Player::GetQuestSlot( Quest *pQuest )
 {
-    uint32 quest = 0;
     if( pQuest )
-        quest = pQuest->GetQuestInfo()->QuestId;
-
-    for ( uint16 i = 0; i < 20; i++ )
     {
-        if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
-            return PLAYER_QUEST_LOG_1_1 + 3*i;
+        uint32 quest = pQuest->GetQuestInfo()->QuestId;
+        for ( uint16 i = 0; i < 20; i++ )
+        {
+            if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
+                return PLAYER_QUEST_LOG_1_1 + 3*i;
+        }
     }
     return 0;
+}
+
+void Player::AreaExplored( Quest *pQuest )
+{
+    if( pQuest )
+    {
+        uint16 log_slot = GetQuestSlot( pQuest );
+        if( log_slot )
+        {
+            uint32 quest = pQuest->GetQuestInfo()->QuestId;
+            mQuestStatus[quest].m_explored = true;
+        }
+        if( CanCompleteQuest( pQuest ) )
+            CompleteQuest( pQuest );
+    }
 }
 
 void Player::ItemAdded( uint32 entry, uint32 count )

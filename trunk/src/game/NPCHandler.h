@@ -52,6 +52,5 @@ struct AreaTriggerPoint
 {
     uint32 Trigger_ID;
     uint32 Quest_ID;
-    uint32 Creature_ID;
 };
 #endif
