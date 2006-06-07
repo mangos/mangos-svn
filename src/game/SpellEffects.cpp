@@ -173,19 +173,17 @@ void Spell::EffectNULL(uint32 i)
 
 void Spell::EffectInstaKill(uint32 i)
 {
-    if(!unitTarget) return;
-    if(!unitTarget->isAlive()) return;
-    uint32 health = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-    m_caster->DealDamage(unitTarget, health, 0, false);
+    if( unitTarget && unitTarget->isAlive() )
+    {
+        uint32 health = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+        m_caster->DealDamage(unitTarget, health, 0, false);
+    }
 }
 
 void Spell::EffectSchoolDMG(uint32 i)
 {
-
-    if(!unitTarget) return;
-    if(!unitTarget->isAlive()) return;
-
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+    if( unitTarget && unitTarget->isAlive() )
+        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);   
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
