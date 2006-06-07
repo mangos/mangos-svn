@@ -2,9 +2,9 @@ GRANT USAGE ON * . * TO 'mangos'@'localhost' IDENTIFIED BY 'mangos' WITH MAX_QUE
 
 CREATE DATABASE `mangos` ;
 
-GRANT ALL PRIVILEGES ON `mangos` . * TO 'mangos'@'localhost' WITH GRANT OPTION ;
-
 CREATE DATABASE `realmd` ;
+
+GRANT ALL PRIVILEGES ON `mangos` . * TO 'mangos'@'localhost' WITH GRANT OPTION ;
 
 GRANT ALL PRIVILEGES ON `realmd` . * TO 'mangos'@'localhost' WITH GRANT OPTION ;
 
