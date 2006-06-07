@@ -100,6 +100,11 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         return;
     if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
         return;
+    if( !owner.isInCombat() )
+    {
+        owner.AIM_Initialize();
+        return;
+    }
 
     Traveller<Creature> traveller(owner);
     bool reach = i_destinationHolder.UpdateTraveller(traveller, time_diff, false);

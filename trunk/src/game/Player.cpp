@@ -6604,15 +6604,15 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
     {
         if ( pQuest->m_rewchoiceitemscount > 0 )
         {
-            if( !CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false, true ) )
+            if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] && !CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false, true ) )
                 return false;
         }
 
         if ( pQuest->m_rewitemscount > 0 )
         {
-            for (int i=0; i < QUEST_REWARDS_COUNT; i++)
+            for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
             {
-                if( !CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false, true ) )
+                if( pQuest->GetQuestInfo()->RewItemId[i] && !CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false, true ) )
                     return false;
             }
         }
