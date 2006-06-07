@@ -298,6 +298,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
 
         // 10% durability loss on death
+        // clean hostilList
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
             DEBUG_LOG("We are dead, loosing 10 percents durability");
@@ -349,14 +350,16 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
         }
 
+        //judge if GainXP, Pet kill like player kill,kill pet not like PvP
         bool playerkill = false;
+        bool PvP = false;
         Player *player;
         if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet() && (crtype != 8))
         {
             Unit* owner = ((Pet*)this)->GetOwner();
             if(!owner)
                 playerkill = false;
-            if(owner->GetTypeId() == TYPEID_PLAYER)
+            else if(owner->GetTypeId() == TYPEID_PLAYER)
             {
                 player = (Player*)owner;
                 playerkill = true;
@@ -366,56 +369,51 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             playerkill = true;
             player = (Player*)this;
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                PvP = true;
         }
         if (playerkill)
         {
-            if(pVictim->GetTypeId() != TYPEID_PLAYER)
-                player->AddQuestsLoot((Creature*)pVictim);
-
-            //Calculate honor points from this kill
             player->CalculateHonor(pVictim);
-            //Calculate reputation points from this kill to wich victim's enemy faction
             player->CalculateReputation(pVictim);
 
-            DEBUG_LOG("DealDamageIsPlayer");
-            uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
-            uint32 entry = 0;
-            if (pVictim->GetTypeId() != TYPEID_PLAYER)
+            if(!PvP)
+            {
+                DEBUG_LOG("DealDamageIsPvE");
+                player->AddQuestsLoot((Creature*)pVictim);
+                uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
+                uint32 entry = 0;
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
 
-            Group *pGroup = objmgr.GetGroupByLeader(player->GetGroupLeader());
-            if (pGroup)
-            {
-                DEBUG_LOG("DealDamageInGroup");
-                xp /= pGroup->GetMembersCount();
-                for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
+                Group *pGroup = objmgr.GetGroupByLeader(player->GetGroupLeader());
+                if (pGroup)
                 {
-                    Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
-                    if(!pGroupGuy)
-                        continue;
-                    if(GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GETXP_DISTANCE))
-                        continue;
-                    if(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel()) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
-                        continue;
-                    pGroupGuy->GiveXP(xp, victimGuid);
-
-                    if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                    DEBUG_LOG("DealDamageInGroup");
+                    xp /= pGroup->GetMembersCount();
+                    for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
+                    {
+                        Player *pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
+                        if(!pGroupGuy)
+                            continue;
+                        if(GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GETXP_DISTANCE))
+                            continue;
+                        if(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel()) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
+                            continue;
+                        pGroupGuy->GiveXP(xp, victimGuid);
                         pGroupGuy->KilledMonster(entry, victimGuid);
+                    }
                 }
-            }
-            else
-            {
-                DEBUG_LOG("DealDamageNotInGroup");
-
-                player->GiveXP(xp, victimGuid);
-
-                if (pVictim->GetTypeId() != TYPEID_PLAYER)
+                else
+                {
+                    DEBUG_LOG("DealDamageNotInGroup");
+                    player->GiveXP(xp, victimGuid);
                     player->KilledMonster(entry,victimGuid);
+                }
             }
         }
         else
         {
-            DEBUG_LOG("DealDamageIsCreature");
+            DEBUG_LOG("DealDamageIsEvE");
             SendAttackStop(victimGuid);
             addUnitState(UNIT_STAT_DIED);
         }
