@@ -1698,7 +1698,8 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_PLOYMORPH))     //Can't transform
+                                                            //Can't transform
+    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_PLOYMORPH))
         return;
     if (apply)
     {

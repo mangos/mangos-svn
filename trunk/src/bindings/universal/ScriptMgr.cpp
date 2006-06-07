@@ -239,7 +239,7 @@ CreatureAI* GetAI(Creature *_Creature )
     return tmpscript->GetAI(_Creature);
 }
 
-void ScriptedAI::UpdateAI(const uint32) 
+void ScriptedAI::UpdateAI(const uint32)
 {
     if( m_creature->getVictim() != NULL )
     {
@@ -266,7 +266,7 @@ void ScriptedAI::UpdateAI(const uint32)
     }
 }
 
-void ScriptedAI::AttackStop(Unit *) 
+void ScriptedAI::AttackStop(Unit *)
 {
     if( m_creature->isAlive() )
         DoGoHome();
@@ -294,9 +294,7 @@ void ScriptedAI::DoGoHome()
     }
 }
 
-
 bool ScriptedAI::needToStop() const
 {
     return ( !m_creature->getVictim()->isTargetableForAttack() || !m_creature->isAlive() );
 }
-

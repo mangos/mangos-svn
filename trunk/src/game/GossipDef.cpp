@@ -149,7 +149,6 @@ void PlayerMenu::CloseGossip()
     sLog.outDebug( "WORLD: Sent SMSG_GOSSIP_COMPLETE" );
 }
 
-
 void PlayerMenu::SendPointOfInterest( float X, float Y, uint32 Icon, uint32 Flags, uint32 Data, char const * locName )
 {
     WorldPacket data;
@@ -224,8 +223,6 @@ void PlayerMenu::SendTalking( char const * title, char const * text )
 
     sLog.outString( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
-
-
 
 /*********************************************************/
 /***                    QUEST SYSTEM                   ***/
@@ -552,4 +549,3 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
     pSession->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_REQUEST_ITEMS NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestInfo()->QuestId );
 }
-

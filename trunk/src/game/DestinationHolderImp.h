@@ -118,7 +118,7 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32
     if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
     {
         Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
-		z = Map->GetHeight( x, y );
+        z = Map->GetHeight( x, y );
         float ori = traveller.GetTraveller().GetAngle(x, y);
         traveller.Relocation(x, y, z, ori);
     }
