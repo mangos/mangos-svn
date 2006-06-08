@@ -288,7 +288,8 @@ void Spell::EffectHeal( uint32 i )
         SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
 
         //If the target is in combat, then player is in combat too
-        if( m_caster->GetTypeId() == TYPEID_PLAYER &&
+        if( m_caster != unitTarget &&
+			m_caster->GetTypeId() == TYPEID_PLAYER &&
             unitTarget->isInCombat() &&
             unitTarget->GetTypeId() == TYPEID_PLAYER &&
             unitTarget->getVictim()->GetTypeId() == TYPEID_PLAYER )
@@ -1260,52 +1261,56 @@ void Spell::EffectAddComboPoints(uint32 i)
 
 void Spell::EffectDuel(uint32 i)
 {
+	WorldPacket data;
 
-    if(!m_caster)
-        return;
+    if(!m_caster) return;
 
-    WorldPacket data;
-
-    GameObject* pGameObj = new GameObject();
-
-    uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
-
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetMapId(),
-        m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
-        m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
-        m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0, 0, 0, 0))
-        return;
-    pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
-    pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
-    pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
-
-    pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, ((Player*)m_caster)->getFaction() );
-    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
-    pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
-    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
-    pGameObj->SetSpellId(m_spellInfo->Id);
-
-    m_caster->AddGameObject(pGameObj);
-    MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
-
-    Player *caster = (Player*)m_caster;
+	Player *caster = (Player*)m_caster;
     Player *target = (Player*)unitTarget;
+	
+	if( caster->isInDuel() || target->isInDuel() ) return;
 
+	//CREATE DUEL FLAG OBJECT
+		GameObject* pGameObj = new GameObject();
+
+		uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
+
+		if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetMapId(),
+			m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
+			m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
+			m_caster->GetPositionZ(),
+			m_caster->GetOrientation(), 0, 0, 0, 0))
+			return;
+		pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
+		pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
+		pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
+
+		pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
+		pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, ((Player*)m_caster)->getFaction() );
+		pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
+		pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
+		pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+		pGameObj->SetSpellId(m_spellInfo->Id);
+
+		m_caster->AddGameObject(pGameObj);
+		MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
+	//END
+
+	//Send request to opositor
     data.Initialize(SMSG_DUEL_REQUESTED);
-    data << pGameObj->GetGUID() << caster->GetGUID();
+    data << pGameObj->GetGUID(); 
+	data << caster->GetGUID();
     target->GetSession()->SendPacket(&data);
-
+	//Set who are the oponents
     caster->SetDuelVs(target);
     target->SetDuelVs(caster);
-
+	//Players are not in duel yet...
     caster->SetInDuel(false);
     target->SetInDuel(false);
-
+	//Set who is the duel caster
     caster->SetDuelSender(caster);
     target->SetDuelSender(caster);
-
+	
     caster->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
     target->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
 
