@@ -41,6 +41,7 @@
 #include "Formulas.h"
 #include "Pet.h"
 #include "SpellAuras.h"
+#include "EventSystem.h"
 
 #include <cmath>
 
@@ -6117,6 +6118,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot )
     {
         sLog.outDebug( "STORAGE : DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
         pItem->SetOwner(0);
+        pItem->DeleteFromDB();
         ItemPrototype *pProto = pItem->GetProto();
 
         if( bag == INVENTORY_SLOT_BAG_0 )
@@ -6786,7 +6788,8 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-                SetUInt32Value( log_slot + 2, GetInGameTime() + limittime * 60000 );
+                uint32 qtime = static_cast<uint32>(time(NULL)) + (limittime * 0.001); 
+                SetUInt32Value( log_slot + 2, qtime );
             }
             else
             {

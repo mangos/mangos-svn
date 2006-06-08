@@ -46,7 +46,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //nothing
     &Spell::EffectInstaKill,                                //SPELL_EFFECT_INSTAKILL
     &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DUMMY
+    &Spell::EffectDummy,                                    //SPELL_EFFECT_DUMMY
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT
     &Spell::EffectTeleportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS
     &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA
@@ -169,6 +169,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 
 void Spell::EffectNULL(uint32 i)
 {
+	sLog.outDebug("WORLD: Spell Effect DUMMY");
 }
 
 
@@ -197,6 +198,10 @@ void Spell::EffectSchoolDMG(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive() )
         m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
+}
+
+void Spell::EffectDummy(uint32 i)
+{
 }
 
 void Spell::EffectTriggerSpell(uint32 i)

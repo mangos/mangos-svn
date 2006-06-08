@@ -192,7 +192,7 @@ enum SpellFailedReason
     CAST_FAIL_INVALID_TARGET = 10,
     CAST_FAIL_CANT_BE_CHARMED = 11,
     CAST_FAIL_CANT_BE_DISENCHANTED = 12,                    //decompose
-    //CAST_FAIL_IN_COMBAT							= 14,
+    //CAST_FAIL_IN_COMBAT                            = 14,
     CAST_FAIL_TARGET_IS_TAPPED = 13,
     CAST_FAIL_CANT_START_DUEL_INVISIBLE = 14,
     CAST_FAIL_CANT_START_DUEL_STEALTHED = 15,
@@ -263,7 +263,7 @@ enum SpellFailedReason
     CAST_FAIL_CAN_ONLY_USE_MOUNTED = 80,
     CAST_FAIL_CAN_ONLY_USE_AT_NIGHT = 81,
     CAST_FAIL_CAN_ONLY_USE_OUTDOORS = 82,
-    //CAST_FAIL_ONLY_SHAPESHIFTED = 83,			// didn't display
+    //CAST_FAIL_ONLY_SHAPESHIFTED = 83,            // didn't display
     CAST_FAIL_CAN_ONLY_USE_STEALTHED  = 84,
     CAST_FAIL_CAN_ONLY_USE_WHILE_SWIMMING = 85,
     CAST_FAIL_OUT_OF_RANGE = 86,
@@ -334,6 +334,7 @@ class Spell
         void EffectNULL(uint32 );
         void EffectSchoolDMG(uint32 i);
         void EffectInstaKill(uint32 i);
+        void EffectDummy(uint32 i);
         void EffectTeleportUnits(uint32 i);
         void EffectApplyAura(uint32 i);
         void EffectSendEvent(uint32 i);
