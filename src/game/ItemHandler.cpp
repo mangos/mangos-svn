@@ -348,7 +348,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - pProto->BuyPrice;
+        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
@@ -430,7 +430,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - pProto->BuyPrice;
+        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
