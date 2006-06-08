@@ -1075,6 +1075,31 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     return true;
 }
 
+void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    if(!spellInfo)
+        return;
+    AuraMap::iterator i;
+    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    {
+        uint32 i_spellId = (*i).second->GetSpellProto()->Id;
+        if((*i).second && i_spellId != spellId)
+        {
+            //if(spellInfo->activeIconID && (*i).second->GetSpellProto()->activeIconID == spellInfo->activeIconID)
+            //    RemoveAurasDueToSpell(i_spellId);
+            //else 
+            if(spellInfo->SpellIconID == (*i).second->GetSpellProto()->SpellIconID)
+            {
+                RemoveAurasDueToSpell(i_spellId);
+            
+                i = m_Auras.begin();
+                if(!(*i).second)
+                    return;
+            }
+        }
+    }
+}
 void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
 {
     AuraMap::iterator i;
