@@ -147,11 +147,15 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
     sLog.outDebug( "WORLD: Recvd MSG_PVP_LOG_DATA Message");
     WorldPacket data;
 
+    BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID);
+    if(!bg)
+        return;
+
     data.Initialize(MSG_PVP_LOG_DATA);                      // MSG_PVP_LOG_DATA
     data << uint8(0x0);
-    data << uint32(sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresSize());
+    data << uint32(bg->GetPlayerScoresSize());
 
-    for(std::map<uint64, BattleGroundScore>::iterator itr=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresBegin();itr!=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresEnd();++itr)
+    for(std::map<uint64, BattleGroundScore>::iterator itr=bg->GetPlayerScoresBegin();itr!=bg->GetPlayerScoresEnd();++itr)
     {
         data << (uint64)itr->first;                         //8
         data << (uint32)itr->second.Rank;                   //4                    //Rank
@@ -170,7 +174,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
     }
     GetPlayer()->GetSession()->SendPacket(&data);
 
-    sLog.outDebug( "WORLD: Send MSG_PVP_LOG_DATA Message players:%u", sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayerScoresSize());
+    sLog.outDebug( "WORLD: Send MSG_PVP_LOG_DATA Message players:%u", bg->GetPlayerScoresSize());
 
     //data << (uint8)0; ////Warsong Gulch
     /*data << (uint8)1; //
