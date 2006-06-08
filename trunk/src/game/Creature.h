@@ -115,8 +115,12 @@ struct GossipOption
 
 struct CreatureItem
 {
-    uint32 ItemId;
-    uint32 amount;
+    uint32 id;
+    uint32 buycount;
+    uint32 count;
+    uint32 maxcount;
+    uint32 incrtime;
+    uint32 lastincr;
 };
 
 struct TrainerSpell
@@ -238,18 +242,29 @@ class MANGOS_DLL_SPEC Creature : public Unit
             AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, false);
         }
 
-        void setItemId(int slot, uint32 tempitemid);
-        void setItemAmount(int slot, int tempamount);
-        void setItemAmountById(uint32 tempitemid, int tempamount);
-
-        void increaseItemCount() { itemcount++; }
-        void addItem(uint32 itemid, uint32 amount);
-        int getItemCount() { return itemcount; }
-        int getItemSlotById(uint32 itemid);
-
-        int getItemAmount(int slot) { return item_list[slot].amount; }
-        uint32 getItemId(int slot) { return item_list[slot].ItemId; }
-        ItemPrototype *getProtoByslot(uint32 slot);
+        /*********************************************************/
+        /***                    VENDOR SYSTEM                  ***/
+        /*********************************************************/
+        
+        uint8 GetItemCount() { return itemcount; }
+        uint32 GetItemId( uint32 slot ) { return item_list[slot].id; }
+        uint32 GetItemBuyCount( uint32 slot ) { return item_list[slot].buycount; }
+        uint32 GetItemCount( uint32 slot ) { return item_list[slot].count; }
+        uint32 GetMaxItemCount( uint32 slot ) { return item_list[slot].maxcount; }
+        uint32 GetItemIncrTime( uint32 slot ) { return item_list[slot].incrtime; }
+        uint32 GetItemLastIncr( uint32 slot ) { return item_list[slot].lastincr; }
+        void SetItemCount( uint32 slot, uint32 count ) { item_list[slot].count = count; }
+        void SetItemLastIncr( uint32 slot, uint32 ptime ) { item_list[slot].lastincr = ptime; }
+        void AddItem( uint32 item, uint32 buycount, uint32 maxcount, uint32 ptime)
+        {
+            item_list[itemcount].id = item;
+            item_list[itemcount].buycount = buycount;
+            item_list[itemcount].count = maxcount;
+            item_list[itemcount].maxcount = maxcount;
+            item_list[itemcount].incrtime = ptime;
+            item_list[itemcount].lastincr = (uint32)time(NULL);
+            itemcount++;
+        }
 
         CreatureInfo *GetCreatureInfo();
 

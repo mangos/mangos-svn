@@ -322,23 +322,24 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
     uint64 vendorguid, bagguid;
     uint32 item;
-    uint8 bag, slot, count, vendorslot = 0;
+    uint8 bag, slot, unk1, vendorslot;
 
-    recv_data >> vendorguid >> item >> bagguid >> slot >> count;
+    recv_data >> vendorguid >> item >> bagguid >> slot >> unk1;
+    recv_data.hexlike();
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
     ItemPrototype *pProto = objmgr.GetItemPrototype( item );
     if( pCreature && pProto )
     {
-        for(int i = 0; i < pCreature->getItemCount(); i++)
+        for(int i = 0; i < pCreature->GetItemCount(); i++)
         {
-            if ( pCreature->getItemId(i) == item )
+            if ( pCreature->GetItemId(i) == item )
             {
                 vendorslot = i;
                 break;
             }
         }
-        if( !vendorslot || (( pCreature->getItemAmount( vendorslot ) >= 0 ) && ( count > pCreature->getItemAmount( vendorslot ))) )
+        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) == 0 )
         {
             _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
@@ -348,7 +349,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
+        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice;
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
@@ -372,7 +373,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 }
             }
         }
-        Item *pItem = _player->CreateItem( item, count);
+        Item *pItem = _player->CreateItem( item, pCreature->GetItemBuyCount( vendorslot ));
         uint16 pos = ((bag << 8) | slot);
         if( _player->IsEquipmentPos( pos ) )
         {
@@ -390,6 +391,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             {
                 _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
                 _player->StoreItem( pos, pItem );
+                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
             }
             else
                 delete pItem;
@@ -404,23 +407,24 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM" );
     uint64 vendorguid;
     uint32 item;
-    uint8 slot, count, vendorslot = 0;
+    uint8 unk1, unk2, vendorslot;
 
-    recv_data >> vendorguid >> item >> count >> slot;
+    recv_data >> vendorguid >> item >> unk1 >> unk2;
+    recv_data.hexlike();
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
     ItemPrototype *pProto = objmgr.GetItemPrototype( item );
     if( pCreature && pProto )
     {
-        for(int i = 0; i < pCreature->getItemCount(); i++)
+        for(int i = 0; i < pCreature->GetItemCount(); i++)
         {
-            if ( pCreature->getItemId(i) == item )
+            if ( pCreature->GetItemId(i) == item )
             {
                 vendorslot = i;
                 break;
             }
         }
-        if( !vendorslot || (( pCreature->getItemAmount( vendorslot ) >= 0 ) && ( count > pCreature->getItemAmount( vendorslot ))) )
+        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) == 0 )
         {
             _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
@@ -430,16 +434,18 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
+        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice;
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
             return;
         }
-        if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, count, false, true ) )
+        if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, pCreature->GetItemBuyCount( vendorslot ), false, true ) )
         {
             _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-            _player->StoreNewItem( pos, item, count );
+            _player->StoreNewItem( pos, item, pCreature->GetItemBuyCount( vendorslot ) );
+            if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
         }
         return;
     }
@@ -448,139 +454,62 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
 {
-
-    WorldPacket data;
     uint64 guid;
 
     recv_data >> guid;
-    sLog.outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY %u", guid );
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    sLog.outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY" );
 
-    if (unit == NULL)
-        return;
-
-    uint8 numitems = (uint8)unit->getItemCount();
-    uint8 actualnumitems = 0;
-    uint8 i = 0;
-
-    for(i = 0; i < numitems; i ++ )
-    {
-        if(unit->getItemId(i) != 0) actualnumitems++;
-    }
-    uint32 guidlow = GUID_LOPART(guid);
-
-    data.Initialize( SMSG_LIST_INVENTORY );
-    data << guid;
-    data << uint8( actualnumitems );
-
-    ItemPrototype * curItem;
-    for(i = 0; i < numitems; i++ )
-    {
-        if(unit->getItemId(i) != 0)
-        {
-            curItem = unit->getProtoByslot(i);
-
-            if( !curItem )
-            {
-                sLog.outError( "Unit %i has nonexistant item %i! the item will be removed next time", guid, unit->getItemId(i) );
-                for( int a = 0; a < 7; a ++ )
-                    data << uint32( 0 );
-
-                // That should be OR or AND ?
-                sDatabase.PExecute("DELETE * FROM `npc_vendor` WHERE `entry` = '%u' AND `itemguid` = '%u'", unit->GetEntry(),unit->getItemId(i));
-
-                unit->setItemAmount(i,0);
-                unit->setItemId(i,0);
-
-            }
-            else
-            {
-                data << uint32( i + 1 );
-
-                data << uint32( unit->getItemId(i) );
-
-                data << uint32( curItem->DisplayInfoID );
-
-                data << uint32( unit->getItemAmount(i) );
-
-                data << uint32( curItem->BuyPrice );
-                data << uint32( 0 );
-                data << uint32( 0 );
-            }
-        }
-    }
-
-    if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
-        return;
-
-    WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
-    SendPacket( &data );
-    sLog.outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
+    SendListInventory( guid );
 }
 
 void WorldSession::SendListInventory( uint64 guid )
 {
-    WorldPacket data;
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
-
-    if (unit == NULL)
-        return;
-
-    uint8 numitems = (uint8)unit->getItemCount();
-    uint8 actualnumitems = 0;
-    uint8 i = 0;
-
-    for(i = 0; i < numitems; i ++ )
+    sLog.outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
+    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    if( pCreature )
     {
-        if(unit->getItemId(i) != 0) actualnumitems++;
-    }
-    uint32 guidlow = GUID_LOPART(guid);
-
-    data.Initialize( SMSG_LIST_INVENTORY );
-    data << guid;
-    data << uint8( actualnumitems );
-
-    ItemPrototype * curItem;
-    for(i = 0; i < numitems; i++ )
-    {
-        if(unit->getItemId(i) != 0)
+        uint32 guidlow = GUID_LOPART(guid);
+        uint8 numitems = pCreature->GetItemCount(); 
+        uint32 ptime = time(NULL);
+        uint32 diff;
+        
+        WorldPacket data;
+        data.Initialize( SMSG_LIST_INVENTORY );
+        data << guid;
+        data << numitems;
+        
+        ItemPrototype *pProto;
+        for(int i = 0; i < numitems; i++ )
         {
-            curItem = unit->getProtoByslot(i);
-            if( !curItem )
+            if( pCreature->GetItemId(i) != 0 )
             {
-                sLog.outError( "Unit %i has nonexistant item %i! the item will be removed next time", guid, unit->getItemId(i) );
-                for( int a = 0; a < 7; a ++ )
-                    data << uint32( 0 );
-
-                sDatabase.PExecute("DELETE * FROM `npc_vendor` WHERE `entry` = '%u' AND `itemguid` = '%u'", unit->GetEntry(),unit->getItemId(i));
-
-                unit->setItemAmount(i,0);
-                unit->setItemId(i,0);
-            }
-            else
-            {
-                data << uint32( i + 1 );
-
-                data << uint32( unit->getItemId(i) );
-
-                data << uint32( curItem->DisplayInfoID );
-
-                data << uint32( unit->getItemAmount(i) );
-
-                data << uint32( curItem->BuyPrice );
-                data << uint32( 0 );
-                data << uint32( 0 );
+                pProto = objmgr.GetItemPrototype(pCreature->GetItemId(i));
+                if( pProto )
+                {
+                    if( pCreature->GetItemIncrTime(i) != 0 && (pCreature->GetItemLastIncr(i) + pCreature->GetItemIncrTime(i) <= ptime) )
+                    {
+                        diff = uint32((ptime - pCreature->GetItemLastIncr(i))/pCreature->GetItemIncrTime(i));
+                        if( (pCreature->GetItemCount(i) + diff * pCreature->GetItemBuyCount(i)) <= pCreature->GetMaxItemCount(i) )
+                            pCreature->SetItemCount(i, pCreature->GetItemCount(i) + diff * pCreature->GetItemBuyCount(i));
+                        else
+                            pCreature->SetItemCount(i, pCreature->GetMaxItemCount(i));
+                        pCreature->SetItemLastIncr(i, ptime);
+                    }
+                    data << uint32( i + 1 );
+                    data << pCreature->GetItemId(i);
+                    data << pProto->DisplayInfoID;
+                    data << uint32(pCreature->GetMaxItemCount(i) <= 0 ? 0xFFFFFFFF : pCreature->GetItemCount(i));
+                    data << pProto->BuyPrice;
+                    data << uint32( 0xFFFFFFFF );
+                    data << pCreature->GetItemBuyCount(i);
+                }
             }
         }
+        
+        if ( !(data.size() == 8 + 1 + ((numitems * 7) * 4)) )
+            return;
+        SendPacket( &data );
     }
-
-    if (!(data.size() == 8 + 1 + ((actualnumitems * 7) * 4)))
-        return;
-
-    WPAssert(data.size() == 8 + 1 + ((actualnumitems * 7) * 4));
-    SendPacket( &data );
-    sLog.outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
 }
 
 void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )

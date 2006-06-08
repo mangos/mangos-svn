@@ -41,7 +41,6 @@
 #include "Formulas.h"
 #include "Pet.h"
 #include "SpellAuras.h"
-#include "EventSystem.h"
 
 #include <cmath>
 
@@ -5098,7 +5097,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
 {
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : CanStoreItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE : CanStoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
@@ -5426,7 +5425,7 @@ uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
     {
         if( !CanUseItem( pItem, msg ) )
             return NULL;
-        sLog.outDebug( "STORAGE : CanEquipItem slot = %u, item = %u", slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE : CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
@@ -5506,7 +5505,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
 {
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : CanBankItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE : CanBankItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
@@ -5926,7 +5925,7 @@ void Player::StoreItem( uint16 pos, Item *pItem )
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
 
-        sLog.outDebug( "STORAGE : StoreItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE : StoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
 
         Item *pItem2 = GetItemByPos( bag, slot );
 

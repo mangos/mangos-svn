@@ -327,7 +327,7 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
 }
 
 bool ChatHandler::HandleItemCommand(const char* args)
-{
+{/*
     WorldPacket data;
 
     char* pitem = strtok((char*)args, " ");
@@ -365,10 +365,10 @@ bool ChatHandler::HandleItemCommand(const char* args)
     {
         QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
 
-        uint8 itemscount = (uint8)pCreature->getItemCount();
+        uint8 itemscount = pCreature->GetItemCount();
         pCreature->setItemId(itemscount , item);
         pCreature->setItemAmount(itemscount , amount);
-        pCreature->increaseItemCount();
+        pCreature->IncrItemCount();
 
         sstext << LANG_ITEM << item << "' '" << tmpItem->Name1 << LANG_ITEM_ADDED_TO_LIST << '\0';
         delete result;
@@ -379,12 +379,12 @@ bool ChatHandler::HandleItemCommand(const char* args)
     }
 
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
-    m_session->SendPacket( &data );
+    m_session->SendPacket( &data );*/
     return true;
 }
 
 bool ChatHandler::HandleItemRemoveCommand(const char* args)
-{
+{/*
     WorldPacket data;
 
     char* iguid = strtok((char*)args, " ");
@@ -409,7 +409,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     }
 
     uint32 itemguid = atoi(iguid);
-    int slot = pCreature->getItemSlotById(itemguid);
+    int slot = pCreature->GetItemSlot(itemguid);
 
     std::stringstream sstext;
     if(slot != -1)
@@ -437,7 +437,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
     }
 
     FillSystemMessageData(&data, m_session, sstext.str().c_str());
-    m_session->SendPacket( &data );
+    m_session->SendPacket( &data );*/
 
     return true;
 }
