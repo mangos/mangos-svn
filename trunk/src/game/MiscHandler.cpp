@@ -292,7 +292,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
-    if( (GetPlayer()->isInCombat()) )
+    if( (GetPlayer()->isInCombat()) || (GetPlayer()->isInDuel()) )
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
@@ -519,7 +519,7 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 {
     WorldPacket data;
 
-    if ( (!GetPlayer()->isAlive()) || GetPlayer()->isInCombat())
+    if ( (!GetPlayer()->isAlive()) || GetPlayer()->isInCombat() || GetPlayer()->isInDuel() )
     {
         data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);

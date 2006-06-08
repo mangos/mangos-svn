@@ -50,19 +50,33 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         DEBUG_LOG("Player 1 is: %lu", (unsigned long)pl->GetGUID());
         DEBUG_LOG("Player 2 is: %lu", (unsigned long)plTarget->GetGUID());
 
+		//Set players team
         pl->SetUInt32Value(PLAYER_DUEL_TEAM,1);
         plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,2);
 
-        pl->SetPvP(true);
-        plTarget->SetPvP(true);
+#if 0
+		//******************************* TEMPORARY *********************************
+		//TODO: Set PvP ON and OFF to players is a little magic to Duel System works
+		//      It is not the right way to do... We need to fix it! :D
+		//
+		//Set players factions. These factios are into factionstemplate.dbc
+		pl->setFaction(-1, BLUE_TEAM);        //Blue faction
+		plTarget->setFaction(-1, RED_TEAM);   //Red faction
 
-        pl->m_isInDuel = true;
-        plTarget->m_isInDuel = true;
+		pl->StorePvpState();
+		plTarget->StorePvpState();
+
+        pl->SetPvP(false);
+        plTarget->SetPvP(true);
+		//******************************* TEMPORARY *********************************
+#endif
+
+		pl->SetInDuel(true);
+        plTarget->SetInDuel(true);
 
         WorldPacket data;
 
         data.Initialize(SMSG_DUEL_COUNTDOWN);
-        //data << (uint64)0xbb8;                              // 3 seconds
         data << (uint32)3000;                               // 3 seconds
         pl->GetSession()->SendPacket(&data);
         plTarget->GetSession()->SendPacket(&data);
