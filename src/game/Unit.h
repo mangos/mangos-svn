@@ -140,7 +140,7 @@ enum ImmuneToMechanic
     IMMUNE_MECHANIC_KNOCKOUT         =14,
     IMMUNE_MECHANIC_BLEED            =15,
     IMMUNE_MECHANIC_HEAL             =16,
-    IMMUNE_MECHANIC_PLOYMORPH        =17,
+    IMMUNE_MECHANIC_POLYMORPH        =17,
     IMMUNE_MECHANIC_BANISH           =18,
     IMMUNE_MECHANIC_SHIELDED         =19,
     IMMUNE_MECHANIC_UNKOWN20         =20,
@@ -359,6 +359,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
         void RemoveSpellsCausingAura(uint32 auraType);
+        void RemoveRankAurasDueToSpell(uint32 spellId);
 
         void RemoveAllAuras();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }

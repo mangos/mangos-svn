@@ -526,13 +526,15 @@ void Aura::_AddAura()
     uint8 slot = 0xFF, i;
     uint32 maxduration = m_duration;
     Aura* aura = NULL;
-    SpellEntry* spellproto = GetSpellProto();
-    aura = m_target->GetAura(m_spellId,spellproto->EffectApplyAuraName[m_effIndex]);
-    if(!aura)
-    {
-        ApplyModifier(true);
-        sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-    }
+    SpellEntry *spellproto = sSpellStore.LookupEntry(m_spellId);
+    aura = m_target->GetAura(m_spellId, spellproto->EffectApplyAuraName[m_effIndex]);
+    if(aura)
+        m_target->RemoveAurasDueToSpell(m_spellId);
+    m_target->RemoveRankAurasDueToSpell(m_spellId);
+
+    ApplyModifier(true);
+    sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
+
     for(i = 0; i< 3; i++)
     {
         aura = m_target->GetAura(m_spellId, i);
@@ -1698,8 +1700,7 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleAuraTransform(bool apply)
 {
-                                                            //Can't transform
-    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_PLOYMORPH))
+    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_POLYMORPH))     //Can't transform
         return;
     if (apply)
     {
