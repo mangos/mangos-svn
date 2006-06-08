@@ -665,37 +665,6 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
     SendMessageToSet( &data, false );
 }
 
-void Creature::setItemId(int slot, uint32 tempitemid) { item_list[slot].ItemId=tempitemid; }
-void Creature::setItemAmount(int slot, int tempamount) { item_list[slot].amount = tempamount; }
-
-void Creature::setItemAmountById(uint32 tempitemid, int tempamount)
-{
-    int i;
-    for(i=0;i<itemcount;i++)
-    {
-        if(item_list[i].ItemId == tempitemid)
-            item_list[i].amount = tempamount;
-    }
-}
-
-void Creature::addItem(uint32 itemid, uint32 amount)
-{
-    item_list[itemcount].ItemId = itemid;
-    item_list[itemcount++].amount = amount;
-
-}
-
-int Creature::getItemSlotById(uint32 itemid)
-{
-    int i;
-    for(i=0;i<itemcount;i++)
-    {
-        if(item_list[i].ItemId == itemid)
-            return i;
-    }
-    return -1;
-}
-
 void Creature::getSkinLoot()
 {
     CreatureInfo *cinfo = GetCreatureInfo();
@@ -878,7 +847,7 @@ void Creature::_LoadGoods()
 
     itemcount = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_vendor` WHERE `entry` = '%u';", GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT `item`,`buycount`,`maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u';", GetEntry());
 
     if(!result) return;
 
@@ -886,15 +855,13 @@ void Creature::_LoadGoods()
     {
         Field *fields = result->Fetch();
 
-        if (getItemCount() >= MAX_CREATURE_ITEMS)
+        if (GetItemCount() >= MAX_CREATURE_ITEMS)
         {
-            sLog.outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetUInt32Value(OBJECT_FIELD_ENTRY), getItemCount(), MAX_CREATURE_ITEMS );
+            sLog.outError( "Vendor %u has too many items (%u >= %i). Check the DB!", GetUInt32Value(OBJECT_FIELD_ENTRY), GetItemCount(), MAX_CREATURE_ITEMS );
             break;
         }
 
-        setItemId(getItemCount() , fields[1].GetUInt32());
-        setItemAmount(getItemCount() , fields[2].GetUInt32());
-        increaseItemCount();
+        AddItem( fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32(), fields[3].GetUInt32());
     }
     while( result->NextRow() );
 
@@ -977,9 +944,6 @@ float Creature::GetAttackDistance(Unit *pl)
 
     return RetDistance;
 }
-
-ItemPrototype *Creature::getProtoByslot(uint32 slot)
-{ return objmgr.GetItemPrototype(item_list[slot].ItemId); }
 
 CreatureInfo *Creature::GetCreatureInfo()
 {

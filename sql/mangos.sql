@@ -1619,14 +1619,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_vendor`;
 CREATE TABLE `npc_vendor` (
-  `entry` bigint(20) unsigned NOT NULL default '0',
-  `itemguid` bigint(20) unsigned NOT NULL default '0',
-  `amount` bigint(20) NOT NULL default '5',
-  `index_id` bigint(20) NOT NULL auto_increment,
-  PRIMARY KEY  (`index_id`),
-  UNIQUE KEY `index_id` (`index_id`),
-  KEY `vendor_id` (`entry`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='InnoDB free: 18432 kB';
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `buycount` int(11) unsigned NOT NULL default '1',
+  `maxcount` int(11) unsigned NOT NULL default '0',
+  `incrtime` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
 
 --
 -- Dumping data for table `npc_vendor`
