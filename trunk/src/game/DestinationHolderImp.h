@@ -63,27 +63,26 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(const float &x1, const float &y1,
 
 template<typename TRAVELLER>
 void
-DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &x2, const float &y2, const float &dest_z, const float offset)
+DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &dest_x, const float &dest_y, const float &dest_z, const float offset)
 {
     i_fromX = traveller.GetPositionX();
     i_fromY = traveller.GetPositionY();
     i_fromZ = traveller.GetPositionZ();
-    float dest_x, dest_y;
-    _findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
+    //float dest_x, dest_y;
+    //_findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
 
     UpdateLocation(traveller, dest_x, dest_y, dest_z);
 
-    float dx = i_destX - i_fromX;
-    float dy = i_destY - i_fromY;
-    float dz = i_destZ - i_fromZ;
-    float dist = ((dx*dx) + (dy*dy) + (dz*dz));
-    dist = ::sqrt(dist);
+    float dx = dest_x - i_fromX;
+    float dy = dest_y - i_fromY;
+    float dz = dest_z - i_fromZ;
+    float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz));
     double speed = traveller.Speed();
-    if(speed<=0)
+    if( speed <= 0 )
         speed = 2.5f;
     speed *= 0.001f;
     uint32 travel_time = static_cast<uint32>(dist / speed + 0.5);
-    traveller.MoveTo(i_destX, i_destY, i_destZ, travel_time);
+    traveller.MoveTo(dest_x, dest_y, dest_z, travel_time);
 }
 
 template<typename TRAVELLER>
@@ -111,14 +110,12 @@ bool
 DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update)
 {
     i_tracker.Update(diff);
-    float x,y,z;
+    float x,y,z/*,z2*/;
     GetLocationNow(x, y, z);
     if( x == -431602080 )
         return false;
     if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
     {
-        Map* Map = MapManager::Instance().GetMap(traveller.GetTraveller().GetMapId());
-        z = Map->GetHeight( x, y );
         float ori = traveller.GetTraveller().GetAngle(x, y);
         traveller.Relocation(x, y, z, ori);
     }
