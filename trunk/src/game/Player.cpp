@@ -600,7 +600,7 @@ void Player::Update( uint32 p_time )
 
     UpdatePVPFlag(time(NULL));
 
-	CheckDuelDistance();
+    CheckDuelDistance();
 
     CheckExploreSystem();
 
@@ -704,14 +704,14 @@ void Player::Update( uint32 p_time )
 
     if (m_deathState == JUST_DIED)
     {
-		if( isInDuel() )
-		{
+        if( isInDuel() )
+        {
             DuelComplete();
-		}
-		else
-		{
+        }
+        else
+        {
             KillPlayer();
-		}
+        }
     }
 
     if(m_nextSave > 0)
@@ -1885,7 +1885,7 @@ void Player::ResurrectPlayer()
 
     // return the PvP enable flag to normal
     SetPvP( GetPvP() );
-	
+    
 
     setDeathState(ALIVE);
 
@@ -2900,19 +2900,19 @@ void Player::CalculateHonor(Unit *uVictim)
 //If players are too far way of duel flag... then player loose the duel
 void Player::CheckDuelDistance()
 {
-	if( !isInDuel() ) return;
-	
-	WorldPacket data;
-	uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
-	
-	GameObject* obj = NULL;
+    if( !isInDuel() ) return;
+    
+    WorldPacket data;
+    uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
+    
+    GameObject* obj = NULL;
     obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
-	//If the distance of duel flag is > 50
-	if( GetDistanceSq(obj) > (float)2500 )
-	{
-		DuelComplete();
-	}
+    //If the distance of duel flag is > 50
+    if( GetDistanceSq(obj) > (float)2500 )
+    {
+        DuelComplete();
+    }
 
 }
 
@@ -2949,14 +2949,14 @@ void Player::DuelComplete()
     SetInDuel(false);
     m_pDuel->SetInDuel(false);
 
-	//Restore the state of pvpOn
-	RestorePvpState();
-	m_pDuel->RestorePvpState();
+    //Restore the state of pvpOn
+    RestorePvpState();
+    m_pDuel->RestorePvpState();
 
-	//ResurrectPlayer();
+    //ResurrectPlayer();
     setDeathState(ALIVE);
 
-	//Remove Duel Flag object
+    //Remove Duel Flag object
     GameObject* obj = NULL;
     obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
@@ -2967,10 +2967,10 @@ void Player::DuelComplete()
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
     m_pDuel->SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     m_pDuel->SetUInt32Value(PLAYER_DUEL_TEAM, 0);
-	
-	//Restore to correct factiontemplate
-	setFaction(getRace(), 0);
-	m_pDuel->setFaction(m_pDuel->getRace(), 0);
+    
+    //Restore to correct factiontemplate
+    setFaction(getRace(), 0);
+    m_pDuel->setFaction(m_pDuel->getRace(), 0);
 }
 
 static unsigned long    holdrand = 0x89abcdef;
@@ -8261,7 +8261,7 @@ void Player::PlaySound(uint32 Sound, bool OnlySelf)
 
 void Player::UpdatePVPFlag(time_t currTime)
 {
-	WorldPacket data;
+    WorldPacket data;
 
     //Player is counting to set/unset pvp flag
     if( !m_pvp_counting ) return;
@@ -8280,11 +8280,11 @@ void Player::UpdatePVPFlag(time_t currTime)
 
         SetPvP(false);
 
-		sChatHandler.FillSystemMessageData(&data, GetSession(), "PvP toggled off.");
+        sChatHandler.FillSystemMessageData(&data, GetSession(), "PvP toggled off.");
         GetSession()->SendPacket(&data);
     }
     else
     {
-        SetPvP(true);		
+        SetPvP(true);        
     }
 }

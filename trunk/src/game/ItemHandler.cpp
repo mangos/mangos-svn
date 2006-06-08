@@ -322,9 +322,9 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
     uint64 vendorguid, bagguid;
     uint32 item;
-    uint8 bag, slot, unk1, vendorslot;
+    uint8 bag, slot, count, vendorslot;
 
-    recv_data >> vendorguid >> item >> bagguid >> slot >> unk1;
+    recv_data >> vendorguid >> item >> bagguid >> slot >> count;
     recv_data.hexlike();
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
@@ -339,7 +339,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 break;
             }
         }
-        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) == 0 )
+        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && (pCreature->GetItemCount( vendorslot ) - count) < 0 )
         {
             _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
@@ -349,7 +349,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice;
+        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
@@ -373,7 +373,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 }
             }
         }
-        Item *pItem = _player->CreateItem( item, pCreature->GetItemBuyCount( vendorslot ));
+        Item *pItem = _player->CreateItem( item, pCreature->GetItemBuyCount( vendorslot ) * count);
         uint16 pos = ((bag << 8) | slot);
         if( _player->IsEquipmentPos( pos ) )
         {
@@ -381,6 +381,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             {
                 _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
                 _player->EquipItem( pos, pItem );
+                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
             }
             else
                 delete pItem;
@@ -407,9 +409,9 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM" );
     uint64 vendorguid;
     uint32 item;
-    uint8 unk1, unk2, vendorslot;
+    uint8 count, unk1, vendorslot;
 
-    recv_data >> vendorguid >> item >> unk1 >> unk2;
+    recv_data >> vendorguid >> item >> count >> unk1;
     recv_data.hexlike();
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
@@ -424,7 +426,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                 break;
             }
         }
-        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && pCreature->GetItemCount( vendorslot ) == 0 )
+        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && (pCreature->GetItemCount( vendorslot ) - count) < 0 )
         {
             _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return;
@@ -434,18 +436,18 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice;
+        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
         if( newmoney < 0 )
         {
             _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
             return;
         }
-        if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, pCreature->GetItemBuyCount( vendorslot ), false, true ) )
+        if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, pCreature->GetItemBuyCount( vendorslot ) * count, false, true ) )
         {
             _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-            _player->StoreNewItem( pos, item, pCreature->GetItemBuyCount( vendorslot ) );
+            _player->StoreNewItem( pos, item, pCreature->GetItemBuyCount( vendorslot ) * count );
             if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
+                pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
         }
         return;
     }
