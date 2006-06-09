@@ -29,7 +29,7 @@ DatabaseMysql sDatabase;
 DatabaseMysql loginDatabase;
 uint32 realmID;
 
-int usage(const char *prog)
+void usage(const char *prog)
 {
     std::cerr << "Usage: " << prog << std::endl;
     std::cerr << "\t" << "-c: config_file [" << _MANGOSD_CONFIG << "]" << std::endl;
