@@ -245,7 +245,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
         /*********************************************************/
-        
+
         uint8 GetItemCount() { return itemcount; }
         uint32 GetItemId( uint32 slot ) { return item_list[slot].id; }
         uint32 GetItemBuyCount( uint32 slot ) { return item_list[slot].buycount; }
