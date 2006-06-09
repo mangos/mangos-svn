@@ -327,117 +327,119 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
 }
 
 bool ChatHandler::HandleItemCommand(const char* args)
-{/*
-    WorldPacket data;
+{
+    /*
+        WorldPacket data;
 
-    char* pitem = strtok((char*)args, " ");
-    if (!pitem)
-        return false;
+        char* pitem = strtok((char*)args, " ");
+        if (!pitem)
+            return false;
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
-        return true;
-    }
+        uint64 guid = m_session->GetPlayer()->GetSelection();
+        if (guid == 0)
+        {
+            FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
+            m_session->SendPacket( &data );
+            return true;
+        }
 
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
-    if(!pCreature)
-    {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
-        return true;
-    }
+        if(!pCreature)
+        {
+            FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
+            m_session->SendPacket( &data );
+            return true;
+        }
 
-    uint32 item = atoi(pitem);
-    int amount = -1;
+        uint32 item = atoi(pitem);
+        int amount = -1;
 
-    char* pamount = strtok(NULL, " ");
-    if (pamount)
-        amount = atoi(pamount);
+        char* pamount = strtok(NULL, " ");
+        if (pamount)
+            amount = atoi(pamount);
 
-    ItemPrototype* tmpItem = objmgr.GetItemPrototype(item);
+        ItemPrototype* tmpItem = objmgr.GetItemPrototype(item);
 
-    std::stringstream sstext;
-    if(tmpItem)
-    {
-        QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
+        std::stringstream sstext;
+        if(tmpItem)
+        {
+            QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
 
-        uint8 itemscount = pCreature->GetItemCount();
-        pCreature->setItemId(itemscount , item);
-        pCreature->setItemAmount(itemscount , amount);
-        pCreature->IncrItemCount();
+            uint8 itemscount = pCreature->GetItemCount();
+            pCreature->setItemId(itemscount , item);
+            pCreature->setItemAmount(itemscount , amount);
+            pCreature->IncrItemCount();
 
-        sstext << LANG_ITEM << item << "' '" << tmpItem->Name1 << LANG_ITEM_ADDED_TO_LIST << '\0';
-        delete result;
-    }
-    else
-    {
-        sstext << LANG_ITEM << item << LANG_ITEM_NOT_FOUND << '\0';
-    }
+            sstext << LANG_ITEM << item << "' '" << tmpItem->Name1 << LANG_ITEM_ADDED_TO_LIST << '\0';
+            delete result;
+        }
+        else
+        {
+            sstext << LANG_ITEM << item << LANG_ITEM_NOT_FOUND << '\0';
+        }
 
-    FillSystemMessageData(&data, m_session, sstext.str().c_str());
-    m_session->SendPacket( &data );*/
+        FillSystemMessageData(&data, m_session, sstext.str().c_str());
+        m_session->SendPacket( &data );*/
     return true;
 }
 
 bool ChatHandler::HandleItemRemoveCommand(const char* args)
-{/*
-    WorldPacket data;
+{
+    /*
+        WorldPacket data;
 
-    char* iguid = strtok((char*)args, " ");
-    if (!iguid)
-        return false;
+        char* iguid = strtok((char*)args, " ");
+        if (!iguid)
+            return false;
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
-        return true;
-    }
-
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-
-    if(!pCreature)
-    {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
-        return true;
-    }
-
-    uint32 itemguid = atoi(iguid);
-    int slot = pCreature->GetItemSlot(itemguid);
-
-    std::stringstream sstext;
-    if(slot != -1)
-    {
-        uint32 guidlow = GUID_LOPART(guid);
-
-        sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u' AND `itemguid` = '%u'",pCreature->GetEntry(),itemguid);
-
-        pCreature->setItemId(slot , 0);
-        pCreature->setItemAmount(slot , 0);
-        ItemPrototype* tmpItem = objmgr.GetItemPrototype(itemguid);
-        if(tmpItem)
+        uint64 guid = m_session->GetPlayer()->GetSelection();
+        if (guid == 0)
         {
-            sstext << LANG_ITEM << itemguid << "' '" << tmpItem->Name1 << LANG_ITEM_DELETED_FROM_LIST << '\0';
+            FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
+            m_session->SendPacket( &data );
+            return true;
+        }
+
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+
+        if(!pCreature)
+        {
+            FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
+            m_session->SendPacket( &data );
+            return true;
+        }
+
+        uint32 itemguid = atoi(iguid);
+        int slot = pCreature->GetItemSlot(itemguid);
+
+        std::stringstream sstext;
+        if(slot != -1)
+        {
+            uint32 guidlow = GUID_LOPART(guid);
+
+            sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u' AND `itemguid` = '%u'",pCreature->GetEntry(),itemguid);
+
+            pCreature->setItemId(slot , 0);
+            pCreature->setItemAmount(slot , 0);
+            ItemPrototype* tmpItem = objmgr.GetItemPrototype(itemguid);
+            if(tmpItem)
+            {
+                sstext << LANG_ITEM << itemguid << "' '" << tmpItem->Name1 << LANG_ITEM_DELETED_FROM_LIST << '\0';
+            }
+            else
+            {
+                sstext << LANG_ITEM << itemguid << LANG_ITEM_DELETED_FROM_LIST << '\0';
+            }
+
         }
         else
         {
-            sstext << LANG_ITEM << itemguid << LANG_ITEM_DELETED_FROM_LIST << '\0';
+            sstext << LANG_ITEM << itemguid << LANG_ITEM_NOT_IN_LIST << '\0';
         }
 
-    }
-    else
-    {
-        sstext << LANG_ITEM << itemguid << LANG_ITEM_NOT_IN_LIST << '\0';
-    }
-
-    FillSystemMessageData(&data, m_session, sstext.str().c_str());
-    m_session->SendPacket( &data );*/
+        FillSystemMessageData(&data, m_session, sstext.str().c_str());
+        m_session->SendPacket( &data );*/
 
     return true;
 }

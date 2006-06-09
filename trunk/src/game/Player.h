@@ -43,9 +43,9 @@ enum Team
     ALLIANCE_FORCES = 891,
     HORDE_FORCES = 892,
     STEAMWHEEDLE_CARTEL = 169,
-	//Duel System
-	BLUE_TEAM = 1621,
-	RED_TEAM = 1622,
+    //Duel System
+    BLUE_TEAM = 1621,
+    RED_TEAM = 1622,
 };
 
 enum Classes
@@ -582,13 +582,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetDuelVs(Player *plyr) { m_pDuel = plyr; }
         void SetInDuel(bool val) { m_isInDuel = val; }
-		bool isInDuel() { return m_isInDuel; }
+        bool isInDuel() { return m_isInDuel; }
         void SetDuelSender(Player *plyr) { m_pDuelSender = plyr; }
-		void CheckDuelDistance();
+        void CheckDuelDistance();
 
-		//Functions to store/restore temporary state of pvpOn
-		void StorePvpState(){ pvpTemp = pvpOn; };
-		void RestorePvpState(){ SetPvP(pvpTemp); };
+        //Functions to store/restore temporary state of pvpOn
+        void StorePvpState(){ pvpTemp = pvpOn; };
+        void RestorePvpState(){ SetPvP(pvpTemp); };
 
         uint32 GetCurrentBuybackSlot() { return m_currentBuybackSlot; }
         void SetCurrentBuybackSlot( uint32 slot )
@@ -860,7 +860,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 tradeGold;
 
         bool pvpOn;
-		bool pvpTemp;
+        bool pvpTemp;
         Player *m_pDuel;
         bool m_isInDuel;
         Player *m_pDuelSender;

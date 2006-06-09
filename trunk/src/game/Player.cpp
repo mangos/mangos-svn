@@ -1885,7 +1885,6 @@ void Player::ResurrectPlayer()
 
     // return the PvP enable flag to normal
     SetPvP( GetPvP() );
-    
 
     setDeathState(ALIVE);
 
@@ -2901,10 +2900,10 @@ void Player::CalculateHonor(Unit *uVictim)
 void Player::CheckDuelDistance()
 {
     if( !isInDuel() ) return;
-    
+
     WorldPacket data;
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
-    
+
     GameObject* obj = NULL;
     obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
@@ -2949,14 +2948,14 @@ void Player::DuelComplete()
     SetInDuel(false);
     m_pDuel->SetInDuel(false);
 
-#if 1
+    #if 1
     //Restore the state of pvpOn
     RestorePvpState();
     m_pDuel->RestorePvpState();
-	//Restore to correct factiontemplate
+    //Restore to correct factiontemplate
     setFaction(getRace(), 0);
     m_pDuel->setFaction(m_pDuel->getRace(), 0);
-#endif
+    #endif
 
     //ResurrectPlayer();
     setDeathState(ALIVE);
@@ -2972,7 +2971,6 @@ void Player::DuelComplete()
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
     m_pDuel->SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     m_pDuel->SetUInt32Value(PLAYER_DUEL_TEAM, 0);
-    
 
 }
 
@@ -6825,7 +6823,7 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-                uint32 qtime = static_cast<uint32>(time(NULL)) + (limittime * 0.001); 
+                uint32 qtime = static_cast<uint32>(time(NULL)) + (limittime * 0.001);
                 SetUInt32Value( log_slot + 2, qtime );
             }
             else
@@ -8288,6 +8286,6 @@ void Player::UpdatePVPFlag(time_t currTime)
     }
     else
     {
-        SetPvP(true);        
+        SetPvP(true);
     }
 }

@@ -471,15 +471,15 @@ void WorldSession::SendListInventory( uint64 guid )
     if( pCreature )
     {
         uint32 guidlow = GUID_LOPART(guid);
-        uint8 numitems = pCreature->GetItemCount(); 
+        uint8 numitems = pCreature->GetItemCount();
         uint32 ptime = time(NULL);
         uint32 diff;
-        
+
         WorldPacket data;
         data.Initialize( SMSG_LIST_INVENTORY );
         data << guid;
         data << numitems;
-        
+
         ItemPrototype *pProto;
         for(int i = 0; i < numitems; i++ )
         {
@@ -507,7 +507,7 @@ void WorldSession::SendListInventory( uint64 guid )
                 }
             }
         }
-        
+
         if ( !(data.size() == 8 + 1 + ((numitems * 7) * 4)) )
             return;
         SendPacket( &data );

@@ -1088,11 +1088,11 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
         {
             //if(spellInfo->activeIconID && (*i).second->GetSpellProto()->activeIconID == spellInfo->activeIconID)
             //    RemoveAurasDueToSpell(i_spellId);
-            //else 
+            //else
             if(spellInfo->SpellIconID == (*i).second->GetSpellProto()->SpellIconID)
             {
                 RemoveAurasDueToSpell(i_spellId);
-            
+
                 i = m_Auras.begin();
                 if(!(*i).second)
                     return;
@@ -1100,6 +1100,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
         }
     }
 }
+
 void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
 {
     AuraMap::iterator i;
