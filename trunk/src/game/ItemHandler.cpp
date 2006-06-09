@@ -624,6 +624,16 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     }
 }
 
+void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
+{
+    sLog.outDebug("WORLD: CMSG_SET_AMMO");
+    uint32 item;
+    recv_data >> item;
+    
+    if( item == 0 || GetPlayer()->CanUseAmmo( item , true ) )
+        GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, item);
+}
+
 void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)
 {
     WorldPacket data;

@@ -4688,7 +4688,7 @@ void Player::SetBindPoint(uint64 guid)
 /***                    STORAGE SYSTEM                 ***/
 /*********************************************************/
 
-void Player::SetSheath(uint32 sheathed)
+void Player::SetSheath( uint32 sheathed )
 {
     if (sheathed)
     {
@@ -4748,11 +4748,14 @@ void Player::SetSheath(uint32 sheathed)
     }
 }
 
-void Player::GetSlotByItem(uint32 type, uint8 slots[4])
+uint8 Player::FindEquipSlot( uint32 type )
 {
-    for (int i = 0; i < 4; i++)
-        slots[i] = NULL_SLOT;
-    switch(type)
+    uint8 slots[4];
+    slots[0] = NULL_SLOT;
+    slots[1] = NULL_SLOT;
+    slots[2] = NULL_SLOT;
+    slots[3] = NULL_SLOT;
+    switch( type )
     {
         case INVTYPE_HEAD:
             slots[0] = EQUIPMENT_SLOT_HEAD;
@@ -4835,53 +4838,21 @@ void Player::GetSlotByItem(uint32 type, uint8 slots[4])
             slots[2] = INVENTORY_SLOT_BAG_3;
             slots[3] = INVENTORY_SLOT_BAG_4;
             break;
+        default :
+            return NULL_SLOT;
     }
-}
 
-uint8 Player::FindEquipSlot(uint32 type)
-{
-    uint8 slots[4];
     uint16 pos;
-    GetSlotByItem(type, slots);
-    if (slots[0] == NULL_SLOT) return NULL_SLOT;
     for (int i = 0; i < 4; i++)
     {
-        if (slots[i] != NULL_SLOT)
+        if ( slots[i] != NULL_SLOT )
         {
             pos = ((INVENTORY_SLOT_BAG_0 << 8) | slots[i]);
-            if (!GetItemByPos(pos)) return slots[i];
+            if ( !GetItemByPos(pos) )
+                return slots[i];
         }
     }
     return slots[0];
-}
-
-uint8 Player::FindFreeItemSlot(uint32 type)
-{
-    uint8 slots[4];
-    uint16 pos;
-    GetSlotByItem(type, slots);
-    if (slots[0] == NULL_SLOT) return INVENTORY_SLOT_ITEM_END;
-    for (int i = 0; i < 4; i++)
-    {
-        if (slots[i] != NULL_SLOT)
-        {
-            pos = ((INVENTORY_SLOT_BAG_0 << 8) | slots[i]);
-            if (!GetItemByPos(pos)) return slots[i];
-        }
-    }
-    return INVENTORY_SLOT_ITEM_END;
-}
-
-int Player::CountFreeBagSlot()
-{
-    int count = 0;
-    uint16 pos;
-    for (uint8 i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-    {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        if (!GetItemByPos(pos)) count++;
-    }
-    return count;
 }
 
 Item* Player::CreateItem( uint32 item, uint32 count )
@@ -5077,6 +5048,43 @@ bool Player::IsBankPos( uint16 pos )
         return true;
     if( bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END )
         return true;
+    return false;
+}
+
+bool Player::HasItemCount( uint32 item, uint32 count )
+{
+    Item *pItem;
+    uint32 tempcount = 0;
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            tempcount += pItem->GetCount();
+            if( tempcount >= count )
+                return true;
+        }
+    }
+    Bag *pBag;
+    ItemPrototype *pBagProto;
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                if( pItem && pItem->GetEntry() == item )
+                {
+                    tempcount += pItem->GetCount();
+                    if( tempcount >= count )
+                        return true;
+                }
+            }
+        }
+    }
     return false;
 }
 
@@ -5494,7 +5502,7 @@ uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
                     return NULL;
                 }
             }
-            return eslot;
+            return ((INVENTORY_SLOT_BAG_0 << 8) | eslot);
         }
     }
     if( msg )
@@ -5904,6 +5912,76 @@ bool Player::CanUseItem( Item *pItem, bool msg )
     return false;
 }
 
+bool Player::CanUseAmmo( uint32 item, bool msg )
+{
+    sLog.outDebug( "STORAGE : CanUseAmmo item = %u", item);
+    if( isDead() )
+    {
+        if( msg )
+            SendEquipError( EQUIP_ERR_YOU_ARE_DEAD, NULL, NULL, 0 );
+        return false;
+    }
+    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    if( pProto )
+    {
+        if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
+        {
+            if( msg )
+                SendEquipError( EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, NULL, NULL, 0 );
+            return false;
+        }
+        if( (pProto->SubClass == ITEM_SUBCLASS_ARROW && GetSkillValue( SKILL_BOWS ) == 0 && GetSkillValue( SKILL_CROSSBOWS ) == 0) || (pProto->SubClass == ITEM_SUBCLASS_BULLET && GetSkillValue( SKILL_GUNS ) == 0) )
+        {
+            if( msg )
+                SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, NULL, NULL, 0 );
+            return false;
+        }
+        if( pProto->RequiredSkill != 0  )
+        {
+            if( GetSkillValue( pProto->RequiredSkill ) == 0 )
+            {
+                if( msg )
+                    SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, NULL, NULL, 0 );
+                return false;
+            }
+            else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
+            {
+                if( msg )
+                    SendEquipError( EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH, NULL, NULL, 0 );
+                return false;
+            }
+        }
+        if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
+        {
+            if( msg )
+                SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, NULL, NULL, 0 );
+            return false;
+        }
+        if( GetHonorRank() < pProto->RequiredHonorRank )
+        {
+            if( msg )
+                SendEquipError( EQUIP_ITEM_RANK_NOT_ENOUGH, NULL, NULL, 0 );
+            return false;
+        }
+        /*if( GetREputation() < pProto->RequiredReputation )
+        {
+        if( msg )
+        SendEquipError( EQUIP_ITEM_REPUTATION_NOT_ENOUGH, pItem, NULL, 0 );
+        return false;
+        }*/
+        if( getLevel() < pProto->RequiredLevel )
+        {
+            if( msg )
+                SendEquipError( EQUIP_ERR_YOU_MUST_REACH_LEVEL_N, NULL, NULL, pProto->RequiredLevel );
+            return false;
+        }
+        return true;
+    }
+    if( msg )
+        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
+    return false;
+}
+
 void Player::StoreNewItem( uint16 pos, uint32 item, uint32 count )
 {
     Item *pItem = CreateItem( item, count );
@@ -6023,12 +6101,13 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
     {
         sLog.outDebug( "STORAGE : RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
+        pItem->SetSlot( 0 );
+        pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
+
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
-            pItem->SetSlot( 0 );
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
-            pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
-
+            
             if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
             {
                 _ApplyItemMods(pItem, slot, false);
@@ -6067,26 +6146,12 @@ void Player::RemoveItem( uint8 bag, uint8 slot )
             }
 
             m_items[slot] = NULL;
-            /*if( IsInWorld() )
-            {
-                pItem->RemoveFromWorld();
-                pItem->DestroyForPlayer( this );
-            }*/
         }
         else
         {
             Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
             if( pBag )
-            {
-                pItem->SetSlot( 0 );
                 pBag->RemoveItem(slot);
-
-                /*if( IsInWorld() )
-                {
-                    pItem->RemoveFromWorld();
-                    pItem->DestroyForPlayer(this);
-                }*/
-            }
         }
     }
 }
@@ -6153,6 +6218,8 @@ void Player::DestroyItem( uint8 bag, uint8 slot )
     {
         sLog.outDebug( "STORAGE : DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
         pItem->SetOwner(0);
+        pItem->SetSlot( 0 );
+        pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         pItem->DeleteFromDB();
         ItemPrototype *pProto = pItem->GetProto();
 
@@ -6160,9 +6227,9 @@ void Player::DestroyItem( uint8 bag, uint8 slot )
         {
             if( pProto && pProto->Class == ITEM_CLASS_QUEST )
                 ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
-            pItem->SetSlot( 0 );
+            
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
-            pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
+            
 
             if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
             {
@@ -6215,7 +6282,6 @@ void Player::DestroyItem( uint8 bag, uint8 slot )
             {
                 if( pProto && pProto->Class == ITEM_CLASS_QUEST )
                     ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
-                pItem->SetSlot( 0 );
                 pBag->RemoveItem(slot);
 
                 if( IsInWorld() )
@@ -6224,7 +6290,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot )
                     pItem->DestroyForPlayer(this);
                 }
             }
-        }
+        }    
     }
 }
 
@@ -7215,17 +7281,15 @@ void Player::AdjustQuestReqItemCount( Quest *pQuest )
 
 uint16 Player::GetQuestSlot( Quest *pQuest )
 {
+    uint32 quest = 0;
     if( pQuest )
+        quest = pQuest->GetQuestInfo()->QuestId;
+    for ( uint16 i = 0; i < 20; i++ )
     {
-        uint32 quest = pQuest->GetQuestInfo()->QuestId;
-        for ( uint16 i = 0; i < 20; i++ )
-        {
-            if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
-                return PLAYER_QUEST_LOG_1_1 + 3*i;
-        }
-        return 0;
+        if ( GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i) == quest )
+            return PLAYER_QUEST_LOG_1_1 + 3*i;
     }
-    return PLAYER_QUEST_LOG_1_1;
+    return 0;
 }
 
 void Player::AreaExplored( Quest *pQuest )

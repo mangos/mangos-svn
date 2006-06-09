@@ -339,7 +339,7 @@ void Spell::EffectCreateItem(uint32 i)
             continue;
         itemid = m_spellInfo->Reagent[x];
         itemcount = m_spellInfo->ReagentCount[x];
-        if(player->GetItemCount(itemid) >= itemcount && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
+        if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
             player->DestroyItemCount(itemid, itemcount);
         else
         {
@@ -844,7 +844,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             continue;
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
-        if(p_caster->GetItemCount(itemid) >= itemcount)
+        if( p_caster->HasItemCount(itemid,itemcount) )
             p_caster->DestroyItemCount(itemid, itemcount);
         else
         {
@@ -911,7 +911,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             continue;
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
-        if(p_caster->GetItemCount(itemid) >= itemcount)
+        if( p_caster->HasItemCount(itemid,itemcount) )
             p_caster->DestroyItemCount(itemid, itemcount);
         else
         {
@@ -1104,30 +1104,22 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     float fdamage;
     if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
-    {
         fdamage = m_caster->CalculateDamage(false);
-    }
     else
     {
         fdamage = m_caster->CalculateDamage(true);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            uint8 slot=EQUIPMENT_SLOT_RANGED;
-            Item *equipitem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
-            //Item *ammoitem = ((Player*)m_caster)->GetItemByItemType(INVTYPE_AMMO);
-            Item *stackitem = NULL;
+            Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+            uint32 type = pItem->GetProto()->InventoryType;
+            uint32 ammo;
+            if( type == INVTYPE_THROWN )
+                ammo = pItem->GetEntry();
+            else
+                ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
 
-            if(!equipitem) return;
-
-            uint32 equipInvType = equipitem->GetProto()->InventoryType;
-
-            //if(equipInvType == INVTYPE_THROWN)
-            stackitem = equipitem;
-            //else
-            //stackitem = ammoitem;
-
-            if(stackitem)
-                ((Player*)m_caster)->DestroyItemCount(stackitem->GetProto()->ItemId, 1);
+            if( ((Player*)m_caster)->HasItemCount( ammo, 1 ) )
+                ((Player*)m_caster)->DestroyItemCount( ammo, 1);
             else
             {
                 SendCastResult(CAST_FAIL_NO_AMMO);
@@ -1435,7 +1427,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             continue;
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
-        if(p_caster->GetItemCount(itemid) >= itemcount)
+        if( p_caster->HasItemCount(itemid,itemcount) )
             p_caster->DestroyItemCount(itemid, itemcount);
         else
         {

@@ -992,15 +992,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;
 }
 
-void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
-{
-    uint32 ammoId;
-    recv_data >> ammoId;
-    GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID,ammoId);
-
-    return;
-}
-
 void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 {
     sLog.outDebug("WORLD: Received CMSG_AREATRIGGER");
