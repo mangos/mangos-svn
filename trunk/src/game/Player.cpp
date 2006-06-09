@@ -2949,9 +2949,14 @@ void Player::DuelComplete()
     SetInDuel(false);
     m_pDuel->SetInDuel(false);
 
+#if 1
     //Restore the state of pvpOn
     RestorePvpState();
     m_pDuel->RestorePvpState();
+	//Restore to correct factiontemplate
+    setFaction(getRace(), 0);
+    m_pDuel->setFaction(m_pDuel->getRace(), 0);
+#endif
 
     //ResurrectPlayer();
     setDeathState(ALIVE);
@@ -2968,9 +2973,7 @@ void Player::DuelComplete()
     m_pDuel->SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     m_pDuel->SetUInt32Value(PLAYER_DUEL_TEAM, 0);
     
-    //Restore to correct factiontemplate
-    setFaction(getRace(), 0);
-    m_pDuel->setFaction(m_pDuel->getRace(), 0);
+
 }
 
 static unsigned long    holdrand = 0x89abcdef;

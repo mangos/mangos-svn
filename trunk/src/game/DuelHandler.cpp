@@ -51,10 +51,10 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         DEBUG_LOG("Player 2 is: %lu", (unsigned long)plTarget->GetGUID());
 
 		//Set players team
-        pl->SetUInt32Value(PLAYER_DUEL_TEAM,1);
-        plTarget->SetUInt32Value(PLAYER_DUEL_TEAM,2);
+        pl->SetUInt32Value(PLAYER_DUEL_TEAM, 1);
+        plTarget->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
 
-#if 0
+#if 1
 		//******************************* TEMPORARY *********************************
 		//TODO: Set PvP ON and OFF to players is a little magic to Duel System works
 		//      It is not the right way to do... We need to fix it! :D
@@ -62,10 +62,10 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 		//Set players factions. These factios are into factionstemplate.dbc
 		pl->setFaction(-1, BLUE_TEAM);        //Blue faction
 		plTarget->setFaction(-1, RED_TEAM);   //Red faction
-
+		
 		pl->StorePvpState();
 		plTarget->StorePvpState();
-
+		
         pl->SetPvP(false);
         plTarget->SetPvP(true);
 		//******************************* TEMPORARY *********************************
