@@ -142,8 +142,6 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
         else
         {
             Item *pItem;
-            //uint32 slot = _player->GetSlotByItemGUID( guid );
-            //if ( slot )
             pItem = _player->GetItemByPos( _player->GetPosByGuid( guid ));
 
             if( pItem )

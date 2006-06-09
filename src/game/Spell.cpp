@@ -1035,14 +1035,14 @@ uint8 Spell::CheckItems()
     Player* p_caster = (Player*)m_caster;
     if (itemTarget)
     {
-        if(p_caster->GetItemCount(itemTarget->GetEntry()) < 1)
+        if( !p_caster->HasItemCount(itemTarget->GetEntry(), 1) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
     }
     if(m_CastItem)
     {
         itemid = m_CastItem->GetEntry();
-        if(p_caster->GetItemCount(itemid) < 1)
+        if( !p_caster->HasItemCount(itemid,1) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
     }
@@ -1052,7 +1052,7 @@ uint8 Spell::CheckItems()
         if((itemid = m_spellInfo->Reagent[i]) == 0)
             continue;
         itemcount = m_spellInfo->ReagentCount[i];
-        if(p_caster->GetItemCount(itemid) < itemcount)
+        if( !p_caster->HasItemCount(itemid,itemcount) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;         //0x54
     }
 
@@ -1061,7 +1061,7 @@ uint8 Spell::CheckItems()
     {
         if(m_spellInfo->Totem[i] != 0)
         {
-            if(p_caster->GetItemCount(m_spellInfo->Totem[i]) >= 1)
+            if( p_caster->HasItemCount(m_spellInfo->Totem[i],1) )
             {
                 totems -= 1;
                 continue;

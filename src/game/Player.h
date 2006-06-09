@@ -337,6 +337,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
 
+        void SetSheath( uint32 sheathed );
+        uint8 FindEquipSlot( uint32 type );
         Item* CreateItem( uint32 item, uint32 count );
         uint32 GetItemCount( uint32 item );
         uint32 GetBankItemCount( uint32 item );
@@ -347,11 +349,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInventoryPos( uint16 pos );
         bool IsEquipmentPos( uint16 pos );
         bool IsBankPos( uint16 pos );
+        bool HasItemCount( uint32 item, uint32 count );
         uint16 CanStoreNewItem( uint8 bag, uint8 slot, uint32 item, uint32 count, bool swap, bool msg );
         uint16 CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
         uint16 CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg );
         uint16 CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
         bool CanUseItem( Item *pItem, bool msg );
+        bool CanUseAmmo( uint32 item, bool msg );
         void StoreNewItem( uint16 pos, uint32 item, uint32 count );
         void StoreItem( uint16 pos, Item *pItem );
         void EquipItem( uint16 pos, Item *pItem );
@@ -604,11 +608,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateSkill(uint32 skill_id);
         void UpdateSkillPro(uint32 spellid);
         uint32 GetSpellByProto(ItemPrototype *proto);
-        void GetSlotByItem(uint32 type, uint8 slots[4]);
-        uint8 FindEquipSlot(uint32 type);
-        uint8 FindFreeItemSlot(uint32 type);
-
-        int CountFreeBagSlot();
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
@@ -638,7 +637,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
         void SendMessageToSet(WorldPacket *data, bool self);
-        void SetSheath (uint32 sheathed);
 
         void DeleteFromDB();
         void DeleteCorpse();

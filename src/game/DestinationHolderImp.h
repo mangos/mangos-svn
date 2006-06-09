@@ -68,8 +68,6 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, const float &
     i_fromX = traveller.GetPositionX();
     i_fromY = traveller.GetPositionY();
     i_fromZ = traveller.GetPositionZ();
-    //float dest_x, dest_y;
-    //_findOffSetPoint(i_fromX, i_fromY, x2, y2, offset, dest_x, dest_y);
 
     UpdateLocation(traveller, dest_x, dest_y, dest_z);
 
@@ -110,7 +108,7 @@ bool
 DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, const uint32 &diff, bool force_update)
 {
     i_tracker.Update(diff);
-    float x,y,z/*,z2*/;
+    float x,y,z;
     GetLocationNow(x, y, z);
     if( x == -431602080 )
         return false;
@@ -141,7 +139,6 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
     }
     else
     {
-        // otherwise, the unit only when to a fraction of its original location
         double percent_passed = (double)((double)time_elapsed / (double)i_totalTravelTime);
         x = i_fromX + ((i_destX - i_fromX) * percent_passed);
         y = i_fromY + ((i_destY - i_fromY) * percent_passed);
