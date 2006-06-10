@@ -150,9 +150,9 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             for(i=0; i<6; i++)
             {
                 if(_player->tradeItems[i] >= 0 )
-                    myItems[i] =_player->RemoveItem(0, (uint8)_player->tradeItems[i]);
+                    myItems[i] =_player->RemoveItem(0, (uint8)_player->tradeItems[i], true);
                 if(_player->pTrader->tradeItems[i] >= 0)
-                    hisItems[i] =_player->pTrader->RemoveItem(0, (uint8)_player->pTrader->tradeItems[i]);
+                    hisItems[i] =_player->pTrader->RemoveItem(0, (uint8)_player->pTrader->tradeItems[i], true);
             }
 
             for(i=0; i<6; i++)
@@ -163,7 +163,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
 
                     if( dst = _player->CanStoreItem( NULL, NULL_SLOT, hisItems[i], false, true ) )
-                        _player->StoreItem( dst, hisItems[i]);
+                        _player->StoreItem( dst, hisItems[i], true);
                 }
                 if(myItems[i])
                 {
@@ -171,7 +171,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
 
                     if( dst = _player->pTrader->CanStoreItem( NULL, NULL_SLOT, myItems[i], false, true ) )
-                        _player->pTrader->StoreItem( dst, myItems[i]);
+                        _player->pTrader->StoreItem( dst, myItems[i], true);
                 }
             }
 

@@ -1078,7 +1078,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     sLog.outDetail(LANG_ADDITEM, itemId, count);
     if( uint16 dst = pl->CanStoreNewItem( NULL, NULL_SLOT, itemId, count, false, true ) )
     {
-        pl->StoreNewItem( dst, itemId, count);
+        pl->StoreNewItem( dst, itemId, count, true);
         FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CREATED, itemId, count));
     }
     else

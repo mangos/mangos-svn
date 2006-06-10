@@ -90,7 +90,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 ss << "' )";
                 sDatabase.Execute( ss.str().c_str() );
 
-                pl->RemoveItem( (pos >> 8), (pos & 255) );
+                pl->RemoveItem( (pos >> 8), (pos & 255), true );
             }
             uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
             pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
@@ -215,7 +215,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Item *it = objmgr.GetMItem(m->item);
 
     if( dst = _player->CanStoreItem( NULL, NULL_SLOT, it, false, true ) )
-        _player->StoreItem( dst, it);
+        _player->StoreItem( dst, it, true);
     /* still needs some condition so that if item can not be received, both mail and
        mailed_items to stay till delete or return, otherwise it's dumped, also a client message */
 
@@ -474,7 +474,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
     if( uint16 dest = _player->CanStoreItem( NULL, NULL_SLOT, item, false, true ) )
-        _player->StoreItem(dest, item);
+        _player->StoreItem(dest, item, true);
 
     /*
         for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)

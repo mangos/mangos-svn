@@ -609,7 +609,7 @@ void Spell::finish()
 
     if (ItemClass == ITEM_CLASS_CONSUMABLE)
     {
-        ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1);
+        ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
         if(ItemCount<=1)
         {
             //pItem->DeleteFromDB();

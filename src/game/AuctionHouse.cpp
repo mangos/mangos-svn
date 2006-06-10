@@ -309,7 +309,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     ss << "' )";
     sDatabase.Execute( ss.str().c_str() );
 
-    pl->RemoveItem( (pos >> 8),(pos & 255));
+    pl->RemoveItem( (pos >> 8),(pos & 255), true);
     WorldPacket data;
     ObjectMgr::AuctionEntryMap::iterator itr;
     uint32 cnt = 0;

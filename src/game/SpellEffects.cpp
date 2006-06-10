@@ -340,7 +340,7 @@ void Spell::EffectCreateItem(uint32 i)
         itemid = m_spellInfo->Reagent[x];
         itemcount = m_spellInfo->ReagentCount[x];
         if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
-            player->DestroyItemCount(itemid, itemcount);
+            player->DestroyItemCount(itemid, itemcount, true);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -355,7 +355,7 @@ void Spell::EffectCreateItem(uint32 i)
     //       num_to_add = m_itemProto->MaxCount;
     Item *pItem = player->CreateItem(newitemid,1);
     if( uint16 dest = player->CanStoreItem( NULL, NULL_SLOT, pItem, false, true) )
-        player->StoreItem( dest, pItem);
+        player->StoreItem( dest, pItem, true);
     if(!pItem)
     {
         SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
@@ -845,7 +845,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if( p_caster->HasItemCount(itemid,itemcount) )
-            p_caster->DestroyItemCount(itemid, itemcount);
+            p_caster->DestroyItemCount(itemid, itemcount, true);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -912,7 +912,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if( p_caster->HasItemCount(itemid,itemcount) )
-            p_caster->DestroyItemCount(itemid, itemcount);
+            p_caster->DestroyItemCount(itemid, itemcount, true);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -1119,7 +1119,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
 
             if( ((Player*)m_caster)->HasItemCount( ammo, 1 ) )
-                ((Player*)m_caster)->DestroyItemCount( ammo, 1);
+                ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
             else
             {
                 SendCastResult(CAST_FAIL_NO_AMMO);
@@ -1428,7 +1428,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
         if( p_caster->HasItemCount(itemid,itemcount) )
-            p_caster->DestroyItemCount(itemid, itemcount);
+            p_caster->DestroyItemCount(itemid, itemcount, true);
         else
         {
             SendCastResult(CAST_FAIL_ITEM_NOT_READY);
@@ -1468,7 +1468,7 @@ void Spell::EffectDisEnchant(uint32 i)
         SendCastResult(CAST_FAIL_CANT_DO_THAT_YET);
         return;
     }
-    p_caster->DestroyItemCount(itemTarget->GetEntry(),1);
+    p_caster->DestroyItemCount(itemTarget->GetEntry(),1, true);
 
     Player *player = (Player*)m_caster;
     p_caster->UpdateSkillPro(m_spellInfo->Id);
@@ -1479,13 +1479,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14344, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 14344, rnd);
+                p_caster->StoreNewItem(dst, 14344, rnd, true);
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14344, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 14344, 1);
+                p_caster->StoreNewItem(dst, 14344, 1, true);
             return;
         }
         else if(item_quality == 2)
@@ -1494,7 +1494,7 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16204, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 16204, rnd);
+                    p_caster->StoreNewItem(dst, 16204, rnd, true);
 
                 return;
             }
@@ -1502,7 +1502,7 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16203, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 16203, rnd);
+                    p_caster->StoreNewItem(dst, 16203, rnd, true);
 
                 return;
             }
@@ -1515,14 +1515,14 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14343, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 14343, rnd);
+                p_caster->StoreNewItem(dst, 14343, rnd, true);
 
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14343, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 14343, 1);
+                p_caster->StoreNewItem(dst, 14343, 1, true);
 
             return;
         }
@@ -1532,14 +1532,14 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11176, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11176, rnd);
+                    p_caster->StoreNewItem(dst, 11176, rnd, true);
                 return;
             }
             else
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16202, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 16202, rnd);
+                    p_caster->StoreNewItem(dst, 16202, rnd, true);
                 return;
             }
         }
@@ -1551,13 +1551,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11178, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11178, rnd);
+                p_caster->StoreNewItem(dst, 11178, rnd, true);
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11178, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11178, 1);
+                p_caster->StoreNewItem(dst, 11178, 1, true);
 
             return;
         }
@@ -1567,7 +1567,7 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11176, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11176, rnd);
+                    p_caster->StoreNewItem(dst, 11176, rnd, true);
 
                 return;
             }
@@ -1575,7 +1575,7 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11175, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11175, rnd);
+                    p_caster->StoreNewItem(dst, 11175, rnd, true);
 
                 return;
             }
@@ -1587,13 +1587,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11177, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11177, rnd);
+                p_caster->StoreNewItem(dst, 11177, rnd, true);
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11177, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11177, 1);
+                p_caster->StoreNewItem(dst, 11177, 1, true);
 
             return;
         }
@@ -1603,14 +1603,14 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11137, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11137, rnd);
+                    p_caster->StoreNewItem(dst, 11137, rnd, true);
                 return;
             }
             else
             {
                 rnd = urand(1,(item_level/10));
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11174, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11174, rnd);
+                    p_caster->StoreNewItem(dst, 11174, rnd, true);
                 return;
             }
         }
@@ -1621,13 +1621,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11139, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11139, rnd);
+                p_caster->StoreNewItem(dst, 11139, rnd, true);
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11139, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11139, 1);
+                p_caster->StoreNewItem(dst, 11139, 1, true);
 
             return;
         }
@@ -1637,7 +1637,7 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11137, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11137, rnd);
+                    p_caster->StoreNewItem(dst, 11137, rnd, true);
 
                 return;
             }
@@ -1645,7 +1645,7 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11135, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11135, rnd);
+                    p_caster->StoreNewItem(dst, 11135, rnd, true);
 
                 return;
             }
@@ -1657,13 +1657,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11138, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11138, rnd);
+                p_caster->StoreNewItem(dst, 11138, rnd, true);
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11138, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11138, 1);
+                p_caster->StoreNewItem(dst, 11138, 1, true);
             return;
         }
         else if(item_quality == 2)
@@ -1672,14 +1672,14 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11083, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11083, rnd);
+                    p_caster->StoreNewItem(dst, 11083, rnd, true);
                 return;
             }
             else
             {
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11134, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11134, rnd);
+                    p_caster->StoreNewItem(dst, 11134, rnd, true);
                 return;
             }
         }
@@ -1690,13 +1690,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11084, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11084, rnd);
+                p_caster->StoreNewItem(dst, 11084, rnd, true);
             return;
         }
         else if(item_quality == 3)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11084, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11084, 1);
+                p_caster->StoreNewItem(dst, 11084, 1, true);
             return;
         }
         else if(item_quality == 2)
@@ -1705,14 +1705,14 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11083, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11083, rnd);
+                    p_caster->StoreNewItem(dst, 11083, rnd, true);
                 return;
             }
             else
             {
                 rnd = (item_level/10);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11082, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11082, rnd);
+                    p_caster->StoreNewItem(dst, 11082, rnd, true);
                 return;
             }
         }
@@ -1723,13 +1723,13 @@ void Spell::EffectDisEnchant(uint32 i)
         {
             rnd = urand(3,5);
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10978, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 10978, rnd);
+                p_caster->StoreNewItem(dst, 10978, rnd, true);
             return;
         }
         else if(item_quality == 3 && item_level >=16)
         {
             if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10978, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 10978, 1);
+                p_caster->StoreNewItem(dst, 10978, 1, true);
             return;
         }
         else if(item_quality == 2)
@@ -1738,28 +1738,28 @@ void Spell::EffectDisEnchant(uint32 i)
             {
                 rnd = urand(1,3);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10940, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10940, rnd);
+                    p_caster->StoreNewItem(dst, 10940, rnd, true);
                 return;
             }
             else if(item_level <=15 && urand(1,100)< 70 )
             {
                 rnd = urand(1,3);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10938, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10938, rnd);
+                    p_caster->StoreNewItem(dst, 10938, rnd, true);
                 return;
             }
             else if(urand(1,100)< 50)
             {
                 rnd = urand(1,3);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10939, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10939, rnd);
+                    p_caster->StoreNewItem(dst, 10939, rnd, true);
                 return;
             }
             else
             {
                 rnd = urand(1,3);
                 if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10998, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10998, rnd);
+                    p_caster->StoreNewItem(dst, 10998, rnd, true);
                 return;
             }
         }
