@@ -18,14 +18,4 @@ INCLUDES += -I$(srcdir)
 noinst_LIBRARIES = libframework.a 
 
 libframework_a_SOURCES = \
-	Dynamic/FactoryHolder.cpp \
-	Dynamic/ObjectRegistry.cpp \
-	GameSystem/Grid.cpp \
-	GameSystem/GridLoader.cpp \
-	GameSystem/TypeContainer.cpp \
-	GameSystem/TypeContainerVisitor.cpp \
-	Policies/CreationPolicy.cpp \
-	Policies/ObjectLifeTime.cpp \
-	Policies/Singleton.cpp \
-	Policies/ThreadingModel.cpp \
-	Utilities/Reference.cpp
+	Policies/ObjectLifeTime.cpp 
