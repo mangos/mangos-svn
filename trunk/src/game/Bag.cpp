@@ -122,7 +122,7 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
             item->SetSlot(slot);
             if(!item->LoadFromDB(item_guid, 1))
                 continue;
-            StoreItem( slot, item );
+            StoreItem( slot, item, true );
         } while (result->NextRow());
 
         delete result;
@@ -151,21 +151,21 @@ uint8 Bag::FindFreeBagSlot()
     return NULL_SLOT;
 }
 
-void Bag::RemoveItem( uint8 slot )
+void Bag::RemoveItem( uint8 slot, bool update )
 {
     m_bagslot[slot] = NULL;
     SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
 }
 
-void Bag::StoreItem( uint8 slot, Item *pItem )
+void Bag::StoreItem( uint8 slot, Item *pItem, bool update )
 {
     if( pItem )
     {
         sLog.outDebug( "STORAGE : StoreItem bag = %u, slot = %u, item = %u", GetSlot(), slot, pItem->GetEntry());
-        pItem->SetSlot( slot );
+        m_bagslot[slot] = pItem;
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
-        m_bagslot[slot] = pItem;
+        pItem->SetSlot( NULL_SLOT );
     }
 }
 

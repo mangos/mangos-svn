@@ -84,8 +84,8 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     {
         if( uint16 dest = _player->CanEquipItem( NULL_SLOT, pItem, false, true ) )
         {
-            _player->RemoveItem(srcbag, srcslot);
-            _player->EquipItem( dest, pItem );
+            _player->RemoveItem(srcbag, srcslot, true);
+            _player->EquipItem( dest, pItem, true );
         }
     }
 }
@@ -98,7 +98,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
     recv_data >> bag >> slot >> count >> data1 >> data2 >> data3;
     sLog.outDebug("STORAGE: receive bag = %u, slot = %u, count = %u", bag, slot, count);
 
-    _player->DestroyItem( bag, slot );
+    _player->DestroyItem( bag, slot, true );
 }
 
 extern void CheckItemDamageValues ( ItemPrototype *itemProto );
@@ -274,7 +274,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                     uint32 buyBackslot = _player->GetCurrentBuybackSlot();
                     _player->AddItemToBuyBackSlot( buyBackslot, pItem );
                     _player->SetCurrentBuybackSlot( buyBackslot + 1 );
-                    _player->RemoveItem( (pos >> 8), (pos & 255));
+                    _player->RemoveItem( (pos >> 8), (pos & 255), true);
                     return;
                 }
                 else
@@ -310,7 +310,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         {
             _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
             _player->RemoveItemFromBuyBackSlot( slot );
-            _player->StoreItem( pos, pItem );
+            _player->StoreItem( pos, pItem, true );
         }
         return;
     }
@@ -380,7 +380,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             if( _player->CanEquipItem( slot, pItem, false, true ) )
             {
                 _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-                _player->EquipItem( pos, pItem );
+                _player->EquipItem( pos, pItem, true );
                 if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                     pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
             }
@@ -392,7 +392,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             if( _player->CanStoreItem( bag, slot, pItem, false, true ) )
             {
                 _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-                _player->StoreItem( pos, pItem );
+                _player->StoreItem( pos, pItem, true );
                 if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                     pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
             }
@@ -445,7 +445,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
         if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, pCreature->GetItemBuyCount( vendorslot ) * count, false, true ) )
         {
             _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-            _player->StoreNewItem( pos, item, pCreature->GetItemBuyCount( vendorslot ) * count );
+            _player->StoreNewItem( pos, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
             if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                 pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
         }
@@ -527,8 +527,8 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     {
         if( uint16 dest = _player->CanStoreItem( dstbag, NULL_SLOT, pItem, false, true ) )
         {
-            _player->RemoveItem(srcbag, srcslot);
-            _player->StoreItem( dest, pItem );
+            _player->RemoveItem(srcbag, srcslot, true);
+            _player->StoreItem( dest, pItem, true );
         }
     }
 }
@@ -599,8 +599,8 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
     {
         if( uint16 dest = _player->CanBankItem( NULL, NULL_SLOT, pItem, false, true ) )
         {
-            _player->RemoveItem(srcbag, srcslot);
-            _player->BankItem( dest, pItem );
+            _player->RemoveItem(srcbag, srcslot, true);
+            _player->BankItem( dest, pItem, true );
         }
     }
 }
@@ -618,8 +618,8 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     {
         if( uint16 dest = _player->CanBankItem( NULL, NULL_SLOT, pItem, false, true ) )
         {
-            _player->RemoveItem(srcbag, srcslot);
-            _player->BankItem( dest, pItem );
+            _player->RemoveItem(srcbag, srcslot, true);
+            _player->BankItem( dest, pItem, true );
         }
     }
 }
