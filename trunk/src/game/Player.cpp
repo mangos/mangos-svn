@@ -6066,16 +6066,19 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
         pItem->SetSlot( slot );
 
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-        SetUInt32Value(VisibleBase, pItem->GetEntry());
-        SetUInt32Value(VisibleBase + 1, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
-        SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
-        SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
-        SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
-        SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
-        SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
-        SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
-        SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
+        if( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+        {
+            int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+            SetUInt32Value(VisibleBase, pItem->GetEntry());
+            SetUInt32Value(VisibleBase + 1, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT));
+            SetUInt32Value(VisibleBase + 2, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 3));
+            SetUInt32Value(VisibleBase + 3, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 6));
+            SetUInt32Value(VisibleBase + 4, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 9));
+            SetUInt32Value(VisibleBase + 5, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 12));
+            SetUInt32Value(VisibleBase + 6, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 15));
+            SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
+            SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
+        }
         _ApplyItemMods(pItem, slot, true);
         for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
         {
@@ -6083,7 +6086,6 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
             if(Enchant_id)
                 AddItemEnchant(Enchant_id);
         }
-
         if( IsInWorld() && update )
         {
             pItem->AddToWorld();
