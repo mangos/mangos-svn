@@ -171,15 +171,7 @@
 			Name="GameSystem"
 			>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\Grid.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\GameSystem\Grid.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\GameSystem\GridLoader.cpp"
 				>
 			</File>
 			<File
@@ -187,15 +179,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\GridLoaderP.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\GameSystem\NGrid.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainer.cpp"
 				>
 			</File>
 			<File
@@ -204,10 +188,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.cpp"
 				>
 			</File>
 			<File
@@ -231,10 +211,6 @@
 			Name="Policies"
 			>
 			<File
-				RelativePath="..\..\src\framework\Policies\CreationPolicy.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\Policies\CreationPolicy.h"
 				>
 			</File>
@@ -247,19 +223,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\Singleton.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\Policies\Singleton.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\framework\Policies\SingletonImp.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\Policies\ThreadingModel.cpp"
 				>
 			</File>
 			<File
@@ -276,10 +244,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\framework\Utilities\HashMap.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\Utilities\Reference.cpp"
 				>
 			</File>
 			<File
@@ -303,15 +267,7 @@
 			Name="Dynamic"
 			>
 			<File
-				RelativePath="..\..\src\framework\Dynamic\FactoryHolder.cpp"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\Dynamic\FactoryHolder.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\Dynamic\ObjectRegistry.cpp"
 				>
 			</File>
 			<File

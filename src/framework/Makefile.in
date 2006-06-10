@@ -65,12 +65,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libframework_a_AR = $(AR) $(ARFLAGS)
 libframework_a_LIBADD =
-am_libframework_a_OBJECTS = FactoryHolder.$(OBJEXT) \
-	ObjectRegistry.$(OBJEXT) Grid.$(OBJEXT) GridLoader.$(OBJEXT) \
-	TypeContainer.$(OBJEXT) TypeContainerVisitor.$(OBJEXT) \
-	CreationPolicy.$(OBJEXT) ObjectLifeTime.$(OBJEXT) \
-	Singleton.$(OBJEXT) ThreadingModel.$(OBJEXT) \
-	Reference.$(OBJEXT)
+am_libframework_a_OBJECTS = ObjectLifeTime.$(OBJEXT) 
 libframework_a_OBJECTS = $(am_libframework_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -217,17 +212,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libframework.a 
 libframework_a_SOURCES = \
-	Dynamic/FactoryHolder.cpp \
-	Dynamic/ObjectRegistry.cpp \
-	GameSystem/Grid.cpp \
-	GameSystem/GridLoader.cpp \
-	GameSystem/TypeContainer.cpp \
-	GameSystem/TypeContainerVisitor.cpp \
-	Policies/CreationPolicy.cpp \
-	Policies/ObjectLifeTime.cpp \
-	Policies/Singleton.cpp \
-	Policies/ThreadingModel.cpp \
-	Utilities/Reference.cpp
+	Policies/ObjectLifeTime.cpp
 
 all: all-am
 
@@ -276,17 +261,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/CreationPolicy.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FactoryHolder.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Grid.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GridLoader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectLifeTime.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ObjectRegistry.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Reference.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Singleton.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ThreadingModel.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TypeContainer.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/TypeContainerVisitor.Po@am__quote@
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -309,104 +284,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-FactoryHolder.o: Dynamic/FactoryHolder.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FactoryHolder.o -MD -MP -MF "$(DEPDIR)/FactoryHolder.Tpo" -c -o FactoryHolder.o `test -f 'Dynamic/FactoryHolder.cpp' || echo '$(srcdir)/'`Dynamic/FactoryHolder.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/FactoryHolder.Tpo" "$(DEPDIR)/FactoryHolder.Po"; else rm -f "$(DEPDIR)/FactoryHolder.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/FactoryHolder.cpp' object='FactoryHolder.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FactoryHolder.o `test -f 'Dynamic/FactoryHolder.cpp' || echo '$(srcdir)/'`Dynamic/FactoryHolder.cpp
-
-FactoryHolder.obj: Dynamic/FactoryHolder.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT FactoryHolder.obj -MD -MP -MF "$(DEPDIR)/FactoryHolder.Tpo" -c -o FactoryHolder.obj `if test -f 'Dynamic/FactoryHolder.cpp'; then $(CYGPATH_W) 'Dynamic/FactoryHolder.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/FactoryHolder.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/FactoryHolder.Tpo" "$(DEPDIR)/FactoryHolder.Po"; else rm -f "$(DEPDIR)/FactoryHolder.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/FactoryHolder.cpp' object='FactoryHolder.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o FactoryHolder.obj `if test -f 'Dynamic/FactoryHolder.cpp'; then $(CYGPATH_W) 'Dynamic/FactoryHolder.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/FactoryHolder.cpp'; fi`
-
-ObjectRegistry.o: Dynamic/ObjectRegistry.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ObjectRegistry.o -MD -MP -MF "$(DEPDIR)/ObjectRegistry.Tpo" -c -o ObjectRegistry.o `test -f 'Dynamic/ObjectRegistry.cpp' || echo '$(srcdir)/'`Dynamic/ObjectRegistry.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ObjectRegistry.Tpo" "$(DEPDIR)/ObjectRegistry.Po"; else rm -f "$(DEPDIR)/ObjectRegistry.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/ObjectRegistry.cpp' object='ObjectRegistry.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ObjectRegistry.o `test -f 'Dynamic/ObjectRegistry.cpp' || echo '$(srcdir)/'`Dynamic/ObjectRegistry.cpp
-
-ObjectRegistry.obj: Dynamic/ObjectRegistry.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ObjectRegistry.obj -MD -MP -MF "$(DEPDIR)/ObjectRegistry.Tpo" -c -o ObjectRegistry.obj `if test -f 'Dynamic/ObjectRegistry.cpp'; then $(CYGPATH_W) 'Dynamic/ObjectRegistry.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/ObjectRegistry.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ObjectRegistry.Tpo" "$(DEPDIR)/ObjectRegistry.Po"; else rm -f "$(DEPDIR)/ObjectRegistry.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Dynamic/ObjectRegistry.cpp' object='ObjectRegistry.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ObjectRegistry.obj `if test -f 'Dynamic/ObjectRegistry.cpp'; then $(CYGPATH_W) 'Dynamic/ObjectRegistry.cpp'; else $(CYGPATH_W) '$(srcdir)/Dynamic/ObjectRegistry.cpp'; fi`
-
-Grid.o: GameSystem/Grid.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Grid.o -MD -MP -MF "$(DEPDIR)/Grid.Tpo" -c -o Grid.o `test -f 'GameSystem/Grid.cpp' || echo '$(srcdir)/'`GameSystem/Grid.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Grid.Tpo" "$(DEPDIR)/Grid.Po"; else rm -f "$(DEPDIR)/Grid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/Grid.cpp' object='Grid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Grid.o `test -f 'GameSystem/Grid.cpp' || echo '$(srcdir)/'`GameSystem/Grid.cpp
-
-Grid.obj: GameSystem/Grid.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Grid.obj -MD -MP -MF "$(DEPDIR)/Grid.Tpo" -c -o Grid.obj `if test -f 'GameSystem/Grid.cpp'; then $(CYGPATH_W) 'GameSystem/Grid.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/Grid.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Grid.Tpo" "$(DEPDIR)/Grid.Po"; else rm -f "$(DEPDIR)/Grid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/Grid.cpp' object='Grid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Grid.obj `if test -f 'GameSystem/Grid.cpp'; then $(CYGPATH_W) 'GameSystem/Grid.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/Grid.cpp'; fi`
-
-GridLoader.o: GameSystem/GridLoader.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridLoader.o -MD -MP -MF "$(DEPDIR)/GridLoader.Tpo" -c -o GridLoader.o `test -f 'GameSystem/GridLoader.cpp' || echo '$(srcdir)/'`GameSystem/GridLoader.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/GridLoader.Tpo" "$(DEPDIR)/GridLoader.Po"; else rm -f "$(DEPDIR)/GridLoader.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/GridLoader.cpp' object='GridLoader.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridLoader.o `test -f 'GameSystem/GridLoader.cpp' || echo '$(srcdir)/'`GameSystem/GridLoader.cpp
-
-GridLoader.obj: GameSystem/GridLoader.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT GridLoader.obj -MD -MP -MF "$(DEPDIR)/GridLoader.Tpo" -c -o GridLoader.obj `if test -f 'GameSystem/GridLoader.cpp'; then $(CYGPATH_W) 'GameSystem/GridLoader.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/GridLoader.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/GridLoader.Tpo" "$(DEPDIR)/GridLoader.Po"; else rm -f "$(DEPDIR)/GridLoader.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/GridLoader.cpp' object='GridLoader.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o GridLoader.obj `if test -f 'GameSystem/GridLoader.cpp'; then $(CYGPATH_W) 'GameSystem/GridLoader.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/GridLoader.cpp'; fi`
-
-TypeContainer.o: GameSystem/TypeContainer.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TypeContainer.o -MD -MP -MF "$(DEPDIR)/TypeContainer.Tpo" -c -o TypeContainer.o `test -f 'GameSystem/TypeContainer.cpp' || echo '$(srcdir)/'`GameSystem/TypeContainer.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/TypeContainer.Tpo" "$(DEPDIR)/TypeContainer.Po"; else rm -f "$(DEPDIR)/TypeContainer.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/TypeContainer.cpp' object='TypeContainer.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TypeContainer.o `test -f 'GameSystem/TypeContainer.cpp' || echo '$(srcdir)/'`GameSystem/TypeContainer.cpp
-
-TypeContainer.obj: GameSystem/TypeContainer.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TypeContainer.obj -MD -MP -MF "$(DEPDIR)/TypeContainer.Tpo" -c -o TypeContainer.obj `if test -f 'GameSystem/TypeContainer.cpp'; then $(CYGPATH_W) 'GameSystem/TypeContainer.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/TypeContainer.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/TypeContainer.Tpo" "$(DEPDIR)/TypeContainer.Po"; else rm -f "$(DEPDIR)/TypeContainer.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/TypeContainer.cpp' object='TypeContainer.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TypeContainer.obj `if test -f 'GameSystem/TypeContainer.cpp'; then $(CYGPATH_W) 'GameSystem/TypeContainer.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/TypeContainer.cpp'; fi`
-
-TypeContainerVisitor.o: GameSystem/TypeContainerVisitor.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TypeContainerVisitor.o -MD -MP -MF "$(DEPDIR)/TypeContainerVisitor.Tpo" -c -o TypeContainerVisitor.o `test -f 'GameSystem/TypeContainerVisitor.cpp' || echo '$(srcdir)/'`GameSystem/TypeContainerVisitor.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/TypeContainerVisitor.Tpo" "$(DEPDIR)/TypeContainerVisitor.Po"; else rm -f "$(DEPDIR)/TypeContainerVisitor.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/TypeContainerVisitor.cpp' object='TypeContainerVisitor.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TypeContainerVisitor.o `test -f 'GameSystem/TypeContainerVisitor.cpp' || echo '$(srcdir)/'`GameSystem/TypeContainerVisitor.cpp
-
-TypeContainerVisitor.obj: GameSystem/TypeContainerVisitor.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT TypeContainerVisitor.obj -MD -MP -MF "$(DEPDIR)/TypeContainerVisitor.Tpo" -c -o TypeContainerVisitor.obj `if test -f 'GameSystem/TypeContainerVisitor.cpp'; then $(CYGPATH_W) 'GameSystem/TypeContainerVisitor.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/TypeContainerVisitor.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/TypeContainerVisitor.Tpo" "$(DEPDIR)/TypeContainerVisitor.Po"; else rm -f "$(DEPDIR)/TypeContainerVisitor.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='GameSystem/TypeContainerVisitor.cpp' object='TypeContainerVisitor.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o TypeContainerVisitor.obj `if test -f 'GameSystem/TypeContainerVisitor.cpp'; then $(CYGPATH_W) 'GameSystem/TypeContainerVisitor.cpp'; else $(CYGPATH_W) '$(srcdir)/GameSystem/TypeContainerVisitor.cpp'; fi`
-
-CreationPolicy.o: Policies/CreationPolicy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CreationPolicy.o -MD -MP -MF "$(DEPDIR)/CreationPolicy.Tpo" -c -o CreationPolicy.o `test -f 'Policies/CreationPolicy.cpp' || echo '$(srcdir)/'`Policies/CreationPolicy.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/CreationPolicy.Tpo" "$(DEPDIR)/CreationPolicy.Po"; else rm -f "$(DEPDIR)/CreationPolicy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/CreationPolicy.cpp' object='CreationPolicy.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CreationPolicy.o `test -f 'Policies/CreationPolicy.cpp' || echo '$(srcdir)/'`Policies/CreationPolicy.cpp
-
-CreationPolicy.obj: Policies/CreationPolicy.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT CreationPolicy.obj -MD -MP -MF "$(DEPDIR)/CreationPolicy.Tpo" -c -o CreationPolicy.obj `if test -f 'Policies/CreationPolicy.cpp'; then $(CYGPATH_W) 'Policies/CreationPolicy.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/CreationPolicy.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/CreationPolicy.Tpo" "$(DEPDIR)/CreationPolicy.Po"; else rm -f "$(DEPDIR)/CreationPolicy.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/CreationPolicy.cpp' object='CreationPolicy.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o CreationPolicy.obj `if test -f 'Policies/CreationPolicy.cpp'; then $(CYGPATH_W) 'Policies/CreationPolicy.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/CreationPolicy.cpp'; fi`
-
 ObjectLifeTime.o: Policies/ObjectLifeTime.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ObjectLifeTime.o -MD -MP -MF "$(DEPDIR)/ObjectLifeTime.Tpo" -c -o ObjectLifeTime.o `test -f 'Policies/ObjectLifeTime.cpp' || echo '$(srcdir)/'`Policies/ObjectLifeTime.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ObjectLifeTime.Tpo" "$(DEPDIR)/ObjectLifeTime.Po"; else rm -f "$(DEPDIR)/ObjectLifeTime.Tpo"; exit 1; fi
@@ -420,48 +297,6 @@ ObjectLifeTime.obj: Policies/ObjectLifeTime.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/ObjectLifeTime.cpp' object='ObjectLifeTime.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ObjectLifeTime.obj `if test -f 'Policies/ObjectLifeTime.cpp'; then $(CYGPATH_W) 'Policies/ObjectLifeTime.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/ObjectLifeTime.cpp'; fi`
-
-Singleton.o: Policies/Singleton.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Singleton.o -MD -MP -MF "$(DEPDIR)/Singleton.Tpo" -c -o Singleton.o `test -f 'Policies/Singleton.cpp' || echo '$(srcdir)/'`Policies/Singleton.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Singleton.Tpo" "$(DEPDIR)/Singleton.Po"; else rm -f "$(DEPDIR)/Singleton.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/Singleton.cpp' object='Singleton.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Singleton.o `test -f 'Policies/Singleton.cpp' || echo '$(srcdir)/'`Policies/Singleton.cpp
-
-Singleton.obj: Policies/Singleton.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Singleton.obj -MD -MP -MF "$(DEPDIR)/Singleton.Tpo" -c -o Singleton.obj `if test -f 'Policies/Singleton.cpp'; then $(CYGPATH_W) 'Policies/Singleton.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/Singleton.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Singleton.Tpo" "$(DEPDIR)/Singleton.Po"; else rm -f "$(DEPDIR)/Singleton.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/Singleton.cpp' object='Singleton.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Singleton.obj `if test -f 'Policies/Singleton.cpp'; then $(CYGPATH_W) 'Policies/Singleton.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/Singleton.cpp'; fi`
-
-ThreadingModel.o: Policies/ThreadingModel.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ThreadingModel.o -MD -MP -MF "$(DEPDIR)/ThreadingModel.Tpo" -c -o ThreadingModel.o `test -f 'Policies/ThreadingModel.cpp' || echo '$(srcdir)/'`Policies/ThreadingModel.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ThreadingModel.Tpo" "$(DEPDIR)/ThreadingModel.Po"; else rm -f "$(DEPDIR)/ThreadingModel.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/ThreadingModel.cpp' object='ThreadingModel.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ThreadingModel.o `test -f 'Policies/ThreadingModel.cpp' || echo '$(srcdir)/'`Policies/ThreadingModel.cpp
-
-ThreadingModel.obj: Policies/ThreadingModel.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT ThreadingModel.obj -MD -MP -MF "$(DEPDIR)/ThreadingModel.Tpo" -c -o ThreadingModel.obj `if test -f 'Policies/ThreadingModel.cpp'; then $(CYGPATH_W) 'Policies/ThreadingModel.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/ThreadingModel.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/ThreadingModel.Tpo" "$(DEPDIR)/ThreadingModel.Po"; else rm -f "$(DEPDIR)/ThreadingModel.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Policies/ThreadingModel.cpp' object='ThreadingModel.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o ThreadingModel.obj `if test -f 'Policies/ThreadingModel.cpp'; then $(CYGPATH_W) 'Policies/ThreadingModel.cpp'; else $(CYGPATH_W) '$(srcdir)/Policies/ThreadingModel.cpp'; fi`
-
-Reference.o: Utilities/Reference.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Reference.o -MD -MP -MF "$(DEPDIR)/Reference.Tpo" -c -o Reference.o `test -f 'Utilities/Reference.cpp' || echo '$(srcdir)/'`Utilities/Reference.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Reference.Tpo" "$(DEPDIR)/Reference.Po"; else rm -f "$(DEPDIR)/Reference.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Utilities/Reference.cpp' object='Reference.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Reference.o `test -f 'Utilities/Reference.cpp' || echo '$(srcdir)/'`Utilities/Reference.cpp
-
-Reference.obj: Utilities/Reference.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT Reference.obj -MD -MP -MF "$(DEPDIR)/Reference.Tpo" -c -o Reference.obj `if test -f 'Utilities/Reference.cpp'; then $(CYGPATH_W) 'Utilities/Reference.cpp'; else $(CYGPATH_W) '$(srcdir)/Utilities/Reference.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/Reference.Tpo" "$(DEPDIR)/Reference.Po"; else rm -f "$(DEPDIR)/Reference.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='Utilities/Reference.cpp' object='Reference.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o Reference.obj `if test -f 'Utilities/Reference.cpp'; then $(CYGPATH_W) 'Utilities/Reference.cpp'; else $(CYGPATH_W) '$(srcdir)/Utilities/Reference.cpp'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
