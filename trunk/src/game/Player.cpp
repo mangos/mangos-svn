@@ -5493,7 +5493,7 @@ uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
             {
                 uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
                 Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, twinslot );
-                if( twinItem && !HasSpell( 274 ) == 0 )
+                if( twinItem && !HasSpell( 274 ) )
                 {
                     if( msg )
                         SendEquipError( EQUIP_ERR_CANT_DUAL_WIELD, pItem, NULL, 0 );
