@@ -635,6 +635,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAttackSwingNotStanding();
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
+        void SendExplorationExperience(uint32 Area, uint32 Experience);
+
+
 
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
         void SendMessageToSet(WorldPacket *data, bool self);

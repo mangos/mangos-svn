@@ -474,8 +474,6 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
 
 void Player::HandleDrowing(uint32 UnderWaterTime)
 {
-    WorldPacket data;
-
     if (Player::HasSpell(5227))
     {
         UnderWaterTime*=4;
@@ -1049,7 +1047,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
         return;
 
     if (guid != 0)
-        SendLogXPGain(guid,xp,0,false);
+        SendLogXPGain(guid,xp,false,false);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -2482,10 +2480,12 @@ void Player::CheckExploreSystem()
             uint32 XP = p->area_level*10;
             uint32 area = p->ID;
             GiveXP( XP, GetGUID() );
-            data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
+
+            SendExplorationExperience(area,XP);
+            /*data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
             data << area;
             data << XP;
-            GetSession()->SendPacket(&data);
+            GetSession()->SendPacket(&data);*/
 
             sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), area);
         }
@@ -2610,6 +2610,7 @@ void Player::SetInitialFactions()
 
 bool Player::SetStanding(uint32 FTemplate, int standing)
 {
+    //Factions newFaction;
     FactionEntry *factionEntry = NULL;
     FactionTemplateEntry *factionTemplateEntry = NULL;
     std::list<struct Factions>::iterator itr;
@@ -2905,7 +2906,6 @@ void Player::CheckDuelDistance()
 {
     if( !isInDuel() ) return;
 
-    WorldPacket data;
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
 
     GameObject* obj = NULL;
@@ -2987,21 +2987,17 @@ void Rand_Init(int seed)
 
 int irand(int min, int max)
 {
-    int        result;
-
     assert((max - min) < 32768);
 
     max++;
     holdrand = (holdrand * 214013L) + 2531011L;
-    result = holdrand >> 17;
-    result = ((result * (max - min)) >> 15) + min;
-    return(result);
+       
+    return (((holdrand >> 17) * (max - min)) >> 15) + min;
 }
 
-uint32 urand(uint32 min, uint32 max)
+inline uint32 urand(uint32 min, uint32 max)
 {
-    uint32 result = irand(int(min), int(max));
-    return result;
+    return irand(int(min), int(max));
 }
 
 void Player::SendAttackStart(Unit* pVictim)
@@ -8401,10 +8397,22 @@ void Player::PlaySound(uint32 Sound, bool OnlySelf)
         SendMessageToSet( &data, true );
 }
 
-void Player::UpdatePVPFlag(time_t currTime)
+void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
 {
     WorldPacket data;
+    data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
+    data << Area;
+    data << Experience;
+    GetSession()->SendPacket(&data);
+}
 
+
+/*********************************************************/
+/***              Update timers                        ***/
+/*********************************************************/
+
+void Player::UpdatePVPFlag(time_t currTime)
+{
     //Player is counting to set/unset pvp flag
     if( !m_pvp_counting ) return;
 
@@ -8421,7 +8429,8 @@ void Player::UpdatePVPFlag(time_t currTime)
         if( currTime < m_pvp_count + 300 ) return;
 
         SetPvP(false);
-
+        
+        WorldPacket data;
         sChatHandler.FillSystemMessageData(&data, GetSession(), "PvP toggled off.");
         GetSession()->SendPacket(&data);
     }
