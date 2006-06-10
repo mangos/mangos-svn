@@ -349,6 +349,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInventoryPos( uint16 pos );
         bool IsEquipmentPos( uint16 pos );
         bool IsBankPos( uint16 pos );
+        bool IsBagSlot( uint16 pos );
         bool HasItemCount( uint32 item, uint32 count );
         uint16 CanStoreNewItem( uint8 bag, uint8 slot, uint32 item, uint32 count, bool swap, bool msg );
         uint16 CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
