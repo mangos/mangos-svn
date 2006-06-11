@@ -119,10 +119,11 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_data )
 {
-    sLog.outDebug( "WORLD: Recvd MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
+    //sLog.outDebug( "WORLD: Recvd MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
 
     std::list<Player*> ListToSend;
-    for(std::list<Player*>::iterator i=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersBegin();i!=sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersEnd();++i)
+
+    for(std::list<Player*>::iterator i = sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersBegin(); i != sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersEnd(); ++i)
     {
         if((*i) != GetPlayer())
             ListToSend.push_back(*i);
@@ -131,15 +132,15 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
     WorldPacket data;
     data.Initialize(MSG_BATTLEGROUND_PLAYER_POSITIONS);     // MSG_BATTLEGROUND_PLAYER_POSITIONS
     data << uint32(ListToSend.size());
-    data << uint32(sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersSize());
     for(std::list<Player*>::iterator itr=ListToSend.begin();itr!=ListToSend.end();++itr)
     {
         data << (uint64)(*itr)->GetGUID();
         data << (float)(*itr)->GetPositionX();
         data << (float)(*itr)->GetPositionY();
     }
+    data << uint8(0);
     GetPlayer()->GetSession()->SendPacket(&data);
-    sLog.outDebug( "WORLD: Send MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
+    //sLog.outDebug( "WORLD: Send MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
 }
 
 void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
