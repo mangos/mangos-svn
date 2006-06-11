@@ -6387,23 +6387,26 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if( pItem && pItem->GetEntry() == item )
+                for(int j = 0; j < pBagProto->ContainerSlots; ++j)
                 {
-                    if( pItem->GetCount() + remcount <= count )
+                    pItem = pBag->GetItemByPos(j);
+                    if( pItem && pItem->GetEntry() == item )
                     {
-                        remcount += pItem->GetCount();
-                        DestroyItem( INVENTORY_SLOT_BAG_0, i, update );
-                    }
-                    else
-                    {
-                        pProto = pItem->GetProto();
-                        if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-                            ItemRemoved( pItem->GetEntry(), count - remcount );
-                        pItem->SetCount( pItem->GetCount() - count + remcount );
-                        if( IsInWorld() && update )
-                            pItem->SendUpdateToPlayer( this );
-                        return;
+                        if( pItem->GetCount() + remcount <= count )
+                        {
+                            remcount += pItem->GetCount();
+                            DestroyItem( INVENTORY_SLOT_BAG_0, i, update );
+                        }
+                        else
+                        {
+                            pProto = pItem->GetProto();
+                            if( pProto && pProto->Class == ITEM_CLASS_QUEST )
+                                ItemRemoved( pItem->GetEntry(), count - remcount );
+                            pItem->SetCount( pItem->GetCount() - count + remcount );
+                            if( IsInWorld() && update )
+                                pItem->SendUpdateToPlayer( this );
+                            return;
+                        }
                     }
                 }
             }
