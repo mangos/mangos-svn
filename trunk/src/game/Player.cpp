@@ -2995,11 +2995,6 @@ int irand(int min, int max)
     return (((holdrand >> 17) * (max - min)) >> 15) + min;
 }
 
-inline uint32 urand(uint32 min, uint32 max)
-{
-    return irand(int(min), int(max));
-}
-
 void Player::SendAttackStart(Unit* pVictim)
 {
     WorldPacket data;
@@ -5086,12 +5081,15 @@ bool Player::HasItemCount( uint32 item, uint32 count )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if( pItem && pItem->GetEntry() == item )
+                for(int j = 0; j < pBagProto->ContainerSlots; ++j)
                 {
-                    tempcount += pItem->GetCount();
-                    if( tempcount >= count )
-                        return true;
+                    pItem = pBag->GetItemByPos(j);
+                    if( pItem && pItem->GetEntry() == item )
+                    {
+                        tempcount += pItem->GetCount();
+                        if( tempcount >= count )
+                            return true;
+                    }
                 }
             }
         }
