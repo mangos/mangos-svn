@@ -83,7 +83,7 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	GuildHandler.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) \
 	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
 	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
-	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
+	LootHandler.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
 	MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
 	MotionMaster.$(OBJEXT) MovementGenerator.$(OBJEXT) \
 	MovementHandler.$(OBJEXT) Mthread.$(OBJEXT) \
@@ -302,6 +302,7 @@ libgame_a_SOURCES = \
 	Level1.cpp \
 	Level2.cpp \
 	Level3.cpp \
+	LootHandler.cpp \
 	LootMgr.cpp \
 	Mail.cpp \
 	Map.cpp \
@@ -526,6 +527,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Level3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LootHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/LootMgr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mail.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Map.Po@am__quote@
