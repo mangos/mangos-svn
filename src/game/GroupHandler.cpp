@@ -357,3 +357,17 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     group->SetLooterGuid( lootMaster );
     group->SendUpdate();
 }
+
+void WorldSession::HandleLootRoll( WorldPacket &recv_data )
+{
+    uint64 Guid;
+    uint32 NumberOfPlayers;
+    uint8 Choise;
+    recv_data >> Guid;
+    recv_data >> NumberOfPlayers;
+    recv_data >> Choise;
+    recv_data.hexlike();
+
+
+    sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
+}

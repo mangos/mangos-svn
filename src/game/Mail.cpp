@@ -206,7 +206,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 {
     uint64 mailbox;
     uint32 message;
-    uint16 dst;
+    uint16 dest;
     WorldPacket data;
     recv_data >> mailbox;
     recv_data >> message;
@@ -214,35 +214,21 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Mail* m = pl->GetMail(message);
     Item *it = objmgr.GetMItem(m->item);
 
-    if( dst = _player->CanStoreItem( NULL, NULL_SLOT, it, false, true ) )
-        _player->StoreItem( dst, it, true);
-    /* still needs some condition so that if item can not be received, both mail and
-       mailed_items to stay till delete or return, otherwise it's dumped, also a client message */
-
-    m->item = 0;
-    pl->AddMail(m);
-
-    /* 
+    uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, it, false );
+    if( msg == EQUIP_ERR_OK )
+    {
         m->item = 0;
         pl->AddMail(m);
-        for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-        {
-            if (_player->GetItemByPos(i) == NULL)
-            {
-                slot = i;
-                break;
-            }
-        }
-        it->SetUInt64Value(ITEM_FIELD_CONTAINED,pl->GetGUID());
-        it->SetUInt64Value(ITEM_FIELD_OWNER,pl->GetGUID());
-        _player->AddItemToSlot(slot, it);
-    */
-    objmgr.RemoveMItem(it->GetGUIDLow());
-    data.Initialize(SMSG_SEND_MAIL_RESULT);
-    data << uint32(message);
-    data << uint32(2);
-    data << uint32(0);
-    SendPacket(&data);
+        _player->StoreItem( dest, it, true);
+        objmgr.RemoveMItem(it->GetGUIDLow());
+        data.Initialize(SMSG_SEND_MAIL_RESULT);
+        data << uint32(message);
+        data << uint32(2);
+        data << uint32(0);
+        SendPacket(&data);
+    }
+    else
+        _player->SendEquipError( msg, it, NULL, 0);
 }
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
@@ -473,44 +459,12 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
         return;
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
-    if( uint16 dest = _player->CanStoreItem( NULL, NULL_SLOT, item, false, true ) )
+    uint16 dest;
+    uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, item, false );
+    if( msg == EQUIP_ERR_OK )
         _player->StoreItem(dest, item, true);
-
-    /*
-        for(i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-        {
-            if (_player->GetItemByPos(i) == NULL)
-            {
-                slot = i;
-                slotfree=true;
-                break;
-            }
-        }
-        if (slotfree)
-        {
-            Item *item = new Item();
-
-            item->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), 889, _player, 1);
-            item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
-
-            _player->AddItemToSlot( slot, item );
-
-            Data.Initialize(SMSG_SEND_MAIL_RESULT);
-            Data << uint32(mailid);
-            Data << uint32(sbit2);
-            Data << uint32(0);
-            SendPacket(&Data);
-        }
-        else
-        {
-            Data.Initialize(SMSG_SEND_MAIL_RESULT);
-            Data << uint32(mailid);
-            Data << uint32(0);
-            Data << uint32(1);
-            SendPacket(&Data);
-        }
-    */
-
+    else
+        _player->SendEquipError( msg, item, NULL, 0);
 }
 
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )

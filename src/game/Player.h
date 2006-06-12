@@ -338,7 +338,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void SetSheath( uint32 sheathed );
-        uint8 FindEquipSlot( uint32 type );
+        uint8 FindEquipSlot( uint32 type, uint32 slot, bool swap );
         Item* CreateItem( uint32 item, uint32 count );
         uint32 GetItemCount( uint32 item );
         uint32 GetBankItemCount( uint32 item );
@@ -349,14 +349,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInventoryPos( uint16 pos );
         bool IsEquipmentPos( uint16 pos );
         bool IsBankPos( uint16 pos );
-        bool IsBagSlot( uint16 pos );
         bool HasItemCount( uint32 item, uint32 count );
-        uint16 CanStoreNewItem( uint8 bag, uint8 slot, uint32 item, uint32 count, bool swap, bool msg );
-        uint16 CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
-        uint16 CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg );
-        uint16 CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg );
-        bool CanUseItem( Item *pItem, bool msg );
-        bool CanUseAmmo( uint32 item, bool msg );
+        uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap );
+        uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
+        uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap );
+        uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
+        uint8 CanUseItem( Item *pItem );
+        uint8 CanUseAmmo( uint32 item );
         void StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         void StoreItem( uint16 pos, Item *pItem, bool update );
         void EquipItem( uint16 pos, Item *pItem, bool update );

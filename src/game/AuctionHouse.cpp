@@ -460,7 +460,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                             {
                                 if( quality == (0xffffffff) || proto->Quality == quality )
                                 {
-                                    if( usable == (0x00) || _player->CanUseItem( item, false ) )
+                                    if( usable == (0x00) || _player->CanUseItem( item ) == EQUIP_ERR_OK )
                                     {
                                         if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
                                         {

@@ -282,7 +282,12 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             if ( pPlayer->CanSeeStartQuest( pQuest ) )
             {
                 if ( pPlayer->SatisfyQuestLevel(pQuest, false) )
-                    return DIALOG_STATUS_AVAILABLE;
+                {
+                    if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+                        return DIALOG_STATUS_REWARD_REP;
+                    else
+                        return DIALOG_STATUS_AVAILABLE;
+                }
                 result = DIALOG_STATUS_UNAVAILABLE;
             }
         }

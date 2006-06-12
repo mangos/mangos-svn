@@ -46,7 +46,12 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (!pUser->CanUseItem(pItem, true)) return;
+    uint8 msg = pUser->CanUseItem(pItem);
+    if( msg != EQUIP_ERR_OK )
+    {
+        pUser->SendEquipError( msg, pItem, NULL, 0 );
+        return;
+    }
 
     if (pUser->isInCombat())
     {

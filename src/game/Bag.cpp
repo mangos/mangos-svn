@@ -161,7 +161,6 @@ void Bag::StoreItem( uint8 slot, Item *pItem, bool update )
 {
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : StoreItem bag = %u, slot = %u, item = %u", GetSlot(), slot, pItem->GetEntry());
         m_bagslot[slot] = pItem;
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());

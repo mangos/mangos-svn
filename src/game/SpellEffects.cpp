@@ -333,13 +333,14 @@ void Spell::EffectCreateItem(uint32 i)
     if((newitemid = m_spellInfo->EffectItemType[i]) == 0)
         return;
 
+    uint16 dest;
     for(uint32 x=0;x<8;x++)
     {
         if(m_spellInfo->Reagent[x] == 0)
             continue;
         itemid = m_spellInfo->Reagent[x];
         itemcount = m_spellInfo->ReagentCount[x];
-        if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(NULL, NULL_SLOT, newitemid, 1, false, false) >= 1 )
+        if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(NULL, NULL_SLOT, dest, newitemid, 1, false ) == EQUIP_ERR_OK )
             player->DestroyItemCount(itemid, itemcount, true);
         else
         {
@@ -354,17 +355,17 @@ void Spell::EffectCreateItem(uint32 i)
     //   if(num_to_add > m_itemProto->MaxCount)
     //       num_to_add = m_itemProto->MaxCount;
     Item *pItem = player->CreateItem(newitemid,1);
-    if( uint16 dest = player->CanStoreItem( NULL, NULL_SLOT, pItem, false, true) )
-        player->StoreItem( dest, pItem, true);
-    if(!pItem)
+    uint8 msg = player->CanStoreItem( NULL, NULL_SLOT, dest, pItem, false);
+    if( msg == EQUIP_ERR_OK )
     {
-        SendCastResult(CAST_FAIL_TOO_MANY_OF_THAT_ITEM_ALREADY);
-        return;
+        player->StoreItem( dest, pItem, true);
+        if( !pItem->GetUInt32Value(ITEM_CLASS_CONSUMABLE) )
+            pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+        //should send message "create item" to client.-FIX ME
+        player->UpdateSkillPro(m_spellInfo->Id);
     }
-    if(!pItem->GetUInt32Value(ITEM_CLASS_CONSUMABLE))
-        pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
-    //should send message "create item" to client.-FIX ME
-    player->UpdateSkillPro(m_spellInfo->Id);
+    else
+        player->SendEquipError( msg, NULL, NULL, 0 );
 }
 
 void Spell::EffectPresistentAA(uint32 i)
@@ -1452,8 +1453,6 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 void Spell::EffectDisEnchant(uint32 i)
 {
     Player* p_caster = (Player*)m_caster;
-    uint16 dst;
-    uint32 rnd;
     if(!itemTarget)
         return;
     uint32 item_level = itemTarget->GetProto()->ItemLevel;
@@ -1473,297 +1472,197 @@ void Spell::EffectDisEnchant(uint32 i)
     Player *player = (Player*)m_caster;
     p_caster->UpdateSkillPro(m_spellInfo->Id);
 
+    uint32 item;
+    uint32 count;
     if(item_level >= 51 && item_level <= 60)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14344, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 14344, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 14344;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14344, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 14344, 1, true);
-            return;
+            count = 1;
+            item = 14344;
         }
         else if(item_quality == 2)
         {
+            count = urand(1,(item_level/10));
             if(urand(1,100)< 85)
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16204, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 16204, rnd, true);
-
-                return;
-            }
+                item = 16204;
             else
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16203, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 16203, rnd, true);
-
-                return;
-            }
+                item = 16203;
         }
-
     }
     else if(item_level >= 46 && item_level <= 50)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14343, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 14343, rnd, true);
-
-            return;
+            count = urand(3,5);
+            item = 14343;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 14343, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 14343, 1, true);
-
-            return;
+            count = 1;
+            item = 14343;
         }
         else if(item_quality == 2)
         {
+            count = urand(1,(item_level/10));
             if(urand(1,100)< 85)
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11176, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11176, rnd, true);
-                return;
-            }
+                count = 11176;
             else
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 16202, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 16202, rnd, true);
-                return;
-            }
+                count = 16202;
         }
-
     }
     else if(item_level >= 41 && item_level <= 45)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11178, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11178, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 11178;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11178, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11178, 1, true);
-
-            return;
+            count = 1;
+            item = 11178;
         }
         else if(item_quality == 2)
         {
+            count = urand(1,(item_level/10));
             if(urand(1,100)< 85)
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11176, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11176, rnd, true);
-
-                return;
-            }
+                item = 11176;
             else
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11175, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11175, rnd, true);
-
-                return;
-            }
+                item = 11175;
         }
     }
     else if(item_level >= 36 && item_level <= 40)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11177, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11177, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 11177;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11177, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11177, 1, true);
-
-            return;
+            count = 1;
+            item = 11177;
         }
         else if(item_quality == 2)
         {
+            count = urand(1,(item_level/10));
             if(urand(1,100)< 85)
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11137, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11137, rnd, true);
-                return;
-            }
+                item = 11137;
             else
-            {
-                rnd = urand(1,(item_level/10));
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11174, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11174, rnd, true);
-                return;
-            }
+                item = 11174;
         }
     }
     else if(item_level >= 31 && item_level <= 35)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11139, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11139, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 11139;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11139, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11139, 1, true);
-
-            return;
+            count = 1;
+            item = 11139;
         }
         else if(item_quality == 2)
         {
+            count = (item_level/10);
             if(urand(1,100)< 85)
-            {
-                rnd = (item_level/10);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11137, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11137, rnd, true);
-
-                return;
-            }
+                item = 11137;
             else
-            {
-                rnd = (item_level/10);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11135, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11135, rnd, true);
-
-                return;
-            }
+                item = 11135;
         }
     }
     else if(item_level >= 25 && item_level <= 30)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11138, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11138, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 11138;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11138, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11138, 1, true);
-            return;
+            count = 1;
+            item = 11138;
         }
         else if(item_quality == 2)
         {
+            count = (item_level/10);
             if(urand(1,100)< 85)
-            {
-                rnd = (item_level/10);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11083, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11083, rnd, true);
-                return;
-            }
+                item = 11083;
             else
-            {
-                rnd = (item_level/10);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11134, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11134, rnd, true);
-                return;
-            }
+                item = 11134;
         }
     }
     else if(item_level >= 21 && item_level <= 25)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11084, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 11084, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 11084;
         }
         else if(item_quality == 3)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11084, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 11084, 1, true);
-            return;
+            count = 1;
+            item = 11084;
         }
         else if(item_quality == 2)
         {
+            count = (item_level/10);
             if(urand(1,100)< 85)
-            {
-                rnd = (item_level/10);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11083, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11083, rnd, true);
-                return;
-            }
+                item = 11083;
             else
-            {
-                rnd = (item_level/10);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 11082, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 11082, rnd, true);
-                return;
-            }
+                item = 11082;
         }
     }
     else if(item_level >= 1 && item_level <= 20)
     {
         if(item_quality == 4)
         {
-            rnd = urand(3,5);
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10978, rnd, false, true ) )
-                p_caster->StoreNewItem(dst, 10978, rnd, true);
-            return;
+            count = urand(3,5);
+            item = 10978;
         }
         else if(item_quality == 3 && item_level >=16)
         {
-            if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10978, 1, false, true ) )
-                p_caster->StoreNewItem(dst, 10978, 1, true);
-            return;
+            count = 1;
+            item = 10978;
         }
         else if(item_quality == 2)
         {
             if(urand(1,100)< 70)
             {
-                rnd = urand(1,3);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10940, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10940, rnd, true);
-                return;
+                count = urand(1,3);
+                item = 10940;
             }
             else if(item_level <=15 && urand(1,100)< 70 )
             {
-                rnd = urand(1,3);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10938, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10938, rnd, true);
-                return;
+                count = urand(1,3);
+                item = 10938;
             }
             else if(urand(1,100)< 50)
             {
-                rnd = urand(1,3);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10939, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10939, rnd, true);
-                return;
+                count = urand(1,3);
+                item = 10939;
             }
             else
             {
-                rnd = urand(1,3);
-                if( dst = p_caster->CanStoreNewItem( NULL, NULL_SLOT, 10998, rnd, false, true ) )
-                    p_caster->StoreNewItem(dst, 10998, rnd, true);
-                return;
+                count = urand(1,3);
+                item = 10998;
             }
         }
     }
+    uint16 dest;
+    uint8 msg = player->CanStoreNewItem( NULL, NULL_SLOT, dest, item, count, false );
+    if( msg == EQUIP_ERR_OK )
+        player->StoreNewItem( dest, item, count, true );
+    else
+        player->SendEquipError( msg, NULL, NULL, 0);
     return ;
 }
 
