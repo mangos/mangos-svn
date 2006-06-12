@@ -282,6 +282,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GROUP_SET_LEADER,         STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          },
         { CMSG_GROUP_DISBAND,            STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            },
         { CMSG_LOOT_METHOD,              STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              },
+        { CMSG_LOOT_ROLL,                STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      },
 
         { CMSG_GUILD_QUERY,             STATUS_LOGGEDIN, &WorldSession::HandleGuildQueryOpcode               },
         { CMSG_GUILD_CREATE,            STATUS_LOGGEDIN, &WorldSession::HandleGuildCreateOpcode              },

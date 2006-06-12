@@ -82,11 +82,34 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     Item *pItem  = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {
-        if( uint16 dest = _player->CanEquipItem( NULL_SLOT, pItem, false, true ) )
+        uint16 dest;
+        uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, true );
+        if( msg == EQUIP_ERR_OK )
         {
-            _player->RemoveItem(srcbag, srcslot, true);
-            _player->EquipItem( dest, pItem, true );
+            Item *pItem2 = _player->GetItemByPos( dest );
+            if( pItem2 )
+            {
+                uint16 src = ((srcbag << 8) | srcslot);
+                uint8 bag = dest >> 8;
+                uint8 slot = dest & 255;
+                _player->RemoveItem( bag, slot, false );
+                _player->RemoveItem( srcbag, srcslot, false );
+                if( _player->IsInventoryPos( src ) )
+                    _player->StoreItem( src, pItem2, true);
+                else if( _player->IsBankPos ( src ) )
+                    _player->BankItem( src, pItem2, true);
+                else if( _player->IsEquipmentPos ( src ) )
+                    _player->EquipItem( src, pItem2, true);
+                _player->EquipItem( dest, pItem, true );
+            }
+            else
+            {
+                _player->RemoveItem( srcbag, srcslot, true );
+                _player->EquipItem( dest, pItem, true );
+            }
         }
+        else
+            _player->SendEquipError( msg, pItem, NULL, 0 );
     }
 }
 
@@ -296,26 +319,32 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 
     recv_data >> vendorguid >> slot;
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
     Item *pItem = _player->GetItemFromBuyBackSlot( slot );
-    if( pCreature && pItem )
+    if( pItem )
     {
-        uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
-        if( newmoney < 0 )
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+        if( pCreature )
         {
-            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
+            uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
+            if( newmoney < 0 )
+            {
+                _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
+               return;
+            }
+            uint16 dest;
+            uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, pItem, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                _player->RemoveItemFromBuyBackSlot( slot );
+                _player->StoreItem( dest, pItem, true );
+            }
+            else
+                _player->SendEquipError( msg, pItem, NULL, 0);
             return;
         }
-        if(uint16 pos = _player->CanStoreItem( NULL, NULL_SLOT, pItem, false, true ) )
-        {
-            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-            _player->RemoveItemFromBuyBackSlot( slot );
-            _player->StoreItem( pos, pItem, true );
-        }
-        return;
+        _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, pItem->GetEntry(), 0);
     }
-    //_player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, pItem->GetEntry(), 0);
-    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, 0, 0);
 }
 
 void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
@@ -328,90 +357,80 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
     recv_data.hexlike();
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
     ItemPrototype *pProto = objmgr.GetItemPrototype( item );
-    if( pCreature && pProto )
+    if( pProto )
     {
-        bool pCreaturehasItem = false;
-        for(int i = 0; i < pCreature->GetItemCount(); i++)
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+        if( pCreature )
         {
-            if ( pCreature->GetItemId(i) == item )
+            for(int i = 0; i < pCreature->GetItemCount(); i++)
             {
-                vendorslot = i;
-                pCreaturehasItem = true;
-                break;
-            }
-        }
-        if(!pCreaturehasItem)
-        {
-            sLog.outDetail( "WARNING! FIND BUY ITEM CHEAT!" );
-            //maybe we should ban this player
-            _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
-            return;
-        }
-        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && (pCreature->GetItemCount( vendorslot ) - count) < 0 )
-        {
-            _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
-            return;
-        }
-        //if( _player->getLevel() < pProto->RequiredLevel )
-        //{
-        //    _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
-        //    return;
-        //}
-        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
-        if( newmoney < 0 )
-        {
-            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-            return;
-        }
-        Bag *pBag;
-        if( bagguid == _player->GetGUID() )
-            bag = INVENTORY_SLOT_BAG_0;
-        else
-        {
-            for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END;i++)
-            {
-                pBag = (Bag*)_player->GetItemByPos(INVENTORY_SLOT_BAG_0,i);
-                if( pBag )
+                if ( pCreature->GetItemId(i) == item )
                 {
-                    if( bagguid == pBag->GetGUID() )
+                    vendorslot = i + 1;
+                    break;
+                }
+            }
+            if( !vendorslot )
+            {
+                _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+                return;
+            }
+            else
+                vendorslot -= 1;
+            if( pCreature->GetMaxItemCount( vendorslot ) != 0 && (pCreature->GetItemCount( vendorslot ) - count) < 0 )
+            {
+                _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
+                return;
+            }
+            if( _player->getLevel() < pProto->RequiredLevel )
+            {
+                _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
+                return;
+            }
+            int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
+            if( newmoney < 0 )
+            {
+                _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+                return;
+            }
+            Bag *pBag;
+            if( bagguid == _player->GetGUID() )
+                bag = INVENTORY_SLOT_BAG_0;
+            else
+            {
+                for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END;i++)
+                {
+                    pBag = (Bag*)_player->GetItemByPos(INVENTORY_SLOT_BAG_0,i);
+                    if( pBag )
                     {
-                        bag = i;
-                        break;
+                        if( bagguid == pBag->GetGUID() )
+                        {
+                            bag = i;
+                            break;
+                        }
                     }
                 }
             }
-        }
-        Item *pItem = _player->CreateItem( item, pCreature->GetItemBuyCount( vendorslot ) * count);
-        uint16 pos = ((bag << 8) | slot);
-        if( _player->IsEquipmentPos( pos ) )
-        {
-            if( _player->CanEquipItem( slot, pItem, false, true ) )
+            uint16 dest = ((bag << 8) | slot);
+            uint8 msg;
+            if( _player->IsInventoryPos( dest ) )
             {
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-                _player->EquipItem( pos, pItem, true );
-                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
+                msg = _player->CanStoreNewItem( bag, slot, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false ); 
+                if( msg == EQUIP_ERR_OK )
+                {
+                    _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                    _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
+                    if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                        pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
+                }
+                else
+                    _player->SendEquipError( msg, NULL, NULL, 0);
             }
-            else
-                delete pItem;
-        }
-        else
-        {
-            if( _player->CanStoreItem( bag, slot, pItem, false, true ) )
-            {
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-                _player->StoreItem( pos, pItem, true );
-                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
-            }
-            else
-                delete pItem;
         }
         return;
     }
-    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
 }
 
 void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
@@ -424,53 +443,58 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     recv_data >> vendorguid >> item >> count >> unk1;
     recv_data.hexlike();
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
     ItemPrototype *pProto = objmgr.GetItemPrototype( item );
-    if( pCreature && pProto )
+    if( pProto )
     {
-        bool pCreaturehasItem = false;
-        for(int i = 0; i < pCreature->GetItemCount(); i++)
+        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
+        if( pCreature )
         {
-            if ( pCreature->GetItemId(i) == item )
+            for(int i = 0; i < pCreature->GetItemCount(); i++)
             {
-                vendorslot = i;
-                pCreaturehasItem = true;
-                break;
+                if ( pCreature->GetItemId(i) == item )
+                {
+                    vendorslot = i + 1;
+                    break;
+                }
             }
-        }
-        if(!pCreaturehasItem)
-        {
-            sLog.outDetail( "WARNING! FIND BUY ITEM CHEAT!" );
-            //maybe we should ban this player
-            _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
-            return;
-        }
-        if( pCreature->GetMaxItemCount( vendorslot ) != 0 && (pCreature->GetItemCount( vendorslot ) - count) < 0 )
-        {
-            _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
-            return;
-        }
-        //if( _player->getLevel() < pProto->RequiredLevel )
-        //{
-        //    _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
-        //    return;
-        //}
-        int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
-        if( newmoney < 0 )
-        {
-            _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-            return;
-        }
-        if(uint16 pos = _player->CanStoreNewItem( NULL, NULL_SLOT, item, pCreature->GetItemBuyCount( vendorslot ) * count, false, false ) )
-        {
-            _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
-            _player->StoreNewItem( pos, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
-            if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
+            if( !vendorslot )
+            {
+                _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+                return;
+            }
+            else
+                vendorslot -= 1;
+            if( pCreature->GetMaxItemCount( vendorslot ) != 0 && (pCreature->GetItemCount( vendorslot ) - count) < 0 )
+            {
+                _player->SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
+                return;
+            }
+            if( _player->getLevel() < pProto->RequiredLevel )
+            {
+                _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
+                return;
+            }
+            int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
+            if( newmoney < 0 )
+            {
+                _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
+                return;
+            }
+            uint16 dest;
+            uint8 msg = _player->CanStoreNewItem( NULL, NULL_SLOT, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
+                if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
+                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
+            }
+            else
+                _player->SendEquipError( msg, NULL, NULL, 0);
         }
         return;
     }
-    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
+    _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
 }
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
@@ -491,6 +515,7 @@ void WorldSession::SendListInventory( uint64 guid )
     {
         uint32 guidlow = GUID_LOPART(guid);
         uint8 numitems = pCreature->GetItemCount();
+        uint8 count = 0;
         uint32 ptime = time(NULL);
         uint32 diff;
 
@@ -507,6 +532,7 @@ void WorldSession::SendListInventory( uint64 guid )
                 pProto = objmgr.GetItemPrototype(pCreature->GetItemId(i));
                 if( pProto )
                 {
+                    count++;
                     if( pCreature->GetItemIncrTime(i) != 0 && (pCreature->GetItemLastIncr(i) + pCreature->GetItemIncrTime(i) <= ptime) )
                     {
                         diff = uint32((ptime - pCreature->GetItemLastIncr(i))/pCreature->GetItemIncrTime(i));
@@ -527,8 +553,9 @@ void WorldSession::SendListInventory( uint64 guid )
             }
         }
 
-        if ( !(data.size() == 8 + 1 + ((numitems * 7) * 4)) )
+        if ( !(data.size() == 8 + 1 + ((count * 7) * 4)) )
             return;
+        data.put<uint32>(8, count);
         SendPacket( &data );
     }
 }
@@ -544,11 +571,15 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     Item *pItem = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {
-        if( uint16 dest = _player->CanStoreItem( dstbag, NULL_SLOT, pItem, false, true ) )
+        uint16 dest;
+        uint8 msg = _player->CanStoreItem( dstbag, NULL_SLOT, dest, pItem, false );
+        if( msg == EQUIP_ERR_OK )
         {
             _player->RemoveItem(srcbag, srcslot, true);
             _player->StoreItem( dest, pItem, true );
         }
+        else
+            _player->SendEquipError( msg, pItem, NULL, 0);
     }
 }
 
@@ -616,11 +647,15 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
     Item *pItem = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {
-        if( uint16 dest = _player->CanBankItem( NULL, NULL_SLOT, pItem, false, true ) )
+        uint16 dest;
+        uint8 msg = _player->CanBankItem( NULL, NULL_SLOT, dest, pItem, false );
+        if( msg == EQUIP_ERR_OK )
         {
             _player->RemoveItem(srcbag, srcslot, true);
             _player->BankItem( dest, pItem, true );
         }
+        else
+            _player->SendEquipError( msg, pItem, NULL, 0 );
     }
 }
 
@@ -635,11 +670,15 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     Item *pItem = _player->GetItemByPos( srcbag, srcslot );
     if( pItem )
     {
-        if( uint16 dest = _player->CanStoreItem( NULL, NULL_SLOT, pItem, false, true ) )
+        uint16 dest;
+        uint8 msg = _player->CanBankItem( NULL, NULL_SLOT, dest, pItem, false );
+        if( msg == EQUIP_ERR_OK )
         {
             _player->RemoveItem(srcbag, srcslot, true);
             _player->BankItem( dest, pItem, true );
         }
+        else
+            _player->SendEquipError( msg, pItem, NULL, 0 );
     }
 }
 
@@ -647,10 +686,19 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 {
     sLog.outDebug("WORLD: CMSG_SET_AMMO");
     uint32 item;
+    
     recv_data >> item;
 
-    if( item == 0 || GetPlayer()->CanUseAmmo( item , true ) )
-        GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, item);
+    if( item == 0 )
+        GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, 0);
+    else
+    {
+        uint8 msg = GetPlayer()->CanUseAmmo( item );
+        if( msg == EQUIP_ERR_OK )
+            GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, item);
+        else
+            GetPlayer()->SendEquipError( msg, NULL, NULL, 0);
+    }
 }
 
 void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID)

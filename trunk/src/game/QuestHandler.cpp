@@ -132,9 +132,9 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
             if( !Script->QuestSelect(_player, pCreature, pQuest ) )
             {
                 if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( pQuest ) )
-                    _player->PlayerTalkClass->SendQuestReward( pQuest, pCreature->GetGUID(), true, NULL, 0 );
+                    _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), true );
                 else if( status == QUEST_STATUS_INCOMPLETE )
-                    _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+                    _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), false );
                 else
                     _player->PlayerTalkClass->SendQuestDetails(pQuest, pCreature->GetGUID(), true);
             }

@@ -27,8 +27,7 @@ class Corpse : public Object
         Corpse( );
 
         bool Create( uint32 guidlow );
-        bool Create ( uint32 guidlow, Player *owner, uint32 mapid,
-            float x, float y, float z, float ang );
+        bool Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang );
 
         void SaveToDB(bool bones = false);
         void DeleteFromDB();

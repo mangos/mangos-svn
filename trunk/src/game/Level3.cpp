@@ -1076,13 +1076,16 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     Player* pl = m_session->GetPlayer();
 
     sLog.outDetail(LANG_ADDITEM, itemId, count);
-    if( uint16 dst = pl->CanStoreNewItem( NULL, NULL_SLOT, itemId, count, false, true ) )
+    uint16 dest;
+    uint8 msg = pl->CanStoreNewItem( NULL, NULL_SLOT, dest, itemId, count, false );
+    if( msg == EQUIP_ERR_OK )
     {
-        pl->StoreNewItem( dst, itemId, count, true);
+        pl->StoreNewItem( dest, itemId, count, true);
         FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CREATED, itemId, count));
     }
     else
     {
+        pl->SendEquipError( msg, NULL, NULL, 0 );
         FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CANNOT_CREATE, itemId, count));
     }
     m_session->SendPacket(&data);

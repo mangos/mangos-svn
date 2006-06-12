@@ -220,6 +220,9 @@
 				RelativePath="..\..\src\game\ItemHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\LootHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Mail.cpp">
 			</File>
 			<File
@@ -286,10 +289,10 @@
 				RelativePath="..\..\src\game\Spell.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\SpellAuras.cpp">
+				RelativePath="..\..\src\game\SpellAuraDefines.h">
 			</File>
 			<File
-			        RelativePath="..\..\src\game\SpellAuraDefines.h">
+				RelativePath="..\..\src\game\SpellAuras.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\SpellAuras.h">
