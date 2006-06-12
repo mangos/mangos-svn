@@ -637,8 +637,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAttackSwingBadFacingAttack();
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
-
-
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
         void SendMessageToSet(WorldPacket *data, bool self);
 
@@ -885,7 +883,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 int irand(int min, int max);
 
 inline uint32 urand(uint32 min, uint32 max)
-{   
+{
     return irand(int(min), int(max));
 }
 

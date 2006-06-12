@@ -534,7 +534,7 @@ void Aura::_AddAura()
 
     ApplyModifier(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-    
+
     for(i = 0; i< 3; i++)
     {
         aura = m_target->GetAura(m_spellId, i);

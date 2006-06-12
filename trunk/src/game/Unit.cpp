@@ -1084,21 +1084,21 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         uint32 i_spellId = (*i).second->GetSpellProto()->Id;
-            uint32 i_spellIcon = (*i).second->GetSpellProto()->SpellIconID;
+        uint32 i_spellIcon = (*i).second->GetSpellProto()->SpellIconID;
         if((*i).second && i_spellId != spellId)
         {
             bool hasAuraform = false;
             for(int x=0;x<3;x++)
-            if((*i).second->GetSpellProto()->EffectApplyAuraName[x] == 36)
+                if((*i).second->GetSpellProto()->EffectApplyAuraName[x] == 36)
             {
                 hasAuraform = true;
                 break;
             }
             if(hasAuraform)
                 continue;
-            if(i_spellId == 3025 || i_spellId == 3122 || i_spellId == 5419 
-            || i_spellId == 5421 || i_spellId == 1178 || i_spellId == 9635 
-            || i_spellId == 2882 || i_spellId == 7376 || i_spellId == 7381)
+            if(i_spellId == 3025 || i_spellId == 3122 || i_spellId == 5419
+                || i_spellId == 5421 || i_spellId == 1178 || i_spellId == 9635
+                || i_spellId == 2882 || i_spellId == 7376 || i_spellId == 7381)
                 continue;
             if(i_spellIcon && spellInfo->SpellIconID == i_spellIcon)
             {

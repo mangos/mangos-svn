@@ -65,7 +65,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libframework_a_AR = $(AR) $(ARFLAGS)
 libframework_a_LIBADD =
-am_libframework_a_OBJECTS = ObjectLifeTime.$(OBJEXT) 
+am_libframework_a_OBJECTS = ObjectLifeTime.$(OBJEXT)
 libframework_a_OBJECTS = $(am_libframework_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -212,7 +212,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libframework.a 
 libframework_a_SOURCES = \
-	Policies/ObjectLifeTime.cpp
+	Policies/ObjectLifeTime.cpp 
 
 all: all-am
 
