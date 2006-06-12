@@ -2672,8 +2672,8 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         else if(dif > 5) dif = 5;
 
         int RepPoints;
-        if(HasSpell(20599))                   //spell : diplomacy
-            RepPoints = ((5-dif)*0.20)*110;     //human gain more 10% rep.
+        if(HasSpell(20599))                                 //spell : diplomacy
+            RepPoints = ((5-dif)*0.20)*110;                 //human gain more 10% rep.
         else
             RepPoints = ((5-dif)*0.20)*100;
         SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
@@ -2991,7 +2991,7 @@ int irand(int min, int max)
 
     max++;
     holdrand = (holdrand * 214013L) + 2531011L;
-       
+
     return (((holdrand >> 17) * (max - min)) >> 15) + min;
 }
 
@@ -5311,7 +5311,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                     {
                         Bag *pBag = (Bag*)pItem;
                         if( pBag && !pBag->IsEmpty() )
-                        {   
+                        {
                             if( msg )
                                 SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, NULL, 0 );
                             return NULL;
@@ -6071,7 +6071,7 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
                 pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
                 pItem->SetSlot( slot );
-                
+
                 if( IsInWorld() && update )
                 {
                     pItem->AddToWorld();
@@ -6282,9 +6282,8 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         {
             if( pProto && pProto->Class == ITEM_CLASS_QUEST )
                 ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
-            
+
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
-            
 
             if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
             {
@@ -6345,7 +6344,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                     pItem->DestroyForPlayer(this);
                 }
             }
-        }    
+        }
     }
 }
 
@@ -8407,7 +8406,6 @@ void Player::SendExplorationExperience(uint32 Area, uint32 Experience)
     GetSession()->SendPacket(&data);
 }
 
-
 /*********************************************************/
 /***              Update timers                        ***/
 /*********************************************************/
@@ -8430,7 +8428,7 @@ void Player::UpdatePVPFlag(time_t currTime)
         if( currTime < m_pvp_count + 300 ) return;
 
         SetPvP(false);
-        
+
         WorldPacket data;
         sChatHandler.FillSystemMessageData(&data, GetSession(), "PvP toggled off.");
         GetSession()->SendPacket(&data);
