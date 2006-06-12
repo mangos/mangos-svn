@@ -299,6 +299,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\LootHandler.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Mail.cpp"
 				>
 			</File>

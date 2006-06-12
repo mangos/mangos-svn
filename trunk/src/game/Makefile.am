@@ -61,6 +61,7 @@ libgame_a_SOURCES = \
 	Level1.cpp \
 	Level2.cpp \
 	Level3.cpp \
+	LootHandler.cpp \
 	LootMgr.cpp \
 	Mail.cpp \
 	Map.cpp \
