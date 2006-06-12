@@ -1105,7 +1105,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
                 RemoveAurasDueToSpell(i_spellId);
 
                 i = m_Auras.begin();
-                if(!(*i).second)
+                if(i == m_Auras.end() || !(*i).second)
                     return;
             }
         }
