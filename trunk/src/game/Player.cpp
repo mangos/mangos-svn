@@ -380,7 +380,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
     }
 
-    uint16 dst;
+    uint16 dest;
+    uint8 msg;
     Item *pItem;
     for (; item_id_itr!=info->item_id.end(); item_id_itr++, item_bagIndex_itr++, item_slot_itr++, item_amount_itr++)
     {
@@ -391,32 +392,50 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
         if (titem_id)
         {
-            sLog.outDebug("ITEM: Creating initial item, itemId = %u, bagIndex = %u, slot = %u, count = %u",titem_id, titem_bagIndex, titem_slot, titem_amount);
+            sLog.outDebug("STORAGE: Creating initial item, itemId = %u, bagIndex = %u, slot = %u, count = %u",titem_id, titem_bagIndex, titem_slot, titem_amount);
 
             pItem = CreateItem( titem_id, titem_amount);
             if( pItem )
             {
-                dst = ((titem_bagIndex << 8) | titem_slot);
-                if( IsInventoryPos( dst ) )
+                dest = ((titem_bagIndex << 8) | titem_slot);
+                if( IsInventoryPos( dest ) )
                 {
-                    if( dst = CanStoreItem( titem_bagIndex, titem_slot, pItem, false, false ) )
-                        StoreItem( dst, pItem, true);
+                    msg = CanStoreItem( titem_bagIndex, titem_slot, dest, pItem, false );
+                    if( msg == EQUIP_ERR_OK )
+                        StoreItem( dest, pItem, true);
                     else
+                    {
+                        sLog.outDebug("ITEM: Can't store item, error msg = %u",msg);
                         delete pItem;
+                    }
                 }
-                else if( IsEquipmentPos( dst ) )
+                else if( IsEquipmentPos( dest ) )
                 {
-                    if( dst = CanEquipItem( titem_slot, pItem, false, false ) )
-                        EquipItem( dst, pItem, true);
+                    msg = CanEquipItem( titem_slot, dest, pItem, false );
+                    if( msg == EQUIP_ERR_OK )
+                        EquipItem( dest, pItem, true);
                     else
+                    {
+                        sLog.outDebug("ITEM: Can't equip item, error msg = %u",msg);
                         delete pItem;
+                    }
+                }
+                else if( IsBankPos( dest ) )
+                {
+                    msg = CanBankItem( titem_bagIndex, titem_slot, dest, pItem, false );
+                    if( msg == EQUIP_ERR_OK )
+                        BankItem( dest, pItem, true);
+                    else
+                    {
+                        sLog.outDebug("ITEM: Can't bank item, error msg = %u",msg);
+                        delete pItem;
+                    }
                 }
                 else
                     delete pItem;
             }
         }
     }
-
     return true;
 }
 
@@ -4743,7 +4762,7 @@ void Player::SetSheath( uint32 sheathed )
     }
 }
 
-uint8 Player::FindEquipSlot( uint32 type )
+uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap )
 {
     uint8 slots[4];
     slots[0] = NULL_SLOT;
@@ -4837,11 +4856,22 @@ uint8 Player::FindEquipSlot( uint32 type )
             return NULL_SLOT;
     }
 
-    for (int i = 0; i < 4; i++)
+    if( slot != NULL_SLOT )
     {
-        if ( slots[i] != NULL_SLOT )
+        if( swap || !GetItemByPos( INVENTORY_SLOT_BAG_0, slot ) )
         {
-            if ( !GetItemByPos( INVENTORY_SLOT_BAG_0, slots[i] ) )
+            for (int i = 0; i < 4; i++)
+            {
+                if ( slots[i] == slot )
+                    return slot;
+            }
+        }
+    }
+    else
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            if ( slots[i] != NULL_SLOT && ( swap || !GetItemByPos( INVENTORY_SLOT_BAG_0, slots[i] ) ) )
                 return slots[i];
         }
     }
@@ -5044,19 +5074,6 @@ bool Player::IsBankPos( uint16 pos )
     return false;
 }
 
-bool Player::IsBagSlot( uint16 pos )
-{
-    uint8 bag = pos >> 8;
-    uint8 slot = pos & 255;
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END ) )
-        return true;
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END ) )
-        return true;
-    //if( bag >= BANK_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END )
-    //    return true;
-    return false;
-}
-
 bool Player::HasItemCount( uint32 item, uint32 count )
 {
     Item *pItem;
@@ -5081,14 +5098,14 @@ bool Player::HasItemCount( uint32 item, uint32 count )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; ++j)
+                for(int j = 0; j < pBagProto->ContainerSlots; j++)
                 {
-                    pItem = pBag->GetItemByPos(j);
+                    pItem = GetItemByPos( i, j );
                     if( pItem && pItem->GetEntry() == item )
                     {
                         tempcount += pItem->GetCount();
                         if( tempcount >= count )
-                            return true;
+                         return true;
                     }
                 }
             }
@@ -5097,22 +5114,25 @@ bool Player::HasItemCount( uint32 item, uint32 count )
     return false;
 }
 
-uint16 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint32 item, uint32 count, bool swap, bool msg )
+uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap )
 {
+    dest = NULL;
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
-        uint16 result = CanStoreItem( bag, slot, pItem, swap, msg );
+        uint8 result = CanStoreItem( bag, slot, dest, pItem, swap );
         delete pItem;
         return result;
     }
-    if( msg )
-        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
-    return NULL;
+    if( !swap )
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+    else
+        return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
-uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg )
+uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap )
 {
+    dest = NULL;
     if( pItem )
     {
         sLog.outDebug( "STORAGE : CanStoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
@@ -5124,11 +5144,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
             ItemPrototype *pBagProto;
             uint16 pos;
             if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_DONT_OWN_THAT_ITEM, pItem, NULL, 0 );
-                return NULL;
-            }
+                return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == NULL )
             {
                 if( !swap && pProto->MaxCount > 0 )
@@ -5142,11 +5158,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                         {
                             curcount += pItem2->GetCount();
                             if( curcount + pItem->GetCount() > pProto->MaxCount )
-                            {
-                                if( msg )
-                                    SendEquipError( EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, pItem, NULL, 0 );
-                                return NULL;
-                            }
+                                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                         }
                     }
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
@@ -5166,11 +5178,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                                     {
                                         curcount += pItem2->GetCount();
                                         if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                        {
-                                            if( msg )
-                                                SendEquipError( EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, pItem, NULL, 0 );
-                                            return NULL;
-                                        }
+                                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                                     }
                                 }
                             }
@@ -5193,50 +5201,28 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                                     {
                                         curcount += pItem2->GetCount();
                                         if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                        {
-                                            if( msg )
-                                                SendEquipError( EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, pItem, NULL, 0 );
-                                            return NULL;
-                                        }
+                                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                                     }
                                 }
                             }
                         }
                     }
                 }
-                if( pProto->InventoryType == INVTYPE_BAG )
-                {
-                    /*if(CanUseItem( pItem, false ))
-                    {
-                        for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-                        {
-                            pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-                            pItem2 = GetItemByPos( pos );
-                            if( !pItem2 )
-                                return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
-                        }
-                    }*/
-
-                    Bag *pBag = (Bag*)pItem;
-                    if( pBag && !pBag->IsEmpty() )
-                    {
-                        if( msg )
-                            SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, NULL, 0 );
-                        return NULL;
-                    }
-                }
                 if( pProto->Stackable > 1 )
                 {
                     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                         pItem2 = GetItemByPos( pos );
                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                            return pos;
+                        {
+                            dest = pos;
+                            return EQUIP_ERR_OK;
+                        }
                     }
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                         pBag = (Bag*)GetItemByPos( pos );
                         if( pBag )
                         {
@@ -5245,10 +5231,13 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pos = ((i << 8) | j );
+                                    pos = ( (i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
                                     if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                        return pos;
+                                    {
+                                        dest = pos;
+                                        return EQUIP_ERR_OK;
+                                    }
                                 }
                             }
                         }
@@ -5258,7 +5247,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                 {
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                         pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                         if( pBag )
                         {
@@ -5267,10 +5256,13 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                                    pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                                     pItem2 = GetItemByPos( i, j );
                                     if( !pItem2 )
-                                        return ( (i << 8) | j );
+                                    {
+                                        dest = ( (i << 8) | j );
+                                        return EQUIP_ERR_OK;
+                                    }
                                 }
                             }
                         }
@@ -5280,7 +5272,10 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                 {
                     pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                     if( !pItem2 )
-                        return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                    {
+                        dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                        return EQUIP_ERR_OK;
+                    }
                 }
                 for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
                 {
@@ -5294,14 +5289,15 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                             {
                                 pItem2 = GetItemByPos( i, j );
                                 if( !pItem2 )
-                                    return ( (i << 8) | j );
+                                {
+                                    dest = ( (i << 8) | j );
+                                    return EQUIP_ERR_OK;
+                                }
                             }
                         }
                     }
                 }
-                if( msg )
-                    SendEquipError( EQUIP_ERR_INVENTORY_FULL, pItem, NULL, 0 );
-                return NULL;
+                return EQUIP_ERR_INVENTORY_FULL;
             }
             else
             {
@@ -5311,11 +5307,7 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                     {
                         Bag *pBag = (Bag*)pItem;
                         if( pBag && !pBag->IsEmpty() )
-                        {
-                            if( msg )
-                                SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, NULL, 0 );
-                            return NULL;
-                        }
+                            return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                     }
                     if( pProto->Stackable > 1 )
                     {
@@ -5325,7 +5317,10 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                             {
                                 pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                                 if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                    return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                {
+                                    dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                    return EQUIP_ERR_OK;
+                                }
                             }
                         }
                         else
@@ -5340,7 +5335,10 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                                     {
                                         pItem2 = GetItemByPos( bag, j );
                                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                            return ( (bag << 8) | j );
+                                        {
+                                            dest = ( (bag << 8) | j );
+                                            return EQUIP_ERR_OK;
+                                        }
                                     }
                                 }
                             }
@@ -5352,7 +5350,10 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                         {
                             pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                             if( !pItem2 )
-                                return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                            {
+                                dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                return EQUIP_ERR_OK;
+                            }
                         }
                     }
                     else
@@ -5364,53 +5365,49 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                             if( pBagProto )
                             {
                                 if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
-                                {
-                                    if( msg )
-                                        SendEquipError( EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE, pItem, NULL, 0 );
-                                    return NULL;
-                                }
+                                    return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
                                 if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
-                                {
-                                    if( msg )
-                                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pItem, NULL, 0 );
-                                    return NULL;
-                                }
+                                    return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pItem2 = GetItemByPos( bag, j );
                                     if( !pItem2 )
-                                        return ( (bag << 8) | j );
+                                    {
+                                        dest = ( (bag << 8) | j );
+                                        return EQUIP_ERR_OK;
+                                    }
                                 }
                             }
                         }
                     }
-
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_BAG_FULL, pItem, NULL, 0 );
-                    return NULL;
+                    return EQUIP_ERR_BAG_FULL;
                 }
                 else
                 {
-                    pItem2 = GetItemByPos( bag, slot );
                     if( pProto->InventoryType == INVTYPE_BAG )
                     {
                         Bag *pBag = (Bag*)pItem;
                         if( pBag && !pBag->IsEmpty() )
-                        {
-                            if( msg )
-                                SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, pItem2, 0 );
-                            return NULL;
-                        }
+                            return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                     }
+                    pItem2 = GetItemByPos( bag, slot );
                     if( pItem2 && !swap )
                     {
                         if( pProto->Stackable > 1 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                            return ( (bag << 8) | slot );
+                        {
+                            dest = ( (bag << 8) | slot );
+                            return EQUIP_ERR_OK;
+                        }
+                        else
+                            return EQUIP_ERR_COULDNT_SPLIT_ITEMS;
                     }
                     else
                     {
                         if( bag == INVENTORY_SLOT_BAG_0 )
-                            return ( (bag << 8) | slot );
+                        {
+                            dest = ( (bag << 8) | slot );
+                            return EQUIP_ERR_OK;
+                        }
                         else
                         {
                             pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
@@ -5420,18 +5417,11 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
                                 if( pBagProto )
                                 {
                                     if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
-                                    {
-                                        if( msg )
-                                            SendEquipError( EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE, pItem, pItem2, 0 );
-                                        return NULL;
-                                    }
+                                        return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
                                     if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
-                                    {
-                                        if( msg )
-                                            SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pItem, pItem2, 0 );
-                                        return NULL;
-                                    }
-                                    return ( (bag << 8) | slot );
+                                        return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
+                                    dest = ( (bag << 8) | slot );
+                                    return EQUIP_ERR_OK;
                                 }
                             }
                         }
@@ -5440,63 +5430,37 @@ uint16 Player::CanStoreItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool
             }
         }
     }
-    if( msg )
-    {
-        if( !swap )
-            SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
-        else
-            SendEquipError( EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, NULL, NULL, 0);
-    }
+    if( !swap )
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+    else
+        return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
     return NULL;
 }
 
-uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
+uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
 {
+    dest = NULL;
     if( pItem )
     {
-        if( !CanUseItem( pItem, msg ) )
-            return NULL;
         sLog.outDebug( "STORAGE : CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
-            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_DONT_OWN_THAT_ITEM, NULL, NULL, 0 );
-                return NULL;
-            }
             uint32 type = pProto->InventoryType;
-            uint8 eslot = FindEquipSlot( type );
+            uint8 eslot = FindEquipSlot( type, slot, swap );
             if( eslot == NULL_SLOT )
-            {
-                if( msg )
-                {
-                    if( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END )
-                        SendEquipError( EQUIP_ERR_NOT_A_BAG, pItem, NULL, 0 );
-                    else
-                        SendEquipError( EQUIP_ERR_ITEM_CANT_BE_EQUIPPED, pItem, NULL, 0 );
-                }
-                return NULL;
-            }
-            if( slot != NULL_SLOT && slot != eslot )
-                eslot = slot;
+                return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+            uint8 msg = CanUseItem( pItem );
+            if( msg != EQUIP_ERR_OK )
+                return msg;
             if( !swap && GetItemByPos( INVENTORY_SLOT_BAG_0, eslot ) )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE, pItem, NULL, 0 );
-                return NULL;
-            }
+                return EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE;
             if( type == INVTYPE_WEAPON || type == INVTYPE_WEAPONMAINHAND || type == INVTYPE_WEAPONOFFHAND )
             {
                 uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
                 Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, twinslot );
-                if( twinItem && !HasSpell( 274 ) )
-                {
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_CANT_DUAL_WIELD, pItem, NULL, 0 );
-                    return NULL;
-                }
+                if( twinItem && twinItem->GetProto()->InventoryType != INVTYPE_SHIELD && !HasSpell( 274 ) )
+                    return EQUIP_ERR_CANT_DUAL_WIELD;
             }
             if( type == INVTYPE_SHIELD )
             {
@@ -5506,11 +5470,7 @@ uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
                 {
                     uint32 twintype = twinItem->GetProto()->InventoryType;
                     if( twintype == INVTYPE_2HWEAPON )
-                    {
-                        if( msg )
-                            SendEquipError( EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED, pItem, NULL, 0 );
-                        return NULL;
-                    }
+                        return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
                 }
             }
             if( type == INVTYPE_2HWEAPON )
@@ -5518,22 +5478,21 @@ uint16 Player::CanEquipItem( uint8 slot, Item *pItem, bool swap, bool msg )
                 uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
                 Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, twinslot );
                 if( twinItem )
-                {
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_ITEM_CANT_BE_EQUIPPED, pItem, NULL, 0 );
-                    return NULL;
-                }
+                    return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
             }
-            return ((INVENTORY_SLOT_BAG_0 << 8) | eslot);
+            dest = ((INVENTORY_SLOT_BAG_0 << 8) | eslot);
+            return EQUIP_ERR_OK;
         }
     }
-    if( msg )
-        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
-    return NULL;
+    if( !swap )
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+    else
+        return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
-uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool msg )
+uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap )
 {
+    dest = NULL;
     if( pItem )
     {
         sLog.outDebug( "STORAGE : CanBankItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
@@ -5545,11 +5504,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
             ItemPrototype *pBagProto;
             uint16 pos;
             if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_DONT_OWN_THAT_ITEM, NULL, NULL, 0 );
-                return NULL;
-            }
+                return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == NULL )
             {
                 if( !swap && pProto->MaxCount > 0 )
@@ -5563,11 +5518,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                         {
                             curcount += pItem2->GetCount();
                             if( curcount + pItem->GetCount() > pProto->MaxCount )
-                            {
-                                if( msg )
-                                    SendEquipError( EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, pItem, NULL, 0 );
-                                return NULL;
-                            }
+                                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                         }
                     }
                     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
@@ -5587,11 +5538,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                                     {
                                         curcount += pItem2->GetCount();
                                         if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                        {
-                                            if( msg )
-                                                SendEquipError( EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, pItem, NULL, 0 );
-                                            return NULL;
-                                        }
+                                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                                     }
                                 }
                             }
@@ -5614,58 +5561,28 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                                     {
                                         curcount += pItem2->GetCount();
                                         if( curcount + pItem->GetCount() > pProto->MaxCount )
-                                        {
-                                            if( msg )
-                                                SendEquipError( EQUIP_ERR_CANT_CARRY_MORE_OF_THIS, pItem, NULL, 0 );
-                                            return NULL;
-                                        }
+                                            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
                                     }
                                 }
                             }
                         }
                     }
                 }
-                if( pProto->InventoryType == INVTYPE_BAG )
-                {
-                    if( CanUseItem( pItem, false ) )
-                    {
-                        for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-                        {
-                            pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-                            pItem2 = GetItemByPos( pos );
-                            if( !pItem2 )
-                            {
-                                if(!HasBankBagSlot(i))
-                                {
-                                    //if( msg )
-                                    //    SendEquipError( EQUIP_ERR_MUST_PURCHASE_THAT_BAG_SLOT, pItem, NULL, 0 );
-                                    //return NULL;
-                                }
-                                else
-                                    return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
-                            }
-                        }
-                    }
-                    Bag *pBag = (Bag*)pItem;
-                    if( pBag && !pBag->IsEmpty() )
-                    {
-                        if( msg )
-                            SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, NULL, 0 );
-                        return NULL;
-                    }
-                }
                 if( pProto->Stackable > 1 )
                 {
                     for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                         pItem2 = GetItemByPos( pos );
                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                            return pos;
+                        {
+                            dest = pos;
+                            return EQUIP_ERR_OK;
+                        }
                     }
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                         pBag = (Bag*)GetItemByPos( pos );
                         if( pBag )
                         {
@@ -5674,10 +5591,13 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pos = ((i << 8) | j );
+                                    pos = ( (i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
                                     if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                        return pos;
+                                    {
+                                        dest = pos;
+                                        return EQUIP_ERR_OK;
+                                    }
                                 }
                             }
                         }
@@ -5687,7 +5607,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                 {
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
-                        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                         pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                         if( pBag )
                         {
@@ -5696,10 +5616,13 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
-                                    pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+                                    pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                                     pItem2 = GetItemByPos( i, j );
                                     if( !pItem2 )
-                                        return ( (i << 8) | j );
+                                    {
+                                        dest = ( (i << 8) | j );
+                                        return EQUIP_ERR_OK;
+                                    }
                                 }
                             }
                         }
@@ -5709,7 +5632,10 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                 {
                     pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                     if( !pItem2 )
-                        return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                    {
+                        dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                        return EQUIP_ERR_OK;
+                    }
                 }
                 for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                 {
@@ -5723,14 +5649,15 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 pItem2 = GetItemByPos( i, j );
                                 if( !pItem2 )
-                                    return ( (i << 8) | j );
+                                {
+                                    dest = ( (i << 8) | j );
+                                    return EQUIP_ERR_OK;
+                                }
                             }
                         }
                     }
                 }
-                if( msg )
-                    SendEquipError( EQUIP_ERR_BANK_FULL, pItem, NULL, 0 );
-                return NULL;
+                return EQUIP_ERR_BANK_FULL;
             }
             else
             {
@@ -5740,11 +5667,7 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                     {
                         Bag *pBag = (Bag*)pItem;
                         if( pBag && !pBag->IsEmpty() )
-                        {
-                            if( msg )
-                                SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, NULL, 0 );
-                            return NULL;
-                        }
+                            return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                     }
                     if( pProto->Stackable > 1 )
                     {
@@ -5754,7 +5677,10 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             {
                                 pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                                 if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                    return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                {
+                                    dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                    return EQUIP_ERR_OK;
+                                }
                             }
                         }
                         else
@@ -5769,7 +5695,10 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                                     {
                                         pItem2 = GetItemByPos( bag, j );
                                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                                            return ( (bag << 8) | j );
+                                        {
+                                            dest = ( (bag << 8) | j );
+                                            return EQUIP_ERR_OK;
+                                        }
                                     }
                                 }
                             }
@@ -5781,7 +5710,10 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                         {
                             pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
                             if( !pItem2 )
-                                return ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                            {
+                                dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                return EQUIP_ERR_OK;
+                            }
                         }
                     }
                     else
@@ -5793,70 +5725,67 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                             if( pBagProto )
                             {
                                 if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
-                                {
-                                    if( msg )
-                                        SendEquipError( EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE, pItem, NULL, 0 );
-                                    return NULL;
-                                }
+                                    return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
                                 if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
-                                {
-                                    if( msg )
-                                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pItem, NULL, 0 );
-                                    return NULL;
-                                }
+                                    return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
                                 for(int j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pItem2 = GetItemByPos( bag, j );
                                     if( !pItem2 )
-                                        return ( (bag << 8) | j );
+                                    {
+                                        dest = ( (bag << 8) | j );
+                                        return EQUIP_ERR_OK;
+                                    }
                                 }
                             }
                         }
                     }
-
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_BAG_FULL, pItem, NULL, 0 );
-                    return NULL;
+                    return EQUIP_ERR_BAG_FULL;
                 }
                 else
                 {
                     if( pProto->InventoryType == INVTYPE_BAG )
                     {
                         Bag *pBag = (Bag*)pItem;
-                        if( pBag && IsBagSlot(( (bag << 8) | slot )))
+                        if( pBag )
                         {
-                            if(!CanUseItem( pItem, true ))
+                            if( slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END )
                             {
-                                //TODO: if has (pItem2 = GetItemByPos( bag, slot );) should unlock it.
-                                return NULL;
+                                if( !HasBankBagSlot( slot ) )
+                                    return EQUIP_ERR_MUST_PURCHASE_THAT_BAG_SLOT;
+                                if( uint8 cantuse = CanUseItem( pItem ) != EQUIP_ERR_OK )
+                                    return cantuse;
                             }
-                            if(!HasBankBagSlot(slot))
+                            else
                             {
-                                if( msg )
-                                    SendEquipError( EQUIP_ERR_MUST_PURCHASE_THAT_BAG_SLOT, pItem, NULL, 0 );
-                                return NULL;
+                                if( !pBag->IsEmpty() )
+                                    return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                             }
                         }
-                        else
-                        {
-                            if( pBag && !pBag->IsEmpty() )
-                            {
-                                if( msg )
-                                    SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pItem, NULL, 0 );
-                                return NULL;
-                            }
-                        }
+                    }
+                    else
+                    {
+                        if( slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END )
+                            return EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT;
                     }
                     pItem2 = GetItemByPos( bag, slot );
                     if( pItem2 && !swap )
                     {
                         if( pProto->Stackable > 1 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
-                            return ( (bag << 8) | slot );
+                        {
+                            dest = ( (bag << 8) | slot );
+                            return EQUIP_ERR_OK;
+                        }
+                        else
+                            return EQUIP_ERR_COULDNT_SPLIT_ITEMS;
                     }
                     else
                     {
                         if( bag == INVENTORY_SLOT_BAG_0 )
-                            return ( (bag << 8) | slot );
+                        {
+                            dest = ( (bag << 8) | slot );
+                            return EQUIP_ERR_OK;
+                        }
                         else
                         {
                             pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
@@ -5866,18 +5795,11 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
                                 if( pBagProto )
                                 {
                                     if( pBagProto->Class == ITEM_CLASS_QUIVER && pBagProto->SubClass != pProto->SubClass )
-                                    {
-                                        if( msg )
-                                            SendEquipError( EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE, pItem, NULL, 0 );
-                                        return NULL;
-                                    }
+                                        return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
                                     if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
-                                    {
-                                        if( msg )
-                                            SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pItem, NULL, 0 );
-                                        return NULL;
-                                    }
-                                    return ( (bag << 8) | slot );
+                                        return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
+                                    dest = ( (bag << 8) | slot );
+                                    return EQUIP_ERR_OK;
                                 }
                             }
                         }
@@ -5886,155 +5808,87 @@ uint16 Player::CanBankItem( uint8 bag, uint8 slot, Item *pItem, bool swap, bool 
             }
         }
     }
-    if( msg )
-        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
+    if( !swap )
+        return EQUIP_ERR_ITEM_NOT_FOUND;
+    else
+        return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
     return NULL;
 }
 
-bool Player::CanUseItem( Item *pItem, bool msg )
+uint8 Player::CanUseItem( Item *pItem )
 {
     if( pItem )
     {
         sLog.outDebug( "STORAGE : CanUseItem item = %u", pItem->GetEntry());
         if( isDead() )
-        {
-            if( msg )
-                SendEquipError( EQUIP_ERR_YOU_ARE_DEAD, pItem, NULL, 0 );
-            return false;
-        }
+            return EQUIP_ERR_YOU_ARE_DEAD;
+        //if( isStunned() )
+        //    return EQUIP_ERR_YOU_ARE_STUNNED;
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
+            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+                return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, pItem, NULL, 0 );
-                return false;
-            }
+                return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
             if( pItem->GetSkill() != 0  )
             {
                 if( GetSkillValue( pItem->GetSkill() ) == 0 )
-                {
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, pItem, NULL, 0 );
-                    return false;
-                }
+                    return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             }
             if( pProto->RequiredSkill != 0  )
             {
                 if( GetSkillValue( pProto->RequiredSkill ) == 0 )
-                {
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, pItem, NULL, 0 );
-                    return false;
-                }
+                    return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
                 else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
-                {
-                    if( msg )
-                        SendEquipError( EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH, pItem, NULL, 0 );
-                    return false;
-                }
+                    return EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH;
             }
             if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, pItem, NULL, 0 );
-                return false;
-            }
+                return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             if( GetHonorRank() < pProto->RequiredHonorRank )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ITEM_RANK_NOT_ENOUGH, pItem, NULL, 0 );
-                return false;
-            }
+                return EQUIP_ITEM_RANK_NOT_ENOUGH;
             /*if( GetREputation() < pProto->RequiredReputation )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ITEM_REPUTATION_NOT_ENOUGH, pItem, NULL, 0 );
-                return false;
-            }*/
+                return EQUIP_ITEM_REPUTATION_NOT_ENOUGH;
+            */
             if( getLevel() < pProto->RequiredLevel )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_YOU_MUST_REACH_LEVEL_N, pItem, NULL, pProto->RequiredLevel );
-                return false;
-            }
-            return true;
+                return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
+            return EQUIP_ERR_OK;
         }
     }
-    if( msg )
-        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
-    return false;
+    return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
-bool Player::CanUseAmmo( uint32 item, bool msg )
+uint8 Player::CanUseAmmo( uint32 item )
 {
     sLog.outDebug( "STORAGE : CanUseAmmo item = %u", item);
     if( isDead() )
-    {
-        if( msg )
-            SendEquipError( EQUIP_ERR_YOU_ARE_DEAD, NULL, NULL, 0 );
-        return false;
-    }
+        return EQUIP_ERR_YOU_ARE_DEAD;
+    //if( isStunned() )
+    //    return EQUIP_ERR_YOU_ARE_STUNNED;
     ItemPrototype *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
         if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
-        {
-            if( msg )
-                SendEquipError( EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM, NULL, NULL, 0 );
-            return false;
-        }
-        if( (pProto->SubClass == ITEM_SUBCLASS_ARROW && GetSkillValue( SKILL_BOWS ) == 0 && GetSkillValue( SKILL_CROSSBOWS ) == 0) || (pProto->SubClass == ITEM_SUBCLASS_BULLET && GetSkillValue( SKILL_GUNS ) == 0) )
-        {
-            if( msg )
-                SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, NULL, NULL, 0 );
-            return false;
-        }
+            return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
         if( pProto->RequiredSkill != 0  )
         {
             if( GetSkillValue( pProto->RequiredSkill ) == 0 )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, NULL, NULL, 0 );
-                return false;
-            }
+                return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
-            {
-                if( msg )
-                    SendEquipError( EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH, NULL, NULL, 0 );
-                return false;
-            }
+                return EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH;
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
-        {
-            if( msg )
-                SendEquipError( EQUIP_ERR_NO_REQUIRED_PROFICIENCY, NULL, NULL, 0 );
-            return false;
-        }
+            return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
         if( GetHonorRank() < pProto->RequiredHonorRank )
-        {
-            if( msg )
-                SendEquipError( EQUIP_ITEM_RANK_NOT_ENOUGH, NULL, NULL, 0 );
-            return false;
-        }
+            return EQUIP_ITEM_RANK_NOT_ENOUGH;
         /*if( GetREputation() < pProto->RequiredReputation )
-        {
-        if( msg )
-        SendEquipError( EQUIP_ITEM_REPUTATION_NOT_ENOUGH, pItem, NULL, 0 );
-        return false;
-        }*/
+        return EQUIP_ITEM_REPUTATION_NOT_ENOUGH;
+        */
         if( getLevel() < pProto->RequiredLevel )
-        {
-            if( msg )
-                SendEquipError( EQUIP_ERR_YOU_MUST_REACH_LEVEL_N, NULL, NULL, pProto->RequiredLevel );
-            return false;
-        }
-        return true;
+            return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
+        return EQUIP_ERR_OK;
     }
-    if( msg )
-        SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL, 0 );
-    return false;
+    return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
 void Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
@@ -6163,12 +6017,9 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+            if ( slot >= EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END )
             {
                 _ApplyItemMods(pItem, slot, false);
-                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
-                for (int i = VisibleBase; i < VisibleBase + 12; ++i)
-                    SetUInt32Value(i, 0);
                 for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
                 {
                     uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
@@ -6198,6 +6049,12 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                         }
                     }
                 }
+                if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+                {
+                    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+                    for (int i = VisibleBase; i < VisibleBase + 12; ++i)
+                        SetUInt32Value(i, 0);
+                }
             }
         }
         else
@@ -6208,6 +6065,8 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
         }
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         pItem->SetSlot( NULL_SLOT );
+        if( IsInWorld() && update )
+            pItem->SendUpdateToPlayer( this );
     }
 }
 
@@ -6245,20 +6104,23 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-                if( pItem && pItem->GetEntry() == item )
+                for(int j = 0; j < pBagProto->ContainerSlots; j++)
                 {
-                    if( pItem->GetCount() + remcount <= count )
+                    pItem = GetItemByPos( i, j );
+                    if( pItem && pItem->GetEntry() == item )
                     {
-                        remcount += pItem->GetCount();
-                        RemoveItem( INVENTORY_SLOT_BAG_0, i, update );
-                    }
-                    else
-                    {
-                        pItem->SetCount( pItem->GetCount() - count + remcount );
-                        if( IsInWorld() && update )
-                            pItem->SendUpdateToPlayer( this );
-                        return;
+                        if( pItem->GetCount() + remcount <= count )
+                        {
+                            remcount += pItem->GetCount();
+                            RemoveItem( i, j, update );
+                        }
+                        else
+                        {
+                            pItem->SetCount( pItem->GetCount() - count + remcount );
+                            if( IsInWorld() && update )
+                                pItem->SendUpdateToPlayer( this );
+                            return;
+                        }
                     }
                 }
             }
@@ -6386,7 +6248,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; ++j)
+                for(int j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     pItem = pBag->GetItemByPos(j);
                     if( pItem && pItem->GetEntry() == item )
@@ -6394,7 +6256,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                         if( pItem->GetCount() + remcount <= count )
                         {
                             remcount += pItem->GetCount();
-                            DestroyItem( INVENTORY_SLOT_BAG_0, i, update );
+                            DestroyItem( i, j, update );
                         }
                         else
                         {
@@ -6428,41 +6290,51 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
         Item *pNewItem = CreateItem( pSrcItem->GetEntry(), count );
         if( pNewItem )
         {
+            uint16 dest;
+            uint8 msg;
             if( IsInventoryPos( dst ) )
             {
-                uint16 dest = CanStoreItem( dstbag, dstslot, pNewItem, false, true );
-                if( dest )
+                msg = CanStoreItem( dstbag, dstslot, dest, pNewItem, false );
+                if( msg == EQUIP_ERR_OK )
                 {
                     pSrcItem->SetCount( pSrcItem->GetCount() - count );
                     if( IsInWorld() )
                         pSrcItem->SendUpdateToPlayer( this );
                     StoreItem( dest, pNewItem, true);
                 }
+                else
+                    SendEquipError( msg, pSrcItem, NULL, 0 );
             }
             else if( IsBankPos ( dst ) )
             {
-                uint16 dest = CanBankItem( dstbag, dstslot, pNewItem, false, true );
-                if( dest )
+                msg = CanBankItem( dstbag, dstslot, dest, pNewItem, false );
+                if( msg == EQUIP_ERR_OK )
                 {
                     pSrcItem->SetCount( pSrcItem->GetCount() - count );
                     if( IsInWorld() )
                         pSrcItem->SendUpdateToPlayer( this );
                     BankItem( dest, pNewItem, true);
                 }
+                else
+                    SendEquipError( msg, pSrcItem, NULL, 0 );
             }
             else if( IsEquipmentPos ( dst ) )
             {
-                uint16 dest = CanEquipItem( dstslot, pNewItem, false,  true );
-                if( dest )
+                msg = CanEquipItem( dstslot, dest, pNewItem, false );
+                if( msg == EQUIP_ERR_OK )
                 {
                     pSrcItem->SetCount( pSrcItem->GetCount() - count );
                     if( IsInWorld() )
                         pSrcItem->SendUpdateToPlayer( this );
                     EquipItem( dest, pNewItem, true);
                 }
+                else
+                    SendEquipError( msg, pSrcItem, NULL, 0 );
             }
+            return;
         }
     }
+    SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, pSrcItem, NULL, 0 );
 }
 
 void Player::SwapItem( uint16 src, uint16 dst )
@@ -6476,55 +6348,60 @@ void Player::SwapItem( uint16 src, uint16 dst )
     Item *pSrcItem = GetItemByPos( srcbag, srcslot );
     Item *pDstItem = GetItemByPos( dstbag, dstslot );
 
-    if( srcbag == INVENTORY_SLOT_BAG_0 && srcslot == dstbag )
-    {
-        //Cant move a bag into itself
-        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem, 0);
-        return;
-    }
     if( pSrcItem )
     {
+        sLog.outDebug( "STORAGE : SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry()); 
+        if( srcslot == dstbag )
+        {
+            SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem, 0);
+            return;
+        }
         uint16 dest;
-        sLog.outDebug( "STORAGE : SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
+        uint8 msg; 
         if( !pDstItem )
         {
             if( IsInventoryPos( dst ) )
             {
-                dest = CanStoreItem( dstbag, dstslot, pSrcItem, false, true );
-                if( dest )
+                msg = CanStoreItem( dstbag, dstslot, dest, pSrcItem, false );
+                if( msg == EQUIP_ERR_OK )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     StoreItem( dest, pSrcItem, true);
                     return;
                 }
+                else
+                    SendEquipError( msg, pSrcItem, NULL, 0);
             }
             else if( IsBankPos ( dst ) )
             {
-                dest = CanBankItem( dstbag, dstslot, pSrcItem, false, true );
-                if( dest )
+                msg = CanBankItem( dstbag, dstslot, dest, pSrcItem, false);
+                if( msg == EQUIP_ERR_OK )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     BankItem( dest, pSrcItem, true);
                     return;
                 }
+                else
+                    SendEquipError( msg, pSrcItem, NULL, 0);
             }
             else if( IsEquipmentPos ( dst ) )
             {
-                dest = CanEquipItem( dstslot, pSrcItem, false, true );
-                if( dest )
+                msg = CanEquipItem( dstslot, dest, pSrcItem, false );
+                if( msg == EQUIP_ERR_OK )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     EquipItem( dest, pSrcItem, true);
                     return;
                 }
+                else
+                    SendEquipError( msg, pSrcItem, NULL, 0);
             }
         }
         else
         {
             if( IsInventoryPos( dst ) )
             {
-                dest = CanStoreItem( dstbag, dstslot, pSrcItem, false, false );
-                if( dest )
+                if( CanStoreItem( dstbag, dstslot, dest, pSrcItem, false ) == EQUIP_ERR_OK )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     StoreItem( dest, pSrcItem, true);
@@ -6533,8 +6410,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
             }
             else if( IsBankPos ( dst ) )
             {
-                dest = CanBankItem( dstbag, dstslot, pSrcItem, false, false );
-                if( dest )
+                if( CanBankItem( dstbag, dstslot, dest, pSrcItem, false ) == EQUIP_ERR_OK )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     BankItem( dest, pSrcItem, true);
@@ -6543,8 +6419,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
             }
             else if( IsEquipmentPos ( dst ) )
             {
-                dest = CanEquipItem( dstslot, pSrcItem, false, false );
-                if( dest )
+                if( CanEquipItem( dstslot, dest, pSrcItem, false ) == EQUIP_ERR_OK )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     EquipItem( dest, pSrcItem, true);
@@ -6552,39 +6427,59 @@ void Player::SwapItem( uint16 src, uint16 dst )
                 }
             }
             if( IsInventoryPos( dst ) )
-                dest = CanStoreItem( dstbag, dstslot, pSrcItem, true, true );
+                msg = CanStoreItem( dstbag, dstslot, dest, pSrcItem, true );
             else if( IsBankPos( dst ) )
-                dest = CanBankItem( dstbag, dstslot, pSrcItem, true, true );
+                msg = CanBankItem( dstbag, dstslot, dest, pSrcItem, true );
             else if( IsEquipmentPos( dst ) )
-                dest = CanEquipItem( dstslot, pSrcItem, true, true );
-            if( dest )
+                msg = CanEquipItem( dstslot, dest, pSrcItem, true );
+            if( msg == EQUIP_ERR_OK )
             {
                 uint16 dest2;
                 if( IsInventoryPos( src ) )
-                    dest2 = CanStoreItem( srcbag, srcslot, pDstItem, true, true );
-                else if( IsBankPos( src ) )
-                    dest2 = CanBankItem( srcbag, srcslot, pDstItem, true, true );
-                else if( IsEquipmentPos( src ) )
-                    dest2 = CanEquipItem( srcslot, pDstItem, true, true );
-                if( dest2 )
                 {
-                    RemoveItem(dstbag, dstslot, false);
-                    RemoveItem(srcbag, srcslot, false);
-                    if( IsInventoryPos( dst ) )
-                        StoreItem(dest, pSrcItem, true);
-                    else if( IsBankPos( dst ) )
-                        BankItem(dest, pSrcItem, true);
-                    else if( IsEquipmentPos( dst ) )
-                        EquipItem(dest, pSrcItem, true);
-                    if( IsInventoryPos( src ) )
-                        StoreItem(dest2, pDstItem, true);
-                    else if( IsBankPos( src ) )
-                        BankItem(dest2, pDstItem, true);
-                    else if( IsEquipmentPos( src ) )
-                        EquipItem(dest2, pDstItem, true);
-                    return;
+                    msg = CanStoreItem( srcbag, srcslot, dest2, pDstItem, true );
+                    if( msg != EQUIP_ERR_OK )
+                    {
+                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem, 0 );
+                        return;
+                    }
                 }
+                else if( IsBankPos( src ) )
+                {
+                    msg = CanBankItem( srcbag, srcslot, dest2, pDstItem, true );
+                    if( msg != EQUIP_ERR_OK )
+                    {
+                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem, 0 );
+                        return;
+                    }
+                }
+                else if( IsEquipmentPos( src ) )
+                {
+                    msg = CanEquipItem( srcslot, dest2, pDstItem, true);
+                    if( msg != EQUIP_ERR_OK )
+                    {
+                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, pSrcItem, pDstItem, 0 );
+                        return;
+                    }
+                }
+                RemoveItem(dstbag, dstslot, false);
+                RemoveItem(srcbag, srcslot, false);
+                if( IsInventoryPos( dst ) )
+                    StoreItem(dest, pSrcItem, true);
+                else if( IsBankPos( dst ) )
+                    BankItem(dest, pSrcItem, true);
+                else if( IsEquipmentPos( dst ) )
+                    EquipItem(dest, pSrcItem, true);
+                if( IsInventoryPos( src ) )
+                    StoreItem(dest2, pDstItem, true);
+                else if( IsBankPos( src ) )
+                    BankItem(dest2, pDstItem, true);
+                else if( IsEquipmentPos( src ) )
+                    EquipItem(dest2, pDstItem, true);
+                return;
             }
+            else
+                SendEquipError( msg, pSrcItem, pDstItem, 0 );
             return;
         }
     }
@@ -6618,18 +6513,9 @@ void Player::AddItemToBuyBackSlot( uint32 slot, Item *pItem )
 Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 {
     sLog.outDebug( "STORAGE : GetItemFromBuyBackSlot slot = %u", slot);
-    Item *item;
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
-    {
-        item = m_buybackitems[slot - BUYBACK_SLOT_START];
-        if(!item)
-        {
-            RemoveItemFromBuyBackSlot(slot);
-            return NULL;
-        }
-        return item;
-    }
-    return NULL;;
+        return m_buybackitems[slot - BUYBACK_SLOT_START];
+    return NULL;
 }
 
 void Player::RemoveItemFromBuyBackSlot( uint32 slot )
@@ -6745,13 +6631,15 @@ void Player::SendPreparedQuest( uint64 guid )
         return;
 
     uint32 status = pQuestMenu->GetItem(0).m_qIcon;
-    if ( pQuestMenu->MenuItemCount() == 1 && (status == DIALOG_STATUS_AVAILABLE || status == DIALOG_STATUS_REWARD) )
+    if ( pQuestMenu->MenuItemCount() == 1 )
     {
         Quest *pQuest = objmgr.GetQuest( pQuestMenu->GetItem(0).m_qId );
         if ( pQuest )
         {
-            if( status == DIALOG_STATUS_REWARD )
-                PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0 );
+            if( status == DIALOG_STATUS_REWARD && !GetQuestRewardStatus( pQuest ) )
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, true );
+            else if( status == DIALOG_STATUS_INCOMPLETE )
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, false );
             else
                 PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
         }
@@ -6847,10 +6735,15 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
         if( srcitem > 0 )
         {
             uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
+            uint16 dest;
             if( count <= 0 )
                 count = 1;
-            if( !CanStoreNewItem( NULL, NULL_SLOT, srcitem, count, false, true ) )
+            uint8 msg = CanStoreNewItem( NULL, NULL_SLOT, dest, srcitem, count, false );
+            if( msg != EQUIP_ERR_OK )
+            {
+                SendEquipError( msg, NULL, NULL, 0 );
                 return false;
+            }
         }
         return true;
     }
@@ -6907,18 +6800,34 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 {
     if( pQuest )
     {
+        uint16 dest;
+        uint8 msg;
         if ( pQuest->m_rewchoiceitemscount > 0 )
         {
-            if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] && !CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false, true ) )
-                return false;
+            if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
+            {
+                msg = CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
+                if( msg != EQUIP_ERR_OK )
+                {
+                    SendEquipError( msg, NULL, NULL, 0 );
+                    return false;
+                }
+            }
         }
 
         if ( pQuest->m_rewitemscount > 0 )
         {
             for (int i = 0; i < QUEST_REWARDS_COUNT; i++)
             {
-                if( pQuest->GetQuestInfo()->RewItemId[i] && !CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false, true ) )
-                    return false;
+                if( pQuest->GetQuestInfo()->RewItemId[i] )
+                {
+                    msg = CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
+                    if( msg != EQUIP_ERR_OK )
+                    {
+                        SendEquipError( msg, NULL, NULL, 0 );
+                        return false;
+                    }
+                }
             }
         }
         return true;
@@ -7013,7 +6922,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
 {
     if( pQuest )
     {
-        uint16 dst;
+        uint16 dest;
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++ )
         {
             if ( pQuest->GetQuestInfo()->ReqItemId[i] )
@@ -7026,8 +6935,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         {
             if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
             {
-                if( dst = CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false, true ) )
-                    StoreNewItem( dst, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], true);
+                if( CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
+                    StoreNewItem( dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], true);
             }
         }
 
@@ -7037,8 +6946,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             {
                 if( pQuest->GetQuestInfo()->RewItemId[i] )
                 {
-                    if( dst = CanStoreNewItem( NULL, NULL_SLOT, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false, true ) )
-                        StoreNewItem( dst, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], true);
+                    if( CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false ) == EQUIP_ERR_OK )
+                        StoreNewItem( dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], true);
                 }
             }
         }
@@ -7259,20 +7168,22 @@ bool Player::GiveQuestSourceItem( Quest *pQuest )
         uint32 srcitem = pQuest->GetQuestInfo()->SrcItemId;
         if( srcitem > 0 )
         {
-            uint16 dst;
+            uint16 dest;
             uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
             if( count <= 0 )
                 count = 1;
-            if( dst = CanStoreNewItem( NULL, NULL_SLOT, srcitem, count, false, true ) )
+            uint8 msg = CanStoreNewItem( NULL, NULL_SLOT, dest, srcitem, count, false );
+            if( msg == EQUIP_ERR_OK )
             {
-                StoreNewItem(dst, srcitem, count, true);
+                StoreNewItem(dest, srcitem, count, true);
                 return true;
             }
+            else
+                SendEquipError( msg, NULL, NULL, 0);
             return false;
         }
-        return true;
     }
-    return false;
+    return true;
 }
 
 void Player::TakeQuestSourceItem( Quest *pQuest )
@@ -7877,7 +7788,7 @@ void Player::_LoadInventory()
 
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
-    uint16 dst;
+    uint16 dest;
     if (result)
     {
         do
@@ -7894,21 +7805,21 @@ void Player::_LoadInventory()
             item->SetSlot(slot);
             if(!item->LoadFromDB(item_guid, 1))
                 continue;
-            dst = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
-            if( IsInventoryPos( dst ) )
+            dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+            if( IsInventoryPos( dest ) )
             {
-                if( dst = CanStoreItem( INVENTORY_SLOT_BAG_0, slot, item, false, false ) )
-                    StoreItem(dst, item, true);
+                if( CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                    StoreItem(dest, item, true);
             }
-            else if( IsEquipmentPos( dst ) )
+            else if( IsEquipmentPos( dest ) )
             {
-                if( dst = CanEquipItem( slot, item, false, false ) )
-                    EquipItem(dst, item, true);
+                if( CanEquipItem( slot, dest, item, false ) == EQUIP_ERR_OK )
+                    EquipItem(dest, item, true);
             }
-            else if( IsBankPos( dst ) )
+            else if( IsBankPos( dest ) )
             {
-                if( dst = CanBankItem( INVENTORY_SLOT_BAG_0, slot, item, false, false ) )
-                    BankItem(dst, item, true);
+                if( CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                    BankItem(dest, item, true);
             }
         } while (result->NextRow());
 
@@ -8274,7 +8185,7 @@ void Player::_SaveInventory()
 
     for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
     {
-        if (m_items[i] != 0)
+        if ( m_items[i] != 0 )
         {
             sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), INVENTORY_SLOT_BAG_0, i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
             m_items[i]->SaveToDB();
