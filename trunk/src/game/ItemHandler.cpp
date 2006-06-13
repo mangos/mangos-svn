@@ -329,7 +329,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
             if( newmoney < 0 )
             {
                 _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
-               return;
+                return;
             }
             uint16 dest;
             uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, pItem, false );
@@ -416,7 +416,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             uint8 msg;
             if( _player->IsInventoryPos( dest ) )
             {
-                msg = _player->CanStoreNewItem( bag, slot, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false ); 
+                msg = _player->CanStoreNewItem( bag, slot, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
                 if( msg == EQUIP_ERR_OK )
                 {
                     _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
@@ -686,7 +686,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 {
     sLog.outDebug("WORLD: CMSG_SET_AMMO");
     uint32 item;
-    
+
     recv_data >> item;
 
     if( item == 0 )

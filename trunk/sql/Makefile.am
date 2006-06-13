@@ -18,11 +18,13 @@
 
 # SQL files for MaNGOS database
 EXTRA_DIST = \
-	mangos.sql
+	mangos.sql \
+	realmd.sql
 
 # SQL files for MaNGOS database to be installed to datadir
 pkgdata_DATA = \
-	mangos.sql
+	mangos.sql \
+	realmd.sql
 
 # directory defines
 pkgdatadir = @MANGOSD_DATA@/sql
