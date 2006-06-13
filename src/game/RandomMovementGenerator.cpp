@@ -38,31 +38,30 @@ RandomMovementGenerator::Initialize(Creature &creature)
     i_waypoints[0][1] = y;
     i_waypoints[0][2] = z;
 
-    for(unsigned int idx=1; idx < MAX_RAND_WAYPOINTS+1; ++idx)
-    {
-        const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-        const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
-
-        if( idx == 1 )
-        {
-            i_waypoints[idx][0] = x + wanderX;
-            i_waypoints[idx][1] = y + wanderY;
-            z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
-            if( abs( z2 - z ) < 5 )
-                z = z2;
-            i_waypoints[idx][2] = z;
-        }
-        else
-        {
-            i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
-            i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
-            z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
-            if( abs( z2 - z ) < 5 )
-                z = z2;
-            i_waypoints[idx][2] =  z;
-        }
-    }
-
+     for(unsigned int idx=1; idx < MAX_RAND_WAYPOINTS+1; ++idx) 
+     {
+         const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2; 
+         const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2; 
+  
+         if( idx == 1 ) 
+         { 
+             i_waypoints[idx][0] = x + wanderX; 
+             i_waypoints[idx][1] = y + wanderY; 
+             z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]); 
+             if( abs( z2 - z ) < 5 ) 
+                 z = z2; 
+             i_waypoints[idx][2] = z; 
+         } 
+         else 
+         { 
+             i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX; 
+             i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY; 
+             z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]); 
+             if( abs( z2 - z ) < 5 ) 
+                 z = z2; 
+             i_waypoints[idx][2] =  z; 
+         } 
+     } 
     i_nextMoveTime.Reset((rand() % 10000));
     creature.StopMoving();
 }
@@ -84,7 +83,7 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
         return;
     i_nextMoveTime.Update(diff);
     Traveller<Creature> traveller(creature);
-    i_destinationHolder.UpdateTraveller(traveller, diff,false);
+    i_destinationHolder.ResetUpdate();
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )
@@ -93,10 +92,10 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
             const float &x = i_waypoints[i_nextMove][0];
             const float &y = i_waypoints[i_nextMove][1];
             const float &z = i_waypoints[i_nextMove][2];
-
             creature.addUnitState(UNIT_STAT_ROAMING);
             Traveller<Creature> traveller(creature);
             i_destinationHolder.SetDestination(traveller, x, y, z);
+            traveller.Relocation(x,y,z);
             i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
         }
         else
