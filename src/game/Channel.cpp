@@ -381,7 +381,7 @@ void Channel::Say(Player *p, const char *what)
 
         data.Initialize(SMSG_MESSAGECHAT);
         data << (uint8)14;
-        data << (uint32)0;
+        data << (uint32)0; //language
         data << name.c_str();
         data << (uint32)0;
         data << p->GetGUID();

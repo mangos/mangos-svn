@@ -45,7 +45,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
     if (pChar == NULL)
     {
         if (!objmgr.GetPlayerNameByGUID(guid, name))
-            sLog.outError( "No player name found for this guid" );
+            sLog.outError( "No player name found for this guid: %u", guid );
 
     }
     else
