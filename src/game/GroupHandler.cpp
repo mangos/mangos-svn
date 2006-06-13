@@ -368,6 +368,5 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
     recv_data >> Choise;
     recv_data.hexlike();
 
-
     sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 }

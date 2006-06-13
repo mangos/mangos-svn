@@ -25,7 +25,6 @@
 
 Corpse *m_pCorpse;
 
-
 void HandleCorpsesErase(void*)
 {
     sLog.outBasic("Global Event (corpses/bones removal)");
@@ -33,58 +32,57 @@ void HandleCorpsesErase(void*)
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 1200 AND `bones_flag` = 1;");
 
     if(result)
-	{
-	Field *fields = result->Fetch();
-	m_pCorpse = new Corpse();
+    {
+        Field *fields = result->Fetch();
+        m_pCorpse = new Corpse();
 
-	uint64 guid = fields[0].GetUInt64();
-	float positionX = fields[2].GetFloat();
-	float positionY = fields[3].GetFloat();
-	float positionZ = fields[4].GetFloat();
-	float ort       = fields[5].GetFloat();
-	uint32 mapid    = fields[7].GetUInt32();
-	uint32 flag = fields[10].GetUInt32();
+        uint64 guid = fields[0].GetUInt64();
+        float positionX = fields[2].GetFloat();
+        float positionY = fields[3].GetFloat();
+        float positionZ = fields[4].GetFloat();
+        float ort       = fields[5].GetFloat();
+        uint32 mapid    = fields[7].GetUInt32();
+        uint32 flag = fields[10].GetUInt32();
 
-	m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
-	m_pCorpse->SetMapId(mapid);
-	m_pCorpse->LoadValues( fields[8].GetString() );
+        m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
+        m_pCorpse->SetMapId(mapid);
+        m_pCorpse->LoadValues( fields[8].GetString() );
 
-	ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
-	MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+        ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
+        MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
-	sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%ul';",(unsigned long)guid);
+        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%ul';",(unsigned long)guid);
 
-	m_pCorpse=NULL;
-	delete result;
-	}
-
+        m_pCorpse=NULL;
+        delete result;
+    }
 
     result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 259200 AND `bones_flag` = 0;");
 
     if(result)
-	{
+    {
 
-	Field *fields = result->Fetch();
-	m_pCorpse = new Corpse();
+        Field *fields = result->Fetch();
+        m_pCorpse = new Corpse();
 
-	uint64 guid = fields[0].GetUInt64();
-	float positionX = fields[2].GetFloat();
-	float positionY = fields[3].GetFloat();
-	float positionZ = fields[4].GetFloat();
-	float ort       = fields[5].GetFloat();
-	uint32 mapid    = fields[7].GetUInt32();
-	uint32 flag = fields[10].GetUInt32();
+        uint64 guid = fields[0].GetUInt64();
+        float positionX = fields[2].GetFloat();
+        float positionY = fields[3].GetFloat();
+        float positionZ = fields[4].GetFloat();
+        float ort       = fields[5].GetFloat();
+        uint32 mapid    = fields[7].GetUInt32();
+        uint32 flag = fields[10].GetUInt32();
 
-	m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
-	m_pCorpse->SetMapId(mapid);
-	m_pCorpse->LoadValues( fields[8].GetString() );
+        m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
+        m_pCorpse->SetMapId(mapid);
+        m_pCorpse->LoadValues( fields[8].GetString() );
 
-	ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
-	MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+        ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
+        MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
-	sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%ul';",(unsigned long)guid);
+        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%ul';",(unsigned long)guid);
 
-	m_pCorpse=NULL;
-	delete result;
-	}
+        m_pCorpse=NULL;
+        delete result;
+    }
 }

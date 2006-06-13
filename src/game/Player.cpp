@@ -5105,7 +5105,7 @@ bool Player::HasItemCount( uint32 item, uint32 count )
                     {
                         tempcount += pItem->GetCount();
                         if( tempcount >= count )
-                         return true;
+                            return true;
                     }
                 }
             }
@@ -6350,14 +6350,14 @@ void Player::SwapItem( uint16 src, uint16 dst )
 
     if( pSrcItem )
     {
-        sLog.outDebug( "STORAGE : SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry()); 
+        sLog.outDebug( "STORAGE : SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
         if( srcslot == dstbag )
         {
             SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem, 0);
             return;
         }
         uint16 dest;
-        uint8 msg; 
+        uint8 msg;
         if( !pDstItem )
         {
             if( IsInventoryPos( dst ) )

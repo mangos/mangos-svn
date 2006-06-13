@@ -111,7 +111,6 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     uint64 guid = GetPlayer()->GetLootGUID();
     Loot *pLoot;
 
-
     if( IS_CREATURE_GUID( guid ) )
     {
         Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);

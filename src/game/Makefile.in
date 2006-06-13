@@ -83,8 +83,8 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	GuildHandler.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) \
 	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
 	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
-	LootHandler.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
-	MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
+	LootHandler.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) \
+	Map.$(OBJEXT) MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
 	MotionMaster.$(OBJEXT) MovementGenerator.$(OBJEXT) \
 	MovementHandler.$(OBJEXT) Mthread.$(OBJEXT) \
 	NPCHandler.$(OBJEXT) NullCreatureAI.$(OBJEXT) \
