@@ -306,22 +306,17 @@ void Spell::EffectHealthLeach(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    //okey Touch of Death works
-
     sLog.outDebug("HealthLeach :%u", damage);
-    uint32 dHealth = damage;                                //something like this //maybe some other things are needed
-
-    //Please let me know if this is correct
-    //m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dHealth);
-    SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, dHealth);
 
     uint32 curHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
     uint32 maxHealth = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
 
-    if ((curHealth + (dHealth/2)) < maxHealth)
-        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) + (dHealth/2));
+    if ((curHealth + (damage/2)) < maxHealth)
+        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) + (damage/2));
     else
         m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
+
+    SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, damage);
 }
 
 void Spell::EffectCreateItem(uint32 i)
@@ -1192,14 +1187,12 @@ void Spell::EffectHealMaxHealth(uint32 i)
 
 void Spell::EffectInterruptCast(uint32 i)
 {
-
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
 
     unitTarget->InterruptSpell();
-
 }
 
 void Spell::EffectScriptEffect(uint32 i)

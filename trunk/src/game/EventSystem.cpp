@@ -265,7 +265,7 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
         }
         return 0;
     }
-
+    return 0;
 }
 
 void RemoveEvent(uint32 eventid)
@@ -360,12 +360,12 @@ void RemovePeriodicEvent(void* etid)
         }else
         {
             prev=pos;
-            pos=(PeriodicEvent*)pos->pNext ;
+            pos=(PeriodicEvent*)pos->pNext;
         }
 
     }
     end_read_mpe
-        return;
+    return;
 }
 
 void msThread()

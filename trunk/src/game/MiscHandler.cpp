@@ -35,6 +35,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Object.h"
+#include "BattleGround.h"
 
 void my_esc( char * r, const char * s )
 {
@@ -856,7 +857,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
     else if(at)
     {
-        if(at->mapId == GetPlayer()->GetMapId() )
+		if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->m_bgInBattleGround )
         {
             WorldPacket movedata;
             _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
@@ -865,6 +866,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             //_player->BuildHeartBeatMsg(&data);
             //_player->SendMessageToSet(&data, true);
         }
+		else if (GetPlayer()->m_bgInBattleGround)
+		{
+			
+			sLog.outDebug("AREATRIGGER BATTLEGROUND:%u", Trigger_ID);
+			
+			//handle areatrigger in BG
+			//make a function to handle this type of triggers in the BG code.
+		}
         else
         {
             GetPlayer()->SendNewWorld(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
@@ -1041,10 +1050,8 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
 void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
 {
-
     // TODO
     // we receive guid,x,y,z
-
 }
 
 void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
@@ -1053,10 +1060,9 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     // need to be written
 }
 
-void WorldSession::HandleWarendDataOpcode(WorldPacket& recv_data)
+void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 {
     uint8 tmp;
-    recv_data>>tmp;
+    recv_data >> tmp;
     sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
-    sLog.outDebug("Posible auto shot need this data.");
 }

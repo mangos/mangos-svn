@@ -57,6 +57,10 @@ enum ITEM_BONDING_TYPE
     NO_BIND              = 0,
     BIND_WHEN_PICKED_UP  = 1,
     BIND_WHEN_EQUIPED    = 2,
+	BIND_WHEN_USE        = 3,
+//TODO: Better name these
+	QUEST_ITEM           = 4,
+    QUEST_ITEM1          = 5,
 };
 
 enum INVENTORY_TYPES
