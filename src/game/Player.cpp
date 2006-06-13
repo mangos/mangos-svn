@@ -7393,7 +7393,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                         if ( curkillcount < reqkillcount )
                         {
                             mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
-                            SendQuestUpdateAddKill( pQuest, guid, curkillcount + addkillcount, j);
+                            SendQuestUpdateAddKill( pQuest, guid, j, curkillcount + addkillcount);
                         }
                         if ( CanCompleteQuest( pQuest ) )
                             CompleteQuest( pQuest );
