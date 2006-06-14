@@ -645,13 +645,13 @@ void Aura::HandlePeriodicDamage(bool apply)
 {
     if( apply )
     {
-        //m_PeriodicEventId=AddEvent(&HandleDOTEvent,(void*)this,m_modifier->periodictime,false,true);
+        m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
         m_periodicTimer = m_modifier->periodictime;
     }
     else
     {
-        //RemoveEvent(m_PeriodicEventId);
+        RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_duration = 0;
     }
@@ -712,13 +712,13 @@ void Aura::HandlePeriodicHeal(bool apply)
         return;
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
+        m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
         m_periodicTimer = m_modifier->periodictime;
     }
     else
     {
-        //RemoveEvent(m_PeriodicEventId);
+		RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_duration = 0;
     }
@@ -927,14 +927,15 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
     if(apply)
     {
+		m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
         m_isTrigger = true;
         m_periodicTimer = m_modifier->periodictime;
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        
     }
     else
     {
-        //RemoveEvent(m_PeriodicEventId);
+        RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_isTrigger = false;
         m_duration = 0;

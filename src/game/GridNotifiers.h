@@ -144,7 +144,7 @@ namespace MaNGOS
     };
 
     template<class T>
-        struct MANGOS_DLL_DECL ObjectAccessorNotifier
+	struct MANGOS_DLL_DECL ObjectAccessorNotifier
     {
         T *& i_object;
         uint64 i_id;

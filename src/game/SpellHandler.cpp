@@ -24,6 +24,8 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "Spell.h"
+#include "SpellAuras.h"
+#include "BattleGroundMgr.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -99,9 +101,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
     if(!obj) return;
-
+   // uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
+    //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+    //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
     uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-
     switch(t)
     {
         //door
@@ -128,6 +131,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(info)
             {
                 spellId = info->sound0;
+                //guid=GetPlayer()->GetGUID();
 
                 _player->BuildTeleportAckMsg(&data, obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation());
                 _player->GetSession()->SendPacket(&data);
@@ -159,8 +163,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     spellId = info->sound3;
 
                 guid=_player->GetGUID();
+
             }
-            break;
 
         case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
             //GB flag
@@ -181,7 +185,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 guid=_player->GetGUID();
             }
             break;
-
         default:
             sLog.outDebug( "Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
             break;
@@ -202,6 +205,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     targets.setUnitTarget( _player );
     targets.m_GOTarget = obj;
     spell->prepare(&targets);
+
 }
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)

@@ -184,7 +184,7 @@ void PushmEvent(Event * event)
     end_write_me
 }
 
-uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread,bool bPeriodic)
+uint32 AddEvent(EventHandler func,void* param,uint32 timer,bool separate_thread,bool bPeriodic)
 {
     if(bPeriodic)
     {
@@ -198,7 +198,7 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
         event->handler=func;
         event->param =param;
         event->period =timer;
-        event->st =separate_thread;
+        event->st=separate_thread;
         event->id=avalabelid;
         event->time =now()+timer;
 
@@ -270,13 +270,13 @@ uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread
 
 void RemoveEvent(uint32 eventid)
 {
-    MThread* tr=new MThread;
-    tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)&eventid);
+    /*MThread* tr=new MThread;
+    tr->Start(( void (*)(void*))&RemovePeriodicEvent,(void*)&eventid);*/
 }
 
-void RemovePeriodicEvent(void* etid)
+void RemovePeriodicEvent(uint32 eventid)
 {
-    uint32 eventid = *(uint32*)etid;
+    //uint32 eventid = *(uint32*)etid;
     PeriodicEvent * prev=NULL;
     read_mspe
         PeriodicEvent * pos=msPEvents;
@@ -575,5 +575,4 @@ void StartEventSystem()
     t5->Start(( void (*)(void*))&spThread,NULL);
     MThread* t6=new MThread;
     t6->Start(( void (*)(void*))&mspThread,NULL);
-
 }
