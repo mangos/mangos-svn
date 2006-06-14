@@ -336,6 +336,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
     m_timers[WUPDATE_AUCTIONS].SetInterval(1000);
 
+
     sLog.outString( "WORLD: Starting BattleGround System" );
     sBattleGroundMgr.CreateInitialBattleGrounds();
 

@@ -50,6 +50,6 @@ typedef struct
 }PeriodicEvent;
 
 uint32 AddEvent(EventHandler  func,void* param,uint32 timer,bool separate_thread=false,bool bPeriodic = false);
-void RemovePeriodicEvent(void *eventid);
+void RemovePeriodicEvent(uint32 eventid);
 void StartEventSystem();
 void RemoveEvent(uint32 eventid);

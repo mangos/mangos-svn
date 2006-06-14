@@ -22,6 +22,7 @@
 #include "Log.h"
 #include "RealmList.h"
 #include "AuthSocket.h"
+#include "AuthCodes.h"
 #include <cwctype>                                          // needs for towupper
 
 const AuthHandler table[] =
@@ -131,20 +132,6 @@ void AuthSocket::_HandleLogonChallenge()
 
     _login = (const char*)ch->I;
 
-    enum _errors
-    {
-        CE_SUCCESS = 0,
-        CE_IPBAN=0x01,                                      //2bd -- unable to connect (some internal problem)
-        CE_ACCOUNT_CLOSED=0x03,                             // "This account has been closed and is no longer in service -- Please check the registered email address of this account for further information.";
-        CE_NO_ACCOUNT=0x04,                                 //(5)The information you have entered is not valid.  Please check the spelling of the account name and password.  If you need help in retrieving a lost or stolen password and account
-        CE_ACCOUNT_IN_USE=0x06,                             //This account is already logged in.  Please check the spelling and try again.
-        CE_PREORDER_TIME_LIMIT=0x07,
-        CE_SERVER_FULL=0x08,                                //Could not log in at this time.  Please try again later.
-        CE_WRONG_BUILD_NUMBER=0x09,                         //Unable to validate game version.  This may be caused by file corruption or the interference of another program.
-        CE_UPDATE_CLIENT=0x0a,
-        CE_ACCOUNT_FREEZED=0x0c
-    } ;
-
     std::string password;
 
     bool valid_version=false;
@@ -164,7 +151,7 @@ void AuthSocket::_HandleLogonChallenge()
         QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s'",GetRemoteAddress().c_str());
         if(result)
         {
-            pkt << (uint8)CE_IPBAN;
+            pkt << (uint8)AUTH_BANNED;
             sLog.outBasic("[AuthChallenge] Banned ip %s try to login!",GetRemoteAddress().c_str ());
             delete result;
         }
@@ -180,7 +167,7 @@ void AuthSocket::_HandleLogonChallenge()
                     if ( strcmp((*result)[4].GetString(),GetRemoteAddress().c_str()) )
                     {
                         DEBUG_LOG("[AuthChallenge] Account IP differs");
-                        pkt << (uint8) CE_ACCOUNT_CLOSED;
+                        pkt << (uint8) AUTH_SUSPENDED;
                     }
                     else
                     {
@@ -195,28 +182,31 @@ void AuthSocket::_HandleLogonChallenge()
 
                 if((*result)[2].GetUInt8())                 //if banned
                 {
-                    pkt << (uint8) CE_ACCOUNT_CLOSED;
+                    pkt << (uint8) AUTH_BANNED;
                     sLog.outBasic("[AuthChallenge] Banned account %s try to login!",_login.c_str ());
                 }
                 else
                 {
                     password = (*result)[0].GetString();
-                    /*                   QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
-                                       uint32 cnt=0;
-                                       if(result)
-                                       {
-                                           Field *fields = result->Fetch();
-                                           cnt = fields[0].GetUInt32();
-                                           delete result;
+                    /*
+					QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
+                    uint32 cnt=0;
+                    if(result)
+                    {
+                        Field *fields = result->Fetch();
+                        cnt = fields[0].GetUInt32();
+                        delete result;
 
-                                       }
-                                                                               //number of not-gm players online
-                                       if(cnt>=sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT))
-                                           pkt << (uint8)CE_SERVER_FULL;
+                    }
+                                                            //number of not-gm players online
+                    if(cnt>=sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT))
+                        pkt << (uint8)CE_SERVER_FULL;
 
-                                       else
-                                       {    */
-                                                            //if server is not full
+                    else
+                    {    
+					*/
+                    
+					//if server is not full
 
                     uint32 acct;
                     QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
@@ -230,8 +220,8 @@ void AuthSocket::_HandleLogonChallenge()
                         if(result)
                         {
                             delete result;
-                            pkt << (uint8)CE_ACCOUNT_IN_USE;
-
+                            //TODO FIX THIS THIS IS NOT CORRECT
+                            pkt << (uint8)AUTH_ALREADY_LOGGING_IN;
                         }
                         else
                         {
@@ -276,7 +266,7 @@ void AuthSocket::_HandleLogonChallenge()
             }
             else                                            //no account
             {
-                pkt<< (uint8) CE_NO_ACCOUNT;
+                pkt<< (uint8) AUTH_UNKNOWN_ACCOUNT;
             }
         }                                                   //ip is not banned
 
@@ -293,7 +283,7 @@ void AuthSocket::_HandleLogonChallenge()
             //printf("......patch not found");
             pkt << (uint8) AUTH_LOGON_CHALLENGE;
             pkt << (uint8) 0x00;
-            pkt << (uint8) CE_WRONG_BUILD_NUMBER;
+            pkt << (uint8) AUTH_VERSION_MISMATCH;
             DEBUG_LOG("[AuthChallenge] %u is not a valid client version!", ch->build);
         }else
         {                                                   //have patch
@@ -312,7 +302,7 @@ void AuthSocket::_HandleLogonChallenge()
                 PatchesCache.GetHash(tmp,(uint8*)&xferh .md5 );
             }
 
-            uint8 data[2]={AUTH_LOGON_PROOF,CE_UPDATE_CLIENT};
+            uint8 data[2]={AUTH_LOGON_PROOF,CSTATUS_NEGOTIATION_FAILED};
             SendBuf((const char*)data,sizeof(data));
 
             memcpy(&xferh,"0\x05Patch",7);
@@ -442,7 +432,7 @@ void AuthSocket::_HandleRealmList()
 
     ibuf.Remove(5);
 
-    ByteBuffer pkt;
+    
 
     QueryResult *result = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",_login.c_str());
     if(!result)
@@ -456,8 +446,9 @@ void AuthSocket::_HandleRealmList()
     uint32 id = (*result)[0].GetUInt32();
     delete result;
 
-    uint8 chars = 0;
+    uint8 AmountOfCharacters = 0;
 
+	ByteBuffer pkt;
     pkt << (uint32) 0;
     pkt << (uint8) m_realmList.size();
     RealmList::RealmMap::const_iterator i;
@@ -467,21 +458,22 @@ void AuthSocket::_HandleRealmList()
         pkt << (uint8) i->second->color;
         pkt << i->first;
         pkt << i->second->address;
-        pkt << (float) 1.6;
+		//TODO FIX THIS
+        pkt << (float) 0.0; //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
         //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
         result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `acctid` = %d AND `realmid` = %d",id,i->second->m_ID);
         if( result )
         {
             Field *fields = result->Fetch();
-            chars = fields[0].GetUInt8();
+            AmountOfCharacters = fields[0].GetUInt8();
 
             delete result;
         }
         else
         {
-            chars = 0;
+            AmountOfCharacters = 0;
         }
-        pkt << (uint8) chars;
+        pkt << (uint8) AmountOfCharacters;
         pkt << (uint8) i->second->timezone;
         pkt << (uint8) 0;
     }
@@ -512,7 +504,6 @@ void AuthSocket::_HandleXferResume()
     fseek(pPatch,start,0);
 
     ZThread::Thread u(new PatcherRunnable(this));
-
 }
 
 void AuthSocket::_HandleXferCancel()

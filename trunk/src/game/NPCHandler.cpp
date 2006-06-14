@@ -482,10 +482,3 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         }
     }
 }
-
-//Need fix
-void WorldSession::HandleBattleMasterHelloOpcode( WorldPacket & recv_data )
-{
-    //WorldPacket data;
-    sLog.outDetail("WORLD: Recv CMSG_BATTLEMASTER_HELLO not dispose.");
-}

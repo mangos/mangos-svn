@@ -724,20 +724,31 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendLoot(uint64 guid,uint8 loot_type);
         uint8 CheckFishingAble();
 
-        uint32 m_bgBattleGroundID;
-        bool m_bgInBattleGround;
-        uint8 m_bgTeam;
-        uint32 m_bgEntryPointMap;
-        uint32 m_bgEntryPointO;
-        float m_bgEntryPointX;
-        float m_bgEntryPointY;
-        float m_bgEntryPointZ;
+		inline bool InBattleGround() { return m_bgInBattleGround; };
+		inline void SetInBattleGround(bool val) { m_bgInBattleGround = val; };
+		inline uint32 GetBattleGroundId() { return m_bgBattleGroundID; };
+		inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; };
+
+
+		uint32 m_bgTeam;
+
+
 
         uint32 ApplyRestBonus(uint32 xp);
         uint32 GetRestTime() { return m_restTime;}
         void SetRestTime(uint32 v) { m_restTime = v;}
 
+
+
     protected:
+		bool m_bgInBattleGround;
+		uint8 m_bgBattleGroundID;
+		
+		uint32 m_bgEntryPointMap;
+		float m_bgEntryPointX;
+		float m_bgEntryPointY;
+		float m_bgEntryPointZ;
+		float m_bgEntryPointO;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/

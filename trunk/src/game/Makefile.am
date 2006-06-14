@@ -196,4 +196,9 @@ libgame_a_SOURCES = \
 	WorldLog.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h
+	WorldSocketMgr.h \
+	BattleGround.h \
+	BattleGround.cpp \
+	BattleGroundMgr.h \
+	BattleGroundMgr.cpp \
+	BattleGroundHandler.cpp 
