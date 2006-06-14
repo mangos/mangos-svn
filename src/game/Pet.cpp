@@ -76,10 +76,18 @@ bool Pet::LoadPetFromDB( Unit* owner )
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
-
-    SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+    if(owner->getClass() == CLASS_WARLOCK)
+    {
+        SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+        SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
+        SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
+    }
+    else if(owner->getClass() == CLASS_HUNTER)
+    {
+        SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
+        setPowerType(2);
+    }
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
     SetUInt32Value(UNIT_FIELD_FLAGS,0);
 
@@ -89,10 +97,11 @@ bool Pet::LoadPetFromDB( Unit* owner )
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32());
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());
     //SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+    SetUInt32Value(UNIT_FIELD_BYTES_2,1);
     SetUInt32Value(UNIT_FIELD_STAT0,22);
     SetUInt32Value(UNIT_FIELD_STAT1,22);
-    //SetUInt32Value(UNIT_FIELD_STAT2,25);
-    //SetUInt32Value(UNIT_FIELD_STAT3,28);
+    SetUInt32Value(UNIT_FIELD_STAT2,25);
+    SetUInt32Value(UNIT_FIELD_STAT3,28);
     SetUInt32Value(UNIT_FIELD_STAT4,27);
 
     m_fealty = fields[11].GetUInt32();

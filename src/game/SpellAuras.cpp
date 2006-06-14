@@ -938,6 +938,23 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
         m_isPeriodic = false;
         m_isTrigger = false;
         m_duration = 0;
+        //probably it's temporary for taming creature..
+        if(GetSpellProto()->Id == 1515)
+        {
+            SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
+            Spell *spell = new Spell(m_caster, spell_proto, false, 0);
+            Unit* target = NULL;
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+            }
+            else target = m_target;
+            if(!target)
+                return;
+            SpellCastTargets targets;
+            targets.setUnitTarget(target);
+            spell->prepare(&targets);
+        }
     }
 }
 

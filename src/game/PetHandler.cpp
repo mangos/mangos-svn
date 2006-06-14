@@ -85,7 +85,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 3:
                     if(pet)
                     {
-                        if( _player->getClass() == WARLOCK )
+                        if( _player->getClass() == WARLOCK || _player->getClass() == CLASS_HUNTER)
                             ((Pet*)pet)->SavePetToDB();
                         _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
                         data.Initialize(SMSG_DESTROY_OBJECT);
@@ -118,7 +118,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
             }
             break;
-        case 49408:                                         //0xc100	spell
+        case 49408:                                         //0xc100    spell
         {
             pet->clearUnitState(UNIT_STAT_FOLLOW);
             SpellEntry *spellInfo = sSpellStore.LookupEntry(spellid );
@@ -189,7 +189,7 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(pet)
     {
-        if( _player->getClass() == WARLOCK )
+        if( _player->getClass() == WARLOCK || _player->getClass() == CLASS_HUNTER)
             ((Pet*)pet)->SavePetToDB();
         _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
         WorldPacket data;
