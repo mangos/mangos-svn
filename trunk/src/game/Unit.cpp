@@ -1594,10 +1594,20 @@ void Unit::setPowerType(uint8 PowerType)
         SetUInt32Value(UNIT_FIELD_MAXPOWER4,100);
         SetUInt32Value(UNIT_FIELD_POWER4,100);
     }
+    if(new_powertype == 2)
+    {
+        SetUInt32Value(UNIT_FIELD_MAXPOWER3,100);
+        SetUInt32Value(UNIT_FIELD_POWER3,100);
+    }
     if(new_powertype == 1)
     {
         SetUInt32Value(UNIT_FIELD_MAXPOWER2,1000);
         SetUInt32Value(UNIT_FIELD_POWER2,0);
+    }
+    if(new_powertype == 4)
+    {
+        SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
+        SetUInt32Value(UNIT_FIELD_POWER5,1000000);
     }
 }
 

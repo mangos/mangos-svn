@@ -355,6 +355,7 @@ class Spell
         void EffectTradeSkill(uint32 i);
         void EffectEnchantItemPerm(uint32 i);
         void EffectEnchantItemTmp(uint32 i);
+        void EffectTameCreature(uint32 i);
         void EffectSummonPet(uint32 i);
         void EffectWeaponDmg(uint32 i);
         void EffectWeaponDmgPerc(uint32 i);
@@ -372,6 +373,7 @@ class Spell
         void EffectDisEnchant(uint32 i);
         void EffectInebriate(uint32 i);
         void EffectTriggerSpell(uint32 i);
+        void EffectDismissPet(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
         void EffectSkill(uint32 i);
