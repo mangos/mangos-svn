@@ -279,7 +279,7 @@ void RemovePeriodicEvent(void* etid)
     uint32 eventid = *(uint32*)etid;
     PeriodicEvent * prev=NULL;
     read_mspe
-    PeriodicEvent * pos=msPEvents;
+        PeriodicEvent * pos=msPEvents;
 
     while(pos)
     {
@@ -365,7 +365,7 @@ void RemovePeriodicEvent(void* etid)
 
     }
     end_read_mpe
-    return;
+        return;
 }
 
 void msThread()

@@ -857,7 +857,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
     else if(at)
     {
-		if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->m_bgInBattleGround )
+        if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->m_bgInBattleGround )
         {
             WorldPacket movedata;
             _player->BuildTeleportAckMsg(&movedata, at->X, at->Y, at->Z, at->Orientation );
@@ -866,14 +866,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             //_player->BuildHeartBeatMsg(&data);
             //_player->SendMessageToSet(&data, true);
         }
-		else if (GetPlayer()->m_bgInBattleGround)
-		{
-			
-			sLog.outDebug("AREATRIGGER BATTLEGROUND:%u", Trigger_ID);
-			
-			//handle areatrigger in BG
-			//make a function to handle this type of triggers in the BG code.
-		}
+        else if (GetPlayer()->m_bgInBattleGround)
+        {
+
+            sLog.outDebug("AREATRIGGER BATTLEGROUND:%u", Trigger_ID);
+
+            //handle areatrigger in BG
+            //make a function to handle this type of triggers in the BG code.
+        }
         else
         {
             GetPlayer()->SendNewWorld(at->mapId,at->X,at->Y,at->Z,GetPlayer()->GetOrientation());
