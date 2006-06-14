@@ -253,38 +253,37 @@ bool Unit::HasAuraType(uint32 auraType) const
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
-
-    uint32 crtype = 0;
+	if (!pVictim->isAlive()) return;
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
-        crtype = ((Creature*)pVictim)->GetCreatureInfo()->type;
-        //pVictim->SetInFront(this);
-        ((Creature*)pVictim)->AI().AttackStart(this);
+		//pVictim->SetInFront(this);
+		// no loot,xp,health if type 8 /critters/
+		if ( ((Creature*)pVictim)->GetCreatureInfo()->type == 8)
+		{
+	        ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
+			return;
+		}
+		((Creature*)pVictim)->AI().AttackStart(this);
     }
 
-    // no loot,xp,health if type 8 /critters/
-    if ( crtype == 8)
-        ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
+	DEBUG_LOG("DealDamageStart");
 
-    DEBUG_LOG("DealDamageStart");
-
-    uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
-    if (health <= damage && pVictim->isAlive())
+	uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
+	sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
+    if (health <= damage)
     {
         DEBUG_LOG("DealDamage: victim just died");
-        if(pVictim->GetTypeId() == TYPEID_UNIT && crtype != 8)
-        {
+        if ((pVictim->GetTypeId() == TYPEID_UNIT) )
             ((Creature*)pVictim)->generateLoot();
-        }
-
+        
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
 
-        DEBUG_LOG("DealDamageAura");
+        DEBUG_LOG("SET JUST_DIED");
         pVictim->setDeathState(JUST_DIED);
         //if(m_currentSpell && !m_currentSpell->IsAreaAura() && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
         //    m_currentSpell->cancel();
@@ -297,9 +296,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         pVictim->SendAttackStop(attackerGuid);
 
         DEBUG_LOG("DealDamageHealth1");
-        pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
-
-        DEBUG_LOG("DealDamageHealth2");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
         pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
 
@@ -350,17 +346,22 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             pVictim->m_hostilList.clear();
             DEBUG_LOG("DealDamageNotPlayer");
-            if (crtype == 8)
-                pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-            else
-                pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
+            pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 1);
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
         bool playerkill = false;
         bool PvP = false;
         Player *player;
-        if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet() && (crtype != 8))
+
+        if(GetTypeId() == TYPEID_PLAYER)
+        {
+            playerkill = true;
+            player = (Player*)this;
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                PvP = true;
+        }
+		else if(((Creature*)this)->isPet())
         {
             Unit* owner = ((Pet*)this)->GetOwner();
             if(!owner)
@@ -371,14 +372,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 playerkill = true;
             }
         }
-        if ((GetTypeId() == TYPEID_PLAYER) && (crtype != 8))
-        {
-            playerkill = true;
-            player = (Player*)this;
-            if(pVictim->GetTypeId() == TYPEID_PLAYER)
-                PvP = true;
-        }
-        if (playerkill)
+
+        if(playerkill)
         {
             player->CalculateHonor(pVictim);
             player->CalculateReputation(pVictim);
@@ -392,9 +387,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
 
                 Group *pGroup = objmgr.GetGroupByLeader(player->GetGroupLeader());
-                if (pGroup)
+                if(pGroup)
                 {
-                    DEBUG_LOG("DealDamageInGroup");
+                    DEBUG_LOG("Kill Enemy In Group");
                     xp /= pGroup->GetMembersCount();
                     for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
                     {
@@ -411,7 +406,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 }
                 else
                 {
-                    DEBUG_LOG("DealDamageNotInGroup");
+                    DEBUG_LOG("Player kill enemy alone");
                     player->GiveXP(xp, victimGuid);
                     player->KilledMonster(entry,victimGuid);
                 }
@@ -419,7 +414,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
         else
         {
-            DEBUG_LOG("DealDamageIsEvE");
+            DEBUG_LOG("Monster kill Monster");
             SendAttackStop(victimGuid);
             addUnitState(UNIT_STAT_DIED);
         }
@@ -505,12 +500,12 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     WorldPacket data;
 
-    if( (damage-absorb)==0 )
+    if( (damage-absorb)<= 0 )
     {
         SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, 0, damage, absorb,0,1,0);
         return;
     }
-    else damage=damage-absorb;
+    else damage -= absorb;
 
     sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID);
@@ -737,7 +732,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
-        sLog.outString("Spell Delayed!");
+        sLog.outString("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpell->casttime));
         pVictim->m_currentSpell->Delayed((int32)(0.25f * pVictim->m_currentSpell->casttime));
     }
 }
@@ -1648,6 +1643,7 @@ void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
 /*********************************************************/
 /***                    SPELL SYSTEM                   ***/
 /*********************************************************/
+/*
 void Unit::SendDamageToLog( Unit *pUnit, Spell *pSpell, uint32 damage )
 {
     if( pUnit && pSpell )
@@ -1663,3 +1659,4 @@ void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
         SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, heal, NORMAL_DAMAGE, 0,0,false,0);
     }
 }
+*/
