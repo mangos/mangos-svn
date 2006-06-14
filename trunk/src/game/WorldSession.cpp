@@ -458,7 +458,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 
         { CMSG_SET_ACTIONBAR_TOGGLES,    STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  },
         { CMSG_FIELD_WATCHED_FACTION_SHOW_BAR, STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode },
-        { CMSG_WARDEN_DATA,              STATUS_LOGGEDIN, &WorldSession::HandleWarendDataOpcode              },
+        { CMSG_WARDEN_DATA,              STATUS_LOGGEDIN, &WorldSession::HandleWardenDataOpcode              },
 
         { 0,                             0,               NULL                                               }
     };
