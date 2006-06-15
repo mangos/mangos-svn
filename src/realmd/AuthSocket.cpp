@@ -54,10 +54,8 @@ AuthSocket::AuthSocket(SocketHandler &h) : TcpSocket(h)
 
 AuthSocket::~AuthSocket()
 {
-
     if(pPatch)
         fclose(pPatch);
-
 }
 
 void AuthSocket::OnAccept()
@@ -106,7 +104,6 @@ void AuthSocket::OnRead()
 
 void AuthSocket::_HandleLogonChallenge()
 {
-
     if (ibuf.GetLength() < 4)
         return ;
 
@@ -189,14 +186,13 @@ void AuthSocket::_HandleLogonChallenge()
                 {
                     password = (*result)[0].GetString();
                     /*
-					QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
+                    QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
                     uint32 cnt=0;
                     if(result)
                     {
                         Field *fields = result->Fetch();
                         cnt = fields[0].GetUInt32();
                         delete result;
-
                     }
                                                             //number of not-gm players online
                     if(cnt>=sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT))
@@ -204,9 +200,9 @@ void AuthSocket::_HandleLogonChallenge()
 
                     else
                     {    
-					*/
+                    */
                     
-					//if server is not full
+                    //if server is not full
 
                     uint32 acct;
                     QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
@@ -432,8 +428,6 @@ void AuthSocket::_HandleRealmList()
 
     ibuf.Remove(5);
 
-    
-
     QueryResult *result = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",_login.c_str());
     if(!result)
     {
@@ -448,7 +442,7 @@ void AuthSocket::_HandleRealmList()
 
     uint8 AmountOfCharacters = 0;
 
-	ByteBuffer pkt;
+    ByteBuffer pkt;
     pkt << (uint32) 0;
     pkt << (uint8) m_realmList.size();
     RealmList::RealmMap::const_iterator i;
@@ -458,7 +452,7 @@ void AuthSocket::_HandleRealmList()
         pkt << (uint8) i->second->color;
         pkt << i->first;
         pkt << i->second->address;
-		//TODO FIX THIS
+        //TODO FIX THIS
         pkt << (float) 0.0; //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
         //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
         result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `acctid` = %d AND `realmid` = %d",id,i->second->m_ID);
@@ -466,18 +460,18 @@ void AuthSocket::_HandleRealmList()
         {
             Field *fields = result->Fetch();
             AmountOfCharacters = fields[0].GetUInt8();
-
             delete result;
         }
         else
         {
             AmountOfCharacters = 0;
+            delete result;
         }
         pkt << (uint8) AmountOfCharacters;
         pkt << (uint8) i->second->timezone;
         pkt << (uint8) 0;
     }
-    pkt << (uint8) 0;
+    pkt << (uint8) 0x0;
     pkt << (uint8) 0x2;
 
     ByteBuffer hdr;
@@ -486,12 +480,11 @@ void AuthSocket::_HandleRealmList()
     hdr.append(pkt);
 
     SendBuf((char *)hdr.contents(), hdr.size());
-
 }
 
 void AuthSocket::_HandleXferResume()
 {
-    //	printf("\ngot xfer resume");
+    //    printf("\ngot xfer resume");
     if (ibuf.GetLength ()<9)
     {
         //printf("Wrong packet XFER_RESUME");
@@ -652,5 +645,4 @@ Patcher::~Patcher()
 {
     for(Patches::iterator i = _patches.begin(); i != _patches.end(); i++ )
         delete i->second;
-
 }
