@@ -626,9 +626,12 @@ void Creature::generateLoot()
     if (!HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
         FillLoot(&loot, lootid);
 
-    uint32 level = getLevel();
+	if (GetCreatureInfo()->mingold>0)
+    {
+        uint32 RAND_GOLD = (((double)rand() / (double)RAND_MAX) * GetCreatureInfo()->maxgold + GetCreatureInfo()->mingold);
+        loot.gold = RAND_GOLD;
+    }
 
-    loot.gold = rand() % (level * level * 5);
 }
 
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack)
