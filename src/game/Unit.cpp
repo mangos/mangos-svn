@@ -641,7 +641,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 {
     uint32 absorb=CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage);
 
-    if( (*damage-absorb) == 0 )
+    if( (*damage-absorb) <= 0 )
     {
         *hitInfo = 0x00010020;
         *turn=0;
@@ -797,7 +797,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
         DoAttackDamage(pVictim, &damage, &blocked_amount, &damageType, &hitInfo, &victimState,&AbsorbDamage,&Turn);
         //do animation
         SendAttackStateUpdate(hitInfo, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
-        DealDamage(pVictim, damage-AbsorbDamage, 0, true);
+        DealDamage(pVictim, damage, 0, true);
     }
     else
         //send miss
