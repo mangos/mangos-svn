@@ -55,46 +55,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             sChatHandler.FillMessageData( &data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
             GetPlayer()->SendMessageToSet( &data, true );
         } break;
-        case CHAT_MSG_CHANNEL:
-        {
-            std::string channel = "", msg = "";
-            recv_data >> channel;
-            recv_data >> msg;
-            if(Channel *chn = channelmgr.GetChannel(channel,GetPlayer())) chn->Say(GetPlayer(),msg.c_str());
-        } break;
-        case CHAT_MSG_WHISPER:
-        {
-            std::string to = "", msg = "";
-            recv_data >> to >> msg;
-            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
-            Player *player = objmgr.GetPlayer(to.c_str());
-            if(!player)
-            {
-                data.clear();
-                msg = "Player ";
-                msg += to.c_str();
-                msg += " is not online (Names are case sensitive)";
-                sChatHandler.FillSystemMessageData( &data, this ,msg.c_str() );
-                SendPacket(&data);
-                break;
-            }
-            player->GetSession()->SendPacket(&data);
-            //sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,(( char *)((uint32)player->GetGUID() )),msg.c_str() );
-            sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,NULL,msg.c_str() );
-            SendPacket(&data);
-        } break;
-        case CHAT_MSG_YELL:
-        {
-            std::string msg = "";
-            recv_data >> msg;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
-                break;
-
-            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
-            SendPacket(&data);
-            sWorld.SendGlobalMessage(&data, this);
-        } break;
         case CHAT_MSG_PARTY:
         {
             std::string msg = "";
@@ -111,6 +72,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
         }
         break;
+
         case CHAT_MSG_GUILD:
         {
             std::string msg = "";
@@ -144,6 +106,53 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
             break;
         }
+
+        case CHAT_MSG_YELL:
+        {
+            std::string msg = "";
+            recv_data >> msg;
+
+            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
+            SendPacket(&data);
+            sWorld.SendGlobalMessage(&data, this);
+        } break;
+
+        case CHAT_MSG_WHISPER:
+        {
+            std::string to = "", msg = "";
+            recv_data >> to >> msg;
+            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
+            Player *player = objmgr.GetPlayer(to.c_str());
+            if(!player)
+            {
+                data.clear();
+                msg = "Player ";
+                msg += to.c_str();
+                msg += " is not online (Names are case sensitive)";
+                sChatHandler.FillSystemMessageData( &data, this ,msg.c_str() );
+                SendPacket(&data);
+                break;
+            }
+            player->GetSession()->SendPacket(&data);
+            //sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,(( char *)((uint32)player->GetGUID() )),msg.c_str() );
+            sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,NULL,msg.c_str() );
+            SendPacket(&data);
+        } break;
+
+        case CHAT_MSG_CHANNEL:
+        {
+            std::string channel = "", msg = "";
+            recv_data >> channel;
+            recv_data >> msg;
+            if(Channel *chn = channelmgr.GetChannel(channel,GetPlayer())) chn->Say(GetPlayer(),msg.c_str());
+        } break;
+
+        case CHAT_MSG_AFK:
+            //player troggle's AFK
+            break;
 
         default:
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
