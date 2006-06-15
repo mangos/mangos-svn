@@ -31,7 +31,7 @@ enum ChatMsg
 {
     CHAT_MSG_SAY                                  = 0x00,
     CHAT_MSG_PARTY                                = 0x01,
-
+    CHAT_MSG_RAID                                 = 0x02,
     CHAT_MSG_GUILD                                = 0x03,
     CHAT_MSG_OFFICER                              = 0x04,
     CHAT_MSG_YELL                                 = 0x05,
@@ -51,10 +51,9 @@ enum ChatMsg
     CHAT_MSG_CHANNEL_NOTICE_USER                  = 0x13,
     CHAT_MSG_AFK                                  = 0x14,
     CHAT_MSG_DND                                  = 0x15,
-    CHAT_MSG_COMBAT_LOG                           = 0x16,
-    CHAT_MSG_IGNORED                              = 0x17,
-    CHAT_MSG_SKILL                                = 0x18,
-    CHAT_MSG_LOOT                                 = 0x19,
+    CHAT_MSG_IGNORED                              = 0x16,
+    CHAT_MSG_SKILL                                = 0x17,
+    CHAT_MSG_LOOT                                 = 0x18,
 };
 
 class ChatCommand
