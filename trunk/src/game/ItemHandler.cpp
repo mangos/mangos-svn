@@ -553,7 +553,7 @@ void WorldSession::SendListInventory( uint64 guid )
             }
         }
 
-        if ( !(data.size() == 8 + 1 + ((count * 7) * 4)) )
+        if ( count == 0 || !(data.size() == 8 + 1 + ((count * 7) * 4)) )
             return;
         data.put<uint32>(8, count);
         SendPacket( &data );
