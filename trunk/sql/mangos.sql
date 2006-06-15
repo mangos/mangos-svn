@@ -786,6 +786,8 @@ CREATE TABLE `creature_template` (
   `spell2` int(11) unsigned NOT NULL default '0',
   `spell3` int(11) unsigned NOT NULL default '0',
   `spell4` int(11) unsigned NOT NULL default '0',
+  `mingold` int(30) unsigned NOT NULL default '0',
+  `maxgold` int(30) unsigned NOT NULL default '0',
   `AIName` varchar(128) NOT NULL default '',
   `MoveName` varchar(128) NOT NULL default '',
   `ScriptName` varchar(128) NOT NULL default '',
