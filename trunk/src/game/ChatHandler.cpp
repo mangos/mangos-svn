@@ -60,7 +60,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string channel = "", msg = "";
             recv_data >> channel;
             recv_data >> msg;
-            Channel *chn = channelmgr.GetChannel(channel.c_str(),GetPlayer()); if(chn) chn->Say(GetPlayer(),msg.c_str());
+            if(Channel *chn = channelmgr.GetChannel(channel,GetPlayer())) chn->Say(GetPlayer(),msg.c_str());
         } break;
         case CHAT_MSG_WHISPER:
         {

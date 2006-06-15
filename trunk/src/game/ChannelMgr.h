@@ -21,16 +21,17 @@
 
 class ChannelMgr
 {
-    map<string,Channel *> channels;
-    void MakeNotOnPacket(WorldPacket *data, const char *name)
+    typedef map<string,Channel *> ChannelMap;
+    ChannelMap channels;
+    void MakeNotOnPacket(WorldPacket *data, std::string name)
     {
         data->Initialize(SMSG_CHANNEL_NOTIFY);
-        (*data) << (uint8)0x05 << string(name);
+        (*data) << (uint8)0x05 << name;
     }
     public:
-        Channel *GetJoinChannel(const char *name, Player *p)
+        Channel *GetJoinChannel(std::string name, Player *p)
         {
-            if(channels.count(string(name)) == 0)
+            if(channels.count(name) == 0)
             {
                 Channel *nchan = new Channel;
                 nchan->SetName(name);
@@ -38,9 +39,11 @@ class ChannelMgr
             }
             return channels[name];
         }
-        Channel *GetChannel(const char *name, Player *p)
+        Channel *GetChannel(std::string name, Player *p)
         {
-            if(channels.count(string(name)) == 0)
+            ChannelMap::const_iterator i = channels.find(name);
+
+            if(i == channels.end())
             {
                 WorldPacket data;
                 MakeNotOnPacket(&data,name);
@@ -48,14 +51,20 @@ class ChannelMgr
                 return NULL;
             }
             else
-                return channels[name];
+                return i->second;
         }
-        void LeftChannel(const char *name)
+        void LeftChannel(std::string name)
         {
-            if(channels[name]->GetNumPlayers() == 0 && !channels[name]->IsConstant())
+            ChannelMap::const_iterator i = channels.find(name);
+
+            if(i == channels.end()) return;
+
+            Channel* channel = i->second;
+
+            if(channel->GetNumPlayers() == 0 && !channel->IsConstant())
             {
-                delete channels[name];
                 channels.erase(name);
+                delete channel;
             }
         }
 };

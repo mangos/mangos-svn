@@ -26,7 +26,7 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
     string channelname,pass;
     recvPacket >> channelname;
     recvPacket >> pass;
-    channelmgr.GetJoinChannel(channelname.c_str(),GetPlayer())->Join(GetPlayer(),pass.c_str());
+    channelmgr.GetJoinChannel(channelname,GetPlayer())->Join(GetPlayer(),pass.c_str());
 }
 
 void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
@@ -37,15 +37,15 @@ void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
     if(!channelname.length())
         return;
 
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Leave(GetPlayer());
-    channelmgr.LeftChannel(channelname.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Leave(GetPlayer());
+    channelmgr.LeftChannel(channelname);
 }
 
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->List(GetPlayer());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->List(GetPlayer());
 }
 
 void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
@@ -53,7 +53,7 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
     string channelname,pass;
     recvPacket >> channelname;
     recvPacket >> pass;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Password(GetPlayer(),pass.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Password(GetPlayer(),pass.c_str());
 }
 
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
@@ -61,14 +61,14 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
     string channelname,newp;
     recvPacket >> channelname;
     recvPacket >> newp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->SetOwner(GetPlayer(),newp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->SetOwner(GetPlayer(),newp.c_str());
 }
 
 void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->GetOwner(GetPlayer());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->GetOwner(GetPlayer());
 }
 
 void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
@@ -76,7 +76,7 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->SetModerator(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->SetModerator(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
@@ -84,7 +84,7 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->UnsetModerator(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->UnsetModerator(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
@@ -92,7 +92,7 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->SetMute(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->SetMute(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
@@ -100,7 +100,7 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->UnsetMute(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->UnsetMute(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
@@ -108,7 +108,7 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Invite(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Invite(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
@@ -116,7 +116,7 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Kick(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Kick(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
@@ -124,7 +124,7 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Ban(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Ban(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
@@ -132,19 +132,19 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
     string channelname,otp;
     recvPacket >> channelname;
     recvPacket >> otp;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->UnBan(GetPlayer(),otp.c_str());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->UnBan(GetPlayer(),otp.c_str());
 }
 
 void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Announce(GetPlayer());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Announce(GetPlayer());
 }
 
 void WorldSession::HandleChannelModerate(WorldPacket& recvPacket)
 {
     string channelname;
     recvPacket >> channelname;
-    Channel *chn = channelmgr.GetChannel(channelname.c_str(),GetPlayer()); if(chn) chn->Moderate(GetPlayer());
+    if(Channel *chn = channelmgr.GetChannel(channelname,GetPlayer())) chn->Moderate(GetPlayer());
 }
