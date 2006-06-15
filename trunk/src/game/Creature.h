@@ -182,6 +182,8 @@ struct CreatureInfo
     uint32  spell2;
     uint32  spell3;
     uint32  spell4;
+    uint32  mingold;
+    uint32  maxgold;
     char*   AIName;
     char*   MovementGen;
     char*   ScriptName;

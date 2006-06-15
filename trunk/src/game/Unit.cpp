@@ -264,7 +264,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 		// no loot,xp,health if type 8 /critters/
 		if ( ((Creature*)pVictim)->GetCreatureInfo()->type == 8)
 		{
-	        ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
+			pVictim->setDeathState(JUST_DIED);
+			((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
+			pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
 			return;
 		}
 		((Creature*)pVictim)->AI().AttackStart(this);
@@ -326,7 +328,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 {
                     pet->setDeathState(JUST_DIED);
                     pet->SendAttackStop(attackerGuid);
-                    pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
                     pet->addUnitState(UNIT_STAT_DIED);
@@ -1639,24 +1640,3 @@ void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
 {
     index &= ~ oldFlag;
 }
-
-/*********************************************************/
-/***                    SPELL SYSTEM                   ***/
-/*********************************************************/
-/*
-void Unit::SendDamageToLog( Unit *pUnit, Spell *pSpell, uint32 damage )
-{
-    if( pUnit && pSpell )
-    {
-        SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, damage, NORMAL_DAMAGE, 0,0,false,0);
-    }
-}
-
-void Unit::SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal )
-{
-    if( pUnit && pSpell )
-    {
-        SendSpellNonMeleeDamageLog(pUnit->GetGUID(), pSpell->m_spellInfo->Id, heal, NORMAL_DAMAGE, 0,0,false,0);
-    }
-}
-*/

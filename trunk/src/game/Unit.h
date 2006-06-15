@@ -422,13 +422,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SetStateFlag(uint32 index, uint32 newFlag );
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
 
-        /*********************************************************/
-        /***                    SPELL SYSTEM                   ***/
-        /*********************************************************/
-
-        void SendDamageToLog( Unit *pUnit, Spell *pSpell, uint32 damage );
-        void SendHealToLog( Unit *pUnit, Spell *pSpell, uint32 heal );
-
     protected:
         Unit ( );
 
