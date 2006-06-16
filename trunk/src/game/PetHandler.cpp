@@ -85,8 +85,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case 3:
                     if(pet)
                     {
-                        if( _player->getClass() == WARLOCK || _player->getClass() == CLASS_HUNTER)
-                            ((Pet*)pet)->SavePetToDB();
+                        _player->SavePet();
                         _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
                         data.Initialize(SMSG_DESTROY_OBJECT);
                         data << pet->GetGUID();
@@ -189,8 +188,7 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(pet)
     {
-        if( _player->getClass() == WARLOCK || _player->getClass() == CLASS_HUNTER)
-            ((Pet*)pet)->SavePetToDB();
+        _player->SavePet();
         _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
         WorldPacket data;
         data.Initialize(SMSG_DESTROY_OBJECT);
