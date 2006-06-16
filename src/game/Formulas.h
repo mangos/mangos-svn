@@ -197,10 +197,7 @@ namespace MaNGOS
 
         inline uint32 xp_to_level(uint32 lvl)
         {
-            uint32 xp = (8*lvl + xp_Diff(lvl)) * mxp(lvl);
-            xp = (int)((xp*0.01) + 0.5);                    // its faster to mutiply than divide
-            xp *= 100;
-            return xp;
+            return (8*lvl + xp_Diff(lvl)) * mxp(lvl) + 50;
         }
     }
 }

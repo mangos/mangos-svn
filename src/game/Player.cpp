@@ -791,7 +791,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(GetUInt32Value(UNIT_FIELD_LEVEL));     //1
-    uint32 zoneId=sAreaStore.LookupEntry(MapManager::Instance ().GetMap(m_mapId)->GetAreaFlag(m_positionX,m_positionY))->zone;
+    uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 
     *p_data << zoneId;
     *p_data << GetMapId();
@@ -2495,7 +2495,11 @@ void Player::CheckExploreSystem()
         SetUInt32Value(PLAYER_EXPLORED_ZONES_1 + offset, (uint32)(currFields | val));
 
         AreaTableEntry *p =sAreaStore.LookupEntry(areaFlag);
-        if(p->area_level)
+        if(!p)
+        {
+            sLog.outError("PLAYER: Player %u discovered unknown area (x: %u y: %u map: %u", GetGUID(), m_positionX,m_positionY,GetMapId());
+        }
+        else if(p->area_level)
         {
             uint32 XP = p->area_level*10;
             uint32 area = p->ID;
