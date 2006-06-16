@@ -686,7 +686,8 @@ void Player::Update( uint32 p_time )
                 {
                     setAttackTimer(0);
                     uint32 dmg;
-                    dmg = CalculateDamage (this);
+					
+                    dmg = CalculateDamage (false);
                     AttackerStateUpdate(pVictim, dmg);
                 }
             }
