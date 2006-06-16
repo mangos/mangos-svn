@@ -88,7 +88,7 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
     owner.GetRespawnCoord(x, y, z);
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
-	traveller.Relocation(x,y,z);
+    traveller.Relocation(x,y,z);
     i_targetedHome = true;
     owner.clearUnitState(UNIT_STAT_ALL_STATE);
     owner.addUnitState(UNIT_STAT_FLEEING);

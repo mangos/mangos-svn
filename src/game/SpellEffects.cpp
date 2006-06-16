@@ -983,7 +983,7 @@ void Spell::EffectTameCreature(uint32 i)
         unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_2,1);
         ((Pet*)unitTarget)->AIM_Initialize();
         ((Pet*)unitTarget)->SetisPet(true);
-        
+
         std::string name;
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
             name = ((Player*)m_caster)->GetName();
@@ -1895,7 +1895,6 @@ void Spell::EffectMomentMove(uint32 i)
         m_caster->SendMessageToSet( &data, true );
     }
 }
-
 
 void Spell::EffectSkinning(uint32 i)
 {

@@ -158,7 +158,7 @@ void WorldSession::LogoutPlayer(bool Save)
             {
                 _player->SavePet();
                 _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-                
+
                 WorldPacket data;
                 data.Initialize(SMSG_DESTROY_OBJECT);
                 data << pet->GetGUID();
@@ -167,7 +167,7 @@ void WorldSession::LogoutPlayer(bool Save)
                 data.clear();
                 data.Initialize(SMSG_PET_SPELLS);
                 data << uint64(0);
-                _player->GetSession()->SendPacket(&data);        
+                _player->GetSession()->SendPacket(&data);
             }
             else _player->SetUInt64Value(UNIT_FIELD_SUMMON,0);
         }

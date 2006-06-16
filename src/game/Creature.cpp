@@ -626,10 +626,10 @@ void Creature::generateLoot()
     if (!HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
         FillLoot(&loot, lootid);
 
-	if (GetCreatureInfo()->mingold>0)
+    if (GetCreatureInfo()->mingold>0)
     {
         uint32 gold_diff = GetCreatureInfo()->maxgold - GetCreatureInfo()->mingold + 1;
-		uint32 RAND_GOLD = GetCreatureInfo()->mingold + rand() % gold_diff; 
+        uint32 RAND_GOLD = GetCreatureInfo()->mingold + rand() % gold_diff;
         loot.gold = RAND_GOLD;
     }
 

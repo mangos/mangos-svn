@@ -101,7 +101,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
     if(!obj) return;
-   // uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
+    // uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
     uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);

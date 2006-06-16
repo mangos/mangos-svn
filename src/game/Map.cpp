@@ -391,7 +391,7 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
         NGridType &grid(*i_grids[old_cell.GridX()][old_cell.GridY()]);
 
         {
-			assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
+            assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
 
             WriteGuard guard(i_info[old_cell.GridX()][old_cell.GridY()]->i_lock);
             grid(old_cell.CellX(),old_cell.CellY()).RemoveObject(player, player->GetGUID());
