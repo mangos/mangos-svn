@@ -197,7 +197,9 @@ namespace MaNGOS
 
         inline uint32 xp_to_level(uint32 lvl)
         {
-            return (8*lvl + xp_Diff(lvl)) * mxp(lvl) + 50;
+            uint32 xp = (8*lvl + xp_Diff(lvl)) * mxp(lvl);
+            // The XP to Level is always rounded to the nearest 100 points. 
+            return uint32(( xp + 50 ) * 0.01) * 100;
         }
     }
 }
