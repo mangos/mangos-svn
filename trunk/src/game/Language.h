@@ -178,13 +178,16 @@
 #define LANG_KNOWN_SPELL                 "You already know that spell."
 #define LANG_FORGET_SPELL                "You already forget that spell."
 #define LANG_ADDITEM_SYNTAX              "Syntax: .additem itemId <amount>"
+#define LANG_ADDITEMSET_SYNTAX           "Syntax: .additemset itemsetId"
                                                             //log
 #define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i"
+#define LANG_ADDITEMSET                  "Command : Additemset, itemsetId = %i"
 #define LANG_ITEM_CANNOT_CREATE          "Cannot create item '%i' (amount: %i)"
 #define LANG_ITEM_CREATED                "Item '%i' created (amount: %i)"
 #define LANG_INSERT_GUILD_NAME           "You need to insert a Guild Name!"
 #define LANG_PLAYER_NOT_FOUND            "Player not found!"
 #define LANG_PLAYER_IN_GUILD             "Player already have a guild!"
+#define LANG_NO_ITEMS_FROM_ITEMSET_FOUND "No items from itemset '%u' found."
 
 #define LANG_DISTANCE                    "The distance(sqr) is: %f."
                                                             //log
