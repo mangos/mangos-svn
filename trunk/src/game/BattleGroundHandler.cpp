@@ -89,7 +89,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 
     // We're in BG.
     GetPlayer()->m_bgBattleGroundID = 1;
-    GetPlayer()->m_bgInBattleGround = true;
+    GetPlayer()->SetInBattleGround(true);
 
     // Calculate team
     GetPlayer()->m_bgTeam = sBattleGroundMgr.GenerateTeamByRace(GetPlayer()->getRace());
