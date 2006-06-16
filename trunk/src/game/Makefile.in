@@ -103,7 +103,8 @@ am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	UpdateData.$(OBJEXT) WaypointMovementGenerator.$(OBJEXT) \
 	Weather.$(OBJEXT) World.$(OBJEXT) WorldLog.$(OBJEXT) \
 	WorldSession.$(OBJEXT) WorldSocket.$(OBJEXT) \
-	WorldSocketMgr.$(OBJEXT)
+	WorldSocketMgr.$(OBJEXT) BattleGround.$(OBJEXT) \
+	BattleGroundMgr.$(OBJEXT) BattleGroundHandler.$(OBJEXT)
 libgame_a_OBJECTS = $(am_libgame_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -437,7 +438,12 @@ libgame_a_SOURCES = \
 	WorldLog.h \
 	WorldSession.h \
 	WorldSocket.h \
-	WorldSocketMgr.h
+	WorldSocketMgr.h \
+	BattleGround.h \
+	BattleGround.cpp \
+	BattleGroundMgr.h \
+	BattleGroundMgr.cpp \
+	BattleGroundHandler.cpp 
 
 all: all-am
 

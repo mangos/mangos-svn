@@ -686,7 +686,7 @@ void Player::Update( uint32 p_time )
                 {
                     setAttackTimer(0);
                     uint32 dmg;
-					
+
                     dmg = CalculateDamage (false);
                     AttackerStateUpdate(pVictim, dmg);
                 }
@@ -8285,8 +8285,8 @@ void Player::SavePet()
 
         sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );
         sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
-        pet->GetEntry(), GetGUIDLow(), pet->GetUInt32Value(UNIT_FIELD_LEVEL), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, fealty, name.c_str());
+            pet->GetEntry(), GetGUIDLow(), pet->GetUInt32Value(UNIT_FIELD_LEVEL), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+            pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, fealty, name.c_str());
     }
 }
 

@@ -35,7 +35,7 @@ inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
     return (uint32)xp;
 }
 
-/* Not used 
+/* Not used
 inline uint32 CalculateDamage(const Unit *pAttacker)
 {
     uint32 attack_power = pAttacker->GetUInt32Value(UNIT_FIELD_ATTACK_POWER);

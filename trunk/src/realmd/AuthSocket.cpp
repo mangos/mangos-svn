@@ -199,9 +199,9 @@ void AuthSocket::_HandleLogonChallenge()
                         pkt << (uint8)CE_SERVER_FULL;
 
                     else
-                    {    
+                    {
                     */
-                    
+
                     //if server is not full
 
                     uint32 acct;
@@ -453,7 +453,7 @@ void AuthSocket::_HandleRealmList()
         pkt << i->first;
         pkt << i->second->address;
         //TODO FIX THIS
-        pkt << (float) 0.0; //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
+        pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
         //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
         result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `acctid` = %d AND `realmid` = %d",id,i->second->m_ID);
         if( result )

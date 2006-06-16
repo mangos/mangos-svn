@@ -253,35 +253,35 @@ bool Unit::HasAuraType(uint32 auraType) const
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
-	if (!pVictim->isAlive()) return;
+    if (!pVictim->isAlive()) return;
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
-		//pVictim->SetInFront(this);
-		// no loot,xp,health if type 8 /critters/
-		if ( ((Creature*)pVictim)->GetCreatureInfo()->type == 8)
-		{
-			pVictim->setDeathState(JUST_DIED);
-			((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
-			pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
-			return;
-		}
-		((Creature*)pVictim)->AI().AttackStart(this);
+        //pVictim->SetInFront(this);
+        // no loot,xp,health if type 8 /critters/
+        if ( ((Creature*)pVictim)->GetCreatureInfo()->type == 8)
+        {
+            pVictim->setDeathState(JUST_DIED);
+            ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
+            pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
+            return;
+        }
+        ((Creature*)pVictim)->AI().AttackStart(this);
     }
 
-	DEBUG_LOG("DealDamageStart");
+    DEBUG_LOG("DealDamageStart");
 
-	uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
-	sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
+    uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
+    sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
     if (health <= damage)
     {
         DEBUG_LOG("DealDamage: victim just died");
         if ((pVictim->GetTypeId() == TYPEID_UNIT) )
             ((Creature*)pVictim)->generateLoot();
-        
+
         // If a player kill some one call honor calcules
         // TODO: We need to count dishonorable kills for civilian creatures.
 
@@ -362,7 +362,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 PvP = true;
         }
-		else if(((Creature*)this)->isPet())
+        else if(((Creature*)this)->isPet())
         {
             Unit* owner = ((Pet*)this)->GetOwner();
             if(!owner)

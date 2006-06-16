@@ -113,7 +113,6 @@ bool Pet::LoadPetFromDB( Unit* owner )
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());
     //SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-
     m_fealty = fields[11].GetUInt32();
     m_name = fields[12].GetString();
 
