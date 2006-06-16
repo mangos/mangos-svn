@@ -118,6 +118,9 @@ Player::Player (WorldSession *session): Unit()
 
     m_pvp_count = 0;
     m_pvp_counting = false;
+
+    m_bgInBattleGround = false;
+    m_bgBattleGroundID = 0;
 }
 
 Player::~Player ()
