@@ -1093,6 +1093,61 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleAddItemSetCommand(const char* args)
+{
+    if (!*args)
+    {
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, LANG_ADDITEMSET_SYNTAX);
+        m_session->SendPacket(&data);
+        return true;
+    }
+
+    char* citemsetId = strtok((char*)args, " ");
+    uint32 itemsetId = atol(citemsetId);
+
+    Player* pl = m_session->GetPlayer();
+
+    sLog.outDetail(LANG_ADDITEMSET, itemsetId);
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `itemset` = %u;",itemsetId);
+
+    if(!result)
+    {
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_NO_ITEMS_FROM_ITEMSET_FOUND,itemsetId));
+        m_session->SendPacket( &data );
+
+        return true;
+    }
+
+    do
+    {
+        WorldPacket data;
+    
+        Field *fields = result->Fetch();
+        uint32 itemId = fields[0].GetUInt32();
+
+        uint16 dest;
+
+        uint8 msg = pl->CanStoreNewItem( NULL, NULL_SLOT, dest, itemId, 1, false );
+        if( msg == EQUIP_ERR_OK )
+        {
+            pl->StoreNewItem( dest, itemId, 1, true);
+            FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CREATED, itemId, 1));
+        }
+        else
+        {
+            pl->SendEquipError( msg, NULL, NULL, 0 );
+            FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CANNOT_CREATE, itemId, 1));
+        }
+        m_session->SendPacket(&data);
+
+    }while( result->NextRow() );
+
+    return true;
+}
+
 bool ChatHandler::HandleCreateGuildCommand(const char* args)
 {
     WorldPacket data;

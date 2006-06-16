@@ -186,6 +186,7 @@ class ChatHandler
         bool HandleShowAreaCommand(const char* args);
         bool HandleHideAreaCommand(const char* args);
         bool HandleAddItemCommand(const char* args);
+        bool HandleAddItemSetCommand(const char* args);
         bool HandleCreateGuildCommand(const char* args);
         bool HandleShowHonor(const char* args);
         bool HandleUpdate(const char* args);
