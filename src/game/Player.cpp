@@ -7638,6 +7638,8 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadCorpse();
 
+    _LoadPet();
+
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
     sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
@@ -7855,6 +7857,19 @@ void Player::_LoadMail()
         while( result->NextRow() );
 
         delete result;
+    }
+}
+
+void Player::_LoadPet()
+{
+    uint64 pet_guid = GetUInt64Value(UNIT_FIELD_SUMMON);
+    if(pet_guid)
+    {
+        Creature* in_pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
+        if(in_pet)
+            return;
+        Pet *pet = new Pet();
+        pet->LoadPetFromDB(this);
     }
 }
 
@@ -8076,6 +8091,7 @@ void Player::SaveToDB()
     _SaveActions();
     _SaveAuras();
     _SaveReputation();
+    SavePet();
 
     if(m_pCorpse) m_pCorpse->SaveToDB(false);
 
@@ -8249,6 +8265,28 @@ void Player::_SaveTutorials()
 {
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
     sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+}
+
+void Player::SavePet()
+{
+    uint64 pet_guid = GetUInt64Value(UNIT_FIELD_SUMMON);
+    Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
+    if(pet)
+    {
+
+        std::string name;
+        uint32 fealty,actState;
+
+        fealty = 5;
+        name = GetName();
+        name.append("\\\'s Pet");
+        actState = STATE_RA_FOLLOW;
+
+        sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );
+        sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
+        pet->GetEntry(), GetGUIDLow(), pet->GetUInt32Value(UNIT_FIELD_LEVEL), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+        pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, fealty, name.c_str());
+    }
 }
 
 /*********************************************************/

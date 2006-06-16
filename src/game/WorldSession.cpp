@@ -150,6 +150,27 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             guild->Loadplayerstatsbyguid(_player->GetGUID());
         }
+        uint64 pet_guid = _player->GetUInt64Value(UNIT_FIELD_SUMMON);
+        if(pet_guid)
+        {
+            Creature* pet = ObjectAccessor::Instance().GetCreature(*_player, pet_guid);
+            if(pet)
+            {
+                _player->SavePet();
+                _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+                
+                WorldPacket data;
+                data.Initialize(SMSG_DESTROY_OBJECT);
+                data << pet->GetGUID();
+                _player->GetSession()->SendPacket(&data);
+                MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,false);
+                data.clear();
+                data.Initialize(SMSG_PET_SPELLS);
+                data << uint64(0);
+                _player->GetSession()->SendPacket(&data);        
+            }
+            else _player->SetUInt64Value(UNIT_FIELD_SUMMON,0);
+        }
 
         ObjectAccessor::Instance().RemovePlayer(_player);
         MapManager::Instance().GetMap(_player->GetMapId())->Remove(_player, false);

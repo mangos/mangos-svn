@@ -449,6 +449,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void SaveToDB();
+        void SavePet();
 
         void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
@@ -769,6 +770,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadInventory();
         void _LoadMail();
         void _LoadQuestStatus();
+        void _LoadPet();
         void _LoadReputation();
         void _LoadSpells();
         void _LoadTutorials();
