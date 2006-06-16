@@ -119,6 +119,8 @@ void PetAI::_stopAttack()
 
 void PetAI::UpdateAI(const uint32 diff)
 {
+    if(!i_owner) return;
+
     if( i_pet.getVictim() != NULL && i_pet.isInCombat())
     {
         if( _needToStop() )

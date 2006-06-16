@@ -472,7 +472,7 @@ void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
 
 uint32 Object::GetZoneId( )
 {
-    return sAreaStore.LookupEntry(MapManager::Instance().GetMap(m_mapId)->GetAreaFlag(m_positionX,m_positionY))->zone;
+    return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 }
 
 float Object::GetDistanceSq(const Object* obj) const
