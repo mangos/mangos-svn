@@ -836,7 +836,7 @@ uint32 Unit::CalculateDamage(bool ranged)
     }
     if (min_damage > max_damage)
     {
-        std::swap(max_damage,max_damage);
+        std::swap(min_damage,max_damage);
     }
 
     if(max_damage==0.0)
