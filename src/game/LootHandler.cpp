@@ -61,11 +61,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     if (loot->items.size() > lootSlot)
     {
         item = &(loot->items[lootSlot]);
-        if (item->is_looted)
-            item = NULL;
     }
 
-    if (item == NULL)
+    if ((item == NULL) || (item->is_looted))
     {
         player->SendEquipError( EQUIP_ERR_ALREADY_LOOTED, NULL, NULL, 0);
         return;
@@ -108,25 +106,25 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_LOOT_MONEY");
 
-    uint64 guid = GetPlayer()->GetLootGUID();
-    Loot *pLoot;
+    Player *player = GetPlayer();
+    uint64 guid = player->GetLootGUID();
+    Loot *pLoot = NULL;
 
-    if( IS_CREATURE_GUID( guid ) )
-    {
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
-        if ( pCreature )
-            pLoot = &pCreature->loot ;
-    }
-    else if( IS_GAMEOBJECT_GUID( guid ) )
+    if( IS_GAMEOBJECT_GUID( guid ) )
     {
         GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*GetPlayer(), guid);
         if( pGameObject )
             pLoot = &pGameObject->loot;
+    } else {
+        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
+        if ( pCreature )
+            pLoot = &pCreature->loot ;
     }
+    
 
     if( pLoot )
     {
-        GetPlayer()->ModifyMoney( pLoot->gold );
+        player->ModifyMoney( pLoot->gold );
         pLoot->gold = 0;
         WorldPacket data;
         data.Initialize( SMSG_LOOT_CLEAR_MONEY );
@@ -178,25 +176,20 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
         loot = &pCreature->loot;
 
-        if(!loot->gold)
+        vector<LootItem>::iterator i;
+        i = find_if(loot->items.begin(), loot->items.end(),
+            LootItem::not_looted);
+
+        if((i == loot->items.end()) && (loot->gold == 0))
         {
-            vector<LootItem>::iterator i;
-
-            i = find_if(loot->items.begin(), loot->items.end(),
-                LootItem::not_looted);
-
-            if(i == loot->items.end())
-            {
-                                                            //this is probably wrong
-                pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-                if(pCreature->GetCreatureInfo()->SkinLootId)
-                                                            // set skinnable
-                    pCreature->SetFlag(UNIT_FIELD_FLAGS, 0x4000000);
-            }
-
-            i = remove_if(loot->items.begin(), loot->items.end(),
-                LootItem::looted);
-            loot->items.erase(i, loot->items.end());
+            //this is probably wrong
+            pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+            if(pCreature->GetCreatureInfo()->SkinLootId)
+                // set skinnable
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, 0x4000000);
         }
+
+        i = remove_if(loot->items.begin(), loot->items.end(), LootItem::looted);
+        loot->items.erase(i, loot->items.end());
     }
 }
