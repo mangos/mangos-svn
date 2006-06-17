@@ -124,14 +124,14 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint32 GetAreaId(uint16 areaflag);
         uint32 GetZoneId(uint16 areaflag);
 
-        uint32 GetAreaId(float x, float y) 
-        { 
-            return GetAreaId(GetAreaFlag(x,y)); 
+        uint32 GetAreaId(float x, float y)
+        {
+            return GetAreaId(GetAreaFlag(x,y));
         }
 
         uint32 GetZoneId(float x, float y)
-        { 
-            return GetZoneId(GetAreaFlag(x,y)); 
+        {
+            return GetZoneId(GetAreaFlag(x,y));
         }
 
     private:

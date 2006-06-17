@@ -669,24 +669,24 @@ float Map::GetWaterLevel(float x, float y )
 
 }
 
-uint32 Map::GetAreaId(uint16 areaflag) 
-{ 
-    AreaTableEntry *entry = sAreaStore.LookupEntry(areaflag); 
+uint32 Map::GetAreaId(uint16 areaflag)
+{
+    AreaTableEntry *entry = sAreaStore.LookupEntry(areaflag);
 
-    if (entry) 
-        return entry->ID; 
+    if (entry)
+        return entry->ID;
     else
-        return 0; 
-} 
+        return 0;
+}
 
-uint32 Map::GetZoneId(uint16 areaflag) 
-{ 
-    AreaTableEntry *entry = sAreaStore.LookupEntry(areaflag); 
-    
-    if( entry ) 
-        return ( entry->zone != 0 ) ? entry->zone : entry->ID; 
+uint32 Map::GetZoneId(uint16 areaflag)
+{
+    AreaTableEntry *entry = sAreaStore.LookupEntry(areaflag);
+
+    if( entry )
+        return ( entry->zone != 0 ) ? entry->zone : entry->ID;
     else
-        return 0; 
+        return 0;
 }
 
 template void Map::Add(Creature *);

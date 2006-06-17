@@ -697,7 +697,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int  CalculateTotalKills(Player *pVictim);
         float GetTotalHonor(void) { return m_total_honor_points; };
         int  GetHonorHighestRank(void) { return m_highest_rank; };
-		void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; };
+        void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; };
         int  GetHonorLastWeekRank(void) { return m_last_week_rank; };
         //End of Honor System
 

@@ -2757,18 +2757,18 @@ void Player::UpdateHonor(void)
         do
         {
             Field *fields = result->Fetch();
-			date = fields[2].GetUInt32();
-			
-			if(fields[0].GetUInt32() == HONORABLE_KILL)
+            date = fields[2].GetUInt32();
+
+            if(fields[0].GetUInt32() == HONORABLE_KILL)
             {
                 lifetime_honorableKills++;
                 //total_honor += fields[1].GetFloat();
-				
-				if( date == today)
-				{
-					today_honorableKills++;
-				}
-				if( date == Yestarday)
+
+                if( date == today)
+                {
+                    today_honorableKills++;
+                }
+                if( date == Yestarday)
                 {
                     yestardayKills++;
                     yestardayHonor += fields[1].GetFloat();
@@ -2784,10 +2784,10 @@ void Player::UpdateHonor(void)
                     lastWeekHonor += fields[1].GetFloat();
                 }
 
-				//All honor points until last week
-				if( date < LastWeekEnd )
+                //All honor points until last week
+                if( date < LastWeekEnd )
                 {
-					total_honor += fields[1].GetFloat();
+                    total_honor += fields[1].GetFloat();
                 }
 
             }
@@ -2796,15 +2796,15 @@ void Player::UpdateHonor(void)
                 lifetime_dishonorableKills++;
                 //total_honor -= fields[1].GetFloat();
 
-				if( date == today)
-				{
-					today_dishonorableKills++;
-				}
-
-				//All honor points until last week
-				if( date < LastWeekEnd )
+                if( date == today)
                 {
-					total_honor -= fields[1].GetFloat();
+                    today_dishonorableKills++;
+                }
+
+                //All honor points until last week
+                if( date < LastWeekEnd )
+                {
+                    total_honor -= fields[1].GetFloat();
                 }
             }
         }
@@ -2842,18 +2842,18 @@ void Player::UpdateHonor(void)
 
     //If the new rank is highest then the old one, then m_highest_rank is updated
     if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
-	{
+    {
         SetHonorHighestRank( CalculateHonorRank(total_honor) );
-	}
-    
-	if ( GetHonorHighestRank() )
-	{
+    }
+
+    if ( GetHonorHighestRank() )
+    {
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
-	}
-	else
-	{
+    }
+    else
+    {
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, 0);
-	}
+    }
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
