@@ -2757,31 +2757,18 @@ void Player::UpdateHonor(void)
         do
         {
             Field *fields = result->Fetch();
-            if(fields[0].GetUInt32() == HONORABLE_KILL)
+			date = fields[2].GetUInt32();
+			
+			if(fields[0].GetUInt32() == HONORABLE_KILL)
             {
                 lifetime_honorableKills++;
-                total_honor += fields[1].GetFloat();
-            }
-            else if(fields[0].GetUInt32() == DISHONORABLE_KILL)
-            {
-                lifetime_dishonorableKills++;
-                total_honor -= fields[1].GetFloat();
-            }
-
-            date = fields[2].GetUInt32();
-
-            if( date == today)
-            {
-                if(fields[0].GetUInt32() == HONORABLE_KILL)
-                    today_honorableKills++;
-                else
-                if(fields[0].GetUInt32() == DISHONORABLE_KILL)
-                    today_dishonorableKills++;
-            }
-            //if is a honorable kill
-            if(fields[0].GetUInt32() == HONORABLE_KILL)
-            {
-                if( date == Yestarday)
+                //total_honor += fields[1].GetFloat();
+				
+				if( date == today)
+				{
+					today_honorableKills++;
+				}
+				if( date == Yestarday)
                 {
                     yestardayKills++;
                     yestardayHonor += fields[1].GetFloat();
@@ -2796,8 +2783,30 @@ void Player::UpdateHonor(void)
                     lastWeekKills++;
                     lastWeekHonor += fields[1].GetFloat();
                 }
-            }
 
+				//All honor points until last week
+				if( date < LastWeekEnd )
+                {
+					total_honor += fields[1].GetFloat();
+                }
+
+            }
+            else if(fields[0].GetUInt32() == DISHONORABLE_KILL)
+            {
+                lifetime_dishonorableKills++;
+                //total_honor -= fields[1].GetFloat();
+
+				if( date == today)
+				{
+					today_dishonorableKills++;
+				}
+
+				//All honor points until last week
+				if( date < LastWeekEnd )
+                {
+					total_honor -= fields[1].GetFloat();
+                }
+            }
         }
         while( result->NextRow() );
 
@@ -2819,7 +2828,7 @@ void Player::UpdateHonor(void)
 
     //TODO Fix next rank bar... it is not working fine!
     //NEXT RANK BAR //Total honor points
-    SetUInt32Value(PLAYER_FIELD_BYTES2, (uint32)( (total_honor < 0) ? 0: total_honor) );
+    SetUInt32Value(PLAYER_FIELD_HONOR_BAR, (uint32)( (total_honor < 0) ? 0: total_honor) );
 
     if( CalculateHonorRank(total_honor) )
         SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
@@ -2833,12 +2842,18 @@ void Player::UpdateHonor(void)
 
     //If the new rank is highest then the old one, then m_highest_rank is updated
     if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
-        m_highest_rank = CalculateHonorRank(total_honor);
-
-    if ( GetHonorHighestRank() )
+	{
+        SetHonorHighestRank( CalculateHonorRank(total_honor) );
+	}
+    
+	if ( GetHonorHighestRank() )
+	{
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
-    else
+	}
+	else
+	{
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, 0);
+	}
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
