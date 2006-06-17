@@ -7661,7 +7661,7 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadCorpse();
 
-    _LoadPet();
+    //_LoadPet();
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
@@ -8296,11 +8296,8 @@ void Player::SavePet()
     Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
     if(pet)
     {
-
         std::string name;
-        uint32 fealty,actState;
-
-        fealty = 5;
+        uint32 actState;
         name = GetName();
         name.append("\\\'s Pet");
         actState = STATE_RA_FOLLOW;
@@ -8308,7 +8305,7 @@ void Player::SavePet()
         sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );
         sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
             pet->GetEntry(), GetGUIDLow(), pet->GetUInt32Value(UNIT_FIELD_LEVEL), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-            pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, fealty, name.c_str());
+            pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, pet->GetUInt32Value(UNIT_FIELD_POWER5), name.c_str());
     }
 }
 

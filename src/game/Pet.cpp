@@ -52,7 +52,7 @@ void Pet::SavePetToDB()
 
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
         GetEntry(), owner, GetUInt32Value(UNIT_FIELD_LEVEL), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, m_fealty, m_name.c_str());
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetUInt32Value(UNIT_FIELD_POWER5), m_name.c_str());
 }
 
 bool Pet::LoadPetFromDB( Unit* owner )
@@ -92,8 +92,6 @@ bool Pet::LoadPetFromDB( Unit* owner )
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
         setPowerType(2);
-        SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
-        SetUInt32Value(UNIT_FIELD_POWER5,1000000);
         SetUInt32Value(UNIT_FIELD_STAT0,uint32(20+petlevel*1.55));
         SetUInt32Value(UNIT_FIELD_STAT1,uint32(20+petlevel*0.64));
         SetUInt32Value(UNIT_FIELD_STAT2,uint32(20+petlevel*1.27));
@@ -101,6 +99,8 @@ bool Pet::LoadPetFromDB( Unit* owner )
         SetUInt32Value(UNIT_FIELD_STAT4,uint32(20+petlevel*0.36));
         SetUInt32Value(UNIT_FIELD_ARMOR,petlevel*50);
     }
+    SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
+    SetUInt32Value(UNIT_FIELD_POWER5,fields[11].GetUInt32());
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
     SetUInt32Value(UNIT_FIELD_FLAGS,0);

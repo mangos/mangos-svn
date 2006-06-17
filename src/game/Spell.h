@@ -346,8 +346,10 @@ class Spell
         void EffectPresistentAA(uint32 i);
         void EffectEnergize(uint32 i);
         void EffectOpenLock(uint32 i);
+        void EffectSummonChangeItem(uint32 i);
         void EffectOpenSecretSafe(uint32 i);
         void EffectApplyAA(uint32 i);
+        void EffectSummon(uint32 i);
         void EffectLearnSpell(uint32 i);
         void EffectDispel(uint32 i);
         void EffectSummonWild(uint32 i);
@@ -357,8 +359,11 @@ class Spell
         void EffectEnchantItemTmp(uint32 i);
         void EffectTameCreature(uint32 i);
         void EffectSummonPet(uint32 i);
+        void EffectLearnPetSpell(uint32 i);
         void EffectWeaponDmg(uint32 i);
         void EffectWeaponDmgPerc(uint32 i);
+        void EffectTriggerSpell(uint32 i);
+        void EffectThreat(uint32 i);
         void EffectHealMaxHealth(uint32 i);
         void EffectInterruptCast(uint32 i);
         void EffectScriptEffect(uint32 i);
@@ -372,7 +377,7 @@ class Spell
         void EffectTransmitted(uint32 i);
         void EffectDisEnchant(uint32 i);
         void EffectInebriate(uint32 i);
-        void EffectTriggerSpell(uint32 i);
+        void EffectFeedPet(uint32 i);
         void EffectDismissPet(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
