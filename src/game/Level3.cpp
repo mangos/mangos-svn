@@ -1124,7 +1124,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     do
     {
         WorldPacket data;
-    
+
         Field *fields = result->Fetch();
         uint32 itemId = fields[0].GetUInt32();
 

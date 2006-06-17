@@ -574,7 +574,7 @@ void Spell::EffectOpenLock(uint32 i)
 
 void Spell::EffectSummonChangeItem(uint32 i)
 {
-     if(!itemTarget)
+    if(!itemTarget)
         return;
     uint32 newitemid = m_spellInfo->EffectItemType[i];
     if(!newitemid)
@@ -1958,6 +1958,7 @@ void Spell::EffectFeedPet(uint32 i)
     m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     TriggerSpell();
 }
+
 void Spell::EffectDismissPet(uint32 i)
 {
     Player *_player;
