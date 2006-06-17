@@ -181,7 +181,6 @@ void Spell::FillTargetMap()
 
     for(uint32 i=0;i<3;i++)
     {
-
         SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap,tmpItemMap,tmpGOMap);
         SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap,tmpItemMap,tmpGOMap);
 
@@ -204,6 +203,11 @@ void Spell::FillTargetMap()
             else if(m_spellInfo->Effect[i] == 54) tmpItemMap.push_back(itemTarget);
                                                             // EnchantHeldItem
             else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
+                                                            // LearnPetSpell
+            else if(m_spellInfo->Effect[i] == 57)
+            {
+                SetTargetMap(i,5,tmpUnitMap,tmpItemMap,tmpGOMap);
+            }
         }
 
         m_targetUnits[i] = tmpUnitMap;
@@ -229,7 +233,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         case TARGET_PET:
         {
             Unit* tmpUnit = ObjectAccessor::Instance().GetUnit(*m_caster,m_caster->GetUInt32Value(UNIT_FIELD_PETNUMBER));
-            TagUnitMap.push_back(tmpUnit);
+            if(tmpUnit)
+                TagUnitMap.push_back(tmpUnit);
         }break;
         case TARGET_S_E:
         {

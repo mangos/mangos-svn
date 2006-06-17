@@ -51,7 +51,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleFear,                                      //SPELL_AURA_MOD_FEAR = 7,
     &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
     &Aura::HandleModAttackSpeed,                            //SPELL_AURA_MOD_ATTACKSPEED = 9,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_THREAT = 10,
+    &Aura::HandleModThreat,                                 //SPELL_AURA_MOD_THREAT = 10,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TAUNT = 11,
     &Aura::HandleAuraModStun,                               //SPELL_AURA_MOD_STUN = 12,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_DONE = 13,
@@ -726,11 +726,20 @@ void Aura::HandlePeriodicHeal(bool apply)
 
 void Aura::HandleModAttackSpeed(bool apply)
 {
+    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
+        return;
     int percent = m_modifier->m_amount;
     uint32 curattcktime =  m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
     if(apply)
         m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime/(1+percent/100)));
     else m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime*(1+percent/100)));
+}
+
+void Aura::HandleModThreat(bool apply)
+{
+    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
+        return;
+    m_target->AddHostil(m_caster->GetGUID(),apply ? float(m_modifier->m_amount) : -float(m_modifier->m_amount));
 }
 
 void Aura::HandleAuraWaterWalk(bool apply)
@@ -877,6 +886,8 @@ void HandleTriggerSpellEvent(void *obj)
     if(!Aur)
         return;
     SpellEntry *spellInfo = sSpellStore.LookupEntry( Aur->GetModifier()->m_miscvalue );
+    if(!spellInfo)
+        spellInfo = sSpellStore.LookupEntry(Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
 
     if(!spellInfo)
     {
@@ -940,8 +951,9 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
         m_isTrigger = false;
         m_duration = 0;
         //probably it's temporary for taming creature..
-        if(GetSpellProto()->Id == 1515)
+        if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
         {
+            m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,0);
             SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
             Spell *spell = new Spell(m_caster, spell_proto, false, 0);
             Unit* target = NULL;
@@ -950,7 +962,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
                 target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
             }
             else target = m_target;
-            if(!target)
+            if(!target && !target->isAlive())
                 return;
             SpellCastTargets targets;
             targets.setUnitTarget(target);
