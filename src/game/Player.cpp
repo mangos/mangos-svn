@@ -660,15 +660,15 @@ void Player::Update( uint32 p_time )
             float pldistance = 10.0f;
             if(getClass() == WARRIOR)
             {
-                pldistance = pldistance + 1;
+                pldistance += 1;
             }
             if(GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND ) != 0)
             {
-                pldistance = pldistance + 2;
+                pldistance += 2;
             }
             if(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS) != 0)
             {
-                pldistance = pldistance + 3;
+                pldistance += 3;
             }
 
             if (pVictim)
@@ -688,10 +688,7 @@ void Player::Update( uint32 p_time )
                 else
                 {
                     setAttackTimer(0);
-                    uint32 dmg;
-
-                    dmg = CalculateDamage (false);
-                    AttackerStateUpdate(pVictim, dmg);
+                    AttackerStateUpdate(pVictim);
                 }
             }
         }

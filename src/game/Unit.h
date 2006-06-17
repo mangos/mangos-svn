@@ -271,7 +271,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *turn);
         uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage);
         void HandleEmoteCommand(uint32 anim_id);
-        void AttackerStateUpdate (Unit *pVictim, uint32 damage);
+        void AttackerStateUpdate (Unit *pVictim);
 
         float GetUnitDodgeChance()    const { return m_floatValues[ PLAYER_DODGE_PERCENTAGE ]; }
         float GetUnitParryChance()    const { return m_floatValues[ PLAYER_PARRY_PERCENTAGE ]; }

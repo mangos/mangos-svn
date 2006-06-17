@@ -105,7 +105,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
                 }
                 if(!i_creature.canReachWithAttack(i_creature.getVictim()))
                     return;
-                i_creature.AttackerStateUpdate(i_creature.getVictim(), 0);
+                i_creature.AttackerStateUpdate(i_creature.getVictim());
                 i_creature.setAttackTimer(0);
 
                 if ( !i_creature.getVictim() )
