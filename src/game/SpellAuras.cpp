@@ -962,7 +962,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
                 target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
             }
             else target = m_target;
-            if(!target && !target->isAlive())
+            if(!target || !target->isAlive())
                 return;
             SpellCastTargets targets;
             targets.setUnitTarget(target);
