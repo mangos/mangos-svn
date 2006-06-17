@@ -738,7 +738,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     }
 }
 
-void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
+void Unit::AttackerStateUpdate (Unit *pVictim)
 {
     if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
         return;
@@ -778,7 +778,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, uint32 damage)
             chanceToHit = 15.0f;
     }
 
-    if(!damage) damage = CalculateDamage (false);
+    uint32 damage = CalculateDamage (false);
 
     if((chanceToHit/100) * 512 >= urand(0, 512) )
     {
@@ -836,13 +836,11 @@ uint32 Unit::CalculateDamage(bool ranged)
     }
     if (min_damage > max_damage)
     {
-        float temp = max_damage;
-        max_damage = min_damage;
-        min_damage = temp;
+        std::swap(max_damage,max_damage);
     }
 
-    if(max_damage==0)
-        max_damage=5;
+    if(max_damage==0.0)
+        max_damage = 5.0;
 
     float diff = max_damage - min_damage + 1;
 
