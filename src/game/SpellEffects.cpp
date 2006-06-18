@@ -1022,7 +1022,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
             if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-                p_caster->AddItemEnchant(enchant_id);
+                p_caster->AddItemEnchant(enchant_id,true);
         }
     }
 }
@@ -1087,7 +1087,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
             if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-                p_caster->AddItemEnchant(enchant_id);
+                p_caster->AddItemEnchant(enchant_id,true);
         }
     }
 }
@@ -1712,7 +1712,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
             if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-                p_caster->AddItemEnchant(enchant_id);
+                p_caster->AddItemEnchant(enchant_id,true);
         }
     }
 }

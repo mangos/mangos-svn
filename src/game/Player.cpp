@@ -1083,7 +1083,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
         level += 1;
         newXP -= nextLvlXP;
 
-        //_RemoveStatsMods();
+        _RemoveStatsMods();
 
         BuildLvlUpStats(&HPGain,&MPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
 
@@ -1148,7 +1148,7 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
         SetUInt32Value(UNIT_FIELD_IQ, newINT);
         SetUInt32Value(UNIT_FIELD_SPIRIT, newSPI);
 
-        //_ApplyStatsMods();
+        _ApplyStatsMods();
 
         WorldPacket data;
         data.Initialize(SMSG_LEVELUP_INFO);
@@ -6010,7 +6010,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         {
             uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
             if(Enchant_id)
-                AddItemEnchant(Enchant_id);
+                AddItemEnchant(Enchant_id,true);
         }
         if( IsInWorld() && update )
         {
@@ -6045,28 +6045,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                     uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
                     if( Enchant_id)
                     {
-                        SpellItemEnchantment *pEnchant;
-                        pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
-                        if(!pEnchant)
-                            continue;
-                        uint32 enchant_display = pEnchant->display_type;
-                        uint32 enchant_value1 = pEnchant->value1;
-                        uint32 enchant_value2 = pEnchant->value2;
-                        uint32 enchant_spell_id = pEnchant->spellid;
-                        uint32 enchant_aura_id = pEnchant->aura_id;
-                        uint32 enchant_description = pEnchant->description;
-                        //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-                        if(enchant_display ==4)
-                            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
-                        else if(enchant_display ==2)
-                        {
-                            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
-                            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
-                        }
-                        else
-                        {
-                            RemoveAurasDueToSpell(enchant_spell_id);
-                        }
+                        AddItemEnchant(Enchant_id,false);
                     }
                 }
                 if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
@@ -7673,8 +7652,9 @@ bool Player::LoadFromDB( uint32 guid )
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
-    //_ApplyAllAuraMods();
-    //_ApplyAllItemMods();
+    _ApplyStatsMods();
+    _ApplyAllAuraMods();
+    _ApplyAllItemMods();
     return true;
 }
 
@@ -8049,9 +8029,10 @@ void Player::SaveToDB()
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
-    //_RemoveStatsMods();
+
     _RemoveAllItemMods();
     _RemoveAllAuraMods();
+    _RemoveStatsMods();
 
     bool inworld = IsInWorld();
     if (inworld)
@@ -8138,10 +8119,10 @@ void Player::SaveToDB()
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    _ApplyStatsMods();
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
-
-    //_ApplyStatsMods();
+    
     //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
 
     if (inworld)

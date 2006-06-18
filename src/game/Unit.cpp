@@ -813,26 +813,17 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 
 uint32 Unit::CalculateDamage(bool ranged)
 {
-    uint32 attack_power;
-
     float min_damage, max_damage, dmg;
+    dmg = 0;
     if(ranged)
     {
-        if(getClass() == HUNTER)
-            attack_power = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
-        else
-            attack_power = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
-
-        dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_RANGEDATTACKTIME);
         min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
         max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
     }
     else
     {
-        attack_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
-        dmg = attack_power / 14.0f * GetFloatValue(UNIT_FIELD_BASEATTACKTIME);
-        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
-        max_damage =GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
+        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
+        max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
     }
     if (min_damage > max_damage)
     {
@@ -1049,7 +1040,7 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID)
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
     AuraMap::iterator i = m_Auras.find( spellEffectPair(Aur->GetId(), Aur->GetEffIndex()) );
-    //_RemoveStatsMods();
+    _RemoveStatsMods();
 
     // take out same spell
     if (i != m_Auras.end())
@@ -1063,7 +1054,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount + 1);
     }
-    //_ApplyStatsMods();
+    _ApplyStatsMods();
 
     return true;
 }
@@ -1138,12 +1129,12 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
 
 void Unit::RemoveAura(AuraMap::iterator &i)
 {
-    //_RemoveStatsMods();
+    _RemoveStatsMods();
     m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
     (*i).second->_RemoveAura();
     delete (*i).second;
     m_Auras.erase(i++);
-    //_ApplyStatsMods();
+    _ApplyStatsMods();
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
@@ -1170,7 +1161,7 @@ uint32 Unit::GetAurDuration(uint32 spellId, uint32 effindex)
 void Unit::RemoveAllAuras()
 {
 
-    //_RemoveStatsMods();
+    _RemoveStatsMods();
 
     while (!m_Auras.empty())
     {
@@ -1178,7 +1169,7 @@ void Unit::RemoveAllAuras()
         RemoveAura(iter);
     }
 
-    //_ApplyStatsMods();
+    _ApplyStatsMods();
 }
 
 void Unit::_RemoveStatsMods()
@@ -1234,9 +1225,32 @@ void Unit::ApplyStats(bool apply)
     float classrate = 0;
 
     // Melee Attack Power
-    // //needs testing, prob wrong value type, or field position
+    // && Melee DPS - (Damage Per Second)
 
-    /*switch(getClass())
+    //Ranged
+    if(getClass() == HUNTER)
+        val2 = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+    else
+        val2 = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+    if(val2 > GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) && !apply) val2 = 0;
+    apply ?
+        SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)+val2):
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)-val2);
+
+
+    val = (uint32)((GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)/14)*GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000 );
+        if(val > GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) && !apply) val = 0;
+    apply ?
+        SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)+val):
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)-val);
+
+    apply ?
+        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE)+val):
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE)-val);
+
+    //Not-ranged
+
+    switch(getClass())
     {
         case WARRIOR: val2 = (uint32)(getLevel()*3 + GetUInt32Value(UNIT_FIELD_STR)*2 - 20); break;
         case PALADIN: val2 = (uint32)(getLevel()*3 + GetUInt32Value(UNIT_FIELD_STR)*2 - 20); break;
@@ -1249,24 +1263,21 @@ void Unit::ApplyStats(bool apply)
         case WARLOCK: val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
     }
 
-    if(val2 > GetUInt32Value(UNIT_FIELD_ATTACKPOWER) && !apply) val2 = 0;
+    if(val2 > GetUInt32Value(UNIT_FIELD_ATTACK_POWER) && !apply) val2 = 0;
     apply ?
-    SetUInt32Value(UNIT_FIELD_ATTACKPOWER,GetUInt32Value(UNIT_FIELD_ATTACKPOWER)+val2):
-    SetUInt32Value(UNIT_FIELD_ATTACKPOWER,GetUInt32Value(UNIT_FIELD_ATTACKPOWER)-val2); */
+        SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)+val2):
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)-val2); 
 
-    // Melee DPS - (Damage Per Second)
-    //needs testing, prob wrong value type, or field position
-
-    /*val = (float)((GetUInt32Value(UNIT_FIELD_ATTACKPOWER)/14)*GetUInt32Value(UNIT_FIELD_BASEATTACKTIME) );
+    val = (uint32)((GetUInt32Value(UNIT_FIELD_ATTACK_POWER)/14)*GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000 );
     if(val > GetFloatValue(UNIT_FIELD_MINDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXDAMAGE) && !apply) val = 0;
 
     apply ?
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, GetFloatValue(UNIT_FIELD_MINDAMAGE)+val):
+        SetFloatValue(UNIT_FIELD_MINDAMAGE, GetFloatValue(UNIT_FIELD_MINDAMAGE)+val):
     SetFloatValue(UNIT_FIELD_MINDAMAGE, GetFloatValue(UNIT_FIELD_MINDAMAGE)-val);
 
     apply ?
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, GetFloatValue(UNIT_FIELD_MAXDAMAGE)+val):
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, GetFloatValue(UNIT_FIELD_MAXDAMAGE)-val);*/
+        SetFloatValue(UNIT_FIELD_MAXDAMAGE, GetFloatValue(UNIT_FIELD_MAXDAMAGE)+val):
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, GetFloatValue(UNIT_FIELD_MAXDAMAGE)-val);
 
     // critical
     if(getClass() == HUNTER) classrate = 53;
@@ -1315,7 +1326,7 @@ void Unit::_RemoveAllAuraMods()
 {
     AuraMap::iterator i;
 
-    //_RemoveStatsMods();
+    _RemoveStatsMods();
 
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
@@ -1328,12 +1339,12 @@ void Unit::_RemoveAllAuraMods()
         //    i = m_Auras.begin();
     }
 
-    //_ApplyStatsMods();
+    _ApplyStatsMods();
 }
 
 void Unit::_ApplyAllAuraMods()
 {
-    //_RemoveStatsMods();
+    _RemoveStatsMods();
 
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
@@ -1342,7 +1353,7 @@ void Unit::_ApplyAllAuraMods()
         (*i).second->_AddAura();
     }
 
-    //_ApplyStatsMods();
+    _ApplyStatsMods();
 }
 
 // TODO: FIX-ME!!!
@@ -1443,10 +1454,9 @@ void Unit::AddHostil(uint64 guid, float hostility)
     m_hostilList.push_back(uh);
 }
 
-void Unit::AddItemEnchant(uint32 enchant_id)
+void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
 {
     SpellItemEnchantment *pEnchant;
-    Aura *pAura;
     pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
         return;
@@ -1459,21 +1469,42 @@ void Unit::AddItemEnchant(uint32 enchant_id)
     SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
 
     if(enchant_display ==4)
-        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1);
+    {
+        apply ?
+        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1):
+        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
+    }
     else if(enchant_display ==2)
     {
-        SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1);
-        SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1);
+        if(getClass() == CLASS_HUNTER)
+        {
+            apply?
+            SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)+enchant_value1):
+            SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)-enchant_value1);
+            apply?
+            SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)+enchant_value1):
+            SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)-enchant_value1);
+        }
+        else
+        {
+            apply?
+            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1):
+            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
+            apply?
+            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1):
+            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
+        }
     }
     else
     {
-        for(int x = 0;x < 3;x++)
-            if(enchantSpell_info->Effect[x])
+        if(apply)
         {
-            //uint32 pAura_id = enchantSpell_info->Effect[x];
-            pAura = new Aura(enchantSpell_info,x,this,this);
-            AddAura(pAura);
+            Spell *spell = new Spell(this, enchantSpell_info, false, 0);
+            SpellCastTargets targets;
+            targets.setUnitTarget(this);
+            spell->prepare(&targets);
         }
+        else this->RemoveAurasDueToSpell(enchant_spell_id);
     }
 }
 
