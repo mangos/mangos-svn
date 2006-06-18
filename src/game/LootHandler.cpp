@@ -115,12 +115,13 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
         GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*GetPlayer(), guid);
         if( pGameObject )
             pLoot = &pGameObject->loot;
-    } else {
+    }
+    else
+    {
         Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
         if ( pCreature )
             pLoot = &pCreature->loot ;
     }
-    
 
     if( pLoot )
     {

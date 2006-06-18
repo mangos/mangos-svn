@@ -630,7 +630,7 @@ void Creature::generateLoot()
         uint32 diff = GetCreatureInfo()->maxgold - GetCreatureInfo()->mingold + 1;
 
         // rand() result (RAND_MAX) small for large gold loots
-        if(diff > 10000) 
+        if(diff > 10000)
         {
             uint32 gold_part              = rand() % (diff / 10000);
             uint32 silver_and_copper_part = rand() % (diff % 10000);
