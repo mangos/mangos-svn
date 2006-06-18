@@ -532,7 +532,9 @@ void Aura::_AddAura()
         m_target->RemoveAurasDueToSpell(m_spellId);
     m_target->RemoveRankAurasDueToSpell(m_spellId);
 
+    m_target->ApplyStats(false);
     ApplyModifier(true);
+    m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
 
     for(i = 0; i< 3; i++)
@@ -606,8 +608,10 @@ void Aura::_AddAura()
 
 void Aura::_RemoveAura()
 {
+    m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier->m_auraname);
     ApplyModifier(false);
+    m_target->ApplyStats(true);
 
     uint8 slot = GetAuraSlot();
     Aura* aura = m_target->GetAura(m_spellId, m_effIndex);

@@ -814,14 +814,18 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 uint32 Unit::CalculateDamage(bool ranged)
 {
     float min_damage, max_damage, dmg;
-    dmg = 0;
+    uint32 attack_power;
     if(ranged)
     {
+        attack_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+        dmg = attack_power / 14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
         min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
         max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
     }
     else
     {
+        attack_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
+        dmg = attack_power / 14.0f * GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000;
         min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
         max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
     }
@@ -1040,8 +1044,6 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID)
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
     AuraMap::iterator i = m_Auras.find( spellEffectPair(Aur->GetId(), Aur->GetEffIndex()) );
-    _RemoveStatsMods();
-
     // take out same spell
     if (i != m_Auras.end())
     {
@@ -1054,8 +1056,6 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount + 1);
     }
-    _ApplyStatsMods();
-
     return true;
 }
 
@@ -1129,12 +1129,10 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
 
 void Unit::RemoveAura(AuraMap::iterator &i)
 {
-    _RemoveStatsMods();
     m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
     (*i).second->_RemoveAura();
     delete (*i).second;
     m_Auras.erase(i++);
-    _ApplyStatsMods();
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
@@ -1160,16 +1158,11 @@ uint32 Unit::GetAurDuration(uint32 spellId, uint32 effindex)
 
 void Unit::RemoveAllAuras()
 {
-
-    _RemoveStatsMods();
-
     while (!m_Auras.empty())
     {
         AuraMap::iterator iter = m_Auras.begin();
         RemoveAura(iter);
     }
-
-    _ApplyStatsMods();
 }
 
 void Unit::_RemoveStatsMods()
@@ -1196,7 +1189,7 @@ void Unit::ApplyStats(bool apply)
     if(!pinfo) return;
 
     float val;
-    uint32 val2;
+    uint32 val2,tem_att_power;
 
     // Armor
     val2 = (uint32)(2*GetUInt32Value(UNIT_FIELD_AGILITY));
@@ -1233,12 +1226,12 @@ void Unit::ApplyStats(bool apply)
     else
         val2 = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
     if(val2 > GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) && !apply) val2 = 0;
+    tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
     apply ?
         SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)+val2):
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)-val2);
 
-
-    val = (uint32)((GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)/14)*GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000 );
+    val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
         if(val > GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) && !apply) val = 0;
     apply ?
         SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)+val):
@@ -1262,13 +1255,15 @@ void Unit::ApplyStats(bool apply)
         case PRIEST:  val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
         case WARLOCK: val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
     }
+    tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
 
     if(val2 > GetUInt32Value(UNIT_FIELD_ATTACK_POWER) && !apply) val2 = 0;
     apply ?
         SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)+val2):
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)-val2); 
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)-val2);
 
-    val = (uint32)((GetUInt32Value(UNIT_FIELD_ATTACK_POWER)/14)*GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000 );
+    val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
+
     if(val > GetFloatValue(UNIT_FIELD_MINDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXDAMAGE) && !apply) val = 0;
 
     apply ?
@@ -1325,9 +1320,6 @@ void Unit::ApplyStats(bool apply)
 void Unit::_RemoveAllAuraMods()
 {
     AuraMap::iterator i;
-
-    _RemoveStatsMods();
-
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         //(*i)->ApplyModifier(false);
@@ -1338,22 +1330,16 @@ void Unit::_RemoveAllAuraMods()
         //else
         //    i = m_Auras.begin();
     }
-
-    _ApplyStatsMods();
 }
 
 void Unit::_ApplyAllAuraMods()
 {
-    _RemoveStatsMods();
-
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         //(*i)->ApplyModifier(true);
         //(*i)->_RemoveAura();
         (*i).second->_AddAura();
     }
-
-    _ApplyStatsMods();
 }
 
 // TODO: FIX-ME!!!
@@ -1504,7 +1490,7 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
             targets.setUnitTarget(this);
             spell->prepare(&targets);
         }
-        else this->RemoveAurasDueToSpell(enchant_spell_id);
+        else RemoveAurasDueToSpell(enchant_spell_id);
     }
 }
 
