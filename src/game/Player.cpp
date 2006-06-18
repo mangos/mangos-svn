@@ -1122,19 +1122,19 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         if (Player::HasSpell(20550))                        //endurance skill support (+5% to total health)
         {
-            exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
+            (uint32)exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
             b_HP = uint8(exHP * 0.05);
             newHP += b_HP;
         }
         if (Player::HasSpell(20598))                        //Human Spirit skill support (+5% to total spirit)
         {
-            exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
+            (uint32)exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
             b_Spirit = uint8(exSpirit * 0.05);
             newSPI += b_Spirit;
         }
         if (Player::HasSpell(20591))                        //Expansive mind support (+5% to total Intellect)
         {
-            exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
+            (uint32)exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
             b_IQ = uint8(exIQ * 0.05);
             newINT += b_IQ;
         }
@@ -2697,9 +2697,9 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 
         int RepPoints;
         if(HasSpell(20599))                                 //spell : diplomacy
-            RepPoints = ((5-dif)*0.20)*110;                 //human gain more 10% rep.
+            (uint32)RepPoints = ((5-dif)*0.20)*110;                 //human gain more 10% rep.
         else
-            RepPoints = ((5-dif)*0.20)*100;
+            (uint32)RepPoints = ((5-dif)*0.20)*100;
         SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
     }
 }
@@ -5026,7 +5026,7 @@ uint16 Player::GetPosByGuid( uint64 guid )
             }
         }
     }
-    return NULL;
+    return 0;
 }
 
 Item* Player::GetItemByPos( uint16 pos )
@@ -5038,7 +5038,7 @@ Item* Player::GetItemByPos( uint16 pos )
 
 Item* Player::GetItemByPos( uint8 bag, uint8 slot )
 {
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
     else
     {
@@ -5074,7 +5074,7 @@ bool Player::IsEquipmentPos( uint16 pos )
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ) )
         return true;
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END ) )
         return true;
@@ -5136,7 +5136,7 @@ bool Player::HasItemCount( uint32 item, uint32 count )
 
 uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap )
 {
-    dest = NULL;
+    dest = 0;
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
@@ -5152,7 +5152,7 @@ uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item,
 
 uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap )
 {
-    dest = NULL;
+    dest = 0;
     if( pItem )
     {
         sLog.outDebug( "STORAGE : CanStoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
@@ -5165,7 +5165,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             uint16 pos;
             if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
-            if( bag == NULL )
+            if( bag == 0 )
             {
                 if( !swap && pProto->MaxCount > 0 )
                 {
@@ -5454,12 +5454,12 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
         return EQUIP_ERR_ITEM_NOT_FOUND;
     else
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
-    return NULL;
+    return 0;
 }
 
 uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
 {
-    dest = NULL;
+    dest = 0;
     if( pItem )
     {
         sLog.outDebug( "STORAGE : CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
@@ -5512,7 +5512,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
 
 uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap )
 {
-    dest = NULL;
+    dest = 0;
     if( pItem )
     {
         sLog.outDebug( "STORAGE : CanBankItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
@@ -5525,7 +5525,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
             uint16 pos;
             if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
-            if( bag == NULL )
+            if( bag == 0 )
             {
                 if( !swap && pProto->MaxCount > 0 )
                 {
@@ -5832,7 +5832,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
         return EQUIP_ERR_ITEM_NOT_FOUND;
     else
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
-    return NULL;
+    return 0;
 }
 
 uint8 Player::CanUseItem( Item *pItem )
@@ -5992,7 +5992,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
         pItem->SetSlot( slot );
 
-        if( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+        if( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END && slot == EQUIPMENT_SLOT_START)
         {
             int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
             SetUInt32Value(VisibleBase, pItem->GetEntry());
@@ -6037,7 +6037,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot >= EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END )
+            if ( slot > EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END && slot == EQUIPMENT_SLOT_START)
             {
                 _ApplyItemMods(pItem, slot, false);
                 for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
@@ -6048,7 +6048,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                         AddItemEnchant(Enchant_id,false);
                     }
                 }
-                if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+                if ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END && slot == EQUIPMENT_SLOT_START)
                 {
                     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
                     for (int i = VisibleBase; i < VisibleBase + 12; ++i)
@@ -6146,7 +6146,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
+            if ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END && slot == EQUIPMENT_SLOT_START)
             {
                 _ApplyItemMods(pItem, slot, false);
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
@@ -6737,7 +6737,7 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
             uint16 dest;
             if( count <= 0 )
                 count = 1;
-            uint8 msg = CanStoreNewItem( NULL, NULL_SLOT, dest, srcitem, count, false );
+            uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
             if( msg != EQUIP_ERR_OK )
             {
                 SendEquipError( msg, NULL, NULL, 0 );
@@ -6805,7 +6805,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
         {
             if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
             {
-                msg = CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
+                msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
                 if( msg != EQUIP_ERR_OK )
                 {
                     SendEquipError( msg, NULL, NULL, 0 );
@@ -6820,7 +6820,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
             {
                 if( pQuest->GetQuestInfo()->RewItemId[i] )
                 {
-                    msg = CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
+                    msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
                     if( msg != EQUIP_ERR_OK )
                     {
                         SendEquipError( msg, NULL, NULL, 0 );
@@ -6870,7 +6870,7 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-                uint32 qtime = static_cast<uint32>(time(NULL)) + (limittime * 0.001);
+                uint32 qtime = static_cast<uint32>(time(NULL)) + (uint32(limittime * 0.001));
                 SetUInt32Value( log_slot + 2, qtime );
             }
             else
@@ -6934,7 +6934,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
         {
             if( pQuest->GetQuestInfo()->RewChoiceItemId[reward] )
             {
-                if( CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
+                if( CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false ) == EQUIP_ERR_OK )
                     StoreNewItem( dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], true);
             }
         }
@@ -6945,7 +6945,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             {
                 if( pQuest->GetQuestInfo()->RewItemId[i] )
                 {
-                    if( CanStoreNewItem( NULL, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false ) == EQUIP_ERR_OK )
+                    if( CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false ) == EQUIP_ERR_OK )
                         StoreNewItem( dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], true);
                 }
             }
@@ -7171,7 +7171,7 @@ bool Player::GiveQuestSourceItem( Quest *pQuest )
             uint32 count = pQuest->GetQuestInfo()->SrcItemCount;
             if( count <= 0 )
                 count = 1;
-            uint8 msg = CanStoreNewItem( NULL, NULL_SLOT, dest, srcitem, count, false );
+            uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
             if( msg == EQUIP_ERR_OK )
             {
                 StoreNewItem(dest, srcitem, count, true);

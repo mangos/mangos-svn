@@ -332,7 +332,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
                 return;
             }
             uint16 dest;
-            uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, pItem, false );
+            uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false );
             if( msg == EQUIP_ERR_OK )
             {
                 _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
@@ -481,7 +481,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                 return;
             }
             uint16 dest;
-            uint8 msg = _player->CanStoreNewItem( NULL, NULL_SLOT, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
+            uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
             if( msg == EQUIP_ERR_OK )
             {
                 _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
@@ -648,7 +648,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
     if( pItem )
     {
         uint16 dest;
-        uint8 msg = _player->CanBankItem( NULL, NULL_SLOT, dest, pItem, false );
+        uint8 msg = _player->CanBankItem( 0, NULL_SLOT, dest, pItem, false );
         if( msg == EQUIP_ERR_OK )
         {
             _player->RemoveItem(srcbag, srcslot, true);
@@ -671,7 +671,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
     if( pItem )
     {
         uint16 dest;
-        uint8 msg = _player->CanBankItem( NULL, NULL_SLOT, dest, pItem, false );
+        uint8 msg = _player->CanBankItem( 0, NULL_SLOT, dest, pItem, false );
         if( msg == EQUIP_ERR_OK )
         {
             _player->RemoveItem(srcbag, srcslot, true);

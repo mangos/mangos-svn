@@ -338,7 +338,7 @@ void Spell::EffectCreateItem(uint32 i)
             continue;
         itemid = m_spellInfo->Reagent[x];
         itemcount = m_spellInfo->ReagentCount[x];
-        if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(NULL, NULL_SLOT, dest, newitemid, 1, false ) == EQUIP_ERR_OK )
+        if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(0, NULL_SLOT, dest, newitemid, 1, false ) == EQUIP_ERR_OK )
             player->DestroyItemCount(itemid, itemcount, true);
         else
         {
@@ -353,7 +353,7 @@ void Spell::EffectCreateItem(uint32 i)
     //   if(num_to_add > m_itemProto->MaxCount)
     //       num_to_add = m_itemProto->MaxCount;
     Item *pItem = player->CreateItem(newitemid,1);
-    uint8 msg = player->CanStoreItem( NULL, NULL_SLOT, dest, pItem, false);
+    uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
     if( msg == EQUIP_ERR_OK )
     {
         player->StoreItem( dest, pItem, true);
@@ -582,7 +582,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
     Player *player = (Player*)m_caster;
     Item *pItem = player->CreateItem(newitemid,1);
     uint16 dest;
-    uint8 msg = player->CanStoreItem( NULL, NULL_SLOT, dest, pItem, false);
+    uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
     if( msg == EQUIP_ERR_OK )
     {
         player->StoreItem( dest, pItem, true);
@@ -1403,7 +1403,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
     else fdamage = 0;
 
-    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,fdamage);
+    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,(uint32)fdamage);
 
 }
 
@@ -1925,7 +1925,7 @@ void Spell::EffectDisEnchant(uint32 i)
         }
     }
     uint16 dest;
-    uint8 msg = player->CanStoreNewItem( NULL, NULL_SLOT, dest, item, count, false );
+    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, item, count, false );
     if( msg == EQUIP_ERR_OK )
         player->StoreNewItem( dest, item, count, true );
     else

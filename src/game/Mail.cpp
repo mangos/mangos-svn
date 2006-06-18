@@ -214,7 +214,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     Mail* m = pl->GetMail(message);
     Item *it = objmgr.GetMItem(m->item);
 
-    uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, it, false );
+    uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, it, false );
     if( msg == EQUIP_ERR_OK )
     {
         m->item = 0;
@@ -460,7 +460,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     item->SetUInt32Value( ITEM_FIELD_ITEM_TEXT_ID , mailid );
 
     uint16 dest;
-    uint8 msg = _player->CanStoreItem( NULL, NULL_SLOT, dest, item, false );
+    uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, item, false );
     if( msg == EQUIP_ERR_OK )
         _player->StoreItem(dest, item, true);
     else
