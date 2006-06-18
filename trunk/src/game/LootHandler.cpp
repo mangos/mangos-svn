@@ -70,7 +70,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     }
 
     uint16 dest;
-    uint8 msg = player->CanStoreNewItem( NULL, NULL_SLOT, dest, item->itemid, 1, false );
+    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, item->itemid, 1, false );
     if ( msg == EQUIP_ERR_OK )
     {
         player->StoreNewItem( dest, item->itemid, 1, true);
