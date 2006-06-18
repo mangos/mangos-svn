@@ -5038,7 +5038,7 @@ Item* Player::GetItemByPos( uint16 pos )
 
 Item* Player::GetItemByPos( uint8 bag, uint8 slot )
 {
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END &&  slot == EQUIPMENT_SLOT_START) )
         return m_items[slot];
     else
     {
@@ -5074,7 +5074,7 @@ bool Player::IsEquipmentPos( uint16 pos )
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END &&  slot == EQUIPMENT_SLOT_START) )
         return true;
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END ) )
         return true;
