@@ -421,14 +421,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 CalculateDamage(bool ranged);
         void SetStateFlag(uint32 index, uint32 newFlag );
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
+        void ApplyStats(bool apply);
 
     protected:
         Unit ( );
 
         void _RemoveStatsMods();
         void _ApplyStatsMods();
-        void ApplyStats(bool apply);
-
+        
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 
