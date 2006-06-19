@@ -1310,9 +1310,9 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     float x = fields[1].GetFloat();
     float y = fields[2].GetFloat();
     float z = fields[3].GetFloat();
-    float or = fields[4].GetFloat();
+    float ort = fields[4].GetFloat();
     int mapid = fields[6].GetUInt16();
     delete result;
-    m_session->GetPlayer()->SendNewWorld(mapid, x, y, z, or);
+    m_session->GetPlayer()->SendNewWorld(mapid, x, y, z, ort);
     return true;
 }
