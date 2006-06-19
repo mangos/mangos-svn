@@ -1122,19 +1122,19 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         if (Player::HasSpell(20550))                        //endurance skill support (+5% to total health)
         {
-            (uint32)exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
+            exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
             b_HP = uint8(exHP * 0.05);
             newHP += b_HP;
         }
         if (Player::HasSpell(20598))                        //Human Spirit skill support (+5% to total spirit)
         {
-            (uint32)exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
+            exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
             b_Spirit = uint8(exSpirit * 0.05);
             newSPI += b_Spirit;
         }
         if (Player::HasSpell(20591))                        //Expansive mind support (+5% to total Intellect)
         {
-            (uint32)exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
+            exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
             b_IQ = uint8(exIQ * 0.05);
             newINT += b_IQ;
         }
@@ -2685,9 +2685,9 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 
         int RepPoints;
         if(HasSpell(20599))                                 //spell : diplomacy
-            (uint32)RepPoints = ((5-dif)*0.20)*110;                 //human gain more 10% rep.
+            RepPoints = ((5-dif)*0.20)*110;                 //human gain more 10% rep.
         else
-            (uint32)RepPoints = ((5-dif)*0.20)*100;
+            RepPoints = ((5-dif)*0.20)*100;
         SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
     }
 }
@@ -5026,7 +5026,7 @@ Item* Player::GetItemByPos( uint16 pos )
 
 Item* Player::GetItemByPos( uint8 bag, uint8 slot )
 {
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END &&  slot == EQUIPMENT_SLOT_START) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
     else
     {
@@ -5062,7 +5062,7 @@ bool Player::IsEquipmentPos( uint16 pos )
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END &&  slot == EQUIPMENT_SLOT_START) )
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END ) )
         return true;
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= INVENTORY_SLOT_BAG_START && slot < INVENTORY_SLOT_BAG_END ) )
         return true;
@@ -5980,7 +5980,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
         pItem->SetSlot( slot );
 
-        if( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END && slot == EQUIPMENT_SLOT_START)
+        if( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
         {
             int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
             SetUInt32Value(VisibleBase, pItem->GetEntry());
@@ -6025,7 +6025,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot > EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END && slot == EQUIPMENT_SLOT_START)
+            if ( slot >= EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END )
             {
                 _ApplyItemMods(pItem, slot, false);
                 for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
@@ -6036,7 +6036,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                         AddItemEnchant(Enchant_id,false);
                     }
                 }
-                if ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END && slot == EQUIPMENT_SLOT_START)
+                if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
                 {
                     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
                     for (int i = VisibleBase; i < VisibleBase + 12; ++i)
@@ -6134,7 +6134,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot > EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END && slot == EQUIPMENT_SLOT_START)
+            if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
             {
                 _ApplyItemMods(pItem, slot, false);
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
