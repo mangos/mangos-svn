@@ -2157,5 +2157,82 @@ bool ChatHandler::HandleQueryNextMailTime(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleFillGraveZones(const char * args)
+{
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM areatrigger_graveyard;");
+    if (!result) return false;
+
+    for (int i=0; i<result->GetRowCount();i++)
+    {
+        Field *fields = result->Fetch();
+        int id = fields[0].GetUInt16();
+        float x = fields[1].GetFloat();
+        float y = fields[2].GetFloat();
+        int mapId = fields[6].GetUInt16();
+        Map *map = MapManager::Instance().GetMap(mapId);
+        if (map)
+        {
+            int zoneId = map->GetZoneId(x,y);
+            sDatabase.PExecute("UPDATE areatrigger_graveyard SET zone=%d WHERE id=%d;",zoneId,id);
+        }
+        //delete fields;
+        result->NextRow();
+    }
+    delete result;
+    return true;
+}
+
+bool ChatHandler::HandleAddTeleCommand(const char * args)
+{
+    if(!*args)
+        return false;
+    QueryResult *result;
+    Player *player=m_session->GetPlayer();
+    if (!player) return false;
+    char *name=(char*)args;
+    result = sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
+    if (result) 
+    {
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, "Teleport location already exists!");
+        m_session->SendPacket( &data );    
+        delete result;
+        return true;
+    }
+    int id;
+    result = sDatabase.Query("SELECT MAX(id) FROM areatrigger_tele;");
+    if (!result) 
+        id = 0;
+    else
+        id = result->Fetch()->GetUInt16()+1;
+    delete result;
+    float x = player->GetPositionX();
+    float y = player->GetPositionY();
+    float z = player->GetPositionZ();
+    float or = player->GetOrientation();
+    int zone = player->GetZoneId();
+    int mapid = player->GetMapId();
+    sDatabase.PExecute("INSERT INTO areatrigger_tele (id,position_x,position_y,position_z,orientation,zone,map,name) VALUES (%d,%f,%f,%f,%f,%d,%d,'%s');",id,x,y,z,or,zone,mapid,name);
+    return true;
+}
+
+bool ChatHandler::HandleDelTeleCommand(const char * args)
+{
+    if(!*args)
+        return false;
+    char *name=(char*)args;
+    QueryResult *result=sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
+    if (!result) 
+    {
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, "Teleport location not found!");
+        m_session->SendPacket( &data );    
+        return true;
+    }
+    delete result;
+    sDatabase.PExecute("DELETE FROM areatrigger_tele WHERE name='%s';",name);
+    return true;
+}
+
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false

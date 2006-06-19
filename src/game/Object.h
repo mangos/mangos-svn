@@ -150,6 +150,7 @@ class MANGOS_DLL_SPEC Object
         const uint32& GetMapId( ) const { return m_mapId; }
 
         uint32 GetZoneId( );
+        uint32 GetAreaId( );
 
         const uint32& GetUInt32Value( const uint16 &index ) const
         {

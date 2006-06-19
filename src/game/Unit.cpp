@@ -817,15 +817,11 @@ uint32 Unit::CalculateDamage(bool ranged)
     uint32 attack_power;
     if(ranged)
     {
-        attack_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
-        dmg = attack_power / 14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
         min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
         max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
     }
     else
     {
-        attack_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
-        dmg = attack_power / 14.0f * GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000;
         min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
         max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
     }
@@ -839,7 +835,7 @@ uint32 Unit::CalculateDamage(bool ranged)
 
     float diff = max_damage - min_damage + 1;
 
-    dmg += float (rand()%(uint32)diff + (uint32)min_damage);
+    dmg = float (rand()%(uint32)diff + (uint32)min_damage);
     return (uint32)dmg;
 }
 
@@ -1048,6 +1044,9 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     if (i != m_Auras.end())
     {
         (*i).second->SetAuraDuration(Aur->GetAuraDuration());
+        if ((*i).second->GetTarget())
+            if ((*i).second->GetTarget()->GetTypeId() == TYPEID_PLAYER )
+                (*i).second->UpdateAuraDuration();
         delete Aur;
     }
     else
