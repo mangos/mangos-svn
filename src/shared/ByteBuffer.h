@@ -251,9 +251,18 @@ class ByteBuffer
         void print_storage()
         {
             printf("STORAGE_SIZE: %u\n", size() );
-            for(uint8 i = 0; i < size(); i++)
+            for(uint32 i = 0; i < size(); i++)
                 printf("%u - ", read<uint8>(i) );
+            printf("\n");
         }
+
+		void textlike()
+		{
+			printf("STORAGE_SIZE: %u\n", size() );
+            for(uint32 i = 0; i < size(); i++)
+                printf("%c", read<uint8>(i) );
+            printf("\n");
+		}
 
         void hexlike()
         {

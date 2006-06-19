@@ -22,6 +22,8 @@
 #include "Master.h"
 #include "Timer.h"
 #include "ScriptCalls.h"
+#include "AddonHandler.h"
+
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
@@ -54,7 +56,10 @@ void CliBroadcast(char*,pPrintf);
 void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
 void CliLoadScripts(char*,pPrintf);
+void CliLoadAddons(char*,pPrintf);
 void CliKick(char*,pPrintf);
+
+
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -73,6 +78,7 @@ const CliCommand Commands[]=
     {CMD("exit"), & CliExit,"Shutdown server"},
     {CMD("version"), & CliVersion,"Display server version"},
     {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
+    {CMD("loadaddons"), & CliLoadAddons,"Load Addons data"},
     {CMD("kick"), & CliKick,"Kick user"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -95,6 +101,19 @@ bool IsItIP(char* banip)
         return false;
 
     return true;
+}
+
+
+void CliLoadAddons(char*command,pPrintf zprintf)
+{
+    char *del;
+    int x=0;
+    while(command[x]==' ')
+        x++;
+    del=&command[x];
+    if (!sAddOnHandler._LoadFromDB()) return;
+    
+    sWorld.SendWorldText("|cffff0000[System Message]:|rAddons reloaded", NULL);
 }
 
 void CliLoadScripts(char*command,pPrintf zprintf)

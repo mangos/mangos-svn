@@ -43,6 +43,8 @@
 #include "GlobalEvents.h"
 #include "BattleGroundMgr.h"
 #include "SystemConfig.h"
+#include "AddonHandler.h"
+#include "zlib/zlib.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -344,6 +346,13 @@ void World::SetInitialWorldSettings()
 
     StartEventSystem();
     sLog.outString( "WORLD: Starting Event System" );
+
+    //Start Addon stuff
+    if (sAddOnHandler._LoadFromDB())
+        sLog.outString( "WORLD: Starting Addon System" );
+    else
+        sLog.outString( "WORLD: Starting Addon System Failed" );
+
 
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days

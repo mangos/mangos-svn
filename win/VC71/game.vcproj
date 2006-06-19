@@ -127,6 +127,12 @@
 			Name="World/Handlers"
 			Filter="">
 			<File
+				RelativePath="..\..\src\game\AddonHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\AddonHandler.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\AuctionHouse.cpp">
 			</File>
 			<File

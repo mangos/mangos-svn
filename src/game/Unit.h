@@ -325,11 +325,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Walkback, bool Run, uint32 Time);
 
         virtual void DealWithSpellDamage(DynamicObject &);
-        virtual void MoveOutOfRange(Player &) {  }
+        virtual void MoveOutOfRange(Player &) {  };
 
         bool isAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return ( m_deathState == DEAD || m_deathState == CORPSE ); };
-        DeathState getDeathState() { return m_deathState; }
+        DeathState getDeathState() { return m_deathState; };
         void setDeathState(DeathState s)
         {
             if (s != ALIVE)

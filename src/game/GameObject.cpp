@@ -109,7 +109,6 @@ void GameObject::Update(uint32 p_time)
             data.Initialize(SMSG_DESTROY_OBJECT);
             data << GetGUID();
             SendMessageToSet(&data, true);
-
             m_respawnTimer = m_respawnDelayTimer;
             break;
     }

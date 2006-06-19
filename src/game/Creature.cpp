@@ -757,11 +757,11 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,cinfo->DisplayID );
 
     SetUInt32Value(UNIT_FIELD_MAXHEALTH,cinfo->maxhealth );
-    //SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
+    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
     SetUInt32Value(UNIT_FIELD_HEALTH,cinfo->maxhealth );
 
     SetUInt32Value(UNIT_FIELD_MAXPOWER2, cinfo->maxmana);   //MAX Mana
-    //SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
+    SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
     SetUInt32Value(UNIT_FIELD_POWER2,cinfo->maxmana );
 
     SetUInt32Value(UNIT_FIELD_LEVEL,cinfo->level);
@@ -817,6 +817,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     m_spells[3] = cinfo->spell4;
 
     SetSpeed( cinfo->speed ) ;
+    
     return true;
 }
 
@@ -833,9 +834,11 @@ bool Creature::LoadFromDB(uint32 guid)
         fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32()))
         return false;
 
+    //health
     SetUInt32Value(UNIT_FIELD_HEALTH,fields[15].GetUInt32());
-    //fix me current mana
-
+    //mana
+    SetUInt32Value(UNIT_FIELD_POWER2,fields[16].GetUInt32());
+    
     SetUInt32Value(UNIT_NPC_FLAGS,fields[19].GetUInt32());
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[20].GetUInt32());
 
