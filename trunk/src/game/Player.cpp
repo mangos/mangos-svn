@@ -264,8 +264,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
 
-    _ApplyStatsMods();
-
     uint32 titem_id;
     uint8 titem_slot;
     uint8 titem_bagIndex;
@@ -3212,14 +3210,20 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         if(slot == EQUIPMENT_SLOT_RANGED)
         {
-            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME + 1, apply ? proto->Delay: 2000);
+            SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, apply ? proto->Delay: 2000);
             typestr = "Range";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
-        else if(slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND)
+        else if(slot==EQUIPMENT_SLOT_MAINHAND)
         {
             SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, apply ? proto->Delay: 2000);
             typestr = "Mainhand";
+            sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
+        }
+        else if(slot==EQUIPMENT_SLOT_OFFHAND)
+        {
+            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, apply ? proto->Delay: 2000);
+            typestr = "Offhand";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
     }
