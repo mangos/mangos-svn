@@ -100,6 +100,7 @@
 #define snprintf _snprintf
 #define atoll __atoi64
 #define vsnprintf _vsnprintf
+#define strdup _strdup
 
 #else
 
