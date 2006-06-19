@@ -119,9 +119,11 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
     ByteBuffer AddOnPacked;
     uLongf AddonRealSize;
     uint32 CurrentPosition;
+    uint32 TempValue;
+    
+    *Source >> TempValue;                                                                       //get real size of the packed structure
 
-    uint32 temp32;
-    *Source >> temp32; AddonRealSize = temp32;                                                  //get real size of the packed structure
+    AddonRealSize = TempValue;                                                                  //temp value becouse ZLIB only excepts uLongf
 
     CurrentPosition = Source->rpos();                                                           //get the position of the pointer in the structure
 
@@ -163,7 +165,7 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
                 sLog.outString("Found new Addon, Name:%s CRC:%x Unknown:%x",AddonNames.c_str(), CRCCHECK, unk6);
             }
             
-            if (CRCCHECK == 0x4C1C776D01LL)                                                       //If addon is Standard addon CRC
+            if (CRCCHECK == 0x4C1C776D01L)                                                       //If addon is Standard addon CRC
             {
                 *Target << uint8(0) << uint8(2) << uint8(1) << uint8(0) << uint32(0);           //value's standard Addons
             }
