@@ -70,7 +70,6 @@ CREATE TABLE `areatrigger_graveyard_zone` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Graveyard Identifier',
   `ghost_map` int(11) unsigned NOT NULL default '0' COMMENT 'Ghost Map Identifier',
   `ghost_zone` int(11) unsigned NOT NULL default '0' COMMENT 'Ghost Zone Identifier',
-  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
 --
