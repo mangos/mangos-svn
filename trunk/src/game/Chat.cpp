@@ -157,6 +157,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "wchange",     3, &ChatHandler::HandleChangeWeather,           "",   NULL },
         { "reload",      3, &ChatHandler::HandleReloadCommand,           "",   NULL },
         { "loadscripts", 3, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
+        { "tele",        1, &ChatHandler::HandleTeleCommand,             "",   NULL },
+        { "addtele",     3, &ChatHandler::HandleAddTeleCommand,          "",   NULL },
+        { "deltele",     3, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
@@ -164,6 +167,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
         { "NewMail",     3, &ChatHandler::HandleSendMailNotice,          "",   NULL },
         { "QNM",         3, &ChatHandler::HandleQueryNextMailTime,       "",   NULL },
+        { "FillGraveZones",3,&ChatHandler::HandleFillGraveZones,         "",   NULL },
         { NULL,          0, NULL,                                        "",   NULL }
     };
 

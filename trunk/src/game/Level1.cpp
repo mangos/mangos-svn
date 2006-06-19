@@ -1269,3 +1269,50 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleTeleCommand(const char * args)
+{
+    QueryResult *result;
+    if(!*args)
+    {
+        result = sDatabase.PQuery("SELECT * FROM areatrigger_tele;");
+        if (!result)
+        {
+            WorldPacket data;
+            FillSystemMessageData(&data, m_session, "Teleport location table is empty!");
+            m_session->SendPacket( &data );
+            return true;
+        }
+        std::string reply="Valid locations are:";
+        for (int i=0; i<result->GetRowCount(); i++)
+        {
+            Field *fields = result->Fetch();
+            reply += " ";
+            reply += fields[7].GetString();
+            result->NextRow();
+        }
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, reply.c_str());
+        m_session->SendPacket( &data );
+        delete result;
+        return true;
+    }
+    char *name = (char*)args;
+    result = sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
+    if (!result) 
+    {
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, "Teleport location not found!");
+        m_session->SendPacket( &data );
+        return true;
+    }
+    Field *fields = result->Fetch();
+    float x = fields[1].GetFloat();
+    float y = fields[2].GetFloat();
+    float z = fields[3].GetFloat();
+    float or = fields[4].GetFloat();
+    int mapid = fields[6].GetUInt16();
+    delete result;
+    m_session->GetPlayer()->SendNewWorld(mapid, x, y, z, or);
+    return true;
+}

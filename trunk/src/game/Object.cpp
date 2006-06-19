@@ -475,6 +475,11 @@ uint32 Object::GetZoneId( )
     return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 }
 
+uint32 Object::GetAreaId( )
+{
+    return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
+}
+
 float Object::GetDistanceSq(const Object* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();

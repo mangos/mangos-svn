@@ -103,7 +103,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             data << uint32( itr->second->getLevel() );
             data << uint32( itr->second->getClass() );
             data << uint32( itr->second->getRace() );
-            data << uint32( itr->second->GetZoneId() );
+            data << uint32( itr->second->GetAreaId() );
         }
     }
 

@@ -515,6 +515,15 @@ void Aura::ApplyModifier(bool apply)
         (*this.*AuraHandler [aura])(apply);
 }
 
+void Aura::UpdateAuraDuration()
+{
+    WorldPacket data;
+    data.Initialize(SMSG_UPDATE_AURA_DURATION);
+    data << (uint8)m_auraSlot << (uint32)m_duration;
+    //((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
+    ((Player *)m_target)->SendDirectMessage(&data);
+}
+
 void Aura::_AddAura()
 {
     if (!m_spellId)
@@ -524,7 +533,6 @@ void Aura::_AddAura()
 
     bool samespell = false;
     uint8 slot = 0xFF, i;
-    uint32 maxduration = m_duration;
     Aura* aura = NULL;
     SpellEntry *spellproto = sSpellStore.LookupEntry(m_spellId);
     aura = m_target->GetAura(m_spellId, spellproto->EffectApplyAuraName[m_effIndex]);
@@ -543,17 +551,10 @@ void Aura::_AddAura()
         if(aura)
         {
             samespell = true;
-            if(i == m_effIndex)
-            {
-                slot = aura->GetAuraSlot();
-                maxduration = (maxduration >= aura->GetAuraDuration()) ? maxduration : aura->GetAuraDuration();
-            }
+            slot = aura->GetAuraSlot();
         }
     }
-    if(m_duration <= maxduration && slot != 0xFF)
-        return;
 
-    WorldPacket data;
     if(!samespell)
     {
         if (IsPositive())
@@ -578,32 +579,23 @@ void Aura::_AddAura()
                 }
             }
         }
-    }
-    if (slot == 0xFF)
-    {
-        return;
-    }
-    m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
-    uint8 flagslot = slot >> 3;
-    uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
-    uint8 value1 = (slot & 7) << 2;
-    value |= ((uint32)AFLAG_SET << value1);
+        uint8 flagslot = slot >> 3;
+        uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
 
-    m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+        uint8 value1 = (slot & 7) << 2;
+        value |= ((uint32)AFLAG_SET << value1);
 
-    uint8 appslot = slot >> 1;
+        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
 
-    if( m_target->GetTypeId() == TYPEID_PLAYER )
-    {
-        data.Initialize(SMSG_UPDATE_AURA_DURATION);
-        data << (uint8)slot << (uint32)maxduration;
-        //((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
-        ((Player *)m_target)->SendDirectMessage(&data);
+        uint8 appslot = slot >> 1;
     }
 
     SetAuraSlot( slot );
+    if( m_target->GetTypeId() == TYPEID_PLAYER )
+        UpdateAuraDuration();
 }
 
 void Aura::_RemoveAura()
