@@ -347,9 +347,14 @@ void World::SetInitialWorldSettings()
     StartEventSystem();
     sLog.outString( "WORLD: Starting Event System" );
 
+
+
+    //load AddonDefault stuff
+    bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
+    sAddOnHandler.SetAddonDefault(temp);
     //Start Addon stuff
     if (sAddOnHandler._LoadFromDB())
-        sLog.outString( "WORLD: Starting Addon System" );
+        sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d", temp );
     else
         sLog.outString( "WORLD: Starting Addon System Failed" );
 

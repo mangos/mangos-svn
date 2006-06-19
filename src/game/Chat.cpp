@@ -324,7 +324,7 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     return 1;
 }
 
-void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint32 type, uint32 language, const char *channelName, const char *message ) const
+void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, const char *message ) const
 {
 
     uint32 messageLength = strlen((char*)message) + 1;

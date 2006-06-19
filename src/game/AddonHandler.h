@@ -25,9 +25,9 @@
 
 struct AddOns
 {
-	std::string Name;
-	uint64 CRC;
-	bool Enabled;
+    std::string Name;
+    uint64 CRC;
+    bool Enabled;
 };
 
 class AddonHandler
@@ -40,15 +40,18 @@ class AddonHandler
         void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);
         bool GetAddonStatus(AddOns* Target, bool* Allowed);
         
-		void _SaveToDB(void);
-		bool _LoadFromDB(void);
-		void _AddAddon(AddOns*);
-		uint8 _removeAddon(std::string*);
-
+        void _SaveToDB(void);
+        bool _LoadFromDB(void);
+        void _AddAddon(AddOns*);
+        uint8 _removeAddon(std::string*);
+        void SetAddonDefault(bool Value) {m_Addon_Default = Value;}
+        bool GetAddonDefault(void) {return m_Addon_Default;}
+        
     private:
-		
-		//! Addon data
-		std::list<AddOns*> m_Addon_data; // contains all the addon names and crc checks
+        
+        //! Addon data
+        std::list<AddOns*> m_Addon_data; // contains all the addon names and crc checks
+        bool m_Addon_Default;
 };
 #define sAddOnHandler MaNGOS::Singleton<AddonHandler>::Instance()
 #endif
