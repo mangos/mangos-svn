@@ -204,10 +204,6 @@ void Spell::FillTargetMap()
                                                             // EnchantHeldItem
             else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
                                                             // LearnPetSpell
-            else if(m_spellInfo->Effect[i] == 57)
-            {
-                SetTargetMap(i,5,tmpUnitMap,tmpItemMap,tmpGOMap);
-            }
         }
 
         m_targetUnits[i] = tmpUnitMap;
@@ -658,6 +654,7 @@ void Spell::SendSpellStart()
     data << m_spellInfo->Id;
     data << cast_flags;
     data << uint32(m_timer);
+    data << uint16(0x2);
 
     m_targets.write( &data );
     ((Player*)m_caster)->SendMessageToSet(&data, true);
