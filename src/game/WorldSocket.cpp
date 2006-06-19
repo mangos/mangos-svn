@@ -207,9 +207,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         recvPacket >> account;
         recvPacket >> clientSeed;
         recvPacket.read(digest, 20);
-        
-        //Create Addon Packet
-        sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
     }
     catch(ByteBuffer::error &)
     {
@@ -301,9 +298,15 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     packet << uint8( 0x02 );
     packet << uint32( 0x0 );
 
+    SendPacket(&packet);
+
     
 
     //! Handled Addons
+
+    //Create Addon Packet
+    sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
+
     SendPacket(&SendAddonPacked);
 
 
