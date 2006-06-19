@@ -2066,46 +2066,34 @@ void Player::DeathDurabilityLoss(double percent)
 
 void Player::RepopAtGraveyard()
 {
-    float closestX = 0, closestY = 0, closestZ = 0;
-
     GraveyardTeleport *ClosestGrave = objmgr.GetClosestGraveYard( m_positionX, m_positionY, m_positionZ, GetMapId(), GetTeam() );
 
     if(ClosestGrave)
     {
-        closestX = ClosestGrave->X;
-        closestY = ClosestGrave->Y;
-        closestZ = ClosestGrave->Z;
-        delete ClosestGrave;
-    }
-
-    if(closestX != 0 && closestY != 0 && closestZ != 0)
-    {
 
         // we should be able to make 2 kinds of teleport after death
-        // near if in the same zoneid and far if in different zoneid
-
+        // near if in the same mapid and far if in different mapid
         WorldPacket data;
 
-        // teleport near
-        //SetDontMove(true);
-        //MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
+        if(ClosestGrave->MapId == GetMapId()) 
+        {
+            // teleport near
 
-        BuildTeleportAckMsg(&data, closestX, closestY, closestZ, 0.0);
-        GetSession()->SendPacket(&data);
+            BuildTeleportAckMsg(&data, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
+            GetSession()->SendPacket(&data);
 
-        SetPosition( closestX, closestY, closestZ, 0.0);
-        BuildHeartBeatMsg(&data);
-        SendMessageToSet(&data, true);
-        //RemoveFromWorld();
-        //MapManager::Instance().GetMap(GetMapId())->Add(this);
-        //SetDontMove(false);
-        //SaveToDB();
+            SetPosition( ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
+            BuildHeartBeatMsg(&data);
+            SendMessageToSet(&data, true);
+        }
+        else
+        {
+            // teleport far
+            SendNewWorld(ClosestGrave->MapId, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
+        }
 
-        // teleport far
-        //SendNewWorld(GetMapId(), closestX, closestY, closestZ, 0.0);
-
+        delete ClosestGrave;
     }
-
 }
 
 void Player::JoinedChannel(Channel *c)

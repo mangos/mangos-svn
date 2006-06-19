@@ -47,7 +47,6 @@ CREATE TABLE `areatrigger_graveyard` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `orientation` float NOT NULL default '0',
-  `zone` int(11) unsigned NOT NULL default '0' COMMENT 'Zone Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `faction` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`)
@@ -57,11 +56,30 @@ CREATE TABLE `areatrigger_graveyard` (
 -- Dumping data for table `areatrigger_graveyard`
 --
 
-
 /*!40000 ALTER TABLE `areatrigger_graveyard` DISABLE KEYS */;
 LOCK TABLES `areatrigger_graveyard` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `areatrigger_graveyard` ENABLE KEYS */;
+
+--
+-- Table structure for table `areatrigger_graveyard_zone`
+--
+
+DROP TABLE IF EXISTS `areatrigger_graveyard_zone`;
+CREATE TABLE `areatrigger_graveyard_zone` (
+  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Graveyard Identifier',
+  `ghost_map` int(11) unsigned NOT NULL default '0' COMMENT 'Ghost Map Identifier',
+  `ghost_zone` int(11) unsigned NOT NULL default '0' COMMENT 'Ghost Zone Identifier',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
+
+--
+-- Dumping data for table `areatrigger_graveyard`
+--
+
+/*!40000 ALTER TABLE `areatrigger_graveyard_zone` DISABLE KEYS */;
+LOCK TABLES `areatrigger_graveyard_zone` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `areatrigger_graveyard_zone` ENABLE KEYS */;
 
 --
 -- Table structure for table `areatrigger_involvedrelation`

@@ -614,12 +614,13 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     // search in same zone first
     uint32 zoneId = MapManager::Instance().GetMap(MapId)->GetZoneId(x,y);
 
-    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `areatrigger_graveyard` WHERE `map` = %u AND `zone` = %u AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, zoneId, team);
+    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` WHERE `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, zoneId, team);
 
-    // or in any zone if fail
+    // or in any nearest zone at map if fail
     if(! result)
-        result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z` FROM `areatrigger_graveyard` WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, team);
+        result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard` WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, team);
 
+    // or not teleport ghost if fail
     if( ! result )
         return NULL;
 
@@ -629,7 +630,8 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     pgrave->X = fields[1].GetFloat();
     pgrave->Y = fields[2].GetFloat();
     pgrave->Z = fields[3].GetFloat();
-    pgrave->MapId = MapId;
+    pgrave->orientation = fields[4].GetFloat();
+    pgrave->MapId = fields[5].GetUInt32();
 
     delete result;
     return pgrave;
