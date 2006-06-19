@@ -48,11 +48,11 @@ uint8 AddonHandler::_removeAddon(std::string* Name)
             //remove addon, from mem and from sql
             sDatabase.PExecute("DELETE FROM `game_addons` WHERE `addonname` = '%s'",(*i)->Name.c_str());
             m_Addon_data.remove(*i);
-            return 0;
+            return 1;
         }
     }
-    //if name does not exists return -1
-    return -1;
+    //if name does not exists return 0
+    return 0;
 }
 
 void AddonHandler::_AddAddon(AddOns* newaddon)
@@ -165,7 +165,7 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
                 sLog.outString("Found new Addon, Name:%s CRC:%x Unknown:%x",AddonNames.c_str(), CRCCHECK, unk6);
             }
             
-            if (CRCCHECK == 0x4C1C776D01L)                                                       //If addon is Standard addon CRC
+            if (CRCCHECK == 0x4C1C776D01LL)                                                      //If addon is Standard addon CRC
             {
                 *Target << uint8(0) << uint8(2) << uint8(1) << uint8(0) << uint32(0);           //value's standard Addons
             }
