@@ -25,6 +25,7 @@ struct GraveyardTeleport
     float X;
     float Y;
     float Z;
+    float orientation;
 
     uint32 MapId;
 
