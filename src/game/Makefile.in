@@ -65,7 +65,7 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libgame_a_AR = $(AR) $(ARFLAGS)
 libgame_a_LIBADD =
-am_libgame_a_OBJECTS = AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
+am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
 	Bag.$(OBJEXT) Base.$(OBJEXT) BattleGround.$(OBJEXT) \
 	BattleGroundHandler.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
 	Channel.$(OBJEXT) ChannelHandler.$(OBJEXT) \
@@ -261,6 +261,7 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 noinst_LIBRARIES = libgame.a
 libgame_a_SOURCES = \
+	AddonHandler.cpp \
 	AggressorAI.cpp \
 	AuctionHouse.cpp \
 	Bag.cpp \
@@ -492,6 +493,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AddonHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AggressorAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AuctionHouse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Bag.Po@am__quote@

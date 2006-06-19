@@ -19,6 +19,7 @@ INCLUDES += -I$(srcdir) -I$(srcdir)/../../dep/include -I$(top_builddir)/src/shar
 noinst_LIBRARIES = libgame.a
 
 libgame_a_SOURCES = \
+	AddonHandler.cpp \
 	AggressorAI.cpp \
 	AuctionHouse.cpp \
 	Bag.cpp \

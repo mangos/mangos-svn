@@ -117,10 +117,11 @@ bool AddonHandler::GetAddonStatus(AddOns* Target, bool* Allowed)
 void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset)
 {
     ByteBuffer AddOnPacked;
-    uint32 AddonRealSize;
+    uLongf AddonRealSize;
     uint32 CurrentPosition;
 
-    *Source >> AddonRealSize;                                                                   //get real size of the packed structure
+    uint32 temp32;
+    *Source >> temp32; AddonRealSize = temp32;                                                  //get real size of the packed structure
 
     CurrentPosition = Source->rpos();                                                           //get the position of the pointer in the structure
 
