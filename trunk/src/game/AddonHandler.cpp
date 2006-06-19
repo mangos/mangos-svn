@@ -23,6 +23,7 @@
 #include "Policies/SingletonImp.h"
 #include "zlib/zlib.h"
 
+//TODO: Make level3 commands for this. .Loadaddons .Saveaddons .loadaddondefault
 
 INSTANTIATE_SINGLETON_1( AddonHandler );
 
@@ -38,7 +39,7 @@ AddonHandler::~AddonHandler()
 
 uint8 AddonHandler::_removeAddon(std::string* Name)
 {
-    sLog.outDebug("Remove addon:%s",*Name);
+    sLog.outDebug("Remove addon:%s",(*Name).c_str());
     for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
     {
         //if name exists remove it and return 0

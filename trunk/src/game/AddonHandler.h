@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "WorldPacket.h"
+#include "Config/ConfigEnv.h"
 
 struct AddOns
 {
@@ -37,15 +38,16 @@ class AddonHandler
         AddonHandler();
         ~AddonHandler();
        
-        void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);
-        bool GetAddonStatus(AddOns* Target, bool* Allowed);
+        void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);                       //built addon packet
+        bool GetAddonStatus(AddOns* Target, bool* Allowed);                                                         //get addon status, it checks the name.
         
         void _SaveToDB(void);
         bool _LoadFromDB(void);
         void _AddAddon(AddOns*);
         uint8 _removeAddon(std::string*);
-        void SetAddonDefault(bool Value) {m_Addon_Default = Value;}
-        bool GetAddonDefault(void) {return m_Addon_Default;}
+        void SetAddonDefault(bool Value) { m_Addon_Default = Value; }
+        bool GetAddonDefault(void) { return m_Addon_Default; }
+        void LoadAddonDefault(void) { SetAddonDefault(sConfig.GetBoolDefault("AddonDefault", 1)); }                 //load the default value from Conf file
         
     private:
         
