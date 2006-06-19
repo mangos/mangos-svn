@@ -2209,10 +2209,10 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     float x = player->GetPositionX();
     float y = player->GetPositionY();
     float z = player->GetPositionZ();
-    float or = player->GetOrientation();
+    float ort = player->GetOrientation();
     int zone = player->GetZoneId();
     int mapid = player->GetMapId();
-    sDatabase.PExecute("INSERT INTO areatrigger_tele (id,position_x,position_y,position_z,orientation,zone,map,name) VALUES (%d,%f,%f,%f,%f,%d,%d,'%s');",id,x,y,z,or,zone,mapid,name);
+    sDatabase.PExecute("INSERT INTO areatrigger_tele (id,position_x,position_y,position_z,orientation,zone,map,name) VALUES (%d,%f,%f,%f,%f,%d,%d,'%s');",id,x,y,z,ort,zone,mapid,name);
     return true;
 }
 

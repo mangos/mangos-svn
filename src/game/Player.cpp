@@ -1120,19 +1120,19 @@ void Player::GiveXP(uint32 xp, const uint64 &guid)
 
         if (Player::HasSpell(20550))                        //endurance skill support (+5% to total health)
         {
-            exHP = (uint32)newHP / 1.05;                    //must remove previous bonus, so stat wouldn't grow toomuch
+            exHP = (uint32)(newHP / 1.05);                    //must remove previous bonus, so stat wouldn't grow toomuch
             b_HP = uint8(exHP * 0.05);
             newHP += b_HP;
         }
         if (Player::HasSpell(20598))                        //Human Spirit skill support (+5% to total spirit)
         {
-            exSpirit = (uint32)newSPI / 1.05;               //must remove previous bonus, so stat wouldn't grow toomuch
+            exSpirit = (uint32)(newSPI / 1.05);               //must remove previous bonus, so stat wouldn't grow toomuch
             b_Spirit = uint8(exSpirit * 0.05);
             newSPI += b_Spirit;
         }
         if (Player::HasSpell(20591))                        //Expansive mind support (+5% to total Intellect)
         {
-            exIQ = (uint32)newINT / 1.05;                   //must remove previous bonus, so stat wouldn't grow toomuch
+            exIQ = (uint32)(newINT / 1.05);                   //must remove previous bonus, so stat wouldn't grow toomuch
             b_IQ = uint8(exIQ * 0.05);
             newINT += b_IQ;
         }
@@ -2683,9 +2683,9 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
 
         int RepPoints;
         if(HasSpell(20599))                                 //spell : diplomacy
-            RepPoints = ((5-dif)*0.20)*110;                 //human gain more 10% rep.
+            RepPoints = (uint32)(((5-dif)*0.20)*110);                 //human gain more 10% rep.
         else
-            RepPoints = ((5-dif)*0.20)*100;
+            RepPoints = (uint32)(((5-dif)*0.20)*100);
         SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
     }
 }
