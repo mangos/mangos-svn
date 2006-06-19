@@ -23,15 +23,15 @@
 
 enum AURA_FLAGS
 {
-    AFLAG_EMPTY = 0x0,
-    AFLAG_SET = 0x9
+    AFLAG_EMPTY             = 0x0,
+    AFLAG_SET               = 0x9
 };
 
 //m_schoolAbsorb
 enum DAMAGE_ABSORB_TYPE
 {
-    ALL_DAMAGE_ABSORB = -2,
-    ONLY_MAGIC_ABSORB  = -1,
+    ALL_DAMAGE_ABSORB       = -2,
+    ONLY_MAGIC_ABSORB       = -1,
 };
 
 enum MOD_TYPES

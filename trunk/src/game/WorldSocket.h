@@ -44,6 +44,7 @@ class WorldSocket : public TcpSocket
     protected:
         void _HandleAuthSession(WorldPacket& recvPacket);
         void _HandlePing(WorldPacket& recvPacket);
+        void SendAuthWaitQue(uint32 PlayersInQue);
 
         static uint32 _GetSeed();
 

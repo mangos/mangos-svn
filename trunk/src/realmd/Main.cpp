@@ -42,6 +42,7 @@ int usage(const char *prog)
 {
     sLog.outString("Usage: \n %s -c config_file [%s]",prog,_MANGOSD_CONFIG);
     exit(1);
+    return 0;
 }
 
 int main(int argc, char **argv)

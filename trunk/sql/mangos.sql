@@ -70,6 +70,7 @@ CREATE TABLE `areatrigger_graveyard_zone` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Graveyard Identifier',
   `ghost_map` int(11) unsigned NOT NULL default '0' COMMENT 'Ghost Map Identifier',
   `ghost_zone` int(11) unsigned NOT NULL default '0' COMMENT 'Ghost Zone Identifier',
+  PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
 --
@@ -821,6 +822,20 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
+
+
+--
+-- Table structure for game_addons
+--
+CREATE TABLE IF EXISTS `game_addons` (
+  `addonname` char(255) NOT NULL default '',
+  `crc` bigint(20) NOT NULL default '0',
+  `enabled` tinyint(4) NOT NULL default '0',
+  PRIMARY KEY  (`addonname`),
+  KEY `addonname` (`addonname`,`crc`,`enabled`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Addon system';
+
+
 
 --
 -- Table structure for table `game_corpse`

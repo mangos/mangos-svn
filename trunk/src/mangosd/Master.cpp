@@ -32,6 +32,7 @@
 #include <signal.h>
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
+#include "AddonHandler.h"
 
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
@@ -179,6 +180,10 @@ bool Master::Run()
         //h.Select(0, 100000);
         h.Select(0, socketSelecttime);
     }
+
+    sLog.outString( "WORLD: Saving Addons" );
+    sAddOnHandler._SaveToDB();
+
 
     _UnhookSignals();
 

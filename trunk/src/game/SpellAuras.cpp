@@ -938,7 +938,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
         m_isPeriodic = true;
         m_isTrigger = true;
         m_periodicTimer = m_modifier->periodictime;
-
     }
     else
     {
@@ -1698,6 +1697,7 @@ void Aura::HandleWaterBreathing(bool apply)
 void Aura::HandleModRegen(bool apply)                       // eating
 {
     apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    // add event
 }
 
 void Aura::HandleModPowerRegen(bool apply)                  // drinking
