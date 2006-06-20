@@ -119,6 +119,11 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     //!in lava check
     if ((z < (posz - (float)0)) && (flag1 & 0x02))
         GetPlayer()->m_isunderwater|= 0x80;
+
+    if(recv_data.GetOpcode() == MSG_MOVE_STOP_SWIM && GetPlayer()->m_form == FORM_AQUA)
+        GetPlayer()->RemoveAurasDueToSpell(GetPlayer()->m_ShapeShiftForm);
+    if(recv_data.GetOpcode() == MSG_MOVE_START_SWIM && GetPlayer()->m_form > 0 && GetPlayer()->m_form != FORM_AQUA)
+        GetPlayer()->RemoveAurasDueToSpell(GetPlayer()->m_ShapeShiftForm);
 }
 
 void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)

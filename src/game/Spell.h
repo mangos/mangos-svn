@@ -353,6 +353,7 @@ class Spell
         void EffectLearnSpell(uint32 i);
         void EffectDispel(uint32 i);
         void EffectSummonWild(uint32 i);
+        void EffectTeleUnitsFaceCaster(uint32 i);
         void EffectLearnSkill(uint32 i);
         void EffectTradeSkill(uint32 i);
         void EffectEnchantItemPerm(uint32 i);

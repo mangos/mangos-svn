@@ -52,7 +52,7 @@ class Aura
         void HandleNULL(bool Apply);
         void HandlePeriodicDamage(bool apply);
         void HandleModConfuse(bool apply);
-        void HandleFear(bool Apply);
+        void HandleModFear(bool Apply);
         void HandlePeriodicHeal(bool apply);
         void HandleModAttackSpeed(bool apply);
         void HandleModThreat(bool apply);
@@ -103,6 +103,7 @@ class Aura
         void HandleChannelDeathItem(bool apply);
         void HandleAuraModAttackPower(bool Apply);
         void HandleAuraTransform(bool Apply);
+        void HandleAuraModIncreaseSwimSpeed(bool Apply);
         void HandleAuraManaShield(bool Apply);
         void HandleAuraSchoolAbsorb(bool Apply);
         void HandleReflectSpellsSchool(bool Apply);
