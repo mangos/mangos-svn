@@ -83,9 +83,9 @@ uint32 Quest::XPValue( Player *pPlayer )
                 return (uint32)(fullxp * 0.8);
             else if( pLevel == qLevel +  7 )
                 return (uint32)(fullxp * 0.6);
-            else if( pLevel == qLevel +  6 )
+            else if( pLevel == qLevel +  8 )
                 return (uint32)(fullxp * 0.4);
-            else if( pLevel == qLevel +  6 )
+            else if( pLevel == qLevel +  9 )
                 return (uint32)(fullxp * 0.2);
             else
                 return (uint32)(fullxp * 0.1);
