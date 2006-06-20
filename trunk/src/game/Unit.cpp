@@ -282,13 +282,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         if ((pVictim->GetTypeId() == TYPEID_UNIT) )
             ((Creature*)pVictim)->generateLoot();
 
-        // If a player kill some one call honor calcules
-        // TODO: We need to count dishonorable kills for civilian creatures.
-
-        DEBUG_LOG("SET JUST_DIED");
-        pVictim->setDeathState(JUST_DIED);
-        //if(m_currentSpell && !m_currentSpell->IsAreaAura() && m_currentSpell->m_targets.getUnitTarget()->GetGUID() == pVictim->GetGUID())
-        //    m_currentSpell->cancel();
+		DEBUG_LOG("SET JUST_DIED");
+		pVictim->setDeathState(JUST_DIED);
 
         uint64 attackerGuid, victimGuid;
         attackerGuid = GetGUID();
