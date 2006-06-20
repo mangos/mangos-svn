@@ -1502,15 +1502,244 @@ bool ChatHandler::HandleUnAuraCommand(const char* args)
     return true;
 }
 
+// Get graveyard 'id' near (50f) from current player position, true if found
+bool ChatHandler::GetCurrentGraveId(uint32& id )
+{
+    Player* player = m_session->GetPlayer();
+
+    QueryResult *result = sDatabase.PQuery(
+        "SELECT `id` FROM `areatrigger_graveyard` "
+        "WHERE  `map` = %u AND (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) < 50*50;", 
+        player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
+    
+    if(result) 
+    {
+        Field *fields = result->Fetch();
+        id = fields[0].GetUInt32();
+        
+        delete result;
+
+        return true;
+    }
+    else
+        return false;
+}
+
+// Link graveyard 'g_id' with current zone
+void ChatHandler::LinkGraveIfNeed(uint32 g_id)
+{
+    WorldPacket data;
+    char buf[120];
+
+    Player* player = m_session->GetPlayer();
+
+    QueryResult *result = sDatabase.PQuery(
+        "SELECT `id` FROM `areatrigger_graveyard_zone` WHERE `id` = %u AND `ghost_map` = %u AND `ghost_zone` =%u;", 
+        g_id,player->GetMapId(),player->GetZoneId());
+
+
+    if(result)
+    {
+        delete result;
+
+        sprintf((char*)buf,"Graveyard #%u already linked to zone #%u (current).", g_id,player->GetZoneId());
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket(&data);
+    }
+    else
+    {
+        sDatabase.PExecute("INSERT INTO `areatrigger_graveyard_zone` ( `id`,`ghost_map`,`ghost_zone`) VALUES ('%u', '%u', '%u');",
+            g_id,player->GetMapId(),player->GetZoneId());
+
+        sprintf((char*)buf,"Graveyard #%u linked to zone #%u (current).", g_id,player->GetZoneId());
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket(&data);
+    }
+}
+
 bool ChatHandler::HandleAddGraveCommand(const char* args)
 {
 
+    if(!*args)
+        return false;
+
+    uint32 g_team;
+    uint32 g_id;
+
+    if (strncmp((char*)args,"any",4)==0)
+        g_team = 0;
+    else if (strncmp((char*)args,"horde",6)==0)
+        g_team = HORDE;
+    else if (strncmp((char*)args,"alliance",9)==0)
+        g_team = ALLIANCE;
+    else
+        return false;
+
+    WorldPacket data;
+
     Player* player = m_session->GetPlayer();
-    sDatabase.PExecute("INSERT INTO `areatrigger_graveyard` ( `position_x`,`position_y`,`position_z`,`zone`,`map`) VALUES ('%f', '%f', '%f', '%u', '%u');",
-        player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetZoneId(), player->GetMapId() );
+
+    // Is this update request?
+    if(GetCurrentGraveId(g_id))
+    {
+        sDatabase.PExecute(
+            "UPDATE `areatrigger_graveyard` "
+            "SET `position_x` = '%f',`position_y` = '%f',`position_z` = '%f',`orientation` = '%f', `map` = %u, `faction` = %u "
+            "WHERE `id` = %u ;" ,
+            player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), player->GetMapId() , g_team, g_id );
+
+        char buf[100];
+        sprintf((char*)buf,"Graveyard #%u updated (coordinates, orientation and faction).", g_id);
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket(&data);
+    }
+    else
+    {
+        // new graveyard 
+        sDatabase.PExecute("INSERT INTO `areatrigger_graveyard` ( `position_x`,`position_y`,`position_z`,`orientation`,`map`,`faction`) "
+            "VALUES ('%f', '%f', '%f', '%f', '%u', '%u');",
+            player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), player->GetMapId(), g_team );
+
+        if(GetCurrentGraveId(g_id))
+        {
+            char buf[100];
+            sprintf((char*)buf,"Graveyard #%u added (coordinates, orientation and faction).", g_id);
+            FillSystemMessageData(&data, m_session, buf);
+            m_session->SendPacket(&data);
+        }
+        else
+        {
+            FillSystemMessageData(&data, m_session, "Graveyard NOT added. Unknown error.");
+            m_session->SendPacket(&data);
+            return true; 
+        }
+    }
+
+    LinkGraveIfNeed(g_id);
 
     return true;
 }
+
+bool ChatHandler::HandleLinkGraveCommand(const char* args)
+{
+
+    if(!*args)
+        return false;
+
+    char* px = strtok((char*)args, " ");
+    if (!px)
+        return false;
+
+    uint32 g_id = (uint32)atoi(px);
+
+    Player* player = m_session->GetPlayer();
+
+    WorldPacket data;
+
+    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `areatrigger_graveyard` WHERE `id` = %u;",g_id);
+
+    if(!result)
+    {
+        char buf[120];
+        sprintf((char*)buf,"Graveyard #%u not exist.", g_id);
+        FillSystemMessageData(&data, m_session, buf );
+        m_session->SendPacket(&data);
+        return true;
+    }
+    else
+        delete result;
+
+    LinkGraveIfNeed(g_id);
+
+    return true;
+}
+
+bool ChatHandler::HandleNearGraveCommand(const char* args)
+{
+    uint32 g_team;
+
+    QueryResult *result;
+
+    if(!*args)
+        g_team = ~uint32(0);
+    else if (strncmp((char*)args,"any",4)==0)
+        g_team = 0;
+    else if (strncmp((char*)args,"horde",6)==0)
+        g_team = HORDE;
+    else if (strncmp((char*)args,"alliance",9)==0)
+        g_team = ALLIANCE;
+    else
+        return false;
+
+    Player* player = m_session->GetPlayer();
+
+    WorldPacket data;
+
+    if(g_team == ~uint32(0))
+    {
+        result = sDatabase.PQuery(
+            "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`areatrigger_graveyard`.`id`,`faction` "
+            "FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
+            "WHERE  `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
+            "ORDER BY `distance` ASC LIMIT 1;", 
+            player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetZoneId());
+    }else{
+        result = sDatabase.PQuery(
+            "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`areatrigger_graveyard`.`id`,`faction` "
+            "FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
+            "WHERE  `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
+            "        AND (`faction` = %u OR `faction` = 0 ) "
+            "ORDER BY `distance` ASC LIMIT 1;", 
+            player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetZoneId(),g_team);
+    }
+
+    if(result)
+    {
+        Field *fields = result->Fetch();
+        uint32 g_id = fields[1].GetUInt32();
+        uint32 g_team = fields[2].GetUInt32();
+
+        std::string team_name = "invalid team, please fix DB";
+
+        if(g_team == 0)
+            team_name = "any";
+        else if(g_team == HORDE)
+            team_name = "horde";
+        else if(g_team == ALLIANCE)
+            team_name = "alliance";
+
+        delete result;
+
+        char buf[100];
+        sprintf((char*)buf,"Graveyard #%u (faction: %s) is nearest from linked to zone #%u.", g_id,team_name.c_str(),player->GetZoneId());
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket(&data);
+    }
+    else
+    {
+
+        std::string team_name;
+
+        if(g_team == 0)
+            team_name = "any";
+        else if(g_team == HORDE)
+            team_name = "horde";
+        else if(g_team == ALLIANCE)
+            team_name = "alliance";
+
+        char buf[100];
+        if(g_team == ~uint32(0))
+            sprintf((char*)buf,"Zone #%u not have linked graveyards.", player->GetZoneId());
+        else
+            sprintf((char*)buf,"Zone #%u not have linked graveyards for faction: %s.", player->GetZoneId(),team_name.c_str());
+
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket(&data);
+    }
+
+    return true;
+}
+
 
 bool ChatHandler::HandleAddSHCommand(const char *args)
 {
@@ -2154,31 +2383,6 @@ bool ChatHandler::HandleQueryNextMailTime(const char* args)
     Data.Initialize(MSG_QUERY_NEXT_MAIL_TIME);
     Data << uint32(flag);
     m_session->SendPacket(&Data);
-    return true;
-}
-
-bool ChatHandler::HandleFillGraveZones(const char * args)
-{
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM areatrigger_graveyard;");
-    if (!result) return false;
-
-    for (int i=0; i<result->GetRowCount();i++)
-    {
-        Field *fields = result->Fetch();
-        int id = fields[0].GetUInt16();
-        float x = fields[1].GetFloat();
-        float y = fields[2].GetFloat();
-        int mapId = fields[6].GetUInt16();
-        Map *map = MapManager::Instance().GetMap(mapId);
-        if (map)
-        {
-            int zoneId = map->GetZoneId(x,y);
-            sDatabase.PExecute("UPDATE areatrigger_graveyard SET zone=%d WHERE id=%d;",zoneId,id);
-        }
-        //delete fields;
-        result->NextRow();
-    }
-    delete result;
     return true;
 }
 

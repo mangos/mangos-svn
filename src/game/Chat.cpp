@@ -139,6 +139,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "addweapon",   3, &ChatHandler::HandleAddWeaponCommand,        "",   NULL },
         { "allowmove",   3, &ChatHandler::HandleAllowMovementCommand,    "",   NULL },
         { "addgrave",    3, &ChatHandler::HandleAddGraveCommand,         "",   NULL },
+        { "linkgrave",   3, &ChatHandler::HandleLinkGraveCommand,        "",   NULL },
+        { "neargrave",   3, &ChatHandler::HandleNearGraveCommand,        "",   NULL },
         { "addsh",       3, &ChatHandler::HandleAddSHCommand,            "",   NULL },
         { "transport",   3, &ChatHandler::HandleSpawnTransportCommand,   "",   NULL },
         { "explorecheat",3, &ChatHandler::HandleExploreCheatCommand,     "",   NULL },
@@ -167,7 +169,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
         { "NewMail",     3, &ChatHandler::HandleSendMailNotice,          "",   NULL },
         { "QNM",         3, &ChatHandler::HandleQueryNextMailTime,       "",   NULL },
-        { "FillGraveZones",3,&ChatHandler::HandleFillGraveZones,         "",   NULL },
         { NULL,          0, NULL,                                        "",   NULL }
     };
 
