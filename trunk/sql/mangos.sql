@@ -48,7 +48,7 @@ CREATE TABLE `areatrigger_graveyard` (
   `position_z` float NOT NULL default '0',
   `orientation` float NOT NULL default '0',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `faction` int(11) unsigned NOT NULL default '0',
+  `faction` int(11) unsigned NOT NULL default '0'
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
@@ -660,7 +660,9 @@ INSERT INTO `command` VALUES ('taxicheat',1,'Syntax: .taxicheat\r\n\r\nReveal al
 INSERT INTO `command` VALUES ('worldport',3,'Syntax: .worldport position_x position_y position_z\r\n\r\nTeleport to the given coordinates on the current continent.');
 INSERT INTO `command` VALUES ('addweapon',3,'Not yet implemented.');
 INSERT INTO `command` VALUES ('allowmove',3,'Syntax: .allowmove\r\n\r\nEnable or disable movement for the selected creature.');
-INSERT INTO `command` VALUES ('addgrave',3,'Syntax: .addgrave\r\n\r\nAdd a graveyard at your current location.');
+INSERT INTO `command` VALUES ('addgrave',3,'Syntax: .addgrave (any|alliance|horde)\r\n\r\nAdd a graveyard at your current location for `any` or specific faction. If in radius 50f already exist graveyard then instead creating new this graveyard coordinates, orientation and faction updated. Current zone automaticly linked to created graveyard.');
+INSERT INTO `command` VALUES ('linkgrave',3,'Syntax: .linkgrave #graveyard_id\r\n\r\nLink current zone to graveyard. This let character ghost from zone teleport to graveyard after die if graveyard is nearest from linked to zone and accept ghost of this faction. From instance ghosts teleported to nearest linked graveyard with ignoring ghost faction.');
+INSERT INTO `command` VALUES ('neargrave',3,'Syntax: .neargrave [any|alliance|horde]\r\n\r\nFind nearest graveyard linked to zone (or only nearest from accepts any, alliance, horde faction ghosts).');
 INSERT INTO `command` VALUES ('addsh',3,'Syntax: .addsh\r\n\r\nAdd a spirit healer to your current location.\r\n\r\nNot yet implemented.');
 INSERT INTO `command` VALUES ('transport',3,'Not yet implemented.');
 INSERT INTO `command` VALUES ('explorecheat',3,'Syntax: .explorecheat\r\n\r\nReveal all maps for the selected character.');

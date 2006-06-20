@@ -611,14 +611,33 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
 GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
 
-    // search in same zone first
+    // search for zone associated closest graveyard
     uint32 zoneId = MapManager::Instance().GetMap(MapId)->GetZoneId(x,y);
 
-    QueryResult *result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` WHERE `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, zoneId, team);
+    // Simulate std. algorithm:
+    //   found some graveyard associated to (ghost_zone,ghost_map) 
+    //
+    //   if mapId == graveyard.mapId (ghost in plain zone or city) and search graveyard at same map
+    //     then check `faction` 
+    //   if mapId != graveyard.mapId (ghost in instance) and search ANY graveyard associated
+    //     then skip check `faction` 
+    QueryResult *result = sDatabase.PQuery(
+        "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,"
+        "       `position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
+        "WHERE  `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
+        "        AND (`ghost_map` <> `map` OR `faction` = %u OR `faction` = 0 ) "
+        "ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, zoneId, team);
 
-    // or in any nearest zone at map if fail
+    // or any nearest freandly graveyard at map (not for instance)
     if(! result)
-        result = sDatabase.PQuery("SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard` WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, team);
+    {
+        sLog.outError("DB incomplite: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
+        result = sDatabase.PQuery(
+            "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`, "
+            "       `position_x`,`position_y`,`position_z`, `orientation`, `map` "
+            "FROM `areatrigger_graveyard` "
+            "WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, team);
+    }
 
     // or not teleport ghost if fail
     if( ! result )

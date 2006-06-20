@@ -3073,9 +3073,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     int32 val;
     std::string typestr;
-    std::string applystr = "Add";
-    if(!apply)
-        applystr = "Remove";
+    std::string applystr = apply ? "Add" : "Remove";
     for (int i = 0; i < 10; i++)
     {
         val = proto->ItemStat[i].ItemStatValue ;
@@ -3229,7 +3227,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     if(apply)
-        CastItemSpell(item,(Unit*)this);
+        CastItemSpell(item,this);
     else
         for (int i = 0; i < 5; i++)
             if(proto->Spells[i].SpellId)

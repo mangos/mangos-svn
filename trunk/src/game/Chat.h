@@ -175,6 +175,8 @@ class ChatHandler
         bool HandleAuraCommand(const char* args);
         bool HandleUnAuraCommand(const char* args);
         bool HandleAddGraveCommand(const char* args);
+        bool HandleLinkGraveCommand(const char* args);
+        bool HandleNearGraveCommand(const char* args);
         bool HandleAddSHCommand(const char* args);
         bool HandleSpawnTransportCommand(const char* args);
         bool HandleExploreCheatCommand(const char* args);
@@ -204,11 +206,15 @@ class ChatHandler
         bool HandleMod32Value(const char* args);
         bool HandleSendMailNotice(const char* args);
         bool HandleQueryNextMailTime(const char * args);
-        bool HandleFillGraveZones(const char * args);
 
         Player* getSelectedChar(WorldSession *client);
 
         WorldSession *m_session;
+
+        // Utility methods for commands
+        bool GetCurrentGraveId(uint32& g_id);
+        void LinkGraveIfNeed(  uint32  g_id);
+
 };
 
 #define sChatHandler MaNGOS::Singleton<ChatHandler>::Instance()
