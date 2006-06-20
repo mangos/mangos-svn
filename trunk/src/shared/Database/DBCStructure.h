@@ -103,7 +103,7 @@ struct SpellEntry
     uint32    EffectRadiusIndex[3];
     uint32    EffectApplyAuraName[3];
     uint32    EffectAmplitude[3];
-    uint32    EffectMultipleValue[3];
+    float     EffectMultipleValue[3];
     uint32    EffectChainTarget[3];
     uint32    EffectItemType[3];
     uint32    EffectMiscValue[3];
