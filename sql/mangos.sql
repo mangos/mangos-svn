@@ -42,7 +42,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `areatrigger_graveyard`;
 CREATE TABLE `areatrigger_graveyard` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `id` int(11) unsigned NOT NULL auto_increment COMMENT 'Identifier';
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -73,7 +73,7 @@ CREATE TABLE `areatrigger_graveyard_zone` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
 --
--- Dumping data for table `areatrigger_graveyard`
+-- Dumping data for table `areatrigger_graveyard_zone`
 --
 
 /*!40000 ALTER TABLE `areatrigger_graveyard_zone` DISABLE KEYS */;
@@ -604,7 +604,96 @@ CREATE TABLE `command` (
 
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
 LOCK TABLES `command` WRITE;
-INSERT INTO `command` VALUES ('modify',1,'Syntax: .modify parameter value\r\n\r\nAllows to modify the value of various parameters. Supported parameters include hp, mana, rage, energy, gold, level, speed, swim, scale, bit, bwalk, aspeed, faction, and spell.\r\n\r\nUse .help modify parameter to get help on specific parameter usage.'),('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),('addmove',2,'Syntax: .move\r\n\r\nAdd your current location as a waypoint for the selected creature.'),('addspirit',3,'Syntax: .addspirit\r\n\r\nSpawns the spirit healer for the current location, if there is one defined for the current location.'),('anim',3,'Syntax: .anim\r\n\r\n'),('announce',1,'Syntax: .announce $MessageToBroadcast\r\n\r\nSend a global message to all characters online.'),('go',3,'Syntax: .go position_x position_y position_z mapid\r\n\r\nTeleport to the given coordinates on the specified map.'),('goname',1,'Syntax: .goname charactername\r\n\r\nTeleport to the given character. Either specify the charactername in the chat or click on the characters symbol, e.g. when you\'re in a group.'),('namego',1,'Syntax: .namego charactername\r\n\r\nTeleport the given character to you. Either specify the charactername in the chat or click on the characters symbol, e.g. when you\'\'re in a group.'),('aura',3,'Syntax: .aura #auraid\r\n\r\nAdd the aura with id #auraid to the selected creature.'),('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level. #level may range from 1 to 63.'),('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),('delete',2,'Syntax: .delete\r\n\r\nDelete the selected creature from the world.'),('demorph',2,'Syntax: .demorph\r\n\r\nDemorph the selected player.'),('die',3,'Syntax: .die\r\n\r\nKill the selected player. If no player is selected, it will kill you.'),('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.'),('dismount',0,'Syntax: .dismount\r\n\r\nDismount you, if you are mounted.'),('displayid',2,'Syntax: .displayid #displayid\r\n\r\nChange the model id of the selected creature to #displayid.'),('factionid',2,'Syntax: .factionid #factionid\r\n\r\nSet the faction of the selected creature to #factionid.'),('gmlist',0,'Syntax: .gmlist\r\n\r\nDisplay a list a available Game Masters.'),('gmoff',1,'Syntax: .gmoff\r\n\r\nDisable the <GM> prefix for your character.'),('gmon',1,'Syntax: .gmon\r\n\r\nEnable the <GM> prefix for your character.'),('gps',1,'Syntax: .gps\r\n\r\nDisplay the position information for a selected character or creature. Position information includes X, Y, Z, and orientation.'),('guid',2,'Syntax: .guid\r\n\r\nDisplay the GUID for the selected player.'),('help',0,'Syntax: .help $command\r\n\r\nDisplay usage instructions for the given $command.'),('info',0,'Syntax: .info\r\n\r\nDisplay the number of connected characters.'),('npcinfo',3,'Syntax: .npcinfo\r\n\r\nDisplay a list of details for the selected creature.\r\n\r\nThe list includes:\r\n- GUID, Faction, NPC flags, Entry ID, Model ID,\r\n- Level,\r\n- Health (current/maximum),\r\n- Field flags, dynamic flags, faction template, \r\n- Position information,\r\n- and the creature type, e.g. if the creature is a vendor.'),('npcinfoset',3,'Syntax: .npcinfoset\r\n\r\nTODO: Write me.'),('item',2,'Syntax: .item #guid #amount\r\n\r\nAdd the given amount #amount of the item with a GUID of #guid to the selected vendor. '),('itemrmv',2,'Syntax: .itemrmv #guid\r\n\r\nRemove the given item with a GUID of #guid from the selected vendor. '),('kick',2,'Syntax: .kick\r\n\r\nKick the selected character from the world.\r\n\r\nNot yet implemented.'),('learn',3,'Syntax: .learn #parameter\r\n\r\nLearn a spell of id #parameter. If you want to learn all default spells for Game Masters, use the syntax .learn all'),('unlearn',3,'Syntax: .unlearn #parameter\r\n\r\nUnlearn a spell of id #parameter. '),('learnsk',3,'Syntax: .learnsk #skillId #level #max\r\n\r\nLearn a skill of id #skill with a current skill value of #level and a maximum value of #max. '),('unleask',3,'Syntax: .unlearnsk #parameter\r\n\r\nUnlearn a skill of id #parameter. '),('morph',3,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.'),('name',2,'Syntax: .name $Name\r\n\r\nChange the name of the selected creature or player to $Name.\r\n\r\nCommand disabled.'),('subname',2,'Syntax: .subname $Name\r\n\r\nChange the subname of the selected creature or player to $Name.\r\n\r\nCommand disabled.'),('npcflag',2,'Syntax: .npcflag #npcflag\r\n\r\nSet the NPC flags of the selected creature to #npcflag.'),('cdist',3,'Syntax: .cdist #units\r\n\r\nSet Creature max think distance to #units (from nearest player).'),('object',3,'Syntax: .object #displayid\r\n\r\nAdd a new object of type mailbox with the display id of #displayid to your current position.'),('gameobject',3,'Syntax: .gameobject #id\r\n\r\nAdd a game object from game object templates to the world using the #id.'),('addgo',3,'Syntax: .addgo #id\r\n\r\nAdd a game object from game object templates to the world using the #id.\r\nNote: this is just a copy of .gameobject.'),('prog',2,'Syntax: .prog\r\n\r\nTeleports you to Programmers Island.'),('random',2,'Syntax: .moverandom #flag\r\n\r\nEnable or disable random movement for a selected creature. Use a #flag of value 1 to enable, use a #flag value of 0 to disable random movement.\r\n\r\nNot yet implemented.'),('recall',1,'Syntax: .recall $place\r\n\r\nTeleport you to various towns around the world. $place defines the target location. Available targets include sunr, thun, ogri, neth, thel, storm, iron, under, and darr.'),('run',2,'Syntax: .run #flag\r\n\r\nEnable or disable running movement for a selected creature. Use a #flag of value 1 to enable, use a #flag value of 0 to disable running.\r\n\r\nNot yet implemented.'),('save',0,'Syntax: .save\r\n\r\nSaves your character.'),('security',3,'Syntax: .security $name #level\r\n\r\nSet the security level of character $name to a level of #level.'),('AddSpawn',2,'Not yet implemented.'),('standstate',3,'Syntax: .standstate #emoteid\r\n\r\nMake the selected creature use the emote of id #emoteid.'),('start',0,'Syntax: .start\r\n\r\nTeleports you to the starting area of your character.'),('taxicheat',1,'Syntax: .taxicheat\r\n\r\nReveal all taxi routes for the selected character.'),('worldport',3,'Syntax: .worldport position_x position_y position_z\r\n\r\nTeleport to the given coordinates on the current continent.'),('addweapon',3,'Not yet implemented.'),('allowmove',3,'Syntax: .allowmove\r\n\r\nEnable or disable movement for the selected creature.'),('addgrave',3,'Syntax: .addgrave\r\n\r\nAdd a graveyard at your current location.'),('addsh',3,'Syntax: .addsh\r\n\r\nAdd a spirit healer to your current location.\r\n\r\nNot yet implemented.'),('transport',3,'Not yet implemented.'),('explorecheat',3,'Syntax: .explorecheat\r\n\r\nReveal all maps for the selected character.'),('hover',3,'Syntax: .hover\r\n\r\nEnable hover mode for the selected player.'),('levelup',3,'Syntax: .levelup #numberoflevels\r\n\r\nIncrease the level of the selected player by #numberoflevels. if #numberoflevels is omitted, the level will be increase by 1.'),('emote',3,'Syntax: .emote #emoteid\r\n\r\nMake the selected creature emote with an emote of id #emoteid.'),('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid for the selected player.'),('hidearea',3,'Syntax: .hidearea #areaid\r\n\r\nHide the area of #areaid for the selected player.'),('addspw',2,'Syntax: .addspw #creatureid\r\n\r\nSpawn a creature by the given template id of #creatureid.\r\n'),('additem',3,'Syntax: .additem #itemid #itemcount\r\n\r\nAdd an item of id #itemid to your inventory. Will add a number of #itemcount. If #itemcount is omitted, only one item will be added.'),('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your inventory. Will add by one example each item from itemset.'),('createguild',3,'Syntax: .createguild $GuildName $GuildLeaderName\r\n\r\nCreate a guild name $GuildName with the character $GuildLeaderName as the leader.'),('showhonor',0,'Syntax: .showhonor\r\n\r\nDisplay your honor ranking.'),('update',3,'Syntax: .update\r\n'),('bank',3,'Syntax: .bank\r\n\r\nShow your bank inventory.'),('wchange',3,'Syntax: .wchange #weathertype #status\r\n\r\nSet current weather to #weathertype with an intensitiy of #status. #weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.'),('reload',3,'Not yet implemented.'),('loadscripts',3,'Syntax: .loadscripts\r\n\r\nWill reload the script library, in case you change it while the server was running.'),('set32value',3,''),('Set32Bit',3,''),('Mod32Value',3,''),('modify hp',1,''),('modify mana',1,''),('modify energy',1,''),('modify gold',1,''),('modify level',1,''),('modify speed',1,''),('modify swim',1,''),('modify scale',1,''),('modify bit',1,''),('modify bwalk',1,''),('modify aspeed',1,''),('modify faction',1,''),('modify spell',1,'');
+INSERT INTO `command` VALUES ('modify',1,'Syntax: .modify parameter value\r\n\r\nAllows to modify the value of various parameters. Supported parameters include hp, mana, rage, energy, gold, level, speed, swim, scale, bit, bwalk, aspeed, faction, and spell.\r\n\r\nUse .help modify parameter to get help on specific parameter usage.');
+INSERT INTO `command` VALUES ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.');
+INSERT INTO `command` VALUES ('addmove',2,'Syntax: .move\r\n\r\nAdd your current location as a waypoint for the selected creature.');
+INSERT INTO `command` VALUES ('addspirit',3,'Syntax: .addspirit\r\n\r\nSpawns the spirit healer for the current location, if there is one defined for the current location.');
+INSERT INTO `command` VALUES ('anim',3,'Syntax: .anim\r\n\r\n');
+INSERT INTO `command` VALUES ('announce',1,'Syntax: .announce $MessageToBroadcast\r\n\r\nSend a global message to all characters online.');
+INSERT INTO `command` VALUES ('go',3,'Syntax: .go position_x position_y position_z mapid\r\n\r\nTeleport to the given coordinates on the specified map.');
+INSERT INTO `command` VALUES ('goname',1,'Syntax: .goname charactername\r\n\r\nTeleport to the given character. Either specify the charactername in the chat or click on the characters symbol, e.g. when you\'re in a group.');
+INSERT INTO `command` VALUES ('namego',1,'Syntax: .namego charactername\r\n\r\nTeleport the given character to you. Either specify the charactername in the chat or click on the characters symbol, e.g. when you\'\'re in a group.');
+INSERT INTO `command` VALUES ('aura',3,'Syntax: .aura #auraid\r\n\r\nAdd the aura with id #auraid to the selected creature.');
+INSERT INTO `command` VALUES ('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level. #level may range from 1 to 63.');
+INSERT INTO `command` VALUES ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.');
+INSERT INTO `command` VALUES ('delete',2,'Syntax: .delete\r\n\r\nDelete the selected creature from the world.');
+INSERT INTO `command` VALUES ('demorph',2,'Syntax: .demorph\r\n\r\nDemorph the selected player.');
+INSERT INTO `command` VALUES ('die',3,'Syntax: .die\r\n\r\nKill the selected player. If no player is selected, it will kill you.');
+INSERT INTO `command` VALUES ('revive',3,'Syntax: .revive\r\n\r\nRevive the selected player. If no player is selected, it will revive you.');
+INSERT INTO `command` VALUES ('dismount',0,'Syntax: .dismount\r\n\r\nDismount you, if you are mounted.');
+INSERT INTO `command` VALUES ('displayid',2,'Syntax: .displayid #displayid\r\n\r\nChange the model id of the selected creature to #displayid.');
+INSERT INTO `command` VALUES ('factionid',2,'Syntax: .factionid #factionid\r\n\r\nSet the faction of the selected creature to #factionid.');
+INSERT INTO `command` VALUES ('gmlist',0,'Syntax: .gmlist\r\n\r\nDisplay a list a available Game Masters.');
+INSERT INTO `command` VALUES ('gmoff',1,'Syntax: .gmoff\r\n\r\nDisable the <GM> prefix for your character.');
+INSERT INTO `command` VALUES ('gmon',1,'Syntax: .gmon\r\n\r\nEnable the <GM> prefix for your character.');
+INSERT INTO `command` VALUES ('gps',1,'Syntax: .gps\r\n\r\nDisplay the position information for a selected character or creature. Position information includes X, Y, Z, and orientation, map Id and zone Id');
+INSERT INTO `command` VALUES ('guid',2,'Syntax: .guid\r\n\r\nDisplay the GUID for the selected player.');
+INSERT INTO `command` VALUES ('help',0,'Syntax: .help $command\r\n\r\nDisplay usage instructions for the given $command.');
+INSERT INTO `command` VALUES ('info',0,'Syntax: .info\r\n\r\nDisplay the number of connected characters.');
+INSERT INTO `command` VALUES ('npcinfo',3,'Syntax: .npcinfo\r\n\r\nDisplay a list of details for the selected creature.\r\n\r\nThe list includes:\r\n- GUID, Faction, NPC flags, Entry ID, Model ID,\r\n- Level,\r\n- Health (current/maximum),\r\n- Field flags, dynamic flags, faction template, \r\n- Position information,\r\n- and the creature type, e.g. if the creature is a vendor.');
+INSERT INTO `command` VALUES ('npcinfoset',3,'Syntax: .npcinfoset\r\n\r\nTODO: Write me.');
+INSERT INTO `command` VALUES ('item',2,'Syntax: .item #guid #amount\r\n\r\nAdd the given amount #amount of the item with a GUID of #guid to the selected vendor. ');
+INSERT INTO `command` VALUES ('itemrmv',2,'Syntax: .itemrmv #guid\r\n\r\nRemove the given item with a GUID of #guid from the selected vendor. ');
+INSERT INTO `command` VALUES ('kick',2,'Syntax: .kick\r\n\r\nKick the selected character from the world.\r\n\r\nNot yet implemented.');
+INSERT INTO `command` VALUES ('learn',3,'Syntax: .learn #parameter\r\n\r\nLearn a spell of id #parameter. If you want to learn all default spells for Game Masters, use the syntax .learn all');
+INSERT INTO `command` VALUES ('unlearn',3,'Syntax: .unlearn #parameter\r\n\r\nUnlearn a spell of id #parameter. ');
+INSERT INTO `command` VALUES ('learnsk',3,'Syntax: .learnsk #skillId #level #max\r\n\r\nLearn a skill of id #skill with a current skill value of #level and a maximum value of #max. ');
+INSERT INTO `command` VALUES ('unleask',3,'Syntax: .unlearnsk #parameter\r\n\r\nUnlearn a skill of id #parameter. ');
+INSERT INTO `command` VALUES ('morph',3,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.');
+INSERT INTO `command` VALUES ('name',2,'Syntax: .name $Name\r\n\r\nChange the name of the selected creature or player to $Name.\r\n\r\nCommand disabled.');
+INSERT INTO `command` VALUES ('subname',2,'Syntax: .subname $Name\r\n\r\nChange the subname of the selected creature or player to $Name.\r\n\r\nCommand disabled.');
+INSERT INTO `command` VALUES ('npcflag',2,'Syntax: .npcflag #npcflag\r\n\r\nSet the NPC flags of the selected creature to #npcflag.');
+INSERT INTO `command` VALUES ('cdist',3,'Syntax: .cdist #units\r\n\r\nSet Creature max think distance to #units (from nearest player).');
+INSERT INTO `command` VALUES ('object',3,'Syntax: .object #displayid\r\n\r\nAdd a new object of type mailbox with the display id of #displayid to your current position.');
+INSERT INTO `command` VALUES ('gameobject',3,'Syntax: .gameobject #id\r\n\r\nAdd a game object from game object templates to the world using the #id.');
+INSERT INTO `command` VALUES ('addgo',3,'Syntax: .addgo #id\r\n\r\nAdd a game object from game object templates to the world using the #id.\r\nNote: this is just a copy of .gameobject.');
+INSERT INTO `command` VALUES ('prog',2,'Syntax: .prog\r\n\r\nTeleports you to Programmers Island.');
+INSERT INTO `command` VALUES ('random',2,'Syntax: .moverandom #flag\r\n\r\nEnable or disable random movement for a selected creature. Use a #flag of value 1 to enable, use a #flag value of 0 to disable random movement.\r\n\r\nNot yet implemented.');
+INSERT INTO `command` VALUES ('recall',1,'Syntax: .recall $place\r\n\r\nTeleport you to various towns around the world. $place defines the target location. Available targets include sunr, thun, ogri, neth, thel, storm, iron, under, and darr.');
+INSERT INTO `command` VALUES ('run',2,'Syntax: .run #flag\r\n\r\nEnable or disable running movement for a selected creature. Use a #flag of value 1 to enable, use a #flag value of 0 to disable running.\r\n\r\nNot yet implemented.');
+INSERT INTO `command` VALUES ('save',0,'Syntax: .save\r\n\r\nSaves your character.');
+INSERT INTO `command` VALUES ('security',3,'Syntax: .security $name #level\r\n\r\nSet the security level of character $name to a level of #level.');
+INSERT INTO `command` VALUES ('AddSpawn',2,'Not yet implemented.');
+INSERT INTO `command` VALUES ('standstate',3,'Syntax: .standstate #emoteid\r\n\r\nMake the selected creature use the emote of id #emoteid.');
+INSERT INTO `command` VALUES ('start',0,'Syntax: .start\r\n\r\nTeleports you to the starting area of your character.');
+INSERT INTO `command` VALUES ('taxicheat',1,'Syntax: .taxicheat\r\n\r\nReveal all taxi routes for the selected character.');
+INSERT INTO `command` VALUES ('worldport',3,'Syntax: .worldport position_x position_y position_z\r\n\r\nTeleport to the given coordinates on the current continent.');
+INSERT INTO `command` VALUES ('addweapon',3,'Not yet implemented.');
+INSERT INTO `command` VALUES ('allowmove',3,'Syntax: .allowmove\r\n\r\nEnable or disable movement for the selected creature.');
+INSERT INTO `command` VALUES ('addgrave',3,'Syntax: .addgrave\r\n\r\nAdd a graveyard at your current location.');
+INSERT INTO `command` VALUES ('addsh',3,'Syntax: .addsh\r\n\r\nAdd a spirit healer to your current location.\r\n\r\nNot yet implemented.');
+INSERT INTO `command` VALUES ('transport',3,'Not yet implemented.');
+INSERT INTO `command` VALUES ('explorecheat',3,'Syntax: .explorecheat\r\n\r\nReveal all maps for the selected character.');
+INSERT INTO `command` VALUES ('hover',3,'Syntax: .hover\r\n\r\nEnable hover mode for the selected player.');
+INSERT INTO `command` VALUES ('levelup',3,'Syntax: .levelup #numberoflevels\r\n\r\nIncrease the level of the selected player by #numberoflevels. if #numberoflevels is omitted, the level will be increase by 1.');
+INSERT INTO `command` VALUES ('emote',3,'Syntax: .emote #emoteid\r\n\r\nMake the selected creature emote with an emote of id #emoteid.');
+INSERT INTO `command` VALUES ('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid for the selected player.');
+INSERT INTO `command` VALUES ('hidearea',3,'Syntax: .hidearea #areaid\r\n\r\nHide the area of #areaid for the selected player.');
+INSERT INTO `command` VALUES ('addspw',2,'Syntax: .addspw #creatureid\r\n\r\nSpawn a creature by the given template id of #creatureid.\r\n');
+INSERT INTO `command` VALUES ('additem',3,'Syntax: .additem #itemid #itemcount\r\n\r\nAdd an item of id #itemid to your inventory. Will add a number of #itemcount. If #itemcount is omitted, only one item will be added.');
+INSERT INTO `command` VALUES ('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your inventory. Will add by one example each item from itemset.');
+INSERT INTO `command` VALUES ('createguild',3,'Syntax: .createguild $GuildName $GuildLeaderName\r\n\r\nCreate a guild name $GuildName with the character $GuildLeaderName as the leader.');
+INSERT INTO `command` VALUES ('showhonor',0,'Syntax: .showhonor\r\n\r\nDisplay your honor ranking.');
+INSERT INTO `command` VALUES ('update',3,'Syntax: .update\r\n'),('bank',3,'Syntax: .bank\r\n\r\nShow your bank inventory.');
+INSERT INTO `command` VALUES ('wchange',3,'Syntax: .wchange #weathertype #status\r\n\r\nSet current weather to #weathertype with an intensitiy of #status. #weathertype can be 1 for rain, 2 for snow, and 3 for sand. #status can be 0 for disabled, and 1 for enabled.');
+INSERT INTO `command` VALUES ('reload',3,'Not yet implemented.');
+INSERT INTO `command` VALUES ('loadscripts',3,'Syntax: .loadscripts\r\n\r\nWill reload the script library, in case you change it while the server was running.');
+INSERT INTO `command` VALUES ('set32value',3,'');
+INSERT INTO `command` VALUES ('Set32Bit',3,'');
+INSERT INTO `command` VALUES ('Mod32Value',3,'');
+INSERT INTO `command` VALUES ('modify hp',1,'');
+INSERT INTO `command` VALUES ('modify mana',1,'');
+INSERT INTO `command` VALUES ('modify energy',1,'');
+INSERT INTO `command` VALUES ('modify gold',1,'');
+INSERT INTO `command` VALUES ('modify level',1,'');
+INSERT INTO `command` VALUES ('modify speed',1,'');
+INSERT INTO `command` VALUES ('modify swim',1,'');
+INSERT INTO `command` VALUES ('modify scale',1,'');
+INSERT INTO `command` VALUES ('modify bit',1,'');
+INSERT INTO `command` VALUES ('modify bwalk',1,'');
+INSERT INTO `command` VALUES ('modify aspeed',1,'');
+INSERT INTO `command` VALUES ('modify faction',1,'');
+INSERT INTO `command` VALUES ('modify spell',1,'');
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 
@@ -826,7 +915,8 @@ UNLOCK TABLES;
 --
 -- Table structure for game_addons
 --
-CREATE TABLE IF EXISTS `game_addons` (
+DROP TABLE IF EXISTS `game_addons`;
+CREATE TABLE `game_addons` (
   `addonname` char(255) NOT NULL default '',
   `crc` bigint(20) NOT NULL default '0',
   `enabled` tinyint(4) NOT NULL default '0',
