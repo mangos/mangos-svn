@@ -2974,6 +2974,9 @@ void Player::DuelComplete()
     GetSession()->SendPacket(&data);
     m_pDuel->GetSession()->SendPacket(&data);
 
+	//Player kneel when finish the duel
+	HandleEmoteCommand(EMOTE_STATE_KNEEL);
+
     SetInDuel(false);
     m_pDuel->SetInDuel(false);
 
