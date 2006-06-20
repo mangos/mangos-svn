@@ -75,23 +75,23 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP
     &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE
     &Spell::EffectWeaponDmgPerc,                            //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE//Useless
     &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK
     &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_MOUNT_OBSOLETE
     &Spell::EffectApplyAA,                                  //SPELL_EFFECT_APPLY_AREA_AURA
     &Spell::EffectLearnSpell,                               //SPELL_EFFECT_LEARN_SPELL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE//Useless
     &Spell::EffectDispel,                                   //SPELL_EFFECT_DISPEL
     &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DUAL_WIELD
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_WILD
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_GUARDIAN
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
+    &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP
     &Spell::EffectNULL,                                     //unknown45
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN
     &Spell::EffectTradeSkill,                               //SPELL_EFFECT_TRADE_SKILL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH//Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT
     &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR
     &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT
@@ -108,8 +108,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN
     &Spell::EffectThreat,                                   //SPELL_EFFECT_THREAT
     &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL//Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL//Useless
     &Spell::EffectHealMaxHealth,                            //SPELL_EFFECT_HEAL_MAX_HEALTH
     &Spell::EffectInterruptCast,                            //SPELL_EFFECT_INTERRUPT_CAST
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT
@@ -250,7 +250,20 @@ void Spell::EffectManaDrain(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    uint32 curPower = unitTarget->GetUInt32Value(UNIT_FIELD_POWER1);
+    uint32 DrainType = m_spellInfo->EffectMiscValue[i];
+    uint32 PowerField = 0; 
+    switch(DrainType)
+    {
+    case 0:PowerField = UNIT_FIELD_POWER1;break;
+    case 1:PowerField = UNIT_FIELD_POWER2;break;
+    case 2:PowerField = UNIT_FIELD_POWER3;break;
+    case 3:PowerField = UNIT_FIELD_POWER4;break;
+    case 4:PowerField = UNIT_FIELD_POWER5;break;
+    default:break;
+    }
+    if(!PowerField)
+        return;
+    uint32 curPower = unitTarget->GetUInt32Value(PowerField);
     if(curPower < damage)
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
     else
@@ -270,11 +283,15 @@ void Spell::EffectPowerDrain(uint32 i)
 
     uint32 curPower = unitTarget->GetUInt32Value(UNIT_FIELD_POWER1);
     uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+    uint32 caster_curPower = m_caster->GetUInt32Value(UNIT_FIELD_POWER1);
     if(curPower < damage)
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
     else
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
-    unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth-damage/2);
+    if(caster_curPower + damage < m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
+        m_caster->SetUInt32Value(UNIT_FIELD_POWER1,caster_curPower + damage);
+    else m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(curHealth-damage*m_spellInfo->EffectMultipleValue[i]));
 
 }
 
@@ -944,6 +961,21 @@ void Spell::EffectSummonWild(uint32 i)
 
 }
 
+void Spell::EffectTeleUnitsFaceCaster(uint32 i)
+{
+    if(!unitTarget)
+        return;
+    WorldPacket data;
+
+    float dis = GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
+    float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+    float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
+
+    unitTarget->BuildTeleportAckMsg(&data,fx,fy,fz+2,-m_caster->GetOrientation());
+    m_caster->SendMessageToSet( &data, true );
+}
+
 void Spell::EffectLearnSkill(uint32 i)
 {
     uint32 skillid =  m_spellInfo->EffectMiscValue[i];
@@ -1095,7 +1127,10 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 void Spell::EffectTameCreature(uint32 i)
 {
     if(!unitTarget || unitTarget->getLevel() > m_caster->getLevel())
+    {
+        SendCastResult(CAST_FAIL_TARGET_IS_TOO_HIGH);
         return;
+    }
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         return;
     CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
@@ -1308,8 +1343,9 @@ void Spell::EffectSummonPet(uint32 i)
 
 void Spell::EffectLearnPetSpell(uint32 i)
 {
-    if(!unitTarget)
-        return;
+    uint64 pet_guid = m_caster->GetUInt64Value(UNIT_FIELD_SUMMON);
+    Creature *pet;
+    pet = ObjectAccessor::Instance().GetCreature(*m_caster, pet_guid);
     SpellEntry *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     if(!learn_spellproto)
         return;
@@ -1317,22 +1353,54 @@ void Spell::EffectLearnPetSpell(uint32 i)
     uint8 learn_msg = 1;
     for(int8 x=0;x<4;x++)
     {
-        has_spellproto = sSpellStore.LookupEntry(unitTarget->m_spells[x]);
+        has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
+        if(pet->m_spells[x] == learn_spellproto->Id)
+            return;
+    }
+    for(int8 x=0;x<4;x++)
+    {
+        has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
         if(!has_spellproto)
         {
-            unitTarget->m_spells[x] = learn_spellproto->Id;
+            pet->m_spells[x] = learn_spellproto->Id;
             learn_msg = 0;
             break;
         }
         else if(has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
         {
-            unitTarget->m_spells[x] = learn_spellproto->Id;
+            pet->m_spells[x] = learn_spellproto->Id;
             learn_msg = 0;
             break;
         }
     }
     if(learn_msg)
+    {
         SendCastResult(CAST_FAIL_SPELL_NOT_LEARNED);
+        return;
+    }
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data;
+        uint16 Command = 7;
+        uint16 State = 6;
+
+        sLog.outDebug("Pet Spells Groups");
+
+        data.clear();
+        data.Initialize(SMSG_PET_SPELLS);
+
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+                                                            //C100 = maybe group
+        data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
+
+        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+        ((Player*)m_caster)->GetSession()->SendPacket(&data);
+    }
 }
 
 void Spell::EffectAttackMe(uint32 i)
@@ -1956,7 +2024,6 @@ void Spell::EffectFeedPet(uint32 i)
     if(pet)
         pet->SetUInt32Value(UNIT_FIELD_POWER5,damage);
     m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-    TriggerSpell();
 }
 
 void Spell::EffectDismissPet(uint32 i)
@@ -2164,16 +2231,34 @@ void Spell::EffectTransmitted(uint32 i)
 
     float min_dis = GetMinRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRange.LookupEntry(m_spellInfo->rangeIndex));
-    float dis = irand(int(min_dis),int(max_dis));
+    float diff = max_dis - min_dis + 1;
+    float dis = (float)(rand()%(uint32)diff + (uint32)min_dis);
+
     fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
     fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
+
+    float fz = MapManager::Instance ().GetMap(m_caster->GetMapId())->GetHeight(fx,fy);
+
+    if(m_spellInfo->EffectMiscValue[i] == 35591)
+    {
+        Map* Map = MapManager::Instance().GetMap(m_caster->GetMapId());
+        //uint8 flag1 = Map->GetTerrainType(fx,fy);
+        float posz = Map->GetWaterLevel(fx,fy);
+                                //!Underwater check
+        if (fz > (posz - (float)2))
+        {
+            SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);
+            up_skillvalue = 4;
+            SendChannelUpdate(0);
+            return;
+        }
+    }
 
     GameObject* pGameObj = new GameObject();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
-        fx, fy, m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0, 0, 0, 0))
+        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0))
         return;
     GameObjectInfo *goInfo = objmgr.GetGameObjectInfo(name_id);
 
@@ -2222,7 +2307,7 @@ void Spell::EffectSkill(uint32 i)
     Player *player = (Player*)m_caster;
 
     uint32 skill_id = m_spellInfo->EffectMiscValue[i];
-    if(skill_id == SKILL_FISHING)
+    if(skill_id == SKILL_FISHING && up_skillvalue != 4)
         up_skillvalue = player->CheckFishingAble();
     if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING || SKILL_HERBALISM)
     {

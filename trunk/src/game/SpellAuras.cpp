@@ -48,7 +48,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY    //missing 4
     &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
-    &Aura::HandleFear,                                      //SPELL_AURA_MOD_FEAR = 7,
+    &Aura::HandleModFear,                                   //SPELL_AURA_MOD_FEAR = 7,
     &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
     &Aura::HandleModAttackSpeed,                            //SPELL_AURA_MOD_ATTACKSPEED = 9,
     &Aura::HandleModThreat,                                 //SPELL_AURA_MOD_THREAT = 10,
@@ -99,7 +99,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 55,
     &Aura::HandleAuraTransform,                             //SPELL_AURA_TRANSFORM = 56,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_CRIT_CHANCE = 57,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_INCREASE_SWIM_SPEED = 58,
+    &Aura::HandleAuraModIncreaseSwimSpeed,                  //SPELL_AURA_MOD_INCREASE_SWIM_SPEED = 58,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY_SILENCE = 60,
     &Aura::HandleAuraModScale,                              //SPELL_AURA_MOD_SCALE = 61,
@@ -668,7 +668,7 @@ void Aura::HandleModConfuse(bool apply)
     }
 }
 
-void Aura::HandleFear(bool Apply)
+void Aura::HandleModFear(bool Apply)
 {
     uint32 apply_stat = UNIT_STAT_FLEEING;
     WorldPacket data;
@@ -1327,15 +1327,18 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
+    float res_speed;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * (100.0f + (float)m_modifier->m_amount)/100.0f ;
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
-    data.Initialize(MSG_MOVE_SET_RUN_SPEED);
+        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(100.0f + (float)m_modifier->m_amount);
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
     data << m_target->GetGUID();
-    data << m_target->GetSpeed( MOVE_RUN );
+    data << (uint32)0;
+    data << res_speed;
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
 }
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
@@ -1344,18 +1347,18 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
+    float res_speed;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * (100.0f + (float)m_modifier->m_amount)/100.0f ;
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(100.0f + (float)m_modifier->m_amount);
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
-
+    data << res_speed;
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
 }
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
@@ -1364,17 +1367,18 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
+    float res_speed;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier->m_amount + 100.0f ) / 100.0f );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * (100.0f + (float)m_modifier->m_amount)/100.0f ;
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier->m_amount + 100.0f ) );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(100.0f + (float)m_modifier->m_amount);
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
+    data << res_speed;
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
@@ -1383,17 +1387,18 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
+    float res_speed;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * m_modifier->m_amount/100.0f );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * (float)m_modifier->m_amount/100.0f;
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier->m_amount );
+        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(float)m_modifier->m_amount;
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
+    data << res_speed;
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply)
@@ -1549,6 +1554,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         if(unit_target->getClass() == CLASS_DRUID)
             unit_target->setPowerType(0);
         unit_target->m_ShapeShiftForm = 0;
+        unit_target->m_form = 0;
         unit_target->RemoveAurasDueToSpell(spellId);
     }
     if(unit_target->GetTypeId() == TYPEID_PLAYER)
@@ -1786,6 +1792,26 @@ void Aura::HandleAuraTransform(bool apply)
     }*/
 }
 
+void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
+{
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
+    if(m_modifier->m_amount<=1)
+        return;
+    WorldPacket data;
+    float res_speed;
+    if(Apply)
+        res_speed = m_target->GetSpeed(MOVE_SWIM) * (100.0f + (float)m_modifier->m_amount)/100.0f;
+    else
+        res_speed = m_target->GetSpeed(MOVE_SWIM) * 100.0f/(100.0f + (float)m_modifier->m_amount);
+    data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetUInt32Value( OBJECT_FIELD_GUID );
+    data << m_target->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
+    data << (uint32)0;
+    data << res_speed;
+    m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", res_speed);
+}
 // FIX-ME PLS!!!
 void Aura::HandleAuraManaShield(bool apply)
 {
