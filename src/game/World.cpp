@@ -347,8 +347,6 @@ void World::SetInitialWorldSettings()
     StartEventSystem();
     sLog.outString( "WORLD: Starting Event System" );
 
-
-
     //load AddonDefault stuff
     bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
     sAddOnHandler.SetAddonDefault(temp);
@@ -357,7 +355,6 @@ void World::SetInitialWorldSettings()
         sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d", temp );
     else
         sLog.outString( "WORLD: Starting Addon System Failed" );
-
 
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days

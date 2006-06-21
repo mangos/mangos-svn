@@ -817,7 +817,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     m_spells[3] = cinfo->spell4;
 
     SetSpeed( cinfo->speed ) ;
-    
+
     return true;
 }
 
@@ -838,7 +838,7 @@ bool Creature::LoadFromDB(uint32 guid)
     SetUInt32Value(UNIT_FIELD_HEALTH,fields[15].GetUInt32());
     //mana
     SetUInt32Value(UNIT_FIELD_POWER2,fields[16].GetUInt32());
-    
+
     SetUInt32Value(UNIT_NPC_FLAGS,fields[19].GetUInt32());
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[20].GetUInt32());
 

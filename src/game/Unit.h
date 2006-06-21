@@ -428,7 +428,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void _RemoveStatsMods();
         void _ApplyStatsMods();
-        
+
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 

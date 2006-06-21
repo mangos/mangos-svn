@@ -251,15 +251,15 @@ void Spell::EffectManaDrain(uint32 i)
         return;
 
     uint32 DrainType = m_spellInfo->EffectMiscValue[i];
-    uint32 PowerField = 0; 
+    uint32 PowerField = 0;
     switch(DrainType)
     {
-    case 0:PowerField = UNIT_FIELD_POWER1;break;
-    case 1:PowerField = UNIT_FIELD_POWER2;break;
-    case 2:PowerField = UNIT_FIELD_POWER3;break;
-    case 3:PowerField = UNIT_FIELD_POWER4;break;
-    case 4:PowerField = UNIT_FIELD_POWER5;break;
-    default:break;
+        case 0:PowerField = UNIT_FIELD_POWER1;break;
+        case 1:PowerField = UNIT_FIELD_POWER2;break;
+        case 2:PowerField = UNIT_FIELD_POWER3;break;
+        case 3:PowerField = UNIT_FIELD_POWER4;break;
+        case 4:PowerField = UNIT_FIELD_POWER5;break;
+        default:break;
     }
     if(!PowerField)
         return;
@@ -1395,7 +1395,7 @@ void Spell::EffectLearnPetSpell(uint32 i)
 
         for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
                                                             //C100 = maybe group
-        data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
+            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -2244,7 +2244,7 @@ void Spell::EffectTransmitted(uint32 i)
         Map* Map = MapManager::Instance().GetMap(m_caster->GetMapId());
         //uint8 flag1 = Map->GetTerrainType(fx,fy);
         float posz = Map->GetWaterLevel(fx,fy);
-                                //!Underwater check
+        //!Underwater check
         if (fz > (posz - (float)2))
         {
             SendCastResult(CAST_FAIL_CANT_BE_CAST_HERE);

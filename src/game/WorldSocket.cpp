@@ -34,8 +34,6 @@
 #include "zlib/zlib.h"
 #include "../realmd/AuthCodes.h"
 
-
-
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
 #if __GNUC__ && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
 #pragma pack(1)
@@ -197,12 +195,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 id, security;
     std::string account;
     WorldPacket packet, SendAddonPacked;
-    
+
     BigNumber K;
 
     try
     {
-        recvPacket >> BuiltNumberClient;    // for now no use
+        recvPacket >> BuiltNumberClient;                    // for now no use
         recvPacket >> unk2;
         recvPacket >> account;
         recvPacket >> clientSeed;
@@ -278,7 +276,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         packet.Initialize( SMSG_AUTH_RESPONSE );
         //packet << uint8( 21 );
         packet << uint8( AUTH_FAILED );
-        
+
         SendPacket( &packet );
 
         sLog.outDetail( "SOCKET: Sent Auth Response (authentification failed)." );
@@ -290,7 +288,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     //Send Auth is okey
     packet.Initialize( SMSG_AUTH_RESPONSE );
-    packet << uint8( AUTH_OK );                                //0x0C
+    packet << uint8( AUTH_OK );                             //0x0C
     packet << uint8( 0xB0 );
     packet << uint8( 0x09 );
     packet << uint8( 0x02 );
@@ -300,15 +298,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     SendPacket(&packet);
 
-    
-
     //! Handled Addons
 
     //Create Addon Packet
     sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos());
 
     SendPacket(&SendAddonPacked);
-
 
     _session = new WorldSession(id, this);
 
@@ -389,9 +384,9 @@ void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
     WorldPacket packet;
     packet.Initialize( SMSG_AUTH_RESPONSE );
     packet << uint8( AUTH_WAIT_QUEUE );
-    packet << uint32 (0x00);        //unknown
-    packet << uint32 (0x00);        //unknown
-    packet << uint8 (0x00);         //unknown
-    packet << uint32 (PlayersInQue);//amount of players in que
+    packet << uint32 (0x00);                                //unknown
+    packet << uint32 (0x00);                                //unknown
+    packet << uint8 (0x00);                                 //unknown
+    packet << uint32 (PlayersInQue);                        //amount of players in que
     SendPacket(&packet);
 }

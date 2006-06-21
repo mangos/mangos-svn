@@ -184,7 +184,6 @@ bool Master::Run()
     sLog.outString( "WORLD: Saving Addons" );
     sAddOnHandler._SaveToDB();
 
-
     _UnhookSignals();
 
     t.wait();

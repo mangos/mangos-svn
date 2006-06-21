@@ -1812,6 +1812,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
     m_target->SendMessageToSet(&data,true);
     sLog.outDebug("ChangeSpeedTo:%f", res_speed);
 }
+
 // FIX-ME PLS!!!
 void Aura::HandleAuraManaShield(bool apply)
 {

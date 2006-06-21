@@ -357,6 +357,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     group->SetLooterGuid( lootMaster );
     group->SendUpdate();
 }
+
 void WorldSession::HandleLootRoll( WorldPacket &recv_data )
 {
     uint64 Guid;

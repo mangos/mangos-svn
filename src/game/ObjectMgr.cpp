@@ -615,12 +615,12 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     uint32 zoneId = MapManager::Instance().GetMap(MapId)->GetZoneId(x,y);
 
     // Simulate std. algorithm:
-    //   found some graveyard associated to (ghost_zone,ghost_map) 
+    //   found some graveyard associated to (ghost_zone,ghost_map)
     //
     //   if mapId == graveyard.mapId (ghost in plain zone or city) and search graveyard at same map
-    //     then check `faction` 
+    //     then check `faction`
     //   if mapId != graveyard.mapId (ghost in instance) and search ANY graveyard associated
-    //     then skip check `faction` 
+    //     then skip check `faction`
     QueryResult *result = sDatabase.PQuery(
         "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,"
         "       `position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
