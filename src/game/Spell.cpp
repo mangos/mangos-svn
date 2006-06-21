@@ -229,8 +229,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         case TARGET_PET:
         {
             Unit* tmpUnit = ObjectAccessor::Instance().GetUnit(*m_caster,m_caster->GetUInt32Value(UNIT_FIELD_PETNUMBER));
-            if(tmpUnit)
-                TagUnitMap.push_back(tmpUnit);
+            TagUnitMap.push_back(tmpUnit);
         }break;
         case TARGET_S_E:
         {
@@ -654,7 +653,6 @@ void Spell::SendSpellStart()
     data << m_spellInfo->Id;
     data << cast_flags;
     data << uint32(m_timer);
-    data << uint16(0x2);
 
     m_targets.write( &data );
     ((Player*)m_caster)->SendMessageToSet(&data, true);

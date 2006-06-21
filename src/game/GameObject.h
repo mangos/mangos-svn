@@ -65,7 +65,7 @@ class MANGOS_DLL_SPEC GameObject : public Object
         void DeleteFromDB();
         void generateLoot();
         void SetLootState(LootState s) { m_lootState = s; }
-        void SetSespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
+        void SetRespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
         bool isFinished() { return m_respawnTimer == 0;}
         void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}
