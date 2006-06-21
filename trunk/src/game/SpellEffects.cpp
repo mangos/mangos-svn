@@ -44,127 +44,127 @@
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
     &Spell::EffectNULL,                                     //nothing
-    &Spell::EffectInstaKill,                                //SPELL_EFFECT_INSTAKILL
-    &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE
-    &Spell::EffectDummy,                                    //SPELL_EFFECT_DUMMY
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT
-    &Spell::EffectTeleportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS
-    &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA
-    &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
-    &Spell::EffectManaDrain,                                //SPELL_EFFECT_MANA_DRAIN
-    &Spell::EffectHealthLeach,                              //SPELL_EFFECT_HEALTH_LEECH
-    &Spell::EffectHeal,                                     //SPELL_EFFECT_HEAL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_BASE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_QUEST_COMPLETE
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL
-    &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_EVADE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PARRY
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BLOCK
-    &Spell::EffectCreateItem,                               //SPELL_EFFECT_CREATE_ITEM
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_WEAPON
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DEFENSE
-    &Spell::EffectPresistentAA,                             //SPELL_EFFECT_PERSISTENT_AREA_AURA
-    &Spell::EffectSummon,                                   //SPELL_EFFECT_SUMMON
-    &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP
-    &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE
-    &Spell::EffectWeaponDmgPerc,                            //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE//Useless
-    &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK
-    &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_MOUNT_OBSOLETE
-    &Spell::EffectApplyAA,                                  //SPELL_EFFECT_APPLY_AREA_AURA
-    &Spell::EffectLearnSpell,                               //SPELL_EFFECT_LEARN_SPELL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE//Useless
-    &Spell::EffectDispel,                                   //SPELL_EFFECT_DISPEL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DUAL_WIELD
-    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_WILD
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_GUARDIAN
-    &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
-    &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP
-    &Spell::EffectNULL,                                     //unknown45
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN
-    &Spell::EffectTradeSkill,                               //SPELL_EFFECT_TRADE_SKILL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH//Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT
-    &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_GUARANTEE_HIT
-    &Spell::EffectEnchantItemPerm,                          //SPELL_EFFECT_ENCHANT_ITEM
-    &Spell::EffectEnchantItemTmp,                           //SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY
-    &Spell::EffectTameCreature,                             //SPELL_EFFECT_TAMECREATURE
-    &Spell::EffectSummonPet,                                //SPELL_EFFECT_SUMMON_PET
-    &Spell::EffectLearnPetSpell,                            //SPELL_EFFECT_LEARN_PET_SPELL
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE
-    &Spell::EffectOpenSecretSafe,                           //SPELL_EFFECT_OPEN_LOCK_ITEM
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PROFICIENCY
-    &Spell::EffectSendEvent,                                //SPELL_EFFECT_SEND_EVENT
-    &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN
-    &Spell::EffectThreat,                                   //SPELL_EFFECT_THREAT
-    &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL//Useless
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL//Useless
-    &Spell::EffectHealMaxHealth,                            //SPELL_EFFECT_HEAL_MAX_HEALTH
-    &Spell::EffectInterruptCast,                            //SPELL_EFFECT_INTERRUPT_CAST
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PICKPOCKET
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_FARSIGHT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_POSSESSED
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD
-    &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SANCTUARY
-    &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT
-    &Spell::EffectDuel,                                     //SPELL_EFFECT_DUEL
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_STUCK
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PLAYER
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ACTIVATE_OBJECT
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT1
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT2
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT3
-    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT4
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT_ALL
-    &Spell::EffectEnchantHeldItem,                          //SPELL_EFFECT_ENCHANT_HELD_ITEM
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PHANTASM
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SELF_RESURRECT
-    &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING
-    &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_CRITTER
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK
-    &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT
-    &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE
-    &Spell::EffectFeedPet,                                  //SPELL_EFFECT_FEED_PET
-    &Spell::EffectDismissPet,                               //SPELL_EFFECT_DISMISS_PET
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_REPUTATION
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT1
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT2
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT3
-    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT4
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISPEL_MECHANIC
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEAD_PET
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DESTROY_ALL_TOTEMS
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEMON
-    &Spell::EffectResurrectNew,                             //SPELL_EFFECT_RESURRECT_NEW
-    &Spell::EffectAttackMe,                                 //SPELL_EFFECT_ATTACK_ME
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE_PCT
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPIRIT_HEAL
-    &Spell::EffectSkill,                                    //SPELL_EFFECT_SKILL -- professions and more
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_APPLY_AURA_NEW
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD
-    &Spell::EffectWeaponDmg                                 //SPELL_EFFECT_ADICIONAL_DMG
+    &Spell::EffectInstaKill,                                //SPELL_EFFECT_INSTAKILL = 1
+    &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_SCHOOL_DAMAGE = 2
+    &Spell::EffectDummy,                                    //SPELL_EFFECT_DUMMY = 3
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL_TELEPORT = 4
+    &Spell::EffectTeleportUnits,                            //SPELL_EFFECT_TELEPORT_UNITS = 5
+    &Spell::EffectApplyAura,                                //SPELL_EFFECT_APPLY_AURA = 6
+    &Spell::EffectSchoolDMG,                                //SPELL_EFFECT_ENVIRONMENTAL_DAMAGE =7
+    &Spell::EffectManaDrain,                                //SPELL_EFFECT_MANA_DRAIN = 8
+    &Spell::EffectHealthLeach,                              //SPELL_EFFECT_HEALTH_LEECH = 9
+    &Spell::EffectHeal,                                     //SPELL_EFFECT_HEAL = 10
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND = 11
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PORTAL = 12
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_BASE = 13
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_QUEST_COMPLETE = 16
+    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
+    &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT = 18
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_EVADE = 21
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PARRY = 22
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_BLOCK = 23
+    &Spell::EffectCreateItem,                               //SPELL_EFFECT_CREATE_ITEM = 24
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_WEAPON = 25
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DEFENSE = 26
+    &Spell::EffectPresistentAA,                             //SPELL_EFFECT_PERSISTENT_AREA_AURA = 27
+    &Spell::EffectSummon,                                   //SPELL_EFFECT_SUMMON = 28
+    &Spell::EffectMomentMove,                               //SPELL_EFFECT_LEAP = 29
+    &Spell::EffectEnergize,                                 //SPELL_EFFECT_ENERGIZE = 30
+    &Spell::EffectWeaponDmgPerc,                            //SPELL_EFFECT_WEAPON_PERCENT_DAMAGE = 31
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_TRIGGER_MISSILE = 32 //Useless
+    &Spell::EffectOpenLock,                                 //SPELL_EFFECT_OPEN_LOCK = 33
+    &Spell::EffectSummonChangeItem,                         //SPELL_EFFECT_SUMMON_MOUNT_OBSOLETE = 34
+    &Spell::EffectApplyAA,                                  //SPELL_EFFECT_APPLY_AREA_AURA = 35
+    &Spell::EffectLearnSpell,                               //SPELL_EFFECT_LEARN_SPELL = 36
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPELL_DEFENSE = 37 //Useless
+    &Spell::EffectDispel,                                   //SPELL_EFFECT_DISPEL = 38
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE = 39
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DUAL_WIELD = 40
+    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_WILD = 41
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_GUARDIAN = 42
+    &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER = 43
+    &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP = 44
+    &Spell::EffectNULL,                                     //unknown45 = 45
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPAWN = 46
+    &Spell::EffectTradeSkill,                               //SPELL_EFFECT_TRADE_SKILL = 47
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH = 48 //Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT = 49
+    &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR = 50
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT = 51
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_GUARANTEE_HIT = 52
+    &Spell::EffectEnchantItemPerm,                          //SPELL_EFFECT_ENCHANT_ITEM = 53
+    &Spell::EffectEnchantItemTmp,                           //SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY = 54
+    &Spell::EffectTameCreature,                             //SPELL_EFFECT_TAMECREATURE = 55
+    &Spell::EffectSummonPet,                                //SPELL_EFFECT_SUMMON_PET = 56
+    &Spell::EffectLearnPetSpell,                            //SPELL_EFFECT_LEARN_PET_SPELL = 57
+    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE = 58
+    &Spell::EffectOpenSecretSafe,                           //SPELL_EFFECT_OPEN_LOCK_ITEM = 59
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PROFICIENCY = 60
+    &Spell::EffectSendEvent,                                //SPELL_EFFECT_SEND_EVENT = 61
+    &Spell::EffectPowerDrain,                               //SPELL_EFFECT_POWER_BURN = 62
+    &Spell::EffectThreat,                                   //SPELL_EFFECT_THREAT = 63
+    &Spell::EffectTriggerSpell,                             //SPELL_EFFECT_TRIGGER_SPELL = 64
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEALTH_FUNNEL = 65 //Useless
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_POWER_FUNNEL = 66 //Useless
+    &Spell::EffectHealMaxHealth,                            //SPELL_EFFECT_HEAL_MAX_HEALTH = 67
+    &Spell::EffectInterruptCast,                            //SPELL_EFFECT_INTERRUPT_CAST = 68
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT = 69
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_PICKPOCKET = 71
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_FARSIGHT = 72
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_POSSESSED = 73
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
+    &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SANCTUARY = 79
+    &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS = 80
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_BIND_SIGHT = 82
+    &Spell::EffectDuel,                                     //SPELL_EFFECT_DUEL = 83
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_STUCK = 84
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PLAYER = 85
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_ACTIVATE_OBJECT = 86
+    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT1 = 87
+    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT2 = 88
+    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT3 = 89
+    &Spell::EffectSummonTotem,                              //SPELL_EFFECT_SUMMON_TOTEM_SLOT4 = 90
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT_ALL = 91
+    &Spell::EffectEnchantHeldItem,                          //SPELL_EFFECT_ENCHANT_HELD_ITEM = 92
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PHANTASM = 93
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SELF_RESURRECT = 94
+    &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING = 95
+    &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE = 96
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_CRITTER = 97
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK = 98
+    &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT = 99
+    &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE = 100
+    &Spell::EffectFeedPet,                                  //SPELL_EFFECT_FEED_PET = 101
+    &Spell::EffectDismissPet,                               //SPELL_EFFECT_DISMISS_PET = 102
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_REPUTATION = 103
+    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT1 = 104
+    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT2 = 105
+    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT3 = 106
+    &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT4 = 107
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DISPEL_MECHANIC = 108
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEAD_PET = 109
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DESTROY_ALL_TOTEMS = 110
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE = 111
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEMON = 112
+    &Spell::EffectResurrectNew,                             //SPELL_EFFECT_RESURRECT_NEW = 113
+    &Spell::EffectAttackMe,                                 //SPELL_EFFECT_ATTACK_ME = 114
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE_PCT = 115
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SKIN_PLAYER_CORPSE = 116
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SPIRIT_HEAL = 117
+    &Spell::EffectSkill,                                    //SPELL_EFFECT_SKILL = 118 -- professions and more
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_APPLY_AURA_NEW = 119
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_TELEPORT_GRAVEYARD = 120
+    &Spell::EffectWeaponDmg                                 //SPELL_EFFECT_ADICIONAL_DMG = 121
 };
 
 void Spell::EffectNULL(uint32 i)
@@ -652,6 +652,8 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
     spawnCreature->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
     spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_POWER1,28 + 10 * level);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER1,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
     spawnCreature->setPowerType(0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
@@ -903,6 +905,8 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
     spawnCreature->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
     spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_POWER1,28 + 10 * level);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER1,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
     spawnCreature->setPowerType(0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
@@ -1155,6 +1159,8 @@ void Spell::EffectTameCreature(uint32 i)
         unitTarget->SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
         unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
         unitTarget->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
+        unitTarget->SetUInt32Value(UNIT_FIELD_MAXPOWER1,28 + 10 * petlevel);
+        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,28 + 10 * petlevel);
         unitTarget->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
         unitTarget->setPowerType(2);
@@ -1616,7 +1622,7 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, ((Player*)m_caster)->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
-    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     m_caster->AddGameObject(pGameObj);
@@ -2104,7 +2110,7 @@ void Spell::EffectSummonObject(uint32 i)
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
     m_caster->AddGameObject(pGameObj);
 
@@ -2213,14 +2219,32 @@ void Spell::EffectCharge(uint32 i)
 {
     assert(unitTarget);
     assert(m_caster);
+    WorldPacket data;
 
     float x, y, z;
     unitTarget->GetClosePoint(m_caster, x, y, z);
-    float oldspeed = m_caster->GetSpeed();
+    float oldspeed = 1.0f;
     m_caster->SetSpeed(oldspeed * 3.5);
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << unitTarget->GetGUID();
+    data << (uint32)0;
+    data << (float)(SPEED_RUN*3.5);
+    m_caster->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", SPEED_RUN*3.5);
+
     m_caster->SendMoveToPacket(x, y, z, true);
     m_caster->Attack(unitTarget);
     m_caster->SetSpeed(oldspeed);
+
+    data.clear();
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << unitTarget->GetGUID();
+    data << (uint32)0;
+    data << (float)(SPEED_RUN);
+    m_caster->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", SPEED_RUN);
     //m_caster->SendAttackStart(pEnemy);
 }
 
@@ -2268,15 +2292,11 @@ void Spell::EffectTransmitted(uint32 i)
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
     pGameObj->SetUInt32Value(13, 0xBEE9E017 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
-    pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, goInfo->displayId);
-    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, goInfo->type);
-    pGameObj->SetUInt32Value(GAMEOBJECT_FLAGS, goInfo->flags);
-    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, goInfo->faction);
-    pGameObj->SetSespawnTimer(GetDuration(m_spellInfo));
+    pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");
-    m_caster->AddGameObject(pGameObj);
+    //m_caster->AddGameObject(pGameObj);
     //m_ObjToDel.push_back(pGameObj);
 
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);

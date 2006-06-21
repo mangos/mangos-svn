@@ -79,8 +79,6 @@ bool Pet::LoadPetFromDB( Unit* owner )
     if(owner->getClass() == CLASS_WARLOCK)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
-        SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
         SetUInt32Value(UNIT_FIELD_STAT0,22);
         SetUInt32Value(UNIT_FIELD_STAT1,22);
         SetUInt32Value(UNIT_FIELD_STAT2,25);
@@ -101,6 +99,8 @@ bool Pet::LoadPetFromDB( Unit* owner )
     }
     SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
     SetUInt32Value(UNIT_FIELD_POWER5,fields[11].GetUInt32());
+    SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
+    SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
 
     SetUInt32Value(UNIT_FIELD_FLAGS,0);

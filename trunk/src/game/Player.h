@@ -737,6 +737,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetRestTime() { return m_restTime;}
         void SetRestTime(uint32 v) { m_restTime = v;}
 
+        bool IsInWater(){return (m_isunderwater & 0x80);};
+
     protected:
         bool m_bgInBattleGround;
         uint8 m_bgBattleGroundID;

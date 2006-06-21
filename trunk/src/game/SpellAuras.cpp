@@ -471,8 +471,8 @@ void Aura::Update(uint32 diff)
             m_target->AttackStop();
             angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
             speed = m_target->GetSpeed();
-            x = m_target->GetPositionX() + speed*m_duration * cos(-angle);
-            y = m_target->GetPositionY() + speed*m_duration * sin(-angle);
+            x = m_target->GetPositionX() + speed*m_duration * cos(angle);
+            y = m_target->GetPositionY() + speed*m_duration * sin(angle);
             int mapid = m_target->GetMapId();
             z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
             m_target->SendMoveToPacket(x,y,z,true);
@@ -1327,18 +1327,15 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
-    float res_speed;
     if(apply)
-        res_speed = m_target->GetSpeed(MOVE_RUN) * (100.0f + (float)m_modifier->m_amount)/100.0f ;
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
     else
-        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(100.0f + (float)m_modifier->m_amount);
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
+    data.Initialize(MSG_MOVE_SET_RUN_SPEED);
     data << m_target->GetGUID();
-    data << (uint32)0;
-    data << res_speed;
+    data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
@@ -1347,18 +1344,18 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
-    float res_speed;
     if(apply)
-        res_speed = m_target->GetSpeed(MOVE_RUN) * (100.0f + (float)m_modifier->m_amount)/100.0f ;
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
     else
-        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(100.0f + (float)m_modifier->m_amount);
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
-    data << res_speed;
+    data << m_target->GetSpeed( MOVE_RUN );
+
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
@@ -1367,18 +1364,17 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
-    float res_speed;
     if(apply)
-        res_speed = m_target->GetSpeed(MOVE_RUN) * (100.0f + (float)m_modifier->m_amount)/100.0f ;
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier->m_amount + 100.0f ) / 100.0f );
     else
-        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(100.0f + (float)m_modifier->m_amount);
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier->m_amount + 100.0f ) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
-    data << res_speed;
+    data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
@@ -1387,18 +1383,17 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
-    float res_speed;
     if(apply)
-        res_speed = m_target->GetSpeed(MOVE_RUN) * (float)m_modifier->m_amount/100.0f;
+        m_target->SetSpeed( m_target->GetSpeed() * m_modifier->m_amount/100.0f );
     else
-        res_speed = m_target->GetSpeed(MOVE_RUN) * 100.0f/(float)m_modifier->m_amount;
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier->m_amount );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
     data << (uint32)0;
-    data << res_speed;
+    data << m_target->GetSpeed( MOVE_RUN );
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f",res_speed);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply)
@@ -1523,6 +1518,14 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
     if(apply)
     {
+        if(unit_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(((Player*)unit_target)->IsInWater())
+            {
+                if(m_modifier->m_miscvalue != FORM_AQUA )
+                    return;
+            }
+        }
         if(unit_target->m_ShapeShiftForm)
             unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
 
@@ -1794,23 +1797,21 @@ void Aura::HandleAuraTransform(bool apply)
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
+     sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
-    float res_speed;
     if(Apply)
-        res_speed = m_target->GetSpeed(MOVE_SWIM) * (100.0f + (float)m_modifier->m_amount)/100.0f;
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier->m_amount + 100.0f ) / 100.0f );
     else
-        res_speed = m_target->GetSpeed(MOVE_SWIM) * 100.0f/(100.0f + (float)m_modifier->m_amount);
-    data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE);
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier->m_amount + 100.0f ) );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
-    data << m_target->GetUInt32Value( OBJECT_FIELD_GUID );
-    data << m_target->GetUInt32Value( OBJECT_FIELD_GUID + 1 );
+    data << m_target->GetGUID();
     data << (uint32)0;
-    data << res_speed;
+    data << m_target->GetSpeed( MOVE_SWIM );
     m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", res_speed);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_SWIM));
 }
 
 // FIX-ME PLS!!!

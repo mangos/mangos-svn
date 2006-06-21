@@ -122,7 +122,12 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(recv_data.GetOpcode() == MSG_MOVE_STOP_SWIM && GetPlayer()->m_form == FORM_AQUA)
         GetPlayer()->RemoveAurasDueToSpell(GetPlayer()->m_ShapeShiftForm);
-    if(recv_data.GetOpcode() == MSG_MOVE_START_SWIM && GetPlayer()->m_form > 0 && GetPlayer()->m_form != FORM_AQUA)
+    if(recv_data.GetOpcode() == MSG_MOVE_START_SWIM 
+        && GetPlayer()->m_form > 0 
+        && GetPlayer()->m_form != FORM_AQUA
+        && GetPlayer()->m_form != FORM_DEFENSIVESTANCE
+        && GetPlayer()->m_form != FORM_BATTLESTANCE
+        && GetPlayer()->m_form != FORM_BERSERKERSTANCE)
         GetPlayer()->RemoveAurasDueToSpell(GetPlayer()->m_ShapeShiftForm);
 }
 
