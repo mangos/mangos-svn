@@ -222,75 +222,123 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Initialize data stores...");
     barGoLink bar( 14 );
-    bar.step();
+
+    bool dbc_ok = true;
 
     tmpPath=dataPath;
     tmpPath.append("dbc/EmotesText.dbc");
-    sEmoteStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sEmoteStore.Load(tmpPath.c_str())) 
+        bar.step(); 
+    else
+        dbc_ok = false; 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/Spell.dbc");
-    sSpellStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sSpellStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellRange.dbc");
-    sSpellRange.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sSpellRange.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellCastTimes.dbc");
-    sCastTime.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sCastTime.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellDuration.dbc");
-    sSpellDuration.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sSpellDuration.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellRadius.dbc");
-    sSpellRadius.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sSpellRadius.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/Talent.dbc");
-    sTalentStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sTalentStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/Faction.dbc");
-    sFactionStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sFactionStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/FactionTemplate.dbc");
-    sFactionTemplateStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sFactionTemplateStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/ItemDisplayInfo.dbc");
-    sItemDisplayTemplateStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sItemDisplayTemplateStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/ItemSet.dbc");
-    sItemSetStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sItemSetStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/AreaTable.dbc");
-    sAreaStore.Load((char *)(tmpPath.c_str()));
+    if(sAreaStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SkillLineAbility.dbc");
-    sSkillLineAbilityStore.Load((char *)(tmpPath.c_str()));
-    bar.step();
+    if(sSkillLineAbilityStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellItemEnchantment.dbc");
-    sSpellItemEnchantmentStore.Load((char *)(tmpPath.c_str()));
+    if(sSpellItemEnchantmentStore.Load(tmpPath.c_str()))
+        bar.step(); 
+    else
+        dbc_ok = false; 
+
+
+    if(!dbc_ok)
+    {
+        sLog.outError("\n\nIncorrect DataDir value in mangosd.conf or some required *.dbc files not found by path: %s/dbc",dataPath.c_str());
+        exit(1);
+    }
+
     bar.step();
 
     sLog.outString( "" );

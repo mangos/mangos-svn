@@ -67,16 +67,19 @@ class DBCStorage
             return nCount;
         }
 
-        void Load(char* fn)
+        bool Load(char const* fn)
         {
 
             dbc = new DBCFile;
             // Check if load was sucessful, only then continue
-            if (dbc->Load(fn))
+            bool res = dbc->Load(fn);
+            if (res)
             {
                 data=(T **) dbc->AutoProduceData(fmt,&nCount);
             }
             delete dbc;
+            
+            return res;
         }
 
         T** data;
