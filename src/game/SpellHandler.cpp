@@ -51,7 +51,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     uint8 msg = pUser->CanUseItem(pItem);
     if( msg != EQUIP_ERR_OK )
     {
-        pUser->SendEquipError( msg, pItem, NULL, 0 );
+        pUser->SendEquipError( msg, pItem, NULL );
         return;
     }
 

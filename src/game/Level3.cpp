@@ -1085,7 +1085,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     }
     else
     {
-        pl->SendEquipError( msg, NULL, NULL, 0 );
+        pl->SendEquipError( msg, NULL, NULL );
         FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CANNOT_CREATE, itemId, count));
     }
     m_session->SendPacket(&data);
@@ -1138,7 +1138,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
         }
         else
         {
-            pl->SendEquipError( msg, NULL, NULL, 0 );
+            pl->SendEquipError( msg, NULL, NULL );
             FillSystemMessageData(&data, m_session, fmtstring(LANG_ITEM_CANNOT_CREATE, itemId, 1));
         }
         m_session->SendPacket(&data);

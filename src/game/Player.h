@@ -369,7 +369,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddItemToBuyBackSlot( uint32 slot, Item *pItem );
         Item* GetItemFromBuyBackSlot( uint32 slot );
         void RemoveItemFromBuyBackSlot( uint32 slot );
-        void SendEquipError( uint8 msg, Item* pItem, Item *pItem2, uint32 param );
+        void SendEquipError( uint8 msg, Item* pItem, Item *pItem2 );
         void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
         void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
 

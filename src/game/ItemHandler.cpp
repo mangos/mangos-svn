@@ -109,7 +109,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
             }
         }
         else
-            _player->SendEquipError( msg, pItem, NULL, 0 );
+            _player->SendEquipError( msg, pItem, NULL );
     }
 }
 
@@ -253,7 +253,7 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
         {
             data.Initialize( SMSG_READ_ITEM_FAILED );
             sLog.outDetail("STORAGE: Unable to read item");
-            _player->SendEquipError( msg, pItem, NULL, 0 );
+            _player->SendEquipError( msg, pItem, NULL );
         }
         data << pItem->GetGUID();
         SendPacket(&data);
@@ -339,7 +339,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
                 _player->StoreItem( dest, pItem, true );
             }
             else
-                _player->SendEquipError( msg, pItem, NULL, 0);
+                _player->SendEquipError( msg, pItem, NULL );
             return;
         }
         _player->SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, pItem->GetEntry(), 0);
@@ -424,7 +424,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                         pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
                 }
                 else
-                    _player->SendEquipError( msg, NULL, NULL, 0);
+                    _player->SendEquipError( msg, NULL, NULL );
             }
         }
         return;
@@ -489,7 +489,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                     pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
             }
             else
-                _player->SendEquipError( msg, NULL, NULL, 0);
+                _player->SendEquipError( msg, NULL, NULL );
         }
         return;
     }
@@ -578,7 +578,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
             _player->StoreItem( dest, pItem, true );
         }
         else
-            _player->SendEquipError( msg, pItem, NULL, 0);
+            _player->SendEquipError( msg, pItem, NULL );
     }
 }
 
@@ -654,7 +654,7 @@ void WorldSession::HandleAutoBankItemOpcode(WorldPacket& recvPacket)
             _player->BankItem( dest, pItem, true );
         }
         else
-            _player->SendEquipError( msg, pItem, NULL, 0 );
+            _player->SendEquipError( msg, pItem, NULL );
     }
 }
 
@@ -677,7 +677,7 @@ void WorldSession::HandleAutoStoreBankItemOpcode(WorldPacket& recvPacket)
             _player->BankItem( dest, pItem, true );
         }
         else
-            _player->SendEquipError( msg, pItem, NULL, 0 );
+            _player->SendEquipError( msg, pItem, NULL );
     }
 }
 
@@ -696,7 +696,7 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
         if( msg == EQUIP_ERR_OK )
             GetPlayer()->SetUInt32Value(PLAYER_AMMO_ID, item);
         else
-            GetPlayer()->SendEquipError( msg, NULL, NULL, 0);
+            GetPlayer()->SendEquipError( msg, NULL, NULL );
     }
 }
 

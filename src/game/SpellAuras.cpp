@@ -1725,7 +1725,7 @@ void Aura::HandleChannelDeathItem(bool apply)
         if( msg == EQUIP_ERR_OK )
             ((Player*)m_caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
         else
-            ((Player*)m_caster)->SendEquipError( msg, NULL, NULL, 0 );
+            ((Player*)m_caster)->SendEquipError( msg, NULL, NULL );
     }
 }
 

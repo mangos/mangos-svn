@@ -6295,7 +6295,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     StoreItem( dest, pNewItem, true);
                 }
                 else
-                    SendEquipError( msg, pSrcItem, NULL, 0 );
+                    SendEquipError( msg, pSrcItem, NULL );
             }
             else if( IsBankPos ( dst ) )
             {
@@ -6308,7 +6308,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     BankItem( dest, pNewItem, true);
                 }
                 else
-                    SendEquipError( msg, pSrcItem, NULL, 0 );
+                    SendEquipError( msg, pSrcItem, NULL );
             }
             else if( IsEquipmentPos ( dst ) )
             {
@@ -6321,12 +6321,12 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     EquipItem( dest, pNewItem, true);
                 }
                 else
-                    SendEquipError( msg, pSrcItem, NULL, 0 );
+                    SendEquipError( msg, pSrcItem, NULL );
             }
             return;
         }
     }
-    SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, pSrcItem, NULL, 0 );
+    SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, pSrcItem, NULL );
 }
 
 void Player::SwapItem( uint16 src, uint16 dst )
@@ -6345,7 +6345,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
         sLog.outDebug( "STORAGE: SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
         if( srcslot == dstbag )
         {
-            SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem, 0);
+            SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem );
             return;
         }
         uint16 dest;
@@ -6362,7 +6362,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     return;
                 }
                 else
-                    SendEquipError( msg, pSrcItem, NULL, 0);
+                    SendEquipError( msg, pSrcItem, NULL );
             }
             else if( IsBankPos ( dst ) )
             {
@@ -6374,7 +6374,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     return;
                 }
                 else
-                    SendEquipError( msg, pSrcItem, NULL, 0);
+                    SendEquipError( msg, pSrcItem, NULL );
             }
             else if( IsEquipmentPos ( dst ) )
             {
@@ -6386,7 +6386,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     return;
                 }
                 else
-                    SendEquipError( msg, pSrcItem, NULL, 0);
+                    SendEquipError( msg, pSrcItem, NULL );
             }
         }
         else
@@ -6471,7 +6471,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     msg = CanStoreItem( srcbag, srcslot, dest2, pDstItem, true );
                     if( msg != EQUIP_ERR_OK )
                     {
-                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem, 0 );
+                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem );
                         return;
                     }
                 }
@@ -6480,7 +6480,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     msg = CanBankItem( srcbag, srcslot, dest2, pDstItem, true );
                     if( msg != EQUIP_ERR_OK )
                     {
-                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem, 0 );
+                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG, pSrcItem, pDstItem );
                         return;
                     }
                 }
@@ -6489,7 +6489,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     msg = CanEquipItem( srcslot, dest2, pDstItem, true);
                     if( msg != EQUIP_ERR_OK )
                     {
-                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, pSrcItem, pDstItem, 0 );
+                        SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, pSrcItem, pDstItem );
                         return;
                     }
                 }
@@ -6510,7 +6510,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                 return;
             }
             else
-                SendEquipError( msg, pSrcItem, pDstItem, 0 );
+                SendEquipError( msg, pSrcItem, pDstItem );
             return;
         }
     }
@@ -6566,14 +6566,14 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot )
     }
 }
 
-void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2, uint32 param )
+void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 {
     sLog.outDetail( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
     WorldPacket data;
     data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
     data << msg;
-    if( param > 0 )
-        data << param;
+    if( msg == EQUIP_ERR_YOU_MUST_REACH_LEVEL_N )
+        data << (pItem ? pItem->GetProto()->RequiredLevel : uint32(0));
     data << (pItem ? pItem->GetGUID() : uint64(0));
     data << (pItem2 ? pItem2->GetGUID() : uint64(0));
     data << uint8(0);
@@ -6772,7 +6772,7 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
             uint8 msg = CanStoreNewItem( 0, NULL_SLOT, dest, srcitem, count, false );
             if( msg != EQUIP_ERR_OK )
             {
-                SendEquipError( msg, NULL, NULL, 0 );
+                SendEquipError( msg, NULL, NULL );
                 return false;
             }
         }
@@ -6840,7 +6840,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
                 msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewChoiceItemId[reward], pQuest->GetQuestInfo()->RewChoiceItemCount[reward], false );
                 if( msg != EQUIP_ERR_OK )
                 {
-                    SendEquipError( msg, NULL, NULL, 0 );
+                    SendEquipError( msg, NULL, NULL );
                     return false;
                 }
             }
@@ -6855,7 +6855,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
                     msg = CanStoreNewItem( 0, NULL_SLOT, dest, pQuest->GetQuestInfo()->RewItemId[i], pQuest->GetQuestInfo()->RewItemCount[i], false );
                     if( msg != EQUIP_ERR_OK )
                     {
-                        SendEquipError( msg, NULL, NULL, 0 );
+                        SendEquipError( msg, NULL, NULL );
                         return false;
                     }
                 }
@@ -7207,7 +7207,7 @@ bool Player::GiveQuestSourceItem( Quest *pQuest )
                 return true;
             }
             else
-                SendEquipError( msg, NULL, NULL, 0);
+                SendEquipError( msg, NULL, NULL );
             return false;
         }
     }
