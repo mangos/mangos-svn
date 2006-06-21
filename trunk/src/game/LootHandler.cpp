@@ -65,7 +65,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     if ((item == NULL) || (item->is_looted))
     {
-        player->SendEquipError( EQUIP_ERR_ALREADY_LOOTED, NULL, NULL, 0);
+        player->SendEquipError( EQUIP_ERR_ALREADY_LOOTED, NULL, NULL );
         return;
     }
 
@@ -99,7 +99,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         SendPacket( &data );
     }
     else
-        player->SendEquipError( msg, NULL, NULL, 0);
+        player->SendEquipError( msg, NULL, NULL );
 }
 
 void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )

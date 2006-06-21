@@ -380,7 +380,7 @@ void Spell::EffectCreateItem(uint32 i)
         player->UpdateSkillPro(m_spellInfo->Id);
     }
     else
-        player->SendEquipError( msg, NULL, NULL, 0 );
+        player->SendEquipError( msg, NULL, NULL );
 }
 
 void Spell::EffectPresistentAA(uint32 i)
@@ -606,7 +606,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
         player->DestroyItemCount(pItem->GetEntry(),1,true);
     }
     else
-        player->SendEquipError( msg, NULL, NULL, 0 );
+        player->SendEquipError( msg, NULL, NULL );
 }
 
 void Spell::EffectOpenSecretSafe(uint32 i)
@@ -1997,7 +1997,7 @@ void Spell::EffectDisEnchant(uint32 i)
     if( msg == EQUIP_ERR_OK )
         player->StoreNewItem( dest, item, count, true );
     else
-        player->SendEquipError( msg, NULL, NULL, 0);
+        player->SendEquipError( msg, NULL, NULL );
     return ;
 }
 

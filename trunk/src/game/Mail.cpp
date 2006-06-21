@@ -228,7 +228,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         SendPacket(&data);
     }
     else
-        _player->SendEquipError( msg, it, NULL, 0);
+        _player->SendEquipError( msg, it, NULL );
 }
 
 void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
@@ -464,7 +464,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
     if( msg == EQUIP_ERR_OK )
         _player->StoreItem(dest, item, true);
     else
-        _player->SendEquipError( msg, item, NULL, 0);
+        _player->SendEquipError( msg, item, NULL );
 }
 
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
