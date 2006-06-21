@@ -129,104 +129,100 @@ extern void CheckItemDamageValues ( ItemPrototype *itemProto );
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
+
     WorldPacket data;
+    data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
 
-    uint32 itemId, guidLow, guidHigh;
-    recv_data >> itemId >> guidLow >> guidHigh;
+    uint32 item, guidLow, guidHigh;
+    recv_data >> item >> guidLow >> guidHigh;
 
-    ItemPrototype *itemProto = objmgr.GetItemPrototype(itemId);
+    sLog.outDetail("STORAGE: Item Query = %u", item);
 
-    if (!itemProto)
+    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    if( pProto )
     {
-        sLog.outError("ITEM: Unknown item, itemId = %u", itemId);
-        data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
-        data << itemId;
-        for(int a=0;a<11;a++)
+        data << pProto->ItemId;
+        data << pProto->Class;
+        data << pProto->SubClass;
+        data << pProto->Name1;
+        data << pProto->Name2;
+        data << pProto->Name3;
+        data << pProto->Name4;
+        data << pProto->DisplayInfoID;
+        data << pProto->Quality;
+        data << pProto->Flags;
+        data << pProto->BuyPrice;
+        data << pProto->SellPrice;
+        data << pProto->InventoryType;
+        data << pProto->AllowableClass;
+        data << pProto->AllowableRace;
+        data << pProto->ItemLevel;
+        data << pProto->RequiredLevel;
+        data << pProto->RequiredSkill;
+        data << pProto->RequiredSkillRank;
+        data << pProto->RequiredSpell;
+        data << pProto->RequiredHonorRank;
+        data << pProto->RequiredCityRank;
+        data << pProto->RequiredReputationFaction;
+        data << pProto->RequiredReputationRank;
+        data << pProto->MaxCount;
+        data << pProto->Stackable;
+        data << pProto->ContainerSlots;
+        for(int i = 0; i < 10; i++)
+        {
+            data << pProto->ItemStat[i].ItemStatType;
+            data << pProto->ItemStat[i].ItemStatValue;
+        }
+        for(int i = 0; i < 5; i++)
+        {
+            data << pProto->Damage[i].DamageMin;
+            data << pProto->Damage[i].DamageMax;
+            data << pProto->Damage[i].DamageType;
+        }
+        data << pProto->Armor;
+        data << pProto->HolyRes;
+        data << pProto->FireRes;
+        data << pProto->NatureRes;
+        data << pProto->FrostRes;
+        data << pProto->ShadowRes;
+        data << pProto->ArcaneRes;
+        data << pProto->Delay;
+        data << pProto->Ammo_type;
+        
+        data << (float)pProto->RangedModRange;
+        for(int s = 0; s < 5; s++)
+        {
+            data << pProto->Spells[s].SpellId;
+            data << pProto->Spells[s].SpellTrigger;
+            data << pProto->Spells[s].SpellCharges;
+            data << pProto->Spells[s].SpellCooldown;
+            data << pProto->Spells[s].SpellCategory;
+            data << pProto->Spells[s].SpellCategoryCooldown;
+        }
+        data << pProto->Bonding;
+        data << pProto->Description;
+        data << pProto->PageText;
+        data << pProto->LanguageID;
+        data << pProto->PageMaterial;
+        data << pProto->StartQuest;
+        data << pProto->LockID;
+        data << pProto->Material;
+        data << pProto->Sheath;
+        data << pProto->Extra;
+        data << pProto->Block;
+        data << pProto->ItemSet;
+        data << pProto->MaxDurability;
+        data << pProto->Area;
+        data << pProto->Unknown1;
+    }
+    else
+    {
+        data << item;
+        for(int a = 0; a < 11; a++)
             data << uint64(0);
         SendPacket( &data );
         return;
     }
-
-    sLog.outDetail("ITEM: Item query, itemId = %u, guidLow = %u, guidHigh = %u", itemId, guidLow, guidHigh);
-
-    data.Initialize( SMSG_ITEM_QUERY_SINGLE_RESPONSE );
-    data << itemProto->ItemId;
-    data << itemProto->Class;
-    data << itemProto->SubClass;
-    data << itemProto->Name1;
-    data << itemProto->Name2;
-    data << itemProto->Name3;
-    data << itemProto->Name4;
-    data << itemProto->DisplayInfoID;
-    data << itemProto->Quality;
-    data << itemProto->Flags;
-    data << itemProto->BuyPrice;
-    data << itemProto->SellPrice;
-    data << itemProto->InventoryType;
-    data << itemProto->AllowableClass;
-    data << itemProto->AllowableRace;
-    data << itemProto->ItemLevel;
-    data << itemProto->RequiredLevel;
-    data << itemProto->RequiredSkill;
-    data << itemProto->RequiredSkillRank;
-    data << itemProto->RequiredSpell;
-    data << itemProto->RequiredHonorRank;
-    data << itemProto->RequiredCityRank;
-    data << itemProto->RequiredReputationFaction;
-    data << itemProto->RequiredReputationRank;
-    data << itemProto->MaxCount;
-    data << itemProto->Stackable;
-    data << itemProto->ContainerSlots;
-    for(int i = 0; i < 10; i++)
-    {
-        data << itemProto->ItemStat[i].ItemStatType;
-        data << itemProto->ItemStat[i].ItemStatValue;
-    }
-    for(int i = 0; i < 5; i++)
-    {
-        data << itemProto->Damage[i].DamageMin;
-        data << itemProto->Damage[i].DamageMax;
-        data << itemProto->Damage[i].DamageType;
-    }
-    data << itemProto->Armor;
-    data << itemProto->HolyRes;
-    data << itemProto->FireRes;
-    data << itemProto->NatureRes;
-    data << itemProto->FrostRes;
-    data << itemProto->ShadowRes;
-    data << itemProto->ArcaneRes;
-    data << itemProto->Delay;
-    data << itemProto->Ammo_type;
-
-    data << (float)itemProto->RangedModRange;
-
-    for(int s = 0; s < 5; s++)
-    {
-        data << itemProto->Spells[s].SpellId;
-        data << itemProto->Spells[s].SpellTrigger;
-        data << itemProto->Spells[s].SpellCharges;
-        data << itemProto->Spells[s].SpellCooldown;
-        data << itemProto->Spells[s].SpellCategory;
-        data << itemProto->Spells[s].SpellCategoryCooldown;
-    }
-    data << itemProto->Bonding;
-    data << itemProto->Description;
-    data << itemProto->PageText;
-    data << itemProto->LanguageID;
-    data << itemProto->PageMaterial;
-    data << itemProto->StartQuest;
-    data << itemProto->LockID;
-    data << itemProto->Material;
-    data << itemProto->Sheath;
-    data << itemProto->Extra;
-    data << itemProto->Block;
-    data << itemProto->ItemSet;
-    data << itemProto->MaxDurability;
-    data << itemProto->Area;
-    data << itemProto->Unknown1;                            //unknown1
-
-    //TODO FIX THIS
-    //WPAssert(data.size() == 454 + strlen(itemProto->Name1) + strlen(itemProto->Name2) + strlen(itemProto->Name3) + strlen(itemProto->Name4) + strlen(itemProto->Description));
     SendPacket( &data );
 }
 
@@ -237,24 +233,27 @@ extern char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subcla
 void WorldSession::HandleReadItem( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: CMSG_READ_ITEM");
-    uint8 bagIndex, slot;
+
     WorldPacket data;
-    recv_data >> bagIndex >> slot;
+    uint8 bag, slot;
+    recv_data >> bag >> slot;
 
-    sLog.outDetail("ITEM: Read, bagIndex = %u, slot = %u", bagIndex, slot);
-    Item *pItem = _player->GetItemByPos( bagIndex, slot );
+    sLog.outDetail("STORAGE: Read bag = %u, slot = %u", bag, slot);
+    Item *pItem = _player->GetItemByPos( bag, slot );
 
-    if (pItem)
+    if( pItem && pItem->GetProto()->PageText )
     {
-        if ((!pItem->GetProto()->PageText) || (_player->isInCombat()) || (_player->isDead()))
+        uint8 msg = _player->CanUseItem( pItem );
+        if( msg == EQUIP_ERR_OK )
         {
-            data.Initialize( SMSG_READ_ITEM_FAILED );
-            sLog.outDetail("ITEM: Unable to read item");
+            data.Initialize (SMSG_READ_ITEM_OK);
+            sLog.outDetail("STORAGE: Item page sent");
         }
         else
         {
-            data.Initialize (SMSG_READ_ITEM_OK);
-            sLog.outDetail("ITEM: Item page sent");
+            data.Initialize( SMSG_READ_ITEM_FAILED );
+            sLog.outDetail("STORAGE: Unable to read item");
+            _player->SendEquipError( msg, pItem, NULL, 0 );
         }
         data << pItem->GetGUID();
         SendPacket(&data);
