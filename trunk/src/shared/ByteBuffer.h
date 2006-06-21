@@ -256,13 +256,13 @@ class ByteBuffer
             printf("\n");
         }
 
-		void textlike()
-		{
-			printf("STORAGE_SIZE: %u\n", size() );
+        void textlike()
+        {
+            printf("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
                 printf("%c", read<uint8>(i) );
             printf("\n");
-		}
+        }
 
         void hexlike()
         {

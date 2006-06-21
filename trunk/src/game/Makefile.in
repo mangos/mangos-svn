@@ -65,12 +65,12 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libgame_a_AR = $(AR) $(ARFLAGS)
 libgame_a_LIBADD =
-am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) AuctionHouse.$(OBJEXT) \
-	Bag.$(OBJEXT) Base.$(OBJEXT) BattleGround.$(OBJEXT) \
-	BattleGroundHandler.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
-	Channel.$(OBJEXT) ChannelHandler.$(OBJEXT) \
-	CharacterHandler.$(OBJEXT) Chat.$(OBJEXT) \
-	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
+am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
+	AuctionHouse.$(OBJEXT) Bag.$(OBJEXT) Base.$(OBJEXT) \
+	BattleGround.$(OBJEXT) BattleGroundHandler.$(OBJEXT) \
+	BattleGroundMgr.$(OBJEXT) Channel.$(OBJEXT) \
+	ChannelHandler.$(OBJEXT) CharacterHandler.$(OBJEXT) \
+	Chat.$(OBJEXT) ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
 	Container.$(OBJEXT) Corpse.$(OBJEXT) CreatureAI.$(OBJEXT) \
 	CreatureAIRegistry.$(OBJEXT) CreatureAISelector.$(OBJEXT) \
 	Creature.$(OBJEXT) debugcmds.$(OBJEXT) \

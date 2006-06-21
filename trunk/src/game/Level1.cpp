@@ -1299,7 +1299,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     }
     char *name = (char*)args;
     result = sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
-    if (!result) 
+    if (!result)
     {
         WorldPacket data;
         FillSystemMessageData(&data, m_session, "Teleport location not found!");

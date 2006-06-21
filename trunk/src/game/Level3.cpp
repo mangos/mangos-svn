@@ -1509,14 +1509,14 @@ bool ChatHandler::GetCurrentGraveId(uint32& id )
 
     QueryResult *result = sDatabase.PQuery(
         "SELECT `id` FROM `areatrigger_graveyard` "
-        "WHERE  `map` = %u AND (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) < 50*50;", 
+        "WHERE  `map` = %u AND (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) < 50*50;",
         player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
-    
-    if(result) 
+
+    if(result)
     {
         Field *fields = result->Fetch();
         id = fields[0].GetUInt32();
-        
+
         delete result;
 
         return true;
@@ -1534,9 +1534,8 @@ void ChatHandler::LinkGraveIfNeed(uint32 g_id)
     Player* player = m_session->GetPlayer();
 
     QueryResult *result = sDatabase.PQuery(
-        "SELECT `id` FROM `areatrigger_graveyard_zone` WHERE `id` = %u AND `ghost_map` = %u AND `ghost_zone` =%u;", 
+        "SELECT `id` FROM `areatrigger_graveyard_zone` WHERE `id` = %u AND `ghost_map` = %u AND `ghost_zone` =%u;",
         g_id,player->GetMapId(),player->GetZoneId());
-
 
     if(result)
     {
@@ -1595,7 +1594,7 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
     }
     else
     {
-        // new graveyard 
+        // new graveyard
         sDatabase.PExecute("INSERT INTO `areatrigger_graveyard` ( `position_x`,`position_y`,`position_z`,`orientation`,`map`,`faction`) "
             "VALUES ('%f', '%f', '%f', '%f', '%u', '%u');",
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), player->GetMapId(), g_team );
@@ -1611,7 +1610,7 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
         {
             FillSystemMessageData(&data, m_session, "Graveyard NOT added. Unknown error.");
             m_session->SendPacket(&data);
-            return true; 
+            return true;
         }
     }
 
@@ -1681,15 +1680,17 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
             "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`areatrigger_graveyard`.`id`,`faction` "
             "FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
             "WHERE  `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
-            "ORDER BY `distance` ASC LIMIT 1;", 
+            "ORDER BY `distance` ASC LIMIT 1;",
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetZoneId());
-    }else{
+    }
+    else
+    {
         result = sDatabase.PQuery(
             "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`areatrigger_graveyard`.`id`,`faction` "
             "FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
             "WHERE  `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
             "        AND (`faction` = %u OR `faction` = 0 ) "
-            "ORDER BY `distance` ASC LIMIT 1;", 
+            "ORDER BY `distance` ASC LIMIT 1;",
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetZoneId(),g_team);
     }
 
@@ -1739,7 +1740,6 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
 
     return true;
 }
-
 
 bool ChatHandler::HandleAddSHCommand(const char *args)
 {
@@ -2395,17 +2395,17 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     if (!player) return false;
     char *name=(char*)args;
     result = sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
-    if (result) 
+    if (result)
     {
         WorldPacket data;
         FillSystemMessageData(&data, m_session, "Teleport location already exists!");
-        m_session->SendPacket( &data );    
+        m_session->SendPacket( &data );
         delete result;
         return true;
     }
     int id;
     result = sDatabase.Query("SELECT MAX(id) FROM areatrigger_tele;");
-    if (!result) 
+    if (!result)
         id = 0;
     else
         id = result->Fetch()->GetUInt16()+1;
@@ -2426,11 +2426,11 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
         return false;
     char *name=(char*)args;
     QueryResult *result=sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
-    if (!result) 
+    if (!result)
     {
         WorldPacket data;
         FillSystemMessageData(&data, m_session, "Teleport location not found!");
-        m_session->SendPacket( &data );    
+        m_session->SendPacket( &data );
         return true;
     }
     delete result;

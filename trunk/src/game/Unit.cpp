@@ -282,8 +282,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         if ((pVictim->GetTypeId() == TYPEID_UNIT) )
             ((Creature*)pVictim)->generateLoot();
 
-		DEBUG_LOG("SET JUST_DIED");
-		pVictim->setDeathState(JUST_DIED);
+        DEBUG_LOG("SET JUST_DIED");
+        pVictim->setDeathState(JUST_DIED);
 
         uint64 attackerGuid, victimGuid;
         attackerGuid = GetGUID();
@@ -1227,7 +1227,7 @@ void Unit::ApplyStats(bool apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
 
     val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
-        //if(val > GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) && !apply) val = 0;
+    //if(val > GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) && !apply) val = 0;
     apply ?
         SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)+val):
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)-val);
@@ -1454,7 +1454,7 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
     if(enchant_display ==4)
     {
         apply ?
-        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1):
+            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1):
         SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
     }
     else if(enchant_display ==2)
@@ -1462,19 +1462,19 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
         if(getClass() == CLASS_HUNTER)
         {
             apply?
-            SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)+enchant_value1):
+                SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)+enchant_value1):
             SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)-enchant_value1);
             apply?
-            SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)+enchant_value1):
+                SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)+enchant_value1):
             SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)-enchant_value1);
         }
         else
         {
             apply?
-            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1):
+                SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1):
             SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
             apply?
-            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1):
+                SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1):
             SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
         }
     }

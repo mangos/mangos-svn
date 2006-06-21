@@ -168,11 +168,11 @@ void PetAI::UpdateAI(const uint32 diff)
         {
             AttackStart(i_owner->getAttackerForHelper());
         }
-		else if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
-		{
-			i_pet.addUnitState(UNIT_STAT_FOLLOW);
-			i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
-		}
+        else if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
+        {
+            i_pet.addUnitState(UNIT_STAT_FOLLOW);
+            i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
+        }
     }
 }
 

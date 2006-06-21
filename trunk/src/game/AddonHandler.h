@@ -37,22 +37,26 @@ class AddonHandler
         /* Construction */
         AddonHandler();
         ~AddonHandler();
-       
-        void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);                       //built addon packet
-        bool GetAddonStatus(AddOns* Target, bool* Allowed);                                                         //get addon status, it checks the name.
-        
+
+                                                            //built addon packet
+        void BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, uint32 Packetoffset);
+        bool GetAddonStatus(AddOns* Target, bool* Allowed); //get addon status, it checks the name.
+
         void _SaveToDB(void);
         bool _LoadFromDB(void);
         void _AddAddon(AddOns*);
         uint8 _removeAddon(std::string*);
         void SetAddonDefault(bool Value) { m_Addon_Default = Value; }
         bool GetAddonDefault(void) { return m_Addon_Default; }
-        void LoadAddonDefault(void) { SetAddonDefault(sConfig.GetBoolDefault("AddonDefault", 1)); }                 //load the default value from Conf file
-        
+        void LoadAddonDefault(void)                         //load the default value from Conf file
+        {
+            SetAddonDefault(sConfig.GetBoolDefault("AddonDefault", 1));
+        }
+
     private:
-        
+
         //! Addon data
-        std::list<AddOns*> m_Addon_data; // contains all the addon names and crc checks
+        std::list<AddOns*> m_Addon_data;                    // contains all the addon names and crc checks
         bool m_Addon_Default;
 };
 #define sAddOnHandler MaNGOS::Singleton<AddonHandler>::Instance()

@@ -24,7 +24,6 @@
 #include "ScriptCalls.h"
 #include "AddonHandler.h"
 
-
 #ifdef ENABLE_CLI
 #include "CliRunnable.h"
 
@@ -58,8 +57,6 @@ void CliDelete(char*,pPrintf);
 void CliLoadScripts(char*,pPrintf);
 void CliLoadAddons(char*,pPrintf);
 void CliKick(char*,pPrintf);
-
-
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -103,7 +100,6 @@ bool IsItIP(char* banip)
     return true;
 }
 
-
 void CliLoadAddons(char*command,pPrintf zprintf)
 {
     char *del;
@@ -112,7 +108,7 @@ void CliLoadAddons(char*command,pPrintf zprintf)
         x++;
     del=&command[x];
     if (!sAddOnHandler._LoadFromDB()) return;
-    
+
     sWorld.SendWorldText("|cffff0000[System Message]:|rAddons reloaded", NULL);
 }
 
