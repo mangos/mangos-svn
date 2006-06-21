@@ -339,8 +339,6 @@ void World::SetInitialWorldSettings()
         exit(1);
     }
 
-    bar.step();
-
     sLog.outString( "" );
     sLog.outString( ">> Loaded 14 data stores" );
     sLog.outString( "" );
