@@ -406,7 +406,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
                         StoreItem( dest, pItem, true);
                     else
                     {
-                        sLog.outDebug("ITEM: Can't store item, error msg = %u",msg);
+                        sLog.outDebug("STORAGE: Can't store item, error msg = %u",msg);
                         delete pItem;
                     }
                 }
@@ -417,7 +417,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
                         EquipItem( dest, pItem, true);
                     else
                     {
-                        sLog.outDebug("ITEM: Can't equip item, error msg = %u",msg);
+                        sLog.outDebug("STORAGE: Can't equip item, error msg = %u",msg);
                         delete pItem;
                     }
                 }
@@ -428,7 +428,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
                         BankItem( dest, pItem, true);
                     else
                     {
-                        sLog.outDebug("ITEM: Can't bank item, error msg = %u",msg);
+                        sLog.outDebug("STORAGE: Can't bank item, error msg = %u",msg);
                         delete pItem;
                     }
                 }
@@ -2974,8 +2974,8 @@ void Player::DuelComplete()
     GetSession()->SendPacket(&data);
     m_pDuel->GetSession()->SendPacket(&data);
 
-	//Player kneel when finish the duel
-	HandleEmoteCommand(EMOTE_STATE_KNEEL);
+    //Player kneel when finish the duel
+    HandleEmoteCommand(EMOTE_STATE_KNEEL);
 
     SetInDuel(false);
     m_pDuel->SetInDuel(false);
@@ -5148,7 +5148,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
     dest = 0;
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : CanStoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
+        sLog.outDebug( "STORAGE: CanStoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
@@ -5406,7 +5406,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     pItem2 = GetItemByPos( bag, slot );
                     if( pItem2 && !swap )
                     {
-                        if( pProto->Stackable > 1 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
+                        if( pProto->Stackable > 1 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() < pProto->Stackable )
                         {
                             dest = ( (bag << 8) | slot );
                             return EQUIP_ERR_OK;
@@ -5455,7 +5455,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
     dest = 0;
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
+        sLog.outDebug( "STORAGE: CanEquipItem slot = %u, item = %u, count = %u", slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
@@ -5508,7 +5508,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
     dest = 0;
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : CanBankItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
+        sLog.outDebug( "STORAGE: CanBankItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
@@ -5832,7 +5832,7 @@ uint8 Player::CanUseItem( Item *pItem )
 {
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : CanUseItem item = %u", pItem->GetEntry());
+        sLog.outDebug( "STORAGE: CanUseItem item = %u", pItem->GetEntry());
         if( isDead() )
             return EQUIP_ERR_YOU_ARE_DEAD;
         //if( isStunned() )
@@ -5873,7 +5873,7 @@ uint8 Player::CanUseItem( Item *pItem )
 
 uint8 Player::CanUseAmmo( uint32 item )
 {
-    sLog.outDebug( "STORAGE : CanUseAmmo item = %u", item);
+    sLog.outDebug( "STORAGE: CanUseAmmo item = %u", item);
     if( isDead() )
         return EQUIP_ERR_YOU_ARE_DEAD;
     //if( isStunned() )
@@ -5926,7 +5926,7 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
 
-        sLog.outDebug( "STORAGE : StoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
+        sLog.outDebug( "STORAGE: StoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
 
         Item *pItem2 = GetItemByPos( bag, slot );
 
@@ -5978,7 +5978,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
 
-        sLog.outDebug( "STORAGE : EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE: EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         m_items[slot] = pItem;
         SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
@@ -6023,7 +6023,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
     Item *pItem = GetItemByPos( bag, slot );
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE: RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
@@ -6064,7 +6064,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
 
 void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
 {
-    sLog.outDebug( "STORAGE : RemoveItemCount item = %u, count = %u", item, count);
+    sLog.outDebug( "STORAGE: RemoveItemCount item = %u, count = %u", item, count);
     Item *pItem;
     uint32 remcount = 0;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
@@ -6125,7 +6125,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     Item *pItem = GetItemByPos( bag, slot );
     if( pItem )
     {
-        sLog.outDebug( "STORAGE : DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+        sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
         pItem->SetOwner(0);
         pItem->SetSlot( 0 );
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
@@ -6204,7 +6204,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
 void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
 {
-    sLog.outDebug( "STORAGE : DestroyItemCount item = %u, count = %u", item, count);
+    sLog.outDebug( "STORAGE: DestroyItemCount item = %u, count = %u", item, count);
     Item *pItem;
     ItemPrototype *pProto;
     uint32 remcount = 0;
@@ -6278,7 +6278,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
     Item *pSrcItem = GetItemByPos( srcbag, srcslot );
     if( pSrcItem )
     {
-        sLog.outDebug( "STORAGE : SplitItem bag = %u, slot = %u, item = %u, count = %u", dstbag, dstslot, pSrcItem->GetEntry(), count);
+        sLog.outDebug( "STORAGE: SplitItem bag = %u, slot = %u, item = %u, count = %u", dstbag, dstslot, pSrcItem->GetEntry(), count);
         Item *pNewItem = CreateItem( pSrcItem->GetEntry(), count );
         if( pNewItem )
         {
@@ -6342,7 +6342,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
 
     if( pSrcItem )
     {
-        sLog.outDebug( "STORAGE : SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
+        sLog.outDebug( "STORAGE: SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
         if( srcslot == dstbag )
         {
             SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem, 0);
@@ -6395,8 +6395,21 @@ void Player::SwapItem( uint16 src, uint16 dst )
             {
                 if( CanStoreItem( dstbag, dstslot, dest, pSrcItem, false ) == EQUIP_ERR_OK )
                 {
-                    RemoveItem(srcbag, srcslot, true);
-                    StoreItem( dest, pSrcItem, true);
+                    if( pSrcItem->GetCount() + pDstItem->GetCount() <= pSrcItem->GetProto()->Stackable )
+                    {
+                        RemoveItem(srcbag, srcslot, true);
+                        StoreItem( dest, pSrcItem, true);
+                    }
+                    else
+                    {
+                        pSrcItem->SetCount( pSrcItem->GetCount() + pDstItem->GetCount() - pSrcItem->GetProto()->Stackable );
+                        pDstItem->SetCount( pSrcItem->GetProto()->Stackable );
+                        if( IsInWorld() )
+                        {
+                            pSrcItem->SendUpdateToPlayer( this );
+                            pDstItem->SendUpdateToPlayer( this );
+                        }
+                    }
                     return;
                 }
             }
@@ -6404,8 +6417,21 @@ void Player::SwapItem( uint16 src, uint16 dst )
             {
                 if( CanBankItem( dstbag, dstslot, dest, pSrcItem, false ) == EQUIP_ERR_OK )
                 {
-                    RemoveItem(srcbag, srcslot, true);
-                    BankItem( dest, pSrcItem, true);
+                    if( pSrcItem->GetCount() + pDstItem->GetCount() <= pSrcItem->GetProto()->Stackable )
+                    {
+                        RemoveItem(srcbag, srcslot, true);
+                        BankItem( dest, pSrcItem, true);
+                    }
+                    else
+                    {
+                        pSrcItem->SetCount( pSrcItem->GetCount() + pDstItem->GetCount() - pSrcItem->GetProto()->Stackable );
+                        pDstItem->SetCount( pSrcItem->GetProto()->Stackable );
+                        if( IsInWorld() )
+                        {
+                            pSrcItem->SendUpdateToPlayer( this );
+                            pDstItem->SendUpdateToPlayer( this );
+                        }
+                    }
                     return;
                 }
             }
@@ -6413,8 +6439,21 @@ void Player::SwapItem( uint16 src, uint16 dst )
             {
                 if( CanEquipItem( dstslot, dest, pSrcItem, false ) == EQUIP_ERR_OK )
                 {
-                    RemoveItem(srcbag, srcslot, true);
-                    EquipItem( dest, pSrcItem, true);
+                    if( pSrcItem->GetCount() + pDstItem->GetCount() <= pSrcItem->GetProto()->Stackable )
+                    {
+                        RemoveItem(srcbag, srcslot, true);
+                        EquipItem( dest, pSrcItem, true);
+                    }
+                    else
+                    {
+                        pSrcItem->SetCount( pSrcItem->GetCount() + pDstItem->GetCount() - pSrcItem->GetProto()->Stackable );
+                        pDstItem->SetCount( pSrcItem->GetProto()->Stackable );
+                        if( IsInWorld() )
+                        {
+                            pSrcItem->SendUpdateToPlayer( this );
+                            pDstItem->SendUpdateToPlayer( this );
+                        }
+                    }
                     return;
                 }
             }
@@ -6484,7 +6523,7 @@ void Player::AddItemToBuyBackSlot( uint32 slot, Item *pItem )
         if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
         {
             RemoveItemFromBuyBackSlot( slot );
-            sLog.outDebug( "STORAGE : AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
+            sLog.outDebug( "STORAGE: AddItemToBuyBackSlot item = %u, slot = %u", pItem->GetEntry(), slot);
             uint32 eslot = slot - BUYBACK_SLOT_START;
 
             m_buybackitems[eslot] = pItem;
@@ -6504,7 +6543,7 @@ void Player::AddItemToBuyBackSlot( uint32 slot, Item *pItem )
 
 Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 {
-    sLog.outDebug( "STORAGE : GetItemFromBuyBackSlot slot = %u", slot);
+    sLog.outDebug( "STORAGE: GetItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
         return m_buybackitems[slot - BUYBACK_SLOT_START];
     return NULL;
@@ -6512,7 +6551,7 @@ Item* Player::GetItemFromBuyBackSlot( uint32 slot )
 
 void Player::RemoveItemFromBuyBackSlot( uint32 slot )
 {
-    sLog.outDebug( "STORAGE : RemoveItemFromBuyBackSlot slot = %u", slot);
+    sLog.outDebug( "STORAGE: RemoveItemFromBuyBackSlot slot = %u", slot);
     if( slot >= BUYBACK_SLOT_START && slot < BUYBACK_SLOT_END )
     {
         uint32 eslot = slot - BUYBACK_SLOT_START;
@@ -6880,9 +6919,6 @@ void Player::CompleteQuest( Quest *pQuest )
     if( pQuest )
     {
         SetQuestStatus( pQuest, QUEST_STATUS_COMPLETE);
-
-        if( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO ) )
-            SendQuestComplete( pQuest );
 
         uint16 log_slot = GetQuestSlot( pQuest );
         if( log_slot )
