@@ -212,7 +212,7 @@ void AuthSocket::_HandleLogonChallenge()
                         acct=fields[0].GetUInt32();
                         delete resultAcct;
 
-                        QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `account` = '%u';",acct);
+                        QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `id` = '%u';",acct);
                         if(result)
                         {
                             delete result;
