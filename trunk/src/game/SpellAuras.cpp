@@ -970,8 +970,8 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
 
 void Aura::HandleAuraModResistanceExclusive(bool apply)
 {
-    uint32 index = 0;
-    uint32 index2 = 0;
+    uint16 index = 0;
+    uint16 index2 = 0;
     switch(m_modifier->m_miscvalue)
     {
         case 1:
@@ -1152,16 +1152,15 @@ void Aura::HandleInvisibilityDetect(bool Apply)
 
 void Aura::HandleAuraModResistance(bool apply)
 {
-    uint32 index = 0;
-    uint32 index2 = 0;
+    uint16 index = 0;
+    uint16 index2 = 0;
     switch(m_modifier->m_miscvalue)
     {
         case 1:
-			{
+        {
             index = UNIT_FIELD_ARMOR;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
-            }
-	    break;
+        }break;
         case IMMUNE_SCHOOL_HOLY:
         {
             index = UNIT_FIELD_RESISTANCES_01;
@@ -1234,7 +1233,7 @@ void Aura::HandleAuraModResistance(bool apply)
         if(m_target->GetTypeId() == TYPEID_PLAYER)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
     }
-};
+}
 void Aura::HandleAuraModRoot(bool apply)
 {
     uint32 apply_stat = UNIT_STAT_ROOT;
@@ -1431,7 +1430,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply)
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply)
 {
-    uint32 powerField = 23;
+    uint16 powerField = UNIT_FIELD_POWER1;
     uint8 powerType = m_target->getPowerType();
     if(powerType != m_modifier->m_miscvalue)
         return;
@@ -1998,9 +1997,8 @@ void Aura::HandleModResistancePercent(bool apply)
 
 void Aura::HandleAuraModBaseResistancePCT(bool apply)
 {
-    HandleModResistancePercent(apply);
-    uint32 index = 0;
-    uint32 index2 = 0;
+    uint16 index = 0;
+    uint16 index2 = 0;
     switch(m_modifier->m_miscvalue)
     {
         case 1:

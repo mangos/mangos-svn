@@ -204,7 +204,7 @@ void Spell::FillTargetMap()
                                                             // EnchantHeldItem
             else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
                                                             // Resurrect
-            else if(m_spellInfo->Effect[i] == 113) tmpUnitMap.push_back(m_targets.getUnitTarget());
+            //else if(m_spellInfo->Effect[i] == 113) tmpUnitMap.push_back(m_targets.getUnitTarget());
                                                             // FeedPet/LearnPetSpell
             else if(m_spellInfo->Effect[i] == 101 || m_spellInfo->Effect[i] == 57)
                 SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
