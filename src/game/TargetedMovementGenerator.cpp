@@ -43,11 +43,13 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner, float offset)
 {
     if( !&i_target || !&owner )
         return;
+
+    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
+        return;
+
     float x, y, z;
     i_target.GetContactPoint( &owner, x, y, z );
     Traveller<Creature> traveller(owner);
-    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
-        return;
     i_destinationHolder.SetDestination(traveller, x, y, z, offset);
 }
 
