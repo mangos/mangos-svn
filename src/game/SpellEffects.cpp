@@ -246,7 +246,7 @@ void Spell::EffectApplyAura(uint32 i)
 void Spell::EffectManaDrain(uint32 i)
 {
     uint32 DrainType = m_spellInfo->EffectMiscValue[i];
-    uint32 PowerField = 0;
+    uint16 PowerField = 0;
     switch(DrainType)
     {
         case 0:PowerField = UNIT_FIELD_POWER1;break;
@@ -411,7 +411,7 @@ void Spell::EffectEnergize(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
-    uint32 POWER_TYPE;
+    uint16 POWER_TYPE;
 
     switch(m_spellInfo->EffectMiscValue[i])
     {
@@ -436,9 +436,6 @@ void Spell::EffectEnergize(uint32 i)
             POWER_TYPE = UNIT_FIELD_POWER5;
         }break;
     }
-    //if(POWER_TYPE == UNIT_FIELD_POWER2)
-    //    damage = damage;
-
     uint32 curEnergy = unitTarget->GetUInt32Value(POWER_TYPE);
     uint32 maxEnergy = unitTarget->GetUInt32Value(POWER_TYPE+6);
     if(curEnergy+damage > maxEnergy)
