@@ -220,38 +220,41 @@ void World::SetInitialWorldSettings()
 
     new ChannelMgr;
 
-    sLog.outString("Initialize data stores...");
-    barGoLink bar( 14 );
 
-    bool dbc_ok = true;
+    const int DBCFilesCount = 14;
+
+    sLog.outString("Initialize data stores...");
+    barGoLink bar( DBCFilesCount );
+
+    std::list<std::string> not_found_dbc_files;
 
     tmpPath=dataPath;
     tmpPath.append("dbc/EmotesText.dbc");
     if(sEmoteStore.Load(tmpPath.c_str())) 
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/EmotesText.dbc"); 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/Spell.dbc");
     if(sSpellStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/Spell.dbc"); 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellRange.dbc");
     if(sSpellRange.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/SpellRange.dbc"); 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellCastTimes.dbc");
     if(sCastTime.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/SpellCastTimes.dbc"); 
 
 
     tmpPath=dataPath;
@@ -259,7 +262,7 @@ void World::SetInitialWorldSettings()
     if(sSpellDuration.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/SpellDuration.dbc"); 
 
 
     tmpPath=dataPath;
@@ -267,7 +270,7 @@ void World::SetInitialWorldSettings()
     if(sSpellRadius.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/SpellRadius.dbc"); 
 
 
     tmpPath=dataPath;
@@ -275,7 +278,7 @@ void World::SetInitialWorldSettings()
     if(sTalentStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/Talent.dbc"); 
 
 
     tmpPath=dataPath;
@@ -283,7 +286,7 @@ void World::SetInitialWorldSettings()
     if(sFactionStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/Faction.dbc"); 
 
 
     tmpPath=dataPath;
@@ -291,7 +294,7 @@ void World::SetInitialWorldSettings()
     if(sFactionTemplateStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/FactionTemplate.dbc"); 
 
 
     tmpPath=dataPath;
@@ -299,7 +302,7 @@ void World::SetInitialWorldSettings()
     if(sItemDisplayTemplateStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/ItemDisplayInfo.dbc"); 
 
 
     tmpPath=dataPath;
@@ -307,7 +310,7 @@ void World::SetInitialWorldSettings()
     if(sItemSetStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/ItemSet.dbc"); 
 
 
     tmpPath=dataPath;
@@ -315,14 +318,14 @@ void World::SetInitialWorldSettings()
     if(sAreaStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/AreaTable.dbc"); 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SkillLineAbility.dbc");
     if(sSkillLineAbilityStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/SkillLineAbility.dbc"); 
 
 
     tmpPath=dataPath;
@@ -330,12 +333,21 @@ void World::SetInitialWorldSettings()
     if(sSpellItemEnchantmentStore.Load(tmpPath.c_str()))
         bar.step(); 
     else
-        dbc_ok = false; 
+        not_found_dbc_files.push_back("dbc/SpellItemEnchantment.dbc"); 
 
-
-    if(!dbc_ok)
+    if(not_found_dbc_files.size() >= DBCFilesCount )
     {
-        sLog.outError("\n\nIncorrect DataDir value in mangosd.conf or some required *.dbc files not found by path: %s/dbc",dataPath.c_str());
+        sLog.outError("\n\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
+        exit(1);
+    }
+    else if(not_found_dbc_files.size() > 0 )
+    {
+
+	std::string str;
+        for(std::list<std::string>::iterator i = not_found_dbc_files.begin(); i != not_found_dbc_files.end(); ++i)
+            str += dataPath + *i + "\n";
+
+        sLog.outError("\n\nSome required *.dbc files (%u from %d) not found:\n%s",not_found_dbc_files.size(),DBCFilesCount,str.c_str());
         exit(1);
     }
 

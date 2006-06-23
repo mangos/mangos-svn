@@ -232,8 +232,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_PET:
         {
-            Creature* tmpCreature = ObjectAccessor::Instance().GetCreature(*m_caster,m_caster->GetUInt64Value(UNIT_FIELD_SUMMON));
-            Unit* tmpUnit = (Unit*)tmpCreature;
+            Unit* tmpUnit = ObjectAccessor::Instance().GetCreature(*m_caster,m_caster->GetUInt64Value(UNIT_FIELD_SUMMON));
             TagUnitMap.push_back(tmpUnit);
         }break;
         case TARGET_S_E:
