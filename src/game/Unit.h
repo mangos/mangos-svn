@@ -398,7 +398,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
 
-        struct DamageManaShield* m_damageManaShield;
+        //struct DamageManaShield* m_damageManaShield;
+        std::list<struct DamageManaShield*> m_damageManaShield;
 
         uint32 m_spells[UNIT_MAX_SPELLS];
         Spell * m_currentSpell;

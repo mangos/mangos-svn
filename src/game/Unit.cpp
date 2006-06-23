@@ -71,7 +71,7 @@ Unit::Unit() : Object()
     m_ReflectSpellSchool = 0;
     m_ReflectSpellPerc   = 0;
 
-    m_damageManaShield = NULL;
+    //m_damageManaShield = NULL;
     m_spells[0] = 0;
     m_spells[1] = 0;
     m_spells[2] = 0;
@@ -487,12 +487,9 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         return;
     uint32 absorb=0;
 
-    //if(pVictim->m_damageManaShield)
-    //    if(pVictim->m_damageManaShield->m_modType == SPELL_AURA_SCHOOL_ABSORB)
-    // FIX-ME
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
     if(spellInfo)
-        absorb=CalDamageAbsorb(pVictim,spellInfo->School,damage);
+        absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage);
 
     WorldPacket data;
 
@@ -503,10 +500,10 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     }
     else damage -= absorb;
 
-    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID);
+    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u.",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID,absorb);
 
-    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, damage, NORMAL_DAMAGE, 0,0,false,0);
+    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, damage, spellInfo->School, absorb, 0, false, 0);
     DealDamage(pVictim, damage, 0, true);
 }
 
@@ -535,7 +532,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, NORMAL_DAMAGE, 0,0,false,0);
+        SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, spellProto->School, 0, 0, false, 0);
         SendMessageToSet(&data,true);
 
         DealDamage(pVictim, mod->m_amount, procFlag, true);
@@ -569,53 +566,71 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
 
     if(!pVictim)
         return 0;
+    if(!pVictim->isAlive())
+        return 0;
 
-    if( pVictim->m_damageManaShield && pVictim->isAlive() )
+     for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
     {
-        //check if absorb
-        if( pVictim->m_damageManaShield->m_schoolAbsorb != ALL_DAMAGE_ABSORB )
-        {
-            if( ( pVictim->m_damageManaShield->m_schoolAbsorb == ONLY_MAGIC_ABSORB) &&
-                ( School == NORMAL_DAMAGE ) )
-                return 0;
-            else
-            if( School != pVictim->m_damageManaShield->m_schoolAbsorb )
-                return 0;
-        }
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( (*i)->m_spellId);
 
-        //calculate absorb damage
-        currAbsorbDamage= damage+ pVictim->m_damageManaShield->m_currAbsorb;
-        if( currAbsorbDamage < pVictim->m_damageManaShield->m_totalAbsorb )
+        if(((*i)->m_schoolType & School) || (*i)->m_schoolType == School || (*i)->m_schoolType ==127)
         {
-            AbsorbDamage = damage;
-            pVictim->m_damageManaShield->m_currAbsorb = currAbsorbDamage;
-        }
-        else
-        {
-            AbsorbDamage = pVictim->m_damageManaShield->m_totalAbsorb
-                - pVictim->m_damageManaShield->m_currAbsorb;
-            pVictim->m_damageManaShield->m_currAbsorb =
-                pVictim->m_damageManaShield->m_totalAbsorb;
-            removeAura = true;
-        }
-
-        if(pVictim->m_damageManaShield->m_modType == SPELL_AURA_MANA_SHIELD)
-        {
-            currentPower = pVictim->GetUInt32Value(UNIT_FIELD_POWER1);
-            if ( currentPower > AbsorbDamage*2 )
+            currAbsorbDamage = damage+ (*i)->m_currAbsorb;
+            if(currAbsorbDamage < (*i)->m_totalAbsorb)
             {
-                pVictim->SetUInt32Value(UNIT_FIELD_POWER1, currentPower-AbsorbDamage*2 );
+                AbsorbDamage = damage;
+                (*i)->m_currAbsorb = currAbsorbDamage;
             }
             else
             {
-                pVictim->SetUInt32Value(UNIT_FIELD_POWER1, 0 );
-                AbsorbDamage = AbsorbDamage - currentPower/2;
+                AbsorbDamage = (*i)->m_totalAbsorb - (*i)->m_currAbsorb;
+                (*i)->m_currAbsorb = (*i)->m_totalAbsorb;
                 removeAura = true;
             }
-        }
 
-        if(removeAura)
-            pVictim->RemoveAurasDueToSpell(pVictim->m_damageManaShield->m_spellId);
+            if((*i)->m_modType == SPELL_AURA_MANA_SHIELD)
+            {
+                float multiple;
+                for(int x=0;x<3;x++)
+                if(spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MANA_SHIELD)
+                {
+                    multiple = spellInfo->EffectMultipleValue[x];
+                    break;
+                }
+                currentPower = pVictim->GetUInt32Value(UNIT_FIELD_POWER1);
+                if ( (float)(currentPower) > AbsorbDamage*multiple )
+                {
+                    pVictim->SetUInt32Value(UNIT_FIELD_POWER1, (uint32)(currentPower-AbsorbDamage*multiple) );
+                }
+                else
+                {
+                    pVictim->SetUInt32Value(UNIT_FIELD_POWER1, 0 );
+                }
+            }
+
+            if(removeAura)
+                pVictim->RemoveAurasDueToSpell((*i)->m_spellId);
+        }
+        break;
+    }
+    if(School == 0)
+    {
+        uint32 armor = pVictim->GetUInt32Value(UNIT_FIELD_ARMOR);
+        float tmpvalue = armor/(pVictim->getLevel()*85.0 +400.0 +armor);
+        if(tmpvalue < 0)
+            tmpvalue = 0.0;
+        if(tmpvalue > 1.0)
+            tmpvalue = 1.0;
+        AbsorbDamage += uint32(damage * tmpvalue);
+        if(AbsorbDamage > damage)
+            AbsorbDamage = damage;
+    }
+    if( School > 0)
+    {
+        uint32 tmpvalue2 = pVictim->GetUInt32Value(UNIT_FIELD_ARMOR + School);
+        AbsorbDamage += uint32(damage*tmpvalue2*0.0025);
+        if(AbsorbDamage > damage)
+            AbsorbDamage = damage;
     }
 
     // random durability loss for items on absorb (ABSORB)
@@ -634,7 +649,11 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
 
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *turn)
 {
-    uint32 absorb=CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage);
+    for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
+    {
+        SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
+    }
+    uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage);
 
     if( (*damage-absorb) <= 0 )
     {
@@ -647,7 +666,9 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         return;
     }
     else
-        *damage -= absorb;
+    {
+        *absorbDamage = absorb;
+    }
 
     uint16 pos;
     if(GetTypeId() == TYPEID_PLAYER)
@@ -792,18 +813,18 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         DoAttackDamage(pVictim, &damage, &blocked_amount, &damageType, &hitInfo, &victimState,&AbsorbDamage,&Turn);
         //do animation
         SendAttackStateUpdate(hitInfo, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
-        DealDamage(pVictim, damage, 0, true);
+        DealDamage(pVictim, (damage-AbsorbDamage)< 0 ? 0 :(damage-AbsorbDamage), 0, true);
     }
     else
         //send miss
         SendAttackStateUpdate(hitInfo|HITINFO_MISS, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
 
     if (GetTypeId() == TYPEID_PLAYER)
-        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg.",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
+        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg,abs is %u.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage,AbsorbDamage);
     else
-        DEBUG_LOG("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg.",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage);
+        DEBUG_LOG("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg,abs is %u.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage,AbsorbDamage);
 }
 
 uint32 Unit::CalculateDamage(bool ranged)
