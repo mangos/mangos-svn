@@ -121,7 +121,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
     &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_ATTACK = 78 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SANCTUARY = 79
     &Spell::EffectAddComboPoints,                           //SPELL_EFFECT_ADD_COMBO_POINTS = 80
     &Spell::EffectNULL,                                     //SPELL_EFFECT_CREATE_HOUSE = 81
@@ -245,11 +245,6 @@ void Spell::EffectApplyAura(uint32 i)
 
 void Spell::EffectManaDrain(uint32 i)
 {
-    if(!unitTarget)
-        return;
-    if(!unitTarget->isAlive())
-        return;
-
     uint32 DrainType = m_spellInfo->EffectMiscValue[i];
     uint32 PowerField = 0;
     switch(DrainType)
@@ -263,11 +258,16 @@ void Spell::EffectManaDrain(uint32 i)
     }
     if(!PowerField)
         return;
+    if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
+
     uint32 curPower = unitTarget->GetUInt32Value(PowerField);
     if(curPower < damage)
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
+        unitTarget->SetUInt32Value(PowerField,0);
     else
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
+        unitTarget->SetUInt32Value(PowerField,curPower-damage);
 }
 
 void Spell::EffectSendEvent(uint32 i)
@@ -1349,9 +1349,10 @@ void Spell::EffectSummonPet(uint32 i)
 
 void Spell::EffectLearnPetSpell(uint32 i)
 {
-    uint64 pet_guid = m_caster->GetUInt64Value(UNIT_FIELD_SUMMON);
-    Creature *pet;
-    pet = ObjectAccessor::Instance().GetCreature(*m_caster, pet_guid);
+    if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
     SpellEntry *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     if(!learn_spellproto)
         return;
@@ -1359,22 +1360,22 @@ void Spell::EffectLearnPetSpell(uint32 i)
     uint8 learn_msg = 1;
     for(int8 x=0;x<4;x++)
     {
-        has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
-        if(pet->m_spells[x] == learn_spellproto->Id)
+        has_spellproto = sSpellStore.LookupEntry(unitTarget->m_spells[x]);
+        if(unitTarget->m_spells[x] == learn_spellproto->Id)
             return;
     }
     for(int8 x=0;x<4;x++)
     {
-        has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
+        has_spellproto = sSpellStore.LookupEntry(unitTarget->m_spells[x]);
         if(!has_spellproto)
         {
-            pet->m_spells[x] = learn_spellproto->Id;
+            unitTarget->m_spells[x] = learn_spellproto->Id;
             learn_msg = 0;
             break;
         }
         else if(has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
         {
-            pet->m_spells[x] = learn_spellproto->Id;
+            unitTarget->m_spells[x] = learn_spellproto->Id;
             learn_msg = 0;
             break;
         }
@@ -1395,13 +1396,13 @@ void Spell::EffectLearnPetSpell(uint32 i)
         data.clear();
         data.Initialize(SMSG_PET_SPELLS);
 
-        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+        data << (uint64)unitTarget->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
         for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
                                                             //C100 = maybe group
-            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
+            data << uint16 (unitTarget->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -2021,15 +2022,16 @@ void Spell::EffectInebriate(uint32 i)
 
 void Spell::EffectFeedPet(uint32 i)
 {
-    Player *_player;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        _player = (Player*)m_caster;
-    else return;
-    uint64 guid = _player->GetUInt64Value(UNIT_FIELD_SUMMON);
-    Creature* pet = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if(pet)
-        pet->SetUInt32Value(UNIT_FIELD_POWER5,damage);
-    m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
+    uint32 feelty = unitTarget->GetUInt32Value(UNIT_FIELD_POWER5);
+    if(damage + feelty <  unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER5))
+        unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,damage + feelty);
+    else unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER5));
+    //trigger spell crash server.it must be added after fixed.
+    //m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
 }
 
 void Spell::EffectDismissPet(uint32 i)
@@ -2040,6 +2042,7 @@ void Spell::EffectDismissPet(uint32 i)
     else return;
     uint64 guid = _player->GetUInt64Value(UNIT_FIELD_SUMMON);
     Creature* pet = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    unitTarget = (Unit*)pet;
     if(pet)
     {
         _player->SavePet();
@@ -2155,7 +2158,7 @@ void Spell::EffectResurrect(uint32 i)
 
     uint32 health = m_spellInfo->EffectBasePoints[i];
     uint32 mana = m_spellInfo->EffectMiscValue[i];
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), health, mana);
     SendResurrectRequest((Player*)unitTarget);
 }
 

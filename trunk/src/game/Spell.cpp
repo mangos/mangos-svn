@@ -203,7 +203,11 @@ void Spell::FillTargetMap()
             else if(m_spellInfo->Effect[i] == 54) tmpItemMap.push_back(itemTarget);
                                                             // EnchantHeldItem
             else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
-                                                            // LearnPetSpell
+                                                            // Resurrect
+            else if(m_spellInfo->Effect[i] == 113) tmpUnitMap.push_back(m_targets.getUnitTarget());
+                                                            // FeedPet/LearnPetSpell
+            else if(m_spellInfo->Effect[i] == 101 || m_spellInfo->Effect[i] == 57)
+                SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
         }
 
         m_targetUnits[i] = tmpUnitMap;
@@ -228,7 +232,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_PET:
         {
-            Unit* tmpUnit = ObjectAccessor::Instance().GetUnit(*m_caster,m_caster->GetUInt32Value(UNIT_FIELD_PETNUMBER));
+            Creature* tmpCreature = ObjectAccessor::Instance().GetCreature(*m_caster,m_caster->GetUInt64Value(UNIT_FIELD_SUMMON));
+            Unit* tmpUnit = (Unit*)tmpCreature;
             TagUnitMap.push_back(tmpUnit);
         }break;
         case TARGET_S_E:
@@ -462,14 +467,13 @@ void Spell::cast()
         std::list<Item*>::iterator iitem;
         std::list<GameObject*>::iterator igo;
 
-        bool needspelllog = false;
+        bool needspelllog = true;
 
         for(uint32 j = 0;j<3;j++)
         {
-            if(m_spellInfo->Effect[j] != 2)                 // Dont do spell log, if is school damage spell
-                needspelllog = true;
-            else
+            if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)                 // Dont do spell log, if is school damage spell
                 needspelllog = false;
+            if(needspelllog) SendLogExecute();
 
             for(iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();iunit++)
                 HandleEffects((*iunit),NULL,NULL,j);
@@ -479,7 +483,7 @@ void Spell::cast()
                 HandleEffects(NULL,NULL,(*igo),j);
         }
 
-        if(needspelllog) SendLogExecute();
+        //if(needspelllog) SendLogExecute();
 
         for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
         {

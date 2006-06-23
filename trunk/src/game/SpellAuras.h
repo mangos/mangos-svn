@@ -25,7 +25,7 @@ struct DamageManaShield
 {
     uint32 m_spellId;
     uint32 m_modType;
-    int32 m_schoolAbsorb;
+    int32 m_schoolType;
     uint32 m_totalAbsorb;
     uint32 m_currAbsorb;
 };
@@ -98,6 +98,7 @@ class Aura
         void HandleAuraModScale(bool Apply);
         void HandleAuraMounted(bool Apply);
         void HandleWaterBreathing(bool apply);
+        void HandleModBaseResistance(bool apply);
         void HandleModRegen(bool apply);
         void HandleModPowerRegen(bool apply);
         void HandleChannelDeathItem(bool apply);

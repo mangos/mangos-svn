@@ -188,6 +188,8 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(pet)
     {
+        uint32 feelty = pet->GetUInt32Value(UNIT_FIELD_POWER5);
+        pet->SetUInt32Value(UNIT_FIELD_POWER5 ,(feelty-50000) > 0 ?(feelty-50000) : 0);
         _player->SavePet();
         _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
         WorldPacket data;
