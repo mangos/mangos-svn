@@ -1157,9 +1157,11 @@ void Aura::HandleAuraModResistance(bool apply)
     switch(m_modifier->m_miscvalue)
     {
         case 1:
+			{
             index = UNIT_FIELD_ARMOR;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
-        }break;
+            }
+	    break;
         case IMMUNE_SCHOOL_HOLY:
         {
             index = UNIT_FIELD_RESISTANCES_01;
@@ -1232,8 +1234,7 @@ void Aura::HandleAuraModResistance(bool apply)
         if(m_target->GetTypeId() == TYPEID_PLAYER)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
     }
-}
-
+};
 void Aura::HandleAuraModRoot(bool apply)
 {
     uint32 apply_stat = UNIT_STAT_ROOT;
