@@ -599,6 +599,35 @@ void Spell::finish()
 
     m_ObjToDel.clear();*/
 
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* _player = (Player*)m_caster;
+        data.Initialize(SMSG_SPELL_COOLDOWN);
+        data << m_caster->GetGUID();
+        std::list<Playerspell*>::iterator itr;
+        std::list<Playerspell*> player_spells;
+        player_spells = _player->getSpellList();
+        for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+        {
+            if(!(*itr)->spellId)
+                continue;
+            data << uint32((*itr)->spellId);
+            SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+            if(m_spellInfo->CategoryRecoveryTime > 0)
+            {
+                if(spellInfo->Category == m_spellInfo->Category)
+                {
+                    data << uint32(m_spellInfo->CategoryRecoveryTime);
+                    continue;
+                }
+            }
+            else if(m_spellInfo->Id == spellInfo->Id && m_spellInfo->RecoveryTime > 0)
+                data << uint32(m_spellInfo->RecoveryTime);
+            else data << uint32(1500);
+        }
+        m_caster->SendMessageToSet(&data, true);
+    }
+
     uint8 powerType = m_caster->getPowerType();
     if(m_TriggerSpell)
         TriggerSpell();

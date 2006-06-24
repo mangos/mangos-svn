@@ -2219,33 +2219,12 @@ void Spell::EffectCharge(uint32 i)
 {
     assert(unitTarget);
     assert(m_caster);
-    WorldPacket data;
-
+    
     float x, y, z;
     unitTarget->GetClosePoint(m_caster, x, y, z);
-    float oldspeed = 1.0f;
-    m_caster->SetSpeed(oldspeed * 3.5);
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << unitTarget->GetGUID();
-    data << (uint32)0;
-    data << (float)(SPEED_RUN*3.5);
-    m_caster->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", SPEED_RUN*3.5);
 
-    m_caster->SendMoveToPacket(x, y, z, true);
+    m_caster->SendMonsterMove(x, y, z, false,true,0.5);
     m_caster->Attack(unitTarget);
-    m_caster->SetSpeed(oldspeed);
-
-    data.clear();
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << unitTarget->GetGUID();
-    data << (uint32)0;
-    data << (float)(SPEED_RUN);
-    m_caster->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", SPEED_RUN);
-    //m_caster->SendAttackStart(pEnemy);
 }
 
 void Spell::EffectTransmitted(uint32 i)

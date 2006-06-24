@@ -467,15 +467,23 @@ void Aura::Update(uint32 diff)
             m_duration = 0;
         if(m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))
         {
-            float x,y,z,angle,speed;
+            float x,y,z,angle,speed,pos_x,pos_y,pos_z;
+            uint32 time;
             m_target->AttackStop();
             angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
             speed = m_target->GetSpeed();
-            x = m_target->GetPositionX() + speed*m_duration * cos(angle);
-            y = m_target->GetPositionY() + speed*m_duration * sin(angle);
-            int mapid = m_target->GetMapId();
-            z = MapManager::Instance ().GetMap(mapid)->GetHeight(x,y);
-            m_target->SendMoveToPacket(x,y,z,true);
+            pos_x = m_target->GetPositionX()+speed*diff* cos(-angle)/1000;
+            pos_y = m_target->GetPositionY()+speed*diff* sin(-angle)/1000;
+            uint32 mapid = m_target->GetMapId();
+            pos_z = MapManager::Instance().GetMap(mapid)->GetHeight(pos_x,pos_y);
+            m_target->Relocate(pos_x,pos_y,pos_z,-angle);
+
+            x = m_target->GetPositionX() + speed*m_duration * cos(-angle)/1000;
+            y = m_target->GetPositionY() + speed*m_duration * sin(-angle)/1000;
+            mapid = m_target->GetMapId();
+            z = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
+            time = uint32(::sqrt(x*x+y*y+z*z)/speed);
+            m_target->SendMonsterMove(x,y,z,false,true,time);
         }
     }
     if(m_isPeriodic && m_duration > 0)
@@ -677,6 +685,7 @@ void Aura::HandleModFear(bool Apply)
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
         m_target->SendAttackStop(m_caster->GetGUID());
+        m_caster->SendAttackStop(m_target->GetGUID());
         m_target->AttackStop();
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
