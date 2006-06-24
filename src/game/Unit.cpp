@@ -514,8 +514,14 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     {
         return;
     }
-    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id);
+    uint32 absorb=0;
+
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellProto->Id);
+    if(spellInfo)
+        absorb = CalDamageAbsorb(pVictim,spellInfo->School,mod->m_amount);
+
+    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id,absorb);
 
     WorldPacket data;
     data.Initialize(SMSG_PERIODICAURALOG);
@@ -532,10 +538,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
     if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
     {
-        SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, spellProto->School, 0, 0, false, 0);
+        SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, spellProto->School, absorb, 0, false, 0);
         SendMessageToSet(&data,true);
 
-        DealDamage(pVictim, mod->m_amount, procFlag, true);
+        DealDamage(pVictim, (mod->m_amount-absorb) < 0 ? 0 :(mod->m_amount-absorb), procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
@@ -569,7 +575,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
     if(!pVictim->isAlive())
         return 0;
 
-     for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
+    for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
     {
         SpellEntry *spellInfo = sSpellStore.LookupEntry( (*i)->m_spellId);
 
@@ -628,7 +634,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
     if( School > 0)
     {
         uint32 tmpvalue2 = pVictim->GetUInt32Value(UNIT_FIELD_ARMOR + School);
-        AbsorbDamage += uint32(damage*tmpvalue2*0.0025);
+        AbsorbDamage += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
         if(AbsorbDamage > damage)
             AbsorbDamage = damage;
     }

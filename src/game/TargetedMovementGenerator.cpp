@@ -103,7 +103,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
     if( !&owner || !owner.isAlive() || !&i_target || i_targetedHome )
         return;
-    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) || owner.hasUnitState(UNIT_STAT_FLEEING))
         return;
     if( !owner.isInCombat() && !owner.hasUnitState(UNIT_STAT_FOLLOW) )
     {
