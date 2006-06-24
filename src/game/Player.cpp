@@ -327,8 +327,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_petLevel = 0;
     m_petFamilyId = 0;
 
+	m_rating = 0;
     m_highest_rank = 0;
-    m_last_week_rank = 0;
+    m_standing = 0;
 
     // Skill spec +5
     if (Player::HasSpell(20597))
@@ -2807,7 +2808,7 @@ void Player::UpdateHonor(void)
     //LAST WEEK
     SetUInt32Value(PLAYER_FIELD_LAST_WEEK_KILLS, lastWeekKills);
     SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32)lastWeekHonor);
-    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekRank());
+    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekStanding());
 
     //TODO Fix next rank bar... it is not working fine!
     //NEXT RANK BAR //Total honor points
@@ -2823,12 +2824,12 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
 
+	//RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
     if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
     {
         SetHonorHighestRank( CalculateHonorRank(total_honor) );
     }
-
     if ( GetHonorHighestRank() )
     {
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
@@ -2837,6 +2838,12 @@ void Player::UpdateHonor(void)
     {
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, 0);
     }
+
+	//RATING
+	m_rating = MaNGOS::Honor::CalculeRating(this);
+
+	//STANDING
+	m_standing = MaNGOS::Honor::CalculeRating(this);
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
@@ -7591,7 +7598,7 @@ void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature
 bool Player::LoadFromDB( uint32 guid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
 
     if(!result)
         return false;
@@ -7633,8 +7640,9 @@ bool Player::LoadFromDB( uint32 guid )
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
     m_highest_rank = fields[14].GetUInt32();
-    m_last_week_rank = fields[15].GetUInt32();
-    m_cinematic = fields[16].GetUInt32();
+    m_standing = fields[15].GetUInt32();
+	m_rating = fields[16].GetFloat();
+    m_cinematic = fields[17].GetUInt32();
 
     if( HasFlag(PLAYER_FLAGS, 8) )
         SetUInt32Value(PLAYER_FLAGS, 0);
@@ -8070,7 +8078,7 @@ void Player::SaveToDB()
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     ss.rdbuf()->str("");
-    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`honor`,`last_week_honor`,`cinematic`) VALUES ("
+    ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -8100,7 +8108,10 @@ void Player::SaveToDB()
     ss << m_highest_rank;
 
     ss << ", ";
-    ss << m_last_week_rank;
+    ss << m_standing;
+
+	ss << ", ";
+    ss << m_rating;
 
     ss << ", ";
     ss << m_cinematic;

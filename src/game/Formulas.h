@@ -26,6 +26,17 @@ namespace MaNGOS
 
     namespace Honor
     {
+		//TODO: Implement this function
+		inline int CalculeStanding(Player *plr)
+        {
+			return 0;
+		}
+		//TODO: Fix this formula, for now the weekly rating is how many honor player gain in a week
+		inline float CalculeRating(Player *plr)
+        {
+			return ((float)plr->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION));
+		}
+
         inline float DishonorableKillPoints(int level)
         {
             float result = 10;
