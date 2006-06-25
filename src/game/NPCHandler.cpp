@@ -230,7 +230,18 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         SpellCastTargets targets;
         targets.setUnitTarget( _player );
+        
+
+        float u_oprientation = unit->GetOrientation();
+
+        // trainer always see at customer in time of training (part of client functionality)
+        unit->SetInFront(_player);
+
         spell->prepare(&targets);
+
+        // trainer always return to original orientation 
+        unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
+
         //SendTrainerList( guid );
     }
 }
