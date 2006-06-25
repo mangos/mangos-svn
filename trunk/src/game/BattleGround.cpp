@@ -167,8 +167,10 @@ void BattleGround::AddPlayer(Player *plr)
 
     plr->SendInitWorldStates(plr->GetMapId());
 
+    WorldPacket data = sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(plr);
+
     // Let others from your team know //dono if correct if team1 only get team packages?
-    SendPacketToTeam(plr->m_bgTeam,&sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(plr));
+    SendPacketToTeam(plr->m_bgTeam, &data);
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
 }

@@ -398,7 +398,7 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
         pCreature->SetFloatValue(UNIT_FIELD_MAXDAMAGE ,  5.0f);
         pCreature->SetFloatValue(UNIT_FIELD_MINDAMAGE , 8.0f);
         pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, 1900);
-        pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000);
+        pCreature->SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, 2000);
         pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
         pCreature->AIM_Initialize();
         sLog.outError("AddObject at Chat.cpp");

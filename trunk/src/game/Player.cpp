@@ -224,7 +224,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
     SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, 2000 );       // melee attack time
-    SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000  );    // ranged attack time
+    SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, 2000  );    // ranged attack time
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
@@ -327,7 +327,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_petLevel = 0;
     m_petFamilyId = 0;
 
-	m_rating = 0;
+    m_rating = 0;
     m_highest_rank = 0;
     m_standing = 0;
 
@@ -1450,7 +1450,7 @@ void Player::learnSpell(uint16 spell_id)
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
 
-    addSpell(spell_id);
+    addSpell(spell_id,0);
 
 }
 
@@ -1551,7 +1551,8 @@ void Player::_SetVisibleBits(UpdateMask *updateMask, Player *target) const
     for(uint16 i = UNIT_FIELD_AURA; i < UNIT_FIELD_AURASTATE; i ++)
         updateMask->SetBit(i);
     updateMask->SetBit(UNIT_FIELD_BASEATTACKTIME);
-    updateMask->SetBit(UNIT_FIELD_BASEATTACKTIME+1);
+    updateMask->SetBit(UNIT_FIELD_OFFHANDATTACKTIME);
+    updateMask->SetBit(UNIT_FIELD_RANGEDATTACKTIME);
     updateMask->SetBit(UNIT_FIELD_BOUNDINGRADIUS);
     updateMask->SetBit(UNIT_FIELD_COMBATREACH);
     updateMask->SetBit(UNIT_FIELD_DISPLAYID);
@@ -2824,7 +2825,7 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
 
-	//RIGHEST RANK
+    //RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
     if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
     {
@@ -2839,11 +2840,11 @@ void Player::UpdateHonor(void)
         SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, 0);
     }
 
-	//RATING
-	m_rating = MaNGOS::Honor::CalculeRating(this);
+    //RATING
+    m_rating = MaNGOS::Honor::CalculeRating(this);
 
-	//STANDING
-	m_standing = MaNGOS::Honor::CalculeRating(this);
+    //STANDING
+    m_standing = MaNGOS::Honor::CalculeRating(this);
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
@@ -3230,7 +3231,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         }
         else if(slot==EQUIPMENT_SLOT_OFFHAND)
         {
-            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, apply ? proto->Delay: 2000);
+            SetUInt32Value(UNIT_FIELD_OFFHANDATTACKTIME, apply ? proto->Delay: 2000);
             typestr = "Offhand";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
@@ -6994,7 +6995,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             sdata.Initialize (SMSG_LEARNED_SPELL);
             sdata << pQuest->GetQuestInfo()->RewSpell;
             GetSession()->SendPacket( &sdata );
-            addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell );
+            addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell,0 );
         }
 
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -7623,7 +7624,7 @@ bool Player::LoadFromDB( uint32 guid )
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME));
 
     m_race = fields[5].GetUInt8();
     //Need to call it to initialize m_team (m_team can be calculated from m_race)
@@ -7641,7 +7642,7 @@ bool Player::LoadFromDB( uint32 guid )
     m_orientation = fields[11].GetFloat();
     m_highest_rank = fields[14].GetUInt32();
     m_standing = fields[15].GetUInt32();
-	m_rating = fields[16].GetFloat();
+    m_rating = fields[16].GetFloat();
     m_cinematic = fields[17].GetUInt32();
 
     if( HasFlag(PLAYER_FLAGS, 8) )
@@ -7688,7 +7689,7 @@ bool Player::LoadFromDB( uint32 guid )
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME));
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
     return true;
@@ -8064,7 +8065,7 @@ void Player::SaveToDB()
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME));
 
     _RemoveAllItemMods();
     _RemoveAllAuraMods();
@@ -8110,7 +8111,7 @@ void Player::SaveToDB()
     ss << ", ";
     ss << m_standing;
 
-	ss << ", ";
+    ss << ", ";
     ss << m_rating;
 
     ss << ", ";
@@ -8156,7 +8157,7 @@ void Player::SaveToDB()
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME));
     _ApplyAllAuraMods();
     _ApplyAllItemMods();
 
