@@ -132,7 +132,7 @@ void WorldSession::HandleTaxiQueryAviableNodesOpcode( WorldPacket & recv_data )
     data << uint32( curloc );
     for (uint8 i=0; i<8; i++)
     {
-        TaxiMask[i] = 4294967295;
+        TaxiMask[i] = 0xFFFFFFFF;
         //sLog.outDebug( "! TaxiMask %d GetTaximask %d",TaxiMask[i],GetPlayer( )->GetTaximask(i) );
         TaxiMask[i] &= GetPlayer( )->GetTaximask(i);
         data << TaxiMask[i];

@@ -364,12 +364,15 @@ void Spell::EffectCreateItem(uint32 i)
         }
     }
 
-    //uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
-    //if (m_itemProto->Class != ITEM_CLASS_CONSUMABLE)
-    //   num_to_add = 1;
-    //   if(num_to_add > m_itemProto->MaxCount)
-    //       num_to_add = m_itemProto->MaxCount;
+    uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
+
     Item *pItem = player->CreateItem(newitemid,1);
+
+    if(pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE)
+        num_to_add = 1;
+    if(num_to_add > pItem->GetProto()->Stackable)
+        num_to_add = pItem->GetProto()->Stackable;
+
     uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
     if( msg == EQUIP_ERR_OK )
     {

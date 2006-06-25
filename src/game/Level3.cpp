@@ -180,7 +180,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
             pCreature->SetFloatValue( UNIT_FIELD_MAXDAMAGE ,  5.0f );
             pCreature->SetFloatValue( UNIT_FIELD_MINDAMAGE , 8.0f );
             pCreature->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME, 1900 );
-            pCreature->SetUInt32Value( UNIT_FIELD_BASEATTACKTIME+1, 2000 );
+            pCreature->SetUInt32Value( UNIT_FIELD_RANGEDATTACKTIME, 2000 );
             pCreature->SetFloatValue( UNIT_FIELD_BOUNDINGRADIUS, 2.0f );
 
             sLog.outError("AddObject at Level3.cpp line 185");
@@ -975,7 +975,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
             data.Initialize( SMSG_LEARNED_SPELL );
             data << (uint32)spell;
             m_session->SendPacket( &data );
-            m_session->GetPlayer()->addSpell((uint16)spell);
+            m_session->GetPlayer()->addSpell((uint16)spell,0);
 
             loop++;
         }
@@ -995,7 +995,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     data.Initialize( SMSG_LEARNED_SPELL );
     data << (uint32)spell;
     m_session->SendPacket( &data );
-    m_session->GetPlayer()->addSpell((uint16)spell);
+    m_session->GetPlayer()->addSpell((uint16)spell,0);
 
     return true;
 }
@@ -1370,9 +1370,9 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
     if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
         return false;
-    //    pGameObj->SetZoneId(chr->GetZoneId());
+    //pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
-    //    pGameObj->SetNameId(id);
+    //pGameObj->SetNameId(id);
     sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
 
     pGameObj->SaveToDB();
@@ -1775,7 +1775,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     pCreature->SetFloatValue(UNIT_FIELD_MAXDAMAGE ,  5.0f);
     pCreature->SetFloatValue(UNIT_FIELD_MINDAMAGE , 8.0f);
     pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, 1900);
-    pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1, 2000);
+    pCreature->SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, 2000);
     pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
 
     sLog.outError("AddObject at Level3.cpp line 1470");
