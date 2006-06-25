@@ -16,12 +16,15 @@ File names are divided into two parts. First part of the name, is the table that
 needs and update or has been added. The second part is the revision that will
 need the update. See an example below:
 
-         character_spell-1123.sql
+         1123_character_spell.sql
          |                  |
-The table character_spell   |
-will need an update.        |
-                            |
-                            MaNGOS revision 1123 or older will need this update.
-                            Any release after revision 1123, e.g. 1124 or 1137,
-                            already includes this update in the default database
-                            file mangos.sql.
+         |                  |
+         |                  The table character_spell
+         |                  will need an update.
+         |
+         MaNGOS revision older 1123 will need this update.
+         After appling this update DB compatiable with revision 1122
+         will be compatibale with revision 1123.
+         Revision 1123 and any revision after 1123, e.g. 1124 or 1137,
+         already includes this update in the default database
+         file mangos.sql.

@@ -515,6 +515,7 @@ float Object::GetAngle(const Object* obj) const
     return GetAngle( obj->GetPositionX(), obj->GetPositionY() );
 }
 
+// Retirn angle in range 0..2*pi
 float Object::GetAngle( const float x, const float y ) const
 {
     float dx = x - GetPositionX();
@@ -528,20 +529,24 @@ float Object::GetAngle( const float x, const float y ) const
 bool Object::HasInArc(const float arcangle, const Object* obj) const
 {
     float arc = arcangle;
-    float ori = m_orientation;
-    if( arcangle > 2.0f * M_PI )
-        arc = arcangle - 2.0f * M_PI;
-    if( ori < 0 )
-        ori = ori + 2.0f * M_PI;
-    float angle = GetAngle( obj );
-    angle -= ori;
-    if (angle > (2.0f * M_PI))
+
+    // move arc to range 0.. 2*pi
+    while( arc > 2.0f * M_PI )
+        arc -=  2.0f * M_PI;
+    while( arc < 0 )
+        arc +=  2.0f * M_PI;
+
+    float angle = GetAngle( obj ); 
+    angle -= m_orientation;
+
+    // move angle to range -pi ... +pi
+    while( angle > M_PI)
         angle -= 2.0f * M_PI;
-    if (angle < (2.0f * M_PI * -1))
+    while(angle < -M_PI)
         angle += 2.0f * M_PI;
 
-    float lborder =  -1 * (arc/2.0f);
-    float rborder = (arc/2.0f);
+    float lborder =  -1 * (arc/2.0f); // in range -pi..0
+    float rborder = (arc/2.0f);       // in range 0..pi
     return (( angle >= lborder ) && ( angle <= rborder ));
 }
 
