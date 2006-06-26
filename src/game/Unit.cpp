@@ -254,8 +254,6 @@ bool Unit::HasAuraType(uint32 auraType) const
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive()) return;
-    if(GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == pVictim->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) && pVictim->GetTypeId() != TYPEID_PLAYER)
-        return;
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);

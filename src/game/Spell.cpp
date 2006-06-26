@@ -489,7 +489,7 @@ void Spell::cast()
             if((*iunit)->m_ReflectSpellSchool) reflect(*iunit);
             //HandleAddAura((*iunit));
         }
-        
+        /*
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             data.clear();
@@ -519,7 +519,7 @@ void Spell::cast()
             }
             m_caster->SendMessageToSet(&data, true);
         }
-
+        */
     }
 
     if(m_spellState != SPELL_STATE_CASTING)
