@@ -1037,6 +1037,9 @@ uint8 Spell::CanCast()
             castResult = CAST_FAIL_IMMUNE;
         */
 
+	if(m_spellInfo->AttributesExEx & 1048576 && !target->HasInArc(M_PI, m_caster) )
+	    castResult = CAST_FAIL_NOT_BEHIND_TARGET;
+
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
 
