@@ -7429,7 +7429,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                         if ( curkillcount < reqkillcount )
                         {
                             mQuestStatus[quest].m_mobcount[j] = curkillcount + addkillcount;
-                            SendQuestUpdateAddKill( pQuest, guid, j, curkillcount + addkillcount);
+                            SendQuestUpdateAddKill( pQuest, guid, j, curkillcount, addkillcount);
                         }
                         if ( CanCompleteQuest( pQuest ) )
                             CompleteQuest( pQuest );
@@ -7558,36 +7558,37 @@ void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
     }
 }
 
-void Player::SendQuestUpdateAddItem( Quest *pQuest, uint32 item, uint32 nb )
+void Player::SendQuestUpdateAddItem( Quest *pQuest, uint32 item_idx, uint32 count )
 {
     if( pQuest )
     {
         WorldPacket data;
         data.Initialize( SMSG_QUESTUPDATE_ADD_ITEM );
         sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM" );
-        data << pQuest->GetQuestInfo()->ReqItemId[item];
-        data << nb;
+        data << pQuest->GetQuestInfo()->ReqItemId[item_idx];
+        data << count;
         GetSession()->SendPacket( &data );
     }
 }
 
-void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature, uint32 nb )
+void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count )
 {
+    assert(old_count + add_count < 64 && "mob count store in 6 bits 2^6 = 64 (0..63)");
     if( pQuest )
     {
         WorldPacket data;
         data.Initialize( SMSG_QUESTUPDATE_ADD_KILL );
         sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL" );
         data << pQuest->GetQuestInfo()->QuestId;
-        data << pQuest->GetQuestInfo()->ReqKillMobId[ creature ];
-        data << nb;
-        data << pQuest->GetQuestInfo()->ReqKillMobCount[ creature ];
+        data << pQuest->GetQuestInfo()->ReqKillMobId[ creature_idx ];
+        data << old_count + add_count;
+        data << pQuest->GetQuestInfo()->ReqKillMobCount[ creature_idx ];
         data << guid;
         GetSession()->SendPacket(&data);
 
         uint16 log_slot = GetQuestSlot( pQuest );
         uint32 kills = GetUInt32Value( log_slot + 1 );
-        kills = kills + (1 << ( 6 * nb ));
+        kills = kills + (add_count << ( 6 * creature_idx ));  
         SetUInt32Value( log_slot + 1, kills );
     }
 }

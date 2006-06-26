@@ -419,8 +419,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendQuestTimerFailed( Quest *pQuest );
         void SendCanTakeQuestResponse( uint32 msg );
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
-        void SendQuestUpdateAddItem( Quest *pQuest, uint32 item, uint32 nb );
-        void SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature, uint32 nb );
+        void SendQuestUpdateAddItem( Quest *pQuest, uint32 item_idx, uint32 count );
+        void SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };
