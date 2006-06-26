@@ -819,7 +819,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         DoAttackDamage(pVictim, &damage, &blocked_amount, &damageType, &hitInfo, &victimState,&AbsorbDamage,&Turn);
         //do animation
         SendAttackStateUpdate(hitInfo, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,Turn,victimState,blocked_amount);
-        DealDamage(pVictim, (damage-AbsorbDamage)< 0 ? 0 :(damage-AbsorbDamage), 0, true);
+        DealDamage(pVictim, damage <= AbsorbDamage ? 0 : (damage-AbsorbDamage), 0, true);
     }
     else
         //send miss
