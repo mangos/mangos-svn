@@ -30,7 +30,7 @@
 #define SPEED_STOP      0.0f
 #define SPEED_WALK      2.5f
 #define SPEED_RUN       7.0f
-#define SPEED_WALKBACK  2.5f
+#define SPEED_WALKBACK  1.25f
 #define SPEED_SWIM      4.722222f
 #define SPEED_SWIMBACK  4.5f
 #define SPEED_TURN      3.141594f
