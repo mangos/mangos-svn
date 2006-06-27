@@ -490,7 +490,7 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
     sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestInfo()->QuestId );
 }
 
-void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable )
+void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel )
 {
     WorldPacket data;
 
@@ -518,7 +518,10 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
     // Emote
     data << uint32(0x01);
     // Close Window after cancel
-    data << uint32(0x00);
+    if (CloseOnCancel)
+        data << uint32(0x01);
+    else
+        data << uint32(0x00);
     // Req Gold
     data << uint32(0x00);
 

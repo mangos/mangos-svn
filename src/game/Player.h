@@ -411,7 +411,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ItemAdded( uint32 entry, uint32 count );
         void ItemRemoved( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
-        void AddQuestsLoot( Creature* creature );
+        void AddQuestsLoot( Loot* loot, uint32 lootid );
+
 
         void SendQuestComplete( Quest *pQuest );
         void SendQuestReward( Quest *pQuest );
