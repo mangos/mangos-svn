@@ -3364,6 +3364,7 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
 {
     Player  *player = this;
     Loot    *loot;
+    uint32  lootid;
 
     if (IS_GAMEOBJECT_GUID(guid))
     {
@@ -3373,16 +3374,17 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
         if (!go)
             return;
 
+        loot = &go->loot;
+        lootid =  go->lootid;
+
         go->generateLoot();
         if(loot_type == 3)
         {
-            loot = &go->loot;
             uint32 zone = GetZoneId();
-            uint32 lootid = 30000 + zone;
+            uint32 fish_lootid = 30000 + zone;
             //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
-            go->getFishLoot(loot,lootid);
+            go->getFishLoot(loot,fish_lootid);
         }
-        loot = &go->loot;
     }
     else
     {
@@ -3392,13 +3394,19 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
         if (!creature)
             return;
 
-        loot = &creature->loot;
+        loot   = &creature->loot;
+        lootid = creature->GetCreatureInfo()->lootid;
+
+        creature->generateLoot();
+
         if (loot_type == 2)
         {
             creature->getSkinLoot();
             loot = &creature->loot;
         }
     }
+
+    AddQuestsLoot(loot,lootid);
 
     m_lootGuid = guid;
 
@@ -6676,9 +6684,9 @@ void Player::SendPreparedQuest( uint64 guid )
         if ( pQuest )
         {
             if( status == DIALOG_STATUS_REWARD && !GetQuestRewardStatus( pQuest ) )
-                PlayerTalkClass->SendRequestedItems( pQuest, guid, true );
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, true, true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
-                PlayerTalkClass->SendRequestedItems( pQuest, guid, false );
+                PlayerTalkClass->SendRequestedItems( pQuest, guid, false, true );
             else
                 PlayerTalkClass->SendQuestDetails( pQuest, guid, true );
         }
@@ -7443,7 +7451,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     }
 }
 
-void Player::AddQuestsLoot( Creature* creature )
+void Player::AddQuestsLoot( Loot* loot, uint32 lootid )
 {
     quest_status qs;
     uint32 itemid=0;
@@ -7459,7 +7467,7 @@ void Player::AddQuestsLoot( Creature* creature )
                 itemid=qs.m_quest->GetQuestInfo()->ReqItemId[j];
                 if ( itemid>0 )
                 {
-                    ChangeLoot(&(creature->loot),creature->GetCreatureInfo()->lootid,itemid,70.0f);
+                    ChangeLoot(loot,lootid,itemid,70.0f);
                 }
             }
         }

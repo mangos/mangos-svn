@@ -279,8 +279,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     if (health <= damage)
     {
         DEBUG_LOG("DealDamage: victim just died");
-        if ((pVictim->GetTypeId() == TYPEID_UNIT) )
-            ((Creature*)pVictim)->generateLoot();
 
         DEBUG_LOG("SET JUST_DIED");
         pVictim->setDeathState(JUST_DIED);
@@ -377,7 +375,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if(!PvP)
             {
                 DEBUG_LOG("DealDamageIsPvE");
-                player->AddQuestsLoot((Creature*)pVictim);
                 uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
                 uint32 entry = 0;
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
