@@ -2794,6 +2794,9 @@ void Player::UpdateHonor(void)
         delete result;
     }
 
+	//Store Total Honor points...
+    SetTotalHonor(total_honor);
+
     //RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
     if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
@@ -2802,7 +2805,7 @@ void Player::UpdateHonor(void)
     }
 
     //RATING
-    SetHonorRating( total_honor/*MaNGOS::Honor::CalculeRating(this)*/ );
+    SetHonorRating( MaNGOS::Honor::CalculeRating(this) );
 
     //STANDING
     SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this) );
@@ -2836,9 +2839,6 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
     //TODO: Into what field we need to set it? Fix it!
     SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? (((uint32) GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
-
-    //Store Total Honor points...
-    m_total_honor_points = total_honor;
 }
 
 int Player::GetHonorRank()

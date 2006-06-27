@@ -53,10 +53,10 @@ namespace MaNGOS
 
             return 0;
         }
-        //TODO: Fix this formula, for now the weekly rating is how many honor player gain in a week
+        //TODO: Fix this formula, for now the weekly rating is how many honor player gain all life time
         inline float CalculeRating(Player *plr)
         {
-            return ((float)plr->GetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION));
+			return plr->GetTotalHonor();
         }
 
         inline float DishonorableKillPoints(int level)
