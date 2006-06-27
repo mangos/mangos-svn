@@ -692,7 +692,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         int  CalculateHonorRank(float honor);
         int GetHonorRank();
         int  CalculateTotalKills(Player *pVictim);
-        float GetTotalHonor() const { return m_total_honor_points; }
+		//Acessors of total honor points
+		void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
+        float GetTotalHonor(void) { return m_total_honor_points; };
         //Acessors of righest rank
         int  GetHonorHighestRank() const { return m_highest_rank; }
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
