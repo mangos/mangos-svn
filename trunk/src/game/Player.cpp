@@ -3372,13 +3372,18 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
         loot = &go->loot;
         lootid =  go->lootid;
 
-        go->generateLoot();
-        if(loot_type == 3)
+        if(loot->empty()) 
         {
-            uint32 zone = GetZoneId();
-            uint32 fish_lootid = 30000 + zone;
-            //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
-            go->getFishLoot(loot,fish_lootid);
+            go->generateLoot();
+            if(loot_type == 3)
+            {
+                uint32 zone = GetZoneId();
+                uint32 fish_lootid = 30000 + zone;
+                //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
+                go->getFishLoot(loot,fish_lootid);
+            }
+
+            AddQuestsLoot(loot,lootid);
         }
     }
     else
@@ -3392,16 +3397,19 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
         loot   = &creature->loot;
         lootid = creature->GetCreatureInfo()->lootid;
 
-        creature->generateLoot();
-
-        if (loot_type == 2)
+        if(loot->empty()) 
         {
-            creature->getSkinLoot();
-            loot = &creature->loot;
+            creature->generateLoot();
+
+            if (loot_type == 2)
+            {
+                creature->getSkinLoot();
+                loot = &creature->loot;
+            }
+
+            AddQuestsLoot(loot,lootid);
         }
     }
-
-    AddQuestsLoot(loot,lootid);
 
     m_lootGuid = guid;
 

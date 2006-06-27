@@ -371,8 +371,8 @@ void World::SetInitialWorldSettings()
 
     objmgr.SetHighestGuids();
 
-    sLog.outString( "Loading Creatures Loot Tables..." );
-    LoadCreaturesLootTables();
+    sLog.outString( "Loading Loot Tables..." );
+    LoadLootTables();
 
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();

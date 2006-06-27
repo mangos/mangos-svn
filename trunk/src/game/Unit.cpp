@@ -36,6 +36,7 @@
 #include "CreatureAI.h"
 #include "Formulas.h"
 #include "Pet.h"
+#include "Util.h"
 
 #include <math.h>
 
@@ -730,7 +731,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     {
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
-            if(procspell->procFlags == 40 && procspell->procChance * 1000 > rand() % 100000)
+            if(procspell->procFlags == 40 && procspell->procChance > rand_chance() )
             {
                 SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
 

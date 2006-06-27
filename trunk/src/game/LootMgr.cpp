@@ -30,14 +30,14 @@
 using std::remove_copy_if;
 using std::ptr_fun;
 
-LootStore CreatureLoot;
+LootStore LootTemplates;
 
 void UnloadLoot()
 {
-    CreatureLoot.clear();
+    LootTemplates.clear();
 }
 
-void LoadCreaturesLootTables()
+void LoadLootTables()
 {
     uint32 curId = 0;
     LootStore::iterator tab;
@@ -63,7 +63,7 @@ void LoadCreaturesLootTables()
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
-            CreatureLoot[entry].push_back( LootItem(item, displayid, chance) );
+            LootTemplates[entry].push_back( LootItem(item, displayid, chance) );
 
             count++;
         } while (result->NextRow());
@@ -82,7 +82,7 @@ void FillLoot(Loot *loot, uint32 loot_id)
     loot->items.clear();
     loot->gold = 0;
 
-    if ((tab = CreatureLoot.find(loot_id)) == CreatureLoot.end())
+    if ((tab = LootTemplates.find(loot_id)) == LootTemplates.end())
         return;
 
     vector <LootItem>::iterator new_end;
@@ -103,12 +103,12 @@ void FillSkinLoot(Loot *Skinloot,uint32 itemid)
 
 void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance)
 {
-    LootStore::iterator tab =CreatureLoot.find(loot_id);
-    if( CreatureLoot.end()==tab)return;
+    LootStore::iterator tab = LootTemplates.find(loot_id);
+    if( LootTemplates.end() == tab )return;
 
-    for(list<LootItem>::iterator iter = tab->second.begin(); iter!=tab->second.end();iter++)
+    for(LootItemList::iterator iter = tab->second.begin(); iter!=tab->second.end(); ++iter )
     {
-        if((*iter).itemid==itemid && (rand()%100000 < chance*1000))
+        if( (*iter).itemid == itemid && rand_chance() < chance )
         {
             LootItem itm;
             itm.itemid = itemid;
