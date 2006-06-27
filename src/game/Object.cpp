@@ -470,12 +470,12 @@ void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
     }
 }
 
-uint32 Object::GetZoneId( )
+uint32 Object::GetZoneId() const
 {
     return MapManager::Instance().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 }
 
-uint32 Object::GetAreaId( )
+uint32 Object::GetAreaId() const
 {
     return MapManager::Instance().GetMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
 }

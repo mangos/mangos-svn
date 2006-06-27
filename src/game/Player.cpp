@@ -1044,14 +1044,15 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     }
 }
 
-inline void Player::SendLogXPGain(uint64 GUID,uint32 GivenXP,bool Type, bool Rested)
+void Player::SendLogXPGain(uint32 GivenXP, Unit* victim)
 {
     WorldPacket data;
     data.Initialize( SMSG_LOG_XPGAIN );
-    data << GUID;
+    data << ( victim ? victim->GetGUID() : uint64(0) );
     data << GivenXP;                                        // given experience
-    data << (uint8)Type;                                    // 00-kill_xp type, 01-non_kill_xp type
-    if (Rested)
+    data << ( victim ? (uint8)0 : (uint8)1 );               // 00-kill_xp type, 01-non_kill_xp type
+
+    if (isRested())
         data << GivenXP;                                    // rested given experience
     else
         data << (GivenXP/2);                                // unrested given experience
@@ -1060,13 +1061,12 @@ inline void Player::SendLogXPGain(uint64 GUID,uint32 GivenXP,bool Type, bool Res
     GetSession()->SendPacket(&data);
 }
 
-void Player::GiveXP(uint32 xp, const uint64 &guid)
+void Player::GiveXP(uint32 xp, Unit* victim)
 {
     if ( xp < 1 )
         return;
 
-    if (guid != 0)
-        SendLogXPGain(guid,xp,false,false);
+    SendLogXPGain(xp,victim);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -2324,7 +2324,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
 
 }
 
-uint16 Player::GetSkillValue(uint32 skill)
+uint16 Player::GetSkillValue(uint32 skill) const
 {
     if(!skill)return 0;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
@@ -2491,13 +2491,9 @@ void Player::CheckExploreSystem()
         {
             uint32 XP = p->area_level*10;
             uint32 area = p->ID;
-            GiveXP( XP, GetGUID() );
+            GiveXP( XP, NULL );
 
             SendExplorationExperience(area,XP);
-            /*data.Initialize( SMSG_EXPLORATION_EXPERIENCE );
-            data << area;
-            data << XP;
-            GetSession()->SendPacket(&data);*/
 
             sLog.outDetail("PLAYER: Player %u discovered a new area: %u", GetGUID(), area);
         }
@@ -3713,7 +3709,7 @@ uint32 Player::ApplyRestBonus(uint32 xp)
     return bonus * xp;
 }
 
-uint8 Player::CheckFishingAble()
+uint8 Player::CheckFishingAble() const
 {
     uint32 zone = GetZoneId();
     uint32 fish_value = GetSkillValue(SKILL_FISHING);
@@ -7023,7 +7019,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
 
         if ( getLevel() < 60 )
         {
-            GiveXP( pQuest->XPValue( this ), GetGUID() );
+            GiveXP( pQuest->XPValue( this ), NULL );
             ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
         }
         else

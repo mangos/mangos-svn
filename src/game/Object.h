@@ -142,15 +142,15 @@ class MANGOS_DLL_SPEC Object
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
         }
 
-        const uint32& GetTaximask( uint8 index ) const { return m_taximask[index]; }
+        uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
 
         void SetMapId(uint32 newMap) { m_mapId = newMap; }
 
-        const uint32& GetMapId( ) const { return m_mapId; }
+        uint32 GetMapId() const { return m_mapId; }
 
-        uint32 GetZoneId( );
-        uint32 GetAreaId( );
+        uint32 GetZoneId() const;
+        uint32 GetAreaId() const;
 
         const uint32& GetUInt32Value( const uint16 &index ) const
         {

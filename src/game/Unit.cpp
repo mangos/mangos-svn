@@ -376,7 +376,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             if(!PvP)
             {
                 DEBUG_LOG("DealDamageIsPvE");
-                uint32 xp = MaNGOS::XP::Gain(static_cast<Player *>(player), pVictim);
+                uint32 xp = MaNGOS::XP::Gain(player, pVictim);
                 uint32 entry = 0;
                 entry = pVictim->GetUInt32Value(OBJECT_FIELD_ENTRY );
 
@@ -394,14 +394,14 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                             continue;
                         if(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel()) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
                             continue;
-                        pGroupGuy->GiveXP(xp, victimGuid);
+                        pGroupGuy->GiveXP(xp, pVictim);
                         pGroupGuy->KilledMonster(entry, victimGuid);
                     }
                 }
                 else
                 {
                     DEBUG_LOG("Player kill enemy alone");
-                    player->GiveXP(xp, victimGuid);
+                    player->GiveXP(xp, pVictim);
                     player->KilledMonster(entry,victimGuid);
                 }
             }
@@ -539,7 +539,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, spellProto->School, absorb, 0, false, 0);
         SendMessageToSet(&data,true);
 
-        DealDamage(pVictim, (mod->m_amount-absorb) < 0 ? 0 :(mod->m_amount-absorb), procFlag, true);
+        DealDamage(pVictim, mod->m_amount <= absorb ? 0 : (mod->m_amount-absorb), procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
