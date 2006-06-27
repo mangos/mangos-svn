@@ -327,7 +327,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
 
-        void GiveXP(uint32 xp, const uint64 &guid);
+        void GiveXP(uint32 xp, Unit* victim);
 
         void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
 
@@ -622,7 +622,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void DestroyForPlayer( Player *target ) const;
         void SendDelayResponse(const uint32);
-        void SendLogXPGain(uint64 GUID,uint32 GivenXP,bool Type, bool Rested);
+        void SendLogXPGain(uint32 GivenXP,Unit* victim);
 
         void SendAttackStart(Unit* pVictim);
 
@@ -665,21 +665,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateSkillWeapon();
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
-        uint16 GetSkillValue(uint32 skill);
+        uint16 GetSkillValue(uint32 skill) const;
 
         void SetDontMove(bool dontMove);
-        bool GetDontMove() { return m_dontMove; }
+        bool GetDontMove() const { return m_dontMove; }
 
         void CheckExploreSystem(void);
 
-        uint32 GetTeam()
-        {
-            return m_team;
-        };
-        uint32 getLevel()
-        {
-            return (GetUInt32Value(UNIT_FIELD_LEVEL));
-        }
+        uint32 GetTeam() const { return m_team; }
+        uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
+
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         bool SetStanding(uint32 FTemplate, int standing);
         void CalculateReputation(Unit *pVictim);
@@ -692,25 +687,25 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        void UpdateHonor(void);
+        void UpdateHonor();
         void CalculateHonor(Unit *pVictim);
         int  CalculateHonorRank(float honor);
         int GetHonorRank();
         int  CalculateTotalKills(Player *pVictim);
-        float GetTotalHonor(void) { return m_total_honor_points; };
+        float GetTotalHonor() const { return m_total_honor_points; }
         //Acessors of righest rank
-        int  GetHonorHighestRank(void) { return m_highest_rank; };
-        void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; };
+        int  GetHonorHighestRank() const { return m_highest_rank; }
+        void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
         //Acessors of rating
-        float GetHonorRating(void) {return m_rating; };
-        void SetHonorRating(float rating) { m_rating = rating; };
+        float GetHonorRating() const { return m_rating; }
+        void SetHonorRating(float rating) { m_rating = rating; }
         //Acessors of last week standing
-        int  GetHonorLastWeekStanding(void) { return m_standing; };
-        void SetHonorLastWeekStanding(int standing){ m_standing = standing; };
+        int  GetHonorLastWeekStanding() const { return m_standing; }
+        void SetHonorLastWeekStanding(int standing){ m_standing = standing; }
         //End of Honor System
 
         void SetDrunkValue(uint16 newDrunkValue);
-        uint16 GetDrunkValue() { return m_drunk; }
+        uint16 GetDrunkValue() const { return m_drunk; }
 
         void ApplyItemMods(Item *item,uint8 slot,bool apply)
         {
@@ -732,20 +727,21 @@ class MANGOS_DLL_SPEC Player : public Unit
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
         void SendLoot(uint64 guid,uint8 loot_type);
-        uint8 CheckFishingAble();
+        uint8 CheckFishingAble() const;
 
-        inline bool InBattleGround() { return m_bgInBattleGround; };
-        inline void SetInBattleGround(bool val) { m_bgInBattleGround = val; };
-        inline uint32 GetBattleGroundId() { return m_bgBattleGroundID; };
-        inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; };
+        inline bool InBattleGround() const { return m_bgInBattleGround; }
+        inline void SetInBattleGround(bool val) { m_bgInBattleGround = val; }
+        inline uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
+        inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
 
         uint32 m_bgTeam;
 
+        bool isRested() const { return GetRestTime() >= 10000; }
         uint32 ApplyRestBonus(uint32 xp);
-        uint32 GetRestTime() { return m_restTime;}
+        uint32 GetRestTime() const { return m_restTime;}
         void SetRestTime(uint32 v) { m_restTime = v;}
 
-        bool IsInWater(){return (m_isunderwater & 0x80);};
+        bool IsInWater() const { return (m_isunderwater & 0x80); }
 
     protected:
         bool m_bgInBattleGround;

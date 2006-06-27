@@ -2025,7 +2025,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         uint32 nextLvlXP = chr->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
         uint32 givexp = nextLvlXP - curXP;
 
-        chr->GiveXP(givexp,chr->GetGUID());
+        chr->GiveXP(givexp,NULL);
 
         WorldPacket data;
         std::stringstream sstext;
