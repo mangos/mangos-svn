@@ -2798,6 +2798,29 @@ void Player::UpdateHonor(void)
         delete result;
     }
 
+	//RIGHEST RANK
+    //If the new rank is highest then the old one, then m_highest_rank is updated
+    if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
+    {
+        SetHonorHighestRank( CalculateHonorRank(total_honor) );
+    }
+
+    //RATING
+	SetHonorRating( total_honor/*MaNGOS::Honor::CalculeRating(this)*/ );
+
+	//STANDING
+	SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this) );
+
+	//TODO Fix next rank bar... it is not working fine! For while it be set with the total honor points...
+    //NEXT RANK BAR
+    SetUInt32Value(PLAYER_FIELD_HONOR_BAR, (uint32)( (total_honor < 0) ? 0: total_honor) );
+	
+	//RANK (Patent)
+    if( CalculateHonorRank(total_honor) )
+        SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
+    else
+        SetUInt32Value(PLAYER_BYTES_3, m_drunk);
+
     //TODAY
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (today_dishonorableKills << 16) + today_honorableKills );
     //YESTERDAY
@@ -2811,40 +2834,12 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_LAST_WEEK_CONTRIBUTION, (uint32)lastWeekHonor);
     SetUInt32Value(PLAYER_FIELD_LAST_WEEK_RANK, GetHonorLastWeekStanding());
 
-    //TODO Fix next rank bar... it is not working fine!
-    //NEXT RANK BAR //Total honor points
-    SetUInt32Value(PLAYER_FIELD_HONOR_BAR, (uint32)( (total_honor < 0) ? 0: total_honor) );
-
-    if( CalculateHonorRank(total_honor) )
-        SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
-    else
-        SetUInt32Value(PLAYER_BYTES_3, m_drunk);
-
     //LIFE TIME
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
-
-    //RIGHEST RANK
-    //If the new rank is highest then the old one, then m_highest_rank is updated
-    if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
-    {
-        SetHonorHighestRank( CalculateHonorRank(total_honor) );
-    }
-    if ( GetHonorHighestRank() )
-    {
-        SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, ((uint32) GetHonorHighestRank() << 24) + 0x040F0001 );
-    }
-    else
-    {
-        SetUInt32Value(PLAYER_FIELD_PVP_MEDALS, 0);
-    }
-
-    //RATING
-    m_rating = MaNGOS::Honor::CalculeRating(this);
-
-    //STANDING
-    m_standing = MaNGOS::Honor::CalculeRating(this);
+	//TODO: Into what field we need to set it? Fix it!
+	SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? (((uint32) GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
