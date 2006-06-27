@@ -690,16 +690,24 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateMaxSkills();
         void ModifySkillBonus(uint32 skillid,int32 val);
 
-        //Honor System
+        /*********************************************************/
+        /***                  HONOR SYSTEM                     ***/
+        /*********************************************************/
         void UpdateHonor(void);
         void CalculateHonor(Unit *pVictim);
         int  CalculateHonorRank(float honor);
         int GetHonorRank();
         int  CalculateTotalKills(Player *pVictim);
         float GetTotalHonor(void) { return m_total_honor_points; };
-        int  GetHonorHighestRank(void) { return m_highest_rank; };
+		//Acessors of righest rank
+		int  GetHonorHighestRank(void) { return m_highest_rank; };
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; };
-        int  GetHonorLastWeekStanding(void) { return m_standing; };
+        //Acessors of rating
+		float GetHonorRating(void) {return m_rating; };
+		void SetHonorRating(float rating) { m_rating = rating; };
+		//Acessors of last week standing
+		int  GetHonorLastWeekStanding(void) { return m_standing; };
+		void SetHonorLastWeekStanding(int standing){ m_standing = standing; };
         //End of Honor System
 
         void SetDrunkValue(uint16 newDrunkValue);

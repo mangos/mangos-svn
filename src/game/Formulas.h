@@ -20,6 +20,7 @@
 #define MANGOS_FORMULAS_H
 
 #include "World.h"
+#include "Database/DatabaseEnv.h"
 
 namespace MaNGOS
 {
@@ -29,6 +30,27 @@ namespace MaNGOS
 		//TODO: Implement this function
 		inline int CalculeStanding(Player *plr)
         {
+			uint64 guid = 0;
+			int standing = 0;
+
+			QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` ORDER BY `rating` DESC;");
+			if(result)
+			{
+				do
+				{
+					Field *fields = result->Fetch();
+					guid = fields[0].GetUInt64();
+					
+					standing++;
+					
+					if(plr->GetGUID() == guid)
+					{
+						return standing;
+					}
+				}
+				while( result->NextRow() );
+			}
+
 			return 0;
 		}
 		//TODO: Fix this formula, for now the weekly rating is how many honor player gain in a week
