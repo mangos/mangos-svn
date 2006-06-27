@@ -6935,6 +6935,8 @@ void Player::CompleteQuest( Quest *pQuest )
             state |= 1 << 24;
             SetUInt32Value( log_slot + 1, state );
         }
+
+        SendQuestComplete( pQuest );
     }
 }
 
