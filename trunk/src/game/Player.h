@@ -413,7 +413,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void KilledMonster( uint32 entry, uint64 guid );
         void AddQuestsLoot( Loot* loot, uint32 lootid );
 
-
         void SendQuestComplete( Quest *pQuest );
         void SendQuestReward( Quest *pQuest );
         void SendQuestFailed( Quest *pQuest );
@@ -699,15 +698,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetHonorRank();
         int  CalculateTotalKills(Player *pVictim);
         float GetTotalHonor(void) { return m_total_honor_points; };
-		//Acessors of righest rank
-		int  GetHonorHighestRank(void) { return m_highest_rank; };
+        //Acessors of righest rank
+        int  GetHonorHighestRank(void) { return m_highest_rank; };
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; };
         //Acessors of rating
-		float GetHonorRating(void) {return m_rating; };
-		void SetHonorRating(float rating) { m_rating = rating; };
-		//Acessors of last week standing
-		int  GetHonorLastWeekStanding(void) { return m_standing; };
-		void SetHonorLastWeekStanding(int standing){ m_standing = standing; };
+        float GetHonorRating(void) {return m_rating; };
+        void SetHonorRating(float rating) { m_rating = rating; };
+        //Acessors of last week standing
+        int  GetHonorLastWeekStanding(void) { return m_standing; };
+        void SetHonorLastWeekStanding(int standing){ m_standing = standing; };
         //End of Honor System
 
         void SetDrunkValue(uint16 newDrunkValue);
@@ -868,7 +867,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_dontMove;
 
         float m_total_honor_points;
-		float m_rating;
+        float m_rating;
         int m_highest_rank;
         int m_standing;
 

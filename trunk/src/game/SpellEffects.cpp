@@ -2222,7 +2222,7 @@ void Spell::EffectCharge(uint32 i)
 {
     assert(unitTarget);
     assert(m_caster);
-    
+
     float x, y, z;
     unitTarget->GetClosePoint(m_caster, x, y, z);
 

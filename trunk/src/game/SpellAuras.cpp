@@ -848,7 +848,7 @@ void Aura::HandleAuraModStun(bool apply)
             m_target->SendMessageToSet(&data,true);
             m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
         }
-        else 
+        else
             ((Creature *)m_target)->StopMoving();
     }
     else
@@ -868,7 +868,7 @@ void Aura::HandleAuraModStun(bool apply)
 
 void Aura::HandleAuraModRangedAttackPower(bool apply)
 {
-    apply ? 
+    apply ?
         m_target->SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_target->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS) + m_modifier->m_amount) :
     m_target->SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_target->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS) - m_modifier->m_amount);
 }
@@ -1079,7 +1079,7 @@ void Aura::HandleAuraDamageShield(bool apply)
     if(apply)
     {
         for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-        if(i->m_spellId == GetId() && i->m_caster == GetCaster())
+            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
         {
             m_target->m_damageShields.erase(i);
             break;
@@ -1093,7 +1093,7 @@ void Aura::HandleAuraDamageShield(bool apply)
     else
     {
         for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-        if(i->m_spellId == GetId() && i->m_caster == GetCaster())
+            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
         {
             m_target->m_damageShields.erase(i);
             break;
@@ -1243,6 +1243,7 @@ void Aura::HandleAuraModResistance(bool apply)
             m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
     }
 }
+
 void Aura::HandleAuraModRoot(bool apply)
 {
     uint32 apply_stat = UNIT_STAT_ROOT;
@@ -1649,24 +1650,24 @@ void Aura::HandleAuraProcTriggerSpell(bool apply)
 // FIX-ME PLS!!!
 void Aura::HandleAuraProcTriggerDamage(bool apply)
 {
-       /*if(apply)
-            {
-                DamageShield* ds = new DamageShield();
-                ds->m_caster = GetCaster();
-                ds->m_damage = m_modifier->m_amount;
-                ds->m_spellId = GetId();
-                m_target->m_damageShields.push_back((*ds));
-            }
-            else
-            {
-                for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-                    if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-                {
-                    m_target->m_damageShields.erase(i);
-                    break;
-                }
-            }
-            */
+    /*if(apply)
+         {
+             DamageShield* ds = new DamageShield();
+             ds->m_caster = GetCaster();
+             ds->m_damage = m_modifier->m_amount;
+             ds->m_spellId = GetId();
+             m_target->m_damageShields.push_back((*ds));
+         }
+         else
+         {
+             for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
+                 if(i->m_spellId == GetId() && i->m_caster == GetCaster())
+             {
+                 m_target->m_damageShields.erase(i);
+                 break;
+             }
+         }
+         */
 }
 
 void Aura::HandleAuraTracCreatures(bool apply)
@@ -1847,7 +1848,7 @@ void Aura::HandleAuraTransform(bool apply)
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 {
-     sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
     if(m_modifier->m_amount<=1)
         return;
     WorldPacket data;
@@ -1868,7 +1869,7 @@ void Aura::HandleAuraManaShield(bool apply)
 {
     if(apply)
     {
-        
+
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
         {
             if(m_modifier->m_miscvalue == (*i)->m_schoolType)
@@ -1876,7 +1877,7 @@ void Aura::HandleAuraManaShield(bool apply)
                 m_target->m_damageManaShield.erase(i);
             }
         }
-        
+
         DamageManaShield *dms = new DamageManaShield();
 
         dms->m_spellId = GetId();
@@ -1903,7 +1904,7 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
 {
     if(apply)
     {
-        
+
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
         {
             if(m_modifier->m_miscvalue == (*i)->m_schoolType)
@@ -1911,7 +1912,7 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
                 m_target->m_damageManaShield.erase(i);
             }
         }
-        
+
         DamageManaShield *dms = new DamageManaShield();
 
         dms->m_spellId = GetId();
@@ -2059,7 +2060,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
             }
             return;
         }break;
-        
+
         default:
         {
             sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");

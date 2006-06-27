@@ -546,7 +546,7 @@ void WorldSession::SendListInventory( uint64 guid )
                             pCreature->SetItemCount(i, pCreature->GetMaxItemCount(i));
                         pCreature->SetItemLastIncr(i, ptime);
                     }
-                    data << uint32( 0xFFFFFFFF ); // unknown (not index item in sell list!) this value fix not selling first item in list
+                    data << uint32( 0xFFFFFFFF );           // unknown (not index item in sell list!) this value fix not selling first item in list
                     data << pCreature->GetItemId(i);
                     data << pProto->DisplayInfoID;
                     data << uint32(pCreature->GetMaxItemCount(i) <= 0 ? 0xFFFFFFFF : pCreature->GetItemCount(i));
@@ -558,7 +558,7 @@ void WorldSession::SendListInventory( uint64 guid )
         }
 
         if ( count == 0 || data.size() != 8 + 1 + count * 7 * 4 )
-           return;
+            return;
         data.put<uint32>(8, count);
         SendPacket( &data );
     }

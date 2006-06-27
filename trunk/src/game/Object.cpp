@@ -536,7 +536,7 @@ bool Object::HasInArc(const float arcangle, const Object* obj) const
     while( arc < 0 )
         arc +=  2.0f * M_PI;
 
-    float angle = GetAngle( obj ); 
+    float angle = GetAngle( obj );
     angle -= m_orientation;
 
     // move angle to range -pi ... +pi
@@ -545,8 +545,8 @@ bool Object::HasInArc(const float arcangle, const Object* obj) const
     while(angle < -M_PI)
         angle += 2.0f * M_PI;
 
-    float lborder =  -1 * (arc/2.0f); // in range -pi..0
-    float rborder = (arc/2.0f);       // in range 0..pi
+    float lborder =  -1 * (arc/2.0f);                       // in range -pi..0
+    float rborder = (arc/2.0f);                             // in range 0..pi
     return (( angle >= lborder ) && ( angle <= rborder ));
 }
 

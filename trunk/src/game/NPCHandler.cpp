@@ -230,7 +230,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         SpellCastTargets targets;
         targets.setUnitTarget( _player );
-        
 
         float u_oprientation = unit->GetOrientation();
 
@@ -239,7 +238,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
         spell->prepare(&targets);
 
-        // trainer always return to original orientation 
+        // trainer always return to original orientation
         unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
 
         //SendTrainerList( guid );
