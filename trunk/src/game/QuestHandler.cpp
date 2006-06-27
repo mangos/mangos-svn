@@ -206,8 +206,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                 _player->CalculateReputation( pQuest, guid );
                 if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
                 {
-                    Quest* nextquest;
-                    if( nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                    if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
                         _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
                 }
             }
@@ -218,8 +217,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                 {
                     if( !Script->GOChooseReward( _player, pGameObject, pQuest, reward ) )
                     {
-                        Quest* nextquest;
-                        if( nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                        if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
                             _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
                     }
                 }
