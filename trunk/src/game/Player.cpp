@@ -7686,6 +7686,8 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadCorpse();
 
     //_LoadPet();
+    
+    _ApplyAllAuraMods();
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
@@ -7700,8 +7702,8 @@ bool Player::LoadFromDB( uint32 guid )
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME));
-    _ApplyAllAuraMods();
-    _ApplyAllItemMods();
+    //_ApplyAllAuraMods();
+    //_ApplyAllItemMods();
     return true;
 }
 
