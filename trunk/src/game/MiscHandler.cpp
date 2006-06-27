@@ -956,21 +956,24 @@ void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
     WorldPacket data;
     uint64 guid;
-    uint64 uknown1;
+    uint64 unknown1;
+    uint32 unknown2;
     float PositionX;
     float PositionY;
     float PositionZ;
     float Orientation;
 
     recv_data >> guid;
-    recv_data >> uknown1;
+    recv_data >> unknown1;
+    recv_data >> unknown2;
     recv_data >> PositionX;
     recv_data >> PositionY;
     recv_data >> PositionZ;
     recv_data >> Orientation;
 
     DEBUG_LOG("Guid %lu",guid);
-    DEBUG_LOG("uknown1 %lu",uknown1);
+    DEBUG_LOG("unknown1 %lu",unknown1);
+    DEBUG_LOG("unknown2 %lu",unknown2);
     DEBUG_LOG("X %f",PositionX);
     DEBUG_LOG("Y %f",PositionY);
     DEBUG_LOG("Z %f",PositionZ);
@@ -988,21 +991,24 @@ void WorldSession::HandleMooveRootAck(WorldPacket& recv_data)
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
     WorldPacket data;
     uint64 guid;
-    uint64 uknown1;
+    uint64 unknown1;
+    uint32 unknown2;
     float PositionX;
     float PositionY;
     float PositionZ;
     float Orientation;
 
     recv_data >> guid;
-    recv_data >> uknown1;
-    recv_data >> Orientation;
+    recv_data >> unknown1;
+    recv_data >> unknown2;
     recv_data >> PositionX;
     recv_data >> PositionY;
     recv_data >> PositionZ;
+    recv_data >> Orientation;
 
     DEBUG_LOG("Guid %lu",guid);
-    DEBUG_LOG("uknown1 %lu",uknown1);
+    DEBUG_LOG("unknown1 %lu",unknown1);
+    DEBUG_LOG("unknown1 %lu",unknown2);
     DEBUG_LOG("X %f",PositionX);
     DEBUG_LOG("Y %f",PositionY);
     DEBUG_LOG("Z %f",PositionZ);
