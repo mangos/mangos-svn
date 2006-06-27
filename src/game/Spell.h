@@ -201,7 +201,7 @@ enum SpellFailedReason
     CAST_FAIL_YOU_ARE_DEAD = 18,
     CAST_FAIL_OBJECT_ALREADY_BEING_USED = 19,
     CAST_FAIL_CANT_DO_WHILE_CONFUSED = 20,
-    CAST_FAIL_CANT_DO_WHILE_XXXX =21,                       //spell be cooldown by xxx 
+    CAST_FAIL_CANT_DO_WHILE_XXXX =21,                       //spell be cooldown by xxx
     CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED = 22,
     CAST_FAIL_MUST_HAVE_XXXX_EQUIPPED = 23,
     CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND = 24,

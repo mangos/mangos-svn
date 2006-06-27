@@ -78,7 +78,7 @@ class DBCStorage
                 data=(T **) dbc->AutoProduceData(fmt,&nCount);
             }
             delete dbc;
-            
+
             return res;
         }
 

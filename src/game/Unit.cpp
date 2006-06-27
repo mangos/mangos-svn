@@ -595,7 +595,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage)
             {
                 float multiple;
                 for(int x=0;x<3;x++)
-                if(spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MANA_SHIELD)
+                    if(spellInfo->EffectApplyAuraName[x] == SPELL_AURA_MANA_SHIELD)
                 {
                     multiple = spellInfo->EffectMultipleValue[x];
                     break;

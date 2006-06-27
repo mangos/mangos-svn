@@ -470,7 +470,8 @@ void Spell::cast()
 
         for(uint32 j = 0;j<3;j++)
         {
-            if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)                 // Dont do spell log, if is school damage spell
+                                                            // Dont do spell log, if is school damage spell
+            if(m_spellInfo->Effect[j] == 2 || m_spellInfo->Effect[j] == 0)
                 needspelllog = false;
             if(needspelllog) SendLogExecute();
 
@@ -1037,8 +1038,8 @@ uint8 Spell::CanCast()
             castResult = CAST_FAIL_IMMUNE;
         */
 
-	if(m_spellInfo->AttributesExEx & 1048576 && !target->HasInArc(M_PI, m_caster) )
-	    castResult = CAST_FAIL_NOT_BEHIND_TARGET;
+        if(m_spellInfo->AttributesExEx & 1048576 && !target->HasInArc(M_PI, m_caster) )
+            castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;

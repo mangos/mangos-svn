@@ -2798,7 +2798,7 @@ void Player::UpdateHonor(void)
         delete result;
     }
 
-	//RIGHEST RANK
+    //RIGHEST RANK
     //If the new rank is highest then the old one, then m_highest_rank is updated
     if( CalculateHonorRank(total_honor) > GetHonorHighestRank() )
     {
@@ -2806,16 +2806,16 @@ void Player::UpdateHonor(void)
     }
 
     //RATING
-	SetHonorRating( total_honor/*MaNGOS::Honor::CalculeRating(this)*/ );
+    SetHonorRating( total_honor/*MaNGOS::Honor::CalculeRating(this)*/ );
 
-	//STANDING
-	SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this) );
+    //STANDING
+    SetHonorLastWeekStanding( MaNGOS::Honor::CalculeStanding(this) );
 
-	//TODO Fix next rank bar... it is not working fine! For while it be set with the total honor points...
+    //TODO Fix next rank bar... it is not working fine! For while it be set with the total honor points...
     //NEXT RANK BAR
     SetUInt32Value(PLAYER_FIELD_HONOR_BAR, (uint32)( (total_honor < 0) ? 0: total_honor) );
-	
-	//RANK (Patent)
+
+    //RANK (Patent)
     if( CalculateHonorRank(total_honor) )
         SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
     else
@@ -2838,8 +2838,8 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, (lifetime_dishonorableKills << 16) + lifetime_honorableKills );
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
-	//TODO: Into what field we need to set it? Fix it!
-	SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? (((uint32) GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
+    //TODO: Into what field we need to set it? Fix it!
+    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? (((uint32) GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 
     //Store Total Honor points...
     m_total_honor_points = total_honor;
@@ -7593,7 +7593,7 @@ void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature
 
         uint16 log_slot = GetQuestSlot( pQuest );
         uint32 kills = GetUInt32Value( log_slot + 1 );
-        kills = kills + (add_count << ( 6 * creature_idx ));  
+        kills = kills + (add_count << ( 6 * creature_idx ));
         SetUInt32Value( log_slot + 1, kills );
     }
 }
