@@ -83,7 +83,11 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     if( pItem )
     {
         uint16 dest;
-        uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, true );
+	bool swap = false;
+	ItemPrototype *pProto = pItem->GetProto();
+	if (pProto) swap = (pProto->InventoryType == INVTYPE_BAG) ? false : swap;
+	uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, swap );
+
         if( msg == EQUIP_ERR_OK )
         {
             Item *pItem2 = _player->GetItemByPos( dest );
