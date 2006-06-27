@@ -7891,7 +7891,7 @@ void Player::_LoadMail()
         {
             Field *fields = result->Fetch();
             Mail *be = new Mail;
-            be->messageID = fields[0].GetUInt32();
+            be->id = fields[0].GetUInt32();
             be->sender = fields[1].GetUInt32();
             be->receiver = fields[2].GetUInt32();
             be->subject = fields[3].GetString();
