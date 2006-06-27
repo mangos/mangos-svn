@@ -808,6 +808,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void StopMirrorTimer(uint8 Type);
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
 
+        void outDebugValues() const;
+
         uint64 m_lootGuid;
 
         std::string m_name;
