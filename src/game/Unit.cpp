@@ -488,7 +488,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
     if(spellInfo)
-        absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage,resist);
+        absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage,&resist);
 
     WorldPacket data;
 
@@ -517,7 +517,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellProto->Id);
     if(spellInfo)
-        absorb = CalDamageAbsorb(pVictim,spellInfo->School,mod->m_amount,resist);
+        absorb = CalDamageAbsorb(pVictim,spellInfo->School,mod->m_amount,&resist);
 
     sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id,absorb);
@@ -562,7 +562,7 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
     SendMessageToSet(&data, true);
 }
 
-uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 resist)
+uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 *resist)
 {
     int32 AbsorbDamage=0;
     int32 currAbsorbDamage=0;
@@ -633,9 +633,9 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     if( School > 0)
     {
         uint32 tmpvalue2 = pVictim->GetUInt32Value(UNIT_FIELD_ARMOR + School);
-        resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
-        if(resist > damage)
-            resist = damage;
+        *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
+        if(*resist > damage)
+            *resist = damage;
     }
 
     // random durability loss for items on absorb (ABSORB)
@@ -659,7 +659,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     {
         SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
     }*/
-    uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,*resist);
+    uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
 
     if( (*damage-absorb-*resist) <= 0 )
     {
