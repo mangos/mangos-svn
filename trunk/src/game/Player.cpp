@@ -7677,13 +7677,12 @@ bool Player::LoadFromDB( uint32 guid )
 
     //_LoadPet();
     
-    _ApplyAllAuraMods();
+    // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
+    // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
 
     sLog.outDebug("The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugValues();
 
-    //_ApplyAllAuraMods();
-    //_ApplyAllItemMods();
     return true;
 }
 
