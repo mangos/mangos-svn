@@ -173,7 +173,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
     uint64 guid;
-    uint32 spellId=0, playerGold=0;
+    uint32 spellId = 0;
     TrainerSpell *proto=NULL;
 
     recv_data >> guid >> spellId;
@@ -213,14 +213,13 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         sLog.outError("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
         return;
     }
-    playerGold = _player->GetUInt32Value( PLAYER_FIELD_COINAGE );
-    if( playerGold >= proto->spellcost )
+    if( _player->GetMoney() >= proto->spellcost )
     {
         data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED );
         data << guid << spellId;
         SendPacket( &data );
 
-        _player->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - proto->spellcost );
+        _player->ModifyMoney( -int32(proto->spellcost) );
 
         Spell *spell;
         if(proto->spell->SpellVisual == 222)
@@ -440,10 +439,9 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
             uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
             uint32 costs = durability - curdur;
 
-            if (_player->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+            if (_player->GetMoney() >= costs)
             {
-                uint32 newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                _player->ModifyMoney( -int32(costs) );
                 // repair item
                 pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
             }
@@ -472,10 +470,9 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
                     uint32 curdur = pItem->GetUInt32Value(ITEM_FIELD_DURABILITY);
                     uint32 costs = durability - curdur;
 
-                    if (_player->GetUInt32Value(PLAYER_FIELD_COINAGE) >= costs)
+                    if (_player->GetMoney() >= costs)
                     {
-                        uint32 newmoney = ((_player->GetUInt32Value(PLAYER_FIELD_COINAGE)) - costs);
-                        _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney);
+                        _player->ModifyMoney( -int32(costs) );
                         // repair item
                         pItem->SetUInt32Value(ITEM_FIELD_DURABILITY, durability);
                         // DEBUG_LOG("Item is: %d, maxdurability is: %d", srcitem, durability);

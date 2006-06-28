@@ -151,7 +151,6 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     uint32 path;
     uint32 cost;
     uint16 MountId;
-    int32 newmoney;
     WorldPacket data;
 
     recv_data >> guid >> sourcenode >> destinationnode;
@@ -172,8 +171,8 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
         return;
     }
 
-    newmoney = ((GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE)) - cost);
-    if(newmoney < 0 )
+    uint32 money = GetPlayer()->GetMoney();
+    if(money < cost )
     {
         data << uint32( 3 );
         SendPacket( &data );
@@ -184,7 +183,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
     GetPlayer( )->SaveToDB();                               //For temporary avoid save player on air
 
-    GetPlayer( )->setDismountCost( newmoney );
+    GetPlayer( )->setDismountCost( money - cost);
 
     data << uint32( 0 );
 

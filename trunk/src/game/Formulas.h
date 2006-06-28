@@ -234,6 +234,12 @@ namespace MaNGOS
             // The XP to Level is always rounded to the nearest 100 points.
             return uint32(( xp + 50 ) * 0.01) * 100;
         }
+
+        inline uint32 xp_to_money(uint32 xp)
+        {
+            // for max_level
+            return xp;
+        }
     }
 }
 #endif

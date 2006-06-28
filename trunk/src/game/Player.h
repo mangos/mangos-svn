@@ -305,6 +305,8 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
+#define MAX_PLAYER_LEVEL 60
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -457,9 +459,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void Regenerate(uint16 field_cur, uint16 field_max);
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
 
-        inline uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
-        inline void ModifyMoney (int32 d) { SetMoney (GetMoney() + d); }
-        void SetMoney (uint32 value) { SetUInt32Value (PLAYER_FIELD_COINAGE, value); }
+        uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
+        void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d); }
+        void SetMoney( uint32 value ) { SetUInt32Value (PLAYER_FIELD_COINAGE, value); }
 
         uint32 GetTutorialInt(uint32 intId )
         {
@@ -552,13 +554,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             return pvpOn;
         };
-
-        void setGold(int gold)
-        {
-            uint32 moneyuser = GetUInt32Value(PLAYER_FIELD_COINAGE);
-            SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser + gold );
-        };
-
+      
         void setFaction(uint8 race, uint32 faction);
 
         inline std::list<struct actions> getActionList() { return m_actions; };

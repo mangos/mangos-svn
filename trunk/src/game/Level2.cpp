@@ -580,7 +580,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return false;
 
     uint8 lvl = (uint8) atoi((char*)args);
-    if ( lvl < 1 || lvl > 63)
+    if ( lvl < 1 || lvl > MAX_PLAYER_LEVEL + 3)
     {
         FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );

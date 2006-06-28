@@ -296,8 +296,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
             {
                 if( pProto->SellPrice > 0 )
                 {
-                    uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) + pProto->SellPrice * pItem->GetCount();
-                    _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                    _player->ModifyMoney( pProto->SellPrice * pItem->GetCount() );
                     uint32 buyBackslot = _player->GetCurrentBuybackSlot();
                     _player->AddItemToBuyBackSlot( buyBackslot, pItem );
                     _player->SetCurrentBuybackSlot( buyBackslot + 1 );
@@ -329,8 +328,8 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
         if( pCreature )
         {
-            uint32 newmoney = _player->GetUInt32Value(PLAYER_FIELD_COINAGE) - _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
-            if( newmoney < 0 )
+            int32 price = _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
+            if( _player->GetMoney() < price )
             {
                 _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
                 return;
@@ -339,7 +338,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
             uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false );
             if( msg == EQUIP_ERR_OK )
             {
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                _player->ModifyMoney( -price );
                 _player->RemoveItemFromBuyBackSlot( slot );
                 _player->StoreItem( dest, pItem, true );
             }
@@ -392,8 +391,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
                 return;
             }
-            int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
-            if( newmoney < 0 )
+            int32 price  = pProto->BuyPrice * count;
+            if( _player->GetMoney() < price )
             {
                 _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
                 return;
@@ -423,7 +422,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 msg = _player->CanStoreNewItem( bag, slot, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
                 if( msg == EQUIP_ERR_OK )
                 {
-                    _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                    _player->ModifyMoney( -price );
                     _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
                     if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                         pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
@@ -478,8 +477,10 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                 _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
                 return;
             }
-            int newmoney = (int)_player->GetUInt32Value(PLAYER_FIELD_COINAGE) - (int)pProto->BuyPrice * count;
-            if( newmoney < 0 )
+
+            int32 price = pProto->BuyPrice * count;
+
+            if( _player->GetMoney() < price )
             {
                 _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
                 return;
@@ -488,7 +489,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
             if( msg == EQUIP_ERR_OK )
             {
-                _player->SetUInt32Value( PLAYER_FIELD_COINAGE , newmoney );
+                _player->ModifyMoney( -price );
                 _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
                 if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                     pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
@@ -590,12 +591,14 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
 void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug("WORLD: CMSG_BUY_BANK_SLOT");
-    uint32 bank, result, price, playerGold;
 
-    bank = _player->GetUInt32Value(PLAYER_BYTES_2);
-    result = (bank & 0x70000) >> 16;
+
+    uint32 bank = _player->GetUInt32Value(PLAYER_BYTES_2);
+    uint32 result = (bank & 0x70000) >> 16;
 
     sLog.outDetail("PLAYER: Buy bank bag slot, slot number = %u", result);
+
+    uint32 price;
 
     // Prices Hardcoded
     switch (result)
@@ -631,11 +634,11 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
         return;
     }
     bank = (bank & ~0x70000) + (result << 16);
-    playerGold = _player->GetUInt32Value(PLAYER_FIELD_COINAGE);
-    if (playerGold >= price)
+
+    if (_player->GetMoney() >= price)
     {
         _player->SetUInt32Value(PLAYER_BYTES_2, bank);
-        _player->SetMoney(playerGold - price);
+        _player->ModifyMoney(-int32(price));
 
     }
 }
