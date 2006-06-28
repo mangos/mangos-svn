@@ -212,7 +212,7 @@ Item* Bag::GetItemByPos( uint8 slot )
     ItemPrototype *pBagProto = GetProto();
     if( pBagProto )
     {
-        if( slot >= 0 && slot < pBagProto->ContainerSlots )
+        if( slot < pBagProto->ContainerSlots )
             return m_bagslot[slot];
     }
     return NULL;

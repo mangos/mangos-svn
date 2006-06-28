@@ -1194,6 +1194,24 @@ void Unit::_ApplyStatsMods()
     ApplyStats(true);
 }
 
+void Unit::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
+{
+    uint32 cur = GetUInt32Value(index);
+    if(val > cur && !apply ) val = cur;
+
+    SetUInt32Value(index,cur+(apply ? val : -val));
+}
+
+void Unit::ApplyModFloatValue(uint16 index, float  val, bool apply)
+{
+    uint32 cur = GetFloatValue(index);
+    if(val > cur && !apply ) val = cur;
+
+    SetFloatValue(index,cur+(apply ? val : -val));
+}
+
+
+
 void Unit::ApplyStats(bool apply)
 {
     // TODO:
@@ -1212,26 +1230,21 @@ void Unit::ApplyStats(bool apply)
 
     // Armor
     val2 = (uint32)(2*GetUInt32Value(UNIT_FIELD_AGILITY));
-    if(val2 > GetUInt32Value(UNIT_FIELD_ARMOR) && !apply) val2 = 0;
-    apply ?
-        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+val2):
-    SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-val2);
+
+    ApplyModUInt32Value(UNIT_FIELD_ARMOR, val2, apply);
 
     // HP
     val2 = (uint32)((GetUInt32Value(UNIT_FIELD_STAMINA) - pinfo->stamina)*10);
-    if(val2 > GetUInt32Value(UNIT_FIELD_MAXHEALTH) && !apply) val2 = 0;
-    apply ?
-        SetUInt32Value(UNIT_FIELD_MAXHEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH)+val2):
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH)-val2);
+
+    ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH, val2, apply);
 
     // MP
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
         val2 = (uint32)((GetUInt32Value(UNIT_FIELD_IQ) - pinfo->intellect)*15);
-        if(val2 > GetUInt32Value(UNIT_FIELD_MAXPOWER1) && !apply) val2 = 0;
-        apply ?
-            SetUInt32Value(UNIT_FIELD_MAXPOWER1,GetUInt32Value(UNIT_FIELD_MAXPOWER1)+val2):
-        SetUInt32Value(UNIT_FIELD_MAXPOWER1,GetUInt32Value(UNIT_FIELD_MAXPOWER1)-val2);
+
+        ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1, val2, apply);
+
     }
 
     float classrate = 0;
@@ -1244,23 +1257,19 @@ void Unit::ApplyStats(bool apply)
         val2 = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
     else
         val2 = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
-    //if(val2 > GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) && !apply) val2 = 0;
-    tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
-    apply ?
-        SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)+val2):
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER)-val2);
+
+
+    if(!apply)
+        tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+
+    ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, val2, apply);
+
     if(apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
 
     val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
-    //if(val > GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) && !apply) val = 0;
-    apply ?
-        SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)+val):
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE)-val);
-
-    apply ?
-        SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE)+val):
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE)-val);
+    ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, val, apply);
+    ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, val, apply);
 
     //Not-ranged
 
@@ -1278,24 +1287,15 @@ void Unit::ApplyStats(bool apply)
     }
     tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
 
-    //if(val2 > GetUInt32Value(UNIT_FIELD_ATTACK_POWER) && !apply) val2 = 0;
-    apply ?
-        SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)+val2):
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,GetUInt32Value(UNIT_FIELD_ATTACK_POWER)-val2);
+    ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER, val2, apply);
+
     if(apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
 
     val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000;
 
-    //if(val > GetFloatValue(UNIT_FIELD_MINDAMAGE) && val > GetFloatValue(UNIT_FIELD_MAXDAMAGE) && !apply) val = 0;
-
-    apply ?
-        SetFloatValue(UNIT_FIELD_MINDAMAGE, GetFloatValue(UNIT_FIELD_MINDAMAGE)+val):
-    SetFloatValue(UNIT_FIELD_MINDAMAGE, GetFloatValue(UNIT_FIELD_MINDAMAGE)-val);
-
-    apply ?
-        SetFloatValue(UNIT_FIELD_MAXDAMAGE, GetFloatValue(UNIT_FIELD_MAXDAMAGE)+val):
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE, GetFloatValue(UNIT_FIELD_MAXDAMAGE)-val);
+    ApplyModFloatValue(UNIT_FIELD_MINDAMAGE, val, apply);
+    ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, val, apply);
 
     // critical
     if(getClass() == HUNTER) classrate = 53;
@@ -1303,11 +1303,8 @@ void Unit::ApplyStats(bool apply)
     else classrate = 20;
 
     val = (float)(5 + GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
-    if(val > GetFloatValue(PLAYER_CRIT_PERCENTAGE)  && !apply) val = 0;
 
-    apply ?
-        SetFloatValue(PLAYER_CRIT_PERCENTAGE, GetFloatValue(PLAYER_CRIT_PERCENTAGE)+val):
-    SetFloatValue(PLAYER_CRIT_PERCENTAGE, GetFloatValue(PLAYER_CRIT_PERCENTAGE)-val);
+    ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE, val, apply);
 
     //dodge
     if(getClass() == HUNTER) classrate = 26.5;
@@ -1316,27 +1313,18 @@ void Unit::ApplyStats(bool apply)
 
                                                             ///*+(Defense*0,04);
     val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
-    if(val > GetFloatValue(PLAYER_DODGE_PERCENTAGE)  && !apply) val = 0;
 
-    apply ?
-        SetFloatValue(PLAYER_DODGE_PERCENTAGE, GetFloatValue(PLAYER_DODGE_PERCENTAGE)+val):
-    SetFloatValue(PLAYER_DODGE_PERCENTAGE, GetFloatValue(PLAYER_DODGE_PERCENTAGE)-val);
+    ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);
 
     //parry
     val = (float)(5);
-    if(val > GetFloatValue(PLAYER_PARRY_PERCENTAGE)  && !apply) val = 0;
 
-    apply ?
-        SetFloatValue(PLAYER_PARRY_PERCENTAGE, GetFloatValue(PLAYER_PARRY_PERCENTAGE)+val):
-    SetFloatValue(PLAYER_PARRY_PERCENTAGE, GetFloatValue(PLAYER_PARRY_PERCENTAGE)-val);
+    ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, val, apply);
 
     //block
     val = (float)(GetUInt32Value(UNIT_FIELD_STR)/22);
-    if(val > GetFloatValue(PLAYER_BLOCK_PERCENTAGE)  && !apply) val = 0;
 
-    apply ?
-        SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE)+val):
-    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE)-val);
+    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, val, apply);
 
 }
 
@@ -1479,29 +1467,19 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
 
     if(enchant_display ==4)
     {
-        apply ?
-            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)+enchant_value1):
-        SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
+        ApplyModUInt32Value(UNIT_FIELD_ARMOR,enchant_value1,apply);
     }
     else if(enchant_display ==2)
     {
         if(getClass() == CLASS_HUNTER)
         {
-            apply?
-                SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)+enchant_value1):
-            SetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE)-enchant_value1);
-            apply?
-                SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)+enchant_value1):
-            SetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,GetUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE)-enchant_value1);
+            ApplyModUInt32Value(UNIT_FIELD_MINRANGEDDAMAGE,enchant_value1,apply);
+            ApplyModUInt32Value(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_value1,apply);
         }
         else
         {
-            apply?
-                SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)+enchant_value1):
-            SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
-            apply?
-                SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)+enchant_value1):
-            SetUInt32Value(UNIT_FIELD_MAXDAMAGE,GetUInt32Value(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
+            ApplyModUInt32Value(UNIT_FIELD_MINDAMAGE,enchant_value1,apply);
+            ApplyModUInt32Value(UNIT_FIELD_MAXDAMAGE,enchant_value1,apply);
         }
     }
     else
