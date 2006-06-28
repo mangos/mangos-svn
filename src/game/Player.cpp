@@ -1068,14 +1068,18 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
     SendLogXPGain(xp,victim);
 
+    uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+
+    // XP to money conversion processed in Player::RewardQuest
+    if(level >= MAX_PLAYER_LEVEL)
+        return;
+
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     uint32 newXP = curXP + xp;
 
-    while (newXP >= nextLvlXP)
+    while( newXP >= nextLvlXP && level < MAX_PLAYER_LEVEL )
     {
-        uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
-
         uint32 MPGain,HPGain,STRGain,STAGain,AGIGain,INTGain,SPIGain;
         MPGain=HPGain=STRGain=STAGain=AGIGain=INTGain=SPIGain=0;
 
@@ -1107,8 +1111,8 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         }
 
         SetUInt32Value(UNIT_FIELD_LEVEL, level);
-        SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
         nextLvlXP = MaNGOS::XP::xp_to_level(level);
+        SetUInt32Value(PLAYER_NEXT_LEVEL_XP, nextLvlXP);
 
         UpdateMaxSkills ();
 
@@ -3044,7 +3048,7 @@ void Player::SendAttackStart(Unit* pVictim)
 void Player::FlightComplete()
 {
     clearUnitState(UNIT_STAT_IN_FLIGHT);
-    SetUInt32Value( PLAYER_FIELD_COINAGE , m_dismountCost);
+    SetMoney( m_dismountCost);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
 
@@ -7017,13 +7021,13 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             SetUInt32Value(log_slot + 2, 0);
         }
 
-        if ( getLevel() < 60 )
+        if ( getLevel() < MAX_PLAYER_LEVEL )
         {
             GiveXP( pQuest->XPValue( this ), NULL );
             ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
         }
         else
-            ModifyMoney( pQuest->GetQuestInfo()->RewMoney + pQuest->XPValue( this ) );
+            ModifyMoney( pQuest->GetQuestInfo()->RewMoney + MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
 
         if ( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
             mQuestStatus[quest].m_rewarded = true;

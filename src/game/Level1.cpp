@@ -1162,7 +1162,7 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         return true;
     }
 
-    uint32 moneyuser =(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_COINAGE));
+    uint32 moneyuser = m_session->GetPlayer()->GetMoney();
 
     char buf[256];
 
@@ -1182,7 +1182,7 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
 
-            chr->SetUInt32Value( PLAYER_FIELD_COINAGE, 0);
+            chr->SetMoney(0);
         }
         else
         {
@@ -1194,6 +1194,8 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
             sprintf((char*)buf,LANG_YOURS_MONEY_TAKEN, m_session->GetPlayer()->GetName(), abs(gold));
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
+
+            chr->SetMoney( newmoney );
         }
     }
     else
@@ -1206,10 +1208,11 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         sprintf((char*)buf,LANG_YOURS_MONEY_GIVEN, m_session->GetPlayer()->GetName(), gold);
         FillSystemMessageData(&data, m_session, buf);
         chr->GetSession()->SendPacket(&data);
+
+        chr->ModifyMoney( gold );
     }
 
-    sLog.outDetail(LANG_NEW_MONEY, moneyuser, gold, moneyuser+gold);
-    chr->SetUInt32Value( PLAYER_FIELD_COINAGE, moneyuser+gold );
+    sLog.outDetail(LANG_NEW_MONEY, moneyuser, gold, chr->GetMoney() );
 
     return true;
 }

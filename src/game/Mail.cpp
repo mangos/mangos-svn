@@ -47,9 +47,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     Player* pl = _player;
 
     WorldPacket tmpData;
-    uint32 tmpMoney = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
 
-    if (tmpMoney - money < 30)
+    if (pl->GetMoney() < money + 30)
     {
         tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
         tmpData << uint32(0);
@@ -92,8 +91,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
                 pl->RemoveItem( (pos >> 8), (pos & 255), true );
             }
-            uint32 playerGold = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
-            pl->SetUInt32Value( PLAYER_FIELD_COINAGE, playerGold - 30 - money );
+            pl->ModifyMoney( -30 - money );
 
             if (receive)
             {
@@ -240,7 +238,6 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     recv_data >> id;
     Player *pl = _player;
     Mail* m = pl->GetMail(id);
-    uint32 money = pl->GetUInt32Value(PLAYER_FIELD_COINAGE);
 
     data.Initialize(SMSG_SEND_MAIL_RESULT);
     data << uint32(id);
@@ -248,7 +245,7 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     data << uint32(0);
     SendPacket(&data);
 
-    pl->SetUInt32Value(PLAYER_FIELD_COINAGE,money + m->money);
+    pl->ModifyMoney(m->money);
     m->money = 0;
     pl->AddMail(m);
 

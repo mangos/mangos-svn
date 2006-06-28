@@ -1816,7 +1816,7 @@ void Spell::EffectDisEnchant(uint32 i)
 
     uint32 item;
     uint32 count;
-    if(item_level >= 51 && item_level <= 60)
+    if(item_level >= 51)
     {
         if(item_quality == 4)
         {

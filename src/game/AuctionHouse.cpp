@@ -86,7 +86,8 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
 void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 {
     uint64 auctioneer;
-    uint32 auction,price;
+    uint32 auction;
+    uint32 price;
     WorldPacket data;
     recv_data >> auctioneer;
     recv_data >> auction >> price;
@@ -126,7 +127,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             bidentry *be = new bidentry;
             be->AuctionID = auction;
             be->amt = price;
-            pl->SetUInt32Value(PLAYER_FIELD_COINAGE,(pl->GetUInt32Value(PLAYER_FIELD_COINAGE) - price));
+            pl->ModifyMoney(-int32(price));
             bidentry *bo = pl->GetBid(auction);
             if (bo)
             {
@@ -199,7 +200,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         }
         else
         {
-            pl->SetUInt32Value(PLAYER_FIELD_COINAGE,(pl->GetUInt32Value(PLAYER_FIELD_COINAGE) - ah->buyout));
+            pl->ModifyMoney(-int32(ah->buyout));
             Mail *m = new Mail;
             m->messageID = objmgr.GenerateMailID();
             m->sender = ah->owner;
