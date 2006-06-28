@@ -490,37 +490,41 @@ void Spell::cast()
             if((*iunit)->m_ReflectSpellSchool) reflect(*iunit);
             //HandleAddAura((*iunit));
         }
-        /*
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && 
+           (m_spellInfo->RecoveryTime > 0 || m_spellInfo->CategoryRecoveryTime > 0) )
         {
-            data.clear();
-            Player* _player = (Player*)m_caster;
-            data.Initialize(SMSG_SPELL_COOLDOWN);
-            data << m_caster->GetGUID();
-            std::list<Playerspell*>::iterator itr;
-            std::list<Playerspell*> player_spells;
-            player_spells = _player->getSpellList();
-            for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+             data.clear();
+             Player* _player = (Player*)m_caster;
+             data.Initialize(SMSG_SPELL_COOLDOWN);
+             data << m_caster->GetGUID();
+            if (m_spellInfo->CategoryRecoveryTime > 0)
             {
-                if(!(*itr)->spellId)
-                    continue;
-                data << uint32((*itr)->spellId);
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
-                if(m_spellInfo->CategoryRecoveryTime > 0)
+                std::list<Playerspell*>::iterator itr;
+                std::list<Playerspell*> player_spells;
+                player_spells = _player->getSpellList();
+                for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
                 {
-                    if(spellInfo->Category == m_spellInfo->Category)
-                    {
-                        data << uint32(m_spellInfo->CategoryRecoveryTime);
+                    if(!(*itr)->spellId)
                         continue;
+                    SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+                    if( spellInfo->Category == m_spellInfo->Category)
+                    {
+                        data << uint32((*itr)->spellId);
+                        if ((*itr)->spellId != m_spellInfo->Id || m_spellInfo->RecoveryTime == 0)
+                            data << uint32(m_spellInfo->CategoryRecoveryTime);
+                        else 
+                            data << uint32(m_spellInfo->RecoveryTime);
                     }
                 }
-                else if(m_spellInfo->Id == spellInfo->Id && m_spellInfo->RecoveryTime > 0)
-                    data << uint32(m_spellInfo->RecoveryTime);
-                else data << uint32(1500);
             }
-            m_caster->SendMessageToSet(&data, true);
+            else if (m_spellInfo->RecoveryTime > 0)
+            {
+                data << uint32(m_spellInfo->Id);
+                data << uint32(m_spellInfo->RecoveryTime);
+            }
+            _player->GetSession()->SendPacket(&data);
         }
-        */
     }
 
     if(m_spellState != SPELL_STATE_CASTING)
