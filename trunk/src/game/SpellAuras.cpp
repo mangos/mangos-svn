@@ -2054,9 +2054,9 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
                 index = UNIT_FIELD_RESISTANCES_01 + x;
                 m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->SetUInt32Value(index,m_target->GetUInt32Value(index) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount)));
+                m_target->SetUInt32Value(index,uint32(m_target->GetUInt32Value(index) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount)));
+                    m_target->SetUInt32Value(index2,uint32(m_target->GetUInt32Value(index2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
             }
             return;
         }break;
@@ -2068,9 +2068,9 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         }break;
     }
 
-    m_target->SetUInt32Value(index,m_target->GetUInt32Value(index) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount)));
+    m_target->SetUInt32Value(index,uint32(m_target->GetUInt32Value(index) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
     if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount)));
+        m_target->SetUInt32Value(index2,uint32(m_target->GetUInt32Value(index2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply)

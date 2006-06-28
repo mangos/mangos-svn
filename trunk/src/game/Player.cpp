@@ -3083,38 +3083,38 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         switch (proto->ItemStat[i].ItemStatType)
         {
             case POWER:                                     // modify MP
-                SetUInt32Value(UNIT_FIELD_MAXPOWER1, GetUInt32Value(UNIT_FIELD_MAXPOWER1)+(apply? val:-val));
+                ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1, val, apply);
                 typestr = "Mana";
                 break;
             case HEALTH:                                    // modify HP
-                SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH)+(apply? val:-val));
+                ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH, val, apply);
                 typestr = "Health";
                 break;
             case AGILITY:                                   // modify agility
-                SetUInt32Value(UNIT_FIELD_AGILITY,GetUInt32Value(UNIT_FIELD_AGILITY)+(apply? val:-val));
-                SetUInt32Value(PLAYER_FIELD_POSSTAT1,GetUInt32Value(PLAYER_FIELD_POSSTAT1)+(apply? val:-val));
+                ApplyModUInt32Value(UNIT_FIELD_AGILITY,   val, apply);
+                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT1,val, apply);
                 typestr = "AGILITY";
                 break;
             case STRENGHT:                                  //modify strength
-                SetUInt32Value(UNIT_FIELD_STR,GetUInt32Value(UNIT_FIELD_STR)+(apply? val:-val));
-                SetUInt32Value(PLAYER_FIELD_POSSTAT0,GetUInt32Value(PLAYER_FIELD_POSSTAT0)+(apply? val:-val));
+                ApplyModUInt32Value(UNIT_FIELD_STR,       val, apply);
+                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT0,val, apply);
                 typestr = "STRENGHT";
                 break;
             case INTELLECT:                                 //modify intellect
-                SetUInt32Value(UNIT_FIELD_IQ,GetUInt32Value(UNIT_FIELD_IQ)+(apply? val:-val));
-                SetUInt32Value(PLAYER_FIELD_POSSTAT3,GetUInt32Value(PLAYER_FIELD_POSSTAT3)+(apply? val:-val));
-                SetUInt32Value(UNIT_FIELD_MAXPOWER1, GetUInt32Value(UNIT_FIELD_MAXPOWER1)+(apply? val:-val)*15);
+                ApplyModUInt32Value(UNIT_FIELD_IQ,        val,    apply);
+                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT3,val,    apply);
+                ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1, val*15, apply);
                 typestr = "INTELLECT";
                 break;
             case SPIRIT:                                    //modify spirit
-                SetUInt32Value(UNIT_FIELD_SPIRIT,GetUInt32Value(UNIT_FIELD_SPIRIT)+(apply? val:-val));
-                SetUInt32Value(PLAYER_FIELD_POSSTAT4,GetUInt32Value(PLAYER_FIELD_POSSTAT4)+(apply? val:-val));
+                ApplyModUInt32Value(UNIT_FIELD_SPIRIT,    val, apply);
+                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT4,val, apply);
                 typestr = "SPIRIT";
                 break;
             case STAMINA:                                   //modify stamina
-                SetUInt32Value(UNIT_FIELD_STAMINA,GetUInt32Value(UNIT_FIELD_STAMINA)+(apply? val:-val));
-                SetUInt32Value(PLAYER_FIELD_POSSTAT2,GetUInt32Value(PLAYER_FIELD_POSSTAT2)+(apply? val:-val));
-                SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH)+(apply? val:-val)*10);
+                ApplyModUInt32Value(UNIT_FIELD_STAMINA   ,val,   apply);
+                ApplyModUInt32Value(PLAYER_FIELD_POSSTAT2,val,   apply);
+                ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH ,val*10,apply);
                 typestr = "STAMINA";
                 break;
         }
@@ -3125,49 +3125,49 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Armor)
     {
-        SetUInt32Value(UNIT_FIELD_ARMOR, GetUInt32Value(UNIT_FIELD_ARMOR) + (apply ? proto->Armor: -(int32)proto->Armor));
+        ApplyModUInt32Value(UNIT_FIELD_ARMOR, proto->Armor, apply);
         sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
     }
 
     if (proto->Block)
     {
-        SetFloatValue(PLAYER_BLOCK_PERCENTAGE, GetFloatValue(PLAYER_BLOCK_PERCENTAGE) + (apply ? proto->Block: -(float)proto->Block));
+        ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, proto->Block, apply);
         sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
     }
 
     if (proto->HolyRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_01, GetUInt32Value(UNIT_FIELD_RESISTANCES_01) + (apply ? proto->HolyRes: -(int32)proto->HolyRes));
+        ApplyModFloatValue(UNIT_FIELD_RESISTANCES_01, proto->HolyRes, apply);
         sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
     }
 
     if (proto->FireRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_02, GetUInt32Value(UNIT_FIELD_RESISTANCES_02) + (apply ? proto->FireRes: -(int32)proto->FireRes));
+        ApplyModFloatValue(UNIT_FIELD_RESISTANCES_02, proto->FireRes, apply);
         sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
     if (proto->NatureRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_03, GetUInt32Value(UNIT_FIELD_RESISTANCES_03) + (apply ? proto->NatureRes: -(int32)proto->NatureRes));
+        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_03, proto->NatureRes, apply);
         sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
     }
 
     if (proto->FrostRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_04, GetUInt32Value(UNIT_FIELD_RESISTANCES_04) + (apply ? proto->FrostRes: -(int32)proto->FrostRes));
+        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_04, proto->FrostRes, apply);
         sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
     }
 
     if (proto->ShadowRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_05, GetUInt32Value(UNIT_FIELD_RESISTANCES_05) + (apply ? proto->ShadowRes: -(int32)proto->ShadowRes));
+        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_05, proto->ShadowRes, apply);
         sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
     }
 
     if (proto->ArcaneRes)
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_06, GetUInt32Value(UNIT_FIELD_RESISTANCES_06) + (apply ? proto->ArcaneRes: -(int32)proto->ArcaneRes));
+        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_06, proto->ArcaneRes, apply);
         sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
@@ -3196,13 +3196,13 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
     {
-        SetFloatValue(MINDAMAGEFIELD, GetFloatValue(MINDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMin: -proto->Damage[0].DamageMin));
+        ApplyModFloatValue(MINDAMAGEFIELD, proto->Damage[0].DamageMin, apply);
         sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
     }
 
     if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
     {
-        SetFloatValue(MAXDAMAGEFIELD, GetFloatValue(MAXDAMAGEFIELD) + (apply ? proto->Damage[0].DamageMax: -proto->Damage[0].DamageMax));
+        ApplyModFloatValue(MAXDAMAGEFIELD, proto->Damage[0].DamageMax, apply);
         sLog.outString("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
     }
 

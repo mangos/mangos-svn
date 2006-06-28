@@ -432,6 +432,9 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
+        
+        void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
+        void ApplyModFloatValue( uint16 index, float val, bool apply);
 
         void _UpdateSpells(uint32 time);
         void _UpdateHostil( uint32 time );
