@@ -268,8 +268,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void setPowerType(uint8 PowerType);
 
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
-        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *turn);
-        uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage);
+        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *risist);
+        uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 resist);
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim);
 
