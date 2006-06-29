@@ -1194,24 +1194,6 @@ void Unit::_ApplyStatsMods()
     ApplyStats(true);
 }
 
-void Unit::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
-{
-    uint32 cur = GetUInt32Value(index);
-    if(val > cur && !apply ) val = cur;
-
-    SetUInt32Value(index,cur+(apply ? val : -val));
-}
-
-void Unit::ApplyModFloatValue(uint16 index, float  val, bool apply)
-{
-    uint32 cur = GetFloatValue(index);
-    if(val > cur && !apply ) val = cur;
-
-    SetFloatValue(index,cur+(apply ? val : -val));
-}
-
-
-
 void Unit::ApplyStats(bool apply)
 {
     // TODO:

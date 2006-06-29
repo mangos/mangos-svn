@@ -305,8 +305,6 @@ class WorldSession;
 #define BUYBACK_SLOT_12              80
 #define BUYBACK_SLOT_END             81
 
-#define MAX_PLAYER_LEVEL 60
-
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -330,6 +328,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerCreateInfo* GetPlayerInfo(){return info;}
 
         void GiveXP(uint32 xp, Unit* victim);
+        void GiveLevel();
 
         void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
 

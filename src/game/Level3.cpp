@@ -2021,11 +2021,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     for(int i=0;i<nrlvl || i==0;i++)
     {
-        uint32 curXP = chr->GetUInt32Value(PLAYER_XP);
-        uint32 nextLvlXP = chr->GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
-        uint32 givexp = nextLvlXP - curXP;
-
-        chr->GiveXP(givexp,NULL);
+        chr->GiveLevel();
 
         WorldPacket data;
         std::stringstream sstext;
@@ -2033,6 +2029,8 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         FillSystemMessageData(&data, chr->GetSession(), sstext.str().c_str());
         chr->GetSession()->SendPacket( &data );
     }
+    chr->SetUInt32Value(PLAYER_XP,0);
+
     return true;
 }
 

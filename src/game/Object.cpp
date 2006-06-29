@@ -430,6 +430,22 @@ void Object::SetFloatValue( const uint16 &index, const float &value )
     }
 }
 
+void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
+{
+    uint32 cur = GetUInt32Value(index);
+    if(val > cur && !apply ) val = cur;
+
+    SetUInt32Value(index,cur+(apply ? val : -val));
+}
+
+void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
+{
+    uint32 cur = GetFloatValue(index);
+    if(val > cur && !apply ) val = cur;
+
+    SetFloatValue(index,cur+(apply ? val : -val));
+}
+
 void Object::SetFlag( const uint16 &index, uint32 newFlag )
 {
     ASSERT( index < m_valuesCount );
