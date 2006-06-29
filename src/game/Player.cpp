@@ -7081,6 +7081,8 @@ bool Player::SatisfyQuestClass( Quest *pQuest, bool msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
         }
+        return true;
+
     }
     return false;
 }
