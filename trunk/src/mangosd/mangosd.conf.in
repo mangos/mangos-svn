@@ -36,6 +36,11 @@ PlayerLimit = 100
 #          0 (false)
 AddonDefault = 1
 
+# Max level that can reached by player for expirience.
+# Change not recommended
+# Default: 60
+MaxPlayerLevel = 60
+
 # Message of the Day. Displayed at worldlogin for every user.
 Motd = "Welcome to the Massive Network Game Object Server."
 

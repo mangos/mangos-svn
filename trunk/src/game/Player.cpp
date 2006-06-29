@@ -1071,127 +1071,134 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
 
     // XP to money conversion processed in Player::RewardQuest
-    if(level >= MAX_PLAYER_LEVEL)
+    if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         return;
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     uint32 newXP = curXP + xp;
 
-    while( newXP >= nextLvlXP && level < MAX_PLAYER_LEVEL )
+    while( newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
     {
-        uint32 MPGain,HPGain,STRGain,STAGain,AGIGain,INTGain,SPIGain;
-        MPGain=HPGain=STRGain=STAGain=AGIGain=INTGain=SPIGain=0;
-
-        level += 1;
         newXP -= nextLvlXP;
 
-        _RemoveStatsMods();
+        GiveLevel();
 
-        BuildLvlUpStats(&HPGain,&MPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
-
-        uint32 newMP;
-
-        if(getClass() == WARRIOR || getClass() == ROGUE)
-            MPGain = 0;
-        else
-            newMP = GetUInt32Value(UNIT_FIELD_MAXPOWER1) + MPGain;
-
-        uint32 newHP = GetUInt32Value(UNIT_FIELD_MAXHEALTH) + HPGain;
-        uint32 newSTR = GetUInt32Value(UNIT_FIELD_STR) + STRGain;
-        uint32 newSTA = GetUInt32Value(UNIT_FIELD_STAMINA) + STAGain;
-        uint32 newAGI = GetUInt32Value(UNIT_FIELD_AGILITY) + AGIGain;
-        uint32 newINT = GetUInt32Value(UNIT_FIELD_IQ) + INTGain;
-        uint32 newSPI = GetUInt32Value(UNIT_FIELD_SPIRIT) + SPIGain;
-
-        if( level > 9)
-        {
-            uint32 curTalentPoints = GetUInt32Value(PLAYER_CHARACTER_POINTS1);
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,curTalentPoints+1);
-        }
-
-        SetUInt32Value(UNIT_FIELD_LEVEL, level);
-        nextLvlXP = MaNGOS::XP::xp_to_level(level);
-        SetUInt32Value(PLAYER_NEXT_LEVEL_XP, nextLvlXP);
-
-        UpdateMaxSkills ();
-
-        //fill new stats
-        if(getClass() != WARRIOR && getClass() != ROGUE)
-        {
-            SetUInt32Value(UNIT_FIELD_POWER1, newMP);
-            SetUInt32Value(UNIT_FIELD_MAXPOWER1, newMP);
-        }
-
-        if (Player::HasSpell(20550))                        //endurance skill support (+5% to total health)
-        {
-            exHP = (uint32)(newHP / 1.05);                  //must remove previous bonus, so stat wouldn't grow toomuch
-            b_HP = uint8(exHP * 0.05);
-            newHP += b_HP;
-        }
-        if (Player::HasSpell(20598))                        //Human Spirit skill support (+5% to total spirit)
-        {
-            exSpirit = (uint32)(newSPI / 1.05);             //must remove previous bonus, so stat wouldn't grow toomuch
-            b_Spirit = uint8(exSpirit * 0.05);
-            newSPI += b_Spirit;
-        }
-        if (Player::HasSpell(20591))                        //Expansive mind support (+5% to total Intellect)
-        {
-            exIQ = (uint32)(newINT / 1.05);                 //must remove previous bonus, so stat wouldn't grow toomuch
-            b_IQ = uint8(exIQ * 0.05);
-            newINT += b_IQ;
-        }
-
-        SetUInt32Value(UNIT_FIELD_HEALTH, newHP);
-        SetUInt32Value(UNIT_FIELD_MAXHEALTH, newHP);
-
-        SetUInt32Value(UNIT_FIELD_STR, newSTR);
-        SetUInt32Value(UNIT_FIELD_STAMINA, newSTA);
-        SetUInt32Value(UNIT_FIELD_AGILITY, newAGI);
-        SetUInt32Value(UNIT_FIELD_IQ, newINT);
-        SetUInt32Value(UNIT_FIELD_SPIRIT, newSPI);
-
-        _ApplyStatsMods();
-
-        WorldPacket data;
-        data.Initialize(SMSG_LEVELUP_INFO);
-        data << uint32(level);
-        data << uint32(HPGain);
-        data << uint32(MPGain);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-
-        data << uint32(STRGain);
-        data << uint32(STAGain);
-        data << uint32(AGIGain);
-        data << uint32(INTGain);
-        data << uint32(SPIGain);
-
-        WPAssert(data.size() == 48);
-        GetSession()->SendPacket(&data);
-
-        SetUInt32Value(PLAYER_XP, newXP);
-        uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
+        level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+        nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     }
 
     SetUInt32Value(PLAYER_XP, newXP);
 }
+
+// Update player to next level
+// Current player expirience not update (must be update by caller)
+void Player::GiveLevel()
+{
+    uint32 MPGain,HPGain,STRGain,STAGain,AGIGain,INTGain,SPIGain;
+    MPGain=HPGain=STRGain=STAGain=AGIGain=INTGain=SPIGain=0;
+
+    uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+
+    level += 1;
+
+    _RemoveStatsMods();
+
+    BuildLvlUpStats(&HPGain,&MPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
+
+    uint32 newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetUInt32Value(UNIT_FIELD_MAXPOWER1) + MPGain;
+
+    uint32 newHP  = GetUInt32Value(UNIT_FIELD_MAXHEALTH) + HPGain;
+    uint32 newSTR = GetUInt32Value(UNIT_FIELD_STR) + STRGain;
+    uint32 newSTA = GetUInt32Value(UNIT_FIELD_STAMINA) + STAGain;
+    uint32 newAGI = GetUInt32Value(UNIT_FIELD_AGILITY) + AGIGain;
+    uint32 newINT = GetUInt32Value(UNIT_FIELD_IQ) + INTGain;
+    uint32 newSPI = GetUInt32Value(UNIT_FIELD_SPIRIT) + SPIGain;
+
+    if( level > 9)
+    {
+        uint32 curTalentPoints = GetUInt32Value(PLAYER_CHARACTER_POINTS1);
+        SetUInt32Value(PLAYER_CHARACTER_POINTS1,curTalentPoints+1);
+    }
+
+    SetUInt32Value(UNIT_FIELD_LEVEL, level);
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
+
+    UpdateMaxSkills ();
+
+    //fill new stats
+    if(getClass() != WARRIOR && getClass() != ROGUE)
+    {
+        SetUInt32Value(UNIT_FIELD_POWER1, newMP);
+        SetUInt32Value(UNIT_FIELD_MAXPOWER1, newMP);
+    }
+
+    if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
+    {
+        exHP = (uint32)(newHP / 1.05);                      //must remove previous bonus, so stat wouldn't grow toomuch
+        b_HP = uint8(exHP * 0.05);
+        newHP += b_HP;
+    }
+    
+    if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
+    {
+        exSpirit = (uint32)(newSPI / 1.05);                 //must remove previous bonus, so stat wouldn't grow toomuch
+        b_Spirit = uint8(exSpirit * 0.05);
+        newSPI += b_Spirit;
+    }
+
+    if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
+    {
+        exIQ = (uint32)(newINT / 1.05);                     //must remove previous bonus, so stat wouldn't grow toomuch
+        b_IQ = uint8(exIQ * 0.05);
+        newINT += b_IQ;
+    }
+
+    SetUInt32Value(UNIT_FIELD_HEALTH, newHP);
+    SetUInt32Value(UNIT_FIELD_MAXHEALTH, newHP);
+
+    SetUInt32Value(UNIT_FIELD_STR, newSTR);
+    SetUInt32Value(UNIT_FIELD_STAMINA, newSTA);
+    SetUInt32Value(UNIT_FIELD_AGILITY, newAGI);
+    SetUInt32Value(UNIT_FIELD_IQ, newINT);
+    SetUInt32Value(UNIT_FIELD_SPIRIT, newSPI);
+
+    _ApplyStatsMods();
+
+    WorldPacket data;
+    data.Initialize(SMSG_LEVELUP_INFO);
+    data << uint32(level);
+    data << uint32(HPGain);
+    data << uint32(MPGain);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+
+    data << uint32(STRGain);
+    data << uint32(STAGain);
+    data << uint32(AGIGain);
+    data << uint32(INTGain);
+    data << uint32(SPIGain);
+
+    WPAssert(data.size() == 48);
+    GetSession()->SendPacket(&data);
+}
+
 
 void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
 {
     uint8 _class=getClass();
     uint8 lvl=getLevel();
 
-    *MP = (uint32)(GetUInt32Value(UNIT_FIELD_SPIRIT) / 2);
+    uint32 tempMP = (uint32)(GetUInt32Value(UNIT_FIELD_SPIRIT) / 2);
+
     *HP = (uint32)(GetUInt32Value(UNIT_FIELD_STAMINA) / 2);
 
     switch(_class)
     {
         case WARRIOR:
-            //*HP +=
-            //*MP +=
+            *MP   = 0;
             *STR += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
             *STA += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
             *AGI += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
@@ -1199,8 +1206,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 9 && !(lvl%2) ? 1: 0);
             break;
         case PALADIN:
-            //*HP +=
-            //*MP +=
+            *MP   = tempMP;
             *STR += (lvl > 3  ? 1: 0);
             *STA += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
             *AGI += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
@@ -1208,8 +1214,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 7 ? 1: 0);
             break;
         case HUNTER:
-            //*HP +=
-            //*MP +=
+            *MP   = tempMP;
             *STR += (lvl > 4  ? 1: 0);
             *STA += (lvl > 4  ? 1: 0);
             *AGI += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
@@ -1217,8 +1222,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
             break;
         case ROGUE:
-            //*HP +=
-            //*MP +=
+            *MP   = 0;
             *STR += (lvl > 5  ? 1: 0);
             *STA += (lvl > 4  ? 1: 0);
             *AGI += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
@@ -1226,8 +1230,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
             break;
         case PRIEST:
-            //*HP +=
-            //*MP +=
+            *MP   = tempMP;
             *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
             *STA += (lvl > 5  ? 1: 0);
             *AGI += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
@@ -1235,8 +1238,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 3  ? 1: 0);
             break;
         case SHAMAN:
-            //*HP +=
-            //*MP +=
+            *MP   = tempMP;
             *STR += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
             *STA += (lvl > 4 ? 1: 0);
             *AGI += (lvl > 7 && !(lvl%2) ? 1: 0);
@@ -1244,8 +1246,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 4 ? 1: 0);
             break;
         case MAGE:
-            //*HP +=
-            //*MP +=
+            *MP   = tempMP;
             *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
             *STA += (lvl > 5  ? 1: 0);
             *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
@@ -1253,8 +1254,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
             break;
         case WARLOCK:
-            //*HP +=
-            //*MP +=
+            *MP   = tempMP;
             *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
             *STA += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
             *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
@@ -1262,6 +1262,7 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
             break;
         case DRUID:
+            *MP   = tempMP;
             *STR += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
             *STA += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
             *AGI += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));
@@ -7021,13 +7022,12 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             SetUInt32Value(log_slot + 2, 0);
         }
 
-        if ( getLevel() < MAX_PLAYER_LEVEL )
-        {
+        if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
             GiveXP( pQuest->XPValue( this ), NULL );
-            ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
-        }
         else
-            ModifyMoney( pQuest->GetQuestInfo()->RewMoney + MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
+            ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->XPValue( this )) );
+
+        ModifyMoney( pQuest->GetQuestInfo()->RewMoney );
 
         if ( !pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
             mQuestStatus[quest].m_rewarded = true;

@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "Language.h"
+#include "World.h"
 
 bool ChatHandler::HandleGUIDCommand(const char* args)
 {
@@ -580,7 +581,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return false;
 
     uint8 lvl = (uint8) atoi((char*)args);
-    if ( lvl < 1 || lvl > MAX_PLAYER_LEVEL + 3)
+    if ( lvl < 1 || lvl > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) + 3)
     {
         FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
         m_session->SendPacket( &data );
