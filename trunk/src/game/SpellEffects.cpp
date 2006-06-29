@@ -201,9 +201,6 @@ void Spell::EffectSchoolDMG(uint32 i)
 
 void Spell::EffectDummy(uint32 i)
 {
-    if( !(unitTarget && unitTarget->isAlive() && m_caster->isAlive()))
-        return;
-    m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,unitTarget->GetGUID());
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
@@ -2051,7 +2048,7 @@ void Spell::EffectDismissPet(uint32 i)
         data.Initialize(SMSG_DESTROY_OBJECT);
         data << pet->GetGUID();
         _player->GetSession()->SendPacket(&data);
-        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
+        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,false);
         data.clear();
         data.Initialize(SMSG_PET_SPELLS);
         data << uint64(0);
