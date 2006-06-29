@@ -1040,8 +1040,15 @@ uint8 Spell::CanCast()
         }
         if(unitTarget->m_immuneToSchool & m_school)
             castResult = CAST_FAIL_IMMUNE;
-        */
-
+        
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Item *pitem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0,INVTYPE_WEAPON);
+            if(pitem->GetProto()->Class != m_spellInfo->EquippedItemClass) 
+                castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
+            if(!(pitem->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
+                castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
+        }*/
         if(m_spellInfo->AttributesExEx & 1048576 && !target->HasInArc(M_PI, m_caster) )
             castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 

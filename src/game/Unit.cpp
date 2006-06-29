@@ -549,6 +549,22 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
+	else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
+	{
+		uint16 field = 0;
+		switch(mod->m_miscvalue)
+		{
+			case 0:field = UNIT_FIELD_POWER1;break;
+			case 1:field = UNIT_FIELD_POWER2;break;
+			case 2:field = UNIT_FIELD_POWER3;break;
+			case 3:field = UNIT_FIELD_POWER4;break;
+			case 4:field = UNIT_FIELD_POWER5;break;
+			default:break;
+		}
+		if(!field)
+			return;
+		SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
+	}
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
@@ -654,11 +670,10 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
 {
-    /*
     for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
     {
         SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
-    }*/
+    }
     uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
 
     if( (*damage-absorb-*resist) <= 0 )
@@ -1086,31 +1101,35 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     AuraMap::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        uint32 i_spellId = (*i).second->GetSpellProto()->Id;
-        uint32 i_spellIcon = (*i).second->GetSpellProto()->SpellIconID;
-        if((*i).second && i_spellId != spellId)
+		bool isRankspell = true;
+		uint32 i_spellId = (*i).second->GetId();
+		if((*i).second && i_spellId && i_spellId != spellId)
         {
-            bool hasAuraform = false;
-            for(int x=0;x<3;x++)
-                if((*i).second->GetSpellProto()->EffectApplyAuraName[x] == 36)
-            {
-                hasAuraform = true;
-                break;
-            }
-            if(hasAuraform)
-                continue;
-            if(i_spellId == 3025 || i_spellId == 3122 || i_spellId == 5419
-                || i_spellId == 5421 || i_spellId == 1178 || i_spellId == 9635
-                || i_spellId == 2882 || i_spellId == 7376 || i_spellId == 7381)
-                continue;
-            if(i_spellIcon && spellInfo->SpellIconID == i_spellIcon)
-            {
+			if((*i).second->GetSpellProto()->SpellIconID != spellInfo->SpellIconID)
+				continue;
+			if((*i).second->GetSpellProto()->SpellVisual != spellInfo->SpellVisual)
+				continue;
+			if((*i).second->GetSpellProto()->Category != spellInfo->Category)
+				continue;
+			if((*i).second->GetSpellProto()->Attributes != spellInfo->Attributes)
+				continue;
+			if((*i).second->GetSpellProto()->AttributesEx != spellInfo->AttributesEx)
+				continue;
+			for(int x=0;x<3;x++)
+			{
+				if((*i).second->GetSpellProto()->EffectApplyAuraName[x] != spellInfo->EffectApplyAuraName[x])
+				{
+					isRankspell = false;
+					break;
+				}
+			}
+			if(isRankspell)
                 RemoveAurasDueToSpell(i_spellId);
 
-                i = m_Auras.begin();
-                if(i == m_Auras.end() || !(*i).second)
-                    return;
-            }
+            i = m_Auras.begin();
+            if(i == m_Auras.end() || !(*i).second)
+                return;
+            
         }
     }
 }

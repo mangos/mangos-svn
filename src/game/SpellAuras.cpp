@@ -65,7 +65,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //missing 21
     &Aura::HandleAuraModResistance,                         //SPELL_AURA_MOD_RESISTANCE = 22,
     &Aura::HandlePeriodicTriggerSpell,                      //SPELL_AURA_PERIODIC_TRIGGER_SPELL = 23,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_ENERGIZE = 24,
+    &Aura::HandlePeriodicEnergize,                          //SPELL_AURA_PERIODIC_ENERGIZE = 24,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY = 25,
     &Aura::HandleAuraModRoot,                               //SPELL_AURA_MOD_ROOT = 26,
     &Aura::HandleAuraModSilence,                            //SPELL_AURA_MOD_SILENCE = 27,
@@ -649,13 +649,13 @@ void Aura::HandlePeriodicDamage(bool apply)
 {
     if( apply )
     {
-        m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
         m_periodicTimer = m_modifier->periodictime;
     }
     else
     {
-        RemovePeriodicEvent(m_PeriodicEventId);
+        //RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_duration = 0;
     }
@@ -717,13 +717,13 @@ void Aura::HandlePeriodicHeal(bool apply)
         return;
     if(apply)
     {
-        m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
         m_periodicTimer = m_modifier->periodictime;
     }
     else
     {
-        RemovePeriodicEvent(m_PeriodicEventId);
+        //RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_duration = 0;
     }
@@ -918,7 +918,6 @@ void HandleTriggerSpellEvent(void *obj)
 
 void Aura::TriggerSpell()
 {
-    //SpellEntry *spellInfo = sSpellStore.LookupEntry( m_modifier->m_miscvalue );
     SpellEntry *spellInfo = sSpellStore.LookupEntry( GetSpellProto()->EffectTriggerSpell[m_effIndex] );
 
     if(!spellInfo)
@@ -928,12 +927,11 @@ void Aura::TriggerSpell()
     }
 
     Spell *spell = new Spell(m_caster, spellInfo, true, this);
-    Unit* target = NULL;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    Unit* target = m_target;
+    if(!target && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
     }
-    else target = m_target;
     if(!target)
         return;
     SpellCastTargets targets;
@@ -945,21 +943,20 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
     if(apply)
     {
-        m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
         m_isPeriodic = true;
         m_isTrigger = true;
         m_periodicTimer = m_modifier->periodictime;
     }
     else
     {
-        RemovePeriodicEvent(m_PeriodicEventId);
+        //RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_isTrigger = false;
         m_duration = 0;
         //probably it's temporary for taming creature..
         if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
         {
-            m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,0);
             SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
             Spell *spell = new Spell(m_caster, spell_proto, false, 0);
             Unit* target = NULL;
@@ -974,6 +971,22 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
             targets.setUnitTarget(target);
             spell->prepare(&targets);
         }
+    }
+}
+
+void Aura::HandlePeriodicEnergize(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier->periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
     }
 }
 
@@ -1073,7 +1086,6 @@ void Aura::HandleAuraSafeFall(bool apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-// FIX-ME!!!
 void Aura::HandleAuraDamageShield(bool apply)
 {
     if(apply)
@@ -1647,27 +1659,31 @@ void Aura::HandleAuraProcTriggerSpell(bool apply)
     }
 }
 
-// FIX-ME PLS!!!
 void Aura::HandleAuraProcTriggerDamage(bool apply)
 {
-    /*if(apply)
-         {
-             DamageShield* ds = new DamageShield();
-             ds->m_caster = GetCaster();
-             ds->m_damage = m_modifier->m_amount;
-             ds->m_spellId = GetId();
-             m_target->m_damageShields.push_back((*ds));
-         }
-         else
-         {
-             for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-                 if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-             {
-                 m_target->m_damageShields.erase(i);
-                 break;
-             }
-         }
-         */
+    if(apply)
+    {
+        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
+            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
+        {
+            m_target->m_damageShields.erase(i);
+            break;
+        }
+        DamageShield* ds = new DamageShield();
+        ds->m_caster = GetCaster();
+        ds->m_damage = m_modifier->m_amount;
+        ds->m_spellId = GetId();
+        m_target->m_damageShields.push_back((*ds));
+    }
+    else
+    {
+        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
+            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
+        {
+            m_target->m_damageShields.erase(i);
+            break;
+        }
+    }     
 }
 
 void Aura::HandleAuraTracCreatures(bool apply)
@@ -1872,7 +1888,7 @@ void Aura::HandleAuraManaShield(bool apply)
 
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
         {
-            if(m_modifier->m_miscvalue == (*i)->m_schoolType)
+            if(GetId() == (*i)->m_spellId)
             {
                 m_target->m_damageManaShield.erase(i);
             }
@@ -1891,7 +1907,7 @@ void Aura::HandleAuraManaShield(bool apply)
     {
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
         {
-            if(m_modifier->m_auraname == (*i)->m_modType && m_modifier->m_miscvalue == (*i)->m_schoolType)
+            if(GetId() == (*i)->m_spellId)
             {
                 m_target->m_damageManaShield.erase(i);
                 break;
@@ -1907,7 +1923,7 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
 
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
         {
-            if(m_modifier->m_miscvalue == (*i)->m_schoolType)
+            if(GetId() == (*i)->m_spellId)
             {
                 m_target->m_damageManaShield.erase(i);
             }
@@ -1926,7 +1942,7 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
     {
         for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
         {
-            if(m_modifier->m_auraname == (*i)->m_modType && m_modifier->m_miscvalue == (*i)->m_schoolType)
+            if(GetId() == (*i)->m_spellId)
             {
                 m_target->m_damageManaShield.erase(i);
                 break;

@@ -65,6 +65,7 @@ class Aura
         void HandleAuraModIncreaseEnergyPercent(bool Apply);
         void HandleAuraModIncreaseHealthPercent(bool Apply);
         void HandlePeriodicTriggerSpell(bool apply);
+        void HandlePeriodicEnergize(bool apply);
         void HandleAuraModResistanceExclusive(bool Apply);
         void HandleAuraSafeFall(bool Apply);
         void HandleAuraDamageShield(bool Apply);
