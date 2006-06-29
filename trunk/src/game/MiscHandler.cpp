@@ -833,8 +833,6 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
-    AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID);
-
     AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
     if( pArea )
     {
@@ -855,7 +853,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
             GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
     }
-    else if(at)
+    else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {
         if(at->mapId == GetPlayer()->GetMapId() && !GetPlayer()->m_bgInBattleGround )
         {
