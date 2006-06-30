@@ -623,8 +623,8 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
     //     then skip check `faction`
     QueryResult *result = sDatabase.PQuery(
         "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,"
-        "       `position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `areatrigger_graveyard`, `areatrigger_graveyard_zone` "
-        "WHERE  `areatrigger_graveyard`.`id` = `areatrigger_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
+        "       `position_x`,`position_y`,`position_z`, `orientation`, `map` FROM `game_graveyard`, `game_graveyard_zone` "
+        "WHERE  `game_graveyard`.`id` = `game_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
         "        AND (`ghost_map` <> `map` OR `faction` = %u OR `faction` = 0 ) "
         "ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, zoneId, team);
 
@@ -635,7 +635,7 @@ GraveyardTeleport *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uin
         result = sDatabase.PQuery(
             "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`, "
             "       `position_x`,`position_y`,`position_z`, `orientation`, `map` "
-            "FROM `areatrigger_graveyard` "
+            "FROM `game_graveyard` "
             "WHERE `map` = %u  AND ( `faction` = %u OR `faction` = 0 ) ORDER BY `distance` ASC LIMIT 1;", x, y, z, MapId, team);
     }
 

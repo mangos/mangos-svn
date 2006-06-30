@@ -1278,7 +1278,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     QueryResult *result;
     if(!*args)
     {
-        result = sDatabase.PQuery("SELECT * FROM areatrigger_tele;");
+        result = sDatabase.PQuery("SELECT `name` FROM `game_tele`;");
         if (!result)
         {
             WorldPacket data;
@@ -1291,7 +1291,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         {
             Field *fields = result->Fetch();
             reply += " ";
-            reply += fields[7].GetString();
+            reply += fields[0].GetString();
             result->NextRow();
         }
         WorldPacket data;
@@ -1301,7 +1301,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
     char *name = (char*)args;
-    result = sDatabase.PQuery("SELECT * FROM areatrigger_tele WHERE name='%s';",name);
+    result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s';",name);
     if (!result)
     {
         WorldPacket data;
@@ -1310,11 +1310,11 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
     Field *fields = result->Fetch();
-    float x = fields[1].GetFloat();
-    float y = fields[2].GetFloat();
-    float z = fields[3].GetFloat();
-    float ort = fields[4].GetFloat();
-    int mapid = fields[6].GetUInt16();
+    float x = fields[0].GetFloat();
+    float y = fields[1].GetFloat();
+    float z = fields[2].GetFloat();
+    float ort = fields[3].GetFloat();
+    int mapid = fields[4].GetUInt16();
     delete result;
     m_session->GetPlayer()->SendNewWorld(mapid, x, y, z, ort);
     return true;
