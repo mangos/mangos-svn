@@ -21,7 +21,7 @@
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 
-SpellEntry* Cast(Player*player,uint32 spellId)
+SpellEntry* Cast(Player*player,Item* item, uint32 spellId)
 {
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -30,18 +30,20 @@ SpellEntry* Cast(Player*player,uint32 spellId)
         sLog.outError("WORLD: unknown spell id %i", spellId);
         return NULL;
     }
-    Spell *spell = new Spell(player, spellInfo, false, 0);
+    Spell *spell = new Spell(player, spellInfo, true, 0);
     WPAssert(spell);
 
     SpellCastTargets targets;
     targets.setUnitTarget( player );
+    spell->m_CastItem = item;
     spell->prepare(&targets);
     return spellInfo;
 
 }
 
-void AddItemsSetItem(Player*player,ItemPrototype *proto)
+void AddItemsSetItem(Player*player,Item *item)
 {
+    ItemPrototype *proto = item->GetProto();
     uint32 setid = proto->ItemSet;
 
     ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
@@ -95,7 +97,7 @@ void AddItemsSetItem(Player*player,ItemPrototype *proto)
                     for(uint32 y=0;y<8;y++)
                         if(!eff->spells[y])
                         {
-                            eff->spells[y]=Cast(player,set->spells[x]);
+                            eff->spells[y]=Cast(player,item,set->spells[x]);
                             break;
                         }
             }
