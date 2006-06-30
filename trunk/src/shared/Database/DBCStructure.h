@@ -134,6 +134,13 @@ struct SpellCastTime
     uint32    ID;
     uint32    CastTime;
 };
+
+struct SpellFocusObject
+{
+    uint32    ID;
+    char*     Name;
+};
+
 struct SpellRadius
 {
     uint32    ID;
