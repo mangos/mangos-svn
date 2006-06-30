@@ -107,8 +107,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
     {
-        //if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
-        //    continue;
+        if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
+            continue;
         //if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
         //    Tspells.push_back(*itr);
         if((*itr)->spell)
@@ -240,7 +240,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         // trainer always return to original orientation
         unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
 
-        //SendTrainerList( guid );
+        SendTrainerList( guid );
     }
 }
 

@@ -975,7 +975,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
             data.Initialize( SMSG_LEARNED_SPELL );
             data << (uint32)spell;
             m_session->SendPacket( &data );
-            m_session->GetPlayer()->addSpell((uint16)spell,0);
+            m_session->GetPlayer()->addSpell((uint16)spell,1);
 
             loop++;
         }
@@ -995,7 +995,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     data.Initialize( SMSG_LEARNED_SPELL );
     data << (uint32)spell;
     m_session->SendPacket( &data );
-    m_session->GetPlayer()->addSpell((uint16)spell,0);
+    m_session->GetPlayer()->addSpell((uint16)spell,1);
 
     return true;
 }

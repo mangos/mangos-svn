@@ -115,7 +115,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                 sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
                 data << spellid;
                 GetPlayer( )->GetSession()->SendPacket(&data);
-                GetPlayer( )->addSpell((uint16)spellid,0);
+                GetPlayer( )->addSpell((uint16)spellid,1);
 
                 SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
                 if(spellInfo)

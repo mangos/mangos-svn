@@ -47,6 +47,7 @@ uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
 float GetMaxRange(SpellRange *range);
 int32 GetDuration(SpellEntry *spellInfo);
+bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2);
 
 template<class T>
 class DBCStorage

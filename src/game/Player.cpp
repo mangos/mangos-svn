@@ -287,7 +287,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         if (tspell)
         {
             sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
-            addSpell(tspell, 0);
+            addSpell(tspell,1);
         }
     }
 
@@ -1275,15 +1275,23 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
 void Player::SendInitialSpells()
 {
     WorldPacket data;
-    uint16 spellCount = m_spells.size();
+    //uint16 spellCount = m_spells.size();
+    uint16 spellCount = 0;
+    std::list<Playerspell*>::iterator itr;
+    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    {
+        if((*itr)->active)
+            spellCount +=1;
+    }
 
     data.Initialize( SMSG_INITIAL_SPELLS );
     data << uint8(0);
     data << uint16(spellCount);
 
-    std::list<Playerspell*>::iterator itr;
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
+        if(!(*itr)->active)
+            continue;
         data << uint16((*itr)->spellId);
         data << uint16((*itr)->slotId);
     }
@@ -1367,7 +1375,7 @@ void Player::AddMail(Mail *m)
     m_mail.push_back(m);
 }
 
-void Player::addSpell(uint16 spell_id, uint16 slot_id)
+void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
     if(!spellInfo) return;
@@ -1376,8 +1384,29 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
 
     newspell = new Playerspell;
     newspell->spellId = spell_id;
+    newspell->active = active;
 
     WorldPacket data;
+    std::list<Playerspell*>::iterator itr,next;
+    for (itr = m_spells.begin(); itr != m_spells.end(); itr=next)
+    {
+        next = itr;
+        next++;
+        if(!(*itr)->spellId)
+            continue;
+        if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
+        {
+            if((*itr)->active)
+            {
+                data.Initialize(SMSG_REMOVED_SPELL);
+                data << uint32((*itr)->spellId);
+                GetSession()->SendPacket( &data );
+                (*itr)->active = 0;
+                //player->removeSpell(uint16((*itr)->spellId));
+            }
+        }
+    }
+
 
     uint8 op;
     uint16 tmpslot=slot_id,val=0;
@@ -1449,13 +1478,12 @@ void Player::addSpell(uint16 spell_id, uint16 slot_id)
 
 void Player::learnSpell(uint16 spell_id)
 {
-
     WorldPacket data;
     data.Initialize(SMSG_LEARNED_SPELL);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
 
-    addSpell(spell_id,0);
+    addSpell(spell_id,1);
 
 }
 
@@ -2799,7 +2827,7 @@ void Player::UpdateHonor(void)
         delete result;
     }
 
-	//Store Total Honor points...
+    //Store Total Honor points...
     SetTotalHonor(total_honor);
 
     //RIGHEST RANK
@@ -7009,7 +7037,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward )
             sdata.Initialize (SMSG_LEARNED_SPELL);
             sdata << pQuest->GetQuestInfo()->RewSpell;
             GetSession()->SendPacket( &sdata );
-            addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell,0 );
+            addSpell( (uint16)pQuest->GetQuestInfo()->RewSpell,1);
         }
 
         uint32 quest = pQuest->GetQuestInfo()->QuestId;
@@ -7992,7 +8020,7 @@ void Player::_LoadSpells()
 
     m_spells.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot` FROM `character_spell` WHERE `guid` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u';",GetGUIDLow());
 
     if(result)
     {
@@ -8000,7 +8028,7 @@ void Player::_LoadSpells()
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt16(), fields[1].GetUInt16());
+            addSpell(fields[0].GetUInt16(), fields[2].GetUInt8(), fields[1].GetUInt16());
         }
         while( result->NextRow() );
 
@@ -8272,7 +8300,7 @@ void Player::_SaveSpells()
     std::list<Playerspell*>::iterator itr;
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId);
+        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u');", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
     }
 }
 

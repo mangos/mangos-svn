@@ -81,6 +81,7 @@ struct Playerspell
 {
     uint16 spellId;
     uint16 slotId;
+    uint8 active;
 };
 
 struct actions
@@ -499,7 +500,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool HasSpell(uint32 spell);
         void SendInitialSpells();
-        void addSpell(uint16 spell_id, uint16 slot_id=0xffff);
+        void addSpell(uint16 spell_id,uint8 active,uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
@@ -687,8 +688,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         int  CalculateHonorRank(float honor);
         int GetHonorRank();
         int  CalculateTotalKills(Player *pVictim);
-		//Acessors of total honor points
-		void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
+        //Acessors of total honor points
+        void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
         float GetTotalHonor(void) { return m_total_honor_points; };
         //Acessors of righest rank
         int  GetHonorHighestRank() const { return m_highest_rank; }
