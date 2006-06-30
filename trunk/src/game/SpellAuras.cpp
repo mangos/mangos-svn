@@ -1807,14 +1807,16 @@ void Aura::HandleChannelDeathItem(bool apply)
 
 void Aura::HandleAuraModAttackPower(bool apply)
 {
-    m_target->SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,m_target->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS)+ apply?(m_modifier->m_amount):(-m_modifier->m_amount));
+    m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier->m_amount, apply);
 }
 
 void Aura::HandleAuraTransform(bool apply)
 {
-                                                            //Can't transform
-    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_POLYMORPH))
+    if(!m_target)
         return;
+    if (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_POLYMORPH)   //Can't transform
+        return;
+
     if (apply)
     {
         CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);
