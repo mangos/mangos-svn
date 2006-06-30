@@ -1496,10 +1496,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             spellId = 3122;
             break;
         case FORM_TRAVEL:
-            if(unit_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 892;
-            else if(unit_target->getRace() == RACE_TAUREN)
-                modelid = 8571;
+            modelid = 632;
             spellId = 5419;
             break;
         case FORM_AQUA:
@@ -1527,9 +1524,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
             break;
         case FORM_DIREBEAR:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
-                modelid = 15374;
+                modelid = 2281;
             else if(unit_target->getRace() == RACE_TAUREN)
-                modelid = 15375;
+                modelid = 2289;
             PowerType = 1;
             spellId = 9635;
             break;
@@ -1556,9 +1553,15 @@ void Aura::HandleAuraModShapeshift(bool apply)
         case FORM_STEALTH:
             spellId = 0;
             break;
-        default:
-            sLog.outString("Unknown Shapeshift Type");
+        case FORM_MOONKIN:
+            if(unit_target->getRace() == RACE_NIGHT_ELF)
+                modelid = 15374;
+            else if(unit_target->getRace() == RACE_TAUREN)
+                modelid = 15375;
+            spellId = 24907;
             break;
+        default:
+            sLog.outString("Unknown Shapeshift Type: %u", m_modifier->m_miscvalue);
     }
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
@@ -1587,6 +1590,8 @@ void Aura::HandleAuraModShapeshift(bool apply)
         }
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier->m_miscvalue;
+        if(unit_target->m_form == FORM_DIREBEAR)
+            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,3.0f);
 
         if(spellInfo)
         {
@@ -1599,6 +1604,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
     else
     {
+        unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
         unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(unit_target->getClass() == CLASS_DRUID)

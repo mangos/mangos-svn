@@ -158,7 +158,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
         player_spells = p_caster->getSpellList();
         for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
         {
-            if ((*itr)->spellId != m_spellInfo->Id)
+            if ((*itr)->spellId != m_spellInfo->Id && (*itr)->active == 1)
             {
                 spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
                 if(spellInfo && spellInfo->SpellIconID == m_spellInfo->SpellIconID && spellInfo->EffectMiscValue[0] ==10)
@@ -506,7 +506,7 @@ void Spell::cast()
                 player_spells = _player->getSpellList();
                 for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
                 {
-                    if(!(*itr)->spellId)
+                    if(!(*itr)->spellId || !(*itr)->active)
                         continue;
                     SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
                     if( spellInfo->Category == m_spellInfo->Category)

@@ -90,3 +90,21 @@ int32 GetDuration(SpellEntry *spellInfo)
         return 0;
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
+
+bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2)
+{
+    SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
+    if(!spellInfo_1 || !spellInfo_2 || spellInfo_1->Id == spellId_2)
+        return false;
+    //not sure the code below can separate all spell which is not the rank spell to another.
+    if(spellInfo_1->SpellIconID != spellInfo_2->SpellIconID
+        || spellInfo_1->SpellVisual != spellInfo_2->SpellVisual
+        || spellInfo_1->Category != spellInfo_2->Category
+        || spellInfo_1->Attributes != spellInfo_2->Attributes
+        || spellInfo_1->AttributesEx !=spellInfo_2->AttributesEx
+        || spellInfo_1->EffectApplyAuraName[0] != spellInfo_2->EffectApplyAuraName[0]
+        || spellInfo_1->EffectApplyAuraName[1] != spellInfo_2->EffectApplyAuraName[1]
+        || spellInfo_1->EffectApplyAuraName[2] != spellInfo_2->EffectApplyAuraName[2])
+        return false;
+    return true;
+}

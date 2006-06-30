@@ -174,7 +174,8 @@ enum ShapeshiftForm
     FORM_DEFENSIVESTANCE  = 18,
     FORM_BERSERKERSTANCE  = 19,
     FORM_SHADOW           = 28,
-    FORM_STEALTH          = 30
+    FORM_STEALTH          = 30,
+    FORM_MOONKIN          = 31
 };
 
 enum SpellFailedReason

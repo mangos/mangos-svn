@@ -447,10 +447,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 ((Player*)pVictim)->DeathDurabilityLoss(0.05);
             }
         }
-        for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
-        {
-            pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
-        }
     }
 
     DEBUG_LOG("DealDamageEnd");
@@ -549,22 +545,22 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
-	else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
-	{
-		uint16 field = 0;
-		switch(mod->m_miscvalue)
-		{
-			case 0:field = UNIT_FIELD_POWER1;break;
-			case 1:field = UNIT_FIELD_POWER2;break;
-			case 2:field = UNIT_FIELD_POWER3;break;
-			case 3:field = UNIT_FIELD_POWER4;break;
-			case 4:field = UNIT_FIELD_POWER5;break;
-			default:break;
-		}
-		if(!field)
-			return;
-		SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
-	}
+    else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
+    {
+        uint16 field = 0;
+        switch(mod->m_miscvalue)
+        {
+            case 0:field = UNIT_FIELD_POWER1;break;
+            case 1:field = UNIT_FIELD_POWER2;break;
+            case 2:field = UNIT_FIELD_POWER3;break;
+            case 3:field = UNIT_FIELD_POWER4;break;
+            case 4:field = UNIT_FIELD_POWER5;break;
+            default:break;
+        }
+        if(!field)
+            return;
+        SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
+    }
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
@@ -670,26 +666,6 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
 {
-    for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
-    {
-        SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
-    }
-    uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
-
-    if( (*damage-absorb-*resist) <= 0 )
-    {
-        *hitInfo = 0x00010020;
-        *victimState=1;
-        *absorbDamage = absorb;
-        *blocked_amount=0;
-        *damageType = 0;
-        return;
-    }
-    else
-    {
-        *absorbDamage = absorb;
-    }
-
     uint16 pos;
     if(GetTypeId() == TYPEID_PLAYER)
     {
@@ -740,6 +716,24 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
         *victimState = 4;
         ((Player*)pVictim)->UpdateDefense();
+    }
+
+    for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
+    {
+        pVictim->SpellNonMeleeDamageLog(this,i->m_spellId,i->m_damage);
+    }
+    uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
+
+    if( (*damage-absorb-*resist) <= 0 )
+    {
+        *hitInfo = 0x00010020;
+        *absorbDamage = absorb;
+        *damageType = 0;
+        return;
+    }
+    else
+    {
+        *absorbDamage = absorb;
     }
 
     // proc trigger aura
@@ -1098,38 +1092,23 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo)
         return;
-    AuraMap::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    AuraMap::iterator i,next;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
-		bool isRankspell = true;
-		uint32 i_spellId = (*i).second->GetId();
-		if((*i).second && i_spellId && i_spellId != spellId)
+        next = i;
+        next++;
+        uint32 i_spellId = (*i).second->GetId();
+        if((*i).second && i_spellId && i_spellId != spellId)
         {
-			if((*i).second->GetSpellProto()->SpellIconID != spellInfo->SpellIconID)
-				continue;
-			if((*i).second->GetSpellProto()->SpellVisual != spellInfo->SpellVisual)
-				continue;
-			if((*i).second->GetSpellProto()->Category != spellInfo->Category)
-				continue;
-			if((*i).second->GetSpellProto()->Attributes != spellInfo->Attributes)
-				continue;
-			if((*i).second->GetSpellProto()->AttributesEx != spellInfo->AttributesEx)
-				continue;
-			for(int x=0;x<3;x++)
-			{
-				if((*i).second->GetSpellProto()->EffectApplyAuraName[x] != spellInfo->EffectApplyAuraName[x])
-				{
-					isRankspell = false;
-					break;
-				}
-			}
-			if(isRankspell)
+            if(IsRankSpellDueToSpell(spellInfo,i_spellId))
+            {
                 RemoveAurasDueToSpell(i_spellId);
 
-            i = m_Auras.begin();
-            if(i == m_Auras.end() || !(*i).second)
-                return;
-            
+                if( m_Auras.empty() )
+                    break;
+                else
+                    next =  m_Auras.begin();
+            }
         }
     }
 }
