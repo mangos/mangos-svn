@@ -61,6 +61,7 @@ Unit::Unit() : Object()
     m_silenced = false;
     waterbreath = false;
 
+    m_immuneToMechanic = 0;
     m_immuneToEffect = 0;
     m_immuneToState  = 0;
     m_immuneToSchool = 0;
@@ -1314,7 +1315,9 @@ void Unit::_RemoveAllAuraMods()
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         //(*i)->ApplyModifier(false);
-        (*i).second->_RemoveAura();
+        ApplyStats(false);
+        (*i).second->ApplyModifier(false);
+        ApplyStats(true);
         //RemoveAura(i);
         //if(m_Auras.empty())
         //    break;
@@ -1329,7 +1332,9 @@ void Unit::_ApplyAllAuraMods()
     {
         //(*i)->ApplyModifier(true);
         //(*i)->_RemoveAura();
-        (*i).second->_AddAura();
+        ApplyStats(false);
+        (*i).second->ApplyModifier(true);
+        ApplyStats(true);
     }
 }
 
