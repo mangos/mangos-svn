@@ -448,7 +448,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 ((Player*)pVictim)->DeathDurabilityLoss(0.05);
             }
         }
-    }
+        }
 
     DEBUG_LOG("DealDamageEnd");
 }
@@ -546,22 +546,22 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
-    {
-        uint16 field = 0;
-        switch(mod->m_miscvalue)
-        {
-            case 0:field = UNIT_FIELD_POWER1;break;
-            case 1:field = UNIT_FIELD_POWER2;break;
-            case 2:field = UNIT_FIELD_POWER3;break;
-            case 3:field = UNIT_FIELD_POWER4;break;
-            case 4:field = UNIT_FIELD_POWER5;break;
-            default:break;
-        }
-        if(!field)
-            return;
-        SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
-    }
+	else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
+	{
+		uint16 field = 0;
+		switch(mod->m_miscvalue)
+		{
+			case 0:field = UNIT_FIELD_POWER1;break;
+			case 1:field = UNIT_FIELD_POWER2;break;
+			case 2:field = UNIT_FIELD_POWER3;break;
+			case 3:field = UNIT_FIELD_POWER4;break;
+			case 4:field = UNIT_FIELD_POWER5;break;
+			default:break;
+		}
+		if(!field)
+			return;
+		SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
+	}
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
@@ -1098,20 +1098,20 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     {
         next = i;
         next++;
-        uint32 i_spellId = (*i).second->GetId();
-        if((*i).second && i_spellId && i_spellId != spellId)
+		uint32 i_spellId = (*i).second->GetId();
+		if((*i).second && i_spellId && i_spellId != spellId)
         {
             if(IsRankSpellDueToSpell(spellInfo,i_spellId))
-            {
+			{
                 RemoveAurasDueToSpell(i_spellId);
 
                 if( m_Auras.empty() )
                     break;
                 else
                     next =  m_Auras.begin();
-            }
         }
     }
+}
 }
 
 void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
@@ -1311,18 +1311,11 @@ void Unit::ApplyStats(bool apply)
 
 void Unit::_RemoveAllAuraMods()
 {
-    AuraMap::iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        //(*i)->ApplyModifier(false);
         ApplyStats(false);
         (*i).second->ApplyModifier(false);
         ApplyStats(true);
-        //RemoveAura(i);
-        //if(m_Auras.empty())
-        //    break;
-        //else
-        //    i = m_Auras.begin();
     }
 }
 
@@ -1330,8 +1323,6 @@ void Unit::_ApplyAllAuraMods()
 {
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
-        //(*i)->ApplyModifier(true);
-        //(*i)->_RemoveAura();
         ApplyStats(false);
         (*i).second->ApplyModifier(true);
         ApplyStats(true);

@@ -107,7 +107,7 @@ void CliLoadAddons(char*command,pPrintf zprintf)
     while(command[x]==' ')
         x++;
     del=&command[x];
-    if (!sAddOnHandler._LoadFromDB()) return;
+    sAddOnHandler._LoadFromDB();
 
     sWorld.SendWorldText("|cffff0000[System Message]:|rAddons reloaded", NULL);
 }

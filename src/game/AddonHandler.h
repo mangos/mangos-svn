@@ -43,7 +43,7 @@ class AddonHandler
         bool GetAddonStatus(AddOns* Target, bool* Allowed); //get addon status, it checks the name.
 
         void _SaveToDB(void);
-        bool _LoadFromDB(void);
+        void _LoadFromDB(void);
         void _AddAddon(AddOns*);
         uint8 _removeAddon(std::string*);
         void SetAddonDefault(bool Value) { m_Addon_Default = Value; }
