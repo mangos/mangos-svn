@@ -90,20 +90,21 @@ class DBCStorage
         const char * fmt;
 };
 
-extern DBCStorage <TalentEntry> sTalentStore;
-extern DBCStorage <SpellRadius> sSpellRadius;
-extern DBCStorage <AreaTableEntry> sAreaStore;
-extern DBCStorage <FactionTemplateEntry> sFactionTemplateStore;
-
-extern DBCStorage <SpellRange>  sSpellRange;
-extern DBCStorage <emoteentry> sEmoteStore;
-
-extern DBCStorage <SpellEntry> sSpellStore;
-extern DBCStorage <SpellCastTime> sCastTime;
-extern DBCStorage <SpellDuration> sSpellDuration;
-extern DBCStorage <FactionEntry> sFactionStore;
-extern DBCStorage <ItemSetEntry> sItemSetStore;
+extern DBCStorage <AreaTableEntry>           sAreaStore;
+extern DBCStorage <SpellCastTime>            sCastTime;
+extern DBCStorage <emoteentry>               sEmoteStore;
+extern DBCStorage <FactionEntry>             sFactionStore;
+extern DBCStorage <FactionTemplateEntry>     sFactionTemplateStore;
 extern DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore;
-extern DBCStorage <SkillLineAbility> sSkillLineAbilityStore;
-extern DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore;
+extern DBCStorage <ItemSetEntry>             sItemSetStore;
+extern DBCStorage <SkillLineAbility>         sSkillLineAbilityStore;
+extern DBCStorage <SpellDuration>            sSpellDuration;
+extern DBCStorage <SpellFocusObject>         sSpellFocusObject;
+extern DBCStorage <SpellItemEnchantment>     sSpellItemEnchantmentStore;
+extern DBCStorage <SpellRadius>              sSpellRadius;
+extern DBCStorage <SpellRange>               sSpellRange;
+extern DBCStorage <SpellEntry>               sSpellStore;
+extern DBCStorage <TalentEntry>              sTalentStore;
+
+
 #endif

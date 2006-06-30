@@ -20,6 +20,7 @@
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
+#include "GridNotifiers.h"
 #include "Opcodes.h"
 #include "Log.h"
 #include "UpdateMask.h"
@@ -1098,6 +1099,49 @@ uint8 Spell::CheckItems()
         if( !p_caster->HasItemCount(itemid,1) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
         else return uint8(0);
+    }
+
+    if(m_spellInfo->RequiresSpellFocus)
+    {
+        SpellFocusObject* focusobj = sSpellFocusObject.LookupEntry(m_spellInfo->RequiresSpellFocus);
+        assert(focusobj);
+        char const* focusname = focusobj->Name;
+
+        QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `gameobject_template` WHERE `name` = \"%s\";",focusname);
+        if(!result)
+        {
+            sLog.outError("Gameobject template \"%s\" not found (required as object focus for cast #u)",focusname,this->m_spellInfo->Id);
+            return (uint8)CAST_FAIL_REQUIRES_SOMETHING;
+        }
+
+        // many gameobject can have same focusname (forge for example)
+        std::set<uint32> go_ids;
+        do
+        {
+            Field *fields = result->Fetch();
+            go_ids.insert(fields[0].GetUInt32());
+        } while (result->NextRow());
+
+        delete result;
+
+        // Find GO
+        SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
+        float range = GetMaxRange(srange);
+
+        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+
+        bool ok = false;
+        MaNGOS::ObjectSetIn2DRangeChecker<GameObject> checker(ok,m_caster,go_ids, range);
+
+        TypeContainerVisitor<MaNGOS::ObjectSetIn2DRangeChecker<GameObject>, TypeMapContainer<AllObjectTypes> > object_checker(checker);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+
+        if(!ok) return (uint8)CAST_FAIL_REQUIRES_SOMETHING;
+
+        // game object found in range
     }
 
     for(uint32 i=0;i<8;i++)

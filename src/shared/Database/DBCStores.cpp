@@ -24,24 +24,30 @@
 
 DBCStorage <AreaTableEntry> sAreaStore(AreaTableEntryfmt);
 
-DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
-DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt);
-
-DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
-
-DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
 DBCStorage <emoteentry> sEmoteStore(emoteentryfmt);
 
-DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
-DBCStorage <SpellCastTime> sCastTime(SpellCastTimefmt);
-DBCStorage <SpellDuration> sSpellDuration(SpellDurationfmt);
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
+DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 DBCStorage <ItemDisplayTemplateEntry> sItemDisplayTemplateStore(ItemDisplayTemplateEntryfmt);
 
 DBCStorage <SkillLineAbility> sSkillLineAbilityStore(SkillLineAbilityfmt);
+
 DBCStorage <SpellItemEnchantment> sSpellItemEnchantmentStore(SpellItemEnchantmentfmt);
+DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
+DBCStorage <SpellCastTime> sCastTime(SpellCastTimefmt);
+DBCStorage <SpellDuration> sSpellDuration(SpellDurationfmt);
+DBCStorage <SpellFocusObject> sSpellFocusObject(SpellFocusObjectfmt);
+DBCStorage <SpellRadius> sSpellRadius(SpellRadiusfmt);
+DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
+
+DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
+
+
+
+
+
 
 float GetRadius(SpellRadius *radius)
 {

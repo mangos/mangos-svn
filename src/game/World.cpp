@@ -221,7 +221,7 @@ void World::SetInitialWorldSettings()
 
     new ChannelMgr;
 
-    const int DBCFilesCount = 14;
+    const int DBCFilesCount = 15;
 
     sLog.outString("Initialize data stores...");
     barGoLink bar( DBCFilesCount );
@@ -229,53 +229,18 @@ void World::SetInitialWorldSettings()
     std::list<std::string> not_found_dbc_files;
 
     tmpPath=dataPath;
+    tmpPath.append("dbc/AreaTable.dbc");
+    if(sAreaStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/AreaTable.dbc");
+
+    tmpPath=dataPath;
     tmpPath.append("dbc/EmotesText.dbc");
     if(sEmoteStore.Load(tmpPath.c_str()))
         bar.step();
     else
         not_found_dbc_files.push_back("dbc/EmotesText.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/Spell.dbc");
-    if(sSpellStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/Spell.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellRange.dbc");
-    if(sSpellRange.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellRange.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellCastTimes.dbc");
-    if(sCastTime.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellCastTimes.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellDuration.dbc");
-    if(sSpellDuration.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellDuration.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/SpellRadius.dbc");
-    if(sSpellRadius.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/SpellRadius.dbc");
-
-    tmpPath=dataPath;
-    tmpPath.append("dbc/Talent.dbc");
-    if(sTalentStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/Talent.dbc");
 
     tmpPath=dataPath;
     tmpPath.append("dbc/Faction.dbc");
@@ -306,13 +271,6 @@ void World::SetInitialWorldSettings()
         not_found_dbc_files.push_back("dbc/ItemSet.dbc");
 
     tmpPath=dataPath;
-    tmpPath.append("dbc/AreaTable.dbc");
-    if(sAreaStore.Load(tmpPath.c_str()))
-        bar.step();
-    else
-        not_found_dbc_files.push_back("dbc/AreaTable.dbc");
-
-    tmpPath=dataPath;
     tmpPath.append("dbc/SkillLineAbility.dbc");
     if(sSkillLineAbilityStore.Load(tmpPath.c_str()))
         bar.step();
@@ -320,11 +278,61 @@ void World::SetInitialWorldSettings()
         not_found_dbc_files.push_back("dbc/SkillLineAbility.dbc");
 
     tmpPath=dataPath;
+    tmpPath.append("dbc/Spell.dbc");
+    if(sSpellStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/Spell.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellCastTimes.dbc");
+    if(sCastTime.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellCastTimes.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellDuration.dbc");
+    if(sSpellDuration.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellDuration.dbc");
+
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellFocusObject.dbc");
+    if(sSpellFocusObject.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("SpellFocusObject.dbc"); 
+
+    tmpPath=dataPath;
     tmpPath.append("dbc/SpellItemEnchantment.dbc");
     if(sSpellItemEnchantmentStore.Load(tmpPath.c_str()))
         bar.step();
     else
         not_found_dbc_files.push_back("dbc/SpellItemEnchantment.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellRadius.dbc");
+    if(sSpellRadius.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellRadius.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellRange.dbc");
+    if(sSpellRange.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellRange.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Talent.dbc");
+    if(sTalentStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/Talent.dbc");
 
     if(not_found_dbc_files.size() >= DBCFilesCount )
     {
@@ -343,7 +351,7 @@ void World::SetInitialWorldSettings()
     }
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded 14 data stores" );
+    sLog.outString( ">> Loaded %d data stores", DBCFilesCount );
     sLog.outString( "" );
 
     sLog.outString( "Loading Quests..." );
