@@ -69,7 +69,7 @@ const CliCommand Commands[]=
     {CMD("unban"), & CliRemoveBan,"Remove ban from ip|account"},
     {CMD("setgm"), & CliSetGM,"Edit user privileges"},
     {CMD("listgm"), & CliListGM,"Display user privileges"},
-    //	{CMD("quit"), & CliExit,"Shutdown server"},  //allowing aliases
+    //    {CMD("quit"), & CliExit,"Shutdown server"},  //allowing aliases
     {CMD("create"), & CliCreate,"Create account"},
     {CMD("delete"), & CliDelete,"Delete account and characters"},
     {CMD("exit"), & CliExit,"Shutdown server"},
