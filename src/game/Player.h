@@ -904,6 +904,6 @@ inline uint32 urand(uint32 min, uint32 max)
     return irand(int(min), int(max));
 }
 
-void AddItemsSetItem(Player*player,ItemPrototype *proto);
+void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype *proto);
 #endif

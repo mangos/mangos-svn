@@ -3100,7 +3100,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if(proto->ItemSet)
     {
         if (apply)
-            AddItemsSetItem(this,proto);
+            AddItemsSetItem(this,item);
         else
             RemoveItemsSetItem(this,proto);
     }
@@ -3297,7 +3297,7 @@ void Player::CastItemSpell(Item *item,Unit* Target)
 
         DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
 
-        spell = new Spell(this, spellInfo, false, 0);
+        spell = new Spell(this, spellInfo, true, 0);
         WPAssert(spell);
 
         SpellCastTargets targets;
@@ -7690,8 +7690,6 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadMail();
 
-    _LoadInventory();
-
     _LoadSpells();
 
     _LoadActions();
@@ -7703,6 +7701,8 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadBids();
 
     _LoadAuras();
+
+    _LoadInventory();
 
     _LoadReputation();
 

@@ -887,6 +887,9 @@ void Spell::SendPlaySpellVisual(uint32 SpellID)
 
 void Spell::TakePower()
 {
+    if(m_CastItem) 
+        return;
+
     uint16 powerField;
 
     uint8 powerType = m_caster->getPowerType();
