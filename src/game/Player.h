@@ -77,12 +77,14 @@ enum Races
     GOBLIN = 9,
 };
 
-struct Playerspell
+struct PlayerSpell
 {
     uint16 spellId;
     uint16 slotId;
     uint8 active;
 };
+
+typedef std::list<PlayerSpell*> PlayerSpellList;
 
 struct actions
 {
@@ -504,7 +506,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
-        inline std::list<Playerspell*> getSpellList() { return m_spells; };
+        PlayerSpellList const& getSpellList() { return m_spells; };
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
@@ -847,7 +849,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<struct Factions> factions;
         std::list<bidentry*> m_bids;
         std::list<Mail*> m_mail;
-        std::list<Playerspell*> m_spells;
+        PlayerSpellList m_spells;
         std::list<struct actions> m_actions;
 
         uint64 m_resurrectGUID;

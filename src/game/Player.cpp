@@ -1275,9 +1275,10 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
 void Player::SendInitialSpells()
 {
     WorldPacket data;
-    //uint16 spellCount = m_spells.size();
     uint16 spellCount = 0;
-    std::list<Playerspell*>::iterator itr;
+
+    PlayerSpellList::const_iterator itr;
+
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if((*itr)->active)
@@ -1380,14 +1381,14 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
     if(!spellInfo) return;
 
-    Playerspell *newspell;
+    PlayerSpell *newspell;
 
-    newspell = new Playerspell;
+    newspell = new PlayerSpell;
     newspell->spellId = spell_id;
     newspell->active = active;
 
     WorldPacket data;
-    std::list<Playerspell*>::iterator itr,next;
+    PlayerSpellList::iterator itr,next;
     for (itr = m_spells.begin(); itr != m_spells.end(); itr=next)
     {
         next = itr;
@@ -1419,8 +1420,8 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     if (tmpslot == 0xffff)
     {
         uint16 maxid = 0;
-        std::list<Playerspell*>::iterator itr;
-        for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
+        PlayerSpellList::iterator itr;
+        for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         {
             if ((*itr)->slotId > maxid) maxid = (*itr)->slotId;
         }
@@ -1489,7 +1490,7 @@ void Player::learnSpell(uint16 spell_id)
 
 bool Player::removeSpell(uint16 spell_id)
 {
-    std::list<Playerspell*>::iterator itr;
+    PlayerSpellList::iterator itr;
     for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if ((*itr)->spellId == spell_id)
@@ -1685,15 +1686,13 @@ void Player::DestroyForPlayer( Player *target ) const
 
 bool Player::HasSpell(uint32 spell)
 {
-    std::list<Playerspell*>::iterator itr;
-
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
 
     if (!spellInfo) return true;
 
     // Look in the effects of spell , if is a Learn Spell Effect, see if is equal to triggerspell
     // If inst, look if have this spell.
-    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         for(uint8 i=0;i<3;i++)
         {
@@ -8297,8 +8296,7 @@ void Player::_SaveSpells()
 {
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
 
-    std::list<Playerspell*>::iterator itr;
-    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u');", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
     }

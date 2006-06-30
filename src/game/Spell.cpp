@@ -125,9 +125,6 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     SpellEntry *spellInfo;
     Player* p_caster;
-    std::list<Playerspell*>::iterator itr;
-
-    std::list<Playerspell*> player_spells;
 
     m_spellInfo = info;
     m_caster = Caster;
@@ -155,8 +152,8 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     if( Caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
     {
         p_caster = (Player*)m_caster;
-        player_spells = p_caster->getSpellList();
-        for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+        PlayerSpellList const& player_spells = p_caster->getSpellList();
+        for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
         {
             if ((*itr)->spellId != m_spellInfo->Id && (*itr)->active == 1)
             {
@@ -501,10 +498,8 @@ void Spell::cast()
              data << m_caster->GetGUID();
             if (m_spellInfo->CategoryRecoveryTime > 0)
             {
-                std::list<Playerspell*>::iterator itr;
-                std::list<Playerspell*> player_spells;
-                player_spells = _player->getSpellList();
-                for (itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+                PlayerSpellList const& player_spells = _player->getSpellList();
+                for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
                 {
                     if(!(*itr)->spellId || !(*itr)->active)
                         continue;
