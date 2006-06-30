@@ -546,22 +546,22 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
-	else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
-	{
-		uint16 field = 0;
-		switch(mod->m_miscvalue)
-		{
-			case 0:field = UNIT_FIELD_POWER1;break;
-			case 1:field = UNIT_FIELD_POWER2;break;
-			case 2:field = UNIT_FIELD_POWER3;break;
-			case 3:field = UNIT_FIELD_POWER4;break;
-			case 4:field = UNIT_FIELD_POWER5;break;
-			default:break;
-		}
-		if(!field)
-			return;
-		SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
-	}
+    else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
+    {
+        uint16 field = 0;
+        switch(mod->m_miscvalue)
+        {
+            case 0:field = UNIT_FIELD_POWER1;break;
+            case 1:field = UNIT_FIELD_POWER2;break;
+            case 2:field = UNIT_FIELD_POWER3;break;
+            case 3:field = UNIT_FIELD_POWER4;break;
+            case 4:field = UNIT_FIELD_POWER5;break;
+            default:break;
+        }
+        if(!field)
+            return;
+        SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
+    }
 }
 
 void Unit::HandleEmoteCommand(uint32 anim_id)
@@ -1098,11 +1098,11 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     {
         next = i;
         next++;
-		uint32 i_spellId = (*i).second->GetId();
-		if((*i).second && i_spellId && i_spellId != spellId)
+        uint32 i_spellId = (*i).second->GetId();
+        if((*i).second && i_spellId && i_spellId != spellId)
         {
             if(IsRankSpellDueToSpell(spellInfo,i_spellId))
-			{
+            {
                 RemoveAurasDueToSpell(i_spellId);
 
                 if( m_Auras.empty() )

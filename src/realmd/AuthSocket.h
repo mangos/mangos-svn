@@ -195,7 +195,7 @@ class PatcherRunnable: public ZThread::Runnable
 
 typedef struct
 {
-    //	uint8 id[10];
+    //    uint8 id[10];
     uint8 md5[MD5_DIGEST_LENGTH];
 }PATCH_INFO;
 

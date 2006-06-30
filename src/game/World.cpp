@@ -406,7 +406,7 @@ void World::SetInitialWorldSettings()
 
     //Start Addon stuff
     bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
-    sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all not registared in DB)", temp, temp? "Enabled" : "Disabled"  );
+    sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all addons not registared in DB)", temp, temp? "Enabled" : "Disabled"  );
     sAddOnHandler.SetAddonDefault(temp);
     sAddOnHandler._LoadFromDB();
 
