@@ -401,25 +401,21 @@ void World::SetInitialWorldSettings()
     MaNGOS::Game::Initialize();
     sLog.outString( "WORLD: SetInitialWorldSettings done" );
 
-    StartEventSystem();
     sLog.outString( "WORLD: Starting Event System" );
+    StartEventSystem();
 
-    //load AddonDefault stuff
-    bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
-    sAddOnHandler.SetAddonDefault(temp);
     //Start Addon stuff
-    if (sAddOnHandler._LoadFromDB())
-        sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d", temp );
-    else
-        sLog.outString( "WORLD: Starting Addon System Failed" );
+    bool temp = sConfig.GetBoolDefault("AddonDefault", 1);
+    sLog.outString( "WORLD: Starting Addon System, AddonDefault:%d (%s all not registared in DB)", temp, temp? "Enabled" : "Disabled"  );
+    sAddOnHandler.SetAddonDefault(temp);
+    sAddOnHandler._LoadFromDB();
 
+    sLog.outString( "WORLD: Starting Corpse Handler" );
     // global event to erase corpses/bones
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     // need good tests on windows
-
     uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
-    sLog.outString( "WORLD: Starting Corpse Handler" );
 }
 
 void World::Update(time_t diff)

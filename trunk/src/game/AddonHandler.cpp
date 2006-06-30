@@ -72,14 +72,14 @@ void AddonHandler::_SaveToDB()
     }
 }
 
-bool AddonHandler::_LoadFromDB()
+void AddonHandler::_LoadFromDB()
 {
     //clean the addon data before use
     m_Addon_data.clear();
 
     QueryResult *result = sDatabase.PQuery( "SELECT * FROM `game_addons`;" );
     if( !result )
-        return false;
+        return;
 
     AddOns *newaddon;
 
@@ -92,11 +92,10 @@ bool AddonHandler::_LoadFromDB()
         newaddon->CRC = fields[1].GetUInt64();
         newaddon->Enabled = fields[2].GetUInt8();           //fields[2].GetBool();
 
-        sLog.outDebug("LoadAddons from DB:%s Enabled:%d", newaddon->Name.c_str(), newaddon->Enabled);
+        sLog.outDebug("LoadAddons from DB:%s State:%s", newaddon->Name.c_str(), newaddon->Enabled ? "Enabled" : "Disabled" );
         _AddAddon(newaddon);
     } while (result->NextRow());
     delete result;
-    return true;
 }
 
 bool AddonHandler::GetAddonStatus(AddOns* Target, bool* Allowed)
