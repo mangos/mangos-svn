@@ -37,53 +37,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `areatrigger_city` ENABLE KEYS */;
 
 --
--- Table structure for table `areatrigger_graveyard`
---
-
-DROP TABLE IF EXISTS `areatrigger_graveyard`;
-CREATE TABLE `areatrigger_graveyard` (
-  `id` int(11) unsigned NOT NULL auto_increment,
-  `position_x` float NOT NULL default '0',
-  `position_y` float NOT NULL default '0',
-  `position_z` float NOT NULL default '0',
-  `orientation` float NOT NULL default '0',
-  `map` int(11) unsigned NOT NULL default '0',
-  `faction` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
-
---
--- Dumping data for table `areatrigger_graveyard`
---
-
-
-/*!40000 ALTER TABLE `areatrigger_graveyard` DISABLE KEYS */;
-LOCK TABLES `areatrigger_graveyard` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `areatrigger_graveyard` ENABLE KEYS */;
-
---
--- Table structure for table `areatrigger_graveyard_zone`
---
-
-DROP TABLE IF EXISTS `areatrigger_graveyard_zone`;
-CREATE TABLE `areatrigger_graveyard_zone` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `ghost_map` int(11) unsigned NOT NULL default '0',
-  `ghost_zone` int(11) unsigned NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
-
---
--- Dumping data for table `areatrigger_graveyard_zone`
---
-
-
-/*!40000 ALTER TABLE `areatrigger_graveyard_zone` DISABLE KEYS */;
-LOCK TABLES `areatrigger_graveyard_zone` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `areatrigger_graveyard_zone` ENABLE KEYS */;
-
---
 -- Table structure for table `areatrigger_involvedrelation`
 --
 
@@ -882,6 +835,53 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `game_corpse` ENABLE KEYS */;
 
 --
+-- Table structure for table `game_graveyard`
+--
+
+DROP TABLE IF EXISTS `game_graveyard`;
+CREATE TABLE `game_graveyard` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `map` int(11) unsigned NOT NULL default '0',
+  `faction` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
+
+--
+-- Dumping data for table `game_graveyard`
+--
+
+
+/*!40000 ALTER TABLE `game_graveyard` DISABLE KEYS */;
+LOCK TABLES `game_graveyard` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_graveyard` ENABLE KEYS */;
+
+--
+-- Table structure for table `game_graveyard_zone`
+--
+
+DROP TABLE IF EXISTS `game_graveyard_zone`;
+CREATE TABLE `game_graveyard_zone` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `ghost_map` int(11) unsigned NOT NULL default '0',
+  `ghost_zone` int(11) unsigned NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
+
+--
+-- Dumping data for table `game_graveyard_zone`
+--
+
+
+/*!40000 ALTER TABLE `game_graveyard_zone` DISABLE KEYS */;
+LOCK TABLES `game_graveyard_zone` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_graveyard_zone` ENABLE KEYS */;
+
+--
 -- Table structure for table `game_spell`
 --
 
@@ -937,6 +937,32 @@ CREATE TABLE `game_talent` (
 LOCK TABLES `game_talent` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `game_talent` ENABLE KEYS */;
+
+
+--
+-- Table structure for table `game_tele`
+--
+
+CREATE TABLE `game_tele` (
+  `id` int(11) unsigned NOT NULL auto_increment,
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `map` int(11) unsigned NOT NULL default '0',
+  `name` varchar(100) NOT NULL default '',
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Tele Command';
+
+--
+-- Dumping data for table `game_tele`
+--
+
+
+/*!40000 ALTER TABLE `game_tele` DISABLE KEYS */;
+LOCK TABLES `game_tele` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `game_tele` ENABLE KEYS */;
 
 --
 -- Table structure for table `game_weather`
