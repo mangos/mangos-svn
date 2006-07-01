@@ -586,7 +586,7 @@ void Creature::LoadGossipOptions()
         go->NpcFlag=fields[2].GetUInt32();
         go->Icon=fields[3].GetUInt32();
         go->Action=fields[4].GetUInt32();
-        go->Option=fields[5].GetString();
+        go->Option=fields[5].GetCppString();
         addGossipOption(go);
     }while( result->NextRow() );
 }

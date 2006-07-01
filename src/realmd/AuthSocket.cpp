@@ -184,7 +184,7 @@ void AuthSocket::_HandleLogonChallenge()
                 }
                 else
                 {
-                    password = (*result)[0].GetString();
+                    password = (*result)[0].GetCppString();
                     /*
                     QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
                     uint32 cnt=0;
