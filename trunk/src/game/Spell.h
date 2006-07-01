@@ -344,6 +344,7 @@ class Spell
         void EffectManaDrain(uint32 i);
         void EffectHeal(uint32 i);
         void EffectHealthLeach(uint32 i);
+        void EffectQuestComplete(uint32 i);
         void EffectCreateItem(uint32 i);
         void EffectPresistentAA(uint32 i);
         void EffectEnergize(uint32 i);
@@ -382,6 +383,7 @@ class Spell
         void EffectInebriate(uint32 i);
         void EffectFeedPet(uint32 i);
         void EffectDismissPet(uint32 i);
+        void EffectReputation(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
         void EffectSkill(uint32 i);

@@ -383,6 +383,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void PrepareQuestMenu( uint64 guid );
         void SendPreparedQuest( uint64 guid );
+        Quest *GetActiveQuest( uint32 quest_id ) const;
         Quest *GetNextQuest( uint64 guid, Quest *pQuest );
         bool CanSeeStartQuest( Quest *pQuest );
         bool CanTakeQuest( Quest *pQuest, bool msg );
@@ -675,6 +676,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         bool SetStanding(uint32 FTemplate, int standing);
+        bool ModifyFactionReputation(FactionEntry* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
         void CalculateReputation(Quest *pQuest, uint64 guid);
         void SetInitialFactions();

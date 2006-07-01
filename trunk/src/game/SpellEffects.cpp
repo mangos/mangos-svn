@@ -40,6 +40,7 @@
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
+#include "GossipDef.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -59,7 +60,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_BASE = 13
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_QUEST_COMPLETE = 16
+    &Spell::EffectQuestComplete,                            //SPELL_EFFECT_QUEST_COMPLETE = 16
     &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
     &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT = 18
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
@@ -146,7 +147,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE = 100
     &Spell::EffectFeedPet,                                  //SPELL_EFFECT_FEED_PET = 101
     &Spell::EffectDismissPet,                               //SPELL_EFFECT_DISMISS_PET = 102
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_REPUTATION = 103
+    &Spell::EffectReputation,                               //SPELL_EFFECT_REPUTATION = 103
     &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT1 = 104
     &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT2 = 105
     &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT3 = 106
@@ -2033,10 +2034,11 @@ void Spell::EffectFeedPet(uint32 i)
 
 void Spell::EffectDismissPet(uint32 i)
 {
-    Player *_player;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        _player = (Player*)m_caster;
-    else return;
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player *_player = (Player*)m_caster;
+
     uint64 guid = _player->GetUInt64Value(UNIT_FIELD_SUMMON);
     Creature* pet = ObjectAccessor::Instance().GetCreature(*_player, guid);
     unitTarget = (Unit*)pet;
@@ -2173,6 +2175,50 @@ void Spell::EffectMomentMove(uint32 i)
         m_caster->BuildTeleportAckMsg(&data,fx,fy,fz,m_caster->GetOrientation());
         m_caster->SendMessageToSet( &data, true );
     }
+}
+
+void Spell::EffectReputation(uint32 i)
+{
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player *_player = (Player*)m_caster;
+
+    int32  rep_change = m_spellInfo->EffectBasePoints[i]+1; // field store reputation change -1
+
+    uint32 faction_id = m_spellInfo->EffectMiscValue[i];
+
+    FactionEntry* factionEntry = sFactionStore.LookupEntry(faction_id);
+
+    if(!factionEntry) 
+        return;
+
+    _player->ModifyFactionReputation(factionEntry,rep_change);
+}
+
+void Spell::EffectQuestComplete(uint32 i)
+{
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player *_player = (Player*)m_caster;
+
+    uint32 quest_id = m_spellInfo->EffectMiscValue[i];
+
+    Quest *pQuest = _player->GetActiveQuest(quest_id);
+
+    if(!pQuest)
+        return;
+
+    if(_player->CanCompleteQuest( pQuest ) ) 
+        _player->CompleteQuest( pQuest );
+    else
+        return;
+
+    if(_player->GetQuestRewardStatus( pQuest )) 
+        return
+
+    _player->PlayerTalkClass->SendQuestReward( pQuest, _player->GetGUID(), true, NULL, 0 );
 }
 
 void Spell::EffectSkinning(uint32 i)
