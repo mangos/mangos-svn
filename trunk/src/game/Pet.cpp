@@ -114,7 +114,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     //SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
     m_fealty = fields[11].GetUInt32();
-    m_name = fields[12].GetString();
+    m_name = fields[12].GetCppString();
 
     m_spells[0] = fields[6].GetUInt32();
     m_spells[1] = fields[7].GetUInt32();

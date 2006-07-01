@@ -107,14 +107,14 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     Field *fields = result->Fetch();
 
     Id = fields[0].GetUInt32();
-    name = fields[1].GetString();
+    name = fields[1].GetCppString();
     leaderGuid = fields[2].GetUInt64();
     EmblemStyle = fields[3].GetUInt32();
     EmblemColor = fields[4].GetUInt32();
     BorderStyle = fields[5].GetUInt32();
     BorderColor = fields[6].GetUInt32();
     BackgroundColor = fields[7].GetUInt32();
-    MOTD = fields[8].GetString();
+    MOTD = fields[8].GetCppString();
 
     delete result;
 
@@ -153,7 +153,7 @@ void Guild::LoadRanksFromDB(uint32 GuildId)
     do
     {
         fields = result->Fetch();
-        CreateRank(fields[1].GetString(),fields[2].GetUInt32());
+        CreateRank(fields[1].GetCppString(),fields[2].GetUInt32());
 
     }while( result->NextRow() );
     delete result;
@@ -178,8 +178,8 @@ void Guild::LoadMembersFromDB(uint32 GuildId)
         newmember->RankId = fields[2].GetUInt32();
         pl = ObjectAccessor::Instance().FindPlayer(newmember->guid);
         if(!pl || !pl->IsInWorld()) Loadplayerstats(newmember);
-        newmember->Pnote = fields[3].GetString();
-        newmember->OFFnote = fields[4].GetString();
+        newmember->Pnote = fields[3].GetCppString();
+        newmember->OFFnote = fields[4].GetCppString();
         AddMember(newmember);
 
     }while( result->NextRow() );
@@ -200,7 +200,7 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
 
     fields = result->Fetch();
 
-    memslot->name  = fields[0].GetString();
+    memslot->name  = fields[0].GetCppString();
     memslot->level = fields[1].GetUInt8();
     memslot->Class = fields[2].GetUInt8();
     memslot->zoneId = fields[3].GetUInt32();

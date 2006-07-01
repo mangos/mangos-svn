@@ -243,7 +243,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 
     if(result)
     {
-        name = (*result)[0].GetString();
+        name = (*result)[0].GetCppString();
         delete result;
         return true;
     }
@@ -413,8 +413,8 @@ void ObjectMgr::LoadGossipText()
 
         for (int i=0; i< 8; i++)
         {
-            pGText->Options[i].Text_0           = fields[cic++].GetString();
-            pGText->Options[i].Text_1           = fields[cic++].GetString();
+            pGText->Options[i].Text_0           = fields[cic++].GetCppString();
+            pGText->Options[i].Text_1           = fields[cic++].GetCppString();
 
             pGText->Options[i].Language         = fields[cic++].GetUInt32();
             pGText->Options[i].Probability      = fields[cic++].GetFloat();
@@ -457,7 +457,7 @@ ItemPage *ObjectMgr::RetreiveItemPageText(uint32 Page_ID)
 
         pIText->Page_ID    = fields[cic++].GetUInt32();
 
-        pIText->PageText   = fields[cic++].GetString();
+        pIText->PageText   = fields[cic++].GetCppString();
         pIText->Next_Page  = fields[cic++].GetUInt32();
 
         if ( !pIText->Page_ID ) break;

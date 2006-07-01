@@ -1291,7 +1291,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         {
             Field *fields = result->Fetch();
             reply += " ";
-            reply += fields[0].GetString();
+            reply += fields[0].GetCppString();
             result->NextRow();
         }
         WorldPacket data;

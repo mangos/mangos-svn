@@ -7666,7 +7666,7 @@ bool Player::LoadFromDB( uint32 guid )
     LoadValues( fields[3].GetString() );
     m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
 
-    m_name = fields[4].GetString();
+    m_name = fields[4].GetCppString();
 
     sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
@@ -7918,8 +7918,8 @@ void Player::_LoadMail()
             be->messageID = fields[0].GetUInt32();
             be->sender = fields[1].GetUInt32();
             be->receiver = fields[2].GetUInt32();
-            be->subject = fields[3].GetString();
-            be->body = fields[4].GetString();
+            be->subject = fields[3].GetCppString();
+            be->body = fields[4].GetCppString();
             be->item = fields[5].GetUInt32();
             be->time = fields[6].GetUInt32();
             be->money = fields[7].GetUInt32();

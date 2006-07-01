@@ -41,6 +41,9 @@ class Field
         enum DataTypes GetType() const { return mType; }
 
         const char *GetString() const { return mValue; }
+        std::string GetCppString() const { 
+            return mValue ? mValue : ""; // std::string s = 0 have undefine result in C++
+        } 
         float GetFloat() const { return mValue ? static_cast<float>(atof(mValue)) : 0; }
         bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
         uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : 0; }

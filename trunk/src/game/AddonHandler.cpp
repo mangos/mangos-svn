@@ -88,7 +88,7 @@ void AddonHandler::_LoadFromDB()
         Field *fields = result->Fetch();
 
         newaddon = new AddOns;
-        newaddon->Name = fields[0].GetString();
+        newaddon->Name = fields[0].GetCppString();
         newaddon->CRC = fields[1].GetUInt64();
         newaddon->Enabled = fields[2].GetUInt8();           //fields[2].GetBool();
 
