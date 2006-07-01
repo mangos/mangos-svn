@@ -2653,7 +2653,6 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
     //Factions newFaction;
     FactionEntry *factionEntry = NULL;
     FactionTemplateEntry *factionTemplateEntry = NULL;
-    std::list<struct Factions>::iterator itr;
 
     //Find the Faction Template into the DBC
     for(int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
@@ -2675,7 +2674,12 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
 
     assert(factionEntry);
 
-    //Find faction and set the new standing
+    return ModifyFactionReputation(factionEntry,standing);
+}
+
+bool Player::ModifyFactionReputation(FactionEntry* factionEntry, int32 standing)
+{
+    std::list<struct Factions>::iterator itr;
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
         if(itr->ReputationListID == factionEntry->reputationListID)
@@ -2686,9 +2690,9 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
             return true;
         }
     }
-
     return false;
 }
+
 
 //Calculates how many reputation points player gains in wich victim's enemy factions
 void Player::CalculateReputation(Unit *pVictim)
@@ -6750,6 +6754,14 @@ void Player::SendPreparedQuest( uint64 guid )
         PlayerTalkClass->SendQuestMenu( qe, title, guid );
     }
 }
+
+Quest *Player::GetActiveQuest( uint32 quest_id ) const
+{
+    StatusMap::const_iterator itr = mQuestStatus.find(quest_id);
+
+    return (itr != mQuestStatus.end()) ?  itr->second.m_quest : NULL;
+}
+
 
 Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
 {
