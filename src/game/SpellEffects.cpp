@@ -374,7 +374,7 @@ void Spell::EffectCreateItem(uint32 i)
     if( msg == EQUIP_ERR_OK )
     {
         player->StoreItem( dest, pItem, true);
-        if( !pItem->GetUInt32Value(ITEM_CLASS_CONSUMABLE) )
+        if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
             pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
         //should send message "create item" to client.-FIX ME
         player->UpdateSkillPro(m_spellInfo->Id);
