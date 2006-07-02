@@ -183,9 +183,6 @@ void SocketHandler::Set(SOCKET s,bool bRead,bool bWrite,bool bException)
 int SocketHandler::Select(long sec,long usec)
 {
     struct timeval tv;
-    fd_set rfds = m_rfds;
-    fd_set wfds = m_wfds;
-    fd_set efds = m_efds;
     int n;
 
     while (m_add.size() && m_sockets.size() < FD_SETSIZE )
@@ -209,8 +206,14 @@ int SocketHandler::Select(long sec,long usec)
         m_sockets[s] = p;
         m_add.erase(it);
     }
+
+    fd_set rfds = m_rfds;
+    fd_set wfds = m_wfds;
+    fd_set efds = m_efds;
+
     tv.tv_sec = sec;
     tv.tv_usec = usec;
+
     n = select( (int)(m_maxsock + 1),&rfds,&wfds,&efds,&tv);
     if (n == -1)
     {
