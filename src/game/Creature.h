@@ -323,6 +323,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         };
         Loot loot;
 
+        SpellEntry *reachWithSpellAttack(Unit *pVictim);
+        uint32 m_spells[UNIT_MAX_SPELLS];
+
     protected:
         void _LoadGoods();
         void _LoadQuests();

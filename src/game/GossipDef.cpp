@@ -320,10 +320,9 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     data << pQuest->GetQuestInfo()->QuestId << pQuest->GetQuestInfo()->Title << pQuest->GetQuestInfo()->Details;
     data << pQuest->GetQuestInfo()->Objectives << uint32( ActivateAccept );
     ItemPrototype* IProto;
-    int i;
 
     data << pQuest->m_rewchoiceitemscount;
-    for (uint32 i=0; i <QUEST_REWARD_CHOICES_COUNT; i++)    // pQuest->m_rewchoiceitemscount
+    for (uint32 i=0; i <QUEST_REWARD_CHOICES_COUNT; i++)
     {
         data << uint32(pQuest->GetQuestInfo()->RewChoiceItemId[i]);
         data << uint32(pQuest->GetQuestInfo()->RewChoiceItemCount[i]);
@@ -335,7 +334,7 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     }
 
     data << pQuest->m_rewitemscount;
-    for (i=0; i <QUEST_REWARDS_COUNT; i++)                  // pQuest->m_rewitemscount
+    for (uint32 i=0; i <QUEST_REWARDS_COUNT; i++)
     {
         data << pQuest->GetQuestInfo()->RewItemId[i];
         data << pQuest->GetQuestInfo()->RewItemCount[i];
@@ -348,17 +347,15 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
 
     data << pQuest->GetQuestInfo()->RewMoney;
 
-    uint32 Objs = pQuest->m_reqitemscount;
-    data << Objs;
-
-    for (i=0; i <  QUEST_OBJECTIVES_COUNT; i++)             //QUEST_OBJECTIVES_COUNT
+    data << pQuest->m_reqitemscount;
+    for (uint32 i=0; i <  QUEST_OBJECTIVES_COUNT; i++)
     {
         data << pQuest->GetQuestInfo()->ReqItemId[i];
         data << pQuest->GetQuestInfo()->ReqItemCount[i];
     }
-    Objs = pQuest->m_reqmobscount;
-    data << Objs;
-    for (i=0; i <QUEST_OBJECTIVES_COUNT; i++)               //QUEST_OBJECTIVES_COUNT
+
+    data << pQuest->m_reqmobscount;
+    for (uint32 i=0; i <QUEST_OBJECTIVES_COUNT; i++)
     {
         data << pQuest->GetQuestInfo()->ReqKillMobId[i];
         data << pQuest->GetQuestInfo()->ReqKillMobCount[i];

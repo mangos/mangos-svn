@@ -1106,6 +1106,15 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     char* citemsetId = strtok((char*)args, " ");
     uint32 itemsetId = atol(citemsetId);
 
+    // prevent generation all items with itemset field value '0'
+    if (itemsetId == 0)
+    {
+        WorldPacket data;
+        FillSystemMessageData(&data, m_session, fmtstring(LANG_NO_ITEMS_FROM_ITEMSET_FOUND,itemsetId));
+        m_session->SendPacket(&data);
+        return true;
+    }
+
     Player* pl = m_session->GetPlayer();
 
     sLog.outDetail(LANG_ADDITEMSET, itemsetId);
