@@ -30,7 +30,7 @@ Pet::Pet()
     m_name = "Pet";
     m_actState = STATE_RA_FOLLOW;
     m_fealty = 0;
-    for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+    for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
         m_spells[i]=0;
 }
 
@@ -141,7 +141,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+        for(uint32 i=0;i < CREATURE_MAX_SPELLS ; i++)
                                                             //C100 = maybe group
             data << uint16 (m_spells[i]) << uint16 (0xC100);
 

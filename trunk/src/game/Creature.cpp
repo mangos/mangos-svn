@@ -991,7 +991,7 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
     if(!pVictim)
         return NULL;
     SpellEntry *spellInfo;
-    for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+    for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
     {
         if(!m_spells[i])
             continue;

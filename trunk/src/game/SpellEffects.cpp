@@ -697,9 +697,8 @@ void Spell::EffectSummon(uint32 i)
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-                                                            //C100 = maybe group
-            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);
+        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);    //C100 = maybe group
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -950,9 +949,8 @@ void Spell::EffectSummonWild(uint32 i)
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-                                                            //C100 = maybe group
-            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);
+        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);    //C100 = maybe group
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1204,9 +1202,8 @@ void Spell::EffectTameCreature(uint32 i)
 
             data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-            for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-                                                            //C100 = maybe group
-                data << uint16 (creatureTarget->m_spells[i]) << uint16 (0xC100);
+            for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100); //C100 = maybe group
 
             data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1257,9 +1254,8 @@ void Spell::EffectSummonPet(uint32 i)
 
                 data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-                for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-                                                            //C100 = maybe group
-                    data << uint16 (OldSummon->m_spells[i]) << uint16 (0xC100);
+                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                    data << uint16(OldSummon->m_spells[i]) << uint16(0xC100);  //C100 = maybe group 
 
                 data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1308,8 +1304,10 @@ void Spell::EffectSummonPet(uint32 i)
         name.append("\\\'s Pet");
         NewSummon->SetName( name );
         NewSummon->SetFealty( 10 );
-        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+
+        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
             NewSummon->m_spells[i] = 0;
+
         if(petentry == 416)                                 //imp
         {
             NewSummon->m_spells[0] = 133;                   //133---fire bolt 1
@@ -1338,9 +1336,8 @@ void Spell::EffectSummonPet(uint32 i)
 
             data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-            for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-                                                            //C100 = maybe group
-                data << uint16 (NewSummon->m_spells[i]) << uint16 (0xC100);
+            for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                data << uint16(NewSummon->m_spells[i]) << uint16(0xC100);      //C100 = maybe group
 
             data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1409,9 +1406,8 @@ void Spell::EffectLearnPetSpell(uint32 i)
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
-        for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
-                                                            //C100 = maybe group
-            data << uint16 (creatureTarget ->m_spells[i]) << uint16 (0xC100);
+        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+            data << uint16 (creatureTarget ->m_spells[i]) << uint16 (0xC100);  //C100 = maybe group
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
