@@ -209,7 +209,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         void setAttackTimer(uint32 time, bool rangeattack = false);
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
-        SpellEntry *reachWithSpellAttack(Unit *pVictim);
 
         inline void addAttacker(Unit *pAttacker)
         {
@@ -300,11 +299,11 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         bool isStunned() const { return m_attackTimer == 0;};
 
-        bool isInFlight() const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
+        bool isInFlight()  const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
+        bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
+        bool isAttacking() const { return hasUnitState(UNIT_STAT_ATTACKING); }
+        bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }
 
-        bool isInCombat()  const { return (m_state & UNIT_STAT_IN_COMBAT); }
-        bool isAttacking() const { return (m_state & UNIT_STAT_ATTACKING); }
-        bool isAttacked()  const { return (m_state & UNIT_STAT_ATTACK_BY); }
         bool HasAuraType(uint32 auraType) const;
         bool isStealth() const                              // cache this in a bool someday
         {
@@ -401,7 +400,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         //struct DamageManaShield* m_damageManaShield;
         std::list<struct DamageManaShield*> m_damageManaShield;
 
-        uint32 m_spells[UNIT_MAX_SPELLS];
         Spell * m_currentSpell;
 
         float GetHostility(uint64 guid);

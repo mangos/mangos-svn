@@ -440,7 +440,7 @@ void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 
 void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 {
-    uint32 cur = GetFloatValue(index);
+    float cur = GetFloatValue(index);
     if(val > cur && !apply ) val = cur;
 
     SetFloatValue(index,cur+(apply ? val : -val));

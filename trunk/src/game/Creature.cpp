@@ -50,6 +50,11 @@ m_faction(0),m_emoteState(0),m_isPet(false)
 
     memset(item_list, 0, sizeof(CreatureItem)*MAX_CREATURE_ITEMS);
     for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
+
+    m_spells[0] = 0;
+    m_spells[1] = 0;
+    m_spells[2] = 0;
+    m_spells[3] = 0;
 }
 
 Creature::~Creature()
@@ -979,4 +984,44 @@ void Creature::Say(char const* message, uint32 language)
 
     sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_SAY, language, NULL, message );
     SendMessageToSet( &data, false );
+}
+
+SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
+{
+    if(!pVictim)
+        return NULL;
+    SpellEntry *spellInfo;
+    for(uint32 i=0;i<UNIT_MAX_SPELLS;i++)
+    {
+        if(!m_spells[i])
+            continue;
+        spellInfo = sSpellStore.LookupEntry(m_spells[i] );
+        if(!spellInfo)
+        {
+            sLog.outError("WORLD: unknown spell id %i\n", m_spells[i]);
+            continue;
+        }
+
+        /*spell = new Spell(this, spellInfo, false, 0);
+        spell->m_targets = targets;
+        if(!spell)
+        {
+            sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
+            continue;
+        }*/
+        if(spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
+            continue;
+        SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
+        float range = GetMaxRange(srange);
+        float minrange = GetMinRange(srange);
+        float dist = GetDistanceSq(pVictim);
+        //if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
+        //    continue;
+        if( dist > range * range || dist < minrange * minrange )
+            continue;
+        if(m_silenced)
+            continue;
+        return spellInfo;
+    }
+    return NULL;
 }
