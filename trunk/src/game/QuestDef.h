@@ -157,10 +157,7 @@ struct QuestInfo
     char* CompletionText;
     char* IncompleteText;
     char* EndText;
-    char* ObjectiveText1;
-    char* ObjectiveText2;
-    char* ObjectiveText3;
-    char* ObjectiveText4;
+    char* ObjectiveText[4];
     uint32 ReqItemId[ QUEST_OBJECTIVES_COUNT ];
     uint32 ReqItemCount[ QUEST_OBJECTIVES_COUNT ];
     uint32 ReqKillMobId[ QUEST_OBJECTIVES_COUNT ];

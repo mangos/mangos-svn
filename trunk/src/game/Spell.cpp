@@ -333,6 +333,23 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         {
             TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
+        case TARGET_AF_P:
+        {
+            Player* targetPlayer = m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*)m_targets.getUnitTarget() : NULL;
+
+            Group* pGroup = targetPlayer ? objmgr.GetGroupByLeader(targetPlayer->GetGroupLeader()) : NULL;
+            if(pGroup)
+            {
+                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                {
+                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(m_targets.getUnitTarget()->GetDistanceSq(Target) < radius * radius )
+                        TagUnitMap.push_back(Target);
+                }
+            }
+            else
+                TagUnitMap.push_back(m_targets.getUnitTarget());
+        }break;
         case TARGET_SELF_FISHING:
         {
             TagUnitMap.push_back(m_caster);

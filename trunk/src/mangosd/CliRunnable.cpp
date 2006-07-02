@@ -151,7 +151,7 @@ void CliDelete(char*command,pPrintf zprintf)
     int guid = fields[0].GetUInt32();
     sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",guid);
     loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",del);
-    loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `account` = '%d'",guid);
+    loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",guid);
     delete result;
 
     zprintf("We deleted : %s\x0d\x0a",del);
