@@ -1066,13 +1066,13 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     if ( xp < 1 )
         return;
 
-    SendLogXPGain(xp,victim);
-
     uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
 
     // XP to money conversion processed in Player::RewardQuest
     if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         return;
+
+    SendLogXPGain(xp,victim);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);

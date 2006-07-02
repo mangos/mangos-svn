@@ -317,8 +317,8 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     data.Initialize(SMSG_QUESTGIVER_QUEST_DETAILS);
 
     data << npcGUID;
-    data << pQuest->GetQuestInfo()->QuestId << pQuest->GetQuestInfo()->Title << pQuest->GetQuestInfo()->Objectives;
-    data << pQuest->GetQuestInfo()->Details << uint32( ActivateAccept );
+    data << pQuest->GetQuestInfo()->QuestId << pQuest->GetQuestInfo()->Title << pQuest->GetQuestInfo()->Details;
+    data << pQuest->GetQuestInfo()->Objectives << uint32( ActivateAccept );
     ItemPrototype* IProto;
     int i;
 
@@ -423,11 +423,8 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
         data << uint32(pQuest->GetQuestInfo()->ReqItemId[iI]) << uint32(pQuest->GetQuestInfo()->ReqItemCount[iI]);
     }
 
-    //for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
-    data << pQuest->GetQuestInfo()->ObjectiveText1;
-    data << pQuest->GetQuestInfo()->ObjectiveText2;
-    data << pQuest->GetQuestInfo()->ObjectiveText3;
-    data << pQuest->GetQuestInfo()->ObjectiveText4;
+    for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
+        data << pQuest->GetQuestInfo()->ObjectiveText[iI];
 
     pSession->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u",pQuest->GetQuestInfo()->QuestId );
