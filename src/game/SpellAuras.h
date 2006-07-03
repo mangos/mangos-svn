@@ -96,7 +96,9 @@ class Aura
         void HandleAuraModDodgePercent(bool Apply);
         void HandleAuraModBlockPercent(bool Apply);
         void HandleAuraModCritPercent(bool Apply);
+        void HandlePeriodicLeech(bool Apply);
         void HandleAuraModScale(bool Apply);
+        void HandlePeriodicManaLeech(bool Apply);
         void HandleAuraMounted(bool Apply);
         void HandleWaterBreathing(bool apply);
         void HandleModBaseResistance(bool apply);

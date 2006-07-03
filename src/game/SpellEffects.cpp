@@ -262,10 +262,21 @@ void Spell::EffectManaDrain(uint32 i)
         return;
 
     uint32 curPower = unitTarget->GetUInt32Value(PowerField);
+    float tmpvalue = m_spellInfo->EffectMultipleValue[i];
+    if(!tmpvalue)
+        tmpvalue = 1;
     if(curPower < damage)
+    {
         unitTarget->SetUInt32Value(PowerField,0);
+        if(DrainType == 0)
+            m_caster->SetUInt32Value(PowerField,uint32(m_caster->GetUInt32Value(PowerField)+curPower*tmpvalue));
+    }
     else
+    {
         unitTarget->SetUInt32Value(PowerField,curPower-damage);
+        if(DrainType == 0)
+            m_caster->SetUInt32Value(PowerField,uint32(m_caster->GetUInt32Value(PowerField)+damage*tmpvalue));
+    }
 }
 
 void Spell::EffectSendEvent(uint32 i)
@@ -282,14 +293,21 @@ void Spell::EffectPowerDrain(uint32 i)
     uint32 curPower = unitTarget->GetUInt32Value(UNIT_FIELD_POWER1);
     uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
     uint32 caster_curPower = m_caster->GetUInt32Value(UNIT_FIELD_POWER1);
+    uint32 tmpvalue = 0;
     if(curPower < damage)
+    {
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
+        tmpvalue = uint32(curPower*m_spellInfo->EffectMultipleValue[i]);
+    }
     else
+    {
+        tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
-    if(caster_curPower + damage < m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
-        m_caster->SetUInt32Value(UNIT_FIELD_POWER1,caster_curPower + damage);
+    }
+    if(caster_curPower + tmpvalue < m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
+        m_caster->SetUInt32Value(UNIT_FIELD_POWER1,caster_curPower + tmpvalue);
     else m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(curHealth-damage*m_spellInfo->EffectMultipleValue[i]));
+    unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth-tmpvalue);
 
 }
 
@@ -326,15 +344,22 @@ void Spell::EffectHealthLeach(uint32 i)
 
     sLog.outDebug("HealthLeach :%u", damage);
 
-    uint32 curHealth = m_caster->GetUInt32Value(UNIT_FIELD_HEALTH);
-    uint32 maxHealth = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+    //SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, damage);
+    uint32 tmpvalue = 0;
 
-    if ((curHealth + (damage/2)) < maxHealth)
-        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) + (damage/2));
+    if(unitTarget->GetUInt32Value(UNIT_FIELD_POWER1) - damage > 0)
+    {
+        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,uint32(unitTarget->GetUInt32Value(UNIT_FIELD_POWER1) - damage));
+        tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
+    }
     else
-        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
-
-    SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, damage);
+    {
+        tmpvalue = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_POWER1)*m_spellInfo->EffectMultipleValue[i]);
+        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
+    }
+    if(m_caster->GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue < m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1) )
+        m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue);
+    else m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
 }
 
 void Spell::EffectCreateItem(uint32 i)
@@ -2343,6 +2368,8 @@ void Spell::EffectTransmitted(uint32 i)
         if(((Player*)m_caster)->CheckFishingAble() > 0)
         {
             //pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
+            pGameObj->SetUInt32Value(12, 0x3F6262A6 );
+            pGameObj->SetUInt32Value(13, 0xBEEF0B9F );
             data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
             data<<uint64(pGameObj->GetGUID());
             data<<uint8(0);

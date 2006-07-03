@@ -94,7 +94,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_BLOCK_SKILL = 50, obsolete?
     &Aura::HandleAuraModBlockPercent,                       //SPELL_AURA_MOD_BLOCK_PERCENT = 51,
     &Aura::HandleAuraModCritPercent,                        //SPELL_AURA_MOD_CRIT_PERCENT = 52,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_LEECH = 53,
+    &Aura::HandlePeriodicLeech,                             //SPELL_AURA_PERIODIC_LEECH = 53,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HIT_CHANCE = 54,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 55,
     &Aura::HandleAuraTransform,                             //SPELL_AURA_TRANSFORM = 56,
@@ -105,7 +105,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModScale,                              //SPELL_AURA_MOD_SCALE = 61,
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_HEALTH_FUNNEL = 62,
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_MANA_FUNNEL = 63,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_MANA_LEECH = 64,
+    &Aura::HandlePeriodicManaLeech,                         //SPELL_AURA_PERIODIC_MANA_LEECH = 64,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CASTING_SPEED = 65,
     &Aura::HandleNULL,                                      //SPELL_AURA_FEIGN_DEATH = 66,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DISARM = 67,
@@ -1658,9 +1658,41 @@ void Aura::HandleAuraModCritPercent(bool apply)
     m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier->m_amount,apply);
 }
 
+void Aura::HandlePeriodicLeech(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier->periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+
 void Aura::HandleAuraModScale(bool apply)
 {
     m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
+}
+
+void Aura::HandlePeriodicManaLeech(bool Apply)
+{
+    if(Apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier->periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
 }
 
 void Aura::HandleAuraMounted(bool apply)

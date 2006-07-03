@@ -81,6 +81,9 @@ Unit::Unit() : Object()
         m_AuraModifiers[i] = -1;
 
     m_attacking = NULL;
+
+    m_Seal.initial();
+    m_Bless.initial();
 }
 
 Unit::~Unit()
@@ -501,6 +504,52 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount);
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+    }
+    else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
+    {
+        uint32 tmpvalue = 0;
+        for(int x=0;x<3;x++)
+        {
+            if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
+                continue;
+            if(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH) - mod->m_amount > 0)
+            {
+                pVictim->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH) - mod->m_amount));
+                tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
+            }
+            else
+            {
+                tmpvalue = uint32(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH)*spellInfo->EffectMultipleValue[x]);
+                pVictim->SetUInt32Value(UNIT_FIELD_HEALTH,0);
+            }
+            break;
+        }
+        if(GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
+            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue);
+        else SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+    }
+    else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
+    {
+        uint32 tmpvalue = 0;
+        for(int x=0;x<3;x++)
+        {
+            if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
+                continue;
+            if(pVictim->GetUInt32Value(UNIT_FIELD_POWER1) - mod->m_amount > 0)
+            {
+                pVictim->SetUInt32Value(UNIT_FIELD_POWER1,uint32(pVictim->GetUInt32Value(UNIT_FIELD_POWER1) - mod->m_amount));
+                tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
+            }
+            else
+            {
+                tmpvalue = uint32(pVictim->GetUInt32Value(UNIT_FIELD_POWER1)*spellInfo->EffectMultipleValue[x]);
+                pVictim->SetUInt32Value(UNIT_FIELD_POWER1,0);
+            }
+            break;
+        }
+        if(GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue < GetUInt32Value(UNIT_FIELD_MAXPOWER1) )
+            SetUInt32Value(UNIT_FIELD_POWER1,GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue);
+        else SetUInt32Value(UNIT_FIELD_POWER1,GetUInt32Value(UNIT_FIELD_MAXPOWER1));
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
     {
