@@ -79,6 +79,44 @@ struct DamageShield
     Unit *m_caster;
 };
 
+struct PaladinAura
+{
+    uint32 m_spellId;
+    Unit *m_caster;
+    std::list<Unit*> m_unit_target[3];
+    void initial()
+    {
+        m_spellId = 0;
+        m_caster = NULL;
+        for(int i=0;i<3;i++)
+        {
+            m_unit_target[i].clear();
+        }
+    };
+};
+
+struct PaladinSeal
+{
+    uint32 m_spellId;
+    Unit *target;
+    void initial()
+    {
+        m_spellId = 0;
+        target = NULL;
+    };
+};
+
+struct PaladinBless
+{
+    uint32 m_spellId;
+    Unit *target;
+    void initial()
+    {
+        m_spellId = 0;
+        target = NULL;
+    };
+};
+
 struct ProcTriggerSpell
 {
     uint32 trigger;
@@ -396,9 +434,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool m_silenced;
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
-
-        //struct DamageManaShield* m_damageManaShield;
         std::list<struct DamageManaShield*> m_damageManaShield;
+        std::list<struct PaladinAura> m_PaladinAura;
+        PaladinSeal m_Seal;
+        PaladinBless m_Bless;
 
         Spell * m_currentSpell;
 
