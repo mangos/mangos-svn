@@ -180,13 +180,11 @@ class MANGOS_DLL_SPEC Object
 
         void ApplyPercentModUInt32Value(uint16 index, float val, bool apply)
         {   
-            ASSERT( val >= 0 );
             SetUInt32Value(index, (uint32)(GetUInt32Value(index) * (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val))) );
         }
 
         void ApplyPercentModFloatValue(uint16 index, float val, bool apply)
         { 
-            ASSERT( val >= 0 );
             SetFloatValue(index, GetFloatValue(index) * (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)) );
         }
 
