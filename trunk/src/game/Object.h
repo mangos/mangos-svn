@@ -152,45 +152,59 @@ class MANGOS_DLL_SPEC Object
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
 
-        const uint32& GetUInt32Value( const uint16 &index ) const
+        const uint32& GetUInt32Value( uint16 index ) const
         {
             ASSERT( index < m_valuesCount );
             return m_uint32Values[ index ];
         }
 
-        const uint64& GetUInt64Value( const uint16 &index ) const
+        const uint64& GetUInt64Value( uint16 index ) const
         {
             ASSERT( index + 1 < m_valuesCount );
             return *((uint64*)&(m_uint32Values[ index ]));
         }
 
-        const float& GetFloatValue( const uint16 &index ) const
+        const float& GetFloatValue( uint16 index ) const
         {
             ASSERT( index < m_valuesCount );
             return m_floatValues[ index ];
         }
 
-        void SetUInt32Value( const uint16 &index, const uint32 &value );
-
-        void SetUInt64Value( const uint16 &index, const uint64 &value );
-
-        void SetFloatValue( const uint16 &index, const float &value );
+        void SetUInt32Value( uint16 index, const uint32  value );
+        void SetUInt64Value( uint16 index, const uint64 &value );
+        void SetFloatValue(  uint16 index, const float  &value );
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
-
+        void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
         void ApplyModFloatValue( uint16 index, float val, bool apply);
 
+        void ApplyPercentModUInt32Value(uint16 index, float val, bool apply)
+        {   
+            ASSERT( val >= 0 );
+            SetUInt32Value(index, (uint32)(GetUInt32Value(index) * (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val))) );
+        }
 
-        void SetFlag( const uint16 &index, uint32 newFlag );
+        void ApplyPercentModFloatValue(uint16 index, float val, bool apply)
+        { 
+            ASSERT( val >= 0 );
+            SetFloatValue(index, GetFloatValue(index) * (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)) );
+        }
 
-        void RemoveFlag( const uint16 &index, uint32 oldFlag );
+        void SetFlag( uint16 index, uint32 newFlag );
 
-        bool GetFlag( const uint16 &index, uint32 checkFlag );
+        void RemoveFlag( uint16 index, uint32 oldFlag );
 
-        bool HasFlag( const uint16 &index, uint32 flag ) const
+        bool GetFlag( uint16 index, uint32 checkFlag );
+
+        bool HasFlag( uint16 index, uint32 flag ) const
         {
             ASSERT( index < m_valuesCount );
             return (m_uint32Values[ index ] & flag) != 0;
+        }
+
+        void ApplyModFlag( uint16 index, uint32 flag, bool apply)
+        {
+            if(apply) SetFlag(index,flag); else RemoveFlag(index,flag);
         }
 
         void ClearUpdateMask( )

@@ -733,11 +733,8 @@ void Aura::HandleModAttackSpeed(bool apply)
 {
     if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
         return;
-    int percent = m_modifier->m_amount;
-    uint32 curattcktime =  m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
-    if(apply)
-        m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime/(1+percent/100)));
-    else m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,uint32(curattcktime*(1+percent/100)));
+    
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleModThreat(bool apply)
@@ -868,23 +865,17 @@ void Aura::HandleAuraModStun(bool apply)
 
 void Aura::HandleAuraModRangedAttackPower(bool apply)
 {
-    apply ?
-        m_target->SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_target->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS) + m_modifier->m_amount) :
-    m_target->SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_target->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS) - m_modifier->m_amount);
+    m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
 {
-    uint32 percent = m_modifier->m_amount;
-    uint32 current = m_target->GetUInt32Value(UNIT_FIELD_POWER4);
-    apply ? m_target->SetUInt32Value(UNIT_FIELD_POWER4,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_POWER4,current-(current*100)/(100+percent));
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_POWER4,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 {
-    uint32 percent = m_modifier->m_amount;
-    uint32 current = m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-    apply ? m_target->SetUInt32Value(UNIT_FIELD_MAXHEALTH,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_MAXHEALTH,current-(current*100)/(100+percent));
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH,m_modifier->m_amount,apply);
 }
 
 // FIX-ME!!
@@ -1036,21 +1027,12 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
         {
             for(int8 x=0;x < 6;x++)
             {
-                index = UNIT_FIELD_RESISTANCES_01 + x;
-                m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
+                index  = UNIT_FIELD_RESISTANCES_01 + x;
+                index2 = m_modifier->m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                if(apply)
-                {
-                    m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
-                    if(m_target->GetTypeId() == TYPEID_PLAYER)
-                        m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
-                }
-                else
-                {
-                    m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
-                    if(m_target->GetTypeId() == TYPEID_PLAYER)
-                        m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
-                }
+                m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
             }
             return;
         }break;
@@ -1061,18 +1043,9 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
         }break;
     }
 
-    if(apply)
-    {
-        m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
-    }
-    else
-    {
-        m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
-    }
+    m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraSafeFall(bool apply)
@@ -1217,21 +1190,12 @@ void Aura::HandleAuraModResistance(bool apply)
         {
             for(int8 x=0;x < 6;x++)
             {
-                index = UNIT_FIELD_RESISTANCES_01 + x;
-                m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
+                index  = UNIT_FIELD_RESISTANCES_01 + x;
+                index2 = m_modifier->m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                if(apply)
-                {
-                    m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
-                    if(m_target->GetTypeId() == TYPEID_PLAYER)
-                        m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
-                }
-                else
-                {
-                    m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
-                    if(m_target->GetTypeId() == TYPEID_PLAYER)
-                        m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
-                }
+                m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
             }
             return;
         }break;
@@ -1242,18 +1206,9 @@ void Aura::HandleAuraModResistance(bool apply)
         }break;
     }
 
-    if(apply)
-    {
-        m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
-    }
-    else
-    {
-        m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
-    }
+    m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModRoot(bool apply)
@@ -1328,17 +1283,10 @@ void Aura::HandleAuraModStat(bool apply)
             index = UNIT_FIELD_STR;
             m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
             for(int x=0;x<5;x++)
-                if(apply)
             {
-                m_target->SetUInt32Value(index+x,m_target->GetUInt32Value(index+x)+m_modifier->m_amount);
+                m_target->ApplyModUInt32Value(index+x,m_modifier->m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->SetUInt32Value(index2+x,m_target->GetUInt32Value(index2+x)+m_modifier->m_amount);
-            }
-            else
-            {
-                m_target->SetUInt32Value(index+x,m_target->GetUInt32Value(index+x)-m_modifier->m_amount);
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->SetUInt32Value(index2+x,m_target->GetUInt32Value(index2+x)-m_modifier->m_amount);
+                    m_target->ApplyModUInt32Value(index2+x,m_modifier->m_amount,apply);
             }
             return;
         }break;
@@ -1348,23 +1296,11 @@ void Aura::HandleAuraModStat(bool apply)
             break;
     }
 
-    if(apply)
-    {
-        m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)+m_modifier->m_amount);
-        //if(index3)
-        //    m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? m_modifier->m_amount:-m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)+m_modifier->m_amount);
-    }
-    else
-    {
-        m_target->SetUInt32Value(index,m_target->GetUInt32Value(index)-m_modifier->m_amount);
-        //if(index3)
-        //    m_target->SetUInt32Value(index3, m_target->GetUInt32Value(index3)+(m_modifier->m_miscvalue2 == 0 ? -m_modifier->m_amount:m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15));
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            m_target->SetUInt32Value(index2,m_target->GetUInt32Value(index2)-m_modifier->m_amount);
-    }
-
+    m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+    //if(index3)
+    //    m_target->ApplyModUInt32Value(index3, (m_modifier->m_miscvalue2 == 0 ? m_modifier->m_amount:-m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15),apply);
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
@@ -1704,32 +1640,27 @@ void Aura::HandleAuraTracResources(bool apply)
 
 void Aura::HandleAuraModParryPercent(bool apply)
 {
-    float current = m_target->GetFloatValue(PLAYER_PARRY_PERCENTAGE);
-    apply ? m_target->SetFloatValue(PLAYER_PARRY_PERCENTAGE,current+m_modifier->m_amount) : m_target->SetFloatValue(PLAYER_PARRY_PERCENTAGE,current-m_modifier->m_amount);
+    m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModDodgePercent(bool apply)
 {
-    float current = m_target->GetFloatValue(PLAYER_DODGE_PERCENTAGE);
-    apply ? m_target->SetFloatValue(PLAYER_DODGE_PERCENTAGE,current+m_modifier->m_amount) : m_target->SetFloatValue(PLAYER_DODGE_PERCENTAGE,current-m_modifier->m_amount);
+    m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModBlockPercent(bool apply)
 {
-    float current = m_target->GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
-    apply ? m_target->SetFloatValue(PLAYER_BLOCK_PERCENTAGE,current+m_modifier->m_amount) : m_target->SetFloatValue(PLAYER_BLOCK_PERCENTAGE,current-m_modifier->m_amount);
+    m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModCritPercent(bool apply)
 {
-    float current = m_target->GetFloatValue(PLAYER_CRIT_PERCENTAGE);
-    apply ? m_target->SetFloatValue(PLAYER_CRIT_PERCENTAGE,current+m_modifier->m_amount) : m_target->SetFloatValue(PLAYER_CRIT_PERCENTAGE,current-m_modifier->m_amount);
+    m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleAuraModScale(bool apply)
 {
-    float current = m_target->GetFloatValue(OBJECT_FIELD_SCALE_X);
-    apply ? m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,current+current/100*10) : m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,current-current/110*100);
+    m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
 }
 
 void Aura::HandleAuraMounted(bool apply)
@@ -1758,33 +1689,33 @@ void Aura::HandleAuraMounted(bool apply)
 
 void Aura::HandleWaterBreathing(bool apply)
 {
-    apply ? m_target->waterbreath = true : m_target->waterbreath = false;
+    m_target->waterbreath = apply;
 }
 
 void Aura::HandleModBaseResistance(bool apply)
 {
     if(m_modifier->m_miscvalue == 1 || m_modifier->m_miscvalue == 127)
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier->m_amount, apply);
     if(m_modifier->m_miscvalue == 126 || m_modifier->m_miscvalue == 127)
     {
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_01, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_01) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_02, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_02) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_03, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_03) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_04, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_04) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_05, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_05) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_06, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_06) + (apply? m_modifier->m_amount : - m_modifier->m_amount) ));
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier->m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier->m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier->m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier->m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier->m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier->m_amount, apply);
     }
 }
 
 void Aura::HandleModRegen(bool apply)                       // eating
 {
-    apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
     // add event
 }
 
 void Aura::HandleModPowerRegen(bool apply)                  // drinking
 {
-    apply ? m_target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT) : m_target->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+    m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 }
 
 void Aura::HandleChannelDeathItem(bool apply)
@@ -1979,53 +1910,53 @@ void Aura::HandleModDamagePercentDone(bool apply)
 
     if(m_modifier->m_miscvalue == 1)
     {
-        m_target->SetFloatValue(UNIT_FIELD_MINDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetFloatValue(UNIT_FIELD_MAXDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MAXDAMAGE) * (apply ? (100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier->m_amount, apply );
     }
     if(m_modifier->m_miscvalue == 126)
     {
-        m_target->SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier->m_amount, apply );
     }
     if(m_modifier->m_miscvalue == 127)
     {
-        m_target->SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, (m_target->GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier->m_amount, apply );
     }
 }
 
 void Aura::HandleModPercentStat(bool apply)
 {
-    m_target->SetUInt32Value(UNIT_FIELD_MAXHEALTH, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-    m_target->SetUInt32Value(UNIT_FIELD_MAXPOWER1, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER1) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-    m_target->SetUInt32Value(UNIT_FIELD_MAXPOWER2, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-    m_target->SetUInt32Value(UNIT_FIELD_MAXPOWER3, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER3) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-    m_target->SetUInt32Value(UNIT_FIELD_MAXPOWER4, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER4) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-    m_target->SetUInt32Value(UNIT_FIELD_MAXPOWER5, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_MAXPOWER5) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH, m_modifier->m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER1, m_modifier->m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER2, m_modifier->m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER3, m_modifier->m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER4, m_modifier->m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER5, m_modifier->m_amount, apply );
     if(m_modifier->m_miscvalue == 0 || m_modifier->m_miscvalue == -1)
-        m_target->SetUInt32Value(UNIT_FIELD_STR, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_STR) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STR,     m_modifier->m_amount, apply );
     if(m_modifier->m_miscvalue == 1 || m_modifier->m_miscvalue == -1)
-        m_target->SetUInt32Value(UNIT_FIELD_AGILITY, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_AGILITY) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_AGILITY, m_modifier->m_amount, apply );
     if(m_modifier->m_miscvalue == 2 || m_modifier->m_miscvalue == -1)
-        m_target->SetUInt32Value(UNIT_FIELD_STAMINA, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_STAMINA) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STAMINA, m_modifier->m_amount, apply );
     if(m_modifier->m_miscvalue == 3 || m_modifier->m_miscvalue == -1)
-        m_target->SetUInt32Value(UNIT_FIELD_IQ, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_IQ) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_IQ,      m_modifier->m_amount, apply );
     if(m_modifier->m_miscvalue == 4 || m_modifier->m_miscvalue == -1)
-        m_target->SetUInt32Value(UNIT_FIELD_SPIRIT, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_SPIRIT) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_SPIRIT,  m_modifier->m_amount, apply );
 }
 
 void Aura::HandleModResistancePercent(bool apply)
 {
     if(m_modifier->m_miscvalue == 1 || m_modifier->m_miscvalue == 127)
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier->m_amount, apply );
     if(m_modifier->m_miscvalue == 127 || m_modifier->m_miscvalue == 126)
     {
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_01, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_01) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_02, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_02) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_03, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_03) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_04, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_04) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_05, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_05) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
-        m_target->SetUInt32Value(UNIT_FIELD_RESISTANCES_06, (uint32)(m_target->GetUInt32Value(UNIT_FIELD_RESISTANCES_06) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))) );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier->m_amount, apply );
     }
 }
 
@@ -2078,9 +2009,9 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
                 index = UNIT_FIELD_RESISTANCES_01 + x;
                 m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->SetUInt32Value(index,uint32(m_target->GetUInt32Value(index) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
+                m_target->ApplyPercentModUInt32Value(index,m_modifier->m_amount, apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->SetUInt32Value(index2,uint32(m_target->GetUInt32Value(index2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
+                    m_target->ApplyPercentModUInt32Value(index2,m_modifier->m_amount, apply);
             }
             return;
         }break;
@@ -2092,18 +2023,16 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         }break;
     }
 
-    m_target->SetUInt32Value(index,uint32(m_target->GetUInt32Value(index) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
+    m_target->ApplyPercentModUInt32Value(index,m_modifier->m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SetUInt32Value(index2,uint32(m_target->GetUInt32Value(index2) * (apply?(100.0f+m_modifier->m_amount)/100.0f : 100.0f / (100.0f+m_modifier->m_amount))));
+        m_target->ApplyPercentModUInt32Value(index2,m_modifier->m_amount,apply);
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    uint32 percent = m_modifier->m_amount;
-    uint32 current = m_target->GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1);
-    apply ? m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current+(current*percent)/100) : m_target->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,current-(current*100)/(100+percent));
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,m_modifier->m_amount, apply);
 }
 
 void Aura::SendCoolDownEvent()

@@ -680,7 +680,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CalculateReputation(Unit *pVictim);
         void CalculateReputation(Quest *pQuest, uint64 guid);
         void SetInitialFactions();
-        void UpdateReputation(void);
+        void UpdateReputation() const;
+        void SendSetFactionStanding(const Factions* faction) const;
         void UpdateMaxSkills();
         void ModifySkillBonus(uint32 skillid,int32 val);
 

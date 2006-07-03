@@ -377,7 +377,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
     }
 }
 
-void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
+void Object::SetUInt32Value( uint16 index, uint32 value )
 {
     ASSERT( index < m_valuesCount );
     m_uint32Values[ index ] = value;
@@ -394,7 +394,7 @@ void Object::SetUInt32Value( const uint16 &index, const uint32 &value )
     }
 }
 
-void Object::SetUInt64Value( const uint16 &index, const uint64 &value )
+void Object::SetUInt64Value( uint16 index, const uint64 &value )
 {
     ASSERT( index + 1 < m_valuesCount );
     m_uint32Values[ index ] = *((uint32*)&value);
@@ -413,7 +413,7 @@ void Object::SetUInt64Value( const uint16 &index, const uint64 &value )
     }
 }
 
-void Object::SetFloatValue( const uint16 &index, const float &value )
+void Object::SetFloatValue( uint16 index, const float &value )
 {
     ASSERT( index < m_valuesCount );
     m_floatValues[ index ] = value;
@@ -446,7 +446,7 @@ void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
     SetFloatValue(index,cur+(apply ? val : -val));
 }
 
-void Object::SetFlag( const uint16 &index, uint32 newFlag )
+void Object::SetFlag( uint16 index, uint32 newFlag )
 {
     ASSERT( index < m_valuesCount );
     m_uint32Values[ index ] |= newFlag;
@@ -463,13 +463,13 @@ void Object::SetFlag( const uint16 &index, uint32 newFlag )
     }
 }
 
-bool Object::GetFlag( const uint16 &index, uint32 checkFlag )
+bool Object::GetFlag( uint16 index, uint32 checkFlag )
 {
     ASSERT( index < m_valuesCount );
     return m_uint32Values[ index ] & checkFlag;
 }
 
-void Object::RemoveFlag( const uint16 &index, uint32 oldFlag )
+void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 {
     ASSERT( index < m_valuesCount );
     m_uint32Values[ index ] &= ~oldFlag;
