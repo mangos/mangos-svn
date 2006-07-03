@@ -2580,24 +2580,29 @@ void Player::setFaction(uint8 race, uint32 faction)
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
 }
 
-void Player::UpdateReputation()
+void Player::UpdateReputation() const
 {
-
-    WorldPacket data;
-    std::list<struct Factions>::iterator itr;
+    std::list<struct Factions>::const_iterator itr;
 
     sLog.outDebug( "WORLD: Player::UpdateReputation" );
 
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        if( itr->Flags & 0x00000001 )                       //If faction is visible then update it
-        {
-            data.Initialize(SMSG_SET_FACTION_STANDING);
-            data << (uint32) itr->Flags;
-            data << (uint32) itr->ReputationListID;
-            data << (uint32) itr->Standing;
-            GetSession()->SendPacket(&data);
-        }
+        SendSetFactionStanding(&*itr);
+    }
+}
+
+void Player::SendSetFactionStanding(const Factions* faction) const
+{
+    WorldPacket data;
+    
+    if(faction->Flags & 0x00000001 ) //If faction is visible then update it
+    {
+        data.Initialize(SMSG_SET_FACTION_STANDING);
+        data << (uint32) faction->Flags;
+        data << (uint32) faction->ReputationListID;
+        data << (uint32) faction->Standing;
+        GetSession()->SendPacket(&data);
     }
 }
 
@@ -2686,13 +2691,12 @@ bool Player::ModifyFactionReputation(FactionEntry* factionEntry, int32 standing)
         {
             itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
             itr->Flags = (itr->Flags | 0x00000001);
-            UpdateReputation();
+            SendSetFactionStanding(&*itr);
             return true;
         }
     }
     return false;
 }
-
 
 //Calculates how many reputation points player gains in wich victim's enemy factions
 void Player::CalculateReputation(Unit *pVictim)
@@ -3173,13 +3177,13 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->HolyRes)
     {
-        ApplyModFloatValue(UNIT_FIELD_RESISTANCES_01, proto->HolyRes, apply);
+        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_01, proto->HolyRes, apply);
         sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
     }
 
     if (proto->FireRes)
     {
-        ApplyModFloatValue(UNIT_FIELD_RESISTANCES_02, proto->FireRes, apply);
+        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_02, proto->FireRes, apply);
         sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
