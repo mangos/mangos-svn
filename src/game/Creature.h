@@ -294,7 +294,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetGossipCount( uint32 gossipid );
         void addGossipOption(GossipOption *gso) { m_goptions.push_back(gso); }
 
-        void generateLoot();
+        void generateMoneyLoot();
         void getSkinLoot();
 
         inline void setEmoteState(uint8 emote) { m_emoteState = emote; };

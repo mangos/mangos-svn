@@ -3393,58 +3393,52 @@ void Player::_ApplyAllItemMods()
 
 void Player::SendLoot(uint64 guid, uint8 loot_type)
 {
-    Player  *player = this;
     Loot    *loot;
-    uint32  lootid;
 
     if (IS_GAMEOBJECT_GUID(guid))
     {
         GameObject *go =
-            ObjectAccessor::Instance().GetGameObject(*player, guid);
+            ObjectAccessor::Instance().GetGameObject(*this, guid);
 
         if (!go)
             return;
 
         loot = &go->loot;
-        lootid =  go->lootid;
 
         if(loot->empty()) 
         {
-            go->generateLoot();
-            if(loot_type == 3)
-            {
-                uint32 zone = GetZoneId();
-                uint32 fish_lootid = 30000 + zone;
-                //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
-                go->getFishLoot(loot,fish_lootid);
-            }
+            uint32 lootid =  go->lootid;
 
-            AddQuestsLoot(loot,lootid);
+            if(lootid)
+                FillLoot(this,loot,lootid);
+
+            if(loot_type == 3)
+                go->getFishLoot(loot);
         }
     }
     else
     {
         Creature *creature =
-            ObjectAccessor::Instance().GetCreature(*player, guid);
+            ObjectAccessor::Instance().GetCreature(*this, guid);
 
         if (!creature)
             return;
 
         loot   = &creature->loot;
-        lootid = creature->GetCreatureInfo()->lootid;
 
         if(loot->empty()) 
         {
-            creature->generateLoot();
+            uint32 lootid = creature->GetCreatureInfo()->lootid;
+
+            if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                FillLoot(this,loot,lootid);
+
+            creature->generateMoneyLoot();
 
             if (loot_type == 2)
-            {
                 creature->getSkinLoot();
-                loot = &creature->loot;
-            }
-
-            AddQuestsLoot(loot,lootid);
         }
+
     }
 
     m_lootGuid = guid;
@@ -4774,14 +4768,14 @@ void Player::SetSheath( uint32 sheathed )
 {
     if (sheathed)
     {
-        Item *item=NULL;
+        Item *item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-        if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+        if (!item)
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+        
+        if (!item)
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+
         if (!item)
             return;
 
@@ -4790,21 +4784,21 @@ void Player::SetSheath( uint32 sheathed )
 
         if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
         {
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, item->GetGUIDLow());
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, itemSheathType);
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, itemProto->DisplayInfoID);
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, item->GetGUIDLow());
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, itemSheathType);
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, itemProto->DisplayInfoID);
         }
         if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
         {
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, item->GetGUIDLow());
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, itemSheathType);
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, itemProto->DisplayInfoID);
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, item->GetGUIDLow());
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, itemSheathType);
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, itemProto->DisplayInfoID);
         }
         if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
         {
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, item->GetGUIDLow());
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, itemSheathType);
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, itemProto->DisplayInfoID);
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, item->GetGUIDLow());
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, itemSheathType);
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, itemProto->DisplayInfoID);
         }
     }
     else
@@ -7499,27 +7493,24 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
     }
 }
 
-void Player::AddQuestsLoot( Loot* loot, uint32 lootid )
+bool Player::HaveQuestForItem( uint32 itemid )
 {
-    quest_status qs;
-    uint32 itemid=0;
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        qs=i->second;
+        quest_status qs=i->second;
+
         if (qs.m_status == QUEST_STATUS_INCOMPLETE)
         {
             if (!qs.m_quest) continue;
 
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
             {
-                itemid=qs.m_quest->GetQuestInfo()->ReqItemId[j];
-                if ( itemid>0 )
-                {
-                    ChangeLoot(loot,lootid,itemid,70.0f);
-                }
+                if(itemid == qs.m_quest->GetQuestInfo()->ReqItemId[j])
+                    return true;
             }
         }
     }
+    return false;
 }
 
 void Player::SendQuestComplete( Quest *pQuest )

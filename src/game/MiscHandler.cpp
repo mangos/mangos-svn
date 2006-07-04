@@ -172,7 +172,7 @@ void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
     if (GetPlayer()->GetSession()->GetSecurity() > 0)
     {
         LogoutRequest(0);
-        LogoutPlayer(1);
+        LogoutPlayer(true);
     }
 }
 

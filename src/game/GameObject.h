@@ -63,14 +63,13 @@ class MANGOS_DLL_SPEC GameObject : public Object
         void SaveToDB();
         bool LoadFromDB(uint32 guid);
         void DeleteFromDB();
-        void generateLoot();
         void SetLootState(LootState s) { m_lootState = s; }
         void SetRespawnTimer(uint32 respawn) { m_respawnTimer = respawn; }
         bool isFinished() { return m_respawnTimer == 0;}
         void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}
         uint32 GetSpellId() { return m_spellId;}
-        void getFishLoot(Loot *loot,uint32 lootid);
+        void getFishLoot(Loot *loot);
 
         LootState getLootState() { return m_lootState; }
 

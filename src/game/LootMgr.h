@@ -30,25 +30,25 @@
 using std::vector;
 using std::list;
 
+class Player;
+
 struct LootItem
 {
     uint32  itemid;
     uint32  displayid;
     float   chance;
+    float   questchance;
     bool    is_looted;
 
-    LootItem(uint32 _itemid = 0, uint32 _displayid = 0,
-        float _chance = 0, bool _isLooted = false) :
-    itemid(_itemid), displayid(_displayid),
-        chance(_chance), is_looted(_isLooted) {}
+    LootItem() 
+        : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true) {}
+
+    LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance) 
+        : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), is_looted(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
 
-    static bool not_chance_for(LootItem &itm)
-    {
-        return itm.chance <= rand_chance();
-    }
 };
 
 struct Loot
@@ -66,9 +66,8 @@ struct Loot
     bool empty() const { return items.empty() && gold == 0; }
 };
 
-void FillLoot(Loot *loot, uint32 loot_id);
+void FillLoot(Player* player,Loot *loot, uint32 loot_id);
 void FillSkinLoot(Loot *Skinloot,uint32 itemid);
-void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance);
 void LoadLootTables();
 
 typedef list<LootItem> LootItemList;
