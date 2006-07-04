@@ -34,119 +34,113 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     uint32 talent_id, requested_rank;
     recv_data >> talent_id >> requested_rank;
 
-    TalentEntry *talentInfo = sTalentStore.LookupEntry( talent_id );
-
     uint32 CurTalentPoints =  GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS1);
     if(CurTalentPoints == 0)
-    {
+        return;
 
-    }
-    else
+    if (requested_rank > 4)
+        return;
+
+
+    TalentEntry *talentInfo = sTalentStore.LookupEntry( talent_id );
+
+    Player * player = GetPlayer();
+
+    // Check if it requires another talent
+    if (talentInfo->DependsOn > 0)
     {
-        if (requested_rank > 4)
+        TalentEntry *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
+        bool hasEnoughRank = false;
+        for (int i = talentInfo->DependsOnRank; i <= 4; i++)
         {
+            if (depTalentInfo->RankID[i] != 0)
+                if (player->HasSpell(depTalentInfo->RankID[i]))
+                    hasEnoughRank = true;
+        }
+        if (!hasEnoughRank)
             return;
-        }
+    }
 
-        Player * player = GetPlayer();
+    // Find out how many points we have in this field
+    int spentPoints = 0;
 
-        // Check if it requires another talent
-        if (talentInfo->DependsOn > 0)
+    int tTree = talentInfo->TalentTree;
+    if (talentInfo->Row > 0)
+    {
+        unsigned int numRows = sTalentStore.GetNumRows();
+        for (unsigned int i = 0; i < numRows; i++)      // Loop through all talents.
         {
-            TalentEntry *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
-            bool hasEnoughRank = false;
-            for (int i = talentInfo->DependsOnRank; i <= 4; i++)
+                                                        // Someday, someone needs to revamp
+            TalentEntry *tmpTalent = sTalentStore.data[i];
+            if (tmpTalent)                              // the way talents are tracked
             {
-                if (depTalentInfo->RankID[i] != 0)
-                    if (player->HasSpell(depTalentInfo->RankID[i]))
-                        hasEnoughRank = true;
-            }
-            if (!hasEnoughRank)
-                return;
-        }
-
-        // Find out how many points we have in this field
-        int spentPoints = 0;
-
-        int tTree = talentInfo->TalentTree;
-
-        if (talentInfo->Row > 0)
-        {
-            unsigned int numRows = sTalentStore.GetNumRows();
-            for (unsigned int i = 0; i < numRows; i++)      // Loop through all talents.
-            {
-                                                            // Someday, someone needs to revamp
-                TalentEntry *tmpTalent = sTalentStore.data[i];
-                if (tmpTalent)                              // the way talents are tracked
+                if (tmpTalent->TalentTree == tTree)
                 {
-                    if (tmpTalent->TalentTree == tTree)
+                    for (int j = 0; j <= 4; j++)
                     {
-                        for (int j = 0; j <= 4; j++)
+                        if (tmpTalent->RankID[j] != 0)
                         {
-                            if (tmpTalent->RankID[j] != 0)
+                            if (player->HasSpell(tmpTalent->RankID[j]))
                             {
-                                if (player->HasSpell(tmpTalent->RankID[j]))
-                                {
-                                    spentPoints += j + 1;
-                                }
+                                spentPoints += j + 1;
                             }
                         }
                     }
                 }
             }
         }
+    }
 
-        uint32 spellid = talentInfo->RankID[requested_rank];
-        if( spellid == 0 )
+    uint32 spellid = talentInfo->RankID[requested_rank];
+    if( spellid == 0 )
+    {
+        sLog.outDetail("Talent: %u Rank: %u = 0", talent_id, requested_rank);
+    }
+    else
+    {
+        if(spentPoints < (talentInfo->Row * 5))         // Min points spent
         {
-            sLog.outDetail("Talent: %u Rank: %u = 0", talent_id, requested_rank);
+            return;
         }
-        else
+
+        if(!(GetPlayer( )->HasSpell(spellid)))
         {
-            if(spentPoints < (talentInfo->Row * 5))         // Min points spent
+
+            data.Initialize(SMSG_LEARNED_SPELL);
+            sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
+            data << spellid;
+            GetPlayer( )->GetSession()->SendPacket(&data);
+            GetPlayer( )->addSpell((uint16)spellid,1);
+
+            SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
+            if(spellInfo)
             {
-                return;
-            }
-
-            if(!(GetPlayer( )->HasSpell(spellid)))
-            {
-
-                data.Initialize(SMSG_LEARNED_SPELL);
-                sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
-                data << spellid;
-                GetPlayer( )->GetSession()->SendPacket(&data);
-                GetPlayer( )->addSpell((uint16)spellid,1);
-
-                SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
-                if(spellInfo)
+                for(uint32 i = 0;i<3;i++)
                 {
-                    for(uint32 i = 0;i<3;i++)
-                    {
-                        uint8 eff = spellInfo->Effect[i];
-                        if (eff>=TOTAL_SPELL_EFFECTS)
-                            continue;
+                    uint8 eff = spellInfo->Effect[i];
+                    if (eff>=TOTAL_SPELL_EFFECTS)
+                        continue;
 
-                        // Duration 21 = permanent
-                        if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
-                        {
-                            Aura *Aur = new Aura(spellInfo, i, NULL, GetPlayer());
-                            GetPlayer()->AddAura(Aur);
-                        }
+                    // Duration 21 = permanent
+                    if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
+                    {
+                        Aura *Aur = new Aura(spellInfo, i, NULL, GetPlayer());
+                        GetPlayer()->AddAura(Aur);
                     }
                 }
-
-                if(requested_rank > 0 )
-                {
-                    uint32 respellid = talentInfo->RankID[requested_rank-1];
-                    data.Initialize(SMSG_REMOVED_SPELL);
-                    data << respellid;
-                    GetPlayer( )->GetSession()->SendPacket(&data);
-                    GetPlayer( )->removeSpell((uint16)respellid);
-
-                    GetPlayer()->RemoveAurasDueToSpell(respellid);
-                }
-                GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
             }
+
+            if(requested_rank > 0 )
+            {
+                uint32 respellid = talentInfo->RankID[requested_rank-1];
+                data.Initialize(SMSG_REMOVED_SPELL);
+                data << respellid;
+                GetPlayer( )->GetSession()->SendPacket(&data);
+                GetPlayer( )->removeSpell((uint16)respellid);
+
+                GetPlayer()->RemoveAurasDueToSpell(respellid);
+            }
+            GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
         }
     }
 }
