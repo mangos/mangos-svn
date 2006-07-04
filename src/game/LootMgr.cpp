@@ -65,6 +65,9 @@ void LoadLootTables()
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
+            if( chance == 0 && questchance == 0 )
+                sLog.outError("Item #%u have in chance and questchance fields value 0 in `loot_template` DB table . It can be succesfully looted.",entry);
+
             LootTemplates[entry].push_back( LootItem(item, displayid, chance, questchance) );
 
             count++;
@@ -75,6 +78,8 @@ void LoadLootTables()
         sLog.outString( "" );
         sLog.outString( ">> Loaded %u loot definitions", count );
     }
+    else
+        sLog.outError("\n>> Loaded 0 loot definitions. DB table `loot_template` have incompatible structure or empty.");
 }
 
 struct NotChanceFor
