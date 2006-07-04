@@ -185,9 +185,9 @@ void Weather::ReGenerate()
 
     uint32 chance1, chance2, chance3;
     Field *fields = result->Fetch();
-    chance1 = fields[season+1].GetUInt32();
-    chance2 = fields[season+2].GetUInt32();
-    chance3 = fields[season+3].GetUInt32();
+    chance1 = fields[season * 3 + 1].GetUInt32();
+    chance2 = fields[season * 3 + 2].GetUInt32();
+    chance3 = fields[season * 3 + 3].GetUInt32();
     delete result;
     if(chance1 > 100)
         chance1 =25;
