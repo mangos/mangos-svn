@@ -618,18 +618,8 @@ bool Creature::hasInvolvedQuest(uint32 quest_id)
     return false;
 }
 
-void Creature::generateLoot()
+void Creature::generateMoneyLoot()
 {
-    //DO NOT GENERATE LOOT IF IT'S NOT SPECIFIED!
-    //ESPECIALLY USING RND, IT'S COMPLETELY WRONG
-    //Looit is used as goods id for vendors
-    //they have no loot but have items to trade
-
-    uint32 lootid = GetCreatureInfo()->lootid;
-
-    if (!HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-        FillLoot(&loot, lootid);
-
     if (GetCreatureInfo()->maxgold > 0)
     {
         uint32 diff = GetCreatureInfo()->maxgold - GetCreatureInfo()->mingold + 1;
@@ -646,7 +636,6 @@ void Creature::generateLoot()
             loot.gold = rand() % diff + GetCreatureInfo()->mingold;
         }
     }
-
 }
 
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, bool WalkBack)

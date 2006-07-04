@@ -44,8 +44,9 @@ void LoadLootTables()
     uint32 item, displayid, entry;
     uint32 count = 0;
     float chance;
+    float questchance;
 
-    QueryResult *result = sDatabase.Query("SELECT `entry`, `item`, `chance` FROM `loot_template`;");
+    QueryResult *result = sDatabase.Query("SELECT `entry`, `item`, `chance`, `questchance` FROM `loot_template`;");
 
     if (result)
     {
@@ -58,12 +59,13 @@ void LoadLootTables()
             entry = fields[0].GetUInt32();
             item = fields[1].GetUInt32();;
             chance = fields[2].GetFloat();
+            questchance = fields[3].GetFloat();
 
             ItemPrototype *proto = objmgr.GetItemPrototype(item);
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
-            LootTemplates[entry].push_back( LootItem(item, displayid, chance) );
+            LootTemplates[entry].push_back( LootItem(item, displayid, chance, questchance) );
 
             count++;
         } while (result->NextRow());
@@ -75,7 +77,24 @@ void LoadLootTables()
     }
 }
 
-void FillLoot(Loot *loot, uint32 loot_id)
+struct NotChanceFor
+{
+    Player* m_player;
+
+    explicit NotChanceFor(Player* _player) : m_player(_player) {}
+
+    bool operator() ( LootItem &itm )
+    {
+        if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
+        {
+            return itm.questchance <= rand_chance();
+        }
+        else
+            return itm.chance <= rand_chance();
+    }
+};
+
+void FillLoot(Player* player, Loot *loot, uint32 loot_id)
 {
     LootStore::iterator tab;
 
@@ -87,9 +106,11 @@ void FillLoot(Loot *loot, uint32 loot_id)
 
     vector <LootItem>::iterator new_end;
     loot->items.resize(tab->second.size());
+
     // fill loot with items that have a chance
-    new_end = remove_copy_if(tab->second.begin(), tab->second.end(), loot->items.begin(),
-        LootItem::not_chance_for);
+    NotChanceFor not_chance_for(player);
+
+    new_end = remove_copy_if(tab->second.begin(), tab->second.end(), loot->items.begin(),not_chance_for);
     loot->items.erase(new_end, loot->items.end());
 }
 
@@ -98,24 +119,6 @@ void FillSkinLoot(Loot *Skinloot,uint32 itemid)
     //Skinloot->items.clear();
     ItemPrototype *proto = objmgr.GetItemPrototype(itemid);
     uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
-    Skinloot->items.push_back(LootItem(itemid,displayid,99));
+    Skinloot->items.push_back(LootItem(itemid,displayid,99,0));
 }
 
-void ChangeLoot(Loot * loot,uint32 loot_id,uint32 itemid, float chance)
-{
-    LootStore::iterator tab = LootTemplates.find(loot_id);
-    if( LootTemplates.end() == tab )return;
-
-    for(LootItemList::iterator iter = tab->second.begin(); iter!=tab->second.end(); ++iter )
-    {
-        if( (*iter).itemid == itemid && rand_chance() < chance )
-        {
-            LootItem itm;
-            itm.itemid = itemid;
-            itm.displayid = (*iter).displayid;
-            itm.is_looted =false;
-            itm.chance=chance;
-            loot->items.push_back(itm);
-        }
-    }
-}
