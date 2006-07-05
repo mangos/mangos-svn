@@ -421,13 +421,6 @@ void Aura::_AddAura()
                 }
             }
         }
-        // only remove icon when the last aura of the spell is removed
-        for(int i = 0; i < 3; i++)
-        {
-            aura = m_target->GetAura(m_spellId, i);
-            if(aura && i != m_effIndex)
-                return;
-        }
 
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
@@ -461,6 +454,14 @@ void Aura::_RemoveAura()
 
     if(m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + slot)) == 0)
         return;
+
+    // only remove icon when the last aura of the spell is removed
+    for(int i = 0; i < 3; i++)
+    {
+        aura = m_target->GetAura(m_spellId, i);
+        if(aura && i != m_effIndex)
+            return;
+    }
 
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
 
