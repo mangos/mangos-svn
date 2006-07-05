@@ -82,8 +82,6 @@ Unit::Unit() : Object()
 
     m_attacking = NULL;
 
-    m_Seal.initial();
-    m_Bless.initial();
 }
 
 Unit::~Unit()
@@ -1086,6 +1084,12 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     else
     {
+        if (!RemoveNoStackAurasDueToAura(Aur))
+        {
+            delete Aur;
+            return false; // couldnt remove conflicting aura with higher rank
+        }
+
         Aur->_AddAura();
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount + 1);
@@ -1114,9 +1118,73 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
                     break;
                 else
                     next =  m_Auras.begin();
+            }
         }
     }
 }
+
+bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
+{
+    if (!Aur) 
+        return false;
+    if (!Aur->GetSpellProto()) return false;
+    uint32 spellId = Aur->GetId(); 
+    uint32 effIndex = Aur->GetEffIndex();
+    bool is_sec = IsSpellSingleEffectPerCaster(spellId);
+    AuraMap::iterator i,next;
+    for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
+    {
+        next = i;
+        next++;
+        if (!(*i).second) continue;
+        if (!(*i).second->GetSpellProto()) continue;
+
+        uint32 i_spellId = (*i).second->GetId();
+        uint32 i_effIndex = (*i).second->GetEffIndex();
+        if(i_spellId != spellId)
+        {
+            bool sec_match = false;
+            if (is_sec && IsSpellSingleEffectPerCaster(i_spellId))
+                if (Aur->GetCaster() == (*i).second->GetCaster())
+                    if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
+                        sec_match = true;
+            
+            if(IsNoStackSpellDueToSpell(spellId, i_spellId) || sec_match)
+            {
+                // if sec_match this isnt always true, needs to be rechecked
+                for(int x=0;x<8;x++)
+                if(Aur->GetSpellProto()->SpellNameIndex[x] != (*i).second->GetSpellProto()->SpellNameIndex[x])
+                    return false;
+                if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
+                    return false; // cannot remove higher rank
+                
+                RemoveAurasDueToSpell(i_spellId);
+
+                if( m_Auras.empty() )
+                    break;
+                else
+                    next =  m_Auras.begin();
+            }
+            else // Potions stack aura by aura
+            if (Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
+                (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION)
+            {
+                if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
+                {
+                    if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
+                    return false; // cannot remove higher rank
+                    
+                    RemoveAura(i);
+
+                    if( m_Auras.empty() )
+                        break;
+                    else
+                        next =  m_Auras.begin();
+                }
+            }
+        }
+    }
+    return true;
 }
 
 void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)

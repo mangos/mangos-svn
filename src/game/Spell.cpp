@@ -483,46 +483,6 @@ void Spell::cast()
         std::list<GameObject*>::iterator igo;
 
         bool needspelllog = true;
-        if(m_spellInfo->Attributes == 0x9050000 && m_caster->getClass() == CLASS_PALADIN && m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            for(std::list<struct PaladinAura>::iterator i = m_caster->m_PaladinAura.begin();i != m_caster->m_PaladinAura.end();i++)
-            if(i->m_caster == m_caster)
-            {
-                std::list<Unit*>::iterator punit;
-                for(int j = 0;j<3;j++)
-                for(punit= (i->m_unit_target[j]).begin();punit!= (i->m_unit_target[j]).end();punit++)
-                {
-                    if((*punit))
-                        (*punit)->RemoveAura(i->m_spellId,j);
-                }
-            }
-            PaladinAura *pPaladinAura = new PaladinAura();
-            pPaladinAura->m_caster = m_caster;
-            pPaladinAura->m_spellId = m_spellInfo->Id;
-            for(int j = 0;j<3;j++)
-                pPaladinAura->m_unit_target[j].clear();
-            for(int j = 0;j<3;j++)
-                pPaladinAura->m_unit_target[j] = m_targetUnits[j];
-            m_caster->m_PaladinAura.push_back(*pPaladinAura);
-        }
-        if(m_spellInfo->Attributes == 0x50000 && m_caster->getClass() == CLASS_PALADIN && m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(m_spellInfo->AttributesEx == 0 && m_spellInfo->EffectImplicitTargetA[0] == 1)
-            {
-                if(m_caster->m_Seal.m_spellId && m_caster->m_Seal.target)
-                    m_caster->m_Seal.target->RemoveAurasDueToSpell(m_caster->m_Seal.m_spellId);
-                m_caster->m_Seal.target = m_targets.getUnitTarget();
-                m_caster->m_Seal.m_spellId = m_spellInfo->Id;
-            }
-            else if(m_spellInfo->EffectImplicitTargetA[0] == 21 || m_spellInfo->EffectImplicitTargetA[0] == 57)
-            {
-                if(m_caster->m_Bless.m_spellId && m_caster->m_Bless.target)
-                    m_caster->m_Bless.target->RemoveAurasDueToSpell(m_caster->m_Bless.m_spellId);
-                m_caster->m_Bless.target = m_targets.getUnitTarget();
-                m_caster->m_Bless.m_spellId = m_spellInfo->Id;
-            }
-        }
-
         for(uint32 j = 0;j<3;j++)
         {
                                                             // Dont do spell log, if is school damage spell

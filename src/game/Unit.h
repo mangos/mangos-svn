@@ -79,44 +79,6 @@ struct DamageShield
     Unit *m_caster;
 };
 
-struct PaladinAura
-{
-    uint32 m_spellId;
-    Unit *m_caster;
-    std::list<Unit*> m_unit_target[3];
-    void initial()
-    {
-        m_spellId = 0;
-        m_caster = NULL;
-        for(int i=0;i<3;i++)
-        {
-            m_unit_target[i].clear();
-        }
-    };
-};
-
-struct PaladinSeal
-{
-    uint32 m_spellId;
-    Unit *target;
-    void initial()
-    {
-        m_spellId = 0;
-        target = NULL;
-    };
-};
-
-struct PaladinBless
-{
-    uint32 m_spellId;
-    Unit *target;
-    void initial()
-    {
-        m_spellId = 0;
-        target = NULL;
-    };
-};
-
 struct ProcTriggerSpell
 {
     uint32 trigger;
@@ -189,10 +151,11 @@ enum ImmuneToMechanic
     IMMUNE_MECHANIC_INVULNERABILITY  =25,
     IMMUNE_MECHANIC_UNKOWN26         =26
 };
+
 enum ImmuneToDispel
 {
     IMMUNE_DISPEL_MAGIC        =1,
-    IMMUNE_DISPEL_UNKNOWN      =2,
+    IMMUNE_DISPEL_CURSE        =2,
     IMMUNE_DISPEL_DISEASE      =3,
     IMMUNE_DISPEL_POISON       =4,
     IMMUNE_DISPEL_STEALTH      =5,
@@ -397,6 +360,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveAurasDueToSpell(uint32 spellId);
         void RemoveSpellsCausingAura(uint32 auraType);
         void RemoveRankAurasDueToSpell(uint32 spellId);
+        bool RemoveNoStackAurasDueToAura(Aura *Aur);
 
         void RemoveAllAuras();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
@@ -435,9 +399,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
-        std::list<struct PaladinAura> m_PaladinAura;
-        PaladinSeal m_Seal;
-        PaladinBless m_Bless;
 
         Spell * m_currentSpell;
 

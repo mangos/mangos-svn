@@ -69,6 +69,7 @@ enum Targets
     TARGET_DY_OBJ       = 47,                               //DynamicObject
     TARGET_AE_SELECTED  = 53,
     TARGET_S_F_2        = 57,                               //single friend
+    TARGET_AF_PC        = 61,                               //areaeffect same party & class
 };
 
 enum SpellCastFlags
