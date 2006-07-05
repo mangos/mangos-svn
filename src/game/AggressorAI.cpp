@@ -46,9 +46,13 @@ AggressorAI::MoveInLineOfSight(Unit *u)
 {
     if( i_creature.getVictim() == NULL && u->isTargetableForAttack() )
     {
-        FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-        if( i_myFaction.IsHostileTo( your_faction ) )
-            AttackStart(u);
+        float attackRadius = i_creature.GetAttackDistance(u);
+        if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
+        {
+            FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+            if( i_myFaction.IsHostileTo( your_faction ) )
+                AttackStart(u);
+        }
     }
 }
 
