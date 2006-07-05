@@ -100,7 +100,7 @@ class MANGOS_DLL_SPEC GossipMenu
         void AddMenuItem(uint8 Icon, char const * Message, bool Coded = false);
         void AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
 
-        uint8 MenuItemCount()
+        unsigned int MenuItemCount()
         {
             return m_gItemsCount;
         }
@@ -116,7 +116,7 @@ class MANGOS_DLL_SPEC GossipMenu
         void ClearMenu();
 
     protected:
-        int m_gItemsCount;
+        unsigned int m_gItemsCount;
         GossipMenuItem m_gItems[GOSSIP_MAX_MENU_ITEMS];
 };
 

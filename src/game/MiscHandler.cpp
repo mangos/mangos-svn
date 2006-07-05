@@ -39,7 +39,7 @@
 
 void my_esc( char * r, const char * s )
 {
-    int n = strlen( s ), i, j;
+    int i, j;
     for ( i = 0, j = 0; s[i]; i++ )
     {
         if ( s[i] == '"' || s[i] == '\\' || s[i] == '\'' ) r[j++] = '\\';
@@ -61,8 +61,8 @@ extern int num_item_prototypes;
 void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 {
     uint32 clientcount = 0;
-    int datalen = 8;
-    int countcheck = 0;
+    size_t datalen = 8;
+    uint32 countcheck = 0;
     WorldPacket data;
 
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
@@ -679,7 +679,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
         data << (uint8)ignoreResult << (uint64)IgnoreGuid;
 
-        QueryResult *result = sDatabase.PQuery("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE');", (uint32)guid, IgnoreName.c_str(), (uint32)IgnoreGuid);
+        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE');", guid, IgnoreName.c_str(), IgnoreGuid);
 
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)

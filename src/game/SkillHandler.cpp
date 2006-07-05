@@ -62,9 +62,9 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     }
 
     // Find out how many points we have in this field
-    int spentPoints = 0;
+    uint32 spentPoints = 0;
 
-    int tTree = talentInfo->TalentTree;
+    uint32 tTree = talentInfo->TalentTree;
     if (talentInfo->Row > 0)
     {
         unsigned int numRows = sTalentStore.GetNumRows();

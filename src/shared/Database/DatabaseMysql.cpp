@@ -46,7 +46,6 @@ bool DatabaseMysql::Initialize(const char *infoString)
     }
 
     vector<string> tokens = StrSplit(infoString, ";");
-    std::string params[5] = { "", "", "", "", "" };
 
     vector<string>::iterator iter;
 

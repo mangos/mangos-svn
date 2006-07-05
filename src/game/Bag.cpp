@@ -95,7 +95,7 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 {
     if(!Item::LoadFromDB(guid, auctioncheck))
         return false;
-    for (int i = 0; i < GetProto()->ContainerSlots; i++)
+    for (uint32 i = 0; i < GetProto()->ContainerSlots; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
         if (m_bagslot[i])

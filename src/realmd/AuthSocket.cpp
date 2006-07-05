@@ -76,7 +76,7 @@ void AuthSocket::OnRead()
             return;
 
         ibuf.SoftRead((char *)&_cmd, 1);
-        int i;
+        size_t i;
 
         for (i=0;i<AUTH_TOTAL_COMMANDS; i++)
         {

@@ -40,11 +40,11 @@
 #include "Policies/SingletonImp.h"
 
 Creature::Creature() :
-Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
-m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
-itemcount(0), mTaxiNode(0), m_regenTimer(2000),
-m_moveBackward(false), m_moveRandom(false), m_moveRun(false),
-m_faction(0),m_emoteState(0),m_isPet(false)
+    Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
+    m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
+    itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false), 
+    m_moveRun(false), m_faction(0), m_emoteState(0), m_isPet(false), 
+    m_regenTimer(2000)
 {
     m_valuesCount = UNIT_END;
 

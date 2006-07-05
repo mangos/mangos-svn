@@ -221,7 +221,7 @@ void World::SetInitialWorldSettings()
 
     new ChannelMgr;
 
-    const int DBCFilesCount = 15;
+    const uint32 DBCFilesCount = 15;
 
     sLog.outString("Initialize data stores...");
     barGoLink bar( DBCFilesCount );
@@ -415,7 +415,9 @@ void World::SetInitialWorldSettings()
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     // need good tests on windows
-    uint32 m_CorpsesEventID = AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
+    
+    //uint32 m_CorpsesEventID = 
+    AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
 }
 
 void World::Update(time_t diff)

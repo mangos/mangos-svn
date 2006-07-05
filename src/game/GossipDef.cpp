@@ -73,7 +73,7 @@ uint32 GossipMenu::MenuItemAction( unsigned int ItemId )
 
 void GossipMenu::ClearMenu()
 {
-    for (int i=0; i<m_gItemsCount; i++)
+    for (unsigned int i=0; i<m_gItemsCount; i++)
         delete m_gItems[i].m_gMessage;
 
     m_gItemsCount = 0;
@@ -443,7 +443,7 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
     {
         data << uint32( EmoteCnt );
 
-        for (int iI = 0; iI < EmoteCnt; iI++ )
+        for (unsigned int iI = 0; iI < EmoteCnt; iI++ )
         {
             data << Emotes[iI]._Delay;
             data << Emotes[iI]._Emote;

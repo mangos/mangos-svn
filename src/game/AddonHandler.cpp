@@ -101,7 +101,6 @@ void AddonHandler::_LoadFromDB()
 bool AddonHandler::GetAddonStatus(AddOns* Target, bool* Allowed)
 {
     //sLog.outDebug("Get Addon Status");
-    uint8 state = 0;
     for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
     {
         if (!strcmp((*i)->Name.c_str(), Target->Name.c_str()))
@@ -132,7 +131,6 @@ void AddonHandler::BuildAddonPacket(WorldPacket* Source, WorldPacket* Target, ui
     {
         bool* AddonAllowed = new bool;                      //handle addon check and enable-ing
 
-        uint32 NumberofAddons = 0;
         uint32 Unknown1;
         uint8 Unknown0;
 

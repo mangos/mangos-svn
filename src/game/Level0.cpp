@@ -64,7 +64,6 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
-    ChatCommand *table = getCommandTable();
     WorldPacket data;
 
     if(!*args)

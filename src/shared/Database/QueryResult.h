@@ -33,7 +33,7 @@ class QueryResult
 
         const Field & operator [] (int index) const { return mCurrentRow[index]; }
 
-        int GetFieldCount() const { return mFieldCount; }
+        uint32 GetFieldCount() const { return mFieldCount; }
 
         uint64 GetRowCount() const { return mRowCount; }
 

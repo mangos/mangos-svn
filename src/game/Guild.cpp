@@ -382,7 +382,7 @@ std::string Guild::GetRankName(uint32 rankId)
     std::list<RankInfo*>::iterator itr;
 
     if(rankId > ranks.size()-1) return NULL;
-    int i=0;
+    uint32 i=0;
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     {
         if (i == rankId)
@@ -397,7 +397,7 @@ uint32 Guild::GetRankRights(uint32 rankId)
     std::list<RankInfo*>::iterator itr;
 
     if(rankId > ranks.size()-1) return 0;
-    int i=0;
+    uint32 i=0;
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     {
         if (i == rankId)
@@ -412,7 +412,7 @@ void Guild::SetRankName(uint32 rankId, std::string name)
     std::list<RankInfo*>::iterator itr;
 
     if(rankId > ranks.size()-1) return;
-    int i=0;
+    uint32 i=0;
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     {
         if (i == rankId)
@@ -429,7 +429,7 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
     std::list<RankInfo*>::iterator itr;
 
     if(rankId > ranks.size()-1) return;
-    int i=0;
+    uint32 i=0;
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     {
         if (i == rankId)

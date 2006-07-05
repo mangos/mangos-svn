@@ -76,8 +76,6 @@ void Channel::Leave(Player *p, bool send)
     }
     else
     {
-        bool changeowner = (owner == p);
-
         MakeYouLeft(&data);
         if(send)
         {
@@ -377,7 +375,6 @@ void Channel::Say(Player *p, const char *what)
     else
     {
         uint32 messageLength = strlen((char*)what) + 1;
-        uint8 afk = 0;
 
         data.Initialize(SMSG_MESSAGECHAT);
         data << (uint8)14;

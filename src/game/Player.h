@@ -690,8 +690,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         void UpdateHonor();
         void CalculateHonor(Unit *pVictim);
-        int  CalculateHonorRank(float honor);
-        int GetHonorRank();
+        uint32 CalculateHonorRank(float honor);
+        uint32 GetHonorRank();
         int  CalculateTotalKills(Player *pVictim);
         //Acessors of total honor points
         void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };

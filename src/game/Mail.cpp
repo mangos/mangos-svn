@@ -344,8 +344,6 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
     //    int i;
     uint32 realID = GetItemGuidFromDisplayID(itemid, _player);
     char const *itemInfo;
-    bool resist_added = false;
-    bool names_added = false;
 
     if (realID < 0)
     {
@@ -446,8 +444,6 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
     sLog.outString("HandleMailCreateTextItem unk1=%u,unk2=%u,mailid=%u",unk1,unk2,mailid);
 
-    uint32 sbit2=5;
-    bool   slotfree=false;
     WorldPacket Data;
 
     Item *item = new Item();

@@ -465,7 +465,7 @@ class Spell
         // -------------------------------------------
 
         uint32 m_spellState;
-        int32 m_timer;
+        uint32 m_timer;
         SpellEntry * m_TriggerSpell;
 
         float m_castPositionX;

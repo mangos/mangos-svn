@@ -119,7 +119,12 @@ class Aura
         void HandleAuraModBaseResistancePCT(bool Apply);
         void HandleRangedAmmoHaste(bool Apply);
 
-        Aura() : m_procSpell(NULL), m_modifier(NULL), m_spellId(0), m_effIndex(0xFFFF), m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0xFF), m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false) {}
+        Aura() : 
+            m_procSpell(NULL), m_modifier(NULL), m_spellId(0), m_effIndex(0xFFFF), 
+            m_caster(NULL), m_target(NULL), m_duration(0), m_auraSlot(0xFF), m_positive(false), 
+            m_permanent(false), m_isPeriodic(false), m_isTrigger(false),
+            m_periodicTimer(0), m_PeriodicEventId(0) {}
+
         Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target);
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);

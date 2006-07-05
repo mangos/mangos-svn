@@ -1287,7 +1287,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
             return true;
         }
         std::string reply="Valid locations are:";
-        for (int i=0; i<result->GetRowCount(); i++)
+        for (uint64 i=0; i < result->GetRowCount(); i++)
         {
             Field *fields = result->Fetch();
             reply += " ";

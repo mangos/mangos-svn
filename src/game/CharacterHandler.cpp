@@ -482,7 +482,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     data.Initialize(SMSG_INITIALIZE_FACTIONS);
     data << uint32 (0x00000040);
-    for(int a=0; a<64; a++)
+    for(uint32 a=0; a<64; a++)
     {
         if(GetPlayer()->FactionIsInTheList(a))
         {

@@ -202,8 +202,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
-m_spellId(spellproto->Id), m_caster(caster), m_target(target), m_effIndex(eff),
-m_auraSlot(0),m_positive(false), m_permanent(false),  m_isPeriodic(false), m_procSpell(NULL),  m_isTrigger(false)
+    m_procSpell(NULL), m_modifier(NULL), m_spellId(spellproto->Id), m_effIndex(eff), 
+    m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),  
+    m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -431,8 +432,6 @@ void Aura::_AddAura()
         value |= ((uint32)AFLAG_SET << value1);
 
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
-
-        uint8 appslot = slot >> 1;
     }
 
     SetAuraSlot( slot );
@@ -456,7 +455,7 @@ void Aura::_RemoveAura()
         return;
 
     // only remove icon when the last aura of the spell is removed
-    for(int i = 0; i < 3; i++)
+    for(uint32 i = 0; i < 3; i++)
     {
         aura = m_target->GetAura(m_spellId, i);
         if(aura && i != m_effIndex)
