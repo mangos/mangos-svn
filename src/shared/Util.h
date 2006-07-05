@@ -24,12 +24,12 @@
 std::vector<std::string> StrSplit(const std::string &src, const std::string &sep);
 
 
-// return random float from 00.000 to 99.999 (100000 variants)
+// return random float from 00.000000 to 99.999999 (100000000 variants)
 inline float rand_chance() { 
     // rand() result range is 0..RAND_MAX where RAND_MAX is implementation define (at 32-bit OS in most case RAND_MAX = 32767)
-    // this is small number for chances writed like xx.xxx (100000 cases)
-    // using combined 2 call rand() instead: xx.yyy
-    return float(rand() % 100) + float(rand() % 1000)/1000.0;
+    // this is small number for chances writed like xx.xxxxxx (100000000 cases)
+    // using combined 2 call rand() instead: xx.xxyyyy
+    return float(rand() % 10000)/100.0 + float(rand() % 10000)/1000000.0;
 }
 
 #endif
