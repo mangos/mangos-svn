@@ -68,7 +68,7 @@ void LoadLootTables()
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
-            if( chance < 0.001 && questchance < 0.001 )
+            if( chance < 0.000001 && questchance < 0.000001 )
                 ssNonLootableItems << "loot entry = " << entry << " item = " << item << "\n";
 
             LootTemplates[entry].push_back( LootItem(item, displayid, chance, questchance) );
@@ -80,7 +80,7 @@ void LoadLootTables()
 
         sLog.outString( "\n>> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outError("\nSome items can't be succesfully looted: have in chance and questchance fields value < 0.001 in `loot_template` DB table . List:\n%s",ssNonLootableItems.str().c_str());
+            sLog.outError("\nSome items can't be succesfully looted: have in chance and questchance fields value < 0.000001 in `loot_template` DB table . List:\n%s",ssNonLootableItems.str().c_str());
     }
     else
         sLog.outError("\n>> Loaded 0 loot definitions. DB table `loot_template` have incompatible structure or empty.");
