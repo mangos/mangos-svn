@@ -2371,6 +2371,19 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
 
 }
 
+bool Player::HasSkill(uint32 skill) const
+{
+    if(!skill)return false;
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if (GetUInt32Value(PLAYER_SKILL(i)) == skill)
+        {
+			return true;
+		}
+	}
+	return false;
+}
+
 uint16 Player::GetSkillValue(uint32 skill) const
 {
     if(!skill)return 0;

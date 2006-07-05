@@ -665,6 +665,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
         uint16 GetSkillValue(uint32 skill) const;
+		bool HasSkill(uint32 skill) const;
 
         void SetDontMove(bool dontMove);
         bool GetDontMove() const { return m_dontMove; }
