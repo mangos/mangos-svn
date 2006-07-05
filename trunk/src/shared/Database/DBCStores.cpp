@@ -241,13 +241,13 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         if (spellInfo->SpellVisual == 5622)
             return SPELL_SEAL;
 
-        for (int i = 0; i < 3; i)
+        for (int i = 0; i < 3; i++)
         {
             // only paladin auras have this
             if (spellInfo->Effect[i] == 35)//SPELL_EFFECT_APPLY_AREA_AURA 
                 return SPELL_AURA;
             // only paladin blessings / greater blessings have this
-            if (spellInfo->EffectImplicitTargetA[i] == 32//TARGET_S_F
+            if (spellInfo->EffectImplicitTargetA[i] == 21//TARGET_S_F
                 ||spellInfo->EffectImplicitTargetA[i] == 57//TARGET_S_F_2
                 ||spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC
                 return SPELL_BLESSING;
@@ -264,7 +264,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         // only hunter stings have this
         if (spellInfo->Dispel == 4)//IMMUNE_DISPEL_POISON
             return SPELL_STING;
-        if (spellInfo->School = 3/*SPELL_SCHOOL_NATURE*/ && spellInfo->activeIconID == 122)
+        // only hunter aspects have this
+        if (spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && spellInfo->activeIconID == 122)
             return SPELL_ASPECT;
     }
 
