@@ -226,7 +226,6 @@ void Spell::EffectTeleportUnits(uint32 i)
 
 void Spell::EffectApplyAura(uint32 i)
 {
-    uint8 castResult = 0;
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
@@ -2341,7 +2340,6 @@ void Spell::EffectTransmitted(uint32 i)
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
         fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0))
         return;
-    GameObjectInfo *goInfo = objmgr.GetGameObjectInfo(name_id);
 
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );

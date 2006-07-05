@@ -29,7 +29,7 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
 {
     public:
 
-        TargetedMovementGenerator(Unit &target) : i_target(target), i_targetedHome(false), i_attackRadius(0) {}
+        TargetedMovementGenerator(Unit &target) : i_target(target), i_attackRadius(0), i_targetedHome(false) {}
         ~TargetedMovementGenerator() {}
 
         void Initialize(Creature &);

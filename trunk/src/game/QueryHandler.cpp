@@ -266,7 +266,6 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
 
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
 
-    uint32 npcflags = unit->GetUInt32Value(UNIT_NPC_FLAGS);
     uint8 u8unk1=0,u8unk2=0,u8unk3=0;
     //------------------------------------------------------------------------
     data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );

@@ -124,7 +124,7 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run)
         speed = 2.5f;
     speed *= 0.001f;
     uint32 time = static_cast<uint32>(dist / speed + 0.5);
-    float orientation = (float)atan2((double)dy, (double)dx);
+    //float orientation = (float)atan2((double)dy, (double)dx);
     SendMonsterMove(x,y,z,false,run,time);
 
 }
@@ -350,7 +350,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                             continue;
                         if(GetDistanceSq(pGroupGuy) > sWorld.getConfig(CONFIG_GETXP_DISTANCE))
                             continue;
-                        if(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel()) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
+                        if(uint32(abs((int)pGroupGuy->getLevel() - (int)pVictim->getLevel())) > sWorld.getConfig(CONFIG_GETXP_LEVELDIFF))
                             continue;
                         pGroupGuy->GiveXP(xp, pVictim);
                         pGroupGuy->KilledMonster(entry, victimGuid);
@@ -494,7 +494,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, mod->m_amount, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
 
-        DealDamage(pVictim, mod->m_amount <= (absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, true);
+        DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
@@ -580,8 +580,8 @@ void Unit::HandleEmoteCommand(uint32 anim_id)
 
 uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 *resist)
 {
-    int32 AbsorbDamage=0;
-    int32 currAbsorbDamage=0;
+    uint32 AbsorbDamage=0;
+    uint32 currAbsorbDamage=0;
     uint32 currentPower;
     bool  removeAura=false;
 
@@ -787,8 +787,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     uint32   AbsorbDamage = 0;
     uint32   resist=0;
 
-    uint32    victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
-    uint32    attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
+    //uint32    victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
+    //uint32    attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
 
     if (pVictim->isDead())
     {
@@ -1506,10 +1506,10 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
         return;
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
-    uint32 enchant_value2 = pEnchant->value2;
+    //uint32 enchant_value2 = pEnchant->value2;
     uint32 enchant_spell_id = pEnchant->spellid;
-    uint32 enchant_aura_id = pEnchant->aura_id;
-    uint32 enchant_description = pEnchant->description;
+    //uint32 enchant_aura_id = pEnchant->aura_id;
+    //uint32 enchant_description = pEnchant->description;
     SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
 
     if(enchant_display ==4)

@@ -197,8 +197,8 @@ bool ChatHandler::HandleItemMoveCommand(const char* args)
 
     uint16 src = ((INVENTORY_SLOT_BAG_0 << 8) | srcslot);
     uint16 dst = ((INVENTORY_SLOT_BAG_0 << 8) | dstslot);
-    Item * dstitem = m_session->GetPlayer()->GetItemByPos(dst);
-    Item * srcitem = m_session->GetPlayer()->GetItemByPos(src);
+
+    m_session->GetPlayer()->SwapItem( src, dst );
 
     return true;
 }

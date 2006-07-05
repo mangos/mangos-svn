@@ -351,7 +351,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
             {
                 uint32 pguid = _player->GetGUID();
                 uint32 memberscount = pGroup->GetMembersCount();
-                for (int i = 0; i < memberscount; i++)
+                for (uint32 i = 0; i < memberscount; i++)
                 {
                     guid = pGroup->GetMemberGUID(i);
                     if( guid !=  pguid )

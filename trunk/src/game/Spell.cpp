@@ -646,7 +646,6 @@ void Spell::finish()
 
     m_ObjToDel.clear();*/
 
-    uint8 powerType = m_caster->getPowerType();
     if(m_TriggerSpell)
         TriggerSpell();
 
@@ -655,8 +654,7 @@ void Spell::finish()
     ItemPrototype *proto = m_CastItem->GetProto();
     uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
-    uint32 ItemId = proto->ItemId;
-
+    
     if (ItemClass == ITEM_CLASS_CONSUMABLE)
     {
         ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
@@ -1002,7 +1000,7 @@ void Spell::TriggerSpell()
 uint8 Spell::CanCast()
 {
     uint8 castResult = 0;
-    uint32 m_school = 0;
+    //uint32 m_school = 0;
 
     if (m_CastItem || itemTarget)
     {

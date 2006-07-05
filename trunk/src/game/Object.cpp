@@ -432,8 +432,8 @@ void Object::SetFloatValue( uint16 index, const float &value )
 
 void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 {
-    uint32 cur = GetUInt32Value(index);
-    if(val > cur && !apply ) val = cur;
+    int32 cur = GetUInt32Value(index);
+    if(!apply && val > cur ) val = cur;
 
     SetUInt32Value(index,cur+(apply ? val : -val));
 }

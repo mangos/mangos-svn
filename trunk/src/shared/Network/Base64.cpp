@@ -22,13 +22,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "Base64.h"
 
-char *Base64::bstr =
+char const *Base64::bstr =
 "ABCDEFGHIJKLMNOPQ"
 "RSTUVWXYZabcdefgh"
 "ijklmnopqrstuvwxy"
 "z0123456789+/";
 
-char Base64::rstr[] =
+char const Base64::rstr[] =
 {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,

@@ -328,7 +328,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
         if( pCreature )
         {
-            int32 price = _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
+            uint32 price = _player->GetUInt32Value( PLAYER_FIELD_BUYBACK_PRICE_1 + slot - BUYBACK_SLOT_START );
             if( _player->GetMoney() < price )
             {
                 _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, pItem->GetEntry(), 0);
@@ -338,7 +338,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
             uint8 msg = _player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false );
             if( msg == EQUIP_ERR_OK )
             {
-                _player->ModifyMoney( -price );
+                _player->ModifyMoney( -(int32)price );
                 _player->RemoveItemFromBuyBackSlot( slot );
                 _player->StoreItem( dest, pItem, true );
             }
@@ -391,7 +391,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 _player->SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
                 return;
             }
-            int32 price  = pProto->BuyPrice * count;
+            uint32 price  = pProto->BuyPrice * count;
             if( _player->GetMoney() < price )
             {
                 _player->SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
@@ -422,7 +422,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
                 msg = _player->CanStoreNewItem( bag, slot, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
                 if( msg == EQUIP_ERR_OK )
                 {
-                    _player->ModifyMoney( -price );
+                    _player->ModifyMoney( -(int32)price );
                     _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
                     if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                         pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
@@ -478,7 +478,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                 return;
             }
 
-            int32 price = pProto->BuyPrice * count;
+            uint32 price = pProto->BuyPrice * count;
 
             if( _player->GetMoney() < price )
             {
@@ -489,7 +489,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
             uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
             if( msg == EQUIP_ERR_OK )
             {
-                _player->ModifyMoney( -price );
+                _player->ModifyMoney( -(int32)price );
                 _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
                 if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
                     pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
@@ -518,9 +518,8 @@ void WorldSession::SendListInventory( uint64 guid )
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if( pCreature )
     {
-        uint32 guidlow = GUID_LOPART(guid);
         uint8 numitems = pCreature->GetItemCount();
-        uint8 count = 0;
+        uint32 count = 0;
         uint32 ptime = time(NULL);
         uint32 diff;
 

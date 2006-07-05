@@ -42,7 +42,6 @@ void HandleCorpsesErase(void*)
         float positionZ = fields[4].GetFloat();
         float ort       = fields[5].GetFloat();
         uint32 mapid    = fields[7].GetUInt32();
-        uint32 flag = fields[10].GetUInt32();
 
         m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
         m_pCorpse->SetMapId(mapid);
@@ -71,7 +70,6 @@ void HandleCorpsesErase(void*)
         float positionZ = fields[4].GetFloat();
         float ort       = fields[5].GetFloat();
         uint32 mapid    = fields[7].GetUInt32();
-        uint32 flag = fields[10].GetUInt32();
 
         m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
         m_pCorpse->SetMapId(mapid);

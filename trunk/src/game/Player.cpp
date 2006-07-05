@@ -1298,7 +1298,7 @@ void Player::SendInitialSpells()
     }
     data << uint16(0);
 
-    WPAssert(data.size() == 5+(4*spellCount));
+    WPAssert(data.size() == 5+(4*size_t(spellCount)));
 
     GetSession()->SendPacket(&data);
 
@@ -2204,7 +2204,7 @@ void Player::UpdateSkill(uint32 skill_id)
 
     if ((!max) || (!value) || (value >= max)) return;
 
-    if (!((value/max)*512 >= urand(0,512)))
+    if (uint32(value/max)*512 < urand(0,512))
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
 
@@ -2388,7 +2388,6 @@ void Player::SendInitialActions()
 {
     sLog.outString( "Initializing Action Buttons for '%u'", GetGUIDLow() );
     WorldPacket data;
-    uint16 actionCount = m_actions.size();
     uint16 button=0;
 
     std::list<struct actions>::iterator itr;
@@ -2637,7 +2636,7 @@ void Player::SetInitialFactions()
     Factions newFaction;
     FactionEntry *factionEntry = NULL;
 
-    for(int i = 1; i <= sFactionStore.GetNumRows(); i++)
+    for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++)
     {
         factionEntry = sFactionStore.LookupEntry(i);
 
@@ -2675,7 +2674,7 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
     FactionTemplateEntry *factionTemplateEntry = NULL;
 
     //Find the Faction Template into the DBC
-    for(int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
+    for(unsigned int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
     {
         factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
         if( !factionTemplateEntry ) continue;
@@ -2685,7 +2684,7 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
     assert(factionTemplateEntry);
 
     //Find faction by faction template
-    for(int i = 1; i <= sFactionStore.GetNumRows(); i++ )
+    for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++ )
     {
         factionEntry = sFactionStore.LookupEntry(i);
         if( !factionEntry ) continue;
@@ -2702,7 +2701,7 @@ bool Player::ModifyFactionReputation(FactionEntry* factionEntry, int32 standing)
     std::list<struct Factions>::iterator itr;
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        if(itr->ReputationListID == factionEntry->reputationListID)
+        if(itr->ReputationListID == int32(factionEntry->reputationListID))
         {
             itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
             itr->Flags = (itr->Flags | 0x00000001);
@@ -2871,7 +2870,7 @@ void Player::UpdateHonor(void)
 
     //RANK (Patent)
     if( CalculateHonorRank(total_honor) )
-        SetUInt32Value(PLAYER_BYTES_3, (( (uint32)CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
+        SetUInt32Value(PLAYER_BYTES_3, (( CalculateHonorRank(total_honor) << 24) + 0x04000000) + m_drunk);
     else
         SetUInt32Value(PLAYER_BYTES_3, m_drunk);
 
@@ -2896,13 +2895,13 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? (((uint32) GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }
 
-int Player::GetHonorRank()
+uint32 Player::GetHonorRank()
 {
     return CalculateHonorRank(m_total_honor_points);
 }
 
 //What is Player's rank... private, scout...
-int Player::CalculateHonorRank(float honor_points)
+uint32 Player::CalculateHonorRank(float honor_points)
 {
     int rank = 0;
 
@@ -5054,7 +5053,7 @@ uint16 Player::GetPosByGuid( uint64 guid )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     pos = ((i << 8) | j);
                     pItem = GetItemByPos( pos );
@@ -5073,7 +5072,7 @@ uint16 Player::GetPosByGuid( uint64 guid )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     pos = ((i << 8) | j);
                     pItem = GetItemByPos( pos );
@@ -5175,7 +5174,7 @@ bool Player::HasItemCount( uint32 item, uint32 count )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     pItem = GetItemByPos( i, j );
                     if( pItem && pItem->GetEntry() == item )
@@ -5247,7 +5246,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             pBagProto = pBag->GetProto();
                             if( pBagProto )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ((i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
@@ -5270,7 +5269,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             pBagProto = pBag->GetProto();
                             if( pBagProto )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ((i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
@@ -5306,7 +5305,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             pBagProto = pBag->GetProto();
                             if( pBagProto )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ( (i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
@@ -5331,7 +5330,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             pBagProto = pBag->GetProto();
                             if( pBagProto && pBagProto->SubClass == pProto->SubClass )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                                     pItem2 = GetItemByPos( i, j );
@@ -5362,7 +5361,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         pBagProto = pBag->GetProto();
                         if( pBagProto && pBagProto->Class != ITEM_CLASS_QUIVER )
                         {
-                            for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                            for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                             {
                                 pItem2 = GetItemByPos( i, j );
                                 if( !pItem2 )
@@ -5408,7 +5407,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                                 pBagProto = pBag->GetProto();
                                 if( pBagProto )
                                 {
-                                    for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                    for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                     {
                                         pItem2 = GetItemByPos( bag, j );
                                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
@@ -5445,7 +5444,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                                     return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
                                 if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
                                     return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pItem2 = GetItemByPos( bag, j );
                                     if( !pItem2 )
@@ -5607,7 +5606,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             pBagProto = pBag->GetProto();
                             if( pBagProto )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ((i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
@@ -5630,7 +5629,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             pBagProto = pBag->GetProto();
                             if( pBagProto )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ((i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
@@ -5666,7 +5665,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             pBagProto = pBag->GetProto();
                             if( pBagProto )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ( (i << 8) | j );
                                     pItem2 = GetItemByPos( pos );
@@ -5722,7 +5721,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                         pBagProto = pBag->GetProto();
                         if( pBagProto && pBagProto->Class != ITEM_CLASS_QUIVER )
                         {
-                            for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                            for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                             {
                                 pItem2 = GetItemByPos( i, j );
                                 if( !pItem2 )
@@ -5768,7 +5767,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                                 pBagProto = pBag->GetProto();
                                 if( pBagProto )
                                 {
-                                    for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                    for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                     {
                                         pItem2 = GetItemByPos( bag, j );
                                         if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
@@ -5805,7 +5804,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                                     return EQUIP_ERR_ONLY_AMMO_CAN_GO_HERE;
                                 if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass > ITEM_SUBCLASS_CONTAINER && pBagProto->SubClass != pProto->SubClass )
                                     return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pItem2 = GetItemByPos( bag, j );
                                     if( !pItem2 )
@@ -6160,7 +6159,7 @@ void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     pItem = GetItemByPos( i, j );
                     if( pItem && pItem->GetEntry() == item )
@@ -6220,10 +6219,10 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                             continue;
                         uint32 enchant_display = pEnchant->display_type;
                         uint32 enchant_value1 = pEnchant->value1;
-                        uint32 enchant_value2 = pEnchant->value2;
+                        //uint32 enchant_value2 = pEnchant->value2;
                         uint32 enchant_spell_id = pEnchant->spellid;
-                        uint32 enchant_aura_id = pEnchant->aura_id;
-                        uint32 enchant_description = pEnchant->description;
+                        //uint32 enchant_aura_id = pEnchant->aura_id;
+                        //uint32 enchant_description = pEnchant->description;
                         //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
                         if(enchant_display ==4)
                             SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
@@ -6304,7 +6303,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             pBagProto = pBag->GetProto();
             if( pBagProto )
             {
-                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     pItem = pBag->GetItemByPos(j);
                     if( pItem && pItem->GetEntry() == item )

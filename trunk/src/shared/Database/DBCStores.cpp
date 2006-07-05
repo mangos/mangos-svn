@@ -192,7 +192,7 @@ bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
          return false;
 
-    for (int i = 0; i < 3; i)
+    for (int i = 0; i < 3; ++i)
         if (spellInfo_1->Effect[i] != spellInfo_2->Effect[i] ||
             spellInfo_1->EffectItemType[i] != spellInfo_2->EffectItemType[i] ||
             spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i] ||

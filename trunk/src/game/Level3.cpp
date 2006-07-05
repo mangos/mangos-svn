@@ -299,7 +299,6 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
     }
 
     uint32 skill = 0;
-    uint16 level = 1;
     char args1[512];
     strcpy (args1, args);
 
@@ -1640,8 +1639,6 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
 
     uint32 g_id = (uint32)atoi(px);
 
-    Player* player = m_session->GetPlayer();
-
     WorldPacket data;
 
     QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `game_graveyard` WHERE `id` = %u;",g_id);
@@ -1864,11 +1861,6 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     skinid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
     Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
 
-    // 'id' changed to 'guid'
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u';", target->GetGUIDLow());
-
-    Field *fields = result->Fetch();
-
     sprintf(buf,LANG_NPCINFO_CHAR, GUID_LOPART(guid), faction, npcflags, Entry, skinid);
     sprintf(buf,LANG_NPCINFO_LEVEL, buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
     sprintf(buf,LANG_NPCINFO_HEALTH, buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
@@ -1887,7 +1879,6 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     sChatHandler.FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket(&data);
-    delete result;
     return true;
 }
 
@@ -2378,7 +2369,6 @@ bool ChatHandler::HandleSendMailNotice(const char* args)
 bool ChatHandler::HandleQueryNextMailTime(const char* args)
 {
     WorldPacket Data;
-    bool checkmail=false;
 
     char* px = strtok((char*)args, " ");
     uint32 flag;

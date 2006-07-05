@@ -44,7 +44,7 @@ class Base64
     private:
         Base64(const Base64& ) {}
         Base64& operator=(const Base64& ) { return *this; }
-        static  char *bstr;
-        static  char rstr[128];
+        static  char const *bstr;
+        static  char const rstr[128];
 };
 #endif                                            // _BASE64_H

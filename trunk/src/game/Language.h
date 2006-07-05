@@ -232,7 +232,7 @@
 #define LANG_SET_UINT_FIELD              "You Set %u Field:%u to uint32 Value: %u"
                                                             //log
 #define LANG_SET_FLOAT                   "Set %u float Value:[OPCODE]:%u [VALUE]:%f"
-#define LANG_SET_FLOAT_FIELD             "You Set %u Field:%i to float Value: %i"
+#define LANG_SET_FLOAT_FIELD             "You Set %u Field:%i to float Value: %f"
                                                             //log
 #define LANG_GET_UINT                    "Get %u uint32 Value:[OPCODE]:%u [VALUE]:%u"
 #define LANG_GET_UINT_FIELD              "The uint32 value of %u in %u is: %u"

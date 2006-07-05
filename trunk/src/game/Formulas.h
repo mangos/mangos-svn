@@ -79,10 +79,10 @@ namespace MaNGOS
         inline float HonorableKillPoints( Player *killer, Player *victim )
         {
             int total_kills  = killer->CalculateTotalKills(victim);
-            int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
-            int v_rank       = victim->CalculateHonorRank( victim->GetTotalHonor() );
-            int k_level      = killer->getLevel();
-            int v_level      = victim->getLevel();
+            //int k_rank       = killer->CalculateHonorRank( killer->GetTotalHonor() );
+            uint32 v_rank    = victim->CalculateHonorRank( victim->GetTotalHonor() );
+            uint32 k_level   = killer->getLevel();
+            //int v_level      = victim->getLevel();
             float diff_honor = (victim->GetTotalHonor() /(killer->GetTotalHonor()+1))+1;
             float diff_level = (victim->getLevel()*(1.0/( killer->getLevel() )));
 

@@ -144,7 +144,7 @@ void Group::BroadcastToGroup(WorldSession *session, std::string msg)
 {
     if (session && session->GetPlayer())
     {
-        for (int i = 0; i < m_count; i++)
+        for (uint32 i = 0; i < m_count; i++)
         {
             WorldPacket data;
             sChatHandler.FillMessageData(&data, session, CHAT_MSG_PARTY, LANG_UNIVERSAL, NULL, msg.c_str());

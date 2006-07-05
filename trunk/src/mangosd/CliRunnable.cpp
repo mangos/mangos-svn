@@ -86,7 +86,7 @@ bool IsItIP(char* banip)
     //and must contain only numbers + .
     unsigned int iDotCount=0;
     unsigned int l=strlen(banip);
-    for(int y=0;y<l;y++)
+    for(unsigned int y=0;y<l;y++)
     {
         if(banip[y]=='.')iDotCount++;
         else
@@ -471,7 +471,7 @@ void CliRunnable::run()
 
     char commandbuf[256];
 
-    uint32 realCurrTime = 0, realPrevTime = 0;
+    //uint32 realCurrTime = 0, realPrevTime = 0;
 
     sLog.outString("");
     void CliHelp();

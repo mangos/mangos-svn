@@ -39,7 +39,6 @@ void UnloadLoot()
 
 void LoadLootTables()
 {
-    uint32 curId = 0;
     LootStore::iterator tab;
     uint32 item, displayid, entry;
     uint32 count = 0;
