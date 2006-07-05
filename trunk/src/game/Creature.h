@@ -326,6 +326,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
         uint32 m_spells[CREATURE_MAX_SPELLS];
 
+        float GetAttackDistance(Unit *pl);
     protected:
         void _LoadGoods();
         void _LoadQuests();
@@ -357,7 +358,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_faction;
         uint8 m_emoteState;
         bool m_isPet;                                       //add by vendy
-        float GetAttackDistance(Unit *pl);
         void Regenerate(uint16 field_cur, uint16 field_max);
         uint32 m_regenTimer;
 

@@ -40,10 +40,14 @@ void GuardAI::MoveInLineOfSight(Unit *u)
 {
     if( i_creature.getVictim() == NULL && u->isTargetableForAttack())
     {
-        FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-        //Need add code to let guard suport player
-        if(( i_myFaction->hostile & 1 )>0 || (i_myFaction->hostile & your_faction->friendly)>0 || (your_faction->hostile & 1)>0 )
-            AttackStart(u);
+        float attackRadius = i_creature.GetAttackDistance(u);
+        if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
+        {
+            FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+            //Need add code to let guard suport player
+            if(( i_myFaction->hostile & 1 )>0 || (i_myFaction->hostile & your_faction->friendly)>0 || (your_faction->hostile & 1)>0 )
+                AttackStart(u);
+        }
     }
 }
 
