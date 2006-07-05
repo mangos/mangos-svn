@@ -114,20 +114,16 @@ struct SpellEntry
     uint32    SpellIconID;
     uint32    activeIconID;
     uint32      spellPriority;
-    uint32    Rank;
-    uint32    RankAlt1;
-    uint32    RankAlt2;
-    uint32    RankAlt3;
-    uint32    RankAlt4;
-    uint32    RankAlt5;
-    uint32    RankAlt6;
-    uint32    RankAlt7;
+    uint32    SpellNameIndex[8];
+    uint32    SpellNameFlag;
+    uint32    Rank[8];
     uint32    RankFlags;
     uint32    ManaCostPercentage;
     uint32    StartRecoveryCategory;
     uint32    StartRecoveryTime;
     uint32      field156;
     uint32    SpellFamilyName;
+    uint32    SpellFamilyFlags ;
 };
 struct SpellCastTime
 {

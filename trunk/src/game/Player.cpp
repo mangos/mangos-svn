@@ -1378,8 +1378,11 @@ void Player::AddMail(Mail *m)
 
 void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 {
+    uint32 newrank = 0;
+    uint32 oldrank = 0;
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
     if(!spellInfo) return;
+    newrank = FindSpellRank(spell_id);
 
     PlayerSpell *newspell;
 
@@ -1388,22 +1391,34 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     newspell->active = active;
 
     WorldPacket data;
-    PlayerSpellList::iterator itr,next;
-    for (itr = m_spells.begin(); itr != m_spells.end(); itr=next)
+    if(newrank > 0 && newspell->active)
     {
-        next = itr;
-        next++;
-        if(!(*itr)->spellId)
-            continue;
-        if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
+        PlayerSpellList::iterator itr,next;
+        for (itr = m_spells.begin(); itr != m_spells.end(); itr=next)
         {
-            if((*itr)->active)
+            next = itr;
+            next++;
+            if(!(*itr)->spellId)
+                continue;
+            if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
             {
-                data.Initialize(SMSG_REMOVED_SPELL);
-                data << uint32((*itr)->spellId);
-                GetSession()->SendPacket( &data );
-                (*itr)->active = 0;
-                //player->removeSpell(uint16((*itr)->spellId));
+                oldrank = FindSpellRank((*itr)->spellId);
+                if(oldrank == 0)
+                    break;
+                if(newrank > oldrank && (*itr)->active)
+                {
+                    data.Initialize(SMSG_REMOVED_SPELL);
+                    data << uint32((*itr)->spellId);
+                    GetSession()->SendPacket( &data );
+                    (*itr)->active = 0;
+                }
+                if(newrank < oldrank)
+                {
+                    data.Initialize(SMSG_REMOVED_SPELL);
+                    data << uint32(spell_id);
+                    GetSession()->SendPacket( &data );
+                    newspell->active = 0;
+                }
             }
         }
     }

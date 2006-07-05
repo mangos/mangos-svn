@@ -377,26 +377,25 @@ void Aura::_AddAura()
     bool samespell = false;
     uint8 slot = 0xFF, i;
     Aura* aura = NULL;
-    SpellEntry *spellproto = sSpellStore.LookupEntry(m_spellId);
-    aura = m_target->GetAura(m_spellId, spellproto->EffectApplyAuraName[m_effIndex]);
-    if(aura)
-        m_target->RemoveAurasDueToSpell(m_spellId);
-    m_target->RemoveRankAurasDueToSpell(m_spellId);
 
-    m_target->ApplyStats(false);
-    ApplyModifier(true);
-    m_target->ApplyStats(true);
-    sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
-
-    for(i = 0; i< 3; i++)
+    for(i = 0; i < 3; i++)
     {
         aura = m_target->GetAura(m_spellId, i);
         if(aura)
         {
-            samespell = true;
-            slot = aura->GetAuraSlot();
+            if (i != m_effIndex)
+            {
+                samespell = true;
+                slot = aura->GetAuraSlot();
+            }
         }
     }
+
+    //m_target->RemoveRankAurasDueToSpell(m_spellId);
+    m_target->ApplyStats(false);
+    ApplyModifier(true);
+    m_target->ApplyStats(true);
+    sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
 
     if(!samespell)
     {
@@ -421,6 +420,13 @@ void Aura::_AddAura()
                     break;
                 }
             }
+        }
+        // only remove icon when the last aura of the spell is removed
+        for(int i = 0; i < 3; i++)
+        {
+            aura = m_target->GetAura(m_spellId, i);
+            if(aura && i != m_effIndex)
+                return;
         }
 
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());

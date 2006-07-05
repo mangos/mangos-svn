@@ -42,12 +42,45 @@ struct AuctionEntry
     uint32 Id;
 };
 
+enum SpellSpecific
+{
+    SPELL_NORMAL = 0,
+    SPELL_SEAL = 1,
+    SPELL_BLESSING = 2,
+    SPELL_AURA = 3,
+    SPELL_STING = 4,
+    SPELL_CURSE = 5,
+    SPELL_ASPECT = 6,
+    SPELL_GR_BLESSING = 7
+};
+
+enum SpellFamilyNames
+{
+    SPELLFAMILY_GENERIC = 0,
+    SPELLFAMILY_MAGE = 3,
+    SPELLFAMILY_WARRIOR = 4,
+    SPELLFAMILY_WARLOCK = 5,
+    SPELLFAMILY_PRIEST = 6,
+    SPELLFAMILY_DRUID = 7,
+    SPELLFAMILY_ROGUE = 8,
+    SPELLFAMILY_HUNTER = 9,
+    SPELLFAMILY_PALADIN = 10,
+    SPELLFAMILY_SHAMAN = 11,
+    SPELLFAMILY_POTION = 13
+};
+
 float GetRadius(SpellRadius *radius);
 uint32 GetCastTime(SpellCastTime *time);
 float GetMinRange(SpellRange *range);
 float GetMaxRange(SpellRange *range);
 int32 GetDuration(SpellEntry *spellInfo);
+uint32 FindSpellRank(uint32 spellId);
 bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2);
+bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
+bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
+int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
+SpellSpecific GetSpellSpecific(uint32 spellId);
+bool IsSpellSingleEffectPerCaster(uint32 spellId);
 
 template<class T>
 class DBCStorage
