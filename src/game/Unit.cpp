@@ -1152,11 +1152,9 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
             if(IsNoStackSpellDueToSpell(spellId, i_spellId) || sec_match)
             {
                 // if sec_match this isnt always true, needs to be rechecked
-                for(int x=0;x<8;x++)
-                if(Aur->GetSpellProto()->SpellNameIndex[x] != (*i).second->GetSpellProto()->SpellNameIndex[x])
-                    return false;
-                if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
-                    return false; // cannot remove higher rank
+                if (IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+                    if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
+                        return false; // cannot remove higher rank
                 
                 RemoveAurasDueToSpell(i_spellId);
 

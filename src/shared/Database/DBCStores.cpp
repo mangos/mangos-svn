@@ -246,13 +246,11 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             // only paladin auras have this
             if (spellInfo->Effect[i] == 35)//SPELL_EFFECT_APPLY_AREA_AURA 
                 return SPELL_AURA;
-            // only paladin blessings have this
+            // only paladin blessings / greater blessings have this
             if (spellInfo->EffectImplicitTargetA[i] == 32//TARGET_S_F
-                ||spellInfo->EffectImplicitTargetA[i] == 57)//TARGET_S_F_2
+                ||spellInfo->EffectImplicitTargetA[i] == 57//TARGET_S_F_2
+                ||spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC
                 return SPELL_BLESSING;
-            // only paladin greater blessings have this
-            if (spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC
-                return SPELL_GR_BLESSING;
         }
     }
 
@@ -282,7 +280,6 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_STING:
         case SPELL_CURSE:
         case SPELL_ASPECT:
-        case SPELL_GR_BLESSING:
             return true;
         default:
             return false;

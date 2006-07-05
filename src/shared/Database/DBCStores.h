@@ -50,8 +50,7 @@ enum SpellSpecific
     SPELL_AURA = 3,
     SPELL_STING = 4,
     SPELL_CURSE = 5,
-    SPELL_ASPECT = 6,
-    SPELL_GR_BLESSING = 7
+    SPELL_ASPECT = 6
 };
 
 enum SpellFamilyNames
