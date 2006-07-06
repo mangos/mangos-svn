@@ -944,12 +944,15 @@ float Creature::GetAttackDistance(Unit *pl)
 
     int16 leveldif       = playlevel - creaturelevel;
 
-	if ( leveldif > 25)
-        leveldif = 25;
+    // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
+    if ( leveldif < - 25)
+        leveldif = -25;
 
-    float RetDistance = 10 * GetFloatValue(UNIT_FIELD_COMBATREACH) - (float)leveldif;;
+    // "The aggro radius of a mob having the same level as the player is roughly 20 yards"
+    // "Aggro Radius varries with level difference at a rate of roughly 1 yard/level"
+    float RetDistance = 10 * GetFloatValue(UNIT_FIELD_COMBATREACH) - (float)leveldif;
 
-    // restore minimum distance
+    // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
     if(RetDistance < 5) 
         RetDistance = 5;
 
