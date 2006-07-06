@@ -116,7 +116,6 @@ struct GossipOption
 struct CreatureItem
 {
     uint32 id;
-    uint32 buycount;
     uint32 count;
     uint32 maxcount;
     uint32 incrtime;
@@ -250,17 +249,15 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint8 GetItemCount() { return itemcount; }
         uint32 GetItemId( uint32 slot ) { return item_list[slot].id; }
-        uint32 GetItemBuyCount( uint32 slot ) { return item_list[slot].buycount; }
         uint32 GetItemCount( uint32 slot ) { return item_list[slot].count; }
         uint32 GetMaxItemCount( uint32 slot ) { return item_list[slot].maxcount; }
         uint32 GetItemIncrTime( uint32 slot ) { return item_list[slot].incrtime; }
         uint32 GetItemLastIncr( uint32 slot ) { return item_list[slot].lastincr; }
         void SetItemCount( uint32 slot, uint32 count ) { item_list[slot].count = count; }
         void SetItemLastIncr( uint32 slot, uint32 ptime ) { item_list[slot].lastincr = ptime; }
-        void AddItem( uint32 item, uint32 buycount, uint32 maxcount, uint32 ptime)
+        void AddItem( uint32 item, uint32 maxcount, uint32 ptime)
         {
             item_list[itemcount].id = item;
-            item_list[itemcount].buycount = buycount;
             item_list[itemcount].count = maxcount;
             item_list[itemcount].maxcount = maxcount;
             item_list[itemcount].incrtime = ptime;

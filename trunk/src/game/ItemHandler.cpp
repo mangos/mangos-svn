@@ -419,13 +419,13 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
             uint8 msg;
             if( _player->IsInventoryPos( dest ) )
             {
-                msg = _player->CanStoreNewItem( bag, slot, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
+                msg = _player->CanStoreNewItem( bag, slot, dest, item, pProto->BuyCount * count, false );
                 if( msg == EQUIP_ERR_OK )
                 {
                     _player->ModifyMoney( -(int32)price );
-                    _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
+                    _player->StoreNewItem( dest, item, pProto->BuyCount * count, true );
                     if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                        pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) );
+                        pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount );
                 }
                 else
                     _player->SendEquipError( msg, NULL, NULL );
@@ -486,13 +486,13 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
                 return;
             }
             uint16 dest;
-            uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, false );
+            uint8 msg = _player->CanStoreNewItem( 0, NULL_SLOT, dest, item, pProto->BuyCount * count, false );
             if( msg == EQUIP_ERR_OK )
             {
                 _player->ModifyMoney( -(int32)price );
-                _player->StoreNewItem( dest, item, pCreature->GetItemBuyCount( vendorslot ) * count, true );
+                _player->StoreNewItem( dest, item, pProto->BuyCount  * count, true );
                 if( pCreature->GetMaxItemCount( vendorslot ) != 0 )
-                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pCreature->GetItemBuyCount( vendorslot ) * count );
+                    pCreature->SetItemCount( vendorslot, pCreature->GetItemCount( vendorslot ) - pProto->BuyCount * count );
             }
             else
                 _player->SendEquipError( msg, NULL, NULL );
@@ -540,8 +540,8 @@ void WorldSession::SendListInventory( uint64 guid )
                     if( pCreature->GetItemIncrTime(i) != 0 && (pCreature->GetItemLastIncr(i) + pCreature->GetItemIncrTime(i) <= ptime) )
                     {
                         diff = uint32((ptime - pCreature->GetItemLastIncr(i))/pCreature->GetItemIncrTime(i));
-                        if( (pCreature->GetItemCount(i) + diff * pCreature->GetItemBuyCount(i)) <= pCreature->GetMaxItemCount(i) )
-                            pCreature->SetItemCount(i, pCreature->GetItemCount(i) + diff * pCreature->GetItemBuyCount(i));
+                        if( (pCreature->GetItemCount(i) + diff * pProto->BuyCount) <= pCreature->GetMaxItemCount(i) )
+                            pCreature->SetItemCount(i, pCreature->GetItemCount(i) + diff * pProto->BuyCount);
                         else
                             pCreature->SetItemCount(i, pCreature->GetMaxItemCount(i));
                         pCreature->SetItemLastIncr(i, ptime);
@@ -552,7 +552,7 @@ void WorldSession::SendListInventory( uint64 guid )
                     data << uint32(pCreature->GetMaxItemCount(i) <= 0 ? 0xFFFFFFFF : pCreature->GetItemCount(i));
                     data << pProto->BuyPrice;
                     data << uint32( 0xFFFFFFFF );
-                    data << pCreature->GetItemBuyCount(i);
+                    data << pProto->BuyCount;
                 }
             }
         }

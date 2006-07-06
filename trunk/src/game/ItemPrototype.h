@@ -222,6 +222,7 @@ struct ItemPrototype
     uint32 DisplayInfoID;
     uint32 Quality;
     uint32 Flags;
+    uint32 BuyCount;
     uint32 BuyPrice;
     uint32 SellPrice;
     uint32 InventoryType;

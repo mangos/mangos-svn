@@ -864,7 +864,7 @@ void Creature::_LoadGoods()
 
     itemcount = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `item`,`buycount`,`maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u';", GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u';", GetEntry());
 
     if(!result) return;
 
@@ -878,7 +878,7 @@ void Creature::_LoadGoods()
             break;
         }
 
-        AddItem( fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32(), fields[3].GetUInt32());
+        AddItem( fields[0].GetUInt32(), fields[1].GetUInt32(), fields[2].GetUInt32());
     }
     while( result->NextRow() );
 
