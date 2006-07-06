@@ -941,22 +941,18 @@ float Creature::GetAttackDistance(Unit *pl)
 {
     uint16 playlevel     = (uint16)pl->GetUInt32Value(UNIT_FIELD_LEVEL);
     uint16 creaturelevel = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+
     int16 leveldif       = playlevel - creaturelevel;
 
-    float RetDistance = 5.0;
+	if ( leveldif > 25)
+        leveldif = 25;
 
-    if ( leveldif > 0 )
-    {
-        RetDistance =  (10 * GetFloatValue(UNIT_FIELD_COMBATREACH)) - (float)leveldif;
-    }
-    else if ( leveldif < 0 )
-    {
-		RetDistance = (10 * GetFloatValue(UNIT_FIELD_COMBATREACH)) + (float)leveldif;
-	}
-	else if ( leveldif > 25)
-	{
-		RetDistance = 3;
-	}
+    float RetDistance = 10 * GetFloatValue(UNIT_FIELD_COMBATREACH) - (float)leveldif;;
+
+    // restore minimum distance
+    if(RetDistance < 5) 
+        RetDistance = 5;
+
     return RetDistance;
 }
 
