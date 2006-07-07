@@ -698,7 +698,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
         float GetTotalHonor(void) { return m_total_honor_points; };
         //Acessors of righest rank
-        int  GetHonorHighestRank() const { return m_highest_rank; }
+        uint32 GetHonorHighestRank() const { return m_highest_rank; }
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
         //Acessors of rating
         float GetHonorRating() const { return m_rating; }
@@ -870,7 +870,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         float m_total_honor_points;
         float m_rating;
-        int m_highest_rank;
+        uint32 m_highest_rank;
         int m_standing;
 
         int m_cinematic;
