@@ -898,7 +898,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     sLog.outString( "WORLD: Received CMSG_SET_ACTION_BUTTON" );
     uint8 button, misc, type;
     uint16 action;
-    recv_data >> button >> action >> misc >> type;
+    recv_data >> button >> action >> type >> misc;
     sLog.outString( "BUTTON: %u ACTION: %u TYPE: %u MISC: %u", button, action, type, misc );
     if(action==0)
     {
@@ -911,7 +911,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
         if(type==64)
         {
             sLog.outString( "MISC: Added Macro %u into button %u", action, button );
-            GetPlayer()->addAction(button,action,misc,type);
+            GetPlayer()->addAction(button,action,type,misc);
         }
         else if(type==0)
         {
