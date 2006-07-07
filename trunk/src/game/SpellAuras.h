@@ -105,6 +105,9 @@ class Aura
         void HandleModRegen(bool apply);
         void HandleModPowerRegen(bool apply);
         void HandleChannelDeathItem(bool apply);
+        void HandleModDamagePCTTaken(bool apply);
+        void HandleModPCTRegen(bool Apply);
+        void HandlePeriodicDamagePCT(bool Apply);
         void HandleAuraModAttackPower(bool Apply);
         void HandleAuraTransform(bool Apply);
         void HandleAuraModIncreaseSwimSpeed(bool Apply);
@@ -162,12 +165,14 @@ class Aura
         uint32 CalculateDamage();
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
+        ProcTriggerDamage* GetProcDamage() { return m_procdamage; }
         void TriggerSpell();
         void SendCoolDownEvent();
 
     private:
 
         ProcTriggerSpell *m_procSpell;
+        ProcTriggerDamage *m_procdamage;
         Modifier *m_modifier;
         uint32 m_spellId;
         uint32 m_effIndex;

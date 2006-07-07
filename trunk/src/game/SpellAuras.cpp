@@ -128,9 +128,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModRegen,                                  //SPELL_AURA_MOD_REGEN = 84,
     &Aura::HandleModPowerRegen,                             //SPELL_AURA_MOD_POWER_REGEN = 85,
     &Aura::HandleChannelDeathItem,                          //SPELL_AURA_CHANNEL_DEATH_ITEM = 86,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PERCENT_REGEN = 88,
-    &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
+    &Aura::HandleModDamagePCTTaken,                         //SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN = 87,
+    &Aura::HandleModPCTRegen,                               //SPELL_AURA_MOD_PERCENT_REGEN = 88,
+    &Aura::HandlePeriodicDamagePCT,                         //SPELL_AURA_PERIODIC_DAMAGE_PERCENT = 89,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RESIST_CHANCE = 90,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECT_RANGE = 91,
     &Aura::HandleNULL,                                      //SPELL_AURA_PREVENTS_FLEEING = 92,
@@ -202,7 +202,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
-    m_procSpell(NULL), m_modifier(NULL), m_spellId(spellproto->Id), m_effIndex(eff), 
+    m_procSpell(NULL),m_procdamage(NULL), m_modifier(NULL), m_spellId(spellproto->Id), m_effIndex(eff), 
     m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),  
     m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0)
 {
@@ -1430,8 +1430,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply)
     {
         m_procSpell = new ProcTriggerSpell();
         m_procSpell->caster = m_caster->GetGUID();
-        m_procSpell->spellId = GetSpellProto()->EffectTriggerSpell[m_effIndex];
-        m_procSpell->trigger = GetSpellProto()->EffectBasePoints[m_effIndex];
+        m_procSpell->spellId = GetSpellProto()->EffectTriggerSpell[GetEffIndex()];
         m_procSpell->procChance = GetSpellProto()->procChance;
         m_procSpell->procFlags = GetSpellProto()->procFlags;
         m_procSpell->procCharges = GetSpellProto()->procCharges;
@@ -1446,27 +1445,16 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
 {
     if(apply)
     {
-        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-        {
-            m_target->m_damageShields.erase(i);
-            break;
-        }
-        DamageShield* ds = new DamageShield();
-        ds->m_caster = GetCaster();
-        ds->m_damage = m_modifier->m_amount;
-        ds->m_spellId = GetId();
-        m_target->m_damageShields.push_back((*ds));
+        m_procdamage->caster = m_caster->GetGUID();
+        m_procdamage->procDamage = m_modifier->m_amount;
+        m_procdamage->procChance = GetSpellProto()->procChance;
+        m_procdamage->procFlags = GetSpellProto()->procFlags;
+        m_procdamage->procCharges = GetSpellProto()->procCharges;
     }
     else
     {
-        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-        {
-            m_target->m_damageShields.erase(i);
-            break;
-        }
-    }     
+        m_procdamage = NULL;
+    }    
 }
 
 void Aura::HandleAuraTracCreatures(bool apply)
@@ -1606,6 +1594,32 @@ void Aura::HandleChannelDeathItem(bool apply)
             ((Player*)m_caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
         else
             ((Player*)m_caster)->SendEquipError( msg, NULL, NULL );
+    }
+}
+
+void Aura::HandleModDamagePCTTaken(bool apply)
+{
+    m_target->m_modDamagePCT = apply ? m_modifier->m_amount : 0;
+}
+
+void Aura::HandleModPCTRegen(bool apply)
+{
+    m_target->m_RegenPCT = apply ? m_modifier->m_amount : 0;
+}
+
+void Aura::HandlePeriodicDamagePCT(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier->periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
     }
 }
 

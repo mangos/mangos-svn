@@ -314,9 +314,10 @@ void Spell::EffectHeal( uint32 i )
 {
     if( unitTarget && unitTarget->isAlive() )
     {
+        float pct = (100+unitTarget->m_RegenPCT)/100;
         uint32 curhealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
         uint32 maxhealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-        uint32 addhealth = ( curhealth + damage < maxhealth ? damage : maxhealth - curhealth );
+        uint32 addhealth = ( curhealth + damage*pct < maxhealth ? damage*pct : maxhealth - curhealth );
         unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
         SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
@@ -345,20 +346,21 @@ void Spell::EffectHealthLeach(uint32 i)
 
     //SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, damage);
     uint32 tmpvalue = 0;
+    float pct = (100+unitTarget->m_RegenPCT)/100;
 
-    if(unitTarget->GetUInt32Value(UNIT_FIELD_POWER1) - damage > 0)
+    if(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) - damage > 0)
     {
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,uint32(unitTarget->GetUInt32Value(UNIT_FIELD_POWER1) - damage));
+        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) - damage));
         tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
     }
     else
     {
-        tmpvalue = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_POWER1)*m_spellInfo->EffectMultipleValue[i]);
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
+        tmpvalue = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH)*m_spellInfo->EffectMultipleValue[i]);
+        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,0);
     }
-    if(m_caster->GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue < m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1) )
-        m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue);
-    else m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+    if(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct < m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
+        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct);
+    else m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 }
 
 void Spell::EffectCreateItem(uint32 i)

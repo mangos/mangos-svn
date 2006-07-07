@@ -81,7 +81,8 @@ Unit::Unit() : Object()
         m_AuraModifiers[i] = -1;
 
     m_attacking = NULL;
-
+    m_modDamagePCT = 0;
+    m_RegenPCT = 0;
 }
 
 Unit::~Unit()
@@ -213,6 +214,7 @@ bool Unit::HasAuraType(uint32 auraType) const
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive()) return;
+    damage = int32(damage*(m_modDamagePCT+100)/100);
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -496,10 +498,17 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
         DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, true);
     }
+    else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
+    {
+        int32 pdamage = GetUInt32Value(UNIT_FIELD_HEALTH)*(100+mod->m_amount)/100;
+        SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
+        SendMessageToSet(&data,true);
+        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), procFlag, true);
+    }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
-        if(GetUInt32Value(UNIT_FIELD_HEALTH) < GetUInt32Value(UNIT_FIELD_MAXHEALTH) + mod->m_amount)
-            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount);
+        if(GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount*(100+m_RegenPCT)/100 < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
+            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount*(100+m_RegenPCT)/100);
         else
             SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
@@ -522,8 +531,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
             }
             break;
         }
-        if(GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
-            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue);
+        if(GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*(100+m_RegenPCT)/100 < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
+            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*(100+m_RegenPCT)/100);
         else SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
@@ -696,7 +705,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         *victimState = 2;
 
         ((Player*)pVictim)->UpdateDefense();
-        HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
     }
     else if (pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->GetUnitDodgeChance()/100) * 512 >= urand(0, 512))
     {
@@ -704,7 +713,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         *victimState = 3;
 
         ((Player*)pVictim)->UpdateDefense();
-        HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
     }
     else if (pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->GetUnitBlockChance()/100) * 512 >= urand(0, 512))
     {
@@ -714,9 +723,9 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         else *damage = 0;
 
         if (pVictim->GetUnitBlockValue())
-            HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
         else
-            HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
         *victimState = 4;
         ((Player*)pVictim)->UpdateDefense();
@@ -739,13 +748,73 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     {
         *absorbDamage = absorb;
     }
-
+    // proc trigger damage
+    for (AuraMap::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
+    {
+        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
+        if(procdamage)
+        {
+            bool nocharges = procdamage->procCharges == 0 ? true : false;
+            if(procdamage->procFlags & 0x402 && procdamage->procChance > rand_chance()
+                && (procdamage->procCharges > 0 || nocharges) && *victimState == 1)
+            {
+                pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
+                if(!nocharges)
+                    procdamage->procCharges -= 1;
+            }
+            else if(procdamage->procFlags == 64 && procdamage->procChance > rand_chance() 
+                && (procdamage->procCharges > 0 || nocharges) && *victimState == 4)
+            {
+                pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
+                if(!nocharges)
+                    procdamage->procCharges -= 1;
+            }
+        }
+    }
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    {
+        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
+        if(procdamage)
+        {
+            bool nocharges = procdamage->procCharges == 0 ? true : false;
+            if(procdamage->procFlags == 1 && procdamage->procChance > rand_chance()
+                && (procdamage->procCharges > 0 || nocharges)  && *victimState == 1)
+            {
+                SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
+                if(!nocharges)
+                    procdamage->procCharges -= 1;
+            }
+        }
+    }
     // proc trigger aura
     for (AuraMap::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
     {
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
-            if(procspell->procFlags == 40 && procspell->procChance > rand_chance() )
+            if(procspell->procFlags & 0x2 && procspell->procChance > rand_chance() )
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
+
+                if(!spellInfo)
+                {
+                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->spellId);
+                    return;
+                }
+
+                Spell *spell = new Spell(pVictim, spellInfo, false, 0);
+                WPAssert(spell);
+
+                SpellCastTargets targets;
+                targets.setUnitTarget( this );
+                spell->prepare(&targets);
+            }
+        }
+    }
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    {
+        if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
+        {
+            if(procspell->procFlags & 0x1 && procspell->procChance > rand_chance() )
             {
                 SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
 

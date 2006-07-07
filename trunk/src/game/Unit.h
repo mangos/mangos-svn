@@ -79,6 +79,15 @@ struct DamageShield
     Unit *m_caster;
 };
 
+struct ProcTriggerDamage
+{
+    uint64 caster;
+    uint32 procDamage;
+    uint32 procChance;
+    uint32 procFlags;
+    uint32 procCharges;
+};
+
 struct ProcTriggerSpell
 {
     uint32 trigger;
@@ -391,6 +400,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         float m_speed;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
+        uint32 m_modDamagePCT;
+        uint32 m_RegenPCT;
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
