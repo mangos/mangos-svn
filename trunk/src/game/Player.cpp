@@ -2714,9 +2714,9 @@ bool Player::ModifyFactionReputation(FactionEntry* factionEntry, int32 standing)
     std::list<struct Factions>::iterator itr;
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
-        if(itr->ReputationListID == int32(factionEntry->reputationListID))
+        if(int32(itr->ReputationListID) == factionEntry->reputationListID)
         {
-            itr->Standing = (((int)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
+            itr->Standing = (((int32)itr->Standing + standing) > 0 ? itr->Standing + standing: 0);
             itr->Flags = (itr->Flags | 0x00000001);
             SendSetFactionStanding(&*itr);
             return true;
@@ -2905,7 +2905,7 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, lifetime_dishonorableKills);
     SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, lifetime_honorableKills);
     //TODO: Into what field we need to set it? Fix it!
-    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? (((uint32) GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
+    SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? ((GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }
 
 uint32 Player::GetHonorRank()
