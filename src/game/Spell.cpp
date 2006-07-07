@@ -52,6 +52,7 @@ SpellCastTargets::SpellCastTargets()
     m_GOTarget   = NULL;
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0;
     m_strTarget = "";
+    m_targetMask = 0;
 }
 
 SpellCastTargets::~SpellCastTargets()
@@ -395,7 +396,6 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         default:
         {
         }break;
-    }
         case TARGET_AF_PC:
         {
             Player* targetPlayer = m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER ? (Player*)m_targets.getUnitTarget() : NULL;
@@ -414,6 +414,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             else
                 TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
+    }
 }
 
 void Spell::prepare(SpellCastTargets * targets)
