@@ -66,7 +66,7 @@ ARFLAGS = cru
 libgame_a_AR = $(AR) $(ARFLAGS)
 libgame_a_LIBADD =
 am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
-	AuctionHouse.$(OBJEXT) Bag.$(OBJEXT) Base.$(OBJEXT) \
+	AuctionHouse.$(OBJEXT) Bag.$(OBJEXT) \
 	BattleGround.$(OBJEXT) BattleGroundHandler.$(OBJEXT) \
 	BattleGroundMgr.$(OBJEXT) Channel.$(OBJEXT) \
 	ChannelHandler.$(OBJEXT) CharacterHandler.$(OBJEXT) \
@@ -75,7 +75,7 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	CreatureAIRegistry.$(OBJEXT) CreatureAISelector.$(OBJEXT) \
 	Creature.$(OBJEXT) debugcmds.$(OBJEXT) \
 	DestinationHolder.$(OBJEXT) DuelHandler.$(OBJEXT) \
-	DynamicObject.$(OBJEXT) EventSystem.$(OBJEXT) \
+	DynamicObject.$(OBJEXT) \
 	FlightMaster.$(OBJEXT) GameObject.$(OBJEXT) \
 	GlobalEvents.$(OBJEXT) GossipDef.$(OBJEXT) \
 	GridNotifiers.$(OBJEXT) GridStates.$(OBJEXT) Group.$(OBJEXT) \
@@ -86,12 +86,12 @@ am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
 	LootHandler.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) \
 	Map.$(OBJEXT) MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
 	MotionMaster.$(OBJEXT) MovementGenerator.$(OBJEXT) \
-	MovementHandler.$(OBJEXT) Mthread.$(OBJEXT) \
+	MovementHandler.$(OBJEXT) \
 	NPCHandler.$(OBJEXT) NullCreatureAI.$(OBJEXT) \
 	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
 	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
 	Opcodes.$(OBJEXT) Pet.$(OBJEXT) PetAI.$(OBJEXT) \
-	PetHandler.$(OBJEXT) Player.$(OBJEXT) ProgressBar.$(OBJEXT) \
+	PetHandler.$(OBJEXT) Player.$(OBJEXT) \
 	QueryHandler.$(OBJEXT) QuestDef.$(OBJEXT) \
 	QuestHandler.$(OBJEXT) RandomMovementGenerator.$(OBJEXT) \
 	ReactorAI.$(OBJEXT) RedZoneDistrict.$(OBJEXT) \
@@ -265,7 +265,6 @@ libgame_a_SOURCES = \
 	AggressorAI.cpp \
 	AuctionHouse.cpp \
 	Bag.cpp \
-	Base.cpp \
 	BattleGround.cpp \
 	BattleGroundHandler.cpp \
 	BattleGroundMgr.cpp \
@@ -285,7 +284,6 @@ libgame_a_SOURCES = \
 	DestinationHolder.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
-	EventSystem.cpp \
 	FlightMaster.cpp \
 	GameObject.cpp \
 	GlobalEvents.cpp \
@@ -313,7 +311,6 @@ libgame_a_SOURCES = \
 	MotionMaster.cpp \
 	MovementGenerator.cpp \
 	MovementHandler.cpp \
-	Mthread.cpp \
 	NPCHandler.cpp \
 	NullCreatureAI.cpp \
 	ObjectAccessor.cpp \
@@ -327,7 +324,6 @@ libgame_a_SOURCES = \
 	PetAI.h \
 	PetHandler.cpp \
 	Player.cpp \
-	ProgressBar.cpp \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestHandler.cpp \
@@ -357,7 +353,6 @@ libgame_a_SOURCES = \
 	AggressorAI.h \
 	AnimalRandomMovementGenerator.h \
 	Bag.h \
-	Base.h \
 	BattleGround.h \
 	BattleGroundMgr.h \
 	Cell.h \
@@ -376,7 +371,6 @@ libgame_a_SOURCES = \
 	DestinationHolder.h \
 	DestinationHolderImp.h \
 	DynamicObject.h \
-	EventSystem.h \
 	FactionTemplateResolver.h \
 	FlightMaster.h \
 	Formulas.h \
@@ -402,7 +396,6 @@ libgame_a_SOURCES = \
 	MotionMaster.h \
 	MovementGenerator.h \
 	MovementGeneratorImpl.h \
-	Mthread.h \
 	NameTables.h \
 	NPCHandler.h \
 	NullCreatureAI.h \
@@ -414,7 +407,6 @@ libgame_a_SOURCES = \
 	Opcodes.h \
 	Path.h \
 	Player.h \
-	ProgressBar.hpp \
 	QuestDef.h \
 	RandomMovementGenerator.h \
 	ReactorAI.h \
@@ -497,7 +489,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AggressorAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/AuctionHouse.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Bag.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Base.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BattleGround.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BattleGroundHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/BattleGroundMgr.Po@am__quote@
@@ -516,7 +507,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DestinationHolder.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DuelHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/DynamicObject.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/EventSystem.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/FlightMaster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GameObject.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/GlobalEvents.Po@am__quote@
@@ -544,7 +534,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MotionMaster.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MovementGenerator.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/MovementHandler.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Mthread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NPCHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/NullCreatureAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Object.Po@am__quote@
@@ -556,7 +545,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PetAI.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/PetHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/Player.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ProgressBar.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QueryHandler.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestDef.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/QuestHandler.Po@am__quote@

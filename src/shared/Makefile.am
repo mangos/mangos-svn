@@ -22,13 +22,21 @@ INCLUDES += -I$(srcdir)/../game -I$(srcdir)/../realmd
 noinst_LIBRARIES = libshared.a libauth.a libconfig.a libdatabase.a libnetwork.a
 
 libshared_a_SOURCES = \
+    Base.h \
+    Base.cpp \
     Log.cpp \
     MemoryLeaks.cpp \
     ByteBuffer.h \
     Common.h \
     Errors.h \
+    EventSystem.h \
+    EventSystem.cpp \
     Log.h \
     MemoryLeaks.h \
+    Mthread.h \
+    Mthread.cpp \
+    ProgressBar.h \
+    ProgressBar.cpp \
     Singleton.h \
     Timer.h \
     Util.h \

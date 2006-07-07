@@ -24,7 +24,7 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectMgr.h"
-#include "ProgressBar.hpp"
+#include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 
 using std::remove_copy_if;

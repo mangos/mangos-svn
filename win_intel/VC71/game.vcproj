@@ -555,28 +555,10 @@
 			Name="Server"
 			Filter="">
 			<File
-				RelativePath="..\..\src\game\Base.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\Base.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\EventSystem.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\EventSystem.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\GlobalEvents.cpp">
 			</File>
 			<File
 				RelativePath="..\..\src\game\GlobalEvents.h">
-			</File>
-			<File
-				RelativePath="..\..\src\game\Mthread.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\Mthread.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\NameTables.h">

@@ -19,6 +19,8 @@
 #include "DBCStores.h"
 //#include "DataStore.h"
 #include "Policies/SingletonImp.h"
+#include "Log.h"
+#include "ProgressBar.h"
 
 #include "DBCfmt.cpp"
 
@@ -44,7 +46,142 @@ DBCStorage <SpellRange> sSpellRange(SpellRangefmt);
 
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 
+void LoadDBCStores(std::string dataPath)
+{
+    std::string tmpPath="";
 
+    const uint32 DBCFilesCount = 15;
+
+    barGoLink bar( DBCFilesCount );
+
+    std::list<std::string> not_found_dbc_files;
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/AreaTable.dbc");
+    if(sAreaStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/AreaTable.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/EmotesText.dbc");
+    if(sEmoteStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/EmotesText.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Faction.dbc");
+    if(sFactionStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/Faction.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/FactionTemplate.dbc");
+    if(sFactionTemplateStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/FactionTemplate.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/ItemDisplayInfo.dbc");
+    if(sItemDisplayTemplateStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/ItemDisplayInfo.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/ItemSet.dbc");
+    if(sItemSetStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/ItemSet.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SkillLineAbility.dbc");
+    if(sSkillLineAbilityStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SkillLineAbility.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Spell.dbc");
+    if(sSpellStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/Spell.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellCastTimes.dbc");
+    if(sCastTime.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellCastTimes.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellDuration.dbc");
+    if(sSpellDuration.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellDuration.dbc");
+
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellFocusObject.dbc");
+    if(sSpellFocusObject.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("SpellFocusObject.dbc"); 
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellItemEnchantment.dbc");
+    if(sSpellItemEnchantmentStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellItemEnchantment.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellRadius.dbc");
+    if(sSpellRadius.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellRadius.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/SpellRange.dbc");
+    if(sSpellRange.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/SpellRange.dbc");
+
+    tmpPath=dataPath;
+    tmpPath.append("dbc/Talent.dbc");
+    if(sTalentStore.Load(tmpPath.c_str()))
+        bar.step();
+    else
+        not_found_dbc_files.push_back("dbc/Talent.dbc");
+
+    if(not_found_dbc_files.size() >= DBCFilesCount )
+    {
+        sLog.outError("\n\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
+        exit(1);
+    }
+    else if(not_found_dbc_files.size() > 0 )
+    {
+
+        std::string str;
+        for(std::list<std::string>::iterator i = not_found_dbc_files.begin(); i != not_found_dbc_files.end(); ++i)
+            str += dataPath + *i + "\n";
+
+        sLog.outError("\n\nSome required *.dbc files (%u from %d) not found:\n%s",not_found_dbc_files.size(),DBCFilesCount,str.c_str());
+        exit(1);
+    }
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %d data stores", DBCFilesCount );
+    sLog.outString( "" );
+}
 
 
 

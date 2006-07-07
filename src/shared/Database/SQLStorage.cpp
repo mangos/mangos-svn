@@ -17,8 +17,8 @@
  */
 
 #include "SQLStorage.h"
-#include "../game/EventSystem.h"
-#include "../game/ProgressBar.hpp"
+#include "ProgressBar.h"
+#include "EventSystem.h"
 
 extern DatabaseMysql  sDatabase;
 
