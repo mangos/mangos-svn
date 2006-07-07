@@ -261,10 +261,10 @@ uint32 FindSpellRank(uint32 spellId)
             case 134282:rank = 14;break;
             case 134290:rank = 15;break;
             case 146442:rank = 16;break;
-            case 59695:rank = 51;break;//51-54 is rank of profession skill.
-            case 46478:rank = 52;break;
-            case 84128:rank = 53;break;
-            case 274133:rank = 54;break;
+            case 59695:rank = 1;break;//rank of profession skill.
+            case 46478:rank = 2;break;
+            case 84128:rank = 3;break;
+            case 274133:rank = 4;break;
             case 822:rank = 0;break;//spell from creating related to race 
             default:rank = 0;break;
         }
@@ -289,10 +289,10 @@ uint32 FindSpellRank(uint32 spellId)
             case 129146:rank = 14;break;
             case 129156:rank = 15;break;
             case 140190:rank = 16;break;
-            case 49393:rank = 51;break;//51-54 is rank of profession skill.
-            case 49400:rank = 52;break;
-            case 83240:rank = 53;break;
-            case 256953:rank = 54;break;
+            case 49393:rank = 1;break;//rank of profession skill.
+            case 49400:rank = 2;break;
+            case 83240:rank = 3;break;
+            case 256953:rank = 4;break;
             case 797:rank = 0;break;//spell from creating related to race 
             default:rank = 0;break;
         }

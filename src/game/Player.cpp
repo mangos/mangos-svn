@@ -1407,15 +1407,17 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
                     break;
                 if(newrank > oldrank && (*itr)->active)
                 {
-                    data.Initialize(SMSG_REMOVED_SPELL);
+                    data.Initialize(SMSG_SUPERCEDED_SPELL);
                     data << uint32((*itr)->spellId);
+                    data << uint32(spell_id);
                     GetSession()->SendPacket( &data );
                     (*itr)->active = 0;
                 }
                 if(newrank < oldrank)
                 {
-                    data.Initialize(SMSG_REMOVED_SPELL);
+                    data.Initialize(SMSG_SUPERCEDED_SPELL);
                     data << uint32(spell_id);
+                    data << uint32((*itr)->spellId);
                     GetSession()->SendPacket( &data );
                     newspell->active = 0;
                 }
@@ -2378,10 +2380,10 @@ bool Player::HasSkill(uint32 skill) const
     {
         if (GetUInt32Value(PLAYER_SKILL(i)) == skill)
         {
-			return true;
-		}
-	}
-	return false;
+            return true;
+        }
+    }
+    return false;
 }
 
 uint16 Player::GetSkillValue(uint32 skill) const
