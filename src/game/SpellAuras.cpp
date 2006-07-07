@@ -226,9 +226,9 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
             break;
 
         default:
-            m_positive = true;
+            m_positive = (spellproto->AttributesEx & (1<<7)) ? false : true;
     }
-
+    
     uint32 type = 0;
     if(!m_positive)
         type = 1;
