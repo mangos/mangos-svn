@@ -139,5 +139,6 @@ extern DBCStorage <SpellRange>               sSpellRange;
 extern DBCStorage <SpellEntry>               sSpellStore;
 extern DBCStorage <TalentEntry>              sTalentStore;
 
+void LoadDBCStores(std::string dataPath);
 
 #endif

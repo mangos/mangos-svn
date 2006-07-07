@@ -23,7 +23,6 @@ libgame_a_SOURCES = \
 	AggressorAI.cpp \
 	AuctionHouse.cpp \
 	Bag.cpp \
-	Base.cpp \
 	BattleGround.cpp \
 	BattleGroundHandler.cpp \
 	BattleGroundMgr.cpp \
@@ -43,7 +42,6 @@ libgame_a_SOURCES = \
 	DestinationHolder.cpp \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
-	EventSystem.cpp \
 	FlightMaster.cpp \
 	GameObject.cpp \
 	GlobalEvents.cpp \
@@ -71,7 +69,6 @@ libgame_a_SOURCES = \
 	MotionMaster.cpp \
 	MovementGenerator.cpp \
 	MovementHandler.cpp \
-	Mthread.cpp \
 	NPCHandler.cpp \
 	NullCreatureAI.cpp \
 	ObjectAccessor.cpp \
@@ -85,7 +82,6 @@ libgame_a_SOURCES = \
 	PetAI.h \
 	PetHandler.cpp \
 	Player.cpp \
-	ProgressBar.cpp \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestHandler.cpp \
@@ -115,7 +111,6 @@ libgame_a_SOURCES = \
 	AggressorAI.h \
 	AnimalRandomMovementGenerator.h \
 	Bag.h \
-	Base.h \
 	BattleGround.h \
 	BattleGroundMgr.h \
 	Cell.h \
@@ -134,7 +129,6 @@ libgame_a_SOURCES = \
 	DestinationHolder.h \
 	DestinationHolderImp.h \
 	DynamicObject.h \
-	EventSystem.h \
 	FactionTemplateResolver.h \
 	FlightMaster.h \
 	Formulas.h \
@@ -160,7 +154,6 @@ libgame_a_SOURCES = \
 	MotionMaster.h \
 	MovementGenerator.h \
 	MovementGeneratorImpl.h \
-	Mthread.h \
 	NameTables.h \
 	NPCHandler.h \
 	NullCreatureAI.h \
@@ -172,7 +165,6 @@ libgame_a_SOURCES = \
 	Opcodes.h \
 	Path.h \
 	Player.h \
-	ProgressBar.hpp \
 	QuestDef.h \
 	RandomMovementGenerator.h \
 	ReactorAI.h \

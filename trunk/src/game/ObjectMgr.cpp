@@ -28,7 +28,7 @@
 #include "WorldSession.h"
 #include "Group.h"
 #include "Guild.h"
-#include "ProgressBar.cpp"
+#include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);

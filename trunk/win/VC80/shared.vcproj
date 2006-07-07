@@ -297,6 +297,14 @@
 			Name="Util"
 			>
 			<File
+				RelativePath="..\..\src\shared\Base.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Base.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\ByteBuffer.h"
 				>
 			</File>
@@ -305,11 +313,35 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\EventSystem.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\EventSystem.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\MemoryLeaks.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\shared\MemoryLeaks.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Mthread.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Mthread.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\ProgressBar.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\ProgressBar.h"
 				>
 			</File>
 			<File
