@@ -933,7 +933,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     //uint32    victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
     //uint32    attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
 
-    if (pVictim->isDead())
+    if (!pVictim->isAlive())
     {
         SendAttackStop(pVictim->GetGUID());
         return;
