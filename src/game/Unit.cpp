@@ -188,18 +188,21 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 
 void Unit::RemoveSpellsCausingAura(uint32 auraType)
 {
-    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); iter++)
+    AuraMap::iterator iter, next;
+    for (iter = m_Auras.begin(); iter != m_Auras.end(); iter = next)
     {
+        next = iter;
+        ++next;
+
         if ((*iter).second)
         {
             if (((*iter).second)->GetModifier()->m_auraname == auraType)
             {
                 uint32 spellId = ((*iter).second)->GetId();
                 RemoveAurasDueToSpell(spellId);
-                //if spell has more than one aura,iter++ or iter+2 will delete already,so it will crash.
-                //this is temporary fixed,need better one.
-                iter = m_Auras.begin();
-                if( iter == m_Auras.end() || !(*iter).second )
+                if (!m_Auras.empty())
+                    next = m_Auras.begin();
+                else
                     return;
             }
         }
@@ -520,15 +523,16 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
             if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
                 continue;
             if(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH) - mod->m_amount > 0)
-            {
-                pVictim->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH) - mod->m_amount));
                 tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
-            }
             else
-            {
                 tmpvalue = uint32(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH)*spellInfo->EffectMultipleValue[x]);
-                pVictim->SetUInt32Value(UNIT_FIELD_HEALTH,0);
-            }
+
+            DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, false);
+            if (!pVictim->isAlive() && m_currentSpell)
+                if (m_currentSpell->m_spellInfo)
+                    if (m_currentSpell->m_spellInfo->Id == spellProto->Id)
+                        m_currentSpell->cancel();
+
             break;
         }
         if(GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*(100+m_RegenPCT)/100 < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
@@ -836,8 +840,16 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
-        sLog.outString("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpell->casttime));
-        pVictim->m_currentSpell->Delayed((int32)(0.25f * pVictim->m_currentSpell->casttime));
+        if (pVictim->m_currentSpell->getState() != SPELL_STATE_CASTING)
+        {
+            sLog.outString("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpell->casttime));
+            pVictim->m_currentSpell->Delayed((int32)(0.25f * pVictim->m_currentSpell->casttime));
+        }
+        else
+        {
+            sLog.outString("Spell Canceled!");
+            pVictim->m_currentSpell->cancel();
+        }
     }
 }
 
@@ -1082,6 +1094,7 @@ void Unit::castSpell( Spell * pSpell )
     {
         m_currentSpell->cancel();
         delete m_currentSpell;
+        m_currentSpell = NULL;
     }
 
     m_currentSpell = pSpell;
@@ -1093,6 +1106,7 @@ void Unit::InterruptSpell()
     {
         //m_currentSpell->SendInterrupted(0x20);
         m_currentSpell->cancel();
+        delete m_currentSpell;
         m_currentSpell = NULL;
     }
 }

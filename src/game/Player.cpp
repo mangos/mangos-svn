@@ -115,6 +115,7 @@ Player::Player (WorldSession *session): Unit()
     m_drunk = 0;
     m_restTime = 0;
     m_lastManaUse = 0;
+    m_deathTimer = 0;
 
     m_pvp_count = 0;
     m_pvp_counting = false;
@@ -767,6 +768,18 @@ void Player::Update( uint32 p_time )
 
         if (m_drunkTimer > 30000)
             HandleSobering();
+    }
+
+    if(m_deathTimer > 0)
+    {
+        if(p_time >= m_deathTimer)
+        {
+            m_deathTimer = 0;
+            BuildPlayerRepop();
+            RepopAtGraveyard();
+        }
+        else
+            m_deathTimer -= p_time;
     }
 }
 
@@ -1974,6 +1987,7 @@ void Player::ResurrectPlayer()
         DeMorph();
     }
 
+    m_deathTimer = 0;
 }
 
 void Player::KillPlayer()
@@ -1990,6 +2004,9 @@ void Player::KillPlayer()
     SetFlag( UNIT_FIELD_FLAGS, 0x08 );
 
     SetFlag( UNIT_DYNAMIC_FLAGS, 0x00 );
+
+    // 6 minutes until repop at graveyard
+    m_deathTimer = 360000;
 }
 
 void Player::CreateCorpse()
@@ -2069,11 +2086,9 @@ void Player::SpawnCorpseBones()
     data << (uint64)m_pCorpse->GetGUID();
     GetSession()->SendPacket(&data);
 
-    MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
-
     m_pCorpse->SaveToDB(true);
-    m_pCorpse = NULL;
 
+    DeleteCorpse();
 }
 
 void Player::DeathDurabilityLoss(double percent)
