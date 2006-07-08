@@ -410,6 +410,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
+        std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
 
         Spell * m_currentSpell;
 
@@ -458,6 +459,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         AuraMap m_Auras;
 
+        std::list<Aura *> m_scAuras; // casted singlecast auras
         std::list<DynamicObject*> m_dynObj;
         std::list<GameObject*> m_gameObj;
         std::list<Hostil*> m_hostilList;
