@@ -44,9 +44,6 @@
 
 #include <cmath>
 
-uint8 b_HP=0, b_Spirit=0, b_Stamina=0, b_IQ=0, b_Agility=0, b_Strength=0, b_Weaps;
-uint8 exHP=0, exSpirit=0, exStamina=0, exIQ=0, exAgility=0, exStrangth=0;
-
 Player::Player (WorldSession *session): Unit()
 {
     m_objectType |= TYPE_PLAYER;
@@ -360,8 +357,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     //+5% HP if has skill Endurance
     if (Player::HasSpell(20550))
     {
-        b_HP = uint32(GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 0.05);
-        SetUInt32Value(UNIT_FIELD_MAXHEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH) + b_HP);
+        SetUInt32Value(UNIT_FIELD_MAXHEALTH, uint32(GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 1.05));
     }
 
     // school resistances
@@ -1147,22 +1143,22 @@ void Player::GiveLevel()
 
     if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
     {
-        exHP = (uint32)(newHP / 1.05);                      //must remove previous bonus, so stat wouldn't grow toomuch
-        b_HP = uint8(exHP * 0.05);
+        uint32 exHP = uint32(newHP / 1.05);                 //must remove previous bonus, so stat wouldn't grow toomuch
+        uint32 b_HP = uint32(exHP * 0.05);
         newHP += b_HP;
     }
     
     if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
     {
-        exSpirit = (uint32)(newSPI / 1.05);                 //must remove previous bonus, so stat wouldn't grow toomuch
-        b_Spirit = uint8(exSpirit * 0.05);
+        uint32 exSpirit = uint32(newSPI / 1.05);            //must remove previous bonus, so stat wouldn't grow toomuch
+        uint32 b_Spirit = uint32(exSpirit * 0.05);
         newSPI += b_Spirit;
     }
 
     if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
     {
-        exIQ = (uint32)(newINT / 1.05);                     //must remove previous bonus, so stat wouldn't grow toomuch
-        b_IQ = uint8(exIQ * 0.05);
+        uint32 exIQ = uint32(newINT / 1.05);                //must remove previous bonus, so stat wouldn't grow toomuch
+        uint32 b_IQ = uint32(exIQ * 0.05);
         newINT += b_IQ;
     }
 
@@ -5925,7 +5921,7 @@ uint8 Player::CanUseItem( Item *pItem )
     if( pItem )
     {
         sLog.outDebug( "STORAGE: CanUseItem item = %u", pItem->GetEntry());
-        if( isDead() )
+        if( !isAlive() )
             return EQUIP_ERR_YOU_ARE_DEAD;
         //if( isStunned() )
         //    return EQUIP_ERR_YOU_ARE_STUNNED;
@@ -5966,7 +5962,7 @@ uint8 Player::CanUseItem( Item *pItem )
 uint8 Player::CanUseAmmo( uint32 item )
 {
     sLog.outDebug( "STORAGE: CanUseAmmo item = %u", item);
-    if( isDead() )
+    if( !isAlive() )
         return EQUIP_ERR_YOU_ARE_DEAD;
     //if( isStunned() )
     //    return EQUIP_ERR_YOU_ARE_STUNNED;
