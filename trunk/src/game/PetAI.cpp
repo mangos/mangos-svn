@@ -135,7 +135,7 @@ void PetAI::UpdateAI(const uint32 diff)
             if ( i_pet.m_currentSpell )
             {
                 if( i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
-                    i_pet.m_currentSpell = NULL;
+                    i_pet.m_currentSpell->cancel();
                 else
                     return;
             }
