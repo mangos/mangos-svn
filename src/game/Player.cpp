@@ -74,7 +74,6 @@ Player::Player (WorldSession *session): Unit()
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
     m_pCorpse = NULL;
-    m_currentSpell = NULL;
     m_resurrectGUID = 0;
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;

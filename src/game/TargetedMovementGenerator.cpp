@@ -208,8 +208,7 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
             return;
         else
         {
-            delete owner.m_currentSpell;
-            owner.m_currentSpell = NULL;
+            owner.m_currentSpell->cancel();
         }
     }
     Spell *spell = new Spell(&owner, spellInfo, false, 0);

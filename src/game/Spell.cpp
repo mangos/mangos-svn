@@ -458,6 +458,9 @@ void Spell::prepare(SpellCastTargets * targets)
 
 void Spell::cancel()
 {
+    if(m_spellState == SPELL_STATE_FINISHED)
+        return;
+
     WorldPacket data;
     m_autoRepeat = false;
     if(m_spellState == SPELL_STATE_PREPARING)

@@ -1162,8 +1162,6 @@ void Unit::InterruptSpell()
     {
         //m_currentSpell->SendInterrupted(0x20);
         m_currentSpell->cancel();
-        delete m_currentSpell;
-        m_currentSpell = NULL;
     }
 }
 

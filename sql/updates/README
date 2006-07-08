@@ -12,9 +12,9 @@ To see if you need an update, the file names have been given a fixed structure
 that should enable you to see if you need an update or not.
 
 === File name descriptin ===
-File names are divided into two parts. First part of the name, is the table that
-needs and update or has been added. The second part is the revision that will
-need the update. See an example below:
+File names are divided into two parts. First part is the revision that will be 
+compatible with database after apply update. The second part of the name, 
+is the table that needs and update or has been added. See an example below:
 
          1123_character_spell.sql
          |                  |
