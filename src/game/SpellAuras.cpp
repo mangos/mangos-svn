@@ -1931,3 +1931,23 @@ void Aura::SendCoolDownEvent()
     data << uint32(0);                                      //CoolDown Time ?
     m_caster->SendMessageToSet(&data,true);
 }
+
+bool Aura::IsSingleTarget()
+{
+    SpellEntry *spellInfo = GetSpellProto();
+    if (!spellInfo) return false;
+
+    // cheap shot is an exception
+    if ( m_spellId == 1833 || m_spellId == 14902 ) return false;
+
+    // cannot be cast on another target while not cooled down anyway
+    if ( GetAuraDuration() < spellInfo->RecoveryTime) return false;
+    if ( spellInfo->RecoveryTime == 0 && GetAuraDuration() < spellInfo->CategoryRecoveryTime) return false;
+
+    // banish is not covered
+    if ( m_spellId == 710 || m_spellId == 18647 || m_spellId == 27565) return true;
+
+    // all other single target spells have
+    if ( spellInfo->AttributesEx & (1<<18) ) return true;
+    return false;
+}

@@ -157,6 +157,8 @@ class Aura
         bool IsPermanent() { return m_permanent; }
         void SetPermanent(bool value) { m_permanent = value; }
 
+        bool IsSingleTarget();
+
         void Update(uint32 diff);
         void ApplyModifier(bool Apply);
 

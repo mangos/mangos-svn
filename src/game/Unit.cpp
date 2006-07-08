@@ -83,6 +83,7 @@ Unit::Unit() : Object()
     m_attacking = NULL;
     m_modDamagePCT = 0;
     m_RegenPCT = 0;
+    m_scAuras.clear();
 }
 
 Unit::~Unit()
@@ -1176,6 +1177,32 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         Aur->_AddAura();
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount + 1);
+
+        if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
+        {
+            std::list<Aura *> *scAuras = Aur->GetCaster()->GetSingleCastAuras();
+            std::list<Aura *>::iterator itr, next;
+            for (itr = scAuras->begin(); itr != scAuras->end(); itr = next)
+            {
+                next = itr;
+                next++;
+                if ((*itr)->GetTarget() != Aur->GetTarget() &&
+                    (*itr)->GetSpellProto()->Category == Aur->GetSpellProto()->Category &&
+                    (*itr)->GetSpellProto()->SpellIconID == Aur->GetSpellProto()->SpellIconID &&
+                    (*itr)->GetSpellProto()->SpellVisual == Aur->GetSpellProto()->SpellVisual &&
+                    (*itr)->GetSpellProto()->Attributes == Aur->GetSpellProto()->Attributes &&
+                    (*itr)->GetSpellProto()->AttributesEx == Aur->GetSpellProto()->AttributesEx &&
+                    (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
+                {
+                    (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
+                    if(scAuras->empty())
+                        break;
+                    else
+                        next = scAuras->begin();
+                }
+            }
+            scAuras->push_back(Aur);
+        }
     }
     return true;
 }
@@ -1301,6 +1328,11 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
 
 void Unit::RemoveAura(AuraMap::iterator &i)
 {
+    if ((*i).second->IsSingleTarget())
+    {
+        std::list<Aura *> *scAuras = (*i).second->GetCaster()->GetSingleCastAuras();
+        scAuras->remove((*i).second);
+    }
     m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
     (*i).second->_RemoveAura();
     delete (*i).second;
