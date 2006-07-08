@@ -98,6 +98,13 @@ struct ProcTriggerSpell
     uint32 procCharges;
 };
 
+struct SpellCritSchool
+{
+	uint32 spellId;
+	int32 school;
+	int32 chance;
+};
+
 enum DeathState
 {
     ALIVE = 0,
@@ -400,8 +407,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         float m_speed;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
-        uint32 m_modDamagePCT;
-        uint32 m_RegenPCT;
+        int32 m_modDamagePCT;
+        int32 m_RegenPCT;
+		int32 m_modHitChance;
+		int32 m_baseSpellCritChance;
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
@@ -410,6 +419,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
+		std::list<struct SpellCritSchool*> m_spellCritSchool;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
 
         Spell * m_currentSpell;

@@ -1194,7 +1194,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER, creatureTarget->GetGUIDLow());
-        //creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
+        creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         creatureTarget->SetUInt32Value(UNIT_FIELD_STAT0,int(20+petlevel*1.55));
