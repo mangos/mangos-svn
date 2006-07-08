@@ -95,10 +95,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModBlockPercent,                       //SPELL_AURA_MOD_BLOCK_PERCENT = 51,
     &Aura::HandleAuraModCritPercent,                        //SPELL_AURA_MOD_CRIT_PERCENT = 52,
     &Aura::HandlePeriodicLeech,                             //SPELL_AURA_PERIODIC_LEECH = 53,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HIT_CHANCE = 54,
+    &Aura::HandleModHitChance,                              //SPELL_AURA_MOD_HIT_CHANCE = 54,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 55,
     &Aura::HandleAuraTransform,                             //SPELL_AURA_TRANSFORM = 56,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_CRIT_CHANCE = 57,
+    &Aura::HandleModSpellCritChance,                        //SPELL_AURA_MOD_SPELL_CRIT_CHANCE = 57,
     &Aura::HandleAuraModIncreaseSwimSpeed,                  //SPELL_AURA_MOD_INCREASE_SWIM_SPEED = 58,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY_SILENCE = 60,
@@ -112,7 +112,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STALKED = 68,
     &Aura::HandleAuraSchoolAbsorb,                          //SPELL_AURA_SCHOOL_ABSORB = 69,
     &Aura::HandleNULL,                                      //SPELL_AURA_EXTRA_ATTACKS = 70,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
+    &Aura::HandleModSpellCritChanceShool,                   //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST = 72,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST_SCHOOL = 73,
     &Aura::HandleReflectSpellsSchool,                       //SPELL_AURA_REFLECT_SPELLS_SCHOOL = 74,
@@ -1504,6 +1504,11 @@ void Aura::HandlePeriodicLeech(bool apply)
     }
 }
 
+void Aura::HandleModHitChance(bool Apply)
+{
+    m_target->m_modHitChance = Apply?m_modifier->m_amount:0;
+}
+
 void Aura::HandleAuraModScale(bool apply)
 {
     m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
@@ -1689,6 +1694,10 @@ void Aura::HandleAuraTransform(bool apply)
     }*/
 }
 
+void Aura::HandleModSpellCritChance(bool Apply)
+{
+    m_target->m_baseSpellCritChance += Apply?m_modifier->m_amount:(-m_modifier->m_amount);
+}
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 {
     sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
@@ -1772,6 +1781,37 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
             if(GetId() == (*i)->m_spellId)
             {
                 m_target->m_damageManaShield.erase(i);
+                break;
+            }
+        }
+    }
+}
+
+void Aura::HandleModSpellCritChanceShool(bool Apply)
+{
+    if(Apply)
+    {
+        for(std::list<struct SpellCritSchool*>::iterator i = m_target->m_spellCritSchool.begin();i != m_target->m_spellCritSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_spellCritSchool.erase(i);
+            }
+        }
+        SpellCritSchool *scs = new SpellCritSchool();
+
+        scs->chance = m_modifier->m_amount;
+        scs->spellId = GetId();
+        scs->school = m_modifier->m_miscvalue;
+        m_target->m_spellCritSchool.push_back(scs);
+    }
+    else
+    {
+        for(std::list<struct SpellCritSchool*>::iterator i = m_target->m_spellCritSchool.begin();i != m_target->m_spellCritSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_spellCritSchool.erase(i);
                 break;
             }
         }

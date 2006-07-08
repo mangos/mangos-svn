@@ -73,7 +73,6 @@ Unit::Unit() : Object()
     m_ReflectSpellSchool = 0;
     m_ReflectSpellPerc   = 0;
 
-    //m_damageManaShield = NULL;
     m_transform = 0;
     m_ShapeShiftForm = 0;
 
@@ -83,6 +82,9 @@ Unit::Unit() : Object()
     m_attacking = NULL;
     m_modDamagePCT = 0;
     m_RegenPCT = 0;
+    m_modHitChance = 0;
+    m_baseSpellCritChance = 5;
+    m_spellCritSchool.clear();
     m_scAuras.clear();
 }
 
@@ -445,10 +447,26 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         return;
     uint32 absorb=0;
     uint32 resist=0;
+    int32 critchance = m_baseSpellCritChance;
+    int crit = 0;
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
     if(spellInfo)
+    {
+        for(std::list<struct SpellCritSchool*>::iterator i = m_spellCritSchool.begin();i != m_spellCritSchool.end();i++)
+        {
+            if((*i)->school == -1 || (*i)->school == spellInfo->School)
+            {
+                critchance += (*i)->chance;
+            }
+        }
+        if(critchance + (GetUInt32Value(UNIT_FIELD_IQ) - 100)/100 >= urand(0,100))
+        {
+            damage = uint32(damage*1.5);
+            crit = 1;
+        }
         absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage,&resist);
+    }
 
     WorldPacket data;
 
@@ -458,8 +476,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         return;
     }
 
-    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u .",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID, absorb, resist);
+    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u crit is %i.",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID, absorb, resist,crit);
 
     SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, damage, spellInfo->School, absorb, resist, false, 0);
     DealDamage(pVictim, damage<(absorb+resist)?0:(damage-absorb-resist), 0, true);
@@ -474,13 +492,30 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     uint32 absorb=0;
     uint32 resist=0;
+    int32 critchance = m_baseSpellCritChance;
+    int crit = 0;
+    uint32 pdamage = mod->m_amount;
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellProto->Id);
     if(spellInfo)
-        absorb = CalDamageAbsorb(pVictim,spellInfo->School,mod->m_amount,&resist);
+    {
+        for(std::list<struct SpellCritSchool*>::iterator i = m_spellCritSchool.begin();i != m_spellCritSchool.end();i++)
+        {
+            if((*i)->school == -2 || (*i)->school == spellInfo->School)
+            {
+                critchance += (*i)->chance;
+            }
+        }
+        if(critchance + (GetUInt32Value(UNIT_FIELD_IQ) - 100)/100 >= urand(0,100))
+        {
+            pdamage = uint32(pdamage*1.5);
+            crit = 1;
+        }
+        absorb = CalDamageAbsorb(pVictim,spellInfo->School,pdamage,&resist);
+    }
 
-    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), mod->m_amount, spellProto->Id,absorb);
+    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u crit is %u",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb,crit);
 
     WorldPacket data;
     data.Initialize(SMSG_PERIODICAURALOG);
@@ -697,14 +732,14 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
         ((Player*)this)->UpdateSkillWeapon();
 
-    if (GetTypeId() == TYPEID_PLAYER && (GetUnitCriticalChance()/100) * 512 >= urand(0, 512))
+    if (GetUnitCriticalChance()/100 * 512 >= urand(0, 512))
     {
         *hitInfo = 0xEA;
         *damage *= 2;
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
     }
-    else if (pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->GetUnitParryChance()/100) * 512 >= urand(0, 512))
+    else if ((pVictim->GetUnitParryChance()/100) * 512 >= urand(0, 512))
     {
         *damage = 0;
         *victimState = 2;
@@ -712,7 +747,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ((Player*)pVictim)->UpdateDefense();
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
     }
-    else if (pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->GetUnitDodgeChance()/100) * 512 >= urand(0, 512))
+    else if ((pVictim->GetUnitDodgeChance()/100) * 512 >= urand(0, 512))
     {
         *damage = 0;
         *victimState = 3;
@@ -720,7 +755,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ((Player*)pVictim)->UpdateDefense();
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
     }
-    else if (pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->GetUnitBlockChance()/100) * 512 >= urand(0, 512))
+    else if ((pVictim->GetUnitBlockChance()/100) * 512 >= urand(0, 512))
     {
         *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 10));
 
@@ -863,11 +898,37 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     uint32   damageType = NORMAL_DAMAGE;
     uint32   blocked_amount = 0;
     uint32   victimState = VICTIMSTATE_NORMAL;
-    int32    attackerSkill = GetUnitMeleeSkill();
-    int32    victimSkill = pVictim->GetUnitMeleeSkill();
+    int32    attackerSkill = 0;//GetUnitMeleeSkill();
+    int32    victimSkill = 0;//pVictim->GetUnitMeleeSkill();
     float    chanceToHit = 100.0f;
     uint32   AbsorbDamage = 0;
     uint32   resist=0;
+
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        uint32 weaponskill = 0;
+        Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if (!tmpitem)
+            tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (tmpitem)
+            weaponskill = tmpitem->GetSkill();
+        else weaponskill = SKILL_UNARMED;
+        attackerSkill = ((Player*)this)->GetSkillValue(weaponskill);
+    }
+    else attackerSkill = (getLevel()-1)*5;
+
+    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+    {
+        uint32 weaponskill = 0;
+        Item *tmpitem = ((Player*)pVictim)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if (!tmpitem)
+            tmpitem = ((Player*)pVictim)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (tmpitem)
+            weaponskill = tmpitem->GetSkill();
+        else weaponskill = SKILL_UNARMED;
+        victimSkill = ((Player*)pVictim)->GetSkillValue(weaponskill);
+    }
+    else victimSkill = (pVictim->getLevel()-1)*5;
 
     //uint32    victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
     //uint32    attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
@@ -883,20 +944,14 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 
     //if(isStunned()) return;
 
-    if (GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (attackerSkill <= victimSkill - 24)
-            chanceToHit = 0;
-        else if (attackerSkill <= victimSkill)
-            chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
-
-        if (chanceToHit < 15.0f)
-            chanceToHit = 15.0f;
-    }
+    if (attackerSkill <= victimSkill - 24)
+        chanceToHit = 0;
+    else if (attackerSkill <= victimSkill)
+        chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
 
     uint32 damage = CalculateDamage (false);
 
-    if((chanceToHit/100) * 512 >= urand(0, 512) )
+    if((chanceToHit+m_modHitChance)/100 * 512 >= urand(0, 512) )
     {
         if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
         {

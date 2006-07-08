@@ -25,7 +25,7 @@ struct DamageManaShield
 {
     uint32 m_spellId;
     uint32 m_modType;
-    uint32 m_schoolType;
+    int32 m_schoolType;
     uint32 m_totalAbsorb;
     uint32 m_currAbsorb;
 };
@@ -97,6 +97,7 @@ class Aura
         void HandleAuraModBlockPercent(bool Apply);
         void HandleAuraModCritPercent(bool Apply);
         void HandlePeriodicLeech(bool Apply);
+        void HandleModHitChance(bool Apply);
         void HandleAuraModScale(bool Apply);
         void HandlePeriodicManaLeech(bool Apply);
         void HandleAuraMounted(bool Apply);
@@ -110,9 +111,11 @@ class Aura
         void HandlePeriodicDamagePCT(bool Apply);
         void HandleAuraModAttackPower(bool Apply);
         void HandleAuraTransform(bool Apply);
+        void HandleModSpellCritChance(bool Apply);
         void HandleAuraModIncreaseSwimSpeed(bool Apply);
         void HandleAuraManaShield(bool Apply);
         void HandleAuraSchoolAbsorb(bool Apply);
+        void HandleModSpellCritChanceShool(bool Apply);
         void HandleReflectSpellsSchool(bool Apply);
         void HandleModMechanicImmunity(bool Apply);
         void HandleAuraModSkill(bool Apply);
