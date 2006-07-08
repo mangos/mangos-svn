@@ -1437,6 +1437,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply)
     }
     else
     {
+        delete m_procSpell;
         m_procSpell = NULL;
     }
 }

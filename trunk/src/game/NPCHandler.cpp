@@ -30,6 +30,7 @@
 #include "ScriptCalls.h"
 #include "ObjectAccessor.h"
 #include "Creature.h"
+#include "MapManager.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 {
@@ -325,38 +326,50 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendSpiritRessurect()
 {
+    if (!_player)
+        return;
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( 15007 );
-    if(spellInfo)
+    _player->ResurrectPlayer();
+    uint32 level = _player->getLevel();
+
+    //Characters from level 1-10 are not affected by resurrection sickness.
+    //Characters from level 11-19 will suffer from one minute of sickness
+    //for each level they are above 10.
+    //Characters level 20 and up suffer from ten minutes of sickness.
+    if (level > 10)
     {
-        for(uint32 i = 0;i<3;i++)
+        SpellEntry *spellInfo = sSpellStore.LookupEntry( 15007 );
+        if(spellInfo)
         {
-            uint8 eff = spellInfo->Effect[i];
-            if(eff>=TOTAL_SPELL_EFFECTS)
-                continue;
-            if(eff==6)
+            for(uint32 i = 0;i<3;i++)
             {
-                Aura *Aur = new Aura(spellInfo, i, _player, _player);
-                _player->AddAura(Aur);
+                uint8 eff = spellInfo->Effect[i];
+                if(eff>=TOTAL_SPELL_EFFECTS)
+                    continue;
+                if(eff==6)
+                {
+                    Aura *Aur = new Aura(spellInfo, i, _player, _player);
+                    _player->AddAura(Aur);
+                    if (level < 20)
+                    {
+                        Aur->SetAuraDuration((level-10)*60000);
+                        Aur->UpdateAuraDuration();
+                    }
+                }
             }
         }
     }
 
+    _player->ApplyStats(false);
+    _player->SetUInt32Value(UNIT_FIELD_HEALTH, _player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)/2 );
+    _player->SetUInt32Value(UNIT_FIELD_POWER1, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER1)/2 );
+    _player->ApplyStats(true);
+
     _player->DeathDurabilityLoss(0.25);
-    _player->SetMovement(MOVE_LAND_WALK);
-    _player->SetPlayerSpeed(MOVE_RUN, (float)7.5, true);
-    _player->SetPlayerSpeed(MOVE_SWIM, (float)4.9, true);
-
-    _player->SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-    _player->SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-    _player->SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-    _player->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-    _player->SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-    _player->SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
-
-    _player->ResurrectPlayer();
-    //_player->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(_player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
     _player->SpawnCorpseBones();
+
+    // update world right away
+    MapManager::Instance().GetMap(_player->GetMapId())->Add(GetPlayer());
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )

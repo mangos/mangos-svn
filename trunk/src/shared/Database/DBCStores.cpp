@@ -315,16 +315,22 @@ bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
 {
     SpellEntry *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
-    if(!spellInfo_1 || !spellInfo_2) return false;
-    if(spellInfo_1->Id == spellId_2) return false;
 
-    if (spellInfo_1->SpellFamilyName == 0 ||
-        spellInfo_2->SpellFamilyName == 0)
-         return false;
+    if(!spellInfo_1 || !spellInfo_2) 
+        return false;
 
-    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID ||
-        IsRankSpellDueToSpell(spellInfo_1, spellId_2)) 
+    if(spellInfo_1->Id == spellId_2) 
+        return false;
+
+    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID && 
+        spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
         return true;
+
+    if (IsRankSpellDueToSpell(spellInfo_1, spellId_2)) 
+        return true;
+
+    if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
+         return false;
 
     if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
          return false;

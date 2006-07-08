@@ -467,6 +467,9 @@ void Spell::cancel()
     }
     else if(m_spellState == SPELL_STATE_CASTING)
     {
+        for (int j = 0; j < 3; j++)
+            for(std::list<Unit*>::iterator iunit= m_targetUnits[j].begin();iunit != m_targetUnits[j].end();++iunit)
+                if (*iunit) (*iunit)->RemoveAurasDueToSpell(m_spellInfo->Id);
         m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
         SendChannelUpdate(0);
     }

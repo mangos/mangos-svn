@@ -894,6 +894,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 m_drunk;
         time_t m_lastManaUse;
 
+        uint32 m_deathTimer;
         uint8 m_isunderwater;
 
         uint32 m_restTime;
