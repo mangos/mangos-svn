@@ -195,7 +195,11 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         case DRUID: powertype = 0; unitfield = 0x0000EE00; break;
     }
 
-    SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+	if ( race == TAUREN )
+	{
+		 SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
+	}
+	else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
     SetUInt32Value(UNIT_FIELD_STAMINA, info->stamina );
