@@ -1045,7 +1045,7 @@ uint32 Unit::CalculateDamage(bool ranged)
         std::swap(min_damage,max_damage);
     }
 
-    if(max_damage==0.0)
+    if(max_damage == 0.0)
         max_damage = 5.0;
 
     float diff = max_damage - min_damage + 1;
@@ -1575,8 +1575,10 @@ void Unit::ApplyStats(bool apply)
     if(getClass() == HUNTER) classrate = 26.5;
     else if(getClass() == ROGUE)  classrate = 14.5;
     else classrate = 20;
-
-                                                            ///*+(Defense*0,04);
+                                                                  ///*+(Defense*0,04);
+    if (getRace() == NIGHTELF)
+	val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate + 1);
+	else
     val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
 
     ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);
