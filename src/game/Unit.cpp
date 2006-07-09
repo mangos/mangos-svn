@@ -744,7 +744,9 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         *damage = 0;
         *victimState = 2;
 
-        ((Player*)pVictim)->UpdateDefense();
+        if(GetTypeId() == TYPEID_PLAYER)
+            ((Player*)pVictim)->UpdateDefense();
+
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
     }
     else if ((pVictim->GetUnitDodgeChance()/100) * 512 >= urand(0, 512))
@@ -752,7 +754,9 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         *damage = 0;
         *victimState = 3;
 
-        ((Player*)pVictim)->UpdateDefense();
+        if(GetTypeId() == TYPEID_PLAYER)
+            ((Player*)pVictim)->UpdateDefense();
+
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
     }
     else if ((pVictim->GetUnitBlockChance()/100) * 512 >= urand(0, 512))
@@ -768,7 +772,9 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
         *victimState = 4;
-        ((Player*)pVictim)->UpdateDefense();
+
+        if(GetTypeId() == TYPEID_PLAYER)
+            ((Player*)pVictim)->UpdateDefense();
     }
 
     for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
