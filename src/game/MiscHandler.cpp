@@ -117,24 +117,16 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
-    if( (GetPlayer()->isInCombat()) || (GetPlayer()->isInDuel()) )
-    {
-        data.Initialize( SMSG_LOGOUT_RESPONSE );
-        data << (uint8)0xC;
-        data << uint32(0);
-        data << uint8(0);
-        SendPacket( &data );
-        LogoutRequest(0);
-        return;
-    }
-
-    Player* Target = GetPlayer();
+	Player* Target = GetPlayer();
     uint32 MapID = Target->GetMapId();
     Map* Map = MapManager::Instance().GetMap(MapID);
     float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
     sLog.outDebug("Current z:%f \tMap Z:%f", Target->GetPositionZ(),posz);
-    //need more judge and handle while jumping and falling
-    if ((Target->GetPositionZ() > posz + 1))
+
+	//Can not logout if...
+    if( (GetPlayer()->isInCombat()) ||        //...is in combat
+		(GetPlayer()->isInDuel()) ||          //...is in Duel
+		(Target->GetPositionZ() > posz + 1) ) //...need more judge and handle while jumping and falling
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
@@ -143,7 +135,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         SendPacket( &data );
         LogoutRequest(0);
         return;
-    }
+    }    
 
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
