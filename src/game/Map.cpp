@@ -262,8 +262,12 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self)
 void Map::MessageBoardcast(Object *obj, WorldPacket *msg)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        DEBUG_LOG("Map::MessageBoardcast: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
