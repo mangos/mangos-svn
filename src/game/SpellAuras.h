@@ -74,6 +74,7 @@ class Aura
         void HandleAuraModResistance(bool Apply);
         void HandleAuraModRoot(bool Apply);
         void HandleAuraModSilence(bool Apply);
+        void HandleReflectSpells(bool Apply);
         void HandleAuraModStat(bool Apply);
         void HandleAuraModIncreaseSpeed(bool Apply);
         void HandleAuraModIncreaseMountedSpeed(bool Apply);
@@ -96,6 +97,7 @@ class Aura
         void HandleAuraModCritPercent(bool Apply);
         void HandlePeriodicLeech(bool Apply);
         void HandleModHitChance(bool Apply);
+        void HandleModSpellHitChance(bool Apply);
         void HandleAuraModScale(bool Apply);
         void HandlePeriodicManaLeech(bool Apply);
         void HandleAuraMounted(bool Apply);
@@ -111,6 +113,7 @@ class Aura
         void HandleAuraTransform(bool Apply);
         void HandleModSpellCritChance(bool Apply);
         void HandleAuraModIncreaseSwimSpeed(bool Apply);
+        void HandleModDamageDoneCreature(bool Apply);
         void HandleAuraManaShield(bool Apply);
         void HandleAuraSchoolAbsorb(bool Apply);
         void HandleModSpellCritChanceShool(bool Apply);
