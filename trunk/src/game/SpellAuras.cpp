@@ -202,7 +202,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
-    m_procSpell(NULL),m_procdamage(NULL), m_modifier(NULL), m_spellId(spellproto->Id), m_effIndex(eff), 
+    m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff), 
     m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),  
     m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0)
 {
@@ -242,7 +242,6 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
         damage = CalculateDamage();
 
     m_effIndex = eff;
-    m_modifier = new Modifier;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
 }
 
@@ -285,13 +284,11 @@ uint32 Aura::CalculateDamage()
 
 void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
 {
-    if(!m_modifier)
-        m_modifier = new Modifier;
-    m_modifier->m_auraname = t;
-    m_modifier->m_amount   = a;
-    m_modifier->m_miscvalue = miscValue;
-    m_modifier->m_miscvalue2 = miscValue2;
-    m_modifier->periodictime = pt;
+    m_modifier.m_auraname = t;
+    m_modifier.m_amount   = a;
+    m_modifier.m_miscvalue = miscValue;
+    m_modifier.m_miscvalue2 = miscValue2;
+    m_modifier.periodictime = pt;
 }
 
 void Aura::Update(uint32 diff)
@@ -334,7 +331,7 @@ void Aura::Update(uint32 diff)
         if(m_periodicTimer == 0)
         {
             // update before applying (aura can be removed in TriggerSpell or PeriodicAuraLog calls)
-            m_periodicTimer = m_modifier->periodictime;
+            m_periodicTimer = m_modifier.periodictime;
 
             if(m_isTrigger)
             {
@@ -343,9 +340,9 @@ void Aura::Update(uint32 diff)
             else
             {
                 if(!m_caster)
-                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
                 else
-                    m_caster->PeriodicAuraLog(m_target, GetSpellProto(), m_modifier);
+                    m_caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
             }
         }
     }
@@ -354,7 +351,7 @@ void Aura::Update(uint32 diff)
 void Aura::ApplyModifier(bool apply)
 {
     uint8 aura = 0;
-    aura = m_modifier->m_auraname;
+    aura = m_modifier.m_auraname;
     if(aura<TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply);
 }
@@ -396,7 +393,7 @@ void Aura::_AddAura()
     m_target->ApplyStats(false);
     ApplyModifier(true);
     m_target->ApplyStats(true);
-    sLog.outDebug("Aura %u now is in use", m_modifier->m_auraname);
+    sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
     if(!samespell)
     {
@@ -442,7 +439,7 @@ void Aura::_AddAura()
 void Aura::_RemoveAura()
 {
     m_target->ApplyStats(false);
-    sLog.outDebug("Aura %u now is remove", m_modifier->m_auraname);
+    sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false);
     m_target->ApplyStats(true);
 
@@ -490,9 +487,9 @@ void Aura::HandlePeriodicDamage(bool apply)
 {
     if( apply )
     {
-        //m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -558,9 +555,9 @@ void Aura::HandlePeriodicHeal(bool apply)
         return;
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -575,14 +572,14 @@ void Aura::HandleModAttackSpeed(bool apply)
     if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
         return;
     
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME,m_modifier->m_amount,apply);
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleModThreat(bool apply)
 {
     if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
         return;
-    m_target->AddHostil(m_caster->GetGUID(),apply ? float(m_modifier->m_amount) : -float(m_modifier->m_amount));
+    m_target->AddHostil(m_caster->GetGUID(),apply ? float(m_modifier.m_amount) : -float(m_modifier.m_amount));
 }
 
 void Aura::HandleAuraWaterWalk(bool apply)
@@ -706,17 +703,17 @@ void Aura::HandleAuraModStun(bool apply)
 
 void Aura::HandleAuraModRangedAttackPower(bool apply)
 {
-    m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier->m_amount,apply);
+    m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
 {
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_POWER4,m_modifier->m_amount,apply);
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_POWER4,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 {
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH,m_modifier->m_amount,apply);
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH,m_modifier.m_amount,apply);
 }
 
 // FIX-ME!!
@@ -775,10 +772,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
 {
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
         m_isTrigger = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -810,9 +807,9 @@ void Aura::HandlePeriodicEnergize(bool apply)
 {
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -826,42 +823,42 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
 {
     uint16 index = 0;
     uint16 index2 = 0;
-    switch(m_modifier->m_miscvalue)
+    switch(m_modifier.m_miscvalue)
     {
         case 1:
         {
             index = UNIT_FIELD_ARMOR;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
         }break;
         case IMMUNE_SCHOOL_HOLY:
         {
             index = UNIT_FIELD_RESISTANCES_01;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
         }break;
         case IMMUNE_SCHOOL_FIRE:
         {
             index = UNIT_FIELD_RESISTANCES_02;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
         }break;
         case IMMUNE_SCHOOL_NATURE:
         {
             index = UNIT_FIELD_RESISTANCES_03;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
         }break;
         case IMMUNE_SCHOOL_FROST:
         {
             index = UNIT_FIELD_RESISTANCES_04;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
         }break;
         case IMMUNE_SCHOOL_SHADOW:
         {
             index = UNIT_FIELD_RESISTANCES_05;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
         }break;
         case IMMUNE_SCHOOL_ARCANE:
         {
             index = UNIT_FIELD_RESISTANCES_06;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
         }
         break;
         case IMMUNE_SCHOOL_MAGIC:
@@ -869,11 +866,11 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
             for(int8 x=0;x < 6;x++)
             {
                 index  = UNIT_FIELD_RESISTANCES_01 + x;
-                index2 = m_modifier->m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
+                index2 = m_modifier.m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+                m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
+                    m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
             }
             return;
         }break;
@@ -884,9 +881,9 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
         }break;
     }
 
-    m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+    m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
+        m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraSafeFall(bool apply)
@@ -912,7 +909,7 @@ void Aura::HandleAuraDamageShield(bool apply)
         }
         DamageShield* ds = new DamageShield();
         ds->m_caster = GetCaster();
-        ds->m_damage = m_modifier->m_amount;
+        ds->m_damage = m_modifier.m_amount;
         ds->m_spellId = GetId();
         m_target->m_damageShields.push_back((*ds));
     }
@@ -989,42 +986,42 @@ void Aura::HandleAuraModResistance(bool apply)
 {
     uint16 index = 0;
     uint16 index2 = 0;
-    switch(m_modifier->m_miscvalue)
+    switch(m_modifier.m_miscvalue)
     {
         case 1:
         {
             index = UNIT_FIELD_ARMOR;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
         }break;
         case IMMUNE_SCHOOL_HOLY:
         {
             index = UNIT_FIELD_RESISTANCES_01;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
         }break;
         case IMMUNE_SCHOOL_FIRE:
         {
             index = UNIT_FIELD_RESISTANCES_02;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
         }break;
         case IMMUNE_SCHOOL_NATURE:
         {
             index = UNIT_FIELD_RESISTANCES_03;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
         }break;
         case IMMUNE_SCHOOL_FROST:
         {
             index = UNIT_FIELD_RESISTANCES_04;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
         }break;
         case IMMUNE_SCHOOL_SHADOW:
         {
             index = UNIT_FIELD_RESISTANCES_05;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
         }break;
         case IMMUNE_SCHOOL_ARCANE:
         {
             index = UNIT_FIELD_RESISTANCES_06;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
         }
         break;
         case IMMUNE_SCHOOL_MAGIC:
@@ -1032,11 +1029,11 @@ void Aura::HandleAuraModResistance(bool apply)
             for(int8 x=0;x < 6;x++)
             {
                 index  = UNIT_FIELD_RESISTANCES_01 + x;
-                index2 = m_modifier->m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
+                index2 = m_modifier.m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+                m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
+                    m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
             }
             return;
         }break;
@@ -1047,9 +1044,9 @@ void Aura::HandleAuraModResistance(bool apply)
         }break;
     }
 
-    m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+    m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
+        m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModRoot(bool apply)
@@ -1095,39 +1092,39 @@ void Aura::HandleAuraModStat(bool apply)
     uint16 index = 0;
     uint16 index2 = 0;
     uint16 index3 = 0;
-    switch(m_modifier->m_miscvalue)
+    switch(m_modifier.m_miscvalue)
     {
         case 0:
             index = UNIT_FIELD_STR;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
             break;
         case 1:
             index = UNIT_FIELD_AGILITY;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
             break;
         case 2:
             index = UNIT_FIELD_STAMINA;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
             index3 = UNIT_FIELD_MAXHEALTH;
             break;
         case 3:
             index = UNIT_FIELD_IQ;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
             index3 = UNIT_FIELD_MAXPOWER1;
             break;
         case 4:
             index = UNIT_FIELD_SPIRIT;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
             break;
         case -1:
         {
             index = UNIT_FIELD_STR;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
             for(int x=0;x<5;x++)
             {
-                m_target->ApplyModUInt32Value(index+x,m_modifier->m_amount,apply);
+                m_target->ApplyModUInt32Value(index+x,m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->ApplyModUInt32Value(index2+x,m_modifier->m_amount,apply);
+                    m_target->ApplyModUInt32Value(index2+x,m_modifier.m_amount,apply);
             }
             return;
         }break;
@@ -1137,23 +1134,23 @@ void Aura::HandleAuraModStat(bool apply)
             break;
     }
 
-    m_target->ApplyModUInt32Value(index,m_modifier->m_amount,apply);
+    m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
     //if(index3)
-    //    m_target->ApplyModUInt32Value(index3, (m_modifier->m_miscvalue2 == 0 ? m_modifier->m_amount:-m_modifier->m_amount)*(m_modifier->m_miscvalue==2?10:15),apply);
+    //    m_target->ApplyModUInt32Value(index3, (m_modifier.m_miscvalue2 == 0 ? m_modifier.m_amount:-m_modifier.m_amount)*(m_modifier.m_miscvalue==2?10:15),apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyModUInt32Value(index2,m_modifier->m_amount,apply);
+        m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
-    if(m_modifier->m_amount<=1)
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
     data.Initialize(MSG_MOVE_SET_RUN_SPEED);
     data << m_target->GetGUID();
     data << m_target->GetSpeed( MOVE_RUN );
@@ -1163,14 +1160,14 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
 
 void Aura::HandleAuraModIncreaseSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
-    if(m_modifier->m_amount<=1)
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier->m_amount)/100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier->m_amount) );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
@@ -1183,14 +1180,14 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply)
 
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
-    if(m_modifier->m_amount<=1)
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier->m_amount + 100.0f ) / 100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier->m_amount + 100.0f ) );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
@@ -1202,14 +1199,14 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier->m_amount);
-    if(m_modifier->m_amount<=1)
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
     if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * m_modifier->m_amount/100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * m_modifier.m_amount/100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier->m_amount );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier.m_amount );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
@@ -1223,7 +1220,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply)
 {
     uint32 newValue;
     newValue = m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-    apply ? newValue += m_modifier->m_amount : newValue -= m_modifier->m_amount;
+    apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
     m_target->SetUInt32Value(UNIT_FIELD_MAXHEALTH,newValue);
 }
 
@@ -1231,7 +1228,7 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
 {
     uint16 powerField = UNIT_FIELD_POWER1;
     uint8 powerType = m_target->getPowerType();
-    if(powerType != m_modifier->m_miscvalue)
+    if(powerType != m_modifier.m_miscvalue)
         return;
     if(powerType == 0)
         powerField = UNIT_FIELD_POWER1;
@@ -1246,7 +1243,7 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply)
     }
 
     uint32 newValue = m_target->GetUInt32Value(powerField);
-    apply ? newValue += m_modifier->m_amount : newValue -= m_modifier->m_amount;
+    apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
     m_target->SetUInt32Value(powerField,newValue);
 }
 
@@ -1258,8 +1255,8 @@ void Aura::HandleAuraModShapeshift(bool apply)
     uint32 spellId = 0;
     uint32 modelid = 0;
     uint8 PowerType = 0;
-    uint32 new_bytes_1 = m_modifier->m_miscvalue;
-    switch(m_modifier->m_miscvalue)
+    uint32 new_bytes_1 = m_modifier.m_miscvalue;
+    switch(m_modifier.m_miscvalue)
     {
         case FORM_CAT:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
@@ -1338,7 +1335,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             spellId = 24907;
             break;
         default:
-            sLog.outString("Unknown Shapeshift Type: %u", m_modifier->m_miscvalue);
+            sLog.outString("Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
     }
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
@@ -1349,7 +1346,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         {
             if(((Player*)unit_target)->IsInWater())
             {
-                if(m_modifier->m_miscvalue != FORM_AQUA )
+                if(m_modifier.m_miscvalue != FORM_AQUA )
                     return;
             }
         }
@@ -1366,7 +1363,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
             unit_target->setPowerType(PowerType);
         }
         unit_target->m_ShapeShiftForm = m_spellId;
-        unit_target->m_form = m_modifier->m_miscvalue;
+        unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
             unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,3.0f);
 
@@ -1396,32 +1393,32 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
 void Aura::HandleModMechanicImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToMechanic,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToMechanic,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToMechanic,m_modifier.m_miscvalue);
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToEffect,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToEffect,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToEffect,m_modifier.m_miscvalue);
 }
 
 void Aura::HandleAuraModStateImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToState,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToState,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToState,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToState,m_modifier.m_miscvalue);
 }
 
 void Aura::HandleAuraModSchoolImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToSchool,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToSchool,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToSchool,m_modifier.m_miscvalue);
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDmg,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToDmg,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDmg,m_modifier.m_miscvalue);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDispel,m_modifier->m_miscvalue);
+    apply ? m_target->SetStateFlag(m_target->m_immuneToDispel,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDispel,m_modifier.m_miscvalue);
 }
 
 void Aura::HandleAuraProcTriggerSpell(bool apply)
@@ -1447,7 +1444,7 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
     if(apply)
     {
         m_procdamage->caster = m_caster->GetGUID();
-        m_procdamage->procDamage = m_modifier->m_amount;
+        m_procdamage->procDamage = m_modifier.m_amount;
         m_procdamage->procChance = GetSpellProto()->procChance;
         m_procdamage->procFlags = GetSpellProto()->procFlags;
         m_procdamage->procCharges = GetSpellProto()->procCharges;
@@ -1460,41 +1457,41 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
 
 void Aura::HandleAuraTracCreatures(bool apply)
 {
-    m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? m_modifier->m_miscvalue : 0 );
+    m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? m_modifier.m_miscvalue : 0 );
 }
 
 void Aura::HandleAuraTracResources(bool apply)
 {
-    m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier->m_miscvalue-1): 0 );
+    m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1): 0 );
 }
 
 void Aura::HandleAuraModParryPercent(bool apply)
 {
-    m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier->m_amount,apply);
+    m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModDodgePercent(bool apply)
 {
-    m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier->m_amount,apply);
+    m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModBlockPercent(bool apply)
 {
-    m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier->m_amount,apply);
+    m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModCritPercent(bool apply)
 {
-    m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier->m_amount,apply);
+    m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier.m_amount,apply);
 }
 
 void Aura::HandlePeriodicLeech(bool apply)
 {
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -1506,7 +1503,7 @@ void Aura::HandlePeriodicLeech(bool apply)
 
 void Aura::HandleModHitChance(bool Apply)
 {
-    m_target->m_modHitChance = Apply?m_modifier->m_amount:0;
+    m_target->m_modHitChance = Apply?m_modifier.m_amount:0;
 }
 
 void Aura::HandleAuraModScale(bool apply)
@@ -1518,9 +1515,9 @@ void Aura::HandlePeriodicManaLeech(bool Apply)
 {
     if(Apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -1534,7 +1531,7 @@ void Aura::HandleAuraMounted(bool apply)
 {
     if(apply)
     {
-        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);
+        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         if(!ci)return;
         uint32 displayId = ci->DisplayID;
         if(displayId != 0)
@@ -1561,16 +1558,16 @@ void Aura::HandleWaterBreathing(bool apply)
 
 void Aura::HandleModBaseResistance(bool apply)
 {
-    if(m_modifier->m_miscvalue == 1 || m_modifier->m_miscvalue == 127)
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier->m_amount, apply);
-    if(m_modifier->m_miscvalue == 126 || m_modifier->m_miscvalue == 127)
+    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier.m_amount, apply);
+    if(m_modifier.m_miscvalue == 126 || m_modifier.m_miscvalue == 127)
     {
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier->m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier->m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier->m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier->m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier->m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier->m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier.m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier.m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier.m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier.m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier.m_amount, apply);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier.m_amount, apply);
     }
 }
 
@@ -1605,21 +1602,21 @@ void Aura::HandleChannelDeathItem(bool apply)
 
 void Aura::HandleModDamagePCTTaken(bool apply)
 {
-    m_target->m_modDamagePCT = apply ? m_modifier->m_amount : 0;
+    m_target->m_modDamagePCT = apply ? m_modifier.m_amount : 0;
 }
 
 void Aura::HandleModPCTRegen(bool apply)
 {
-    m_target->m_RegenPCT = apply ? m_modifier->m_amount : 0;
+    m_target->m_RegenPCT = apply ? m_modifier.m_amount : 0;
 }
 
 void Aura::HandlePeriodicDamagePCT(bool apply)
 {
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier->periodictime,false,true);
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
         m_isPeriodic = true;
-        m_periodicTimer = m_modifier->periodictime;
+        m_periodicTimer = m_modifier.periodictime;
     }
     else
     {
@@ -1631,7 +1628,7 @@ void Aura::HandlePeriodicDamagePCT(bool apply)
 
 void Aura::HandleAuraModAttackPower(bool apply)
 {
-    m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier->m_amount, apply);
+    m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier.m_amount, apply);
 }
 
 void Aura::HandleAuraTransform(bool apply)
@@ -1643,7 +1640,7 @@ void Aura::HandleAuraTransform(bool apply)
 
     if (apply)
     {
-        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier->m_miscvalue);
+        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
         m_target->setTransForm(GetSpellProto()->Id);
     }
@@ -1696,18 +1693,18 @@ void Aura::HandleAuraTransform(bool apply)
 
 void Aura::HandleModSpellCritChance(bool Apply)
 {
-    m_target->m_baseSpellCritChance += Apply?m_modifier->m_amount:(-m_modifier->m_amount);
+    m_target->m_baseSpellCritChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
 }
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 {
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier->m_amount);
-    if(m_modifier->m_amount<=1)
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
         return;
     WorldPacket data;
     if(Apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier->m_amount + 100.0f ) / 100.0f );
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
     else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier->m_amount + 100.0f ) );
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
     data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
     data << uint8(0xFF);
     data << m_target->GetGUID();
@@ -1733,10 +1730,10 @@ void Aura::HandleAuraManaShield(bool apply)
         DamageManaShield *dms = new DamageManaShield();
 
         dms->m_spellId = GetId();
-        dms->m_modType = m_modifier->m_auraname;
-        dms->m_totalAbsorb = m_modifier->m_amount;
+        dms->m_modType = m_modifier.m_auraname;
+        dms->m_totalAbsorb = m_modifier.m_amount;
         dms->m_currAbsorb = 0;
-        dms->m_schoolType = m_modifier->m_miscvalue;
+        dms->m_schoolType = m_modifier.m_miscvalue;
         m_target->m_damageManaShield.push_back(dms);
     }
     else
@@ -1768,10 +1765,10 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
         DamageManaShield *dms = new DamageManaShield();
 
         dms->m_spellId = GetId();
-        dms->m_modType = m_modifier->m_auraname;
-        dms->m_totalAbsorb = m_modifier->m_amount;
+        dms->m_modType = m_modifier.m_auraname;
+        dms->m_totalAbsorb = m_modifier.m_amount;
         dms->m_currAbsorb = 0;
-        dms->m_schoolType = m_modifier->m_miscvalue;
+        dms->m_schoolType = m_modifier.m_miscvalue;
         m_target->m_damageManaShield.push_back(dms);
     }
     else
@@ -1800,9 +1797,9 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
         }
         SpellCritSchool *scs = new SpellCritSchool();
 
-        scs->chance = m_modifier->m_amount;
+        scs->chance = m_modifier.m_amount;
         scs->spellId = GetId();
-        scs->school = m_modifier->m_miscvalue;
+        scs->school = m_modifier.m_miscvalue;
         m_target->m_spellCritSchool.push_back(scs);
     }
     else
@@ -1820,8 +1817,8 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
 
 void Aura::HandleReflectSpellsSchool(bool apply)
 {
-    apply ? m_target->m_ReflectSpellSchool = m_modifier->m_miscvalue : m_target->m_ReflectSpellSchool = 0;
-    apply ? m_target->m_ReflectSpellPerc = m_modifier->m_amount : m_target->m_ReflectSpellPerc = 0;
+    apply ? m_target->m_ReflectSpellSchool = m_modifier.m_miscvalue : m_target->m_ReflectSpellSchool = 0;
+    apply ? m_target->m_ReflectSpellPerc = m_modifier.m_amount : m_target->m_ReflectSpellPerc = 0;
 }
 
 void Aura::HandleAuraModSkill(bool apply)
@@ -1834,57 +1831,57 @@ void Aura::HandleAuraModSkill(bool apply)
 
 void Aura::HandleModDamagePercentDone(bool apply)
 {
-    sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier->m_miscvalue, m_modifier->m_miscvalue2);
+    sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
 
-    if(m_modifier->m_miscvalue == 1)
+    if(m_modifier.m_miscvalue == 1)
     {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
     }
-    if(m_modifier->m_miscvalue == 126)
+    if(m_modifier.m_miscvalue == 126)
     {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
     }
-    if(m_modifier->m_miscvalue == 127)
+    if(m_modifier.m_miscvalue == 127)
     {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
     }
 }
 
 void Aura::HandleModPercentStat(bool apply)
 {
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH, m_modifier->m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER1, m_modifier->m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER2, m_modifier->m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER3, m_modifier->m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER4, m_modifier->m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER5, m_modifier->m_amount, apply );
-    if(m_modifier->m_miscvalue == 0 || m_modifier->m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STR,     m_modifier->m_amount, apply );
-    if(m_modifier->m_miscvalue == 1 || m_modifier->m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_AGILITY, m_modifier->m_amount, apply );
-    if(m_modifier->m_miscvalue == 2 || m_modifier->m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STAMINA, m_modifier->m_amount, apply );
-    if(m_modifier->m_miscvalue == 3 || m_modifier->m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_IQ,      m_modifier->m_amount, apply );
-    if(m_modifier->m_miscvalue == 4 || m_modifier->m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_SPIRIT,  m_modifier->m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH, m_modifier.m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER1, m_modifier.m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER2, m_modifier.m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER3, m_modifier.m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER4, m_modifier.m_amount, apply );
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER5, m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 0 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STR,     m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_AGILITY, m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STAMINA, m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 3 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_IQ,      m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 4 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_SPIRIT,  m_modifier.m_amount, apply );
 }
 
 void Aura::HandleModResistancePercent(bool apply)
 {
-    if(m_modifier->m_miscvalue == 1 || m_modifier->m_miscvalue == 127)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier->m_amount, apply );
-    if(m_modifier->m_miscvalue == 127 || m_modifier->m_miscvalue == 126)
+    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 127 || m_modifier.m_miscvalue == 126)
     {
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier->m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier->m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier.m_amount, apply );
     }
 }
 
@@ -1892,42 +1889,42 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
 {
     uint16 index = 0;
     uint16 index2 = 0;
-    switch(m_modifier->m_miscvalue)
+    switch(m_modifier.m_miscvalue)
     {
         case 1:
         {
             index = UNIT_FIELD_ARMOR;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
         }break;
         case IMMUNE_SCHOOL_HOLY:
         {
             index = UNIT_FIELD_RESISTANCES_01;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
         }break;
         case IMMUNE_SCHOOL_FIRE:
         {
             index = UNIT_FIELD_RESISTANCES_02;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
         }break;
         case IMMUNE_SCHOOL_NATURE:
         {
             index = UNIT_FIELD_RESISTANCES_03;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
         }break;
         case IMMUNE_SCHOOL_FROST:
         {
             index = UNIT_FIELD_RESISTANCES_04;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
         }break;
         case IMMUNE_SCHOOL_SHADOW:
         {
             index = UNIT_FIELD_RESISTANCES_05;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
         }break;
         case IMMUNE_SCHOOL_ARCANE:
         {
             index = UNIT_FIELD_RESISTANCES_06;
-            m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
         }
         break;
         case IMMUNE_SCHOOL_MAGIC:
@@ -1935,11 +1932,11 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
             for(int8 x=0;x < 6;x++)
             {
                 index = UNIT_FIELD_RESISTANCES_01 + x;
-                m_modifier->m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
+                m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->ApplyPercentModUInt32Value(index,m_modifier->m_amount, apply);
+                m_target->ApplyPercentModUInt32Value(index,m_modifier.m_amount, apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->ApplyPercentModUInt32Value(index2,m_modifier->m_amount, apply);
+                    m_target->ApplyPercentModUInt32Value(index2,m_modifier.m_amount, apply);
             }
             return;
         }break;
@@ -1951,16 +1948,16 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         }break;
     }
 
-    m_target->ApplyPercentModUInt32Value(index,m_modifier->m_amount,apply);
+    m_target->ApplyPercentModUInt32Value(index,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyPercentModUInt32Value(index2,m_modifier->m_amount,apply);
+        m_target->ApplyPercentModUInt32Value(index2,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,m_modifier->m_amount, apply);
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,m_modifier.m_amount, apply);
 }
 
 void Aura::SendCoolDownEvent()

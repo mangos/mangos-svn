@@ -112,7 +112,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
 
     if(!set)
     {
-        sLog.outError("Item set %u for item (id %u) not found, mods not removed.",setid,proto->ItemId);
+        sLog.outError("Item set #%u for item #%u not found, mods not removed.",setid,proto->ItemId);
         return;
     }
 
@@ -126,7 +126,12 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
                 break;
             }
 
-    assert(eff);
+    if(!eff)
+    {
+        sLog.outError("Item set effect for equiped item #%u not found, mods not removed.",proto->ItemId);
+        return;
+    }
+    
     eff->item_count--;
 
     for(uint32 x=0;x<8;x++)
@@ -422,7 +427,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
     if(!m_itemProto)
         return false;
 
-    SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);              //this seems to be wrong (c) Phantomas
+    SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
     SetUInt32Value(ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
 
