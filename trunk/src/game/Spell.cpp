@@ -78,7 +78,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     if(m_targetMask & TARGET_FLAG_OBJECT)
         m_GOTarget = ObjectAccessor::Instance().GetGameObject(*caster, readGUID(data));
 
-    if(m_targetMask & TARGET_FLAG_ITEM)
+    if((m_targetMask & TARGET_FLAG_ITEM) && caster->GetTypeId() == TYPEID_PLAYER)
         m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(readGUID(data)));
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
@@ -150,7 +150,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     casttime = GetCastTime(sCastTime.LookupEntry(m_spellInfo->CastingTimeIndex));
 
-    if( Caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
     {
         p_caster = (Player*)m_caster;
         PlayerSpellList const& player_spells = p_caster->getSpellList();
@@ -256,15 +256,17 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AC_P:
         {
-            Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
+            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader()) : NULL;
             if(pGroup)
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
             {
-                Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
-                if(!Target || Target->GetGUID() == m_caster->GetGUID())
-                    continue;
-                if(m_caster->GetDistanceSq(Target) < radius * radius )
-                    TagUnitMap.push_back(Target);
+                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                {
+                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!Target || Target->GetGUID() == m_caster->GetGUID())
+                        continue;
+                    if(m_caster->GetDistanceSq(Target) < radius * radius )
+                        TagUnitMap.push_back(Target);
+                }
             }
             else
                 TagUnitMap.push_back(m_caster);
@@ -363,23 +365,26 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             if(!m_targets.getUnitTarget())
                 break;
 
-            Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
-            for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+            Group* pGroup = m_caster->GetTypeId() == TYPEID_PLAYER ? objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader()) : NULL;
+            if(pGroup)
             {
-                if(m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
+                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
                 {
-                    onlyParty = true;
-                    break;
+                    if(m_targets.getUnitTarget()->GetGUID() == pGroup->GetMemberGUID(p))
+                    {
+                        onlyParty = true;
+                        break;
+                    }
                 }
-            }
-            for(uint32 p=0;p<pGroup->GetMembersCount();p++)
-            {
-                Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                {
+                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
 
-                if(!Target || Target->GetGUID() == m_caster->GetGUID())
-                    continue;
-                if(m_caster->GetDistanceSq(Target) < radius * radius && Target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
-                    TagUnitMap.push_back(Target);
+                    if(!Target || Target->GetGUID() == m_caster->GetGUID())
+                        continue;
+                    if(m_caster->GetDistanceSq(Target) < radius * radius && Target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+                        TagUnitMap.push_back(Target);
+                }
             }
         }break;
         case TARGET_AE_SELECTED:
@@ -748,8 +753,8 @@ void Spell::SendSpellStart()
     data << uint32(m_timer);
 
     m_targets.write( &data );
-    ((Player*)m_caster)->SendMessageToSet(&data, true);
 
+    m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::SendSpellGo()
@@ -890,10 +895,12 @@ void Spell::SendChannelUpdate(uint32 time)
 
 void Spell::SendChannelStart(uint32 duration)
 {
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_caster, ((Player *)m_caster)->GetSelection());
+    Unit* target = 0;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
+
+        target = ObjectAccessor::Instance().GetCreature(*m_caster, ((Player *)m_caster)->GetSelection());
 
         WorldPacket data;
         data.Initialize( MSG_CHANNEL_START );
@@ -936,6 +943,9 @@ void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage)
 
 void Spell::SendPlaySpellVisual(uint32 SpellID)
 {
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     WorldPacket data;
     data.Initialize(SMSG_PLAY_SPELL_VISUAL);
     data << m_caster->GetGUID();
@@ -1141,7 +1151,7 @@ uint8 Spell::CanCast()
 uint8 Spell::CheckItems()
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
-        return uint8(0);
+        return 0;
 
     uint32 itemid, itemcount;
     Player* p_caster = (Player*)m_caster;
@@ -1260,7 +1270,8 @@ uint32 Spell::CalculateDamage(uint8 i)
 void Spell::HandleTeleport(uint32 id, Unit* Target)
 {
 
-    if(!Target) return;
+    if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
+        return;
 
     TeleportCoords* TC = new TeleportCoords();
 
@@ -1286,12 +1297,12 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     }
 
     ((Player*)Target)->SendNewWorld(TC->mapId,TC->x,TC->y,TC->z,0.0f);
-
 }
 
 void Spell::Delayed(int32 delaytime)
 {
-    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER) return;
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER) 
+        return;
 
     m_timer += delaytime;
 

@@ -358,11 +358,15 @@ void Aura::ApplyModifier(bool apply)
 
 void Aura::UpdateAuraDuration()
 {
+
+    if(m_target->GetTypeId() != TYPEID_PLAYER) 
+        return;
+
     WorldPacket data;
     data.Initialize(SMSG_UPDATE_AURA_DURATION);
     data << (uint8)m_auraSlot << (uint32)m_duration;
     //((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
-    ((Player *)m_target)->SendDirectMessage(&data);
+    ((Player*)m_target)->SendDirectMessage(&data);
 }
 
 void Aura::_AddAura()
@@ -606,6 +610,9 @@ void Aura::HandleAuraFeatherFall(bool apply)
 
 void Aura::HandleAddModifier(bool apply)
 {
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     WorldPacket data;
 
     SpellEntry *spellInfo = GetSpellProto();
@@ -1926,6 +1933,9 @@ void Aura::HandleReflectSpellsSchool(bool apply)
 
 void Aura::HandleAuraModSkill(bool apply)
 {
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     SpellEntry* prot=GetSpellProto();
 
     ((Player*)m_target)->ModifySkillBonus(prot->EffectMiscValue[0],

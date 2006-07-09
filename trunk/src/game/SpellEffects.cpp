@@ -176,6 +176,7 @@ void Spell::EffectNULL(uint32 i)
 void Spell::EffectResurrectNew(uint32 i)
 {
     if(!unitTarget) return;
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
     if(unitTarget->isAlive()) return;
     if(!unitTarget->IsInWorld()) return;
 
@@ -320,7 +321,8 @@ void Spell::EffectHeal( uint32 i )
         uint32 addhealth = ( curhealth + damage*pct < maxhealth ? damage*pct : maxhealth - curhealth );
         unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
-        SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
 
         //If the target is in combat, then player is in combat too
         if( m_caster != unitTarget &&
@@ -481,7 +483,7 @@ void Spell::EffectOpenLock(uint32 i)
         return;
     }
 
-    if(!m_caster)
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
     {
         sLog.outDebug( "WORLD: Open Lock - No Player Caster!");
         return;
@@ -617,6 +619,10 @@ void Spell::EffectSummonChangeItem(uint32 i)
 {
     if(!itemTarget)
         return;
+
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     uint32 newitemid = m_spellInfo->EffectItemType[i];
     if(!newitemid)
         return;
@@ -742,12 +748,16 @@ void Spell::EffectLearnSpell(uint32 i)
         return;
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         unitTarget = m_targets.getUnitTarget();
+
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player *player = (Player*)unitTarget;
 
     uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
     //data.Initialize(SMSG_LEARNED_SPELL);
     //data << spellToLearn;
-    //((Player*)unitTarget)->GetSession()->SendPacket(&data);
+    //player->GetSession()->SendPacket(&data);
     player->learnSpell((uint16)spellToLearn);
     //some addspell isn't needed if you have a good DB,FISHING && MINING && HERBALISM have to be needed.
     switch(spellToLearn)
@@ -1005,6 +1015,9 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
 
 void Spell::EffectLearnSkill(uint32 i)
 {
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     uint32 skillid =  m_spellInfo->EffectMiscValue[i];
     uint16 skillval = ((Player*)unitTarget)->GetSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
@@ -1021,6 +1034,9 @@ void Spell::EffectTradeSkill(uint32 i)
 
 void Spell::EffectEnchantItemPerm(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player* p_caster = (Player*)m_caster;
     uint32 add_slot = 0;
     uint8 item_slot = 0;
@@ -1088,6 +1104,9 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 
 void Spell::EffectEnchantItemTmp(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player* p_caster = (Player*)m_caster;
     uint32 add_slot = 0;
     uint8 item_slot = 0;
@@ -1563,7 +1582,8 @@ void Spell::EffectHealMaxHealth(uint32 i)
     else
         unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth+heal);
 
-    SendHealSpellOnPlayer((Player*)m_caster, m_spellInfo->Id, maxHealth - curHealth);
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        SendHealSpellOnPlayer((Player*)m_caster, m_spellInfo->Id, maxHealth - curHealth);
 }
 
 void Spell::EffectInterruptCast(uint32 i)
@@ -1611,6 +1631,10 @@ void Spell::EffectAddComboPoints(uint32 i)
 {
     if(!unitTarget)
         return;
+
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     uint8 comboPoints = ((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
     if(m_caster->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != unitTarget->GetGUID())
     {
@@ -1629,7 +1653,11 @@ void Spell::EffectDuel(uint32 i)
 {
     WorldPacket data;
 
-    if(!m_caster) return;
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
 
     Player *caster = (Player*)m_caster;
     Player *target = (Player*)unitTarget;
@@ -1764,6 +1792,9 @@ void Spell::EffectSummonTotem(uint32 i)
 
 void Spell::EffectEnchantHeldItem(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player* p_caster = (Player*)m_caster;
     uint32 add_slot = 0;
     uint8 item_slot = 0;
@@ -1826,6 +1857,9 @@ void Spell::EffectEnchantHeldItem(uint32 i)
 
 void Spell::EffectDisEnchant(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player* p_caster = (Player*)m_caster;
     if(!itemTarget)
         return;
@@ -2042,6 +2076,9 @@ void Spell::EffectDisEnchant(uint32 i)
 
 void Spell::EffectInebriate(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player *player = (Player*)m_caster;
     uint16 currentDrunk = player->GetDrunkValue();
     uint16 drunkMod = m_spellInfo->EffectBasePoints[i] * 0xFFFF / 100;
@@ -2184,6 +2221,8 @@ void Spell::EffectResurrect(uint32 i)
 
     if(!unitTarget)
         return;
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
     if(unitTarget->isAlive())
         return;
     if(!unitTarget->IsInWorld())
@@ -2259,8 +2298,9 @@ void Spell::EffectSkinning(uint32 i)
 {
     if(unitTarget->GetTypeId() != TYPEID_UNIT )
         return;
-    if(!m_caster)
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
+
     CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
 
     if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
@@ -2366,7 +2406,7 @@ void Spell::EffectTransmitted(uint32 i)
 
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
-        if(((Player*)m_caster)->CheckFishingAble() > 0)
+        if( m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->CheckFishingAble() > 0)
         {
             //pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
             pGameObj->SetUInt32Value(12, 0x3F6262A6 );
@@ -2384,6 +2424,9 @@ void Spell::EffectTransmitted(uint32 i)
 
 void Spell::EffectSkill(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     Player *player = (Player*)m_caster;
 
     uint32 skill_id = m_spellInfo->EffectMiscValue[i];

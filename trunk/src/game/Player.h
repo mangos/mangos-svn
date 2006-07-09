@@ -637,7 +637,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
-        void SendMessageToSet(WorldPacket *data, bool self);
+        void SendMessageToSet(WorldPacket *data, bool self); // overwrite Object::SendMessageToSet
 
         void DeleteFromDB();
         void DeleteCorpse();
