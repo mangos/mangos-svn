@@ -1396,7 +1396,12 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
-            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,2.0f);
+			if (m_target->getRace() == TAUREN)
+			{
+				m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,2.35f);
+			}
+			else
+            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,2.0f);
 
         if(spellInfo)
         {
@@ -1409,6 +1414,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
     else
     {
+		if (m_target->getRace() == TAUREN)
+				unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+		else
         unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
         unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
