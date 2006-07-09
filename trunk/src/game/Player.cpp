@@ -5547,6 +5547,9 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
+            if(isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE)
+                return EQUIP_ERR_CANT_DO_IN_COMBAT;
+
             uint32 type = pProto->InventoryType;
             uint8 eslot = FindEquipSlot( type, slot, swap );
             if( eslot == NULL_SLOT )
@@ -6431,11 +6434,20 @@ void Player::SwapItem( uint16 src, uint16 dst )
     if( pSrcItem )
     {
         sLog.outDebug( "STORAGE: SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
+
+        if(IsEquipmentPos ( src ) && isInCombat() && 
+            pSrcItem->GetProto()->Class != ITEM_CLASS_WEAPON && pSrcItem->GetProto()->Class != ITEM_CLASS_PROJECTILE)
+        {
+            SendEquipError( EQUIP_ERR_CANT_DO_IN_COMBAT, pSrcItem, pDstItem );
+            return;
+        }
+
         if( srcslot == dstbag )
         {
             SendEquipError( EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG, pSrcItem, pDstItem );
             return;
         }
+
         uint16 dest;
         uint8 msg;
         if( !pDstItem )
