@@ -1200,12 +1200,73 @@ void Player::GiveLevel()
 
 void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
 {
-    uint8 _class=getClass();
-    uint8 lvl=getLevel();
+	/*TODO: Add race bonuses on lvl. Lvl stats may depend on race and class.
+	uint8 race   = getRace();*/
+    uint8 _class = getClass();
+    uint8 lvl    = getLevel();
 
     uint32 tempMP = (uint32)(GetUInt32Value(UNIT_FIELD_SPIRIT) / 2);
 
     *HP = (uint32)(GetUInt32Value(UNIT_FIELD_STAMINA) / 2);
+	/*
+	switch(race)
+	{
+	case HUMAN:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case ORC:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case DWARF:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case NIGHT_ELF:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case UNDEAD:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case TAUREN:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case GNOME:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;
+	case TROLL:
+		*STR += 0.1;
+		*STA += 0.1;
+		*AGI += 0.1;
+		*INT += 0.1;
+		*SPI += 0.1;
+		break;*/
 
     switch(_class)
     {
