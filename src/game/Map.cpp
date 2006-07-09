@@ -218,8 +218,11 @@ void
 Map::Add(T *obj)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        DEBUG_LOG("Map::Add: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
 
     Cell cell = RedZone::GetZone(p);
     EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
@@ -348,8 +351,11 @@ void
 Map::Remove(T *obj, bool remove)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        DEBUG_LOG("Map::Remove: Object %lu have invalide coordiated X:%u Y:%u grid cell [%u:%u]", (unsigned long)obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
 
     Cell cell = RedZone::GetZone(p);
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )

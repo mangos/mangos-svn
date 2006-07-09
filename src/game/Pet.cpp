@@ -185,6 +185,6 @@ void Pet::DeletePetFromDB()
 
     data << (uint16)ci->civilian;                           //wdbFeild14
 
-    ((Player*)player)->GetSession()->SendPacket( &data );
+    player->GetSession()->SendPacket( &data );
 }
 */

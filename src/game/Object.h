@@ -219,7 +219,7 @@ class MANGOS_DLL_SPEC Object
         bool HasInArc( const float arcangle, const Object* obj ) const;
         void GetContactPoint( const Object* obj, float &x, float &y, float &z ) const;
 
-        void SendMessageToSet(WorldPacket *data, bool self);
+        virtual void SendMessageToSet(WorldPacket *data, bool self);
 
         void LoadValues(const char* data);
         void LoadTaxiMask(const char* data);

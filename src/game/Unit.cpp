@@ -395,7 +395,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
             if( GetTypeId() == TYPEID_PLAYER
-                && getClass() == WARRIOR || m_form == 5 || m_form == 8)
+                && (getClass() == WARRIOR || m_form == 5 || m_form == 8) )
                 ((Player*)this)->CalcRage(damage,true);
         }
         else
@@ -411,7 +411,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 ((Player*)pVictim)->DeathDurabilityLoss(0.05);
             }
         }
-        }
+    }
 
     DEBUG_LOG("DealDamageEnd");
 }
@@ -761,7 +761,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        for(int i = 0; i < EQUIPMENT_SLOT_END; i++)
+        for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
         {
             pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
             ((Player*)this)->CastItemSpell(((Player*)this)->GetItemByPos(pos),pVictim);
@@ -783,7 +783,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         *damage = 0;
         *victimState = 2;
 
-        if(GetTypeId() == TYPEID_PLAYER)
+        if(pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateDefense();
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
@@ -793,7 +793,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         *damage = 0;
         *victimState = 3;
 
-        if(GetTypeId() == TYPEID_PLAYER)
+        if(pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateDefense();
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
@@ -812,7 +812,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
         *victimState = 4;
 
-        if(GetTypeId() == TYPEID_PLAYER)
+        if(pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateDefense();
     }
 

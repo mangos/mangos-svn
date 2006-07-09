@@ -851,6 +851,8 @@ void Player::SendNewWorld(uint32 mapid, float x, float y, float z, float orienta
             m_attackers.erase(iter);
     }
 
+    SaveToDB(); 
+
     MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
     data.Initialize(SMSG_TRANSFER_PENDING);
