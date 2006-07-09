@@ -522,10 +522,31 @@ void Spell::cast()
         }
 
         if(needspelllog) SendLogExecute();
-
-        for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
+        
+        bool canreflect = false;
+        for(int j=0;j<3;j++)
+        switch(m_spellInfo->EffectImplicitTargetA[j])
         {
-            reflect(*iunit);
+            case TARGET_S_E:
+            case TARGET_AE_E:
+            case TARGET_AE_E_INSTANT:
+            case TARGET_AC_E:
+            case TARGET_INFRONT:
+            case TARGET_DUELVSPLAYER:
+            case TARGET_AE_E_CHANNEL:
+            //case TARGET_AE_SELECTED:
+            canreflect = true;
+            break;
+
+            default:
+                canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+        }
+        if(canreflect)
+        {
+            for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
+            {
+                reflect(*iunit);
+            }
         }
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER && 

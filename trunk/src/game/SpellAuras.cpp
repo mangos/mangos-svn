@@ -1396,7 +1396,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
-            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,3.0f);
+            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,2.0f);
 
         if(spellInfo)
         {

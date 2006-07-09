@@ -195,11 +195,11 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         case DRUID: powertype = 0; unitfield = 0x0000EE00; break;
     }
 
-	if ( race == TAUREN )
-	{
-		 SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
-	}
-	else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+    if ( race == TAUREN )
+    {
+         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
+    }
+    else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
     SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
     SetUInt32Value(UNIT_FIELD_STAMINA, info->stamina );
@@ -2310,8 +2310,11 @@ void Player::UpdateMaxSkills()
             || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING)
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
-        uint32 max=data>>16;
+        uint32 max = data>>16;
         uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;
+        if((max_Skill>>16) > 300)
+            max_Skill = data%0x10000+300*0x10000;
+
         if(max!=1 && max != 300)
         {
             SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
