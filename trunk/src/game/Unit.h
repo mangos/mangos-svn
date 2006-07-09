@@ -100,9 +100,23 @@ struct ProcTriggerSpell
 
 struct SpellCritSchool
 {
-	uint32 spellId;
-	int32 school;
-	int32 chance;
+    uint32 spellId;
+    int32 school;
+    int32 chance;
+};
+
+struct ReflectSpellSchool
+{
+    uint32 spellId;
+    int32 school;
+    int32 chance;
+};
+
+struct DamageDoneCreature
+{
+    uint32 spellId;
+    uint32 creaturetype;
+    int32 damage;
 };
 
 enum DeathState
@@ -402,15 +416,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_immuneToDispel;
         uint32 m_detectStealth;
         uint32 m_stealthvalue;
-        uint32 m_ReflectSpellSchool;
-        uint32 m_ReflectSpellPerc;
         float m_speed;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
         int32 m_modDamagePCT;
         int32 m_RegenPCT;
-		int32 m_modHitChance;
-		int32 m_baseSpellCritChance;
+        int32 m_modHitChance;
+        int32 m_modSpellHitChance;
+        int32 m_baseSpellCritChance;
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
@@ -419,8 +432,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
-		std::list<struct SpellCritSchool*> m_spellCritSchool;
+        std::list<struct SpellCritSchool*> m_spellCritSchool;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
+        std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
+        std::list<struct DamageDoneCreature*> m_damageDoneCreature;
 
         Spell * m_currentSpell;
 

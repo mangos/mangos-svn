@@ -69,10 +69,6 @@ Unit::Unit() : Object()
     m_immuneToDispel = 0;
     m_detectStealth = 0;
     m_stealthvalue = 0;
-
-    m_ReflectSpellSchool = 0;
-    m_ReflectSpellPerc   = 0;
-
     m_transform = 0;
     m_ShapeShiftForm = 0;
 
@@ -83,9 +79,12 @@ Unit::Unit() : Object()
     m_modDamagePCT = 0;
     m_RegenPCT = 0;
     m_modHitChance = 0;
+    m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_spellCritSchool.clear();
+    m_reflectSpellSchool.clear();
     m_scAuras.clear();
+    m_damageDoneCreature.clear();
 }
 
 Unit::~Unit()
@@ -220,7 +219,6 @@ bool Unit::HasAuraType(uint32 auraType) const
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive()) return;
-    damage = int32(damage*(m_modDamagePCT+100)/100);
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -449,6 +447,9 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     uint32 resist=0;
     int32 critchance = m_baseSpellCritChance;
     int crit = 0;
+    CreatureInfo *cinfo = NULL;
+    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
     if(spellInfo)
@@ -465,10 +466,23 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
             damage = uint32(damage*1.5);
             crit = 1;
         }
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
+        {
+            if(cinfo && cinfo->type == (*i)->creaturetype)
+            {
+                damage += (*i)->damage;
+                break;
+            }
+        }
         absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage,&resist);
     }
 
     WorldPacket data;
+    if(m_modSpellHitChance+100 < urand(0,100))
+    {
+        SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_MISS, pVictim->GetGUID(), 1, spellInfo->School, 0, 0,0,1,0);
+        return;
+    }
 
     if( (damage-absorb-resist)<= 0 )
     {
@@ -495,6 +509,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     int32 critchance = m_baseSpellCritChance;
     int crit = 0;
     uint32 pdamage = mod->m_amount;
+    CreatureInfo *cinfo = NULL;
+    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellProto->Id);
     if(spellInfo)
@@ -510,6 +527,14 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         {
             pdamage = uint32(pdamage*1.5);
             crit = 1;
+        }
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
+        {
+            if(cinfo && cinfo->type == (*i)->creaturetype)
+            {
+                pdamage += (*i)->damage;
+                break;
+            }
         }
         absorb = CalDamageAbsorb(pVictim,spellInfo->School,pdamage,&resist);
     }
@@ -720,6 +745,20 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
 {
     uint16 pos;
+    CreatureInfo *cinfo = NULL;
+    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+
+    *damage = int32(*damage*(m_modDamagePCT+100)/100);
+    for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
+    {
+        if(cinfo && cinfo->type == (*i)->creaturetype)
+        {
+            *damage += (*i)->damage;
+            break;
+        }
+    }
+
     if(GetTypeId() == TYPEID_PLAYER)
     {
         for(int i = 0; i < EQUIPMENT_SLOT_END; i++)

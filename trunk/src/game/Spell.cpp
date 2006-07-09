@@ -525,8 +525,7 @@ void Spell::cast()
 
         for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
         {
-            if((*iunit)->m_ReflectSpellSchool) reflect(*iunit);
-            //HandleAddAura((*iunit));
+            reflect(*iunit);
         }
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER && 
@@ -1293,26 +1292,15 @@ void Spell::reflect(Unit *refunit)
 
     // if the spell to reflect is a reflect spell, do nothing.
     for(int i=0; i<3; i++)
-        if(m_spellInfo->Effect[i] == 6 && m_spellInfo->EffectApplyAuraName[i] == 74)
+        if(m_spellInfo->Effect[i] == 6 && (m_spellInfo->EffectApplyAuraName[i] == 74 || m_spellInfo->EffectApplyAuraName[i] == 28))
             return;
-
-    switch(refunit->m_ReflectSpellSchool)
+    for(std::list<struct ReflectSpellSchool*>::iterator i = refunit->m_reflectSpellSchool.begin();i != refunit->m_reflectSpellSchool.end();i++)
     {
-        case 126:                                           // All
-            refspell = m_spellInfo;
-            break;
-        case 4:                                             // Fire
-            refspell = (m_spellInfo->School == 2 ? m_spellInfo : NULL);
-            break;
-        case 16:                                            // Frost
-            refspell = (m_spellInfo->School == 4 ? m_spellInfo : NULL);
-            break;
-        case 32:                                            // Shadow
-            refspell = (m_spellInfo->School == 5 ? m_spellInfo : NULL);
-            break;
-        case 64:                                            // Arcane
-            refspell = (m_spellInfo->School == 6 ? m_spellInfo : NULL);
-            break;
+        if((*i)->school == -1 || (*i)->school == m_spellInfo->School)
+        {
+            if((*i)->chance >= urand(0,100))
+                refspell = m_spellInfo;
+        }
     }
 
     if(!refspell || m_caster == refunit) return;

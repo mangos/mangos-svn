@@ -69,7 +69,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY = 25,
     &Aura::HandleAuraModRoot,                               //SPELL_AURA_MOD_ROOT = 26,
     &Aura::HandleAuraModSilence,                            //SPELL_AURA_MOD_SILENCE = 27,
-    &Aura::HandleNULL,                                      //SPELL_AURA_REFLECT_SPELLS = 28,
+    &Aura::HandleReflectSpells,                             //SPELL_AURA_REFLECT_SPELLS = 28,
     &Aura::HandleAuraModStat,                               //SPELL_AURA_MOD_STAT = 29,
     &Aura::HandleAuraModSkill,                              //SPELL_AURA_MOD_SKILL = 30,
     &Aura::HandleAuraModIncreaseSpeed,                      //SPELL_AURA_MOD_INCREASE_SPEED = 31,
@@ -96,11 +96,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModCritPercent,                        //SPELL_AURA_MOD_CRIT_PERCENT = 52,
     &Aura::HandlePeriodicLeech,                             //SPELL_AURA_PERIODIC_LEECH = 53,
     &Aura::HandleModHitChance,                              //SPELL_AURA_MOD_HIT_CHANCE = 54,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 55,
+    &Aura::HandleModSpellHitChance,                         //SPELL_AURA_MOD_SPELL_HIT_CHANCE = 55,
     &Aura::HandleAuraTransform,                             //SPELL_AURA_TRANSFORM = 56,
     &Aura::HandleModSpellCritChance,                        //SPELL_AURA_MOD_SPELL_CRIT_CHANCE = 57,
     &Aura::HandleAuraModIncreaseSwimSpeed,                  //SPELL_AURA_MOD_INCREASE_SWIM_SPEED = 58,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
+    &Aura::HandleModDamageDoneCreature,                     //SPELL_AURA_MOD_DAMAGE_DONE_CREATURE = 59,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_PACIFY_SILENCE = 60,
     &Aura::HandleAuraModScale,                              //SPELL_AURA_MOD_SCALE = 61,
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_HEALTH_FUNNEL = 62,
@@ -1087,6 +1087,37 @@ void Aura::HandleAuraModSilence(bool apply)
     apply ? m_target->m_silenced = true : m_target->m_silenced = false;
 }
 
+void Aura::HandleReflectSpells(bool apply)
+{
+    if(apply)
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+            }
+        }
+        ReflectSpellSchool *rss = new ReflectSpellSchool();
+
+        rss->chance = m_modifier.m_amount;
+        rss->spellId = GetId();
+        rss->school = -1;
+        m_target->m_reflectSpellSchool.push_back(rss);
+    }
+    else
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+                break;
+            }
+        }
+    }
+}
+
 void Aura::HandleAuraModStat(bool apply)
 {
     uint16 index = 0;
@@ -1506,6 +1537,11 @@ void Aura::HandleModHitChance(bool Apply)
     m_target->m_modHitChance = Apply?m_modifier.m_amount:0;
 }
 
+void Aura::HandleModSpellHitChance(bool Apply)
+{
+    m_target->m_modSpellHitChance = Apply?m_modifier.m_amount:0;
+}
+
 void Aura::HandleAuraModScale(bool apply)
 {
     m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
@@ -1695,6 +1731,7 @@ void Aura::HandleModSpellCritChance(bool Apply)
 {
     m_target->m_baseSpellCritChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
 }
+
 void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 {
     sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
@@ -1712,6 +1749,39 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
     data << m_target->GetSpeed( MOVE_SWIM );
     m_target->SendMessageToSet(&data,true);
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_SWIM));
+}
+
+void Aura::HandleModDamageDoneCreature(bool Apply)
+{
+    if(Apply)
+    {
+
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageDoneCreature.erase(i);
+            }
+        }
+
+        DamageDoneCreature *ddc = new DamageDoneCreature();
+
+        ddc->spellId = GetId();
+        ddc->damage = m_modifier.m_amount;
+        ddc->creaturetype = m_modifier.m_miscvalue;
+        m_target->m_damageDoneCreature.push_back(ddc);
+    }
+    else
+    {
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageDoneCreature.erase(i);
+                break;
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraManaShield(bool apply)
@@ -1817,8 +1887,33 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
 
 void Aura::HandleReflectSpellsSchool(bool apply)
 {
-    apply ? m_target->m_ReflectSpellSchool = m_modifier.m_miscvalue : m_target->m_ReflectSpellSchool = 0;
-    apply ? m_target->m_ReflectSpellPerc = m_modifier.m_amount : m_target->m_ReflectSpellPerc = 0;
+    if(apply)
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+            }
+        }
+        ReflectSpellSchool *rss = new ReflectSpellSchool();
+
+        rss->chance = m_modifier.m_amount;
+        rss->spellId = GetId();
+        rss->school = m_modifier.m_miscvalue;
+        m_target->m_reflectSpellSchool.push_back(rss);
+    }
+    else
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+                break;
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraModSkill(bool apply)
