@@ -2021,6 +2021,9 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     for(int i=0;i<nrlvl || i==0;i++)
     {
+        // each skills that have max skill value dependent from level seted to current level max skill value
+        chr->UpdateSkillsToMaxSkillsForLevel();
+
         chr->GiveLevel();
 
         WorldPacket data;
