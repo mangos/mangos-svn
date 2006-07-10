@@ -1141,7 +1141,7 @@ void Player::GiveLevel()
 
 
     // Gain stats
-    MPGain = uint32(newSPI / 2);
+    MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newSPI / 2);
     HPGain = uint32(newSTA / 2);
     BuildLvlUpStats(&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
 
