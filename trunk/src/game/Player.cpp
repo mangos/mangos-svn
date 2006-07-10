@@ -2363,6 +2363,29 @@ void Player::UpdateMaxSkills()
     }
 }
 
+void Player::UpdateSkillsToMaxSkillsForLevel()
+{
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+        if (GetUInt32Value(PLAYER_SKILL(i)))
+    {
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i));
+        if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
+            || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
+            || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
+            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING)
+            continue;
+        uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
+
+        uint32 max = data>>16;
+
+        if(max > 1)
+        {
+            uint32 new_data = max * 0x10000 + max;
+            SetUInt32Value(PLAYER_SKILL(i)+1,new_data);
+        }
+    }
+}
+
 // This functions sets a skill line value (and adds if doesn't exist yet)
 // To "remove" a skill line, set it's values to zero
 void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)

@@ -684,6 +684,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateReputation() const;
         void SendSetFactionStanding(const Factions* faction) const;
         void UpdateMaxSkills();
+        void UpdateSkillsToMaxSkillsForLevel(); // for .levelup
         void ModifySkillBonus(uint32 skillid,int32 val);
 
         /*********************************************************/
