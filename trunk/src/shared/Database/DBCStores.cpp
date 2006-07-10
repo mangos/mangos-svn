@@ -132,7 +132,7 @@ void LoadDBCStores(std::string dataPath)
     if(sSpellFocusObject.Load(tmpPath.c_str()))
         bar.step();
     else
-        not_found_dbc_files.push_back("SpellFocusObject.dbc"); 
+        not_found_dbc_files.push_back("dbc/SpellFocusObject.dbc"); 
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellItemEnchantment.dbc");

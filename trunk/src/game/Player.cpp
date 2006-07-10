@@ -851,8 +851,6 @@ void Player::SendNewWorld(uint32 mapid, float x, float y, float z, float orienta
             m_attackers.erase(iter);
     }
 
-    SaveToDB(); 
-
     MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
     data.Initialize(SMSG_TRANSFER_PENDING);
@@ -1116,69 +1114,88 @@ void Player::GiveLevel()
 
     level += 1;
 
+    // Remove item, aura, stats bonuses
+    _RemoveAllItemMods();
+    _RemoveAllAuraMods();
     _RemoveStatsMods();
 
-    BuildLvlUpStats(&HPGain,&MPGain,&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
+    // base stats 
+    float newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetUInt32Value(UNIT_FIELD_MAXPOWER1);
 
-    uint32 newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetUInt32Value(UNIT_FIELD_MAXPOWER1) + MPGain;
+    float newHP  = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+    float newSTR = GetUInt32Value(UNIT_FIELD_STR);
+    float newSTA = GetUInt32Value(UNIT_FIELD_STAMINA);
+    float newAGI = GetUInt32Value(UNIT_FIELD_AGILITY);
+    float newINT = GetUInt32Value(UNIT_FIELD_IQ);
+    float newSPI = GetUInt32Value(UNIT_FIELD_SPIRIT);
 
-    uint32 newHP  = GetUInt32Value(UNIT_FIELD_MAXHEALTH) + HPGain;
-    uint32 newSTR = GetUInt32Value(UNIT_FIELD_STR) + STRGain;
-    uint32 newSTA = GetUInt32Value(UNIT_FIELD_STAMINA) + STAGain;
-    uint32 newAGI = GetUInt32Value(UNIT_FIELD_AGILITY) + AGIGain;
-    uint32 newINT = GetUInt32Value(UNIT_FIELD_IQ) + INTGain;
-    uint32 newSPI = GetUInt32Value(UNIT_FIELD_SPIRIT) + SPIGain;
+    // Remove class and race bonuses from base stats
+    if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
+        newHP = newHP / 1.05;
+    
+    if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
+        newSPI = newSPI / 1.05;
 
-    if( level > 9)
-    {
-        uint32 curTalentPoints = GetUInt32Value(PLAYER_CHARACTER_POINTS1);
-        SetUInt32Value(PLAYER_CHARACTER_POINTS1,curTalentPoints+1);
-    }
+    if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
+        newINT  = newINT / 1.05;
 
+
+    // Gain stats
+    MPGain = uint32(newSPI / 2);
+    HPGain = uint32(newSTA / 2);
+    BuildLvlUpStats(&STRGain,&STAGain,&AGIGain,&INTGain,&SPIGain);
+
+    // Apply gain stats
+    newMP  += MPGain;
+    newHP  += HPGain;
+    newSTR += STRGain;
+    newSTA += STAGain;
+    newAGI += AGIGain;
+    newINT += INTGain;
+    newSPI += SPIGain;
+
+    // Apply class and race bonuses to stats
+    if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
+        newHP  = newHP * 1.05;
+    
+    if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
+        newSPI  = newSPI * 1.05;
+
+    if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
+        newINT = newINT * 1.05;
+
+    // update level, talants, max level of skills 
     SetUInt32Value(UNIT_FIELD_LEVEL, level);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
+    if( level > 9)
+        SetUInt32Value(PLAYER_CHARACTER_POINTS1,GetUInt32Value(PLAYER_CHARACTER_POINTS1)+1);
+
     UpdateMaxSkills ();
 
-    //fill new stats
+    // save new stats
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        SetUInt32Value(UNIT_FIELD_POWER1, newMP);
-        SetUInt32Value(UNIT_FIELD_MAXPOWER1, newMP);
+        SetUInt32Value(UNIT_FIELD_POWER1, uint32(newMP));
+        SetUInt32Value(UNIT_FIELD_MAXPOWER1, uint32(newMP));
     }
 
-    if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
-    {
-        uint32 exHP = uint32(newHP / 1.05);                 //must remove previous bonus, so stat wouldn't grow toomuch
-        uint32 b_HP = uint32(exHP * 0.05);
-        newHP += b_HP;
-    }
-    
-    if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
-    {
-        uint32 exSpirit = uint32(newSPI / 1.05);            //must remove previous bonus, so stat wouldn't grow toomuch
-        uint32 b_Spirit = uint32(exSpirit * 0.05);
-        newSPI += b_Spirit;
-    }
 
-    if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
-    {
-        uint32 exIQ = uint32(newINT / 1.05);                //must remove previous bonus, so stat wouldn't grow toomuch
-        uint32 b_IQ = uint32(exIQ * 0.05);
-        newINT += b_IQ;
-    }
+    SetUInt32Value(UNIT_FIELD_HEALTH,    uint32(newHP));
+    SetUInt32Value(UNIT_FIELD_MAXHEALTH, uint32(newHP));
 
-    SetUInt32Value(UNIT_FIELD_HEALTH, newHP);
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH, newHP);
+    SetUInt32Value(UNIT_FIELD_STR,     uint32(newSTR));
+    SetUInt32Value(UNIT_FIELD_STAMINA, uint32(newSTA));
+    SetUInt32Value(UNIT_FIELD_AGILITY, uint32(newAGI));
+    SetUInt32Value(UNIT_FIELD_IQ,      uint32(newINT));
+    SetUInt32Value(UNIT_FIELD_SPIRIT,  uint32(newSPI));
 
-    SetUInt32Value(UNIT_FIELD_STR, newSTR);
-    SetUInt32Value(UNIT_FIELD_STAMINA, newSTA);
-    SetUInt32Value(UNIT_FIELD_AGILITY, newAGI);
-    SetUInt32Value(UNIT_FIELD_IQ, newINT);
-    SetUInt32Value(UNIT_FIELD_SPIRIT, newSPI);
-
+    // apply stats, aura, items mods
     _ApplyStatsMods();
+    _ApplyAllAuraMods();
+    _ApplyAllItemMods();
 
+    // send levelup info to client
     WorldPacket data;
     data.Initialize(SMSG_LEVELUP_INFO);
     data << uint32(level);
@@ -1200,80 +1217,14 @@ void Player::GiveLevel()
 }
 
 
-void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
+void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
 {
-	/*TODO: Add race bonuses on lvl. Lvl stats may depend on race and class.
-	uint8 race   = getRace();*/
-    uint8 _class = getClass();
-    uint8 lvl    = getLevel();
-
-    uint32 tempMP = (uint32)(GetUInt32Value(UNIT_FIELD_SPIRIT) / 2);
-
-    *HP = (uint32)(GetUInt32Value(UNIT_FIELD_STAMINA) / 2);
-	/*
-	switch(race)
-	{
-	case HUMAN:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case ORC:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case DWARF:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case NIGHT_ELF:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case UNDEAD:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case TAUREN:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case GNOME:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;
-	case TROLL:
-		*STR += 0.1;
-		*STA += 0.1;
-		*AGI += 0.1;
-		*INT += 0.1;
-		*SPI += 0.1;
-		break;*/
+    uint8 _class=getClass();
+    uint8 lvl=getLevel();
 
     switch(_class)
     {
         case WARRIOR:
-            *MP   = 0;
             *STR += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
             *STA += (lvl > 23 ? 2: (lvl > 1  ? 1: 0));
             *AGI += (lvl > 36 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
@@ -1281,7 +1232,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 9 && !(lvl%2) ? 1: 0);
             break;
         case PALADIN:
-            *MP   = tempMP;
             *STR += (lvl > 3  ? 1: 0);
             *STA += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
             *AGI += (lvl > 38 ? 1: (lvl > 7 && !(lvl%2) ? 1: 0));
@@ -1289,7 +1239,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 7 ? 1: 0);
             break;
         case HUNTER:
-            *MP   = tempMP;
             *STR += (lvl > 4  ? 1: 0);
             *STA += (lvl > 4  ? 1: 0);
             *AGI += (lvl > 33 ? 2: (lvl > 1 ? 1: 0));
@@ -1297,7 +1246,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
             break;
         case ROGUE:
-            *MP   = 0;
             *STR += (lvl > 5  ? 1: 0);
             *STA += (lvl > 4  ? 1: 0);
             *AGI += (lvl > 16 ? 2: (lvl > 1 ? 1: 0));
@@ -1305,7 +1253,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 38 ? 1: (lvl > 9 && !(lvl%2) ? 1: 0));
             break;
         case PRIEST:
-            *MP   = tempMP;
             *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
             *STA += (lvl > 5  ? 1: 0);
             *AGI += (lvl > 38 ? 1: (lvl > 8 && (lvl%2) ? 1: 0));
@@ -1313,7 +1260,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 3  ? 1: 0);
             break;
         case SHAMAN:
-            *MP   = tempMP;
             *STR += (lvl > 34 ? 1: (lvl > 6 && (lvl%2) ? 1: 0));
             *STA += (lvl > 4 ? 1: 0);
             *AGI += (lvl > 7 && !(lvl%2) ? 1: 0);
@@ -1321,7 +1267,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 4 ? 1: 0);
             break;
         case MAGE:
-            *MP   = tempMP;
             *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
             *STA += (lvl > 5  ? 1: 0);
             *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
@@ -1329,7 +1274,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 33 ? 2: (lvl > 2 ? 1: 0));
             break;
         case WARLOCK:
-            *MP   = tempMP;
             *STR += (lvl > 9 && !(lvl%2) ? 1: 0);
             *STA += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
             *AGI += (lvl > 9 && !(lvl%2) ? 1: 0);
@@ -1337,7 +1281,6 @@ void Player::BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint3
             *SPI += (lvl > 38 ? 2: (lvl > 3 ? 1: 0));
             break;
         case DRUID:
-            *MP   = tempMP;
             *STR += (lvl > 38 ? 2: (lvl > 6 && (lvl%2) ? 1: 0));
             *STA += (lvl > 32 ? 2: (lvl > 4 ? 1: 0));
             *AGI += (lvl > 38 ? 2: (lvl > 8 && (lvl%2) ? 1: 0));

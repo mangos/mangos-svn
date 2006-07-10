@@ -952,7 +952,8 @@ float Creature::GetAttackDistance(Unit *pl)
 	float RetDistance = 20;
 
     // "Aggro Radius varries with level difference at a rate of roughly 1 yard/level"
-    RetDistance += (float)leveldif;
+    // radius grow if playlevel < creaturelevel
+    RetDistance -= (float)leveldif; 
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
     if(RetDistance < 5) 
