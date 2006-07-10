@@ -489,8 +489,6 @@ void Spell::cancel()
 
 void Spell::cast()
 {
-    WorldPacket data;
-
     uint8 castResult = 0;
     if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
         m_caster->SetInFront(unitTarget);
@@ -554,38 +552,8 @@ void Spell::cast()
             }
         }
 
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && 
-           (m_spellInfo->RecoveryTime > 0 || m_spellInfo->CategoryRecoveryTime > 0) )
-        {
-             data.clear();
-             Player* _player = (Player*)m_caster;
-             data.Initialize(SMSG_SPELL_COOLDOWN);
-             data << m_caster->GetGUID();
-            if (m_spellInfo->CategoryRecoveryTime > 0)
-            {
-                PlayerSpellList const& player_spells = _player->getSpellList();
-                for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
-                {
-                    if(!(*itr)->spellId || !(*itr)->active)
-                        continue;
-                    SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
-                    if( spellInfo->Category == m_spellInfo->Category)
-                    {
-                        data << uint32((*itr)->spellId);
-                        if ((*itr)->spellId != m_spellInfo->Id || m_spellInfo->RecoveryTime == 0)
-                            data << uint32(m_spellInfo->CategoryRecoveryTime);
-                        else 
-                            data << uint32(m_spellInfo->RecoveryTime);
-                    }
-                }
-            }
-            else if (m_spellInfo->RecoveryTime > 0)
-            {
-                data << uint32(m_spellInfo->Id);
-                data << uint32(m_spellInfo->RecoveryTime);
-            }
-            _player->GetSession()->SendPacket(&data);
-        }
+        SendSpellCooldown();
+
     }
 
     if(m_spellState != SPELL_STATE_CASTING)
@@ -597,6 +565,47 @@ void Spell::cast()
 
     //}
 
+}
+
+void Spell::SendSpellCooldown()
+{
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if( m_spellInfo->RecoveryTime == 0 && m_spellInfo->CategoryRecoveryTime == 0 )
+        return;
+
+    Player* _player = (Player*)m_caster;
+
+    WorldPacket data;
+
+    data.clear();
+    data.Initialize(SMSG_SPELL_COOLDOWN);
+    data << m_caster->GetGUID();
+    if (m_spellInfo->CategoryRecoveryTime > 0)
+    {
+        PlayerSpellList const& player_spells = _player->getSpellList();
+        for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
+        {
+            if(!(*itr)->spellId || !(*itr)->active)
+                continue;
+            SpellEntry *spellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+            if( spellInfo->Category == m_spellInfo->Category)
+            {
+                data << uint32((*itr)->spellId);
+                if ((*itr)->spellId != m_spellInfo->Id || m_spellInfo->RecoveryTime == 0)
+                    data << uint32(m_spellInfo->CategoryRecoveryTime);
+                else 
+                    data << uint32(m_spellInfo->RecoveryTime);
+            }
+        }
+    }
+    else if (m_spellInfo->RecoveryTime > 0)
+    {
+        data << uint32(m_spellInfo->Id);
+        data << uint32(m_spellInfo->RecoveryTime);
+    }
+    _player->GetSession()->SendPacket(&data);
 }
 
 void Spell::update(uint32 difftime)

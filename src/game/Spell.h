@@ -417,6 +417,7 @@ class Spell
         void SendCastResult(uint8 result);
         void SendSpellStart();
         void SendSpellGo();
+        void SendSpellCooldown();
         void SendLogExecute();
         void SendInterrupted(uint8 result);
         void SendChannelUpdate(uint32 time);

@@ -333,7 +333,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel();
 
-        void BuildLvlUpStats(uint32 *HP,uint32 *MP,uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
+        void BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI);
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
