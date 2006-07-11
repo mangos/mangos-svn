@@ -1050,8 +1050,10 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     }
     else
     {
-        curValue -= addvalue;
-        if (curValue < 0) curValue = 0;
+        if(curValue <= addvalue)
+            curValue = 0;
+        else
+            curValue -= addvalue;
         SetUInt32Value(field_cur, curValue);
     }
 }
