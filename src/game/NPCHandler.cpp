@@ -363,6 +363,10 @@ void WorldSession::SendSpiritResurrect()
     _player->ApplyStats(false);
     _player->SetUInt32Value(UNIT_FIELD_HEALTH, _player->GetUInt32Value(UNIT_FIELD_MAXHEALTH)/2 );
     _player->SetUInt32Value(UNIT_FIELD_POWER1, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER1)/2 );
+    _player->SetUInt32Value(UNIT_FIELD_POWER2, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER2)/2 );
+    _player->SetUInt32Value(UNIT_FIELD_POWER3, 0 );
+    _player->SetUInt32Value(UNIT_FIELD_POWER4, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER4)/2 );
+    _player->SetUInt32Value(UNIT_FIELD_POWER5, _player->GetUInt32Value(UNIT_FIELD_MAXPOWER5)/2 );
     _player->ApplyStats(true);
 
     _player->DeathDurabilityLoss(0.25);

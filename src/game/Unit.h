@@ -242,7 +242,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
 
-        inline void addAttacker(Unit *pAttacker)
+        void addAttacker(Unit *pAttacker)
         {
             if (pAttacker == this)
                 return;
@@ -251,7 +251,7 @@ class MANGOS_DLL_SPEC Unit : public Object
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
         }
-        inline void removeAttacker(Unit *pAttacker)
+        void removeAttacker(Unit *pAttacker)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
@@ -260,7 +260,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             if (m_attackers.size() == 0)
                 clearUnitState(UNIT_STAT_ATTACK_BY);
         }
-        inline bool removeAttackee(Unit *pAttacker)
+        bool removeAttackee(Unit *pAttacker)
         {
             if (pAttacker == getVictim())
             {
@@ -283,18 +283,18 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AttackStop();
         Unit * getVictim() { return m_attacking; }
 
-        inline void addUnitState(uint32 f) { m_state |= f; };
-        inline bool hasUnitState(const uint32 f) const { return (m_state & f); }
-        inline void clearUnitState(uint32 f) { m_state &= ~f; };
+        void addUnitState(uint32 f) { m_state |= f; };
+        bool hasUnitState(const uint32 f) const { return (m_state & f); }
+        void clearUnitState(uint32 f) { m_state &= ~f; };
 
-        inline uint32 getLevel() const { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
-        inline uint8 getRace() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
-        inline uint32 getRaceMask() const { return 1 << (getRace()-1); };
-        inline uint8 getClass() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
-        inline uint32 getClassMask() const { return 1 << (getClass()-1); };
-        inline uint8 getGender() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
-        inline uint8 getPowerType() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF; };
-        inline uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
+        uint32 getLevel() const { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
+        uint8 getRace() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
+        uint32 getRaceMask() const { return 1 << (getRace()-1); };
+        uint8 getClass() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
+        uint32 getClassMask() const { return 1 << (getClass()-1); };
+        uint8 getGender() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
+        uint8 getPowerType() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF; };
+        uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
         void setPowerType(uint8 PowerType);
 
