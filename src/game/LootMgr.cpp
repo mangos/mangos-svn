@@ -85,6 +85,16 @@ void LoadLootTables()
         sLog.outError("\n>> Loaded 0 loot definitions. DB table `loot_template` have incompatible structure or empty.");
 }
 
+// Result: true  - have chance for non quest items or active quest items (loot can be empty or non empty in this case)
+//         false - only quest loot for non active quests (loot empty)
+bool LootItem::lootable(LootItem &itm, Player* player)
+{
+    if(player && itm.questchance > 0 && player->HaveQuestForItem(itm.itemid))
+        return true;
+    else 
+        return itm.chance > 0; 
+};
+
 struct NotChanceFor
 {
     Player* m_player;
@@ -94,23 +104,26 @@ struct NotChanceFor
     bool operator() ( LootItem &itm )
     {
         if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
-        {
             return itm.questchance <= rand_chance();
-        }
-        else
+        else if(itm.chance > 0) 
             return itm.chance <= rand_chance();
+        else
+            return true;
     }
 };
 
 void FillLoot(Player* player, Loot *loot, uint32 loot_id)
 {
-    LootStore::iterator tab;
-
     loot->items.clear();
     loot->gold = 0;
 
-    if ((tab = LootTemplates.find(loot_id)) == LootTemplates.end())
+    LootStore::iterator tab = LootTemplates.find(loot_id);
+
+    if (tab == LootTemplates.end())
+    {
+        sLog.outError("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in loot_template.",loot_id);
         return;
+    }
 
     vector <LootItem>::iterator new_end;
     loot->items.resize(tab->second.size());

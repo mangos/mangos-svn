@@ -985,7 +985,11 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     }
 
     if (m_currentSpell)
+    {
+        if (m_currentSpell->IsMeleeSpell())
+            m_currentSpell->cast();
         return;
+    }
 
     //if(isStunned()) return;
 

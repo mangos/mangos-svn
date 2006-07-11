@@ -405,10 +405,11 @@ class Spell
         uint8 CheckItems();
         uint32 CalculateDamage(uint8 i);
         void HandleTeleport(uint32 id, Unit* Target);
-        void Delayed(int32 delaytime);
+        void Delayed(int32 delaytime);  
         void reflect(Unit *refunit);
-        inline uint32 getState() { return m_spellState; }
-        inline void setState(uint32 state) { m_spellState = state; }
+        inline uint32 getState() const { return m_spellState; }
+        void setState(uint32 state) { m_spellState = state; }
+        void TakeCastItem();
 
         void writeSpellGoTargets( WorldPacket * data );
         void FillTargetMap();
@@ -434,16 +435,18 @@ class Spell
         SpellCastTargets m_targets;
 
         int32 casttime;
-        bool IsAutoRepeat() { return m_autoRepeat; }
+        bool IsAutoRepeat() const { return m_autoRepeat; }
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = casttime<0?0:casttime;}
-        bool IsAreaAura() { return m_spellInfo->Effect[0] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[1] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[2] ==SPELL_EFFECT_PERSISTENT_AREA_AURA;}
+        bool IsAreaAura() const { return m_spellInfo->Effect[0] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[1] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[2] ==SPELL_EFFECT_PERSISTENT_AREA_AURA;}
         //void SetArearAura(bool value) {m_AreaAura = value;}
+        bool IsMeleeSpell() const { return m_meleeSpell; }
 
     protected:
 
         Unit* m_caster;
         bool m_autoRepeat;
+        bool m_meleeSpell;
 
         // Current targets, to be used in SpellEffects
         Unit* unitTarget;

@@ -2139,6 +2139,8 @@ void Player::RepopAtGraveyard()
 
     if(ClosestGrave)
     {
+        // stop countdown until repop
+        m_deathTimer = 0;
 
         // we should be able to make 2 kinds of teleport after death
         // near if in the same mapid and far if in different mapid
@@ -3513,7 +3515,6 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
             if (loot_type == 2)
                 creature->getSkinLoot();
         }
-
     }
 
     m_lootGuid = guid;
