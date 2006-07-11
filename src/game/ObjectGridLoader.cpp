@@ -64,7 +64,11 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             T *obj = new T;
             uint32 guid = fields[0].GetUInt32();
             if(!obj->LoadFromDB(guid))
+            {
+                delete obj;
                 continue;
+            }
+
             m[obj->GetGUID()] = obj;
 
             addUnitState(obj);
@@ -72,9 +76,8 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             ++count;
 
         }while( result->NextRow() );
+        delete result;
     }
-    result = NULL;
-    delete result;
 }
 
 void
