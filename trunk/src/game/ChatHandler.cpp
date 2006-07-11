@@ -197,7 +197,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
         data << (uint32)emote_anim;
         data << GetPlayer()->GetGUID();
         WPAssert(data.size() == 12);
-        sWorld.SendGlobalMessage(&data);
+        GetPlayer()->SendMessageToSet( &data, true );
 
         data.Initialize(SMSG_TEXT_EMOTE);
         data << GetPlayer()->GetGUID();
@@ -215,7 +215,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
         WPAssert(data.size() == 20 + namlen);
         SendPacket( &data );
-        sWorld.SendGlobalMessage(&data, this);
+        GetPlayer()->SendMessageToSet( &data, true );
     }
 }
 
