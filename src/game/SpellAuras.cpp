@@ -1405,10 +1405,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
         if(unit_target->m_form == FORM_DIREBEAR)
 			if (m_target->getRace() == TAUREN)
 			{
-				m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,2.35f);
+				m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
 			}
 			else
-            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,2.0f);
+            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
         if(spellInfo)
         {
