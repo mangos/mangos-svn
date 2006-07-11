@@ -792,10 +792,23 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->ResurrectPlayer();
 
-    GetPlayer()->GetUInt32Value(UNIT_FIELD_HEALTH) > GetPlayer()->m_resurrectHealth ? GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->m_resurrectHealth )
-        : GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->GetUInt32Value(UNIT_FIELD_HEALTH) );
-    GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER1) > GetPlayer()->m_resurrectMana ? GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->m_resurrectMana )
-        : GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER1) );
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_HEALTH) > GetPlayer()->m_resurrectHealth)
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->m_resurrectHealth );
+
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER1) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->m_resurrectMana );
+
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER2) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER2, GetPlayer()->m_resurrectMana );
+
+    GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER3, 0 );
+
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER4) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER4, GetPlayer()->m_resurrectMana );
+
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER5) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER5, GetPlayer()->m_resurrectMana );
+
 
     GetPlayer()->SpawnCorpseBones();
 
