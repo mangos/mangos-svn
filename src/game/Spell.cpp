@@ -492,7 +492,7 @@ void Spell::cancel()
 
     finish();
     m_caster->RemoveDynObject(m_spellInfo->Id);
-    m_caster->RemoveGameObject(m_spellInfo->Id);
+    m_caster->RemoveGameObject(m_spellInfo->Id,true);
 }
 
 void Spell::cast()

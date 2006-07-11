@@ -2746,7 +2746,11 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
         if( factionTemplateEntry->ID == FTemplate ) break;
     }
 
-    assert(factionTemplateEntry);
+    if(!factionTemplateEntry)
+    {
+        sLog.outError("Player::SetStanding: Can't update reputation of %s for unknown FactionTemplate #%u.",GetName(),FTemplate);
+        return false;
+    }
 
     //Find faction by faction template
     for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++ )
@@ -2754,6 +2758,12 @@ bool Player::SetStanding(uint32 FTemplate, int standing)
         factionEntry = sFactionStore.LookupEntry(i);
         if( !factionEntry ) continue;
         if( factionEntry->ID == factionTemplateEntry->faction ) break;
+    }
+
+    if(!factionEntry)
+    {
+        sLog.outError("Player::SetStanding: Can't update reputation of %s for FactionTemplate #%u (unknown faction #%u). Not compatiable DBC files.",GetName(),FTemplate,factionTemplateEntry->faction);
+        return false;
     }
 
     assert(factionEntry);
@@ -3051,11 +3061,10 @@ void Player::CheckDuelDistance()
 
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
 
-    GameObject* obj = NULL;
-    obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
     //If the distance of duel flag is > 50
-    if( GetDistanceSq(obj) > (float)2500 )
+    if( !obj || GetDistanceSq(obj) > (float)2500 )
     {
         DuelComplete();
     }
@@ -3068,6 +3077,9 @@ void Player::DuelComplete()
 
     WorldPacket data;
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
+
+    AttackStop();
+    m_pDuel->AttackStop();
 
     data.Initialize(SMSG_DUEL_WINNER);
     data << (uint8)0;
@@ -3111,11 +3123,14 @@ void Player::DuelComplete()
     setDeathState(ALIVE);
 
     //Remove Duel Flag object
-    GameObject* obj = NULL;
-    obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
 
     if(obj)
+    {
+        RemoveGameObject(obj->GetSpellId(),false);
+        m_pDuel->RemoveGameObject(obj->GetSpellId(),false);
         MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
+    }
 
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
     SetUInt32Value(PLAYER_DUEL_TEAM, 0);
