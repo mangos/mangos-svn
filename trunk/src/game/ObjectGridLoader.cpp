@@ -72,9 +72,9 @@ template<class T> void LoadHelper(const char* table, const uint32 &grid_id, cons
             ++count;
 
         }while( result->NextRow() );
-        result = NULL;
-        delete result;
     }
+    result = NULL;
+    delete result;
 }
 
 void
