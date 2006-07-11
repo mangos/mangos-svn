@@ -120,7 +120,7 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     LoadRanksFromDB(GuildId);
     LoadMembersFromDB(GuildId);
     
-    QueryResult *result1 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u';","%d", GuildId);
+    QueryResult *result = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u';","%d", GuildId);
 
     if(!result)
         return;
