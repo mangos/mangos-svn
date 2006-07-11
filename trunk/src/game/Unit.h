@@ -238,6 +238,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual void Update( uint32 time );
 
         void setAttackTimer(uint32 time, bool rangeattack = false);
+        uint32 getAttackTimer() const { return m_attackTimer; }
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
 

@@ -48,7 +48,7 @@ struct LootItem
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
-
+    static bool lootable(LootItem &itm, Player* player);
 };
 
 struct Loot

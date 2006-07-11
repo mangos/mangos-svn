@@ -169,6 +169,14 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     m_timer = casttime<0?0:casttime;
 
+    m_meleeSpell = false;
+    if (m_spellInfo->StartRecoveryTime == 0)
+    {
+        for (int i = 0; i < 3; i++)
+            if (m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL ||
+                m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE)
+                m_meleeSpell = true;
+    }
 }
 
 void Spell::FillTargetMap()
@@ -496,6 +504,7 @@ void Spell::cast()
     if(castResult == 0)
     {
         TakePower();
+        TakeCastItem();
         FillTargetMap();
         SendCastResult(castResult);
         SendSpellGo();
@@ -620,10 +629,8 @@ void Spell::update(uint32 difftime)
         }
     }
 
-    if( ( m_timer != 0 ) && (m_caster->GetTypeId() == TYPEID_PLAYER) &&
-        (m_castPositionX != m_caster->GetPositionX() ||
-        m_castPositionY != m_caster->GetPositionY() ||
-        m_castPositionZ != m_caster->GetPositionZ() ) )
+    if( ( m_timer != 0 && !m_meleeSpell) && (m_caster->GetTypeId() == TYPEID_PLAYER) &&
+        ( m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ() ) )
     {
         cancel();
     }
@@ -639,7 +646,7 @@ void Spell::update(uint32 difftime)
                     m_timer -= difftime;
             }
 
-            if(m_timer == 0)
+            if(m_timer == 0 && !m_meleeSpell)
                 cast();
         } break;
         case SPELL_STATE_CASTING:
@@ -707,23 +714,6 @@ void Spell::finish()
 
     if(m_TriggerSpell)
         TriggerSpell();
-
-    if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-    ItemPrototype *proto = m_CastItem->GetProto();
-    uint32 ItemCount = m_CastItem->GetCount();
-    uint32 ItemClass = proto->Class;
-    
-    if (ItemClass == ITEM_CLASS_CONSUMABLE)
-    {
-        ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
-        if(ItemCount<=1)
-        {
-            //pItem->DeleteFromDB();
-            //delete m_CastItem;
-            m_CastItem = NULL;
-        }
-    }
 }
 
 void Spell::SendCastResult(uint8 result)
@@ -962,6 +952,25 @@ void Spell::SendPlaySpellVisual(uint32 SpellID)
     ((Player*)m_caster)->GetSession()->SendPacket(&data);
 }
 
+void Spell::TakeCastItem()
+{
+    if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    ItemPrototype *proto = m_CastItem->GetProto();
+    uint32 ItemCount = m_CastItem->GetCount();
+    uint32 ItemClass = proto->Class;
+    
+    if (ItemClass == ITEM_CLASS_CONSUMABLE)
+    {
+        ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
+        if(ItemCount<=1)
+        {
+            //delete m_CastItem;
+            m_CastItem = NULL;
+        }
+    }
+}
+
 void Spell::TakePower()
 {
     if(m_CastItem) 
@@ -1175,7 +1184,24 @@ uint8 Spell::CheckItems()
         itemid = m_CastItem->GetEntry();
         if( !p_caster->HasItemCount(itemid,1) )
             return (uint8)CAST_FAIL_ITEM_NOT_READY;
-        else return uint8(0);
+        else
+        {
+            ItemPrototype *proto = m_CastItem->GetProto();
+            uint32 ItemClass = proto->Class;
+            if (ItemClass == ITEM_CLASS_CONSUMABLE && unitTarget)
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
+                        if (unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) == unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH))
+                            return (uint8)CAST_FAIL_ALREADY_FULL_HEALTH;
+                    if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
+                        if (unitTarget->GetUInt32Value(UNIT_FIELD_POWER1) == unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
+                            return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
+                }
+            }
+            return uint8(0);
+        }
     }
 
     if(m_spellInfo->RequiresSpellFocus)
