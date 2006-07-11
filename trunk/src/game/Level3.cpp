@@ -1167,8 +1167,8 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
     if (!*args)
         return false;
 
-    lname = strtok((char*)args, " ");
-    gname = strtok(NULL, " ");
+    gname = strtok((char*)args, " ");
+    lname = strtok(NULL, " ");
     if(!lname)
         return false;
     else if(!gname)
