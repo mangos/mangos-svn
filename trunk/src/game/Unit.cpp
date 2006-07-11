@@ -1792,7 +1792,7 @@ void Unit::AddGameObject(GameObject* gameObj)
     m_gameObj.push_back(gameObj);
 }
 
-void Unit::RemoveGameObject(uint32 spellid)
+void Unit::RemoveGameObject(uint32 spellid, bool del)
 {
     if(m_gameObj.empty())
         return;
@@ -1803,7 +1803,9 @@ void Unit::RemoveGameObject(uint32 spellid)
         next++;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
-            (*i)->Delete();
+            if(del) 
+                (*i)->Delete();
+
             m_gameObj.erase(i);
             if(m_gameObj.empty())
                 break;

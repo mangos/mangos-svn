@@ -304,10 +304,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim);
 
-        float GetUnitDodgeChance()    const { return m_floatValues[ PLAYER_DODGE_PERCENTAGE ]; }
-        float GetUnitParryChance()    const { return m_floatValues[ PLAYER_PARRY_PERCENTAGE ]; }
-        float GetUnitBlockChance()    const { return m_floatValues[ PLAYER_BLOCK_PERCENTAGE ]; }
-        float GetUnitCriticalChance() const { return m_floatValues[ PLAYER_CRIT_PERCENTAGE  ]; }
+        float GetUnitDodgeChance()    const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_DODGE_PERCENTAGE ] : 5; }
+        float GetUnitParryChance()    const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_PARRY_PERCENTAGE ] : 5; }
+        float GetUnitBlockChance()    const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_BLOCK_PERCENTAGE ] : 5; }
+        float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_CRIT_PERCENTAGE  ] : 5; }
 
         uint32 GetUnitBlockValue() const { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
         uint32 GetUnitStrength()   const { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
@@ -454,7 +454,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
         void AddGameObject(GameObject* gameObj);
-        void RemoveGameObject(uint32 spellid);
+        void RemoveGameObject(uint32 spellid, bool del);
         uint32 CalculateDamage(bool ranged);
         void SetStateFlag(uint32 index, uint32 newFlag );
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
