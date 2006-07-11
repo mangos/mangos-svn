@@ -97,7 +97,7 @@ extern uint32 GetSkillLevel(Player *player,uint32 skill);
 #define SEND_TABARDLIST(a)         GetSession()->SendTabardVendorActivate(a)
 #define SEND_AUCTIONLIST(a)        GetSession()->SendAuctionHello(a)
 #define SEND_TAXILIST(a)           GetSession()->SendTaxiStatus(a)
-#define SEND_SPRESSURECT()         GetSession()->SendSpiritRessurect()
+#define SEND_SPRESURRECT()         GetSession()->SendSpiritResurrect()
 #define GET_HONORRANK()            GetHonorRank()
 
 // -----------------------------------

@@ -414,7 +414,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if( player->isDead() )
-                player->GetSession()->SendSpiritRessurect();
+                player->GetSession()->SendSpiritResurrect();
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             player->PrepareQuestMenu( guid );
