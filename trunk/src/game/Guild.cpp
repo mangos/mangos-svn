@@ -96,10 +96,31 @@ void Guild::create(uint64 lGuid, std::string gname)
 
 }
 
+void Guild::InviteMember(Player* pl)
+{
+    if(pl)
+    {
+        MemberSlot *newmember;
+        newmember = new MemberSlot;
+        newmember->name = pl->GetName();
+        newmember->guid = pl->GetGUID();
+        newmember->RankId = GR_INITIATE;
+        newmember->OFFnote = "";
+        newmember->level = pl->getLevel();
+        newmember->Class = pl->getClass();
+        newmember->zoneId = sAreaStore.LookupEntry(MapManager::Instance().GetMap(pl->GetMapId())->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()))->zone;
+        AddMember(newmember);
+        SaveMemberToDB(newmember);
+    }
+}
+	
 void Guild::LoadGuildFromDB(uint32 GuildId)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild` WHERE `guildid` = '%u';", GuildId);
+    LoadRanksFromDB(GuildId);
+    LoadMembersFromDB(GuildId);
+    
+    QueryResult *result1 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u';","%d", GuildId);
 
     if(!result)
         return;
@@ -125,22 +146,20 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
 
     delete result1;
 
-    QueryResult *result2 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%m\") FROM `guild` WHERE `guildid` = '%u';", GuildId);
+    QueryResult *result2 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u';","%m';", GuildId);
     if(!result2) return;
     fields = result2->Fetch();
     CreatedMonth = fields[0].GetUInt32();
 
     delete result2;
 
-    QueryResult *result3 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%Y\") FROM `guild` WHERE `guildid` = '%u';", GuildId);
+    QueryResult *result3 = sDatabase.PQuery("SELECT DATE_FORMAT(`createdate`,\"%s\") FROM `guild` WHERE `guildid` = '%u';", "%Y", GuildId);
     if(!result3) return;
     fields = result3->Fetch();
     CreatedYear = fields[0].GetUInt32();
 
     delete result3;
 
-    LoadRanksFromDB(GuildId);
-    LoadMembersFromDB(GuildId);
 }
 
 void Guild::LoadRanksFromDB(uint32 GuildId)
@@ -191,11 +210,10 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
     Field *fields;
 
     // column 'level' doesn't exist in `character` table.
-    // column 'zoneId' doesn't exist in `character` table.
-    // are these part of data?
+    // column 'zoneId' maybe now work?
     // FIXME: Get proper values for characters' zone and level.
-    QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
-
+    //QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
+      QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y` FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
     if(!result) return;
 
     fields = result->Fetch();
@@ -203,7 +221,7 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
     memslot->name  = fields[0].GetCppString();
     memslot->level = fields[1].GetUInt8();
     memslot->Class = fields[2].GetUInt8();
-    memslot->zoneId = fields[3].GetUInt32();
+    memslot->zoneId = sAreaStore.LookupEntry(MapManager::Instance().GetMap(fields[2].GetUInt32())->GetAreaFlag(fields[3].GetFloat(),fields[4].GetFloat()))->zone;
     delete result;
 }
 
@@ -268,7 +286,7 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
 void Guild::SaveGuildToDB()
 {
     sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
-    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%u', '%u', '%u', '%u', '%u', '%s', 'NOW()');", Id, name.c_str(), leaderGuid, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, MOTD.c_str());
+    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`MOTD`,`createdate`) VALUES('%u','%s','%u', '%u', '%u', '%u', '%u', '%u', '%s', NOW());", Id, name.c_str(), leaderGuid, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, MOTD.c_str());
     SaveRanksToDB();
     SaveGuildMembersToDB();
 }
@@ -303,7 +321,7 @@ void Guild::SaveMemberToDB(MemberSlot *memslot)
     if(!memslot) return;
 
     sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u';",memslot->guid);
-    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u', '%s', '%s');", Id, memslot->guid, memslot->RankId, memslot->Pnote.c_str(), memslot->OFFnote.c_str());
+    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`) VALUES ('%u', '%u', '%u');", Id, memslot->guid, memslot->RankId);
 }
 
 void Guild::DelGuildFromDB()

@@ -134,6 +134,7 @@ class Guild
         void SetLeader(uint64 guid){ leaderGuid = guid; }
         void AddMember(MemberSlot *memslot){ members.push_back(memslot); }
         void DelMember(uint64 guid);
+		void InviteMember(Player* pl);
 
         void SetMOTD(std::string motd) { MOTD = motd; }
         void SetGINFO(std::string ginfo){ GINFO = ginfo; }
