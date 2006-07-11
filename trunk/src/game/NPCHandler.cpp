@@ -321,10 +321,10 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 {
-    SendSpiritRessurect();
+    SendSpiritResurrect();
 }
 
-void WorldSession::SendSpiritRessurect()
+void WorldSession::SendSpiritResurrect()
 {
     if (!_player)
         return;

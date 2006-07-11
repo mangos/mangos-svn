@@ -87,7 +87,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionHello( uint64 guid );
         void SendTabardVendorActivate( uint64 guid );
         void SendTaxiStatus( uint64 guid );
-        void SendSpiritRessurect();
+        void SendSpiritResurrect();
         void SendBindPoint();
 
         //Item Enchantement
