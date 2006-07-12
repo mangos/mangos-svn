@@ -179,10 +179,10 @@ struct FactionEntry
 struct FactionTemplateEntry
 {
     uint32      ID;
-    uint32      faction;
     uint32      fightsupport;
     uint32      friendly;
     uint32      hostile;
+    uint32      faction;
 };
 struct ItemDisplayTemplateEntry
 {

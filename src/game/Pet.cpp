@@ -101,7 +101,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     SetUInt32Value(UNIT_FIELD_POWER5,fields[11].GetUInt32());
     SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
 
     SetUInt32Value(UNIT_FIELD_FLAGS,0);
 

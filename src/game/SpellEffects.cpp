@@ -678,7 +678,7 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 28 + 30*level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_LEVEL , level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNUMBER, unitTarget->GetGUIDLow());
@@ -935,7 +935,7 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 28 + 30*level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_LEVEL , level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNUMBER, unitTarget->GetGUIDLow());
@@ -1143,7 +1143,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
         creatureTarget->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
         creatureTarget->setPowerType(2);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+        creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER, creatureTarget->GetGUIDLow());
@@ -1258,7 +1258,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+        NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
 
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
 
@@ -1592,7 +1592,7 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
     pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
-    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, ((Player*)m_caster)->getFaction() );
+    pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 16 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
     pGameObj->SetRespawnTimer(GetDuration(m_spellInfo));

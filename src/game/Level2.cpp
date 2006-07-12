@@ -712,7 +712,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
         return true;
     }
 
-    pCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE , factionId);
+    pCreature->setFaction(factionId);
 
     pCreature->SaveToDB();
 

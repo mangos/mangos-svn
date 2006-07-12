@@ -43,7 +43,7 @@ Creature::Creature() :
     Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
     m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
     itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false), 
-    m_moveRun(false), m_faction(0), m_emoteState(0), m_isPet(false), 
+    m_moveRun(false), m_emoteState(0), m_isPet(false), 
     m_regenTimer(2000)
 {
     m_valuesCount = UNIT_END;
@@ -731,7 +731,7 @@ void Creature::SaveToDB()
     //<< (uint32)(m_state) << ","                     // is it really death state or just state?
 
         << GetUInt32Value(UNIT_NPC_FLAGS) << ","            //npcflags
-        << GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) << ","
+        << getFaction() << ","
         << "'')";                                           // should save auras
 
     sDatabase.Execute( ss.str( ).c_str( ) );

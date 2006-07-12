@@ -510,11 +510,9 @@ namespace MaNGOS
             {
                 if( !itr->second->isAlive() )
                     continue;
-                if( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius
-                    && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
-                    if(( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
-                    && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
-                        i_data.push_back(itr->second);
+                if( itr->second->getFaction() != i_spell.m_caster->getFaction()
+                    && itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
+                    i_data.push_back(itr->second);
             }
         }
     };

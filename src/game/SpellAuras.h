@@ -124,6 +124,7 @@ class Aura
         void HandleModPercentStat(bool Apply);
         void HandleModResistancePercent(bool Apply);
         void HandleAuraModBaseResistancePCT(bool Apply);
+        void HandleForceReaction(bool Apply);
         void HandleRangedAmmoHaste(bool Apply);
 
         Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target);

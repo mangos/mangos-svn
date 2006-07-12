@@ -19,7 +19,7 @@
 const char AreaTableEntryfmt[]="ixinxxxxxxixxxxxxxxxx";
 const char emoteentryfmt[]="nxixxxxxxxxxxxxxxxx";
 const char FactionEntryfmt[]="nixxxxxxxiiiiiiiiiixxxxxxxxxxxxxxxxxx";
-const char FactionTemplateEntryfmt[]="nixiiixxxxxxxx";
+const char FactionTemplateEntryfmt[]="nxxiiixxxxixxx";
 const char ItemDisplayTemplateEntryfmt[]="ixxxxxxxxxxixxxxxxxxxxi";
 const char ItemSetEntryfmt[]="dxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char SkillLineAbilityfmt[]="iiniiiiiiiiixxx";

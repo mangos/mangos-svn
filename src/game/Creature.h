@@ -314,10 +314,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool LoadFromDB(uint32 guid);
         void DeleteFromDB();
 
-        uint32 getFaction()
-        {
-            return m_faction;
-        };
         Loot loot;
 
         SpellEntry *reachWithSpellAttack(Unit *pVictim);
@@ -352,7 +348,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_moveRandom;
         bool m_moveRun;
 
-        uint32 m_faction;
         uint8 m_emoteState;
         bool m_isPet;                                       //add by vendy
         void Regenerate(uint16 field_cur, uint16 field_max);

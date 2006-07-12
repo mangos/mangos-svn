@@ -1917,6 +1917,20 @@ void Unit::setPowerType(uint8 PowerType)
     }
 }
 
+FactionTemplateEntry* Unit::getFactionTemplateEntry() const
+{
+    FactionTemplateEntry* entry = sFactionTemplateStore.LookupEntry(getFaction());
+    if(!entry) 
+    {
+        if(GetTypeId() == TYPEID_PLAYER)
+            sLog.outError("Player %s have invalide faction (fuction template id) #%u", ((Player*)this)->GetName(), getFaction());
+        else
+            sLog.outError("Creature (template id: %u) have invalide faction (fuction template id) #%u", ((Creature*)this)->GetCreatureInfo()->Entry, getFaction());
+    }
+    return entry;
+}
+
+
 void Unit::Attack(Unit *victim)
 {
     if (m_attacking)

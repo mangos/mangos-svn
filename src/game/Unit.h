@@ -65,8 +65,9 @@
 #define NULL_BAG                    0
 #define NULL_SLOT                   255
 
-struct SpellEntry;
+struct FactionTemplateEntry;
 struct Modifier;
+struct SpellEntry;
 
 class Aura;
 class Spell;
@@ -294,9 +295,15 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 getClassMask() const { return 1 << (getClass()-1); };
         uint8 getGender() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
         uint8 getPowerType() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF; };
+        void setPowerType(uint8 PowerType);
+
+        // function template id
+        uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }    
+        void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
+        FactionTemplateEntry* getFactionTemplateEntry() const;
+
         uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
-        void setPowerType(uint8 PowerType);
 
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist);

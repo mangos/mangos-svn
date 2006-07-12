@@ -620,6 +620,9 @@
 			Name="Tool"
 			Filter="">
 			<File
+				RelativePath="..\..\src\game\Language.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\tools.cpp">
 			</File>
 			<File

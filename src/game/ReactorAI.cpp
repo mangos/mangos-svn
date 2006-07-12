@@ -29,8 +29,7 @@
 int
 ReactorAI::Permissible(const Creature *creature)
 {
-    FactionTemplateEntry *fact = sFactionTemplateStore.LookupEntry(creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-    FactionTemplateResolver fact_source(fact);
+    FactionTemplateResolver fact_source(creature->getFactionTemplateEntry());
     if( fact_source.IsNeutralToAll() )
         return PERMIT_BASE_REACTIVE;
 
