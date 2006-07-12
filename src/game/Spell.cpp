@@ -170,7 +170,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     m_timer = casttime<0?0:casttime;
 
     m_meleeSpell = false;
-    if (m_spellInfo->StartRecoveryTime == 0)
+    if (m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat)
     {
         for (int i = 0; i < 3; i++)
             if (m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL ||
