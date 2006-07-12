@@ -261,15 +261,6 @@ class MANGOS_DLL_SPEC Unit : public Object
             if (m_attackers.size() == 0)
                 clearUnitState(UNIT_STAT_ATTACK_BY);
         }
-        bool removeAttackee(Unit *pAttacker)
-        {
-            if (pAttacker == getVictim())
-            {
-                AttackStop();
-                return true;
-            }
-            return false;
-        }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
         {
             if (getVictim() != NULL)
@@ -282,6 +273,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         }
         void Attack(Unit *victim);
         void AttackStop();
+        void RemoveAllAttackers();
         Unit * getVictim() { return m_attacking; }
 
         void addUnitState(uint32 f) { m_state |= f; };
@@ -374,13 +366,8 @@ class MANGOS_DLL_SPEC Unit : public Object
             {
                 if (isInCombat())
                 {
-                    while (m_attackers.size() != 0)
-                    {
-                        AttackerSet::iterator iter = m_attackers.begin();
-                        if (!((*iter)->removeAttackee(this)))
-                            m_attackers.erase(iter);
-                    }
                     AttackStop();
+                    RemoveAllAttackers();
                 }
             }
             if (s == JUST_DIED)

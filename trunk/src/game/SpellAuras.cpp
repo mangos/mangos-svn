@@ -303,6 +303,7 @@ void Aura::Update(uint32 diff)
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
             uint32 time;
             m_target->AttackStop();
+            m_target->RemoveAllAttackers();
             angle = m_target->GetAngle( m_caster->GetPositionX(), m_caster->GetPositionY() );
             speed = m_target->GetSpeed();
             pos_x = m_target->GetPositionX()+speed*diff* cos(-angle)/1000;

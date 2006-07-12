@@ -535,15 +535,15 @@ namespace MaNGOS
                 switch(i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if((i_spell.m_caster->isInFront((Unit*)(itr->second), radius )) && (itr->second)->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+                        if((i_spell.m_caster->isInFront((Unit*)(itr->second), radius )) && (itr->second)->getFaction() != i_spell.m_caster->getFaction())
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_SELF_CENTER:
-                        if((i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+                        if((i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ) && itr->second->getFaction() != i_spell.m_caster->getFaction() )
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_DEST_CENTER:
-                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ) && itr->second->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) != i_spell.m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) )
+                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ) && itr->second->getFaction() != i_spell.m_caster->getFaction() )
                             i_data.push_back(itr->second);
                         break;
                 }
