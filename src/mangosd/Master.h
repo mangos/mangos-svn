@@ -41,6 +41,8 @@ class Master
         void _UnhookSignals();
 
         static void _OnSignal(int s);
+
+        void clearOnlineAccounts();
 };
 
 #define sMaster MaNGOS::Singleton<Master>::Instance()

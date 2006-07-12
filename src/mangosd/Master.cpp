@@ -250,12 +250,25 @@ bool Master::_StartDB()
     }
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
+
+    clearOnlineAccounts();
     return true;
 }
 
 void Master::_StopDB()
 {
+    clearOnlineAccounts();
 }
+
+void Master::clearOnlineAccounts()
+{
+    // Cleanup online status for characters hosted at current realm
+    loginDatabase.PExecute(
+        "UPDATE `account`,`realmcharacters` SET `account`.`online` = 0 "
+        "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
+        "  AND `realmcharacters`.`realmid` = %d;",realmID);
+}
+
 
 void Master::_HookSignals()
 {
