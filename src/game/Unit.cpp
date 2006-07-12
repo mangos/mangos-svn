@@ -1955,6 +1955,15 @@ void Unit::AttackStop()
     RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
 }
 
+void Unit::RemoveAllAttackers()
+{
+    while (m_attackers.size() != 0)
+    {
+        AttackerSet::iterator iter = m_attackers.begin();
+        (*iter)->AttackStop();
+    }
+}
+
 void Unit::SetStateFlag(uint32 index, uint32 newFlag )
 {
     index |= newFlag;

@@ -844,12 +844,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
 void Player::SendNewWorld(uint32 mapid, float x, float y, float z, float orientation)
 {
     AttackStop();
-    while (m_attackers.size() != 0)
-    {
-        AttackerSet::iterator iter = m_attackers.begin();
-        if (!((*iter)->removeAttackee(this)))
-            m_attackers.erase(iter);
-    }
+    RemoveAllAttackers();
 
     MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
     WorldPacket data;
