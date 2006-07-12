@@ -1555,7 +1555,7 @@ void Spell::EffectAddComboPoints(uint32 i)
     }
     else if(comboPoints < 5)
     {
-        comboPoints += damage;
+		comboPoints += m_spellInfo->EffectBasePoints[i];
         m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
     }
 
