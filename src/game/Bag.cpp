@@ -117,6 +117,12 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
             ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
+            if(!proto) 
+            {
+                sLog.outError( "Bag::LoadFromDB: Player %s have unknown item (id: #%u) in bag #%u, skipped.", m_owner->GetName(),item_id,GetSlot());
+                continue;
+            }
+
             Item *item = NewItemOrBag(proto);
             item->SetOwner(m_owner);
             item->SetSlot(slot);

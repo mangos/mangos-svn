@@ -7953,6 +7953,12 @@ void Player::_LoadInventory()
 
             ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
+            if(!proto) 
+            {
+                sLog.outError( "Player::_LoadInventory: Player %s have unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
+                continue;
+            }
+
             Item *item = NewItemOrBag(proto);
             item->SetOwner(this);
             item->SetSlot(slot);
