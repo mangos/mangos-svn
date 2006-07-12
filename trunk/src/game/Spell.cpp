@@ -390,7 +390,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
                     if(!Target || Target->GetGUID() == m_caster->GetGUID())
                         continue;
-                    if(m_caster->GetDistanceSq(Target) < radius * radius && Target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE) == m_caster->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))
+                    if(Target->getFaction() == m_caster->getFaction() && m_caster->GetDistanceSq(Target) < radius * radius)
                         TagUnitMap.push_back(Target);
                 }
             }

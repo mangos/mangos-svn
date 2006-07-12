@@ -29,15 +29,14 @@
 int
 AggressorAI::Permissible(const Creature *creature)
 {
-    FactionTemplateEntry *fact = sFactionTemplateStore.LookupEntry(creature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
-    FactionTemplateResolver fact_source(fact);
+    FactionTemplateResolver fact_source(creature->getFactionTemplateEntry());
     if( fact_source.IsHostileToAll() )
         return PERMIT_BASE_PROACTIVE;
 
     return PERMIT_BASE_NO;
 }
 
-AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_myFaction(sFactionTemplateStore.LookupEntry(c.GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE))), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
+AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_myFaction(c.getFactionTemplateEntry()), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
 {
 }
 
@@ -49,7 +48,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
         {
-            FactionTemplateEntry *your_faction = sFactionTemplateStore.LookupEntry(u->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+            FactionTemplateResolver your_faction = u->getFactionTemplateEntry();
             if( i_myFaction.IsHostileTo( your_faction ) )
                 AttackStart(u);
         }

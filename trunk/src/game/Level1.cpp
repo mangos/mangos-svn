@@ -465,7 +465,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     {
         if(chr)
         {
-            factionid = chr->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE);
+            factionid = chr->getFaction();
             flag      = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
             npcflag   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
             dyflag   = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
@@ -503,6 +503,15 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     else
         dyflag = atoi(pdyflag);
 
+    if(!sFactionTemplateStore.LookupEntry(factionid))
+    {
+        sprintf((char*)buf,LANG_WRONG_FACTION, factionid);
+        FillSystemMessageData(&data, m_session, buf);
+        m_session->SendPacket( &data );
+        return true;
+    }
+
+
     sprintf((char*)buf,LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
     FillSystemMessageData(&data, m_session, buf);
     m_session->SendPacket( &data );
@@ -512,7 +521,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 
     //chr->GetSession()->SendPacket(&data);
 
-    chr->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,factionid);
+    chr->setFaction(factionid);
     chr->SetUInt32Value(UNIT_FIELD_FLAGS,flag);
     chr->SetUInt32Value(UNIT_NPC_FLAGS,npcflag);
     chr->SetUInt32Value(UNIT_DYNAMIC_FLAGS,dyflag);

@@ -1856,7 +1856,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
         return true;
     }
 
-    faction = target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE);
+    faction = target->getFaction();
     npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
     skinid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
     Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
@@ -1864,7 +1864,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     sprintf(buf,LANG_NPCINFO_CHAR, GUID_LOPART(guid), faction, npcflags, Entry, skinid);
     sprintf(buf,LANG_NPCINFO_LEVEL, buf, target->GetUInt32Value(UNIT_FIELD_LEVEL));
     sprintf(buf,LANG_NPCINFO_HEALTH, buf, target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
-    sprintf(buf,LANG_NPCINFO_FLAGS, buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE));
+    sprintf(buf,LANG_NPCINFO_FLAGS, buf, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
 
     sprintf(buf,LANG_NPCINFO_POSITION, buf, float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));
 

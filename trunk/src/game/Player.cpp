@@ -235,7 +235,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
 
-    setFaction(m_race, 0);
+    setFactionForRace(m_race);
 
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
@@ -2612,51 +2612,47 @@ void Player::CheckExploreSystem()
 
 }
 
-void Player::setFaction(uint8 race, uint32 faction)
+void Player::setFactionForRace(uint8 race)
 {
-
-    if(race > 0)
+    m_team = 0;
+    uint32 faction = 0;
+    switch(race)
     {
-        m_faction = 0;
-        m_team = 0;
-        switch(race)
-        {
-            case HUMAN:
-                m_faction = 1;
-                m_team = (uint32)ALLIANCE;
-                break;
-            case DWARF:
-                m_faction = 3;
-                m_team = (uint32)ALLIANCE;
-                break;
-            case NIGHTELF:
-                m_faction = 4;
-                m_team = (uint32)ALLIANCE;
-                break;
-            case GNOME:
-                m_faction = 115;
-                m_team = (uint32)ALLIANCE;
-                break;
+        case HUMAN:
+            faction = 1;
+            m_team = (uint32)ALLIANCE;
+            break;
+        case DWARF:
+            faction = 3;
+            m_team = (uint32)ALLIANCE;
+            break;
+        case NIGHTELF:
+            faction = 4;
+            m_team = (uint32)ALLIANCE;
+            break;
+        case GNOME:
+            faction = 115;
+            m_team = (uint32)ALLIANCE;
+            break;
 
-            case ORC:
-                m_faction = 2;
-                m_team = (uint32)HORDE;
-                break;
-            case UNDEAD_PLAYER:
-                m_faction = 5;
-                m_team = (uint32)HORDE;
-                break;
-            case TAUREN:
-                m_faction = 6;
-                m_team = (uint32)HORDE;
-                break;
-            case TROLL:
-                m_faction = 116;
-                m_team = (uint32)HORDE;
-                break;
-        }
-    } else m_faction = faction;
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, m_faction );
+        case ORC:
+            faction = 2;
+            m_team = (uint32)HORDE;
+            break;
+        case UNDEAD_PLAYER:
+            faction = 5;
+            m_team = (uint32)HORDE;
+            break;
+        case TAUREN:
+            faction = 6;
+            m_team = (uint32)HORDE;
+            break;
+        case TROLL:
+            faction = 116;
+            m_team = (uint32)HORDE;
+            break;
+    }
+    setFaction( faction );
 }
 
 void Player::UpdateReputation() const
@@ -2732,41 +2728,23 @@ void Player::SetInitialFactions()
     }
 }
 
-bool Player::SetStanding(uint32 FTemplate, int standing)
+bool Player::SetStanding(uint32 faction, int standing)
 {
-    //Factions newFaction;
-    FactionEntry *factionEntry = NULL;
-    FactionTemplateEntry *factionTemplateEntry = NULL;
-
-    //Find the Faction Template into the DBC
-    for(unsigned int i = 1; i <= sFactionTemplateStore.GetNumRows(); i++ )
-    {
-        factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
-        if( !factionTemplateEntry ) continue;
-        if( factionTemplateEntry->ID == FTemplate ) break;
-    }
+    FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(faction);
 
     if(!factionTemplateEntry)
     {
-        sLog.outError("Player::SetStanding: Can't update reputation of %s for unknown FactionTemplate #%u.",GetName(),FTemplate);
+        sLog.outError("Player::SetStanding: Can't update reputation of %s for unknown faction (faction template id) #%u.",GetName(),faction);
         return false;
     }
 
-    //Find faction by faction template
-    for(unsigned int i = 1; i <= sFactionStore.GetNumRows(); i++ )
-    {
-        factionEntry = sFactionStore.LookupEntry(i);
-        if( !factionEntry ) continue;
-        if( factionEntry->ID == factionTemplateEntry->faction ) break;
-    }
+    FactionEntry *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
     if(!factionEntry)
     {
-        sLog.outError("Player::SetStanding: Can't update reputation of %s for FactionTemplate #%u (unknown faction #%u). Not compatiable DBC files.",GetName(),FTemplate,factionTemplateEntry->faction);
+        sLog.outError("Player::SetStanding: Can't update reputation of %s for faction #%u (unknown faction id #%u). Not compatiable DBC files.",GetName(),faction,factionTemplateEntry->faction);
         return false;
     }
-
-    assert(factionEntry);
 
     return ModifyFactionReputation(factionEntry,standing);
 }
@@ -2794,7 +2772,7 @@ void Player::CalculateReputation(Unit *pVictim)
 
     if( pVictim->GetTypeId() != TYPEID_PLAYER )
     {
-        SetStanding( pVictim->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (-100) );
+        SetStanding( pVictim->getFaction(), (-100) );
     }
 }
 
@@ -2813,7 +2791,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
             RepPoints = (uint32)(((5-dif)*0.20)*110);       //human gain more 10% rep.
         else
             RepPoints = (uint32)(((5-dif)*0.20)*100);
-        SetStanding(pCreature->GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE), (RepPoints > 0 ? RepPoints : 1) );
+        SetStanding(pCreature->getFaction(), (RepPoints > 0 ? RepPoints : 1) );
     }
 }
 
@@ -3115,8 +3093,8 @@ void Player::DuelComplete()
     RestorePvpState();
     m_pDuel->RestorePvpState();
     //Restore to correct factiontemplate
-    setFaction(getRace(), 0);
-    m_pDuel->setFaction(m_pDuel->getRace(), 0);
+    setFactionForRace(getRace());
+    m_pDuel->setFactionForRace(m_pDuel->getRace());
     #endif
 
     //ResurrectPlayer();
@@ -7774,7 +7752,7 @@ bool Player::LoadFromDB( uint32 guid )
     m_race = fields[5].GetUInt8();
     //Need to call it to initialize m_team (m_team can be calculated from m_race)
     //Other way is to saves m_team into characters table.
-    setFaction(m_race, 0);
+    setFactionForRace(m_race);
 
     m_class = fields[6].GetUInt8();
 

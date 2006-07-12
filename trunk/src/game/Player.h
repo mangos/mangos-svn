@@ -527,11 +527,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_cinematic = cine;
         }
 
-        uint32 getFaction()
-        {
-            return m_faction;
-        };
-
         void UpdatePVPFlag(time_t currTime);
 
         void SetPVPCount(time_t count)
@@ -558,7 +553,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             return pvpOn;
         };
       
-        void setFaction(uint8 race, uint32 faction);
+        void setFactionForRace(uint8 race);
 
         inline std::list<struct actions> getActionList() { return m_actions; };
         void addAction(uint8 button, uint16 action, uint8 type, uint8 misc);
@@ -676,7 +671,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
-        bool SetStanding(uint32 FTemplate, int standing);
+        bool SetStanding(uint32 faction, int standing);
         bool ModifyFactionReputation(FactionEntry* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
         void CalculateReputation(Quest *pQuest, uint64 guid);
@@ -824,9 +819,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_race;
         uint32 m_class;
-        uint32 m_faction;
         uint32 m_team;
-        uint8 m_outfitId;
+        uint8  m_outfitId;
         uint16 m_petInfoId;
         uint16 m_petLevel;
         uint16 m_petFamilyId;

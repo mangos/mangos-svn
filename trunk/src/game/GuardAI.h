@@ -52,7 +52,7 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
         void _stopAttack(void);
 
         Creature &i_creature;
-        FactionTemplateEntry* i_myFaction;
+        FactionTemplateResolver i_myFaction;
         GuardState i_state;
         TimeTracker i_tracker;
 };

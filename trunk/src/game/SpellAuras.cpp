@@ -180,7 +180,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE_PERCENT = 136,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HASTE = 138,
-    &Aura::HandleNULL,                                      //SPELL_AURA_FORCE_REACTION = 139,
+    &Aura::HandleForceReaction,                             //SPELL_AURA_FORCE_REACTION = 139,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_HASTE = 140,
     &Aura::HandleRangedAmmoHaste,                           //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
     &Aura::HandleAuraModBaseResistancePCT,                  //SPELL_AURA_MOD_BASE_RESISTANCE_PCT = 142,
@@ -2065,6 +2065,37 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyPercentModUInt32Value(index2,m_modifier.m_amount,apply);
 }
+
+void Aura::HandleForceReaction(bool Apply)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(Apply)
+    {
+        uint32 faction_id = m_modifier.m_miscvalue;
+
+        FactionTemplateEntry *factionTemplateEntry;
+
+        for(uint32 i = 0; i <  sFactionTemplateStore.GetNumRows(); ++i)
+        {
+            factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
+            if(!factionTemplateEntry) 
+                continue;
+
+            if(factionTemplateEntry->faction == faction_id)
+                break;
+        }
+
+        if(!factionTemplateEntry)
+            return;
+
+        m_target->setFaction(factionTemplateEntry->ID);
+    }
+    else
+        ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
+}
+
 
 void Aura::HandleRangedAmmoHaste(bool apply)
 {
