@@ -222,6 +222,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+   if(pVictim->hasUnitState(UNIT_STAT_ROOT))
+      pVictim->clearUnitState(UNIT_STAT_ROOT);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
@@ -1403,7 +1405,31 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
+      {
+         if(dispel_type == 1)
+         {
+            bool positive = true;
+            switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
+            {
+               case TARGET_S_E:
+               case TARGET_AE_E:
+               case TARGET_AE_E_INSTANT:
+               case TARGET_AC_E:
+               case TARGET_INFRONT:
+               case TARGET_DUELVSPLAYER:
+               case TARGET_AE_E_CHANNEL:
+               case TARGET_AE_SELECTED:
+               positive = false;
+               break;
+
+               default:
+                  positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
+            }
+            if(positive)
+               continue;
+         }
             break;
+      }
     }
 
     if(i == m_Auras.end()) return;
@@ -1581,8 +1607,8 @@ void Unit::ApplyStats(bool apply)
     else classrate = 20;
                                                                   ///*+(Defense*0,04);
     if (getRace() == NIGHTELF)
-	val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate + 1);
-	else
+   val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate + 1);
+   else
     val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
 
     ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);

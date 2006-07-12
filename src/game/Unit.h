@@ -341,7 +341,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         {
             return HasAuraType(SPELL_AURA_MOD_STEALTH);
         }
-        bool isTargetableForAttack() const { return isAlive() && !isInFlight() && !isStealth(); }
+        bool isTargetableForAttack() const { return isAlive() && !isInFlight() /*&& !isStealth()*/; }
 
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);

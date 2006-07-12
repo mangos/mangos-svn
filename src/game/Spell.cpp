@@ -538,8 +538,9 @@ void Spell::cast()
         
         bool canreflect = false;
         for(int j=0;j<3;j++)
-        switch(m_spellInfo->EffectImplicitTargetA[j])
-        {
+      {
+         switch(m_spellInfo->EffectImplicitTargetA[j])
+         {
             case TARGET_S_E:
             case TARGET_AE_E:
             case TARGET_AE_E_INSTANT:
@@ -552,8 +553,12 @@ void Spell::cast()
             break;
 
             default:
-                canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
-        }
+               canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+         }
+         if(canreflect)
+            continue;
+         else break;
+      }
         if(canreflect)
         {
             for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
@@ -1262,6 +1267,16 @@ uint8 Spell::CanCast()
             return castResult;
         }
     }
+   for (int i = 0; i < 3; i++)
+   {
+      switch(m_spellInfo->EffectApplyAuraName[i])
+      {
+         case SPELL_AURA_MOD_STEALTH:
+         {
+            //detect if any mod is in x yards.if true,can't steath.FIX ME!
+         }
+      }
+   }
 
     castResult = CheckItems();
 
