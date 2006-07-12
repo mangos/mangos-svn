@@ -166,9 +166,6 @@ bool StartDB(std::string &dbstring)
 
     }
 
-    // Right now we just clear all logged in accounts on boot up
-    // We should query the realms and ask them.
-    dbRealmServer.PExecute( "UPDATE `account` SET `online` = 0;" );
     return true;
 }
 
