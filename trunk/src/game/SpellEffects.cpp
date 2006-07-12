@@ -413,7 +413,9 @@ void Spell::EffectPresistentAA(uint32 i)
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
-    dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
+   Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
+    unitTarget->AddAura(Aur);
+    //dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
     //m_dynObjToDel.push_back(dynObj);
     m_caster->AddDynObject(dynObj);
     dynObj->AddToWorld();
@@ -1553,7 +1555,7 @@ void Spell::EffectAddComboPoints(uint32 i)
     }
     else if(comboPoints < 5)
     {
-        comboPoints += 1;
+        comboPoints += damage;
         m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
     }
 

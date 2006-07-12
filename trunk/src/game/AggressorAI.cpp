@@ -44,7 +44,7 @@ AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_myFaction(sFactionTempl
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() )
+    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && IsVisible(u) )
     {
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
