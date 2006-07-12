@@ -369,26 +369,12 @@ void Spell::EffectCreateItem(uint32 i)
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player* player = (Player*)m_caster;
-    uint32 newitemid, itemid, itemcount;
-    if((newitemid = m_spellInfo->EffectItemType[i]) == 0)
-        return;
 
-    uint16 dest;
-    for(uint32 x=0;x<8;x++)
-    {
-        if(m_spellInfo->Reagent[x] == 0)
-            continue;
-        itemid = m_spellInfo->Reagent[x];
-        itemcount = m_spellInfo->ReagentCount[x];
-        if( player->HasItemCount(itemid,itemcount) && player->CanStoreNewItem(0, NULL_SLOT, dest, newitemid, 1, false ) == EQUIP_ERR_OK )
-            player->DestroyItemCount(itemid, itemcount, true);
-        else
-        {
-            SendCastResult(CAST_FAIL_ITEM_NOT_READY);
-            return;
-        }
-    }
+    Player* player = (Player*)m_caster;
+
+    uint32 newitemid = m_spellInfo->EffectItemType[i];
+    if(!newitemid)
+        return;
 
     uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
 
@@ -399,6 +385,7 @@ void Spell::EffectCreateItem(uint32 i)
     if(num_to_add > pItem->GetProto()->Stackable)
         num_to_add = pItem->GetProto()->Stackable;
 
+    uint16 dest;
     uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
     if( msg == EQUIP_ERR_OK )
     {
@@ -1058,27 +1045,6 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             }
         }
     }
-    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass
-        /*|| !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass)*/)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
-
-    for(uint32 x=0;x<8;x++)
-    {
-        if(m_spellInfo->Reagent[x] == 0)
-            continue;
-        uint32 itemid = m_spellInfo->Reagent[x];
-        uint32 itemcount = m_spellInfo->ReagentCount[x];
-        if( p_caster->HasItemCount(itemid,itemcount) )
-            p_caster->DestroyItemCount(itemid, itemcount, true);
-        else
-        {
-            SendCastResult(CAST_FAIL_ITEM_NOT_READY);
-            return;
-        }
-    }
 
     for(add_slot = 0; add_slot < 21; add_slot ++)
         if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -1128,27 +1094,6 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             }
         }
     }
-    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass
-        /*|| !(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass)*/)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
-
-    for(uint32 x=0;x<8;x++)
-    {
-        if(m_spellInfo->Reagent[x] == 0)
-            continue;
-        uint32 itemid = m_spellInfo->Reagent[x];
-        uint32 itemcount = m_spellInfo->ReagentCount[x];
-        if( p_caster->HasItemCount(itemid,itemcount) )
-            p_caster->DestroyItemCount(itemid, itemcount, true);
-        else
-        {
-            SendCastResult(CAST_FAIL_ITEM_NOT_READY);
-            return;
-        }
-    }
 
     for(add_slot = 0; add_slot < 21; add_slot ++)
         if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -1172,27 +1117,13 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
 void Spell::EffectTameCreature(uint32 i)
 {
-    if(!unitTarget || unitTarget->getLevel() > m_caster->getLevel())
-    {
-        SendCastResult(CAST_FAIL_TARGET_IS_TOO_HIGH);
+    if(!unitTarget)
         return;
-    }
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         return;
 
     Creature* creatureTarget = (Creature*)unitTarget;
-
-    CreatureInfo *cinfo = creatureTarget->GetCreatureInfo();
-
-    if(cinfo->type != CREATURE_TYPE_BEAST)
-        return;
-
-    if(m_caster->GetUInt64Value(UNIT_FIELD_SUMMON))
-    {
-        SendCastResult(CAST_FAIL_ALREADY_HAVE_SUMMON);
-        return;
-    }
 
     WorldPacket data;
 
@@ -1409,33 +1340,19 @@ void Spell::EffectLearnPetSpell(uint32 i)
     if(!learn_spellproto)
         return;
     SpellEntry *has_spellproto;
-    uint8 learn_msg = 1;
-    for(int8 x=0;x<4;x++)
-    {
-        has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
-        if(creatureTarget ->m_spells[x] == learn_spellproto->Id)
-            return;
-    }
     for(int8 x=0;x<4;x++)
     {
         has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
         if(!has_spellproto)
         {
             creatureTarget ->m_spells[x] = learn_spellproto->Id;
-            learn_msg = 0;
             break;
         }
         else if(has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
         {
             creatureTarget ->m_spells[x] = learn_spellproto->Id;
-            learn_msg = 0;
             break;
         }
-    }
-    if(learn_msg)
-    {
-        SendCastResult(CAST_FAIL_SPELL_NOT_LEARNED);
-        return;
     }
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1507,13 +1424,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             else
                 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
 
-            if( ((Player*)m_caster)->HasItemCount( ammo, 1 ) )
-                ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
-            else
-            {
-                SendCastResult(CAST_FAIL_NO_AMMO);
-                return;
-            }
+            ((Player*)m_caster)->DestroyItemCount( ammo, 1, true);
         }
     }
 
@@ -1530,7 +1441,6 @@ void Spell::EffectWeaponDmg(uint32 i)
     else fdamage = 0;
 
     m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,(uint32)fdamage);
-
 }
 
 void Spell::EffectWeaponDmgPerc(uint32 i)
@@ -1816,31 +1726,6 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             }
         }
     }
-    if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
-    if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
-    {
-        SendCastResult(CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM);
-        return;
-    }
-
-    for(uint32 x=0;x<8;x++)
-    {
-        if(m_spellInfo->Reagent[x] == 0)
-            continue;
-        uint32 itemid = m_spellInfo->Reagent[x];
-        uint32 itemcount = m_spellInfo->ReagentCount[x];
-        if( p_caster->HasItemCount(itemid,itemcount) )
-            p_caster->DestroyItemCount(itemid, itemcount, true);
-        else
-        {
-            SendCastResult(CAST_FAIL_ITEM_NOT_READY);
-            return;
-        }
-    }
 
     if (add_slot < 21)
     {
@@ -1865,23 +1750,13 @@ void Spell::EffectDisEnchant(uint32 i)
         return;
     uint32 item_level = itemTarget->GetProto()->ItemLevel;
     uint32 item_quality = itemTarget->GetProto()->Quality;
-    if(item_quality > 4 || item_quality < 2)
-    {
-        SendCastResult(CAST_FAIL_CANT_BE_DISENCHANTED);
-        return;
-    }
-    if(itemTarget->GetProto()->Class != 2 || itemTarget->GetProto()->Class != 4)
-    {
-        SendCastResult(CAST_FAIL_CANT_BE_DISENCHANTED);
-        return;
-    }
     p_caster->DestroyItemCount(itemTarget->GetEntry(),1, true);
 
     Player *player = (Player*)m_caster;
     p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     uint32 item;
-    uint32 count;
+    uint32 count = 0;
     if(item_level >= 51)
     {
         if(item_quality == 4)
@@ -2301,28 +2176,11 @@ void Spell::EffectSkinning(uint32 i)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
-
-    if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
-    {
-        SendCastResult(CAST_FAIL_INVALID_TARGET);
-        return;
-    }
-    if(unitTarget->m_form == 99)
-    {
-        SendCastResult(CAST_FAIL_NOT_SKINNABLE);
-        return;
-    }
     int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
     int32 targetlevel = unitTarget->getLevel();
-    if(fishvalue >= (targetlevel-5)*5)
-    {
-        ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
-    }else
-    {
-        SendCastResult(CAST_FAIL_FAILED);
-        return;
-    }
+
+    ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
+
     if(fishvalue> (targetlevel +15)*5 )
         up_skillvalue = 4;
     else if(fishvalue>= (targetlevel +10)*5 )

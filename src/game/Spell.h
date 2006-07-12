@@ -400,6 +400,8 @@ class Spell
         void cast();
         void finish();
         void TakePower();
+        void TakeReagents();
+        void TakeCastItem();
         void TriggerSpell();
         uint8 CanCast();
         uint8 CheckItems();
@@ -409,7 +411,6 @@ class Spell
         void reflect(Unit *refunit);
         inline uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
-        void TakeCastItem();
 
         void writeSpellGoTargets( WorldPacket * data );
         void FillTargetMap();

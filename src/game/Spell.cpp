@@ -505,6 +505,7 @@ void Spell::cast()
     {
         TakePower();
         TakeCastItem();
+        TakeReagents();
         FillTargetMap();
         SendCastResult(castResult);
         SendSpellGo();
@@ -1009,6 +1010,28 @@ void Spell::TakePower()
     }
 }
 
+void Spell::TakeReagents()
+{
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player* p_caster = (Player*)m_caster;
+    for(uint32 x=0;x<8;x++)
+    {
+        if(m_spellInfo->Reagent[x] == 0)
+            continue;
+        uint32 itemid = m_spellInfo->Reagent[x];
+        uint32 itemcount = m_spellInfo->ReagentCount[x];
+        if( p_caster->HasItemCount(itemid,itemcount) )
+            p_caster->DestroyItemCount(itemid, itemcount, true);
+        else
+        {
+            SendCastResult(CAST_FAIL_ITEM_NOT_READY);
+            return;
+        }
+    }
+}
+
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i)
 {
     uint8 castResult = 0;
@@ -1158,6 +1181,88 @@ uint8 Spell::CanCast()
         return castResult;
     }
 
+    for (int i = 0; i < 3; i++)
+    {
+        // for effects of spells that have only one target
+        switch(m_spellInfo->Effect[i]) 
+        {
+            case SPELL_EFFECT_TAMECREATURE:
+            {
+                if (!unitTarget) return CAST_FAIL_FAILED;
+                if (unitTarget->GetTypeId() == TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if (unitTarget->getLevel() > m_caster->getLevel())
+                {        
+                    castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
+                    break;
+                }
+                CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
+                if(cinfo->type != CREATURE_TYPE_BEAST)
+                {
+                    castResult = CAST_FAIL_INVALID_TARGET;
+                    break;
+                }
+                if(m_caster->GetUInt64Value(UNIT_FIELD_SUMMON))
+                {
+                    castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
+                    break;
+                }
+                break;
+            }
+            case SPELL_EFFECT_LEARN_PET_SPELL:
+            {
+                if(!unitTarget) return CAST_FAIL_FAILED;
+                if(unitTarget->GetTypeId() == TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                SpellEntry *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+                if(!learn_spellproto) return CAST_FAIL_FAILED;
+                Creature* creatureTarget = (Creature*)unitTarget;
+                uint8 learn_msg = 1;
+                for(int8 x=0;x<4;x++)
+                {
+                    if((creatureTarget)->m_spells[x] == learn_spellproto->Id)
+                    {
+                        castResult = CAST_FAIL_ALREADY_LEARNED_THAT_SPELL;
+                        break;
+                    }
+                    SpellEntry *has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
+                    if (!has_spellproto) learn_msg = 0;
+                    else if (has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
+                        learn_msg = 0;
+                }
+                if(learn_msg)
+                    castResult = CAST_FAIL_SPELL_NOT_LEARNED;
+                break;
+            }
+            case SPELL_EFFECT_SKINNING:
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if(!unitTarget) return CAST_FAIL_FAILED;
+                if(unitTarget->GetTypeId() != TYPEID_UNIT) return CAST_FAIL_FAILED;
+                CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
+                if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
+                {
+                    castResult = CAST_FAIL_INVALID_TARGET;
+                    break;
+                }
+                if(unitTarget->m_form == 99)
+                {
+                    castResult = CAST_FAIL_NOT_SKINNABLE;
+                    break;
+                }
+                int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
+                int32 targetlevel = unitTarget->getLevel();
+                if(fishvalue < (targetlevel-5)*5)
+                    castResult = CAST_FAIL_FAILED;
+                break;
+            }
+        }
+
+        if(castResult != 0)
+        {
+            SendCastResult(castResult);
+            return castResult;
+        }
+    }
+
     castResult = CheckItems();
 
     if(castResult != 0)
@@ -1173,12 +1278,7 @@ uint8 Spell::CheckItems()
 
     uint32 itemid, itemcount;
     Player* p_caster = (Player*)m_caster;
-    if (itemTarget)
-    {
-        if( !p_caster->HasItemCount(itemTarget->GetEntry(), 1) )
-            return (uint8)CAST_FAIL_ITEM_NOT_READY;
-        else return uint8(0);
-    }
+
     if(m_CastItem)
     {
         itemid = m_CastItem->GetEntry();
@@ -1271,6 +1371,71 @@ uint8 Spell::CheckItems()
     }
     if(totems != 0)
         return uint8(0x70);
+
+    if (!itemTarget)
+        return uint8(0);
+
+    if( !p_caster->HasItemCount(itemTarget->GetEntry(), 1) )
+        return (uint8)CAST_FAIL_ITEM_NOT_READY;
+
+    for(int i = 0; i < 3; i++)
+    {
+        switch (m_spellInfo->Effect[i]) 
+        {
+            case SPELL_EFFECT_CREATE_ITEM:
+            {
+                if (m_spellInfo->EffectItemType[i])
+                {
+                    uint16 dest;
+                    uint8 msg = p_caster->CanStoreNewItem(0, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], 1, false );
+                    if (msg != EQUIP_ERR_OK )
+                    {
+                        p_caster->SendEquipError( msg, NULL, NULL );
+                        return uint8(CAST_FAIL_FAILED); // TODO: don't show two errors
+                    }
+                }
+                break;
+            }
+            case SPELL_EFFECT_ENCHANT_ITEM:
+            case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
+            case SPELL_EFFECT_ENCHANT_HELD_ITEM:
+            {
+                if(itemTarget->GetProto()->Class != m_spellInfo->EquippedItemClass)
+                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
+                if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENCHANT_HELD_ITEM &&
+                    itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
+                    return CAST_FAIL_ENCHANT_NOT_EXISTING_ITEM;
+                break;
+            }
+            case SPELL_EFFECT_DISENCHANT:
+            {
+                uint32 item_quality = itemTarget->GetProto()->Quality;
+                if(item_quality > 4 || item_quality < 2)
+                    return CAST_FAIL_CANT_BE_DISENCHANTED;
+                if(itemTarget->GetProto()->Class != 2 && itemTarget->GetProto()->Class != 4)
+                    return CAST_FAIL_CANT_BE_DISENCHANTED;
+                break;
+            }
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            {
+                if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
+                    break;
+                Item *pItem = p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+                uint32 type = pItem->GetProto()->InventoryType;
+                uint32 ammo;
+                if( type == INVTYPE_THROWN )
+                    ammo = pItem->GetEntry();
+                else
+                    ammo = p_caster->GetUInt32Value(PLAYER_AMMO_ID);
+
+                if( !p_caster->HasItemCount( ammo, 1 ) )
+                    return CAST_FAIL_NO_AMMO;
+                break;
+            }
+        }
+    }
+
     return uint8(0);
 }
 
