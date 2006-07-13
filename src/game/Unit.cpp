@@ -384,7 +384,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     {
         DEBUG_LOG("DealDamageAlive");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
-        pVictim->addAttacker(this);
+        Attack(pVictim);
 
         if(pVictim->getTransForm())
         {
@@ -1947,17 +1947,19 @@ void Unit::Attack(Unit *victim)
     addUnitState(UNIT_STAT_ATTACKING);
     SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     m_attacking = victim;
+    m_attacking->_addAttacker(this);
 }
 
-void Unit::AttackStop()
+bool Unit::AttackStop()
 {
     if (!m_attacking)
-        return;
+        return false;
 
-    m_attacking->removeAttacker(this);
+    m_attacking->_removeAttacker(this);
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
     RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
+    return true;
 }
 
 bool Unit::isInCombatWithPlayer() const
@@ -1977,7 +1979,11 @@ void Unit::RemoveAllAttackers()
     while (m_attackers.size() != 0)
     {
         AttackerSet::iterator iter = m_attackers.begin();
-        (*iter)->AttackStop();
+        if(!(*iter)->AttackStop())
+        {
+            sLog.outError("WORLD: Unit has an attacker that isnt attacking it!");
+            m_attackers.erase(iter);
+        }
     }
 }
 
