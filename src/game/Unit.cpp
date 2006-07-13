@@ -888,7 +888,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                     return;
                 }
 
-                Spell *spell = new Spell(pVictim, spellInfo, false, 0);
+                Spell *spell = new Spell(pVictim, spellInfo, true, 0);
                 WPAssert(spell);
 
                 SpellCastTargets targets;
@@ -911,7 +911,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                     return;
                 }
 
-                Spell *spell = new Spell(pVictim, spellInfo, false, 0);
+                Spell *spell = new Spell(pVictim, spellInfo, true, 0);
                 WPAssert(spell);
 
                 SpellCastTargets targets;
@@ -999,6 +999,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         chanceToHit = 0;
     else if (attackerSkill <= victimSkill)
         chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
+    if(GetTypeId() != TYPEID_PLAYER && chanceToHit ==0)
+        chanceToHit = 15;
 
     uint32 damage = CalculateDamage (false);
 
@@ -1781,7 +1783,7 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
     {
         if(apply)
         {
-            Spell *spell = new Spell(this, enchantSpell_info, false, 0);
+            Spell *spell = new Spell(this, enchantSpell_info, true, 0);
             SpellCastTargets targets;
             targets.setUnitTarget(this);
             spell->prepare(&targets);

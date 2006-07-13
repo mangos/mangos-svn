@@ -51,6 +51,8 @@ AggressorAI::MoveInLineOfSight(Unit *u)
             FactionTemplateResolver your_faction = u->getFactionTemplateEntry();
             if( i_myFaction.IsHostileTo( your_faction ) )
                 AttackStart(u);
+            if(u->isStealth())
+                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }
@@ -201,13 +203,20 @@ AggressorAI::IsVisible(Unit *pl) const
     bool seestealth = true;
     uint32 sight = sWorld.getConfig(CONFIG_SIGHT_MONSTER);
     float dist = i_creature.GetDistanceSq(pl);
+    float attackRadius = i_creature.GetAttackDistance(pl);
     if(pl->isStealth())
     {
+        int32 seevaluse;
         int notfront = i_creature.isInFront(pl, sight) ? 0 : 1;
-        seestealth = (5  + i_creature.getLevel() * 5 + i_creature.m_detectStealth - pl->m_stealthvalue - (uint32)sqrt(dist) - 50 * notfront) > urand(0,100);
+        seevaluse = 5  + i_creature.getLevel() * 5 + i_creature.m_detectStealth - pl->m_stealthvalue - (uint32)sqrt(dist/100) - 50 * notfront;
+        if(seevaluse<0)
+            seestealth = false;
+        else if(seevaluse>int32(urand(0,100)))
+            seestealth = true;
+      else seestealth = false;
     }
                                                             // offset=1.0
-    return pl->isTargetableForAttack() && seestealth && (dist * 1.0 <= sight) ;
+    return seestealth && (dist * 1.0 <= sight) ;
 }
 
 void
