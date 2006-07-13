@@ -1555,7 +1555,11 @@ void Spell::EffectAddComboPoints(uint32 i)
     }
     else if(comboPoints < 5)
     {
-		comboPoints += m_spellInfo->EffectBasePoints[i];
+      if(m_spellInfo->Mechanic == 12 && m_spellInfo->SpellIconID == 244 && m_spellInfo->SpellVisual == 266)
+         comboPoints += 2;
+      else comboPoints += 1;
+      if(comboPoints > 5)
+         comboPoints = 5;
         m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
     }
 
