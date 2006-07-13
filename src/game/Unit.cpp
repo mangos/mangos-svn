@@ -270,10 +270,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             {
                 ((Player*)pVictim)->DeathDurabilityLoss(0.10);
             }
-            std::list<Hostil*>::iterator i;
+            HostilList::iterator i;
             for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
             {
-                if((*i)->UnitGuid==victimGuid)
+                if(i->UnitGuid==victimGuid)
                 {
                     m_hostilList.erase(i);
                     break;
@@ -291,9 +291,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                     pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
                     pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
                     pet->addUnitState(UNIT_STAT_DIED);
-                    for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
+                    for(i = m_hostilList.begin(); i != m_hostilList.end(); ++i)
                     {
-                        if((*i)->UnitGuid==pet->GetGUID())
+                        if(i->UnitGuid==pet->GetGUID())
                         {
                             m_hostilList.erase(i);
                             break;
@@ -1178,11 +1178,11 @@ void Unit::_UpdateHostil( uint32 time )
 {
     if(!isInCombat() && m_hostilList.size() )
     {
-        std::list<Hostil*>::iterator iter;
-        for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); iter++)
+        HostilList::iterator iter;
+        for(iter=m_hostilList.begin(); iter!=m_hostilList.end(); ++iter)
         {
-            (*iter)->Hostility-=time/1000.0f;
-            if((*iter)->Hostility<=0.0f)
+            iter->Hostility-=time/1000.0f;
+            if(iter->Hostility<=0.0f)
             {
                 m_hostilList.erase(iter);
                 if(!m_hostilList.size())
@@ -1193,6 +1193,21 @@ void Unit::_UpdateHostil( uint32 time )
         }
     }
 }
+
+Unit* Unit::SelectHostilTarget() 
+{
+    if(!m_hostilList.size())
+        return NULL;
+
+    m_hostilList.sort();
+    m_hostilList.reverse();
+    uint64 guid = m_hostilList.front().UnitGuid;
+    if(guid != getVictim()->GetGUID())
+        return ObjectAccessor::Instance().GetUnit(*this, guid);
+    else
+        return NULL;
+}
+
 
 void Unit::castSpell( Spell * pSpell )
 {
@@ -1706,41 +1721,29 @@ Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
     return NULL;
 }
 
-Hostil* Unit::GetHostil(uint64 guid)
+float Unit::GetHostility(uint64 guid) const
 {
-    std::list<Hostil*>::iterator i;
-    for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
-        if((*i)->UnitGuid==guid)
-            return (*i);
-    return NULL;
-}
-
-float Unit::GetHostility(uint64 guid)
-{
-    std::list<Hostil*>::iterator i;
+    HostilList::const_iterator i;
     for ( i = m_hostilList.begin(); i!= m_hostilList.end(); i++)
     {
-        if((*i)->UnitGuid==guid)
-            return (*i)->Hostility;
+        if(i->UnitGuid==guid)
+            return i->Hostility;
     }
     return 0.0f;
 }
 
 void Unit::AddHostil(uint64 guid, float hostility)
 {
-    std::list<Hostil*>::iterator i;
+    HostilList::iterator i;
     for(i = m_hostilList.begin(); i != m_hostilList.end(); i++)
     {
-        if((*i)->UnitGuid==guid)
+        if(i->UnitGuid==guid)
         {
-            (*i)->Hostility+=hostility;
+            i->Hostility+=hostility;
             return;
         }
     }
-    Hostil *uh=new Hostil;
-    uh->UnitGuid=guid;
-    uh->Hostility=hostility;
-    m_hostilList.push_back(uh);
+    m_hostilList.push_back(Hostil(guid,hostility));
 }
 
 void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
@@ -1953,6 +1956,18 @@ void Unit::AttackStop()
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
     RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
+}
+
+bool Unit::isInCombatWithPlayer() const
+{
+    if(getVictim() && getVictim()->GetTypeId() == TYPEID_PLAYER) 
+        return true;
+
+    for(AttackerSet::const_iterator i = m_attackers.begin(); i != m_attackers.end(); ++i)
+    {
+        if((*i)->GetTypeId() == TYPEID_PLAYER) return true;
+    }
+    return false;
 }
 
 void Unit::RemoveAllAttackers()

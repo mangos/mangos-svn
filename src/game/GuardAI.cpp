@@ -69,7 +69,7 @@ bool GuardAI::_needToStop() const
     i_creature.GetRespawnCoord(rx, ry, rz);
     float spawndist=i_creature.GetDistanceSq(rx,ry,rz);
     float length = i_creature.GetDistanceSq(i_creature.getVictim());
-    float hostillen=i_creature.GetHostility( i_creature.getVictim()->GetGUID())/(3.0f * i_creature.getLevel()+1.0f);
+    float hostillen=i_creature.GetHostilityDistance( i_creature.getVictim()->GetGUID());
     return (( length > (10.0f + hostillen) * (10.0f + hostillen) && spawndist > 6400.0f )
         || ( length > (20.0f + hostillen) * (20.0f + hostillen) && spawndist > 2500.0f )
         || ( length > (30.0f + hostillen) * (30.0f + hostillen) ));
@@ -161,19 +161,9 @@ void GuardAI::UpdateAI(const uint32 diff)
                 {
                     if( i_creature.isAttackReady() )
                     {
-                        std::list<Hostil*> hostillist = i_creature.GetHostilList();
-                        if(hostillist.size())
-                        {
-                            hostillist.sort();
-                            hostillist.reverse();
-                            uint64 guid = (*hostillist.begin())->UnitGuid;
-                            if(!i_creature.getVictim() || guid != i_creature.getVictim()->GetGUID())
-                            {
-                                Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
-                                if(newtarget)
-                                    AttackStart(newtarget);
-                            }
-                        }
+                        Unit* newtarget = i_creature.SelectHostilTarget();
+                        if(newtarget)
+                            AttackStart(newtarget);
                         if(!i_creature.getVictim() || !i_creature.canReachWithAttack(i_creature.getVictim()))
                             return;
                         i_creature.AttackerStateUpdate(i_creature.getVictim());

@@ -327,9 +327,8 @@ void Spell::EffectHeal( uint32 i )
         //If the target is in combat, then player is in combat too
         if( m_caster != unitTarget &&
             m_caster->GetTypeId() == TYPEID_PLAYER &&
-            unitTarget->isInCombat() &&
             unitTarget->GetTypeId() == TYPEID_PLAYER &&
-            unitTarget->getVictim()->GetTypeId() == TYPEID_PLAYER )
+            unitTarget->isInCombatWithPlayer() )
         {
             ((Player*)m_caster)->SetPvP(true);
         }

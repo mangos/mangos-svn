@@ -217,6 +217,8 @@ enum ImmuneToSchool
 
 struct Hostil
 {
+    Hostil(uint64 _UnitGuid, float _Hostility) : UnitGuid(_UnitGuid), Hostility(_Hostility) {}
+
     uint64 UnitGuid;
     float Hostility;
     bool operator <(Hostil item)
@@ -227,6 +229,8 @@ struct Hostil
             return false;
     };
 };
+
+typedef std::list<Hostil> HostilList;
 
 class MANGOS_DLL_SPEC Unit : public Object
 {
@@ -274,7 +278,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void Attack(Unit *victim);
         void AttackStop();
         void RemoveAllAttackers();
-        Unit * getVictim() { return m_attacking; }
+        bool isInCombatWithPlayer() const;
+        Unit* getVictim() const { return m_attacking; }
 
         void addUnitState(uint32 f) { m_state |= f; };
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -434,10 +439,12 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         Spell * m_currentSpell;
 
-        float GetHostility(uint64 guid);
-        Hostil* GetHostil(uint64 guid);
-        std::list<Hostil*> GetHostilList() { return m_hostilList; }
+        float GetHostility(uint64 guid) const;
+        float GetHostilityDistance(uint64 guid) const { return GetHostility( guid )/(3.5f * getLevel()+1.0f); }
+        HostilList& GetHostilList() { return m_hostilList; }
         void AddHostil(uint64 guid, float hostility);
+        Unit* SelectHostilTarget();
+
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap const& GetAuras( ) {return m_Auras;}
         long GetTotalAuraModifier(uint32 ModifierID);
@@ -482,7 +489,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<Aura *> m_scAuras; // casted singlecast auras
         std::list<DynamicObject*> m_dynObj;
         std::list<GameObject*> m_gameObj;
-        std::list<Hostil*> m_hostilList;
+        HostilList m_hostilList;
         uint32 m_transform;
 
         long m_AuraModifiers[TOTAL_AURAS];

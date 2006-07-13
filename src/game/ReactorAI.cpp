@@ -89,19 +89,10 @@ ReactorAI::UpdateAI(const uint32 time_diff)
         {
             if( i_creature.isAttackReady() )
             {
-                std::list<Hostil*> hostillist = i_creature.GetHostilList();
-                if(hostillist.size())
-                {
-                    hostillist.sort();
-                    hostillist.reverse();
-                    uint64 guid;
-                    if((guid = (*hostillist.begin())->UnitGuid) != i_creature.getVictim()->GetGUID())
-                    {
-                        Unit* newtarget = ObjectAccessor::Instance().GetUnit(i_creature, guid);
-                        if(newtarget)
-                            AttackStart(newtarget);
-                    }
-                }
+                Unit* newtarget = i_creature.SelectHostilTarget();
+                if(newtarget)
+                    AttackStart(newtarget);
+
                 if(!i_creature.canReachWithAttack(i_creature.getVictim()))
                     return;
                 i_creature.AttackerStateUpdate(i_creature.getVictim());
