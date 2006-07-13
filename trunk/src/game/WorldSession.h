@@ -89,6 +89,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiStatus( uint64 guid );
         void SendSpiritResurrect();
         void SendBindPoint();
+        void SendGMTicketGetTicket(uint32 status, char const* text);
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);

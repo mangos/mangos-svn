@@ -219,7 +219,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     return pPlayerCreateInfo;
 }
 
-uint32 ObjectMgr::GetPlayerGUIDByName(const char *name) const
+uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
 {
 
     uint64 guid = 0;

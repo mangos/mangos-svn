@@ -34,39 +34,27 @@
 
 bool ChatHandler::HandleGUIDCommand(const char* args)
 {
-    WorldPacket data;
+    uint64 guid = m_session->GetPlayer()->GetSelection();
 
-    uint64 guid;
-    guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
-    char buf[256];
-    sprintf((char*)buf,LANG_OBJECT_GUID, GUID_LOPART(guid), GUID_HIPART(guid));
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
+    PSendSysMessage(LANG_OBJECT_GUID, GUID_LOPART(guid), GUID_HIPART(guid));
     return true;
 }
 
 bool ChatHandler::HandleNameCommand(const char* args)
 {
-    /*    WorldPacket data;
-    Temp. disabled
+    /* Temp. disabled
         if(!*args)
             return false;
 
         if(strlen((char*)args)>75)
         {
-
-            char buf[256];
-            sprintf((char*)buf,LANG_TOO_LONG_NAME, strlen((char*)args)-75);
-            FillSystemMessageData(&data, m_session, buf);
-            m_session->SendPacket( &data );
+            PSendSysMessage(LANG_TOO_LONG_NAME, strlen((char*)args)-75);
             return true;
         }
 
@@ -74,8 +62,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         {
             if(!isalpha(args[i]) && args[i]!=' ')
             {
-                FillSystemMessageData(&data, m_session, LANG_CHARS_ONLY);
-                m_session->SendPacket( &data );
+                SendSysMessage(LANG_CHARS_ONLY);
                 return false;
             }
         }
@@ -84,8 +71,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
         guid = m_session->GetPlayer()->GetSelection();
         if (guid == 0)
         {
-            FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_NO_SELECTION);
             return true;
         }
 
@@ -93,8 +79,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
 
         if(!pCreature)
         {
-            FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_SELECT_CREATURE);
             return true;
         }
 
@@ -111,7 +96,6 @@ bool ChatHandler::HandleNameCommand(const char* args)
 bool ChatHandler::HandleSubNameCommand(const char* args)
 {
     /* Temp. disabled
-    WorldPacket data;
 
     if(!*args)
         args = "";
@@ -119,10 +103,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     if(strlen((char*)args)>75)
     {
 
-        char buf[256];
-        sprintf((char*)buf,LANG_TOO_LONG_SUBNAME, strlen((char*)args)-75);
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
+        PSendSysMessage(LANG_TOO_LONG_SUBNAME, strlen((char*)args)-75);
         return true;
     }
 
@@ -130,8 +111,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     {
         if(!isalpha(args[i]) && args[i]!=' ')
         {
-            FillSystemMessageData(&data, m_session, LANG_CHARS_ONLY);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_CHARS_ONLY);
             return false;
         }
     }
@@ -139,8 +119,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
     guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -148,8 +127,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -163,13 +141,7 @@ bool ChatHandler::HandleSubNameCommand(const char* args)
 
 bool ChatHandler::HandleNYICommand(const char* args)
 {
-    WorldPacket data;
-    char buf[256];
-
-    sprintf((char*)buf,LANG_NOT_IMPLEMENTED);
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
+    SendSysMessage(LANG_NOT_IMPLEMENTED);
     return true;
 }
 
@@ -205,8 +177,6 @@ bool ChatHandler::HandleItemMoveCommand(const char* args)
 
 bool ChatHandler::HandleSpawnCommand(const char* args)
 {
-    WorldPacket data;
-
     char* pEntry = strtok((char*)args, " ");
     if (!pEntry)
         return false;
@@ -239,8 +209,7 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
     {
         if(!isalpha(pName[i]) && pName[i]!=' ')
         {
-            FillSystemMessageData(&data, m_session, LANG_CHARS_ONLY);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_CHARS_ONLY);
             return false;
         }
     }
@@ -251,8 +220,6 @@ bool ChatHandler::HandleSpawnCommand(const char* args)
 
 bool ChatHandler::HandleAddSpwCommand(const char* args)
 {
-
-    WorldPacket data;
     char* charID = strtok((char*)args, " ");
     if (!charID)
         return false;
@@ -295,13 +262,10 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
 bool ChatHandler::HandleDeleteCommand(const char* args)
 {
-    WorldPacket data;
-
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -309,8 +273,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
     if(!unit)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -319,8 +282,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
     ObjectAccessor::Instance().RemoveCreatureFromPlayerView(m_session->GetPlayer(),unit);
     MapManager::Instance().GetMap(unit->GetMapId())->Remove(unit, true);
 
-    FillSystemMessageData(&data, m_session, "Creature Removed");
-    m_session->SendPacket( &data );
+    SendSysMessage("Creature Removed");
 
     return true;
 }
@@ -335,8 +297,6 @@ bool ChatHandler::HandleDeMorphCommand(const char* args)
 bool ChatHandler::HandleItemCommand(const char* args)
 {
     /*
-        WorldPacket data;
-
         char* pitem = strtok((char*)args, " ");
         if (!pitem)
             return false;
@@ -344,8 +304,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
         uint64 guid = m_session->GetPlayer()->GetSelection();
         if (guid == 0)
         {
-            FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_NO_SELECTION);
             return true;
         }
 
@@ -353,8 +312,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
 
         if(!pCreature)
         {
-            FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_SELECT_CREATURE);
             return true;
         }
 
@@ -367,7 +325,6 @@ bool ChatHandler::HandleItemCommand(const char* args)
 
         ItemPrototype* tmpItem = objmgr.GetItemPrototype(item);
 
-        std::stringstream sstext;
         if(tmpItem)
         {
             QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
@@ -376,25 +333,20 @@ bool ChatHandler::HandleItemCommand(const char* args)
             pCreature->setItemId(itemscount , item);
             pCreature->setItemAmount(itemscount , amount);
             pCreature->IncrItemCount();
-
-            sstext << LANG_ITEM << item << "' '" << tmpItem->Name1 << LANG_ITEM_ADDED_TO_LIST << '\0';
+            PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,item,tmpItem->Name1);
             delete result;
         }
         else
         {
-            sstext << LANG_ITEM << item << LANG_ITEM_NOT_FOUND << '\0';
+            PSendSysMessage(LANG_ITEM_NOT_FOUND,item);
         }
-
-        FillSystemMessageData(&data, m_session, sstext.str().c_str());
-        m_session->SendPacket( &data );*/
+    */
     return true;
 }
 
 bool ChatHandler::HandleItemRemoveCommand(const char* args)
 {
     /*
-        WorldPacket data;
-
         char* iguid = strtok((char*)args, " ");
         if (!iguid)
             return false;
@@ -402,8 +354,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
         uint64 guid = m_session->GetPlayer()->GetSelection();
         if (guid == 0)
         {
-            FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_NO_SELECTION);
             return true;
         }
 
@@ -411,15 +362,13 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
 
         if(!pCreature)
         {
-            FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_SELECT_CREATURE);
             return true;
         }
 
         uint32 itemguid = atoi(iguid);
         int slot = pCreature->GetItemSlot(itemguid);
 
-        std::stringstream sstext;
         if(slot != -1)
         {
             uint32 guidlow = GUID_LOPART(guid);
@@ -431,34 +380,28 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
             ItemPrototype* tmpItem = objmgr.GetItemPrototype(itemguid);
             if(tmpItem)
             {
-                sstext << LANG_ITEM << itemguid << "' '" << tmpItem->Name1 << LANG_ITEM_DELETED_FROM_LIST << '\0';
+                PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemguid,tmpItem->Name1);
             }
             else
             {
-                sstext << LANG_ITEM << itemguid << LANG_ITEM_DELETED_FROM_LIST << '\0';
+                PSendSysMessage(LANG_ITEM_DELETED_FROM_LIST,itemguid,"<unknonwn>");
             }
 
         }
         else
         {
-            sstext << LANG_ITEM << itemguid << LANG_ITEM_NOT_IN_LIST << '\0';
+            PSendSysMessage(LANG_ITEM_NOT_IN_LIST,itemguid);
         }
-
-        FillSystemMessageData(&data, m_session, sstext.str().c_str());
-        m_session->SendPacket( &data );*/
-
+    */
     return true;
 }
 
 bool ChatHandler::HandleAddMoveCommand(const char* args)
 {
-    WorldPacket data;
-
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -466,8 +409,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -475,16 +417,13 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     // changed 'X', 'y', 'Z' to 'positionx', 'positiony', 'positionz'
     sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f');", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
 
-    FillSystemMessageData(&data, m_session, LANG_WAYPOINT_ADDED);
-    m_session->SendPacket( &data );
+    SendSysMessage(LANG_WAYPOINT_ADDED);
 
     return true;
 }
 
 bool ChatHandler::HandleRandomCommand(const char* args)
 {
-    WorldPacket data;
-
     if(!*args)
         return false;
 
@@ -493,16 +432,14 @@ bool ChatHandler::HandleRandomCommand(const char* args)
     if (option != 0 && option != 1)
     {
         //m_session->GetPlayer( )->SendMessageToSet( &data, true );
-        FillSystemMessageData(&data, m_session, LANG_USE_BOL);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_USE_BOL);
         return true;
     }
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -510,8 +447,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -521,16 +457,13 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     pCreature->setMoveRandomFlag(option > 0);
 
-    FillSystemMessageData(&data, m_session, LANG_VALUE_SAVED);
-    m_session->SendPacket( &data );
+    SendSysMessage(LANG_VALUE_SAVED);
 
     return true;
 }
 
 bool ChatHandler::HandleRunCommand(const char* args)
 {
-    WorldPacket data;
-
     if(!*args)
         return false;
 
@@ -538,17 +471,14 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     if(option != 0 && option != 1)
     {
-        m_session->GetPlayer( )->SendMessageToSet( &data, true );
-        FillSystemMessageData(&data, m_session, LANG_USE_BOL);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_USE_BOL);
         return true;
     }
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -556,8 +486,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -567,32 +496,26 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     pCreature->setMoveRunFlag(option > 0);
 
-    FillSystemMessageData(&data, m_session, LANG_VALUE_SAVED);
-    m_session->SendPacket( &data );
-
+    SendSysMessage(LANG_VALUE_SAVED);
     return true;
 }
 
 bool ChatHandler::HandleChangeLevelCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
     uint8 lvl = (uint8) atoi((char*)args);
     if ( lvl < 1 || lvl > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) + 3)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -600,8 +523,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -616,8 +538,6 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
 
 bool ChatHandler::HandleNPCFlagCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
@@ -626,8 +546,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -635,8 +554,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -644,8 +562,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     pCreature->SaveToDB();
 
-    FillSystemMessageData(&data, m_session, LANG_VALUE_SAVED_REJOIN);
-    m_session->SendPacket( &data );
+    SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
     uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
     m_session->SendCreatureQuery( entry, guid );
@@ -655,8 +572,6 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
 bool ChatHandler::HandleDisplayIdCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
@@ -665,8 +580,7 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -674,8 +588,7 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -688,8 +601,6 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
 
 bool ChatHandler::HandleFactionIdCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
@@ -698,8 +609,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid == 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_SELECTION);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_SELECTION);
         return true;
     }
 
@@ -707,8 +617,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
 
     if(!pCreature)
     {
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -738,5 +647,201 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
     }
 
     sWorld.KickPlayer(kickName);
+    return true;
+}
+
+void ChatHandler::ShowTicket(uint64 guid, uint32 category, char const* text)
+{
+    std::string name;
+    objmgr.GetPlayerNameByGUID(guid,name);
+
+    if(name=="") name = " <unknown> ";
+
+    PSendSysMessage("Ticket of %s (Category: %i):\n%s\n", name.c_str(),category,text);
+}
+
+bool ChatHandler::HandleTicketCommand(const char* args)
+{
+    char* px = strtok((char*)args, " ");
+
+    // ticket<end>
+    if (!px)
+	{
+        QueryResult *result = sDatabase.PQuery("SELECT `ticket_id` FROM `character_ticket`;");
+        size_t count = result ? result->GetRowCount() : 0;
+
+        PSendSysMessage("Tickets count: %i show new tickets: %s\n", count,m_session->GetPlayer()->isAcceptTickets() ?  "on" : "off");
+        delete result;
+        return true;
+	}
+
+    // ticket on
+    if(strncmp(px,"on",3) == 0)
+    {
+        m_session->GetPlayer()->SetAcceptTicket(true);
+        SendSysMessage("New ticket show: on");
+        return true;
+    }
+
+    // ticket off
+    if(strncmp(px,"off",4) == 0)
+    {
+        m_session->GetPlayer()->SetAcceptTicket(false);
+        SendSysMessage("New ticket show: off");
+        return true;
+    }
+
+    // ticket #num
+    int num = atoi(px);
+    if(num > 0)
+    {
+        QueryResult *result = sDatabase.PQuery("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket`;");
+
+        if(!result || num > result->GetRowCount())
+        {
+            PSendSysMessage("Ticket %i doesn't exist", num);
+            delete result;
+            return true;
+        }
+
+        for(int i = 1; i < num; ++i)
+            result->NextRow();
+
+        Field* fields = result->Fetch();
+
+        uint64 guid = fields[0].GetUInt64();
+        uint32 category = fields[1].GetUInt32();
+        char const* text = fields[2].GetString();
+
+        ShowTicket(guid,category,text);
+        delete result;
+        return true;
+    }
+
+    uint64 guid = objmgr.GetPlayerGUIDByName(px);
+
+    if(!guid)
+        return false;
+
+    // ticket $char_name
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket` WHERE `guid` = '%u';",GUID_LOPART(guid));
+
+    if(!result)
+        return false;
+
+    Field* fields = result->Fetch();
+
+    uint32 category = fields[1].GetUInt32();
+    char const* text = fields[2].GetString();
+
+    ShowTicket(guid,category,text);
+    delete result;
+
+    return true;
+}
+
+uint32 ChatHandler::GetTicketIDByNum(uint32 num)
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `ticket_id` FROM `character_ticket`;");
+
+    if(!result || num > result->GetRowCount())
+    {
+        PSendSysMessage("Ticket %i doesn't exist", num);
+        delete result;
+        return 0;
+    }
+
+    for(int i = 1; i < num; ++i)
+        result->NextRow();
+
+    Field* fields = result->Fetch();
+
+    uint32 id = fields[0].GetUInt32();
+    delete result;
+    return id;
+}
+
+bool ChatHandler::HandleDelTicketCommand(const char *args)
+{
+    char* px = strtok((char*)args, " ");
+    if (!px)
+        return false;
+
+    // delticket all
+    if(strncmp(px,"all",4) == 0)
+    {
+        QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character_ticket`;");
+
+        if(!result)
+            return true;
+
+        // notify players about ticket deleting
+        do{
+            Field* fields = result->Fetch();
+
+            uint64 guid = fields[1].GetUInt64();
+    
+            if(Player* sender = objmgr.GetPlayer(guid))
+                sender->GetSession()->SendGMTicketGetTicket(1,0);
+
+        }while(result->NextRow());
+
+        delete result;
+
+        sDatabase.PExecute("DELETE FROM `character_ticket`;");
+        SendSysMessage("All tickets deleted.");
+        return true;
+    }
+
+    int num = (uint32)atoi(px);
+    
+    // delticket #num
+    if(num > 0)
+    {
+        QueryResult *result = sDatabase.PQuery("SELECT `ticket_id`,`guid` FROM `character_ticket` LIMIT %i;",num);
+
+        if(!result || num > result->GetRowCount())
+        {
+            PSendSysMessage("Ticket %i doesn't exist", num);
+            delete result;
+            return true;
+        }
+
+        for(int i = 1; i < num; ++i)
+            result->NextRow();
+
+        Field* fields = result->Fetch();
+
+        uint32 id   = fields[0].GetUInt32();
+        uint64 guid = fields[1].GetUInt64();
+        delete result;
+    
+        sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `ticket_id` = '%u';", id);
+
+        // notify players about ticket deleting
+        if(Player* sender = objmgr.GetPlayer(guid))
+        {
+            sender->GetSession()->SendGMTicketGetTicket(1,0);
+            PSendSysMessage("Character %s ticket deleted.",sender->GetName());
+        }
+        else
+            SendSysMessage("Ticket deleted.");
+
+        return true;
+    }
+
+    uint64 guid = objmgr.GetPlayerGUIDByName(px);
+
+    if(!guid)
+        return false;
+
+    // delticket $char_name
+    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u';",GUID_LOPART(guid));
+
+    // notify players about ticket deleting
+    if(Player* sender = objmgr.GetPlayer(guid))
+       sender->GetSession()->SendGMTicketGetTicket(1,0);
+
+    PSendSysMessage("Character %s ticket deleted.",px);
     return true;
 }

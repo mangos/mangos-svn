@@ -58,6 +58,7 @@ Player::Player (WorldSession *session): Unit()
     m_timedquest = 0;
 
     m_afk = 0;
+    m_acceptTicket = true;
     m_curTarget = 0;
     m_curSelection = 0;
     m_lootGuid = 0;
@@ -1052,6 +1053,11 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
         SetUInt32Value(field_cur, curValue);
     }
 }
+
+bool Player::isAcceptTickets() const { 
+    return GetSession()->GetSecurity() >=2 && m_acceptTicket; 
+}
+
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim)
 {
@@ -2735,11 +2741,9 @@ bool Player::SetStanding(uint32 faction, int standing)
 
     FactionEntry *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
+    // Faction without recorded reputation. Just ignore.
     if(!factionEntry)
-    {
-        sLog.outError("Player::SetStanding: Can't update reputation of %s for faction #%u (unknown faction id #%u). Not compatiable DBC files.",GetName(),faction,factionTemplateEntry->faction);
         return false;
-    }
 
     return ModifyFactionReputation(factionEntry,standing);
 }

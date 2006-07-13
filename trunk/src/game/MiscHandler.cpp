@@ -194,6 +194,20 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message" );
 }
 
+void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
+{
+    int len = strlen(text);
+    WorldPacket data;
+    data.Initialize( SMSG_GMTICKET_GETTICKET );
+    data << uint32(6);
+    if(len > 0)
+        data.append((uint8 *)text,len+1);
+    else
+        data << uint32(0);
+    SendPacket( &data );
+}
+
+
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
@@ -216,25 +230,14 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            data.Initialize( SMSG_GMTICKET_GETTICKET );
-
             QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_ticket` WHERE `guid` = '%u';", GUID_LOPART(guid));
             fields = result->Fetch();
 
-            char tickettext[255];
-            strcpy( tickettext,fields[2].GetString() );
-            data << uint32(6);
-            data.append((uint8 *)tickettext,strlen(tickettext)+1);
-            SendPacket( &data );
+            SendGMTicketGetTicket(6,fields[2].GetString());
             delete result;
         }
         else
-        {
-            data << uint32(1);
-            data << uint32(0);
-            SendPacket( &data );
-        }
-
+            SendGMTicketGetTicket(1,0);
     }
     delete result;
 }
@@ -265,10 +268,8 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
     data << uint32(1);
     data << uint32(0);
     SendPacket( &data );
-    data.Initialize( SMSG_GMTICKET_GETTICKET );
-    data << uint32(1);
-    data << uint32(0);
-    SendPacket( &data );
+
+    SendGMTicketGetTicket(1,0);
 }
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
@@ -316,6 +317,13 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
             data << uint32(2);
             SendPacket( &data );
             DEBUG_LOG("update the ticket\n");
+
+            ObjectAccessor::PlayersMapType &m = ObjectAccessor::Instance().GetPlayers();
+            for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+            {
+                if(itr->second->GetSession()->GetSecurity() >= 2 && itr->second->isAcceptTickets())
+                    ChatHandler::PSendSysMessage(itr->second->GetSession(),"New ticket from %s",GetPlayer()->GetName());
+            }
         }
     }
 
@@ -539,7 +547,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     std::string friendName = "UNKNOWN";
     unsigned char friendResult = FRIEND_NOT_FOUND;
     Player *pfriend=NULL;
-    uint32 friendGuid = 0;
+    uint64 friendGuid = 0;
     uint32 friendArea = 0, friendLevel = 0, friendClass = 0;
     WorldPacket data;
 
@@ -640,7 +648,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     std::string IgnoreName = "UNKNOWN";
     unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     Player *pIgnore=NULL;
-    uint32 IgnoreGuid = 0;
+    uint64 IgnoreGuid = 0;
 
     WorldPacket data;
 

@@ -162,6 +162,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "tele",        1, &ChatHandler::HandleTeleCommand,             "",   NULL },
         { "addtele",     3, &ChatHandler::HandleAddTeleCommand,          "",   NULL },
         { "deltele",     3, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
+        { "ticket",      2, &ChatHandler::HandleTicketCommand,           "",   NULL },
+        { "delticket",   2, &ChatHandler::HandleDelTicketCommand,        "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
@@ -221,7 +223,7 @@ bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
     }
 }
 
-void ChatHandler::SendMultilineMessage(const char *str)
+void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str)
 {
     char buf[256];
     WorldPacket data;
@@ -233,14 +235,61 @@ void ChatHandler::SendMultilineMessage(const char *str)
         strncpy(buf, line, pos-line);
         buf[pos-line]=0;
 
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket(&data);
+        FillSystemMessageData(&data, session, buf);
+        session->SendPacket(&data);
 
         line = pos+1;
     }
 
-    FillSystemMessageData(&data, m_session, line);
-    m_session->SendPacket(&data);
+    FillSystemMessageData(&data, session, line);
+    session->SendPacket(&data);
+}
+
+void ChatHandler::SendSysMessage(WorldSession* session, const char *str)
+{
+    WorldPacket data;
+    FillSystemMessageData(&data, session, str);
+    session->SendPacket(&data);
+}
+
+void ChatHandler::PSendSysMultilineMessage(WorldSession* session, const char *format, ...)
+{
+    va_list ap;
+    char str [1024];
+    va_start(ap, format);
+    vsnprintf(str,1024,format, ap );
+    va_end(ap);
+    SendSysMultilineMessage(session,str);
+}
+
+void ChatHandler::PSendSysMessage(WorldSession* session, const char *format, ...)
+{
+    va_list ap;
+    char str [1024];
+    va_start(ap, format);
+    vsnprintf(str,1024,format, ap );
+    va_end(ap);
+    SendSysMessage(session,str);
+}
+
+void ChatHandler::PSendSysMultilineMessage(const char *format, ...)
+{
+    va_list ap;
+    char str [1024];
+    va_start(ap, format);
+    vsnprintf(str,1024,format, ap );
+    va_end(ap);
+    SendSysMultilineMessage(m_session,str);
+}
+
+void ChatHandler::PSendSysMessage(const char *format, ...)
+{
+    va_list ap;
+    char str [1024];
+    va_start(ap, format);
+    vsnprintf(str,1024,format, ap );
+    va_end(ap);
+    SendSysMessage(m_session,str);
 }
 
 bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
@@ -271,13 +320,9 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             if(!ExecuteCommandInTable(table[i].ChildCommands, text))
             {
                 if(table[i].Help != "")
-                    SendMultilineMessage(table[i].Help.c_str());
+                    SendSysMultilineMessage(table[i].Help.c_str());
                 else
-                {
-                    WorldPacket data;
-                    FillSystemMessageData(&data, m_session, "There is no such subcommand.");
-                    m_session->SendPacket(&data);
-                }
+                    SendSysMessage("There is no such subcommand.");
             }
 
             return true;
@@ -286,13 +331,9 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
         if(!(this->*(table[i].Handler))(text))
         {
             if(table[i].Help != "")
-                SendMultilineMessage(table[i].Help.c_str());
+                SendSysMultilineMessage(table[i].Help.c_str());
             else
-            {
-                WorldPacket data;
-                FillSystemMessageData(&data, m_session, "Incorrect syntax.");
-                m_session->SendPacket(&data);
-            }
+                SendSysMessage("Incorrect syntax.");
         }
 
         return true;
@@ -325,7 +366,7 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     return 1;
 }
 
-void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, const char *message ) const
+void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, const char *message )
 {
 
     uint32 messageLength = strlen((char*)message) + 1;
