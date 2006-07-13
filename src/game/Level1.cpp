@@ -70,22 +70,16 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     {
         if(!(obj = (Object*)ObjectAccessor::Instance().FindPlayer(guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
         {
-            WorldPacket data;
-
-            FillSystemMessageData(&data, m_session, LANG_SELECT_CHAR_OR_CREATURE);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
             return true;
         }
     }
     else
         obj = (Object*)m_session->GetPlayer();
 
-    char buf[256];
-    sprintf((char*)buf, LANG_MAP_POSITION,
+    PSendSysMultilineMessage(LANG_MAP_POSITION,
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation());
-
-    SendMultilineMessage(buf);
 
     return true;
 }
@@ -101,20 +95,15 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
     if (chr)
     {
 
-        char buf[256];
-        char buf0[256];
         if(chr->IsBeingTeleported()==true)
         {
-            sprintf((char*)buf,LANG_IS_TELEPORTED, chr->GetName());
-            FillSystemMessageData(&data, m_session, buf);
-            m_session->SendPacket( &data );
+            PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
             return true;
         }
-        sprintf((char*)buf,LANG_SUMMONING, chr->GetName());
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
+        PSendSysMessage(LANG_SUMMONING, chr->GetName());
 
-        sprintf((char*)buf0,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
+        char buf0[256];
+        snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
         FillSystemMessageData(&data, m_session, buf0);
         chr->GetSession()->SendPacket( &data );
 
@@ -125,12 +114,8 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             ,0.0f);
     }
     else
-    {
-        char buf[256];
-        sprintf((char*)buf,LANG_NO_PLAYER, args);
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
-    }
+        PSendSysMessage(LANG_NO_PLAYER, args);
+
     return true;
 }
 
@@ -144,18 +129,13 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player *chr = objmgr.GetPlayer(args);
     if (chr)
     {
-        char buf[256];
         if(chr->IsBeingTeleported()==true)
         {
-            sprintf((char*)buf,LANG_IS_TELEPORTED, chr->GetName());
-            FillSystemMessageData(&data, m_session, buf);
-            m_session->SendPacket( &data );
+            PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
             return true;
         }
 
-        sprintf((char*)buf,LANG_APPEARING_AT, chr->GetName());
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
+        PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
         char buf0[256];
         sprintf((char*)buf0,LANG_APPEARING_TO, m_session->GetPlayer()->GetName());
@@ -166,12 +146,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         m_session->GetPlayer()->SendNewWorld(chr->GetMapId(), chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(),0.0f);
     }
     else
-    {
-        char buf[256];
-        sprintf((char*)buf,LANG_NO_PLAYER, args);
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
-    }
+        PSendSysMessage(LANG_NO_PLAYER, args);
 
     return true;
 }
@@ -227,25 +202,21 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
 
     if (hp <= 0 || hpm <= 0 || hpm < hp)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+
+    PSendSysMessage(LANG_YOU_CHANGE_HP, hp, hpm, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_HP, hp, hpm, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_HP_CHANGED, m_session->GetPlayer()->GetName(), hp, hpm);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -276,25 +247,20 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_MANA, mana, manam, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_MANA, mana, manam, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_MANA_CHANGED, m_session->GetPlayer()->GetName(), mana, manam);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -325,25 +291,20 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_ENERGY, mana/10, manam/10, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_ENERGY, mana/10, manam/10, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_ENERGY_CHANGED, m_session->GetPlayer()->GetName(), mana/10, manam/10);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -376,25 +337,20 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
 
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_RAGE, mana/10, manam/10, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_RAGE, mana/10, manam/10, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_RAGE_CHANGED, m_session->GetPlayer()->GetName(), mana/10, manam/10);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -417,25 +373,20 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
 
     if(lvl > 99 || lvl < 1)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_LVL, lvl, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_LVL, lvl, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_LVL_CHANGED, m_session->GetPlayer()->GetName(), lvl);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -449,13 +400,10 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
 bool ChatHandler::HandleModifyFactionCommand(const char* args)
 {
 
-    WorldPacket data;
-
     uint32 factionid;
     uint32 flag;
     uint32  npcflag;
     uint32 dyflag;
-    char buf[256];
 
     char* pfactionid = strtok((char*)args, " ");
     Unit* chr =NULL;
@@ -469,17 +417,14 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
             flag      = chr->GetUInt32Value(UNIT_FIELD_FLAGS);
             npcflag   = chr->GetUInt32Value(UNIT_NPC_FLAGS);
             dyflag   = chr->GetUInt32Value(UNIT_DYNAMIC_FLAGS);
-            sprintf((char*)buf,LANG_CURRENT_FACTION,chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
-            FillSystemMessageData(&data, m_session, buf);
-            m_session->SendPacket( &data );
+            PSendSysMessage(LANG_CURRENT_FACTION,chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
         }
         return true;
     }
 
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
@@ -505,16 +450,12 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 
     if(!sFactionTemplateStore.LookupEntry(factionid))
     {
-        sprintf((char*)buf,LANG_WRONG_FACTION, factionid);
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
+        PSendSysMessage(LANG_WRONG_FACTION, factionid);
         return true;
     }
 
 
-    sprintf((char*)buf,LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
+    PSendSysMessage(LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
 
     //sprintf((char*)buf,"%s changed your Faction to %i.", m_session->GetPlayer()->GetName(), factionid);
     //FillSystemMessageData(&data, m_session, buf);
@@ -561,17 +502,14 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+
+    PSendSysMessage(LANG_YOU_CHANGE_SPELLFLATID, spellflatid, val, mark, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_SPELLFLATID, spellflatid, val, mark, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_SPELLFLATID_CHANGED, m_session->GetPlayer()->GetName(), spellflatid, val, mark);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -599,23 +537,16 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
-    char buf[256];
-
     if (flag != 0)
-    {
-        sprintf((char*)buf,LANG_YOU_GIVE_TAXIS, chr->GetName());
-    }
+        PSendSysMessage(LANG_YOU_GIVE_TAXIS, chr->GetName());
     else
-    {
-        sprintf((char*)buf,LANG_YOU_REMOVE_TAXIS, chr->GetName());
-    }
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
+        PSendSysMessage(LANG_YOU_REMOVE_TAXIS, chr->GetName());
+
+    char buf[256];
 
     if (flag != 0)
     {
@@ -656,25 +587,21 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
 
     if (ASpeed > 50 || ASpeed <= 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+
+    PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_ASPEED_CHANGED, m_session->GetPlayer()->GetName(), ASpeed);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -716,25 +643,21 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
 
     if (Speed > 50 || Speed <= 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+
+    PSendSysMessage(LANG_YOU_CHANGE_SPEED, Speed, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_SPEED, Speed, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_SPEED_CHANGED, m_session->GetPlayer()->GetName(), Speed);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -763,25 +686,20 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     if (Swim > 50 || Swim <= 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_SWIM_SPEED, Swim, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_SWIM_SPEED, Swim, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_SWIM_SPEED_CHANGED, m_session->GetPlayer()->GetName(), Swim);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -809,25 +727,20 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     if (BSpeed > 50 || BSpeed <= 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_BACK_SPEED, BSpeed, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_BACK_SPEED, BSpeed, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_BACK_SPEED_CHANGED, m_session->GetPlayer()->GetName(), BSpeed);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -854,25 +767,20 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
     float Scale = (float)atof((char*)args);
     if (Scale > 3 || Scale <= 0)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_CHANGE_SIZE, Scale, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_CHANGE_SIZE, Scale, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_YOURS_SIZE_CHANGED, m_session->GetPlayer()->GetName(), Scale);
     FillSystemMessageData(&data, m_session, buf);
 
@@ -1105,27 +1013,20 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
             mId=2346;
             break;
         default:
-
-            FillSystemMessageData(&data, m_session, LANG_NO_MOUNT);
-            m_session->SendPacket( &data );
-
+            SendSysMessage(LANG_NO_MOUNT);
             return true;
     }
 
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
+    PSendSysMessage(LANG_YOU_GIVE_MOUNT, chr->GetName());
+
     char buf[256];
-
-    sprintf((char*)buf,LANG_YOU_GIVE_MOUNT, chr->GetName());
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
     sprintf((char*)buf,LANG_MOUNT_GIVED, m_session->GetPlayer()->GetName());
     FillSystemMessageData(&data, m_session, buf);
 
@@ -1166,14 +1067,11 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
     uint32 moneyuser = m_session->GetPlayer()->GetMoney();
-
-    char buf[256];
 
     if(gold < 0)
     {
@@ -1183,10 +1081,9 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         if(newmoney < 0 )
         {
 
-            sprintf((char*)buf,LANG_YOU_TAKE_ALL_MONEY, chr->GetName());
-            FillSystemMessageData(&data, m_session, buf);
-            m_session->SendPacket( &data );
+            PSendSysMessage(LANG_YOU_TAKE_ALL_MONEY, chr->GetName());
 
+            char buf[256];
             sprintf((char*)buf,LANG_YOURS_ALL_MONEY_GONE, m_session->GetPlayer()->GetName());
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
@@ -1196,10 +1093,9 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
         else
         {
 
-            sprintf((char*)buf,LANG_YOU_TAKE_MONEY, abs(gold), chr->GetName());
-            FillSystemMessageData(&data, m_session, buf);
-            m_session->SendPacket( &data );
+            PSendSysMessage(LANG_YOU_TAKE_MONEY, abs(gold), chr->GetName());
 
+            char buf[256];
             sprintf((char*)buf,LANG_YOURS_MONEY_TAKEN, m_session->GetPlayer()->GetName(), abs(gold));
             FillSystemMessageData(&data, m_session, buf);
             chr->GetSession()->SendPacket(&data);
@@ -1210,10 +1106,9 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
     else
     {
 
-        sprintf((char*)buf,LANG_YOU_GIVE_MONEY, gold, chr->GetName());
-        FillSystemMessageData(&data, m_session, buf);
-        m_session->SendPacket( &data );
+        PSendSysMessage(LANG_YOU_GIVE_MONEY, gold, chr->GetName());
 
+        char buf[256];
         sprintf((char*)buf,LANG_YOURS_MONEY_GIVEN, m_session->GetPlayer()->GetName(), gold);
         FillSystemMessageData(&data, m_session, buf);
         chr->GetSession()->SendPacket(&data);
@@ -1228,13 +1123,10 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
 
 bool ChatHandler::HandleModifyBitCommand(const char* args)
 {
-    WorldPacket data;
-
     Player *chr = getSelectedChar(m_session);
     if (chr == NULL)
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CHAR_SELECTED);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
@@ -1251,33 +1143,26 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
 
     if (field < 1 || field >= PLAYER_END)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
 
     if (bit < 1 || bit > 32)
     {
-        FillSystemMessageData(&data, m_session, LANG_BAD_VALUE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_BAD_VALUE);
         return true;
     }
-
-    char buf[256];
 
     if ( chr->HasFlag( field, (1<<(bit-1)) ) )
     {
         chr->RemoveFlag( field, (1<<(bit-1)) );
-        sprintf((char*)buf,LANG_REMOVE_BIT, bit, field);
+        PSendSysMessage(LANG_REMOVE_BIT, bit, field);
     }
     else
     {
         chr->SetFlag( field, (1<<(bit-1)) );
-        sprintf((char*)buf,LANG_SET_BIT, bit, field);
+        PSendSysMessage(LANG_SET_BIT, bit, field);
     }
-
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
 
     return true;
 }
@@ -1290,9 +1175,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         result = sDatabase.PQuery("SELECT `name` FROM `game_tele`;");
         if (!result)
         {
-            WorldPacket data;
-            FillSystemMessageData(&data, m_session, "Teleport location table is empty!");
-            m_session->SendPacket( &data );
+            SendSysMessage("Teleport location table is empty!");
             return true;
         }
         std::string reply="Valid locations are:";
@@ -1303,9 +1186,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
             reply += fields[0].GetCppString();
             result->NextRow();
         }
-        WorldPacket data;
-        FillSystemMessageData(&data, m_session, reply.c_str());
-        m_session->SendPacket( &data );
+        SendSysMessage(reply.c_str());
         delete result;
         return true;
     }
@@ -1313,9 +1194,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s';",name);
     if (!result)
     {
-        WorldPacket data;
-        FillSystemMessageData(&data, m_session, "Teleport location not found!");
-        m_session->SendPacket( &data );
+        SendSysMessage("Teleport location not found!");
         return true;
     }
     Field *fields = result->Fetch();

@@ -72,11 +72,16 @@ class ChatHandler
         ChatHandler();
         ~ChatHandler();
 
-        void FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char* channelName, const char* message ) const;
-        void FillSystemMessageData( WorldPacket *data, WorldSession* session, const char* message ) const
+        static void FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char* channelName, const char* message );
+        static void FillSystemMessageData( WorldPacket *data, WorldSession* session, const char* message )
         {
             FillMessageData( data, session, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, message );
         }
+
+        static void SendSysMessage(         WorldSession* session, const char *str);
+        static void SendSysMultilineMessage(WorldSession* session, const char *str);
+        static void PSendSysMessage(         WorldSession* session, const char *format, ...);
+        static void PSendSysMultilineMessage(WorldSession* session, const char *format, ...);
 
         int ParseCommands(const char* text, WorldSession *session);
 
@@ -84,7 +89,10 @@ class ChatHandler
         void SpawnCreature(WorldSession *session, const char* pName, uint32 displayId, uint32 npcFlags, uint32 factionId, uint32 level);
 
         bool hasStringAbbr(const char* s1, const char* s2);
-        void SendMultilineMessage(const char *str);
+        void SendSysMessage(const char *str) { SendSysMessage(m_session,str); }
+        void SendSysMultilineMessage(const char *str) { SendSysMultilineMessage(m_session,str); }
+        void PSendSysMessage(const char *format, ...);
+        void PSendSysMultilineMessage(const char *format, ...);
 
         bool ExecuteCommandInTable(ChatCommand *table, const char* text);
         bool ShowHelpForCommand(ChatCommand *table, const char* cmd);
@@ -198,6 +206,8 @@ class ChatHandler
         bool HandleTeleCommand(const char * args);
         bool HandleAddTeleCommand(const char * args);
         bool HandleDelTeleCommand(const char * args);
+        bool HandleTicketCommand(const char* args);
+        bool HandleDelTicketCommand(const char* args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);
@@ -214,7 +224,8 @@ class ChatHandler
         // Utility methods for commands
         bool GetCurrentGraveId(uint32& g_id);
         void LinkGraveIfNeed(  uint32  g_id);
-
+        void ShowTicket(uint64 guid, uint32 category, char const* text);
+        uint32 GetTicketIDByNum(uint32 num);
 };
 
 #define sChatHandler MaNGOS::Singleton<ChatHandler>::Instance()

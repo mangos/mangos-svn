@@ -48,13 +48,11 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 
         if(table[i].Help == "")
         {
-            WorldPacket data;
-            FillSystemMessageData(&data, m_session, LANG_NO_HELP_CMD);
-            m_session->SendPacket(&data);
+            SendSysMessage(LANG_NO_HELP_CMD);
             return true;
         }
 
-        SendMultilineMessage(table[i].Help.c_str());
+        SendSysMultilineMessage(table[i].Help.c_str());
 
         return true;
     }
@@ -64,8 +62,6 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {
-    WorldPacket data;
-
     if(!*args)
         return false;
 
@@ -75,8 +71,7 @@ bool ChatHandler::HandleHelpCommand(const char* args)
 
     if(!ShowHelpForCommand(getCommandTable(), cmd))
     {
-        FillSystemMessageData(&data, m_session, LANG_NO_CMD);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_NO_CMD);
     }
 
     return true;
@@ -85,10 +80,8 @@ bool ChatHandler::HandleHelpCommand(const char* args)
 bool ChatHandler::HandleCommandsCommand(const char* args)
 {
     ChatCommand *table = getCommandTable();
-    WorldPacket data;
 
-    FillSystemMessageData(&data, m_session, LANG_AVIABLE_CMD);
-    m_session->SendPacket(&data);
+    SendSysMessage(LANG_AVIABLE_CMD);
 
     for(uint32 i = 0; table[i].Name != NULL; i++)
     {
@@ -98,8 +91,7 @@ bool ChatHandler::HandleCommandsCommand(const char* args)
         if(m_session->GetSecurity() < table[i].SecurityLevel)
             continue;
 
-        FillSystemMessageData(&data, m_session, table[i].Name);
-        m_session->SendPacket(&data);
+        SendSysMessage(table[i].Name);
     }
 
     return true;
@@ -107,14 +99,8 @@ bool ChatHandler::HandleCommandsCommand(const char* args)
 
 bool ChatHandler::HandleAcctCommand(const char* args)
 {
-    WorldPacket data;
-
     uint32 gmlevel = m_session->GetSecurity();
-    char buf[256];
-    sprintf(buf, LANG_ACCOUNT_LEVEL, gmlevel);
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
-
+    PSendSysMessage(LANG_ACCOUNT_LEVEL, gmlevel);
     return true;
 }
 
@@ -134,22 +120,15 @@ bool ChatHandler::HandleStartCommand(const char* args)
 
 bool ChatHandler::HandleInfoCommand(const char* args)
 {
-    WorldPacket data;
-
     uint32 clientsNum = sWorld.GetSessionCount();
-    char buf[256];
 
-    sprintf((char*)buf,LANG_CONNECTED_USERS, (int) clientsNum);
-    FillSystemMessageData(&data, m_session, buf);
-    m_session->SendPacket( &data );
+    PSendSysMessage(LANG_CONNECTED_USERS, (int) clientsNum);
 
     return true;
 }
 
 bool ChatHandler::HandleDismountCommand(const char* args)
 {
-    WorldPacket data;
-
     m_session->GetPlayer( )->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
     m_session->GetPlayer( )->RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
 
@@ -162,17 +141,13 @@ bool ChatHandler::HandleDismountCommand(const char* args)
 
 bool ChatHandler::HandleSaveCommand(const char* args)
 {
-    WorldPacket data;
-
     m_session->GetPlayer()->SaveToDB();
-    FillSystemMessageData(&data, m_session, LANG_PLAYER_SAVED);
-    m_session->SendPacket( &data );
+    SendSysMessage(LANG_PLAYER_SAVED);
     return true;
 }
 
 bool ChatHandler::HandleGMListCommand(const char* args)
 {
-    WorldPacket data;
     bool first = true;
 
     ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
@@ -181,31 +156,22 @@ bool ChatHandler::HandleGMListCommand(const char* args)
         if(itr->second->GetSession()->GetSecurity())
         {
             if(first)
-            {
-                FillSystemMessageData(&data, m_session, LANG_GMS_ON_SRV);
-                m_session->SendPacket( &data );
-            }
+                SendSysMessage(LANG_GMS_ON_SRV);
 
-            FillSystemMessageData(&data, m_session, itr->second->GetName());
-            m_session->SendPacket( &data );
+            SendSysMessage(itr->second->GetName());
 
             first = false;
         }
     }
 
     if(first)
-    {
-        FillSystemMessageData(&data, m_session, LANG_GMS_NOT_LOGGED);
-        m_session->SendPacket( &data );
-    }
+        SendSysMessage(LANG_GMS_NOT_LOGGED);
 
     return true;
 }
 
 bool ChatHandler::HandleShowHonor(const char* args)
 {
-    WorldPacket data;
-
     uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
     uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
     uint32 highest_rank             = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_PVP_MEDALS);
@@ -273,30 +239,12 @@ bool ChatHandler::HandleShowHonor(const char* args)
         rank_name = LANG_NO_RANK;
     }
 
-    char msg[256];
-    sprintf(msg, LANG_RANK, rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
-    FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data );
-
-    sprintf(msg, LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
-    FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data );
-
-    sprintf(msg, LANG_HONOR_YESTERDAY, yestarday_kills, yestarday_honor);
-    FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data );
-
-    sprintf(msg, LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
-    FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data );
-
-    sprintf(msg, LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
-    FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data );
-
-    sprintf(msg, LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank);
-    FillSystemMessageData(&data, m_session, msg);
-    m_session->SendPacket( &data );
+    PSendSysMessage(LANG_RANK, rank_name.c_str(), m_session->GetPlayer()->GetName(), m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ));
+    PSendSysMessage(LANG_HONOR_TODAY, today_honorable_kills, today_dishonorable_kills);
+    PSendSysMessage(LANG_HONOR_YESTERDAY, yestarday_kills, yestarday_honor);
+    PSendSysMessage(LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
+    PSendSysMessage(LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
+    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank);
 
     return true;
 }

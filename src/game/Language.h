@@ -147,11 +147,10 @@
 #define LANG_ADD_OBJ                     "AddObject at Chat.cpp"
 #define LANG_DEMORPHED                   "Demorphed %s"     //log
 
-#define LANG_ITEM                        "Item '"
-#define LANG_ITEM_ADDED_TO_LIST          "' Added to list"
-#define LANG_ITEM_NOT_FOUND              "' Not Found in Database."
-#define LANG_ITEM_DELETED_FROM_LIST      "' Deleted from list"
-#define LANG_ITEM_NOT_IN_LIST            "' Not Found in List."
+#define LANG_ITEM_ADDED_TO_LIST          "Item '%i' '%s' Added to list"
+#define LANG_ITEM_NOT_FOUND              "Item '%i' Not Found in Database."
+#define LANG_ITEM_DELETED_FROM_LIST      "Item '%i' '%s' Deleted from list"
+#define LANG_ITEM_NOT_IN_LIST            "Item '%i' Not Found in List."
 
 #define LANG_WAYPOINT_ADDED              "Waypoint added."
 #define LANG_USE_BOL                     "Incorrect value, use 0 or 1"
@@ -194,25 +193,23 @@
                                                             //log
 #define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176"
 
-#define LANG_ITEM_SLOT                   "Item Slot '"
-#define LANG_ITEM_SLOT_NOT_EXIST         "' doesn't exist."
-#define LANG_ITEM_ADDED_TO_SLOT          "' Added to Slot "
+#define LANG_ITEM_SLOT                   "Item '%i' '%s' Item Slot %i"
+#define LANG_ITEM_SLOT_NOT_EXIST         "Item '%i' doesn't exist."
+#define LANG_ITEM_ADDED_TO_SLOT          "Item '%i' '%s' Added to Slot %i"
 
 #define LANG_GAMEOBJECT_SYNTAX           "Usage: .gameobject <id>"
-#define LANG_GAMEOBJECT                  "Game Object '"
-#define LANG_GAMEOBJECT_NOT_EXIST        LANG_ITEM_SLOT_NOT_EXIST
+#define LANG_GAMEOBJECT_NOT_EXIST        "Game Object '%i' doesn't exist."
                                                             //log
 #define LANG_GAMEOBJECT_CURRENT          ">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f."
-#define LANG_GAMEOBJECT_ADD              ">> Add Game Object '"
-#define LANG_GAMEOBJECT_ADD_AT           ") added at '"
+#define LANG_GAMEOBJECT_ADD              ">> Add Game Object '%i' (%s) added at '%f %f %f'."
 
 #define LANG_NPCINFO_CHAR                "Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nNameID: %u.\nSkinID: %u."
-#define LANG_NPCINFO_LEVEL               "%s\nLevel: %u."
-#define LANG_NPCINFO_HEALTH              "%s\nHealth (base): %u. (max): %u. (current): %u."
-#define LANG_NPCINFO_FLAGS               "%s\nField Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u."
-#define LANG_NPCINFO_POSITION            "%s\nPosition: %f %f %f."
-#define LANG_NPCINFO_VENDOR              "%s\n*** Is a vendor!"
-#define LANG_NPCINFO_TRAINER             "%s\n*** Is a trainer!"
+#define LANG_NPCINFO_LEVEL               "Level: %u."
+#define LANG_NPCINFO_HEALTH              "Health (base): %u. (max): %u. (current): %u."
+#define LANG_NPCINFO_FLAGS               "Field Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u."
+#define LANG_NPCINFO_POSITION            "Position: %f %f %f."
+#define LANG_NPCINFO_VENDOR              "*** Is a vendor!"
+#define LANG_NPCINFO_TRAINER             "*** Is a trainer!"
 
 #define LANG_YOU_SET_EXPLORE_ALL         "%s has explored all zones now."
 #define LANG_YOU_SET_EXPLORE_NOTHING     "%s has no more explored zones."

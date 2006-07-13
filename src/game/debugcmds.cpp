@@ -33,7 +33,6 @@
 
 bool ChatHandler::HandleDebugInArcCommand(const char* args)
 {
-    WorldPacket data;
     Object *obj;
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
@@ -41,17 +40,14 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
     {
         if(!(obj = (Object*)ObjectAccessor::Instance().GetPlayer(*m_session->GetPlayer(), guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
         {
-            FillSystemMessageData(&data, m_session, LANG_SELECT_CHAR_OR_CREATURE);
-            m_session->SendPacket( &data );
+            SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
             return true;
         }
     }
     else
-        obj = (Object*)m_session->GetPlayer();
+        obj = m_session->GetPlayer();
 
-    char buf[256];
-
-    FillSystemMessageData(&data, m_session, buf);
+    SendSysMessage(LANG_NOT_IMPLEMENTED);
 
     return true;
 }
@@ -84,9 +80,7 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
     Unit* target = ObjectAccessor::Instance().GetCreature(*pPlayer, pPlayer->GetSelection());
     if(!target)
     {
-        WorldPacket data;
-        FillSystemMessageData(&data, m_session, LANG_SELECT_CREATURE);
-        m_session->SendPacket( &data );
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
     uint32 icon = atol((char*)args);

@@ -327,6 +327,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildEnumData( WorldPacket * p_data );
 
         uint8 ToggleAFK() { m_afk = !m_afk; return m_afk; };
+        bool isAcceptTickets() const;
+        void SetAcceptTicket(bool on) { m_acceptTicket = on; }
+
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
 
@@ -831,6 +834,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
 
         uint8 m_afk;
+        bool  m_acceptTicket;
         uint64 m_curTarget;
         uint64 m_curSelection;
 
