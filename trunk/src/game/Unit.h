@@ -247,7 +247,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
 
-        void addAttacker(Unit *pAttacker)
+        void _addAttacker(Unit *pAttacker) // must be called only from Unit::Attack(Unit*)
         {
             if (pAttacker == this)
                 return;
@@ -256,7 +256,7 @@ class MANGOS_DLL_SPEC Unit : public Object
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
         }
-        void removeAttacker(Unit *pAttacker)
+        void _removeAttacker(Unit *pAttacker) // must be called only from Unit::AttackStop()
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
@@ -276,7 +276,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             return NULL;
         }
         void Attack(Unit *victim);
-        void AttackStop();
+        bool AttackStop();
         void RemoveAllAttackers();
         bool isInCombatWithPlayer() const;
         Unit* getVictim() const { return m_attacking; }
