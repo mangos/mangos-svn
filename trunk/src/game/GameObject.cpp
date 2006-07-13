@@ -104,6 +104,7 @@ void GameObject::Update(uint32 p_time)
             }
             break;
         case LOOTED:
+            loot.clear();
             SetLootState(CLOSED);
 
             data.Initialize(SMSG_DESTROY_OBJECT);
