@@ -1024,28 +1024,11 @@ void Spell::EffectEnchantItemPerm(uint32 i)
 {
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
+    if (!itemTarget)
+        return;
 
     Player* p_caster = (Player*)m_caster;
     uint32 add_slot = 0;
-    uint8 item_slot = 0;
-
-    uint32 field = 99;
-    if(itemTarget)
-        field = 1;
-    else
-        field = 3;
-
-    if(!itemTarget)
-    {
-        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-        {
-            if(p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j ) != 0 && p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j )->GetProto()->ItemId == itemTarget->GetEntry())
-            {
-                itemTarget = p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j );
-                item_slot = j;
-            }
-        }
-    }
 
     for(add_slot = 0; add_slot < 21; add_slot ++)
         if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
@@ -1063,8 +1046,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         {
             uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
-            if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-                p_caster->AddItemEnchant(enchant_id,true);
+            p_caster->AddItemEnchant(enchant_id,true);
         }
     }
 }
@@ -1549,16 +1531,15 @@ void Spell::EffectAddComboPoints(uint32 i)
     uint8 comboPoints = ((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
     if(m_caster->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != unitTarget->GetGUID())
     {
+        comboPoints = damage;
         m_caster->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,unitTarget->GetGUID());
-        m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x01 << 8)));
+        m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
     }
     else if(comboPoints < 5)
     {
-      if(m_spellInfo->Mechanic == 12 && m_spellInfo->SpellIconID == 244 && m_spellInfo->SpellVisual == 266)
-         comboPoints += 2;
-      else comboPoints += 1;
-      if(comboPoints > 5)
-         comboPoints = 5;
+        comboPoints += damage;
+        if(comboPoints > 5)
+            comboPoints = 5;
         m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
     }
 

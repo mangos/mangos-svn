@@ -428,6 +428,39 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
     }
+
+    if (m_spellInfo->MaxAffectedTargets != 0 && TagUnitMap.size() > m_spellInfo->MaxAffectedTargets)
+    {
+        // make sure one unit is always removed per iteration
+        uint32 removed_utarget = 0;
+        for (std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end(); ++itr)
+        {
+            if (!*itr) continue;
+            if ((*itr) == m_targets.getUnitTarget())
+            {
+                TagUnitMap.erase(itr);
+                removed_utarget = 1;
+                break;
+            }
+        }
+        // remove random units from the map
+        while (TagUnitMap.size() > m_spellInfo->MaxAffectedTargets - removed_utarget)
+        {
+            uint32 poz = urand(0, TagUnitMap.size()-1);
+            for (std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end(); ++itr, --poz)
+            {
+                if (!*itr) continue;
+                if (!poz)
+                {
+                    TagUnitMap.erase(itr);
+                    break;
+                }
+            }
+        }
+        // the player's target will always be added to the map
+        if (removed_utarget)
+            TagUnitMap.push_back(m_targets.getUnitTarget());
+    }
 }
 
 void Spell::prepare(SpellCastTargets * targets)
@@ -1259,6 +1292,25 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_FAILED;
                 break;
             }
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            {
+                if(m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
+                    break;
+                Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+                uint32 type = pItem->GetProto()->InventoryType;
+                uint32 ammo;
+                if( type == INVTYPE_THROWN )
+                    ammo = pItem->GetEntry();
+                else
+                    ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
+
+                if( !((Player*)m_caster)->HasItemCount( ammo, 1 ) )
+                    return CAST_FAIL_NO_AMMO;
+                break;
+            }
+            default:break;
         }
 
         if(castResult != 0)
@@ -1267,22 +1319,23 @@ uint8 Spell::CanCast()
             return castResult;
         }
     }
-   for (int i = 0; i < 3; i++)
-   {
-      switch(m_spellInfo->EffectApplyAuraName[i])
-      {
-         case SPELL_AURA_MOD_STEALTH:
-         {
-            //detect if any mod is in x yards.if true,can't steath.FIX ME!
-         }
-      }
-   }
-
-    castResult = CheckItems();
-
-    if(castResult != 0)
-        SendCastResult(castResult);
-
+    for (int i = 0; i < 3; i++)
+    {
+        switch(m_spellInfo->EffectApplyAuraName[i])
+        {
+            case SPELL_AURA_MOD_STEALTH:
+            {
+                //detect if any mod is in x range.if true,can't steath.FIX ME!
+                break;
+            }
+            default:break;
+        }
+      if(castResult != 0)
+        {
+            SendCastResult(castResult);
+            return castResult;
+        }
+    }
     return castResult;
 }
 
@@ -1431,23 +1484,7 @@ uint8 Spell::CheckItems()
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
                 break;
             }
-            case SPELL_EFFECT_WEAPON_DAMAGE:
-            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-            {
-                if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
-                    break;
-                Item *pItem = p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-                uint32 type = pItem->GetProto()->InventoryType;
-                uint32 ammo;
-                if( type == INVTYPE_THROWN )
-                    ammo = pItem->GetEntry();
-                else
-                    ammo = p_caster->GetUInt32Value(PLAYER_AMMO_ID);
-
-                if( !p_caster->HasItemCount( ammo, 1 ) )
-                    return CAST_FAIL_NO_AMMO;
-                break;
-            }
+         default:break;
         }
     }
 

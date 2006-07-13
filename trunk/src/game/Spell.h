@@ -21,6 +21,7 @@
 
 #include "GridDefines.h"
 #include "Database/DBCStores.h"
+#include "FactionTemplateResolver.h"
 
 class WorldSession;
 class Unit;
@@ -505,13 +506,17 @@ namespace MaNGOS
         SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) : i_data(data), i_spell(spell), i_index(i) {}
         inline void Visit(PlayerMapType &m)
         {
+            FactionTemplateResolver my_faction(sFactionTemplateStore.LookupEntry(i_spell.m_caster->getFaction()));
             float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 if( !itr->second->isAlive() )
                     continue;
-                if( itr->second->getFaction() != i_spell.m_caster->getFaction()
-                    && itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
+                FactionTemplateEntry *its_faction = sFactionTemplateStore.LookupEntry(itr->second->getFaction());
+                if (!its_faction) continue;
+                if( my_faction.IsFriendlyTo(its_faction) ) continue;
+
+                if( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
                     i_data.push_back(itr->second);
             }
         }
@@ -528,22 +533,28 @@ namespace MaNGOS
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
         {
+            FactionTemplateResolver my_faction(sFactionTemplateStore.LookupEntry(i_spell.m_caster->getFaction()));
             float radius = GetRadius(sSpellRadius.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
             for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
+                if( !itr->second->isAlive() )
+                    continue;
+                FactionTemplateEntry *its_faction = sFactionTemplateStore.LookupEntry((itr->second)->getFaction());
+                if (!its_faction) continue;
+                if (my_faction.IsFriendlyTo( its_faction )) continue;
 
                 switch(i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if((i_spell.m_caster->isInFront((Unit*)(itr->second), radius )) && (itr->second)->getFaction() != i_spell.m_caster->getFaction())
-                            i_data.push_back(itr->second);
+                        if((i_spell.m_caster->isInFront((Unit*)(itr->second), radius )))
+                        i_data.push_back(itr->second);
                         break;
                     case PUSH_SELF_CENTER:
-                        if((i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ) && itr->second->getFaction() != i_spell.m_caster->getFaction() )
+                        if((i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ))
                             i_data.push_back(itr->second);
                         break;
                     case PUSH_DEST_CENTER:
-                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ) && itr->second->getFaction() != i_spell.m_caster->getFaction() )
+                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius ))
                             i_data.push_back(itr->second);
                         break;
                 }
