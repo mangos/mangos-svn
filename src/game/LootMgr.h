@@ -64,6 +64,7 @@ struct Loot
     }
 
     bool empty() const { return items.empty() && gold == 0; }
+    void clear() { items.clear(); gold = 0; }
 };
 
 void FillLoot(Player* player,Loot *loot, uint32 loot_id);

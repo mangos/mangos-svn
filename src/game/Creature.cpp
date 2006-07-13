@@ -141,6 +141,7 @@ void Creature::AIM_Update(const uint32 &diff)
 
                 DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
                 ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
+                loot.clear();
                 setDeathState(DEAD);
                 m_respawnTimer = m_respawnDelay;
                 GetRespawnCoord(m_positionX, m_positionY, m_positionZ);
