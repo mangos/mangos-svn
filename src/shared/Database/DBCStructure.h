@@ -124,6 +124,7 @@ struct SpellEntry
     uint32      field156;
     uint32    SpellFamilyName;
     uint32    SpellFamilyFlags ;
+    uint32    MaxAffectedTargets;
 };
 struct SpellCastTime
 {
