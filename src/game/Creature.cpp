@@ -756,7 +756,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetUInt32Value(UNIT_FIELD_MAXPOWER1, cinfo->maxmana);   //MAX Mana
     SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
-    SetUInt32Value(UNIT_FIELD_POWER2,cinfo->maxmana );
+    SetUInt32Value(UNIT_FIELD_POWER1,cinfo->maxmana );
 
     SetUInt32Value(UNIT_FIELD_LEVEL,cinfo->level);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
