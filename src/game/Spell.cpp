@@ -1211,12 +1211,24 @@ uint8 Spell::CanCast()
 
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
         castResult = CAST_FAIL_CANT_DO_WHILE_STUNNED;
+
+    for (int i = 0; i < 3; i++)
+    {
+        switch (m_spellInfo->EffectImplicitTargetA[i])
+        {
+            case TARGET_AE_E_CHANNEL:
+            case TARGET_AE_E_INSTANT:
+            case TARGET_AE_E:
+            {
+                if(m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ) >= range * range)
+                    castResult = CAST_FAIL_OUT_OF_RANGE;
+                break;
+            }
+        }
+    }
+
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
-
-    if(m_targets.m_targetMask != TARGET_FLAG_SELF && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destY != 0)
-        if(m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ) >= range * range)
-            castResult = CAST_FAIL_OUT_OF_RANGE;
 
     if( castResult != 0 )
     {
