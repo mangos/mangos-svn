@@ -1960,8 +1960,7 @@ void Spell::EffectFeedPet(uint32 i)
     if(damage + feelty <  unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER5))
         unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,damage + feelty);
     else unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER5));
-    //trigger spell crash server.it must be added after fixed.
-    //m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
 }
 
 void Spell::EffectDismissPet(uint32 i)
