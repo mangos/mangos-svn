@@ -795,13 +795,9 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
         if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
         {
             SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
-            Spell *spell = new Spell(m_caster, spell_proto, false, 0);
+            Spell *spell = new Spell(m_caster, spell_proto, true, 0);
             Unit* target = NULL;
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-            }
-            else target = m_target;
+            target = m_target;
             if(!target || !target->isAlive())
                 return;
             SpellCastTargets targets;
@@ -1404,11 +1400,11 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
-			if (m_target->getRace() == TAUREN)
-			{
-				m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-			}
-			else
+            if (m_target->getRace() == TAUREN)
+            {
+                m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+            }
+            else
             m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
         if(spellInfo)
@@ -1422,9 +1418,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
     else
     {
-		if (m_target->getRace() == TAUREN)
-				unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-		else
+        if (m_target->getRace() == TAUREN)
+                unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+        else
         unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
         unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
