@@ -277,6 +277,9 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
         return true;
     }
 
+    unit->AttackStop();
+    unit->RemoveAllAttackers();
+
     unit->DeleteFromDB();
 
     ObjectAccessor::Instance().RemoveCreatureFromPlayerView(m_session->GetPlayer(),unit);

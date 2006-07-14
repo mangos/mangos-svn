@@ -196,7 +196,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 {
-    int len = strlen(text);
+    int len = text ? strlen(text) : 0;
     WorldPacket data;
     data.Initialize( SMSG_GMTICKET_GETTICKET );
     data << uint32(6);
