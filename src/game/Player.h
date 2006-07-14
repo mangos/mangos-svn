@@ -375,7 +375,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasItemCount( uint32 item, uint32 count );
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap );
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
-        uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap );
+        uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive = true );
         uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
         uint8 CanUseItem( Item *pItem, bool check_alive = true );
         uint8 CanUseAmmo( uint32 item );

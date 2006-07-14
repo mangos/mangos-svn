@@ -5578,7 +5578,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
     return 0;
 }
 
-uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
+uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive )
 {
     dest = 0;
     if( pItem )
@@ -5594,7 +5594,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
             uint8 eslot = FindEquipSlot( type, slot, swap );
             if( eslot == NULL_SLOT )
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
-            uint8 msg = CanUseItem( pItem , false );
+            uint8 msg = CanUseItem( pItem , check_alive );
             if( msg != EQUIP_ERR_OK )
                 return msg;
             if( !swap && GetItemByPos( INVENTORY_SLOT_BAG_0, eslot ) )
@@ -6460,6 +6460,12 @@ void Player::SwapItem( uint16 src, uint16 dst )
     if( pSrcItem )
     {
         sLog.outDebug( "STORAGE: SwapItem bag = %u, slot = %u, item = %u", dstbag, dstslot, pSrcItem->GetEntry());
+
+        if(!isAlive() )
+        {
+            SendEquipError( EQUIP_ERR_YOU_ARE_DEAD, pSrcItem, pDstItem );
+            return;
+        }
 
         if(IsEquipmentPos ( src ) && isInCombat() && 
             pSrcItem->GetProto()->Class != ITEM_CLASS_WEAPON && pSrcItem->GetProto()->Class != ITEM_CLASS_PROJECTILE)
@@ -7966,7 +7972,7 @@ void Player::_LoadInventory()
             }
             else if( IsEquipmentPos( dest ) )
             {
-                if( CanEquipItem( slot, dest, item, false ) == EQUIP_ERR_OK )
+                if( CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
                     EquipItem(dest, item, true);
             }
             else if( IsBankPos( dest ) )
