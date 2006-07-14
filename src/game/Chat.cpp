@@ -369,7 +369,7 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
 void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, const char *message )
 {
 
-    uint32 messageLength = strlen((char*)message) + 1;
+    uint32 messageLength = (message ? strlen(message) : 0) + 1;
     uint8 afk = 0;
     uint64 guid = 0;
 
@@ -477,10 +477,10 @@ char const *fmtstring( char const *format, ... )
     vsprintf (temp_buffer, format, argptr);
     va_end (argptr);
 
-    if ((len = strlen(temp_buffer)) >= MAX_FMT_STRING)
-    {
+    len = strlen(temp_buffer);
+
+    if( len >= MAX_FMT_STRING )
         return "ERROR";
-    }
 
     if (len + index >= MAX_FMT_STRING-1)
     {

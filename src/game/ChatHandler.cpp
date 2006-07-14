@@ -177,14 +177,14 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     if( pCreature != NULL )
     {
         nam = pCreature->GetCreatureInfo()->Name;
-        namlen = strlen(nam) + 1;
+        namlen = (nam ? strlen(nam) : 0) + 1;
     }
     {
         Player *pChar = dynamic_cast<Player *>(unit);
         if( pChar != NULL )
         {
             nam = pChar->GetName();
-            namlen = strlen(nam) + 1;
+            namlen = (nam ? strlen(nam) : 0) + 1;
         }
     }
 

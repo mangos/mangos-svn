@@ -356,6 +356,9 @@ void Channel::Moderate(Player *p)
 
 void Channel::Say(Player *p, const char *what)
 {
+    if(!what)
+        return;
+
     WorldPacket data;
     if(!IsOn(p))
     {
@@ -374,7 +377,7 @@ void Channel::Say(Player *p, const char *what)
     }
     else
     {
-        uint32 messageLength = strlen((char*)what) + 1;
+        uint32 messageLength = strlen(what) + 1;
 
         data.Initialize(SMSG_MESSAGECHAT);
         data << (uint8)14;

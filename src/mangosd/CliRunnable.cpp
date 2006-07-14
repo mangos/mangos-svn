@@ -82,6 +82,8 @@ const CliCommand Commands[]=
 
 bool IsItIP(char* banip)
 {
+    if(!banip)
+        return false;
     //ip looks like a.b.c.d  -- let's calc number of '.' it must be equal to 3
     //and must contain only numbers + .
     unsigned int iDotCount=0;

@@ -99,7 +99,7 @@ class ByteBuffer
         }
         ByteBuffer &operator<<(const char *str)
         {
-            append((uint8 *)str, strlen(str));
+            append((uint8 *)str, str ? strlen(str) : 0);
             append((uint8)0);
             return *this;
         }
