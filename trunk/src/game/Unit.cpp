@@ -1938,6 +1938,9 @@ FactionTemplateEntry* Unit::getFactionTemplateEntry() const
 
 void Unit::Attack(Unit *victim)
 {
+    if(victim == this)
+        return;
+
     if (m_attacking)
     {
         if (m_attacking == victim)

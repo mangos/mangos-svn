@@ -249,8 +249,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void _addAttacker(Unit *pAttacker) // must be called only from Unit::Attack(Unit*)
         {
-            if (pAttacker == this)
-                return;
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
