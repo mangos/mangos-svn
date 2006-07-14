@@ -93,7 +93,7 @@ void PetAI::_stopAttack()
     }
     else if( !victim  )
     {
-        DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
+        DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_pet.GetGUIDLow());
     }
     else if( !victim->isAlive() )
     {
