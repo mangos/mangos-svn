@@ -241,6 +241,8 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
     else
         damage = CalculateDamage();
 
+    m_areaAura = spellproto->Effect[eff]==SPELL_EFFECT_APPLY_AREA_AURA ? true : false;
+
     m_effIndex = eff;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
 }
@@ -344,6 +346,43 @@ void Aura::Update(uint32 diff)
                     m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
                 else
                     m_caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+            }
+        }
+    }
+   
+    if(m_areaAura && m_caster && m_target)
+    {
+        // update for the caster of the aura
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetGUID() == m_target->GetGUID())
+        {
+            Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
+            float radius =  GetRadius(sSpellRadius.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+            if(pGroup)
+            {
+                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                {
+                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!Target || Target->GetGUID() == m_caster->GetGUID())
+                        continue;
+                    Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
+
+                    if(m_caster->GetDistanceSq(Target) > radius * radius )
+                    {
+                        // remove auras of the same caster from out of range players
+                        if (t_aura) 
+                            if (t_aura->GetCaster()->GetGUID() == m_caster->GetGUID())
+                                Target->RemoveAura(m_spellId, m_effIndex);
+                    }
+                    else
+                    {
+                        // apply aura to players in range that dont have it yet
+                        if (!t_aura)
+                        {
+                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, m_caster, Target);
+                            Target->AddAura(aur);
+                        }
+                    }
+                }
             }
         }
     }

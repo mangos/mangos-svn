@@ -1636,25 +1636,33 @@ void Spell::EffectSummonTotem(uint32 i)
     }
     if(guid != 0)
     {
-        Creature* Totem = NULL;
-
-        if(Totem)
+        Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
+ 
+        if(OldTotem)
         {
-            MapManager::Instance().GetMap(Totem->GetMapId())->Remove(Totem, true);
-            Totem = NULL;
+            data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
+            data << guid;
+            m_caster->SendMessageToSet(&data, true);
+
+            data.Initialize(SMSG_DESTROY_OBJECT);
+            data << guid;
+            m_caster->SendMessageToSet(&data, true);
+            MapManager::Instance().GetMap(OldTotem->GetMapId())->Remove(OldTotem, true);
+            OldTotem = NULL;
         }
     }
 
     Creature* pTotem = new Creature();
 
-    if(pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
+    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
         m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(),
         m_caster->GetPositionZ(),m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i] ))
     {
-
+        delete pTotem;
         return;
     }
+    pTotem->AIM_Initialize();
 
     pTotem->SetUInt32Value(UNIT_FIELD_LEVEL,m_caster->getLevel());
     sLog.outError("AddObject at Spell.cppl line 1040");
@@ -1683,7 +1691,7 @@ void Spell::EffectSummonTotem(uint32 i)
             m_caster->m_TotemSlot4 = pTotem->GetGUID();
         }break;
     }
-
+    m_caster->CastSpell(m_caster, pTotem->GetCreatureInfo()->spell1, true);
 }
 
 void Spell::EffectEnchantHeldItem(uint32 i)
