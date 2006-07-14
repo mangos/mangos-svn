@@ -32,7 +32,7 @@ int PetAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-PetAI::PetAI(Creature &c) : i_pet(c), i_tracker(TIME_INTERVAL_LOOK)
+PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
     i_owner = ObjectAccessor::Instance().GetCreature(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
     if(!i_owner)
@@ -70,31 +70,40 @@ bool PetAI::IsVisible(Unit *pl) const
 
 bool PetAI::_needToStop() const
 {
-    return !i_pet.getVictim()->isTargetableForAttack() || !i_pet.isAlive();
+    return !i_pet.getVictim() || !i_pet.getVictim()->isTargetableForAttack() || !i_pet.isAlive();
 }
 
 void PetAI::_stopAttack()
 {
-    if(!i_pet.getVictim())
+    if( !i_victimGuid )
         return;
+
+    Unit* victim = ObjectAccessor::Instance().GetCreature(i_pet, i_victimGuid );
+
+    assert(!i_pet.getVictim() || i_pet.getVictim() == victim);
 
     if( !i_pet.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
         i_pet.StopMoving();
         i_pet->Idle();
+        i_victimGuid = 0;
         i_pet.AttackStop();
         return;
     }
-    else if( !i_pet.getVictim()->isAlive() )
+    else if( !victim  )
+    {
+        DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
+    }
+    else if( !victim->isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_pet.GetGUIDLow());
     }
-    else if( i_pet.getVictim()->isStealth() )
+    else if( victim->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_pet.GetGUIDLow());
     }
-    else if( i_pet.getVictim()->isInFlight() )
+    else if( victim->isInFlight() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_pet.GetGUIDLow());
     }
@@ -114,19 +123,23 @@ void PetAI::_stopAttack()
         i_pet.addUnitState(UNIT_STAT_STOPPED);
         i_pet->Idle();
     }
+    i_victimGuid = 0;
     i_pet.AttackStop();
 }
 
 void PetAI::UpdateAI(const uint32 diff)
 {
-    if(!i_owner) return;
+    // update i_victimGuid if i_pet.getVictim() !=0 and changed
+    if(i_pet.getVictim())
+        i_victimGuid = i_pet.getVictim()->GetGUID();
 
-    if( i_pet.getVictim() )
+    // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clearóâ at Unit death etc.
+    if( i_victimGuid )
     {
         if( _needToStop() )
         {
             DEBUG_LOG("Pet AI stoped attacking [guid=%u]", i_pet.GetGUIDLow());
-            _stopAttack();
+            _stopAttack();                                  // i_victimGuid == 0 && i_pet.getVictim() == NULL now
             return;
         }
         else if( i_pet.IsStopped() )
@@ -164,11 +177,11 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else
     {
-        if(i_owner->isInCombat())
+        if(i_owner && i_owner->isInCombat())
         {
             AttackStart(i_owner->getAttackerForHelper());
         }
-        else if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
+        else if(i_owner && ((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
         {
             i_pet.addUnitState(UNIT_STAT_FOLLOW);
             i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
@@ -186,6 +199,7 @@ void PetAI::_taggedToKill(Unit *u)
     if( i_pet.getVictim() || !u)
         return;
     i_pet.clearUnitState(UNIT_STAT_FOLLOW);
+    i_victimGuid = u->GetGUID();
     i_pet.Attack(u);
     i_pet->Mutate(new TargetedMovementGenerator(*u));
 
