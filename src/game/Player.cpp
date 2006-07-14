@@ -3166,6 +3166,7 @@ void Player::FlightComplete()
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 {
+    if(!isAlive()) return;
 
     if(slot >= INVENTORY_SLOT_BAG_END || !item) return;
 
@@ -3345,6 +3346,14 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         for (int i = 0; i < 5; i++)
             if(proto->Spells[i].SpellId)
                 RemoveAurasDueToSpell(proto->Spells[i].SpellId );
+
+    for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
+    {
+        uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
+        if(Enchant_id)
+            AddItemEnchant(Enchant_id,true);
+    }
+
     sLog.outDebug("_ApplyItemMods complete.");
     _ApplyStatsMods();
 }
@@ -5585,7 +5594,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap )
             uint8 eslot = FindEquipSlot( type, slot, swap );
             if( eslot == NULL_SLOT )
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
-            uint8 msg = CanUseItem( pItem );
+            uint8 msg = CanUseItem( pItem , false );
             if( msg != EQUIP_ERR_OK )
                 return msg;
             if( !swap && GetItemByPos( INVENTORY_SLOT_BAG_0, eslot ) )
@@ -5950,12 +5959,12 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
     return 0;
 }
 
-uint8 Player::CanUseItem( Item *pItem )
+uint8 Player::CanUseItem( Item *pItem, bool check_alive )
 {
     if( pItem )
     {
         sLog.outDebug( "STORAGE: CanUseItem item = %u", pItem->GetEntry());
-        if( !isAlive() )
+        if( !isAlive() && check_alive )
             return EQUIP_ERR_YOU_ARE_DEAD;
         //if( isStunned() )
         //    return EQUIP_ERR_YOU_ARE_STUNNED;
@@ -6121,12 +6130,6 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
             SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
         }
         _ApplyItemMods(pItem, slot, true);
-        for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
-        {
-            uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
-            if(Enchant_id)
-                AddItemEnchant(Enchant_id,true);
-        }
         if( IsInWorld() && update )
         {
             pItem->AddToWorld();
@@ -6155,14 +6158,6 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             if ( slot >= EQUIPMENT_SLOT_START && slot < INVENTORY_SLOT_BAG_END )
             {
                 _ApplyItemMods(pItem, slot, false);
-                for(int enchant_solt =  0 ; enchant_solt < 21; enchant_solt+=3)
-                {
-                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
-                    if( Enchant_id)
-                    {
-                        AddItemEnchant(Enchant_id,false);
-                    }
-                }
                 if ( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
                 {
                     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);

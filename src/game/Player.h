@@ -340,6 +340,22 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
+        void setDeathState(DeathState s)
+        {
+            if(s == JUST_DIED && isAlive())
+            {
+                _RemoveAllItemMods();
+            }
+            bool cur = isAlive();
+            Unit::setDeathState(s);
+            if(isAlive() && !cur)
+            {
+                _ApplyAllItemMods();
+            }
+
+        };
+
+
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
@@ -361,7 +377,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
         uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap );
         uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
-        uint8 CanUseItem( Item *pItem );
+        uint8 CanUseItem( Item *pItem, bool check_alive = true );
         uint8 CanUseAmmo( uint32 item );
         void StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         void StoreItem( uint16 pos, Item *pItem, bool update );
