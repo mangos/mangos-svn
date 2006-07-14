@@ -48,6 +48,7 @@ ReactorAI::AttackStart(Unit *p)
     {
         DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
         i_creature.Attack(p);
+        i_victimGuid = p->GetGUID();
         i_creature->Mutate(new TargetedMovementGenerator(*p));
     }
 }
@@ -77,13 +78,17 @@ ReactorAI::IsVisible(Unit *pl) const
 void
 ReactorAI::UpdateAI(const uint32 time_diff)
 {
+    // update i_victimGuid if i_creature.getVictim() !=0 and changed
+    if(i_creature.getVictim())
+        i_victimGuid = i_creature.getVictim()->GetGUID();
 
-    if( i_creature.getVictim() != NULL )
+    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() clearóâ at Unit death etc.
+    if( i_victimGuid )
     {
         if( needToStop() )
         {
             DEBUG_LOG("Creature %u stopped attacking.", i_creature.GetGUIDLow());
-            stopAttack();
+            stopAttack();                                  // i_victimGuid == 0 && i_creature.getVictim() == NULL now
         }
         else if( i_creature.IsStopped() )
         {
@@ -111,7 +116,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
 bool
 ReactorAI::needToStop() const
 {
-    if( !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
+    if( !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
@@ -127,28 +132,37 @@ ReactorAI::needToStop() const
 void
 ReactorAI::stopAttack()
 {
-    if( i_creature.getVictim() != NULL )
+    assert( i_victimGuid );
+
+    Unit* victim = ObjectAccessor::Instance().GetCreature(i_creature, i_victimGuid );
+
+    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
+
+    if( !i_creature.isAlive() )
     {
-        if( !i_creature.isAlive() )
-        {
-            DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
-            i_creature->Idle();
-        }
-        else if( i_creature.getVictim()->isStealth() )
-        {
-            DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
-            static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
-        }
-        else if( i_creature.getVictim()->isInFlight() )
-        {
-            DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
-            static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
-        }
-        else
-        {
-            DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", i_creature.getVictim()->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
-            static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
-        }
-        i_creature.AttackStop();
+        DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
+        i_creature->Idle();
     }
+    else if( !victim  )
+    {
+        DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+    }
+    else if( victim->isStealth() )
+    {
+        DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+    }
+    else if( victim->isInFlight() )
+    {
+        DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+    }
+    else
+    {
+        DEBUG_LOG("Creature stopped attacking due to target %s [guid=%u]", i_creature.getVictim()->isAlive() ? "out run him" : "is dead", i_creature.GetGUIDLow());
+        static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
+    }
+    i_victimGuid = 0;
+    i_creature.AttackStop();
 }

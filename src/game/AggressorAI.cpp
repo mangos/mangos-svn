@@ -36,14 +36,14 @@ AggressorAI::Permissible(const Creature *creature)
     return PERMIT_BASE_NO;
 }
 
-AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_myFaction(c.getFactionTemplateEntry()), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
+AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_victimGuid(0), i_myFaction(c.getFactionTemplateEntry()), i_state(STATE_NORMAL), i_tracker(TIME_INTERVAL_LOOK)
 {
 }
 
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
-    if( i_creature.getVictim() == NULL && u->isTargetableForAttack() && IsVisible(u) )
+    if( !i_creature.getVictim() && u->isTargetableForAttack() && IsVisible(u) )
     {
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.GetDistanceSq(u) <= attackRadius*attackRadius)
@@ -70,7 +70,7 @@ AggressorAI::DamageInflict(Unit *healer, uint32 amount_healed)
 bool
 AggressorAI::_needToStop() const
 {
-    if( !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
+    if( !i_creature.getVictim() || !i_creature.getVictim()->isTargetableForAttack() || !i_creature.isAlive() )
         return true;
 
     float rx,ry,rz;
@@ -85,28 +85,38 @@ AggressorAI::_needToStop() const
 
 void AggressorAI::AttackStop(Unit *)
 {
+    i_victimGuid = 0;
     i_creature.AttackStop();
 }
 
 void AggressorAI::_stopAttack()
 {
-    assert( i_creature.getVictim() != NULL );
+    assert( i_victimGuid );
+
+    Unit* victim = ObjectAccessor::Instance().GetCreature(i_creature, i_victimGuid );
+
+    assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
 
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
+        i_victimGuid = 0;
         i_creature.AttackStop();
         return;
     }
-    else if( !i_creature.getVictim()->isAlive() )
+    else if( !victim  )
+    {
+        DEBUG_LOG("Creature stopped attacking because victim is non exist [guid=%u]", i_creature.GetGUIDLow());
+    }
+    else if( !victim->isAlive() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is dead [guid=%u]", i_creature.GetGUIDLow());
     }
-    else if( i_creature.getVictim()->isStealth() )
+    else if( victim->isStealth() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is stealth [guid=%u]", i_creature.GetGUIDLow());
     }
-    else if( i_creature.getVictim()->isInFlight() )
+    else if( victim->isInFlight() )
     {
         DEBUG_LOG("Creature stopped attacking cuz his victim is fly away [guid=%u]", i_creature.GetGUIDLow());
     }
@@ -116,6 +126,8 @@ void AggressorAI::_stopAttack()
         //i_state = STATE_LOOK_AT_VICTIM;
         //i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
+
+    i_victimGuid = 0;
     i_creature.AttackStop();
 
     //i_creature.StopMoving();
@@ -126,14 +138,22 @@ void AggressorAI::_stopAttack()
 void
 AggressorAI::UpdateAI(const uint32 diff)
 {
-    if( i_creature.getVictim() != NULL )
+    // update i_victimGuid if i_creature.getVictim() !=0 and changed
+    if(i_creature.getVictim())
+        i_victimGuid = i_creature.getVictim()->GetGUID();
+
+    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() clearóâ at Unit death etc.
+    if( i_victimGuid )
     {
         if( _needToStop() )
         {
             DEBUG_LOG("Aggressor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            _stopAttack();
+            _stopAttack();                                  // i_victimGuid == 0 && i_creature.getVictim() == NULL now
             return;
         }
+
+        assert((i_victimGuid != 0) == (i_creature.getVictim() != NULL) && "i_victimGuid and i_creature.getVictim() not synchronized.");
+
         //switch( i_state )
         //{
         /*case STATE_LOOK_AT_VICTIM:
@@ -225,6 +245,7 @@ AggressorAI::AttackStart(Unit *u)
     if( i_creature.getVictim() || !u )
         return;
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
+    i_victimGuid = u->GetGUID();
     i_creature.Attack(u);
     i_creature.setAttackTimer(0);
     i_creature->Mutate(new TargetedMovementGenerator(*u));
