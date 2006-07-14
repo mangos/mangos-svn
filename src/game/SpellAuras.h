@@ -154,6 +154,7 @@ class Aura
 
         bool IsPermanent() { return m_permanent; }
         void SetPermanent(bool value) { m_permanent = value; }
+        bool IsAreaAura() const { return m_areaAura; }
 
         bool IsSingleTarget();
 
@@ -187,6 +188,7 @@ class Aura
         bool m_permanent;
         bool m_isPeriodic;
         bool m_isTrigger;
+        bool m_areaAura;
 
         uint32 m_periodicTimer;
         uint32 m_PeriodicEventId;

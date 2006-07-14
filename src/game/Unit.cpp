@@ -1478,6 +1478,29 @@ void Unit::RemoveAura(AuraMap::iterator &i)
         std::list<Aura *> *scAuras = (*i).second->GetCaster()->GetSingleCastAuras();
         scAuras->remove((*i).second);
     }
+    // remove aura from party members when the caster turns off the aura
+    if((*i).second->IsAreaAura())
+    {
+        Unit *i_caster = (*i).second->GetCaster(), *i_target = (*i).second->GetTarget();
+        if(i_caster->GetTypeId() == TYPEID_PLAYER && i_caster->GetGUID() == i_target->GetGUID())
+        {
+            Group* pGroup = objmgr.GetGroupByLeader(((Player*)i_caster)->GetGroupLeader());
+            float radius =  GetRadius(sSpellRadius.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
+            if(pGroup)
+            {
+                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                {
+                    Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
+                    if(!Target || Target->GetGUID() == i_caster->GetGUID())
+                        continue;
+                    Aura *t_aura = Target->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
+                    if (t_aura)
+                        if (t_aura->GetCaster()->GetGUID() == i_caster->GetGUID())
+                            Target->RemoveAura((*i).second->GetId(), (*i).second->GetEffIndex());
+                }
+            }
+        }
+    }
     m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
     (*i).second->_RemoveAura();
     delete (*i).second;

@@ -440,8 +440,6 @@ class Spell
         bool IsAutoRepeat() const { return m_autoRepeat; }
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = casttime<0?0:casttime;}
-        bool IsAreaAura() const { return m_spellInfo->Effect[0] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[1] ==SPELL_EFFECT_PERSISTENT_AREA_AURA || m_spellInfo->Effect[2] ==SPELL_EFFECT_PERSISTENT_AREA_AURA;}
-        //void SetArearAura(bool value) {m_AreaAura = value;}
         bool IsMeleeSpell() const { return m_meleeSpell; }
 
     protected:
