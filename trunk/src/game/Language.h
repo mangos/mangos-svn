@@ -70,7 +70,7 @@
 #define LANG_HONOR_YESTERDAY             "Yesterday: [Kills: |c0000ff00%u|r] [Honor: %u]"
 #define LANG_HONOR_THIS_WEEK             "This Week: [Kills: |c0000ff00%u|r] [Honor: %u]"
 #define LANG_HONOR_LAST_WEEK             "Last Week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]"
-#define LANG_HONOR_LIFE                  "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank: %u]"
+#define LANG_HONOR_LIFE                  "Life Time: [Honorable Kills: |c0000ff00%u|r] [Dishonorable Kills: |c00ff0000%u|r] [Highest Rank %u: %s]"
 
 // level 1 chat
 #define LANG_BROADCAST                   "BROADCAST: %s"

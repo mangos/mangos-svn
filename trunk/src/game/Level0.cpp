@@ -174,7 +174,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
 {
     uint32 dishonorable_kills       = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS);
     uint32 honorable_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
-    uint32 highest_rank             = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_PVP_MEDALS);
+	uint32 highest_rank             = (m_session->GetPlayer()->GetHonorHighestRank() < 16)? m_session->GetPlayer()->GetHonorHighestRank() : 0;
     uint32 today_honorable_kills    = (uint16)m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS);
     uint32 today_dishonorable_kills = (uint16)(m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_SESSION_KILLS)>>16);
     uint32 yestarday_kills          = m_session->GetPlayer()->GetUInt32Value(PLAYER_FIELD_YESTERDAY_KILLS);
@@ -224,16 +224,19 @@ bool ChatHandler::HandleShowHonor(const char* args)
         LANG_HRD_GAME_MASTER
     };
     std::string rank_name;
+	std::string hrank_name;
 
     if ( m_session->GetPlayer()->GetTeam() == ALLIANCE )
     {
         rank_name = alliance_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
-    }
+		hrank_name = alliance_ranks[ highest_rank ];
+	}
     else
     if ( m_session->GetPlayer()->GetTeam() == HORDE )
     {
         rank_name = horde_ranks[ m_session->GetPlayer()->CalculateHonorRank( m_session->GetPlayer()->GetTotalHonor() ) ];
-    }
+        hrank_name = horde_ranks[ highest_rank ];
+	}
     else
     {
         rank_name = LANG_NO_RANK;
@@ -244,7 +247,7 @@ bool ChatHandler::HandleShowHonor(const char* args)
     PSendSysMessage(LANG_HONOR_YESTERDAY, yestarday_kills, yestarday_honor);
     PSendSysMessage(LANG_HONOR_THIS_WEEK, this_week_kills, this_week_honor);
     PSendSysMessage(LANG_HONOR_LAST_WEEK, last_week_kills, last_week_honor, last_week_standing);
-    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank);
+    PSendSysMessage(LANG_HONOR_LIFE, honorable_kills, dishonorable_kills, highest_rank, hrank_name);
 
     return true;
 }
