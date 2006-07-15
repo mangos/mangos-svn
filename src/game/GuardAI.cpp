@@ -84,7 +84,7 @@ void GuardAI::_stopAttack()
 {
     assert( i_victimGuid );
 
-    Unit* victim = ObjectAccessor::Instance().GetCreature(i_creature, i_victimGuid );
+    Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
 
     assert(!i_creature.getVictim() || i_creature.getVictim() == victim);
 

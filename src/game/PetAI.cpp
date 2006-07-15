@@ -34,9 +34,7 @@ int PetAI::Permissible(const Creature *creature)
 
 PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
-    i_owner = ObjectAccessor::Instance().GetCreature(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
-    if(!i_owner)
-        i_owner = ObjectAccessor::Instance().GetPlayer(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
+    i_owner = ObjectAccessor::Instance().GetUnit(c, c.GetUInt64Value(UNIT_FIELD_SUMMONEDBY));
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)
@@ -78,7 +76,7 @@ void PetAI::_stopAttack()
     if( !i_victimGuid )
         return;
 
-    Unit* victim = ObjectAccessor::Instance().GetCreature(i_pet, i_victimGuid );
+    Unit* victim = ObjectAccessor::Instance().GetUnit(i_pet, i_victimGuid );
 
     assert(!i_pet.getVictim() || i_pet.getVictim() == victim);
 

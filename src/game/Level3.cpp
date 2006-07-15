@@ -1739,6 +1739,10 @@ bool ChatHandler::HandleEmoteCommand(const char* args)
         return false;
 
     Unit* target = ObjectAccessor::Instance().GetCreature(*chr, chr->GetSelection());
+
+    if(!target)
+        return false;
+
     target->SetUInt32Value(UNIT_NPC_EMOTESTATE,emote);
 
     return true;
