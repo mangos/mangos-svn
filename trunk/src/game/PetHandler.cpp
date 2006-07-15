@@ -79,9 +79,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 {
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
                     uint64 selguid = _player->GetSelection();
-                    Unit *TargetUnit = ObjectAccessor::Instance().GetCreature(*_player, selguid);
-                    if(!TargetUnit)
-                        TargetUnit=ObjectAccessor::Instance().FindPlayer(selguid);
+                    Unit *TargetUnit = ObjectAccessor::Instance().GetUnit(*_player, selguid);
                     if(TargetUnit == NULL) return;
                     pet->AI().AttackStart(TargetUnit);
                     data.Initialize(SMSG_AI_REACTION);
@@ -126,9 +124,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             Spell *spell = new Spell(pet, spellInfo, false, 0);
             WPAssert(spell);
             uint64 selectguid = _player->GetSelection();
-            Unit* unit_target=ObjectAccessor::Instance().GetCreature(*_player,selectguid);
-            if(!unit_target)
-                unit_target=ObjectAccessor::Instance().FindPlayer(selectguid);
+            Unit* unit_target=ObjectAccessor::Instance().GetUnit(*_player,selectguid);
             if(unit_target == NULL) return;
             SpellCastTargets targets;
             targets.setUnitTarget( unit_target );           //(Unit*)_player;

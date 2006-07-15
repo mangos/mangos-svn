@@ -38,7 +38,8 @@ bool ChatHandler::HandleDebugInArcCommand(const char* args)
     uint64 guid = m_session->GetPlayer()->GetSelection();
     if (guid != 0)
     {
-        if(!(obj = (Object*)ObjectAccessor::Instance().GetPlayer(*m_session->GetPlayer(), guid)) && !(obj = (Object*)ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),guid)))
+        obj = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(), guid);
+        if(!obj)
         {
             SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
             return true;

@@ -938,7 +938,7 @@ void Spell::SendChannelStart(uint32 duration)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
 
-        target = ObjectAccessor::Instance().GetCreature(*m_caster, ((Player *)m_caster)->GetSelection());
+        target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
 
         WorldPacket data;
         data.Initialize( MSG_CHANNEL_START );

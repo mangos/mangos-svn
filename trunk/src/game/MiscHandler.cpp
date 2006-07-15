@@ -853,7 +853,10 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         if( pQuest )
         {
             if( !Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID ) )
-                GetPlayer()->AreaExplored( pQuest );
+            {
+                if(GetPlayer()->GetQuestStatus(pQuest) == QUEST_STATUS_INCOMPLETE)
+                    GetPlayer()->AreaExplored( pQuest );
+            }
         }
     }
 
