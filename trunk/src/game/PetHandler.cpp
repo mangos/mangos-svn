@@ -51,6 +51,13 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid1)) );
         return;
     }
+
+    if(pet != GetPlayer()->GetPet() )
+    {
+        sLog.outError( "HandlePetAction.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid1)),GetPlayer()->GetName() );
+        return;
+    }
+
     switch(flag)
     {
         case 1792:                                          //0x0700
@@ -83,18 +90,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
                 }
                 case 3:
-                    if(pet)
-                    {
-                        _player->SavePet();
-                        _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-                        data.Initialize(SMSG_DESTROY_OBJECT);
-                        data << pet->GetGUID();
-                        _player->SendMessageToSet (&data, true);
-                        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
-                        data.Initialize(SMSG_PET_SPELLS);
-                        data << uint64(0);
-                        _player->GetSession()->SendPacket(&data);
-                    }
+                    _player->UnsummonPet(true);
                     break;
                 default:
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
@@ -190,15 +186,6 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     {
         uint32 feelty = pet->GetUInt32Value(UNIT_FIELD_POWER5);
         pet->SetUInt32Value(UNIT_FIELD_POWER5 ,(feelty-50000) > 0 ?(feelty-50000) : 0);
-        _player->SavePet();
-        _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-        WorldPacket data;
-        data.Initialize(SMSG_DESTROY_OBJECT);
-        data << pet->GetGUID();
-        _player->SendMessageToSet (&data, true);
-        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,true);
-        data.Initialize(SMSG_PET_SPELLS);
-        data << uint64(0);
-        _player->GetSession()->SendPacket(&data);
+        _player->UnsummonPet(true);
     }
 }

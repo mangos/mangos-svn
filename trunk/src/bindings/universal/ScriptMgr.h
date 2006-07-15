@@ -76,7 +76,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     // Called at each attack of m_creature by any victim
     void AttackStart(Unit *) {}
 
-    // Called at stoing attack by any attacker
+    // Called at stoping attack by any attacker
     void AttackStop(Unit *);
 
     // Called at any heal cast/item used (call non implemented in mangos)

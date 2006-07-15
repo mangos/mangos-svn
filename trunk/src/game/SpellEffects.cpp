@@ -724,7 +724,7 @@ void Spell::EffectSummon(uint32 i)
 
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
         ((Player*)m_caster)->SavePet();
-        m_caster->SetUInt64Value(UNIT_FIELD_SUMMON,spawnCreature->GetGUID());
+        m_caster->SetPet(spawnCreature);
     }
 }
 
@@ -981,7 +981,7 @@ void Spell::EffectSummonWild(uint32 i)
 
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
         ((Player*)m_caster)->SavePet();
-        m_caster->SetUInt64Value(UNIT_FIELD_SUMMON,spawnCreature->GetGUID());
+        m_caster->SetPet(spawnCreature);
     }
 
 }
@@ -1169,7 +1169,7 @@ void Spell::EffectTameCreature(uint32 i)
 
             ((Player*)m_caster)->GetSession()->SendPacket(&data);
             ((Player*)m_caster)->SavePet();
-            m_caster->SetUInt64Value(UNIT_FIELD_SUMMON,creatureTarget->GetGUID());
+            m_caster->SetPet(creatureTarget);
         }
     }
 }
@@ -1177,52 +1177,48 @@ void Spell::EffectTameCreature(uint32 i)
 void Spell::EffectSummonPet(uint32 i)
 {
     WorldPacket data;
-    uint64 petguid;
     float px, py, pz;
     m_caster->GetClosePoint(NULL, px, py, pz);
-    if((petguid=m_caster->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+
+    Creature *OldSummon = m_caster->GetPet();
+    if(OldSummon && OldSummon->isPet())
     {
-        Creature *OldSummon;
-        OldSummon = ObjectAccessor::Instance().GetCreature(*m_caster, petguid);
-        if(OldSummon && OldSummon->isPet())
+        if(OldSummon->isDead())
         {
-            if(OldSummon->isDead())
-            {
-                uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
-                OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
-                OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * petlvl );
-                OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlvl );
-                OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);
-                OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
-                OldSummon->setDeathState(ALIVE);
-                OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
-                ((Creature&)*OldSummon)->Clear();
-                MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
-            }
-            OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                uint16 Command = 7;
-                uint16 State = 6;
-
-                sLog.outDebug("Pet Spells Groups");
-
-                data.clear();
-                data.Initialize(SMSG_PET_SPELLS);
-
-                data << (uint64)OldSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-                data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                    data << uint16(OldSummon->m_spells[i]) << uint16(0xC100);  //C100 = maybe group 
-
-                data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            }
-            return;
+            uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
+            OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
+            OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * petlvl );
+            OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlvl );
+            OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);
+            OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
+            OldSummon->setDeathState(ALIVE);
+            OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
+            ((Creature&)*OldSummon)->Clear();
+            MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
         }
+        OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            uint16 Command = 7;
+            uint16 State = 6;
+
+            sLog.outDebug("Pet Spells Groups");
+
+            data.clear();
+            data.Initialize(SMSG_PET_SPELLS);
+
+            data << (uint64)OldSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+            data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+            for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                data << uint16(OldSummon->m_spells[i]) << uint16(0xC100);  //C100 = maybe group 
+
+            data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+            ((Player*)m_caster)->GetSession()->SendPacket(&data);
+        }
+        return;
     }
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
     Pet* NewSummon = new Pet();
@@ -1279,7 +1275,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->AIM_Initialize();
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
 
-        m_caster->SetUInt64Value(UNIT_FIELD_SUMMON, NewSummon->GetGUID());
+        m_caster->SetPet(NewSummon);
         sLog.outDebug("New Pet has guid %u", NewSummon->GetGUID());
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1978,26 +1974,13 @@ void Spell::EffectDismissPet(uint32 i)
 
     Player *_player = (Player*)m_caster;
 
-    uint64 guid = _player->GetUInt64Value(UNIT_FIELD_SUMMON);
-    Creature* pet = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature* pet = _player->GetPet();
     unitTarget = (Unit*)pet;
-    if(pet)
-    {
-        _player->SavePet();
-        _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
-        WorldPacket data;
-        data.Initialize(SMSG_DESTROY_OBJECT);
-        data << pet->GetGUID();
-        _player->GetSession()->SendPacket(&data);
-        MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,false);
-        data.clear();
-        data.Initialize(SMSG_PET_SPELLS);
-        data << uint64(0);
-        _player->GetSession()->SendPacket(&data);
-        //pet->LoadFromDB(pet->GetGUIDLow());
-        pet = NULL;
-    }
-    else _player->SetUInt64Value(UNIT_FIELD_SUMMON, 0);
+
+    if(!pet)
+        return;
+
+    _player->UnsummonPet(false);
 }
 
 void Spell::EffectSummonObject(uint32 i)

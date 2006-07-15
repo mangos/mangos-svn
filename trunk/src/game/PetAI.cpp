@@ -198,10 +198,13 @@ void PetAI::_taggedToKill(Unit *u)
 {
     if( i_pet.getVictim() || !u)
         return;
-    i_pet.clearUnitState(UNIT_STAT_FOLLOW);
-    i_victimGuid = u->GetGUID();
-    i_pet.Attack(u);
-    i_pet->Mutate(new TargetedMovementGenerator(*u));
+
+    if(i_pet.Attack(u))
+    {
+        i_pet.clearUnitState(UNIT_STAT_FOLLOW);
+        i_victimGuid = u->GetGUID();
+        i_pet->Mutate(new TargetedMovementGenerator(*u));
+    }
 
     /*SpellEntry *spellInfo;
     if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack( u )))

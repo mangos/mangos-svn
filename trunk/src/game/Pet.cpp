@@ -124,7 +124,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     SetisPet(true);
     AIM_Initialize();
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
-    owner->SetUInt64Value(UNIT_FIELD_SUMMON, GetGUID());
+    owner->SetPet(this);
     sLog.outDebug("New Pet has guid %u", GetGUID());
 
     //summon imp Template ID is 416

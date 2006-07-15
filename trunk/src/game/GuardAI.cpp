@@ -226,7 +226,9 @@ void GuardAI::AttackStart(Unit *u)
     if( i_creature.getVictim() || !u )
         return;
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
-    i_victimGuid = u->GetGUID();
-    i_creature.Attack(u);
-    i_creature->Mutate(new TargetedMovementGenerator(*u));
+    if(i_creature.Attack(u))
+    {
+        i_victimGuid = u->GetGUID();
+        i_creature->Mutate(new TargetedMovementGenerator(*u));
+    }
 }

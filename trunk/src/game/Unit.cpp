@@ -279,28 +279,23 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                     break;
                 }
             }
-            uint64 petguid;
-            if((petguid=pVictim->GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+
+            Creature *pet = pVictim->GetPet();
+            if(pet && pet->isPet())
             {
-                Creature *pet;
-                pet = ObjectAccessor::Instance().GetCreature(*pVictim, petguid);
-                if(pet && pet->isPet())
+                pet->setDeathState(JUST_DIED);
+                pet->SendAttackStop(attackerGuid);
+                pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+                pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
+                pet->addUnitState(UNIT_STAT_DIED);
+                for(i = m_hostilList.begin(); i != m_hostilList.end(); ++i)
                 {
-                    pet->setDeathState(JUST_DIED);
-                    pet->SendAttackStop(attackerGuid);
-                    pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
-                    pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
-                    pet->addUnitState(UNIT_STAT_DIED);
-                    for(i = m_hostilList.begin(); i != m_hostilList.end(); ++i)
+                    if(i->UnitGuid==pet->GetGUID())
                     {
-                        if(i->UnitGuid==pet->GetGUID())
-                        {
-                            m_hostilList.erase(i);
-                            break;
-                        }
+                        m_hostilList.erase(i);
+                        break;
                     }
                 }
-                //pVictim->SetUInt64Value( UNIT_FIELD_SUMMON, 0 );
             }
         }
         else
@@ -1072,13 +1067,11 @@ void Unit::SendAttackStop(uint64 victimGuid)
     data << (uint32)0;
 
     SendMessageToSet(&data, true);
-    sLog.outDetail("%u %X stopped attacking "I64FMT,
-        GetGUIDLow(), GetGUIDHigh(), victimGuid);
+    sLog.outDetail("%u %X stopped attacking "I64FMT, GetGUIDLow(), GetGUIDHigh(), victimGuid);
 
     Creature *pVictim = ObjectAccessor::Instance().GetCreature(*this, victimGuid);
     if( pVictim != NULL )
         pVictim->AI().AttackStop(this);
-
 }
 
 void Unit::_UpdateSpells( uint32 time )
@@ -1959,21 +1952,22 @@ FactionTemplateEntry* Unit::getFactionTemplateEntry() const
 }
 
 
-void Unit::Attack(Unit *victim)
+bool Unit::Attack(Unit *victim)
 {
     if(victim == this)
-        return;
+        return false;
 
     if (m_attacking)
     {
         if (m_attacking == victim)
-            return;
+            return false;
         AttackStop();
     }
     addUnitState(UNIT_STAT_ATTACKING);
     SetFlag(UNIT_FIELD_FLAGS, 0x80000);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
+    return true;
 }
 
 bool Unit::AttackStop()
@@ -2021,4 +2015,26 @@ void Unit::SetStateFlag(uint32 index, uint32 newFlag )
 void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
 {
     index &= ~ oldFlag;
+}
+
+Creature* Unit::GetPet() const
+{
+    uint64 pet_guid = GetPetGUID();
+    if(pet_guid)
+    {
+        Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
+        if(!pet)
+        {
+            sLog.outError("Unit::GetPet: Pet %u not exist.",pet->GetGUIDLow());
+            const_cast<Unit*>(this)->SetPet(0);
+        }
+        return pet;
+    }
+    else
+        return NULL;
+}
+
+void Unit::SetPet(Creature* pet) 
+{ 
+    SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0); 
 }

@@ -70,6 +70,7 @@ struct Modifier;
 struct SpellEntry;
 
 class Aura;
+class Creature;
 class Spell;
 class DynamicObject;
 
@@ -273,7 +274,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
             return NULL;
         }
-        void Attack(Unit *victim);
+        bool Attack(Unit *victim);
         bool AttackStop();
         void RemoveAllAttackers();
         bool isInCombatWithPlayer() const;
@@ -379,6 +380,10 @@ class MANGOS_DLL_SPEC Unit : public Object
             }
             m_deathState = s;
         }
+
+        uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
+        Creature* GetPet() const;
+        void SetPet(Creature* pet);
 
         bool AddAura(Aura *aur, bool uniq = false);
 

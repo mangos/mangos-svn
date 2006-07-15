@@ -43,7 +43,7 @@ INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(ObjectAccessor, ZThread::FastMutex);
 
 Creature*
-ObjectAccessor::GetCreature(Unit &u, uint64 guid)
+ObjectAccessor::GetCreature(Unit const &u, uint64 guid)
 {
     CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
@@ -57,7 +57,7 @@ ObjectAccessor::GetCreature(Unit &u, uint64 guid)
 }
 
 Corpse*
-ObjectAccessor::GetCorpse(Unit &u, uint64 guid)
+ObjectAccessor::GetCorpse(Unit const &u, uint64 guid)
 {
     CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
@@ -71,7 +71,7 @@ ObjectAccessor::GetCorpse(Unit &u, uint64 guid)
 }
 
 Unit*
-ObjectAccessor::GetUnit(Unit &u, uint64 guid)
+ObjectAccessor::GetUnit(Unit const &u, uint64 guid)
 {
     Unit *unit = NULL;
 
@@ -83,13 +83,13 @@ ObjectAccessor::GetUnit(Unit &u, uint64 guid)
 }
 
 Player*
-ObjectAccessor::GetPlayer(Unit &u, uint64 guid)
+ObjectAccessor::GetPlayer(Unit const &u, uint64 guid)
 {
     return FindPlayer(guid);
 }
 
 GameObject*
-ObjectAccessor::GetGameObject(Unit &u, uint64 guid)
+ObjectAccessor::GetGameObject(Unit const &u, uint64 guid)
 {
     CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);
@@ -103,7 +103,7 @@ ObjectAccessor::GetGameObject(Unit &u, uint64 guid)
 }
 
 DynamicObject*
-ObjectAccessor::GetDynamicObject(Unit &u, uint64 guid)
+ObjectAccessor::GetDynamicObject(Unit const &u, uint64 guid)
 {
     CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
     Cell cell = RedZone::GetZone(p);

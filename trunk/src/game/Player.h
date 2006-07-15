@@ -345,6 +345,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(s == JUST_DIED && isAlive())
             {
                 _RemoveAllItemMods();
+                UnsummonPet(true);
             }
             bool cur = isAlive();
             Unit::setDeathState(s);
@@ -355,6 +356,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         };
 
+        void UnsummonPet(bool remove);
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
