@@ -972,7 +972,7 @@ void Creature::Say(char const* message, uint32 language)
 {
     WorldPacket data;
 
-    sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_SAY, language, NULL, message );
+    sChatHandler.FillMessageData( &data, NULL, CHAT_MSG_SAY, language, NULL, 0, message );
     SendMessageToSet( &data, false );
 }
 

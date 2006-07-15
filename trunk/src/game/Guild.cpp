@@ -355,7 +355,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg)
         for (itr = members.begin(); itr != members.end(); itr++)
         {
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, LANG_UNIVERSAL, NULL, msg.c_str());
+            sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, LANG_UNIVERSAL, NULL, 0, msg.c_str());
 
             pl = ObjectAccessor::Instance().FindPlayer((*itr)->guid);
 
@@ -375,7 +375,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg)
         for (itr = members.begin(); itr != members.end(); itr++)
         {
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, LANG_UNIVERSAL, NULL, msg.c_str());
+            sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, LANG_UNIVERSAL, NULL, 0, msg.c_str());
 
             pl = ObjectAccessor::Instance().FindPlayer((*itr)->guid);
 

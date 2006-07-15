@@ -147,7 +147,7 @@ void Group::BroadcastToGroup(WorldSession *session, std::string msg)
         for (uint32 i = 0; i < m_count; i++)
         {
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, session, CHAT_MSG_PARTY, LANG_UNIVERSAL, NULL, msg.c_str());
+            sChatHandler.FillMessageData(&data, session, CHAT_MSG_PARTY, LANG_UNIVERSAL, NULL, 0, msg.c_str());
             Player *pl = ObjectAccessor::Instance().FindPlayer(m_members[i].guid);
             if (pl && pl->GetSession())
                 pl->GetSession()->SendPacket(&data);

@@ -52,7 +52,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            sChatHandler.FillMessageData( &data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
+            sChatHandler.FillMessageData( &data, this, type, LANG_UNIVERSAL, NULL, 0, msg.c_str() );
             GetPlayer()->SendMessageToSet( &data, true );
         } break;
 
@@ -115,7 +115,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
+            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, 0, msg.c_str() );
             SendPacket(&data);
             sWorld.SendGlobalMessage(&data, this);
         } break;
@@ -124,21 +124,16 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string to = "", msg = "";
             recv_data >> to >> msg;
-            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, msg.c_str() );
             Player *player = objmgr.GetPlayer(to.c_str());
             if(!player)
             {
-                data.clear();
-                msg = "Player ";
-                msg += to.c_str();
-                msg += " is not online (Names are case sensitive)";
-                sChatHandler.FillSystemMessageData( &data, this ,msg.c_str() );
-                SendPacket(&data);
+                std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
+                sChatHandler.SendSysMessage(this ,msg_err.c_str() );
                 break;
             }
+            sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, 0, msg.c_str() );
             player->GetSession()->SendPacket(&data);
-            //sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,(( char *)((uint32)player->GetGUID() )),msg.c_str() );
-            sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,NULL,msg.c_str() );
+            sChatHandler.FillMessageData(&data,this,CHAT_MSG_WHISPER_INFORM,LANG_UNIVERSAL,NULL,player->GetGUID(),msg.c_str() );
             SendPacket(&data);
         } break;
 

@@ -366,12 +366,11 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     return 1;
 }
 
-void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, const char *message )
+//Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
+void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message )
 {
-
     uint32 messageLength = (message ? strlen(message) : 0) + 1;
     uint8 afk = 0;
-    uint64 guid = 0;
 
     data->Initialize(SMSG_MESSAGECHAT);
     *data << (uint8)type;
@@ -383,22 +382,22 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         *data << channelName;
     }
 
+    // in CHAT_MSG_WHISPER_INFORM mode used original target_guid
     if (type == CHAT_MSG_SAY  || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER ||
         type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY   || type == CHAT_MSG_GUILD   ||
         type == CHAT_MSG_OFFICER)
     {
-        guid = session ? session->GetPlayer()->GetGUID() : 0;
+        target_guid = session ? session->GetPlayer()->GetGUID() : 0;
     }
-    else if (type == CHAT_MSG_WHISPER_INFORM)
+    else if (type != CHAT_MSG_WHISPER_INFORM)
     {
-
-        guid = uint32(channelName);
+        target_guid = 0; // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
     }
 
-    *data << guid;
+    *data << target_guid;
 
     if (type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
-        *data << guid;
+        *data << target_guid;
 
     *data << messageLength;
     *data << message;
