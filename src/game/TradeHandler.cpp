@@ -211,13 +211,14 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 			SendPacket(&data); 
 			_player->pTrader->pTrader = NULL; 
 			_player->pTrader = NULL; 
-} 
-else
-{ data.Initialize(SMSG_TRADE_STATUS); 
-data << (uint32)4; 
-_player->pTrader->GetSession()->SendPacket(&data); 
-} 
-} 
+        } 
+        else
+        { 
+            data.Initialize(SMSG_TRADE_STATUS); 
+            data << (uint32)4; 
+            _player->pTrader->GetSession()->SendPacket(&data); 
+        } 
+    } 
 }
 
 void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
@@ -246,18 +247,25 @@ void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
     ClearTrade();
 }
 
-void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::SendCancelTrade()
 {
     WorldPacket data;
 
-    if(_player->pTrader )
-    {
-        data.Initialize(SMSG_TRADE_STATUS);
-        data << (uint32)3;
-        _player->pTrader->GetSession()->SendPacket(&data);
-    }
+    data.Initialize(SMSG_TRADE_STATUS);
+    data << (uint32)3;
+    SendPacket(&data);
+}
 
-    _player->pTrader = NULL;
+
+void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
+{
+    if(_player->pTrader)
+    {
+        // prevent back cancel message (already processed)
+        _player->pTrader->pTrader = NULL;
+        _player->pTrader->GetSession()->SendCancelTrade();
+        _player->pTrader = NULL;
+    }
     ClearTrade();
 }
 

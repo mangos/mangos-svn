@@ -424,10 +424,13 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
         cell_lock->Visit(cell_lock, player_notifier, *this);
     }
 
-    MaNGOS::PlayerConfrontationNotifier confront(*player);
-    TypeContainerVisitor<MaNGOS::PlayerConfrontationNotifier, TypeMapContainer<AllObjectTypes> > player_confronted(confront);
+    MaNGOS::PlayerRelocationNotifier relocationNotifier(*player);
     new_cell.data.Part.reserved = ALL_DISTRICT;
-    cell_lock->Visit(cell_lock, player_confronted, *this);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, TypeMapContainer<AllObjectTypes> > p2c_relocation(relocationNotifier);
+    cell_lock->Visit(cell_lock, p2c_relocation, *this);
+    TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > p2p_relocation(relocationNotifier);
+    cell_lock->Visit(cell_lock, p2p_relocation, *this);
+
 
     if( same_cell )
         return;
@@ -480,8 +483,13 @@ Map::CreatureRelocation(Creature *creature, const float &x, const float &y, cons
     }
     else
     {
-
+        CellLock<ReadGuard> cell_lock(new_cell, new_val);
+        MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
+        new_cell.data.Part.reserved = ALL_DISTRICT;
+        TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, ContainerMapList<Player> > c2p_relocation(relocationNotifier);
+        cell_lock->Visit(cell_lock, c2p_relocation, *this);
     }
+
 }
 
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y)

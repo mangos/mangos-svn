@@ -90,6 +90,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSpiritResurrect();
         void SendBindPoint();
         void SendGMTicketGetTicket(uint32 status, char const* text);
+        void SendCancelTrade();
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);

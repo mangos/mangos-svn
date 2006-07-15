@@ -764,6 +764,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool IsInWater() const { return (m_isunderwater & 0x80); }
 
+        Player* GetTrader() const { return pTrader; }
+
     protected:
         bool m_bgInBattleGround;
         uint8 m_bgBattleGroundID;
