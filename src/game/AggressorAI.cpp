@@ -85,8 +85,6 @@ AggressorAI::_needToStop() const
 
 void AggressorAI::AttackStop(Unit *)
 {
-    i_victimGuid = 0;
-    i_creature.AttackStop();
 }
 
 void AggressorAI::_stopAttack()

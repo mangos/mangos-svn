@@ -7588,7 +7588,8 @@ bool Player::HaveQuestForItem( uint32 itemid )
 
             for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
             {
-                if(itemid == qs.m_quest->GetQuestInfo()->ReqItemId[j])
+                QuestInfo* qinfo = qs.m_quest->GetQuestInfo();
+                if(itemid == qinfo->ReqItemId[j] && qs.m_itemcount[j] < qinfo->ReqItemCount[j] )
                     return true;
             }
         }
@@ -8019,7 +8020,7 @@ void Player::_LoadMail()
 
 void Player::_LoadPet()
 {
-    uint64 pet_guid = GetUInt64Value(UNIT_FIELD_SUMMON);
+    uint64 pet_guid = GetPetGUID();
     if(pet_guid)
     {
         Creature* in_pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
@@ -8244,14 +8245,10 @@ void Player::SaveToDB()
 
     if(m_pCorpse) m_pCorpse->SaveToDB(false);
 
-    uint64 petguid;
-    if((petguid=GetUInt64Value(UNIT_FIELD_SUMMON)) != 0)
+    Creature *OldSummon = GetPet();
+    if(OldSummon && OldSummon->isPet())
     {
-        Creature *OldSummon = ObjectAccessor::Instance().GetCreature(*this, petguid);
-        if(OldSummon && OldSummon->isPet())
-        {
-            ((Pet*)OldSummon)->SavePetToDB();
-        }
+        ((Pet*)OldSummon)->SavePetToDB();
     }
 
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
@@ -8406,8 +8403,7 @@ void Player::_SaveTutorials()
 
 void Player::SavePet()
 {
-    uint64 pet_guid = GetUInt64Value(UNIT_FIELD_SUMMON);
-    Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
+    Creature* pet = GetPet();
     if(pet)
     {
         std::string name;
@@ -8536,4 +8532,24 @@ void Player::UpdatePVPFlag(time_t currTime)
     {
         SetPvP(true);
     }
+}
+
+void Player::UnsummonPet(bool remove)
+{
+    Creature* pet = GetPet();
+    if(!pet) return;
+
+    SavePet();
+    SetPet(0);
+
+    WorldPacket data;
+    data.Initialize(SMSG_DESTROY_OBJECT);
+    data << pet->GetGUID();
+    SendMessageToSet (&data, true);
+
+    MapManager::Instance().GetMap(pet->GetMapId())->Remove(pet,remove);
+
+    data.Initialize(SMSG_PET_SPELLS);
+    data << uint64(0);
+    GetSession()->SendPacket(&data);
 }

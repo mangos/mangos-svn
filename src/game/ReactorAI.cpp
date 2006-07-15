@@ -46,10 +46,12 @@ ReactorAI::AttackStart(Unit *p)
 {
     if( i_creature.getVictim() == NULL )
     {
-        DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
-        i_creature.Attack(p);
-        i_victimGuid = p->GetGUID();
-        i_creature->Mutate(new TargetedMovementGenerator(*p));
+        if(i_creature.Attack(p))
+        {
+            DEBUG_LOG("Tag unit LowGUID(%u) HighGUID(%u) as a victim", p->GetGUIDLow(), p->GetGUIDHigh());
+            i_victimGuid = p->GetGUID();
+            i_creature->Mutate(new TargetedMovementGenerator(*p));
+        }
     }
 }
 

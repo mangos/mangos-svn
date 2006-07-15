@@ -51,12 +51,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
-        Creature* GetCreature(Unit &, uint64);
-        Corpse* GetCorpse(Unit &, uint64);
-        Unit* GetUnit(Unit &, uint64);
-        Player* GetPlayer(Unit &, uint64);
-        GameObject* GetGameObject(Unit &, uint64);
-        DynamicObject* GetDynamicObject(Unit &, uint64);
+        Creature* GetCreature(Unit const &, uint64);
+        Corpse* GetCorpse(Unit const &, uint64);
+        Unit* GetUnit(Unit const &, uint64);
+        Player* GetPlayer(Unit const &, uint64);
+        GameObject* GetGameObject(Unit const &, uint64);
+        DynamicObject* GetDynamicObject(Unit const &, uint64);
 
         Player* FindPlayer(uint64);
         Player* FindPlayerByName(const char *name) ;

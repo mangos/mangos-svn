@@ -240,7 +240,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_PET:
         {
-            Unit* tmpUnit = ObjectAccessor::Instance().GetCreature(*m_caster,m_caster->GetUInt64Value(UNIT_FIELD_SUMMON));
+            Unit* tmpUnit = m_caster->GetPet();
             TagUnitMap.push_back(tmpUnit);
         }break;
         case TARGET_S_E:
@@ -1245,7 +1245,7 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_INVALID_TARGET;
                     break;
                 }
-                if(m_caster->GetUInt64Value(UNIT_FIELD_SUMMON))
+                if(m_caster->GetPetGUID())
                 {
                     castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
                     break;
