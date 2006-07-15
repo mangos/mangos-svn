@@ -111,10 +111,64 @@ MaNGOS::ObjectUpdater::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
 
 template<>
 inline void
-MaNGOS::PlayerConfrontationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
 {
-    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( iter->second->isAlive() && !iter->second->isInFlight() && iter->second->AI().IsVisible(&i_player) )
-            iter->second->AI().MoveInLineOfSight(&i_player);
+    if(!i_player.isAlive() || i_player.isInFlight()) 
+        return;
+
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        // Remove selection
+        if(i_player.GetSelection()==iter->second->GetGUID())
+            if(i_player.GetDistanceSq(iter->second) > 100*100) // visibility distance
+                sLog.outError("Player %s deselection of player %s (out of range) not implemented.",i_player.GetName(),iter->second->GetName());
+
+        // Cancel Trade
+        if(i_player.GetTrader()==iter->second)
+            if(i_player.GetDistanceSq(iter->second) > 5*5) // iteraction distance
+                i_player.GetSession()->SendCancelTrade(); // will clode both side trade windows
+    }
 }
-#endif
+
+inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
+{
+    // Remove selection
+    if(pl->GetSelection()==c->GetGUID())
+        if(pl->GetDistanceSq(c) > 100*100) // visibility distance
+            sLog.outError("Player %s deselection of creature %lu (out of range) not implemented.",pl->GetName(),c->GetGUID());
+
+    // Cancel training or shoping or bank dialogs
+    //if(pl->**==c)
+    //    if(pl->GetDistanceSq(iter->second) > 5*5) // iteraction distance
+    //        ??? what do
+
+    // Creature AI reaction
+    if( c->AI().IsVisible(pl) )
+        c->AI().MoveInLineOfSight(pl);
+}
+ 
+template<>
+inline void
+MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
+{
+    if(!i_player.isAlive() || i_player.isInFlight()) 
+        return;
+
+    for(std::map<OBJECT_HANDLE, Creature *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        if( iter->second->isAlive() && !iter->second->isInFlight())
+            PlayerCreatureRelocationWorker(&i_player,iter->second);
+}
+
+template<>
+inline void
+MaNGOS::CreatureRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
+{
+    if(!i_creature.isAlive() || i_creature.isInFlight()) 
+        return;
+
+    for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        if( iter->second->isAlive() && !iter->second->isInFlight())
+            PlayerCreatureRelocationWorker(iter->second, &i_creature);
+}
+
+#endif // MANGOS_GRIDNOTIFIERSIMPL_H

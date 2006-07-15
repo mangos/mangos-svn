@@ -234,13 +234,24 @@ namespace MaNGOS
         #endif
     };
 
-    struct MANGOS_DLL_DECL PlayerConfrontationNotifier
+    struct MANGOS_DLL_DECL PlayerRelocationNotifier
     {
         Player &i_player;
-        PlayerConfrontationNotifier(Player &pl) : i_player(pl) {}
+        PlayerRelocationNotifier(Player &pl) : i_player(pl) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
         #ifdef WIN32
+        template<> void Visit(std::map<OBJECT_HANDLE, Player   *> &);
         template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
+        #endif
+    };
+
+    struct MANGOS_DLL_DECL CreatureRelocationNotifier
+    {
+        Creature &i_creature;
+        CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        #ifdef WIN32
+        template<> void Visit(std::map<OBJECT_HANDLE, Player *> &);
         #endif
     };
 
@@ -251,7 +262,9 @@ namespace MaNGOS
     template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
-    template<> void PlayerConfrontationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void PlayerRelocationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void PlayerRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
+    template<> void CreatureRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m ) {}
     template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, GameObject *> &m ) {}
     template<> inline void GridUnitListNotifier::Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m ) {}
