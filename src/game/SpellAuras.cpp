@@ -1661,13 +1661,13 @@ void Aura::HandleModBaseResistance(bool apply)
 
 void Aura::HandleModRegen(bool apply)                       // eating
 {
-    m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
     // add event
 }
 
 void Aura::HandleModPowerRegen(bool apply)                  // drinking
 {
-    m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 }
 
 void Aura::HandleChannelDeathItem(bool apply)

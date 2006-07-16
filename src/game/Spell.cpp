@@ -238,6 +238,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
     float radius =  GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     switch(cur)
     {
+        case TARGET_TOTEM_EARTH:
+        case TARGET_TOTEM_WATER:
+        case TARGET_TOTEM_AIR:
+        case TARGET_TOTEM_FIRE:
         case TARGET_SELF:
         case TARGET_DY_OBJ:                                 //add by vendy
         {
@@ -246,6 +250,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         case TARGET_PET:
         {
             Unit* tmpUnit = m_caster->GetPet();
+            if (!tmpUnit) break;
             TagUnitMap.push_back(tmpUnit);
         }break;
         case TARGET_S_E:
@@ -482,8 +487,6 @@ void Spell::prepare(SpellCastTargets * targets)
     if(!gameObjTarget)
         gameObjTarget = m_targets.m_GOTarget;
 
-    SendSpellStart();
-
     m_spellState = SPELL_STATE_PREPARING;
 
     m_castPositionX = m_caster->GetPositionX();
@@ -499,12 +502,16 @@ void Spell::prepare(SpellCastTargets * targets)
             m_triggeredByAura->SetAuraDuration(0);
         }
         finish();
+        return;
     }
 
     if(m_Istriggeredpell)
         cast();
     else
+    {
         m_caster->castSpell( this );
+        SendSpellStart();
+    }
 }
 
 void Spell::cancel()
