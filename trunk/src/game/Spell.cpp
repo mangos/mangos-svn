@@ -1390,7 +1390,7 @@ uint8 Spell::CheckRange()
         float dist = m_caster->GetDistanceSq(target);
         if(dist > max_range * max_range)
             return CAST_FAIL_OUT_OF_RANGE;            //0x56;
-        if(dist <= min_range * min_range)
+        if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
         if(m_caster != target && !m_caster->isInFront( target, max_range))
             return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
@@ -1401,7 +1401,7 @@ uint8 Spell::CheckRange()
         float dist = m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
         if(dist > max_range * max_range)
             return CAST_FAIL_OUT_OF_RANGE;
-        if(dist <= min_range * min_range)
+        if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
     }
 
