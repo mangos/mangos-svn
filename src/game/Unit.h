@@ -402,7 +402,8 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void castSpell(Spell * pSpell);
         void InterruptSpell();
-        bool m_meleeSpell;
+        Spell * m_currentSpell;
+        Spell * m_currentMeleeSpell;
         uint32 m_addDmgOnce;
         uint64 m_TotemSlot1;
         uint64 m_TotemSlot2;
@@ -439,8 +440,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
         std::list<struct DamageDoneCreature*> m_damageDoneCreature;
-
-        Spell * m_currentSpell;
 
         float GetHostility(uint64 guid) const;
         float GetHostilityDistance(uint64 guid) const { return GetHostility( guid )/(3.5f * getLevel()+1.0f); }

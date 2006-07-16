@@ -173,9 +173,14 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     if (m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat)
     {
         for (int i = 0; i < 3; i++)
+        {
             if (m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL ||
                 m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE)
+            {
                 m_meleeSpell = true;
+                break;
+            }
+        }
     }
 }
 
@@ -571,27 +576,27 @@ void Spell::cast()
         
         bool canreflect = false;
         for(int j=0;j<3;j++)
-      {
-         switch(m_spellInfo->EffectImplicitTargetA[j])
-         {
-            case TARGET_S_E:
-            case TARGET_AE_E:
-            case TARGET_AE_E_INSTANT:
-            case TARGET_AC_E:
-            case TARGET_INFRONT:
-            case TARGET_DUELVSPLAYER:
-            case TARGET_AE_E_CHANNEL:
-            //case TARGET_AE_SELECTED:
-            canreflect = true;
-            break;
+        {
+            switch(m_spellInfo->EffectImplicitTargetA[j])
+            {
+                case TARGET_S_E:
+                case TARGET_AE_E:
+                case TARGET_AE_E_INSTANT:
+                case TARGET_AC_E:
+                case TARGET_INFRONT:
+                case TARGET_DUELVSPLAYER:
+                case TARGET_AE_E_CHANNEL:
+                //case TARGET_AE_SELECTED:
+                    canreflect = true;
+                    break;
 
-            default:
-               canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
-         }
-         if(canreflect)
-            continue;
-         else break;
-      }
+                default:
+                    canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+            }
+            if(canreflect)
+                continue;
+            else break;
+        }
         if(canreflect)
         {
             for(iunit= UniqueTargets.begin();iunit != UniqueTargets.end();iunit++)
@@ -716,7 +721,6 @@ void Spell::finish()
     if(!m_caster) return;
 
     m_spellState = SPELL_STATE_FINISHED;
-    m_caster->m_meleeSpell = false;
     m_caster->m_canMove = true;
 
     WorldPacket data;

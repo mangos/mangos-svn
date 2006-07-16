@@ -646,7 +646,7 @@ void Player::Update( uint32 p_time )
 
     if (isAttacking())
     {
-        if (isAttackReady())
+        if (isAttackReady() && m_currentSpell == 0 )
         {
             Unit *pVictim = getVictim();
             //if(!pVictim) {
@@ -8524,9 +8524,7 @@ void Player::UpdatePVPFlag(time_t currTime)
 
         SetPvP(false);
 
-        WorldPacket data;
-        sChatHandler.FillSystemMessageData(&data, GetSession(), "PvP toggled off.");
-        GetSession()->SendPacket(&data);
+        sChatHandler.SendSysMessage(GetSession(), "PvP toggled off.");
     }
     else
     {
