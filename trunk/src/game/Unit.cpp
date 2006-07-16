@@ -51,7 +51,7 @@ Unit::Unit() : Object()
     m_form = 0;
     m_deathState = ALIVE;
     m_currentSpell = NULL;
-    m_meleeSpell = false;
+    m_currentMeleeSpell = NULL;
     m_addDmgOnce = 0;
     m_TotemSlot1 = m_TotemSlot2 = m_TotemSlot3 = m_TotemSlot4  = 0;
     //m_Aura = NULL;
@@ -981,10 +981,12 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         return;
     }
 
-    if (m_currentSpell)
+    if(m_currentSpell)
+        return;
+
+    if (m_currentMeleeSpell)
     {
-        if (m_currentSpell->IsMeleeSpell())
-            m_currentSpell->cast();
+        m_currentMeleeSpell->cast();
         return;
     }
 
@@ -1104,6 +1106,16 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
+    if(m_currentMeleeSpell != NULL)
+    {
+        m_currentMeleeSpell ->update(time);
+        if(m_currentMeleeSpell ->getState() == SPELL_STATE_FINISHED)
+        {
+            delete m_currentMeleeSpell ;
+            m_currentMeleeSpell  = NULL;
+        }
+    }
+
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
     {
         if ((*i).second)
@@ -1207,14 +1219,26 @@ Unit* Unit::SelectHostilTarget()
 void Unit::castSpell( Spell * pSpell )
 {
 
-    if(m_currentSpell)
+    if(pSpell->IsMeleeSpell())
     {
-        m_currentSpell->cancel();
-        delete m_currentSpell;
-        m_currentSpell = NULL;
+        if(m_currentMeleeSpell)
+        {
+            m_currentMeleeSpell->cancel();
+            delete m_currentMeleeSpell;
+            m_currentMeleeSpell = NULL;
+        }
+        m_currentMeleeSpell = pSpell;
     }
-
-    m_currentSpell = pSpell;
+    else
+    {
+        if(m_currentSpell)
+        {
+            m_currentSpell->cancel();
+            delete m_currentSpell;
+            m_currentSpell = NULL;
+        }
+        m_currentSpell = pSpell;
+    }
 }
 
 void Unit::InterruptSpell()
@@ -1943,10 +1967,16 @@ FactionTemplateEntry* Unit::getFactionTemplateEntry() const
     FactionTemplateEntry* entry = sFactionTemplateStore.LookupEntry(getFaction());
     if(!entry) 
     {
-        if(GetTypeId() == TYPEID_PLAYER)
-            sLog.outError("Player %s have invalide faction (fuction template id) #%u", ((Player*)this)->GetName(), getFaction());
-        else
-            sLog.outError("Creature (template id: %u) have invalide faction (fuction template id) #%u", ((Creature*)this)->GetCreatureInfo()->Entry, getFaction());
+         static uint64 guid = 0; // prevent repeating spam same faction problem
+
+        if(GetGUID() != guid)
+        {
+            if(GetTypeId() == TYPEID_PLAYER)
+                sLog.outError("Player %s have invalide faction (fuction template id) #%u", ((Player*)this)->GetName(), getFaction());
+            else
+                sLog.outError("Creature (template id: %u) have invalide faction (fuction template id) #%u", ((Creature*)this)->GetCreatureInfo()->Entry, getFaction());
+            guid = GetGUID();
+        }
     }
     return entry;
 }

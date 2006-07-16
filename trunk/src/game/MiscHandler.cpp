@@ -342,10 +342,10 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 {
-    WorldPacket data;
 
     if ( (!GetPlayer()->isAlive()) || GetPlayer()->isInCombat() || GetPlayer()->isInDuel() )
     {
+        WorldPacket data;
         data.Initialize(SMSG_CAST_RESULT);
         data << uint32(0);
         data << uint8(2);
@@ -356,13 +356,11 @@ void WorldSession::HandleEnablePvP(WorldPacket& recvPacket)
 
     if( GetPlayer()->GetPvP() )
     {
-        sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
-        SendPacket(&data);
+        sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You will be unflagged for PvP combat after five minutes of non-PvP action in friendly territory.");
     }
     else
     {
-        sChatHandler.FillSystemMessageData(&data, GetPlayer()->GetSession(), "You are now flagged PvP combat and will remain so until toggled off.");
-        SendPacket(&data);
+        sChatHandler.SendSysMessage(GetPlayer()->GetSession(), "You are now flagged PvP combat and will remain so until toggled off.");
     }
     GetPlayer()->SetPVPCount(time(NULL));
 
