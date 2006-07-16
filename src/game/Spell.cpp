@@ -1156,10 +1156,7 @@ uint8 Spell::CanCast()
 
         return castResult;
     }
-    Unit *target = NULL;
-    target = m_targets.getUnitTarget();
-    SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
-    float range = GetMaxRange(srange);
+    Unit *target = m_targets.getUnitTarget();
     if(target)
     {
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
@@ -1213,11 +1210,6 @@ uint8 Spell::CanCast()
 
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
             castResult = CAST_FAIL_CANT_DO_WHILE_CONFUSED;
-
-        if(!m_caster->isInFront( target, range ) && m_caster->GetGUID() != target->GetGUID())
-            castResult = CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
-        if(m_caster->GetDistanceSq(target) > range * range && m_caster->GetTypeId() != TYPEID_PLAYER)
-            castResult = CAST_FAIL_OUT_OF_RANGE;            //0x56;
     }
 
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
@@ -1226,9 +1218,8 @@ uint8 Spell::CanCast()
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
 
-    if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destY != 0)
-        if(m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ) >= range * range)
-            castResult = CAST_FAIL_OUT_OF_RANGE;
+    if(castResult == 0)
+        castResult = CheckRange();
 
     if( castResult != 0 )
     {
@@ -1385,6 +1376,38 @@ uint8 Spell::CanCast()
     }
     return castResult;
 }
+
+uint8 Spell::CheckRange()
+{
+    SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
+    float max_range = GetMaxRange(srange);
+    float min_range = GetMinRange(srange);
+
+    Unit *target = m_targets.getUnitTarget();
+
+    if(target)
+    {
+        float dist = m_caster->GetDistanceSq(target);
+        if(dist > max_range * max_range)
+            return CAST_FAIL_OUT_OF_RANGE;            //0x56;
+        if(dist <= min_range * min_range)
+            return CAST_FAIL_TOO_CLOSE;
+        if(m_caster != target && !m_caster->isInFront( target, max_range))
+            return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
+    }
+    
+    if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destY != 0)
+    {
+        float dist = m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+        if(dist > max_range * max_range)
+            return CAST_FAIL_OUT_OF_RANGE;
+        if(dist <= min_range * min_range)
+            return CAST_FAIL_TOO_CLOSE;
+    }
+
+    return 0; // ok
+}
+
 
 uint8 Spell::CheckItems()
 {

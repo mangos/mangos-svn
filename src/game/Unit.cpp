@@ -1085,8 +1085,17 @@ void Unit::_UpdateSpells( uint32 time )
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
             {
-                m_currentSpell->setState(SPELL_STATE_PREPARING);
-                m_currentSpell->ReSetTimer();
+                if(m_currentSpell->CheckRange() == 0)
+                {
+                    m_currentSpell->setState(SPELL_STATE_PREPARING);
+                    m_currentSpell->ReSetTimer();
+                }
+                else
+                {
+                    m_currentSpell->cancel();
+                    delete m_currentSpell;
+                    m_currentSpell = NULL;
+                }
             }
         }
         else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)

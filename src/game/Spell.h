@@ -406,6 +406,7 @@ class Spell
         void TriggerSpell();
         uint8 CanCast();
         uint8 CheckItems();
+        uint8 CheckRange();
         uint32 CalculateDamage(uint8 i);
         void HandleTeleport(uint32 id, Unit* Target);
         void Delayed(int32 delaytime);  
