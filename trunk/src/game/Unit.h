@@ -493,6 +493,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<GameObject*> m_gameObj;
         HostilList m_hostilList;
         uint32 m_transform;
+        uint32 m_removedAuras;
 
         long m_AuraModifiers[TOTAL_AURAS];
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem

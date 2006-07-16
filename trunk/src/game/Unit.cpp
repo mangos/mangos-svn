@@ -741,7 +741,6 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
 {
-    uint16 pos;
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -753,15 +752,6 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         {
             *damage += (*i)->damage;
             break;
-        }
-    }
-
-    if(GetTypeId() == TYPEID_PLAYER)
-    {
-        for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-        {
-            pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-            ((Player*)this)->CastItemSpell(((Player*)this)->GetItemByPos(pos),pVictim);
         }
     }
 
@@ -1116,11 +1106,21 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
+	m_removedAuras = 0;
+    for (AuraMap::iterator i = m_Auras.begin(), next; i != m_Auras.end(); i = next)
     {
+        next = i;
+        next++;
         if ((*i).second)
         {
-            (*(i++)).second->Update( time );
+            (*i).second->Update( time );
+            // several auras can be deleted due to update
+            if (m_removedAuras)
+            {
+                if (m_Auras.empty()) break;
+                next = m_Auras.begin();
+                m_removedAuras = 0;
+            }
         }
     }
 
@@ -1522,6 +1522,7 @@ void Unit::RemoveAura(AuraMap::iterator &i)
     (*i).second->_RemoveAura();
     delete (*i).second;
     m_Auras.erase(i++);
+    m_removedAuras++; // internal count used by unit update
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
