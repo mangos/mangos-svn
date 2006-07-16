@@ -1046,6 +1046,12 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     if( msg == EQUIP_ERR_OK )
     {
         pl->StoreNewItem( dest, itemId, count, true);
+
+        // remove binding (let GM give it to another player)
+        Item* item = pl->GetItemByPos(dest);
+        if(item)
+            item->SetOwner(0);
+        
         PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
     }
     else
@@ -1101,6 +1107,12 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
         if( msg == EQUIP_ERR_OK )
         {
             pl->StoreNewItem( dest, itemId, 1, true);
+
+            // remove binding (let GM give it to another player)
+            Item* item = pl->GetItemByPos(dest);
+            if(item)
+                item->SetOwner(0);
+
             PSendSysMessage(LANG_ITEM_CREATED, itemId, 1);
         }
         else
