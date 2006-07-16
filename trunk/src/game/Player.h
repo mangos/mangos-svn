@@ -363,24 +363,24 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         void SetSheath( uint32 sheathed );
-        uint8 FindEquipSlot( uint32 type, uint32 slot, bool swap );
-        Item* CreateItem( uint32 item, uint32 count );
-        uint32 GetItemCount( uint32 item );
-        uint32 GetBankItemCount( uint32 item );
-        uint16 GetPosByGuid( uint64 guid );
-        Item* GetItemByPos( uint16 pos );
-        Item* GetItemByPos( uint8 bag, uint8 slot );
-        bool HasBankBagSlot( uint8 slot );
-        bool IsInventoryPos( uint16 pos );
-        bool IsEquipmentPos( uint16 pos );
-        bool IsBankPos( uint16 pos );
-        bool HasItemCount( uint32 item, uint32 count );
-        uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap );
-        uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
-        uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive = true );
-        uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap );
-        uint8 CanUseItem( Item *pItem, bool check_alive = true );
-        uint8 CanUseAmmo( uint32 item );
+        uint8 FindEquipSlot( uint32 type, uint32 slot, bool swap ) const;
+        Item* CreateItem( uint32 item, uint32 count ) const;
+        uint32 GetItemCount( uint32 item ) const;
+        uint32 GetBankItemCount( uint32 item ) const;
+        uint16 GetPosByGuid( uint64 guid ) const;
+        Item* GetItemByPos( uint16 pos ) const;
+        Item* GetItemByPos( uint8 bag, uint8 slot ) const;
+        bool HasBankBagSlot( uint8 slot ) const;
+        bool IsInventoryPos( uint16 pos ) const;
+        bool IsEquipmentPos( uint16 pos ) const;
+        bool IsBankPos( uint16 pos ) const;
+        bool HasItemCount( uint32 item, uint32 count ) const;
+        uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
+        uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
+        uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive = true ) const;
+        uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
+        uint8 CanUseItem( Item *pItem, bool check_alive = true ) const;
+        uint8 CanUseAmmo( uint32 item ) const;
         void StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         void StoreItem( uint16 pos, Item *pItem, bool update );
         void EquipItem( uint16 pos, Item *pItem, bool update );
@@ -522,7 +522,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<bidentry*>::iterator GetBidBegin() { return m_bids.begin();};
         std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
 
-        bool HasSpell(uint32 spell);
+        bool HasSpell(uint32 spell) const;
         void SendInitialSpells();
         void addSpell(uint16 spell_id,uint8 active,uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
@@ -681,7 +681,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
         uint16 GetSkillValue(uint32 skill) const;
-		bool HasSkill(uint32 skill) const;
+        bool HasSkill(uint32 skill) const;
 
         void SetDontMove(bool dontMove);
         bool GetDontMove() const { return m_dontMove; }
@@ -708,12 +708,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         void UpdateHonor();
         void CalculateHonor(Unit *pVictim);
-        uint32 CalculateHonorRank(float honor);
-        uint32 GetHonorRank();
-        int  CalculateTotalKills(Player *pVictim);
+        uint32 CalculateHonorRank(float honor) const;
+        uint32 GetHonorRank() const;
+        int  CalculateTotalKills(Player *pVictim) const;
         //Acessors of total honor points
         void SetTotalHonor(float total_honor_points) { m_total_honor_points = total_honor_points; };
-        float GetTotalHonor(void) { return m_total_honor_points; };
+        float GetTotalHonor(void) const { return m_total_honor_points; };
         //Acessors of righest rank
         uint32 GetHonorHighestRank() const { return m_highest_rank; }
         void SetHonorHighestRank(uint32 hr) { m_highest_rank = hr; }
