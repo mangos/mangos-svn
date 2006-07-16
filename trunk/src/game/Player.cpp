@@ -4845,61 +4845,49 @@ void Player::SetBindPoint(uint64 guid)
 
 void Player::SetSheath( uint32 sheathed )
 {
-    if (sheathed)
+    switch (sheathed)
     {
-        Item *item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-
-        if (!item)
-            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        
-        if (!item)
-            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-
-        if (!item)
-            return;
-
-        ItemPrototype *itemProto = item->GetProto();
-        uint32 itemSheathType = itemProto->Sheath;
-
-        if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-        {
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, item->GetGUIDLow());
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, itemSheathType);
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, itemProto->DisplayInfoID);
-        }
-        if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-        {
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, item->GetGUIDLow());
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, itemSheathType);
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, itemProto->DisplayInfoID);
-        }
-        if (GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-        {
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, item->GetGUIDLow());
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, itemSheathType);
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, itemProto->DisplayInfoID);
-        }
+        case 0:
+            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            {
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, item->GetGUIDLow());
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, item->GetProto()->Sheath);
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, item->GetProto()->DisplayInfoID);
+            }; break;
+        case 1:
+            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            {
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, item->GetGUIDLow());
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, item->GetProto()->Sheath);
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, item->GetProto()->DisplayInfoID);
+            }; break;
+        case 2:
+            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+            {
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, item->GetGUIDLow());
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, item->GetProto()->Sheath);
+                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, item->GetProto()->DisplayInfoID);
+            }; break;
+        default:;
     }
-    else
+
+    if (sheathed != 0 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 0))
     {
-        if (GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 0))
-        {
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, uint32(0));
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, uint32(0));
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, uint32(0));
-        }
-        if (GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1))
-        {
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, uint32(0));
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, uint32(0));
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, uint32(0));
-        }
-        if (GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2))
-        {
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, uint32(0));
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, uint32(0));
-            this->SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, uint32(0));
-        }
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, uint32(0));
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, uint32(0));
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, uint32(0));
+    }
+    if (sheathed != 1 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1))
+    {
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, uint32(0));
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, uint32(0));
+            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, uint32(0));
+    }
+    if (sheathed != 2 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2))
+    {
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, uint32(0));
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, uint32(0));
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, uint32(0));
     }
 }
 
