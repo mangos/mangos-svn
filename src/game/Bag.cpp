@@ -147,7 +147,7 @@ void Bag::DeleteFromDB()
     }
 }
 
-uint8 Bag::FindFreeBagSlot()
+uint8 Bag::FindFreeBagSlot() const
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
     for (uint8 i=0; i <ContainerSlots; i++)
@@ -186,7 +186,7 @@ void Bag::BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) co
 }
 
 // If the bag is empty returns true
-bool Bag::IsEmpty()
+bool Bag::IsEmpty() const
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
     for(uint32 i=0; i < ContainerSlots; i++)
@@ -195,7 +195,7 @@ bool Bag::IsEmpty()
     return true;
 }
 
-uint8 Bag::GetSlotByItemGUID(uint64 guid)
+uint8 Bag::GetSlotByItemGUID(uint64 guid) const
 {
     uint32 ContainerSlots=GetProto()->ContainerSlots;
 
@@ -213,7 +213,7 @@ uint8 Bag::GetSlotByItemGUID(uint64 guid)
 // - Return values: 0 - item not added
 //                  1 - item added to a free slot (and perhaps to a stack)
 //                  2 - item added to a stack (item should be deleted)
-Item* Bag::GetItemByPos( uint8 slot )
+Item* Bag::GetItemByPos( uint8 slot ) const
 {
     ItemPrototype *pBagProto = GetProto();
     if( pBagProto )

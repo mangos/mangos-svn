@@ -1722,7 +1722,7 @@ void Player::DestroyForPlayer( Player *target ) const
     }
 }
 
-bool Player::HasSpell(uint32 spell)
+bool Player::HasSpell(uint32 spell) const
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
 
@@ -2947,13 +2947,13 @@ void Player::UpdateHonor(void)
     SetUInt32Value(PLAYER_FIELD_PVP_MEDALS/*???*/, (GetHonorHighestRank() != 0 ? ((GetHonorHighestRank() << 24) + 0x040F0001) : 0) );
 }
 
-uint32 Player::GetHonorRank()
+uint32 Player::GetHonorRank() const
 {
     return CalculateHonorRank(m_total_honor_points);
 }
 
 //What is Player's rank... private, scout...
-uint32 Player::CalculateHonorRank(float honor_points)
+uint32 Player::CalculateHonorRank(float honor_points) const
 {
     int rank = 0;
 
@@ -2966,7 +2966,7 @@ uint32 Player::CalculateHonorRank(float honor_points)
 }
 
 //How many times Player kill pVictim...
-int Player::CalculateTotalKills(Player *pVictim)
+int Player::CalculateTotalKills(Player *pVictim) const
 {
     int total_kills = 0;
 
@@ -4891,7 +4891,7 @@ void Player::SetSheath( uint32 sheathed )
     }
 }
 
-uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap )
+uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
 {
     uint8 slots[4];
     slots[0] = NULL_SLOT;
@@ -5007,7 +5007,7 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap )
     return slots[0];
 }
 
-Item* Player::CreateItem( uint32 item, uint32 count )
+Item* Player::CreateItem( uint32 item, uint32 count ) const
 {
     ItemPrototype *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
@@ -5017,7 +5017,7 @@ Item* Player::CreateItem( uint32 item, uint32 count )
             count = pProto->Stackable;
         if ( count < 1 )
             count = 1;
-        if( pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, this) )
+        if( pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, const_cast<Player*>(this)) )
         {
             pItem->SetCount( count );
             return pItem;
@@ -5026,7 +5026,7 @@ Item* Player::CreateItem( uint32 item, uint32 count )
     return NULL;
 }
 
-uint32 Player::GetItemCount( uint32 item )
+uint32 Player::GetItemCount( uint32 item ) const
 {
     Item *pItem;
     uint32 count = 0;
@@ -5055,7 +5055,7 @@ uint32 Player::GetItemCount( uint32 item )
     return count;
 }
 
-uint32 Player::GetBankItemCount( uint32 item )
+uint32 Player::GetBankItemCount( uint32 item ) const
 {
     Item *pItem;
     uint32 count = 0;
@@ -5084,7 +5084,7 @@ uint32 Player::GetBankItemCount( uint32 item )
     return count;
 }
 
-uint16 Player::GetPosByGuid( uint64 guid )
+uint16 Player::GetPosByGuid( uint64 guid ) const
 {
     Item *pItem;
     uint16 pos;
@@ -5138,14 +5138,14 @@ uint16 Player::GetPosByGuid( uint64 guid )
     return 0;
 }
 
-Item* Player::GetItemByPos( uint16 pos )
+Item* Player::GetItemByPos( uint16 pos ) const
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
     return GetItemByPos( bag, slot );
 }
 
-Item* Player::GetItemByPos( uint8 bag, uint8 slot )
+Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= EQUIPMENT_SLOT_START && slot < BANK_SLOT_BAG_END ) )
         return m_items[slot];
@@ -5158,7 +5158,7 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot )
     return NULL;
 }
 
-bool Player::HasBankBagSlot( uint8 slot )
+bool Player::HasBankBagSlot( uint8 slot ) const
 {
     uint32 maxslot = ((GetUInt32Value(PLAYER_BYTES_2) & 0x70000) >> 16) + BANK_SLOT_BAG_START;
     if( slot < maxslot )
@@ -5166,7 +5166,7 @@ bool Player::HasBankBagSlot( uint8 slot )
     return false;
 }
 
-bool Player::IsInventoryPos( uint16 pos )
+bool Player::IsInventoryPos( uint16 pos ) const
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
@@ -5179,7 +5179,7 @@ bool Player::IsInventoryPos( uint16 pos )
     return false;
 }
 
-bool Player::IsEquipmentPos( uint16 pos )
+bool Player::IsEquipmentPos( uint16 pos ) const
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
@@ -5190,7 +5190,7 @@ bool Player::IsEquipmentPos( uint16 pos )
     return false;
 }
 
-bool Player::IsBankPos( uint16 pos )
+bool Player::IsBankPos( uint16 pos ) const
 {
     uint8 bag = pos >> 8;
     uint8 slot = pos & 255;
@@ -5203,7 +5203,7 @@ bool Player::IsBankPos( uint16 pos )
     return false;
 }
 
-bool Player::HasItemCount( uint32 item, uint32 count )
+bool Player::HasItemCount( uint32 item, uint32 count ) const
 {
     Item *pItem;
     uint32 tempcount = 0;
@@ -5243,7 +5243,7 @@ bool Player::HasItemCount( uint32 item, uint32 count )
     return false;
 }
 
-uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap )
+uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const
 {
     dest = 0;
     Item *pItem = CreateItem( item, count );
@@ -5259,7 +5259,7 @@ uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item,
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
-uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap )
+uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const
 {
     dest = 0;
     if( pItem )
@@ -5566,7 +5566,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
     return 0;
 }
 
-uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive )
+uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool check_alive ) const
 {
     dest = 0;
     if( pItem )
@@ -5622,7 +5622,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
-uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap )
+uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const 
 {
     dest = 0;
     if( pItem )
@@ -5947,7 +5947,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
     return 0;
 }
 
-uint8 Player::CanUseItem( Item *pItem, bool check_alive )
+uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
 {
     if( pItem )
     {
@@ -5990,7 +5990,7 @@ uint8 Player::CanUseItem( Item *pItem, bool check_alive )
     return EQUIP_ERR_ITEM_NOT_FOUND;
 }
 
-uint8 Player::CanUseAmmo( uint32 item )
+uint8 Player::CanUseAmmo( uint32 item ) const
 {
     sLog.outDebug( "STORAGE: CanUseAmmo item = %u", item);
     if( !isAlive() )

@@ -38,11 +38,11 @@ class Bag : public Item
         void StoreItem( uint8 slot, Item *pItem, bool update );
         void RemoveItem( uint8 slot, bool update );
 
-        Item* GetItemByPos( uint8 slot );
+        Item* GetItemByPos( uint8 slot ) const;
 
-        uint8 FindFreeBagSlot();
-        uint8 GetSlotByItemGUID(uint64 guid);
-        bool IsEmpty();
+        uint8 FindFreeBagSlot() const;
+        uint8 GetSlotByItemGUID(uint64 guid) const;
+        bool IsEmpty() const;
 
         // DB operations
         void SaveToDB();

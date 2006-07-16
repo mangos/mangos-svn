@@ -413,7 +413,7 @@ break;
 return itemIcon;
 }
 */
-bool Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
+bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
 {
     Object::_Create( guidlow, HIGHGUID_ITEM );
 
@@ -438,7 +438,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player *owner)
     SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4, m_itemProto->Spells[4].SpellCharges);
     SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
     SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay);
-    m_owner = owner;
+    SetOwner(owner);
     return true;
 }
 
