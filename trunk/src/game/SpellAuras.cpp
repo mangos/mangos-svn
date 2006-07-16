@@ -322,33 +322,6 @@ void Aura::Update(uint32 diff)
             m_target->SendMonsterMove(x,y,z,false,true,time);
         }
     }
-    if(m_isPeriodic && m_duration > 0)
-    {
-        if(m_periodicTimer > 0)
-        {
-            if(m_periodicTimer <= diff)
-                m_periodicTimer = 0;
-            else
-                m_periodicTimer -= diff;
-        }
-        if(m_periodicTimer == 0)
-        {
-            // update before applying (aura can be removed in TriggerSpell or PeriodicAuraLog calls)
-            m_periodicTimer = m_modifier.periodictime;
-
-            if(m_isTrigger)
-            {
-                TriggerSpell();
-            }
-            else
-            {
-                if(!m_caster)
-                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
-                else
-                    m_caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
-            }
-        }
-    }
    
     if(m_areaAura && m_caster && m_target)
     {
@@ -383,6 +356,34 @@ void Aura::Update(uint32 diff)
                         }
                     }
                 }
+            }
+        }
+    }
+
+    if(m_isPeriodic && m_duration > 0)
+    {
+        if(m_periodicTimer > 0)
+        {
+            if(m_periodicTimer <= diff)
+                m_periodicTimer = 0;
+            else
+                m_periodicTimer -= diff;
+        }
+        if(m_periodicTimer == 0)
+        {
+            // update before applying (aura can be removed in TriggerSpell or PeriodicAuraLog calls)
+            m_periodicTimer = m_modifier.periodictime;
+
+            if(m_isTrigger)
+            {
+                TriggerSpell();
+            }
+            else
+            {
+                if(!m_caster)
+                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+                else
+                    m_caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
             }
         }
     }
