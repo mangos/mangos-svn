@@ -2083,15 +2083,7 @@ void Spell::EffectResurrect(uint32 i)
     uint32 health = m_spellInfo->EffectBasePoints[i];
     uint32 mana = m_spellInfo->EffectMiscValue[i];
 
-    Corpse* corpse = pTarget->GetCorpse();
-    if(!corpse)
-        return;
-
-    float c_x = corpse->GetFloatValue( CORPSE_FIELD_POS_X );
-    float c_y = corpse->GetFloatValue( CORPSE_FIELD_POS_Y );
-    float c_z = corpse->GetFloatValue( CORPSE_FIELD_POS_Z );
-    
-    pTarget->setResurrect(m_caster->GetGUID(), c_x, c_y, c_z, health, mana);
+    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
