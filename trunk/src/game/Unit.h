@@ -43,7 +43,7 @@
 #define VICTIMSTATE_UNKNOWN1        0
 #define VICTIMSTATE_NORMAL          1
 #define VICTIMSTATE_DODGE           2
-#define VICTIMSTATE_PARRIE          3
+#define VICTIMSTATE_PARRY           3
 #define VICTIMSTATE_UNKNOWN2        4
 #define VICTIMSTATE_BLOCKS          5
 #define VICTIMSTATE_EVADES          6
@@ -57,7 +57,7 @@
 #define HITINFO_HITSTRANGESOUND1    0x20                    //maybe linked to critical hit
 #define HITINFO_HITSTRANGESOUND2    0x40                    //maybe linked to critical hit
 #define HITINFO_CRITICALHIT         0x80
-#define HITINFO_GLANSING            0x4000
+#define HITINFO_GLANCING            0x4000
 #define HITINFO_CRUSHING            0x8000
 #define HITINFO_NOACTION            0x10000
 #define HITINFO_SWINGNOHITSOUND     0x80000
@@ -233,6 +233,11 @@ struct Hostil
 
 typedef std::list<Hostil> HostilList;
 
+enum MeleeHitOutcome {
+    MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY, MELEE_HIT_GLANCING,
+    MELEE_HIT_CRIT, MELEE_HIT_NORMAL
+};
+
 class MANGOS_DLL_SPEC Unit : public Object
 {
     public:
@@ -300,7 +305,6 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
-
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist);
         uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 *resist);
@@ -314,7 +318,10 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 GetUnitBlockValue() const { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
         uint32 GetUnitStrength()   const { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
-        uint32 GetUnitMeleeSkill() const { return (uint32)m_uint32Values[ UNIT_FIELD_ATTACK_POWER ]; }
+        uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
+        uint16 GetDefenceSkillValue() const;
+        uint16 GetWeaponSkillValue() const;
+        MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim) const;
 
         bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
         bool isTrainer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }
