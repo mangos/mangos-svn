@@ -1198,13 +1198,22 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-	m_removedAuras = 0;
+    // TODO: Find a better way to prevent crash when multiple auras are removed.
+    m_removedAuras = 0;
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+        if ((*i).second)
+            (*i).second->SetUpdated(false);
+
     for (AuraMap::iterator i = m_Auras.begin(), next; i != m_Auras.end(); i = next)
     {
         next = i;
         next++;
         if ((*i).second)
         {
+            // prevent double update
+            if ((*i).second->IsUpdated())
+                continue;
+            (*i).second->SetUpdated(true);
             (*i).second->Update( time );
             // several auras can be deleted due to update
             if (m_removedAuras)
