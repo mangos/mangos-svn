@@ -70,6 +70,8 @@ class BattleGround
 
         bool HasFreeSlots(uint32 Team);
 
+        void HandleAreaTrigger(Player* Source, uint32 Trigger);
+
         /* Player lists */
         inline std::list<Player*>::iterator GetPlayersBegin() { return m_Players.begin(); };
         inline std::list<Player*>::iterator GetPlayersEnd() { return m_Players.end(); };

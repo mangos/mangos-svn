@@ -19,6 +19,28 @@
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
+#include "Creature.h"
+#include "Chat.h"
+#include "Spell.h"
+
+
+// TODO: Make a warper for all this type of opcodes, and add this one to it
+// becouse this is a relative universal opcode
+void SendAreaTriggerMessage(Player* Target, const char* Text, ...)
+{
+    va_list ap;                     //
+    char str [1024];                //1024 seems to be rather large
+    va_start(ap, Text);
+    vsnprintf(str,1024,Text, ap );
+    va_end(ap);
+
+    WorldPacket data;
+    data.Initialize(SMSG_AREA_TRIGGER_MESSAGE);
+    data << uint32(0);
+    data << str;
+    data << uint8(0);
+    Target->GetSession()->SendPacket(&data);
+}
 
 BattleGround::BattleGround()
 {
@@ -221,4 +243,66 @@ bool BattleGround::HasFreeSlots(uint32 Team)
         return true;
     else
         return false;
+}
+
+//
+void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
+{
+    //I thank a neutral friend for the SpellID's
+    uint32 SpellId = 0;
+    switch(Trigger)
+    {
+        case 3686:      // Speed
+        case 3687:      // Speed (Horde)    
+            SpellId=23451;
+            break;
+        case 3706:      // Restoration
+        case 3708:      // Restoration (Horde)
+            SpellId=23493;
+            break;
+        case 3707:      // Berserking
+        case 3709:      // Berserking (Horde)
+            SpellId=23505;
+            break;
+        case 3669:
+        case 3671:
+        {
+            // Exit BG*/
+            if(Source->InBattleGround())
+            {
+                BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(Source->GetBattleGroundId());
+                if(TempBattlegrounds)
+                    TempBattlegrounds->RemovePlayer(Source,true,true);
+                return;
+            }
+            RemovePlayer(Source, true, true);
+            return;
+        }break;
+        case 3646:
+        case 3647:
+        {
+            // Flag capture points
+            return;
+        }break;
+        default:
+        {
+            sLog.outString("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
+            SendAreaTriggerMessage(Source, "Warning: Unhandled AreaTrigger in Battleground: %d", Trigger);
+        }break;
+    }
+
+    if(SpellId)
+    {
+        SpellEntry *Entry = sSpellStore.LookupEntry(SpellId);
+        
+        if(!Entry)
+          sLog.outError("WARNING: Tried to add unknown spell id %d to plr.", SpellId);
+        
+        Spell *spell = new Spell(Source, Entry, true,0);
+        WPAssert(spell);
+        SpellCastTargets targets;
+        targets.setUnitTarget(Source);
+        targets.m_targetMask = TARGET_FLAG_UNIT;
+        spell->prepare(&targets);
+    }
 }

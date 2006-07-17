@@ -42,7 +42,7 @@ uint8 AddonHandler::_removeAddon(std::string* Name)
     sLog.outDebug("Remove addon:%s",(*Name).c_str());
     for(std::list<AddOns*>::iterator i = m_Addon_data.begin();i!=m_Addon_data.end();++i)
     {
-        //if name exists remove it and return 0
+        //if name exists remove it and return 1
         if ((*i)->Name == *Name)
         {
             //remove addon, from mem and from sql

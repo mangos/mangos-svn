@@ -474,7 +474,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
         absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage,&resist);
     }
 
-    WorldPacket data;
+    //WorldPacket data;
     if(m_modSpellHitChance+100 < urand(0,100))
     {
         SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_MISS, pVictim->GetGUID(), 1, spellInfo->School, 0, 0,0,1,0);
