@@ -169,6 +169,8 @@ class Aura
         ProcTriggerDamage* GetProcDamage() { return m_procdamage; }
         void TriggerSpell();
         void SendCoolDownEvent();
+        bool IsUpdated() { return m_updated; }
+        void SetUpdated(bool val) { m_updated = val; }
 
     private:
 
@@ -192,6 +194,7 @@ class Aura
 
         uint32 m_periodicTimer;
         uint32 m_PeriodicEventId;
+        bool m_updated;
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply);
