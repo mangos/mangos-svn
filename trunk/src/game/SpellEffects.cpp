@@ -412,9 +412,7 @@ void Spell::EffectPresistentAA(uint32 i)
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
-   Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
-    unitTarget->AddAura(Aur);
-    //dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
+    dynObj->PeriodicTriggerDamage(damage, m_spellInfo->EffectAmplitude[i], GetRadius(sSpellRadius.LookupEntry(m_spellInfo->EffectRadiusIndex[i])));
     //m_dynObjToDel.push_back(dynObj);
     m_caster->AddDynObject(dynObj);
     dynObj->AddToWorld();
@@ -2074,15 +2072,27 @@ void Spell::EffectResurrect(uint32 i)
         return;
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
+
     if(unitTarget->isAlive())
         return;
     if(!unitTarget->IsInWorld())
         return;
 
+    Player* pTarget = ((Player*)unitTarget);
+
     uint32 health = m_spellInfo->EffectBasePoints[i];
     uint32 mana = m_spellInfo->EffectMiscValue[i];
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), health, mana);
-    SendResurrectRequest((Player*)unitTarget);
+
+    Corpse* corpse = pTarget->GetCorpse();
+    if(!corpse)
+        return;
+
+    float c_x = corpse->GetFloatValue( CORPSE_FIELD_POS_X );
+    float c_y = corpse->GetFloatValue( CORPSE_FIELD_POS_Y );
+    float c_z = corpse->GetFloatValue( CORPSE_FIELD_POS_Z );
+    
+    pTarget->setResurrect(m_caster->GetGUID(), c_x, c_y, c_z, health, mana);
+    SendResurrectRequest(pTarget);
 }
 
 void Spell::EffectMomentMove(uint32 i)

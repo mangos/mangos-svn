@@ -130,17 +130,19 @@ void DynamicObject::DealWithSpellDamage(Unit &caster)
     mod.m_amount = m_PeriodicDamage;
 
     UnitList.clear();
+    FactionTemplateResolver my_faction = m_caster->getFactionTemplateEntry();
     MapManager::Instance().GetMap(m_mapId)->GetUnitList(GetPositionX(), GetPositionY(),UnitList);
     for(std::list<Unit*>::iterator iter=UnitList.begin();iter!=UnitList.end();iter++)
     {
-        if((*iter) )
+        if((*iter))
         {
             if((*iter)->isAlive()&& !(*iter)->isInFlight() )
             {
-                if((*iter)->getFaction() != caster.getFaction() && GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius )
-                {
+                FactionTemplateResolver its_faction = (*iter)->getFactionTemplateEntry();
+                if(my_faction.IsFriendlyTo(its_faction))
+                    continue;
+                if(GetDistanceSq(*iter) < m_PeriodicDamageRadius * m_PeriodicDamageRadius )
                     caster.PeriodicAuraLog((*iter),m_spell,&mod);
-                }
             }
         }
     }

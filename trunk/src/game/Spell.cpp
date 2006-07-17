@@ -196,31 +196,38 @@ void Spell::FillTargetMap()
         SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap,tmpItemMap,tmpGOMap);
         SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap,tmpItemMap,tmpGOMap);
 
-        if(!m_spellInfo->EffectImplicitTargetA[i] || m_spellInfo->EffectImplicitTargetB[i] )
+        if(!m_spellInfo->EffectImplicitTargetA[i] && !m_spellInfo->EffectImplicitTargetB[i] )
         {
-            // add where custom effects that need default target.
-                                                            // Apply Aura
-            if(m_spellInfo->Effect[i] == 27) tmpUnitMap.push_back(m_caster);
-                                                            // Learn Spell
-            else if(m_spellInfo->Effect[i] == 36) tmpUnitMap.push_back(m_targets.getUnitTarget());
-                                                            // Learn Skill
-            else if(m_spellInfo->Effect[i] == 44) tmpUnitMap.push_back(m_targets.getUnitTarget());
-                                                            // Execute Skill
-            else if(m_spellInfo->Effect[i] == 118) tmpUnitMap.push_back(m_caster);
-                                                            // DisEnchant
-            else if(m_spellInfo->Effect[i] == 99) tmpItemMap.push_back(itemTarget);
-                                                            // EnchantPem
-            else if(m_spellInfo->Effect[i] == 53) tmpItemMap.push_back(itemTarget);
-                                                            // EnchantTmp
-            else if(m_spellInfo->Effect[i] == 54) tmpItemMap.push_back(itemTarget);
-                                                            // EnchantHeldItem
-            else if(m_spellInfo->Effect[i] == 92) tmpItemMap.push_back(itemTarget);
-                                                            // FeedPet/LearnPetSpell
-            else if(m_spellInfo->Effect[i] == 101 || m_spellInfo->Effect[i] == 57)
-                SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
-                                                            // SealAura
-            else if(m_spellInfo->Effect[i] == 35 && m_spellInfo->Attributes == 0x9050000)
-                SetTargetMap(i,TARGET_AF_P,tmpUnitMap,tmpItemMap,tmpGOMap);
+            // add here custom effects that need default target.
+            switch(m_spellInfo->Effect[i])
+            {
+                //case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+                case SPELL_EFFECT_RESURRECT:
+                case SPELL_EFFECT_LEARN_SPELL:
+                case SPELL_EFFECT_SKILL_STEP:
+                case SPELL_EFFECT_RESURRECT_NEW:
+                    tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    break;
+                case SPELL_EFFECT_SKILL:
+                    tmpUnitMap.push_back(m_caster);
+                    break;
+                case SPELL_EFFECT_DISENCHANT:
+                case SPELL_EFFECT_ENCHANT_ITEM:
+                case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
+                case SPELL_EFFECT_ENCHANT_HELD_ITEM:
+                    tmpItemMap.push_back(itemTarget);
+                    break;
+                case SPELL_EFFECT_LEARN_PET_SPELL:
+                case SPELL_EFFECT_FEED_PET:
+                    SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
+                    break;
+                case SPELL_EFFECT_APPLY_AREA_AURA: 
+                    if(m_spellInfo->Attributes == 0x9050000) // SealAura
+                        SetTargetMap(i,TARGET_AF_P,tmpUnitMap,tmpItemMap,tmpGOMap);
+                    break;
+                default:
+                    break;
+            }
         }
 
         m_targetUnits[i] = tmpUnitMap;
@@ -262,15 +269,19 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AE_E_INSTANT:
         {
-            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
-            cell.data.Part.reserved = ALL_DISTRICT;
-            cell.SetNoCreate();
+            // targets the ground, not the units in the area
+            if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
+            {
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i,PUSH_DEST_CENTER);
-            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-            CellLock<GridReadGuard> cell_lock(cell, p);
-            cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i,PUSH_DEST_CENTER);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+            }
         }break;
         case TARGET_AC_P:
         {
@@ -337,15 +348,19 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_AE_E_CHANNEL:
         {
-            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
-            cell.data.Part.reserved = ALL_DISTRICT;
-            cell.SetNoCreate();
+            // targets the ground, not the units in the area
+            if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
+            {
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i,PUSH_DEST_CENTER);
-            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
-            CellLock<GridReadGuard> cell_lock(cell, p);
-            cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i,PUSH_DEST_CENTER);
+                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId())); 
+            }
         }break;
         case TARGET_MINION:
         {
@@ -577,6 +592,10 @@ void Spell::cast()
                 HandleEffects(NULL,(*iitem),NULL,j);
             for(igo= m_targetGOs[j].begin();igo != m_targetGOs[j].end();igo++)
                 HandleEffects(NULL,NULL,(*igo),j);
+
+            // persistent area auras target only the ground
+            if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                HandleEffects(NULL,NULL,NULL, j);
         }
 
         if(needspelllog) SendLogExecute();

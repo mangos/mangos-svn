@@ -538,6 +538,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_resurrectHealth = health;
             m_resurrectMana = mana;
         };
+        Corpse* GetCorpse() const { return this->m_pCorpse; }
 
         int getCinematic()
         {

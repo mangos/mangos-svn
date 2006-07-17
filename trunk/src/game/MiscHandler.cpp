@@ -789,7 +789,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     recv_data >> guid;
     recv_data >> status;
 
-    if(status != 0)
+    if(status == 0)
         return;
 
     if(GetPlayer()->m_resurrectGUID == 0)
@@ -797,23 +797,33 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->ResurrectPlayer();
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_HEALTH) > GetPlayer()->m_resurrectHealth)
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH) > GetPlayer()->m_resurrectHealth)
         GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->m_resurrectHealth );
+    else
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH) );
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER1) > GetPlayer()->m_resurrectMana)
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER1) > GetPlayer()->m_resurrectMana)
         GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->m_resurrectMana );
+    else
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER1) );
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER2) > GetPlayer()->m_resurrectMana)
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER2) > GetPlayer()->m_resurrectMana)
         GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER2, GetPlayer()->m_resurrectMana );
+    else
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER2, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER2) );
+
 
     GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER3, 0 );
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER4) > GetPlayer()->m_resurrectMana)
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER4) > GetPlayer()->m_resurrectMana)
         GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER4, GetPlayer()->m_resurrectMana );
+    else
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER4, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER4) );
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_POWER5) > GetPlayer()->m_resurrectMana)
+    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER5) > GetPlayer()->m_resurrectMana)
         GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER5, GetPlayer()->m_resurrectMana );
-
+    else
+        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER5, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER5) );
 
     GetPlayer()->SpawnCorpseBones();
 
