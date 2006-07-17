@@ -629,8 +629,7 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 
     data << (uint8)FriendResult << (uint64)FriendGUID;
 
-    uint32 guid;
-    guid=GetPlayer()->GetGUIDLow();
+    uint32 guid = GetPlayer()->GetGUIDLow();
 
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'",(uint32)guid, GUID_LOPART(FriendGUID));
 
@@ -878,13 +877,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             //_player->BuildHeartBeatMsg(&data);
             //_player->SendMessageToSet(&data, true);
         }
-        else if (GetPlayer()->m_bgInBattleGround)
+        else if (GetPlayer()->m_bgInBattleGround)                           //if player is playing in a BattleGround
         {
+            //! AreaTrigger BattleGround
 
-            sLog.outDebug("AREATRIGGER BATTLEGROUND:%u", Trigger_ID);
-
-            //handle areatrigger in BG
-            //make a function to handle this type of triggers in the BG code.
+            //Get current BattleGround the player is in
+            BattleGround* TempBattlegrounds = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
+            //Run the areatrigger code
+            TempBattlegrounds->HandleAreaTrigger(GetPlayer(),Trigger_ID);
         }
         else
         {
@@ -995,6 +995,7 @@ void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
 void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
 {
     // TODO send groups need data
+    sLog.outDebug( "WORLD: MSG_LOOKING_FOR_GROUP" );
 }
 
 void WorldSession::HandleMooveRootAck(WorldPacket& recv_data)
@@ -1042,16 +1043,40 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
-    // set run speed ? received data is more
-    sLog.outDebug("CMSG_FORCE_RUN_SPEED_CHANGE_ACK");
-    recv_data.hexlike();
+    //check for speed stuff
+    uint64 GUID;
+    uint32 Flags,unk1, unk0;
+    uint32 d_time;
+    float X,Y,Z,O;
+    float NewSpeed;
+
+    recv_data >> GUID;
+    recv_data >> unk0 >> Flags;
+    if (Flags & 0x2000)                                         //double check, old value and new calue
+    {
+        uint32 unk2, unk3, unk4, unk5;
+        float OldSpeed;
+
+        recv_data >> d_time;
+        recv_data >> X >> Y >> Z >> O;
+        recv_data >> unk2 >> unk3;                              //no idea, maybe unk2 = flags2
+        recv_data >> unk4 >> unk5;                              //no idea
+        recv_data >> unk1 >> OldSpeed >> NewSpeed;
+    }
+    else                                                        //single check
+    {
+        recv_data >> d_time;
+        recv_data >> X >> Y >> Z >> O;
+        recv_data >> unk1 >> NewSpeed;
+    }
+    if (GetPlayer()->GetSpeed(MOVE_RUN) != NewSpeed)
+        sLog.outError("SpeedChange player is NOT correct, its set to: %f", NewSpeed);    //now kick player???
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)
 {
     // set swim speed ? received data is more
     sLog.outDebug("CMSG_FORCE_SWIM_SPEED_CHANGE_ACK");
-    recv_data.hexlike();
 
 }
 
