@@ -1374,8 +1374,8 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
 
     float    chanceToHit = 100.0f;
-    int32    attackerSkill = m_caster->GetUnitMeleeSkill();
-    int32    victimSkill = unitTarget->GetUnitMeleeSkill();
+    int32    attackerSkill = m_caster->GetWeaponSkillValue();
+    int32    victimSkill = unitTarget->GetDefenceSkillValue();
     if (m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
         if (attackerSkill <= victimSkill - 24)

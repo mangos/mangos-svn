@@ -741,11 +741,17 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
 {
+    MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim);
+    if (outcome == MELEE_HIT_MISS) {
+        *hitInfo |= HITINFO_MISS;
+        return;
+    }
+
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    *damage = int32(*damage*(m_modDamagePCT+100)/100);
+    *damage = (CalculateDamage (false) * (m_modDamagePCT+100))/100;
     for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
     {
         if(cinfo && cinfo->type == (*i)->creaturetype)
@@ -758,25 +764,29 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
         ((Player*)this)->UpdateSkillWeapon();
 
-    if (GetUnitCriticalChance()/100 * 512 >= urand(0, 512))
+    switch (outcome)
     {
-        *hitInfo = 0xEA;
+    case MELEE_HIT_CRIT:
+        //*hitInfo = 0xEA;
+        *hitInfo  = HITINFO_HITSTRANGESOUND1 | HITINFO_HITSTRANGESOUND2 | HITINFO_CRITICALHIT
+                    | HITINFO_NORMALSWING2 | 0x8; // 0xEA
         *damage *= 2;
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
-    }
-    else if ((pVictim->GetUnitParryChance()/100) * 512 >= urand(0, 512))
-    {
+        break;
+
+    case MELEE_HIT_PARRY:
         *damage = 0;
         *victimState = 2;
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateDefense();
+    	pVictim->m_attackTimer = 0; // parry sets attack timer to 0
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-    }
-    else if ((pVictim->GetUnitDodgeChance()/100) * 512 >= urand(0, 512))
-    {
+        break;
+
+    case MELEE_HIT_DODGE:
         *damage = 0;
         *victimState = 3;
 
@@ -784,13 +794,15 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             ((Player*)pVictim)->UpdateDefense();
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-    }
-    else if ((pVictim->GetUnitBlockChance()/100) * 512 >= urand(0, 512))
-    {
-        *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 10));
+        break;
 
-        if (*blocked_amount < *damage) *damage = *damage - *blocked_amount;
-        else *damage = 0;
+    case MELEE_HIT_BLOCK:
+        *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 20));
+
+        if (*blocked_amount < *damage)
+                *damage -= *blocked_amount;
+        else
+                *damage = 0;
 
         if (pVictim->GetUnitBlockValue())
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
@@ -801,6 +813,18 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateDefense();
+        break;
+
+    case MELEE_HIT_GLANCING:
+        // 30% reduction at 15 skill diff, no reduction at 5 skill diff
+        int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue() - 5) * 3;
+        if (reducePerc < 70)
+                reducePerc = 70;
+        *damage = *damage * reducePerc / 100;
+        *hitInfo |= HITINFO_GLANCING;
+        break;
+
+    // TODO: handle crushing blow
     }
 
     for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
@@ -809,9 +833,10 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     }
     uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
 
-    if( (*damage-absorb-*resist) <= 0 )
+    if (*damage <= absorb + *resist)
     {
-        *hitInfo = 0x00010020;
+        //*hitInfo = 0x00010020;
+        *hitInfo = HITINFO_NOACTION | HITINFO_HITSTRANGESOUND1;
         *absorbDamage = absorb;
         *damageType = 0;
         return;
@@ -925,45 +950,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 {
     if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
         return;
-    WorldPacket data;
-    uint32   hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;
-    uint32   damageType = NORMAL_DAMAGE;
-    uint32   blocked_amount = 0;
-    uint32   victimState = VICTIMSTATE_NORMAL;
-    int32    attackerSkill = 0;//GetUnitMeleeSkill();
-    int32    victimSkill = 0;//pVictim->GetUnitMeleeSkill();
-    float    chanceToHit = 100.0f;
-    uint32   AbsorbDamage = 0;
-    uint32   resist=0;
-
-    if(GetTypeId() == TYPEID_PLAYER)
-    {
-        uint32 weaponskill = 0;
-        Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        if (!tmpitem)
-            tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-        if (tmpitem)
-            weaponskill = tmpitem->GetSkill();
-        else weaponskill = SKILL_UNARMED;
-        attackerSkill = ((Player*)this)->GetSkillValue(weaponskill);
-    }
-    else attackerSkill = (getLevel()-1)*5;
-
-    if(pVictim->GetTypeId() == TYPEID_PLAYER)
-    {
-        uint32 weaponskill = 0;
-        Item *tmpitem = ((Player*)pVictim)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        if (!tmpitem)
-            tmpitem = ((Player*)pVictim)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-        if (tmpitem)
-            weaponskill = tmpitem->GetSkill();
-        else weaponskill = SKILL_UNARMED;
-        victimSkill = ((Player*)pVictim)->GetSkillValue(weaponskill);
-    }
-    else victimSkill = (pVictim->getLevel()-1)*5;
-
-    //uint32    victimAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
-    //uint32    attackerAgility = pVictim->GetUInt32Value(UNIT_FIELD_AGILITY);
 
     if (!pVictim->isAlive())
     {
@@ -980,47 +966,120 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         return;
     }
 
-    //if(isStunned()) return;
+    WorldPacket data;
+    uint32   hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;
+    uint32   damageType = NORMAL_DAMAGE;
+    uint32   victimState = VICTIMSTATE_NORMAL;
 
-    if (attackerSkill <= victimSkill - 24)
-        chanceToHit = 0;
-    else if (attackerSkill <= victimSkill)
-        chanceToHit = 100.0f - (victimSkill - attackerSkill) * (100.0f / 30.0f);
-    if(GetTypeId() != TYPEID_PLAYER && chanceToHit ==0)
-        chanceToHit = 15;
+    uint32   damage = 0;
+    uint32   blocked_dmg = 0;
+    uint32   absorbed_dmg = 0;
+    uint32   resisted_dmg = 0;
 
-    uint32 damage = CalculateDamage (false);
+    DoAttackDamage (pVictim, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg);
 
-    if((chanceToHit+m_modHitChance)/100 * 512 >= urand(0, 512) )
-    {
-        if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
-        {
-            if (attackerSkill < victimSkill - 20)
-                damage = (damage * 30) / 100;
-            else if (attackerSkill < victimSkill - 10)
-                damage = (damage * 60) / 100;
-        }
-    }
-    else damage = 0;
-
-    if (damage)
-    {
-        DoAttackDamage(pVictim, &damage, &blocked_amount, &damageType, &hitInfo, &victimState,&AbsorbDamage,&resist);
-        //do animation
-        SendAttackStateUpdate(hitInfo, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,resist,victimState,blocked_amount);
-        DealDamage(pVictim, damage <= (AbsorbDamage+resist) ? 0 : (damage-AbsorbDamage-resist), 0, true);
-    }
-    else
+    if (hitInfo & HITINFO_MISS)
         //send miss
-        SendAttackStateUpdate(hitInfo|HITINFO_MISS, pVictim->GetGUID(), 1, damageType, damage, AbsorbDamage,resist,victimState,blocked_amount);
+        SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+    else
+    {
+        //do animation
+        SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+        if (damage >= (absorbed_dmg + resisted_dmg))
+            damage -= (absorbed_dmg + resisted_dmg);
+        else
+            damage = 0;
+        DealDamage (pVictim, damage, 0, true);
+    }
 
     if (GetTypeId() == TYPEID_PLAYER)
-        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg,abs is %u,resist is %u .",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage,AbsorbDamage,resist);
+        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg, absorbed %u, resisted %u.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, resisted_dmg);
     else
-        DEBUG_LOG("AttackerStateUpdate: (NPC) %u %X attacked %u %X for %u dmg,abs is %uresist is %u .",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage,AbsorbDamage,resist);
+        DEBUG_LOG("AttackerStateUpdate: (NPC)    %u %X attacked %u %X for %u dmg, absorbed %u, resisted %u.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, resisted_dmg);
 }
+
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
+{
+    int32 skillDiff =  GetWeaponSkillValue() - pVictim->GetDefenceSkillValue();
+    // bonus from skills is 0.04% at lvl 60, ASSUME bonus 0.4% at lvl 0 and interpolate
+    int32    skillBonus = skillDiff * (getLevel() >= 60 ? 4 : (400 - 6*(int32)getLevel())/10);
+    int32    sum = 0, tmp = 0;
+    int32    roll = urand (0, 10000);
+
+    DEBUG_LOG ("RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
+    DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, +hit %d, dodge %u, parry %u, block %u, crit %u",
+        roll, m_modHitChance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
+	    (uint32)(pVictim->GetUnitBlockChance()*100), (uint32)(GetUnitCriticalChance()*100));
+
+    // FIXME: dual wield has 24% base chance to miss instead of 5%, also
+    //        dual wield is hard-limited to min. 19% miss rate
+    // base miss rate is 5% and can't get higher than 60%
+    tmp = 500 - skillBonus - m_modHitChance*100;
+    if (roll < (sum += (tmp >= 6000 ? 6000 : tmp)))
+        { DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS"); return MELEE_HIT_MISS; }
+
+    // always crit against a sitting target
+    if (   (pVictim->GetTypeId() == TYPEID_PLAYER)
+        && (((Player*)pVictim)->getStandState() & (PLAYER_STATE_SLEEP | PLAYER_STATE_SIT
+                                                   | PLAYER_STATE_SIT_CHAIR
+                                                   | PLAYER_STATE_SIT_LOW_CHAIR
+                                                   | PLAYER_STATE_SIT_MEDIUM_CHAIR
+                                                   | PLAYER_STATE_SIT_HIGH_CHAIR)))
+        { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); return MELEE_HIT_CRIT; }
+
+    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
+    if (tmp > 0 && roll < (sum += tmp))
+        { DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); return MELEE_HIT_DODGE; }
+
+    // check if attack comes from behind (ASSUME behind is +/-45 degrees from the back)
+    bool    fromBehind = !pVictim->HasInArc(3*M_PI/2,this);
+    int32   modCrit = 0;
+
+    if (fromBehind)
+    {
+        // ASSUME +10% crit from behind
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind.");
+        modCrit += 1000;
+    } else {
+        // cannot parry or block attacks from behind
+       tmp = (int32)(pVictim->GetUnitParryChance()*100);
+        if (   (tmp > 0)                        // check if unit _can_ parry
+            && ((tmp -= skillBonus) > 0)
+            && (roll < (sum += tmp)))
+            { DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum); return MELEE_HIT_PARRY; }
+
+        tmp = (int32)(pVictim->GetUnitBlockChance()*100);
+        if (   (tmp > 0)                        // check if unit _can_ block
+            && ((tmp -= skillBonus) > 0)
+             && (roll < (sum += tmp)))
+            { DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum); return MELEE_HIT_BLOCK; }
+    }
+
+    // flat 40% chance to score a glancing blow if you're 3 or more levels
+    // below mob level or your weapon skill is too low
+    if (   (GetTypeId() == TYPEID_PLAYER)
+        && (pVictim->GetTypeId() != TYPEID_PLAYER)
+        && ((getLevel() + 3 <= pVictim->getLevel()) || (skillDiff <= -15))
+        && (roll < (sum += 4000)))
+        { DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum); return MELEE_HIT_GLANCING; }
+
+    // FIXME: +skill and +defense has no effect on crit chance in PvP combat
+    tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
+    if (tmp > 0 && roll < (sum += tmp))
+        { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum); return MELEE_HIT_CRIT; }
+
+    // TODO: crushing blows from mobs
+    //       current data: crushing blows do 150% normal damage
+    //                     possible if mob.level >= player.level + 3
+    //                     also possible if mob.weaponskill >= player.defense + 15
+    //                     15% min. chance at 3 levels difference
+
+    DEBUG_LOG ("RollMeleeOutcomeAgainst: NORMAL");
+    return MELEE_HIT_NORMAL;
+}
+
 
 uint32 Unit::CalculateDamage(bool ranged)
 {
@@ -1064,6 +1123,30 @@ void Unit::SendAttackStop(uint64 victimGuid)
     Creature *pVictim = ObjectAccessor::Instance().GetCreature(*this, victimGuid);
     if( pVictim != NULL )
         pVictim->AI().AttackStop(this);
+}
+
+uint16 Unit::GetDefenceSkillValue() const
+{
+    if(GetTypeId() == TYPEID_PLAYER)
+        return ((Player*)this)->GetSkillValue (SKILL_DEFENSE);
+    else
+        return GetUnitMeleeSkill();
+}
+
+uint16 Unit::GetWeaponSkillValue() const
+{
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        uint32 skill = 0;
+        Item *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if(!item)
+            Item *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+        skill = item ? item->GetSkill() : SKILL_UNARMED;
+        return ((Player*)this)->GetSkillValue (skill);
+    }
+    else
+        return GetUnitMeleeSkill();
 }
 
 void Unit::_UpdateSpells( uint32 time )
