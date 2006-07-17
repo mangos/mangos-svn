@@ -116,8 +116,12 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             sChatHandler.FillMessageData(&data, this, type, LANG_UNIVERSAL, NULL, 0, msg.c_str() );
-            SendPacket(&data);
-            sWorld.SendGlobalMessage(&data, this);
+
+            //please test this, its important that this is correct. I leave the previouse code becouse of this.
+            GetPlayer()->SendMessageToSet( &data, true );
+            //SendPacket(&data);
+            //sWorld.SendGlobalMessage(&data, this);
+            
         } break;
 
         case CHAT_MSG_WHISPER:
