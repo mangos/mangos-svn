@@ -1377,11 +1377,14 @@ uint8 Spell::CanCast()
                     if( my_faction.IsFriendlyTo(its_faction) ) 
                         continue;
 
-                    float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
-                    if((*itr)->GetTypeId() != TYPEID_PLAYER && (*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
+                    if((*itr)->GetTypeId() != TYPEID_PLAYER)
                     {
-                        castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
-                        break;
+                        float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
+                        if((*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
+                        {
+                            castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
+                            break;
+                        }
                     }
                 }
 
