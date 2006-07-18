@@ -693,6 +693,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
+        uint32 GetReputation(uint32 faction_id) const;
         bool SetStanding(uint32 faction, int standing);
         bool ModifyFactionReputation(FactionEntry* factionEntry, int32 standing);
         void CalculateReputation(Unit *pVictim);
