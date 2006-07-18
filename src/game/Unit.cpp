@@ -458,7 +458,9 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
                 critchance += (*i)->chance;
             }
         }
-        if(critchance + (GetUInt32Value(UNIT_FIELD_IQ) - 100)/100 >= urand(0,100))
+        critchance += (int32)(GetUInt32Value(UNIT_FIELD_IQ)/100-1);
+        critchance = critchance > 0 ? critchance :0;
+        if(critchance >= urand(0,100))
         {
             damage = uint32(damage*1.5);
             crit = 1;
@@ -520,7 +522,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
                 critchance += (*i)->chance;
             }
         }
-        if(critchance + (GetUInt32Value(UNIT_FIELD_IQ) - 100)/100 >= urand(0,100))
+        critchance += (int32)(GetUInt32Value(UNIT_FIELD_IQ)/100-1);
+        critchance = critchance > 0 ? critchance :0;
+        if(critchance >= urand(0,100))
         {
             pdamage = uint32(pdamage*1.5);
             crit = 1;
@@ -781,7 +785,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER)
             ((Player*)pVictim)->UpdateDefense();
-    	pVictim->m_attackTimer = 0; // parry sets attack timer to 0
+        pVictim->m_attackTimer = 0; // parry sets attack timer to 0
 
         pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
         break;
@@ -852,8 +856,8 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         if(procdamage)
         {
             bool nocharges = procdamage->procCharges == 0 ? true : false;
-            if(procdamage->procFlags & 0x402 && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges) && *victimState == 1)
+            if((procdamage->procFlags & 40) && procdamage->procChance > rand_chance()
+                && (procdamage->procCharges > 0 || nocharges))
             {
                 pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
                 if(!nocharges)
@@ -875,7 +879,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         {
             bool nocharges = procdamage->procCharges == 0 ? true : false;
             if(procdamage->procFlags == 1 && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges)  && *victimState == 1)
+                && (procdamage->procCharges > 0 || nocharges))
             {
                 SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
                 if(!nocharges)
@@ -883,13 +887,17 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             }
         }
     }
-    // proc trigger aura
+    // proc trigger aura, Fix Me about procflag & what case.
     for (AuraMap::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
     {
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
-            if(procspell->procFlags & 0x2 && procspell->procChance > rand_chance() )
+            bool nocharges = procspell->procCharges == 0 ? true : false;
+            if((procspell->procFlags & 40)  && procspell->procChance > rand_chance()
+                && (procspell->procCharges > 0 || nocharges))
             {
+                if(!nocharges)
+                    procspell->procCharges -= 1;
                 SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
 
                 if(!spellInfo)
@@ -911,8 +919,12 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     {
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
-            if(procspell->procFlags & 0x1 && procspell->procChance > rand_chance() )
+            bool nocharges = procspell->procCharges == 0 ? true : false;
+            if((procspell->procFlags & 20) && procspell->procChance > rand_chance()
+                && (procspell->procCharges > 0 || nocharges))
             {
+                if(!nocharges)
+                    procspell->procCharges -= 1;
                 SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
 
                 if(!spellInfo)
@@ -1011,7 +1023,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
     DEBUG_LOG ("RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
     DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, +hit %d, dodge %u, parry %u, block %u, crit %u",
         roll, m_modHitChance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
-	    (uint32)(pVictim->GetUnitBlockChance()*100), (uint32)(GetUnitCriticalChance()*100));
+        (uint32)(pVictim->GetUnitBlockChance()*100), (uint32)(GetUnitCriticalChance()*100));
 
     // FIXME: dual wield has 24% base chance to miss instead of 5%, also
     //        dual wield is hard-limited to min. 19% miss rate

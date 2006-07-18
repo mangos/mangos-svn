@@ -229,7 +229,7 @@ AggressorAI::IsVisible(Unit *pl) const
         seevaluse = 5  + i_creature.getLevel() * 5 + i_creature.m_detectStealth - pl->m_stealthvalue - (uint32)sqrt(dist/100) - 50 * notfront;
         if(seevaluse<0)
             seestealth = false;
-        else if(seevaluse>int32(urand(0,100)))
+        else if(seevaluse>=int32(urand(0,30)))
             seestealth = true;
       else seestealth = false;
     }
