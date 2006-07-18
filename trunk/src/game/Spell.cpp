@@ -222,7 +222,7 @@ void Spell::FillTargetMap()
                     SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA: 
-                    if(m_spellInfo->Attributes == 0x9050000) // SealAura
+                    if(m_spellInfo->Attributes == 0x9050000) // AreaAura
                         SetTargetMap(i,TARGET_AF_P,tmpUnitMap,tmpItemMap,tmpGOMap);
                     break;
                 default:
@@ -1377,7 +1377,8 @@ uint8 Spell::CanCast()
                     if( my_faction.IsFriendlyTo(its_faction) ) 
                         continue;
 
-                    if((*itr)->GetTypeId() != TYPEID_PLAYER && (*itr)->GetDistanceSq(m_caster) < ((Creature*)(*itr))->GetAttackDistance(m_caster))
+                    float attackdis = ((Creature*)(*itr))->GetAttackDistance(m_caster);
+                    if((*itr)->GetTypeId() != TYPEID_PLAYER && (*itr)->GetDistanceSq(m_caster) < attackdis*attackdis )
                     {
                         castResult = CAST_FAIL_TOO_CLOSE_TO_ENEMY;
                         break;
