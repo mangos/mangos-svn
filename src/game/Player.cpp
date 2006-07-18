@@ -241,7 +241,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
-    SetUInt32Value(UNIT_FIELD_FLAGS , 0x08 );
+    SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
 
     SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
                                                             //-1 is default value
@@ -1941,7 +1941,7 @@ void Player::BuildPlayerRepop()
     StopMirrorTimer(1);
     StopMirrorTimer(2);
 
-    SetUInt32Value(UNIT_FIELD_FLAGS, 0x08);
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
     SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
     SetUInt32Value(UNIT_FIELD_AURA + 33, 0x5068 );          //!dono
 
@@ -2009,7 +2009,7 @@ void Player::KillPlayer()
     StopMirrorTimer(2);
 
     setDeathState(CORPSE);
-    SetFlag( UNIT_FIELD_FLAGS, 0x08 );
+    SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
     SetFlag( UNIT_DYNAMIC_FLAGS, 0x00 );
 
@@ -3172,11 +3172,8 @@ void Player::FlightComplete()
     clearUnitState(UNIT_STAT_IN_FLIGHT);
     SetMoney( m_dismountCost);
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-    RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
-
     /* Remove the "player locked" flag, to allow movement */
-    if (GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
-        RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
+    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT | UNIT_FLAG_DISABLE_MOVE );
 }
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
@@ -8180,13 +8177,12 @@ void Player::SaveToDB()
     {
         return;
         SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-        RemoveFlag( UNIT_FIELD_FLAGS ,0x000004 );
-        RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
+        RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
     }
 
     // Set player sit state to standing on save
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-    RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
     //remove restflag when save
     //this is becouse of the rename char stuff

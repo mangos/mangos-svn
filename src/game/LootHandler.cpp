@@ -186,8 +186,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             //this is probably wrong
             pCreature->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
             if(pCreature->GetCreatureInfo()->SkinLootId)
-                // set skinnable
-                pCreature->SetFlag(UNIT_FIELD_FLAGS, 0x4000000);
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         }
 
         i = remove_if(loot->items.begin(), loot->items.end(), LootItem::looted);

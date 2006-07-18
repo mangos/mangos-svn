@@ -233,7 +233,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             pVictim->setDeathState(JUST_DIED);
             ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
-            pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
+            pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
             return;
         }
         ((Creature*)pVictim)->AI().AttackStart(this);
@@ -259,7 +259,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
         DEBUG_LOG("DealDamageHealth1");
         pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
-        pVictim->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
+        pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
 
         // 10% durability loss on death
         // clean hostilList
@@ -286,7 +286,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
                 pet->setDeathState(JUST_DIED);
                 pet->SendAttackStop(attackerGuid);
                 pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
-                pet->RemoveFlag(UNIT_FIELD_FLAGS, 0x00080000);
+                pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
                 pet->addUnitState(UNIT_STAT_DIED);
                 for(i = m_hostilList.begin(); i != m_hostilList.end(); ++i)
                 {
@@ -1015,8 +1015,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
 {
     int32 skillDiff =  GetWeaponSkillValue() - pVictim->GetDefenceSkillValue();
-    // bonus from skills is 0.04% at lvl 60, ASSUME bonus 0.4% at lvl 0 and interpolate
-    int32    skillBonus = skillDiff * (getLevel() >= 60 ? 4 : (400 - 6*(int32)getLevel())/10);
+    // bonus from skills is 0.04%
+    int32    skillBonus = skillDiff * 4;
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -1029,7 +1029,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
     //        dual wield is hard-limited to min. 19% miss rate
     // base miss rate is 5% and can't get higher than 60%
     tmp = 500 - skillBonus - m_modHitChance*100;
-    if (roll < (sum += (tmp >= 6000 ? 6000 : tmp)))
+    if (tmp > 0 && roll < (sum += (tmp >= 6000 ? 6000 : tmp)))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS"); return MELEE_HIT_MISS; }
 
     // always crit against a sitting target
@@ -1045,8 +1045,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); return MELEE_HIT_DODGE; }
 
-    // check if attack comes from behind (ASSUME behind is +/-45 degrees from the back)
-    bool    fromBehind = !pVictim->HasInArc(3*M_PI/2,this);
+    // check if attack comes from behind
+    bool    fromBehind = !pVictim->HasInArc(M_PI,this);
     int32   modCrit = 0;
 
     if (fromBehind)
@@ -2108,7 +2108,7 @@ bool Unit::Attack(Unit *victim)
         AttackStop();
     }
     addUnitState(UNIT_STAT_ATTACKING);
-    SetFlag(UNIT_FIELD_FLAGS, 0x80000);
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
     return true;
@@ -2122,7 +2122,7 @@ bool Unit::AttackStop()
     m_attacking->_removeAttacker(this);
     m_attacking = NULL;
     clearUnitState(UNIT_STAT_ATTACKING);
-    RemoveFlag(UNIT_FIELD_FLAGS, 0x80000);
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
     return true;
 }
 

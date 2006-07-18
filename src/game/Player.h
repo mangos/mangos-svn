@@ -564,8 +564,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             pvpOn = b;
 
-            if(!b) SetFlag(UNIT_FIELD_FLAGS , 0x08);        //PvP OFF
-            else  RemoveFlag(UNIT_FIELD_FLAGS , 0x08);      //PvP ON
+            if(!b) SetFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);        //PvP OFF
+            else  RemoveFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);      //PvP ON
 
             m_pvp_counting = false;
         };
