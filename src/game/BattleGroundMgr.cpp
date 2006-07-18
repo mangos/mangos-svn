@@ -200,6 +200,6 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 teamId, uint32 bgId)
     float O = GetBattleGround(bgId)->GetTeamStartLocO(teamId);
 
     sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
-    pl->SendNewWorld(mapid, x, y, z, O);
+    pl->TeleportTo(mapid, x, y, z, O);
     pl->SendInitWorldStates(mapid);
 }

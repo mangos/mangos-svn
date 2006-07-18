@@ -1641,7 +1641,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
         }
     }
 
-    ((Player*)Target)->SendNewWorld(TC->mapId,TC->x,TC->y,TC->z,0.0f);
+    ((Player*)Target)->TeleportTo(TC->mapId,TC->x,TC->y,TC->z,0.0f);
 }
 
 void Spell::Delayed(int32 delaytime)

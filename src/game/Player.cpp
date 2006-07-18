@@ -842,28 +842,41 @@ void Player::BuildEnumData( WorldPacket * p_data )
 
 }
 
-void Player::SendNewWorld(uint32 mapid, float x, float y, float z, float orientation)
+void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation)
 {
     AttackStop();
     RemoveAllAttackers();
 
-    MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
-    WorldPacket data;
-    data.Initialize(SMSG_TRANSFER_PENDING);
-    data << uint32(mapid);
-    GetSession()->SendPacket(&data);
+    if(this->GetMapId() == mapid)
+    {
+        // near teleport
+        WorldPacket data;
+        BuildTeleportAckMsg(&data, x, y, z, orientation);
+        GetSession()->SendPacket(&data);
+        SetPosition( x, y, z, orientation );
+        BuildHeartBeatMsg(&data);
+        SendMessageToSet(&data, true);
+    }
+    else
+    {
+        MapManager::Instance().GetMap(GetMapId())->Remove(this, false);
+        WorldPacket data;
+        data.Initialize(SMSG_TRANSFER_PENDING);
+        data << uint32(mapid);
+        GetSession()->SendPacket(&data);
 
-    data.Initialize(SMSG_NEW_WORLD);
-    data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
-    GetSession()->SendPacket( &data );
+        data.Initialize(SMSG_NEW_WORLD);
+        data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
+        GetSession()->SendPacket( &data );
 
-    SetMapId(mapid);
-    Relocate(x,y,z,orientation);
-    SetPosition(x,y,z,orientation);
-    SetDontMove(true);
-    //SaveToDB();
+        SetMapId(mapid);
+        Relocate(x,y,z,orientation);
+        SetPosition(x,y,z,orientation);
+        SetDontMove(true);
+        //SaveToDB();
 
-    MapManager::Instance().GetMap(mapid)->Add(this);
+        MapManager::Instance().GetMap(mapid)->Add(this);
+    }
 }
 
 void Player::AddToWorld()
@@ -2145,27 +2158,7 @@ void Player::RepopAtGraveyard()
         // stop countdown until repop
         m_deathTimer = 0;
 
-        // we should be able to make 2 kinds of teleport after death
-        // near if in the same mapid and far if in different mapid
-        WorldPacket data;
-
-        if(ClosestGrave->MapId == GetMapId())
-        {
-            // teleport near
-
-            BuildTeleportAckMsg(&data, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
-            GetSession()->SendPacket(&data);
-
-            SetPosition( ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
-            BuildHeartBeatMsg(&data);
-            SendMessageToSet(&data, true);
-        }
-        else
-        {
-            // teleport far
-            SendNewWorld(ClosestGrave->MapId, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
-        }
-
+        TeleportTo(ClosestGrave->MapId, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
         delete ClosestGrave;
     }
 }
