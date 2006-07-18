@@ -1002,6 +1002,12 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         else
             damage = 0;
         DealDamage (pVictim, damage, 0, true);
+		
+        if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive()) 
+        { 
+            for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+                ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i),pVictim);
+        }
     }
 
     if (GetTypeId() == TYPEID_PLAYER)

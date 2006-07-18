@@ -3170,8 +3170,6 @@ void Player::FlightComplete()
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 {
-    if(!isAlive()) return;
-
     if(slot >= INVENTORY_SLOT_BAG_END || !item) return;
 
     ItemPrototype *proto = item->GetProto();
@@ -3344,8 +3342,10 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         }
     }
 
+    _ApplyStatsMods();
+
     if(apply)
-        CastItemSpell(item,this);
+        CastItemEquipSpell(item);
     else
         for (int i = 0; i < 5; i++)
             if(proto->Spells[i].SpellId)
@@ -3359,10 +3359,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     }
 
     sLog.outDebug("_ApplyItemMods complete.");
-    _ApplyStatsMods();
 }
 
-void Player::CastItemSpell(Item *item,Unit* Target)
+void Player::CastItemEquipSpell(Item *item)
 {
     if(!item) return;
 
@@ -3376,6 +3375,7 @@ void Player::CastItemSpell(Item *item,Unit* Target)
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
+		if(proto->Spells[i].SpellTrigger != ON_EQUIP) continue;
 
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
@@ -3384,8 +3384,44 @@ void Player::CastItemSpell(Item *item,Unit* Target)
             continue;
         }
 
-        if(Target->GetGUID() == GetGUID() && !IsItemSpellToEquip(spellInfo)) continue;
-        else if(Target->GetGUID() != GetGUID() && IsItemSpellToEquip(spellInfo)) continue;
+        DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
+ 
+        spell = new Spell(this, spellInfo, true, 0);
+        WPAssert(spell);
+
+        SpellCastTargets targets;
+        targets.setUnitTarget( this );
+        spell->m_CastItem = item;
+        spell->prepare(&targets);
+    }
+}
+
+void Player::CastItemCombatSpell(Item *item,Unit* Target)
+{
+    if(!item) 
+        return;
+
+    ItemPrototype *proto = item->GetProto();
+    if(!proto) 
+        return;
+
+    if (!Target || Target == this ) 
+        return;
+
+    Spell *spell;
+    SpellEntry *spellInfo;
+
+    for (int i = 0; i < 5; i++)
+    {
+        if(!proto->Spells[i].SpellId ) continue;
+		if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
+
+        spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
+        if(!spellInfo)
+        {
+            DEBUG_LOG("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
+            continue;
+        }
 
         DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
 
@@ -3403,6 +3439,8 @@ void Player::CastItemSpell(Item *item,Unit* Target)
 // If not you can have unexpected beaviur. like item giving damage to player when equip.
 bool Player::IsItemSpellToEquip(SpellEntry *spellInfo)
 {
+    return (GetDuration(spellInfo) == -1); // infinite duration -> passive aura
+    /*
     for(int j = 0; j< 3; j++)
     {
         if(spellInfo->Effect[j] == 6)
@@ -3422,12 +3460,16 @@ bool Player::IsItemSpellToEquip(SpellEntry *spellInfo)
     }
 
     return true;
+    */
 }
 
 // only some item spell/auras effects can be executed when in combat.
 // If not you can have unexpected beaviur. like having stats always growing each attack.
 bool Player::IsItemSpellToCombat(SpellEntry *spellInfo)
 {
+    return (GetDuration(spellInfo) != -1); // infinite duration -> passive aura
+
+    /*
     for(int j = 0; j< 3; j++)
     {
         if(spellInfo->Effect[j] == 6)
@@ -3447,6 +3489,7 @@ bool Player::IsItemSpellToCombat(SpellEntry *spellInfo)
     }
 
     return false;
+    */
 }
 
 void Player::_RemoveAllItemMods()
@@ -6121,7 +6164,10 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
             SetUInt32Value(VisibleBase + 7, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + 18));
             SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
         }
-        _ApplyItemMods(pItem, slot, true);
+
+        if(isAlive())
+            _ApplyItemMods(pItem, slot, true);
+
         if( IsInWorld() && update )
         {
             pItem->AddToWorld();
@@ -8183,8 +8229,11 @@ void Player::SaveToDB()
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();
 
-    _RemoveAllItemMods();
-    _RemoveAllAuraMods();
+    if(isAlive())
+    {
+        _RemoveAllItemMods();
+        _RemoveAllAuraMods();
+    }
 
     bool inworld = IsInWorld();
     if (inworld)
@@ -8260,8 +8309,11 @@ void Player::SaveToDB()
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
-    _ApplyAllAuraMods();
-    _ApplyAllItemMods();
+    if(isAlive())
+    {
+        _ApplyAllAuraMods();
+        _ApplyAllItemMods();
+    }
 
     //_ApplyStatsMods(); //debug wkjhsadfjkhasdl;fh
 

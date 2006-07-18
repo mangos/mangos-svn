@@ -117,16 +117,16 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
-	Player* Target = GetPlayer();
+    Player* Target = GetPlayer();
     uint32 MapID = Target->GetMapId();
     Map* Map = MapManager::Instance().GetMap(MapID);
     float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
     sLog.outDebug("Current z:%f \tMap Z:%f", Target->GetPositionZ(),posz);
 
-	//Can not logout if...
+    //Can not logout if...
     if( (GetPlayer()->isInCombat()) ||        //...is in combat
-		(GetPlayer()->isInDuel()) ||          //...is in Duel
-		(Target->GetPositionZ() > posz + 1) ) //...need more judge and handle while jumping and falling
+        (GetPlayer()->isInDuel())   ||        //...is in Duel
+        (Target->GetPositionZ() > posz + 1) ) //...need more judge and handle while jumping and falling
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
@@ -768,8 +768,11 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     // spawnbones
     GetPlayer()->SpawnCorpseBones();
 
-    // set health
+    // set health, mana
+    GetPlayer()->ApplyStats(false);
     GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH,(uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
+    GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1,(uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER1)*0.50) );
+    GetPlayer()->ApplyStats(true);
 
     // update world right away
     MapManager::Instance().GetMap(GetPlayer()->GetMapId())->Add(GetPlayer());
@@ -1063,6 +1066,10 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
     recv_data >> unk0 >> Flags;
     if (Flags & 0x2000)                                         //double check, old value and new calue
     {
+        // Crash server. Wrong package structure used???
+        // Crash at "recv_data >> unk1 >> OldSpeed >> NewSpeed" and have recv_data._wpos = 60
+        return; 
+
         uint32 unk2, unk3, unk4, unk5;
         float OldSpeed;
 

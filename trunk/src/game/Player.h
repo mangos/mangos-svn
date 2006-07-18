@@ -342,18 +342,18 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDeathState(DeathState s)
         {
-            if(s == JUST_DIED && isAlive())
+            bool cur = isAlive();
+            Unit::setDeathState(s);
+
+            if(s == JUST_DIED && cur)
             {
                 _RemoveAllItemMods();
                 UnsummonPet(true);
             }
-            bool cur = isAlive();
-            Unit::setDeathState(s);
             if(isAlive() && !cur)
             {
                 _ApplyAllItemMods();
             }
-
         };
 
         void UnsummonPet(bool remove);
@@ -729,6 +729,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetDrunkValue(uint16 newDrunkValue);
         uint16 GetDrunkValue() const { return m_drunk; }
+        uint32 GetDeathTimer() const { return m_deathTimer; }
 
         void ApplyItemMods(Item *item,uint8 slot,bool apply)
         {
@@ -738,7 +739,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
 
-        void CastItemSpell(Item *item,Unit* Target);
+        void CastItemEquipSpell(Item *item);
+        void CastItemCombatSpell(Item *item,Unit* Target);
         bool IsItemSpellToEquip(SpellEntry *spellInfo);
         bool IsItemSpellToCombat(SpellEntry *spellInfo);
 
