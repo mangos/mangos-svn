@@ -33,7 +33,6 @@
 #include "UpdateData.h"
 #include "Channel.h"
 #include "Chat.h"
-#include "Chat.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
