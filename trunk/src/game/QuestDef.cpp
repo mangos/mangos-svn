@@ -23,7 +23,7 @@ Quest::Quest()
 {
     m_quest = new QuestInfo;
     m_reqitemscount = 0;
-    m_reqmobscount = 0;
+    m_reqmobs_or_GO_count = 0;
     m_rewchoiceitemscount = 0;
     m_rewitemscount = 0;
 }
@@ -41,7 +41,7 @@ void Quest::LoadQuest( QuestInfo *pQuestInfo )
     {
         m_quest = pQuestInfo;
         m_reqitemscount = 0;
-        m_reqmobscount = 0;
+        m_reqmobs_or_GO_count = 0;
         m_rewitemscount = 0;
         m_rewchoiceitemscount = 0;
 
@@ -49,8 +49,8 @@ void Quest::LoadQuest( QuestInfo *pQuestInfo )
         {
             if ( pQuestInfo->ReqItemId[i] )
                 m_reqitemscount++;
-            if ( pQuestInfo->ReqKillMobId[i] )
-                m_reqmobscount++;
+            if ( pQuestInfo->ReqKillMobOrGOId[i] )
+                m_reqmobs_or_GO_count++;
         }
 
         for (int i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)

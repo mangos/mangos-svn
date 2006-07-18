@@ -145,6 +145,8 @@ struct QuestInfo
     uint32 RequiredRaces;
     uint32 RequiredClass;
     uint32 RequiredTradeskill;
+    uint32 RequiredRepFaction;
+    uint32 RequiredRepValue;
     uint32 LimitTime;
     uint32 SpecialFlags;
     uint32 PrevQuestId;
@@ -160,8 +162,8 @@ struct QuestInfo
     char* ObjectiveText[4];
     uint32 ReqItemId[ QUEST_OBJECTIVES_COUNT ];
     uint32 ReqItemCount[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqKillMobId[ QUEST_OBJECTIVES_COUNT ];
-    uint32 ReqKillMobCount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 ReqKillMobOrGOId[ QUEST_OBJECTIVES_COUNT ];
+    uint32 ReqKillMobOrGOCount[ QUEST_OBJECTIVES_COUNT ];
     //uint32 ReqQuests[ QUEST_DEPLINK_COUNT ];
     uint32 RewChoiceItemId[ QUEST_REWARD_CHOICES_COUNT ];
     uint32 RewChoiceItemCount[ QUEST_REWARD_CHOICES_COUNT ];
@@ -188,7 +190,7 @@ class Quest
         QuestInfo *GetQuestInfo() { return m_quest; }
 
         uint32 m_reqitemscount;
-        uint32 m_reqmobscount;
+        uint32 m_reqmobs_or_GO_count;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
 

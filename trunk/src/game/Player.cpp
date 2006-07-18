@@ -2729,6 +2729,21 @@ void Player::SetInitialFactions()
     }
 }
 
+uint32 Player::GetReputation(uint32 faction_id) const
+{
+    FactionEntry *factionEntry = sFactionStore.LookupEntry(faction_id);
+
+    std::list<struct Factions>::const_iterator itr;
+    for(itr = factions.begin(); itr != factions.end(); ++itr)
+    {
+        if(int32(itr->ReputationListID) == factionEntry->reputationListID)
+        {
+            return itr->Standing;
+        }
+    }
+    return 0;
+}
+
 bool Player::SetStanding(uint32 faction, int standing)
 {
     FactionTemplateEntry *factionTemplateEntry = sFactionTemplateStore.LookupEntry(faction);
@@ -6933,7 +6948,11 @@ bool Player::CanCompleteQuest( Quest *pQuest )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
-                    if( pQuest->GetQuestInfo()->ReqKillMobCount[i] != 0 && mQuestStatus[quest].m_mobcount[i] < pQuest->GetQuestInfo()->ReqKillMobCount[i] )
+                    // GO activate objectives
+                    if( pQuest->GetQuestInfo()->ReqKillMobOrGOId <= 0 )
+                        continue;
+
+                    if( pQuest->GetQuestInfo()->ReqKillMobOrGOCount[i] != 0 && mQuestStatus[quest].m_mobcount[i] < pQuest->GetQuestInfo()->ReqKillMobOrGOCount[i] )
                         return false;
                 }
             }
@@ -7267,7 +7286,13 @@ bool Player::SatisfyQuestRace( Quest *pQuest, bool msg )
 bool Player::SatisfyQuestReputation( Quest *pQuest, bool msg )
 {
     if( pQuest )
-        return true;
+    {
+        uint32 faction_id = pQuest->GetQuestInfo()->RequiredRepFaction;
+        if(!faction_id)
+            return true;
+
+        return GetReputation(faction_id) >= pQuest->GetQuestInfo()->RequiredRepValue;
+    }
     return false;
 }
 
@@ -7544,10 +7569,15 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
-                    reqkill = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqKillMobId[j];
+                    reqkill = mQuestStatus[quest].m_quest->GetQuestInfo()->ReqKillMobOrGOId[j];
+
+                    // GO activate qobjective or none
+                    if(reqkill <=0)
+                        continue;
+
                     if ( reqkill == entry )
                     {
-                        reqkillcount = pQuest->GetQuestInfo()->ReqKillMobCount[j];
+                        reqkillcount = pQuest->GetQuestInfo()->ReqKillMobOrGOCount[j];
                         curkillcount = mQuestStatus[quest].m_mobcount[j];
                         if ( curkillcount < reqkillcount )
                         {
@@ -7701,9 +7731,9 @@ void Player::SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature
         data.Initialize( SMSG_QUESTUPDATE_ADD_KILL );
         sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL" );
         data << pQuest->GetQuestInfo()->QuestId;
-        data << pQuest->GetQuestInfo()->ReqKillMobId[ creature_idx ];
+        data << pQuest->GetQuestInfo()->ReqKillMobOrGOId[ creature_idx ];
         data << old_count + add_count;
-        data << pQuest->GetQuestInfo()->ReqKillMobCount[ creature_idx ];
+        data << pQuest->GetQuestInfo()->ReqKillMobOrGOCount[ creature_idx ];
         data << guid;
         GetSession()->SendPacket(&data);
 
