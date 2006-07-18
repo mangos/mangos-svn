@@ -1184,7 +1184,7 @@ void Spell::EffectSummonPet(uint32 i)
         if(OldSummon->isDead())
         {
             uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
-            OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
+            OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * petlvl );
             OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlvl );
             OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);

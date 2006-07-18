@@ -144,8 +144,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         data.Initialize( SMSG_FORCE_MOVE_ROOT );
         data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
         SendPacket( &data );
-        //! DISABLE_ROTATE = 0x40000;
-        Target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+        Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     }
 
     data.Initialize( SMSG_LOGOUT_RESPONSE );
@@ -189,7 +188,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
     GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
     //! DISABLE_ROTATE
-    GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+    GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
     sLog.outDebug( "WORLD: sent SMSG_LOGOUT_CANCEL_ACK Message" );
 }

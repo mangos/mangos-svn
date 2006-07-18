@@ -156,7 +156,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     recv_data >> guid >> sourcenode >> destinationnode;
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,sourcenode ,destinationnode);
 
-    if( GetPlayer( )->GetUInt32Value( UNIT_FIELD_FLAGS ) & 0x4 )
+    if( GetPlayer( )->HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
         return;
 
     objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
@@ -194,8 +194,7 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     assert( pathnodes.Size() > 0 );
 
     GetPlayer( )->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID, MountId );
-    GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
-    GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
+    GetPlayer( )->SetFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
 
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
     data.Initialize( SMSG_MONSTER_MOVE );

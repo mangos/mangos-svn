@@ -1689,7 +1689,7 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 100);
     pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 100);
     pCreature->SetUInt32Value(UNIT_FIELD_LEVEL, 60);
-    pCreature->SetUInt32Value(UNIT_FIELD_FLAGS, 768);
+    pCreature->SetUInt32Value(UNIT_FIELD_FLAGS, 0x0300);
     pCreature->SetUInt32Value(UNIT_FIELD_AURA+0, 10848);
     pCreature->SetUInt32Value(UNIT_FIELD_AURALEVELS+0, 0xEEEEEE3C);
     pCreature->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+0, 0xEEEEEE00);

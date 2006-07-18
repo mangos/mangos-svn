@@ -1625,17 +1625,13 @@ void Aura::HandleAuraMounted(bool apply)
         if(displayId != 0)
         {
             m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , displayId);
-            //m_target->SetUInt32Value( UNIT_FIELD_FLAGS , 0x002000 );
-            //m_target->SetFlag( UNIT_FIELD_FLAGS ,0x000004 );
-            m_target->SetFlag( UNIT_FIELD_FLAGS, 0x002000 );
+            //m_target->SetFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_MOVEBLOCKED );
+            m_target->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
         }
     }else
     {
         m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-        m_target->RemoveFlag( UNIT_FIELD_FLAGS, 0x002000 );
-
-        if (m_target->GetUInt32Value(UNIT_FIELD_FLAGS) & 0x000004 )
-            m_target->RemoveFlag( UNIT_FIELD_FLAGS, 0x000004 );
+        m_target->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT  | UNIT_FLAG_DISABLE_MOVE );
     }
 }
 

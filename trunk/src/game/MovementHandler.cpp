@@ -73,7 +73,7 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
     }
 
     //handle fall and logout at the sametime
-    if (Target->GetFlag(UNIT_FIELD_FLAGS, 0x40000))
+    if (Target->GetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
         // Can't move

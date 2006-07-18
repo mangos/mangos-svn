@@ -123,7 +123,7 @@ void Creature::AIM_Update(const uint32 &diff)
             {
                 DEBUG_LOG("Respawning...");
 
-                RemoveFlag (UNIT_FIELD_FLAGS, 0x4000000);
+                RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
                 SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);

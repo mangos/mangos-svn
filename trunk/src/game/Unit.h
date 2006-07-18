@@ -150,6 +150,17 @@ enum UnitState
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
+
+// Value masks for UNIT_FIELD_FLAGS
+#define UNIT_FLAG_NONE           0x0000000
+#define UNIT_FLAG_DISABLE_MOVE   0x0000004
+#define UNIT_FLAG_NOT_IN_PVP     0x0000008
+#define UNIT_FLAG_RESTING        0x0000020
+#define UNIT_FLAG_MOUNT          0x0002000
+#define UNIT_FLAG_DISABLE_ROTATE 0x0040000
+#define UNIT_FLAG_ATTACKING      0x0080000
+#define UNIT_FLAG_SKINNABLE      0x4000000
+
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
