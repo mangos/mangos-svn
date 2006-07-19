@@ -134,6 +134,10 @@ class MANGOS_DLL_SPEC Item : public Object
         Player* GetOwner() const { return m_owner; }
         void SetOwner(Player *owner) { m_owner = owner; }
 
+        Player* GetBindedWith() const { return m_bindedWith; }
+        void SetBindingWith(Player* pl) { m_bindedWith = pl; }
+        bool IsBindedNotWith(Player const* pl) const { return  m_bindedWith != 0 && m_bindedWith != pl; }
+
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint32 auctioncheck);
         virtual void DeleteFromDB();
@@ -153,8 +157,9 @@ class MANGOS_DLL_SPEC Item : public Object
 
         uint32 GetSkill();
         uint32 GetSpell();
-    protected:
+    private:
         uint32 m_slot;
         Player *m_owner;
+        Player *m_bindedWith;
 };
 #endif
