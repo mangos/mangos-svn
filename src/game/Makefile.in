@@ -66,32 +66,31 @@ ARFLAGS = cru
 libgame_a_AR = $(AR) $(ARFLAGS)
 libgame_a_LIBADD =
 am_libgame_a_OBJECTS = AddonHandler.$(OBJEXT) AggressorAI.$(OBJEXT) \
-	AuctionHouse.$(OBJEXT) Bag.$(OBJEXT) \
-	BattleGround.$(OBJEXT) BattleGroundHandler.$(OBJEXT) \
-	BattleGroundMgr.$(OBJEXT) Channel.$(OBJEXT) \
-	ChannelHandler.$(OBJEXT) CharacterHandler.$(OBJEXT) \
-	Chat.$(OBJEXT) ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
+	AuctionHouse.$(OBJEXT) Bag.$(OBJEXT) BattleGround.$(OBJEXT) \
+	BattleGroundHandler.$(OBJEXT) BattleGroundMgr.$(OBJEXT) \
+	Channel.$(OBJEXT) ChannelHandler.$(OBJEXT) \
+	CharacterHandler.$(OBJEXT) Chat.$(OBJEXT) \
+	ChatHandler.$(OBJEXT) CombatHandler.$(OBJEXT) \
 	Container.$(OBJEXT) Corpse.$(OBJEXT) CreatureAI.$(OBJEXT) \
 	CreatureAIRegistry.$(OBJEXT) CreatureAISelector.$(OBJEXT) \
 	Creature.$(OBJEXT) debugcmds.$(OBJEXT) \
 	DestinationHolder.$(OBJEXT) DuelHandler.$(OBJEXT) \
-	DynamicObject.$(OBJEXT) \
-	FlightMaster.$(OBJEXT) GameObject.$(OBJEXT) \
-	GlobalEvents.$(OBJEXT) GossipDef.$(OBJEXT) \
-	GridNotifiers.$(OBJEXT) GridStates.$(OBJEXT) Group.$(OBJEXT) \
-	GroupHandler.$(OBJEXT) GuardAI.$(OBJEXT) Guild.$(OBJEXT) \
-	GuildHandler.$(OBJEXT) IdleMovementGenerator.$(OBJEXT) \
-	Item.$(OBJEXT) ItemHandler.$(OBJEXT) Level0.$(OBJEXT) \
-	Level1.$(OBJEXT) Level2.$(OBJEXT) Level3.$(OBJEXT) \
-	LootHandler.$(OBJEXT) LootMgr.$(OBJEXT) Mail.$(OBJEXT) \
-	Map.$(OBJEXT) MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
+	DynamicObject.$(OBJEXT) FlightMaster.$(OBJEXT) \
+	GameObject.$(OBJEXT) GlobalEvents.$(OBJEXT) \
+	GossipDef.$(OBJEXT) GridNotifiers.$(OBJEXT) \
+	GridStates.$(OBJEXT) Group.$(OBJEXT) GroupHandler.$(OBJEXT) \
+	GuardAI.$(OBJEXT) Guild.$(OBJEXT) GuildHandler.$(OBJEXT) \
+	IdleMovementGenerator.$(OBJEXT) Item.$(OBJEXT) \
+	ItemHandler.$(OBJEXT) Level0.$(OBJEXT) Level1.$(OBJEXT) \
+	Level2.$(OBJEXT) Level3.$(OBJEXT) LootHandler.$(OBJEXT) \
+	LootMgr.$(OBJEXT) Mail.$(OBJEXT) Map.$(OBJEXT) \
+	MapManager.$(OBJEXT) MiscHandler.$(OBJEXT) \
 	MotionMaster.$(OBJEXT) MovementGenerator.$(OBJEXT) \
-	MovementHandler.$(OBJEXT) \
-	NPCHandler.$(OBJEXT) NullCreatureAI.$(OBJEXT) \
-	ObjectAccessor.$(OBJEXT) Object.$(OBJEXT) \
-	ObjectGridLoader.$(OBJEXT) ObjectMgr.$(OBJEXT) \
-	Opcodes.$(OBJEXT) Pet.$(OBJEXT) PetAI.$(OBJEXT) \
-	PetHandler.$(OBJEXT) Player.$(OBJEXT) \
+	MovementHandler.$(OBJEXT) NPCHandler.$(OBJEXT) \
+	NullCreatureAI.$(OBJEXT) ObjectAccessor.$(OBJEXT) \
+	Object.$(OBJEXT) ObjectGridLoader.$(OBJEXT) \
+	ObjectMgr.$(OBJEXT) Opcodes.$(OBJEXT) Pet.$(OBJEXT) \
+	PetAI.$(OBJEXT) PetHandler.$(OBJEXT) Player.$(OBJEXT) \
 	QueryHandler.$(OBJEXT) QuestDef.$(OBJEXT) \
 	QuestHandler.$(OBJEXT) RandomMovementGenerator.$(OBJEXT) \
 	ReactorAI.$(OBJEXT) RedZoneDistrict.$(OBJEXT) \

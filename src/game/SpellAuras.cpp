@@ -202,9 +202,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
-    m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff), 
-    m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),  
-    m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0)
+m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
+m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),
+m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -228,7 +228,7 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
         default:
             m_positive = (spellproto->AttributesEx & (1<<7)) ? false : true;
     }
-    
+
     uint32 type = 0;
     if(!m_positive)
         type = 1;
@@ -322,7 +322,7 @@ void Aura::Update(uint32 diff)
             m_target->SendMonsterMove(x,y,z,false,true,time);
         }
     }
-   
+
     if(m_areaAura && m_caster && m_target)
     {
         // update for the caster of the aura
@@ -342,7 +342,7 @@ void Aura::Update(uint32 diff)
                     if(m_caster->GetDistanceSq(Target) > radius * radius )
                     {
                         // remove auras of the same caster from out of range players
-                        if (t_aura) 
+                        if (t_aura)
                             if (t_aura->GetCaster()->GetGUID() == m_caster->GetGUID())
                                 Target->RemoveAura(m_spellId, m_effIndex);
                     }
@@ -400,7 +400,7 @@ void Aura::ApplyModifier(bool apply)
 void Aura::UpdateAuraDuration()
 {
 
-    if(m_target->GetTypeId() != TYPEID_PLAYER) 
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     WorldPacket data;
@@ -616,7 +616,7 @@ void Aura::HandleModAttackSpeed(bool apply)
 {
     if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
         return;
-    
+
     m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME,m_modifier.m_amount,apply);
 }
 
@@ -1441,10 +1441,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
             if (m_target->getRace() == TAUREN)
-            {
-                m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
-            }
-            else
+        {
+            m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+        }
+        else
             m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
         if(spellInfo)
@@ -1459,9 +1459,9 @@ void Aura::HandleAuraModShapeshift(bool apply)
     else
     {
         if (m_target->getRace() == TAUREN)
-                unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
+            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
         else
-        unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
+            unit_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
         unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(unit_target->getClass() == CLASS_DRUID)
@@ -1535,7 +1535,7 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
     else
     {
         m_procdamage = NULL;
-    }    
+    }
 }
 
 void Aura::HandleAuraTracCreatures(bool apply)
@@ -1719,7 +1719,8 @@ void Aura::HandleAuraTransform(bool apply)
 {
     if(!m_target)
         return;
-    if (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_POLYMORPH)   //Can't transform
+                                                            //Can't transform
+    if (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_POLYMORPH)
         return;
 
     if (apply)
@@ -2113,7 +2114,7 @@ void Aura::HandleForceReaction(bool Apply)
         for(uint32 i = 0; i <  sFactionTemplateStore.GetNumRows(); ++i)
         {
             factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
-            if(!factionTemplateEntry) 
+            if(!factionTemplateEntry)
                 continue;
 
             if(factionTemplateEntry->faction == faction_id)
@@ -2128,7 +2129,6 @@ void Aura::HandleForceReaction(bool Apply)
     else
         ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
 }
-
 
 void Aura::HandleRangedAmmoHaste(bool apply)
 {

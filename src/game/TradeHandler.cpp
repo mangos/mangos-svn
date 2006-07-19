@@ -88,137 +88,150 @@ void WorldSession::UpdateTrade()
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
-	{ 
-		WorldPacket data; 
-		Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL }; 
-	    Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL }; 
-		bool myCanStoreItem=false,hisCanStoreItem=false,myCanCompleteTrade=true,hisCanCompleteTrade=true; 
-		int i,k; 
-		uint16 dst; 
-		if ( !GetPlayer()->pTrader ) return; 
-		_player->acceptTrade = true; 
-		if (_player->pTrader->acceptTrade ) { 
-			data.Initialize(SMSG_TRADE_STATUS); 
-			data << (uint32)4; 
-			_player->pTrader->GetSession()->SendPacket(&data); 
-			for(i=0; i<6; i++) { 
-				sLog.outDebug("player trade item: %u",_player->tradeItems[i]); 
-				if(_player->tradeItems[i] >= 0 ) { 
-					myItems[i]=_player->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) _player->tradeItems[i] ); 
-				} 
-				sLog.outDebug("partner trade item: %u",_player->pTrader->tradeItems[i]); 
-				if(_player->pTrader->tradeItems[i] >= 0) { 
-					hisItems[i]=_player->pTrader->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) _player->pTrader->tradeItems[i]); 
-				} 
-			} 
-			for(i=0; i<6; i++) 
-			{ 
-				if(myItems[i]) 
-				{ 
-					for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++) 
-					{ 
-						myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID()); 
-						if(_player->pTrader->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, myItems[i], false )== EQUIP_ERR_OK) { 
-							hisCanStoreItem = true;  
-							sLog.outDebug("partner can accept item: %u",myItems[i]); 
-							break; 
-						} 
-					} 
-				} 
-				else 
-				{ 
-					hisCanStoreItem = true; 
-				} 
-				sLog.outDebug("hisCanStoreItem: %u",hisCanStoreItem); 
-				if(hisItems[i]) { 
-					for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++) { 
-						hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID()); 
-						if(_player->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, hisItems[i], false ) == EQUIP_ERR_OK) {  
-							myCanStoreItem = true; 
-							sLog.outDebug("you can accept item: %u",hisItems[i]);  
-							break; 
-						} 
-					} 
-				} 
-				else 
-				{ 
-					myCanStoreItem = true; 
-				}                        
-				sLog.outDebug("myCanStoreItem: %u",myCanStoreItem); 
-				if (!myCanStoreItem || !hisCanStoreItem) { 
-					myCanCompleteTrade = myCanStoreItem; 
-					hisCanCompleteTrade = hisCanStoreItem; 
-					break; 
-				} 
-			} 
-			if(!myCanCompleteTrade)
-			{ 
-				sChatHandler.FillSystemMessageData(&data,_player->GetSession(), "You do not have enough free slots"); 
-				GetPlayer( )->GetSession( )->SendPacket( &data ); 
-				sChatHandler.FillSystemMessageData(&data,_player->pTrader->GetSession(), "Your partner does not have enough free bag slots"); 
-				GetPlayer( )->pTrader->GetSession( )->SendPacket( &data ); 
-				_player->GetSession()->HandleUnacceptTradeOpcode(recvPacket); 
-				_player->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket); 
-				return; 
-			} 
-			else if (!hisCanCompleteTrade) 
-			{                                               
-				sChatHandler.FillSystemMessageData(&data,_player->GetSession(), "Your partner does not have enough free bag slots"); 
-				GetPlayer()->GetSession()->SendPacket( &data ); 
-				sChatHandler.FillSystemMessageData(&data,_player->pTrader->GetSession(), "You do not have enough free slots"); 
-				GetPlayer()->pTrader->GetSession()->SendPacket( &data ); 
-				_player->GetSession()->HandleUnacceptTradeOpcode(recvPacket); 
-				_player->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket); 
-				return; 
-			}  
-			for(i=0; i<6; i++) 
-			{ 
-				if(myItems[i])
-				{ 
-					for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++) { 
-						myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID()); 
-						if(_player->pTrader->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, myItems[i], false ) == EQUIP_ERR_OK) { 
-							sLog.outDebug("partner storing: %u",myItems[i]); 
-							_player->pTrader->StoreItem( dst, myItems[i], true); 
-							_player->RemoveItem(255, (uint8)_player->tradeItems[i], true); 
-							break; 
-						} 
-					} 
-				} 
-				if(hisItems[i])
-				{ 
-					for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++) { 
-						hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID()); 
-						if(_player->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, hisItems[i], false ) == EQUIP_ERR_OK) { 
-							sLog.outDebug("player storing: %u",hisItems[i]); 
-							_player->StoreItem( dst, hisItems[i], true); 
-							_player->pTrader->RemoveItem(255, (uint8)_player->pTrader->tradeItems[i], true); 
-							break; 
-						} 
-					} 
-				} 
-			} 
-			_player->ModifyMoney( -((int)_player->tradeGold) ); 
-			_player->ModifyMoney(_player->pTrader->tradeGold ); 
-			_player->pTrader->ModifyMoney( -((int)_player->pTrader->tradeGold) ); 
-			_player->pTrader->ModifyMoney(_player->tradeGold ); 
-			ClearTrade(); 
-			data.Initialize(SMSG_TRADE_STATUS); 
-			data << (uint32)8;  
-			_player->pTrader->GetSession()->SendPacket(&data); 
-			data.Initialize(SMSG_TRADE_STATUS);  
-			data << (uint32)8;  
-			SendPacket(&data); 
-			_player->pTrader->pTrader = NULL; 
-			_player->pTrader = NULL; 
-        } 
+    {
+        WorldPacket data;
+        Item *myItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+        Item *hisItems[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+        bool myCanStoreItem=false,hisCanStoreItem=false,myCanCompleteTrade=true,hisCanCompleteTrade=true;
+        int i,k;
+        uint16 dst;
+        if ( !GetPlayer()->pTrader ) return;
+        _player->acceptTrade = true;
+        if (_player->pTrader->acceptTrade )
+        {
+            data.Initialize(SMSG_TRADE_STATUS);
+            data << (uint32)4;
+            _player->pTrader->GetSession()->SendPacket(&data);
+            for(i=0; i<6; i++)
+            {
+                sLog.outDebug("player trade item: %u",_player->tradeItems[i]);
+                if(_player->tradeItems[i] >= 0 )
+                {
+                    myItems[i]=_player->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) _player->tradeItems[i] );
+                }
+                sLog.outDebug("partner trade item: %u",_player->pTrader->tradeItems[i]);
+                if(_player->pTrader->tradeItems[i] >= 0)
+                {
+                    hisItems[i]=_player->pTrader->GetItemByPos( INVENTORY_SLOT_BAG_0,(uint8) _player->pTrader->tradeItems[i]);
+                }
+            }
+            for(i=0; i<6; i++)
+            {
+                if(myItems[i])
+                {
+                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    {
+                        myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
+                        if(_player->pTrader->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, myItems[i], false )== EQUIP_ERR_OK)
+                        {
+                            hisCanStoreItem = true;
+                            sLog.outDebug("partner can accept item: %u",myItems[i]);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    hisCanStoreItem = true;
+                }
+                sLog.outDebug("hisCanStoreItem: %u",hisCanStoreItem);
+                if(hisItems[i])
+                {
+                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    {
+                        hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
+                        if(_player->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, hisItems[i], false ) == EQUIP_ERR_OK)
+                        {
+                            myCanStoreItem = true;
+                            sLog.outDebug("you can accept item: %u",hisItems[i]);
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    myCanStoreItem = true;
+                }
+                sLog.outDebug("myCanStoreItem: %u",myCanStoreItem);
+                if (!myCanStoreItem || !hisCanStoreItem)
+                {
+                    myCanCompleteTrade = myCanStoreItem;
+                    hisCanCompleteTrade = hisCanStoreItem;
+                    break;
+                }
+            }
+            if(!myCanCompleteTrade)
+            {
+                sChatHandler.FillSystemMessageData(&data,_player->GetSession(), "You do not have enough free slots");
+                GetPlayer( )->GetSession( )->SendPacket( &data );
+                sChatHandler.FillSystemMessageData(&data,_player->pTrader->GetSession(), "Your partner does not have enough free bag slots");
+                GetPlayer( )->pTrader->GetSession( )->SendPacket( &data );
+                _player->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+                _player->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+                return;
+            }
+            else if (!hisCanCompleteTrade)
+            {
+                sChatHandler.FillSystemMessageData(&data,_player->GetSession(), "Your partner does not have enough free bag slots");
+                GetPlayer()->GetSession()->SendPacket( &data );
+                sChatHandler.FillSystemMessageData(&data,_player->pTrader->GetSession(), "You do not have enough free slots");
+                GetPlayer()->pTrader->GetSession()->SendPacket( &data );
+                _player->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+                _player->pTrader->GetSession()->HandleUnacceptTradeOpcode(recvPacket);
+                return;
+            }
+            for(i=0; i<6; i++)
+            {
+                if(myItems[i])
+                {
+                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    {
+                        myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
+                        if(_player->pTrader->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, myItems[i], false ) == EQUIP_ERR_OK)
+                        {
+                            sLog.outDebug("partner storing: %u",myItems[i]);
+                            _player->pTrader->StoreItem( dst, myItems[i], true);
+                            _player->RemoveItem(255, (uint8)_player->tradeItems[i], true);
+                            break;
+                        }
+                    }
+                }
+                if(hisItems[i])
+                {
+                    for (k=INVENTORY_SLOT_ITEM_START; k< INVENTORY_SLOT_ITEM_END;k++)
+                    {
+                        hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
+                        if(_player->CanStoreItem( INVENTORY_SLOT_BAG_0, k, dst, hisItems[i], false ) == EQUIP_ERR_OK)
+                        {
+                            sLog.outDebug("player storing: %u",hisItems[i]);
+                            _player->StoreItem( dst, hisItems[i], true);
+                            _player->pTrader->RemoveItem(255, (uint8)_player->pTrader->tradeItems[i], true);
+                            break;
+                        }
+                    }
+                }
+            }
+            _player->ModifyMoney( -((int)_player->tradeGold) );
+            _player->ModifyMoney(_player->pTrader->tradeGold );
+            _player->pTrader->ModifyMoney( -((int)_player->pTrader->tradeGold) );
+            _player->pTrader->ModifyMoney(_player->tradeGold );
+            ClearTrade();
+            data.Initialize(SMSG_TRADE_STATUS);
+            data << (uint32)8;
+            _player->pTrader->GetSession()->SendPacket(&data);
+            data.Initialize(SMSG_TRADE_STATUS);
+            data << (uint32)8;
+            SendPacket(&data);
+            _player->pTrader->pTrader = NULL;
+            _player->pTrader = NULL;
+        }
         else
-        { 
-            data.Initialize(SMSG_TRADE_STATUS); 
-            data << (uint32)4; 
-            _player->pTrader->GetSession()->SendPacket(&data); 
-        } 
-    } 
+        {
+            data.Initialize(SMSG_TRADE_STATUS);
+            data << (uint32)4;
+            _player->pTrader->GetSession()->SendPacket(&data);
+        }
+    }
 }
 
 void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
@@ -255,7 +268,6 @@ void WorldSession::SendCancelTrade()
     data << (uint32)3;
     SendPacket(&data);
 }
-
 
 void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
 {

@@ -231,7 +231,7 @@ AggressorAI::IsVisible(Unit *pl) const
             seestealth = false;
         else if(seevaluse>=int32(urand(0,30)))
             seestealth = true;
-      else seestealth = false;
+        else seestealth = false;
     }
                                                             // offset=1.0
     return seestealth && (dist * 1.0 <= sight) ;

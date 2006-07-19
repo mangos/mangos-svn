@@ -197,7 +197,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     if ( race == TAUREN )
     {
-         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
+        SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
     }
     else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
     SetUInt32Value(UNIT_FIELD_STR, info->strength );
@@ -1066,10 +1066,10 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
     }
 }
 
-bool Player::isAcceptTickets() const { 
-    return GetSession()->GetSecurity() >=2 && m_acceptTicket; 
+bool Player::isAcceptTickets() const
+{
+    return GetSession()->GetSecurity() >=2 && m_acceptTicket;
 }
-
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim)
 {
@@ -1134,7 +1134,7 @@ void Player::GiveLevel()
     _RemoveAllAuraMods();
     _RemoveStatsMods();
 
-    // base stats 
+    // base stats
     float newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetUInt32Value(UNIT_FIELD_MAXPOWER1);
 
     float newHP  = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
@@ -1147,13 +1147,12 @@ void Player::GiveLevel()
     // Remove class and race bonuses from base stats
     if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
         newHP = newHP / 1.05;
-    
+
     if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
         newSPI = newSPI / 1.05;
 
     if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
         newINT  = newINT / 1.05;
-
 
     // Gain stats
     MPGain = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : uint32(newSPI / 2);
@@ -1172,14 +1171,14 @@ void Player::GiveLevel()
     // Apply class and race bonuses to stats
     if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
         newHP  = newHP * 1.05;
-    
+
     if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
         newSPI  = newSPI * 1.05;
 
     if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
         newINT = newINT * 1.05;
 
-    // update level, talants, max level of skills 
+    // update level, talants, max level of skills
     SetUInt32Value(UNIT_FIELD_LEVEL, level);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
@@ -1194,7 +1193,6 @@ void Player::GiveLevel()
         SetUInt32Value(UNIT_FIELD_POWER1, uint32(newMP));
         SetUInt32Value(UNIT_FIELD_MAXPOWER1, uint32(newMP));
     }
-
 
     SetUInt32Value(UNIT_FIELD_HEALTH,    uint32(newHP));
     SetUInt32Value(UNIT_FIELD_MAXHEALTH, uint32(newHP));
@@ -1230,7 +1228,6 @@ void Player::GiveLevel()
     WPAssert(data.size() == 48);
     GetSession()->SendPacket(&data);
 }
-
 
 void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
 {
@@ -1457,7 +1454,6 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
             }
         }
     }
-
 
     uint8 op;
     uint16 tmpslot=slot_id,val=0;
@@ -2663,8 +2659,8 @@ void Player::UpdateReputation() const
 void Player::SendSetFactionStanding(const Factions* faction) const
 {
     WorldPacket data;
-    
-    if(faction->Flags & 0x00000001 ) //If faction is visible then update it
+
+    if(faction->Flags & 0x00000001 )                        //If faction is visible then update it
     {
         data.Initialize(SMSG_SET_FACTION_STANDING);
         data << (uint32) faction->Flags;
@@ -3375,7 +3371,7 @@ void Player::CastItemEquipSpell(Item *item)
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
-		if(proto->Spells[i].SpellTrigger != ON_EQUIP) continue;
+        if(proto->Spells[i].SpellTrigger != ON_EQUIP) continue;
 
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
@@ -3385,7 +3381,7 @@ void Player::CastItemEquipSpell(Item *item)
         }
 
         DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
- 
+
         spell = new Spell(this, spellInfo, true, 0);
         WPAssert(spell);
 
@@ -3398,14 +3394,14 @@ void Player::CastItemEquipSpell(Item *item)
 
 void Player::CastItemCombatSpell(Item *item,Unit* Target)
 {
-    if(!item) 
+    if(!item)
         return;
 
     ItemPrototype *proto = item->GetProto();
-    if(!proto) 
+    if(!proto)
         return;
 
-    if (!Target || Target == this ) 
+    if (!Target || Target == this )
         return;
 
     Spell *spell;
@@ -3414,7 +3410,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     for (int i = 0; i < 5; i++)
     {
         if(!proto->Spells[i].SpellId ) continue;
-		if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
+        if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
         spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
         if(!spellInfo)
@@ -3439,7 +3435,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
 // If not you can have unexpected beaviur. like item giving damage to player when equip.
 bool Player::IsItemSpellToEquip(SpellEntry *spellInfo)
 {
-    return (GetDuration(spellInfo) == -1); // infinite duration -> passive aura
+    return (GetDuration(spellInfo) == -1);                  // infinite duration -> passive aura
     /*
     for(int j = 0; j< 3; j++)
     {
@@ -3467,7 +3463,7 @@ bool Player::IsItemSpellToEquip(SpellEntry *spellInfo)
 // If not you can have unexpected beaviur. like having stats always growing each attack.
 bool Player::IsItemSpellToCombat(SpellEntry *spellInfo)
 {
-    return (GetDuration(spellInfo) != -1); // infinite duration -> passive aura
+    return (GetDuration(spellInfo) != -1);                  // infinite duration -> passive aura
 
     /*
     for(int j = 0; j< 3; j++)
@@ -3532,7 +3528,7 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
 
         loot = &go->loot;
 
-        if(loot->empty()) 
+        if(loot->empty())
         {
             uint32 lootid =  go->lootid;
 
@@ -3553,7 +3549,7 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
 
         loot   = &creature->loot;
 
-        if(loot->empty()) 
+        if(loot->empty())
         {
             uint32 lootid = creature->GetCreatureInfo()->lootid;
 
@@ -4928,7 +4924,7 @@ void Player::SetSheath( uint32 sheathed )
     {
         SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, uint32(0));
         SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, uint32(0));
-            SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, uint32(0));
+        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, uint32(0));
     }
     if (sheathed != 2 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2))
     {
@@ -5669,7 +5665,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
 }
 
-uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const 
+uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const
 {
     dest = 0;
     if( pItem )
@@ -6505,7 +6501,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
             return;
         }
 
-        if(IsEquipmentPos ( src ) && isInCombat() && 
+        if(IsEquipmentPos ( src ) && isInCombat() &&
             pSrcItem->GetProto()->Class != ITEM_CLASS_WEAPON && pSrcItem->GetProto()->Class != ITEM_CLASS_PROJECTILE)
         {
             SendEquipError( EQUIP_ERR_CANT_DO_IN_COMBAT, pSrcItem, pDstItem );
@@ -6880,7 +6876,6 @@ Quest *Player::GetActiveQuest( uint32 quest_id ) const
 
     return (itr != mQuestStatus.end()) ?  itr->second.m_quest : NULL;
 }
-
 
 Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
 {
@@ -7853,7 +7848,7 @@ bool Player::LoadFromDB( uint32 guid )
     _LoadCorpse();
 
     //_LoadPet();
-    
+
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
     // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load
 
@@ -8007,7 +8002,7 @@ void Player::_LoadInventory()
 
             ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
 
-            if(!proto) 
+            if(!proto)
             {
                 sLog.outError( "Player::_LoadInventory: Player %s have unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
                 continue;

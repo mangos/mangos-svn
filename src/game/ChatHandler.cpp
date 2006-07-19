@@ -121,7 +121,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             GetPlayer()->SendMessageToSet( &data, true );
             //SendPacket(&data);
             //sWorld.SendGlobalMessage(&data, this);
-            
+
         } break;
 
         case CHAT_MSG_WHISPER:

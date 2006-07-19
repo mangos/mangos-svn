@@ -431,7 +431,6 @@ Map::PlayerRelocation(Player *player, const float &x, const float &y, const floa
     TypeContainerVisitor<MaNGOS::PlayerRelocationNotifier, ContainerMapList<Player> > p2p_relocation(relocationNotifier);
     cell_lock->Visit(cell_lock, p2p_relocation, *this);
 
-
     if( same_cell )
         return;
 

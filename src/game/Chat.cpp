@@ -391,7 +391,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     }
     else if (type != CHAT_MSG_WHISPER_INFORM)
     {
-        target_guid = 0; // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
+        target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
     }
 
     *data << target_guid;

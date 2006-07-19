@@ -716,7 +716,8 @@ void Spell::EffectSummon(uint32 i)
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);    //C100 = maybe group
+                                                            //C100 = maybe group
+            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -973,7 +974,8 @@ void Spell::EffectSummonWild(uint32 i)
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);    //C100 = maybe group
+                                                            //C100 = maybe group
+            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1161,7 +1163,8 @@ void Spell::EffectTameCreature(uint32 i)
             data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
             for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100); //C100 = maybe group
+                                                            //C100 = maybe group
+                data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100);
 
             data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1210,7 +1213,8 @@ void Spell::EffectSummonPet(uint32 i)
             data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
             for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                data << uint16(OldSummon->m_spells[i]) << uint16(0xC100);  //C100 = maybe group 
+                                                            //C100 = maybe group
+                data << uint16(OldSummon->m_spells[i]) << uint16(0xC100);
 
             data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1291,7 +1295,8 @@ void Spell::EffectSummonPet(uint32 i)
             data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
             for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                data << uint16(NewSummon->m_spells[i]) << uint16(0xC100);      //C100 = maybe group
+                                                            //C100 = maybe group
+                data << uint16(NewSummon->m_spells[i]) << uint16(0xC100);
 
             data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1347,7 +1352,8 @@ void Spell::EffectLearnPetSpell(uint32 i)
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-            data << uint16 (creatureTarget ->m_spells[i]) << uint16 (0xC100);  //C100 = maybe group
+                                                            //C100 = maybe group
+            data << uint16 (creatureTarget ->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -1631,7 +1637,7 @@ void Spell::EffectSummonTotem(uint32 i)
     if(guid != 0)
     {
         Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
- 
+
         if(OldTotem)
         {
             data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
@@ -2116,7 +2122,7 @@ void Spell::EffectReputation(uint32 i)
 
     FactionEntry* factionEntry = sFactionStore.LookupEntry(faction_id);
 
-    if(!factionEntry) 
+    if(!factionEntry)
         return;
 
     _player->ModifyFactionReputation(factionEntry,rep_change);
@@ -2136,15 +2142,15 @@ void Spell::EffectQuestComplete(uint32 i)
     if(!pQuest)
         return;
 
-    if(_player->CanCompleteQuest( pQuest ) ) 
+    if(_player->CanCompleteQuest( pQuest ) )
         _player->CompleteQuest( pQuest );
     else
         return;
 
-    if(_player->GetQuestRewardStatus( pQuest )) 
+    if(_player->GetQuestRewardStatus( pQuest ))
         return
 
-    _player->PlayerTalkClass->SendQuestReward( pQuest, _player->GetGUID(), true, NULL, 0 );
+            _player->PlayerTalkClass->SendQuestReward( pQuest, _player->GetGUID(), true, NULL, 0 );
 }
 
 void Spell::EffectSkinning(uint32 i)

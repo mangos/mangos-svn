@@ -90,7 +90,7 @@ ReactorAI::UpdateAI(const uint32 time_diff)
         if( needToStop() )
         {
             DEBUG_LOG("Creature %u stopped attacking.", i_creature.GetGUIDLow());
-            stopAttack();                                  // i_victimGuid == 0 && i_creature.getVictim() == NULL now
+            stopAttack();                                   // i_victimGuid == 0 && i_creature.getVictim() == NULL now
         }
         else if( i_creature.IsStopped() )
         {

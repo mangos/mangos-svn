@@ -60,8 +60,8 @@ void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
         //      It is not the right way to do... We need to fix it! :D
         //
         //Set players factions. These factios are into factionstemplate.dbc
-        pl->setFaction(BLUE_TEAM);                       //Blue faction
-        plTarget->setFaction(RED_TEAM);                  //Red faction
+        pl->setFaction(BLUE_TEAM);                          //Blue faction
+        plTarget->setFaction(RED_TEAM);                     //Red faction
 
         pl->StorePvpState();
         plTarget->StorePvpState();

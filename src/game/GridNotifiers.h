@@ -170,21 +170,21 @@ namespace MaNGOS
     };
 
     template<class T>
-    struct MANGOS_DLL_DECL ObjectSetIn2DRangeChecker
+        struct MANGOS_DLL_DECL ObjectSetIn2DRangeChecker
     {
         bool& i_result;
         Unit* i_unit;
         std::set<uint32> const& i_ids;
         float  i_dist2;
 
-        ObjectSetIn2DRangeChecker(bool& result, Unit* unit, std::set<uint32> const& ids, float radius) 
+        ObjectSetIn2DRangeChecker(bool& result, Unit* unit, std::set<uint32> const& ids, float radius)
             : i_result(result), i_unit(unit), i_ids(ids), i_dist2(radius*radius) {}
 
         void Visit(std::map<OBJECT_HANDLE, GameObject *> &m)
         {
             for(std::map<OBJECT_HANDLE, GameObject *>::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
-                            
+
                 if(i_ids.find(itr->second->GetGOInfo()->id) != i_ids.end())
                 {
                     if(itr->second->GetDistance2dSq(i_unit) <= i_dist2)

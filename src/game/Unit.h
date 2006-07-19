@@ -150,7 +150,6 @@ enum UnitState
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
-
 // Value masks for UNIT_FIELD_FLAGS
 #define UNIT_FLAG_NONE           0x0000000
 #define UNIT_FLAG_DISABLE_MOVE   0x0000004
@@ -244,7 +243,8 @@ struct Hostil
 
 typedef std::list<Hostil> HostilList;
 
-enum MeleeHitOutcome {
+enum MeleeHitOutcome
+{
     MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY, MELEE_HIT_GLANCING,
     MELEE_HIT_CRIT, MELEE_HIT_NORMAL
 };
@@ -264,14 +264,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isAttackReady() const { return m_attackTimer == 0; }
         bool canReachWithAttack(Unit *pVictim) const;
 
-        void _addAttacker(Unit *pAttacker) // must be called only from Unit::Attack(Unit*)
+        void _addAttacker(Unit *pAttacker)                  // must be called only from Unit::Attack(Unit*)
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
             addUnitState(UNIT_STAT_ATTACK_BY);
         }
-        void _removeAttacker(Unit *pAttacker) // must be called only from Unit::AttackStop()
+        void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
@@ -310,7 +310,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void setPowerType(uint8 PowerType);
 
         // function template id
-        uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }    
+        uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
         FactionTemplateEntry* getFactionTemplateEntry() const;
 
@@ -489,7 +489,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
-        
+
         void _UpdateSpells(uint32 time);
         void _UpdateHostil( uint32 time );
         //void _UpdateAura();
@@ -506,7 +506,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         AuraMap m_Auras;
 
-        std::list<Aura *> m_scAuras; // casted singlecast auras
+        std::list<Aura *> m_scAuras;                        // casted singlecast auras
         std::list<DynamicObject*> m_dynObj;
         std::list<GameObject*> m_gameObj;
         HostilList m_hostilList;

@@ -124,9 +124,9 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     sLog.outDebug("Current z:%f \tMap Z:%f", Target->GetPositionZ(),posz);
 
     //Can not logout if...
-    if( (GetPlayer()->isInCombat()) ||        //...is in combat
-        (GetPlayer()->isInDuel())   ||        //...is in Duel
-        (Target->GetPositionZ() > posz + 1) ) //...need more judge and handle while jumping and falling
+    if( (GetPlayer()->isInCombat()) ||                      //...is in combat
+        (GetPlayer()->isInDuel())   ||                      //...is in Duel
+        (Target->GetPositionZ() > posz + 1) )               //...need more judge and handle while jumping and falling
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
@@ -135,7 +135,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         SendPacket( &data );
         LogoutRequest(0);
         return;
-    }    
+    }
 
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
@@ -205,7 +205,6 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
         data << uint32(0);
     SendPacket( &data );
 }
-
 
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
@@ -814,7 +813,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     else
         GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER2, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER2) );
 
-
     GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER3, 0 );
 
     if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER4) > GetPlayer()->m_resurrectMana)
@@ -889,7 +887,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             //_player->BuildHeartBeatMsg(&data);
             //_player->SendMessageToSet(&data, true);
         }
-        else if (GetPlayer()->m_bgInBattleGround)                           //if player is playing in a BattleGround
+        else if (GetPlayer()->m_bgInBattleGround)           //if player is playing in a BattleGround
         {
             //! AreaTrigger BattleGround
 
@@ -1064,29 +1062,30 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 
     recv_data >> GUID;
     recv_data >> unk0 >> Flags;
-    if (Flags & 0x2000)                                         //double check, old value and new calue
+    if (Flags & 0x2000)                                     //double check, old value and new calue
     {
         // Crash server. Wrong package structure used???
         // Crash at "recv_data >> unk1 >> OldSpeed >> NewSpeed" and have recv_data._wpos = 60
-        return; 
+        return;
 
         uint32 unk2, unk3, unk4, unk5;
         float OldSpeed;
 
         recv_data >> d_time;
         recv_data >> X >> Y >> Z >> O;
-        recv_data >> unk2 >> unk3;                              //no idea, maybe unk2 = flags2
-        recv_data >> unk4 >> unk5;                              //no idea
+        recv_data >> unk2 >> unk3;                          //no idea, maybe unk2 = flags2
+        recv_data >> unk4 >> unk5;                          //no idea
         recv_data >> unk1 >> OldSpeed >> NewSpeed;
     }
-    else                                                        //single check
+    else                                                    //single check
     {
         recv_data >> d_time;
         recv_data >> X >> Y >> Z >> O;
         recv_data >> unk1 >> NewSpeed;
     }
     if (GetPlayer()->GetSpeed(MOVE_RUN) != NewSpeed)
-        sLog.outError("SpeedChange player is NOT correct, its set to: %f", NewSpeed);    //now kick player???
+                                                            //now kick player???
+        sLog.outError("SpeedChange player is NOT correct, its set to: %f", NewSpeed);
 }
 
 void WorldSession::HandleForceSwimSpeedChangeAck(WorldPacket& recv_data)

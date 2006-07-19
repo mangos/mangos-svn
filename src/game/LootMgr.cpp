@@ -91,8 +91,8 @@ bool LootItem::lootable(LootItem &itm, Player* player)
 {
     if(player && itm.questchance > 0 && player->HaveQuestForItem(itm.itemid))
         return true;
-    else 
-        return itm.chance > 0; 
+    else
+        return itm.chance > 0;
 };
 
 struct NotChanceFor
@@ -105,7 +105,7 @@ struct NotChanceFor
     {
         if(m_player && itm.questchance > 0 && m_player->HaveQuestForItem(itm.itemid))
             return itm.questchance <= rand_chance();
-        else if(itm.chance > 0) 
+        else if(itm.chance > 0)
             return itm.chance <= rand_chance();
         else
             return true;
@@ -142,4 +142,3 @@ void FillSkinLoot(Loot *Skinloot,uint32 itemid)
     uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
     Skinloot->items.push_back(LootItem(itemid,displayid,99,0));
 }
-

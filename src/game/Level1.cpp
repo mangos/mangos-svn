@@ -214,7 +214,6 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
         return true;
     }
 
-
     PSendSysMessage(LANG_YOU_CHANGE_HP, hp, hpm, chr->GetName());
 
     char buf[256];
@@ -455,7 +454,6 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
         return true;
     }
 
-
     PSendSysMessage(LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
 
     //sprintf((char*)buf,"%s changed your Faction to %i.", m_session->GetPlayer()->GetName(), factionid);
@@ -506,7 +504,6 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
         SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
-
 
     PSendSysMessage(LANG_YOU_CHANGE_SPELLFLATID, spellflatid, val, mark, chr->GetName());
 
@@ -599,7 +596,6 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
         return true;
     }
 
-
     PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
 
     char buf[256];
@@ -654,7 +650,6 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
         SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
-
 
     PSendSysMessage(LANG_YOU_CHANGE_SPEED, Speed, chr->GetName());
 
