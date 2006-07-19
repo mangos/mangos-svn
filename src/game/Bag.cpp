@@ -73,19 +73,19 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
         m_bagslot[i] = NULL;
     }
 
-    m_owner = owner;
+    SetOwner(owner);
     return true;
 }
 
 void Bag::SaveToDB()
 {
     Item::SaveToDB();
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", m_owner->GetGUIDLow(), GetSlot());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", GetOwner()->GetGUIDLow(), GetSlot());
     for (uint8 i = 0; i < GetProto()->ContainerSlots; i++)
     {
         if (m_bagslot[i])
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", m_owner->GetGUIDLow(), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetOwner()->GetGUIDLow(), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
             m_bagslot[i]->SaveToDB();
         }
     }
@@ -104,7 +104,7 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
             m_bagslot[i] = NULL;
         }
     }
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", m_owner->GetGUIDLow(), GetSlot());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", GetOwner()->GetGUIDLow(), GetSlot());
 
     if (result)
     {
@@ -119,12 +119,12 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
             if(!proto)
             {
-                sLog.outError( "Bag::LoadFromDB: Player %s have unknown item (id: #%u) in bag #%u, skipped.", m_owner->GetName(),item_id,GetSlot());
+                sLog.outError( "Bag::LoadFromDB: Player %s have unknown item (id: #%u) in bag #%u, skipped.", GetOwner()->GetName(),item_id,GetSlot());
                 continue;
             }
 
             Item *item = NewItemOrBag(proto);
-            item->SetOwner(m_owner);
+            item->SetOwner(GetOwner());
             item->SetSlot(slot);
             if(!item->LoadFromDB(item_guid, 1))
                 continue;

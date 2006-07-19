@@ -5315,7 +5315,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             Bag *pBag;
             ItemPrototype *pBagProto;
             uint16 pos;
-            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+            if(pItem->IsBindedNotWith(this))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == 0 )
             {
@@ -5678,7 +5678,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
             Bag *pBag;
             ItemPrototype *pBagProto;
             uint16 pos;
-            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+            if( pItem->IsBindedNotWith(this) )
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == 0 )
             {
@@ -6002,7 +6002,7 @@ uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
-            if( pProto->Bonding != NO_BIND && pItem->GetOwner() != 0 && pItem->GetOwner() != this )
+            if( pItem->IsBindedNotWith(this) )
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
                 return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
@@ -6083,7 +6083,7 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
     if( pItem )
     {
         if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
-            pItem->SetOwner( this );
+            pItem->SetBindingWith( this );
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -6134,8 +6134,9 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
-        if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED )
-            pItem->SetOwner( this );
+        // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
+        if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
+            pItem->SetBindingWith( this );
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -8011,8 +8012,10 @@ void Player::_LoadInventory()
             Item *item = NewItemOrBag(proto);
             item->SetOwner(this);
             item->SetSlot(slot);
+
             if(!item->LoadFromDB(item_guid, 1))
                 continue;
+
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
             if( IsInventoryPos( dest ) )
             {

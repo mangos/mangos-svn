@@ -166,6 +166,8 @@ Item::Item( )
     m_objectTypeId = TYPEID_ITEM;
 
     m_valuesCount = ITEM_END;
+    m_owner = 0;
+    m_bindedWith = 0;
     m_slot = 0;
 }
 
@@ -483,6 +485,11 @@ bool Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
     LoadValues(fields[0].GetString());
 
     delete result;
+
+    // temporary solution while correct binding save not implemented
+    if( GetProto()->Bonding != NO_BIND )
+        SetBindingWith( GetOwner() );
+
     return true;
 }
 
