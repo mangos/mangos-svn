@@ -113,14 +113,14 @@ void Guild::InviteMember(Player* pl)
         SaveMemberToDB(newmember);
     }
 }
-	
+
 void Guild::LoadGuildFromDB(uint32 GuildId)
 {
 
     LoadRanksFromDB(GuildId);
     LoadMembersFromDB(GuildId);
-    
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild` WHERE `guildid` = '%u';", GuildId); 
+
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `guild` WHERE `guildid` = '%u';", GuildId);
 
     if(!result)
         return;
@@ -213,7 +213,7 @@ void Guild::Loadplayerstats(MemberSlot *memslot)
     // column 'zoneId' maybe now work?
     // FIXME: Get proper values for characters' zone and level.
     //QueryResult *result = sDatabase.PQuery("SELECT (`name`, `level`, `class`, `zoneId`) FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
-      QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y` FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y` FROM `character` WHERE `guid` = '%lu';", (unsigned long)memslot->guid);
     if(!result) return;
 
     fields = result->Fetch();

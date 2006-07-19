@@ -163,19 +163,19 @@ bool Master::Run()
 
     }
     // patch by SegaL. Only for HT and dual core. Ypu may apply it at your own risk.
-	//int Aff; 
-	//Aff = sConfig.GetIntDefault("Affinity", 0); 
-	//if(!Aff) 
-	//{ 
-	//	sLog.outError("Affinity ID not defined"); 
-	//	exit(1); 
-	//} 
-	//else 
-	//{ 
-	//	sLog.outString("Set Affinity running as %d", Aff); 
-	//} 
-	//HANDLE hProcess = GetCurrentProcess(); 
-	//SetProcessAffinityMask(hProcess,Aff); 
+    //int Aff;
+    //Aff = sConfig.GetIntDefault("Affinity", 0);
+    //if(!Aff)
+    //{
+    //	sLog.outError("Affinity ID not defined");
+    //	exit(1);
+    //}
+    //else
+    //{
+    //	sLog.outString("Set Affinity running as %d", Aff);
+    //}
+    //HANDLE hProcess = GetCurrentProcess();
+    //SetProcessAffinityMask(hProcess,Aff);
     //SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS);
 
     h.Add(&RAListenSocket);
@@ -268,7 +268,6 @@ void Master::clearOnlineAccounts()
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
         "  AND `realmcharacters`.`realmid` = %d;",realmID);
 }
-
 
 void Master::_HookSignals()
 {

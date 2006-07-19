@@ -66,7 +66,8 @@ LIBRARIES = $(noinst_LIBRARIES)
 ARFLAGS = cru
 libauth_a_AR = $(AR) $(ARFLAGS)
 libauth_a_LIBADD =
-am_libauth_a_OBJECTS = BigNumber.$(OBJEXT) Sha1.$(OBJEXT) AuthCrypt.$(OBJEXT)
+am_libauth_a_OBJECTS = BigNumber.$(OBJEXT) Sha1.$(OBJEXT) \
+	AuthCrypt.$(OBJEXT)
 libauth_a_OBJECTS = $(am_libauth_a_OBJECTS)
 libconfig_a_AR = $(AR) $(ARFLAGS)
 libconfig_a_LIBADD =
@@ -92,9 +93,9 @@ am_libnetwork_a_OBJECTS = Base64.$(OBJEXT) CircularBuffer.$(OBJEXT) \
 libnetwork_a_OBJECTS = $(am_libnetwork_a_OBJECTS)
 libshared_a_AR = $(AR) $(ARFLAGS)
 libshared_a_LIBADD =
-am_libshared_a_OBJECTS = Base.$(OBJEXT) EventSystem.$(OBJEXT) Log.$(OBJEXT) \
-	MemoryLeaks.$(OBJEXT) Mthread.$(OBJEXT) ProgressBar.$(OBJEXT) \
-	Util.$(OBJEXT)
+am_libshared_a_OBJECTS = Base.$(OBJEXT) Log.$(OBJEXT) \
+	MemoryLeaks.$(OBJEXT) EventSystem.$(OBJEXT) Mthread.$(OBJEXT) \
+	ProgressBar.$(OBJEXT) Util.$(OBJEXT)
 libshared_a_OBJECTS = $(am_libshared_a_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -257,21 +258,21 @@ sysconfdir = @MANGOSD_CONFIGDIR@
 target_alias = @target_alias@
 noinst_LIBRARIES = libshared.a libauth.a libconfig.a libdatabase.a libnetwork.a
 libshared_a_SOURCES = \
+    Base.h \
     Base.cpp \
     Log.cpp \
-    EventSystem.cpp \
     MemoryLeaks.cpp \
-    Mthread.cpp \
-    ProgressBar.cpp \
-    Base.h \
     ByteBuffer.h \
     Common.h \
     Errors.h \
     EventSystem.h \
+    EventSystem.cpp \
     Log.h \
     MemoryLeaks.h \
     Mthread.h \
+    Mthread.cpp \
     ProgressBar.h \
+    ProgressBar.cpp \
     Singleton.h \
     Timer.h \
     Util.h \

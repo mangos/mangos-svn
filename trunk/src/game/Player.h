@@ -564,8 +564,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             pvpOn = b;
 
-            if(!b) SetFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);        //PvP OFF
-            else  RemoveFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);      //PvP ON
+                                                            //PvP OFF
+            if(!b) SetFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);
+                                                            //PvP ON
+            else  RemoveFlag(UNIT_FIELD_FLAGS , UNIT_FLAG_NOT_IN_PVP);
 
             m_pvp_counting = false;
         };
@@ -574,7 +576,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         {
             return pvpOn;
         };
-      
+
         void setFactionForRace(uint8 race);
 
         inline std::list<struct actions> getActionList() { return m_actions; };
@@ -654,7 +656,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         bool SetPosition(const float &x, const float &y, const float &z, const float &orientation);
-        void SendMessageToSet(WorldPacket *data, bool self); // overwrite Object::SendMessageToSet
+        void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
 
         void DeleteFromDB();
         void DeleteCorpse();
@@ -702,7 +704,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateReputation() const;
         void SendSetFactionStanding(const Factions* faction) const;
         void UpdateMaxSkills();
-        void UpdateSkillsToMaxSkillsForLevel(); // for .levelup
+        void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
         void ModifySkillBonus(uint32 skillid,int32 val);
 
         /*********************************************************/

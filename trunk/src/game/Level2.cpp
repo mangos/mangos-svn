@@ -669,14 +669,14 @@ bool ChatHandler::HandleTicketCommand(const char* args)
 
     // ticket<end>
     if (!px)
-	{
+    {
         QueryResult *result = sDatabase.PQuery("SELECT `ticket_id` FROM `character_ticket`;");
         size_t count = result ? result->GetRowCount() : 0;
 
         PSendSysMessage("Tickets count: %i show new tickets: %s\n", count,m_session->GetPlayer()->isAcceptTickets() ?  "on" : "off");
         delete result;
         return true;
-	}
+    }
 
     // ticket on
     if(strncmp(px,"on",3) == 0)
@@ -779,11 +779,12 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
             return true;
 
         // notify players about ticket deleting
-        do{
+        do
+        {
             Field* fields = result->Fetch();
 
             uint64 guid = fields[1].GetUInt64();
-    
+
             if(Player* sender = objmgr.GetPlayer(guid))
                 sender->GetSession()->SendGMTicketGetTicket(1,0);
 
@@ -797,7 +798,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     }
 
     int num = (uint32)atoi(px);
-    
+
     // delticket #num
     if(num > 0)
     {
@@ -818,7 +819,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         uint32 id   = fields[0].GetUInt32();
         uint64 guid = fields[1].GetUInt64();
         delete result;
-    
+
         sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `ticket_id` = '%u';", id);
 
         // notify players about ticket deleting
@@ -843,7 +844,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
     // notify players about ticket deleting
     if(Player* sender = objmgr.GetPlayer(guid))
-       sender->GetSession()->SendGMTicketGetTicket(1,0);
+        sender->GetSession()->SendGMTicketGetTicket(1,0);
 
     PSendSysMessage("Character %s ticket deleted.",px);
     return true;

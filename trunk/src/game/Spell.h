@@ -409,7 +409,7 @@ class Spell
         uint8 CheckRange();
         uint32 CalculateDamage(uint8 i);
         void HandleTeleport(uint32 id, Unit* Target);
-        void Delayed(int32 delaytime);  
+        void Delayed(int32 delaytime);
         void reflect(Unit *refunit);
         inline uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
@@ -514,7 +514,7 @@ namespace MaNGOS
                     continue;
 
                 FactionTemplateResolver its_faction = itr->second->getFactionTemplateEntry();
-                if( my_faction.IsFriendlyTo(its_faction) ) 
+                if( my_faction.IsFriendlyTo(its_faction) )
                     continue;
 
                 if( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
@@ -542,14 +542,14 @@ namespace MaNGOS
                     continue;
 
                 FactionTemplateResolver its_faction = itr->second->getFactionTemplateEntry();
-                if (my_faction.IsFriendlyTo( its_faction )) 
+                if (my_faction.IsFriendlyTo( its_faction ))
                     continue;
 
                 switch(i_push_type)
                 {
                     case PUSH_IN_FRONT:
                         if((i_spell.m_caster->isInFront((Unit*)(itr->second), radius )))
-                        i_data.push_back(itr->second);
+                            i_data.push_back(itr->second);
                         break;
                     case PUSH_SELF_CENTER:
                         if((i_spell.m_caster->GetDistanceSq( (Unit*)(itr->second) ) < radius * radius ))

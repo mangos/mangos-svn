@@ -261,7 +261,7 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
     {
         target->SetSkill(skill, level, max);
         PSendSysMessage(LANG_LEARNED_SKILL, skill);
-    } 
+    }
     else
         PSendSysMessage(LANG_INVALID_SKILL_ID, skill);
 
@@ -1051,7 +1051,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         Item* item = pl->GetItemByPos(dest);
         if(item)
             item->SetOwner(0);
-        
+
         PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
     }
     else
@@ -2266,7 +2266,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     float z = player->GetPositionZ();
     float ort = player->GetOrientation();
     int mapid = player->GetMapId();
-    
+
     if(sDatabase.PExecute("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s');",x,y,z,ort,mapid,name))
     {
         SendSysMessage("Teleport location added.");

@@ -41,7 +41,6 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     if (requested_rank > 4)
         return;
 
-
     TalentEntry *talentInfo = sTalentStore.LookupEntry( talent_id );
 
     Player * player = GetPlayer();
@@ -68,11 +67,11 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     if (talentInfo->Row > 0)
     {
         unsigned int numRows = sTalentStore.GetNumRows();
-        for (unsigned int i = 0; i < numRows; i++)      // Loop through all talents.
+        for (unsigned int i = 0; i < numRows; i++)          // Loop through all talents.
         {
-                                                        // Someday, someone needs to revamp
+            // Someday, someone needs to revamp
             TalentEntry *tmpTalent = sTalentStore.data[i];
-            if (tmpTalent)                              // the way talents are tracked
+            if (tmpTalent)                                  // the way talents are tracked
             {
                 if (tmpTalent->TalentTree == tTree)
                 {
@@ -98,7 +97,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     }
     else
     {
-        if(spentPoints < (talentInfo->Row * 5))         // Min points spent
+        if(spentPoints < (talentInfo->Row * 5))             // Min points spent
         {
             return;
         }

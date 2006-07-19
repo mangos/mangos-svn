@@ -131,7 +131,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
         sLog.outError("Item set effect for equiped item #%u not found, mods not removed.",proto->ItemId);
         return;
     }
-    
+
     eff->item_count--;
 
     for(uint32 x=0;x<8;x++)

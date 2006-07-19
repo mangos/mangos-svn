@@ -222,7 +222,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Initialize data stores...");
     LoadDBCStores(dataPath);
 
-
     sLog.outString( "Loading Quests..." );
     objmgr.LoadQuests();
 
@@ -284,8 +283,8 @@ void World::SetInitialWorldSettings()
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     // need good tests on windows
-    
-    //uint32 m_CorpsesEventID = 
+
+    //uint32 m_CorpsesEventID =
     AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
 }
 

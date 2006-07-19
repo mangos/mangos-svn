@@ -40,10 +40,10 @@ struct LootItem
     float   questchance;
     bool    is_looted;
 
-    LootItem() 
+    LootItem()
         : itemid(0), displayid(0), chance(0), questchance(0), is_looted(true) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance) 
+    LootItem(uint32 _itemid, uint32 _displayid, float _chance, float _questchance)
         : itemid(_itemid), displayid(_displayid), chance(_chance), questchance(_questchance), is_looted(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }

@@ -222,8 +222,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-   if(pVictim->hasUnitState(UNIT_STAT_ROOT))
-      pVictim->clearUnitState(UNIT_STAT_ROOT);
+    if(pVictim->hasUnitState(UNIT_STAT_ROOT))
+        pVictim->clearUnitState(UNIT_STAT_ROOT);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
@@ -746,7 +746,8 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
 {
     MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim);
-    if (outcome == MELEE_HIT_MISS) {
+    if (outcome == MELEE_HIT_MISS)
+    {
         *hitInfo |= HITINFO_MISS;
         return;
     }
@@ -770,65 +771,65 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
     switch (outcome)
     {
-    case MELEE_HIT_CRIT:
-        //*hitInfo = 0xEA;
-        *hitInfo  = HITINFO_HITSTRANGESOUND1 | HITINFO_HITSTRANGESOUND2 | HITINFO_CRITICALHIT
-                    | HITINFO_NORMALSWING2 | 0x8; // 0xEA
-        *damage *= 2;
+        case MELEE_HIT_CRIT:
+            //*hitInfo = 0xEA;
+            *hitInfo  = HITINFO_HITSTRANGESOUND1 | HITINFO_HITSTRANGESOUND2 | HITINFO_CRITICALHIT
+                | HITINFO_NORMALSWING2 | 0x8;               // 0xEA
+            *damage *= 2;
 
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
-        break;
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
+            break;
 
-    case MELEE_HIT_PARRY:
-        *damage = 0;
-        *victimState = 2;
+        case MELEE_HIT_PARRY:
+            *damage = 0;
+            *victimState = 2;
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateDefense();
-        pVictim->m_attackTimer = 0; // parry sets attack timer to 0
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pVictim)->UpdateDefense();
+            pVictim->m_attackTimer = 0;                     // parry sets attack timer to 0
 
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-        break;
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            break;
 
-    case MELEE_HIT_DODGE:
-        *damage = 0;
-        *victimState = 3;
+        case MELEE_HIT_DODGE:
+            *damage = 0;
+            *victimState = 3;
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateDefense();
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pVictim)->UpdateDefense();
 
-        pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-        break;
+            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            break;
 
-    case MELEE_HIT_BLOCK:
-        *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 20));
+        case MELEE_HIT_BLOCK:
+            *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 20));
 
-        if (*blocked_amount < *damage)
+            if (*blocked_amount < *damage)
                 *damage -= *blocked_amount;
-        else
+            else
                 *damage = 0;
 
-        if (pVictim->GetUnitBlockValue())
-            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
-        else
-            pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+            if (pVictim->GetUnitBlockValue())
+                pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+            else
+                pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
-        *victimState = 4;
+            *victimState = 4;
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)pVictim)->UpdateDefense();
-        break;
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)pVictim)->UpdateDefense();
+            break;
 
-    case MELEE_HIT_GLANCING:
-        // 30% reduction at 15 skill diff, no reduction at 5 skill diff
-        int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue() - 5) * 3;
-        if (reducePerc < 70)
+        case MELEE_HIT_GLANCING:
+            // 30% reduction at 15 skill diff, no reduction at 5 skill diff
+            int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue() - 5) * 3;
+            if (reducePerc < 70)
                 reducePerc = 70;
-        *damage = *damage * reducePerc / 100;
-        *hitInfo |= HITINFO_GLANCING;
-        break;
+            *damage = *damage * reducePerc / 100;
+            *hitInfo |= HITINFO_GLANCING;
+            break;
 
-    // TODO: handle crushing blow
+            // TODO: handle crushing blow
     }
 
     for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
@@ -863,7 +864,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                 if(!nocharges)
                     procdamage->procCharges -= 1;
             }
-            else if(procdamage->procFlags == 64 && procdamage->procChance > rand_chance() 
+            else if(procdamage->procFlags == 64 && procdamage->procChance > rand_chance()
                 && (procdamage->procCharges > 0 || nocharges) && *victimState == 4)
             {
                 pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
@@ -1002,9 +1003,9 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         else
             damage = 0;
         DealDamage (pVictim, damage, 0, true);
-		
-        if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive()) 
-        { 
+
+        if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
+        {
             for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
                 ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i),pVictim);
         }
@@ -1038,21 +1039,21 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
     if (tmp > 0 && roll < (sum += (tmp >= 6000 ? 6000 : tmp)))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS"); return MELEE_HIT_MISS; }
 
-    // always crit against a sitting target
-    if (   (pVictim->GetTypeId() == TYPEID_PLAYER)
+        // always crit against a sitting target
+        if (   (pVictim->GetTypeId() == TYPEID_PLAYER)
         && (((Player*)pVictim)->getStandState() & (PLAYER_STATE_SLEEP | PLAYER_STATE_SIT
-                                                   | PLAYER_STATE_SIT_CHAIR
-                                                   | PLAYER_STATE_SIT_LOW_CHAIR
-                                                   | PLAYER_STATE_SIT_MEDIUM_CHAIR
-                                                   | PLAYER_STATE_SIT_HIGH_CHAIR)))
-        { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); return MELEE_HIT_CRIT; }
+        | PLAYER_STATE_SIT_CHAIR
+        | PLAYER_STATE_SIT_LOW_CHAIR
+        | PLAYER_STATE_SIT_MEDIUM_CHAIR
+        | PLAYER_STATE_SIT_HIGH_CHAIR)))
+            { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); return MELEE_HIT_CRIT; }
 
-    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
+            tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); return MELEE_HIT_DODGE; }
 
-    // check if attack comes from behind
-    bool    fromBehind = !pVictim->HasInArc(M_PI,this);
+        // check if attack comes from behind
+        bool    fromBehind = !pVictim->HasInArc(M_PI,this);
     int32   modCrit = 0;
 
     if (fromBehind)
@@ -1060,18 +1061,20 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         // ASSUME +10% crit from behind
         DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind.");
         modCrit += 1000;
-    } else {
+    }
+    else
+    {
         // cannot parry or block attacks from behind
-       tmp = (int32)(pVictim->GetUnitParryChance()*100);
-        if (   (tmp > 0)                        // check if unit _can_ parry
+        tmp = (int32)(pVictim->GetUnitParryChance()*100);
+        if (   (tmp > 0)                                    // check if unit _can_ parry
             && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum); return MELEE_HIT_PARRY; }
 
-        tmp = (int32)(pVictim->GetUnitBlockChance()*100);
-        if (   (tmp > 0)                        // check if unit _can_ block
+            tmp = (int32)(pVictim->GetUnitBlockChance()*100);
+        if (   (tmp > 0)                                    // check if unit _can_ block
             && ((tmp -= skillBonus) > 0)
-             && (roll < (sum += tmp)))
+            && (roll < (sum += tmp)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum); return MELEE_HIT_BLOCK; }
     }
 
@@ -1083,21 +1086,20 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         && (roll < (sum += 4000)))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum); return MELEE_HIT_GLANCING; }
 
-    // FIXME: +skill and +defense has no effect on crit chance in PvP combat
-    tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
+        // FIXME: +skill and +defense has no effect on crit chance in PvP combat
+        tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum); return MELEE_HIT_CRIT; }
 
-    // TODO: crushing blows from mobs
-    //       current data: crushing blows do 150% normal damage
-    //                     possible if mob.level >= player.level + 3
-    //                     also possible if mob.weaponskill >= player.defense + 15
-    //                     15% min. chance at 3 levels difference
+        // TODO: crushing blows from mobs
+        //       current data: crushing blows do 150% normal damage
+        //                     possible if mob.level >= player.level + 3
+        //                     also possible if mob.weaponskill >= player.defense + 15
+        //                     15% min. chance at 3 levels difference
 
-    DEBUG_LOG ("RollMeleeOutcomeAgainst: NORMAL");
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: NORMAL");
     return MELEE_HIT_NORMAL;
 }
-
 
 uint32 Unit::CalculateDamage(bool ranged)
 {
@@ -1320,7 +1322,7 @@ void Unit::_UpdateHostil( uint32 time )
     }
 }
 
-Unit* Unit::SelectHostilTarget() 
+Unit* Unit::SelectHostilTarget()
 {
     if(!m_hostilList.size())
         return NULL;
@@ -1333,7 +1335,6 @@ Unit* Unit::SelectHostilTarget()
     else
         return NULL;
 }
-
 
 void Unit::castSpell( Spell * pSpell )
 {
@@ -1428,7 +1429,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         if (!RemoveNoStackAurasDueToAura(Aur))
         {
             delete Aur;
-            return false; // couldnt remove conflicting aura with higher rank
+            return false;                                   // couldnt remove conflicting aura with higher rank
         }
 
         Aur->_AddAura();
@@ -1492,10 +1493,10 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 
 bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 {
-    if (!Aur) 
+    if (!Aur)
         return false;
     if (!Aur->GetSpellProto()) return false;
-    uint32 spellId = Aur->GetId(); 
+    uint32 spellId = Aur->GetId();
     uint32 effIndex = Aur->GetEffIndex();
     bool is_sec = IsSpellSingleEffectPerCaster(spellId);
     AuraMap::iterator i,next;
@@ -1515,14 +1516,14 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 if (Aur->GetCaster() == (*i).second->GetCaster())
                     if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
                         sec_match = true;
-            
+
             if(IsNoStackSpellDueToSpell(spellId, i_spellId) || sec_match)
             {
                 // if sec_match this isnt always true, needs to be rechecked
                 if (IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
-                        return false; // cannot remove higher rank
-                
+                        return false;                       // cannot remove higher rank
+
                 RemoveAurasDueToSpell(i_spellId);
 
                 if( m_Auras.empty() )
@@ -1530,15 +1531,15 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 else
                     next =  m_Auras.begin();
             }
-            else // Potions stack aura by aura
+            else                                            // Potions stack aura by aura
             if (Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
                 (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION)
             {
                 if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
                 {
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
-                    return false; // cannot remove higher rank
-                    
+                        return false;                       // cannot remove higher rank
+
                     RemoveAura(i);
 
                     if( m_Auras.empty() )
@@ -1558,31 +1559,31 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type)
     for (i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
         if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
-      {
-         if(dispel_type == 1)
-         {
-            bool positive = true;
-            switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
+        {
+            if(dispel_type == 1)
             {
-               case TARGET_S_E:
-               case TARGET_AE_E:
-               case TARGET_AE_E_INSTANT:
-               case TARGET_AC_E:
-               case TARGET_INFRONT:
-               case TARGET_DUELVSPLAYER:
-               case TARGET_AE_E_CHANNEL:
-               case TARGET_AE_SELECTED:
-               positive = false;
-               break;
+                bool positive = true;
+                switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
+                {
+                    case TARGET_S_E:
+                    case TARGET_AE_E:
+                    case TARGET_AE_E_INSTANT:
+                    case TARGET_AC_E:
+                    case TARGET_INFRONT:
+                    case TARGET_DUELVSPLAYER:
+                    case TARGET_AE_E_CHANNEL:
+                    case TARGET_AE_SELECTED:
+                        positive = false;
+                        break;
 
-               default:
-                  positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
+                    default:
+                        positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
+                }
+                if(positive)
+                    continue;
             }
-            if(positive)
-               continue;
-         }
             break;
-      }
+        }
     }
 
     if(i == m_Auras.end()) return;
@@ -1641,7 +1642,7 @@ void Unit::RemoveAura(AuraMap::iterator &i)
     (*i).second->_RemoveAura();
     delete (*i).second;
     m_Auras.erase(i++);
-    m_removedAuras++; // internal count used by unit update
+    m_removedAuras++;                                       // internal count used by unit update
 }
 
 bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
@@ -1730,7 +1731,6 @@ void Unit::ApplyStats(bool apply)
     else
         val2 = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
 
-
     if(!apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
 
@@ -1782,11 +1782,11 @@ void Unit::ApplyStats(bool apply)
     if(getClass() == HUNTER) classrate = 26.5;
     else if(getClass() == ROGUE)  classrate = 14.5;
     else classrate = 20;
-                                                                  ///*+(Defense*0,04);
+                                                            ///*+(Defense*0,04);
     if (getRace() == NIGHTELF)
-   val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate + 1);
-   else
-    val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
+        val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate + 1);
+    else
+        val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
 
     ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);
 
@@ -1994,7 +1994,7 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
         next++;
         if(spellid == 0 || (*i)->GetSpellId() == spellid)
         {
-            if(del) 
+            if(del)
                 (*i)->Delete();
 
             m_gameObj.erase(i);
@@ -2085,9 +2085,9 @@ void Unit::setPowerType(uint8 PowerType)
 FactionTemplateEntry* Unit::getFactionTemplateEntry() const
 {
     FactionTemplateEntry* entry = sFactionTemplateStore.LookupEntry(getFaction());
-    if(!entry) 
+    if(!entry)
     {
-         static uint64 guid = 0; // prevent repeating spam same faction problem
+        static uint64 guid = 0;                             // prevent repeating spam same faction problem
 
         if(GetGUID() != guid)
         {
@@ -2100,7 +2100,6 @@ FactionTemplateEntry* Unit::getFactionTemplateEntry() const
     }
     return entry;
 }
-
 
 bool Unit::Attack(Unit *victim)
 {
@@ -2134,7 +2133,7 @@ bool Unit::AttackStop()
 
 bool Unit::isInCombatWithPlayer() const
 {
-    if(getVictim() && getVictim()->GetTypeId() == TYPEID_PLAYER) 
+    if(getVictim() && getVictim()->GetTypeId() == TYPEID_PLAYER)
         return true;
 
     for(AttackerSet::const_iterator i = m_attackers.begin(); i != m_attackers.end(); ++i)
@@ -2184,7 +2183,7 @@ Creature* Unit::GetPet() const
         return NULL;
 }
 
-void Unit::SetPet(Creature* pet) 
-{ 
-    SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0); 
+void Unit::SetPet(Creature* pet)
+{
+    SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
 }

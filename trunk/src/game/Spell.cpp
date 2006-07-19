@@ -221,8 +221,8 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_FEED_PET:
                     SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
                     break;
-                case SPELL_EFFECT_APPLY_AREA_AURA: 
-                    if(m_spellInfo->Attributes == 0x9050000) // AreaAura
+                case SPELL_EFFECT_APPLY_AREA_AURA:
+                    if(m_spellInfo->Attributes == 0x9050000)// AreaAura
                         SetTargetMap(i,TARGET_AF_P,tmpUnitMap,tmpItemMap,tmpGOMap);
                     break;
                 default:
@@ -359,7 +359,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i,PUSH_DEST_CENTER);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, TypeMapContainer<AllObjectTypes> > object_notifier(notifier);
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId())); 
+                cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId()));
             }
         }break;
         case TARGET_MINION:
@@ -445,7 +445,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 {
                     Unit* Target = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(p));
                     if(targetPlayer->GetDistanceSq(Target) < radius * radius &&
-                       targetPlayer->getClass() == Target->getClass())
+                        targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -599,7 +599,7 @@ void Spell::cast()
         }
 
         if(needspelllog) SendLogExecute();
-        
+
         bool canreflect = false;
         for(int j=0;j<3;j++)
         {
@@ -612,7 +612,7 @@ void Spell::cast()
                 case TARGET_INFRONT:
                 case TARGET_DUELVSPLAYER:
                 case TARGET_AE_E_CHANNEL:
-                //case TARGET_AE_SELECTED:
+                    //case TARGET_AE_SELECTED:
                     canreflect = true;
                     break;
 
@@ -674,7 +674,7 @@ void Spell::SendSpellCooldown()
                 data << uint32((*itr)->spellId);
                 if ((*itr)->spellId != m_spellInfo->Id || m_spellInfo->RecoveryTime == 0)
                     data << uint32(m_spellInfo->CategoryRecoveryTime);
-                else 
+                else
                     data << uint32(m_spellInfo->RecoveryTime);
             }
         }
@@ -1028,7 +1028,7 @@ void Spell::TakeCastItem()
     ItemPrototype *proto = m_CastItem->GetProto();
     uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
-    
+
     if (ItemClass == ITEM_CLASS_CONSUMABLE)
     {
         ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
@@ -1042,7 +1042,7 @@ void Spell::TakeCastItem()
 
 void Spell::TakePower()
 {
-    if(m_CastItem) 
+    if(m_CastItem)
         return;
 
     uint16 powerField;
@@ -1213,13 +1213,13 @@ uint8 Spell::CanCast()
         }
         if(unitTarget->m_immuneToSchool & m_school)
             castResult = CAST_FAIL_IMMUNE;
-        
+
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass > 0)
         {
             Item *pitem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0,INVTYPE_WEAPON);
             if(!pitem)
                 castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
-            else if(pitem->GetProto()->Class != m_spellInfo->EquippedItemClass) 
+            else if(pitem->GetProto()->Class != m_spellInfo->EquippedItemClass)
                 castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
             else if(!(pitem->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
                 castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
@@ -1249,14 +1249,14 @@ uint8 Spell::CanCast()
     for (int i = 0; i < 3; i++)
     {
         // for effects of spells that have only one target
-        switch(m_spellInfo->Effect[i]) 
+        switch(m_spellInfo->Effect[i])
         {
             case SPELL_EFFECT_TAMECREATURE:
             {
                 if (!unitTarget) return CAST_FAIL_FAILED;
                 if (unitTarget->GetTypeId() == TYPEID_PLAYER) return CAST_FAIL_FAILED;
                 if (unitTarget->getLevel() > m_caster->getLevel())
-                {        
+                {
                     castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
                     break;
                 }
@@ -1374,7 +1374,7 @@ uint8 Spell::CanCast()
 
                     FactionTemplateResolver my_faction = m_caster->getFactionTemplateEntry();
                     FactionTemplateResolver its_faction = (*itr)->getFactionTemplateEntry();
-                    if( my_faction.IsFriendlyTo(its_faction) ) 
+                    if( my_faction.IsFriendlyTo(its_faction) )
                         continue;
 
                     if((*itr)->GetTypeId() != TYPEID_PLAYER)
@@ -1412,13 +1412,13 @@ uint8 Spell::CheckRange()
     {
         float dist = m_caster->GetDistanceSq(target);
         if(dist > max_range * max_range)
-            return CAST_FAIL_OUT_OF_RANGE;            //0x56;
+            return CAST_FAIL_OUT_OF_RANGE;                  //0x56;
         if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
         if(m_caster != target && !m_caster->isInFront( target, max_range))
             return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
     }
-    
+
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destY != 0)
     {
         float dist = m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
@@ -1428,9 +1428,8 @@ uint8 Spell::CheckRange()
             return CAST_FAIL_TOO_CLOSE;
     }
 
-    return 0; // ok
+    return 0;                                               // ok
 }
-
 
 uint8 Spell::CheckItems()
 {
@@ -1541,7 +1540,7 @@ uint8 Spell::CheckItems()
 
     for(int i = 0; i < 3; i++)
     {
-        switch (m_spellInfo->Effect[i]) 
+        switch (m_spellInfo->Effect[i])
         {
             case SPELL_EFFECT_CREATE_ITEM:
             {
@@ -1552,7 +1551,7 @@ uint8 Spell::CheckItems()
                     if (msg != EQUIP_ERR_OK )
                     {
                         p_caster->SendEquipError( msg, NULL, NULL );
-                        return uint8(CAST_FAIL_FAILED); // TODO: don't show two errors
+                        return uint8(CAST_FAIL_FAILED);     // TODO: don't show two errors
                     }
                 }
                 break;
@@ -1577,7 +1576,7 @@ uint8 Spell::CheckItems()
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
                 break;
             }
-         default:break;
+            default:break;
         }
     }
 
@@ -1646,7 +1645,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
 
 void Spell::Delayed(int32 delaytime)
 {
-    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER) 
+    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
     m_timer += delaytime;

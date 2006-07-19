@@ -461,7 +461,7 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
         data << uint32(pQuest->GetQuestInfo()->RewChoiceItemCount[i]);
 
         if ( pItem )
-            data << uint32(pItem->DisplayInfoID); 
+            data << uint32(pItem->DisplayInfoID);
         else
             data << uint32(0);
     }
@@ -473,7 +473,7 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
         data << uint32(pQuest->GetQuestInfo()->RewItemId[i]) << uint32(pQuest->GetQuestInfo()->RewItemCount[i]);
 
         if ( pItem )
-            data << uint32(pItem->DisplayInfoID); 
+            data << uint32(pItem->DisplayInfoID);
         else
             data << uint32(0);
     }

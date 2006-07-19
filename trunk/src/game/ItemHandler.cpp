@@ -591,7 +591,6 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
 {
     sLog.outDebug("WORLD: CMSG_BUY_BANK_SLOT");
 
-
     uint32 bank = _player->GetUInt32Value(PLAYER_BYTES_2);
     uint32 result = (bank & 0x70000) >> 16;
 

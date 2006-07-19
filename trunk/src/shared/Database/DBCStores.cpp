@@ -126,13 +126,12 @@ void LoadDBCStores(std::string dataPath)
     else
         not_found_dbc_files.push_back("dbc/SpellDuration.dbc");
 
-
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellFocusObject.dbc");
     if(sSpellFocusObject.Load(tmpPath.c_str()))
         bar.step();
     else
-        not_found_dbc_files.push_back("dbc/SpellFocusObject.dbc"); 
+        not_found_dbc_files.push_back("dbc/SpellFocusObject.dbc");
 
     tmpPath=dataPath;
     tmpPath.append("dbc/SpellItemEnchantment.dbc");
@@ -183,9 +182,6 @@ void LoadDBCStores(std::string dataPath)
     sLog.outString( "" );
 }
 
-
-
-
 float GetRadius(SpellRadius *radius)
 {
     if(radius)
@@ -227,6 +223,7 @@ int32 GetDuration(SpellEntry *spellInfo)
         return 0;
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
+
 uint32 FindSpellRank(uint32 spellId)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -234,14 +231,14 @@ uint32 FindSpellRank(uint32 spellId)
     int rankfield = -1;
     uint32 rank = 0;
     for(int i=0;i<8;i++)
-    if(spellInfo->Rank[i] > 0)
+        if(spellInfo->Rank[i] > 0)
     {
         rankfield = i;
         break;
     }
     if(rankfield < 0)
         return 0;
-    if(rankfield == 0)//english client
+    if(rankfield == 0)                                      //english client
     {
         switch(spellInfo->Rank[rankfield])
         {
@@ -261,15 +258,15 @@ uint32 FindSpellRank(uint32 spellId)
             case 134282:rank = 14;break;
             case 134290:rank = 15;break;
             case 146442:rank = 16;break;
-            case 59695:rank = 1;break;//rank of profession skill.
+            case 59695:rank = 1;break;                      //rank of profession skill.
             case 46478:rank = 2;break;
             case 84128:rank = 3;break;
             case 274133:rank = 4;break;
-            case 822:rank = 0;break;//spell from creating related to race 
+            case 822:rank = 0;break;                        //spell from creating related to race
             default:rank = 0;break;
         }
     }
-    if(rankfield == 4)//chinese client
+    if(rankfield == 4)                                      //chinese client
     {
         switch(spellInfo->Rank[rankfield])
         {
@@ -289,25 +286,26 @@ uint32 FindSpellRank(uint32 spellId)
             case 129146:rank = 14;break;
             case 129156:rank = 15;break;
             case 140190:rank = 16;break;
-            case 49393:rank = 1;break;//rank of profession skill.
+            case 49393:rank = 1;break;                      //rank of profession skill.
             case 49400:rank = 2;break;
             case 83240:rank = 3;break;
             case 256953:rank = 4;break;
-            case 797:rank = 0;break;//spell from creating related to race 
+            case 797:rank = 0;break;                        //spell from creating related to race
             default:rank = 0;break;
         }
     }
     return rank;
 }
+
 bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2)
 {
     SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
     if(!spellInfo_1 || !spellInfo_2) return false;
     if(spellInfo_1->Id == spellId_2) return false;
 
-    for(int i=0;i<8;i++) 
-    if (spellInfo_1->SpellNameIndex[i] != spellInfo_2->SpellNameIndex[i]) 
-        return false;
+    for(int i=0;i<8;i++)
+        if (spellInfo_1->SpellNameIndex[i] != spellInfo_2->SpellNameIndex[i])
+            return false;
     return true;
 }
 
@@ -316,33 +314,33 @@ bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     SpellEntry *spellInfo_1 = sSpellStore.LookupEntry(spellId_1);
     SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
 
-    if(!spellInfo_1 || !spellInfo_2) 
+    if(!spellInfo_1 || !spellInfo_2)
         return false;
 
-    if(spellInfo_1->Id == spellId_2) 
+    if(spellInfo_1->Id == spellId_2)
         return false;
 
-    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID && 
+    if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
         spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
         return true;
 
-    if (IsRankSpellDueToSpell(spellInfo_1, spellId_2)) 
+    if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
         return true;
 
     if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
-         return false;
+        return false;
 
     if (spellInfo_1->SpellFamilyName != spellInfo_2->SpellFamilyName)
-         return false;
+        return false;
 
     for (int i = 0; i < 3; ++i)
         if (spellInfo_1->Effect[i] != spellInfo_2->Effect[i] ||
-            spellInfo_1->EffectItemType[i] != spellInfo_2->EffectItemType[i] ||
-            spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i] ||
-            spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i])
+        spellInfo_1->EffectItemType[i] != spellInfo_2->EffectItemType[i] ||
+        spellInfo_1->EffectMiscValue[i] != spellInfo_2->EffectMiscValue[i] ||
+        spellInfo_1->EffectApplyAuraName[i] != spellInfo_2->EffectApplyAuraName[i])
             return false;
 
-     return true;
+    return true;
 }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2)
@@ -387,11 +385,11 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         for (int i = 0; i < 3; i++)
         {
             // only paladin auras have this
-            if (spellInfo->Effect[i] == 35)//SPELL_EFFECT_APPLY_AREA_AURA 
+            if (spellInfo->Effect[i] == 35)                 //SPELL_EFFECT_APPLY_AREA_AURA
                 return SPELL_AURA;
             // only paladin blessings / greater blessings have this
-            if (spellInfo->EffectImplicitTargetA[i] == 21//TARGET_S_F
-                ||spellInfo->EffectImplicitTargetA[i] == 57//TARGET_S_F_2
+            if (spellInfo->EffectImplicitTargetA[i] == 21   //TARGET_S_F
+                ||spellInfo->EffectImplicitTargetA[i] == 57 //TARGET_S_F_2
                 ||spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC
                 return SPELL_BLESSING;
         }
@@ -399,13 +397,13 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
     // only warlock curses have this
     if(spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
-        if (spellInfo->Dispel == 2)//IMMUNE_DISPEL_CURSE
+        if (spellInfo->Dispel == 2)                         //IMMUNE_DISPEL_CURSE
             return SPELL_CURSE;
 
     if(spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER)
     {
         // only hunter stings have this
-        if (spellInfo->Dispel == 4)//IMMUNE_DISPEL_POISON
+        if (spellInfo->Dispel == 4)                         //IMMUNE_DISPEL_POISON
             return SPELL_STING;
         // only hunter aspects have this
         if (spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && spellInfo->activeIconID == 122)
@@ -417,7 +415,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
 bool IsSpellSingleEffectPerCaster(uint32 spellId)
 {
-    switch(GetSpellSpecific(spellId)) {
+    switch(GetSpellSpecific(spellId))
+    {
         case SPELL_SEAL:
         case SPELL_BLESSING:
         case SPELL_AURA:
