@@ -433,17 +433,18 @@ void Object::SetFloatValue( uint16 index, const float &value )
 void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 {
     int32 cur = GetUInt32Value(index);
-    if(!apply && val > cur ) val = cur;
-
-    SetUInt32Value(index,cur+(apply ? val : -val));
+    cur += (apply ? val : -val);
+    if(cur < 0) cur = 0;
+    SetUInt32Value(index,cur);
 }
 
 void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
-    if(val > cur && !apply ) val = cur;
+    cur += (apply ? val : -val);
+    if(cur < 0) cur = 0;
 
-    SetFloatValue(index,cur+(apply ? val : -val));
+    SetFloatValue(index,cur);
 }
 
 void Object::SetFlag( uint16 index, uint32 newFlag )
