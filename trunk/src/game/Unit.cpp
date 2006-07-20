@@ -1188,7 +1188,8 @@ void Unit::_UpdateSpells( uint32 time )
             }
             else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
             {
-                if(m_currentSpell->CheckRange() == 0)
+                // recheck range and req. items (ammo and gun, etc)
+                if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
                 {
                     m_currentSpell->setState(SPELL_STATE_PREPARING);
                     m_currentSpell->ReSetTimer();

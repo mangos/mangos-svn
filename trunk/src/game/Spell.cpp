@@ -1333,24 +1333,6 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_FAILED;
                 break;
             }
-            case SPELL_EFFECT_WEAPON_DAMAGE:
-            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-            {
-                if(m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
-                if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
-                    break;
-                Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-                uint32 type = pItem->GetProto()->InventoryType;
-                uint32 ammo;
-                if( type == INVTYPE_THROWN )
-                    ammo = pItem->GetEntry();
-                else
-                    ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
-
-                if( !((Player*)m_caster)->HasItemCount( ammo, 1 ) )
-                    return CAST_FAIL_NO_AMMO;
-                break;
-            }
             default:break;
         }
 
@@ -1591,6 +1573,27 @@ uint8 Spell::CheckItems()
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
                 if(itemTarget->GetProto()->Class != 2 && itemTarget->GetProto()->Class != 4)
                     return CAST_FAIL_CANT_BE_DISENCHANTED;
+                break;
+            }
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            {
+                if(m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
+                if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
+                    break;
+                Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+                if(!pItem)
+                    return CAST_FAIL_MUST_HAVE_ITEM_EQUIPPED;
+
+                uint32 type = pItem->GetProto()->InventoryType;
+                uint32 ammo;
+                if( type == INVTYPE_THROWN )
+                    ammo = pItem->GetEntry();
+                else
+                    ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
+
+                if( !((Player*)m_caster)->HasItemCount( ammo, 1 ) )
+                    return CAST_FAIL_NO_AMMO;
                 break;
             }
             default:break;

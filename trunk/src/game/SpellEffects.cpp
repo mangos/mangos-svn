@@ -1400,6 +1400,9 @@ void Spell::EffectWeaponDmg(uint32 i)
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+            if(!pItem)
+                return;
+
             uint32 type = pItem->GetProto()->InventoryType;
             uint32 ammo;
             if( type == INVTYPE_THROWN )
