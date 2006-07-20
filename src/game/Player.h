@@ -77,6 +77,12 @@ enum Races
     GOBLIN = 9,
 };
 
+enum SpellModType
+{
+    SPELLMOD_FLAT = 107,
+    SPELLMOD_PCT = 108
+};
+
 struct PlayerSpell
 {
     uint16 spellId;

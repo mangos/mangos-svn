@@ -181,12 +181,6 @@ enum ShapeshiftForm
     FORM_MOONKIN          = 31
 };
 
-enum SpellModType
-{
-    SPELLMOD_FLAT = 107,
-    SPELLMOD_PCT = 108
-};
-
 enum SpellModOp
 {
     SPELLMOD_DAMAGE = 0,
