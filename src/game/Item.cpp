@@ -166,8 +166,6 @@ Item::Item( )
     m_objectTypeId = TYPEID_ITEM;
 
     m_valuesCount = ITEM_END;
-    m_owner = 0;
-    m_bindedWith = 0;
     m_slot = 0;
 }
 
@@ -440,7 +438,6 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4, m_itemProto->Spells[4].SpellCharges);
     SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
     SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay);
-    SetOwner(owner);
     return true;
 }
 
@@ -486,10 +483,6 @@ bool Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
     delete result;
 
-    // temporary solution while correct binding save not implemented
-    if( GetProto()->Bonding != NO_BIND )
-        SetBindingWith( GetOwner() );
-
     return true;
 }
 
@@ -502,6 +495,12 @@ ItemPrototype *Item::GetProto() const
 {
     return objmgr.GetItemPrototype(GetUInt32Value(OBJECT_FIELD_ENTRY));
 }
+
+Player* Item::GetOwner()const
+{
+    return objmgr.GetPlayer(GetOwnerGUID());
+}
+
 
 uint32 Item::GetSkill()
 {

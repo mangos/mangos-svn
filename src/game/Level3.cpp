@@ -1050,7 +1050,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         // remove binding (let GM give it to another player)
         Item* item = pl->GetItemByPos(dest);
         if(item)
-            item->SetBindingWith(0);
+            item->SetBinding( false );
 
         PSendSysMessage(LANG_ITEM_CREATED, itemId, count);
     }
@@ -1111,7 +1111,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
             // remove binding (let GM give it to another player)
             Item* item = pl->GetItemByPos(dest);
             if(item)
-                item->SetBindingWith(0);
+                item->SetBinding( false );
 
             PSendSysMessage(LANG_ITEM_CREATED, itemId, 1);
         }

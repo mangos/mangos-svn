@@ -370,8 +370,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     WPAssert(GetPlayer());
 
     // if player is resting stop resting
-    if(GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-        GetPlayer()->RemoveFlag(PLAYER_FLAGS, 0x20);
+    GetPlayer()->RemoveFlag(PLAYER_FLAGS, 0x20);
 
     recv_data >> newZone;
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);

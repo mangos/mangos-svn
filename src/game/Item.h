@@ -131,12 +131,12 @@ class MANGOS_DLL_SPEC Item : public Object
 
         ItemPrototype* GetProto() const;
 
-        Player* GetOwner() const { return m_owner; }
-        void SetOwner(Player *owner) { m_owner = owner; }
+        uint64 const& GetOwnerGUID()    const { return GetUInt64Value(ITEM_FIELD_OWNER); }
+        void SetOwnerGUID(uint64 guid) { SetUInt64Value(ITEM_FIELD_OWNER, guid); }
+        Player* GetOwner()const;
 
-        Player* GetBindedWith() const { return m_bindedWith; }
-        void SetBindingWith(Player* pl) { m_bindedWith = pl; }
-        bool IsBindedNotWith(Player const* pl) const { return  m_bindedWith != 0 && m_bindedWith != pl; }
+        void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS,ITEM_FLAGS_BINDED,val); }
+        bool IsBindedNotWith(uint64 guid) const { return  HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) && GetOwnerGUID()!= guid; }
 
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint32 auctioncheck);
@@ -159,7 +159,5 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetSpell();
     private:
         uint32 m_slot;
-        Player *m_owner;
-        Player *m_bindedWith;
 };
 #endif

@@ -5315,7 +5315,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
             Bag *pBag;
             ItemPrototype *pBagProto;
             uint16 pos;
-            if(pItem->IsBindedNotWith(this))
+            if(pItem->IsBindedNotWith(GetGUID()))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == 0 )
             {
@@ -5678,7 +5678,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
             Bag *pBag;
             ItemPrototype *pBagProto;
             uint16 pos;
-            if( pItem->IsBindedNotWith(this) )
+            if( pItem->IsBindedNotWith(GetGUID()) )
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( bag == 0 )
             {
@@ -6002,7 +6002,7 @@ uint8 Player::CanUseItem( Item *pItem, bool check_alive ) const
         ItemPrototype *pProto = pItem->GetProto();
         if( pProto )
         {
-            if( pItem->IsBindedNotWith(this) )
+            if( pItem->IsBindedNotWith(GetGUID()) )
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
             if( (pProto->AllowableClass & getClassMask()) == 0 || (pProto->AllowableRace & getRaceMask()) == 0 )
                 return EQUIP_ERR_YOU_CAN_NEVER_USE_THAT_ITEM;
@@ -6083,7 +6083,7 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
     if( pItem )
     {
         if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
-            pItem->SetBindingWith( this );
+            pItem->SetBinding( true );
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -6136,7 +6136,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
     {
         // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
         if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
-            pItem->SetBindingWith( this );
+            pItem->SetBinding( true );
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -6208,6 +6208,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 pBag->RemoveItem(slot, update);
         }
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
+        pItem->SetUInt64Value( ITEM_FIELD_OWNER, 0 );
         pItem->SetSlot( NULL_SLOT );
         if( IsInWorld() && update )
             pItem->SendUpdateToPlayer( this );
@@ -6278,7 +6279,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     if( pItem )
     {
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
-        pItem->SetOwner(0);
+        pItem->SetOwnerGUID(0);
         pItem->SetSlot( 0 );
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         pItem->DeleteFromDB();
@@ -8010,7 +8011,6 @@ void Player::_LoadInventory()
             }
 
             Item *item = NewItemOrBag(proto);
-            item->SetOwner(this);
             item->SetSlot(slot);
 
             if(!item->LoadFromDB(item_guid, 1))
