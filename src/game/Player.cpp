@@ -382,8 +382,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
     }
 
-    // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
-    _ApplyStatsMods();
+    // apply original stats mods before item equipment that call before equip _RemoveStatsMods()  
+    _ApplyStatsMods();  
 
     uint16 dest;
     uint8 msg;
@@ -1803,15 +1803,6 @@ void Player::DeleteFromDB()
 
 }
 
-void Player::DeleteCorpse()
-{
-    if(m_pCorpse)
-    {
-        MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
-        m_pCorpse = NULL;
-    }
-}
-
 void Player::SetMovement(uint8 pType)
 {
     WorldPacket data;
@@ -1966,7 +1957,6 @@ void Player::BuildPlayerRepop()
 
     SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
 
-    CreateCorpse();
 }
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
@@ -2026,17 +2016,18 @@ void Player::KillPlayer()
 
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
+
+    // create the body
+    CreateCorpse();
+
+    // save body in db
+    m_pCorpse->SaveToDB();
+
 }
 
 void Player::CreateCorpse()
 {
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
-
-    if(m_pCorpse)
-    {
-        m_pCorpse->DeleteFromDB();
-        DeleteCorpse();
-    }
 
     m_pCorpse = new Corpse();
     if(!m_pCorpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
@@ -2106,8 +2097,6 @@ void Player::SpawnCorpseBones()
     GetSession()->SendPacket(&data);
 
     m_pCorpse->SaveToDB(true);
-
-    DeleteCorpse();
 }
 
 void Player::DeathDurabilityLoss(double percent)
@@ -7954,14 +7943,12 @@ void Player::_LoadBids()
 
 void Player::_LoadCorpse()
 {
-    // TODO do we need to load all corpses ?
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE `player` = '%u' AND `bones_flag` = '0';",GetGUIDLow());
 
     if(!result) return;
 
     Field *fields = result->Fetch();
 
-    DeleteCorpse();
     m_pCorpse = new Corpse();
 
     float positionX = fields[2].GetFloat();
