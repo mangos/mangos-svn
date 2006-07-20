@@ -480,6 +480,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void SetStateFlag(uint32 index, uint32 newFlag );
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
         void ApplyStats(bool apply);
+        void UnsummonTotem(int8 slot = -1);
 
     protected:
         Unit ( );

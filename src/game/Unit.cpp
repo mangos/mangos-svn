@@ -2187,3 +2187,29 @@ void Unit::SetPet(Creature* pet)
 {
     SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
 }
+
+
+void Unit::UnsummonTotem(int8 slot)
+{
+    uint64 t_guids[4] = { m_TotemSlot1, m_TotemSlot2, m_TotemSlot3, m_TotemSlot4 };
+    WorldPacket data;
+    
+    for (int8 i = 0; i < 4; i++)
+    {
+        if (i != slot && slot != -1) continue;
+        Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*this, t_guids[i]);
+
+        if(OldTotem)
+        {
+            data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
+            data << t_guids[i];
+            SendMessageToSet(&data, true);
+
+            data.Initialize(SMSG_DESTROY_OBJECT);
+            data << t_guids[i];
+            SendMessageToSet(&data, true);
+            MapManager::Instance().GetMap(OldTotem->GetMapId())->Remove(OldTotem, true);
+            OldTotem = NULL;
+        }
+    }
+}

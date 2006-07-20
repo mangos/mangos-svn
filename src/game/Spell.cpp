@@ -124,7 +124,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 {
     ASSERT( Caster != NULL && info != NULL );
 
-    SpellEntry *spellInfo;
+    //SpellEntry *spellInfo;
     Player* p_caster;
 
     m_spellInfo = info;
@@ -153,6 +153,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     if( m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
     {
         p_caster = (Player*)m_caster;
+        /*
         PlayerSpellList const& player_spells = p_caster->getSpellList();
         for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
         {
@@ -165,6 +166,8 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
                 }
             }
         }
+        */
+        p_caster->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
     }
 
     m_timer = casttime<0?0:casttime;
@@ -656,12 +659,19 @@ void Spell::SendSpellCooldown()
 
     Player* _player = (Player*)m_caster;
 
+    int32 rec = m_spellInfo->RecoveryTime;
+    int32 catrec = m_spellInfo->CategoryRecoveryTime;
+    _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
+    _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
+	if (rec < 0) rec = 0;
+	if (catrec < 0) catrec = 0;
+
     WorldPacket data;
 
     data.clear();
     data.Initialize(SMSG_SPELL_COOLDOWN);
     data << m_caster->GetGUID();
-    if (m_spellInfo->CategoryRecoveryTime > 0)
+    if (catrec > 0)
     {
         PlayerSpellList const& player_spells = _player->getSpellList();
         for (PlayerSpellList::const_iterator itr = player_spells.begin(); itr != player_spells.end(); ++itr)
@@ -672,17 +682,17 @@ void Spell::SendSpellCooldown()
             if( spellInfo->Category == m_spellInfo->Category)
             {
                 data << uint32((*itr)->spellId);
-                if ((*itr)->spellId != m_spellInfo->Id || m_spellInfo->RecoveryTime == 0)
-                    data << uint32(m_spellInfo->CategoryRecoveryTime);
+                if ((*itr)->spellId != m_spellInfo->Id || rec == 0)
+                    data << uint32(catrec);
                 else
-                    data << uint32(m_spellInfo->RecoveryTime);
+                    data << uint32(rec);
             }
         }
     }
-    else if (m_spellInfo->RecoveryTime > 0)
+    else if (rec > 0)
     {
         data << uint32(m_spellInfo->Id);
-        data << uint32(m_spellInfo->RecoveryTime);
+        data << uint32(rec);
     }
     _player->GetSession()->SendPacket(&data);
 }
@@ -1061,12 +1071,16 @@ void Spell::TakePower()
     }
 
     uint32 currentPower = m_caster->GetUInt32Value(powerField);
+    uint32 manaCost = m_spellInfo->manaCost;
 
-    if(currentPower < m_spellInfo->manaCost)
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
+
+    if(currentPower < manaCost)
         m_caster->SetUInt32Value(powerField, 0);
     else
     {
-        m_caster->SetUInt32Value(powerField, currentPower - m_spellInfo->manaCost);
+        m_caster->SetUInt32Value(powerField, currentPower - manaCost);
         if (powerField == UNIT_FIELD_POWER1)
         {
             // Set the five second timer
@@ -1406,6 +1420,9 @@ uint8 Spell::CheckRange()
     float max_range = GetMaxRange(srange);
     float min_range = GetMinRange(srange);
 
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range);
+
     Unit *target = m_targets.getUnitTarget();
 
     if(target)
@@ -1608,6 +1625,9 @@ uint32 Spell::CalculateDamage(uint8 i)
             m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
     }
 
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, value);
+
     return value;
 }
 
@@ -1686,5 +1706,4 @@ void Spell::reflect(Unit *refunit)
     SpellCastTargets targets;
     targets.setUnitTarget( m_caster );
     spell->prepare(&targets);
-
 }

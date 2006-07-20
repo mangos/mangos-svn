@@ -84,7 +84,16 @@ struct PlayerSpell
     uint8 active;
 };
 
+struct SpellModifier
+{
+    uint8 op;
+    uint8 type;
+    int32 value;
+    uint32 mask;
+};
+
 typedef std::list<PlayerSpell*> PlayerSpellList;
+typedef std::list<SpellModifier*> SpellModList;
 
 struct actions
 {
@@ -529,6 +538,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
         PlayerSpellList const& getSpellList() { return m_spells; };
+
+        SpellModList *getSpellModList(int op) { return &m_spellMods[op]; }
+        int32 GetTotalFlatMods(uint32 spellId, uint8 op);
+        int32 GetTotalPctMods(uint32 spellId, uint8 op);
+        template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
+
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
@@ -880,6 +895,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<Mail*> m_mail;
         PlayerSpellList m_spells;
         std::list<struct actions> m_actions;
+        SpellModList m_spellMods[32];
 
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
@@ -936,4 +952,28 @@ inline uint32 urand(uint32 min, uint32 max)
 
 void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype *proto);
+
+// "the bodies of template functions must be made available in a header file"
+template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo) return 0;
+    T totalpct = 0;
+    T totalflat = 0;
+    for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
+    {
+        SpellModifier *mod = *itr;
+        if (!mod) continue;
+        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0) continue;
+        if (mod->type == SPELLMOD_FLAT)
+            totalflat += mod->value;
+        else if (mod->type == SPELLMOD_PCT)
+            totalpct += mod->value;
+    }
+
+    basevalue *= (100.0f+totalpct)/100.0f;
+    basevalue += totalflat;
+    return basevalue*totalpct/100.0f + totalflat; // diff
+}
+
 #endif
