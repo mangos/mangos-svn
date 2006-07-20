@@ -139,7 +139,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-    if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
+    if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {                                                       //in city no root no lock rotate
         data.Initialize( SMSG_FORCE_MOVE_ROOT );
         data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
@@ -370,7 +370,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     WPAssert(GetPlayer());
 
     // if player is resting stop resting
-    GetPlayer()->RemoveFlag(PLAYER_FLAGS, 0x20);
+    GetPlayer()->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     recv_data >> newZone;
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
@@ -871,9 +871,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         result = sDatabase.PQuery("SELECT * FROM `areatrigger_city` WHERE `id` = '%u';", Trigger_ID);
     if(result)
     {
-        // player flag 0x20 - resting
-        if(!GetPlayer()->HasFlag(PLAYER_FLAGS, 0x20))
-            GetPlayer()->SetFlag(PLAYER_FLAGS, 0x20);
+        GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
     }
     else if(AreaTrigger * at = objmgr.GetAreaTrigger(Trigger_ID))
     {

@@ -203,7 +203,7 @@ namespace MaNGOS
                 xp_gain *= rate;                            //*= u->GetEliteLevel()/2 + 1
                 pl->SetRestTime( (pl->GetRestTime() > rate * 600000) ? pl->GetRestTime() - rate * 600000 : 0 );
                 if(pl->GetRestTime() <=0)
-                    pl->RemoveFlag(PLAYER_FLAGS, 0x20);
+                    pl->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
             }
 
             return (uint32)(xp_gain*sWorld.getRate(RATE_XP));

@@ -450,16 +450,22 @@ void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 void Object::SetFlag( uint16 index, uint32 newFlag )
 {
     ASSERT( index < m_valuesCount );
-    m_uint32Values[ index ] |= newFlag;
+    uint32 oldval = m_uint32Values[ index ];
+    uint32 newval = oldval | newFlag;
 
-    if(m_inWorld)
+    if(oldval != newval)
     {
-        m_updateMask.SetBit( index );
+        m_uint32Values[ index ] = newval;
 
-        if(!m_objectUpdated)
+        if(m_inWorld)
         {
-            ObjectAccessor::Instance().AddUpdateObject(this);
-            m_objectUpdated = true;
+            m_updateMask.SetBit( index );
+
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
         }
     }
 }

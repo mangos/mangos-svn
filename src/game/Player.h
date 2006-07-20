@@ -210,6 +210,12 @@ enum TYPE_OF_KILL
     DISHONORABLE_KILL = 2,
 };
 
+enum PlayerFlags
+{
+    PLAYER_FLAGS_GHOST   = 0x10,
+    PLAYER_FLAGS_RESTING = 0x20,
+};
+
 #define IS_BACK_SLOT(s) (s == 0xFF)
 
 class Quest;

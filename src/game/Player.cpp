@@ -703,7 +703,7 @@ void Player::Update( uint32 p_time )
         // Not attacking or attacked
     }
 
-    if(HasFlag(PLAYER_FLAGS, 0x20))
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
         m_restTime ++;
 
     if(m_regenTimer > 0)
@@ -1961,7 +1961,7 @@ void Player::BuildPlayerRepop()
 
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1000000);          //Set standing so always be standing
 
-    SetUInt32Value(PLAYER_FLAGS, 0x10);
+    SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
 
     CreateCorpse();
 }
@@ -1977,7 +1977,7 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 void Player::ResurrectPlayer()
 {
     // remove death flag + set aura
-    RemoveFlag(PLAYER_FLAGS, 0x10);
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
 
     // return the PvP enable flag to normal
     SetPvP( GetPvP() );
@@ -8222,7 +8222,7 @@ void Player::SaveToDB()
 
     //remove restflag when save
     //this is becouse of the rename char stuff
-    RemoveFlag(PLAYER_FLAGS, 0x20);
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
     outDebugValues();
