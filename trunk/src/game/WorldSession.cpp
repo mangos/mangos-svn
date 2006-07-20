@@ -175,9 +175,6 @@ void WorldSession::LogoutPlayer(bool Save)
             }
             _player->SaveToDB();
 
-            // TODO only if time field is not 0
-            //  and passed certain ammount of time
-            //  _player->DeleteCorpse();
         }
         delete _player;
         _player = 0;
