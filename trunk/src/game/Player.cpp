@@ -382,6 +382,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
     }
 
+    // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
+    _ApplyStatsMods();
+
     uint16 dest;
     uint8 msg;
     Item *pItem;
@@ -3172,8 +3175,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if(!proto) return;
 
-    _RemoveStatsMods();
-
     sLog.outString("applying mods for item %u ",item->GetGUIDLow());
     if(proto->ItemSet)
     {
@@ -3182,6 +3183,8 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         else
             RemoveItemsSetItem(this,proto);
     }
+
+    _RemoveStatsMods();
 
     int32 val;
     std::string typestr;
