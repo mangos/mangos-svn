@@ -291,6 +291,9 @@ void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 misc
     m_modifier.m_miscvalue = miscValue;
     m_modifier.m_miscvalue2 = miscValue2;
     m_modifier.periodictime = pt;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player *)m_caster)->ApplySpellMod(m_spellId,SPELLMOD_ALL_EFFECTS, m_modifier.m_amount);
 }
 
 void Aura::Update(uint32 diff)
@@ -654,63 +657,76 @@ void Aura::HandleAddModifier(bool apply)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data;
+    Player *p_target = (Player *)m_target;
 
     SpellEntry *spellInfo = GetSpellProto();
     if(!spellInfo) return;
-    uint8 op;
-    uint16 val=0;
-    int16 tmpval=0;
-    uint16 mark=0;
-    uint32 shiftdata=0x01;
-    uint8  FlatId=0;
-    uint32 EffectVal;
-    uint32 Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
-    if(spellInfo->EffectItemType[m_effIndex])
+    uint8 op = spellInfo->EffectMiscValue[m_effIndex];
+    int32 value = spellInfo->EffectBasePoints[m_effIndex];
+    uint8 type = spellInfo->EffectApplyAuraName[m_effIndex];
+    uint32 mask = spellInfo->EffectItemType[m_effIndex];
+    if (!op) return;
+    SpellModList *p_mods = p_target->getSpellModList(op);
+    if (!p_mods) return;
+
+    if (apply)
     {
-        EffectVal=spellInfo->EffectItemType[m_effIndex];
-        op=spellInfo->EffectMiscValue[m_effIndex];
-        tmpval = spellInfo->EffectBasePoints[m_effIndex];
+        SpellModifier *mod = new SpellModifier;
+        mod->op = op;
+        mod->value = value;
+        mod->type = type;
+        mod->mask = mask;
+        p_mods->push_back(mod);
+ 
+        uint16 send_val=0, send_mark=0;
+        int16 tmpval=spellInfo->EffectBasePoints[m_effIndex];
+        uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
         if(tmpval != 0)
         {
             if(tmpval > 0)
             {
-                val =  tmpval+1;
-                mark = 0x0;
+                send_val =  tmpval+1;
+                send_mark = 0x0;
             }
             else
             {
-                val  = 0xFFFF + (tmpval+2);
-                mark = 0xFFFF;
+                send_val  = 0xFFFF + (tmpval+2);
+                send_mark = 0xFFFF;
             }
         }
 
-        switch(spellInfo->EffectApplyAuraName[m_effIndex])
-        {
-            case 107:
-                Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-                break;
-            case 108:
-                Opcode=SMSG_SET_PCT_SPELL_MODIFIER;
-                break;
-        }
+        if (mod->type == SPELLMOD_FLAT) Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
+        else if (mod->type == SPELLMOD_PCT) Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
 
-        for(int m_effIndex=0;m_effIndex<32;m_effIndex++)
+        WorldPacket data;
+        for(int eff=0;eff<32;eff++)
         {
-            if ( EffectVal&shiftdata )
+            if ( mask & shiftdata )
             {
-                FlatId=m_effIndex;
                 data.Initialize(Opcode);
-                data << uint8(FlatId);
-                data << uint8(op);
-                data << uint16(val);
-                data << uint16(mark);
-                //m_target->SendMessageToSet(&data,true);
-                ((Player *)m_target)->SendDirectMessage(&data);
+                data << uint8(eff);
+                data << uint8(mod->op);
+                data << uint16(send_val);
+                data << uint16(send_mark);
+                p_target->SendDirectMessage(&data);
             }
             shiftdata=shiftdata<<1;
+        }
+    }
+    else
+    {
+        SpellModList *p_mods = p_target->getSpellModList(spellInfo->EffectMiscValue[m_effIndex]);
+        for (SpellModList::iterator itr = p_mods->begin(); itr != p_mods->end(); ++itr)
+        {
+            SpellModifier *mod = *itr;
+            if (!mod) continue;
+            if (mod->op != op || mod->value != value || mod->type != type || mod->mask != mask)
+                continue;
+            p_mods->remove(mod);
+            delete mod;
+            break;
         }
     }
 }
