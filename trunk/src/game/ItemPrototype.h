@@ -63,6 +63,12 @@ enum ITEM_BONDING_TYPE
     QUEST_ITEM1          = 5,
 };
 
+// masks for ITEM_FIELD_FLAGS field
+enum ITEM_FLAGS
+{
+    ITEM_FLAGS_BINDED = 1,
+};
+
 enum INVENTORY_TYPES
 {
     INVTYPE_NON_EQUIP      = 0,

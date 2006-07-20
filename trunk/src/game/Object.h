@@ -192,8 +192,6 @@ class MANGOS_DLL_SPEC Object
 
         void RemoveFlag( uint16 index, uint32 oldFlag );
 
-        bool GetFlag( uint16 index, uint32 checkFlag );
-
         bool HasFlag( uint16 index, uint32 flag ) const
         {
             ASSERT( index < m_valuesCount );

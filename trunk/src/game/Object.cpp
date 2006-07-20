@@ -464,25 +464,25 @@ void Object::SetFlag( uint16 index, uint32 newFlag )
     }
 }
 
-bool Object::GetFlag( uint16 index, uint32 checkFlag )
-{
-    ASSERT( index < m_valuesCount );
-    return m_uint32Values[ index ] & checkFlag;
-}
-
 void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 {
     ASSERT( index < m_valuesCount );
-    m_uint32Values[ index ] &= ~oldFlag;
+    uint32 oldval = m_uint32Values[ index ];
+    uint32 newval = oldval & ~oldFlag;
 
-    if(m_inWorld)
+    if(oldval != newval)
     {
-        m_updateMask.SetBit( index );
+        m_uint32Values[ index ] = newval;
 
-        if(!m_objectUpdated)
+        if(m_inWorld)
         {
-            ObjectAccessor::Instance().AddUpdateObject(this);
-            m_objectUpdated = true;
+            m_updateMask.SetBit( index );
+
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
         }
     }
 }
