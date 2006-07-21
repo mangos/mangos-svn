@@ -1181,10 +1181,14 @@ void Spell::EffectSummonPet(uint32 i)
     float px, py, pz;
     m_caster->GetClosePoint(NULL, px, py, pz);
 
+    uint32 petentry = m_spellInfo->EffectMiscValue[i];
+
     Creature *OldSummon = m_caster->GetPet();
-    if(OldSummon && OldSummon->isPet())
+
+    // if pet requested type already exist 
+    if(OldSummon && OldSummon->isPet() && OldSummon->GetCreatureInfo()->Entry == petentry)
     {
-        if(OldSummon->isDead())
+        if(OldSummon->isDead() )
         {
             uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
             OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
@@ -1194,7 +1198,7 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
             OldSummon->setDeathState(ALIVE);
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
-            ((Creature&)*OldSummon)->Clear();
+            (*OldSummon)->Clear();
             MapManager::Instance().GetMap(m_caster->GetMapId())->Add(OldSummon);
         }
         OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
@@ -1222,7 +1226,15 @@ void Spell::EffectSummonPet(uint32 i)
         }
         return;
     }
-    uint32 petentry = m_spellInfo->EffectMiscValue[i];
+
+    if(OldSummon)
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_caster)->UnsummonPet(true);
+        else
+            return;
+    }
+
     Pet* NewSummon = new Pet();
     if(NewSummon->LoadPetFromDB( m_caster ))
         return;
