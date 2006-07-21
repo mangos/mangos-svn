@@ -104,7 +104,7 @@ void BattleGround::SendPacketToTeam(uint32 TeamID, WorldPacket *packet)
 
 void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
 {
-    /*std::map<uint64, BattleGroundScore>::iterator itr = m_PlayerScores.find(plr->GetGUID());
+    std::map<uint64, BattleGroundScore>::iterator itr = m_PlayerScores.find(plr->GetGUID());
     // Remove from lists/maps
     if(itr != m_PlayerScores.end())
         m_PlayerScores.erase(itr);
@@ -143,9 +143,11 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     sLog.outDetail("BATTLEGROUND: Player %s left the battle.", plr->GetName());
 
     // We're not in BG.
-    plr->m_bgBattleGroundID = 0;
-    plr->m_bgInBattleGround = false;
-    plr->m_bgTeam = 0;
+    plr->SetBattleGroundId(0);
+
+    plr->SetInBattleGround(false);
+    plr->SetBattleGroundTeam(0);
+
 
     // Packets/Movement
     //WorldPacket data;
@@ -154,14 +156,16 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     {
         // Needs vars added to player class and I'm too lazy to rebuild..
 
-        plr->SendNewWorld(plr->m_bgEntryPointMap, plr->m_bgEntryPointX, plr->m_bgEntryPointY, plr->m_bgEntryPointZ, plr->m_bgEntryPointO);
+        plr->TeleportTo(plr->GetBattleGroundEntryPointMap(), plr->GetBattleGroundEntryPointX(), plr->GetBattleGroundEntryPointY(), plr->GetBattleGroundEntryPointZ(), plr->GetBattleGroundEntryPointO());
+        plr->SendInitWorldStates(plr->GetBattleGroundEntryPointMap());
+        //sLog.outDetail("BATTLEGROUND: Sending %s to %f,%f,%f,%f", pl->GetName(), x,y,z,O);
     }
 
     if(SendPacket)
-        plr->GetSession()->SendPacket(&sBattleGroundMgr.BuildBattleGroundStatusPacket(m_MapId, m_ID, 0, 0));
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(plr, m_MapId, m_ID, 0, 0);
 
     // Log
-    sLog.outDetail("BATTLEGROUND: Removed %s from BattleGround.", plr->GetName());*/
+    sLog.outDetail("BATTLEGROUND: Removed %s from BattleGround.", plr->GetName());
 }
 
 void BattleGround::AddPlayer(Player *plr)
@@ -191,7 +195,7 @@ void BattleGround::AddPlayer(Player *plr)
     WorldPacket data = sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(plr);
 
     // Let others from your team know //dono if correct if team1 only get team packages?
-    SendPacketToTeam(plr->m_bgTeam, &data);
+    SendPacketToTeam(plr->GetBattleGroundTeam(), &data);
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
 }
@@ -226,7 +230,7 @@ void BattleGround::EventPlayerPassFlag(Player *Source, Player *Target)
     char message[100];
     sprintf(message, "%s passed the flag to %s!", Source->GetName(), Target->GetName());
     sChatHandler.FillSystemMessageData(&data, NULL, message);
-    SendPacketToTeam(Source->m_bgTeam, &data);
+    SendPacketToTeam(Source->GetBattleGroundTeam(), &data);
 }
 
 bool BattleGround::HasFreeSlots(uint32 Team)
@@ -236,7 +240,7 @@ bool BattleGround::HasFreeSlots(uint32 Team)
     TeamCounts[0] = 0;
     TeamCounts[1] = 0;
     for(std::list<Player*>::iterator i=m_Players.begin();i!=m_Players.end();++i)
-        TeamCounts[(*i)->m_bgTeam]++;
+        TeamCounts[(*i)->GetBattleGroundTeam()]++;
 
     if(TeamCounts[Team] < m_MaxPlayersPerTeam)
         return true;

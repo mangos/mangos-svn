@@ -92,15 +92,16 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     GetPlayer()->SetInBattleGround(true);
 
     // Calculate team
-    GetPlayer()->m_bgTeam = sBattleGroundMgr.GenerateTeamByRace(GetPlayer()->getRace());
+    GetPlayer()->SetBattleGroundTeam(sBattleGroundMgr.GenerateTeamByRace(GetPlayer()->getRace()));
 
     //sBattleGroundMgr.BuildBattleGroundStatusPacket(GetPlayer(), sBattleGroundMgr.GetBattleGround(1)->GetMapId(), sBattleGroundMgr.GetBattleGround(1)->GetID(),3);
 
-    GetPlayer()->m_bgEntryPointMap = GetPlayer()->GetMapId();
-    GetPlayer()->m_bgEntryPointO = (long unsigned)GetPlayer()->GetOrientation();
-    GetPlayer()->m_bgEntryPointX = GetPlayer()->GetPositionX();
-    GetPlayer()->m_bgEntryPointY = GetPlayer()->GetPositionY();
-    GetPlayer()->m_bgEntryPointZ = GetPlayer()->GetPositionZ();
+    GetPlayer()->SetBattleGroundEntryPointMap(GetPlayer()->GetMapId());
+    GetPlayer()->SetBattleGroundEntryPointO(GetPlayer()->GetOrientation());
+    GetPlayer()->SetBattleGroundEntryPointX(GetPlayer()->GetPositionX());
+    GetPlayer()->SetBattleGroundEntryPointY(GetPlayer()->GetPositionY());
+    GetPlayer()->SetBattleGroundEntryPointZ(GetPlayer()->GetPositionZ());
+
 
     // TODO: Find team based on faction
     uint32 TeamID = 0;
@@ -119,18 +120,16 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_data )
 {
-    //sLog.outDebug( "WORLD: Recvd MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
-
     std::list<Player*> ListToSend;
 
-    for(std::list<Player*>::iterator i = sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersBegin(); i != sBattleGroundMgr.GetBattleGround(GetPlayer()->m_bgBattleGroundID)->GetPlayersEnd(); ++i)
+    for(std::list<Player*>::iterator i = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId())->GetPlayersBegin(); i != sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId())->GetPlayersEnd(); ++i)
     {
         if((*i) != GetPlayer())
             ListToSend.push_back(*i);
     }
 
     WorldPacket data;
-    data.Initialize(MSG_BATTLEGROUND_PLAYER_POSITIONS);     // MSG_BATTLEGROUND_PLAYER_POSITIONS
+    data.Initialize(MSG_BATTLEGROUND_PLAYER_POSITIONS);
     data << uint32(ListToSend.size());
     for(std::list<Player*>::iterator itr=ListToSend.begin();itr!=ListToSend.end();++itr)
     {
@@ -140,7 +139,6 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
     }
     data << uint8(0);
     GetPlayer()->GetSession()->SendPacket(&data);
-    //sLog.outDebug( "WORLD: Send MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
 }
 
 void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
