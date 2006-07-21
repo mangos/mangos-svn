@@ -318,7 +318,7 @@ void Spell::EffectHeal( uint32 i )
         float pct = (100+unitTarget->m_RegenPCT)/100;
         uint32 curhealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
         uint32 maxhealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-        uint32 addhealth = ( curhealth + damage*pct < maxhealth ? damage*pct : maxhealth - curhealth );
+        uint32 addhealth = ( curhealth + damage*pct < maxhealth ? uint32(damage*pct) : maxhealth - curhealth );
         unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -360,7 +360,7 @@ void Spell::EffectHealthLeach(uint32 i)
         unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,0);
     }
     if(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct < m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
-        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct);
+        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct));
     else m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
 }
 
@@ -1749,7 +1749,6 @@ void Spell::EffectDisEnchant(uint32 i)
     uint32 item_quality = itemTarget->GetProto()->Quality;
     p_caster->DestroyItemCount(itemTarget->GetEntry(),1, true);
 
-    Player *player = (Player*)m_caster;
     p_caster->UpdateSkillPro(m_spellInfo->Id);
 
     uint32 item;
@@ -1938,11 +1937,11 @@ void Spell::EffectDisEnchant(uint32 i)
         }
     }
     uint16 dest;
-    uint8 msg = player->CanStoreNewItem( 0, NULL_SLOT, dest, item, count, false );
+    uint8 msg = p_caster->CanStoreNewItem( 0, NULL_SLOT, dest, item, count, false );
     if( msg == EQUIP_ERR_OK )
-        player->StoreNewItem( dest, item, count, true );
+        p_caster->StoreNewItem( dest, item, count, true );
     else
-        player->SendEquipError( msg, NULL, NULL );
+        p_caster->SendEquipError( msg, NULL, NULL );
     return ;
 }
 
@@ -2182,13 +2181,13 @@ void Spell::EffectSkinning(uint32 i)
 
 void Spell::EffectCharge(uint32 i)
 {
-    assert(unitTarget);
-    assert(m_caster);
+    if(!unitTarget || !m_caster)
+        return;
 
     float x, y, z;
     unitTarget->GetClosePoint(m_caster, x, y, z);
 
-    m_caster->SendMonsterMove(x, y, z, false,true,0.5);
+    m_caster->SendMonsterMove(x, y, z, false,true,1);
     m_caster->Attack(unitTarget);
 }
 
