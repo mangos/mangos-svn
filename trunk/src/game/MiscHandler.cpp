@@ -37,6 +37,13 @@
 #include "Object.h"
 #include "BattleGround.h"
 
+
+//TODO add these to the proper header file
+
+#define MOVEMENT_WALKING 0x100
+#define MOVEMENT_JUMPING 0x2000
+#define MOVEMENT_FALLING 0x6000
+
 void my_esc( char * r, const char * s )
 {
     int i, j;
@@ -114,19 +121,16 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
+    Player* Target = GetPlayer();
+
 
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
-    Player* Target = GetPlayer();
-    uint32 MapID = Target->GetMapId();
-    Map* Map = MapManager::Instance().GetMap(MapID);
-    float posz = Map->GetHeight(Target->GetPositionX(),Target->GetPositionY());
-    sLog.outDebug("Current z:%f \tMap Z:%f", Target->GetPositionZ(),posz);
-
     //Can not logout if...
-    if( (GetPlayer()->isInCombat()) ||                      //...is in combat
-        (GetPlayer()->isInDuel())   ||                      //...is in Duel
-        (Target->GetPositionZ() > posz + 1) )               //...need more judge and handle while jumping and falling
+    if( (Target->isInCombat()) ||                          //...is in combat
+        (Target->isInDuel())   ||                          //...is in Duel
+        (Target->GetMovementFlags() & MOVEMENT_JUMPING) || //...is jumping
+        (Target->GetMovementFlags() & MOVEMENT_FALLING) )            //...is falling
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
@@ -139,7 +143,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-    if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+    if(!Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {                                                       //in city no root no lock rotate
         data.Initialize( SMSG_FORCE_MOVE_ROOT );
         data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
@@ -157,8 +161,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 {
-    //WorldPacket data;
-
     sLog.outDebug( "WORLD: Recvd CMSG_PLAYER_LOGOUT Message" );
     if (GetPlayer()->GetSession()->GetSecurity() > 0)
     {
@@ -1063,7 +1065,7 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
     {
         // Crash server. Wrong package structure used???
         // Crash at "recv_data >> unk1 >> OldSpeed >> NewSpeed" and have recv_data._wpos = 60
-        return;
+        //return;
 
         uint32 unk2, unk3, unk4, unk5;
         float OldSpeed;

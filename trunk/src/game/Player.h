@@ -781,31 +781,68 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendLoot(uint64 guid,uint8 loot_type);
         uint8 CheckFishingAble() const;
 
+        /*********************************************************/
+        /***               BATTLEGROUND SYSTEM                 ***/
+        /*********************************************************/
+
         inline bool InBattleGround() const { return m_bgInBattleGround; }
         inline void SetInBattleGround(bool val) { m_bgInBattleGround = val; }
         inline uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
         inline void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
+        inline uint32 GetBattleGroundTeam() const { return m_bgTeam; }
+        inline void SetBattleGroundTeam(uint32 Team) { m_bgTeam = Team;}
+        inline uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
+        inline void SetBattleGroundEntryPointMap(uint32 Map) { m_bgEntryPointMap = Map;}
 
-        uint32 m_bgTeam;
+        inline float GetBattleGroundEntryPointX() const { return m_bgEntryPointX; }
+        inline void SetBattleGroundEntryPointX(float PosX) { m_bgEntryPointX = PosX;}
+
+        inline float GetBattleGroundEntryPointY() const { return m_bgEntryPointY; }
+        inline void SetBattleGroundEntryPointY(float PosY) { m_bgEntryPointY = PosY;}
+
+        inline float GetBattleGroundEntryPointZ() const { return m_bgEntryPointZ; }
+        inline void SetBattleGroundEntryPointZ(float PosZ) { m_bgEntryPointZ = PosZ;}
+            
+        inline float GetBattleGroundEntryPointO() const { return m_bgEntryPointO; }
+        void SetBattleGroundEntryPointO(float PosO) { m_bgEntryPointO = PosO;}
+        
+
+        /*********************************************************/
+        /***                    REST SYSTEM                    ***/
+        /*********************************************************/
 
         bool isRested() const { return GetRestTime() >= 10000; }
         uint32 ApplyRestBonus(uint32 xp);
-        uint32 GetRestTime() const { return m_restTime;}
-        void SetRestTime(uint32 v) { m_restTime = v;}
+        uint32 GetRestTime() const { return m_restTime;};
+        void SetRestTime(uint32 v) { m_restTime = v;};
 
+        /*********************************************************/
+        /***              ENVIROMENTAL SYSTEM                  ***/
+        /*********************************************************/
         bool IsInWater() const { return (m_isunderwater & 0x80); }
 
+ 
+        /*********************************************************/
+        /***                 VARIOUS SYSTEMS                   ***/
+        /*********************************************************/
         Player* GetTrader() const { return pTrader; }
+        uint32 GetMovementFlags() const { return m_movement_flags; }
+        void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
 
     protected:
+
+        /*********************************************************/
+        /***               BATTLEGROUND SYSTEM                 ***/
+        /*********************************************************/
+        
         bool m_bgInBattleGround;
         uint8 m_bgBattleGroundID;
-
         uint32 m_bgEntryPointMap;
         float m_bgEntryPointX;
         float m_bgEntryPointY;
         float m_bgEntryPointZ;
         float m_bgEntryPointO;
+        uint32 m_bgTeam;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -846,21 +883,26 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveSpells();
         void _SaveTutorials();
 
-        void AddWeather();
+        
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
 
         bool FactionIsInTheList(uint32 faction);
 
+        /*********************************************************/
+        /***              ENVIROMENTAL SYSTEM                  ***/
+        /*********************************************************/
+        void AddWeather();
         void HandleDrowing (uint32 UnderWaterTime);
         void HandleLava();
         void HandleSobering();
-
         void StartMirrorTimer(uint8 Type, uint32 MaxValue);
         void ModifyMirrorTimer(uint8 Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen);
         void StopMirrorTimer(uint8 Type);
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
+        uint8 m_isunderwater;
+
 
         void outDebugValues() const;
 
@@ -885,6 +927,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* m_buybackitems[BUYBACK_SLOT_END - BUYBACK_SLOT_START];
 
         uint8 m_afk;
+
+        uint32 m_movement_flags;
+
         bool  m_acceptTicket;
         uint64 m_curTarget;
         uint64 m_curSelection;
@@ -946,8 +991,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_lastManaUse;
 
         uint32 m_deathTimer;
-        uint8 m_isunderwater;
-
+        
         uint32 m_restTime;
         time_t m_pvp_count;
         bool m_pvp_counting;
