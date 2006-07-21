@@ -809,7 +809,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_corpse`;
 CREATE TABLE `game_corpse` (
   `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
+  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Identifier',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -820,7 +820,6 @@ CREATE TABLE `game_corpse` (
   `time` timestamp NOT NULL default '0000-00-00 00:00:00',
   `bones_flag` tinyint(3) NOT NULL default '0',
   PRIMARY KEY  (`guid`),
-  UNIQUE KEY `idx_player` (`player`),
   KEY `idx_bones_flag` (`bones_flag`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 
