@@ -50,7 +50,7 @@ void HandleCorpsesErase(void*)
         ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
         MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
-        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%ul';",(unsigned long)guid);
+        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%lu';",(unsigned long)guid);
 
         m_pCorpse=NULL;
         delete result;
@@ -78,7 +78,7 @@ void HandleCorpsesErase(void*)
         ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
         MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
 
-        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%ul';",(unsigned long)guid);
+        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%lu';",(unsigned long)guid);
 
         m_pCorpse=NULL;
         delete result;
