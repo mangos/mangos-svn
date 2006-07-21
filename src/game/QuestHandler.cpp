@@ -58,10 +58,17 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_HELLO npc = %u",guid );
 
     Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if( pCreature && Script->GossipHello( _player, pCreature ) )
+    if(!pCreature)
         return;
-    _player->PrepareQuestMenu( guid );
-    _player->SendPreparedQuest( guid );
+
+    if(Script->GossipHello( _player, pCreature ) )
+        return;
+
+    // let select not only active quest but also trade and etc in case trader with quest.
+    pCreature->prepareGossipMenu(_player,0);
+    pCreature->sendPreparedGossip( _player );
+    //_player->PrepareQuestMenu( guid );
+    //_player->SendPreparedQuest( guid );
 }
 
 void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
