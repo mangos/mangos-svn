@@ -964,6 +964,12 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Battleground status - not yet" );
 }
 
+void WorldSession::HandleBattleMasterHelloOpcode( WorldPacket & recv_data )
+{
+
+    DEBUG_LOG( "WORLD: Battleground Hello - not yet" );
+}
+
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
 
