@@ -6094,6 +6094,8 @@ void Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 m_items[slot] = pItem;
                 SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
                 pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
+                pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
+
                 pItem->SetSlot( slot );
 
                 if( IsInWorld() && update )
@@ -6141,6 +6143,7 @@ void Player::EquipItem( uint16 pos, Item *pItem, bool update )
         m_items[slot] = pItem;
         SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, GetGUID() );
+        pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetGUID() );
         pItem->SetSlot( slot );
 
         if( slot >= EQUIPMENT_SLOT_START && slot < EQUIPMENT_SLOT_END )
@@ -6203,7 +6206,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 pBag->RemoveItem(slot, update);
         }
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
-        pItem->SetUInt64Value( ITEM_FIELD_OWNER, 0 );
+        // pItem->SetUInt64Value( ITEM_FIELD_OWNER, 0 ); not clear owner at remove (it will be set at store). This used in mail and auction code
         pItem->SetSlot( NULL_SLOT );
         if( IsInWorld() && update )
             pItem->SendUpdateToPlayer( this );
@@ -8006,7 +8009,7 @@ void Player::_LoadInventory()
             Item *item = NewItemOrBag(proto);
             item->SetSlot(slot);
 
-            if(!item->LoadFromDB(item_guid, 1))
+            if(!item->LoadFromDB(item_guid, GetGUID(), 1))
                 continue;
 
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
@@ -8014,16 +8017,22 @@ void Player::_LoadInventory()
             {
                 if( CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
                     StoreItem(dest, item, true);
+                else
+                    delete item;
             }
             else if( IsEquipmentPos( dest ) )
             {
                 if( CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
                     EquipItem(dest, item, true);
+                else
+                    delete item;
             }
             else if( IsBankPos( dest ) )
             {
                 if( CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
                     BankItem(dest, item, true);
+                else
+                    delete item;
             }
         } while (result->NextRow());
 

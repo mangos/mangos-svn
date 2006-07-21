@@ -90,9 +90,9 @@ void Bag::SaveToDB()
     }
 }
 
-bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
+bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 {
-    if(!Item::LoadFromDB(guid, auctioncheck))
+    if(!Item::LoadFromDB(guid, owner_guid, auctioncheck))
         return false;
     for (uint32 i = 0; i < GetProto()->ContainerSlots; i++)
     {
@@ -124,7 +124,7 @@ bool Bag::LoadFromDB(uint32 guid, uint32 auctioncheck)
 
             Item *item = NewItemOrBag(proto);
             item->SetSlot(slot);
-            if(!item->LoadFromDB(item_guid, 1))
+            if(!item->LoadFromDB(item_guid, owner_guid, 1))
                 continue;
             StoreItem( slot, item, true );
         } while (result->NextRow());
@@ -168,6 +168,7 @@ void Bag::StoreItem( uint8 slot, Item *pItem, bool update )
         m_bagslot[slot] = pItem;
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (slot * 2), pItem->GetGUID());
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, GetGUID());
+        pItem->SetUInt64Value( ITEM_FIELD_OWNER, GetOwnerGUID() );
         pItem->SetSlot( NULL_SLOT );
     }
 }

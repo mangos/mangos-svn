@@ -297,7 +297,7 @@ void ObjectMgr::LoadAuctionItems()
     {
         fields = result->Fetch();
         Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(), 2))
+        if(!item->LoadFromDB(fields[0].GetUInt32(),0, 2))
             continue;
         AddAItem(item);
     }
@@ -317,7 +317,7 @@ void ObjectMgr::LoadMailedItems()
     {
         fields = result->Fetch();
         Item* item = new Item;
-        if(!item->LoadFromDB(fields[0].GetUInt32(), 3))
+        if(!item->LoadFromDB(fields[0].GetUInt32(), 0, 3))
             continue;
         AddMItem(item);
     }

@@ -458,7 +458,7 @@ void Item::SaveToDB()
     sDatabase.Execute( ss.str().c_str() );
 }
 
-bool Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
+bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 {
     QueryResult *result;
 
@@ -480,6 +480,13 @@ bool Item::LoadFromDB(uint32 guid, uint32 auctioncheck)
     Field *fields = result->Fetch();
 
     LoadValues(fields[0].GetString());
+
+    if(GetOwnerGUID()!=owner_guid) 
+    {
+        sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %lu. Updated to correct: %lu",GetOwnerGUID(),owner_guid);
+        SetOwnerGUID(owner_guid);
+    }
+
 
     delete result;
 

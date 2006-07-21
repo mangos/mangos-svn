@@ -127,10 +127,9 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
     //Can not logout if...
-    if( (Target->isInCombat()) ||                          //...is in combat
-        (Target->isInDuel())   ||                          //...is in Duel
-        (Target->GetMovementFlags() & MOVEMENT_JUMPING) || //...is jumping
-        (Target->GetMovementFlags() & MOVEMENT_FALLING) )            //...is falling
+    if( Target->isInCombat() ||                                                //...is in combat
+        Target->isInDuel()   ||                                                //...is in Duel
+        Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))       //...is jumping ...is falling
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
