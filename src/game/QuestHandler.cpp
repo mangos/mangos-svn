@@ -207,8 +207,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
         {
             _player->RewardQuest( pQuest, reward );
 
-            Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-            if( pCreature )
+            if(Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid))
             {
                 _player->CalculateReputation( pQuest, guid );
                 if( !(Script->ChooseReward( _player, pCreature, pQuest, reward )) )
@@ -217,18 +216,16 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                         _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
                 }
             }
-            else
+            else if(GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid))
             {
-                GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*_player, guid);
-                if ( pGameObject )
+                if( !Script->GOChooseReward( _player, pGameObject, pQuest, reward ) )
                 {
-                    if( !Script->GOChooseReward( _player, pGameObject, pQuest, reward ) )
-                    {
-                        if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
-                            _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
-                    }
+                    if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                    _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
                 }
             }
+            else
+                sLog.outError("Unknown questgiver GUID #%lu for reward choice (not creature and not gameobject), ignore.",guid);
         }
     }
 }
@@ -244,12 +241,19 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     Quest *pQuest       = objmgr.GetQuest( quest );
     if( pQuest )
     {
-        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
-        if( pCreature )
+        if(Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid))
         {
             if ( _player->CanCompleteQuest( pQuest ) )
                 _player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
         }
+        else if(GameObject *pGO = ObjectAccessor::Instance().GetGameObject(*_player, guid))
+        {
+            if ( _player->CanCompleteQuest( pQuest ) )
+                _player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
+        }
+        else
+            sLog.outError("Unknown questgiver GUID #%lu for reward request (not creature and not gameobject), ignore.",guid);
+
     }
 }
 
