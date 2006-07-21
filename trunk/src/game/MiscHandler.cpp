@@ -1053,6 +1053,7 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
 void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 {
     //check for speed stuff
+    recv_data.hexlike();
     uint64 GUID;
     uint32 Flags,unk1, unk0;
     uint32 d_time;
@@ -1061,12 +1062,8 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 
     recv_data >> GUID;
     recv_data >> unk0 >> Flags;
-    if (Flags & 0x2000)                                     //double check, old value and new calue
+    if (Flags & 0x2000 || Flags & 0x6000)     //0x2000 == jumping  0x6000 == Falling
     {
-        // Crash server. Wrong package structure used???
-        // Crash at "recv_data >> unk1 >> OldSpeed >> NewSpeed" and have recv_data._wpos = 60
-        //return;
-
         uint32 unk2, unk3, unk4, unk5;
         float OldSpeed;
 
@@ -1074,7 +1071,7 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
         recv_data >> X >> Y >> Z >> O;
         recv_data >> unk2 >> unk3;                          //no idea, maybe unk2 = flags2
         recv_data >> unk4 >> unk5;                          //no idea
-        recv_data >> unk1 >> OldSpeed >> NewSpeed;
+        recv_data >> OldSpeed >> NewSpeed;
     }
     else                                                    //single check
     {
