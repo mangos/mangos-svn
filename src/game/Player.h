@@ -827,6 +827,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         Player* GetTrader() const { return pTrader; }
         uint32 GetMovementFlags() const { return m_movement_flags; }
+        bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
 
     protected:

@@ -69,7 +69,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
             data << uint32(0);
             data << uint32(1);
             data << uint32(0);
-            data << it->GetUInt64Value(ITEM_FIELD_OWNER);
+            data << it->GetOwnerGUID();
             data << ae->bid;
             data << uint32(0);
             data << ae->buyout;
@@ -180,7 +180,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
                     data << uint32(0);
                     data << uint32(1);
                     data << uint32(0);
-                    data << it->GetUInt64Value(ITEM_FIELD_OWNER);
+                    data << it->GetOwnerGUID();
                     data << ae->bid;
                     data << uint32(0);
                     data << ae->buyout;
@@ -345,7 +345,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
             data << uint32(0);
             data << uint32(1);
             data << uint32(0);
-            data << it->GetUInt64Value(ITEM_FIELD_OWNER);
+            data << it->GetOwnerGUID();
             data << Aentry->bid;
             data << uint32(0);
             data << Aentry->buyout;
@@ -404,7 +404,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
                         data << uint32(0);
                         data << uint32(1);
                         data << uint32(0);
-                        data << item->GetUInt64Value(ITEM_FIELD_OWNER);
+                        data << item->GetOwnerGUID();
                         data << Aentry->bid;
                         data << uint32(0);
                         data << Aentry->buyout;
@@ -478,7 +478,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                                 data << uint32(0);
                                                 data << uint32(1);
                                                 data << uint32(0);
-                                                data << item->GetUInt64Value(ITEM_FIELD_OWNER);
+                                                data << item->GetOwnerGUID();
                                                 data << Aentry->bid;
                                                 data << uint32(0);
                                                 data << Aentry->buyout;

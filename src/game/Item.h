@@ -139,7 +139,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsBindedNotWith(uint64 guid) const { return  HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) && GetOwnerGUID()!= guid; }
 
         virtual void SaveToDB();
-        virtual bool LoadFromDB(uint32 guid, uint32 auctioncheck);
+        virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck);
         virtual void DeleteFromDB();
 
         void SetDurability(uint32 Value);
