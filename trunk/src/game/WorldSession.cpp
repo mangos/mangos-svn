@@ -435,8 +435,8 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_COMPLETE_CINEMATIC,       STATUS_LOGGEDIN, &WorldSession::HandleCompleteCinema                },
         { CMSG_NEXT_CINEMATIC_CAMERA,    STATUS_LOGGEDIN, &WorldSession::HandleNextCinematicCamera           },
 
-        //{ CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
-        //{ CMSG_BATTLEMASTER_HELLO ,      STATUS_LOGGEDIN, &WorldSession::HandleBattleMasterHelloOpcode       },
+        { CMSG_BATTLEFIELD_STATUS,       STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       },
+        { CMSG_BATTLEMASTER_HELLO,      STATUS_LOGGEDIN, &WorldSession::HandleBattleMasterHelloOpcode       },
 
         { CMSG_MOVE_TIME_SKIPPED,        STATUS_LOGGEDIN, &WorldSession::HandleMoveTimeSkippedOpcode         },
 
