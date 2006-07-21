@@ -2099,6 +2099,7 @@ void Player::SpawnCorpseBones()
     GetSession()->SendPacket(&data);
 
     m_pCorpse->SaveToDB(true);
+    m_pCorpse = NULL;
 }
 
 void Player::DeathDurabilityLoss(double percent)
