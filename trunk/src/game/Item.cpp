@@ -217,9 +217,6 @@ char *GetInventoryImageFilefromDisplayInfoDBC(uint32 DisplayID)
     }
 }
 
-#define ITEM_SUBCLASS_FOOD                  1
-#define ITEM_SUBCLASS_LIQUID                2
-
 char *GetInventoryImageFilefromObjectClass(uint32 classNum, uint32 subclassNum, uint32 type, uint32 DisplayID)
 {
 

@@ -7847,7 +7847,7 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadCorpse();
 
-    //_LoadPet();
+    _LoadPet();
 
     // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
     // Skip _ApplyAllItemMods(); -- applied in _LoadInventory() by EquipItem calls at item load

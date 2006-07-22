@@ -2178,7 +2178,7 @@ Creature* Unit::GetPet() const
         Creature* pet = ObjectAccessor::Instance().GetCreature(*this, pet_guid);
         if(!pet)
         {
-            sLog.outError("Unit::GetPet: Pet %u not exist.",pet->GetGUIDLow());
+            sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
             const_cast<Unit*>(this)->SetPet(0);
         }
         return pet;

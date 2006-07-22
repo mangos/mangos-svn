@@ -658,23 +658,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    //SendMonsterMove(x,y,z,false,run,time);
-
-    WorldPacket data;
-    data.Initialize( SMSG_MONSTER_MOVE );
-    data << uint8(0xFF);
-    data << GetGUID();
-                                                            //point A
-    data << GetPositionX() << GetPositionY() << GetPositionZ();
-                                                            //little trick related to orientation
-    data << (uint32)((*((uint32*)&GetOrientation())) & 0x30000000);
-    data << uint8(WalkBack);                                //run / walk back only when still moving to point B
-    data << uint32(run ? 0x00000100 : 0x00000000);
-    data << time;
-    data << uint32(1);
-    data << x << y << z;                                    //point B
-    WPAssert( data.size() == 50 );
-    SendMessageToSet( &data, false );
+    SendMonsterMove(x,y,z,WalkBack,run,time);
 }
 
 void Creature::getSkinLoot()
