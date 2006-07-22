@@ -385,6 +385,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                    STORAGE SYSTEM                 ***/
         /*********************************************************/
 
+        void SetVirtualItemSlot( uint8 i, Item* item);
         void SetSheath( uint32 sheathed );
         uint8 FindEquipSlot( uint32 type, uint32 slot, bool swap ) const;
         Item* CreateItem( uint32 item, uint32 count ) const;
@@ -707,7 +708,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BroadcastToFriends(std::string msg);
 
         void UpdateDefense();
-        void UpdateSkillWeapon();
+        void UpdateMeleeSkillWeapon();
+        void UpdateRangedSkillWeapon();
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
         uint16 GetSkillValue(uint32 skill) const;

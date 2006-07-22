@@ -640,6 +640,8 @@ void Spell::cast()
 
         SendSpellCooldown();
 
+        if(IsAutoRepeat() && m_caster->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_caster)->UpdateRangedSkillWeapon();
     }
 
     if(m_spellState != SPELL_STATE_CASTING)
