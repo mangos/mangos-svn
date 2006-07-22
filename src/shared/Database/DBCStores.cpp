@@ -320,9 +320,6 @@ bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     if(spellInfo_1->Id == spellId_2)
         return false;
 
-    if (spellInfo_1->SpellIconID != spellInfo_2->SpellIconID)
-        return false;
-
     if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
         spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
     {
@@ -333,12 +330,12 @@ bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
                 spellInfo_2->EffectApplyAuraName[i] == 107 || spellInfo_2->EffectApplyAuraName[i] == 108)
                 isModifier = true;
         }
-        if (isModifier)
-            return false;
+        if (!isModifier)
+            return true;
     }
 
-    if (!IsRankSpellDueToSpell(spellInfo_1, spellId_2))
-        return false;
+    if (IsRankSpellDueToSpell(spellInfo_1, spellId_2))
+        return true;
 
     if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
         return false;
