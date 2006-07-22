@@ -238,7 +238,30 @@ void Spell::EffectApplyAura(uint32 i)
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
+    if (m_CastItem)
+        Aur->SetCastItem(m_CastItem->GetProto());
     unitTarget->AddAura(Aur);
+    if (Aur && Aur->IsTrigger())
+    {
+        // arcane missiles
+        SpellEntry *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+        if (!spellInfo) return;
+        if (spellInfo->EffectImplicitTargetA[0] == TARGET_S_E && m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            FactionTemplateResolver my_faction = m_caster->getFactionTemplateEntry();
+            Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+            if (target)
+            {
+                FactionTemplateResolver sel_faction = target->getFactionTemplateEntry();
+                if (!my_faction.IsFriendlyTo(sel_faction))
+                    Aur->SetTarget(target);
+                else
+                    cancel();
+            }
+            else
+                cancel();
+        }
+    }
 }
 
 void Spell::EffectManaDrain(uint32 i)
@@ -351,13 +374,13 @@ void Spell::EffectHealthLeach(uint32 i)
 
     if(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) - damage > 0)
     {
-        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) - damage));
+        m_caster->DealDamage(unitTarget, damage, 0, true);
         tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
     }
     else
     {
         tmpvalue = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH)*m_spellInfo->EffectMultipleValue[i]);
-        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,0);
+        m_caster->DealDamage(unitTarget, unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH), 0, true);
     }
     if(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct < m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
         m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct));
@@ -372,17 +395,17 @@ void Spell::EffectCreateItem(uint32 i)
     Player* player = (Player*)m_caster;
 
     uint32 newitemid = m_spellInfo->EffectItemType[i];
-    if(!newitemid)
+    ItemPrototype *pProto = objmgr.GetItemPrototype( newitemid );
+    if(!pProto)
         return;
 
     uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
-
-    Item *pItem = player->CreateItem(newitemid,1);
-
-    if(pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE)
+    if(pProto->Class != ITEM_CLASS_CONSUMABLE)
         num_to_add = 1;
-    if(num_to_add > pItem->GetProto()->Stackable)
-        num_to_add = pItem->GetProto()->Stackable;
+    if(num_to_add > pProto->Stackable)
+        num_to_add = pProto->Stackable;
+
+    Item *pItem = player->CreateItem(newitemid, num_to_add);
 
     uint16 dest;
     uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
@@ -1506,9 +1529,13 @@ void Spell::EffectInterruptCast(uint32 i)
 
 void Spell::EffectScriptEffect(uint32 i)
 {
-    //temply use, need fix to right way.
     if(!m_spellInfo->Reagent[0])
-        EffectHeal( i );
+    { 
+        // paladin's holy light / flash of light
+        if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) && 
+            (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242))
+            EffectHeal( i );
+    }
     else
     {
         switch(m_spellInfo->Id)
