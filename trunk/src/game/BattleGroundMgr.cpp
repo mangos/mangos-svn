@@ -47,22 +47,18 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(Player *pl, uint32 MapID, ui
     pl->GetSession()->SendPacket( &data );
 }
 
-WorldPacket BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(Player *plr)
+void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket *data, Player *plr)
 {
     // "player" Has left the battle.
-    WorldPacket data;
-    data.Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT);         //0x2EE
-    data << plr->GetGUID();
-    return data;
+    data->Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT);         //0x2EE
+    (*data) << plr->GetGUID();
 }
 
-WorldPacket BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(Player *plr)
+void BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Player *plr)
 {
     // "player" Has joined the battle.
-    WorldPacket data;
-    data.Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED);       //0x2ED
-    data << plr->GetGUID();
-    return data;
+    data->Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED);       //0x2ED
+    (*data) << plr->GetGUID();
 }
 
 uint32 BattleGroundMgr::CreateBattleGround(uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, std::string BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
@@ -146,7 +142,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     sLog.outString("Created initial battlegrounds.");
 }
 
-WorldPacket BattleGroundMgr::BuildBattleGroundListPacket(uint64 guid, Player* plr)
+void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr)
 {
     // We assume for now all BG NPC's are map 489(Warsong gulch)
     uint32 MapId = 489;
@@ -158,29 +154,25 @@ WorldPacket BattleGroundMgr::BuildBattleGroundListPacket(uint64 guid, Player* pl
     // TODO Lookup npc entry code and find mapid
     // Gossip related
 
-    WorldPacket data;
-    data.Initialize(SMSG_BATTLEFIELD_LIST);
-    data << guid;
-    data << MapId;
+    data->Initialize(SMSG_BATTLEFIELD_LIST);
+    (*data) << guid;
+    (*data) << MapId;
 
     std::list<uint32> SendList;
-    for(std::map<uint32, BattleGround*>::iterator itr=m_BattleGrounds.begin();itr!=m_BattleGrounds.end();++itr)
+    for(std::map<uint32, BattleGround*>::iterator itr=m_BattleGrounds.begin();itr!=m_BattleGrounds.end();itr++)
         if(itr->second->GetMapId() == MapId && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
             SendList.push_back(itr->second->GetID());
     uint32 size = SendList.size();
 
-    data << uint32(size << 8);
+    (*data) << uint32(size << 8);
 
     uint32 count = 1;
 
     for(std::list<uint32>::iterator i = SendList.begin();i!=SendList.end();++i)
     {
-        data << uint32(count << 8);
+        (*data) << uint32(count << 8);
         count++;
     }
-
-    SendList.clear();
-    return data;
 }
 
 void BattleGroundMgr::AddPlayerToBattleGround(Player *pl, uint32 bgId)

@@ -137,7 +137,9 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     if(!Removed) sLog.outError("BATTLEGROUND: Player could not be removed from battleground completely!");
 
     // Let others know
-    SendPacketToAll(&sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(plr));
+    WorldPacket data;
+    sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(&data,plr);
+    SendPacketToAll(&data);
 
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s left the battle.", plr->GetName());
@@ -192,7 +194,8 @@ void BattleGround::AddPlayer(Player *plr)
 
     plr->SendInitWorldStates(plr->GetMapId());
 
-    WorldPacket data = sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(plr);
+    WorldPacket data;
+    sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data,plr);
 
     // Let others from your team know //dono if correct if team1 only get team packages?
     SendPacketToTeam(plr->GetBattleGroundTeam(), &data);
