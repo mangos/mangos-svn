@@ -218,6 +218,10 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_GMTICKET_UPDATETEXT,      STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      },
         { CMSG_TOGGLE_PVP,               STATUS_LOGGEDIN, &WorldSession::HandleEnablePvP                   },
 
+
+	// played time
+        { CMSG_PLAYED_TIME,		 STATUS_LOGGEDIN, &WorldSession::HandlePlayedTime                   },
+
         // new
         { CMSG_FORCE_MOVE_UNROOT_ACK,   STATUS_LOGGEDIN, &WorldSession::HandleMooveUnRootAck                   },
         { CMSG_FORCE_MOVE_ROOT_ACK, STATUS_LOGGEDIN, &WorldSession::HandleMooveRootAck               },

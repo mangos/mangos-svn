@@ -102,6 +102,9 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
 
+	// played time
+        void HandlePlayedTime(WorldPacket& recvPacket);
+
         // new
         void HandleMooveUnRootAck(WorldPacket& recvPacket);
         void HandleMooveRootAck(WorldPacket& recvPacket);

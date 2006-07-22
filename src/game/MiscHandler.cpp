@@ -1125,3 +1125,14 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
     recv_data >> tmp;
     sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
 }
+
+void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
+{
+    // TODO
+    // data sent is incorrect 
+    WorldPacket data;
+    data.Initialize( SMSG_PLAYED_TIME );
+    data << (uint32)0x45F15698;
+    SendPacket( &data );
+}
+
