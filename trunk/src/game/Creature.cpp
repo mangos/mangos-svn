@@ -153,8 +153,8 @@ void Creature::AIM_Update(const uint32 &diff)
         case ALIVE:
         {
             Unit::Update( diff );
-            i_AI->UpdateAI(diff);
             i_motionMaster.UpdateMotion(diff);
+            i_AI->UpdateAI(diff);
             if(m_regenTimer > 0)
             {
                 if(diff >= m_regenTimer)
