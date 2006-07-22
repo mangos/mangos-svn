@@ -765,7 +765,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     }
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
-        ((Player*)this)->UpdateSkillWeapon();
+        ((Player*)this)->UpdateMeleeSkillWeapon();
 
     switch (outcome)
     {

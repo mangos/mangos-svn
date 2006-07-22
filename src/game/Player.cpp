@@ -2265,21 +2265,29 @@ void Player::UpdateSkillPro(uint32 spellid)
 
 }
 
-void Player::UpdateSkillWeapon()
+void Player::UpdateMeleeSkillWeapon()
 {
     Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-    if (!tmpitem)
-        tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-
-    if(tmpitem && tmpitem->GetProto()->SubClass ==20)
-        return;
 
     if (!tmpitem)
         UpdateSkill(SKILL_UNARMED);
-    else
+    else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
         UpdateSkill(tmpitem->GetSkill());
 
+    tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+    if (tmpitem)
+        UpdateSkill(tmpitem->GetSkill());
 }
+
+void Player::UpdateRangedSkillWeapon()
+{
+    Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+
+    if (tmpitem)
+        UpdateSkill(tmpitem->GetSkill());
+}
+
 
 void Player::ModifySkillBonus(uint32 skillid,int32 val)
 {
@@ -4881,51 +4889,39 @@ void Player::SetBindPoint(uint64 guid)
 /***                    STORAGE SYSTEM                 ***/
 /*********************************************************/
 
+void Player::SetVirtualItemSlot( uint8 i, Item* item)
+{
+    assert(i < 3);
+    SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2*i,    item ? item->GetGUIDLow()              : 0);
+    SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2*i +1, item ? item->GetProto()->Sheath        : 0);
+    SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
+}
+
+
 void Player::SetSheath( uint32 sheathed )
 {
     switch (sheathed)
     {
-        case 0:
-            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-            {
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, item->GetGUIDLow());
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, item->GetProto()->Sheath);
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, item->GetProto()->DisplayInfoID);
-            }; break;
-        case 1:
-            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-            {
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, item->GetGUIDLow());
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, item->GetProto()->Sheath);
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, item->GetProto()->DisplayInfoID);
-            }; break;
-        case 2:
-            if (Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-            {
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, item->GetGUIDLow());
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, item->GetProto()->Sheath);
-                SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, item->GetProto()->DisplayInfoID);
-            }; break;
-        default:;
-    }
-
-    if (sheathed != 0 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 0))
-    {
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO, uint32(0));
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_01, uint32(0));
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, uint32(0));
-    }
-    if (sheathed != 1 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1))
-    {
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_02, uint32(0));
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_03, uint32(0));
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_01, uint32(0));
-    }
-    if (sheathed != 2 && GetUInt32Value (UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 2))
-    {
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_04, uint32(0));
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO_05, uint32(0));
-        SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY_02, uint32(0));
+        case 0: // no attack
+            SetVirtualItemSlot(0,NULL);
+            SetVirtualItemSlot(1,NULL);
+            SetVirtualItemSlot(2,NULL);
+            break;
+        case 1: // melee attack
+            SetVirtualItemSlot(0,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND));
+            SetVirtualItemSlot(1,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND));
+            SetVirtualItemSlot(2,NULL);
+            break;
+        case 2: // ranged attack
+            SetVirtualItemSlot(0,NULL);
+            SetVirtualItemSlot(1,NULL);
+            SetVirtualItemSlot(2,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED));
+            break;
+        default:
+            SetVirtualItemSlot(0,NULL);
+            SetVirtualItemSlot(1,NULL);
+            SetVirtualItemSlot(2,NULL);
+            break;
     }
 }
 

@@ -380,16 +380,19 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
 void Object::SetUInt32Value( uint16 index, uint32 value )
 {
     ASSERT( index < m_valuesCount );
-    m_uint32Values[ index ] = value;
-
-    if(m_inWorld)
+    if(m_uint32Values[ index ] != value) 
     {
-        m_updateMask.SetBit( index );
+        m_uint32Values[ index ] = value;
 
-        if(!m_objectUpdated)
+        if(m_inWorld)
         {
-            ObjectAccessor::Instance().AddUpdateObject(this);
-            m_objectUpdated = true;
+            m_updateMask.SetBit( index );
+
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
         }
     }
 }
@@ -397,18 +400,21 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
 void Object::SetUInt64Value( uint16 index, const uint64 &value )
 {
     ASSERT( index + 1 < m_valuesCount );
-    m_uint32Values[ index ] = *((uint32*)&value);
-    m_uint32Values[ index + 1 ] = *(((uint32*)&value) + 1);
-
-    if(m_inWorld)
+    if(*((uint64*)&(m_uint32Values[ index ])) != value)
     {
-        m_updateMask.SetBit( index );
-        m_updateMask.SetBit( index + 1 );
+        m_uint32Values[ index ] = *((uint32*)&value);
+        m_uint32Values[ index + 1 ] = *(((uint32*)&value) + 1);
 
-        if(!m_objectUpdated)
+        if(m_inWorld)
         {
-            ObjectAccessor::Instance().AddUpdateObject(this);
-            m_objectUpdated = true;
+            m_updateMask.SetBit( index );
+            m_updateMask.SetBit( index + 1 );
+
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
         }
     }
 }
@@ -416,16 +422,19 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
 void Object::SetFloatValue( uint16 index, const float &value )
 {
     ASSERT( index < m_valuesCount );
-    m_floatValues[ index ] = value;
-
-    if(m_inWorld)
+    if(m_floatValues[ index ] != value)
     {
-        m_updateMask.SetBit( index );
+        m_floatValues[ index ] = value;
 
-        if(!m_objectUpdated)
+        if(m_inWorld)
         {
-            ObjectAccessor::Instance().AddUpdateObject(this);
-            m_objectUpdated = true;
+            m_updateMask.SetBit( index );
+
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
         }
     }
 }
