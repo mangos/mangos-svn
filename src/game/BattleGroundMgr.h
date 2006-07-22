@@ -32,10 +32,10 @@ class BattleGroundMgr
         ~BattleGroundMgr();
 
         /* Packet Building */
-        WorldPacket BuildPlayerLeftBattleGroundPacket(Player* plr);
-        WorldPacket BuildPlayerJoinedBattleGroundPacket(Player* plr);
+        void BuildPlayerLeftBattleGroundPacket(WorldPacket* data, Player* plr);
+        void BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Player* plr);
 
-        WorldPacket BuildBattleGroundListPacket(uint64 guid, Player* plr);
+        void BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr);
 
         /* Battlegrounds */
         inline std::map<uint32, BattleGround*>::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };

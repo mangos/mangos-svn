@@ -1026,9 +1026,9 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
             totalpct += mod->value;
     }
 
-    basevalue *= (100.0f+totalpct)/100.0f;
+    basevalue *= T((100.0f+totalpct)/100.0f);
     basevalue += totalflat;
-    return basevalue*totalpct/100.0f + totalflat; // diff
+    return T(basevalue*totalpct/100.0f + totalflat); // diff
 }
 
 #endif

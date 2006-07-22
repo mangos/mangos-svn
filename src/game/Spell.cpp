@@ -523,6 +523,10 @@ void Spell::prepare(SpellCastTargets * targets)
         return;
     }
 
+    // do first cast of autorepeat spell with recovery time delay (like after any authocast)
+    if(IsAutoRepeat())
+        m_spellState = SPELL_STATE_FINISHED;
+
     if(m_Istriggeredpell)
         cast();
     else
