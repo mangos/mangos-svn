@@ -1130,10 +1130,17 @@ void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 {
     // TODO
     // we need to send data in unix time format
+    // Make these functions
     WorldPacket data;
-    data.Initialize( SMSG_PLAYED_TIME );
-    data << (uint32)0x45F15698;
-    data << (uint32)0x45F15698;
-    SendPacket( &data );
+	//uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
+	//uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();
+
+    uint32 TotalTimePlayed = 0x45F15698;
+	uint32 LevelPlayedTime = 0x45F15698;
+
+	data.Initialize(SMSG_PLAYED_TIME);
+	data << TotalTimePlayed;
+	data << LevelPlayedTime;
+    SendPacket(&data);
 }
 
