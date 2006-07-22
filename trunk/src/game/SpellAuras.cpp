@@ -204,7 +204,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
 m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),
-m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0)
+m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
+m_castItem(NULL)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -677,6 +678,8 @@ void Aura::HandleAddModifier(bool apply)
         mod->value = value;
         mod->type = type;
         mod->mask = mask;
+        mod->spellId = m_spellId;
+        mod->charges = spellInfo->procCharges;
         p_mods->push_back(mod);
  
         uint16 send_val=0, send_mark=0;
@@ -1673,13 +1676,16 @@ void Aura::HandleModBaseResistance(bool apply)
 
 void Aura::HandleModRegen(bool apply)                       // eating
 {
-    //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
-    // add event
+    if (m_castItem)
+        if (m_castItem->Class == ITEM_CLASS_CONSUMABLE)
+            m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 }
 
 void Aura::HandleModPowerRegen(bool apply)                  // drinking
 {
-    //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    if (m_castItem)
+        if (m_castItem->Class == ITEM_CLASS_CONSUMABLE)
+            m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 }
 
 void Aura::HandleChannelDeathItem(bool apply)

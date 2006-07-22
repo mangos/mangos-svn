@@ -152,10 +152,11 @@ class Aura
         void SetNegative() { m_positive = false; }
         void SetPositive() { m_positive = true; }
 
-        bool IsPermanent() { return m_permanent; }
+        bool IsPermanent() const { return m_permanent; }
         void SetPermanent(bool value) { m_permanent = value; }
         bool IsAreaAura() const { return m_areaAura; }
-
+        bool IsPeriodic() const { return m_isPeriodic; }
+        bool IsTrigger() const { return m_isTrigger; }
         bool IsSingleTarget();
 
         void Update(uint32 diff);
@@ -171,6 +172,7 @@ class Aura
         void SendCoolDownEvent();
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
+        void SetCastItem(ItemPrototype *proto) { m_castItem = proto; }
 
     private:
 
@@ -182,6 +184,7 @@ class Aura
         //SpellEntry *m_spellProto;
         Unit* m_caster;
         Unit* m_target;
+        ItemPrototype* m_castItem;
         int32 m_duration;
 
         uint8 m_auraSlot;
