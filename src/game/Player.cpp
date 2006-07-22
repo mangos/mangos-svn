@@ -4902,17 +4902,17 @@ void Player::SetSheath( uint32 sheathed )
 {
     switch (sheathed)
     {
-        case 0: // no attack
+        case 0: // no prepeared weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             SetVirtualItemSlot(2,NULL);
             break;
-        case 1: // melee attack
+        case 1: // prepeared melee weapon
             SetVirtualItemSlot(0,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND));
             SetVirtualItemSlot(1,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND));
             SetVirtualItemSlot(2,NULL);
             break;
-        case 2: // ranged attack
+        case 2: // prepeared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             SetVirtualItemSlot(2,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED));

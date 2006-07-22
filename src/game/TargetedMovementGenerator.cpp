@@ -95,7 +95,6 @@ TargetedMovementGenerator::TargetedHome(Creature &owner)
     traveller.Relocation(x,y,z);
     i_targetedHome = true;
     owner.clearUnitState(UNIT_STAT_ALL_STATE);
-    owner.addUnitState(UNIT_STAT_FLEEING);
 }
 
 void
