@@ -203,6 +203,15 @@ void Spell::EffectSchoolDMG(uint32 i)
 
 void Spell::EffectDummy(uint32 i)
 {
+    if(!unitTarget)
+        return;
+    if(m_spellInfo->SpellIconID == 1648)
+    {
+        uint32 dmg = damage;
+        dmg += uint32(m_caster->GetUInt32Value(UNIT_FIELD_POWER2)/10 * FindSpellRank(m_spellInfo->Id)*3);
+        m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dmg);
+        m_caster->SetUInt32Value(UNIT_FIELD_POWER2,0);
+    }
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
