@@ -173,7 +173,9 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
     m_timer = casttime<0?0:casttime;
 
     m_meleeSpell = false;
-    if (m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat)
+
+    bool rangedShoot = ((m_spellInfo->Attributes & 18) == 18);
+    if (m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat && !rangedShoot)
     {
         for (int i = 0; i < 3; i++)
         {
