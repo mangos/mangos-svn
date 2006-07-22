@@ -1911,6 +1911,9 @@ void Unit::AddHostil(uint64 guid, float hostility)
 
 void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
 {
+    if (GetTypeId() != TYPEID_PLAYER)
+        return;
+
     SpellItemEnchantment *pEnchant;
     pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
@@ -1942,7 +1945,7 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
     }
     else
     {
-        if(apply)
+        if(apply && ((Player*)this)->IsItemSpellToEquip(enchantSpell_info))
         {
             Spell *spell = new Spell(this, enchantSpell_info, true, 0);
             SpellCastTargets targets;

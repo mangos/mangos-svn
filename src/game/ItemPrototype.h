@@ -122,6 +122,12 @@ enum INVENTORY_CLASS
     ITEM_CLASS_JUNK          = 15,
 };
 
+enum ITEM_SUBCLASS_CONSUMABLE
+{
+    ITEM_SUBCLASS_FOOD                    = 1,
+    ITEM_SUBCLASS_LIQUID                  = 2,
+};
+
 enum ITEM_SUBCLASS_CONTAINER
 {
     ITEM_SUBCLASS_CONTAINER               = 0,

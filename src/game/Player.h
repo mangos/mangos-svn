@@ -96,6 +96,8 @@ struct SpellModifier
     uint8 type;
     int32 value;
     uint32 mask;
+    int16 charges;
+    uint32 spellId;
 };
 
 typedef std::list<PlayerSpell*> PlayerSpellList;
@@ -1015,6 +1017,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     if (!spellInfo) return 0;
     T totalpct = 0;
     T totalflat = 0;
+    bool remove = false;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier *mod = *itr;
@@ -1024,6 +1027,34 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
             totalflat += mod->value;
         else if (mod->type == SPELLMOD_PCT)
             totalpct += mod->value;
+        if (mod->charges > 0)
+        {
+            mod->charges--;
+            if (mod->charges == 0)
+            {
+                mod->charges = -1;
+                remove = true;
+            }
+        }
+    }
+
+    if (remove)
+    {
+        for (SpellModList::iterator itr = m_spellMods[op].begin(), next; itr != m_spellMods[op].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            SpellModifier *mod = *itr;
+            if (!mod) continue;
+            if (mod->charges == -1)
+            {
+                RemoveAurasDueToSpell(mod->spellId);
+                if (m_spellMods[op].empty())
+                    break;
+                else
+                    next = m_spellMods[op].begin();
+            }
+        }
     }
 
     basevalue *= T((100.0f+totalpct)/100.0f);
