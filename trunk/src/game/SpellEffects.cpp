@@ -2301,8 +2301,8 @@ void Spell::EffectTransmitted(uint32 i)
         if( m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->CheckFishingAble() > 0)
         {
             //pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
-            pGameObj->SetUInt32Value(12, 0x3F6262A6 );
-            pGameObj->SetUInt32Value(13, 0xBEEF0B9F );
+            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 ); //Orientation3
+            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 3, -0.4668855369091033 ); //Orientation4
             data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
             data<<uint64(pGameObj->GetGUID());
             data<<uint8(0);
