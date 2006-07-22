@@ -1129,9 +1129,10 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 {
     // TODO
-    // data sent is incorrect 
+    // we need to send data in unix time format
     WorldPacket data;
     data.Initialize( SMSG_PLAYED_TIME );
+    data << (uint32)0x45F15698;
     data << (uint32)0x45F15698;
     SendPacket( &data );
 }
