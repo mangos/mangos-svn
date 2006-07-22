@@ -222,8 +222,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    if(pVictim->hasUnitState(UNIT_STAT_ROOT))
-        pVictim->clearUnitState(UNIT_STAT_ROOT);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
@@ -1733,12 +1731,16 @@ void Unit::ApplyStats(bool apply)
         val2 = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
 
     if(!apply)
-        tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+        tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS);
 
     ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER, val2, apply);
 
     if(apply)
-        tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
+        tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS);
+
+    val = GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER);
+    if(val>0)
+        tem_att_power = uint32(val*tem_att_power);
 
     val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
     ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, val, apply);
@@ -1758,12 +1760,16 @@ void Unit::ApplyStats(bool apply)
         case PRIEST:  val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
         case WARLOCK: val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
     }
-    tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
+    tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
 
     ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER, val2, apply);
 
     if(apply)
-        tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER);
+        tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
+
+    val = GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER);
+    if(val>0)
+        tem_att_power = uint32(val*tem_att_power);
 
     val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000;
 
