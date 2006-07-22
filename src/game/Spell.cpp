@@ -667,8 +667,8 @@ void Spell::SendSpellCooldown()
     int32 catrec = m_spellInfo->CategoryRecoveryTime;
     _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
     _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
-	if (rec < 0) rec = 0;
-	if (catrec < 0) catrec = 0;
+    if (rec < 0) rec = 0;
+    if (catrec < 0) catrec = 0;
 
     WorldPacket data;
 
@@ -1269,6 +1269,19 @@ uint8 Spell::CanCast()
         // for effects of spells that have only one target
         switch(m_spellInfo->Effect[i])
         {
+            case SPELL_EFFECT_DUMMY:
+            {
+                if (!unitTarget) return CAST_FAIL_FAILED;
+                if(m_spellInfo->SpellIconID == 1648)
+                {
+                    if(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) > unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.2)
+                    {
+                        castResult = CAST_FAIL_INVALID_TARGET;
+                        break;
+                    }
+                }
+                break;
+            }
             case SPELL_EFFECT_TAMECREATURE:
             {
                 if (!unitTarget) return CAST_FAIL_FAILED;
