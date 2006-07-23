@@ -376,6 +376,7 @@ class Spell
         void EffectHeal(uint32 i);
         void EffectHealthLeach(uint32 i);
         void EffectQuestComplete(uint32 i);
+        void EffectWeaponDmgNOSchool(uint32 i);
         void EffectCreateItem(uint32 i);
         void EffectPresistentAA(uint32 i);
         void EffectEnergize(uint32 i);

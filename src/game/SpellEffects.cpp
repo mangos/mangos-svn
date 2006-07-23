@@ -61,7 +61,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_SPECIALIZE = 14
     &Spell::EffectNULL,                                     //SPELL_EFFECT_RITUAL_ACTIVATE_PORTAL = 15
     &Spell::EffectQuestComplete,                            //SPELL_EFFECT_QUEST_COMPLETE = 16
-    &Spell::EffectWeaponDmg,                                //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
+    &Spell::EffectWeaponDmgNOSchool,                        //SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL = 17
     &Spell::EffectResurrect,                                //SPELL_EFFECT_RESURRECT = 18
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_EXTRA_ATTACKS = 19
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DODGE = 20
@@ -394,6 +394,28 @@ void Spell::EffectHealthLeach(uint32 i)
     if(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct < m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
         m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct));
     else m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+}
+
+void Spell::EffectWeaponDmgNOSchool(uint32 i)
+{
+    if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
+
+    float minDmg,maxDmg;
+    minDmg = maxDmg = 0;
+
+    minDmg = m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE);
+    maxDmg = m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+
+    uint32 randDmg = (uint32)(maxDmg-minDmg);
+    uint32 dmg = (uint32)minDmg;
+    if(randDmg > 1)
+        dmg += (uint32)(rand()%randDmg);
+    dmg += damage;
+
+    m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,dmg);
 }
 
 void Spell::EffectCreateItem(uint32 i)
@@ -2234,6 +2256,8 @@ void Spell::EffectCharge(uint32 i)
 
     float x, y, z;
     unitTarget->GetClosePoint(m_caster, x, y, z);
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        ((Creature *)unitTarget)->StopMoving();
 
     m_caster->SendMonsterMove(x, y, z, false,true,1);
     m_caster->Attack(unitTarget);

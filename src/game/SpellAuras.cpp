@@ -736,35 +736,28 @@ void Aura::HandleAddModifier(bool apply)
 
 void Aura::HandleAuraModStun(bool apply)
 {
-    uint32 apply_stat = UNIT_STAT_STUNDED;
+    WorldPacket data;
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldPacket data;
-            data.Initialize(SMSG_FORCE_MOVE_ROOT);
-            data << uint8(0xFF) << m_target->GetGUID();
-            m_target->SendMessageToSet(&data,true);
-            m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
-        }
-        else
+        if(m_target->GetTypeId() != TYPEID_PLAYER)
             ((Creature *)m_target)->StopMoving();
+
+        data.Initialize(SMSG_FORCE_MOVE_ROOT);
+        data << uint8(0xFF) << m_target->GetGUID();
+        m_target->SendMessageToSet(&data,true);
+        m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_STUNDED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldPacket data;
-            data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-            data << uint8(0xFF) << m_target->GetGUID();
-            m_target->SendMessageToSet(&data,true);
-            m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
-        }
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+
+        data.Initialize(SMSG_FORCE_MOVE_UNROOT);
+        data << uint8(0xFF) << m_target->GetGUID();
+        m_target->SendMessageToSet(&data,true);
+        
     }
 }
 
