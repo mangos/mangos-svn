@@ -1171,6 +1171,56 @@ uint16 Unit::GetDefenceSkillValue() const
         return GetUnitMeleeSkill();
 }
 
+float Unit::GetUnitDodgeChance() const
+{ 
+    if(hasUnitState(UNIT_STAT_STUNDED)) 
+        return 0;
+
+    return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_DODGE_PERCENTAGE ] : 5; 
+}
+
+
+float Unit::GetUnitParryChance() const
+{ 
+    float chance = 0;
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        Player const* player = (Player const*)this;
+        if(player->HasSpell(3127) || player->HasSpell(18848)) // Parry passive skill
+        {
+            Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            if(!tmpitem)
+                tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND); 
+
+            if(tmpitem && tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON)
+                chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
+        }
+    }
+    else if(GetTypeId() == TYPEID_UNIT)
+    {
+        if(((Creature const*)this)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID)
+            chance = 5;
+    }
+
+    return chance;
+}
+
+float Unit::GetUnitBlockChance() const
+{ 
+    float chance = 0;
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        Item *tmpitem = ((Player const*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        if(tmpitem && tmpitem->GetProto()->Block)
+            chance = GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
+    }
+    else
+        chance = 5;
+
+    return chance;
+}
+
+
 uint16 Unit::GetWeaponSkillValue() const
 {
     if(GetTypeId() == TYPEID_PLAYER)

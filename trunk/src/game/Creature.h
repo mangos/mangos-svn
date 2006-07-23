@@ -247,12 +247,12 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /***                    VENDOR SYSTEM                  ***/
         /*********************************************************/
 
-        uint8 GetItemCount() { return itemcount; }
-        uint32 GetItemId( uint32 slot ) { return item_list[slot].id; }
-        uint32 GetItemCount( uint32 slot ) { return item_list[slot].count; }
-        uint32 GetMaxItemCount( uint32 slot ) { return item_list[slot].maxcount; }
-        uint32 GetItemIncrTime( uint32 slot ) { return item_list[slot].incrtime; }
-        uint32 GetItemLastIncr( uint32 slot ) { return item_list[slot].lastincr; }
+        uint8 GetItemCount() const { return itemcount; }
+        uint32 GetItemId( uint32 slot ) const { return item_list[slot].id; }
+        uint32 GetItemCount( uint32 slot ) const { return item_list[slot].count; }
+        uint32 GetMaxItemCount( uint32 slot ) const { return item_list[slot].maxcount; }
+        uint32 GetItemIncrTime( uint32 slot ) const { return item_list[slot].incrtime; }
+        uint32 GetItemLastIncr( uint32 slot ) const { return item_list[slot].lastincr; }
         void SetItemCount( uint32 slot, uint32 count ) { item_list[slot].count = count; }
         void SetItemLastIncr( uint32 slot, uint32 ptime ) { item_list[slot].lastincr = ptime; }
         void AddItem( uint32 item, uint32 maxcount, uint32 ptime)
@@ -265,10 +265,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
             itemcount++;
         }
 
-        CreatureInfo *GetCreatureInfo();
+        CreatureInfo *GetCreatureInfo() const;
 
         void CreateTrainerSpells();
-        uint32 GetTrainerSpellsSize(){ return m_tspells.size(); }
+        uint32 GetTrainerSpellsSize() const { return m_tspells.size(); }
         std::list<TrainerSpell*>::iterator GetTspellsBegin(){ return m_tspells.begin(); }
         std::list<TrainerSpell*>::iterator GetTspellsEnd(){ return m_tspells.end(); }
 

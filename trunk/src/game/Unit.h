@@ -322,9 +322,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim);
 
-        float GetUnitDodgeChance()    const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_DODGE_PERCENTAGE ] : 5; }
-        float GetUnitParryChance()    const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_PARRY_PERCENTAGE ] : 5; }
-        float GetUnitBlockChance()    const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_BLOCK_PERCENTAGE ] : 5; }
+        float GetUnitDodgeChance()    const;
+        float GetUnitParryChance()    const;
+        float GetUnitBlockChance()    const;
         float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_CRIT_PERCENTAGE  ] : 5; }
 
         uint32 GetUnitBlockValue() const { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
