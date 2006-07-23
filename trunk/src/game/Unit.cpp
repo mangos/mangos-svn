@@ -783,8 +783,10 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             *victimState = 2;
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
                 ((Player*)pVictim)->UpdateDefense();
-            pVictim->m_attackTimer = 0;                     // parry sets attack timer to 0
+                pVictim->m_attackTimer = 0;                                    // parry sets attack timer to 0
+            }
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             break;
@@ -819,6 +821,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             break;
 
         case MELEE_HIT_GLANCING:
+        {
             // 30% reduction at 15 skill diff, no reduction at 5 skill diff
             int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue() - 5) * 3;
             if (reducePerc < 70)
@@ -826,8 +829,16 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             *damage = *damage * reducePerc / 100;
             *hitInfo |= HITINFO_GLANCING;
             break;
+        }
+        case MELEE_HIT_CRUSHING:
+            // 150% normal damage
+            *damage += (*damage / 2);
+            *hitInfo |= HITINFO_CRUSHING;
+            // TODO: victimState, victim animation?
+            break;
 
-            // TODO: handle crushing blow
+        default:
+            break;
     }
 
     for(std::list<struct DamageShield>::iterator i = pVictim->m_damageShields.begin();i != pVictim->m_damageShields.end();i++)
@@ -1046,15 +1057,15 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         | PLAYER_STATE_SIT_HIGH_CHAIR)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); return MELEE_HIT_CRIT; }
 
-            tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
+    // FIXME: stunned target cannot dodge
+    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); return MELEE_HIT_DODGE; }
 
-        // check if attack comes from behind
-        bool    fromBehind = !pVictim->HasInArc(M_PI,this);
     int32   modCrit = 0;
 
-    if (fromBehind)
+    // check if attack comes from behind
+    if (!pVictim->HasInArc(M_PI,this))
     {
         // ASSUME +10% crit from behind
         DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind.");
@@ -1062,7 +1073,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
     }
     else
     {
-        // cannot parry or block attacks from behind
+        // cannot parry or block attacks from behind, but can from forward
         tmp = (int32)(pVictim->GetUnitParryChance()*100);
         if (   (tmp > 0)                                    // check if unit _can_ parry
             && ((tmp -= skillBonus) > 0)
@@ -1084,18 +1095,27 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         && (roll < (sum += 4000)))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum); return MELEE_HIT_GLANCING; }
 
-        // FIXME: +skill and +defense has no effect on crit chance in PvP combat
-        tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
+    // FIXME: +skill and +defense has no effect on crit chance in PvP combat
+    tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum); return MELEE_HIT_CRIT; }
 
-        // TODO: crushing blows from mobs
-        //       current data: crushing blows do 150% normal damage
-        //                     possible if mob.level >= player.level + 3
-        //                     also possible if mob.weaponskill >= player.defense + 15
-        //                     15% min. chance at 3 levels difference
+    // mobs can score crushing blows if they're 3 or more levels above victim
+    // or when their weapon skill is 15 or more above victim's defense skill
+    if (   (GetTypeId() != TYPEID_PLAYER)
+        && ((getLevel() >= pVictim->getLevel() + 3) || (skillDiff >= 15)))
+    {
+        // tmp = player's max defense skill - player's current defense skill
+        tmp = 5*pVictim->getLevel() - pVictim->GetDefenceSkillValue();
+        // having defense above your maximum (from items, talents etc.) has no effect
+        // add 2% chance per lacking skill point, min. is 15%
+        // FIXME: chance should go up with mob lvl
+        tmp = 1500 + (tmp > 0 ? tmp*200 : 0);
+        if (roll < (sum += tmp))
+            { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRUSHING <%d, %d)", sum-tmp, sum); return MELEE_HIT_CRUSHING; }
+    }
 
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: NORMAL");
+    DEBUG_LOG ("RollMeleeOutcomeAgainst: NORMAL");
     return MELEE_HIT_NORMAL;
 }
 
