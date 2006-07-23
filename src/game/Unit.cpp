@@ -908,11 +908,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             {
                 if(!nocharges)
                     procspell->procCharges -= 1;
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
+                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger);
 
                 if(!spellInfo)
                 {
-                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->spellId);
+                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->trigger);
                     return;
                 }
 
@@ -922,6 +922,9 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                 SpellCastTargets targets;
                 targets.setUnitTarget( this );
                 spell->prepare(&targets);
+
+                if((*i).second->GetProcSpell()->trigger == 26545)
+                    pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,(*i).second->CalculateDamage());
             }
         }
     }
@@ -935,11 +938,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             {
                 if(!nocharges)
                     procspell->procCharges -= 1;
-                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->spellId );
+                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger );
 
                 if(!spellInfo)
                 {
-                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->spellId);
+                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->trigger);
                     return;
                 }
 

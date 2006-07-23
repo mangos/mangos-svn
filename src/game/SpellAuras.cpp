@@ -1521,8 +1521,9 @@ void Aura::HandleAuraProcTriggerSpell(bool apply)
     if(apply)
     {
         m_procSpell = new ProcTriggerSpell();
+        m_procSpell->spellId = GetSpellProto()->Id;
         m_procSpell->caster = m_caster->GetGUID();
-        m_procSpell->spellId = GetSpellProto()->EffectTriggerSpell[GetEffIndex()];
+        m_procSpell->trigger = GetSpellProto()->EffectTriggerSpell[GetEffIndex()];
         m_procSpell->procChance = GetSpellProto()->procChance;
         m_procSpell->procFlags = GetSpellProto()->procFlags;
         m_procSpell->procCharges = GetSpellProto()->procCharges;
@@ -2173,10 +2174,10 @@ bool Aura::IsSingleTarget()
     if ( GetAuraDuration() < spellInfo->RecoveryTime) return false;
     if ( spellInfo->RecoveryTime == 0 && GetAuraDuration() < spellInfo->CategoryRecoveryTime) return false;
 
-    // banish is not covered
-    if ( m_spellId == 710 || m_spellId == 18647 || m_spellId == 27565) return true;
-
-    // all other single target spells have
+    // all other single target spells have if it has AttributesEx
     if ( spellInfo->AttributesEx & (1<<18) ) return true;
+
+    // all other single target spells have if it has Attributes
+    if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;
 }
