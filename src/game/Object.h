@@ -96,8 +96,7 @@ class MANGOS_DLL_SPEC Object
         const uint32& GetGUIDLow() const { return m_uint32Values[0]; }
         const uint32& GetGUIDHigh() const { return m_uint32Values[1]; }
 
-        inline
-            uint32 GetEntry(){return m_uint32Values[OBJECT_FIELD_ENTRY];}
+        uint32 GetEntry() const {return m_uint32Values[OBJECT_FIELD_ENTRY];}
 
         const uint8& GetTypeId() const { return m_objectTypeId; }
         bool isType(uint8 mask) const

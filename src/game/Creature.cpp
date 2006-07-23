@@ -946,7 +946,7 @@ float Creature::GetAttackDistance(Unit *pl)
     return RetDistance;
 }
 
-CreatureInfo *Creature::GetCreatureInfo()
+CreatureInfo *Creature::GetCreatureInfo() const
 {
     return objmgr.GetCreatureTemplate(GetEntry());
 }
