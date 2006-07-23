@@ -102,12 +102,14 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     uint32 fieldCount = mysql_field_count(mMysql);
     if (!result)
         return NULL;
-    else if( !rowCount )
+    
+    if( !rowCount )
+    {
+        mysql_free_result(result);
         return NULL;
+    }
 
     QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
-    if(!queryResult)
-        return NULL;
 
     queryResult->NextRow();
 
@@ -134,16 +136,14 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     if (!result )
         return 0;
-    else
+    
     if (!rowCount)
-        return 0;
-
-    QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
-    if(!queryResult)
     {
-
+        mysql_free_result(result);
         return 0;
     }
+
+    QueryResultMysql *queryResult = new QueryResultMysql(result, rowCount, fieldCount);
 
     queryResult->NextRow();
 
