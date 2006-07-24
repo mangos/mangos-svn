@@ -165,6 +165,10 @@ ChatCommand * ChatHandler::getCommandTable()
         { "ticket",      2, &ChatHandler::HandleTicketCommand,           "",   NULL },
         { "delticket",   2, &ChatHandler::HandleDelTicketCommand,        "",   NULL },
 
+	// shutdown commands
+	{ "shutdown",	 3, &ChatHandler::ShutDown,			 "",    NULL },
+        { "cshutdown",	 3, &ChatHandler::CancelShutdown,                "",    NULL },
+
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },

@@ -162,6 +162,10 @@ class ChatHandler
         bool HandleFactionIdCommand(const char* args);
         bool HandleAddSpwCommand(const char* args);
 
+	// shutdown server
+        bool ShutDown(const char* args);
+        bool CancelShutdown (const char* args);
+
         bool HandleSecurityCommand(const char* args);
         bool HandleWorldPortCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);

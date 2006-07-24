@@ -2295,5 +2295,24 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     return true;
 }
 
+bool ChatHandler::ShutDown (const char* args)
+{
+        if(!*args)
+        {
+//                m_session->SystemMessage("Command format: .shutdown <seconds>");
+                return false;
+        }
+
+        uint32 time = atoi(args);
+        sWorld.ShutdownServ(time);
+        return true;
+}
+
+bool ChatHandler::CancelShutdown (const char* args)
+{
+        sWorld.ShutdownServ(0);
+        return true;
+}
+
 // TODO Add a commando "Illegal name" to set playerflag |= 32;
 // maybe do'able with a playerclass m_Illegal_name = false
