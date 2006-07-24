@@ -80,6 +80,7 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 SpellSpecific GetSpellSpecific(uint32 spellId);
 bool IsSpellSingleEffectPerCaster(uint32 spellId);
+bool IsPassiveSpell(uint32 spellId);
 
 template<class T>
 class DBCStorage

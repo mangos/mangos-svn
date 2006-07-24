@@ -249,6 +249,8 @@ void Spell::EffectApplyAura(uint32 i)
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
     if (m_CastItem)
         Aur->SetCastItem(m_CastItem->GetProto());
+    if (m_triggeredByAura)
+        Aur->SetTriggeredByAura(m_triggeredByAura);
     unitTarget->AddAura(Aur);
     if (Aur && Aur->IsTrigger())
     {
@@ -1070,6 +1072,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     for(add_slot = 0; add_slot < 21; add_slot ++)
         if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
     {
+        p_caster->AddItemEnchant(itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot),false);
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot,0);
     }
     add_slot = 0;
@@ -1118,6 +1121,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     for(add_slot = 0; add_slot < 21; add_slot ++)
         if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
     {
+        p_caster->AddItemEnchant(itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot),false);
         itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot,0);
     }
     add_slot = 0;
@@ -1780,6 +1784,8 @@ void Spell::EffectEnchantHeldItem(uint32 i)
             if (m_spellInfo->EffectMiscValue[j])
         {
             uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
+            if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j)))
+                p_caster->AddItemEnchant(itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j)),false);
             itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
             if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
                 p_caster->AddItemEnchant(enchant_id,true);

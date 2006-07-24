@@ -1488,10 +1488,13 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     else
     {
-        if (!RemoveNoStackAurasDueToAura(Aur))
-        {
-            delete Aur;
-            return false;                                   // couldnt remove conflicting aura with higher rank
+        if (!Aur->IsPassive())    // passive auras stack with all 
+         {
+            if (!RemoveNoStackAurasDueToAura(Aur))
+            {
+                delete Aur;
+                return false;                                   // couldnt remove conflicting aura with higher rank
+            }                                  // couldnt remove conflicting aura with higher rank
         }
 
         Aur->_AddAura();
@@ -1568,6 +1571,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         next++;
         if (!(*i).second) continue;
         if (!(*i).second->GetSpellProto()) continue;
+        if (IsPassiveSpell((*i).second->GetId())) continue;
 
         uint32 i_spellId = (*i).second->GetId();
         uint32 i_effIndex = (*i).second->GetEffIndex();

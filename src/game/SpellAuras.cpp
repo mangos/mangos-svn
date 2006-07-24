@@ -205,13 +205,15 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
 m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_castItem(NULL)
+m_castItem(NULL), m_triggeredByAura(NULL)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
     m_duration = GetDuration(spellproto);
     if(m_duration == -1)
         m_permanent = true;
+    m_isPassive = IsPassiveSpell(m_spellId);
+
 
     switch(spellproto->EffectImplicitTargetA[eff])
     {
@@ -403,8 +405,9 @@ void Aura::ApplyModifier(bool apply)
 
 void Aura::UpdateAuraDuration()
 {
-
     if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(m_isPassive)
         return;
 
     WorldPacket data;
@@ -439,10 +442,16 @@ void Aura::_AddAura()
     }
 
     //m_target->RemoveRankAurasDueToSpell(m_spellId);
-    m_target->ApplyStats(false);
+    if (!m_triggeredByAura) // stats could already be removed by triggerer
+        m_target->ApplyStats(false);
     ApplyModifier(true);
-    m_target->ApplyStats(true);
+    if (!m_triggeredByAura) 
+        m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
+
+    if(m_isPassive) // passive auras do not get placed in the slots
+        return;
+
 
     if(!samespell)
     {
@@ -487,10 +496,15 @@ void Aura::_AddAura()
 
 void Aura::_RemoveAura()
 {
-    m_target->ApplyStats(false);
+    if (!m_triggeredByAura) // stats may already be rmoved by triggerer
+        m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false);
-    m_target->ApplyStats(true);
+    if (!m_triggeredByAura)
+        m_target->ApplyStats(true);
+
+    if(m_isPassive) //passive auras do not get put in slots
+        return;
 
     uint8 slot = GetAuraSlot();
     Aura* aura = m_target->GetAura(m_spellId, m_effIndex);
@@ -740,7 +754,7 @@ void Aura::HandleAuraModStun(bool apply)
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
-        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        //m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         if(m_target->GetTypeId() != TYPEID_PLAYER)
             ((Creature *)m_target)->StopMoving();
 
@@ -1438,7 +1452,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
         if(spellInfo)
         {
-            Spell *p_spell = new Spell(m_caster,spellInfo,true,0);
+            Spell *p_spell = new Spell(m_caster,spellInfo,true,this);
             WPAssert(p_spell);
             SpellCastTargets targets;
             targets.setUnitTarget(unit_target);
@@ -2156,7 +2170,10 @@ bool Aura::IsSingleTarget()
     // all other single target spells have if it has AttributesEx
     if ( spellInfo->AttributesEx & (1<<18) ) return true;
 
+    // other single target
+    if ( (spellInfo->SpellIconID == 20 && spellInfo->SpellVisual == 38)
+        || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336))) return true;
     // all other single target spells have if it has Attributes
-    if ( spellInfo->Attributes & (1<<30) ) return true;
+    //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;
 }

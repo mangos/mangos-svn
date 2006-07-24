@@ -157,6 +157,7 @@ class Aura
         bool IsAreaAura() const { return m_areaAura; }
         bool IsPeriodic() const { return m_isPeriodic; }
         bool IsTrigger() const { return m_isTrigger; }
+        bool IsPassive() const { return m_isPassive; }
         bool IsSingleTarget();
 
         void Update(uint32 diff);
@@ -173,6 +174,8 @@ class Aura
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
         void SetCastItem(ItemPrototype *proto) { m_castItem = proto; }
+        Aura *GetTriggeredByAura() const { return m_triggeredByAura; }
+        void SetTriggeredByAura(Aura *Aur) { m_triggeredByAura = Aur; }
 
     private:
 
@@ -185,6 +188,7 @@ class Aura
         Unit* m_caster;
         Unit* m_target;
         ItemPrototype* m_castItem;
+        Aura* m_triggeredByAura;
         int32 m_duration;
 
         uint8 m_auraSlot;
@@ -194,6 +198,7 @@ class Aura
         bool m_isPeriodic;
         bool m_isTrigger;
         bool m_areaAura;
+        bool m_isPassive;
 
         uint32 m_periodicTimer;
         uint32 m_PeriodicEventId;
