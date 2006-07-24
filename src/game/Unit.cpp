@@ -849,7 +849,8 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     {
         *absorbDamage = absorb;
     }
-    // proc trigger damage
+    // Fix me : when the procdamage->procCharges == 0 and nocharges == false,remove this aura.
+    // pVictim's proc trigger damage and spell
     for (AuraMap::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
     {
         ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
@@ -863,33 +864,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                 if(!nocharges)
                     procdamage->procCharges -= 1;
             }
-            else if(procdamage->procFlags == 64 && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges) && *victimState == 4)
-            {
-                pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
-                if(!nocharges)
-                    procdamage->procCharges -= 1;
-            }
         }
-    }
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
-    {
-        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
-        if(procdamage)
-        {
-            bool nocharges = procdamage->procCharges == 0 ? true : false;
-            if(procdamage->procFlags == 1 && procdamage->procChance > rand_chance()
-                && (procdamage->procCharges > 0 || nocharges))
-            {
-                SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
-                if(!nocharges)
-                    procdamage->procCharges -= 1;
-            }
-        }
-    }
-    // proc trigger aura, Fix Me about procflag & what case.
-    for (AuraMap::iterator i = pVictim->m_Auras.begin(); i != pVictim->m_Auras.end(); ++i)
-    {
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
             bool nocharges = procspell->procCharges == 0 ? true : false;
@@ -918,8 +893,21 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             }
         }
     }
+    // this unit's proc trigger damage and spell
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
     {
+        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
+        if(procdamage)
+        {
+            bool nocharges = procdamage->procCharges == 0 ? true : false;
+            if(procdamage->procFlags & 20 && procdamage->procChance > rand_chance()
+                && (procdamage->procCharges > 0 || nocharges))
+            {
+                SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
+                if(!nocharges)
+                    procdamage->procCharges -= 1;
+            }
+        }
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
             bool nocharges = procspell->procCharges == 0 ? true : false;
@@ -936,11 +924,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                     return;
                 }
 
-                Spell *spell = new Spell(pVictim, spellInfo, true, 0);
+                Spell *spell = new Spell(this, spellInfo, true, 0);
                 WPAssert(spell);
 
                 SpellCastTargets targets;
-                targets.setUnitTarget( this );
+                targets.setUnitTarget( pVictim );
                 spell->prepare(&targets);
             }
         }
