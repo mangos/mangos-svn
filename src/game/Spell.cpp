@@ -1063,33 +1063,20 @@ void Spell::TakePower()
     if(m_CastItem)
         return;
 
-    uint16 powerField;
+    Powers powerType = m_caster->getPowerType();
 
-    uint8 powerType = m_caster->getPowerType();
-    if(powerType == 0)
-        powerField = UNIT_FIELD_POWER1;
-    else if(powerType == 1)
-        powerField = UNIT_FIELD_POWER2;
-    else if(powerType == 3)
-        powerField = UNIT_FIELD_POWER4;
-    else
-    {
-        powerField = UNIT_FIELD_POWER1;
-        sLog.outError("SPELL: unknown power type %i spell id %u\n",(int)powerType, m_spellInfo->Id);
-    }
-
-    uint32 currentPower = m_caster->GetUInt32Value(powerField);
+    uint32 currentPower = m_caster->GetPower(powerType);
     uint32 manaCost = m_spellInfo->manaCost;
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
 
     if(currentPower < manaCost)
-        m_caster->SetUInt32Value(powerField, 0);
+        m_caster->SetPower(powerType, 0);
     else
     {
-        m_caster->SetUInt32Value(powerField, currentPower - manaCost);
-        if (powerField == UNIT_FIELD_POWER1)
+        m_caster->SetPower(powerType, currentPower - manaCost);
+        if (powerType == POWER_MANA)
         {
             // Set the five second timer
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1278,7 +1265,7 @@ uint8 Spell::CanCast()
                 if (!unitTarget) return CAST_FAIL_FAILED;
                 if(m_spellInfo->SpellIconID == 1648)
                 {
-                    if(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) > unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.2)
+                    if(unitTarget->GetHealth() > unitTarget->GetMaxHealth()*0.2)
                     {
                         castResult = CAST_FAIL_INVALID_TARGET;
                         break;
@@ -1473,10 +1460,10 @@ uint8 Spell::CheckItems()
                 for (int i = 0; i < 3; i++)
                 {
                     if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
-                        if (unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) == unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH))
+                        if (unitTarget->GetHealth() == unitTarget->GetMaxHealth())
                             return (uint8)CAST_FAIL_ALREADY_FULL_HEALTH;
                     if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
-                        if (unitTarget->GetUInt32Value(UNIT_FIELD_POWER1) == unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
+                        if (unitTarget->GetPower(POWER_MANA) == unitTarget->GetMaxPower(POWER_MANA))
                             return (uint8)CAST_FAIL_ALREADY_FULL_MANA;
                 }
             }

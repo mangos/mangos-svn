@@ -190,7 +190,7 @@ void Spell::EffectInstaKill(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive() )
     {
-        uint32 health = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
+        uint32 health = unitTarget->GetHealth();
         m_caster->DealDamage(unitTarget, health, 0, false);
     }
 }
@@ -208,9 +208,9 @@ void Spell::EffectDummy(uint32 i)
     if(m_spellInfo->SpellIconID == 1648)
     {
         uint32 dmg = damage;
-        dmg += uint32(m_caster->GetUInt32Value(UNIT_FIELD_POWER2)/10 * FindSpellRank(m_spellInfo->Id)*3);
+        dmg += uint32(m_caster->GetPower(POWER_RAGE)/10 * FindSpellRank(m_spellInfo->Id)*3);
         m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, dmg);
-        m_caster->SetUInt32Value(UNIT_FIELD_POWER2,0);
+        m_caster->SetPower(POWER_RAGE,0);
     }
 }
 
@@ -275,39 +275,31 @@ void Spell::EffectApplyAura(uint32 i)
 
 void Spell::EffectManaDrain(uint32 i)
 {
-    uint32 DrainType = m_spellInfo->EffectMiscValue[i];
-    uint16 PowerField = 0;
-    switch(DrainType)
-    {
-        case 0:PowerField = UNIT_FIELD_POWER1;break;
-        case 1:PowerField = UNIT_FIELD_POWER2;break;
-        case 2:PowerField = UNIT_FIELD_POWER3;break;
-        case 3:PowerField = UNIT_FIELD_POWER4;break;
-        case 4:PowerField = UNIT_FIELD_POWER5;break;
-        default:break;
-    }
-    if(!PowerField)
+    if(m_spellInfo->EffectMiscValue[i] > 4)
         return;
+
+    Powers drain_power = Powers(m_spellInfo->EffectMiscValue[i]);
+
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
 
-    uint32 curPower = unitTarget->GetUInt32Value(PowerField);
+    uint32 curPower = unitTarget->GetUInt32Value(drain_power);
     float tmpvalue = m_spellInfo->EffectMultipleValue[i];
     if(!tmpvalue)
         tmpvalue = 1;
     if(curPower < damage)
     {
-        unitTarget->SetUInt32Value(PowerField,0);
-        if(DrainType == 0)
-            m_caster->SetUInt32Value(PowerField,uint32(m_caster->GetUInt32Value(PowerField)+curPower*tmpvalue));
+        unitTarget->SetPower(drain_power,0);
+        if(drain_power == POWER_MANA)
+            m_caster->SetPower(POWER_MANA,m_caster->GetPower(POWER_MANA)+curPower*tmpvalue);
     }
     else
     {
-        unitTarget->SetUInt32Value(PowerField,curPower-damage);
-        if(DrainType == 0)
-            m_caster->SetUInt32Value(PowerField,uint32(m_caster->GetUInt32Value(PowerField)+damage*tmpvalue));
+        unitTarget->SetPower(drain_power,curPower-damage);
+        if(drain_power == POWER_MANA)
+            m_caster->SetPower(POWER_MANA,m_caster->GetPower(POWER_MANA)+damage*tmpvalue);
     }
 }
 
@@ -322,24 +314,24 @@ void Spell::EffectPowerDrain(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    uint32 curPower = unitTarget->GetUInt32Value(UNIT_FIELD_POWER1);
-    uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-    uint32 caster_curPower = m_caster->GetUInt32Value(UNIT_FIELD_POWER1);
+    uint32 curPower = unitTarget->GetPower(POWER_MANA);
+    uint32 curHealth = unitTarget->GetHealth();
+    uint32 caster_curPower = m_caster->GetPower(POWER_MANA);
     uint32 tmpvalue = 0;
     if(curPower < damage)
     {
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,0);
+        unitTarget->SetPower(POWER_MANA,0);
         tmpvalue = uint32(curPower*m_spellInfo->EffectMultipleValue[i]);
     }
     else
     {
         tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER1,curPower-damage);
+        unitTarget->SetPower(POWER_MANA,curPower-damage);
     }
-    if(caster_curPower + tmpvalue < m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1))
-        m_caster->SetUInt32Value(UNIT_FIELD_POWER1,caster_curPower + tmpvalue);
-    else m_caster->SetUInt32Value(UNIT_FIELD_POWER1,m_caster->GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth-tmpvalue);
+    if(caster_curPower + tmpvalue < m_caster->GetMaxPower(POWER_MANA))
+        m_caster->SetPower(POWER_MANA,caster_curPower + tmpvalue);
+    else m_caster->SetPower(POWER_MANA,m_caster->GetMaxPower(POWER_MANA));
+    unitTarget->SetHealth(curHealth-tmpvalue);
 
 }
 
@@ -348,10 +340,10 @@ void Spell::EffectHeal( uint32 i )
     if( unitTarget && unitTarget->isAlive() )
     {
         float pct = (100+unitTarget->m_RegenPCT)/100;
-        uint32 curhealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-        uint32 maxhealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+        uint32 curhealth = unitTarget->GetHealth();
+        uint32 maxhealth = unitTarget->GetMaxHealth();
         uint32 addhealth = ( curhealth + damage*pct < maxhealth ? uint32(damage*pct) : maxhealth - curhealth );
-        unitTarget->SetUInt32Value( UNIT_FIELD_HEALTH, curhealth + addhealth );
+        unitTarget->SetHealth( curhealth + addhealth );
         //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
@@ -381,19 +373,19 @@ void Spell::EffectHealthLeach(uint32 i)
     uint32 tmpvalue = 0;
     float pct = (100+unitTarget->m_RegenPCT)/100;
 
-    if(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH) - damage > 0)
+    if(unitTarget->GetHealth() - damage > 0)
     {
         m_caster->DealDamage(unitTarget, damage, 0, true);
         tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
     }
     else
     {
-        tmpvalue = uint32(unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH)*m_spellInfo->EffectMultipleValue[i]);
-        m_caster->DealDamage(unitTarget, unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH), 0, true);
+        tmpvalue = uint32(unitTarget->GetHealth()*m_spellInfo->EffectMultipleValue[i]);
+        m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), 0, true);
     }
-    if(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct < m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
-        m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,uint32(m_caster->GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*pct));
-    else m_caster->SetUInt32Value(UNIT_FIELD_HEALTH,m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+    if(m_caster->GetHealth() + tmpvalue*pct < m_caster->GetMaxHealth() )
+        m_caster->SetHealth(uint32(m_caster->GetHealth() + tmpvalue*pct));
+    else m_caster->SetHealth(m_caster->GetMaxHealth());
 }
 
 void Spell::EffectWeaponDmgNOSchool(uint32 i)
@@ -428,7 +420,10 @@ void Spell::EffectCreateItem(uint32 i)
     uint32 newitemid = m_spellInfo->EffectItemType[i];
     ItemPrototype *pProto = objmgr.GetItemPrototype( newitemid );
     if(!pProto)
+    {
+        player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
         return;
+    }
 
     uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
     if(pProto->Class != ITEM_CLASS_CONSUMABLE)
@@ -438,18 +433,26 @@ void Spell::EffectCreateItem(uint32 i)
 
     Item *pItem = player->CreateItem(newitemid, num_to_add);
 
+    if(!pItem)
+    {
+        player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        return;
+    }
+
     uint16 dest;
     uint8 msg = player->CanStoreItem( 0, NULL_SLOT, dest, pItem, false);
-    if( msg == EQUIP_ERR_OK )
+    if( msg != EQUIP_ERR_OK )
     {
-        player->StoreItem( dest, pItem, true);
-        if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
-            pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
-        //should send message "create item" to client.-FIX ME
-        player->UpdateSkillPro(m_spellInfo->Id);
-    }
-    else
         player->SendEquipError( msg, NULL, NULL );
+        delete pItem;
+    }
+
+
+    player->StoreItem( dest, pItem, true);
+    if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
+        pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+    //should send message "create item" to client.-FIX ME
+    player->UpdateSkillPro(m_spellInfo->Id);
 }
 
 void Spell::EffectPresistentAA(uint32 i)
@@ -480,38 +483,17 @@ void Spell::EffectEnergize(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
-    uint16 POWER_TYPE;
 
-    switch(m_spellInfo->EffectMiscValue[i])
-    {
-        case 0:
-        {
-            POWER_TYPE = UNIT_FIELD_POWER1;
-        }break;
-        case 1:
-        {
-            POWER_TYPE = UNIT_FIELD_POWER2;
-        }break;
-        case 2:
-        {
-            POWER_TYPE = UNIT_FIELD_POWER3;
-        }break;
-        case 3:
-        {
-            POWER_TYPE = UNIT_FIELD_POWER4;
-        }break;
-        case 4:
-        {
-            POWER_TYPE = UNIT_FIELD_POWER5;
-        }break;
-    }
-    uint32 curEnergy = unitTarget->GetUInt32Value(POWER_TYPE);
-    uint32 maxEnergy = unitTarget->GetUInt32Value(POWER_TYPE+6);
+    if(m_spellInfo->EffectMiscValue[i] > 4)
+        return;
+
+    Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
+    uint32 curEnergy = unitTarget->GetPower(power);
+    uint32 maxEnergy = unitTarget->GetMaxPower(power);
     if(curEnergy+damage > maxEnergy)
-        unitTarget->SetUInt32Value(POWER_TYPE,maxEnergy);
+        unitTarget->SetPower(power,maxEnergy);
     else
-        unitTarget->SetUInt32Value(POWER_TYPE,curEnergy+damage);
-
+        unitTarget->SetPower(power,curEnergy+damage);
 }
 
 void Spell::EffectOpenLock(uint32 i)
@@ -676,7 +658,10 @@ void Spell::EffectSummonChangeItem(uint32 i)
         player->DestroyItemCount(pItem->GetEntry(),1,true);
     }
     else
+    {
+        delete pItem;
         player->SendEquipError( msg, NULL, NULL );
+    }
 }
 
 void Spell::EffectOpenSecretSafe(uint32 i)
@@ -707,7 +692,7 @@ void Spell::EffectSummon(uint32 i)
     if(!pet_entry)
         return;
     uint32 level = m_caster->getLevel();
-    Creature* spawnCreature = new Creature();
+    Pet* spawnCreature = new Pet();
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
         m_caster->GetMapId(),
@@ -720,15 +705,15 @@ void Spell::EffectSummon(uint32 i)
     }
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    spawnCreature->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_POWER1,28 + 10 * level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER1,28 + 10 * level);
+    spawnCreature->SetPower(   POWER_HAPPINESS,1000000);
+    spawnCreature->SetMaxPower(POWER_HAPPINESS,1000000);
+    spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
+    spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    spawnCreature->setPowerType(0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 28 + 30*level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_LEVEL , level);
+    spawnCreature->setPowerType(POWER_MANA);
+    spawnCreature->SetHealth( 28 + 30*level);
+    spawnCreature->SetMaxHealth( 28 + 30*level);
+    spawnCreature->SetLevel( level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
@@ -737,15 +722,14 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
     /*
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT0,int(20+level*1.55));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT1,int(20+level*0.64));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT2,int(20+level*1.27));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT3,int(20+level*0.18));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT4,int(20+level*0.36));
+    spawnCreature->SetStat(STAT_STRENGTH,int(20+level*1.55));
+    spawnCreature->SetStat(STAT_AGILITY,int(20+level*0.64));
+    spawnCreature->SetStat(STAT_STAMINA,int(20+level*1.27));
+    spawnCreature->SetStat(STAT_INTELLECT,int(20+level*0.18));
+    spawnCreature->SetStat(STAT_SPIRIT,int(20+level*0.36));
     */
-    spawnCreature->SetUInt32Value(UNIT_FIELD_ARMOR,level*50);
-    ((Pet*)spawnCreature)->SetisPet(true);
-    ((Pet*)spawnCreature)->AIM_Initialize();
+    spawnCreature->SetArmor(level*50);
+    spawnCreature->AIM_Initialize();
 
     std::string name;
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -965,7 +949,7 @@ void Spell::EffectSummonWild(uint32 i)
     if(!pet_entry)
         return;
     uint32 level = m_caster->getLevel();
-    Creature* spawnCreature = new Creature();
+    Pet* spawnCreature = new Pet();
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
         m_caster->GetMapId(),
@@ -978,15 +962,15 @@ void Spell::EffectSummonWild(uint32 i)
     }
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    spawnCreature->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_POWER1,28 + 10 * level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXPOWER1,28 + 10 * level);
+    spawnCreature->SetPower(   POWER_HAPPINESS,1000000);
+    spawnCreature->SetMaxPower(POWER_HAPPINESS,1000000);
+    spawnCreature->setPowerType(POWER_MANA);
+    spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
+    spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    spawnCreature->setPowerType(0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 30*level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 28 + 30*level);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_LEVEL , level);
+    spawnCreature->SetHealth(    28 + 30*level);
+    spawnCreature->SetMaxHealth( 28 + 30*level);
+    spawnCreature->SetLevel(level);
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
@@ -995,15 +979,14 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
     /*
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT0,int(20+level*1.55));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT1,int(20+level*0.64));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT2,int(20+level*1.27));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT3,int(20+level*0.18));
-    spawnCreature->SetUInt32Value(UNIT_FIELD_STAT4,int(20+level*0.36));
+    spawnCreature->SetStat(STAT_STRENGTH,int(20+level*1.55));
+    spawnCreature->SetStat(STAT_AGILITY,int(20+level*0.64));
+    spawnCreature->SetStat(STAT_STAMINA,int(20+level*1.27));
+    spawnCreature->SetStat(STAT_INTELLECT,int(20+level*0.18));
+    spawnCreature->SetStat(STAT_SPIRIT,int(20+level*0.36));
     */
-    spawnCreature->SetUInt32Value(UNIT_FIELD_ARMOR,level*50);
-    ((Pet*)spawnCreature)->SetisPet(true);
-    ((Pet*)spawnCreature)->AIM_Initialize();
+    spawnCreature->SetArmor(level*50);
+    spawnCreature->AIM_Initialize();
 
     std::string name;
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1166,18 +1149,18 @@ void Spell::EffectTameCreature(uint32 i)
 
     if(m_caster->getClass() == CLASS_HUNTER)
     {
-        uint32 petlevel = creatureTarget->GetUInt32Value(UNIT_FIELD_LEVEL);
+        uint32 petlevel = creatureTarget->getLevel();
         creatureTarget->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         creatureTarget->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         creatureTarget->SetUInt32Value(UNIT_NPC_FLAGS , 0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_MAXPOWER1,28 + 10 * petlevel);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_POWER1,28 + 10 * petlevel);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_POWER5,1000000);
-        creatureTarget->setPowerType(2);
+        creatureTarget->SetHealth(    28 + 10 * petlevel);
+        creatureTarget->SetMaxHealth( 28 + 10 * petlevel);
+        creatureTarget->SetMaxPower(POWER_MANA,28 + 10 * petlevel);
+        creatureTarget->SetPower(   POWER_MANA,28 + 10 * petlevel);
+        creatureTarget->SetMaxPower(POWER_HAPPINESS,1000000);
+        creatureTarget->SetPower(   POWER_HAPPINESS,1000000);
+        creatureTarget->setPowerType(POWER_FOCUS);
         creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
@@ -1185,14 +1168,13 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_STAT0,int(20+petlevel*1.55));
-        creatureTarget->SetUInt32Value(UNIT_FIELD_STAT1,int(20+petlevel*0.64));
-        creatureTarget->SetUInt32Value(UNIT_FIELD_STAT2,int(20+petlevel*1.27));
-        creatureTarget->SetUInt32Value(UNIT_FIELD_STAT3,int(20+petlevel*0.18));
-        creatureTarget->SetUInt32Value(UNIT_FIELD_STAT4,int(20+petlevel*0.36));
-        creatureTarget->SetUInt32Value(UNIT_FIELD_ARMOR,petlevel*50);
+        creatureTarget->SetStat(STAT_STRENGTH,int(20+petlevel*1.55));
+        creatureTarget->SetStat(STAT_AGILITY,int(20+petlevel*0.64));
+        creatureTarget->SetStat(STAT_STAMINA,int(20+petlevel*1.27));
+        creatureTarget->SetStat(STAT_INTELLECT,int(20+petlevel*0.18));
+        creatureTarget->SetStat(STAT_SPIRIT,int(20+petlevel*0.36));
+        creatureTarget->SetArmor(petlevel*50);
         creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_2,1);
-        creatureTarget->SetisPet(true);
         creatureTarget->AIM_Initialize();
 
         std::string name;
@@ -1244,12 +1226,12 @@ void Spell::EffectSummonPet(uint32 i)
     {
         if(OldSummon->isDead() )
         {
-            uint32 petlvl = OldSummon->GetUInt32Value(UNIT_FIELD_LEVEL);
+            uint32 petlvl = OldSummon->getLevel();
             OldSummon->RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-            OldSummon->SetUInt32Value(UNIT_FIELD_HEALTH, 28 + 10 * petlvl );
-            OldSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlvl );
-            OldSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlvl);
-            OldSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlvl);
+            OldSummon->SetHealth( 28 + 10 * petlvl );
+            OldSummon->SetMaxHealth( 28 + 10 * petlvl );
+            OldSummon->SetPower(   POWER_MANA, 28 + 10 * petlvl);
+            OldSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlvl);
             OldSummon->setDeathState(ALIVE);
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
@@ -1296,13 +1278,13 @@ void Spell::EffectSummonPet(uint32 i)
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
         uint32 petlevel=m_caster->getLevel();
-        NewSummon->SetUInt32Value(UNIT_FIELD_LEVEL,petlevel);
+        NewSummon->SetLevel(petlevel);
         NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
-        NewSummon->SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
-        NewSummon->SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
-        NewSummon->SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
+        NewSummon->SetHealth(    28 + 10 * petlevel);
+        NewSummon->SetMaxHealth( 28 + 10 * petlevel);
+        NewSummon->SetPower(   POWER_MANA , 28 + 10 * petlevel);
+        NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
 
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
@@ -1315,11 +1297,11 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT0,22);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT1,22);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT2,25);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT3,28);
-        NewSummon->SetUInt32Value(UNIT_FIELD_STAT4,27);
+        NewSummon->SetStat(STAT_STRENGTH,22);
+        NewSummon->SetStat(STAT_AGILITY,22);
+        NewSummon->SetStat(STAT_STAMINA,25);
+        NewSummon->SetStat(STAT_INTELLECT,28);
+        NewSummon->SetStat(STAT_SPIRIT,27);
         std::string name;
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
             name = ((Player*)m_caster)->GetName();
@@ -1338,7 +1320,6 @@ void Spell::EffectSummonPet(uint32 i)
             NewSummon->AddActState(STATE_RA_SPELL1);
         }
 
-        NewSummon->SetisPet(true);
         NewSummon->SavePetToDB();
         NewSummon->AIM_Initialize();
         MapManager::Instance().GetMap(NewSummon->GetMapId())->Add((Creature*)NewSummon);
@@ -1534,15 +1515,14 @@ void Spell::EffectHealMaxHealth(uint32 i)
     if(unitTarget->m_immuneToMechanic == 16)
         return;
 
-    uint32 heal;
-    heal = m_caster->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+    uint32 heal = m_caster->GetMaxHealth();
 
-    uint32 curHealth = unitTarget->GetUInt32Value(UNIT_FIELD_HEALTH);
-    uint32 maxHealth = unitTarget->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
+    uint32 curHealth = unitTarget->GetHealth();
+    uint32 maxHealth = unitTarget->GetMaxHealth();
     if(curHealth+heal > maxHealth)
-        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,maxHealth);
+        unitTarget->SetHealth(maxHealth);
     else
-        unitTarget->SetUInt32Value(UNIT_FIELD_HEALTH,curHealth+heal);
+        unitTarget->SetHealth(curHealth+heal);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer((Player*)m_caster, m_spellInfo->Id, maxHealth - curHealth);
@@ -1737,7 +1717,7 @@ void Spell::EffectSummonTotem(uint32 i)
     }
     pTotem->AIM_Initialize();
 
-    pTotem->SetUInt32Value(UNIT_FIELD_LEVEL,m_caster->getLevel());
+    pTotem->SetLevel(m_caster->getLevel());
     sLog.outError("AddObject at Spell.cppl line 1040");
     MapManager::Instance().GetMap(pTotem->GetMapId())->Add(pTotem);
 
@@ -2036,10 +2016,10 @@ void Spell::EffectFeedPet(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
-    uint32 feelty = unitTarget->GetUInt32Value(UNIT_FIELD_POWER5);
-    if(damage + feelty <  unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER5))
-        unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,damage + feelty);
-    else unitTarget->SetUInt32Value(UNIT_FIELD_POWER5,unitTarget->GetUInt32Value(UNIT_FIELD_MAXPOWER5));
+    uint32 feelty = unitTarget->GetPower(POWER_HAPPINESS);
+    if(damage + feelty <  unitTarget->GetMaxPower(POWER_HAPPINESS))
+        unitTarget->SetPower(POWER_HAPPINESS,damage + feelty);
+    else unitTarget->SetPower(POWER_HAPPINESS,unitTarget->GetMaxPower(POWER_HAPPINESS));
     m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
 }
 

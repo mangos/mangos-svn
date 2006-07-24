@@ -184,12 +184,12 @@ void World::SetInitialWorldSettings()
         }
     }
 
-    regen_values[RATE_HEALTH] = sConfig.GetFloatDefault("Rate.Health", 1);
-    regen_values[RATE_POWER1] = sConfig.GetFloatDefault("Rate.Power1", 1);
-    regen_values[RATE_POWER2] = sConfig.GetFloatDefault("Rate.Power2", 1);
-    regen_values[RATE_POWER3] = sConfig.GetFloatDefault("Rate.Power3", 1);
-    regen_values[RATE_DROP] = sConfig.GetFloatDefault("Rate.Drop", 1);
-    regen_values[RATE_XP] = sConfig.GetFloatDefault("Rate.XP", 1);
+    regen_values[RATE_HEALTH]      = sConfig.GetFloatDefault("Rate.Health", 1);
+    regen_values[RATE_POWER_MANA]  = sConfig.GetFloatDefault("Rate.Power1", 1);
+    regen_values[RATE_POWER_RAGE]  = sConfig.GetFloatDefault("Rate.Power2", 1);
+    regen_values[RATE_POWER_FOCUS] = sConfig.GetFloatDefault("Rate.Power3", 1);
+    regen_values[RATE_DROP]        = sConfig.GetFloatDefault("Rate.Drop", 1);
+    regen_values[RATE_XP]          = sConfig.GetFloatDefault("Rate.XP", 1);
     m_configs[CONFIG_LOG_LEVEL] = sConfig.GetIntDefault("LogLevel", 0);
     m_configs[CONFIG_LOG_WORLD] = sConfig.GetIntDefault("LogWorld", 0);
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);

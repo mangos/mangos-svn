@@ -230,7 +230,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         if ( ((Creature*)pVictim)->GetCreatureInfo()->type == 8)
         {
             pVictim->setDeathState(JUST_DIED);
-            ((Creature*)pVictim)->SetUInt32Value( UNIT_FIELD_HEALTH, 0);
+            pVictim->SetHealth(0);
             pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
             return;
         }
@@ -239,7 +239,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
     DEBUG_LOG("DealDamageStart");
 
-    uint32 health = pVictim->GetUInt32Value(UNIT_FIELD_HEALTH );
+    uint32 health = pVictim->GetHealth();
     sLog.outDetail("deal dmg:%d to heals:%d ",damage,health);
     if (health <= damage)
     {
@@ -256,7 +256,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         pVictim->SendAttackStop(attackerGuid);
 
         DEBUG_LOG("DealDamageHealth1");
-        pVictim->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+        pVictim->SetHealth(0);
         pVictim->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
 
         // 10% durability loss on death
@@ -283,7 +283,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             {
                 pet->setDeathState(JUST_DIED);
                 pet->SendAttackStop(attackerGuid);
-                pet->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+                pet->SetHealth(0);
                 pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
                 pet->addUnitState(UNIT_STAT_DIED);
                 for(i = m_hostilList.begin(); i != m_hostilList.end(); ++i)
@@ -376,7 +376,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
     else
     {
         DEBUG_LOG("DealDamageAlive");
-        pVictim->SetUInt32Value(UNIT_FIELD_HEALTH , health - damage);
+        pVictim->SetHealth(health - damage);
         Attack(pVictim);
 
         if(pVictim->getTransForm())
@@ -456,7 +456,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
                 critchance += (*i)->chance;
             }
         }
-        critchance += (int32)(GetUInt32Value(UNIT_FIELD_IQ)/100-1);
+        critchance += int32(GetStat(STAT_INTELLECT)/100-1);
         critchance = critchance > 0 ? critchance :0;
         if(critchance >= urand(0,100))
         {
@@ -520,7 +520,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
                 critchance += (*i)->chance;
             }
         }
-        critchance += (int32)(GetUInt32Value(UNIT_FIELD_IQ)/100-1);
+        critchance += int32(GetStat(STAT_INTELLECT)/100-1);
         critchance = critchance > 0 ? critchance :0;
         if(critchance >= urand(0,100))
         {
@@ -563,17 +563,17 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
-        int32 pdamage = GetUInt32Value(UNIT_FIELD_HEALTH)*(100+mod->m_amount)/100;
+        int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
         SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
         SendMessageToSet(&data,true);
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), procFlag, true);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
-        if(GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount*(100+m_RegenPCT)/100 < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
-            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + mod->m_amount*(100+m_RegenPCT)/100);
+        if(GetHealth() + mod->m_amount*(100+m_RegenPCT)/100 < GetMaxHealth() )
+            SetHealth(GetHealth() + mod->m_amount*(100+m_RegenPCT)/100);
         else
-            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+            SetHealth(GetMaxHealth());
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
     {
@@ -582,10 +582,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         {
             if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
                 continue;
-            if(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH) - mod->m_amount > 0)
+            if(pVictim->GetHealth() - mod->m_amount > 0)
                 tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
             else
-                tmpvalue = uint32(pVictim->GetUInt32Value(UNIT_FIELD_HEALTH)*spellInfo->EffectMultipleValue[x]);
+                tmpvalue = uint32(pVictim->GetHealth()*spellInfo->EffectMultipleValue[x]);
 
             DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, false);
             if (!pVictim->isAlive() && m_currentSpell)
@@ -595,9 +595,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
             break;
         }
-        if(GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*(100+m_RegenPCT)/100 < GetUInt32Value(UNIT_FIELD_MAXHEALTH) )
-            SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_HEALTH) + tmpvalue*(100+m_RegenPCT)/100);
-        else SetUInt32Value(UNIT_FIELD_HEALTH,GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+        if(GetHealth() + tmpvalue*(100+m_RegenPCT)/100 < GetMaxHealth() )
+            SetHealth(GetHealth() + tmpvalue*(100+m_RegenPCT)/100);
+        else SetHealth(GetMaxHealth());
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
     {
@@ -606,37 +606,27 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         {
             if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
                 continue;
-            if(pVictim->GetUInt32Value(UNIT_FIELD_POWER1) - mod->m_amount > 0)
+            if(pVictim->GetPower(POWER_MANA) - mod->m_amount > 0)
             {
-                pVictim->SetUInt32Value(UNIT_FIELD_POWER1,uint32(pVictim->GetUInt32Value(UNIT_FIELD_POWER1) - mod->m_amount));
+                pVictim->SetPower(POWER_MANA,pVictim->GetPower(POWER_MANA) - mod->m_amount);
                 tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
             }
             else
             {
-                tmpvalue = uint32(pVictim->GetUInt32Value(UNIT_FIELD_POWER1)*spellInfo->EffectMultipleValue[x]);
-                pVictim->SetUInt32Value(UNIT_FIELD_POWER1,0);
+                tmpvalue = uint32(pVictim->GetPower(POWER_MANA)*spellInfo->EffectMultipleValue[x]);
+                pVictim->SetPower(POWER_MANA,0);
             }
             break;
         }
-        if(GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue < GetUInt32Value(UNIT_FIELD_MAXPOWER1) )
-            SetUInt32Value(UNIT_FIELD_POWER1,GetUInt32Value(UNIT_FIELD_POWER1) + tmpvalue);
-        else SetUInt32Value(UNIT_FIELD_POWER1,GetUInt32Value(UNIT_FIELD_MAXPOWER1));
+        if(GetPower(POWER_MANA) + tmpvalue < GetMaxPower(POWER_MANA) )
+            SetPower(POWER_MANA,GetPower(POWER_MANA) + tmpvalue);
+        else SetPower(POWER_MANA,GetMaxPower(POWER_MANA));
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
     {
-        uint16 field = 0;
-        switch(mod->m_miscvalue)
-        {
-            case 0:field = UNIT_FIELD_POWER1;break;
-            case 1:field = UNIT_FIELD_POWER2;break;
-            case 2:field = UNIT_FIELD_POWER3;break;
-            case 3:field = UNIT_FIELD_POWER4;break;
-            case 4:field = UNIT_FIELD_POWER5;break;
-            default:break;
-        }
-        if(!field)
+        if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
             return;
-        SetUInt32Value(field,GetUInt32Value(field)+mod->m_amount);
+        SetPower(Powers(mod->m_miscvalue),GetPower(Powers(mod->m_miscvalue))+mod->m_amount);
     }
 }
 
@@ -691,14 +681,14 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
                     multiple = spellInfo->EffectMultipleValue[x];
                     break;
                 }
-                currentPower = pVictim->GetUInt32Value(UNIT_FIELD_POWER1);
+                currentPower = pVictim->GetPower(POWER_MANA);
                 if ( (float)(currentPower) > AbsorbDamage*multiple )
                 {
-                    pVictim->SetUInt32Value(UNIT_FIELD_POWER1, (uint32)(currentPower-AbsorbDamage*multiple) );
+                    pVictim->SetPower(POWER_MANA, (uint32)(currentPower-AbsorbDamage*multiple) );
                 }
                 else
                 {
-                    pVictim->SetUInt32Value(UNIT_FIELD_POWER1, 0 );
+                    pVictim->SetPower(POWER_MANA, 0 );
                 }
             }
 
@@ -709,7 +699,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     }
     if(School == 0)
     {
-        uint32 armor = pVictim->GetUInt32Value(UNIT_FIELD_ARMOR);
+        uint32 armor = pVictim->GetArmor();
         float tmpvalue = armor/(pVictim->getLevel()*85.0 +400.0 +armor);
         if(tmpvalue < 0)
             tmpvalue = 0.0;
@@ -721,7 +711,7 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     }
     if( School > 0)
     {
-        uint32 tmpvalue2 = pVictim->GetUInt32Value(UNIT_FIELD_ARMOR + School);
+        uint32 tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
         *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
         if(*resist > damage)
             *resist = damage;
@@ -802,7 +792,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             break;
 
         case MELEE_HIT_BLOCK:
-            *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetUnitStrength() / 20));
+            *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetStat(STAT_STRENGTH) / 20));
 
             if (*blocked_amount < *damage)
                 *damage -= *blocked_amount;
@@ -1060,7 +1050,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         | PLAYER_STATE_SIT_HIGH_CHAIR)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); return MELEE_HIT_CRIT; }
 
-    // FIXME: stunned target cannot dodge
+    // stunned target cannot dodge and this is check in GetUnitDodgeChance()
     tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); return MELEE_HIT_DODGE; }
@@ -1774,21 +1764,21 @@ void Unit::ApplyStats(bool apply)
     uint32 val2,tem_att_power;
 
     // Armor
-    val2 = (uint32)(2*GetUInt32Value(UNIT_FIELD_AGILITY));
+    val2 = 2*GetStat(STAT_AGILITY);
 
-    ApplyModUInt32Value(UNIT_FIELD_ARMOR, val2, apply);
+    ApplyArmorMod( val2, apply);
 
     // HP
-    val2 = (uint32)((GetUInt32Value(UNIT_FIELD_STAMINA) - pinfo->stamina)*10);
+    val2 = (GetStat(STAT_STAMINA) - pinfo->stamina)*10;
 
-    ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH, val2, apply);
+    ApplyMaxHealthMod( val2, apply);
 
     // MP
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        val2 = (uint32)((GetUInt32Value(UNIT_FIELD_IQ) - pinfo->intellect)*15);
+        val2 = (GetStat(STAT_INTELLECT) - pinfo->intellect)*15;
 
-        ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1, val2, apply);
+        ApplyMaxPowerMod(POWER_MANA, val2, apply);
 
     }
 
@@ -1799,9 +1789,9 @@ void Unit::ApplyStats(bool apply)
 
     //Ranged
     if(getClass() == HUNTER)
-        val2 = (getLevel() * 2) + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+        val2 = getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20;
     else
-        val2 = getLevel() + (GetUInt32Value(UNIT_FIELD_AGILITY) * 2) - 20;
+        val2 = getLevel() + GetStat(STAT_AGILITY) * 2 - 20;
 
     if(!apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS);
@@ -1823,15 +1813,15 @@ void Unit::ApplyStats(bool apply)
 
     switch(getClass())
     {
-        case WARRIOR: val2 = (uint32)(getLevel()*3 + GetUInt32Value(UNIT_FIELD_STR)*2 - 20); break;
-        case PALADIN: val2 = (uint32)(getLevel()*3 + GetUInt32Value(UNIT_FIELD_STR)*2 - 20); break;
-        case ROGUE:   val2 = (uint32)(getLevel()*2 + GetUInt32Value(UNIT_FIELD_STR) + GetUInt32Value(UNIT_FIELD_AGILITY) - 20); break;
-        case HUNTER:  val2 = (uint32)(getLevel()*2 + GetUInt32Value(UNIT_FIELD_STR) + GetUInt32Value(UNIT_FIELD_AGILITY) - 20); break;
-        case SHAMAN:  val2 = (uint32)(getLevel()*2 + GetUInt32Value(UNIT_FIELD_STR)*2 - 20); break;
-        case DRUID:   val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR)*2 - 20); break;
-        case MAGE:    val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
-        case PRIEST:  val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
-        case WARLOCK: val2 = (uint32)(GetUInt32Value(UNIT_FIELD_STR) - 10); break;
+        case WARRIOR: val2 = getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20; break;
+        case PALADIN: val2 = getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20; break;
+        case ROGUE:   val2 = getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20; break;
+        case HUNTER:  val2 = getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20; break;
+        case SHAMAN:  val2 = getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20; break;
+        case DRUID:   val2 = GetStat(STAT_STRENGTH)*2 - 20; break;
+        case MAGE:    val2 = GetStat(STAT_STRENGTH) - 10; break;
+        case PRIEST:  val2 = GetStat(STAT_STRENGTH) - 10; break;
+        case WARLOCK: val2 = GetStat(STAT_STRENGTH) - 10; break;
     }
     tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
 
@@ -1854,7 +1844,7 @@ void Unit::ApplyStats(bool apply)
     else if(getClass() == ROGUE)  classrate = 29;
     else classrate = 20;
 
-    val = (float)(5 + GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
+    val = float(5 + GetStat(STAT_AGILITY)/classrate);
 
     ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE, val, apply);
 
@@ -1864,19 +1854,19 @@ void Unit::ApplyStats(bool apply)
     else classrate = 20;
                                                             ///*+(Defense*0,04);
     if (getRace() == NIGHTELF)
-        val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate + 1);
+        val = float(GetStat(STAT_AGILITY)/classrate + 1);
     else
-        val = (float)(GetUInt32Value(UNIT_FIELD_AGILITY)/classrate);
+        val = float(GetStat(STAT_AGILITY)/classrate);
 
     ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, val, apply);
 
     //parry
-    val = (float)(5);
+    val = float(5);
 
     ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, val, apply);
 
     //block
-    val = (float)(GetUInt32Value(UNIT_FIELD_STR)/22);
+    val = float(GetStat(STAT_STRENGTH)/22);
 
     ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, val, apply);
 
@@ -2007,7 +1997,7 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
 
     if(enchant_display ==4)
     {
-        ApplyModUInt32Value(UNIT_FIELD_ARMOR,enchant_value1,apply);
+        ApplyArmorMod(enchant_value1,apply);
     }
     else if(enchant_display ==2)
     {
@@ -2138,30 +2128,32 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingT
     SendMessageToSet( &data, true );
 }
 
-void Unit::setPowerType(uint8 PowerType)
+void Unit::setPowerType(Powers PowerType)
 {
     uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
     SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(PowerType)<<24));
-    uint8 new_powertype = getPowerType();
-    if(new_powertype == 3)
+    Powers new_powertype = getPowerType();
+    switch(new_powertype)
     {
-        SetUInt32Value(UNIT_FIELD_MAXPOWER4,100);
-        SetUInt32Value(UNIT_FIELD_POWER4,100);
-    }
-    if(new_powertype == 2)
-    {
-        SetUInt32Value(UNIT_FIELD_MAXPOWER3,100);
-        SetUInt32Value(UNIT_FIELD_POWER3,100);
-    }
-    if(new_powertype == 1)
-    {
-        SetUInt32Value(UNIT_FIELD_MAXPOWER2,1000);
-        SetUInt32Value(UNIT_FIELD_POWER2,0);
-    }
-    if(new_powertype == 4)
-    {
-        SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
-        SetUInt32Value(UNIT_FIELD_POWER5,1000000);
+        default:
+        case POWER_MANA:
+            break;
+        case POWER_RAGE:
+            SetMaxPower(POWER_RAGE,1000);
+            SetPower(   POWER_RAGE,0);
+            break;
+        case POWER_FOCUS:
+            SetMaxPower(POWER_FOCUS,100);
+            SetPower(   POWER_FOCUS,100);
+            break;
+        case POWER_ENERGY:
+            SetMaxPower(POWER_ENERGY,100);
+            SetPower(   POWER_ENERGY,100);
+            break;
+        case POWER_HAPPINESS:
+            SetMaxPower(POWER_HAPPINESS,1000000);
+            SetPower(POWER_HAPPINESS,1000000);
+            break;
     }
 }
 

@@ -504,7 +504,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetBindPoint(uint64 guid);
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
-        void Regenerate(uint16 field_cur, uint16 field_max);
+        void Regenerate(Powers power);
+        void RegenerateHealth();
         void setRegenTimer(uint32 time) {m_regenTimer = time;}
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
@@ -721,7 +722,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CheckExploreSystem(void);
 
         uint32 GetTeam() const { return m_team; }
-        uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
         uint32 GetReputation(uint32 faction_id) const;

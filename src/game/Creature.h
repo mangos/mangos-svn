@@ -223,8 +223,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isPet() const { return m_isPet; }
         bool isCivilian() { return (bool)GetCreatureInfo()->civilian; }
 
-        void SetisPet(bool val) { m_isPet=val; }
-
         void AIM_Update(const uint32 &);
         void AIM_Initialize(void);
         MotionMaster* operator->(void) { return &i_motionMaster; }
@@ -349,8 +347,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_moveRun;
 
         uint8 m_emoteState;
-        bool m_isPet;                                       //add by vendy
-        void Regenerate(uint16 field_cur, uint16 field_max);
+        bool m_isPet;                                       // set only in Pet::Pet
+        void Regenerate(Powers power);
+        void RegenerateHealth();
         uint32 m_regenTimer;
 
 };

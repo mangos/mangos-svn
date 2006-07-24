@@ -124,7 +124,7 @@ void Creature::AIM_Update(const uint32 &diff)
                 DEBUG_LOG("Respawning...");
 
                 RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                SetUInt32Value(UNIT_FIELD_HEALTH, GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+                SetHealth(GetMaxHealth());
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
@@ -165,8 +165,8 @@ void Creature::AIM_Update(const uint32 &diff)
             if (m_regenTimer != 0)
                 break;
             if (!isInCombat())
-                Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH );
-            Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);
+                RegenerateHealth();
+            Regenerate(POWER_MANA);
             m_regenTimer = 2000;
             break;
         }
@@ -175,45 +175,61 @@ void Creature::AIM_Update(const uint32 &diff)
     }
 }
 
-void Creature::Regenerate(uint16 field_cur, uint16 field_max)
+void Creature::Regenerate(Powers power)
 {
-    uint32 curValue = GetUInt32Value(field_cur);
-    uint32 maxValue = GetUInt32Value(field_max);
+    uint32 curValue = GetPower(power);
+    uint32 maxValue = GetMaxPower(power);
 
-    if(field_cur != UNIT_FIELD_POWER2)
+    if(power != POWER_RAGE)
     {
         if (curValue >= maxValue)   return;
     }
     else if (curValue == 0)
         return;
 
-    float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
-    float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);
+    float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
 
-    uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
+    uint16 Spirit = GetStat(STAT_SPIRIT);
 
-    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
 
     uint32 addvalue = 0;
 
-    switch (field_cur)
+    switch (power)
     {
-        case UNIT_FIELD_HEALTH:
-        {
-            if( GetUInt32Value(UNIT_FIELD_POWER1)>0 )
-                addvalue = uint32((Spirit*0.25) * HealthIncreaseRate);
-            else
-                addvalue = uint32((Spirit*0.80) * HealthIncreaseRate);
-        }break;
-        case UNIT_FIELD_POWER1:
+        case POWER_MANA:
             addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate);
             break;
     }
 
     curValue += addvalue;
     if (curValue > maxValue) curValue = maxValue;
-    SetUInt32Value(field_cur, curValue);
+    SetPower(power, curValue);
+}
+
+void Creature::RegenerateHealth()
+{
+    uint32 curValue = GetHealth();
+    uint32 maxValue = GetMaxHealth();
+
+    if (curValue >= maxValue) return;
+
+    float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
+
+    uint16 Spirit = GetStat(STAT_SPIRIT);
+
+    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
+
+    uint32 addvalue = 0;
+
+    if( GetPower(POWER_MANA) > 0 )
+        addvalue = uint32((Spirit*0.25) * HealthIncreaseRate);
+    else
+        addvalue = uint32((Spirit*0.80) * HealthIncreaseRate);
+
+    curValue += addvalue;
+    if (curValue > maxValue) curValue = maxValue;
+    SetHealth(curValue);
 }
 
 void Creature::AIM_Initialize()
@@ -706,8 +722,8 @@ void Creature::SaveToDB()
         << respawn_cord[1] << ","                           //spawn_position_y
         << respawn_cord[2] << ","                           //spawn_position_z
         << (float)(0) << ","                                //spawn_orientation
-        << GetUInt32Value(UNIT_FIELD_HEALTH) << ","         //curhealth
-        << GetUInt32Value(UNIT_FIELD_POWER2) << ","         //curmana
+        << GetHealth() << ","                               //curhealth
+        << GetPower(POWER_MANA) << ","                      //curmana
         << m_respawnTimer << ","                            //respawntimer
 
         << (uint32)(m_deathState) << ","                    // is it really death state or just state?
@@ -734,15 +750,15 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,cinfo->DisplayID );
 
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH,cinfo->maxhealth );
+    SetMaxHealth(cinfo->maxhealth );
     SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
-    SetUInt32Value(UNIT_FIELD_HEALTH,cinfo->maxhealth );
+    SetHealth(cinfo->maxhealth );
 
-    SetUInt32Value(UNIT_FIELD_MAXPOWER1, cinfo->maxmana);   //MAX Mana
+    SetMaxPower(POWER_MANA,cinfo->maxmana);   //MAX Mana
     SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
-    SetUInt32Value(UNIT_FIELD_POWER1,cinfo->maxmana );
+    SetPower(POWER_MANA,cinfo->maxmana );
 
-    SetUInt32Value(UNIT_FIELD_LEVEL,cinfo->level);
+    SetLevel(cinfo->level);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
 
@@ -752,13 +768,13 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
     SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
 
-    SetUInt32Value(UNIT_FIELD_ARMOR,cinfo->armor);
-    SetUInt32Value(UNIT_FIELD_RESISTANCES_01,cinfo->resistance1);
-    SetUInt32Value(UNIT_FIELD_RESISTANCES_02,cinfo->resistance2);
-    SetUInt32Value(UNIT_FIELD_RESISTANCES_03,cinfo->resistance3);
-    SetUInt32Value(UNIT_FIELD_RESISTANCES_04,cinfo->resistance4);
-    SetUInt32Value(UNIT_FIELD_RESISTANCES_05,cinfo->resistance5);
-    SetUInt32Value(UNIT_FIELD_RESISTANCES_06,cinfo->resistance6);
+    SetArmor(cinfo->armor);
+    SetResistance(SPELL_SCHOOL_HOLY,cinfo->resistance1);
+    SetResistance(SPELL_SCHOOL_FIRE,cinfo->resistance2);
+    SetResistance(SPELL_SCHOOL_NATURE,cinfo->resistance3);
+    SetResistance(SPELL_SCHOOL_FROST,cinfo->resistance4);
+    SetResistance(SPELL_SCHOOL_SHADOW,cinfo->resistance5);
+    SetResistance(SPELL_SCHOOL_ARCANE,cinfo->resistance6);
 
     //this is probably wrong
     SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, cinfo->equipmodel[0]);
@@ -812,10 +828,8 @@ bool Creature::LoadFromDB(uint32 guid)
         fields[5].GetFloat(),fields[6].GetFloat(),fields[1].GetUInt32()))
         return false;
 
-    //health
-    SetUInt32Value(UNIT_FIELD_HEALTH,fields[15].GetUInt32());
-    //mana
-    SetUInt32Value(UNIT_FIELD_POWER2,fields[16].GetUInt32());
+    SetHealth(fields[15].GetUInt32());
+    SetPower(POWER_MANA,fields[16].GetUInt32());
 
     SetUInt32Value(UNIT_NPC_FLAGS,fields[19].GetUInt32());
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,fields[20].GetUInt32());
@@ -923,10 +937,10 @@ void Creature::DeleteFromDB()
 
 float Creature::GetAttackDistance(Unit *pl)
 {
-    uint16 playlevel     = (uint16)pl->GetUInt32Value(UNIT_FIELD_LEVEL);
-    uint16 creaturelevel = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint32 playlevel     = pl->getLevel();
+    uint32 creaturelevel = getLevel();
 
-    int16 leveldif       = playlevel - creaturelevel;
+    int32 leveldif       = playlevel - creaturelevel;
 
     // "The maximum Aggro Radius has a cap of 25 levels under. Example: A level 30 char has the same Aggro Radius of a level 5 char on a level 60 mob."
     if ( leveldif < - 25)
@@ -982,7 +996,7 @@ SpellEntry *Creature::reachWithSpellAttack(Unit *pVictim)
             sLog.outError("WORLD: can't get spell. spell id %i\n", m_spells[i]);
             continue;
         }*/
-        if(spellInfo->manaCost > GetUInt32Value(UNIT_FIELD_POWER1))
+        if(spellInfo->manaCost > GetPower(POWER_MANA))
             continue;
         SpellRange* srange = sSpellRange.LookupEntry(spellInfo->rangeIndex);
         float range = GetMaxRange(srange);

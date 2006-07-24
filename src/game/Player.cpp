@@ -202,25 +202,25 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
     }
     else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-    SetUInt32Value(UNIT_FIELD_STR, info->strength );
-    SetUInt32Value(UNIT_FIELD_AGILITY, info->ability );
-    SetUInt32Value(UNIT_FIELD_STAMINA, info->stamina );
-    SetUInt32Value(UNIT_FIELD_IQ, info->intellect );
-    SetUInt32Value(UNIT_FIELD_SPIRIT, info->spirit );
-    SetUInt32Value(UNIT_FIELD_ARMOR, info->basearmor );
+    SetStat(STAT_STRENGTH,info->strength );
+    SetStat(STAT_AGILITY,info->ability );
+    SetStat(STAT_STAMINA,info->stamina );
+    SetStat(STAT_INTELLECT,info->intellect );
+    SetStat(STAT_SPIRIT,info->spirit );
+    SetArmor(info->basearmor );
     SetUInt32Value(UNIT_FIELD_ATTACK_POWER, info->attackpower );
 
-    SetUInt32Value(UNIT_FIELD_HEALTH, info->health);
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH, info->health);
+    SetHealth(info->health);
+    SetMaxHealth(info->health);
 
-    SetUInt32Value(UNIT_FIELD_POWER1, info->mana );
-    SetUInt32Value(UNIT_FIELD_MAXPOWER1, info->mana );
-    SetUInt32Value(UNIT_FIELD_POWER2, 0 );
-    SetUInt32Value(UNIT_FIELD_MAXPOWER2, info->rage );
-    SetUInt32Value(UNIT_FIELD_POWER3, info->focus );
-    SetUInt32Value(UNIT_FIELD_MAXPOWER3, info->focus );
-    SetUInt32Value(UNIT_FIELD_POWER4, info->energy );
-    SetUInt32Value(UNIT_FIELD_MAXPOWER4, info->energy );
+    SetPower(   POWER_MANA, info->mana );
+    SetMaxPower(POWER_MANA, info->mana );
+    SetPower(   POWER_RAGE, 0 );
+    SetMaxPower(POWER_RAGE, info->rage );
+    SetPower(   POWER_FOCUS, info->focus );
+    SetMaxPower(POWER_FOCUS, info->focus );
+    SetPower(   POWER_ENERGY, info->energy );
+    SetMaxPower(POWER_ENERGY, info->energy );
 
     SetFloatValue(UNIT_FIELD_MINDAMAGE, info->mindmg );
     SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
@@ -235,7 +235,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + gender );
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + gender );
 
-    SetUInt32Value(UNIT_FIELD_LEVEL, 1 );
+    SetLevel( 1 );
 
     setFactionForRace(m_race);
 
@@ -363,25 +363,25 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     //+5% HP if has skill Endurance
     if (Player::HasSpell(20550))
     {
-        SetUInt32Value(UNIT_FIELD_MAXHEALTH, uint32(GetUInt32Value(UNIT_FIELD_MAXHEALTH) * 1.05));
+        SetMaxHealth( uint32(GetMaxHealth() * 1.05)); // only integer part
     }
 
     // school resistances
     if (Player::HasSpell(20596))
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_04, 10);
+        SetResistance(SPELL_SCHOOL_FROST, 10 );
     }
     if (Player::HasSpell(20583))
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_03, 10);
+        SetResistance(SPELL_SCHOOL_NATURE, 10 );
     }
     if (Player::HasSpell(20579))
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_05, 10);
+        SetResistance(SPELL_SCHOOL_SHADOW, 10 );
     }
     if (Player::HasSpell(20592))
     {
-        SetUInt32Value(UNIT_FIELD_RESISTANCES_06, 10);
+        SetResistance(SPELL_SCHOOL_ARCANE, 10 );
     }
 
     // apply original stats mods before item equipment that call before equip _RemoveStatsMods()  
@@ -534,7 +534,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
         {
             //TODO: Check this formula
             uint64 guid = GetGUID();
-            uint32 damage = (GetUInt32Value(UNIT_FIELD_MAXHEALTH) / 5) + rand()%GetUInt32Value(UNIT_FIELD_LEVEL);
+            uint32 damage = (GetMaxHealth() / 5) + rand()%getLevel();
 
             EnvironmentalDamage(guid, DAMAGE_DROWNING,damage);
             m_breathTimer = 2000;
@@ -576,7 +576,7 @@ void Player::HandleLava()
         {
             uint64 guid;
             //uint32 damage = 10;
-            uint32 damage = (GetUInt32Value(UNIT_FIELD_MAXHEALTH) / 3) + rand()%GetUInt32Value(UNIT_FIELD_LEVEL);
+            uint32 damage = (GetMaxHealth() / 3) + rand()%getLevel();
 
             guid = GetGUID();
             EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
@@ -806,7 +806,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     bytes = GetUInt32Value(PLAYER_BYTES_2);
     *p_data << uint8(bytes);
 
-    *p_data << uint8(GetUInt32Value(UNIT_FIELD_LEVEL));     //1
+    *p_data << uint8(getLevel());     //1
     uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 
     *p_data << zoneId;
@@ -910,8 +910,8 @@ void Player::RemoveFromWorld()
 void Player::CalcRage( uint32 damage,bool attacker )
 {
 
-    uint32 maxRage = GetUInt32Value(UNIT_FIELD_MAXPOWER2);
-    uint32 Rage = GetUInt32Value(UNIT_FIELD_POWER2);
+    uint32 maxRage = GetMaxPower(POWER_RAGE);
+    uint32 Rage = GetPower(POWER_RAGE);
 
     if(attacker)
         Rage += (uint32)(10*damage/(getLevel()*0.5f));
@@ -920,7 +920,7 @@ void Player::CalcRage( uint32 damage,bool attacker )
 
     if(Rage > maxRage)  Rage = maxRage;
 
-    SetUInt32Value(UNIT_FIELD_POWER2, Rage);
+    SetPower(POWER_RAGE, Rage);
 }
 
 void Player::RegenerateAll()
@@ -934,73 +934,44 @@ void Player::RegenerateAll()
     // TODO: Replace the 20555 with test for if they have an aura of regeneration
     if (!isInCombat() || Player::HasSpell(20555))
     {
-                                                            //health
-        Regenerate( UNIT_FIELD_HEALTH, UNIT_FIELD_MAXHEALTH);
+        RegenerateHealth();
         if (!isInCombat())
-                                                            //rage
-            Regenerate( UNIT_FIELD_POWER2, UNIT_FIELD_MAXPOWER2);
+            Regenerate(POWER_RAGE);
     }
 
-    Regenerate( UNIT_FIELD_POWER4, UNIT_FIELD_MAXPOWER4);   //energy
-    Regenerate( UNIT_FIELD_POWER1, UNIT_FIELD_MAXPOWER1);   //mana
+    Regenerate( POWER_ENERGY );
+    Regenerate( POWER_MANA ); 
 
     m_regenTimer = regenDelay;
 
 }
 
-void Player::Regenerate(uint16 field_cur, uint16 field_max)
+void Player::Regenerate(Powers power)
 {
-    uint32 curValue = GetUInt32Value(field_cur);
-    uint32 maxValue = GetUInt32Value(field_max);
+    uint32 curValue = GetPower(power);
+    uint32 maxValue = GetMaxPower(power);
 
-    if(field_cur != UNIT_FIELD_POWER2)
+    if(power != POWER_RAGE)
     {
         if (curValue >= maxValue)   return;
     }
     else if (curValue == 0)
         return;
 
-    float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
-    float ManaIncreaseRate = sWorld.getRate(RATE_POWER1);
-    float RageIncreaseRate = sWorld.getRate(RATE_POWER2);
+    float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
+    float RageIncreaseRate = sWorld.getRate(RATE_POWER_RAGE);
 
-    uint16 Spirit = GetUInt32Value(UNIT_FIELD_SPIRIT);
+    uint16 Spirit = GetStat(STAT_SPIRIT);
     uint8 Class = getClass();
 
-    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
     if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
     if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
 
     uint32 addvalue = 0;
 
-    switch (field_cur)
+    switch (power)
     {
-        case UNIT_FIELD_HEALTH:
-            switch (Class)
-            {
-                case DRUID:   addvalue = uint32((Spirit*0.09 + 6.5) * HealthIncreaseRate); break;
-                case HUNTER:  addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
-                case MAGE:    addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
-                case PALADIN: addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
-                case PRIEST:  addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
-                case ROGUE:   addvalue = uint32((Spirit*0.50 + 2.0) * HealthIncreaseRate); break;
-                case SHAMAN:  addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
-                case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
-                case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
-            }
-            if (HasSpell(20555))                            // TODO: Should be aura controlled
-            {
-                if (isInCombat())
-                {
-                    addvalue*=uint32(0.10);
-                }
-                else
-                {
-                    addvalue*=uint32(1.10);
-                }
-            }
-            break;
-        case UNIT_FIELD_POWER1:
+        case POWER_MANA:
             // If < 5s after previous cast which used mana, no regeneration unless
             // we happen to have a modifer that adds it back
             // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
@@ -1037,15 +1008,15 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
                 case WARLOCK: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
             }
             break;
-        case UNIT_FIELD_POWER2:                             // Regenerate rage
+        case POWER_RAGE:                             // Regenerate rage
             addvalue = uint32(1.66 * RageIncreaseRate);
             break;
-        case UNIT_FIELD_POWER4:                             // Regenerate energy (rogue)
+        case POWER_ENERGY:                             // Regenerate energy (rogue)
             addvalue = uint32(20);
             break;
     }
 
-    if (field_cur != UNIT_FIELD_POWER2)
+    if (power != POWER_RAGE)
     {
         switch (getStandState())
         {
@@ -1059,7 +1030,6 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
         }
         curValue += addvalue;
         if (curValue > maxValue) curValue = maxValue;
-        SetUInt32Value(field_cur, curValue);
     }
     else
     {
@@ -1067,8 +1037,59 @@ void Player::Regenerate(uint16 field_cur, uint16 field_max)
             curValue = 0;
         else
             curValue -= addvalue;
-        SetUInt32Value(field_cur, curValue);
     }
+    SetPower(power, curValue);
+}
+
+void Player::RegenerateHealth()
+{
+    uint32 curValue = GetHealth();
+    uint32 maxValue = GetMaxHealth();
+
+    if (curValue >= maxValue) return;
+
+    float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
+
+    uint16 Spirit = GetStat(STAT_SPIRIT);
+    uint8 Class = getClass();
+
+    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
+
+    uint32 addvalue = 0;
+
+    switch (Class)
+    {
+        case DRUID:   addvalue = uint32((Spirit*0.09 + 6.5) * HealthIncreaseRate); break;
+        case HUNTER:  addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
+        case MAGE:    addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
+        case PALADIN: addvalue = uint32((Spirit*0.25) * HealthIncreaseRate); break;
+        case PRIEST:  addvalue = uint32((Spirit*0.10) * HealthIncreaseRate); break;
+        case ROGUE:   addvalue = uint32((Spirit*0.50 + 2.0) * HealthIncreaseRate); break;
+        case SHAMAN:  addvalue = uint32((Spirit*0.11) * HealthIncreaseRate); break;
+        case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
+        case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
+    }
+    if (HasSpell(20555))                            // TODO: Should be aura controlled
+    {
+        if (isInCombat())
+            addvalue*=uint32(0.10);
+        else
+            addvalue*=uint32(1.10);
+    }
+
+    switch (getStandState())
+    {
+        case PLAYER_STATE_SIT_CHAIR:
+        case PLAYER_STATE_SIT_LOW_CHAIR:
+        case PLAYER_STATE_SIT_MEDIUM_CHAIR:
+        case PLAYER_STATE_SIT_HIGH_CHAIR:
+        case PLAYER_STATE_SIT:          addvalue = (uint32)(addvalue*2.0f); break;
+        case PLAYER_STATE_SLEEP:        addvalue = (uint32)(addvalue*3.0f); break;
+        case PLAYER_STATE_KNEEL:        addvalue = (uint32)(addvalue*1.5f); break;
+    }
+    curValue += addvalue;
+    if (curValue > maxValue) curValue = maxValue;
+    SetHealth(curValue);
 }
 
 bool Player::isAcceptTickets() const
@@ -1098,7 +1119,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     if ( xp < 1 )
         return;
 
-    uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint32 level = getLevel();
 
     // XP to money conversion processed in Player::RewardQuest
     if(level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
@@ -1116,7 +1137,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
         GiveLevel();
 
-        level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+        level = getLevel();
         nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     }
 
@@ -1130,7 +1151,7 @@ void Player::GiveLevel()
     uint32 MPGain,HPGain,STRGain,STAGain,AGIGain,INTGain,SPIGain;
     MPGain=HPGain=STRGain=STAGain=AGIGain=INTGain=SPIGain=0;
 
-    uint16 level = (uint16)GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint32 level = getLevel();
 
     level += 1;
 
@@ -1140,14 +1161,14 @@ void Player::GiveLevel()
     _RemoveStatsMods();
 
     // base stats
-    float newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetUInt32Value(UNIT_FIELD_MAXPOWER1);
+    float newMP  = (getClass() == WARRIOR || getClass() == ROGUE) ? 0 : GetMaxPower(POWER_MANA);
 
-    float newHP  = GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-    float newSTR = GetUInt32Value(UNIT_FIELD_STR);
-    float newSTA = GetUInt32Value(UNIT_FIELD_STAMINA);
-    float newAGI = GetUInt32Value(UNIT_FIELD_AGILITY);
-    float newINT = GetUInt32Value(UNIT_FIELD_IQ);
-    float newSPI = GetUInt32Value(UNIT_FIELD_SPIRIT);
+    float newHP  = GetMaxHealth();
+    float newSTR = GetStat(STAT_STRENGTH);
+    float newSTA = GetStat(STAT_STAMINA);
+    float newAGI = GetStat(STAT_AGILITY);
+    float newINT = GetStat(STAT_INTELLECT);
+    float newSPI = GetStat(STAT_SPIRIT);
 
     // Remove class and race bonuses from base stats
     if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
@@ -1184,7 +1205,7 @@ void Player::GiveLevel()
         newINT = newINT * 1.05;
 
     // update level, talants, max level of skills
-    SetUInt32Value(UNIT_FIELD_LEVEL, level);
+    SetLevel( level);
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
 
     if( level > 9)
@@ -1195,18 +1216,18 @@ void Player::GiveLevel()
     // save new stats
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        SetUInt32Value(UNIT_FIELD_POWER1, uint32(newMP));
-        SetUInt32Value(UNIT_FIELD_MAXPOWER1, uint32(newMP));
+        SetPower(   POWER_MANA, uint32(newMP)); // only integer part
+        SetMaxPower(POWER_MANA, uint32(newMP)); // only integer part
     }
 
-    SetUInt32Value(UNIT_FIELD_HEALTH,    uint32(newHP));
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH, uint32(newHP));
+    SetHealth(   uint32(newHP)); // only integer part
+    SetMaxHealth(uint32(newHP)); // only integer part
 
-    SetUInt32Value(UNIT_FIELD_STR,     uint32(newSTR));
-    SetUInt32Value(UNIT_FIELD_STAMINA, uint32(newSTA));
-    SetUInt32Value(UNIT_FIELD_AGILITY, uint32(newAGI));
-    SetUInt32Value(UNIT_FIELD_IQ,      uint32(newINT));
-    SetUInt32Value(UNIT_FIELD_SPIRIT,  uint32(newSPI));
+    SetStat(STAT_STRENGTH, uint32(newSTR)); // only integer part
+    SetStat(STAT_STAMINA,  uint32(newSTA)); // only integer part
+    SetStat(STAT_AGILITY,  uint32(newAGI)); // only integer part
+    SetStat(STAT_INTELLECT,uint32(newINT)); // only integer part
+    SetStat(STAT_SPIRIT,   uint32(newSPI)); // only integer part
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
@@ -1897,7 +1918,7 @@ void Player::BuildPlayerRepop()
 
     WorldPacket data;
 
-    SetUInt32Value( UNIT_FIELD_HEALTH, 1 );
+    SetHealth( 1 );
 
     SetMovement(MOVE_WATER_WALK);
     SetMovement(MOVE_UNROOT);
@@ -2313,7 +2334,7 @@ void Player::UpdateMaxSkills()
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max = data>>16;
-        uint32 max_Skill = data%0x10000+GetUInt32Value(UNIT_FIELD_LEVEL)*5*0x10000;
+        uint32 max_Skill = data%0x10000+getLevel()*5*0x10000;
         if((max_Skill>>16) > 300)
             max_Skill = data%0x10000+300*0x10000;
 
@@ -3196,38 +3217,38 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         switch (proto->ItemStat[i].ItemStatType)
         {
             case POWER:                                     // modify MP
-                ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1, val, apply);
+                ApplyMaxPowerMod(POWER_MANA, val, apply);
                 typestr = "Mana";
                 break;
             case HEALTH:                                    // modify HP
-                ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH, val, apply);
+                ApplyMaxHealthMod(val, apply);
                 typestr = "Health";
                 break;
             case AGILITY:                                   // modify agility
-                ApplyModUInt32Value(UNIT_FIELD_AGILITY,   val, apply);
+                ApplyStatMod(STAT_AGILITY,                val, apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT1,val, apply);
                 typestr = "AGILITY";
                 break;
             case STRENGHT:                                  //modify strength
-                ApplyModUInt32Value(UNIT_FIELD_STR,       val, apply);
+                ApplyStatMod(STAT_STRENGTH,               val, apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT0,val, apply);
                 typestr = "STRENGHT";
                 break;
             case INTELLECT:                                 //modify intellect
-                ApplyModUInt32Value(UNIT_FIELD_IQ,        val,    apply);
+                ApplyStatMod(STAT_INTELLECT,               val,    apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT3,val,    apply);
-                ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1, val*15, apply);
+                ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 typestr = "INTELLECT";
                 break;
             case SPIRIT:                                    //modify spirit
-                ApplyModUInt32Value(UNIT_FIELD_SPIRIT,    val, apply);
+                ApplyStatMod(STAT_SPIRIT,                 val, apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT4,val, apply);
                 typestr = "SPIRIT";
                 break;
             case STAMINA:                                   //modify stamina
-                ApplyModUInt32Value(UNIT_FIELD_STAMINA   ,val,   apply);
+                ApplyStatMod(STAT_STAMINA                ,val,   apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT2,val,   apply);
-                ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH ,val*10,apply);
+                ApplyMaxHealthMod(                        val*10,apply);
                 typestr = "STAMINA";
                 break;
         }
@@ -3238,7 +3259,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Armor)
     {
-        ApplyModUInt32Value(UNIT_FIELD_ARMOR, proto->Armor, apply);
+        ApplyArmorMod( proto->Armor, apply);
         sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
     }
 
@@ -3250,37 +3271,37 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->HolyRes)
     {
-        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_01, proto->HolyRes, apply);
+        ApplyResistanceMod(SPELL_SCHOOL_HOLY, proto->HolyRes, apply);
         sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
     }
 
     if (proto->FireRes)
     {
-        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_02, proto->FireRes, apply);
+        ApplyResistanceMod(SPELL_SCHOOL_FIRE, proto->FireRes, apply);
         sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
     if (proto->NatureRes)
     {
-        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_03, proto->NatureRes, apply);
+        ApplyResistanceMod(SPELL_SCHOOL_NATURE, proto->NatureRes, apply);
         sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
     }
 
     if (proto->FrostRes)
     {
-        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_04, proto->FrostRes, apply);
+        ApplyResistanceMod(SPELL_SCHOOL_FROST, proto->FrostRes, apply);
         sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
     }
 
     if (proto->ShadowRes)
     {
-        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_05, proto->ShadowRes, apply);
+        ApplyResistanceMod(SPELL_SCHOOL_SHADOW, proto->ShadowRes, apply);
         sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
     }
 
     if (proto->ArcaneRes)
     {
-        ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_06, proto->ArcaneRes, apply);
+        ApplyResistanceMod(SPELL_SCHOOL_ARCANE, proto->ArcaneRes, apply);
         sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
@@ -5056,6 +5077,8 @@ Item* Player::CreateItem( uint32 item, uint32 count ) const
             pItem->SetCount( count );
             return pItem;
         }
+        else
+            delete pItem;
     }
     return NULL;
 }
@@ -6309,7 +6332,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                         //uint32 enchant_description = pEnchant->description;
                         //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
                         if(enchant_display ==4)
-                            SetUInt32Value(UNIT_FIELD_ARMOR,GetUInt32Value(UNIT_FIELD_ARMOR)-enchant_value1);
+                            SetArmor(GetArmor()-enchant_value1);
                         else if(enchant_display ==2)
                         {
                             SetUInt32Value(UNIT_FIELD_MINDAMAGE,GetUInt32Value(UNIT_FIELD_MINDAMAGE)-enchant_value1);
@@ -6442,7 +6465,10 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     StoreItem( dest, pNewItem, true);
                 }
                 else
+                {
+                    delete pNewItem;
                     SendEquipError( msg, pSrcItem, NULL );
+                }
             }
             else if( IsBankPos ( dst ) )
             {
@@ -6455,7 +6481,10 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     BankItem( dest, pNewItem, true);
                 }
                 else
+                {
+                    delete pNewItem;
                     SendEquipError( msg, pSrcItem, NULL );
+                }
             }
             else if( IsEquipmentPos ( dst ) )
             {
@@ -6468,7 +6497,10 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                     EquipItem( dest, pNewItem, true);
                 }
                 else
+                {
+                    delete pNewItem;
                     SendEquipError( msg, pSrcItem, NULL );
+                }
             }
             return;
         }
@@ -8468,21 +8500,21 @@ void Player::SavePet()
 
         sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", GetGUIDLow() );
         sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
-            pet->GetEntry(), GetGUIDLow(), pet->GetUInt32Value(UNIT_FIELD_LEVEL), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-            pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, pet->GetUInt32Value(UNIT_FIELD_POWER5), name.c_str());
+            pet->GetEntry(), GetGUIDLow(), pet->getLevel(), pet->GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+            pet->m_spells[0], pet->m_spells[1], pet->m_spells[2], pet->m_spells[3], actState, pet->GetPower(POWER_HAPPINESS), name.c_str());
     }
 }
 
 void Player::outDebugValues() const
 {
-    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetUInt32Value(UNIT_FIELD_MAXHEALTH), GetUInt32Value(UNIT_FIELD_MAXPOWER1));
-    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetUInt32Value(UNIT_FIELD_AGILITY), GetUInt32Value(UNIT_FIELD_STR));
-    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_IQ), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetUInt32Value(UNIT_FIELD_STAMINA), GetUInt32Value(UNIT_FIELD_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%f",GetUInt32Value(UNIT_FIELD_ARMOR), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_01), GetUInt32Value(UNIT_FIELD_RESISTANCES_02));
-    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_03), GetUInt32Value(UNIT_FIELD_RESISTANCES_04));
-    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetUInt32Value(UNIT_FIELD_RESISTANCES_05), GetUInt32Value(UNIT_FIELD_RESISTANCES_06));
+    sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetMaxHealth(), GetMaxPower(POWER_MANA));
+    sLog.outDebug("AGILITY is: \t\t%u\t\tSTRENGHT is: \t\t%u",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
+    sLog.outDebug("INTELLECT is: \t\t%u\t\tSPIRIT is: \t\t%u",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
+    sLog.outDebug("STAMINA is: \t\t%u\t\tSPIRIT is: \t\t%u",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));

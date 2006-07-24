@@ -300,16 +300,48 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
         void clearUnitState(uint32 f) { m_state &= ~f; };
 
-        uint32 getLevel() const { return (GetUInt32Value(UNIT_FIELD_LEVEL)); };
+        uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); };
+        void SetLevel(uint32 lvl) { SetUInt32Value(UNIT_FIELD_LEVEL,lvl); }
         uint8 getRace() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
         uint32 getRaceMask() const { return 1 << (getRace()-1); };
         uint8 getClass() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
         uint32 getClassMask() const { return 1 << (getClass()-1); };
         uint8 getGender() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
-        uint8 getPowerType() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF; };
-        void setPowerType(uint8 PowerType);
 
-        // function template id
+        uint32 GetStat(Stats stat) const { return GetUInt32Value(UNIT_FIELD_STATS+stat); }
+        void SetStat(Stats stat, uint32 val) { SetUInt32Value(UNIT_FIELD_STATS+stat, val); }
+        void ApplyStatMod(Stats stat, uint32 val, bool apply) { ApplyModUInt32Value(UNIT_FIELD_STATS+stat, val, apply); }
+        void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_STATS+stat, val, apply); }
+
+        uint32 GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
+        void SetArmor(uint32 val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
+        void ApplyArmorMod(uint32 val, bool apply) { ApplyResistanceMod(SPELL_SCHOOL_NORMAL, val, apply); }
+        void ApplyArmorPercentMod(float val, bool apply) { ApplyResistancePercentMod(SPELL_SCHOOL_NORMAL, val, apply); }
+
+        uint32 GetResistance(SpellSchools school) const { return GetUInt32Value(UNIT_FIELD_RESISTANCES+school); }
+        void SetResistance(SpellSchools school, uint32 val) { SetUInt32Value(UNIT_FIELD_RESISTANCES+school,val); }
+        void ApplyResistanceMod(SpellSchools school, uint32 val, bool apply) { ApplyModUInt32Value(UNIT_FIELD_RESISTANCES+school, val, apply); }
+        void ApplyResistancePercentMod(SpellSchools school, float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES+school, val, apply); }
+
+        uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
+        uint32 GetMaxHealth() const { return GetUInt32Value(UNIT_FIELD_MAXHEALTH); }
+        void SetHealth(   uint32 val) { SetUInt32Value(UNIT_FIELD_HEALTH,val); }
+        void SetMaxHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_MAXHEALTH,val); }
+        void ApplyMaxHealthMod(uint32 val, bool apply) { ApplyModUInt32Value(UNIT_FIELD_MAXHEALTH, val, apply); }
+        void ApplyMaxHealthPercentMod(float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH, val, apply); }
+
+        Powers getPowerType() const { return Powers((m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF); };
+        void setPowerType(Powers power);
+        uint32 GetPower(   Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1   +power); }
+        uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1+power); }
+        void SetPower(   Powers power, uint32 val) { SetUInt32Value(UNIT_FIELD_POWER1   +power,val); }
+        void SetMaxPower(Powers power, uint32 val) { SetUInt32Value(UNIT_FIELD_MAXPOWER1+power,val); }
+        void ApplyPowerMod(Powers power, uint32 val, bool apply) { ApplyModUInt32Value(UNIT_FIELD_POWER1+power, val, apply); }
+        void ApplyPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_POWER1+power, val, apply); }
+        void ApplyMaxPowerMod(Powers power, uint32 val, bool apply) { ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply); }
+        void ApplyMaxPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply); }
+
+        // fuction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
         FactionTemplateEntry* getFactionTemplateEntry() const;
@@ -325,10 +357,9 @@ class MANGOS_DLL_SPEC Unit : public Object
         float GetUnitDodgeChance()    const;
         float GetUnitParryChance()    const;
         float GetUnitBlockChance()    const;
-        float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_CRIT_PERCENTAGE  ] : 5; }
+        float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? GetFloatValue( PLAYER_CRIT_PERCENTAGE ) : 5; }
 
-        uint32 GetUnitBlockValue() const { return (uint32)m_uint32Values[ UNIT_FIELD_ARMOR ]; }
-        uint32 GetUnitStrength()   const { return (uint32)m_uint32Values[ UNIT_FIELD_STR ]; }
+        uint32 GetUnitBlockValue() const { return GetArmor(); }
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
         uint16 GetDefenceSkillValue() const;
         uint16 GetWeaponSkillValue() const;

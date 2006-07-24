@@ -530,9 +530,9 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return true;
     }
 
-    pCreature->SetUInt32Value(UNIT_FIELD_HEALTH, 100 + 30*lvl);
-    pCreature->SetUInt32Value(UNIT_FIELD_MAXHEALTH, 100 + 30*lvl);
-    pCreature->SetUInt32Value(UNIT_FIELD_LEVEL , lvl);
+    pCreature->SetHealth( 100 + 30*lvl);
+    pCreature->SetMaxHealth( 100 + 30*lvl);
+    pCreature->SetLevel( lvl);
 
     pCreature->SaveToDB();
 

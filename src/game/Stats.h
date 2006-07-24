@@ -24,8 +24,8 @@
 
 inline uint32 CalculateXpToGive(Unit *pVictim, Unit *pAttacker)
 {
-    uint32 VictimLvl = pVictim->GetUInt32Value(UNIT_FIELD_LEVEL);
-    uint32 AttackerLvl = pAttacker->GetUInt32Value(UNIT_FIELD_LEVEL);
+    uint32 VictimLvl = pVictim->getLevel();
+    uint32 AttackerLvl = pAttacker->getLevel();
     double xp = (VictimLvl*5+45)*(1+0.05*(VictimLvl-AttackerLvl));
     if( ( xp < 0 ) || ((VictimLvl<(AttackerLvl * 0.8)) && (AttackerLvl > 5)) )
         xp = 0;

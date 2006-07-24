@@ -44,25 +44,34 @@
 #define CLASS_UNK2                          10
 #define CLASS_DRUID                         11
 
-#define STAT_STRENGTH                       0
-#define STAT_AGILITY                        1
-#define STAT_STAMINA                        2
-#define STAT_INTELLECT                      3
-#define STAT_SPIRIT                         4
+enum Stats
+{
+    STAT_STRENGTH                      = 0,
+    STAT_AGILITY                       = 1,
+    STAT_STAMINA                       = 2,
+    STAT_INTELLECT                     = 3,
+    STAT_SPIRIT                        = 4
+};
 
-#define POWER_MANA                          0
-#define POWER_RAGE                          1
-#define POWER_FOCUS                         2
-#define POWER_ENERGY                        3
-#define POWER_HAPPINESS                     4
+enum Powers
+{
+    POWER_MANA                         = 0,
+    POWER_RAGE                         = 1,
+    POWER_FOCUS                        = 2,
+    POWER_ENERGY                       = 3,
+    POWER_HAPPINESS                    = 4
+};
 
-#define SPELL_SCHOOL_NORMAL                 0
-#define SPELL_SCHOOL_HOLY                   1
-#define SPELL_SCHOOL_FIRE                   2
-#define SPELL_SCHOOL_NATURE                 3
-#define SPELL_SCHOOL_FROST                  4
-#define SPELL_SCHOOL_SHADOW                 5
-#define SPELL_SCHOOL_ARCANE                 6
+enum SpellSchools
+{
+    SPELL_SCHOOL_NORMAL                = 0,
+    SPELL_SCHOOL_HOLY                  = 1,
+    SPELL_SCHOOL_FIRE                  = 2,
+    SPELL_SCHOOL_NATURE                = 3,
+    SPELL_SCHOOL_FROST                 = 4,
+    SPELL_SCHOOL_SHADOW                = 5,
+    SPELL_SCHOOL_ARCANE                = 6
+};
 
 #define ITEM_QUALITY_POOR                   0               //GREY
 #define ITEM_QUALITY_NORMAL                 1               //WHITE
