@@ -49,6 +49,7 @@ class Aura
         //aura handlers
         void HandleNULL(bool Apply);
         void HandlePeriodicDamage(bool apply);
+        void HandleAuraDummy(bool apply);
         void HandleModConfuse(bool apply);
         void HandleModFear(bool Apply);
         void HandlePeriodicHeal(bool apply);

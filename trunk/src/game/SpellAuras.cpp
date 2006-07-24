@@ -45,7 +45,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_BIND_SIGHT
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
-    &Aura::HandleNULL,                                      //SPELL_AURA_DUMMY    //missing 4
+    &Aura::HandleAuraDummy,                                 //SPELL_AURA_DUMMY    //missing 4
     &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
     &Aura::HandleModFear,                                   //SPELL_AURA_MOD_FEAR = 7,
@@ -557,6 +557,52 @@ void Aura::HandlePeriodicDamage(bool apply)
         //RemovePeriodicEvent(m_PeriodicEventId);
         m_isPeriodic = false;
         m_duration = 0;
+    }
+}
+
+void Aura::HandleAuraDummy(bool apply)
+{
+    if(GetSpellProto()->SpellVisual == 5622 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player *player = (Player*)m_caster;
+        if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
+        {
+            if(apply)
+            {
+                m_procdamage = new ProcTriggerDamage();
+                m_procdamage->caster = m_caster->GetGUID();
+                m_procdamage->procChance = GetSpellProto()->procChance;
+                m_procdamage->procDamage = uint32(0.035 * m_modifier.m_amount);
+                m_procdamage->procFlags = GetSpellProto()->procFlags;
+                m_procdamage->procCharges = GetSpellProto()->procCharges;
+            }
+            else
+            {
+                m_procdamage = NULL;
+            }
+        }
+        if(GetEffIndex() == 2)
+        {
+            if(!apply)
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry(m_modifier.m_amount);
+                if(!spellInfo)
+                    return;
+                Spell *p_spell = new Spell(m_caster,spellInfo,false,false);
+                if(!p_spell)
+                    return;
+                SpellCastTargets targets;
+                Unit *ptarget = player->getAttackerForHelper();
+                if(!ptarget && m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    ptarget = ObjectAccessor::Instance().GetUnit(*m_caster, player->GetSelection());
+                }
+                if(!ptarget || ptarget->GetGUID() == m_caster->GetGUID())
+                    return;
+                targets.setUnitTarget(ptarget);
+                p_spell->prepare(&targets);
+            }
+        }
     }
 }
 
@@ -1528,6 +1574,7 @@ void Aura::HandleAuraProcTriggerDamage(bool apply)
 {
     if(apply)
     {
+        m_procdamage = new ProcTriggerDamage();
         m_procdamage->caster = m_caster->GetGUID();
         m_procdamage->procDamage = m_modifier.m_amount;
         m_procdamage->procChance = GetSpellProto()->procChance;
