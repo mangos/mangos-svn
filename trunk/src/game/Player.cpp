@@ -203,7 +203,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
     else SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
     SetStat(STAT_STRENGTH,info->strength );
-    SetStat(STAT_AGILITY,info->ability );
+    SetStat(STAT_AGILITY,info->agility );
     SetStat(STAT_STAMINA,info->stamina );
     SetStat(STAT_INTELLECT,info->intellect );
     SetStat(STAT_SPIRIT,info->spirit );
