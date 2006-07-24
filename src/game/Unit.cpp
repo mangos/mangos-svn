@@ -775,7 +775,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
             {
                 ((Player*)pVictim)->UpdateDefense();
-                pVictim->m_attackTimer = 0;                                    // parry sets attack timer to 0
+                pVictim->m_attackTimer = 0;                 // parry sets attack timer to 0
             }
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
@@ -1050,12 +1050,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         | PLAYER_STATE_SIT_HIGH_CHAIR)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); return MELEE_HIT_CRIT; }
 
-    // stunned target cannot dodge and this is check in GetUnitDodgeChance()
-    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
+            // stunned target cannot dodge and this is check in GetUnitDodgeChance()
+            tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); return MELEE_HIT_DODGE; }
 
-    int32   modCrit = 0;
+        int32   modCrit = 0;
 
     // check if attack comes from behind
     if (!pVictim->HasInArc(M_PI,this))
@@ -1088,14 +1088,14 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         && (roll < (sum += 4000)))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum); return MELEE_HIT_GLANCING; }
 
-    // FIXME: +skill and +defense has no effect on crit chance in PvP combat
-    tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
+        // FIXME: +skill and +defense has no effect on crit chance in PvP combat
+        tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
     if (tmp > 0 && roll < (sum += tmp))
         { DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum); return MELEE_HIT_CRIT; }
 
-    // mobs can score crushing blows if they're 3 or more levels above victim
-    // or when their weapon skill is 15 or more above victim's defense skill
-    if (   (GetTypeId() != TYPEID_PLAYER)
+        // mobs can score crushing blows if they're 3 or more levels above victim
+        // or when their weapon skill is 15 or more above victim's defense skill
+        if (   (GetTypeId() != TYPEID_PLAYER)
         && ((getLevel() >= pVictim->getLevel() + 3) || (skillDiff >= 15)))
     {
         // tmp = player's max defense skill - player's current defense skill
@@ -1165,25 +1165,25 @@ uint16 Unit::GetDefenceSkillValue() const
 }
 
 float Unit::GetUnitDodgeChance() const
-{ 
-    if(hasUnitState(UNIT_STAT_STUNDED)) 
+{
+    if(hasUnitState(UNIT_STAT_STUNDED))
         return 0;
 
-    return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_DODGE_PERCENTAGE ] : 5; 
+    return GetTypeId() == TYPEID_PLAYER ? m_floatValues[ PLAYER_DODGE_PERCENTAGE ] : 5;
 }
 
-
 float Unit::GetUnitParryChance() const
-{ 
+{
     float chance = 0;
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Player const* player = (Player const*)this;
-        if(player->HasSpell(3127) || player->HasSpell(18848)) // Parry passive skill
+                                                            // Parry passive skill
+        if(player->HasSpell(3127) || player->HasSpell(18848))
         {
             Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if(!tmpitem)
-                tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND); 
+                tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
             if(tmpitem && tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON)
                 chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
@@ -1199,7 +1199,7 @@ float Unit::GetUnitParryChance() const
 }
 
 float Unit::GetUnitBlockChance() const
-{ 
+{
     float chance = 0;
     if(GetTypeId() == TYPEID_PLAYER)
     {
@@ -1212,7 +1212,6 @@ float Unit::GetUnitBlockChance() const
 
     return chance;
 }
-
 
 uint16 Unit::GetWeaponSkillValue() const
 {
@@ -1488,13 +1487,13 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     else
     {
-        if (!Aur->IsPassive())    // passive auras stack with all 
-         {
+        if (!Aur->IsPassive())                              // passive auras stack with all
+        {
             if (!RemoveNoStackAurasDueToAura(Aur))
             {
                 delete Aur;
-                return false;                                   // couldnt remove conflicting aura with higher rank
-            }                                  // couldnt remove conflicting aura with higher rank
+                return false;                               // couldnt remove conflicting aura with higher rank
+            }                                               // couldnt remove conflicting aura with higher rank
         }
 
         Aur->_AddAura();
@@ -2267,12 +2266,11 @@ void Unit::SetPet(Creature* pet)
     SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
 }
 
-
 void Unit::UnsummonTotem(int8 slot)
 {
     uint64 t_guids[4] = { m_TotemSlot1, m_TotemSlot2, m_TotemSlot3, m_TotemSlot4 };
     WorldPacket data;
-    
+
     for (int8 i = 0; i < 4; i++)
     {
         if (i != slot && slot != -1) continue;

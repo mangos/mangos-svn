@@ -121,7 +121,7 @@ MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         // Remove selection
         if(i_player.GetSelection()==iter->second->GetGUID())
                                                             // visibility distance
-                if(i_player.GetDistanceSq(iter->second) > 100*100)
+            if(i_player.GetDistanceSq(iter->second) > 100*100)
                 sLog.outError("Player %s deselection of player %s (out of range) not implemented.",i_player.GetName(),iter->second->GetName());
 
         // Cancel Trade

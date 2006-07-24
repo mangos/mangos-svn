@@ -214,7 +214,6 @@ m_castItem(NULL), m_triggeredByAura(NULL)
         m_permanent = true;
     m_isPassive = IsPassiveSpell(m_spellId);
 
-
     switch(spellproto->EffectImplicitTargetA[eff])
     {
         case TARGET_S_E:
@@ -442,16 +441,15 @@ void Aura::_AddAura()
     }
 
     //m_target->RemoveRankAurasDueToSpell(m_spellId);
-    if (!m_triggeredByAura) // stats could already be removed by triggerer
+    if (!m_triggeredByAura)                                 // stats could already be removed by triggerer
         m_target->ApplyStats(false);
     ApplyModifier(true);
-    if (!m_triggeredByAura) 
+    if (!m_triggeredByAura)
         m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
-    if(m_isPassive) // passive auras do not get placed in the slots
+    if(m_isPassive)                                         // passive auras do not get placed in the slots
         return;
-
 
     if(!samespell)
     {
@@ -496,14 +494,14 @@ void Aura::_AddAura()
 
 void Aura::_RemoveAura()
 {
-    if (!m_triggeredByAura) // stats may already be rmoved by triggerer
+    if (!m_triggeredByAura)                                 // stats may already be rmoved by triggerer
         m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false);
     if (!m_triggeredByAura)
         m_target->ApplyStats(true);
 
-    if(m_isPassive) //passive auras do not get put in slots
+    if(m_isPassive)                                         //passive auras do not get put in slots
         return;
 
     uint8 slot = GetAuraSlot();
@@ -695,7 +693,7 @@ void Aura::HandleAddModifier(bool apply)
         mod->spellId = m_spellId;
         mod->charges = spellInfo->procCharges;
         p_mods->push_back(mod);
- 
+
         uint16 send_val=0, send_mark=0;
         int16 tmpval=spellInfo->EffectBasePoints[m_effIndex];
         uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
@@ -771,7 +769,7 @@ void Aura::HandleAuraModStun(bool apply)
         data.Initialize(SMSG_FORCE_MOVE_UNROOT);
         data << uint8(0xFF) << m_target->GetGUID();
         m_target->SendMessageToSet(&data,true);
-        
+
     }
 }
 
@@ -2171,11 +2169,15 @@ bool Aura::IsSingleTarget()
     if ( spellInfo->AttributesEx & (1<<18) ) return true;
 
     // other single target
-    if ( (spellInfo->SpellIconID == 20 && spellInfo->SpellVisual == 38)       //Entangling Roots
-        || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)    //Fear
-		|| (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)   //Banish
-		|| (spellInfo->SpellIconID == 235 && spellInfo->SpellVisual == 137)   //Mind Control
-		) return true;
+                                                            //Entangling Roots
+    if ( (spellInfo->SpellIconID == 20 && spellInfo->SpellVisual == 38)
+                                                            //Fear
+        || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
+                                                            //Banish
+        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
+                                                            //Mind Control
+        || (spellInfo->SpellIconID == 235 && spellInfo->SpellVisual == 137)
+        ) return true;
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;

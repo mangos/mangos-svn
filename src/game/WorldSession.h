@@ -102,7 +102,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
 
-	// played time
+        // played time
         void HandlePlayedTime(WorldPacket& recvPacket);
 
         // new

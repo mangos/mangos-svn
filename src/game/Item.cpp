@@ -478,12 +478,11 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 
     LoadValues(fields[0].GetString());
 
-    if(GetOwnerGUID()!=owner_guid) 
+    if(GetOwnerGUID()!=owner_guid)
     {
         sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %lu. Updated to correct: %lu",GetOwnerGUID(),owner_guid);
         SetOwnerGUID(owner_guid);
     }
-
 
     delete result;
 
@@ -504,7 +503,6 @@ Player* Item::GetOwner()const
 {
     return objmgr.GetPlayer(GetOwnerGUID());
 }
-
 
 uint32 Item::GetSkill()
 {

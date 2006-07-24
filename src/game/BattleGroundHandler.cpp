@@ -102,7 +102,6 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     GetPlayer()->SetBattleGroundEntryPointY(GetPlayer()->GetPositionY());
     GetPlayer()->SetBattleGroundEntryPointZ(GetPlayer()->GetPositionZ());
 
-
     // TODO: Find team based on faction
     uint32 TeamID = 0;
 

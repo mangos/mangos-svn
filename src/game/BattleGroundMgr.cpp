@@ -50,14 +50,14 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(Player *pl, uint32 MapID, ui
 void BattleGroundMgr::BuildPlayerLeftBattleGroundPacket(WorldPacket *data, Player *plr)
 {
     // "player" Has left the battle.
-    data->Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT);         //0x2EE
+    data->Initialize(SMSG_BATTLEGROUND_PLAYER_LEFT);        //0x2EE
     (*data) << plr->GetGUID();
 }
 
 void BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Player *plr)
 {
     // "player" Has joined the battle.
-    data->Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED);       //0x2ED
+    data->Initialize(SMSG_BATTLEGROUND_PLAYER_JOINED);      //0x2ED
     (*data) << plr->GetGUID();
 }
 

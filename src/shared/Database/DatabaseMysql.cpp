@@ -102,7 +102,7 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     uint32 fieldCount = mysql_field_count(mMysql);
     if (!result)
         return NULL;
-    
+
     if( !rowCount )
     {
         mysql_free_result(result);
@@ -136,7 +136,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     if (!result )
         return 0;
-    
+
     if (!rowCount)
     {
         mysql_free_result(result);

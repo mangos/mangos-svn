@@ -221,7 +221,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                 if( !Script->GOChooseReward( _player, pGameObject, pQuest, reward ) )
                 {
                     if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
-                    _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
+                        _player->PlayerTalkClass->SendQuestDetails(nextquest,guid,true);
                 }
             }
             else

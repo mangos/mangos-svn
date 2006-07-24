@@ -449,7 +449,6 @@ void Spell::EffectCreateItem(uint32 i)
         delete pItem;
     }
 
-
     player->StoreItem( dest, pItem, true);
     if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE )
         pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
@@ -1225,7 +1224,7 @@ void Spell::EffectSummonPet(uint32 i)
 
     Creature *OldSummon = m_caster->GetPet();
 
-    // if pet requested type already exist 
+    // if pet requested type already exist
     if(OldSummon && OldSummon->isPet() && OldSummon->GetCreatureInfo()->Entry == petentry)
     {
         if(OldSummon->isDead() )
@@ -1545,9 +1544,9 @@ void Spell::EffectInterruptCast(uint32 i)
 void Spell::EffectScriptEffect(uint32 i)
 {
     if(!m_spellInfo->Reagent[0])
-    { 
+    {
         // paladin's holy light / flash of light
-        if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) && 
+        if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) &&
             (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242))
             EffectHeal( i );
     }
@@ -2311,8 +2310,10 @@ void Spell::EffectTransmitted(uint32 i)
         if( m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->CheckFishingAble() > 0)
         {
             //pGameObj->SetUInt32Value(GAMEOBJECT_STATE, 0);
-            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 ); //Orientation3
-            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 3, -0.4668855369091033 ); //Orientation4
+                                                            //Orientation3
+            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 );
+                                                            //Orientation4
+            pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 3, -0.4668855369091033 );
             data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
             data<<uint64(pGameObj->GetGUID());
             data<<uint8(0);
