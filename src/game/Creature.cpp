@@ -762,9 +762,9 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
 
-    SetUInt32Value(UNIT_FIELD_BASEATTACKTIME,cinfo->baseattacktime);
+    SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
+    SetAttackTime(RANGED_ATTACK,cinfo->rangeattacktime);
 
-    SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME,cinfo->rangeattacktime);
     SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
     SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
 

@@ -163,14 +163,14 @@ void Unit::setAttackTimer(uint32 time, bool rangeattack)
         {
             if (GetTypeId() == TYPEID_PLAYER)
             {
-                m_attackTimer = GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME);
+                m_attackTimer = GetAttackTime(RANGED_ATTACK);
             }
         }
         else
         {
             if (GetTypeId() == TYPEID_PLAYER)
             {
-                m_attackTimer = GetUInt32Value(UNIT_FIELD_BASEATTACKTIME);
+                m_attackTimer = GetAttackTime(BASE_ATTACK);
             }
         }
         m_attackTimer = (m_attackTimer >= 200) ? m_attackTimer : 2000;
@@ -1796,7 +1796,7 @@ void Unit::ApplyStats(bool apply)
     if(val>0)
         tem_att_power = uint32(val*tem_att_power);
 
-    val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME)/1000;
+    val = tem_att_power/14.0f * GetAttackTime(RANGED_ATTACK)/1000;
     ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, val, apply);
     ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, val, apply);
 
@@ -1825,7 +1825,7 @@ void Unit::ApplyStats(bool apply)
     if(val>0)
         tem_att_power = uint32(val*tem_att_power);
 
-    val = tem_att_power/14.0f * GetUInt32Value(UNIT_FIELD_BASEATTACKTIME)/1000;
+    val = tem_att_power/14.0f * GetAttackTime(BASE_ATTACK)/1000;
 
     ApplyModFloatValue(UNIT_FIELD_MINDAMAGE, val, apply);
     ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, val, apply);

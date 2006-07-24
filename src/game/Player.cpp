@@ -228,8 +228,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
-    SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, 2000 );       // melee attack time
-    SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, 2000  );    // ranged attack time
+
+    SetAttackTime(BASE_ATTACK,   2000 );    // melee attack time
+    SetAttackTime(RANGED_ATTACK, 2000 );    // ranged attack time
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
@@ -3362,19 +3363,19 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         if(slot == EQUIPMENT_SLOT_RANGED)
         {
-            SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, apply ? proto->Delay: 2000);
+            SetAttackTime(RANGED_ATTACK, apply ? proto->Delay: 2000);
             typestr = "Range";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_MAINHAND)
         {
-            SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, apply ? proto->Delay: 2000);
+            SetAttackTime(BASE_ATTACK, apply ? proto->Delay: 2000);
             typestr = "Mainhand";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_OFFHAND)
         {
-            SetUInt32Value(UNIT_FIELD_OFFHANDATTACKTIME, apply ? proto->Delay: 2000);
+            SetAttackTime(OFF_ATTACK, apply ? proto->Delay: 2000);
             typestr = "Offhand";
             sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
@@ -8559,7 +8560,7 @@ void Player::outDebugValues() const
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
-    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetUInt32Value(UNIT_FIELD_BASEATTACKTIME), GetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME));
+    sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetAttackTime(BASE_ATTACK), GetAttackTime(RANGED_ATTACK));
 }
 
 /*********************************************************/

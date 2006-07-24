@@ -150,6 +150,13 @@ enum UnitState
     UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
+enum WeaponAttackType
+{
+    BASE_ATTACK   = 0,
+    OFF_ATTACK    = 1,
+    RANGED_ATTACK = 2
+};
+
 // Value masks for UNIT_FIELD_FLAGS
 #define UNIT_FLAG_NONE           0x0000000
 #define UNIT_FLAG_DISABLE_MOVE   0x0000004
@@ -225,6 +232,25 @@ enum ImmuneToSchool
     IMMUNE_SCHOOL_ARCANE       =64,
     IMMUNE_SCHOOL_MAGIC        =126
 };
+
+inline SpellSchools immuneToSchool(ImmuneToSchool immune)
+{
+    switch(immune)
+    {
+        case IMMUNE_SCHOOL_PHYSICAL: return SPELL_SCHOOL_NORMAL;
+        case IMMUNE_SCHOOL_HOLY:     return SPELL_SCHOOL_HOLY;
+        case IMMUNE_SCHOOL_FIRE:     return SPELL_SCHOOL_FIRE;
+        case IMMUNE_SCHOOL_NATURE:   return SPELL_SCHOOL_NATURE;
+        case IMMUNE_SCHOOL_FROST:    return SPELL_SCHOOL_FROST;
+        case IMMUNE_SCHOOL_SHADOW:   return SPELL_SCHOOL_SHADOW;
+        case IMMUNE_SCHOOL_ARCANE:   return SPELL_SCHOOL_ARCANE;
+        case IMMUNE_SCHOOL_MAGIC:
+        default:
+            break;
+    }
+    assert(false);
+    return SPELL_SCHOOL_NORMAL;
+}
 
 struct Hostil
 {
@@ -340,6 +366,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         void ApplyPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_POWER1+power, val, apply); }
         void ApplyMaxPowerMod(Powers power, uint32 val, bool apply) { ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply); }
         void ApplyMaxPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply); }
+
+        uint32 GetAttackTime(WeaponAttackType att) const { return GetUInt32Value(UNIT_FIELD_BASEATTACKTIME+att); }
+        void SetAttackTime(WeaponAttackType att, uint32 val) { SetUInt32Value(UNIT_FIELD_BASEATTACKTIME+att,val); }
+        void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME+att, val, apply); }
 
         // fuction template id
         uint32 getFaction() const { return GetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE); }
