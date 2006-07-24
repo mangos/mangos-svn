@@ -557,6 +557,9 @@ void World::ShutdownServ(uint32 time)
 
 void World::ShuttDownMsg()
 {
+	// TODO 
+	// need to check if passed more than 1 second to avoid flood
+
         if(m_ShutdownTimer <= 0)
 	    raise(SIGINT);
         char msg[256];

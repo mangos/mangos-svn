@@ -245,3 +245,5 @@
                                                             //log
 #define LANG_CHANGE_32BIT                ".Mod32Value:[OPCODE]:%u [VALUE]:%i"
 #define LANG_CHANGE_32BIT_FIELD          "You modified the value of Field:%u to Value: %u"
+
+#define LANG_SHUTTDOWN			 "Syntax is .shutdown seconds"
