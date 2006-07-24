@@ -1374,7 +1374,7 @@ bool ChatHandler::HandleDieCommand(const char* args)
     if(!SelectedPlayer)
         SelectedPlayer = player;
 
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_HEALTH, 0);
+    SelectedPlayer->SetHealth( 0);
     SelectedPlayer->setDeathState(JUST_DIED);
     return true;
 }
@@ -1398,7 +1398,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     }
 
     SelectedPlayer->ResurrectPlayer();
-    SelectedPlayer->SetUInt32Value(UNIT_FIELD_HEALTH, (uint32)(SelectedPlayer->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
+    SelectedPlayer->SetHealth( SelectedPlayer->GetMaxHealth()/2 );
     SelectedPlayer->SpawnCorpseBones();
     return true;
 }
@@ -1779,8 +1779,8 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
 
     PSendSysMessage(LANG_NPCINFO_CHAR,  GUID_LOPART(guid), faction, npcflags, Entry, skinid);
-    PSendSysMessage(LANG_NPCINFO_LEVEL, target->GetUInt32Value(UNIT_FIELD_LEVEL));
-    PSendSysMessage(LANG_NPCINFO_HEALTH,target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetUInt32Value(UNIT_FIELD_MAXHEALTH), target->GetUInt32Value(UNIT_FIELD_HEALTH));
+    PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
+    PSendSysMessage(LANG_NPCINFO_HEALTH,target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
 
     PSendSysMessage(LANG_NPCINFO_POSITION,float(target->GetPositionX()), float(target->GetPositionY()), float(target->GetPositionZ()));

@@ -64,10 +64,10 @@ void WorldSession::HandleFallOpcode( WorldPacket & recv_data )
         Map* Map = MapManager::Instance().GetMap(MapID);
         float posz = Map->GetWaterLevel(x,y);
         guid = Target->GetGUID();
-        float predamage = (float)((((float(FallTime)*10/11000)*(float(FallTime)*10/11000)) - 1) /6 ) * ( Target->GetUInt32Value(UNIT_FIELD_MAXHEALTH));
+        float predamage = float((((float(FallTime)*10/11000)*(float(FallTime)*10/11000)) - 1) /6 ) * Target->GetMaxHealth();
         damage = (uint32)predamage;
 
-        if (damage > 0 && damage < 2*( Target->GetUInt32Value(UNIT_FIELD_MAXHEALTH)))
+        if (damage > 0 && damage < 2* Target->GetMaxHealth())
             Target->EnvironmentalDamage(guid,DAMAGE_FALL, damage);
         DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , z, Target->GetPositionZ(),FallTime, posz,damage);
     }

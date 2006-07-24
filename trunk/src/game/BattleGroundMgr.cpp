@@ -149,7 +149,7 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket* data, uint64 guid
     uint32 PlayerLevel = 10;
 
     if(plr)
-        PlayerLevel = plr->GetUInt32Value(UNIT_FIELD_LEVEL);
+        PlayerLevel = plr->getLevel();
 
     // TODO Lookup npc entry code and find mapid
     // Gossip related

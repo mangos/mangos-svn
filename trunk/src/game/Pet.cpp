@@ -27,6 +27,7 @@
 
 Pet::Pet()
 {
+    m_isPet = true;
     m_name = "Pet";
     m_actState = STATE_RA_FOLLOW;
     m_fealty = 0;
@@ -51,8 +52,8 @@ void Pet::SavePetToDB()
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `current` = 1", owner );
 
     sDatabase.PExecute("INSERT INTO `character_pet` (`entry`,`owner`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`name`,`current`) VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,\"%s\",1)",
-        GetEntry(), owner, GetUInt32Value(UNIT_FIELD_LEVEL), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
-        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetUInt32Value(UNIT_FIELD_POWER5), m_name.c_str());
+        GetEntry(), owner, getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
+        m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS), m_name.c_str());
 }
 
 bool Pet::LoadPetFromDB( Unit* owner )
@@ -71,36 +72,36 @@ bool Pet::LoadPetFromDB( Unit* owner )
         return false;
 
     uint32 petlevel=fields[3].GetUInt32();
-    SetUInt32Value(UNIT_FIELD_LEVEL, petlevel);
+    SetLevel( petlevel);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    SetUInt32Value(UNIT_FIELD_HEALTH , 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH , 28 + 10 * petlevel);
+    SetHealth( 28 + 10 * petlevel);
+    SetMaxHealth( 28 + 10 * petlevel);
     if(owner->getClass() == CLASS_WARLOCK)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        SetUInt32Value(UNIT_FIELD_STAT0,22);
-        SetUInt32Value(UNIT_FIELD_STAT1,22);
-        SetUInt32Value(UNIT_FIELD_STAT2,25);
-        SetUInt32Value(UNIT_FIELD_STAT3,28);
-        SetUInt32Value(UNIT_FIELD_STAT4,27);
-        SetUInt32Value(UNIT_FIELD_ARMOR,petlevel*50);
+        SetStat(STAT_STRENGTH,22);
+        SetStat(STAT_AGILITY,22);
+        SetStat(STAT_STAMINA,25);
+        SetStat(STAT_INTELLECT,28);
+        SetStat(STAT_SPIRIT,27);
+        SetArmor(petlevel*50);
     }
     else if(owner->getClass() == CLASS_HUNTER)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
-        setPowerType(2);
-        SetUInt32Value(UNIT_FIELD_STAT0,uint32(20+petlevel*1.55));
-        SetUInt32Value(UNIT_FIELD_STAT1,uint32(20+petlevel*0.64));
-        SetUInt32Value(UNIT_FIELD_STAT2,uint32(20+petlevel*1.27));
-        SetUInt32Value(UNIT_FIELD_STAT3,uint32(20+petlevel*0.18));
-        SetUInt32Value(UNIT_FIELD_STAT4,uint32(20+petlevel*0.36));
-        SetUInt32Value(UNIT_FIELD_ARMOR,petlevel*50);
+        setPowerType(POWER_FOCUS);
+        SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
+        SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
+        SetStat(STAT_STAMINA,uint32(20+petlevel*1.27));
+        SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
+        SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
+        SetArmor(petlevel*50);
     }
-    SetUInt32Value(UNIT_FIELD_MAXPOWER5,1000000);
-    SetUInt32Value(UNIT_FIELD_POWER5,fields[11].GetUInt32());
-    SetUInt32Value(UNIT_FIELD_POWER1 , 28 + 10 * petlevel);
-    SetUInt32Value(UNIT_FIELD_MAXPOWER1 , 28 + 10 * petlevel);
+    SetMaxPower(POWER_HAPPINESS,1000000);
+    SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
+    SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
+    SetPower(   POWER_MANA, 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
 
     SetUInt32Value(UNIT_FIELD_FLAGS,0);
@@ -121,7 +122,6 @@ bool Pet::LoadPetFromDB( Unit* owner )
     m_spells[2] = fields[8].GetUInt32();
     m_spells[3] = fields[9].GetUInt32();
     m_actState = fields[10].GetUInt32();
-    SetisPet(true);
     AIM_Initialize();
     MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
     owner->SetPet(this);

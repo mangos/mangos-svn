@@ -48,7 +48,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     uint32 MapId = 489;
     uint32 PlayerLevel = 1;
 
-    PlayerLevel = GetPlayer()->GetUInt32Value(UNIT_FIELD_LEVEL);
+    PlayerLevel = GetPlayer()->getLevel();
 
     // TODO: Lookup npc entry code and find mapid
 

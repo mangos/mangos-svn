@@ -151,8 +151,8 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid);
     if(pet && pet->isPet())
     {
-        name = ((Pet*)pet)->GetName();
-        state3=pet->GetUInt32Value(UNIT_FIELD_STAT3);
+        name   = ((Pet*)pet)->GetName();
+        state3 = pet->GetStat(STAT_INTELLECT);
     }
     WorldPacket data;
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
@@ -180,8 +180,8 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(pet)
     {
-        uint32 feelty = pet->GetUInt32Value(UNIT_FIELD_POWER5);
-        pet->SetUInt32Value(UNIT_FIELD_POWER5 ,(feelty-50000) > 0 ?(feelty-50000) : 0);
+        uint32 feelty = pet->GetPower(POWER_HAPPINESS);
+        pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
         _player->UnsummonPet(true);
     }
 }

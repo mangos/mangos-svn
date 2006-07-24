@@ -768,12 +768,12 @@ void Aura::HandleAuraModRangedAttackPower(bool apply)
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
 {
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_POWER4,m_modifier.m_amount,apply);
+    m_target->ApplyPowerPercentMod(POWER_ENERGY,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 {
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH,m_modifier.m_amount,apply);
+    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount,apply);
 }
 
 // FIX-ME!!
@@ -877,43 +877,43 @@ void Aura::HandlePeriodicEnergize(bool apply)
 
 void Aura::HandleAuraModResistanceExclusive(bool apply)
 {
-    uint16 index = 0;
+    SpellSchools school = SPELL_SCHOOL_NORMAL;
     uint16 index2 = 0;
     switch(m_modifier.m_miscvalue)
     {
-        case 1:
+        case IMMUNE_SCHOOL_PHYSICAL:
         {
-            index = UNIT_FIELD_ARMOR;
+            school = SPELL_SCHOOL_NORMAL;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
         }break;
         case IMMUNE_SCHOOL_HOLY:
         {
-            index = UNIT_FIELD_RESISTANCES_01;
+            school = SPELL_SCHOOL_HOLY;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
         }break;
         case IMMUNE_SCHOOL_FIRE:
         {
-            index = UNIT_FIELD_RESISTANCES_02;
+            school = SPELL_SCHOOL_FIRE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
         }break;
         case IMMUNE_SCHOOL_NATURE:
         {
-            index = UNIT_FIELD_RESISTANCES_03;
+            school = SPELL_SCHOOL_NATURE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
         }break;
         case IMMUNE_SCHOOL_FROST:
         {
-            index = UNIT_FIELD_RESISTANCES_04;
+            school = SPELL_SCHOOL_FROST;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
         }break;
         case IMMUNE_SCHOOL_SHADOW:
         {
-            index = UNIT_FIELD_RESISTANCES_05;
+            school = SPELL_SCHOOL_SHADOW;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
         }break;
         case IMMUNE_SCHOOL_ARCANE:
         {
-            index = UNIT_FIELD_RESISTANCES_06;
+            school = SPELL_SCHOOL_ARCANE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
         }
         break;
@@ -921,10 +921,10 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
         {
             for(int8 x=0;x < 6;x++)
             {
-                index  = UNIT_FIELD_RESISTANCES_01 + x;
+                school  = SpellSchools(IMMUNE_SCHOOL_HOLY + x);
                 index2 = m_modifier.m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
+                m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
                     m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
             }
@@ -937,7 +937,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
         }break;
     }
 
-    m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
+    m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
@@ -1040,43 +1040,43 @@ void Aura::HandleInvisibilityDetect(bool Apply)
 
 void Aura::HandleAuraModResistance(bool apply)
 {
-    uint16 index = 0;
+    SpellSchools school = SPELL_SCHOOL_NORMAL;
     uint16 index2 = 0;
     switch(m_modifier.m_miscvalue)
     {
-        case 1:
+        case IMMUNE_SCHOOL_PHYSICAL:
         {
-            index = UNIT_FIELD_ARMOR;
+            school = SPELL_SCHOOL_NORMAL;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
         }break;
         case IMMUNE_SCHOOL_HOLY:
         {
-            index = UNIT_FIELD_RESISTANCES_01;
+            school = SPELL_SCHOOL_HOLY;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
         }break;
         case IMMUNE_SCHOOL_FIRE:
         {
-            index = UNIT_FIELD_RESISTANCES_02;
+            school = SPELL_SCHOOL_FIRE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
         }break;
         case IMMUNE_SCHOOL_NATURE:
         {
-            index = UNIT_FIELD_RESISTANCES_03;
+            school = SPELL_SCHOOL_NATURE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
         }break;
         case IMMUNE_SCHOOL_FROST:
         {
-            index = UNIT_FIELD_RESISTANCES_04;
+            school = SPELL_SCHOOL_FROST;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
         }break;
         case IMMUNE_SCHOOL_SHADOW:
         {
-            index = UNIT_FIELD_RESISTANCES_05;
+            school = SPELL_SCHOOL_SHADOW;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
         }break;
         case IMMUNE_SCHOOL_ARCANE:
         {
-            index = UNIT_FIELD_RESISTANCES_06;
+            school = SPELL_SCHOOL_ARCANE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
         }
         break;
@@ -1084,10 +1084,10 @@ void Aura::HandleAuraModResistance(bool apply)
         {
             for(int8 x=0;x < 6;x++)
             {
-                index  = UNIT_FIELD_RESISTANCES_01 + x;
+                school = SpellSchools(IMMUNE_SCHOOL_HOLY + x);
                 index2 = m_modifier.m_miscvalue2 == 0 ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
+                m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
                     m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
             }
@@ -1100,7 +1100,7 @@ void Aura::HandleAuraModResistance(bool apply)
         }break;
     }
 
-    m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
+    m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
@@ -1176,40 +1176,37 @@ void Aura::HandleReflectSpells(bool apply)
 
 void Aura::HandleAuraModStat(bool apply)
 {
-    uint16 index = 0;
+    Stats stat = STAT_STRENGTH;
     uint16 index2 = 0;
-    uint16 index3 = 0;
     switch(m_modifier.m_miscvalue)
     {
         case 0:
-            index = UNIT_FIELD_STR;
+            stat = STAT_STRENGTH;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
             break;
         case 1:
-            index = UNIT_FIELD_AGILITY;
+            stat = STAT_AGILITY;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
             break;
         case 2:
-            index = UNIT_FIELD_STAMINA;
+            stat = STAT_STAMINA;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
-            index3 = UNIT_FIELD_MAXHEALTH;
             break;
         case 3:
-            index = UNIT_FIELD_IQ;
+            stat = STAT_INTELLECT;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
-            index3 = UNIT_FIELD_MAXPOWER1;
             break;
         case 4:
-            index = UNIT_FIELD_SPIRIT;
+            stat = STAT_SPIRIT;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
             break;
         case -1:
         {
-            index = UNIT_FIELD_STR;
+            stat = STAT_STRENGTH;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
             for(int x=0;x<5;x++)
             {
-                m_target->ApplyModUInt32Value(index+x,m_modifier.m_amount,apply);
+                m_target->ApplyStatMod(Stats(stat+x),m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
                     m_target->ApplyModUInt32Value(index2+x,m_modifier.m_amount,apply);
             }
@@ -1221,9 +1218,7 @@ void Aura::HandleAuraModStat(bool apply)
             break;
     }
 
-    m_target->ApplyModUInt32Value(index,m_modifier.m_amount,apply);
-    //if(index3)
-    //    m_target->ApplyModUInt32Value(index3, (m_modifier.m_miscvalue2 == 0 ? m_modifier.m_amount:-m_modifier.m_amount)*(m_modifier.m_miscvalue==2?10:15),apply);
+    m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
@@ -1305,33 +1300,18 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply)
 
 void Aura::HandleAuraModIncreaseHealth(bool apply)
 {
-    uint32 newValue;
-    newValue = m_target->GetUInt32Value(UNIT_FIELD_MAXHEALTH);
-    apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
-    m_target->SetUInt32Value(UNIT_FIELD_MAXHEALTH,newValue);
+    m_target->ApplyMaxHealthMod(m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply)
 {
-    uint16 powerField = UNIT_FIELD_POWER1;
-    uint8 powerType = m_target->getPowerType();
-    if(powerType != m_modifier.m_miscvalue)
+    Powers powerType = m_target->getPowerType();
+    if(int32(powerType) != m_modifier.m_miscvalue)
         return;
-    if(powerType == 0)
-        powerField = UNIT_FIELD_POWER1;
-    else if(powerType == 1)
-        powerField = UNIT_FIELD_POWER2;
-    else if(powerType == 3)
-        powerField = UNIT_FIELD_POWER4;
-    else
-    {
-        powerField = UNIT_FIELD_POWER1;
-        sLog.outError("AURA: unknown power type %i spell id %u\n",(int)powerType, m_spellId);
-    }
 
-    uint32 newValue = m_target->GetUInt32Value(powerField);
+    uint32 newValue = m_target->GetPower(powerType);
     apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
-    m_target->SetUInt32Value(powerField,newValue);
+    m_target->SetPower(powerType,newValue);
 }
 
 void Aura::HandleAuraModShapeshift(bool apply)
@@ -1341,7 +1321,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
     Unit *unit_target = m_target;
     uint32 spellId = 0;
     uint32 modelid = 0;
-    uint8 PowerType = 0;
+    Powers PowerType = POWER_MANA;
     uint32 new_bytes_1 = m_modifier.m_miscvalue;
     switch(m_modifier.m_miscvalue)
     {
@@ -1350,7 +1330,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
                 modelid = 892;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 8571;
-            PowerType = 3;
+            PowerType = POWER_ENERGY;
             spellId = 3025;
             break;
         case FORM_TREE:
@@ -1372,7 +1352,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
                 modelid = 2281;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
-            PowerType = 1;
+            PowerType = POWER_RAGE;
             spellId = 1178;
             break;
         case FORM_AMBIENT:
@@ -1388,7 +1368,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
                 modelid = 2281;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
-            PowerType = 1;
+            PowerType = POWER_RAGE;
             spellId = 9635;
             break;
         case FORM_CREATUREBEAR:
@@ -1445,10 +1425,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         {
             unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
         }
-        if(PowerType > 0)
-        {
-            unit_target->setPowerType(PowerType);
-        }
+        unit_target->setPowerType(PowerType);
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)
@@ -1477,7 +1454,7 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(unit_target->getClass() == CLASS_DRUID)
-            unit_target->setPowerType(0);
+            unit_target->setPowerType(POWER_MANA);
         unit_target->m_ShapeShiftForm = 0;
         unit_target->m_form = 0;
         unit_target->RemoveAurasDueToSpell(spellId);
@@ -1656,15 +1633,15 @@ void Aura::HandleWaterBreathing(bool apply)
 void Aura::HandleModBaseResistance(bool apply)
 {
     if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier.m_amount, apply);
+        m_target->ApplyArmorMod(m_modifier.m_amount, apply);
     if(m_modifier.m_miscvalue == 126 || m_modifier.m_miscvalue == 127)
     {
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier.m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier.m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier.m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier.m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier.m_amount, apply);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply);
     }
 }
 
@@ -1742,6 +1719,8 @@ void Aura::HandleAuraTransform(bool apply)
     if (apply)
     {
         CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
+        if(!ci)
+            return;
         m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
         m_target->setTransForm(GetSpellProto()->Id);
     }
@@ -2015,78 +1994,78 @@ void Aura::HandleModDamagePercentDone(bool apply)
 
 void Aura::HandleModPercentStat(bool apply)
 {
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXHEALTH, m_modifier.m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER1, m_modifier.m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER2, m_modifier.m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER3, m_modifier.m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER4, m_modifier.m_amount, apply );
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_MAXPOWER5, m_modifier.m_amount, apply );
+    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_MANA,     m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_RAGE,     m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_FOCUS,    m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_ENERGY,   m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_HAPPINESS,m_modifier.m_amount, apply );
     if(m_modifier.m_miscvalue == 0 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STR,     m_modifier.m_amount, apply );
+        m_target->ApplyStatPercentMod(STAT_STRENGTH,m_modifier.m_amount, apply );
     if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_AGILITY, m_modifier.m_amount, apply );
+        m_target->ApplyStatPercentMod(STAT_AGILITY, m_modifier.m_amount, apply );
     if(m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_STAMINA, m_modifier.m_amount, apply );
+        m_target->ApplyStatPercentMod(STAT_STAMINA, m_modifier.m_amount, apply );
     if(m_modifier.m_miscvalue == 3 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_IQ,      m_modifier.m_amount, apply );
+        m_target->ApplyStatPercentMod(STAT_INTELLECT,m_modifier.m_amount, apply );
     if(m_modifier.m_miscvalue == 4 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_SPIRIT,  m_modifier.m_amount, apply );
+        m_target->ApplyStatPercentMod(STAT_SPIRIT,  m_modifier.m_amount, apply );
 }
 
 void Aura::HandleModResistancePercent(bool apply)
 {
     if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES, m_modifier.m_amount, apply );
+        m_target->ApplyArmorPercentMod(m_modifier.m_amount, apply );
     if(m_modifier.m_miscvalue == 127 || m_modifier.m_miscvalue == 126)
     {
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_01, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_02, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_03, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_04, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_05, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RESISTANCES_06, m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply );
     }
 }
 
 void Aura::HandleAuraModBaseResistancePCT(bool apply)
 {
-    uint16 index = 0;
+    SpellSchools school = SPELL_SCHOOL_NORMAL;
     uint16 index2 = 0;
     switch(m_modifier.m_miscvalue)
     {
-        case 1:
+        case IMMUNE_SCHOOL_PHYSICAL:
         {
-            index = UNIT_FIELD_ARMOR;
+            school = SPELL_SCHOOL_NORMAL;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE;
         }break;
         case IMMUNE_SCHOOL_HOLY:
         {
-            index = UNIT_FIELD_RESISTANCES_01;
+            school = SPELL_SCHOOL_HOLY;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01;
         }break;
         case IMMUNE_SCHOOL_FIRE:
         {
-            index = UNIT_FIELD_RESISTANCES_02;
+            school = SPELL_SCHOOL_FIRE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02;
         }break;
         case IMMUNE_SCHOOL_NATURE:
         {
-            index = UNIT_FIELD_RESISTANCES_03;
+            school = SPELL_SCHOOL_NATURE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03;
         }break;
         case IMMUNE_SCHOOL_FROST:
         {
-            index = UNIT_FIELD_RESISTANCES_04;
+            school = SPELL_SCHOOL_FROST;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04;
         }break;
         case IMMUNE_SCHOOL_SHADOW:
         {
-            index = UNIT_FIELD_RESISTANCES_05;
+            school = SPELL_SCHOOL_SHADOW;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05;
         }break;
         case IMMUNE_SCHOOL_ARCANE:
         {
-            index = UNIT_FIELD_RESISTANCES_06;
+            school = SPELL_SCHOOL_ARCANE;
             m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06;
         }
         break;
@@ -2094,10 +2073,10 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         {
             for(int8 x=0;x < 6;x++)
             {
-                index = UNIT_FIELD_RESISTANCES_01 + x;
+                school = SpellSchools(IMMUNE_SCHOOL_HOLY + x);
                 m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 + x : index2 = PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 + x;
 
-                m_target->ApplyPercentModUInt32Value(index,m_modifier.m_amount, apply);
+                m_target->ApplyResistancePercentMod(school,m_modifier.m_amount, apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
                     m_target->ApplyPercentModUInt32Value(index2,m_modifier.m_amount, apply);
             }
@@ -2111,7 +2090,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
         }break;
     }
 
-    m_target->ApplyPercentModUInt32Value(index,m_modifier.m_amount,apply);
+    m_target->ApplyResistancePercentMod(school,m_modifier.m_amount,apply);
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyPercentModUInt32Value(index2,m_modifier.m_amount,apply);
 }
@@ -2150,7 +2129,7 @@ void Aura::HandleRangedAmmoHaste(bool apply)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_BASEATTACKTIME+1,m_modifier.m_amount, apply);
+    m_target->ApplyPercentModUInt32Value(UNIT_FIELD_RANGEDATTACKTIME,m_modifier.m_amount, apply);
 }
 
 void Aura::SendCoolDownEvent()

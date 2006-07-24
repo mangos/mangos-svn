@@ -769,8 +769,8 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
 
     // set health, mana
     GetPlayer()->ApplyStats(false);
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH,(uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH)*0.50) );
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1,(uint32)(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER1)*0.50) );
+    GetPlayer()->SetHealth(GetPlayer()->GetMaxHealth()/2);
+    GetPlayer()->SetPower(POWER_MANA,GetPlayer()->GetMaxPower(POWER_MANA)/2);
     GetPlayer()->ApplyStats(true);
 
     // update world right away
@@ -798,32 +798,27 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->ResurrectPlayer();
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH) > GetPlayer()->m_resurrectHealth)
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->m_resurrectHealth );
+    if(GetPlayer()->GetMaxHealth() > GetPlayer()->m_resurrectHealth)
+        GetPlayer()->SetHealth( GetPlayer()->m_resurrectHealth );
     else
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_HEALTH, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXHEALTH) );
+        GetPlayer()->SetHealth( GetPlayer()->GetMaxHealth() );
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER1) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->m_resurrectMana );
+    if(GetPlayer()->GetMaxPower(POWER_MANA) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->m_resurrectMana );
     else
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER1, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER1) );
+        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->GetMaxPower(POWER_MANA) );
 
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER2) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER2, GetPlayer()->m_resurrectMana );
+    GetPlayer()->SetPower(POWER_RAGE, 0 );
+
+    if(GetPlayer()->GetMaxPower(POWER_FOCUS) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetPower(POWER_FOCUS, GetPlayer()->m_resurrectMana );
     else
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER2, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER2) );
+        GetPlayer()->SetPower(POWER_FOCUS, GetPlayer()->GetMaxPower(POWER_FOCUS) );
 
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER3, 0 );
-
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER4) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER4, GetPlayer()->m_resurrectMana );
+    if(GetPlayer()->GetMaxPower(POWER_ENERGY) > GetPlayer()->m_resurrectMana)
+        GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->m_resurrectMana );
     else
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER4, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER4) );
-
-    if(GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER5) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER5, GetPlayer()->m_resurrectMana );
-    else
-        GetPlayer()->SetUInt32Value(UNIT_FIELD_POWER5, GetPlayer()->GetUInt32Value(UNIT_FIELD_MAXPOWER5) );
+        GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY) );
 
     GetPlayer()->SpawnCorpseBones();
 

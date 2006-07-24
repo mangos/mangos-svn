@@ -222,8 +222,8 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    chr->SetUInt32Value( UNIT_FIELD_MAXHEALTH, hpm );
-    chr->SetUInt32Value( UNIT_FIELD_HEALTH, hp );
+    chr->SetMaxHealth( hpm );
+    chr->SetHealth( hp );
 
     return true;
 }
@@ -266,8 +266,8 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    chr->SetUInt32Value( UNIT_FIELD_MAXPOWER1, manam );
-    chr->SetUInt32Value( UNIT_FIELD_POWER1, mana );
+    chr->SetMaxPower(POWER_MANA,manam );
+    chr->SetPower(POWER_MANA, mana );
 
     return true;
 }
@@ -310,10 +310,10 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    chr->SetUInt32Value( UNIT_FIELD_MAXPOWER4, manam );
-    chr->SetUInt32Value( UNIT_FIELD_POWER4, mana );
+    chr->SetMaxPower(POWER_ENERGY,manam );
+    chr->SetPower(POWER_ENERGY, mana );
 
-    sLog.outString(LANG_CURRENT_ENERGY,chr->GetUInt32Value( UNIT_FIELD_MAXPOWER4));
+    sLog.outString(LANG_CURRENT_ENERGY,chr->GetMaxPower(POWER_ENERGY));
 
     return true;
 }
@@ -356,8 +356,8 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    chr->SetUInt32Value( UNIT_FIELD_MAXPOWER2, manam );
-    chr->SetUInt32Value( UNIT_FIELD_POWER2, mana );
+    chr->SetMaxPower(POWER_RAGE,manam );
+    chr->SetPower(POWER_RAGE, mana );
 
     return true;
 }
@@ -392,7 +392,7 @@ bool ChatHandler::HandleModifyLevelCommand(const char* args)
 
     chr->GetSession()->SendPacket(&data);
 
-    chr->SetUInt32Value( UNIT_FIELD_LEVEL, lvl );
+    chr->SetLevel( lvl );
 
     return true;
 }

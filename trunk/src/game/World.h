@@ -63,9 +63,9 @@ enum WorldConfigs
 enum Rates
 {
     RATE_HEALTH=0,
-    RATE_POWER1,
-    RATE_POWER2,
-    RATE_POWER3,
+    RATE_POWER_MANA,
+    RATE_POWER_RAGE,
+    RATE_POWER_FOCUS,
     RATE_DROP,
     RATE_XP,
     MAX_RATES
@@ -117,19 +117,9 @@ class World
 
         void Update(time_t diff);
 
-        void setRate(uint32 index,float value)
-        {
-            if(index<MAX_RATES)
-                regen_values[index]=value;
-        }
+        void setRate(Rates rate,float value) { regen_values[rate]=value; }
+        float getRate(Rates rate) const { return regen_values[rate]; }
 
-        float getRate(uint32 index)
-        {
-            if(index<MAX_RATES)
-                return regen_values[index];
-            else
-                return 0;
-        }
         void setConfig(uint32 index,uint32 value)
         {
             if(index<CONFIG_VALUE_COUNT)
