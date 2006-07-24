@@ -3375,7 +3375,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
         if(Enchant_id)
-            AddItemEnchant(Enchant_id,true);
+            AddItemEnchant(Enchant_id, apply);
     }
 
     sLog.outDebug("_ApplyItemMods complete.");
@@ -3452,6 +3452,30 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         targets.setUnitTarget( Target );
         spell->m_CastItem = item;
         spell->prepare(&targets);
+    }
+
+    // item combat enchantments
+    for(int e_slot = 0; e_slot < 21; e_slot++)
+    {
+        uint32 enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+e_slot);
+        SpellItemEnchantment *pEnchant;
+        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!pEnchant) continue;
+        uint32 enchant_display = pEnchant->display_type;
+        uint32 enchant_value1 = pEnchant->value1;
+        uint32 enchant_spell_id = pEnchant->spellid;
+        SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+        if(!enchantSpell_info) continue;
+        if(enchant_display!=4 && enchant_display!=2 && this->IsItemSpellToCombat(enchantSpell_info))
+        {
+            if (urand(0,100) <= enchant_value1 || enchant_value1 == 0)
+            {
+                Spell *spell = new Spell(this, enchantSpell_info, true, 0);
+                SpellCastTargets targets;
+                targets.setUnitTarget(Target);
+                spell->prepare(&targets);
+            }
+        }
     }
 }
 

@@ -297,6 +297,14 @@ uint32 FindSpellRank(uint32 spellId)
     return rank;
 }
 
+bool IsPassiveSpell(uint32 spellId)
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+        return false;
+    return ((spellInfo->Attributes & (1<<6)) != 0);
+}
+
 bool IsRankSpellDueToSpell(SpellEntry *spellInfo_1,uint32 spellId_2)
 {
     SpellEntry *spellInfo_2 = sSpellStore.LookupEntry(spellId_2);
