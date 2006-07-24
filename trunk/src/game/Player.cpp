@@ -120,6 +120,8 @@ Player::Player (WorldSession *session): Unit()
     m_bgBattleGroundID = 0;
 
     m_movement_flags = 0;
+
+    m_Last_tick = time(NULL);
 }
 
 Player::~Player ()
@@ -266,6 +268,12 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_FIELD_HONOR_RANK, 0);
         SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
+
+
+    // Played time
+    m_Last_tick = time(NULL);
+    m_Played_time[0] = 0;
+    m_Played_time[1] = 0;
 
     uint32 titem_id;
     uint8 titem_slot;
@@ -622,6 +630,8 @@ void Player::Update( uint32 p_time )
 
     Unit::Update( p_time );
 
+    uint32 now = (uint32)time (NULL);
+
     UpdatePVPFlag(time(NULL));
 
     CheckDuelDistance();
@@ -765,6 +775,15 @@ void Player::Update( uint32 p_time )
 
     //Handle lava
     HandleLava();
+
+        // Played time
+    if (now > m_Last_tick)
+    {
+	uint32 elapsed = (now - m_Last_tick);
+	m_Played_time[0] += elapsed; // Total played time
+	m_Played_time[1] += elapsed; // Level played time
+	m_Last_tick = now;
+    }
 
     if (m_drunk)
     {

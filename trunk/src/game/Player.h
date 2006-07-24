@@ -363,6 +363,12 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
+        // Played Time Stuff
+        uint32 m_Last_tick;
+        uint32 m_Played_time[2];
+        int GetTotalPlayedTime() { return m_Played_time[0]; };
+        int GetLevelPlayedTime() { return m_Played_time[1]; };
+
         void setDeathState(DeathState s)
         {
             bool cur = isAlive();
