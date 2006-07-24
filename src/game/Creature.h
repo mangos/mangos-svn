@@ -301,9 +301,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
                 m_deathTimer = m_corpseDelay;
 
                 if(!IsStopped()) StopMoving();
-                s = CORPSE;
             }
             Unit::setDeathState(s);
+
+            if(s == JUST_DIED)
+                Unit::setDeathState(CORPSE);
         };
 
         void Say(char const* text, uint32 language);
