@@ -51,6 +51,7 @@ World::World()
 {
     m_playerLimit = 0;
     m_allowMovement = true;
+    m_Last_tick = time(NULL);
 }
 
 World::~World()
@@ -547,3 +548,5 @@ void World::KickPlayer(char* playerName)
         playerToKick->LogoutPlayer(true);
     }
 }
+
+
