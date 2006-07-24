@@ -363,7 +363,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     //+5% HP if has skill Endurance
     if (Player::HasSpell(20550))
     {
-        SetMaxHealth( uint32(GetMaxHealth() * 1.05)); // only integer part
+        SetMaxHealth( uint32(GetMaxHealth() * 1.05));       // only integer part
     }
 
     // school resistances
@@ -384,8 +384,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetResistance(SPELL_SCHOOL_ARCANE, 10 );
     }
 
-    // apply original stats mods before item equipment that call before equip _RemoveStatsMods()  
-    _ApplyStatsMods();  
+    // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
+    _ApplyStatsMods();
 
     uint16 dest;
     uint8 msg;
@@ -806,7 +806,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     bytes = GetUInt32Value(PLAYER_BYTES_2);
     *p_data << uint8(bytes);
 
-    *p_data << uint8(getLevel());     //1
+    *p_data << uint8(getLevel());                           //1
     uint32 zoneId = MapManager::Instance ().GetMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 
     *p_data << zoneId;
@@ -940,7 +940,7 @@ void Player::RegenerateAll()
     }
 
     Regenerate( POWER_ENERGY );
-    Regenerate( POWER_MANA ); 
+    Regenerate( POWER_MANA );
 
     m_regenTimer = regenDelay;
 
@@ -1008,10 +1008,10 @@ void Player::Regenerate(Powers power)
                 case WARLOCK: addvalue = uint32((Spirit/5 + 15)  * ManaIncreaseRate); break;
             }
             break;
-        case POWER_RAGE:                             // Regenerate rage
+        case POWER_RAGE:                                    // Regenerate rage
             addvalue = uint32(1.66 * RageIncreaseRate);
             break;
-        case POWER_ENERGY:                             // Regenerate energy (rogue)
+        case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = uint32(20);
             break;
     }
@@ -1069,7 +1069,7 @@ void Player::RegenerateHealth()
         case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
         case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
     }
-    if (HasSpell(20555))                            // TODO: Should be aura controlled
+    if (HasSpell(20555))                                    // TODO: Should be aura controlled
     {
         if (isInCombat())
             addvalue*=uint32(0.10);
@@ -1216,18 +1216,18 @@ void Player::GiveLevel()
     // save new stats
     if(getClass() != WARRIOR && getClass() != ROGUE)
     {
-        SetPower(   POWER_MANA, uint32(newMP)); // only integer part
-        SetMaxPower(POWER_MANA, uint32(newMP)); // only integer part
+        SetPower(   POWER_MANA, uint32(newMP));             // only integer part
+        SetMaxPower(POWER_MANA, uint32(newMP));             // only integer part
     }
 
-    SetHealth(   uint32(newHP)); // only integer part
-    SetMaxHealth(uint32(newHP)); // only integer part
+    SetHealth(   uint32(newHP));                            // only integer part
+    SetMaxHealth(uint32(newHP));                            // only integer part
 
-    SetStat(STAT_STRENGTH, uint32(newSTR)); // only integer part
-    SetStat(STAT_STAMINA,  uint32(newSTA)); // only integer part
-    SetStat(STAT_AGILITY,  uint32(newAGI)); // only integer part
-    SetStat(STAT_INTELLECT,uint32(newINT)); // only integer part
-    SetStat(STAT_SPIRIT,   uint32(newSPI)); // only integer part
+    SetStat(STAT_STRENGTH, uint32(newSTR));                 // only integer part
+    SetStat(STAT_STAMINA,  uint32(newSTA));                 // only integer part
+    SetStat(STAT_AGILITY,  uint32(newAGI));                 // only integer part
+    SetStat(STAT_INTELLECT,uint32(newINT));                 // only integer part
+    SetStat(STAT_SPIRIT,   uint32(newSPI));                 // only integer part
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
@@ -2308,7 +2308,6 @@ void Player::UpdateRangedSkillWeapon()
     if (tmpitem)
         UpdateSkill(tmpitem->GetSkill());
 }
-
 
 void Player::ModifySkillBonus(uint32 skillid,int32 val)
 {
@@ -4942,22 +4941,21 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
     SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
 }
 
-
 void Player::SetSheath( uint32 sheathed )
 {
     switch (sheathed)
     {
-        case 0: // no prepeared weapon
+        case 0:                                             // no prepeared weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             SetVirtualItemSlot(2,NULL);
             break;
-        case 1: // prepeared melee weapon
+        case 1:                                             // prepeared melee weapon
             SetVirtualItemSlot(0,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND));
             SetVirtualItemSlot(1,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND));
             SetVirtualItemSlot(2,NULL);
             break;
-        case 2: // prepeared ranged weapon
+        case 2:                                             // prepeared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             SetVirtualItemSlot(2,GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED));

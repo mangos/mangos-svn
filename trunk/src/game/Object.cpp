@@ -380,7 +380,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
 void Object::SetUInt32Value( uint16 index, uint32 value )
 {
     ASSERT( index < m_valuesCount );
-    if(m_uint32Values[ index ] != value) 
+    if(m_uint32Values[ index ] != value)
     {
         m_uint32Values[ index ] = value;
 
@@ -443,7 +443,7 @@ void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 {
     int32 cur = GetUInt32Value(index);
     cur += (apply ? val : -val);
-    if(cur < 0) 
+    if(cur < 0)
         cur = 0;
     SetUInt32Value(index,cur);
 }
@@ -452,7 +452,7 @@ void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
     cur += (apply ? val : -val);
-    if(cur < 0) 
+    if(cur < 0)
         cur = 0;
 
     SetFloatValue(index,cur);

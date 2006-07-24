@@ -150,7 +150,6 @@ void BattleGround::RemovePlayer(Player *plr, bool Transport, bool SendPacket)
     plr->SetInBattleGround(false);
     plr->SetBattleGroundTeam(0);
 
-
     // Packets/Movement
     //WorldPacket data;
 

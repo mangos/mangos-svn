@@ -806,10 +806,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         inline float GetBattleGroundEntryPointZ() const { return m_bgEntryPointZ; }
         inline void SetBattleGroundEntryPointZ(float PosZ) { m_bgEntryPointZ = PosZ;}
-            
+
         inline float GetBattleGroundEntryPointO() const { return m_bgEntryPointO; }
         void SetBattleGroundEntryPointO(float PosO) { m_bgEntryPointO = PosO;}
-        
 
         /*********************************************************/
         /***                    REST SYSTEM                    ***/
@@ -825,7 +824,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         bool IsInWater() const { return (m_isunderwater & 0x80); }
 
- 
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
@@ -839,7 +837,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
-        
+
         bool m_bgInBattleGround;
         uint8 m_bgBattleGroundID;
         uint32 m_bgEntryPointMap;
@@ -888,7 +886,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveSpells();
         void _SaveTutorials();
 
-        
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
         void _SetVisibleBits(UpdateMask *updateMask, Player *target) const;
@@ -907,7 +904,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void StopMirrorTimer(uint8 Type);
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
         uint8 m_isunderwater;
-
 
         void outDebugValues() const;
 
@@ -996,7 +992,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_lastManaUse;
 
         uint32 m_deathTimer;
-        
+
         uint32 m_restTime;
         time_t m_pvp_count;
         bool m_pvp_counting;
@@ -1061,7 +1057,6 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
 
     basevalue *= T((100.0f+totalpct)/100.0f);
     basevalue += totalflat;
-    return T(basevalue*totalpct/100.0f + totalflat); // diff
+    return T(basevalue*totalpct/100.0f + totalflat);        // diff
 }
-
 #endif

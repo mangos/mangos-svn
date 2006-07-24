@@ -37,7 +37,6 @@
 #include "Object.h"
 #include "BattleGround.h"
 
-
 //TODO add these to the proper header file
 
 #define MOVEMENT_WALKING 0x100
@@ -123,13 +122,13 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     WorldPacket data;
     Player* Target = GetPlayer();
 
-
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
 
     //Can not logout if...
-    if( Target->isInCombat() ||                                                //...is in combat
-        Target->isInDuel()   ||                                                //...is in Duel
-        Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))       //...is jumping ...is falling
+    if( Target->isInCombat() ||                             //...is in combat
+        Target->isInDuel()   ||                             //...is in Duel
+                                                            //...is jumping ...is falling
+        Target->HasMovementFlags( MOVEMENT_JUMPING | MOVEMENT_FALLING ))
     {
         data.Initialize( SMSG_LOGOUT_RESPONSE );
         data << (uint8)0xC;
@@ -1062,7 +1061,7 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 
     recv_data >> GUID;
     recv_data >> unk0 >> Flags;
-    if (Flags & 0x2000 || Flags & 0x6000)     //0x2000 == jumping  0x6000 == Falling
+    if (Flags & 0x2000 || Flags & 0x6000)                   //0x2000 == jumping  0x6000 == Falling
     {
         uint32 unk2, unk3, unk4, unk5;
         float OldSpeed;
@@ -1127,15 +1126,14 @@ void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
     // we need to send data in unix time format
     // Make these functions
     WorldPacket data;
-	//uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
-	//uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();
+    //uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
+    //uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();
 
     uint32 TotalTimePlayed = 0x45F15698;
-	uint32 LevelPlayedTime = 0x45F15698;
+    uint32 LevelPlayedTime = 0x45F15698;
 
-	data.Initialize(SMSG_PLAYED_TIME);
-	data << TotalTimePlayed;
-	data << LevelPlayedTime;
+    data.Initialize(SMSG_PLAYED_TIME);
+    data << TotalTimePlayed;
+    data << LevelPlayedTime;
     SendPacket(&data);
 }
-

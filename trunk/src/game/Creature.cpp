@@ -754,7 +754,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_BASE_HEALTH,cinfo->maxhealth );
     SetHealth(cinfo->maxhealth );
 
-    SetMaxPower(POWER_MANA,cinfo->maxmana);   //MAX Mana
+    SetMaxPower(POWER_MANA,cinfo->maxmana);                 //MAX Mana
     SetUInt32Value(UNIT_FIELD_BASE_MANA, cinfo->maxmana);
     SetPower(POWER_MANA,cinfo->maxmana );
 

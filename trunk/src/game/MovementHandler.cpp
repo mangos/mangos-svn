@@ -97,7 +97,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     //Movement flag
     GetPlayer( )->SetMovementFlags(flags);
-    
+
     GetPlayer( )->SetPosition(x, y, z, orientation);
     if(recv_data.GetOpcode() != MSG_MOVE_JUMP)
     {
