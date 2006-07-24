@@ -2171,8 +2171,11 @@ bool Aura::IsSingleTarget()
     if ( spellInfo->AttributesEx & (1<<18) ) return true;
 
     // other single target
-    if ( (spellInfo->SpellIconID == 20 && spellInfo->SpellVisual == 38)
-        || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336))) return true;
+    if ( (spellInfo->SpellIconID == 20 && spellInfo->SpellVisual == 38)       //Entangling Roots
+        || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)    //Fear
+		|| (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)   //Banish
+		|| (spellInfo->SpellIconID == 235 && spellInfo->SpellVisual == 137)   //Mind Control
+		) return true;
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;
