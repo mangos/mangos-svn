@@ -2299,7 +2299,7 @@ bool ChatHandler::ShutDown (const char* args)
 {
         if(!*args)
         {
-//                m_session->SystemMessage("Command format: .shutdown <seconds>");
+		SendSysMessage(LANG_SHUTTDOWN);
                 return false;
         }
 
