@@ -115,6 +115,9 @@ class World
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0);
 
+        void ShutdownServ(uint32 time);
+        void ShuttDownMsg();
+
         void Update(time_t diff);
 
         void setRate(Rates rate,float value) { regen_values[rate]=value; }
@@ -147,6 +150,12 @@ class World
 
 	    if(m_lastTick == 0)
 		m_lastTick = thisTime;
+
+	    if(m_ShutdownTimer > 0 && m_ShutdownTimer != now)
+	    {
+		m_ShutdownTimer -= (now - m_Last_tick);
+		ShuttDownMsg();
+	    }
 
             m_gameTime += thisTime - m_lastTick;
 

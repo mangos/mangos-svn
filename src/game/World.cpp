@@ -52,6 +52,7 @@ World::World()
     m_playerLimit = 0;
     m_allowMovement = true;
     m_Last_tick = time(NULL);
+    m_ShutdownTimer = 0;
 }
 
 World::~World()
@@ -549,4 +550,27 @@ void World::KickPlayer(char* playerName)
     }
 }
 
+void World::ShutdownServ(uint32 time)
+{
+        m_ShutdownTimer = time;
+}
+
+void World::ShuttDownMsg()
+{
+        if(m_ShutdownTimer <= 0)
+	    raise(SIGINT);
+        char msg[256];
+        std::stringstream ss;
+        WorldPacket data;
+
+        data.Initialize(SMSG_SERVER_MESSAGE);
+        ss << m_ShutdownTimer << " Second(s).";
+        data << uint32(1) << ss.str().c_str() << (uint8)0x00;
+        SendGlobalMessage( &data );
+
+        data.clear();
+        ss.clear();
+
+	DEBUG_LOG("Server is shuttingdown in %d seconds",m_ShutdownTimer);
+}
 
