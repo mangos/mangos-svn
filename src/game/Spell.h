@@ -477,6 +477,7 @@ class Spell
         Unit* m_caster;
         bool m_autoRepeat;
         bool m_meleeSpell;
+        bool m_rangedShoot;
 
         // Current targets, to be used in SpellEffects
         Unit* unitTarget;

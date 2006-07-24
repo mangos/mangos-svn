@@ -174,8 +174,8 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
 
     m_meleeSpell = false;
 
-    bool rangedShoot = ((m_spellInfo->Attributes & 18) == 18);
-    if (m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat && !rangedShoot)
+    m_rangedShoot = ((m_spellInfo->Attributes & 18) == 18);
+    if( m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat && !m_rangedShoot )
     {
         for (int i = 0; i < 3; i++)
         {
@@ -642,7 +642,7 @@ void Spell::cast()
 
         SendSpellCooldown();
 
-        if(IsAutoRepeat() && m_caster->GetTypeId() == TYPEID_PLAYER)
+        if( ( IsAutoRepeat() || m_rangedShoot ) && m_caster->GetTypeId() == TYPEID_PLAYER )
             ((Player*)m_caster)->UpdateRangedSkillWeapon();
     }
 

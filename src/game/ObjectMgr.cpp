@@ -143,7 +143,7 @@ PlayerCreateInfo* ObjectMgr::GetPlayerCreateInfo(uint32 race, uint32 class_)
     pPlayerCreateInfo->positionZ = player_fields[7].GetFloat();
     pPlayerCreateInfo->displayId = player_fields[8].GetUInt16();
     pPlayerCreateInfo->strength = player_fields[9].GetUInt8();
-    pPlayerCreateInfo->ability = player_fields[10].GetUInt8();
+    pPlayerCreateInfo->agility = player_fields[10].GetUInt8();
     pPlayerCreateInfo->stamina = player_fields[11].GetUInt8();
     pPlayerCreateInfo->intellect = player_fields[12].GetUInt8();
     pPlayerCreateInfo->spirit = player_fields[13].GetUInt8();
