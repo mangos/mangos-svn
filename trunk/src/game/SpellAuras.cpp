@@ -581,28 +581,6 @@ void Aura::HandleAuraDummy(bool apply)
                 m_procdamage = NULL;
             }
         }
-        if(GetEffIndex() == 2)
-        {
-            if(!apply)
-            {
-                SpellEntry *spellInfo = sSpellStore.LookupEntry(m_modifier.m_amount);
-                if(!spellInfo)
-                    return;
-                Spell *p_spell = new Spell(m_caster,spellInfo,false,false);
-                if(!p_spell)
-                    return;
-                SpellCastTargets targets;
-                Unit *ptarget = player->getAttackerForHelper();
-                if(!ptarget && m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    ptarget = ObjectAccessor::Instance().GetUnit(*m_caster, player->GetSelection());
-                }
-                if(!ptarget || ptarget->GetGUID() == m_caster->GetGUID())
-                    return;
-                targets.setUnitTarget(ptarget);
-                p_spell->prepare(&targets);
-            }
-        }
     }
 }
 

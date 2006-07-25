@@ -214,6 +214,8 @@ void Spell::FillTargetMap()
                     tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
                 case SPELL_EFFECT_SKILL:
+                case SPELL_EFFECT_FEED_PET:
+                case SPELL_EFFECT_LEARN_PET_SPELL:
                     tmpUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_DISENCHANT:
@@ -221,10 +223,6 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
                 case SPELL_EFFECT_ENCHANT_HELD_ITEM:
                     tmpItemMap.push_back(itemTarget);
-                    break;
-                case SPELL_EFFECT_LEARN_PET_SPELL:
-                case SPELL_EFFECT_FEED_PET:
-                    SetTargetMap(i,TARGET_PET,tmpUnitMap,tmpItemMap,tmpGOMap);
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
                     if(m_spellInfo->Attributes == 0x9050000)// AreaAura
