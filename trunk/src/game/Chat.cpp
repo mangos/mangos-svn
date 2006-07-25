@@ -162,6 +162,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "tele",        1, &ChatHandler::HandleTeleCommand,             "",   NULL },
         { "addtele",     3, &ChatHandler::HandleAddTeleCommand,          "",   NULL },
         { "deltele",     3, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
+        { "reset",       3, &ChatHandler::HandleResetCommand,            "",   NULL },
         { "ticket",      2, &ChatHandler::HandleTicketCommand,           "",   NULL },
         { "delticket",   2, &ChatHandler::HandleDelTicketCommand,        "",   NULL },
 

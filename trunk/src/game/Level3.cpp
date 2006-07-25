@@ -2295,6 +2295,149 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     return true;
 }
 
+bool ChatHandler::HandleResetCommand (const char * args)
+{
+    if(!*args)
+        return false;
+    Player* SelectedPlayer=NULL;
+    Player* player=m_session->GetPlayer();
+    uint64 guid = player->GetSelection();
+    if(guid)
+        SelectedPlayer = objmgr.GetPlayer(guid);
+    if(SelectedPlayer)
+        player = SelectedPlayer;
+
+    std::string argstr = (char*)args;
+    if (argstr == "stats")
+    {
+        PlayerCreateInfo *info = objmgr.GetPlayerCreateInfo((uint32)player->getRace(), (uint32)player->getClass());
+        if(!info) return false;
+
+        for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+        {        
+            if(player->GetItemByPos(INVENTORY_SLOT_BAG_0,i) != NULL)
+            {
+                SendSysMessage("The player must unequip all items before resetting stats!");
+                return true;
+            }
+        }
+
+        Player::AuraMap p_Auras = player->GetAuras();
+        for(Player::AuraMap::iterator itr = p_Auras.begin(); itr != p_Auras.end(); ++itr)
+        {
+            if (itr->second && !itr->second->IsPassive())
+            {
+                SendSysMessage("The player must debuff all non passive auras before resetting stats!");
+                return true;
+            }
+        }
+
+        uint8 powertype = 0;
+        uint32 unitfield = 0;
+        switch(player->getClass())
+        {
+            case WARRIOR: powertype = 1; unitfield = 0x1100EE00; break;
+            case PALADIN: powertype = 0; unitfield = 0x0000EE00; break;
+            case HUNTER: powertype = 0; unitfield = 0x0000EE00; break;
+            case ROGUE: powertype = 3; unitfield = 0x00000000; break;
+            case PRIEST: powertype = 0; unitfield = 0x0000EE00; break;
+            case SHAMAN: powertype = 0; unitfield = 0x0000EE00; break;
+            case MAGE: powertype = 0; unitfield = 0x0000EE00; break;
+            case WARLOCK: powertype = 0; unitfield = 0x0000EE00; break;
+            case DRUID: powertype = 0; unitfield = 0x0000EE00; break;
+        }
+
+        if ( player->getRace() == TAUREN )
+        {
+            player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.35f);
+        }
+        else player->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
+        player->SetStat(STAT_STRENGTH,info->strength );
+        player->SetStat(STAT_AGILITY,info->agility );
+        player->SetStat(STAT_STAMINA,info->stamina );
+        player->SetStat(STAT_INTELLECT,info->intellect );
+        player->SetStat(STAT_SPIRIT,info->spirit );
+        player->SetArmor(info->basearmor );
+        player->SetUInt32Value(UNIT_FIELD_ATTACK_POWER, info->attackpower );
+
+        player->SetHealth(info->health);
+        player->SetMaxHealth(info->health);
+
+        player->SetPower(   POWER_MANA, info->mana );
+        player->SetMaxPower(POWER_MANA, info->mana );
+        player->SetPower(   POWER_RAGE, 0 );
+        player->SetMaxPower(POWER_RAGE, info->rage );
+        player->SetPower(   POWER_FOCUS, info->focus );
+        player->SetMaxPower(POWER_FOCUS, info->focus );
+        player->SetPower(   POWER_ENERGY, info->energy );
+        player->SetMaxPower(POWER_ENERGY, info->energy );
+
+        player->SetFloatValue(UNIT_FIELD_MINDAMAGE, info->mindmg );
+        player->SetFloatValue(UNIT_FIELD_MAXDAMAGE, info->maxdmg );
+        player->SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
+        player->SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
+
+        player->SetAttackTime(BASE_ATTACK,   2000 );    // melee attack time
+        player->SetAttackTime(RANGED_ATTACK, 2000 );    // ranged attack time
+
+        player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
+        player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
+
+        player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId + player->getGender());
+        player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId + player->getGender() );
+
+        player->SetLevel( 1 );
+
+        player->setFactionForRace(player->getRace());
+
+        player->SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( player->getRace() ) | ( player->getClass() << 8 ) | ( player->getGender() << 16 ) | ( powertype << 24 ) ) );
+        player->SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
+        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0xEEEEEE00 );
+        player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
+
+        player->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
+                                                                //-1 is default value
+        player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
+
+        player->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
+        player->SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
+
+        player->SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+        player->SetLevel(1);
+        player->SetUInt32Value(PLAYER_FIELD_POSSTAT0, 0);
+        player->SetUInt32Value(PLAYER_FIELD_POSSTAT1, 0);
+        player->SetUInt32Value(PLAYER_FIELD_POSSTAT2, 0);
+        player->SetUInt32Value(PLAYER_FIELD_POSSTAT3, 0);
+        player->SetUInt32Value(PLAYER_FIELD_POSSTAT4, 0);
+
+        //+5% HP if has skill Endurance
+        if (player->HasSpell(20550))
+        {
+            player->SetMaxHealth( uint32(player->GetMaxHealth() * 1.05));       // only integer part
+        }
+
+        // school resistances
+        if (player->HasSpell(20596))
+        {
+            player->SetResistance(SPELL_SCHOOL_FROST, 10 );
+        }
+        if (player->HasSpell(20583))
+        {
+            player->SetResistance(SPELL_SCHOOL_NATURE, 10 );
+        }
+        if (player->HasSpell(20579))
+        {
+            player->SetResistance(SPELL_SCHOOL_SHADOW, 10 );
+        }
+        if (player->HasSpell(20592))
+        {
+            player->SetResistance(SPELL_SCHOOL_ARCANE, 10 );
+        }
+        return true;
+    }
+    return false;
+}
+
 bool ChatHandler::ShutDown (const char* args)
 {
         if(!*args)
