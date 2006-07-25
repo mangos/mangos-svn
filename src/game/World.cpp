@@ -560,19 +560,19 @@ void World::ShuttDownMsg()
 	// TODO 
 	// need to check if passed more than 1 second to avoid flood
 
-        if(m_ShutdownTimer <= 0)
+    if(m_ShutdownTimer <= 0)
 	    raise(SIGINT);
-        char msg[256];
-        std::stringstream ss;
-        WorldPacket data;
 
-        data.Initialize(SMSG_SERVER_MESSAGE);
-        ss << m_ShutdownTimer << " Second(s).";
-        data << uint32(1) << ss.str().c_str() << (uint8)0x00;
-        SendGlobalMessage( &data );
+    std::stringstream ss;
+    WorldPacket data;
 
-        data.clear();
-        ss.clear();
+    data.Initialize(SMSG_SERVER_MESSAGE);
+    ss << m_ShutdownTimer << " Second(s).";
+    data << uint32(1) << ss.str().c_str() << (uint8)0x00;
+    SendGlobalMessage( &data );
+
+    data.clear();
+    ss.clear();
 
 	DEBUG_LOG("Server is shuttingdown in %d seconds",m_ShutdownTimer);
 }
