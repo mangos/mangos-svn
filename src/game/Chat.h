@@ -210,6 +210,7 @@ class ChatHandler
         bool HandleTeleCommand(const char * args);
         bool HandleAddTeleCommand(const char * args);
         bool HandleDelTeleCommand(const char * args);
+        bool HandleResetCommand (const char * args);
         bool HandleTicketCommand(const char* args);
         bool HandleDelTicketCommand(const char* args);
 
