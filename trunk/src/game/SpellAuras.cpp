@@ -441,11 +441,9 @@ void Aura::_AddAura()
     }
 
     //m_target->RemoveRankAurasDueToSpell(m_spellId);
-    if (!m_triggeredByAura)                                 // stats could already be removed by triggerer
-        m_target->ApplyStats(false);
+    m_target->ApplyStats(false);
     ApplyModifier(true);
-    if (!m_triggeredByAura)
-        m_target->ApplyStats(true);
+    m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
     if(m_isPassive)                                         // passive auras do not get placed in the slots
@@ -494,12 +492,10 @@ void Aura::_AddAura()
 
 void Aura::_RemoveAura()
 {
-    if (!m_triggeredByAura)                                 // stats may already be rmoved by triggerer
-        m_target->ApplyStats(false);
+    m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false);
-    if (!m_triggeredByAura)
-        m_target->ApplyStats(true);
+    m_target->ApplyStats(true);
 
     if(m_isPassive)                                         //passive auras do not get put in slots
         return;
@@ -890,7 +886,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
                 return;
             SpellCastTargets targets;
             targets.setUnitTarget(target);
+            // prevent double stat apply for triggered auras
+            target->ApplyStats(true);
             spell->prepare(&targets);
+            target->ApplyStats(false);
         }
     }
 }
@@ -1385,7 +1384,12 @@ void Aura::HandleAuraModShapeshift(bool apply)
             }
         }
         if(unit_target->m_ShapeShiftForm)
+        {
+            // prevent double stat apply for triggered auras
+            unit_target->ApplyStats(true);
             unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
+            unit_target->ApplyStats(false);
+        }
 
         unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
@@ -1409,7 +1413,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
             WPAssert(p_spell);
             SpellCastTargets targets;
             targets.setUnitTarget(unit_target);
+            // prevent double stat apply for triggered auras
+            unit_target->ApplyStats(true);
             p_spell->prepare(&targets);
+            unit_target->ApplyStats(false);
         }
     }
     else
@@ -1424,7 +1431,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
             unit_target->setPowerType(POWER_MANA);
         unit_target->m_ShapeShiftForm = 0;
         unit_target->m_form = 0;
+        // prevent double stat apply for triggered auras
+        unit_target->ApplyStats(true);
         unit_target->RemoveAurasDueToSpell(spellId);
+        unit_target->ApplyStats(false);
     }
     if(unit_target->GetTypeId() == TYPEID_PLAYER)
         unit_target->SendUpdateToPlayer((Player*)unit_target);
