@@ -57,6 +57,7 @@
 #include <time.h>
 #include <math.h>
 #include <errno.h>
+#include <signal.h>
 
 #if PLATFORM == PLATFORM_WIN32
 #define STRCASECMP stricmp
@@ -86,7 +87,6 @@
 #  include <sys/socket.h>
 #  include <netinet/in.h>
 #  include <unistd.h>
-#  include <signal.h>
 #  include <netdb.h>
 #endif
 
