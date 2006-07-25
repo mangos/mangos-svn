@@ -862,7 +862,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             {
                 pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
                 if(!nocharges)
+                {
                     procdamage->procCharges -= 1;
+                    if(procdamage->procCharges == 0)
+                        (*i).second->RemoveProcDamage();
+                }
             }
         }
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
@@ -871,8 +875,6 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             if((procspell->procFlags & 40)  && procspell->procChance > rand_chance()
                 && (procspell->procCharges > 0 || nocharges))
             {
-                if(!nocharges)
-                    procspell->procCharges -= 1;
                 SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger);
 
                 if(!spellInfo)
@@ -890,6 +892,12 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
                 if((*i).second->GetProcSpell()->trigger == 26545)
                     pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,(*i).second->CalculateDamage());
+               if(!nocharges)
+                {
+                    procspell->procCharges -= 1;
+                    if(procspell->procCharges == 0)
+                        (*i).second->RemoveProcSpell();
+                }
             }
         }
     }
@@ -905,7 +913,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             {
                 SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
                 if(!nocharges)
+                {
                     procdamage->procCharges -= 1;
+                    if(procdamage->procCharges == 0)
+                        (*i).second->RemoveProcDamage();
+                }
             }
         }
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
@@ -914,8 +926,6 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             if((procspell->procFlags & 20) && procspell->procChance > rand_chance()
                 && (procspell->procCharges > 0 || nocharges))
             {
-                if(!nocharges)
-                    procspell->procCharges -= 1;
                 SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger );
 
                 if(!spellInfo)
@@ -930,6 +940,12 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                 SpellCastTargets targets;
                 targets.setUnitTarget( pVictim );
                 spell->prepare(&targets);
+                if(!nocharges)
+                {
+                    procspell->procCharges -= 1;
+                    if(procspell->procCharges == 0)
+                        (*i).second->RemoveProcSpell();
+                }
             }
         }
     }

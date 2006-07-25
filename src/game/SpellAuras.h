@@ -170,6 +170,8 @@ class Aura
 
         ProcTriggerSpell* GetProcSpell() { return m_procSpell; }
         ProcTriggerDamage* GetProcDamage() { return m_procdamage; }
+        void RemoveProcSpell() { m_procSpell = NULL; }
+        void RemoveProcDamage() { m_procdamage = NULL; }
         void TriggerSpell();
         void SendCoolDownEvent();
         bool IsUpdated() { return m_updated; }

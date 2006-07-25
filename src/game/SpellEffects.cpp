@@ -1162,7 +1162,7 @@ void Spell::EffectTameCreature(uint32 i)
         creatureTarget->SetMaxPower(POWER_MANA,28 + 10 * petlevel);
         creatureTarget->SetPower(   POWER_MANA,28 + 10 * petlevel);
         creatureTarget->SetMaxPower(POWER_HAPPINESS,1000000);
-        creatureTarget->SetPower(   POWER_HAPPINESS,1000000);
+        creatureTarget->SetPower(   POWER_HAPPINESS,600000);
         creatureTarget->setPowerType(POWER_FOCUS);
         creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS,0);
@@ -1357,16 +1357,16 @@ void Spell::EffectSummonPet(uint32 i)
 
 void Spell::EffectLearnPetSpell(uint32 i)
 {
-    if(!unitTarget)
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        return;
+    Player *_player = (Player*)m_caster;
 
-    if(!unitTarget->isAlive())
+    Creature *pet = _player->GetPet();
+    if(!pet)
         return;
-
-    Creature* creatureTarget = (Creature*)unitTarget;
+    if(!pet->isAlive())
+        return;
 
     SpellEntry *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     if(!learn_spellproto)
@@ -1374,15 +1374,15 @@ void Spell::EffectLearnPetSpell(uint32 i)
     SpellEntry *has_spellproto;
     for(int8 x=0;x<4;x++)
     {
-        has_spellproto = sSpellStore.LookupEntry(creatureTarget ->m_spells[x]);
+        has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
         if(!has_spellproto)
         {
-            creatureTarget ->m_spells[x] = learn_spellproto->Id;
+            pet->m_spells[x] = learn_spellproto->Id;
             break;
         }
         else if(has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
         {
-            creatureTarget ->m_spells[x] = learn_spellproto->Id;
+            pet->m_spells[x] = learn_spellproto->Id;
             break;
         }
     }
@@ -1397,13 +1397,13 @@ void Spell::EffectLearnPetSpell(uint32 i)
         data.clear();
         data.Initialize(SMSG_PET_SPELLS);
 
-        data << (uint64)creatureTarget ->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
 
         data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
                                                             //C100 = maybe group
-            data << uint16 (creatureTarget ->m_spells[i]) << uint16 (0xC100);
+            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
 
         data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
 
@@ -2017,15 +2017,21 @@ void Spell::EffectInebriate(uint32 i)
 
 void Spell::EffectFeedPet(uint32 i)
 {
-    if(!unitTarget)
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
-    if(!unitTarget->isAlive())
+
+    Player *_player = (Player*)m_caster;
+
+    Creature *pet = _player->GetPet();
+    if(!pet)
         return;
-    uint32 feelty = unitTarget->GetPower(POWER_HAPPINESS);
-    if(damage + feelty <  unitTarget->GetMaxPower(POWER_HAPPINESS))
-        unitTarget->SetPower(POWER_HAPPINESS,damage + feelty);
-    else unitTarget->SetPower(POWER_HAPPINESS,unitTarget->GetMaxPower(POWER_HAPPINESS));
-    m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    if(!pet->isAlive())
+        return;
+    uint32 feelty = pet->GetPower(POWER_HAPPINESS);
+    if(damage + feelty <  pet->GetMaxPower(POWER_HAPPINESS))
+        pet->SetPower(POWER_HAPPINESS,damage + feelty);
+    else pet->SetPower(POWER_HAPPINESS,pet->GetMaxPower(POWER_HAPPINESS));
+    //m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
 }
 
 void Spell::EffectDismissPet(uint32 i)
