@@ -958,12 +958,6 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
     DEBUG_LOG( "WORLD: Battleground status - not yet" );
 }
 
-void WorldSession::HandleBattleMasterHelloOpcode( WorldPacket & recv_data )
-{
-
-    DEBUG_LOG( "WORLD: Battleground Hello - not yet" );
-}
-
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
 
@@ -1122,7 +1116,6 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
 {
-
     WorldPacket data;
     uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
     uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();
