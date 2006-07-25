@@ -45,6 +45,8 @@
 #include "AddonHandler.h"
 #include "zlib/zlib.h"
 
+#include <signal.h>
+
 INSTANTIATE_SINGLETON_1( World );
 
 World::World()
