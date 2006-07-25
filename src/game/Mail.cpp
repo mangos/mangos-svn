@@ -262,18 +262,18 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     std::list<Mail*>::iterator itr;
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
     {
-        data << uint32((*itr)->messageID);
-        data << uint8(0);
-        data << uint32((*itr)->sender);
-        data << uint32(0);
+        data << uint32((*itr)->messageID);          // NOT CORRECT, Unknown
+        data << uint8(0);                           // Message Type 0 = Default
+        data << uint32((*itr)->sender);             // SenderID
+        data << uint32(0);                          // Constant
 
-        data << (*itr)->subject.c_str();
+        data << (*itr)->subject.c_str();            // Subject string
         if((*itr)->body.c_str()!=NULL)
-            data << uint32((*itr)->messageID);
+            data << uint32((*itr)->messageID);      // MessageID!!
         else
-            data << uint32(0);
-        data << uint32(0);
-        data << uint32(41);
+            data << uint32(0);                      // No messageID
+        data << uint32(0);                          // Unknown
+        data << uint32(0);                          // Unknown
         if ((*itr)->item != 0)
         {
             Item* i = objmgr.GetMItem((*itr)->item);
@@ -283,18 +283,19 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         {
             data << uint32(0);
         }
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint8(1);
-        data << uint32(0xFFFFFFFF);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32((*itr)->money);
-        data << uint32((*itr)->COD);
-        data << uint32((*itr)->checked);
+        data << uint32(0);                          // Unknown
+        data << uint32(0);                          // Unknown
+        data << uint32(0);                          // Unknown
+        data << uint8(1);                           // Unknown
+        data << uint32(0xFFFFFFFF);                 // Unknown
+        data << uint32(0);                          // Unknown
+        data << uint32(0);                          // Unknown
+        data << uint32((*itr)->money);              // Gold
+        data << uint32((*itr)->COD);                // COD
+        data << uint32((*itr)->checked);            // flags 0: not checked 1: checked 8: COD Payment: "Subject"
+        data << float(((*itr)->time - time(NULL)) / 3600);  // Time
+        data << uint32(0);                          // Unknown
 
-        data << float(((*itr)->time - time(NULL)) / 3600);
     }
     SendPacket(&data);
 }
