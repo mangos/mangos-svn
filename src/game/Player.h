@@ -1024,8 +1024,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
-    T totalpct = 0;
-    T totalflat = 0;
+    int32 totalpct = 0;
+    int32 totalflat = 0;
     bool remove = false;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
@@ -1066,8 +1066,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
         }
     }
 
-    basevalue *= T((100.0f+totalpct)/100.0f);
-    basevalue += totalflat;
-    return T(basevalue*totalpct/100.0f + totalflat);        // diff
+    float diff = (float)basevalue*(float)totalpct/100.0f + (float)totalflat;
+    basevalue = T((float)basevalue + diff);
+    return T(diff);
 }
 #endif

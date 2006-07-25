@@ -7980,7 +7980,7 @@ void Player::_LoadAuras()
             if (remaintime == -1)
             {
                 sLog.outDebug("SpellAura (id=%u) has duration:%d ", spellid, remaintime);
-                continue;
+                //continue;
                 //temporary disable the Aura with Druation=-1 to avoid spell lost and action lost.
                 //need more fix about Aura Reload.
             }
