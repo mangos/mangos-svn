@@ -303,11 +303,10 @@ void BattleGround::HandleAreaTrigger(Player* Source, uint32 Trigger)
         if(!Entry)
             sLog.outError("WARNING: Tried to add unknown spell id %d to plr.", SpellId);
 
-        Spell *spell = new Spell(Source, Entry, true,0);
-        WPAssert(spell);
+        Spell spell(Source, Entry, true,0);
         SpellCastTargets targets;
         targets.setUnitTarget(Source);
         targets.m_targetMask = TARGET_FLAG_UNIT;
-        spell->prepare(&targets);
+        spell.prepare(&targets);
     }
 }

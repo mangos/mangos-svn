@@ -3407,7 +3407,6 @@ void Player::CastItemEquipSpell(Item *item)
 
     if(!proto) return;
 
-    Spell *spell;
     SpellEntry *spellInfo;
 
     for (int i = 0; i < 5; i++)
@@ -3424,13 +3423,12 @@ void Player::CastItemEquipSpell(Item *item)
 
         DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
 
-        spell = new Spell(this, spellInfo, true, 0);
-        WPAssert(spell);
+        Spell spell(this, spellInfo, true, 0);
 
         SpellCastTargets targets;
         targets.setUnitTarget( this );
-        spell->m_CastItem = item;
-        spell->prepare(&targets);
+        spell.m_CastItem = item;
+        spell.prepare(&targets);
     }
 }
 
@@ -3446,7 +3444,6 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     if (!Target || Target == this )
         return;
 
-    Spell *spell;
     SpellEntry *spellInfo;
 
     for (int i = 0; i < 5; i++)
@@ -3463,13 +3460,12 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
 
         DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
 
-        spell = new Spell(this, spellInfo, true, 0);
-        WPAssert(spell);
+        Spell spell(this, spellInfo, true, 0);
 
         SpellCastTargets targets;
         targets.setUnitTarget( Target );
-        spell->m_CastItem = item;
-        spell->prepare(&targets);
+        spell.m_CastItem = item;
+        spell.prepare(&targets);
     }
 
     // item combat enchantments
@@ -3488,10 +3484,10 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         {
             if (urand(0,100) <= enchant_value1 || enchant_value1 == 0)
             {
-                Spell *spell = new Spell(this, enchantSpell_info, true, 0);
+                Spell spell(this, enchantSpell_info, true, 0);
                 SpellCastTargets targets;
                 targets.setUnitTarget(Target);
-                spell->prepare(&targets);
+                spell.prepare(&targets);
             }
         }
     }

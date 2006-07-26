@@ -824,14 +824,14 @@ void HandleTriggerSpellEvent(void *obj)
         return;
     }
 
-    Spell *spell = new Spell(Aur->GetCaster(), spellInfo, true, Aur);
+    Spell spell(Aur->GetCaster(), spellInfo, true, Aur);
     SpellCastTargets targets;
     targets.setUnitTarget(Aur->GetTarget());
     //WorldPacket dump;
     //dump.Initialize(0);
     //dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
     //targets.read(&dump,this);
-    spell->prepare(&targets);
+    spell.prepare(&targets);
 
     /*else if(m_spellProto->EffectApplyAuraName[i] == 23)
     {
@@ -849,7 +849,7 @@ void Aura::TriggerSpell()
         return;
     }
 
-    Spell *spell = new Spell(m_caster, spellInfo, true, this);
+    Spell spell(m_caster, spellInfo, true, this);
     Unit* target = m_target;
     if(!target && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -859,7 +859,7 @@ void Aura::TriggerSpell()
         return;
     SpellCastTargets targets;
     targets.setUnitTarget(target);
-    spell->prepare(&targets);
+    spell.prepare(&targets);
 }
 
 void Aura::HandlePeriodicTriggerSpell(bool apply)
@@ -881,7 +881,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
         if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
         {
             SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
-            Spell *spell = new Spell(m_caster, spell_proto, true, 0);
+            Spell spell(m_caster, spell_proto, true, 0);
             Unit* target = NULL;
             target = m_target;
             if(!target || !target->isAlive())
@@ -890,7 +890,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply)
             targets.setUnitTarget(target);
             // prevent double stat apply for triggered auras
             target->ApplyStats(true);
-            spell->prepare(&targets);
+            spell.prepare(&targets);
             target->ApplyStats(false);
         }
     }
@@ -1411,13 +1411,12 @@ void Aura::HandleAuraModShapeshift(bool apply)
 
         if(spellInfo)
         {
-            Spell *p_spell = new Spell(m_caster,spellInfo,true,this);
-            WPAssert(p_spell);
+            Spell p_spell(m_caster,spellInfo,true,this);
             SpellCastTargets targets;
             targets.setUnitTarget(unit_target);
             // prevent double stat apply for triggered auras
             unit_target->ApplyStats(true);
-            p_spell->prepare(&targets);
+            p_spell.prepare(&targets);
             unit_target->ApplyStats(false);
         }
     }

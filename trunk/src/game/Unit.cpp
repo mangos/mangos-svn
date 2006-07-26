@@ -429,6 +429,7 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered)
     targets.setUnitTarget( Victim );
     spell->prepare(&targets);
     m_canMove = false;
+    if (triggered) delete spell;
 }
 
 void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
@@ -895,12 +896,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                     return;
                 }
 
-                Spell *spell = new Spell(pVictim, spellInfo, true, 0);
-                WPAssert(spell);
+                Spell spell(pVictim, spellInfo, true, 0);
 
                 SpellCastTargets targets;
                 targets.setUnitTarget( this );
-                spell->prepare(&targets);
+                spell.prepare(&targets);
 
                 if((*i).second->GetProcSpell()->trigger == 26545)
                     pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,(*i).second->CalculateDamage());
@@ -946,12 +946,11 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
                     return;
                 }
 
-                Spell *spell = new Spell(this, spellInfo, true, 0);
-                WPAssert(spell);
+                Spell spell(this, spellInfo, true, 0);
 
                 SpellCastTargets targets;
                 targets.setUnitTarget( pVictim );
-                spell->prepare(&targets);
+                spell.prepare(&targets);
                 if(!nocharges)
                 {
                     procspell->procCharges -= 1;
@@ -2035,10 +2034,10 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
     {
         if(apply && ((Player*)this)->IsItemSpellToEquip(enchantSpell_info))
         {
-            Spell *spell = new Spell(this, enchantSpell_info, true, 0);
+            Spell spell(this, enchantSpell_info, true, 0);
             SpellCastTargets targets;
             targets.setUnitTarget(this);
-            spell->prepare(&targets);
+            spell.prepare(&targets);
         }
         else RemoveAurasDueToSpell(enchant_spell_id);
     }

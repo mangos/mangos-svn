@@ -30,13 +30,12 @@ SpellEntry* Cast(Player*player,Item* item, uint32 spellId)
         sLog.outError("WORLD: unknown spell id %i", spellId);
         return NULL;
     }
-    Spell *spell = new Spell(player, spellInfo, true, 0);
-    WPAssert(spell);
+    Spell spell(player, spellInfo, true, 0);
 
     SpellCastTargets targets;
     targets.setUnitTarget( player );
-    spell->m_CastItem = item;
-    spell->prepare(&targets);
+    spell.m_CastItem = item;
+    spell.prepare(&targets);
     return spellInfo;
 
 }
