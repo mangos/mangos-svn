@@ -554,16 +554,16 @@ void World::KickPlayer(char* playerName)
 
 void World::ShutdownServ(uint32 time)
 {
-        m_ShutdownTimer = time;
+    m_ShutdownTimer = time;
 }
 
 void World::ShuttDownMsg()
 {
-	// TODO 
-	// need to check if passed more than 1 second to avoid flood
+    // TODO
+    // need to check if passed more than 1 second to avoid flood
 
     if(m_ShutdownTimer <= 0)
-	    raise(SIGINT);
+        raise(SIGINT);
 
     std::stringstream ss;
     WorldPacket data;
@@ -576,6 +576,5 @@ void World::ShuttDownMsg()
     data.clear();
     ss.clear();
 
-	DEBUG_LOG("Server is shuttingdown in %d seconds",m_ShutdownTimer);
+    DEBUG_LOG("Server is shuttingdown in %d seconds",m_ShutdownTimer);
 }
-
