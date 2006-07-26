@@ -1073,7 +1073,7 @@ void Spell::TakePower()
     if(m_CastItem)
         return;
 
-    Powers powerType = m_caster->getPowerType();
+    Powers powerType = Powers(m_spellInfo->powerType);
 
     uint32 currentPower = m_caster->GetPower(powerType);
     uint32 manaCost = m_spellInfo->manaCost;

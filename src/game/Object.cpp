@@ -301,7 +301,6 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
                 || isType(TYPE_PLAYER) &&
                 index >= PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 )
             {
-                assert(sizeof(float)==sizeof(uint32));
                 // convert from float to uint32 and send
                 *data << uint32(m_floatValues[ index ]);
             }

@@ -23,8 +23,6 @@
 #include "EventSystem.h"
 #include "GlobalEvents.h"
 
-Corpse *m_pCorpse;
-
 void HandleCorpsesErase(void*)
 {
     sLog.outBasic("Global Event (corpses/bones removal)");
@@ -34,7 +32,7 @@ void HandleCorpsesErase(void*)
     if(result)
     {
         Field *fields = result->Fetch();
-        m_pCorpse = new Corpse();
+        Corpse *m_pCorpse = new Corpse();
 
         uint64 guid = fields[0].GetUInt64();
         float positionX = fields[2].GetFloat();
@@ -52,7 +50,6 @@ void HandleCorpsesErase(void*)
 
         sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%lu';",(unsigned long)guid);
 
-        m_pCorpse=NULL;
         delete result;
     }
 
@@ -62,7 +59,7 @@ void HandleCorpsesErase(void*)
     {
 
         Field *fields = result->Fetch();
-        m_pCorpse = new Corpse();
+        Corpse *m_pCorpse = new Corpse();
 
         uint64 guid = fields[0].GetUInt64();
         float positionX = fields[2].GetFloat();
@@ -80,7 +77,6 @@ void HandleCorpsesErase(void*)
 
         sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%lu';",(unsigned long)guid);
 
-        m_pCorpse=NULL;
         delete result;
     }
 }

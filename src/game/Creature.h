@@ -271,7 +271,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         std::list<TrainerSpell*>::iterator GetTspellsEnd(){ return m_tspells.end(); }
 
         uint32 getDialogStatus(Player *pPlayer, uint32 defstatus);
-        Quest *getNextAvailableQuest(Player *pPlayer, Quest *prevQuest);
 
         bool hasQuest(uint32 quest_id);
         bool hasInvolvedQuest(uint32 quest_id);

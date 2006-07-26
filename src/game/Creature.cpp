@@ -323,30 +323,6 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         return DIALOG_STATUS_CHAT;
 }
 
-Quest *Creature::getNextAvailableQuest(Player *pPlayer, Quest *prevQuest)
-{
-    if ( !prevQuest )
-        return NULL;
-    uint32 quest_id = prevQuest->GetQuestInfo()->NextQuestId;
-    Quest *pQuest;
-
-    if( quest_id <= 0 )
-        return NULL;
-
-    for( std::list<Quest*>::iterator i = mQuests.begin( ); i != mQuests.end( ); i++ )
-    {
-        pQuest = *i;
-        if( pQuest->GetQuestInfo()->QuestId == quest_id )
-        {
-            if ( pPlayer->CanTakeQuest( pQuest, false ) )
-                return pQuest;
-            else
-                return NULL;
-        }
-    }
-    return NULL;
-}
-
 void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 {
     PlayerMenu* pm=pPlayer->PlayerTalkClass;
