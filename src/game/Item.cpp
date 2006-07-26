@@ -142,8 +142,7 @@ void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
                     if(eff->spells[z])
                         if(eff->spells[z]->Id==set->spells[x])
                         {
-                            for(uint32 i =0;x<3;++x)
-                                player->RemoveAura(eff->spells[z]->Id,i);
+                            player->RemoveAurasDueToSpell(set->spells[x]);
                             eff->spells[z]=NULL;
                             break;
                         }

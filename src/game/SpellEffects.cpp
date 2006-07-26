@@ -205,6 +205,20 @@ void Spell::EffectDummy(uint32 i)
 {
     if(!unitTarget)
         return;
+    // starshards/curse of agony hack .. this applies to 1.10 only
+    if (m_triggeredByAura)
+    {
+        SpellEntry *trig_info = m_triggeredByAura->GetSpellProto();
+        if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
+            (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
+        {
+            Unit *tmpTarget = unitTarget;
+            unitTarget = m_triggeredByAura->GetTarget();
+            damage = trig_info->EffectBasePoints[i];
+            EffectSchoolDMG(i);
+            unitTarget = tmpTarget;
+        }
+    }
     if(m_spellInfo->SpellIconID == 1648)
     {
         uint32 dmg = damage;
@@ -427,7 +441,7 @@ void Spell::EffectCreateItem(uint32 i)
     }
 
     uint32 num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
-    if(pProto->Class != ITEM_CLASS_CONSUMABLE)
+    if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
         num_to_add = 1;
     if(num_to_add > pProto->Stackable)
         num_to_add = pProto->Stackable;
