@@ -2149,11 +2149,10 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, uint64 targetGUID, uint8 SwingT
     SendMessageToSet( &data, true );
 }
 
-void Unit::setPowerType(Powers PowerType)
+void Unit::setPowerType(Powers new_powertype)
 {
     uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
-    SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(PowerType)<<24));
-    Powers new_powertype = getPowerType();
+    SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(new_powertype)<<24));
     switch(new_powertype)
     {
         default:

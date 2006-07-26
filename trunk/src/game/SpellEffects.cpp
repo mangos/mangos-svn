@@ -301,7 +301,7 @@ void Spell::EffectManaDrain(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    uint32 curPower = unitTarget->GetUInt32Value(drain_power);
+    uint32 curPower = unitTarget->GetPower(drain_power);
     float tmpvalue = m_spellInfo->EffectMultipleValue[i];
     if(!tmpvalue)
         tmpvalue = 1;
@@ -1489,6 +1489,10 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
     else fdamage = 0;
     fdamage += damage;
+
+    // generate lot additional rage to worrior.
+    //if (fdamage)
+    //    fdamage += damage;
 
     m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,(uint32)fdamage);
 }

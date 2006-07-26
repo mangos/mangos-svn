@@ -1398,7 +1398,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
         {
             unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
         }
-        unit_target->setPowerType(PowerType);
+
+        if(PowerType != POWER_MANA)
+            unit_target->setPowerType(PowerType);
+
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
         if(unit_target->m_form == FORM_DIREBEAR)

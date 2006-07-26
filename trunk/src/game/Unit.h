@@ -30,7 +30,7 @@
 
 #define CREATURE_MAX_SPELLS     4
 #define PLAYER_MAX_SKILLS       127
-#define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + (x*3))
+#define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + ((x)*3))
 // DWORD definitions gathered from windows api
 #define SKILL_VALUE(x)          uint16(x)
 #define SKILL_MAX(x)            uint16((uint32(x) >> 16))
