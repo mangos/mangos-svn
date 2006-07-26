@@ -260,6 +260,8 @@ uint32 Aura::CalculateDamage()
     if(!m_caster)
         caster = m_target;
     level= caster->getLevel();
+    if( level > spellproto->maxLevel && spellproto->maxLevel > 0)
+        level = spellproto->maxLevel;
 
     float basePointsPerLevel = spellproto->EffectRealPointsPerLevel[m_effIndex];
     float randomPointsPerLevel = spellproto->EffectDicePerLevel[m_effIndex];
@@ -2099,8 +2101,8 @@ bool Aura::IsSingleTarget()
     if ( spellInfo->AttributesEx & (1<<18) ) return true;
 
     // other single target
-                                                            //Entangling Roots
-    if ( (spellInfo->SpellIconID == 20 && spellInfo->SpellVisual == 38)
+                                                            //Enslave Demon
+    if ( (spellInfo->SpellIconID == 1500 && spellInfo->SpellVisual == 1266)
                                                             //Fear
         || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
                                                             //Banish

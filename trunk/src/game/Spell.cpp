@@ -1025,6 +1025,18 @@ void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage)
     target->GetSession()->SendPacket(&data);
 }
 
+void Spell::SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
+    data << uint8(0xFF) << target->GetPetGUID();
+    data << uint8(0xFF) << m_caster->GetGUID();
+    data << SpellID;
+    data << Damage;
+    data << uint8(0);
+    target->GetSession()->SendPacket(&data);
+}
+
 void Spell::SendPlaySpellVisual(uint32 SpellID)
 {
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -1612,10 +1624,13 @@ uint8 Spell::CheckItems()
 uint32 Spell::CalculateDamage(uint8 i)
 {
     uint32 value = 0;
+    uint32 level = m_caster->getLevel();
+    if( level > m_spellInfo->maxLevel && m_spellInfo->maxLevel > 0)
+        level = m_spellInfo->maxLevel;
     float basePointsPerLevel = m_spellInfo->EffectRealPointsPerLevel[i];
     float randomPointsPerLevel = m_spellInfo->EffectDicePerLevel[i];
-    uint32 basePoints = uint32(m_spellInfo->EffectBasePoints[i]+m_caster->getLevel()*basePointsPerLevel);
-    uint32 randomPoints = uint32(m_spellInfo->EffectDieSides[i]+m_caster->getLevel()*randomPointsPerLevel);
+    uint32 basePoints = uint32(m_spellInfo->EffectBasePoints[i]+level*basePointsPerLevel);
+    uint32 randomPoints = uint32(m_spellInfo->EffectDieSides[i]+level*randomPointsPerLevel);
     float comboDamage = m_spellInfo->EffectPointsPerComboPoint[i];
     uint8 comboPoints=0;
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
