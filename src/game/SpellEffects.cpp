@@ -333,7 +333,7 @@ void Spell::EffectPowerDrain(uint32 i)
     if(caster_curPower + tmpvalue < m_caster->GetMaxPower(POWER_MANA))
         m_caster->SetPower(POWER_MANA,caster_curPower + tmpvalue);
     else m_caster->SetPower(POWER_MANA,m_caster->GetMaxPower(POWER_MANA));
-    unitTarget->SetHealth(curHealth-tmpvalue);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
 
 }
 
@@ -346,9 +346,8 @@ void Spell::EffectHeal( uint32 i )
         uint32 maxhealth = unitTarget->GetMaxHealth();
         uint32 addhealth = ( curhealth + damage*pct < maxhealth ? uint32(damage*pct) : maxhealth - curhealth );
         unitTarget->SetHealth( curhealth + addhealth );
-        //unitTarget->SendHealToLog( m_caster, m_spell, addhealth );
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayer(((Player*)m_caster), m_spellInfo->Id, addhealth);
+        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+            SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth);
 
         //If the target is in combat, then player is in combat too
         if( m_caster != unitTarget &&
@@ -371,23 +370,23 @@ void Spell::EffectHealthLeach(uint32 i)
 
     sLog.outDebug("HealthLeach :%u", damage);
 
-    //SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, damage);
     uint32 tmpvalue = 0;
     float pct = (100+unitTarget->m_RegenPCT)/100;
 
     if(unitTarget->GetHealth() - damage > 0)
     {
-        m_caster->DealDamage(unitTarget, damage, 0, true);
         tmpvalue = uint32(damage*m_spellInfo->EffectMultipleValue[i]);
     }
     else
     {
         tmpvalue = uint32(unitTarget->GetHealth()*m_spellInfo->EffectMultipleValue[i]);
-        m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), 0, true);
     }
     if(m_caster->GetHealth() + tmpvalue*pct < m_caster->GetMaxHealth() )
         m_caster->SetHealth(uint32(m_caster->GetHealth() + tmpvalue*pct));
     else m_caster->SetHealth(m_caster->GetMaxHealth());
+    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+        SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue*pct));
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage);
 }
 
 void Spell::EffectWeaponDmgNOSchool(uint32 i)
@@ -1475,6 +1474,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
     }
     else fdamage = 0;
+    fdamage += damage;
 
     m_caster->SpellNonMeleeDamageLog(unitTarget,m_spellInfo->Id,(uint32)fdamage);
 }
@@ -1527,8 +1527,8 @@ void Spell::EffectHealMaxHealth(uint32 i)
     else
         unitTarget->SetHealth(curHealth+heal);
 
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        SendHealSpellOnPlayer((Player*)m_caster, m_spellInfo->Id, maxHealth - curHealth);
+    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+        SendHealSpellOnPlayer((Player*)unitTarget, m_spellInfo->Id, maxHealth - curHealth);
 }
 
 void Spell::EffectInterruptCast(uint32 i)
@@ -2031,7 +2031,12 @@ void Spell::EffectFeedPet(uint32 i)
     if(damage + feelty <  pet->GetMaxPower(POWER_HAPPINESS))
         pet->SetPower(POWER_HAPPINESS,damage + feelty);
     else pet->SetPower(POWER_HAPPINESS,pet->GetMaxPower(POWER_HAPPINESS));
-    //m_TriggerSpell = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+
+    SpellEntry *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    Spell *_spell = new Spell(m_caster, spellinfo, true, 0);
+    SpellCastTargets targets;
+    targets.setUnitTarget(pet);
+    _spell->prepare(&targets);
 }
 
 void Spell::EffectDismissPet(uint32 i)

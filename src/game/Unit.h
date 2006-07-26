@@ -425,6 +425,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         }
         bool isTargetableForAttack() const { return isAlive() && !isInFlight() /*&& !isStealth()*/; }
 
+        void SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage);
+        void SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage);
         void PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod);
         void SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage);
         void CastSpell(Unit* Victim, uint32 spellId, bool triggered);

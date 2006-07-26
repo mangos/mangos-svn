@@ -457,6 +457,7 @@ class Spell
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
         void SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage);
+        void SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage);
         void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i);

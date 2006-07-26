@@ -570,23 +570,31 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL)
     {
-        if(GetHealth() + mod->m_amount*(100+m_RegenPCT)/100 < GetMaxHealth() )
-            SetHealth(GetHealth() + mod->m_amount*(100+m_RegenPCT)/100);
+        int32 pdamage = mod->m_amount*(100+m_RegenPCT)/100;
+        if(GetHealth() + pdamage < GetMaxHealth() )
+            SetHealth(GetHealth() + pdamage);
         else
             SetHealth(GetMaxHealth());
+        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
+            SendHealSpellOnPlayer(pVictim, spellProto->Id, pdamage);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
     {
         uint32 tmpvalue = 0;
+        float tmpvalue2 = 0;
         for(int x=0;x<3;x++)
         {
             if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
                 continue;
-            if(pVictim->GetHealth() - mod->m_amount > 0)
-                tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
-            else
-                tmpvalue = uint32(pVictim->GetHealth()*spellInfo->EffectMultipleValue[x]);
+            tmpvalue2 = spellInfo->EffectMultipleValue[x];
+            tmpvalue2 = tmpvalue2 > 0 ? tmpvalue2 : 1;
 
+            if(pVictim->GetHealth() - mod->m_amount > 0)
+                tmpvalue = uint32(mod->m_amount*tmpvalue2);
+            else
+                tmpvalue = uint32(pVictim->GetHealth()*tmpvalue2);
+
+            SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellProto->Id, tmpvalue, spellProto->School, absorb, resist, false, 0);
             DealDamage(pVictim, mod->m_amount <= int32(absorb+resist) ? 0 : (mod->m_amount-absorb-resist), procFlag, false);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
@@ -595,9 +603,13 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
 
             break;
         }
-        if(GetHealth() + tmpvalue*(100+m_RegenPCT)/100 < GetMaxHealth() )
-            SetHealth(GetHealth() + tmpvalue*(100+m_RegenPCT)/100);
+        tmpvalue2 = (100+m_RegenPCT)/100;
+        tmpvalue = uint32(tmpvalue*tmpvalue2);
+        if(GetHealth() + tmpvalue < GetMaxHealth() )
+            SetHealth(GetHealth() + tmpvalue);
         else SetHealth(GetMaxHealth());
+        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
+            pVictim->SendHealSpellOnPlayer(this, spellProto->Id, tmpvalue);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
     {
@@ -2293,4 +2305,28 @@ void Unit::UnsummonTotem(int8 slot)
             OldTotem = NULL;
         }
     }
+}
+
+void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE);
+    data << uint8(0xFF) << pVictim->GetGUID();
+    data << uint8(0xFF) << GetGUID();
+    data << SpellID;
+    data << Damage;
+    data << uint8(0);
+    SendMessageToSet(&data, true);
+}
+
+void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage)
+{
+    WorldPacket data;
+    data.Initialize(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE);
+    data << uint8(0xFF) << pVictim->GetGUID();
+    data << uint8(0xFF) << GetGUID();
+    data << SpellID;
+    data << Damage;
+    data << uint8(0);
+    SendMessageToSet(&data, true);
 }
