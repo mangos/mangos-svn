@@ -1725,9 +1725,9 @@ void Spell::reflect(Unit *refunit)
 
     if(!refspell || m_caster == refunit) return;
 
-    Spell *spell = new Spell(refunit, refspell, true, 0);
+    Spell spell(refunit, refspell, true, 0);
 
     SpellCastTargets targets;
     targets.setUnitTarget( m_caster );
-    spell->prepare(&targets);
+    spell.prepare(&targets);
 }

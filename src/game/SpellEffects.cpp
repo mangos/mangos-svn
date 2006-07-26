@@ -2033,10 +2033,10 @@ void Spell::EffectFeedPet(uint32 i)
     else pet->SetPower(POWER_HAPPINESS,pet->GetMaxPower(POWER_HAPPINESS));
 
     SpellEntry *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-    Spell *_spell = new Spell(m_caster, spellinfo, true, 0);
+    Spell _spell(m_caster, spellinfo, true, 0);
     SpellCastTargets targets;
     targets.setUnitTarget(pet);
-    _spell->prepare(&targets);
+    _spell.prepare(&targets);
 }
 
 void Spell::EffectDismissPet(uint32 i)
