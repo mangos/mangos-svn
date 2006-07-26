@@ -459,6 +459,10 @@ class MANGOS_DLL_SPEC Unit : public Object
             {
                 RemoveAllAuras();
             }
+            if (m_deathState != ALIVE && s == ALIVE)
+            {
+                _ApplyAllAuraMods();
+            }
             m_deathState = s;
         }
 

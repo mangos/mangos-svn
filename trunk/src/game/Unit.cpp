@@ -1502,13 +1502,13 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     else
     {
-        if (!Aur->IsPassive())                              // passive auras stack with all
+        if (!Aur->IsPassive())    // passive auras stack with all 
         {
             if (!RemoveNoStackAurasDueToAura(Aur))
             {
                 delete Aur;
-                return false;                               // couldnt remove conflicting aura with higher rank
-            }                                               // couldnt remove conflicting aura with higher rank
+                return false;                                   // couldnt remove conflicting aura with higher rank
+            }
         }
 
         Aur->_AddAura();
@@ -1748,11 +1748,14 @@ uint32 Unit::GetAurDuration(uint32 spellId, uint32 effindex)
 
 void Unit::RemoveAllAuras()
 {
-    while (!m_Auras.empty())
-    {
-        AuraMap::iterator iter = m_Auras.begin();
-        RemoveAura(iter);
-    }
+    // used just after dieing to remove all visible auras
+    // and disable the mods for the passive ones
+    for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
+        if (!iter->second->IsPassive())
+            RemoveAura(iter);
+        else
+            ++iter;
+    _RemoveAllAuraMods();
 }
 
 void Unit::_RemoveStatsMods()

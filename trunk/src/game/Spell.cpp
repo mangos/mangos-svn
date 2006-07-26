@@ -1416,6 +1416,9 @@ uint8 Spell::CanCast()
 
 uint8 Spell::CheckRange()
 {
+    // self cast doesnt need range checking -- also for Starshards fix
+    if (m_spellInfo->rangeIndex == 1) return 0;
+
     SpellRange* srange = sSpellRange.LookupEntry(m_spellInfo->rangeIndex);
     float max_range = GetMaxRange(srange);
     float min_range = GetMinRange(srange);
