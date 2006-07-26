@@ -162,7 +162,7 @@ class ChatHandler
         bool HandleFactionIdCommand(const char* args);
         bool HandleAddSpwCommand(const char* args);
 
-	// shutdown server
+        // shutdown server
         bool ShutDown(const char* args);
         bool CancelShutdown (const char* args);
 

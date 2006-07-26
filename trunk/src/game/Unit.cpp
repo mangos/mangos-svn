@@ -892,7 +892,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
                 if((*i).second->GetProcSpell()->trigger == 26545)
                     pVictim->SpellNonMeleeDamageLog(this,(*i).second->GetSpellProto()->Id,(*i).second->CalculateDamage());
-               if(!nocharges)
+                if(!nocharges)
                 {
                     procspell->procCharges -= 1;
                     if(procspell->procCharges == 0)

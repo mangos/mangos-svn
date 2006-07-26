@@ -70,17 +70,28 @@ enum EUnitFields
     UNIT_FIELD_PERSUADED                      = 0xC + OBJECT_END,
     UNIT_FIELD_CHANNEL_OBJECT                 = 0xE + OBJECT_END,
     UNIT_FIELD_HEALTH                         = 0x10 + OBJECT_END,
-    UNIT_FIELD_POWER1                         = 0x11 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_POWER2                         = 0x12 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_POWER3                         = 0x13 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_POWER4                         = 0x14 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_POWER5                         = 0x15 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_MAXHEALTH                      = 0x16 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_MAXPOWER1                      = 0x17 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_MAXPOWER2                      = 0x18 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_MAXPOWER3                      = 0x19 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_MAXPOWER4                      = 0x1A + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_MAXPOWER5                      = 0x1B + OBJECT_END, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_POWER1                         = 0x11 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_POWER2                         = 0x12 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_POWER3                         = 0x13 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_POWER4                         = 0x14 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_POWER5                         = 0x15 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_MAXHEALTH                      = 0x16 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_MAXPOWER1                      = 0x17 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_MAXPOWER2                      = 0x18 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_MAXPOWER3                      = 0x19 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_MAXPOWER4                      = 0x1A + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_MAXPOWER5                      = 0x1B + OBJECT_END,
     UNIT_FIELD_LEVEL                          = 0x1C + OBJECT_END,
     UNIT_FIELD_FACTIONTEMPLATE                = 0x1D + OBJECT_END,
     UNIT_FIELD_BYTES_0                        = 0x1E + OBJECT_END,
@@ -101,9 +112,12 @@ enum EUnitFields
     UNIT_FIELD_AURALEVELS                     = 0x5F + OBJECT_END,
     UNIT_FIELD_AURAAPPLICATIONS               = 0x6B + OBJECT_END,
     UNIT_FIELD_AURASTATE                      = 0x77 + OBJECT_END,
-    UNIT_FIELD_BASEATTACKTIME                 = 0x78 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_OFFHANDATTACKTIME              = 0x79 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_RANGEDATTACKTIME               = 0x7A + OBJECT_END, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_BASEATTACKTIME                 = 0x78 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_OFFHANDATTACKTIME              = 0x79 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RANGEDATTACKTIME               = 0x7A + OBJECT_END,
     UNIT_FIELD_BOUNDINGRADIUS                 = 0x7B + OBJECT_END,
     UNIT_FIELD_COMBATREACH                    = 0x7C + OBJECT_END,
     UNIT_FIELD_DISPLAYID                      = 0x7D + OBJECT_END,
@@ -126,21 +140,33 @@ enum EUnitFields
     UNIT_NPC_EMOTESTATE                       = 0x8E + OBJECT_END,
     UNIT_TRAINING_POINTS                      = 0x8F + OBJECT_END,
 
-    UNIT_FIELD_STATS                          = 0x90 + OBJECT_END, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_STATS                          = 0x90 + OBJECT_END,
     UNIT_FIELD_STR                            = UNIT_FIELD_STATS,
-    UNIT_FIELD_AGILITY                        = 0x91 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_STAMINA                        = 0x92 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_IQ                             = 0x93 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_SPIRIT                         = 0x94 + OBJECT_END, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_AGILITY                        = 0x91 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_STAMINA                        = 0x92 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_IQ                             = 0x93 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_SPIRIT                         = 0x94 + OBJECT_END,
 
-    UNIT_FIELD_RESISTANCES                    = 0x95 + OBJECT_END, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES                    = 0x95 + OBJECT_END,
     UNIT_FIELD_ARMOR                          = UNIT_FIELD_RESISTANCES,
-    UNIT_FIELD_RESISTANCES_01                 = 0x96 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_RESISTANCES_02                 = 0x97 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_RESISTANCES_03                 = 0x98 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_RESISTANCES_04                 = 0x99 + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_RESISTANCES_05                 = 0x9A + OBJECT_END, // used at server in float format but send to client in uint32 format
-    UNIT_FIELD_RESISTANCES_06                 = 0x9B + OBJECT_END, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES_01                 = 0x96 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES_02                 = 0x97 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES_03                 = 0x98 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES_04                 = 0x99 + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES_05                 = 0x9A + OBJECT_END,
+                                                            // used at server in float format but send to client in uint32 format
+    UNIT_FIELD_RESISTANCES_06                 = 0x9B + OBJECT_END,
 
     UNIT_FIELD_BASE_MANA                      = 0x9C + OBJECT_END,
     UNIT_FIELD_BASE_HEALTH                    = 0x9D + OBJECT_END,
@@ -380,20 +406,34 @@ enum EUnitFields
     PLAYER_FIELD_NEGSTAT2                      = 0x3A6 + PLAYER_SELECTION,
     PLAYER_FIELD_NEGSTAT3                      = 0x3A7 + PLAYER_SELECTION,
     PLAYER_FIELD_NEGSTAT4                      = 0x3A8 + PLAYER_SELECTION,
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE    = 0x3A9 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 = 0x3AA + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 = 0x3AB + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 = 0x3AC + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 = 0x3AD + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 = 0x3AE + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 = 0x3AF + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE    = 0x3B0 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 = 0x3B1 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02 = 0x3B2 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03 = 0x3B3 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04 = 0x3B4 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05 = 0x3B5 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
-    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 = 0x3B6 + PLAYER_SELECTION, // used at server in float format but send to client in uint32 format
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE    = 0x3A9 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_01 = 0x3AA + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_02 = 0x3AB + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_03 = 0x3AC + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_04 = 0x3AD + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_05 = 0x3AE + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE_06 = 0x3AF + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE    = 0x3B0 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_01 = 0x3B1 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_02 = 0x3B2 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_03 = 0x3B3 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_04 = 0x3B4 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_05 = 0x3B5 + PLAYER_SELECTION,
+                                                            // used at server in float format but send to client in uint32 format
+    PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 = 0x3B6 + PLAYER_SELECTION,
                                                             //float 1.0
     PLAYER_FIELD_MOD_DAMAGE_DONE_POS          = 0x3B7 + PLAYER_SELECTION,
                                                             //float 1.0

@@ -229,8 +229,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
 
-    SetAttackTime(BASE_ATTACK,   2000 );    // melee attack time
-    SetAttackTime(RANGED_ATTACK, 2000 );    // ranged attack time
+    SetAttackTime(BASE_ATTACK,   2000 );                    // melee attack time
+    SetAttackTime(RANGED_ATTACK, 2000 );                    // ranged attack time
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
@@ -269,7 +269,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetUInt32Value(PLAYER_FIELD_HONOR_RANK, 0);
         SetUInt32Value(PLAYER_FIELD_HONOR_HIGHEST_RANK, 0);    SetUInt32Value(PLAYER_FIELD_TODAY_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_THIS_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_DISHONORABLE_KILLS, 0);    SetUInt32Value(PLAYER_FIELD_YESTERDAY_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_LAST_WEEK_STANDING, 0);    SetUInt32Value(PLAYER_FIELD_LIFETIME_HONOR, 0);    SetUInt32Value(PLAYER_FIELD_SESSION_KILLS, 0);
     */
-
 
     // Played time
     m_Last_tick = time(NULL);
@@ -777,13 +776,13 @@ void Player::Update( uint32 p_time )
     //Handle lava
     HandleLava();
 
-        // Played time
+    // Played time
     if (now > m_Last_tick)
     {
-	uint32 elapsed = (now - m_Last_tick);
-	m_Played_time[0] += elapsed; // Total played time
-	m_Played_time[1] += elapsed; // Level played time
-	m_Last_tick = now;
+        uint32 elapsed = (now - m_Last_tick);
+        m_Played_time[0] += elapsed;                        // Total played time
+        m_Played_time[1] += elapsed;                        // Level played time
+        m_Last_tick = now;
     }
 
     if (m_drunk)

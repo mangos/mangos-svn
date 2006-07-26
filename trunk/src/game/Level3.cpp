@@ -2314,7 +2314,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         if(!info) return false;
 
         for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-        {        
+        {
             if(player->GetItemByPos(INVENTORY_SLOT_BAG_0,i) != NULL)
             {
                 SendSysMessage("The player must unequip all items before resetting stats!");
@@ -2377,8 +2377,8 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, info->ranmindmg );
         player->SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, info->ranmaxdmg );
 
-        player->SetAttackTime(BASE_ATTACK,   2000 );    // melee attack time
-        player->SetAttackTime(RANGED_ATTACK, 2000 );    // ranged attack time
+        player->SetAttackTime(BASE_ATTACK,   2000 );        // melee attack time
+        player->SetAttackTime(RANGED_ATTACK, 2000 );        // ranged attack time
 
         player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
         player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
@@ -2396,7 +2396,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_NOT_IN_PVP );
 
         player->SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0x10);
-                                                                //-1 is default value
+                                                            //-1 is default value
         player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
 
         player->SetUInt32Value(PLAYER_NEXT_LEVEL_XP, 400);
@@ -2413,7 +2413,8 @@ bool ChatHandler::HandleResetCommand (const char * args)
         //+5% HP if has skill Endurance
         if (player->HasSpell(20550))
         {
-            player->SetMaxHealth( uint32(player->GetMaxHealth() * 1.05));       // only integer part
+                                                            // only integer part
+            player->SetMaxHealth( uint32(player->GetMaxHealth() * 1.05));
         }
 
         // school resistances
@@ -2440,21 +2441,21 @@ bool ChatHandler::HandleResetCommand (const char * args)
 
 bool ChatHandler::ShutDown (const char* args)
 {
-        if(!*args)
-        {
-		SendSysMessage(LANG_SHUTTDOWN);
-                return false;
-        }
+    if(!*args)
+    {
+        SendSysMessage(LANG_SHUTTDOWN);
+        return false;
+    }
 
-        uint32 time = atoi(args);
-        sWorld.ShutdownServ(time);
-        return true;
+    uint32 time = atoi(args);
+    sWorld.ShutdownServ(time);
+    return true;
 }
 
 bool ChatHandler::CancelShutdown (const char* args)
 {
-        sWorld.ShutdownServ(0);
-        return true;
+    sWorld.ShutdownServ(0);
+    return true;
 }
 
 // TODO Add a commando "Illegal name" to set playerflag |= 32;

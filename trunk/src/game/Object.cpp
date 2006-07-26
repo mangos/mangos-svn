@@ -297,8 +297,8 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
             if( isType(TYPE_UNIT) && (
                 index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
                 index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
-                index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES_06 ) 
-                || isType(TYPE_PLAYER) && 
+                index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES_06 )
+                || isType(TYPE_PLAYER) &&
                 index >= PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 )
             {
                 assert(sizeof(float)==sizeof(uint32));
