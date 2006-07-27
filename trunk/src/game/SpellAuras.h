@@ -48,9 +48,11 @@ class Aura
     public:
         //aura handlers
         void HandleNULL(bool Apply);
+        void HandleModPossess(bool apply);
         void HandlePeriodicDamage(bool apply);
         void HandleAuraDummy(bool apply);
         void HandleModConfuse(bool apply);
+        void HandleModCharm(bool apply);
         void HandleModFear(bool Apply);
         void HandlePeriodicHeal(bool apply);
         void HandleModAttackSpeed(bool apply);
@@ -63,6 +65,7 @@ class Aura
         void HandleAuraModIncreaseSpeedAlways(bool Apply);
         void HandleAuraModIncreaseEnergyPercent(bool Apply);
         void HandleAuraModIncreaseHealthPercent(bool Apply);
+        void HandleHaste(bool Apply);
         void HandlePeriodicTriggerSpell(bool apply);
         void HandlePeriodicEnergize(bool apply);
         void HandleAuraModResistanceExclusive(bool Apply);

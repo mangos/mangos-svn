@@ -43,11 +43,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
     &Aura::HandleNULL,                                      //SPELL_AURA_NONE
     &Aura::HandleNULL,                                      //SPELL_AURA_BIND_SIGHT
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POSSESS = 2,
+    &Aura::HandleModPossess,                                //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
     &Aura::HandleAuraDummy,                                 //SPELL_AURA_DUMMY    //missing 4
     &Aura::HandleModConfuse,                                //SPELL_AURA_MOD_CONFUSE = 5,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CHARM = 6,
+    &Aura::HandleModCharm,                                  //SPELL_AURA_MOD_CHARM = 6,
     &Aura::HandleModFear,                                   //SPELL_AURA_MOD_FEAR = 7,
     &Aura::HandlePeriodicHeal,                              //SPELL_AURA_PERIODIC_HEAL = 8,
     &Aura::HandleModAttackSpeed,                            //SPELL_AURA_MOD_ATTACKSPEED = 9,
@@ -179,7 +179,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE = 135,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HEALING_DONE_PERCENT = 136,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE = 137,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_HASTE = 138,
+    &Aura::HandleHaste,                                     //SPELL_AURA_MOD_HASTE = 138,
     &Aura::HandleForceReaction,                             //SPELL_AURA_FORCE_REACTION = 139,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_RANGED_HASTE = 140,
     &Aura::HandleRangedAmmoHaste,                           //SPELL_AURA_MOD_RANGED_AMMO_HASTE = 141,
@@ -542,6 +542,61 @@ void HandleDOTEvent(void *obj)
     Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
 }
 
+void Aura::HandleModPossess(bool apply)
+{
+    if(!m_target)
+        return;
+    if(m_target->getLevel() <= m_modifier.m_amount)
+    {
+        WorldPacket data;
+
+        Creature* creatureTarget = (Creature*)m_target;
+        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        if( apply )
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+            m_caster->SetCharm(creatureTarget);
+            creatureTarget->AIM_Initialize();
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                uint16 Command = 7;
+                uint16 State = 6;
+
+                sLog.outDebug("Pet Spells Groups");
+
+                data.clear();
+                data.Initialize(SMSG_PET_SPELLS);
+
+                data << (uint64)creatureTarget->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+                data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                                                            //C100 = maybe group
+                    data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100);
+
+                data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+        }
+        else
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            m_caster->SetCharm(0);
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                data.Initialize(SMSG_PET_SPELLS);
+                data << uint64(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+            creatureTarget->AIM_Initialize();
+        }
+    }
+}
+
 void Aura::HandlePeriodicDamage(bool apply)
 {
     if( apply )
@@ -594,6 +649,61 @@ void Aura::HandleModConfuse(bool apply)
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
+}
+
+void Aura::HandleModCharm(bool apply)
+{
+    if(!m_target)
+        return;
+    if(m_target->getLevel() <= m_modifier.m_amount)
+    {
+        WorldPacket data;
+
+        Creature* creatureTarget = (Creature*)m_target;
+        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        if( apply )
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+            m_caster->SetCharm(creatureTarget);
+            creatureTarget->AIM_Initialize();
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                uint16 Command = 7;
+                uint16 State = 6;
+
+                sLog.outDebug("Pet Spells Groups");
+
+                data.clear();
+                data.Initialize(SMSG_PET_SPELLS);
+
+                data << (uint64)creatureTarget->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+                data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                                                            //C100 = maybe group
+                    data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100);
+
+                data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+        }
+        else
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            m_caster->SetCharm(0);
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                data.Initialize(SMSG_PET_SPELLS);
+                data << uint64(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+            creatureTarget->AIM_Initialize();
+        }
     }
 }
 
@@ -808,6 +918,13 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
 {
     m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount,apply);
+}
+
+void Aura::HandleHaste(bool apply)
+{
+    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(OFF_ATTACK,m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
 }
 
 // FIX-ME!!
@@ -2103,14 +2220,10 @@ bool Aura::IsSingleTarget()
     if ( spellInfo->AttributesEx & (1<<18) ) return true;
 
     // other single target
-                                                            //Enslave Demon
-    if ( (spellInfo->SpellIconID == 1500 && spellInfo->SpellVisual == 1266)
                                                             //Fear
-        || (spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
+    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
                                                             //Banish
         || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
-                                                            //Mind Control
-        || (spellInfo->SpellIconID == 235 && spellInfo->SpellVisual == 137)
         ) return true;
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;

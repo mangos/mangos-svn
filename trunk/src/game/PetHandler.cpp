@@ -52,7 +52,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         return;
     }
 
-    if(pet != GetPlayer()->GetPet() )
+    if(pet != GetPlayer()->GetPet() && pet != GetPlayer()->GetCharm())
     {
         sLog.outError( "HandlePetAction.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid1)),GetPlayer()->GetName() );
         return;

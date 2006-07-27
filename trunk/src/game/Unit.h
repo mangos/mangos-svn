@@ -467,8 +467,11 @@ class MANGOS_DLL_SPEC Unit : public Object
         }
 
         uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
+        uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
         Creature* GetPet() const;
+        Creature* GetCharm() const;
         void SetPet(Creature* pet);
+        void SetCharm(Creature* pet);
 
         bool AddAura(Aura *aur, bool uniq = false);
 
