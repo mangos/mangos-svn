@@ -1688,7 +1688,7 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
     }
 }
 
-void Unit::RemoveAura(AuraMap::iterator &i)
+void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
     if ((*i).second->IsSingleTarget())
     {
@@ -1719,6 +1719,7 @@ void Unit::RemoveAura(AuraMap::iterator &i)
         }
     }
     m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
+    (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
     delete (*i).second;
     m_Auras.erase(i++);
@@ -1748,11 +1749,20 @@ uint32 Unit::GetAurDuration(uint32 spellId, uint32 effindex)
 
 void Unit::RemoveAllAuras()
 {
+    while (!m_Auras.empty())
+    {
+        AuraMap::iterator iter = m_Auras.begin();
+        RemoveAura(iter);
+    }
+}
+
+void Unit::RemoveAllAurasOnDeath()
+{
     // used just after dieing to remove all visible auras
     // and disable the mods for the passive ones
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
         if (!iter->second->IsPassive())
-            RemoveAura(iter);
+            RemoveAura(iter, true);
         else
             ++iter;
     _RemoveAllAuraMods();

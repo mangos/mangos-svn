@@ -205,7 +205,7 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
 m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_castItem(NULL), m_triggeredByAura(NULL)
+m_castItem(NULL), m_triggeredByAura(NULL), m_removeOnDeath(false)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -367,7 +367,7 @@ void Aura::Update(uint32 diff)
         }
     }
 
-    if(m_isPeriodic && m_duration > 0)
+    if(m_isPeriodic && m_duration >= 0)
     {
         if(m_periodicTimer > 0)
         {
@@ -1645,7 +1645,7 @@ void Aura::HandleChannelDeathItem(bool apply)
 {
     if(!apply)
     {
-        if(m_caster->GetTypeId() != TYPEID_PLAYER || m_target->isAlive())
+        if(m_caster->GetTypeId() != TYPEID_PLAYER || !m_removeOnDeath)
             return;
         SpellEntry *spellInfo = GetSpellProto();
         if(spellInfo->EffectItemType[m_effIndex] == 0)
