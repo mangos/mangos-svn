@@ -881,19 +881,19 @@ void Spell::EffectLearnSpell(uint32 i)
     {
         //Armor
         case 9078:                                          //Cloth
-            player->SetSkill(415,1,maxskill);
+            player->SetSkill(415,1,1);
             break;
         case 9077:                                          //Leather
-            player->SetSkill(414,1,maxskill);
+            player->SetSkill(414,1,1);
             break;
         case 8737:                                          //Mail
-            player->SetSkill(413,1,maxskill);
+            player->SetSkill(413,1,1);
             break;
         case 750:                                           //Plate Mail
-            player->SetSkill(293,1,maxskill);
+            player->SetSkill(293,1,1);
             break;
         case 9116:                                          //Shield
-            player->SetSkill(433,1,maxskill);
+            player->SetSkill(433,1,1);
             break;
             //Melee Weapons
         case 196:                                           //Axes
