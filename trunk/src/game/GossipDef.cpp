@@ -374,17 +374,21 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
     data << uint32(pQuest->GetQuestInfo()->QuestId);
     data << uint32(pQuest->GetQuestInfo()->MinLevel);
     data << uint32(pQuest->GetQuestInfo()->QuestLevel);
-    data << uint32(pQuest->GetQuestInfo()->ZoneId);
+
+    if(pQuest->GetQuestInfo()->QuestSort > 0)
+        data << uint32(pQuest->GetQuestInfo()->QuestSort * -1);
+    else
+        data << uint32(pQuest->GetQuestInfo()->ZoneId);
 
     data << uint32(pQuest->GetQuestInfo()->Type);
-    data << uint32(pQuest->GetQuestInfo()->RewRepFaction1);
-    data << uint32(pQuest->GetQuestInfo()->RewRepValue1);
-    data << uint32(pQuest->GetQuestInfo()->RewRepFaction2);
-    data << uint32(pQuest->GetQuestInfo()->RewRepValue2);
+    data << uint32(pQuest->GetQuestInfo()->RequiredRepFaction);
+    data << uint32(pQuest->GetQuestInfo()->RequiredRepValue);
+    data << uint32(0);
+    data << uint32(0);
 
     data << uint32(pQuest->GetQuestInfo()->NextQuestId);
     data << uint32(pQuest->GetQuestInfo()->RewMoney);
-    data << uint32(0);                                      // new 1.10 field
+    data << uint32(pQuest->GetQuestInfo()->RewXP);
 
     data << uint32(pQuest->GetQuestInfo()->RewSpell);
 

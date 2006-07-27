@@ -6959,11 +6959,10 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
                 return NULL;;
         }
 
-        Quest *pQuest2;
         uint32 quest = pQuest->GetQuestInfo()->NextQuestId;
         for( std::list<Quest*>::iterator i = pObject->mQuests.begin( ); i != pObject->mQuests.end( ); i++ )
         {
-            pQuest2 = *i;
+            Quest *pQuest2 = *i;
             if( pQuest2->GetQuestInfo()->QuestId == quest )
             {
                 if ( CanTakeQuest( pQuest2, false ) )
@@ -7346,16 +7345,27 @@ bool Player::SatisfyQuestPreviousQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
     {
-        uint32 previousquest = pQuest->GetQuestInfo()->PrevQuestId;
-        if( previousquest == 0 )
+        uint32 questId = pQuest->GetQuestInfo()->QuestId;
+
+        QuestRelations::iterator iter = sPrevQuests.lower_bound(questId);
+        QuestRelations::iterator end  = sPrevQuests.upper_bound(questId);
+
+        // First quest in series
+        if(iter == end)
             return true;
-        if( mQuestStatus.find( previousquest ) == mQuestStatus.end() || !mQuestStatus[previousquest].m_rewarded )
+
+        // Have one form prev, quests in rewarded state
+        for(; iter != end; ++iter )
         {
-            if( msg )
-                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
-            return false;
+            uint32 prevId = iter->second;
+
+            if( mQuestStatus.find( prevId ) != mQuestStatus.end() && mQuestStatus[prevId].m_rewarded )
+                return true;
         }
-        return true;
+
+        // Have only prev. quests in non-rewarded state
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
     }
     return false;
 }
