@@ -38,6 +38,8 @@ extern SQLStorage sGOStorage;
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sQuestsStorage;
 
+QuestRelations sPrevQuests;
+
 ObjectMgr::ObjectMgr()
 {
     m_hiCharGuid = 1;
@@ -366,6 +368,24 @@ void ObjectMgr::LoadGuilds()
 void ObjectMgr::LoadQuests()
 {
     sQuestsStorage.Load ();
+
+    // create multimap previous quest for each existed quest
+    // some quests can have many previous maps setted by NextQuestId in previouse quest
+    // for example set of race quests can lead to single not race specific quest
+    for(uint32 i = 1; i < sQuestsStorage.RecordCount; ++i )
+    {
+        QuestInfo* qinfo = (QuestInfo*)sQuestsStorage.pIndex[i];
+
+        if(!qinfo)
+            continue;
+
+        if(qinfo->PrevQuestId )
+            sPrevQuests.insert(QuestRelations::value_type(qinfo->QuestId,qinfo->PrevQuestId));
+
+        if(qinfo->NextQuestId )
+            sPrevQuests.insert(QuestRelations::value_type(qinfo->NextQuestId,qinfo->QuestId));
+    };
+
     sLog.outString( ">> Loaded %u quests definitions", sQuestsStorage.RecordCount );
     sLog.outString( "" );
 }

@@ -439,7 +439,7 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
 
 void Object::SetFloatValue( uint16 index, const float &value )
 {
-    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+    ASSERT( index + 1 < m_valuesCount || PrintIndexError( index ) );
     if(m_floatValues[ index ] != value)
     {
         m_floatValues[ index ] = value;

@@ -138,6 +138,7 @@ struct QuestInfo
 {
     uint32 QuestId;
     uint32 ZoneId;
+    uint32 QuestSort;
     uint32 Flags;
     uint32 MinLevel;
     uint32 QuestLevel;
