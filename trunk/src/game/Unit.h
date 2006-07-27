@@ -457,7 +457,7 @@ class MANGOS_DLL_SPEC Unit : public Object
             }
             if (s == JUST_DIED)
             {
-                RemoveAllAuras();
+                RemoveAllAurasOnDeath();
             }
             if (m_deathState != ALIVE && s == ALIVE)
             {
@@ -473,7 +473,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool AddAura(Aura *aur, bool uniq = false);
 
         void RemoveFirstAuraByDispel(uint32 dispel_type);
-        void RemoveAura(AuraMap::iterator &i);
+        void RemoveAura(AuraMap::iterator &i, bool onDeath = false);
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
         void RemoveSpellsCausingAura(uint32 auraType);
@@ -481,6 +481,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool RemoveNoStackAurasDueToAura(Aura *Aur);
 
         void RemoveAllAuras();
+        void RemoveAllAurasOnDeath();
         //void SetAura(Aura* Aur){ m_Auras = Aur; }
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
         uint32 GetAurDuration(uint32 spellId, uint32 effindex);

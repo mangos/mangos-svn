@@ -179,6 +179,7 @@ class Aura
         void SetCastItem(ItemPrototype *proto) { m_castItem = proto; }
         Aura *GetTriggeredByAura() const { return m_triggeredByAura; }
         void SetTriggeredByAura(Aura *Aur) { m_triggeredByAura = Aur; }
+        void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
 
     private:
 
@@ -206,6 +207,7 @@ class Aura
         uint32 m_periodicTimer;
         uint32 m_PeriodicEventId;
         bool m_updated;
+        bool m_removeOnDeath;
 };
 
 typedef void(Aura::*pAuraHandler)(bool Apply);

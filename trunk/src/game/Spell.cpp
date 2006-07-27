@@ -1360,6 +1360,32 @@ uint8 Spell::CanCast()
             return castResult;
         }
     }
+
+    // Conflagrate - do only when preparing
+    if (m_caster->m_currentSpell != this && m_spellInfo->SpellIconID == 12 && 
+        m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_targets.getUnitTarget())
+    {
+        Unit::AuraMap t_auras = m_targets.getUnitTarget()->GetAuras();
+        bool hasImmolate = false;
+        for(Unit::AuraMap::iterator itr = t_auras.begin(); itr != t_auras.end(); ++itr)
+        {
+            if (itr->second && !IsPassiveSpell(itr->second->GetId()))
+            {
+                SpellEntry *spellInfo = itr->second->GetSpellProto();
+                if (!spellInfo) continue;
+                if (spellInfo->SpellIconID != 31 || spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK) continue;
+                hasImmolate = true;
+                m_targets.getUnitTarget()->RemoveAurasDueToSpell(spellInfo->Id);
+                break;
+            }
+        }
+        if(!hasImmolate)
+        {
+            SendCastResult(CAST_FAIL_FAILED); // TODO: find a correct error message
+            return CAST_FAIL_FAILED;
+        }
+    }
+
     for (int i = 0; i < 3; i++)
     {
         switch(m_spellInfo->EffectApplyAuraName[i])
