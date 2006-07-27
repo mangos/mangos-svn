@@ -1921,9 +1921,6 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     for(int i=0;i<nrlvl || i==0;i++)
     {
-        // each skills that have max skill value dependent from level seted to current level max skill value
-        chr->UpdateSkillsToMaxSkillsForLevel();
-
         chr->GiveLevel();
 
         WorldPacket data;
@@ -2436,7 +2433,51 @@ bool ChatHandler::HandleResetCommand (const char * args)
         }
         return true;
     }
+    if (argstr == "talents")
+    {
+        for (int i = 0; i < sTalentStore.GetNumRows(); i++)
+        {
+            TalentEntry *talentInfo = sTalentStore.LookupEntry(i);
+            if (!talentInfo) continue;
+            for (int j = 0; j < 5; j++)
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry(talentInfo->RankID[j]);
+                if (!spellInfo) continue;
+                PlayerSpellList s_list = player->getSpellList();
+                for(PlayerSpellList::iterator itr = s_list.begin(); itr != s_list.end(); ++itr)
+                {
+                    if ((*itr)->spellId == spellInfo->Id)
+                    {
+                        WorldPacket data;
+                        data.Initialize(SMSG_REMOVED_SPELL);
+                        data << (*itr)->spellId;
+                        player->GetSession()->SendPacket(&data);
+                        player->removeSpell((*itr)->spellId);
+                        player->RemoveAurasDueToSpell((*itr)->spellId);
+                        break;
+                    }
+                }
+            }
+        }
+        uint32 tp = player->getLevel() < 10 ? 0 : player->getLevel() - 9;
+        player->SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
+        return true;
+    }
     return false;
+}
+
+bool ChatHandler::HandleMaxSkillCommand(const char* args)
+{
+    Player* SelectedPlayer=NULL;
+    Player* player=m_session->GetPlayer();
+    uint64 guid = player->GetSelection();
+    if(guid)
+        SelectedPlayer = objmgr.GetPlayer(guid);
+    if(SelectedPlayer)
+        player = SelectedPlayer;
+    // each skills that have max skill value dependent from level seted to current level max skill value
+    player->UpdateSkillsToMaxSkillsForLevel();
+    return true;
 }
 
 bool ChatHandler::ShutDown (const char* args)
