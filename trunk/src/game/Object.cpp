@@ -29,6 +29,7 @@
 #include "Util.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "Log.h"
 
 using namespace std;
 
@@ -396,7 +397,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
 
 void Object::SetUInt32Value( uint16 index, uint32 value )
 {
-    ASSERT( index < m_valuesCount );
+    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
     if(m_uint32Values[ index ] != value)
     {
         m_uint32Values[ index ] = value;
@@ -416,7 +417,7 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
 
 void Object::SetUInt64Value( uint16 index, const uint64 &value )
 {
-    ASSERT( index + 1 < m_valuesCount );
+    ASSERT( index + 1 < m_valuesCount || PrintIndexError( index ) );
     if(*((uint64*)&(m_uint32Values[ index ])) != value)
     {
         m_uint32Values[ index ] = *((uint32*)&value);
@@ -438,7 +439,7 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
 
 void Object::SetFloatValue( uint16 index, const float &value )
 {
-    ASSERT( index < m_valuesCount );
+    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
     if(m_floatValues[ index ] != value)
     {
         m_floatValues[ index ] = value;
@@ -477,7 +478,7 @@ void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 
 void Object::SetFlag( uint16 index, uint32 newFlag )
 {
-    ASSERT( index < m_valuesCount );
+    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
     uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval | newFlag;
 
@@ -500,7 +501,7 @@ void Object::SetFlag( uint16 index, uint32 newFlag )
 
 void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 {
-    ASSERT( index < m_valuesCount );
+    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
     uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval & ~oldFlag;
 
@@ -627,4 +628,13 @@ void Object::GetClosePoint( const float ox, const float oy, const float oz, floa
     x = GetPositionX() + GetObjectSize() * cos(angle);
     y = GetPositionY() + GetObjectSize() * sin(angle);
     z = GetPositionZ();
+
+}
+
+bool Object::PrintIndexError(uint32 index) const
+{
+    sLog.outError("\nERROR: Access to non-existed value field: %u (count: %u) for object typeid: %u",index,m_valuesCount,GetTypeId());
+
+    // assert must fail after function call
+    return false;
 }

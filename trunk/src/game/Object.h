@@ -153,19 +153,19 @@ class MANGOS_DLL_SPEC Object
 
         const uint32& GetUInt32Value( uint16 index ) const
         {
-            ASSERT( index < m_valuesCount );
+            ASSERT( index < m_valuesCount || PrintIndexError( index ) );
             return m_uint32Values[ index ];
         }
 
         const uint64& GetUInt64Value( uint16 index ) const
         {
-            ASSERT( index + 1 < m_valuesCount );
+            ASSERT( index + 1 < m_valuesCount || PrintIndexError( index ) );
             return *((uint64*)&(m_uint32Values[ index ]));
         }
 
         const float& GetFloatValue( uint16 index ) const
         {
-            ASSERT( index < m_valuesCount );
+            ASSERT( index < m_valuesCount || PrintIndexError( index ) );
             return m_floatValues[ index ];
         }
 
@@ -188,7 +188,7 @@ class MANGOS_DLL_SPEC Object
 
         bool HasFlag( uint16 index, uint32 flag ) const
         {
-            ASSERT( index < m_valuesCount );
+            ASSERT( index < m_valuesCount || PrintIndexError( index ) );
             return (m_uint32Values[ index ] & flag) != 0;
         }
 
@@ -311,5 +311,9 @@ class MANGOS_DLL_SPEC Object
         bool m_inWorld;
 
         bool m_objectUpdated;
+
+    private:
+        // for output helpfull error messages from asserts
+        bool PrintIndexError(uint32 index) const;
 };
 #endif
