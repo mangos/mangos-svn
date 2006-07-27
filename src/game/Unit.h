@@ -121,6 +121,34 @@ struct DamageDoneCreature
     int32 damage;
 };
 
+struct CreatureAttackPower
+{
+    uint32 spellId;
+    uint32 creaturetype;
+    int32 damage;
+};
+
+struct DamageDone
+{
+    uint32 spellId;
+    int32 school;
+    int32 damage;
+};
+
+struct DamageTaken
+{
+    uint32 spellId;
+    int32 school;
+    int32 damage;
+};
+
+struct PowerCostSchool
+{
+    uint32 spellId;
+    int32 school;
+    int32 damage;
+};
+
 enum DeathState
 {
     ALIVE = 0,
@@ -517,6 +545,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         int32 m_modHitChance;
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;
+        int32 m_modCastSpeedPct;
 
         bool isInFront(Unit const* target,float distance);
         void SetInFront(Unit const* target);
@@ -529,6 +558,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
         std::list<struct DamageDoneCreature*> m_damageDoneCreature;
+        std::list<struct DamageDone*> m_damageDone;
+        std::list<struct DamageTaken*> m_damageTaken;
+        std::list<struct PowerCostSchool*> m_powerCostSchool;
+        std::list<struct CreatureAttackPower*> m_creatureAttackPower;
 
         float GetHostility(uint64 guid) const;
         float GetHostilityDistance(uint64 guid) const { return GetHostility( guid )/(3.5f * getLevel()+1.0f); }
@@ -552,6 +585,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
         void ApplyStats(bool apply);
         void UnsummonTotem(int8 slot = -1);
+        uint32 SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 damage);
+        uint32 MeleeDamageBonus(Unit *pVictim, uint32 damage);
 
     protected:
         Unit ( );

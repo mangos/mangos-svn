@@ -42,7 +42,7 @@
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
     &Aura::HandleNULL,                                      //SPELL_AURA_NONE
-    &Aura::HandleNULL,                                      //SPELL_AURA_BIND_SIGHT
+    &Aura::HandleBindSight,                                 //SPELL_AURA_BIND_SIGHT
     &Aura::HandleModPossess,                                //SPELL_AURA_MOD_POSSESS = 2,
     &Aura::HandlePeriodicDamage,                            //SPELL_AURA_PERIODIC_DAMAGE = 3,
     &Aura::HandleAuraDummy,                                 //SPELL_AURA_DUMMY    //missing 4
@@ -54,8 +54,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModThreat,                                 //SPELL_AURA_MOD_THREAT = 10,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TAUNT = 11,
     &Aura::HandleAuraModStun,                               //SPELL_AURA_MOD_STUN = 12,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_DONE = 13,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
+    &Aura::HandleModDamageDone,                             //SPELL_AURA_MOD_DAMAGE_DONE = 13,
+    &Aura::HandleModDamageTaken,                            //SPELL_AURA_MOD_DAMAGE_TAKEN = 14,
     &Aura::HandleAuraDamageShield,                          //SPELL_AURA_DAMAGE_SHIELD = 15,
     &Aura::HandleModStealth,                                //SPELL_AURA_MOD_STEALTH = 16,
     &Aura::HandleModDetect,                                 //SPELL_AURA_MOD_DETECT = 17,
@@ -106,18 +106,18 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_HEALTH_FUNNEL = 62,
     &Aura::HandleNULL,                                      //SPELL_AURA_PERIODIC_MANA_FUNNEL = 63,
     &Aura::HandlePeriodicManaLeech,                         //SPELL_AURA_PERIODIC_MANA_LEECH = 64,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CASTING_SPEED = 65,
+    &Aura::HandleModCastingSpeed,                           //SPELL_AURA_MOD_CASTING_SPEED = 65,
     &Aura::HandleNULL,                                      //SPELL_AURA_FEIGN_DEATH = 66,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DISARM = 67,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_STALKED = 68,
     &Aura::HandleAuraSchoolAbsorb,                          //SPELL_AURA_SCHOOL_ABSORB = 69,
     &Aura::HandleNULL,                                      //SPELL_AURA_EXTRA_ATTACKS = 70,
     &Aura::HandleModSpellCritChanceShool,                   //SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL = 71,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST = 72,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_POWER_COST_SCHOOL = 73,
+    &Aura::HandleModPowerCost,                              //SPELL_AURA_MOD_POWER_COST = 72,
+    &Aura::HandleModPowerCostSchool,                        //SPELL_AURA_MOD_POWER_COST_SCHOOL = 73,
     &Aura::HandleReflectSpellsSchool,                       //SPELL_AURA_REFLECT_SPELLS_SCHOOL = 74,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_LANGUAGE = 75,
-    &Aura::HandleNULL,                                      //SPELL_AURA_FAR_SIGHT = 76,
+    &Aura::HandleFarSight,                                  //SPELL_AURA_FAR_SIGHT = 76,
     &Aura::HandleModMechanicImmunity,                       //SPELL_AURA_MECHANIC_IMMUNITY = 77,
     &Aura::HandleAuraMounted,                               //SPELL_AURA_MOUNTED = 78,
     &Aura::HandleModDamagePercentDone,                      //SPELL_AURA_MOD_DAMAGE_PERCENT_DONE = 79,
@@ -143,7 +143,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModAttackPower,                        //SPELL_AURA_MOD_ATTACK_POWER = 99,
     &Aura::HandleNULL,                                      //SPELL_AURA_AURAS_VISIBLE = 100,
     &Aura::HandleModResistancePercent,                      //SPELL_AURA_MOD_RESISTANCE_PCT = 101,
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_CREATURE_ATTACK_POWER = 102,
+    &Aura::HandleModCreatureAttackPower,                    //SPELL_AURA_MOD_CREATURE_ATTACK_POWER = 102,
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_TOTAL_THREAT = 103,
     &Aura::HandleAuraWaterWalk,                             //SPELL_AURA_WATER_WALK = 104,
     &Aura::HandleAuraFeatherFall,                           //SPELL_AURA_FEATHER_FALL = 105,
@@ -542,6 +542,16 @@ void HandleDOTEvent(void *obj)
     Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
 }
 
+void Aura::HandleBindSight(bool apply)
+{
+    if(!m_target)
+        return;
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *player = (Player*)m_caster;
+    player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+}
+
 void Aura::HandleModPossess(bool apply)
 {
     if(!m_target)
@@ -913,6 +923,84 @@ void Aura::HandleAuraModStun(bool apply)
         m_target->SendMessageToSet(&data,true);
 
     }
+}
+
+void Aura::HandleModDamageDone(bool apply)
+{
+    if(apply)
+    {
+
+        for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageDone.erase(i);
+            }
+        }
+
+        DamageDone *dd = new DamageDone();
+
+        dd->spellId = GetId();
+        dd->damage = m_modifier.m_amount;
+        dd->school = m_modifier.m_miscvalue;
+        m_target->m_damageDone.push_back(dd);
+    }
+    else
+    {
+        for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageDone.erase(i);
+                break;
+            }
+        }
+    }
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(m_modifier.m_miscvalue2)
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+    else 
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleModDamageTaken(bool apply)
+{
+    if(apply)
+    {
+
+        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageTaken.erase(i);
+            }
+        }
+
+        DamageTaken *dt = new DamageTaken();
+
+        dt->spellId = GetId();
+        dt->damage = m_modifier.m_amount;
+        dt->school = m_modifier.m_miscvalue;
+        m_target->m_damageTaken.push_back(dt);
+    }
+    else
+    {
+        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageTaken.erase(i);
+                break;
+            }
+        }
+    }
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(m_modifier.m_miscvalue2)
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+    else 
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModRangedAttackPower(bool apply)
@@ -1571,6 +1659,16 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->SendUpdateToPlayer((Player*)unit_target);
 }
 
+void Aura::HandleFarSight(bool apply)
+{
+    if(!m_target)
+        return;
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *player = (Player*)m_caster;
+    player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
+}
+
 void Aura::HandleModMechanicImmunity(bool apply)
 {
     apply ? m_target->SetStateFlag(m_target->m_immuneToMechanic,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToMechanic,m_modifier.m_miscvalue);
@@ -1714,6 +1812,11 @@ void Aura::HandlePeriodicManaLeech(bool Apply)
     }
 }
 
+void Aura::HandleModCastingSpeed(bool apply)
+{
+    m_target->m_modCastSpeedPct += apply ? m_modifier.m_amount : (-m_modifier.m_amount);
+}
+
 void Aura::HandleAuraMounted(bool apply)
 {
     if(apply)
@@ -1815,6 +1918,39 @@ void Aura::HandlePeriodicDamagePCT(bool apply)
 void Aura::HandleAuraModAttackPower(bool apply)
 {
     m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier.m_amount, apply);
+}
+
+void Aura::HandleModCreatureAttackPower(bool apply)
+{
+    if(apply)
+    {
+
+        for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_creatureAttackPower.erase(i);
+            }
+        }
+
+        CreatureAttackPower *cap = new CreatureAttackPower();
+
+        cap->spellId = GetId();
+        cap->damage = m_modifier.m_amount;
+        cap->creaturetype = m_modifier.m_miscvalue;
+        m_target->m_creatureAttackPower.push_back(cap);
+    }
+    else
+    {
+        for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_creatureAttackPower.erase(i);
+                break;
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraTransform(bool apply)
@@ -2032,6 +2168,42 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
             if(GetId() == (*i)->spellId)
             {
                 m_target->m_spellCritSchool.erase(i);
+                break;
+            }
+        }
+    }
+}
+
+void Aura::HandleModPowerCost(bool apply)
+{
+    m_target->ApplyModUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER, m_modifier.m_amount, apply);
+}
+
+void Aura::HandleModPowerCostSchool(bool apply)
+{
+    if(apply)
+    {
+        for(std::list<struct PowerCostSchool*>::iterator i = m_target->m_powerCostSchool.begin();i != m_target->m_powerCostSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_powerCostSchool.erase(i);
+            }
+        }
+        PowerCostSchool *pcs = new PowerCostSchool();
+
+        pcs->damage = m_modifier.m_amount;
+        pcs->spellId = GetId();
+        pcs->school = m_modifier.m_miscvalue;
+        m_target->m_powerCostSchool.push_back(pcs);
+    }
+    else
+    {
+        for(std::list<struct PowerCostSchool*>::iterator i = m_target->m_powerCostSchool.begin();i != m_target->m_powerCostSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_powerCostSchool.erase(i);
                 break;
             }
         }
