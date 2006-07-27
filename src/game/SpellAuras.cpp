@@ -546,11 +546,16 @@ void Aura::HandleModPossess(bool apply)
 {
     if(!m_target)
         return;
+
+    if(m_target->GetTypeId() != TYPEID_UNIT)
+        return;
+
+    Creature* creatureTarget = (Creature*)m_target;
+
     if(m_target->getLevel() <= m_modifier.m_amount)
     {
         WorldPacket data;
 
-        Creature* creatureTarget = (Creature*)m_target;
         CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
@@ -656,11 +661,16 @@ void Aura::HandleModCharm(bool apply)
 {
     if(!m_target)
         return;
+
+    if(m_target->GetTypeId() != TYPEID_UNIT)
+        return;
+
+    Creature* creatureTarget = (Creature*)m_target;
+
     if(m_target->getLevel() <= m_modifier.m_amount)
     {
         WorldPacket data;
 
-        Creature* creatureTarget = (Creature*)m_target;
         CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
