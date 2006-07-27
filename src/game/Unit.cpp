@@ -2288,9 +2288,31 @@ Creature* Unit::GetPet() const
         return NULL;
 }
 
+Creature* Unit::GetCharm() const
+{
+    uint64 charm_guid = GetCharmGUID();
+    if(charm_guid)
+    {
+        Creature* pet = ObjectAccessor::Instance().GetCreature(*this, charm_guid);
+        if(!pet)
+        {
+            sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(charm_guid));
+            const_cast<Unit*>(this)->SetCharm(0);
+        }
+        return pet;
+    }
+    else
+        return NULL;
+}
+
 void Unit::SetPet(Creature* pet)
 {
     SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
+}
+
+void Unit::SetCharm(Creature* pet)
+{
+    SetUInt64Value(UNIT_FIELD_CHARM,pet ? pet->GetGUID() : 0);
 }
 
 void Unit::UnsummonTotem(int8 slot)

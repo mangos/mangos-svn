@@ -739,6 +739,9 @@ void Spell::update(uint32 difftime)
         {
             if(m_timer > 0)
             {
+                // TODO:Fix me
+                // If m_spellInfo->ChannelInterruptFlags & m_caster->m_channelInterruptFlag,stop the channel;
+                // else channel can't be stoped,and can't attack the target when being attacked.
                 if(difftime >= m_timer)
                     m_timer = 0;
                 else
@@ -1390,6 +1393,15 @@ uint8 Spell::CanCast()
     {
         switch(m_spellInfo->EffectApplyAuraName[i])
         {
+            case SPELL_AURA_MOD_POSSESS:
+            case SPELL_AURA_MOD_CHARM:
+            {
+                if(unitTarget->getLevel() > CalculateDamage(i))
+                {
+                    castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
+                    break;
+                }
+            }
             case SPELL_AURA_MOD_STEALTH:
             {
                 //detect if any mod is in x range.if true,can't steath.FIX ME!
