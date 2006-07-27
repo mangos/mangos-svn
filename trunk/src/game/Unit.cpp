@@ -81,10 +81,15 @@ Unit::Unit() : Object()
     m_modHitChance = 0;
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
+    m_modCastSpeedPct = 0;
     m_spellCritSchool.clear();
     m_reflectSpellSchool.clear();
     m_scAuras.clear();
     m_damageDoneCreature.clear();
+    m_damageDone.clear();
+    m_damageTaken.clear();
+    m_powerCostSchool.clear();
+    m_creatureAttackPower.clear();
 }
 
 Unit::~Unit()
@@ -434,46 +439,19 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered)
 
 void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 {
-
     if(!this || !pVictim)
         return;
     if(!this->isAlive() || !pVictim->isAlive())
         return;
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
+    if(!spellInfo)
+        return;
     uint32 absorb=0;
     uint32 resist=0;
-    int32 critchance = m_baseSpellCritChance;
-    int crit = 0;
-    CreatureInfo *cinfo = NULL;
-    if(pVictim->GetTypeId() != TYPEID_PLAYER)
-        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellID);
-    if(spellInfo)
-    {
-        for(std::list<struct SpellCritSchool*>::iterator i = m_spellCritSchool.begin();i != m_spellCritSchool.end();i++)
-        {
-            if((*i)->school == -1 || (*i)->school == spellInfo->School)
-            {
-                critchance += (*i)->chance;
-            }
-        }
-        critchance += int32(GetStat(STAT_INTELLECT)/100-1);
-        critchance = critchance > 0 ? critchance :0;
-        if(critchance >= urand(0,100))
-        {
-            damage = uint32(damage*1.5);
-            crit = 1;
-        }
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
-        {
-            if(cinfo && cinfo->type == (*i)->creaturetype)
-            {
-                damage += (*i)->damage;
-                break;
-            }
-        }
-        absorb = CalDamageAbsorb(pVictim,spellInfo->School,damage,&resist);
-    }
+    uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
+    absorb = CalDamageAbsorb(pVictim,spellInfo->School,pdamage,&resist);
+
 
     //WorldPacket data;
     if(m_modSpellHitChance+100 < urand(0,100))
@@ -484,15 +462,15 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
 
     if( (damage-absorb-resist)<= 0 )
     {
-        SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, spellInfo->School, damage, absorb,resist,1,0);
+        SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;
     }
 
-    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u crit is %i.",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID, absorb, resist,crit);
+    sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,abs is %u,resist is %u",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellID, absorb, resist);
 
-    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, damage, spellInfo->School, absorb, resist, false, 0);
-    DealDamage(pVictim, damage<(absorb+resist)?0:(damage-absorb-resist), 0, true);
+    SendSpellNonMeleeDamageLog(pVictim->GetGUID(), spellID, pdamage, spellInfo->School, absorb, resist, false, 0);
+    DealDamage(pVictim, pdamage<(absorb+resist)?0:(pdamage-absorb-resist), 0, true);
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
@@ -504,43 +482,12 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
     }
     uint32 absorb=0;
     uint32 resist=0;
-    int32 critchance = m_baseSpellCritChance;
-    int crit = 0;
-    uint32 pdamage = mod->m_amount;
-    CreatureInfo *cinfo = NULL;
-    if(pVictim->GetTypeId() != TYPEID_PLAYER)
-        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(spellProto->Id);
-    if(spellInfo)
-    {
-        for(std::list<struct SpellCritSchool*>::iterator i = m_spellCritSchool.begin();i != m_spellCritSchool.end();i++)
-        {
-            if((*i)->school == -2 || (*i)->school == spellInfo->School)
-            {
-                critchance += (*i)->chance;
-            }
-        }
-        critchance += int32(GetStat(STAT_INTELLECT)/100-1);
-        critchance = critchance > 0 ? critchance :0;
-        if(critchance >= urand(0,100))
-        {
-            pdamage = uint32(pdamage*1.5);
-            crit = 1;
-        }
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
-        {
-            if(cinfo && cinfo->type == (*i)->creaturetype)
-            {
-                pdamage += (*i)->damage;
-                break;
-            }
-        }
-        absorb = CalDamageAbsorb(pVictim,spellInfo->School,pdamage,&resist);
-    }
+    uint32 pdamage = SpellDamageBonus(pVictim,spellProto,mod->m_amount);
+    absorb = CalDamageAbsorb(pVictim,spellProto->School,pdamage,&resist);
 
-    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u crit is %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb,crit);
+    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
+        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
 
     WorldPacket data;
     data.Initialize(SMSG_PERIODICAURALOG);
@@ -585,9 +532,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         float tmpvalue2 = 0;
         for(int x=0;x<3;x++)
         {
-            if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
+            if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
                 continue;
-            tmpvalue2 = spellInfo->EffectMultipleValue[x];
+            tmpvalue2 = spellProto->EffectMultipleValue[x];
             tmpvalue2 = tmpvalue2 > 0 ? tmpvalue2 : 1;
 
             if(pVictim->GetHealth() - mod->m_amount > 0)
@@ -617,16 +564,16 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry *spellProto, Modifier *mod)
         uint32 tmpvalue = 0;
         for(int x=0;x<3;x++)
         {
-            if(mod->m_auraname != spellInfo->EffectApplyAuraName[x])
+            if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
                 continue;
             if(pVictim->GetPower(POWER_MANA) - mod->m_amount > 0)
             {
                 pVictim->SetPower(POWER_MANA,pVictim->GetPower(POWER_MANA) - mod->m_amount);
-                tmpvalue = uint32(mod->m_amount*spellInfo->EffectMultipleValue[x]);
+                tmpvalue = uint32(mod->m_amount*spellProto->EffectMultipleValue[x]);
             }
             else
             {
-                tmpvalue = uint32(pVictim->GetPower(POWER_MANA)*spellInfo->EffectMultipleValue[x]);
+                tmpvalue = uint32(pVictim->GetPower(POWER_MANA)*spellProto->EffectMultipleValue[x]);
                 pVictim->SetPower(POWER_MANA,0);
             }
             break;
@@ -757,15 +704,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    *damage = (CalculateDamage (false) * (m_modDamagePCT+100))/100;
-    for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
-    {
-        if(cinfo && cinfo->type == (*i)->creaturetype)
-        {
-            *damage += (*i)->damage;
-            break;
-        }
-    }
+    *damage = MeleeDamageBonus(pVictim,CalculateDamage (false));
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
         ((Player*)this)->UpdateMeleeSkillWeapon();
@@ -2362,4 +2301,95 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
     data << Damage;
     data << uint8(0);
     SendMessageToSet(&data, true);
+}
+
+uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdamage)
+{
+    int32 critchance = m_baseSpellCritChance;
+    int crit = 0;
+    CreatureInfo *cinfo = NULL;
+    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+
+    if(spellProto)
+    {
+        for(std::list<struct SpellCritSchool*>::iterator i = m_spellCritSchool.begin();i != m_spellCritSchool.end();i++)
+        {
+            if((*i)->school == -2 || (*i)->school == spellProto->School)
+            {
+                critchance += (*i)->chance;
+            }
+        }
+        critchance += int32(GetStat(STAT_INTELLECT)/100-1);
+        critchance = critchance > 0 ? critchance :0;
+        if(critchance >= urand(0,100))
+        {
+            pdamage = uint32(pdamage*1.5);
+            crit = 1;
+        }
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
+        {
+            if(cinfo && cinfo->type == (*i)->creaturetype)
+            {
+                pdamage += (*i)->damage;
+            }
+        }
+        for(std::list<struct DamageDone*>::iterator i = m_damageDone.begin();i != m_damageDone.end();i++)
+        {
+            if((*i)->school == 126 || SpellSchools((*i)->school) == spellProto->School)
+            {
+                pdamage += (*i)->damage;
+            }
+        }
+        for(std::list<struct DamageTaken*>::iterator i = pVictim->m_damageTaken.begin();i != pVictim->m_damageTaken.end();i++)
+        {
+            if((*i)->school == 126 || SpellSchools((*i)->school) == spellProto->School)
+            {
+                pdamage += (*i)->damage;
+            }
+        }
+    }
+    return pdamage;
+}
+
+uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
+{
+    CreatureInfo *cinfo = NULL;
+    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+
+    if(pVictim)
+    {
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
+        {
+            if(cinfo && cinfo->type == (*i)->creaturetype)
+            {
+                pdamage += (*i)->damage;
+            }
+        }
+        for(std::list<struct CreatureAttackPower*>::iterator i = pVictim->m_creatureAttackPower.begin();i != pVictim->m_creatureAttackPower.end();i++)
+        {
+            if(cinfo && cinfo->type == (*i)->creaturetype)
+            {
+                uint32 val = uint32((*i)->damage/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+                pdamage += val;
+            }
+        }
+        for(std::list<struct DamageDone*>::iterator i = m_damageDone.begin();i != m_damageDone.end();i++)
+        {
+            if((*i)->school == 126 || SpellSchools((*i)->school) == 0)
+            {
+                pdamage += (*i)->damage;
+            }
+        }
+        for(std::list<struct DamageTaken*>::iterator i = pVictim->m_damageTaken.begin();i != pVictim->m_damageTaken.end();i++)
+        {
+            if((*i)->school == 126 || SpellSchools((*i)->school) == 0)
+            {
+                pdamage += (*i)->damage;
+            }
+        }
+    }
+    pdamage = uint32(pdamage * (m_modDamagePCT+100)/100);
+    return pdamage;
 }

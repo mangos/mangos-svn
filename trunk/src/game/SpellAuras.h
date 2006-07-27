@@ -48,6 +48,7 @@ class Aura
     public:
         //aura handlers
         void HandleNULL(bool Apply);
+        void HandleBindSight(bool apply);
         void HandleModPossess(bool apply);
         void HandlePeriodicDamage(bool apply);
         void HandleAuraDummy(bool apply);
@@ -61,6 +62,8 @@ class Aura
         void HandleAuraFeatherFall(bool Apply);
         void HandleAddModifier(bool Apply);
         void HandleAuraModStun(bool Apply);
+        void HandleModDamageDone(bool Apply);
+        void HandleModDamageTaken(bool Apply);
         void HandleAuraModRangedAttackPower(bool Apply);
         void HandleAuraModIncreaseSpeedAlways(bool Apply);
         void HandleAuraModIncreaseEnergyPercent(bool Apply);
@@ -104,6 +107,7 @@ class Aura
         void HandleModSpellHitChance(bool Apply);
         void HandleAuraModScale(bool Apply);
         void HandlePeriodicManaLeech(bool Apply);
+        void HandleModCastingSpeed(bool Apply);
         void HandleAuraMounted(bool Apply);
         void HandleWaterBreathing(bool apply);
         void HandleModBaseResistance(bool apply);
@@ -121,9 +125,13 @@ class Aura
         void HandleAuraManaShield(bool Apply);
         void HandleAuraSchoolAbsorb(bool Apply);
         void HandleModSpellCritChanceShool(bool Apply);
+        void HandleModPowerCost(bool Apply);
+        void HandleModPowerCostSchool(bool Apply);
         void HandleReflectSpellsSchool(bool Apply);
+        void HandleFarSight(bool Apply);
         void HandleModMechanicImmunity(bool Apply);
         void HandleAuraModSkill(bool Apply);
+        void HandleModCreatureAttackPower(bool Apply);
         void HandleModDamagePercentDone(bool Apply);
         void HandleModPercentStat(bool Apply);
         void HandleModResistancePercent(bool Apply);

@@ -168,6 +168,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
         }
         */
         p_caster->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
+        casttime = int32(casttime*(100+p_caster->m_modCastSpeedPct)/100);
     }
 
     m_timer = casttime<0?0:casttime;
@@ -1083,6 +1084,15 @@ void Spell::TakePower()
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
+    for(std::list<struct PowerCostSchool*>::iterator i = m_caster->m_powerCostSchool.begin();i != m_caster->m_powerCostSchool.end();i++)
+    {
+        if(m_spellInfo->School == (*i)->school)
+        {
+            manaCost += (*i)->damage;
+            break;
+        }
+    }
+    manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
 
     if(currentPower < manaCost)
         m_caster->SetPower(powerType, 0);
