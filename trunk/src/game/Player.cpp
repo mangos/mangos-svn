@@ -906,6 +906,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         //SaveToDB();
 
         MapManager::Instance().GetMap(mapid)->Add(this);
+
+        // Resend spell list to client after far teleport.
+        SendInitialSpells();
     }
 }
 
@@ -1282,6 +1285,9 @@ void Player::GiveLevel()
 
     WPAssert(data.size() == 48);
     GetSession()->SendPacket(&data);
+
+    // Level Played Time reset
+    m_Played_time[1] = 0;
 }
 
 void Player::BuildLvlUpStats(uint32 *STR,uint32 *STA,uint32 *AGI,uint32 *INT,uint32 *SPI)
