@@ -2132,7 +2132,10 @@ void Player::CreateCorpse()
     m_pCorpse = new Corpse();
     if(!m_pCorpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
+    {
+        delete m_pCorpse;
         return;
+    }
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);
     _pb = GetUInt32Value(PLAYER_BYTES);

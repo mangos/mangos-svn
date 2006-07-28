@@ -480,7 +480,10 @@ void Spell::EffectPresistentAA(uint32 i)
 
     DynamicObject* dynObj = new DynamicObject();
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, GetDuration(m_spellInfo)))
+    {
+        delete dynObj;
         return;
+    }
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
@@ -716,6 +719,7 @@ void Spell::EffectSummon(uint32 i)
         m_spellInfo->EffectMiscValue[i]))
     {
         sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        delete spawnCreature;
         return;
     }
 
@@ -956,6 +960,7 @@ void Spell::EffectSummonWild(uint32 i)
         m_spellInfo->EffectMiscValue[i]))
     {
         sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        delete spawnCreature;
         return;
     }
 
@@ -1253,6 +1258,8 @@ void Spell::EffectSummonPet(uint32 i)
             ((Player*)m_caster)->PetSpellInitialize();
         }
     }
+    else
+        delete NewSummon;
 }
 
 void Spell::EffectLearnPetSpell(uint32 i)
@@ -1512,7 +1519,10 @@ void Spell::EffectDuel(uint32 i)
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
         m_caster->GetPositionZ(),
         m_caster->GetOrientation(), 0, 0, 0, 0))
+    {
+        delete pGameObj;
         return;
+    }
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
     pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
@@ -1987,7 +1997,10 @@ void Spell::EffectSummonObject(uint32 i)
     uint32 display_id = m_spellInfo->EffectMiscValue[i];
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), 0, 0, 0, 0))
+    {
+        delete pGameObj;
         return;
+    }
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i]);
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 6);
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE,33);
@@ -2159,6 +2172,7 @@ void Spell::EffectSummonCritter(uint32 i)
         m_spellInfo->EffectMiscValue[i]))
     {
         sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        delete critter;
         return;
     }
 
@@ -2244,7 +2258,10 @@ void Spell::EffectTransmitted(uint32 i)
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,m_caster->GetMapId(),
         fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0))
+    {
+        delete pGameObj;
         return;
+    }
 
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );

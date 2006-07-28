@@ -149,8 +149,12 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
 
             pCreature = new Creature();
 
-            pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), objmgr.GetCreatureTemplate(name)->Name, fields[5].GetUInt16(),
-                fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), name);
+            if(!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), objmgr.GetCreatureTemplate(name)->Name, fields[5].GetUInt16(),
+                fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), name))
+            {
+                delete pCreature;
+                return false;   
+            }
 
             pCreature->SetZoneId( fields[6].GetUInt16() );
             pCreature->SetUInt32Value( OBJECT_FIELD_ENTRY, name );
@@ -1208,7 +1212,10 @@ bool ChatHandler::HandleObjectCommand(const char* args)
 
     GameObject* pGameObj = new GameObject();
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
+    {
+        delete pGameObj;
         return false;
+    }
     pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, 19);
     sLog.outError(LANG_ADD_OBJ_LV3);
     MapManager::Instance().GetMap(pGameObj->GetMapId())->Add(pGameObj);
@@ -1322,7 +1329,10 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
     if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0))
+    {
+        delete pGameObj;
         return false;
+    }
     //pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
     //pGameObj->SetNameId(id);
@@ -1679,7 +1689,11 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
 
     Creature* pCreature = new Creature();
 
-    pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), "Spirit Healer", chr->GetMapId(), x, y, z, o, objmgr.AddCreatureTemplate(pCreature->GetName(), 5233));
+    if(!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), "Spirit Healer", chr->GetMapId(), x, y, z, o, objmgr.AddCreatureTemplate(pCreature->GetName(), 5233)))
+    {
+        delete pCreature;
+        return false;
+    }
     pCreature->SetZoneId(chr->GetZoneId());
     pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureTemplate(pCreature->GetName(), 5233));
     pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);

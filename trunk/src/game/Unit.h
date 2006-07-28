@@ -186,14 +186,18 @@ enum WeaponAttackType
 };
 
 // Value masks for UNIT_FIELD_FLAGS
-#define UNIT_FLAG_NONE           0x0000000
-#define UNIT_FLAG_DISABLE_MOVE   0x0000004
-#define UNIT_FLAG_NOT_IN_PVP     0x0000008
-#define UNIT_FLAG_RESTING        0x0000020
-#define UNIT_FLAG_MOUNT          0x0002000
-#define UNIT_FLAG_DISABLE_ROTATE 0x0040000
-#define UNIT_FLAG_ATTACKING      0x0080000
-#define UNIT_FLAG_SKINNABLE      0x4000000
+enum UnitFlags
+{
+    UNIT_FLAG_NONE           = 0x00000000,
+    UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
+    UNIT_FLAG_NOT_IN_PVP     = 0x00000008,
+    UNIT_FLAG_RESTING        = 0x00000020,
+    UNIT_FLAG_MOUNT          = 0x00002000,
+    UNIT_FLAG_DISABLE_ROTATE = 0x00040000,
+    UNIT_FLAG_ATTACKING      = 0x00080000,
+    UNIT_FLAG_SKINNABLE      = 0x04000000,
+    UNIT_FLAG_SHEATHE        = 0x40000000
+};
 
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,

@@ -429,7 +429,11 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
 
         Creature* pCreature = new Creature();
 
-        pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), name, chr->GetMapId(), x, y, z, o, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId));
+        if(!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), name, chr->GetMapId(), x, y, z, o, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId)))
+        {
+            delete pCreature;
+            return false;
+        }
         pCreature->SetZoneId(chr->GetZoneId());
         pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId));
         pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
