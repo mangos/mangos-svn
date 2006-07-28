@@ -452,7 +452,6 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     uint32 pdamage = SpellDamageBonus(pVictim,spellInfo,damage);
     absorb = CalDamageAbsorb(pVictim,spellInfo->School,pdamage,&resist);
 
-
     //WorldPacket data;
     if(m_modSpellHitChance+100 < urand(0,100))
     {
@@ -612,8 +611,8 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
         return 0;
     if(!pVictim->isAlive())
         return 0;
-    if(!damage) 
-       return 0;  
+    if(!damage)
+        return 0;
 
     for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
     {
@@ -746,7 +745,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             break;
 
         case MELEE_HIT_BLOCK:
-            *blocked_amount = (pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1); 
+            *blocked_amount = (pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
 
             if (pVictim->GetUnitBlockChance())
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
@@ -1024,7 +1023,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
             && (roll < (sum += tmp)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum); return MELEE_HIT_PARRY; }
 
-        tmp = (int32)(pVictim->GetUnitBlockChance()*100);
+            tmp = (int32)(pVictim->GetUnitBlockChance()*100);
         if (   (tmp > 0)                                    // check if unit _can_ block
             && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
@@ -1438,12 +1437,12 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
     }
     else
     {
-        if (!Aur->IsPassive())    // passive auras stack with all 
+        if (!Aur->IsPassive())                              // passive auras stack with all
         {
             if (!RemoveNoStackAurasDueToAura(Aur))
             {
                 delete Aur;
-                return false;                                   // couldnt remove conflicting aura with higher rank
+                return false;                               // couldnt remove conflicting aura with higher rank
             }
         }
 
@@ -1699,8 +1698,8 @@ void Unit::RemoveAllAurasOnDeath()
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
         if (!iter->second->IsPassive())
             RemoveAura(iter, true);
-        else
-            ++iter;
+    else
+        ++iter;
     _RemoveAllAuraMods();
 }
 
