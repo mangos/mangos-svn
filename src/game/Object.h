@@ -92,9 +92,9 @@ class MANGOS_DLL_SPEC Object
         virtual void AddToWorld() { m_inWorld = true; }
         virtual void RemoveFromWorld() { m_inWorld = false; }
 
-        const uint64& GetGUID() const { return *((uint64*)m_uint32Values); }
-        const uint32& GetGUIDLow() const { return m_uint32Values[0]; }
-        const uint32& GetGUIDHigh() const { return m_uint32Values[1]; }
+        const uint64& GetGUID() const { return GetUInt64Value(0); }
+        const uint32& GetGUIDLow() const { return GetUInt32Value(0); }
+        const uint32& GetGUIDHigh() const { return GetUInt32Value(1); }
 
         uint32 GetEntry() const {return m_uint32Values[OBJECT_FIELD_ENTRY];}
 
