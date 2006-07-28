@@ -7209,7 +7209,8 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-                uint32 qtime = static_cast<uint32>(time(NULL)) + (uint32(limittime * 0.001));
+                uint64 ktime = 0; // unkwnown and dependent from server start time
+                uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
                 SetUInt32Value( log_slot + 2, qtime );
             }
             else
