@@ -178,14 +178,17 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     recv_data >> guid;                                      //pet guid
     sLog.outString( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if(pet->GetGUID() == _player->GetPetGUID())
+    if(pet)
     {
-        uint32 feelty = pet->GetPower(POWER_HAPPINESS);
-        pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
-        _player->UnsummonPet(true);
-    }
-    else if(pet->GetGUID() == _player->GetCharmGUID())
-    {
-        _player->Uncharm();
+        if(pet->GetGUID() == _player->GetPetGUID())
+        {
+            uint32 feelty = pet->GetPower(POWER_HAPPINESS);
+            pet->SetPower(POWER_HAPPINESS ,(feelty-50000) > 0 ?(feelty-50000) : 0);
+            _player->UnsummonPet(true);
+        }
+        else if(pet->GetGUID() == _player->GetCharmGUID())
+        {
+            _player->Uncharm();
+        }
     }
 }
