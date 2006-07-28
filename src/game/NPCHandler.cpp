@@ -208,6 +208,9 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         return;
     if(proto->reqspell && !_player->HasSpell(proto->reqspell))
         return;
+    if(proto->spell->Effect[1] == 44)
+    if(!_player->CanLearnProSpell(spellId))
+        return;
 
     if(!proto)
     {

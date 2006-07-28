@@ -71,6 +71,25 @@ bool Pet::LoadPetFromDB( Unit* owner )
     if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), fields[1].GetUInt32()))
         return false;
 
+    std::string name;
+    if(owner->GetTypeId() == TYPEID_PLAYER)
+        name = ((Player*)owner)->GetName();
+    else
+        name = ((Creature*)owner)->GetCreatureInfo()->Name;
+    name.append("\\\'s Pet");
+    SetName( name );
+
+    CreatureInfo *cinfo = GetCreatureInfo();
+    if(cinfo->type == CREATURE_TYPE_CRITTER)
+    {
+        AIM_Initialize();
+        MapManager::Instance().GetMap(owner->GetMapId())->Add((Creature*)this);
+        owner->SetPet(this);
+        if(owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Player*)owner)->PetSpellInitialize();
+        }
+    }
     uint32 petlevel=fields[3].GetUInt32();
     SetLevel( petlevel);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
@@ -130,24 +149,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     //summon imp Template ID is 416
     if(owner->GetTypeId() == TYPEID_PLAYER)
     {
-        uint16 Command = 7;
-        uint16 State = 6;
-
-        sLog.outDebug("Pet Spells Groups");
-        data.clear();
-        data.Initialize(SMSG_PET_SPELLS);
-
-        data << (uint64)GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-        for(uint32 i=0;i < CREATURE_MAX_SPELLS ; i++)
-                                                            //C100 = maybe group
-            data << uint16 (m_spells[i]) << uint16 (0xC100);
-
-        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-        ((Player*)owner)->GetSession()->SendPacket(&data);
+        ((Player*)owner)->PetSpellInitialize();
     }
     return true;
 }

@@ -386,6 +386,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         };
 
         void UnsummonPet(bool remove);
+        void Uncharm();
 
         uint32 GetResistanceBuffMods(SpellSchools school, bool positive) const { return (uint32)GetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
         void SetResistanceBuffMods(SpellSchools school, bool positive, uint32 val) { SetFloatValue(positive ? PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
@@ -558,7 +559,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::list<bidentry*>::iterator GetBidBegin() { return m_bids.begin();};
         std::list<bidentry*>::iterator GetBidEnd() { return m_bids.end();};
 
+        void PetSpellInitialize();
         bool HasSpell(uint32 spell) const;
+        bool CanLearnProSpell(uint32 spell);
         void SendInitialSpells();
         void addSpell(uint16 spell_id,uint8 active,uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);

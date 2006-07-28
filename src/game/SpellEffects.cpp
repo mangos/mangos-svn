@@ -41,6 +41,7 @@
 #include "Pet.h"
 #include "GameObject.h"
 #include "GossipDef.h"
+#include "Creature.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -86,7 +87,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_LANGUAGE = 39
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DUAL_WIELD = 40
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_WILD = 41
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_GUARDIAN = 42
+    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_GUARDIAN = 42
     &Spell::EffectTeleUnitsFaceCaster,                      //SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER = 43
     &Spell::EffectLearnSkill,                               //SPELL_EFFECT_SKILL_STEP = 44
     &Spell::EffectNULL,                                     //unknown45 = 45
@@ -117,7 +118,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PICKPOCKET = 71
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_FARSIGHT = 72
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_POSSESSED = 73
+    &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74
     &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
@@ -141,7 +142,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SELF_RESURRECT = 94
     &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING = 95
     &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE = 96
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_CRITTER = 97
+    &Spell::EffectSummonCritter,                            //SPELL_EFFECT_SUMMON_CRITTER = 97
     &Spell::EffectNULL,                                     //SPELL_EFFECT_KNOCK_BACK = 98
     &Spell::EffectDisEnchant,                               //SPELL_EFFECT_DISENCHANT = 99
     &Spell::EffectInebriate,                                //SPELL_EFFECT_INEBRIATE = 100
@@ -153,7 +154,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT3 = 106
     &Spell::EffectSummonObject,                             //SPELL_EFFECT_SUMMON_OBJECT_SLOT4 = 107
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISPEL_MECHANIC = 108
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEAD_PET = 109
+    &Spell::EffectSummonDeadPet,                            //SPELL_EFFECT_SUMMON_DEAD_PET = 109
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DESTROY_ALL_TOTEMS = 110
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DURABILITY_DAMAGE = 111
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_DEMON = 112
@@ -720,7 +721,7 @@ void Spell::EffectSummon(uint32 i)
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
     spawnCreature->SetPower(   POWER_HAPPINESS,1000000);
-    spawnCreature->SetMaxPower(POWER_HAPPINESS,1000000);
+    spawnCreature->SetMaxPower(POWER_HAPPINESS,600000);
     spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
     spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
@@ -751,31 +752,14 @@ void Spell::EffectSummon(uint32 i)
     else
         name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
     name.append("\\\'s Pet");
+    spawnCreature->SetName( name );
+    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data;
-        uint16 Command = 7;
-        uint16 State = 6;
-
-        sLog.outDebug("Pet Spells Groups");
-
-        data.clear();
-        data.Initialize(SMSG_PET_SPELLS);
-
-        data << (uint64)spawnCreature->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);
-
-        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-        ((Player*)m_caster)->GetSession()->SendPacket(&data);
         ((Player*)m_caster)->SavePet();
         m_caster->SetPet(spawnCreature);
+        ((Player*)m_caster)->PetSpellInitialize();
     }
 }
 
@@ -977,7 +961,7 @@ void Spell::EffectSummonWild(uint32 i)
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
     spawnCreature->SetPower(   POWER_HAPPINESS,1000000);
-    spawnCreature->SetMaxPower(POWER_HAPPINESS,1000000);
+    spawnCreature->SetMaxPower(POWER_HAPPINESS,600000);
     spawnCreature->setPowerType(POWER_MANA);
     spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
     spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
@@ -992,13 +976,7 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-    /*
-    spawnCreature->SetStat(STAT_STRENGTH,int(20+level*1.55));
-    spawnCreature->SetStat(STAT_AGILITY,int(20+level*0.64));
-    spawnCreature->SetStat(STAT_STAMINA,int(20+level*1.27));
-    spawnCreature->SetStat(STAT_INTELLECT,int(20+level*0.18));
-    spawnCreature->SetStat(STAT_SPIRIT,int(20+level*0.36));
-    */
+
     spawnCreature->SetArmor(level*50);
     spawnCreature->AIM_Initialize();
 
@@ -1008,31 +986,14 @@ void Spell::EffectSummonWild(uint32 i)
     else
         name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
     name.append("\\\'s Pet");
+    spawnCreature->SetName( name );
+    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data;
-        uint16 Command = 7;
-        uint16 State = 6;
-
-        sLog.outDebug("Pet Spells Groups");
-
-        data.clear();
-        data.Initialize(SMSG_PET_SPELLS);
-
-        data << (uint64)spawnCreature->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-            data << uint16 (spawnCreature->m_spells[i]) << uint16 (0xC100);
-
-        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-        ((Player*)m_caster)->GetSession()->SendPacket(&data);
         ((Player*)m_caster)->SavePet();
         m_caster->SetPet(spawnCreature);
+        ((Player*)m_caster)->PetSpellInitialize();
     }
 
 }
@@ -1168,61 +1129,20 @@ void Spell::EffectTameCreature(uint32 i)
         uint32 petlevel = creatureTarget->getLevel();
         creatureTarget->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         creatureTarget->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-        creatureTarget->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
-        creatureTarget->SetHealth(    28 + 10 * petlevel);
-        creatureTarget->SetMaxHealth( 28 + 10 * petlevel);
-        creatureTarget->SetMaxPower(POWER_MANA,28 + 10 * petlevel);
-        creatureTarget->SetPower(   POWER_MANA,28 + 10 * petlevel);
         creatureTarget->SetMaxPower(POWER_HAPPINESS,1000000);
         creatureTarget->SetPower(   POWER_HAPPINESS,600000);
         creatureTarget->setPowerType(POWER_FOCUS);
         creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        creatureTarget->SetUInt32Value(UNIT_FIELD_FLAGS,0);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_PETNUMBER, creatureTarget->GetGUIDLow());
         creatureTarget->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         creatureTarget->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        creatureTarget->SetStat(STAT_STRENGTH,int(20+petlevel*1.55));
-        creatureTarget->SetStat(STAT_AGILITY,int(20+petlevel*0.64));
-        creatureTarget->SetStat(STAT_STAMINA,int(20+petlevel*1.27));
-        creatureTarget->SetStat(STAT_INTELLECT,int(20+petlevel*0.18));
-        creatureTarget->SetStat(STAT_SPIRIT,int(20+petlevel*0.36));
-        creatureTarget->SetArmor(petlevel*50);
-        creatureTarget->SetUInt32Value(UNIT_FIELD_BYTES_2,1);
-        creatureTarget->AIM_Initialize();
-
-        std::string name;
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            name = ((Player*)m_caster)->GetName();
-        else
-            name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-        name.append("\\\'s Pet");
+        ((Pet*)creatureTarget)->AIM_Initialize();
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            uint16 Command = 7;
-            uint16 State = 6;
-
-            sLog.outDebug("Pet Spells Groups");
-
-            data.clear();
-            data.Initialize(SMSG_PET_SPELLS);
-
-            data << (uint64)creatureTarget->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-            data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-            for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-                data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100);
-
-            data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-            ((Player*)m_caster)->GetSession()->SendPacket(&data);
             ((Player*)m_caster)->SavePet();
             m_caster->SetPet(creatureTarget);
+            ((Player*)m_caster)->PetSpellInitialize();
         }
     }
 }
@@ -1248,6 +1168,8 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->SetMaxHealth( 28 + 10 * petlvl );
             OldSummon->SetPower(   POWER_MANA, 28 + 10 * petlvl);
             OldSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlvl);
+            OldSummon->SetPower(   POWER_HAPPINESS , 600000);
+            OldSummon->SetMaxPower(POWER_HAPPINESS, 1000000);
             OldSummon->setDeathState(ALIVE);
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
@@ -1256,25 +1178,7 @@ void Spell::EffectSummonPet(uint32 i)
         OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            uint16 Command = 7;
-            uint16 State = 6;
-
-            sLog.outDebug("Pet Spells Groups");
-
-            data.clear();
-            data.Initialize(SMSG_PET_SPELLS);
-
-            data << (uint64)OldSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-            data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-            for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-                data << uint16(OldSummon->m_spells[i]) << uint16(0xC100);
-
-            data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-            ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            ((Player*)m_caster)->PetSpellInitialize();
         }
         return;
     }
@@ -1301,6 +1205,8 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetMaxHealth( 28 + 10 * petlevel);
         NewSummon->SetPower(   POWER_MANA , 28 + 10 * petlevel);
         NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
+        NewSummon->SetPower(   POWER_HAPPINESS , 600000);
+        NewSummon->SetMaxPower(POWER_HAPPINESS, 1000000);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
 
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
@@ -1325,7 +1231,6 @@ void Spell::EffectSummonPet(uint32 i)
             name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
         name.append("\\\'s Pet");
         NewSummon->SetName( name );
-        NewSummon->SetFealty( 10 );
 
         for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
             NewSummon->m_spells[i] = 0;
@@ -1345,25 +1250,7 @@ void Spell::EffectSummonPet(uint32 i)
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            uint16 Command = 7;
-            uint16 State = 6;
-
-            sLog.outDebug("Pet Spells Groups");
-
-            data.clear();
-            data.Initialize(SMSG_PET_SPELLS);
-
-            data << (uint64)NewSummon->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-            data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-            for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-                data << uint16(NewSummon->m_spells[i]) << uint16(0xC100);
-
-            data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-            ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            ((Player*)m_caster)->PetSpellInitialize();
         }
     }
 }
@@ -1401,26 +1288,7 @@ void Spell::EffectLearnPetSpell(uint32 i)
     }
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        WorldPacket data;
-        uint16 Command = 7;
-        uint16 State = 6;
-
-        sLog.outDebug("Pet Spells Groups");
-
-        data.clear();
-        data.Initialize(SMSG_PET_SPELLS);
-
-        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
-
-        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-        ((Player*)m_caster)->GetSession()->SendPacket(&data);
+        ((Player*)m_caster)->PetSpellInitialize();
     }
 }
 
@@ -2275,6 +2143,70 @@ void Spell::EffectCharge(uint32 i)
 
     m_caster->SendMonsterMove(x, y, z, false,true,1);
     m_caster->Attack(unitTarget);
+}
+
+void Spell::EffectSummonCritter(uint32 i)
+{
+    uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
+    if(!pet_entry)
+        return;
+    Pet* critter = new Pet();
+
+    if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+        m_caster->GetMapId(),
+        m_caster->GetPositionX(),m_caster->GetPositionY(),
+        m_caster->GetPositionZ(),m_caster->GetOrientation(),
+        m_spellInfo->EffectMiscValue[i]))
+    {
+        sLog.outString("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        return;
+    }
+
+    critter->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
+    critter->SetUInt64Value(UNIT_FIELD_CREATEDBY,m_caster->GetGUID());
+    critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+
+    critter->AIM_Initialize();
+
+    std::string name;
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        name = ((Player*)m_caster)->GetName();
+    else
+        name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
+    name.append("\\\'s Pet");
+    critter->SetName( name );
+    m_caster->SetPet(critter);
+    MapManager::Instance().GetMap(m_caster->GetMapId())->Add((Creature*)critter);
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        ((Player*)m_caster)->PetSpellInitialize();
+    }
+}
+
+void Spell::EffectSummonDeadPet(uint32 i)
+{
+    if(m_caster->GetTypeId() != TYPEID_UNIT)
+        return;
+    Player *_player = (Player*)m_caster;
+    Creature *_pet = m_caster->GetPet();
+    if(!_pet)
+        return;
+    if(_pet->isAlive())
+        return;
+    Pet *pet = (Pet*)_pet;
+    pet->setDeathState( ALIVE );
+    pet->clearUnitState(UNIT_STAT_ALL_STATE);
+    pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
+    pet->SetHealth( uint32(pet->GetMaxHealth()*damage/100));
+
+    pet->AIM_Initialize();
+
+    std::string name;
+    name = _player->GetName();
+    name.append("\\\'s Pet");
+    pet->SetName( name );
+    _player->PetSpellInitialize();
+
 }
 
 void Spell::EffectTransmitted(uint32 i)

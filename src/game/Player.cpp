@@ -1816,6 +1816,48 @@ bool Player::HasSpell(uint32 spell) const
     return false;
 }
 
+bool Player::CanLearnProSpell(uint32 spell)
+{
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
+
+    if (!spellInfo)
+        return false;
+    if(spellInfo->Effect[0] != 36)
+        return true;
+
+    uint32 skill = spellInfo->EffectMiscValue[1];
+    uint32 value = 0;
+
+    if( skill != SKILL_HERBALISM && skill != SKILL_MINING && skill != SKILL_LEATHERWORKING
+        && skill != SKILL_BLACKSMITHING && skill != SKILL_ALCHEMY && skill != SKILL_ENCHANTING
+        && skill != SKILL_TAILORING && skill != SKILL_ENGINERING && skill != SKILL_SKINNING)
+        return true;
+    for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    {
+        SpellEntry *pSpellInfo = sSpellStore.LookupEntry((*itr)->spellId);
+        if(!pSpellInfo)
+            continue;
+
+        if(pSpellInfo->Effect[1] == 118)
+        {
+            uint32 pskill = pSpellInfo->EffectMiscValue[1];
+            if( pskill != SKILL_HERBALISM && pskill != SKILL_MINING && pskill != SKILL_LEATHERWORKING
+                && pskill != SKILL_BLACKSMITHING && pskill != SKILL_ALCHEMY && pskill != SKILL_ENCHANTING
+                && pskill != SKILL_TAILORING && pskill != SKILL_ENGINERING && pskill != SKILL_SKINNING)
+                continue;
+            if(pskill == skill)
+            {
+                return true;
+                break;
+            }
+            else value += 1;
+        }
+    }
+    if(value >= sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))
+        return false;
+    else return true;
+}
+
 void Player::DeleteFromDB()
 {
     uint32 guid = GetGUIDLow();
@@ -8705,6 +8747,55 @@ void Player::UnsummonPet(bool remove)
     data.Initialize(SMSG_PET_SPELLS);
     data << uint64(0);
     GetSession()->SendPacket(&data);
+}
+
+void Player::Uncharm()
+{
+    Creature* charm = GetCharm();
+    if(!charm) return;
+
+    SetCharm(0);
+
+    CreatureInfo *cinfo = charm->GetCreatureInfo();
+    charm->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+    charm->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+    
+    charm->AIM_Initialize();
+    WorldPacket data;
+    data.Initialize(SMSG_PET_SPELLS);
+    data << uint64(0);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::PetSpellInitialize()
+{
+    Creature* pet = GetPet();
+    if(!pet)
+        pet = GetCharm();
+    if(pet)
+    {
+
+        WorldPacket data;
+        uint16 Command = 7;
+        uint16 State = 6;
+
+        sLog.outDebug("Pet Spells Groups");
+
+        data.clear();
+        data.Initialize(SMSG_PET_SPELLS);
+
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
+
+        data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
+
+        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+                                                            //C100 = maybe group
+            data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
+
+        data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
+
+        GetSession()->SendPacket(&data);
+    }
 }
 
 int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)

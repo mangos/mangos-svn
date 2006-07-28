@@ -575,25 +575,7 @@ void Aura::HandleModPossess(bool apply)
             creatureTarget->AIM_Initialize();
             if(m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                uint16 Command = 7;
-                uint16 State = 6;
-
-                sLog.outDebug("Pet Spells Groups");
-
-                data.clear();
-                data.Initialize(SMSG_PET_SPELLS);
-
-                data << (uint64)creatureTarget->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-                data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-                    data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100);
-
-                data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                ((Player*)m_caster)->PetSpellInitialize();
             }
         }
         else
@@ -690,25 +672,7 @@ void Aura::HandleModCharm(bool apply)
             creatureTarget->AIM_Initialize();
             if(m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                uint16 Command = 7;
-                uint16 State = 6;
-
-                sLog.outDebug("Pet Spells Groups");
-
-                data.clear();
-                data.Initialize(SMSG_PET_SPELLS);
-
-                data << (uint64)creatureTarget->GetGUID() << uint32(0x00000000) << uint32(0x00001000);
-
-                data << uint16 (2) << uint16(Command << 8) << uint16 (1) << uint16(Command << 8) << uint16 (0) << uint16(Command << 8);
-
-                for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                                                            //C100 = maybe group
-                    data << uint16(creatureTarget->m_spells[i]) << uint16(0xC100);
-
-                data << uint16 (2) << uint16(State << 8) << uint16 (1) << uint16(State << 8) << uint16 (0) << uint16(State << 8);
-
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                ((Player*)m_caster)->PetSpellInitialize();
             }
         }
         else
