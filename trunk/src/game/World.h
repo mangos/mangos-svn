@@ -142,28 +142,7 @@ class World
 
     protected:
 
-        time_t _UpdateGameTime()
-        {
-            time_t thisTime = time(NULL);
-
-            uint32 now = time(NULL),
-                elapsed = (now - m_Last_tick);
-
-            if(m_lastTick == 0)
-                m_lastTick = thisTime;
-
-            if(m_ShutdownTimer > 0 && m_ShutdownTimer != now)
-            {
-                m_ShutdownTimer -= (now - m_Last_tick);
-                ShuttDownMsg();
-            }
-
-            m_gameTime += thisTime - m_lastTick;
-
-            m_Last_tick = now;
-
-            return m_gameTime;
-        }
+        time_t _UpdateGameTime();
 
     private:
 
@@ -183,7 +162,7 @@ class World
 
         time_t m_nextThinkTime;
         uint32 m_configs[CONFIG_VALUE_COUNT];
-        uint32 m_Last_tick;
+        time_t m_Last_tick;
         uint32 m_ShutdownTimer;
 };
 

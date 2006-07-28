@@ -310,13 +310,13 @@ void Spell::EffectManaDrain(uint32 i)
     {
         unitTarget->SetPower(drain_power,0);
         if(drain_power == POWER_MANA)
-            m_caster->SetPower(POWER_MANA,m_caster->GetPower(POWER_MANA)+curPower*tmpvalue);
+            m_caster->SetPower(POWER_MANA,uint32(m_caster->GetPower(POWER_MANA)+curPower*tmpvalue));
     }
     else
     {
         unitTarget->SetPower(drain_power,curPower-damage);
         if(drain_power == POWER_MANA)
-            m_caster->SetPower(POWER_MANA,m_caster->GetPower(POWER_MANA)+damage*tmpvalue);
+            m_caster->SetPower(POWER_MANA,uint32(m_caster->GetPower(POWER_MANA)+damage*tmpvalue));
     }
 }
 

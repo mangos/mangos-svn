@@ -553,6 +553,29 @@ void World::KickPlayer(char* playerName)
     }
 }
 
+time_t World::_UpdateGameTime()
+{
+    time_t thisTime = time(NULL);
+
+    if(m_lastTick == 0)
+        m_lastTick = thisTime;
+
+    uint32 elapsed = uint32(thisTime - m_Last_tick);
+
+    if(m_ShutdownTimer > 0 && elapsed > 0)
+    {
+        m_ShutdownTimer -= elapsed;
+        ShuttDownMsg();
+    }
+
+    m_gameTime += elapsed;
+
+    m_Last_tick = thisTime;
+
+    return m_gameTime;
+}
+
+
 void World::ShutdownServ(uint32 time)
 {
     m_ShutdownTimer = time;
