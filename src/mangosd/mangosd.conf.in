@@ -41,6 +41,11 @@ AddonDefault = 1
 # Default: 60
 MaxPlayerLevel = 60
 
+# Max count that player can learn the primary trade skill.
+# Default: 2
+# Max : 9 
+MaxPrimaryTradeSkill = 2 
+
 # Message of the Day. Displayed at worldlogin for every user.
 Motd = "Welcome to the Massive Network Game Object Server."
 
