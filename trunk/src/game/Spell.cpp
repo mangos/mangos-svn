@@ -168,7 +168,7 @@ Spell::Spell( Unit* Caster, SpellEntry *info, bool triggered, Aura* Aur )
         }
         */
         p_caster->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
-        casttime = int32(casttime*(100+p_caster->m_modCastSpeedPct)/100);
+        casttime = int32(casttime/(100+p_caster->m_modCastSpeedPct)*100);
     }
 
     m_timer = casttime<0?0:casttime;
@@ -1316,6 +1316,11 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
                     break;
                 }
+                if(m_caster->GetCharmGUID())
+                {
+                    castResult = CAST_FAIL_ALREADY_HAVE_CHARMED;
+                    break;
+                }
                 break;
             }
             case SPELL_EFFECT_LEARN_PET_SPELL:
@@ -1364,6 +1369,36 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_FAILED;
                 break;
             }
+            case SPELL_EFFECT_SUMMON_DEAD_PET:
+            {
+                Creature *pet = m_caster->GetPet();
+                if(!pet)
+                    return CAST_FAIL_FAILED;
+                if(pet->isAlive())
+                    return CAST_FAIL_FAILED;
+                break;
+            }
+            case SPELL_EFFECT_SUMMON:
+            case SPELL_EFFECT_SUMMON_WILD:
+            case SPELL_EFFECT_SUMMON_GUARDIAN:
+            case SPELL_EFFECT_SUMMON_PET:
+            case SPELL_EFFECT_SUMMON_POSSESSED:
+            case SPELL_EFFECT_SUMMON_PHANTASM:
+            case SPELL_EFFECT_SUMMON_CRITTER:
+            case SPELL_EFFECT_SUMMON_DEMON:
+            {
+                if(m_caster->GetPetGUID())
+                {
+                    castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
+                    break;
+                }
+                if(m_caster->GetCharmGUID())
+                {
+                    castResult = CAST_FAIL_ALREADY_HAVE_CHARMED;
+                    break;
+                }
+                break;
+            }
             default:break;
         }
 
@@ -1406,6 +1441,16 @@ uint8 Spell::CanCast()
             case SPELL_AURA_MOD_POSSESS:
             case SPELL_AURA_MOD_CHARM:
             {
+                if(m_caster->GetPetGUID())
+                {
+                    castResult = CAST_FAIL_ALREADY_HAVE_SUMMON;
+                    break;
+                }
+                if(m_caster->GetCharmGUID())
+                {
+                    castResult = CAST_FAIL_ALREADY_HAVE_CHARMED;
+                    break;
+                }
                 if(unitTarget->getLevel() > CalculateDamage(i))
                 {
                     castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;

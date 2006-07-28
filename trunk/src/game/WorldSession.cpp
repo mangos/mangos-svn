@@ -158,6 +158,7 @@ void WorldSession::LogoutPlayer(bool Save)
             guild->Loadplayerstatsbyguid(_player->GetGUID());
         }
         _player->UnsummonPet(false);
+        _player->Uncharm();
         _player->UnsummonTotem();
 
         ObjectAccessor::Instance().RemovePlayer(_player);

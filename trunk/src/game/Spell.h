@@ -418,6 +418,8 @@ class Spell
         void EffectReputation(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
+        void EffectSummonCritter(uint32 i);
+        void EffectSummonDeadPet(uint32 i);
         void EffectSkill(uint32 i);
         void EffectAttackMe(uint32 i);
         void EffectResurrectNew(uint32 i);
