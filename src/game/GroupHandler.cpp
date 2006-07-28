@@ -150,7 +150,10 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
         ASSERT(group);
 
         if(!group->Create(player->GetGUID(), player->GetName()))
+        {
+            delete group;
             return;
+        }
 
         group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName());
         objmgr.AddGroup(group);

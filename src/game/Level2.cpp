@@ -242,7 +242,10 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     Creature* pCreature = new Creature;
     if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+    {
+        delete pCreature;
         return false;
+    }
 
     pCreature->AIM_Initialize();
     //pCreature->SetUInt32Value(UNIT_FIELD_HEALTH , 1); // temp set on 1 HP needs to be MAX HP (strange error)
