@@ -136,6 +136,7 @@ class Aura
         void HandleModPercentStat(bool Apply);
         void HandleModResistancePercent(bool Apply);
         void HandleAuraModBaseResistancePCT(bool Apply);
+        void HandleModShieldBlock(bool Apply);
         void HandleForceReaction(bool Apply);
         void HandleRangedAmmoHaste(bool Apply);
 

@@ -612,6 +612,8 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
         return 0;
     if(!pVictim->isAlive())
         return 0;
+    if(!damage) 
+       return 0;  
 
     for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
     {
@@ -722,7 +724,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
         case MELEE_HIT_PARRY:
             *damage = 0;
-            *victimState = 2;
+            *victimState = 3;
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
             {
@@ -735,7 +737,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
         case MELEE_HIT_DODGE:
             *damage = 0;
-            *victimState = 3;
+            *victimState = 2;
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
@@ -744,19 +746,14 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             break;
 
         case MELEE_HIT_BLOCK:
-            *blocked_amount = (pVictim->GetUnitBlockValue() * (pVictim->GetStat(STAT_STRENGTH) / 20));
+            *blocked_amount = (pVictim->GetBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1); 
 
-            if (*blocked_amount < *damage)
-                *damage -= *blocked_amount;
-            else
-                *damage = 0;
-
-            if (pVictim->GetUnitBlockValue())
+            if (pVictim->GetUnitBlockChance())
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
             else
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
-            *victimState = 4;
+            *victimState = 5;
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
@@ -789,7 +786,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     }
     uint32 absorb= CalDamageAbsorb(pVictim,NORMAL_DAMAGE,*damage,resist);
 
-    if (*damage <= absorb + *resist)
+    if (*damage <= absorb + *resist + *blocked_amount)
     {
         //*hitInfo = 0x00010020;
         *hitInfo = HITINFO_NOACTION | HITINFO_HITSTRANGESOUND1;
@@ -954,8 +951,8 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     {
         //do animation
         SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
-        if (damage >= (absorbed_dmg + resisted_dmg))
-            damage -= (absorbed_dmg + resisted_dmg);
+        if (damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
+            damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
         else
             damage = 0;
         DealDamage (pVictim, damage, 0, true);
@@ -968,11 +965,11 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
-        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg, absorbed %u, resisted %u.",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, resisted_dmg);
+        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
     else
-        DEBUG_LOG("AttackerStateUpdate: (NPC)    %u %X attacked %u %X for %u dmg, absorbed %u, resisted %u.",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, resisted_dmg);
+        DEBUG_LOG("AttackerStateUpdate: (NPC)    %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
+            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
@@ -1027,7 +1024,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
             && (roll < (sum += tmp)))
             { DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum); return MELEE_HIT_PARRY; }
 
-            tmp = (int32)(pVictim->GetUnitBlockChance()*100);
+        tmp = (int32)(pVictim->GetUnitBlockChance()*100);
         if (   (tmp > 0)                                    // check if unit _can_ block
             && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
@@ -1834,12 +1831,6 @@ void Unit::ApplyStats(bool apply)
     val = float(5);
 
     ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, val, apply);
-
-    //block
-    val = float(GetStat(STAT_STRENGTH)/22);
-
-    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, val, apply);
-
 }
 
 void Unit::_RemoveAllAuraMods()

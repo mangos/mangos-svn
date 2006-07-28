@@ -31,4 +31,27 @@ inline float rand_chance()
     // using combined 2 call rand() instead: xx.xxyyyy
     return float(rand() % 10000)/100.0 + float(rand() % 10000)/1000000.0;
 }
+
+inline void ApplyModUInt32Var(uint32& var, int32 val, bool apply)
+{
+    int32 cur = var;
+    cur += (apply ? val : -val);
+    if(cur < 0)
+        cur = 0;
+    var = cur;
+}
+
+inline void ApplyModFloatVar(float& var, float  val, bool apply)
+{
+    var += (apply ? val : -val);
+    if(var < 0)
+        var = 0;
+}
+
+inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
+{
+    var *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val));
+}
+
+
 #endif

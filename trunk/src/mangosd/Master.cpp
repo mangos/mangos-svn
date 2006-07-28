@@ -167,12 +167,12 @@ bool Master::Run()
     //Aff = sConfig.GetIntDefault("Affinity", 0);
     //if(!Aff)
     //{
-    //	sLog.outError("Affinity ID not defined");
-    //	exit(1);
+    //  sLog.outError("Affinity ID not defined");
+    //  exit(1);
     //}
     //else
     //{
-    //	sLog.outString("Set Affinity running as %d", Aff);
+    //  sLog.outString("Set Affinity running as %d", Aff);
     //}
     //HANDLE hProcess = GetCurrentProcess();
     //SetProcessAffinityMask(hProcess,Aff);

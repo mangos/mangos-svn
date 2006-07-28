@@ -40,6 +40,7 @@
 #include "Formulas.h"
 #include "Pet.h"
 #include "SpellAuras.h"
+#include "Util.h"
 
 #include <cmath>
 
@@ -120,6 +121,8 @@ Player::Player (WorldSession *session): Unit()
     m_bgBattleGroundID = 0;
 
     m_movement_flags = 0;
+
+    m_BlockValue = 0;
 
     m_Last_tick = time(NULL);
 }
@@ -392,6 +395,9 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetResistance(SPELL_SCHOOL_ARCANE, 10 );
     }
 
+    // initilize potential block chance (used if item with Block value equiped)
+    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 + (float(GetDefenceSkillValue()) - getLevel()*5)*0.04);
+
     // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
     _ApplyStatsMods();
 
@@ -451,6 +457,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
             }
         }
     }
+
     return true;
 }
 
@@ -1247,6 +1254,9 @@ void Player::GiveLevel()
     SetStat(STAT_AGILITY,  uint32(newAGI));                 // only integer part
     SetStat(STAT_INTELLECT,uint32(newINT));                 // only integer part
     SetStat(STAT_SPIRIT,   uint32(newSPI));                 // only integer part
+
+    // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
+    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, - float(getLevel())*5*0.04,true);
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
@@ -2236,30 +2246,35 @@ void Player::BroadcastToFriends(std::string msg)
 
 void Player::UpdateDefense()
 {
-    UpdateSkill(SKILL_DEFENSE);
+    if(UpdateSkill(SKILL_DEFENSE))
+    {
+        // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
+        ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, 0.04,true);
+    }
 }
 
 //skill+1, checking for max value
-void Player::UpdateSkill(uint32 skill_id)
+bool Player::UpdateSkill(uint32 skill_id)
 {
-    if(!skill_id)return;
+    if(!skill_id) return false;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
         if (GetUInt32Value(PLAYER_SKILL(i)) == skill_id) break;
-    if(i>=PLAYER_MAX_SKILLS) return;
+    if(i>=PLAYER_MAX_SKILLS) return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
     uint16 value = SKILL_VALUE(data);
     uint16 max = SKILL_MAX(data);
 
-    if ((!max) || (!value) || (value >= max)) return;
+    if ((!max) || (!value) || (value >= max)) return false;
 
     if (uint32(value/max)*512 < urand(0,512))
     {
         SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
-
+        return true;
     }
 
+    return false;
 }
 
 void Player::UpdateSkillPro(uint32 spellid)
@@ -3283,7 +3298,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     if (proto->Block)
     {
-        ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, proto->Block, apply);
+        ApplyBlockValueMod(proto->Block, apply);
         sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
     }
 
@@ -8716,4 +8731,9 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
             total += mod->value;
     }
     return total;
+}
+
+void Player::ApplyBlockValueMod(int32 val,bool apply)
+{ 
+    ApplyModUInt32Var(m_BlockValue,val,apply);
 }

@@ -417,7 +417,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         float GetUnitBlockChance()    const;
         float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? GetFloatValue( PLAYER_CRIT_PERCENTAGE ) : 5; }
 
-        uint32 GetUnitBlockValue() const { return GetArmor(); }
+        virtual uint32 GetBlockValue() const =0;
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
         uint16 GetDefenceSkillValue() const;
         uint16 GetWeaponSkillValue() const;
