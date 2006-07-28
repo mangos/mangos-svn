@@ -2431,6 +2431,9 @@ bool ChatHandler::HandleResetCommand (const char * args)
         {
             player->SetResistance(SPELL_SCHOOL_ARCANE, 10 );
         }
+
+        // reinitilize potential block chance (used if item with Block value equiped)
+        player->SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 + (float(player->GetDefenceSkillValue()) - player->getLevel()*5)*0.04);
         return true;
     }
     if (argstr == "talents")
