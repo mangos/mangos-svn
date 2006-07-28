@@ -241,7 +241,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
             AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, false);
         }
 
-        uint32 GetBlockValue() const { return getLevel()/2 + 1; } //dunno mob block value 
+        uint32 GetBlockValue() const                        //dunno mob block value
+        {
+            return getLevel()/2 + 1;
+        }
 
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/

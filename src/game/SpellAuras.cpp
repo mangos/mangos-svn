@@ -960,7 +960,7 @@ void Aura::HandleModDamageDone(bool apply)
         return;
     if(m_modifier.m_miscvalue2)
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-    else 
+    else
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
 }
 
@@ -999,7 +999,7 @@ void Aura::HandleModDamageTaken(bool apply)
         return;
     if(m_modifier.m_miscvalue2)
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-    else 
+    else
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
 }
 

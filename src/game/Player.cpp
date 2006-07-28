@@ -8740,6 +8740,6 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
 }
 
 void Player::ApplyBlockValueMod(int32 val,bool apply)
-{ 
+{
     ApplyModUInt32Var(m_BlockValue,val,apply);
 }

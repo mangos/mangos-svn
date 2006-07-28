@@ -1375,7 +1375,7 @@ uint8 Spell::CanCast()
     }
 
     // Conflagrate - do only when preparing
-    if (m_caster->m_currentSpell != this && m_spellInfo->SpellIconID == 12 && 
+    if (m_caster->m_currentSpell != this && m_spellInfo->SpellIconID == 12 &&
         m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_targets.getUnitTarget())
     {
         Unit::AuraMap t_auras = m_targets.getUnitTarget()->GetAuras();
@@ -1394,7 +1394,7 @@ uint8 Spell::CanCast()
         }
         if(!hasImmolate)
         {
-            SendCastResult(CAST_FAIL_FAILED); // TODO: find a correct error message
+            SendCastResult(CAST_FAIL_FAILED);               // TODO: find a correct error message
             return CAST_FAIL_FAILED;
         }
     }
