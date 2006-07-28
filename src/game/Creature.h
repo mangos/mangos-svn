@@ -183,9 +183,9 @@ struct CreatureInfo
     uint32  spell4;
     uint32  mingold;
     uint32  maxgold;
-    char*   AIName;
-    char*   MovementGen;
-    char*   ScriptName;
+    char const* AIName;
+    char const* MovementGen;
+    char const* ScriptName;
 };
 
 enum UNIT_TYPE
@@ -240,6 +240,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
             clearUnitState(UNIT_STAT_MOVING);
             AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, false);
         }
+
+        uint32 GetBlockValue() const { return getLevel()/2 + 1; } //dunno mob block value 
 
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/

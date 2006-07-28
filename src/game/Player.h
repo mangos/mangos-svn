@@ -666,7 +666,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool IsGroupMember(Player *plyr);
 
-        void UpdateSkill(uint32 skill_id);
+        bool UpdateSkill(uint32 skill_id);
         void UpdateSkillPro(uint32 spellid);
         uint32 GetSpellByProto(ItemPrototype *proto);
 
@@ -772,6 +772,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDrunkValue(uint16 newDrunkValue);
         uint16 GetDrunkValue() const { return m_drunk; }
         uint32 GetDeathTimer() const { return m_deathTimer; }
+        uint32 GetBlockValue() const { return m_BlockValue; }
+        void ApplyBlockValueMod(int32 val,bool apply);
 
         void ApplyItemMods(Item *item,uint8 slot,bool apply)
         {
@@ -1007,6 +1009,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_restTime;
         time_t m_pvp_count;
         bool m_pvp_counting;
+
+        uint32 m_BlockValue;
 };
 
 int irand(int min, int max);

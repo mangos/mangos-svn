@@ -191,7 +191,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //SPELL_AURA_ADD_CREATURE_IMMUNITY = 147,
     &Aura::HandleNULL,                                      //SPELL_AURA_RETAIN_COMBO_POINTS = 148,
     &Aura::HandleNULL,                                      //SPELL_AURA_RESIST_PUSHBACK    =    149    ,//    Resist Pushback
-    &Aura::HandleNULL,                                      //SPELL_AURA_MOD_SHIELD_BLOCK    =    150    ,//    Mod Shield Block %
+    &Aura::HandleModShieldBlock,                            //SPELL_AURA_MOD_SHIELD_BLOCK    =    150    ,//    Mod Shield Block %
     &Aura::HandleNULL,                                      //SPELL_AURA_TRACK_STEALTHED    =    151    ,//    Track Stealthed
     &Aura::HandleNULL,                                      //SPELL_AURA_MOD_DETECTED_RANGE    =    152    ,//    Mod Detected Range
     &Aura::HandleNULL,                                      //SPELL_AURA_SPLIT_DAMAGE_FLAT    =    153    ,//    Split Damage Flat
@@ -2368,6 +2368,14 @@ void Aura::HandleForceReaction(bool Apply)
     }
     else
         ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
+}
+
+void Aura::HandleModShieldBlock(bool apply)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    ((Player*)m_target)->ApplyBlockValueMod(m_modifier.m_amount,apply);
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply)
