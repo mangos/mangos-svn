@@ -82,14 +82,14 @@ Unit::Unit() : Object()
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_modCastSpeedPct = 0;
-    m_spellCritSchool.clear();
+    //m_spellCritSchool.clear();
     m_reflectSpellSchool.clear();
     m_scAuras.clear();
-    m_damageDoneCreature.clear();
+    /*m_damageDoneCreature.clear();
     m_damageDone.clear();
     m_damageTaken.clear();
     m_powerCostSchool.clear();
-    m_creatureAttackPower.clear();
+    m_creatureAttackPower.clear();*/
 }
 
 Unit::~Unit()
@@ -1444,7 +1444,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
         Aur->_AddAura();
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
-        m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
+        if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
+            m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
 
         if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
@@ -1651,7 +1652,8 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         }
     }
     m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount);
-    m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
+    if ((*i).second->GetModifier()->m_auraname < TOTAL_AURAS)
+        m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
     (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
     delete (*i).second;
@@ -2293,50 +2295,57 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
 
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdamage)
 {
+    if(!spellProto || !pVictim) return pdamage;
     int32 critchance = m_baseSpellCritChance;
     int crit = 0;
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    if(spellProto)
+    // Damage Done
+    int32 AdvertisedBenefit = 0;
+    uint32 PenaltyFactor = 0;
+    uint32 CastingTime = GetCastTime(sCastTime.LookupEntry(spellProto->CastingTimeIndex));
+    if (CastingTime > 3500) CastingTime = 3500;
+    if (CastingTime < 1500) CastingTime = 1500;
+
+    AuraList mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
+        if(cinfo && (cinfo->type & (*i)->GetModifier()->m_miscvalue) != 0)
+            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    AuraList mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & (int32)spellProto->School) != 0)
+            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    AuraList mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & (int32)spellProto->School) != 0)
+            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    // TODO - fix PenaltyFactor and complete the formula from the wiki
+    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500) * (float)(100 - PenaltyFactor) / 100;
+    pdamage += uint32(ActualBenefit);
+
+    // Spell Criticals
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, critchance);
+
+    AuraList mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
+    for(AuraList::iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & spellProto->School) != 0)
+            critchance += (*i)->GetModifier()->m_amount;
+
+    critchance += int32(GetStat(STAT_INTELLECT)/100-1);
+    critchance = critchance > 0 ? critchance :0;
+
+    if(critchance >= urand(0,100))
     {
-        for(std::list<struct SpellCritSchool*>::iterator i = m_spellCritSchool.begin();i != m_spellCritSchool.end();i++)
-        {
-            if((*i)->school == -2 || (*i)->school == spellProto->School)
-            {
-                critchance += (*i)->chance;
-            }
-        }
-        critchance += int32(GetStat(STAT_INTELLECT)/100-1);
-        critchance = critchance > 0 ? critchance :0;
-        if(critchance >= urand(0,100))
-        {
-            pdamage = uint32(pdamage*1.5);
-            crit = 1;
-        }
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
-        {
-            if(cinfo && cinfo->type == (*i)->creaturetype)
-            {
-                pdamage += (*i)->damage;
-            }
-        }
-        for(std::list<struct DamageDone*>::iterator i = m_damageDone.begin();i != m_damageDone.end();i++)
-        {
-            if((*i)->school == 126 || SpellSchools((*i)->school) == spellProto->School)
-            {
-                pdamage += (*i)->damage;
-            }
-        }
-        for(std::list<struct DamageTaken*>::iterator i = pVictim->m_damageTaken.begin();i != pVictim->m_damageTaken.end();i++)
-        {
-            if((*i)->school == 126 || SpellSchools((*i)->school) == spellProto->School)
-            {
-                pdamage += (*i)->damage;
-            }
-        }
+        pdamage = uint32(pdamage*1.5);
+        crit = 1;
     }
+
     return pdamage;
 }
 
@@ -2357,40 +2366,29 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
             else pdamage = uint32(pdamage*0.75);
         }
     }
-        
 
-    if(pVictim)
-    {
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_damageDoneCreature.begin();i != m_damageDoneCreature.end();i++)
-        {
-            if(cinfo && cinfo->type == (*i)->creaturetype)
-            {
-                pdamage += (*i)->damage;
-            }
-        }
-        for(std::list<struct CreatureAttackPower*>::iterator i = pVictim->m_creatureAttackPower.begin();i != pVictim->m_creatureAttackPower.end();i++)
-        {
-            if(cinfo && cinfo->type == (*i)->creaturetype)
-            {
-                uint32 val = uint32((*i)->damage/14.0f * GetAttackTime(BASE_ATTACK)/1000);
-                pdamage += val;
-            }
-        }
-        for(std::list<struct DamageDone*>::iterator i = m_damageDone.begin();i != m_damageDone.end();i++)
-        {
-            if((*i)->school == 126 || SpellSchools((*i)->school) == 0)
-            {
-                pdamage += (*i)->damage;
-            }
-        }
-        for(std::list<struct DamageTaken*>::iterator i = pVictim->m_damageTaken.begin();i != pVictim->m_damageTaken.end();i++)
-        {
-            if((*i)->school == 126 || SpellSchools((*i)->school) == 0)
-            {
-                pdamage += (*i)->damage;
-            }
-        }
-    }
+    if(!pVictim) return pdamage;
+
+    AuraList mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
+        if(cinfo && cinfo->type == (*i)->GetModifier()->m_miscvalue)
+            pdamage += (*i)->GetModifier()->m_amount;
+
+    AuraList mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
+        if(SpellSchools((*i)->GetModifier()->m_miscvalue) == 0)
+            pdamage += (*i)->GetModifier()->m_amount;
+
+    AuraList mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
+        if(SpellSchools((*i)->GetModifier()->m_miscvalue) == 0)
+            pdamage += (*i)->GetModifier()->m_amount;
+
+    AuraList mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
+    for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
+        if(cinfo && (cinfo->type & (*i)->GetModifier()->m_miscvalue) != 0)
+            pdamage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+
     pdamage = uint32(pdamage * (m_modDamagePCT+100)/100);
     return pdamage;
 }

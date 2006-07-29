@@ -100,12 +100,12 @@ struct ProcTriggerSpell
     uint32 procCharges;
 };
 
-struct SpellCritSchool
+/*struct SpellCritSchool
 {
     uint32 spellId;
     int32 school;
     int32 chance;
-};
+};*/
 
 struct ReflectSpellSchool
 {
@@ -114,7 +114,7 @@ struct ReflectSpellSchool
     int32 chance;
 };
 
-struct DamageDoneCreature
+/*struct DamageDoneCreature
 {
     uint32 spellId;
     uint32 creaturetype;
@@ -147,7 +147,7 @@ struct PowerCostSchool
     uint32 spellId;
     int32 school;
     int32 damage;
-};
+};*/
 
 enum DeathState
 {
@@ -559,14 +559,14 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool waterbreath;
         std::list<struct DamageShield> m_damageShields;
         std::list<struct DamageManaShield*> m_damageManaShield;
-        std::list<struct SpellCritSchool*> m_spellCritSchool;
+        //std::list<struct SpellCritSchool*> m_spellCritSchool;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
-        std::list<struct DamageDoneCreature*> m_damageDoneCreature;
+        /*std::list<struct DamageDoneCreature*> m_damageDoneCreature;
         std::list<struct DamageDone*> m_damageDone;
         std::list<struct DamageTaken*> m_damageTaken;
         std::list<struct PowerCostSchool*> m_powerCostSchool;
-        std::list<struct CreatureAttackPower*> m_creatureAttackPower;
+        std::list<struct CreatureAttackPower*> m_creatureAttackPower;*/
 
         float GetHostility(uint64 guid) const;
         float GetHostilityDistance(uint64 guid) const { return GetHostility( guid )/(3.5f * getLevel()+1.0f); }

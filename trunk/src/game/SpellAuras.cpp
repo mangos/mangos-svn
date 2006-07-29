@@ -896,7 +896,7 @@ void Aura::HandleAuraModStun(bool apply)
 
 void Aura::HandleModDamageDone(bool apply)
 {
-    if(apply)
+/*    if(apply)
     {
 
         for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
@@ -924,7 +924,7 @@ void Aura::HandleModDamageDone(bool apply)
                 break;
             }
         }
-    }
+    }*/
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
     if(m_modifier.m_miscvalue2)
@@ -935,7 +935,7 @@ void Aura::HandleModDamageDone(bool apply)
 
 void Aura::HandleModDamageTaken(bool apply)
 {
-    if(apply)
+    /*if(apply)
     {
 
         for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
@@ -963,7 +963,7 @@ void Aura::HandleModDamageTaken(bool apply)
                 break;
             }
         }
-    }
+    }*/
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
     if(m_modifier.m_miscvalue2)
@@ -1910,7 +1910,7 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleModCreatureAttackPower(bool apply)
 {
-    if(apply)
+ /*   if(apply)
     {
 
         for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
@@ -1938,7 +1938,7 @@ void Aura::HandleModCreatureAttackPower(bool apply)
                 break;
             }
         }
-    }
+    }*/
 }
 
 void Aura::HandleAuraTransform(bool apply)
@@ -2030,7 +2030,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 
 void Aura::HandleModDamageDoneCreature(bool Apply)
 {
-    if(Apply)
+    /*if(Apply)
     {
 
         for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
@@ -2058,7 +2058,7 @@ void Aura::HandleModDamageDoneCreature(bool Apply)
                 break;
             }
         }
-    }
+    }*/
 }
 
 void Aura::HandleAuraManaShield(bool apply)
@@ -2089,6 +2089,7 @@ void Aura::HandleAuraManaShield(bool apply)
         {
             if(GetId() == (*i)->m_spellId)
             {
+                delete *i;
                 m_target->m_damageManaShield.erase(i);
                 break;
             }
@@ -2133,7 +2134,7 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
 
 void Aura::HandleModSpellCritChanceShool(bool Apply)
 {
-    if(Apply)
+    /*if(Apply)
     {
         for(std::list<struct SpellCritSchool*>::iterator i = m_target->m_spellCritSchool.begin();i != m_target->m_spellCritSchool.end();i++)
         {
@@ -2159,7 +2160,7 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
                 break;
             }
         }
-    }
+    }*/
 }
 
 void Aura::HandleModPowerCost(bool apply)
@@ -2169,7 +2170,7 @@ void Aura::HandleModPowerCost(bool apply)
 
 void Aura::HandleModPowerCostSchool(bool apply)
 {
-    if(apply)
+    /*if(apply)
     {
         for(std::list<struct PowerCostSchool*>::iterator i = m_target->m_powerCostSchool.begin();i != m_target->m_powerCostSchool.end();i++)
         {
@@ -2195,7 +2196,7 @@ void Aura::HandleModPowerCostSchool(bool apply)
                 break;
             }
         }
-    }
+    }*/
 }
 
 void Aura::HandleReflectSpellsSchool(bool apply)
@@ -2222,6 +2223,7 @@ void Aura::HandleReflectSpellsSchool(bool apply)
         {
             if(GetId() == (*i)->spellId)
             {
+                delete *i;
                 m_target->m_reflectSpellSchool.erase(i);
                 break;
             }

@@ -1082,16 +1082,14 @@ void Spell::TakePower()
     uint32 currentPower = m_caster->GetPower(powerType);
     uint32 manaCost = m_spellInfo->manaCost;
 
+    Unit::AuraList mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
+    for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue == m_spellInfo->School)
+            manaCost += (*i)->GetModifier()->m_amount;
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
-    for(std::list<struct PowerCostSchool*>::iterator i = m_caster->m_powerCostSchool.begin();i != m_caster->m_powerCostSchool.end();i++)
-    {
-        if(m_spellInfo->School == (*i)->school)
-        {
-            manaCost += (*i)->damage;
-            break;
-        }
-    }
+
     manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
 
     if(currentPower < manaCost)
