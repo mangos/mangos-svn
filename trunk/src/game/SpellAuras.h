@@ -189,6 +189,7 @@ class Aura
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
         void SetCastItem(ItemPrototype *proto) { m_castItem = proto; }
+        ItemPrototype *GetCastItem() { return m_castItem; }
         Aura *GetTriggeredByAura() const { return m_triggeredByAura; }
         void SetTriggeredByAura(Aura *Aur) { m_triggeredByAura = Aur; }
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }

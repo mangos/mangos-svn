@@ -195,30 +195,26 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 
 void Unit::RemoveSpellsCausingAura(uint32 auraType)
 {
-    AuraMap::iterator iter, next;
-    for (iter = m_Auras.begin(); iter != m_Auras.end(); iter = next)
+    AuraList::iterator iter, next;
+    for (iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end(); iter = next)
     {
         next = iter;
         ++next;
 
-        if ((*iter).second)
+        if (*iter)
         {
-            if (((*iter).second)->GetModifier()->m_auraname == auraType)
-            {
-                uint32 spellId = ((*iter).second)->GetId();
-                RemoveAurasDueToSpell(spellId);
-                if (!m_Auras.empty())
-                    next = m_Auras.begin();
-                else
-                    return;
-            }
+            RemoveAurasDueToSpell((*iter)->GetId());
+            if (!m_modAuras[auraType].empty())
+                next = m_modAuras[auraType].begin();
+            else
+                return;
         }
     }
 }
 
 bool Unit::HasAuraType(uint32 auraType) const
 {
-    return (m_AuraModifiers[auraType] != -1);
+    return (!m_modAuras[auraType].empty());
 }
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss)
@@ -1448,7 +1444,8 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
 
         Aur->_AddAura();
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
-        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount + 1);
+        m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
+        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
 
         if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
         {
@@ -1653,7 +1650,8 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             }
         }
     }
-    m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount + 1);
+    m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount);
+    m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
     (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
     delete (*i).second;

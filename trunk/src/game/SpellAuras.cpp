@@ -367,7 +367,7 @@ void Aura::Update(uint32 diff)
         }
     }
 
-    if(m_isPeriodic && m_duration >= 0)
+    if(m_isPeriodic && (m_duration >= 0 || m_isPassive))
     {
         if(m_periodicTimer > 0)
         {
@@ -378,6 +378,11 @@ void Aura::Update(uint32 diff)
         }
         if(m_periodicTimer == 0)
         {
+            if (m_modifier.m_auraname == SPELL_AURA_MOD_REGEN || m_modifier.m_auraname == SPELL_AURA_MOD_POWER_REGEN)
+            {
+                ApplyModifier(true);
+                return;
+            }
             // update before applying (aura can be removed in TriggerSpell or PeriodicAuraLog calls)
             m_periodicTimer = m_modifier.periodictime;
 
@@ -1826,6 +1831,15 @@ void Aura::HandleModRegen(bool apply)                       // eating
     if (m_castItem)
         if (m_castItem->Class == ITEM_CLASS_CONSUMABLE)
             m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+
+    if(apply && !m_periodicTimer)
+    {
+        m_periodicTimer = 5000;
+        if (m_target->GetHealth() + m_modifier.m_amount <= m_target->GetMaxHealth())
+            m_target->SetHealth(m_target->GetHealth() + m_modifier.m_amount);
+    }
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandleModPowerRegen(bool apply)                  // drinking
@@ -1833,6 +1847,16 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
     if (m_castItem)
         if (m_castItem->Class == ITEM_CLASS_CONSUMABLE)
             m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+
+    if(apply && !m_periodicTimer)
+    {
+        m_periodicTimer = 5000;
+        Powers pt = m_target->getPowerType();
+        if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
+            m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
+    }
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandleChannelDeathItem(bool apply)
