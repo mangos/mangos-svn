@@ -724,8 +724,6 @@ void Spell::EffectSummon(uint32 i)
     }
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    spawnCreature->SetPower(   POWER_HAPPINESS,1000000);
-    spawnCreature->SetMaxPower(POWER_HAPPINESS,600000);
     spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
     spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
@@ -736,7 +734,6 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PETNUMBER, unitTarget->GetGUIDLow());
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
@@ -965,8 +962,6 @@ void Spell::EffectSummonWild(uint32 i)
     }
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-    spawnCreature->SetPower(   POWER_HAPPINESS,1000000);
-    spawnCreature->SetMaxPower(POWER_HAPPINESS,600000);
     spawnCreature->setPowerType(POWER_MANA);
     spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
     spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
@@ -977,7 +972,6 @@ void Spell::EffectSummonWild(uint32 i)
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-    spawnCreature->SetUInt32Value(UNIT_FIELD_PETNUMBER, unitTarget->GetGUIDLow());
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
@@ -1173,8 +1167,6 @@ void Spell::EffectSummonPet(uint32 i)
             OldSummon->SetMaxHealth( 28 + 10 * petlvl );
             OldSummon->SetPower(   POWER_MANA, 28 + 10 * petlvl);
             OldSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlvl);
-            OldSummon->SetPower(   POWER_HAPPINESS , 600000);
-            OldSummon->SetMaxPower(POWER_HAPPINESS, 1000000);
             OldSummon->setDeathState(ALIVE);
             OldSummon->clearUnitState(UNIT_STAT_ALL_STATE);
             (*OldSummon)->Clear();
@@ -1210,16 +1202,10 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetMaxHealth( 28 + 10 * petlevel);
         NewSummon->SetPower(   POWER_MANA , 28 + 10 * petlevel);
         NewSummon->SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
-        NewSummon->SetPower(   POWER_HAPPINESS , 600000);
-        NewSummon->SetMaxPower(POWER_HAPPINESS, 1000000);
         NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,0);
-
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER, NewSummon->GetGUIDLow());
         NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
