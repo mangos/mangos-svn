@@ -1259,7 +1259,7 @@ void Player::GiveLevel()
     SetStat(STAT_SPIRIT,   uint32(newSPI));                 // only integer part
 
     // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, - float(getLevel())*5*0.04,true);
+    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, - 5*0.04,true);
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
