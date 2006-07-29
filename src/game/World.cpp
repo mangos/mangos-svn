@@ -290,7 +290,7 @@ void World::SetInitialWorldSettings()
     // need good tests on windows
 
     //uint32 m_CorpsesEventID =
-    AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
+    AddEvent(&HandleCorpsesErase,NULL,12000,false,true);
 
     // Weather Change
     sLog.outString( "WORLD: Starting Weather Change Handler" );
