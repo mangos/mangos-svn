@@ -644,6 +644,15 @@ void Spell::EffectOpenLock(uint32 i)
             SendCastResult(CAST_FAIL_FAILED);
             return;
         }
+        if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill +75 )
+            up_skillvalue = 4;
+        else if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill +50 )
+            up_skillvalue = 3;
+        else if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill +25 )
+            up_skillvalue = 2;
+        else if(((Player*)m_caster)->GetSkillValue(SKILL_MINING) >= requiredskill)
+            up_skillvalue = 1;
+        else up_skillvalue = 0;
 
         loottype=2;
     }else loottype=1;
@@ -2299,23 +2308,28 @@ void Spell::EffectSkill(uint32 i)
     uint32 skill_id = m_spellInfo->EffectMiscValue[i];
     if(skill_id == SKILL_FISHING && up_skillvalue != 4)
         up_skillvalue = player->CheckFishingAble();
-    if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING || SKILL_HERBALISM)
+    if(skill_id == SKILL_SKINNING || skill_id == SKILL_FISHING
+        || skill_id == SKILL_HERBALISM || skill_id == SKILL_MINING)
     {
         switch(up_skillvalue)
         {
             case 0:
                 return;
             case 1:
-                break;
+            {
+                if(urand(1,100) <= 10)
+                    return;
+                else break;
+            }
             case 2:
             {
-                if(urand(1,10) >= 3)
+                if(urand(1,100) <= 40)
                     return;
                 else break;
             }
             case 3:
             {
-                if(urand(1,10) >= 7)
+                if(urand(1,100) <= 70)
                     return;
                 else break;
             }
