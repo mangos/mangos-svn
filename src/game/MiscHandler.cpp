@@ -440,7 +440,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
                 if (*itr && (*itr)->GetCastItem() && (*itr)->GetCastItem()->Class == ITEM_CLASS_CONSUMABLE)
                 {
                    _player->RemoveAurasDueToSpell((*itr)->GetId());
-                    if (!regen_mods.empty()) next = regen_mods.begin();
+                    if (!p_regen_mods.empty()) next = p_regen_mods.begin();
                     else break;
                 }
             }
