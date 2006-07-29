@@ -2201,8 +2201,8 @@ void Player::SpawnCorpseBones()
     GetSession()->SendPacket(&data);
 
     m_pCorpse->SaveToDB(true);
+    MapManager::Instance().GetMap(this->GetMapId())->Remove(m_pCorpse, true);
     m_pCorpse = NULL;
-    delete m_pCorpse;
 }
 
 void Player::DeathDurabilityLoss(double percent)
