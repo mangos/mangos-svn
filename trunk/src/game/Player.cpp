@@ -2350,6 +2350,8 @@ void Player::UpdateSkillPro(uint32 spellid)
     uint16 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max)) return;
+    if(skill_id == SKILL_MINING && value>75)
+        return;
     if(value >= maxValue+25 )
         return;
     else if(value >= maxValue)

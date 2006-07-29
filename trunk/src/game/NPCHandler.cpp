@@ -150,6 +150,10 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         if(_player->HasSpell(spellInfo->Id))
             canlearnflag = 2;                               //gray, can't learn
 
+        if((*itr)->spell->Effect[1] == 44)
+        if(!_player->CanLearnProSpell((*itr)->spell->Id))
+            canlearnflag = 1;
+
         data << uint32((*itr)->spell->Id);
         data << uint8(canlearnflag);
         data << uint32((*itr)->spellcost);
