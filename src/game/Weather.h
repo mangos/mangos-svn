@@ -55,5 +55,5 @@ class Weather
         uint32 m_timer;
 };
 
-//void HandleWeather(void *weather);
+void HandleWeather(void *weather);
 #endif

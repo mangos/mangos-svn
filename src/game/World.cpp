@@ -291,6 +291,11 @@ void World::SetInitialWorldSettings()
 
     //uint32 m_CorpsesEventID =
     AddEvent(&HandleCorpsesErase,NULL,1200000,false,true);
+
+    // Weather Change
+    sLog.outString( "WORLD: Starting Weather Change Handler" );
+    AddEvent(&HandleWeather, NULL, 420000, false, true);
+
 }
 
 void World::Update(time_t diff)

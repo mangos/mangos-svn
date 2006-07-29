@@ -25,11 +25,11 @@
 #include "Config/ConfigEnv.h"
 #include "Chat.h"
 
-/*void HandleWeather(void *weather)
+void HandleWeather(void *weather)
 {
     Weather *wth = ((Weather*)weather);
     wth->ReGenerate();
-}*/
+}
 
 uint32 Weather::GetSound()
 {
@@ -76,7 +76,7 @@ Weather::Weather(Player *player) : m_zone( player->GetZoneId()), m_player(player
     ReGenerate();
     sLog.outString( "WORLD: Starting weather system(change per %u minutes).", (uint32)(m_interval / 60000) );
     m_timer = m_interval;
-    //AddEvent(&HandleWeather, NULL, 420000, false, true);
+//    AddEvent(&HandleWeather, NULL, 420000, false, true);
 }
 
 bool Weather::Update(uint32 diff)
