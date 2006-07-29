@@ -108,7 +108,9 @@ bool Pet::LoadPetFromDB( Unit* owner )
     }
     else if(owner->getClass() == CLASS_HUNTER)
     {
-        SetUInt32Value(UNIT_FIELD_BYTES_0,0x2020100);
+        SetUInt32Value(UNIT_FIELD_PETNUMBER, guid );
+        SetMaxPower(POWER_HAPPINESS,1000000);
+        SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
         setPowerType(POWER_FOCUS);
         SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
         SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
@@ -117,17 +119,13 @@ bool Pet::LoadPetFromDB( Unit* owner )
         SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
         SetArmor(petlevel*50);
     }
-    SetMaxPower(POWER_HAPPINESS,1000000);
-    SetPower(   POWER_HAPPINESS,fields[11].GetUInt32());
+
     SetMaxPower(POWER_MANA, 28 + 10 * petlevel);
     SetPower(   POWER_MANA, 28 + 10 * petlevel);
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
-
     SetUInt32Value(UNIT_FIELD_FLAGS,0);
-
     SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     SetUInt32Value(UNIT_FIELD_BYTES_2,1);
-    SetUInt32Value(UNIT_FIELD_PETNUMBER, guid );
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,5);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[4].GetUInt32());
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[5].GetUInt32());

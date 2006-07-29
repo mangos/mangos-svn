@@ -2345,6 +2345,19 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+    if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())
+    {
+        if(getPowerType() == POWER_FOCUS)
+        {
+            uint32 happiness = GetPower(POWER_HAPPINESS);
+            if(happiness>=750000)
+                pdamage = uint32(pdamage*1.25);
+            else if(happiness>=500000)
+                pdamage = uint32(pdamage*1.0);
+            else pdamage = uint32(pdamage*0.75);
+        }
+    }
+        
 
     if(pVictim)
     {

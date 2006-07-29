@@ -139,13 +139,13 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 {
     sLog.outString( "HandlePetNameQuery.\n" );
-    uint32 state2;
+    uint32 who;
     uint64 guid;
     uint32 state3;
 
     std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
 
-    recv_data >> state2;
+    recv_data >> who;
     recv_data >> guid;
 
     Creature* pet=ObjectAccessor::Instance().GetCreature(*_player,guid);
@@ -156,9 +156,9 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     }
     WorldPacket data;
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
-    data << uint32(0x18088);
-    data << name;
-    data << uint32(0x426D3DC6);
+    data << uint32(who);//This should be who(who query);
+    data << name.c_str();
+    data << uint32(0x426D3DC6);//Unknown, Fix me;
     _player->GetSession()->SendPacket(&data);
 }
 
@@ -170,6 +170,23 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
     sLog.outString( "HandlePetRename. CMSG_PET_RENAME\n" );
+    /*
+    uint32 state2;
+    uint64 guid;
+
+    std::string name = "ERROR_NO_NAME_FOR_PET_GUID";
+
+    recv_data >> state2;
+    recv_data >> guid;
+    recv_data >> name;
+    WorldPacket data;
+
+    data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
+    data << uint32(state2);
+    data << name;
+    data << uint32(0x426D3DC6);
+    _player->GetSession()->SendPacket(&data);
+    */
 }
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
