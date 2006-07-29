@@ -2134,6 +2134,7 @@ void Player::CreateCorpse()
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
         delete m_pCorpse;
+        m_pCorpse = NULL;
         return;
     }
 
@@ -2200,6 +2201,7 @@ void Player::SpawnCorpseBones()
     GetSession()->SendPacket(&data);
 
     m_pCorpse->SaveToDB(true);
+    delete m_pCorpse;
     m_pCorpse = NULL;
 }
 

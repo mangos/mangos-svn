@@ -36,6 +36,7 @@
 #include "ObjectAccessor.h"
 #include "Object.h"
 #include "BattleGround.h"
+#include "SpellAuras.h"
 
 //TODO add these to the proper header file
 
@@ -415,6 +416,35 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
         bytes1 &=0xFFFFFF00;
         bytes1 |=animstate;
         _player->SetUInt32Value(UNIT_FIELD_BYTES_1 , bytes1);
+
+        if (animstate != PLAYER_STATE_SIT_CHAIR && animstate != PLAYER_STATE_SIT_LOW_CHAIR && animstate != PLAYER_STATE_SIT_MEDIUM_CHAIR &&
+            animstate != PLAYER_STATE_SIT_HIGH_CHAIR && animstate != PLAYER_STATE_SIT && animstate != PLAYER_STATE_SLEEP &&
+            animstate != PLAYER_STATE_KNEEL)
+        {
+            // cancel drinking / eating
+            Unit::AuraList regen_mods = _player->GetAurasByType(SPELL_AURA_MOD_REGEN);
+            Unit::AuraList p_regen_mods = _player->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
+            for (Unit::AuraList::iterator itr = regen_mods.begin(), next; itr != regen_mods.end(); itr = next)
+            {
+                next = itr; next++;
+                if (*itr && (*itr)->GetCastItem() && (*itr)->GetCastItem()->Class == ITEM_CLASS_CONSUMABLE)
+                {
+                    _player->RemoveAurasDueToSpell((*itr)->GetId());
+                    if (!regen_mods.empty()) next = regen_mods.begin();
+                    else break;
+                }
+            }
+            for (Unit::AuraList::iterator itr = p_regen_mods.begin(), next; itr != p_regen_mods.end(); itr = next)
+            {
+                next = itr; next++;
+                if (*itr && (*itr)->GetCastItem() && (*itr)->GetCastItem()->Class == ITEM_CLASS_CONSUMABLE)
+                {
+                   _player->RemoveAurasDueToSpell((*itr)->GetId());
+                    if (!regen_mods.empty()) next = regen_mods.begin();
+                    else break;
+                }
+            }
+        }
     }
 }
 

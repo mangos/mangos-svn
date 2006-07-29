@@ -313,6 +313,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         typedef std::set<Unit*> AttackerSet;
         typedef std::pair<uint32, uint32> spellEffectPair;
         typedef std::map< spellEffectPair, Aura*> AuraMap;
+        typedef std::list<Aura *> AuraList;
         virtual ~Unit ( );
 
         virtual void Update( uint32 time );
@@ -575,6 +576,7 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap const& GetAuras( ) {return m_Auras;}
+        AuraList const& GetAurasByType(uint8 type) {return m_modAuras[type];}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
         void AddItemEnchant(uint32 enchant_id,bool apply);
@@ -624,6 +626,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_transform;
         uint32 m_removedAuras;
 
+        AuraList m_modAuras[TOTAL_AURAS];
         long m_AuraModifiers[TOTAL_AURAS];
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
