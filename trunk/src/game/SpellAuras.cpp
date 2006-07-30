@@ -720,8 +720,6 @@ void Aura::HandleModFear(bool Apply)
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
     }
     m_target->SendMessageToSet(&data,true);
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_target);
 }
 
 void HandleHealEvent(void *obj)
@@ -890,7 +888,6 @@ void Aura::HandleAuraModStun(bool apply)
         data.Initialize(SMSG_FORCE_MOVE_UNROOT);
         data << uint8(0xFF) << m_target->GetGUID();
         m_target->SendMessageToSet(&data,true);
-
     }
 }
 
@@ -1624,8 +1621,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
         unit_target->RemoveAurasDueToSpell(spellId);
         unit_target->ApplyStats(false);
     }
-    if(unit_target->GetTypeId() == TYPEID_PLAYER)
-        unit_target->SendUpdateToPlayer((Player*)unit_target);
 }
 
 void Aura::HandleFarSight(bool apply)
