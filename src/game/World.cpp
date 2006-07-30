@@ -294,8 +294,8 @@ void World::SetInitialWorldSettings()
 
     // Weather Change
     sLog.outString( "WORLD: Starting Weather Change Handler" );
-    AddEvent(&HandleWeather, NULL, 420000, false, true);
-
+    // crash server calling HandleWeather(NULL)
+    // AddEvent(&HandleWeather, NULL, 420000, false, true);
 }
 
 void World::Update(time_t diff)
