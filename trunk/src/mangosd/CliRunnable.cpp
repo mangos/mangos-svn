@@ -182,7 +182,7 @@ void CliExit(char*,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character` WHERE `online` > 0;");
+    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `character` WHERE `online` > 0;");
 
     if (result)
     {
@@ -220,7 +220,7 @@ void CliInfo(char*,pPrintf zprintf)
 void CliBanList(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result2 = loginDatabase.PQuery( "SELECT `username` FROM `account` WHERE `banned` > 0;" );
+    QueryResult *result2 = loginDatabase.Query( "SELECT `username` FROM `account` WHERE `banned` > 0;" );
     if(result2)
     {
         zprintf("Banned Accounts:\x0d\x0a");
@@ -232,7 +232,7 @@ void CliBanList(char*,pPrintf zprintf)
         delete result2;
     }
 
-    QueryResult *result3 = loginDatabase.PQuery( "SELECT `ip` FROM `ip_banned`;" );
+    QueryResult *result3 = loginDatabase.Query( "SELECT `ip` FROM `ip_banned`;" );
     if(result3)
     {
         zprintf("Banned IPs:\x0d\x0a");
@@ -313,7 +313,7 @@ void CliListGM(char *command,pPrintf zprintf)
 
     Field *fields;
 
-    QueryResult *result = loginDatabase.PQuery( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0;" );
+    QueryResult *result = loginDatabase.Query( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0;" );
     if(result)
     {
 
@@ -470,6 +470,7 @@ void ParseCommand( pPrintf zprintf, char*command)
 
 void CliRunnable::run()
 {
+    mysql_thread_init(); // let thread do safe mySQL requests
 
     char commandbuf[256];
 
@@ -502,6 +503,7 @@ void CliRunnable::run()
 
     }
 
+    mysql_thread_end(); // free mySQL thread resources
 }
 
 void CliKick(char*command,pPrintf zprintf)

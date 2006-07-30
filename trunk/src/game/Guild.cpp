@@ -75,7 +75,7 @@ void Guild::create(uint64 lGuid, std::string gname)
 
     sLog.outDebug("GUILD: creating guild %s to leader:%lu", gname.c_str(), leaderGuid);
 
-    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`guildid`) FROM `guild`;" );
+    QueryResult *result = sDatabase.Query( "SELECT MAX(`guildid`) FROM `guild`;" );
     if( result )
     {
         Id = (*result)[0].GetUInt32()+1;

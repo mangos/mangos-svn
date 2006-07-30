@@ -25,12 +25,6 @@
 #include "Config/ConfigEnv.h"
 #include "Chat.h"
 
-void HandleWeather(void *weather)
-{
-    Weather *wth = ((Weather*)weather);
-    wth->ReGenerate();
-}
-
 uint32 Weather::GetSound()
 {
     uint32 sound;

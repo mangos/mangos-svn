@@ -25,6 +25,8 @@
 
 void WorldRunnable::run()
 {
+    mysql_thread_init(); // let thread do safe mySQL requests
+
     uint32 realCurrTime = 0, realPrevTime = 0;
 
     while (!Master::m_stopEvent)
@@ -39,4 +41,6 @@ void WorldRunnable::run()
 
         ZThread::Thread::sleep(50);
     }
+
+    mysql_thread_end(); // free mySQL thread resources
 }

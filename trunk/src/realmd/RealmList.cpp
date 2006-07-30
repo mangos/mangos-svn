@@ -43,7 +43,7 @@ int RealmList::GetAndAddRealms(std::string dbstring)
 {
     int count = 0;
     //QueryResult *result = dbRealmServer.PQuery( "SELECT `name`,`address`,`icon`,`color`,`timezone`, `dbstring` FROM `realmlist` ORDER BY `name`;" );
-    QueryResult *result = dbRealmServer.PQuery( "SELECT `id`, `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
+    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`;" );
     if(result)
     {
         do

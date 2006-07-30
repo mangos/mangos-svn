@@ -124,7 +124,8 @@ Player::Player (WorldSession *session): Unit()
 
     m_BlockValue = 0;
 
-    m_Last_tick = time(NULL);
+    m_logintime = time(NULL);
+    m_Last_tick = m_logintime;
 }
 
 Player::~Player ()
@@ -637,7 +638,7 @@ void Player::Update( uint32 p_time )
 
     Unit::Update( p_time );
 
-    uint32 now = (uint32)time (NULL);
+    time_t now = time (NULL);
 
     UpdatePVPFlag(time(NULL));
 

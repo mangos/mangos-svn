@@ -25,9 +25,11 @@
 
 void HandleCorpsesErase(void*)
 {
+    mysql_thread_init(); // let thread do safe mySQL requests
+
     sLog.outBasic("Global Event (corpses/bones removal)");
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 1200 AND `bones_flag` = 1;");
+    QueryResult *result = sDatabase.Query("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 1200 AND `bones_flag` = 1;");
 
     if(result)
     {
@@ -53,7 +55,7 @@ void HandleCorpsesErase(void*)
         delete result;
     }
 
-    result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 259200 AND `bones_flag` = 0;");
+    result = sDatabase.Query("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 259200 AND `bones_flag` = 0;");
 
     if(result)
     {
@@ -79,4 +81,5 @@ void HandleCorpsesErase(void*)
 
         delete result;
     }
+    mysql_thread_end(); // free mySQL thread resources
 }

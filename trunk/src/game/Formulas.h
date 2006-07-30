@@ -33,7 +33,7 @@ namespace MaNGOS
             uint64 guid = 0;
             int standing = 0;
 
-            QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` ORDER BY `rating` DESC;");
+            QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` ORDER BY `rating` DESC;");
             if(result)
             {
                 do
