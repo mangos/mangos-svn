@@ -1203,7 +1203,7 @@ uint8 Spell::CanCast()
         if(castResult != 0)
             SendCastResult(castResult);
 
-        return castResult;
+        //return castResult;
     }
     Unit *target = m_targets.getUnitTarget();
     if(target)

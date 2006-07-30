@@ -1475,6 +1475,9 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     if(!spellInfo) return;
     newrank = FindSpellRank(spell_id);
 
+    if(spellInfo->Effect[0] == 60)
+        GetSession()->SendProficiency(spellInfo->EquippedItemClass,spellInfo->EquippedItemSubClass);
+
     PlayerSpell *newspell;
 
     newspell = new PlayerSpell;
