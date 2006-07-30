@@ -188,10 +188,6 @@ class Aura
         void SendCoolDownEvent();
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
-        void SetCastItem(ItemPrototype *proto) { m_castItem = proto; }
-        ItemPrototype *GetCastItem() { return m_castItem; }
-        Aura *GetTriggeredByAura() const { return m_triggeredByAura; }
-        void SetTriggeredByAura(Aura *Aur) { m_triggeredByAura = Aur; }
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
 
     private:
@@ -204,8 +200,6 @@ class Aura
         //SpellEntry *m_spellProto;
         Unit* m_caster;
         Unit* m_target;
-        ItemPrototype* m_castItem;
-        Aura* m_triggeredByAura;
         int32 m_duration;
 
         uint8 m_auraSlot;

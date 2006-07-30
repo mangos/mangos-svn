@@ -1082,7 +1082,7 @@ void Spell::TakePower()
     uint32 currentPower = m_caster->GetPower(powerType);
     uint32 manaCost = m_spellInfo->manaCost;
 
-    Unit::AuraList mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
+    Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue == m_spellInfo->School)
             manaCost += (*i)->GetModifier()->m_amount;
@@ -1411,7 +1411,7 @@ uint8 Spell::CanCast()
     if (m_caster->m_currentSpell != this && m_spellInfo->SpellIconID == 12 &&
         m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_targets.getUnitTarget())
     {
-        Unit::AuraMap t_auras = m_targets.getUnitTarget()->GetAuras();
+        Unit::AuraMap& t_auras = m_targets.getUnitTarget()->GetAuras();
         bool hasImmolate = false;
         for(Unit::AuraMap::iterator itr = t_auras.begin(); itr != t_auras.end(); ++itr)
         {

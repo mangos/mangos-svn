@@ -262,10 +262,6 @@ void Spell::EffectApplyAura(uint32 i)
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
-    if (m_CastItem)
-        Aur->SetCastItem(m_CastItem->GetProto());
-    if (m_triggeredByAura)
-        Aur->SetTriggeredByAura(m_triggeredByAura);
     unitTarget->AddAura(Aur);
     if (Aur && Aur->IsTrigger())
     {

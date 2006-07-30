@@ -205,7 +205,7 @@ Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
 m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_castItem(NULL), m_triggeredByAura(NULL), m_removeOnDeath(false)
+m_removeOnDeath(false)
 {
     assert(target);
     sLog.outDebug("Aura construct spellid is: %u, auraname is: %u.", spellproto->Id, spellproto->EffectApplyAuraName[eff]);
@@ -1828,9 +1828,8 @@ void Aura::HandleModBaseResistance(bool apply)
 
 void Aura::HandleModRegen(bool apply)                       // eating
 {
-    if (m_castItem)
-        if (m_castItem->Class == ITEM_CLASS_CONSUMABLE)
-            m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 
     if(apply && !m_periodicTimer)
     {
@@ -1844,9 +1843,8 @@ void Aura::HandleModRegen(bool apply)                       // eating
 
 void Aura::HandleModPowerRegen(bool apply)                  // drinking
 {
-    if (m_castItem)
-        if (m_castItem->Class == ITEM_CLASS_CONSUMABLE)
-            m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 
     if(apply && !m_periodicTimer)
     {
