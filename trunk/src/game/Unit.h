@@ -575,8 +575,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         Unit* SelectHostilTarget();
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
-        AuraMap const& GetAuras( ) {return m_Auras;}
-        AuraList const& GetAurasByType(uint8 type) {return m_modAuras[type];}
+        AuraMap& GetAuras( ) {return m_Auras;}
+        AuraList& GetAurasByType(uint8 type) {return m_modAuras[type];}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
         void AddItemEnchant(uint32 enchant_id,bool apply);

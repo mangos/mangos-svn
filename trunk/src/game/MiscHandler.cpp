@@ -422,27 +422,13 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
             animstate != PLAYER_STATE_KNEEL)
         {
             // cancel drinking / eating
-            Unit::AuraList regen_mods = _player->GetAurasByType(SPELL_AURA_MOD_REGEN);
-            Unit::AuraList p_regen_mods = _player->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
-            for (Unit::AuraList::iterator itr = regen_mods.begin(), next; itr != regen_mods.end(); itr = next)
+            Unit::AuraMap& p_auras = _player->GetAuras();
+            for (Unit::AuraMap::iterator itr = p_auras.begin(); itr != p_auras.end();)
             {
-                next = itr; next++;
-                if (*itr && (*itr)->GetCastItem() && (*itr)->GetCastItem()->Class == ITEM_CLASS_CONSUMABLE)
-                {
-                    _player->RemoveAurasDueToSpell((*itr)->GetId());
-                    if (!regen_mods.empty()) next = regen_mods.begin();
-                    else break;
-                }
-            }
-            for (Unit::AuraList::iterator itr = p_regen_mods.begin(), next; itr != p_regen_mods.end(); itr = next)
-            {
-                next = itr; next++;
-                if (*itr && (*itr)->GetCastItem() && (*itr)->GetCastItem()->Class == ITEM_CLASS_CONSUMABLE)
-                {
-                   _player->RemoveAurasDueToSpell((*itr)->GetId());
-                    if (!p_regen_mods.empty()) next = p_regen_mods.begin();
-                    else break;
-                }
+                if (itr->second && (itr->second->GetSpellProto()->AuraInterruptFlags & (1<<18)) != 0)
+                    _player->RemoveAura(itr);
+                else
+                    ++itr;
             }
         }
     }

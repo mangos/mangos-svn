@@ -195,6 +195,7 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
 
 void Unit::RemoveSpellsCausingAura(uint32 auraType)
 {
+    if (auraType >= TOTAL_AURAS) return;
     AuraList::iterator iter, next;
     for (iter = m_modAuras[auraType].begin(); iter != m_modAuras[auraType].end(); iter = next)
     {
@@ -2320,8 +2321,6 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdamage)
 {
     if(!spellProto || !pVictim) return pdamage;
-    int32 critchance = m_baseSpellCritChance;
-    int crit = 0;
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -2333,17 +2332,17 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     if (CastingTime > 3500) CastingTime = 3500;
     if (CastingTime < 1500) CastingTime = 1500;
 
-    AuraList mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
         if(cinfo && (cinfo->type & (*i)->GetModifier()->m_miscvalue) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    AuraList mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if(((*i)->GetModifier()->m_miscvalue & (int32)spellProto->School) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    AuraList mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if(((*i)->GetModifier()->m_miscvalue & (int32)spellProto->School) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
@@ -2353,21 +2352,23 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     pdamage += uint32(ActualBenefit);
 
     // Spell Criticals
+    bool crit = false;
+    int32 critchance = m_baseSpellCritChance + int32(GetStat(STAT_INTELLECT)/100-1);
+    critchance = critchance > 0 ? critchance :0;
+
     if (GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, critchance);
 
-    AuraList mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
+    AuraList& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
     for(AuraList::iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & spellProto->School) != 0)
             critchance += (*i)->GetModifier()->m_amount;
 
-    critchance += int32(GetStat(STAT_INTELLECT)/100-1);
     critchance = critchance > 0 ? critchance :0;
-
     if(critchance >= urand(0,100))
     {
         pdamage = uint32(pdamage*1.5);
-        crit = 1;
+        crit = true;
     }
 
     return pdamage;
@@ -2393,22 +2394,22 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
 
     if(!pVictim) return pdamage;
 
-    AuraList mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
         if(cinfo && cinfo->type == (*i)->GetModifier()->m_miscvalue)
             pdamage += (*i)->GetModifier()->m_amount;
 
-    AuraList mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if(SpellSchools((*i)->GetModifier()->m_miscvalue) == 0)
             pdamage += (*i)->GetModifier()->m_amount;
 
-    AuraList mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    AuraList& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
         if(SpellSchools((*i)->GetModifier()->m_miscvalue) == 0)
             pdamage += (*i)->GetModifier()->m_amount;
 
-    AuraList mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
+    AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
         if(cinfo && (cinfo->type & (*i)->GetModifier()->m_miscvalue) != 0)
             pdamage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
