@@ -1845,8 +1845,11 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
     {
         m_periodicTimer = 5000;
         Powers pt = m_target->getPowerType();
-        if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
-            m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
+        if(pt != POWER_RAGE || !m_target->isInCombat()) // Prevent rage regeneration in combat with rage loss slowdown warrior talant
+        {
+            if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
+                m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
+        }
     }
 
     m_isPeriodic = apply;

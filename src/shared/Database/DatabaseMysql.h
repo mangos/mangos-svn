@@ -20,6 +20,7 @@
 #define _DATABASEMYSQL_H
 
 #include "Policies/Singleton.h"
+#include "zthread/FastMutex.h"
 
 #ifdef WIN32
 #include <winsock2.h>
@@ -47,6 +48,7 @@ class DatabaseMysql : public Database
         operator bool () const { return mMysql != NULL; }
 
     private:
+        ZThread::FastMutex mMutex;
         MYSQL *mMysql;
 };
 

@@ -673,7 +673,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     // ticket<end>
     if (!px)
     {
-        QueryResult *result = sDatabase.PQuery("SELECT `ticket_id` FROM `character_ticket`;");
+        QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`;");
         size_t count = result ? result->GetRowCount() : 0;
 
         PSendSysMessage("Tickets count: %i show new tickets: %s\n", count,m_session->GetPlayer()->isAcceptTickets() ?  "on" : "off");
@@ -701,7 +701,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     int num = atoi(px);
     if(num > 0)
     {
-        QueryResult *result = sDatabase.PQuery("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket`;");
+        QueryResult *result = sDatabase.Query("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket`;");
 
         if(!result || num > result->GetRowCount())
         {
@@ -748,7 +748,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
 
 uint32 ChatHandler::GetTicketIDByNum(uint32 num)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `ticket_id` FROM `character_ticket`;");
+    QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`;");
 
     if(!result || num > result->GetRowCount())
     {

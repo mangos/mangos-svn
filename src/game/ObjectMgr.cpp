@@ -255,7 +255,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 
 void ObjectMgr::LoadAuctions()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `auctionhouse`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `auctionhouse`;" );
 
     if( !result )
         return;
@@ -290,7 +290,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `auctionhouse_item`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `auctionhouse_item`;" );
 
     if( !result )
         return;
@@ -310,7 +310,7 @@ void ObjectMgr::LoadAuctionItems()
 
 void ObjectMgr::LoadMailedItems()
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `mail_item`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `mail_item`;" );
 
     if( !result )
         return;
@@ -331,7 +331,7 @@ void ObjectMgr::LoadMailedItems()
 void ObjectMgr::LoadGuilds()
 {
     Guild *newguild;
-    QueryResult *result = sDatabase.PQuery( "SELECT `guildid` FROM `guild`;" );
+    QueryResult *result = sDatabase.Query( "SELECT `guildid` FROM `guild`;" );
     uint32 count = 0;
 
     if( !result )
@@ -411,7 +411,7 @@ GossipText *ObjectMgr::GetGossipText(uint32 Text_ID)
 void ObjectMgr::LoadGossipText()
 {
     GossipText *pGText;
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_text`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `npc_text`;" );
 
     int count = 0;
     if( !result ) return;
@@ -509,7 +509,7 @@ AreaTriggerPoint *ObjectMgr::GetAreaTriggerQuestPoint(uint32 Trigger_ID)
 void ObjectMgr::LoadAreaTriggerPoints()
 {
     int count = 0;
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `areatrigger_involvedrelation`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `areatrigger_involvedrelation`;" );
     AreaTriggerPoint *pArea;
 
     if( !result ) return;
@@ -699,7 +699,7 @@ AreaTrigger *ObjectMgr::GetAreaTrigger(uint32 Trigger_ID)
 void ObjectMgr::LoadTeleportCoords()
 {
 
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `areatrigger_template`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `areatrigger_template`;" );
 
     if( !result )
         return;
@@ -782,7 +782,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_auctionid = 0;
     }
-    result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `mail`;" );
+    result = sDatabase.Query( "SELECT MAX(`id`) FROM `mail`;" );
     if( result )
     {
         m_mailid = (*result)[0].GetUInt32()+1;
@@ -794,7 +794,7 @@ void ObjectMgr::SetHighestGuids()
         m_mailid = 0;
     }
 
-    result = sDatabase.PQuery( "SELECT MAX(`guid`) FROM `game_corpse`;" );
+    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `game_corpse`;" );
     if( result )
     {
         m_hiCorpseGuid = (*result)[0].GetUInt32()+1;
