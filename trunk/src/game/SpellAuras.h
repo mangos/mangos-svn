@@ -201,6 +201,7 @@ class Aura
         Unit* m_caster;
         Unit* m_target;
         int32 m_duration;
+        int32 m_timeCla;
 
         uint8 m_auraSlot;
 

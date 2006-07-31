@@ -203,7 +203,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
-m_caster(caster), m_target(target), m_auraSlot(0),m_positive(false), m_permanent(false),
+m_caster(caster), m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
 m_removeOnDeath(false)
 {
@@ -307,6 +307,19 @@ void Aura::Update(uint32 diff)
         m_duration -= diff;
         if (m_duration < 0)
             m_duration = 0;
+        m_timeCla -= diff;
+        if(m_timeCla < 0)
+        {
+            Powers powertype = m_caster->getPowerType();
+            uint32 curpower = m_caster->GetPower(powertype);
+            uint32 manaPerSecond = GetSpellProto()->manaPerSecond;
+            uint32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*m_caster->getLevel());
+            m_timeCla = 1000;
+            if(manaPerSecond)
+                m_caster->SetPower(powertype,curpower-manaPerSecond);
+            if(manaPerSecondPerLevel)
+                m_caster->SetPower(powertype,curpower-manaPerSecondPerLevel);
+        }
         if(m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))
         {
             float x,y,z,angle,speed,pos_x,pos_y,pos_z;
