@@ -1094,7 +1094,7 @@ void Spell::TakePower()
 
     if(currentPower < manaCost)
         m_caster->SetPower(powerType, 0);
-    else
+    else if(manaCost > 0)
     {
         m_caster->SetPower(powerType, currentPower - manaCost);
         if (powerType == POWER_MANA)
