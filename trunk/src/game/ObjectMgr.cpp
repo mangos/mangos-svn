@@ -372,7 +372,7 @@ void ObjectMgr::LoadQuests()
     // create multimap previous quest for each existed quest
     // some quests can have many previous maps setted by NextQuestId in previouse quest
     // for example set of race quests can lead to single not race specific quest
-    for(uint32 i = 1; i < sQuestsStorage.RecordCount; ++i )
+    for(uint32 i = 1; i < sQuestsStorage.MaxEntry; ++i )
     {
         QuestInfo* qinfo = (QuestInfo*)sQuestsStorage.pIndex[i];
 
