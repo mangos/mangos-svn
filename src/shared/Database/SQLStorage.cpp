@@ -81,6 +81,7 @@ void SQLStorage::Load ()
     if(!result)
     {
         printf("%s table is empty!\n",table);
+        RecordCount = 0;
         return;
     }
 
