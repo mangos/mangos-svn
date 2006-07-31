@@ -308,16 +308,20 @@ void Aura::Update(uint32 diff)
         if (m_duration < 0)
             m_duration = 0;
         m_timeCla -= diff;
-        if(m_timeCla < 0)
+        if(m_timeCla <= 0)
         {
             Powers powertype = m_caster->getPowerType();
             uint32 curpower = m_caster->GetPower(powertype);
             uint32 manaPerSecond = GetSpellProto()->manaPerSecond;
             uint32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*m_caster->getLevel());
             m_timeCla = 1000;
-            if(manaPerSecond)
+            if(manaPerSecond > curpower)
+                m_caster->SetPower(powertype,0);
+            else
                 m_caster->SetPower(powertype,curpower-manaPerSecond);
-            if(manaPerSecondPerLevel)
+            if(manaPerSecondPerLevel > curpower)
+                m_caster->SetPower(powertype,0);
+            else
                 m_caster->SetPower(powertype,curpower-manaPerSecondPerLevel);
         }
         if(m_target->isAlive() && m_target->hasUnitState(UNIT_STAT_FLEEING))

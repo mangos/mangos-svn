@@ -1084,7 +1084,7 @@ void Spell::TakePower()
     if(m_spellInfo->manaCostPerlevel)
         manaCost += uint32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
     if(m_spellInfo->ManaCostPercentage)
-        manaCost += uint32(m_spellInfo->ManaCostPercentage*m_caster->GetPower(m_caster->getPowerType()));
+        manaCost += uint32(m_spellInfo->ManaCostPercentage*currentPower);
 
     Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
     for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
@@ -1097,7 +1097,10 @@ void Spell::TakePower()
     manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
 
     if(currentPower < manaCost)
-        m_caster->SetPower(powerType, 0);
+    {
+        SendCastResult(CAST_FAIL_NOT_ENOUGH_MANA);
+        return;
+    }
     else if(manaCost > 0)
     {
         m_caster->SetPower(powerType, currentPower - manaCost);
