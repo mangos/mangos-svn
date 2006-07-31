@@ -6877,7 +6877,7 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
     data.Initialize( SMSG_INVENTORY_CHANGE_FAILURE );
     data << msg;
     if( msg == EQUIP_ERR_YOU_MUST_REACH_LEVEL_N )
-        data << (pItem ? pItem->GetProto()->RequiredLevel : uint32(0));
+        data << (pItem && pItem->GetProto() ? pItem->GetProto()->RequiredLevel : uint32(0));
     data << (pItem ? pItem->GetGUID() : uint64(0));
     data << (pItem2 ? pItem2->GetGUID() : uint64(0));
     data << uint8(0);

@@ -38,7 +38,19 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     recvPacket >> bagIndex >> slot >> tmp3;
 
     Item *pItem = pUser->GetItemByPos(bagIndex, slot);
+    if(!pItem)
+    {
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        return;
+    }
+
     ItemPrototype *proto = pItem->GetProto();
+    if(!pItem)
+    {
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        return;
+    }
+
     spellId = proto->Spells[0].SpellId;
 
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -60,18 +72,15 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         if (proto->Class == ITEM_CLASS_CONSUMABLE || proto->Class == ITEM_CLASS_TRADE_GOODS ||
             proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_JUNK)
         {
-
-            WorldPacket data;
-            data.Initialize (SMSG_INVENTORY_CHANGE_FAILURE);
-            data << uint8(EQUIP_ERR_CANT_DO_IN_COMBAT);
-            data << (pItem ? pItem->GetGUID() : uint64(0));
-            //            data << (pItem ? pItem->GetGUID() : uint64(0));
-            data << uint64(0);
-            data << uint8(0);
-            SendPacket(&data);
+            pUser->SendEquipError(EQUIP_ERR_CANT_DO_IN_COMBAT,pItem,NULL);
             return;
         }
     }
+
+    // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
+    if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
+        pItem->SetBinding( true );
+
     Spell *spell = new Spell(pUser, spellInfo, false, 0);
     WPAssert(spell);
 
