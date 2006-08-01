@@ -1072,7 +1072,7 @@ void Player::Regenerate(Powers power)
             }
             break;
         case POWER_RAGE:                                    // Regenerate rage
-            addvalue = uint32(1.66 * RageIncreaseRate);
+            addvalue = uint32(30 * RageIncreaseRate); // 3 rage by tick
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = uint32(20);
