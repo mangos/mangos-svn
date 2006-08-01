@@ -170,7 +170,7 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
 
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
-    if (GetTypeId() != TYPEID_PLAYER)
+    if (GetTypeId() == TYPEID_PLAYER)
         m_attackTimer[type] = GetAttackTime(type);
     else
         m_attackTimer[type] = 2000;
@@ -386,7 +386,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
             if( GetTypeId() == TYPEID_PLAYER
-                && (getClass() == WARRIOR || m_form == 5 || m_form == 8) )
+                && (getClass() == WARRIOR || m_form == 5 || m_form == 8) 
+                && !m_currentMeleeSpell) // not generate rage for special attacks
                 ((Player*)this)->CalcRage(damage,true);
         }
         else

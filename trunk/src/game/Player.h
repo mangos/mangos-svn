@@ -224,6 +224,14 @@ enum PlayerFlags
     PLAYER_FLAGS_RESTING = 0x20,
 };
 
+enum LootType
+{
+    LOOT_CORPSE = 1,
+    LOOT_SKINNING = 2,
+    LOOT_FISHING = 3,
+    LOOT_PICKPOKETING = 4 // unsupported by client, sending LOOT_SKINNING instead
+};
+
 #define IS_BACK_SLOT(s) (s == 0xFF)
 
 class Quest;
@@ -799,7 +807,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerMenu* PlayerTalkClass;
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
-        void SendLoot(uint64 guid,uint8 loot_type);
+        void SendLoot(uint64 guid, LootType loot_type);
         uint8 CheckFishingAble() const;
 
         /*********************************************************/

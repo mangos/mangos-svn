@@ -134,9 +134,7 @@ void GameObject::Delete()
 void GameObject::getFishLoot(Loot *fishloot)
 {
     uint32 zone = GetZoneId();
-    lootid = 30000 + zone;
-    //in some DB,30000 is't right.check your DB.if 30001 -32XXX is fish loot.
-    FillLoot(0,fishloot,lootid);
+    FillLoot(0,fishloot,zone,LootTemplates_Fishing);
 }
 
 void GameObject::SaveToDB()

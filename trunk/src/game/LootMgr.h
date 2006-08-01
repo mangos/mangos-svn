@@ -67,12 +67,17 @@ struct Loot
     void clear() { items.clear(); gold = 0; }
 };
 
-void FillLoot(Player* player,Loot *loot, uint32 loot_id);
-void FillSkinLoot(Loot *Skinloot,uint32 itemid);
-void LoadLootTables();
-
 typedef list<LootItem> LootItemList;
 typedef HM_NAMESPACE::hash_map<uint32, LootItemList > LootStore;
+
+extern LootStore LootTemplates_Creature;
+extern LootStore LootTemplates_Fishing;
+extern LootStore LootTemplates_Gameobject;
+extern LootStore LootTemplates_Pickpocketing;
+
+void FillLoot(Player* player,Loot *loot, uint32 loot_id, LootStore& store);
+void FillSkinLoot(Loot *Skinloot,uint32 itemid);
+void LoadLootTables();
 
 inline ByteBuffer& operator<<(ByteBuffer& b, LootItem& li)
 {

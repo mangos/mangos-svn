@@ -387,6 +387,7 @@ class Spell
         void EffectSummon(uint32 i);
         void EffectLearnSpell(uint32 i);
         void EffectDispel(uint32 i);
+        void EffectPickPocket(uint32 i);
         void EffectSummonWild(uint32 i);
         void EffectTeleUnitsFaceCaster(uint32 i);
         void EffectLearnSkill(uint32 i);

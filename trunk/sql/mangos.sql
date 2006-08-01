@@ -656,6 +656,30 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `creature_involvedrelation` ENABLE KEYS */;
 
 --
+-- Table structure for table `creature_loot_template`
+--
+
+DROP TABLE IF EXISTS `creature_loot_template`;
+CREATE TABLE `creature_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  `questchance` float NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `creature_loot_template`
+--
+
+
+/*!40000 ALTER TABLE `creature_loot_template` DISABLE KEYS */;
+LOCK TABLES `creature_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `creature_loot_template` ENABLE KEYS */;
+
+
+--
 -- Table structure for table `creature_movement`
 --
 
@@ -778,6 +802,29 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
+
+--
+-- Table structure for table `fishing_loot_template`
+--
+
+DROP TABLE IF EXISTS `fishing_loot_template`;
+CREATE TABLE `fishing_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  `questchance` float NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `fishing_loot_template`
+--
+
+
+/*!40000 ALTER TABLE `fishing_loot_template` DISABLE KEYS */;
+LOCK TABLES `fishing_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `fishing_loot_template` ENABLE KEYS */;
 
 --
 -- Table structure for table `game_addons`
@@ -1075,6 +1122,30 @@ CREATE TABLE `gameobject_involvedrelation` (
 LOCK TABLES `gameobject_involvedrelation` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `gameobject_involvedrelation` ENABLE KEYS */;
+
+--
+-- Table structure for table `gameobject_loot_template`
+--
+
+DROP TABLE IF EXISTS `gameobject_loot_template`;
+CREATE TABLE `gameobject_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  `questchance` float NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `gameobject_loot_template`
+--
+
+
+/*!40000 ALTER TABLE `gameobject_loot_template` DISABLE KEYS */;
+LOCK TABLES `gameobject_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `gameobject_loot_template` ENABLE KEYS */;
+
 
 --
 -- Table structure for table `gameobject_questrelation`
@@ -1392,29 +1463,6 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `item_template` ENABLE KEYS */;
 
 --
--- Table structure for table `loot_template`
---
-
-DROP TABLE IF EXISTS `loot_template`;
-CREATE TABLE `loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
-  `chance` float NOT NULL default '100',
-  `questchance` float NOT NULL default '0',
-  PRIMARY KEY  (`entry`,`item`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
-
---
--- Dumping data for table `loot_template`
---
-
-
-/*!40000 ALTER TABLE `loot_template` DISABLE KEYS */;
-LOCK TABLES `loot_template` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `loot_template` ENABLE KEYS */;
-
---
 -- Table structure for table `mail`
 --
 
@@ -1710,6 +1758,30 @@ CREATE TABLE `npc_vendor` (
 LOCK TABLES `npc_vendor` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `npc_vendor` ENABLE KEYS */;
+
+--
+-- Table structure for table `pickpocketing_loot_template`
+--
+
+DROP TABLE IF EXISTS `pickpocketing_loot_template`;
+CREATE TABLE `pickpocketing_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `chance` float NOT NULL default '100',
+  `questchance` float NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `pickpocketing_loot_template`
+--
+
+
+/*!40000 ALTER TABLE `pickpocketing_loot_template` DISABLE KEYS */;
+LOCK TABLES `pickpocketing_loot_template` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `pickpocketing_loot_template` ENABLE KEYS */;
+
 
 --
 -- Table structure for table `playercreateinfo`

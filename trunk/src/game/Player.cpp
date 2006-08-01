@@ -3683,7 +3683,7 @@ void Player::_ApplyAllItemMods()
 3-Fishing
 */
 
-void Player::SendLoot(uint64 guid, uint8 loot_type)
+void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     Loot    *loot;
 
@@ -3702,9 +3702,9 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
             uint32 lootid =  go->lootid;
 
             if(lootid)
-                FillLoot(this,loot,lootid);
+                FillLoot(this,loot,lootid,LootTemplates_Gameobject);
 
-            if(loot_type == 3)
+            if(loot_type == LOOT_FISHING)
                 go->getFishLoot(loot);
         }
     }
@@ -3718,27 +3718,53 @@ void Player::SendLoot(uint64 guid, uint8 loot_type)
 
         loot   = &creature->loot;
 
-        if(loot->empty())
+        uint32 lootid = creature->GetCreatureInfo()->lootid;
+
+        if(loot_type == LOOT_PICKPOKETING)
         {
-            uint32 lootid = creature->GetCreatureInfo()->lootid;
+            if ( !creature->pickPocketed )
+            {
+                creature->pickPocketed = true;
+                loot->clear();
 
-            if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                FillLoot(this,loot,lootid);
+                if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                    FillLoot(this,loot,lootid,LootTemplates_Pickpocketing);    
+                // Generate extra money for pick pocket loot
+                loot->gold = 10* (rand() % ( (creature->getLevel() / 2) + 1) + rand() % ( (getLevel() / 2) + 1 ));
+            }
+        }
+        else
+        {
+            if (creature->pickPocketed)
+            {
+                creature->pickPocketed = false;
+                loot->clear();
+            }
 
-            creature->generateMoneyLoot();
+            if(loot->empty())
+            {
+                if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                    FillLoot(this,loot,lootid,LootTemplates_Creature);
 
-            if (loot_type == 2)
-                creature->getSkinLoot();
+                    creature->generateMoneyLoot();
+
+                if (loot_type == LOOT_SKINNING)
+                    creature->getSkinLoot();
+            }
         }
     }
 
     m_lootGuid = guid;
 
+    // LOOT_PICKPOKETING unsupported by client, sending LOOT_SKINNING instead
+    if(loot_type == LOOT_PICKPOKETING)
+        loot_type = LOOT_SKINNING;
+
     WorldPacket data;
     data.Initialize (SMSG_LOOT_RESPONSE);
 
     data << guid;
-    data << loot_type;                                      //loot_type;
+    data << uint8(loot_type);
     data << *loot;
 
     SendMessageToSet(&data, true);

@@ -116,7 +116,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectInterruptCast,                            //SPELL_EFFECT_INTERRUPT_CAST = 68
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DISTRACT = 69
     &Spell::EffectNULL,                                     //SPELL_EFFECT_PULL = 70
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_PICKPOCKET = 71
+    &Spell::EffectPickPocket,                               //SPELL_EFFECT_PICKPOCKET = 71
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_FARSIGHT = 72
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74
@@ -524,7 +524,7 @@ void Spell::EffectOpenLock(uint32 i)
         sLog.outDebug( "WORLD: Open Lock - No Player Caster!");
         return;
     }
-    uint8 loottype;
+    LootType loottype;
     if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_HERBALISM)
     {
         uint32 displayid= gameObjTarget->GetUInt32Value (GAMEOBJECT_DISPLAYID);
@@ -597,7 +597,7 @@ void Spell::EffectOpenLock(uint32 i)
         else if(((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM) >= requiredskill)
             up_skillvalue = 1;
         else up_skillvalue = 0;
-        loottype=2;
+        loottype = LOOT_SKINNING;
 
     }else if(m_spellInfo->EffectMiscValue[0]==LOCKTYPE_MINING)
     {
@@ -650,12 +650,16 @@ void Spell::EffectOpenLock(uint32 i)
             up_skillvalue = 1;
         else up_skillvalue = 0;
 
-        loottype=2;
-    }else loottype=1;
-    if(loottype == 1)
+        loottype = LOOT_SKINNING;
+    }
+    else 
+        loottype = LOOT_CORPSE;
+    
+    if(loottype == LOOT_CORPSE)
     {
         ((Player*)m_caster)->UpdateSkillPro(m_spellInfo->Id);
     }
+
     ((Player*)m_caster)->SendLoot(gameObjTarget->GetGUID(),loottype);
 
 }
@@ -943,6 +947,34 @@ void Spell::EffectLearnSpell(uint32 i)
 void Spell::EffectDispel(uint32 i)
 {
     m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i]);
+}
+
+void Spell::EffectPickPocket(uint32 i)
+{
+    if( m_caster->GetTypeId() != TYPEID_PLAYER ) 
+        return;
+
+    if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+        return;
+    
+    if( unitTarget->getDeathState() == ALIVE &&    //victim is alive
+        ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID )  //victim have to be humanoid
+    {
+        int chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
+
+        if ( ( rand() % 20 ) <= chance )
+        {
+            //Stealing successfull
+            //sLog.outDebug("Sending loot from pickpocket");
+            ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_PICKPOKETING);
+        }
+        else
+        {
+            //Reveal action + get attack
+            m_caster->RemoveAurasDueToSpell(1784);
+            ((Creature*)unitTarget)->AI().AttackStart(m_caster);
+        }
+    }
 }
 
 void Spell::EffectSummonWild(uint32 i)
@@ -2121,7 +2153,7 @@ void Spell::EffectSkinning(uint32 i)
     int32 fishvalue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
     int32 targetlevel = unitTarget->getLevel();
 
-    ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),2);
+    ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_SKINNING);
 
     if(fishvalue> (targetlevel +15)*5 )
         up_skillvalue = 4;
@@ -2288,7 +2320,7 @@ void Spell::EffectTransmitted(uint32 i)
             data<<uint8(0);
             ((Player*)m_caster)->GetSession()->SendPacket(&data);
             //need fixed produre of fishing.
-            ((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),3);
+            ((Player*)m_caster)->SendLoot(pGameObj->GetGUID(),LOOT_FISHING);
             SendChannelUpdate(0);
         }
     }
