@@ -198,7 +198,7 @@ AggressorAI::UpdateAI(const uint32 diff)
                 if(!i_creature.canReachWithAttack(i_creature.getVictim()))
                     return;
                 i_creature.AttackerStateUpdate(i_creature.getVictim());
-                i_creature.setAttackTimer(0);
+                i_creature.resetAttackTimer();
 
                 if ( !i_creature.getVictim() )
                     return;
@@ -245,6 +245,6 @@ AggressorAI::AttackStart(Unit *u)
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     i_victimGuid = u->GetGUID();
     i_creature.Attack(u);
-    i_creature.setAttackTimer(0);
+    i_creature.resetAttackTimer();
     i_creature->Mutate(new TargetedMovementGenerator(*u));
 }

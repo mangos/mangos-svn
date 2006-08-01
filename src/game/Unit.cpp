@@ -45,7 +45,9 @@ Unit::Unit() : Object()
     m_objectType |= TYPE_UNIT;
     m_objectTypeId = TYPEID_UNIT;
 
-    m_attackTimer = 0;
+    m_attackTimer[BASE_ATTACK]   = 0;
+    m_attackTimer[OFF_ATTACK]    = 0;
+    m_attackTimer[RANGED_ATTACK] = 0;
 
     m_state = 0;
     m_form = 0;
@@ -108,13 +110,21 @@ void Unit::Update( uint32 p_time )
     _UpdateSpells( p_time );
     _UpdateHostil( p_time );
 
-    if(m_attackTimer > 0)
+    if(uint32 base_att = getAttackTimer(BASE_ATTACK))
     {
-        if(p_time >= m_attackTimer)
-            m_attackTimer = 0;
-        else
-            m_attackTimer -= p_time;
+        setAttackTimer(BASE_ATTACK, (p_time >= base_att ? 0 : base_att - p_time) );
     }
+}
+
+bool Unit::haveOffhandWeapon() const
+{
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        return tmpitem && tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON;
+    }
+    else
+        return false;
 }
 
 void Unit::SendMoveToPacket(float x, float y, float z, bool run)
@@ -158,28 +168,12 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, bool Wal
     SendMessageToSet( &data, true );
 }
 
-void Unit::setAttackTimer(uint32 time, bool rangeattack)
+void Unit::resetAttackTimer(WeaponAttackType type)
 {
-    if(time)
-        m_attackTimer = time;
+    if (GetTypeId() != TYPEID_PLAYER)
+        m_attackTimer[type] = GetAttackTime(type);
     else
-    {
-        if(rangeattack)
-        {
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                m_attackTimer = GetAttackTime(RANGED_ATTACK);
-            }
-        }
-        else
-        {
-            if (GetTypeId() == TYPEID_PLAYER)
-            {
-                m_attackTimer = GetAttackTime(BASE_ATTACK);
-            }
-        }
-        m_attackTimer = (m_attackTimer >= 200) ? m_attackTimer : 2000;
-    }
+        m_attackTimer[type] = 2000;
 }
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
@@ -722,10 +716,15 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             *damage = 0;
             *victimState = 3;
 
+            if(pVictim->isAttackReady(BASE_ATTACK))
+                pVictim->resetAttackTimer(BASE_ATTACK);
+
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
             {
                 ((Player*)pVictim)->UpdateDefense();
-                pVictim->m_attackTimer = 0;                 // parry sets attack timer to 0
+
+                if(haveOffhandWeapon() && pVictim->isAttackReady(OFF_ATTACK))
+                    pVictim->resetAttackTimer(OFF_ATTACK);
             }
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
@@ -928,8 +927,14 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
         return;
     }
 
-    WorldPacket data;
-    uint32   hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;
+    uint32 hitInfo;
+    if( haveOffhandWeapon() && isAttackReady(OFF_ATTACK) )
+        hitInfo = HITINFO_LEFTSWING|HITINFO_HITSTRANGESOUND1;
+    else if ( isAttackReady(BASE_ATTACK) )
+        hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;
+    else
+        return;
+
     uint32   damageType = NORMAL_DAMAGE;
     uint32   victimState = VICTIMSTATE_NORMAL;
 
@@ -981,11 +986,19 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         roll, m_modHitChance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
         (uint32)(pVictim->GetUnitBlockChance()*100), (uint32)(GetUnitCriticalChance()*100));
 
-    // FIXME: dual wield has 24% base chance to miss instead of 5%, also
-    //        dual wield is hard-limited to min. 19% miss rate
+    // dual wield has 24% base chance to miss instead of 5%, also
     // base miss rate is 5% and can't get higher than 60%
-    tmp = 500 - skillBonus - m_modHitChance*100;
-    if (tmp > 0 && roll < (sum += (tmp >= 6000 ? 6000 : tmp)))
+    if(haveOffhandWeapon())
+    {
+        tmp = 2400 - skillBonus - m_modHitChance*100;
+    }
+    else
+        tmp = 500 - skillBonus - m_modHitChance*100;
+
+    if(tmp > 6000)
+        tmp = 6000;
+
+    if (tmp > 0 && roll < (sum += tmp ))
     { 
         DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS"); 
         return MELEE_HIT_MISS; 
@@ -1091,11 +1104,17 @@ uint32 Unit::CalculateDamage(bool ranged)
         min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
         max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
     }
-    else
+    else if( haveOffhandWeapon() && isAttackReady(OFF_ATTACK) )
     {
-        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE)+GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
-        max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE)+GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
+        min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
+        max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
     }
+    else 
+    {
+        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
+        max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+    }
+
     if (min_damage > max_damage)
     {
         std::swap(min_damage,max_damage);
@@ -1211,13 +1230,13 @@ void Unit::_UpdateSpells( uint32 time )
             {
                                                             //Auto shot
                 if( m_currentSpell->m_spellInfo->Id == 75 && GetTypeId() == TYPEID_PLAYER )
-                    setAttackTimer( 0, true );
+                    resetAttackTimer( RANGED_ATTACK );
                 else
-                    setAttackTimer(m_currentSpell->m_spellInfo->RecoveryTime);
+                    setAttackTimer( RANGED_ATTACK, m_currentSpell->m_spellInfo->RecoveryTime);
 
                 m_currentSpell->setState(SPELL_STATE_IDLE);
             }
-            else if(m_currentSpell->getState() == SPELL_STATE_IDLE && m_attackTimer == 0)
+            else if(m_currentSpell->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
             {
                 // recheck range and req. items (ammo and gun, etc)
                 if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
@@ -1829,6 +1848,11 @@ void Unit::ApplyStats(bool apply)
 
     ApplyModFloatValue(UNIT_FIELD_MINDAMAGE, val, apply);
     ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, val, apply);
+
+    val = tem_att_power/14.0f * GetAttackTime(OFF_ATTACK)/1000;
+    
+    ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val, apply);
+    ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val, apply);     
 
     // critical
     if(getClass() == HUNTER) classrate = 53;
