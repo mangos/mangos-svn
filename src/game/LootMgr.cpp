@@ -30,14 +30,20 @@
 using std::remove_copy_if;
 using std::ptr_fun;
 
-LootStore LootTemplates;
+LootStore LootTemplates_Creature;
+LootStore LootTemplates_Fishing;
+LootStore LootTemplates_Gameobject;
+LootStore LootTemplates_Pickpocketing;
 
 void UnloadLoot()
 {
-    LootTemplates.clear();
+    LootTemplates_Creature.clear();
+    LootTemplates_Fishing.clear();
+    LootTemplates_Gameobject.clear();
+    LootTemplates_Pickpocketing.clear();
 }
 
-void LoadLootTables()
+void LoadLootTable(LootStore& lootstore,char const* tablename)
 {
     LootStore::iterator tab;
     uint32 item, displayid, entry;
@@ -45,7 +51,9 @@ void LoadLootTables()
     float chance;
     float questchance;
 
-    QueryResult *result = sDatabase.Query("SELECT `entry`, `item`, `chance`, `questchance` FROM `loot_template`;");
+    sLog.outString( "%s :", tablename);
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance` FROM `%s`;",tablename);
 
     if (result)
     {
@@ -70,7 +78,7 @@ void LoadLootTables()
             if( chance < 0.000001 && questchance < 0.000001 )
                 ssNonLootableItems << "loot entry = " << entry << " item = " << item << "\n";
 
-            LootTemplates[entry].push_back( LootItem(item, displayid, chance, questchance) );
+            lootstore[entry].push_back( LootItem(item, displayid, chance, questchance) );
 
             count++;
         } while (result->NextRow());
@@ -79,10 +87,18 @@ void LoadLootTables()
 
         sLog.outString( "\n>> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outError("\nSome items can't be succesfully looted: have in chance and questchance fields value < 0.000001 in `loot_template` DB table . List:\n%s",ssNonLootableItems.str().c_str());
+            sLog.outError("\nSome items can't be succesfully looted: have in chance and questchance fields value < 0.000001 in `%s` DB table . List:\n%s",ssNonLootableItems.str().c_str(),tablename);
     }
     else
-        sLog.outError("\n>> Loaded 0 loot definitions. DB table `loot_template` have incompatible structure or empty.");
+        sLog.outError("\n>> Loaded 0 loot definitions. DB table `%s` is empty.",tablename);
+}
+
+void LoadLootTables()
+{
+    LoadLootTable(LootTemplates_Creature,     "creature_loot_template");
+    LoadLootTable(LootTemplates_Fishing,      "fishing_loot_template");
+    LoadLootTable(LootTemplates_Gameobject,   "gameobject_loot_template");
+    LoadLootTable(LootTemplates_Pickpocketing,"pickpocketing_loot_template");
 }
 
 // Result: true  - have chance for non quest items or active quest items (loot can be empty or non empty in this case)
@@ -112,16 +128,16 @@ struct NotChanceFor
     }
 };
 
-void FillLoot(Player* player, Loot *loot, uint32 loot_id)
+void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 {
     loot->items.clear();
     loot->gold = 0;
 
-    LootStore::iterator tab = LootTemplates.find(loot_id);
+    LootStore::iterator tab = store.find(loot_id);
 
-    if (tab == LootTemplates.end())
+    if (tab == store.end())
     {
-        sLog.outError("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in loot_template.",loot_id);
+        sLog.outError("Loot id #%u used in `creature_template` or `gameobject` or fishing but it doesn't have records in appropriate loot_template_* table.",loot_id);
         return;
     }
 

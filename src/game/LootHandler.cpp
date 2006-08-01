@@ -138,7 +138,7 @@ void WorldSession::HandleLootOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_LOOT");
     uint64 guid;
     recv_data >> guid;
-    GetPlayer()->SendLoot(guid, 1);
+    GetPlayer()->SendLoot(guid, LOOT_CORPSE);
 }
 
 void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
