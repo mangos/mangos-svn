@@ -470,7 +470,7 @@ void ParseCommand( pPrintf zprintf, char*command)
 
 void CliRunnable::run()
 {
-    mysql_thread_init(); // let thread do safe mySQL requests
+    mysql_thread_init();                                    // let thread do safe mySQL requests
 
     char commandbuf[256];
 
@@ -503,7 +503,7 @@ void CliRunnable::run()
 
     }
 
-    mysql_thread_end(); // free mySQL thread resources
+    mysql_thread_end();                                     // free mySQL thread resources
 }
 
 void CliKick(char*command,pPrintf zprintf)

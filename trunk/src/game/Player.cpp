@@ -713,7 +713,7 @@ void Player::Update( uint32 p_time )
                 else
                 {
                     // prevent base and off attack in same time
-                    if(haveOffhandWeapon()) 
+                    if(haveOffhandWeapon())
                     {
                         uint32 off_att = getAttackTimer(OFF_ATTACK);
                         if(off_att <= 200)
@@ -723,9 +723,9 @@ void Player::Update( uint32 p_time )
                     resetAttackTimer(BASE_ATTACK);
                 }
             }
-            
+
             if ( haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
-            {                                                  
+            {
                 if( GetDistanceSq(pVictim) > pldistance )
                 {
                     setAttackTimer(OFF_ATTACK,1000);
@@ -7250,7 +7250,7 @@ void Player::AddQuest( Quest *pQuest )
                 uint32 limittime = pQuest->GetQuestInfo()->LimitTime;
                 SetTimedQuest( pQuest );
                 mQuestStatus[quest].m_timer = limittime * 60000;
-                uint64 ktime = 0; // unkwnown and dependent from server start time
+                uint64 ktime = 0;                           // unkwnown and dependent from server start time
                 uint32 qtime = static_cast<uint32>(time(NULL) - ktime) + limittime;
                 SetUInt32Value( log_slot + 2, qtime );
             }
@@ -8804,7 +8804,7 @@ void Player::Uncharm()
     CreatureInfo *cinfo = charm->GetCreatureInfo();
     charm->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
     charm->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-    
+
     charm->AIM_Initialize();
     WorldPacket data;
     data.Initialize(SMSG_PET_SPELLS);

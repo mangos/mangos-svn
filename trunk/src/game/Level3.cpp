@@ -153,7 +153,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
                 fields[0].GetFloat(), fields[1].GetFloat(), fields[2].GetFloat(), fields[3].GetFloat(), name))
             {
                 delete pCreature;
-                return false;   
+                return false;
             }
 
             pCreature->SetZoneId( fields[6].GetUInt16() );

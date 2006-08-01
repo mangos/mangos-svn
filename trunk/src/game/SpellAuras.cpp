@@ -910,35 +910,35 @@ void Aura::HandleAuraModStun(bool apply)
 
 void Aura::HandleModDamageDone(bool apply)
 {
-/*    if(apply)
-    {
-
-        for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
+    /*    if(apply)
         {
-            if(GetId() == (*i)->spellId)
+
+            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
             {
-                m_target->m_damageDone.erase(i);
+                if(GetId() == (*i)->spellId)
+                {
+                    m_target->m_damageDone.erase(i);
+                }
             }
+
+            DamageDone *dd = new DamageDone();
+
+            dd->spellId = GetId();
+            dd->damage = m_modifier.m_amount;
+            dd->school = m_modifier.m_miscvalue;
+            m_target->m_damageDone.push_back(dd);
         }
-
-        DamageDone *dd = new DamageDone();
-
-        dd->spellId = GetId();
-        dd->damage = m_modifier.m_amount;
-        dd->school = m_modifier.m_miscvalue;
-        m_target->m_damageDone.push_back(dd);
-    }
-    else
-    {
-        for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
+        else
         {
-            if(GetId() == (*i)->spellId)
+            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
             {
-                m_target->m_damageDone.erase(i);
-                break;
+                if(GetId() == (*i)->spellId)
+                {
+                    m_target->m_damageDone.erase(i);
+                    break;
+                }
             }
-        }
-    }*/
+        }*/
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
     if(m_modifier.m_miscvalue2)
@@ -1862,7 +1862,7 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
     {
         m_periodicTimer = 5000;
         Powers pt = m_target->getPowerType();
-        if(pt != POWER_RAGE || !m_target->isInCombat()) // Prevent rage regeneration in combat with rage loss slowdown warrior talant
+        if(pt != POWER_RAGE || !m_target->isInCombat())     // Prevent rage regeneration in combat with rage loss slowdown warrior talant
         {
             if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
                 m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
@@ -1923,35 +1923,35 @@ void Aura::HandleAuraModAttackPower(bool apply)
 
 void Aura::HandleModCreatureAttackPower(bool apply)
 {
- /*   if(apply)
-    {
+    /*   if(apply)
+       {
 
-        for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_creatureAttackPower.erase(i);
-            }
-        }
+           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
+           {
+               if(GetId() == (*i)->spellId)
+               {
+                   m_target->m_creatureAttackPower.erase(i);
+               }
+           }
 
-        CreatureAttackPower *cap = new CreatureAttackPower();
+           CreatureAttackPower *cap = new CreatureAttackPower();
 
-        cap->spellId = GetId();
-        cap->damage = m_modifier.m_amount;
-        cap->creaturetype = m_modifier.m_miscvalue;
-        m_target->m_creatureAttackPower.push_back(cap);
-    }
-    else
-    {
-        for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_creatureAttackPower.erase(i);
-                break;
-            }
-        }
-    }*/
+           cap->spellId = GetId();
+           cap->damage = m_modifier.m_amount;
+           cap->creaturetype = m_modifier.m_miscvalue;
+           m_target->m_creatureAttackPower.push_back(cap);
+       }
+       else
+       {
+           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
+           {
+               if(GetId() == (*i)->spellId)
+               {
+                   m_target->m_creatureAttackPower.erase(i);
+                   break;
+               }
+           }
+       }*/
 }
 
 void Aura::HandleAuraTransform(bool apply)

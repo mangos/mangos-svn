@@ -999,9 +999,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         tmp = 6000;
 
     if (tmp > 0 && roll < (sum += tmp ))
-    { 
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS"); 
-        return MELEE_HIT_MISS; 
+    {
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS");
+        return MELEE_HIT_MISS;
     }
 
     // always crit against a sitting target
@@ -1011,17 +1011,17 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         | PLAYER_STATE_SIT_LOW_CHAIR
         | PLAYER_STATE_SIT_MEDIUM_CHAIR
         | PLAYER_STATE_SIT_HIGH_CHAIR)))
-    { 
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)"); 
-        return MELEE_HIT_CRIT; 
+    {
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)");
+        return MELEE_HIT_CRIT;
     }
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance()
     tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus;
     if (tmp > 0 && roll < (sum += tmp))
-    { 
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum); 
-        return MELEE_HIT_DODGE; 
+    {
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum);
+        return MELEE_HIT_DODGE;
     }
 
     int32   modCrit = 0;
@@ -1040,18 +1040,18 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         if (   (tmp > 0)                                    // check if unit _can_ parry
             && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
-        { 
-            DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum); 
-            return MELEE_HIT_PARRY; 
+        {
+            DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum);
+            return MELEE_HIT_PARRY;
         }
 
         tmp = (int32)(pVictim->GetUnitBlockChance()*100);
         if (   (tmp > 0)                                    // check if unit _can_ block
             && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
-        { 
-            DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum); 
-            return MELEE_HIT_BLOCK; 
+        {
+            DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum);
+            return MELEE_HIT_BLOCK;
         }
     }
 
@@ -1061,17 +1061,17 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
         && (pVictim->GetTypeId() != TYPEID_PLAYER)
         && ((getLevel() + 3 <= pVictim->getLevel()) || (skillDiff <= -15))
         && (roll < (sum += 4000)))
-    { 
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum); 
-        return MELEE_HIT_GLANCING; 
+    {
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
+        return MELEE_HIT_GLANCING;
     }
 
-        // FIXME: +skill and +defense has no effect on crit chance in PvP combat
-        tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
+    // FIXME: +skill and +defense has no effect on crit chance in PvP combat
+    tmp = (int32)(GetUnitCriticalChance()*100) + skillBonus + modCrit;
     if (tmp > 0 && roll < (sum += tmp))
-    { 
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum); 
-        return MELEE_HIT_CRIT; 
+    {
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT <%d, %d)", sum-tmp, sum);
+        return MELEE_HIT_CRIT;
     }
 
     // mobs can score crushing blows if they're 3 or more levels above victim
@@ -1109,7 +1109,7 @@ uint32 Unit::CalculateDamage(bool ranged)
         min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
         max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
     }
-    else 
+    else
     {
         min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
         max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
@@ -1850,9 +1850,9 @@ void Unit::ApplyStats(bool apply)
     ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, val, apply);
 
     val = tem_att_power/14.0f * GetAttackTime(OFF_ATTACK)/1000;
-    
+
     ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val, apply);
-    ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val, apply);     
+    ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val, apply);
 
     // critical
     if(getClass() == HUNTER) classrate = 53;

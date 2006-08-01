@@ -575,7 +575,6 @@ time_t World::_UpdateGameTime()
     return m_gameTime;
 }
 
-
 void World::ShutdownServ(uint32 time)
 {
     m_ShutdownTimer = time;

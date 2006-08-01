@@ -54,5 +54,4 @@ class Weather
         uint32 m_interval;
         uint32 m_timer;
 };
-
 #endif
