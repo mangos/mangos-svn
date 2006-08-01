@@ -318,9 +318,11 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         virtual void Update( uint32 time );
 
-        void setAttackTimer(uint32 time, bool rangeattack = false);
-        uint32 getAttackTimer() const { return m_attackTimer; }
-        bool isAttackReady() const { return m_attackTimer == 0; }
+        void setAttackTimer(WeaponAttackType type, uint32 time) { m_attackTimer[type] = time; }
+        void resetAttackTimer(WeaponAttackType type = BASE_ATTACK);
+        uint32 getAttackTimer(WeaponAttackType type) const { return m_attackTimer[type]; }
+        bool isAttackReady(WeaponAttackType type = BASE_ATTACK) const { return m_attackTimer[type] == 0; }
+        bool haveOffhandWeapon() const;
         bool canReachWithAttack(Unit *pVictim) const;
 
         void _addAttacker(Unit *pAttacker)                  // must be called only from Unit::Attack(Unit*)
@@ -443,8 +445,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         bool isArmorer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_ARMORER ); }
         //Need fix or use this
         bool isGuard() const  { return HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GUARD); }
-
-        bool isStunned() const { return m_attackTimer == 0;};
 
         bool isInFlight()  const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
         bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
@@ -610,7 +610,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         //Aura* m_aura;
         //uint32 m_auraCheck, m_removeAuraTimer;
 
-        uint32 m_attackTimer;
+        uint32 m_attackTimer[3];
 
         AttackerSet m_attackers;
         Unit* m_attacking;

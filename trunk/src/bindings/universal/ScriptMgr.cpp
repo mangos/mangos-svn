@@ -254,7 +254,7 @@ void ScriptedAI::UpdateAI(const uint32)
                 if(!m_creature->canReachWithAttack(m_creature->getVictim()))
                     return;
                 m_creature->AttackerStateUpdate(m_creature->getVictim());
-                m_creature->setAttackTimer(0);
+                m_creature->resetAttackTimer();
 
                 if ( !m_creature->getVictim() )
                     return;

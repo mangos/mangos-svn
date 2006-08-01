@@ -163,7 +163,7 @@ void PetAI::UpdateAI(const uint32 diff)
             else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pet.getVictim()) )
             {
                 i_pet.AttackerStateUpdate(i_pet.getVictim());
-                i_pet.setAttackTimer(0);
+                i_pet.resetAttackTimer();
 
                 if ( !i_pet.getVictim() )
                     return;

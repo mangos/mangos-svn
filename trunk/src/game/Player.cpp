@@ -638,6 +638,17 @@ void Player::Update( uint32 p_time )
 
     Unit::Update( p_time );
 
+    // update player only attacks
+    if(uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
+    {
+        setAttackTimer(RANGED_ATTACK, (p_time >= ranged_att ? 0 : ranged_att - p_time) );
+    }
+
+    if(uint32 off_att = getAttackTimer(OFF_ATTACK))
+    {
+        setAttackTimer(OFF_ATTACK, (p_time >= off_att ? 0 : off_att - p_time) );
+    }
+
     time_t now = time (NULL);
 
     UpdatePVPFlag(time(NULL));
@@ -668,53 +679,75 @@ void Player::Update( uint32 p_time )
 
     if (isAttacking())
     {
-        if (isAttackReady() && m_currentSpell == 0 )
+        Unit *pVictim = getVictim();
+        if( m_currentSpell == 0 && pVictim)
         {
-            Unit *pVictim = getVictim();
-            //if(!pVictim) {
-            //    Attack((Unit *)ObjectAccessor::Instance().FindPlayer(m_curSelection));
-            //    Unit *pVictim = getVictim();
-            //}
 
             // default combat reach 10
             // TODO add weapon,skill check
 
             float pldistance = 10.0f;
-            if(getClass() == WARRIOR)
-            {
-                pldistance += 1;
-            }
-            if(GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND ) != 0)
-            {
-                pldistance += 2;
-            }
-            if(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS) != 0)
-            {
-                pldistance += 3;
-            }
 
-            if (pVictim)
+            if(getClass() == WARRIOR)
+                pldistance += 1;
+
+            if(GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND ) != 0)
+                pldistance += 2;
+
+            if(GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_HANDS) != 0)
+                pldistance += 3;
+
+            if (isAttackReady(BASE_ATTACK))
             {
                 if( GetDistanceSq(pVictim) > pldistance )
                 {
-                    setAttackTimer(uint32(1000));
+                    setAttackTimer(BASE_ATTACK,1000);
                     SendAttackSwingNotInRange();
                 }
                 //120 degreas of radiant range
-                //(120/360)*(2*PI) = 2,094395102/2 = 1,047197551    //1,57079633-1,047197551   //1,57079633+1,047197551
-                else if( !HasInArc( 2.0943951024, pVictim ))
+                else if( !HasInArc( 2*M_PI/3, pVictim ))
                 {
-                    setAttackTimer(uint32(1000));
+                    setAttackTimer(BASE_ATTACK,1000);
                     SendAttackSwingBadFacingAttack();
                 }
                 else
                 {
-                    setAttackTimer(0);
+                    // prevent base and off attack in same time
+                    if(haveOffhandWeapon()) 
+                    {
+                        uint32 off_att = getAttackTimer(OFF_ATTACK);
+                        if(off_att <= 200)
+                            setAttackTimer(OFF_ATTACK,200);
+                    }
                     AttackerStateUpdate(pVictim);
+                    resetAttackTimer(BASE_ATTACK);
+                }
+            }
+            
+            if ( haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+            {                                                  
+                if( GetDistanceSq(pVictim) > pldistance )
+                {
+                    setAttackTimer(OFF_ATTACK,1000);
+                }
+                else if( !HasInArc( 2*M_PI/3, pVictim ))
+                {
+                    setAttackTimer(OFF_ATTACK,1000);
+                }
+                else
+                {
+                    // prevent base and off attack in same time
+                    uint32 base_att = getAttackTimer(BASE_ATTACK);
+                    if(base_att <= 200)
+                        setAttackTimer(BASE_ATTACK,200);
+                    // do attack
+                    AttackerStateUpdate(pVictim);
+                    resetAttackTimer(OFF_ATTACK);
                 }
             }
         }
     }
+
     else if (isAttacked())
     {
         // Leave here so we don't forget this case
@@ -3255,10 +3288,11 @@ void Player::SendAttackStart(Unit* pVictim)
 {
     WorldPacket data;
 
-    if(!isAttackReady())
-    {
-        setAttackTimer(uint32(0));
-    }
+    if(!isAttackReady(BASE_ATTACK))
+        resetAttackTimer(BASE_ATTACK);
+
+    if(haveOffhandWeapon() && !isAttackReady(OFF_ATTACK))
+        resetAttackTimer(OFF_ATTACK);
 
     data.Initialize( SMSG_ATTACKSTART );
     data << GetGUID();
