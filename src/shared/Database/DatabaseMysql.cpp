@@ -102,10 +102,10 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
-    { 
+    {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-    
+
         if(mysql_query(mMysql, sql))
         {
             DEBUG_LOG( "SQL: %s\n", sql );
@@ -142,10 +142,10 @@ bool DatabaseMysql::Execute(const char *sql)
     if (!mMysql)
         return false;
 
-    { 
+    {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-    
+
         DEBUG_LOG( (std::string("SQL: ") + sql).c_str() );
         if(mysql_query(mMysql, sql))
         {

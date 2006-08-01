@@ -151,8 +151,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
             canlearnflag = 2;                               //gray, can't learn
 
         if((*itr)->spell->Effect[1] == 44)
-        if(!_player->CanLearnProSpell((*itr)->spell->Id))
-            canlearnflag = 1;
+            if(!_player->CanLearnProSpell((*itr)->spell->Id))
+                canlearnflag = 1;
 
         data << uint32((*itr)->spell->Id);
         data << uint8(canlearnflag);
@@ -213,8 +213,8 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if(proto->reqspell && !_player->HasSpell(proto->reqspell))
         return;
     if(proto->spell->Effect[1] == 44)
-    if(!_player->CanLearnProSpell(spellId))
-        return;
+        if(!_player->CanLearnProSpell(spellId))
+            return;
 
     if(!proto)
     {

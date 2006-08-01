@@ -156,10 +156,10 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
     }
     WorldPacket data;
     data.Initialize(SMSG_PET_NAME_QUERY_RESPONSE);
-                                                //The value is random,This should be (who query):data << uint32(who);
+    //The value is random,This should be (who query):data << uint32(who);
     data << uint32(0x4D4537);
     data << name.c_str();
-                                                //Unknown, Fix me;
+    //Unknown, Fix me;
     data << uint32(0x426D3DC6);
     _player->GetSession()->SendPacket(&data);
 }

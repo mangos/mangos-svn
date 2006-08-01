@@ -25,7 +25,7 @@
 
 void HandleCorpsesErase(void*)
 {
-    mysql_thread_init(); // let thread do safe mySQL requests
+    mysql_thread_init();                                    // let thread do safe mySQL requests
 
     sLog.outBasic("Global Event (corpses/bones removal)");
 
@@ -81,5 +81,5 @@ void HandleCorpsesErase(void*)
 
         delete result;
     }
-    mysql_thread_end(); // free mySQL thread resources
+    mysql_thread_end();                                     // free mySQL thread resources
 }
