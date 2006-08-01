@@ -27,4 +27,4 @@ CREATE TABLE `pickpocketing_loot_template` (
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
---DROP TABLE `loot_template`;
+DROP TABLE `loot_template`;
