@@ -2164,9 +2164,9 @@ void Spell::EffectSelfResurrect(uint32 i)
     }
     else
     {
-        health = uint32(damage*unitTarget->GetMaxHealth());
+        health = uint32(damage/100*unitTarget->GetMaxHealth());
         if(unitTarget->getPowerType() == POWER_MANA)
-            mana = uint32(damage*unitTarget->GetMaxPower(unitTarget->getPowerType()));
+            mana = uint32(damage/100*unitTarget->GetMaxPower(unitTarget->getPowerType()));
     }
     ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest((Player*)unitTarget);
