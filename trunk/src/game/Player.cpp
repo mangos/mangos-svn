@@ -399,7 +399,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     }
 
     // initilize potential block chance (used if item with Block value equiped)
-    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 + (float(GetDefenceSkillValue()) - getLevel()*5)*0.04);
+    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5 );
+    UpdateBlockPercentage(GetDefenceSkillValue(),getLevel());
 
     // apply original stats mods before item equipment that call before equip _RemoveStatsMods()
     _ApplyStatsMods();
@@ -718,8 +719,8 @@ void Player::Update( uint32 p_time )
                     if(haveOffhandWeapon())
                     {
                         uint32 off_att = getAttackTimer(OFF_ATTACK);
-                        if(off_att < 200)
-                            setAttackTimer(OFF_ATTACK,200);
+                        if(off_att < ATTACK_DISPLAY_DELAY)
+                            setAttackTimer(OFF_ATTACK,ATTACK_DISPLAY_DELAY);
                     }
                     AttackerStateUpdate(pVictim);
                     resetAttackTimer(BASE_ATTACK);
@@ -740,8 +741,8 @@ void Player::Update( uint32 p_time )
                 {
                     // prevent base and off attack in same time, delay attack at 0.2 sec
                     uint32 base_att = getAttackTimer(BASE_ATTACK);
-                    if(base_att < 200)
-                        setAttackTimer(BASE_ATTACK,200);
+                    if(base_att < ATTACK_DISPLAY_DELAY)
+                        setAttackTimer(BASE_ATTACK,ATTACK_DISPLAY_DELAY);
                     // do attack
                     AttackerStateUpdate(pVictim);
                     resetAttackTimer(OFF_ATTACK);
@@ -1310,7 +1311,7 @@ void Player::GiveLevel()
     SetStat(STAT_SPIRIT,   uint32(newSPI));                 // only integer part
 
     // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, - 5*0.04,true);
+    UpdateBlockPercentage(0,1);
 
     // apply stats, aura, items mods
     _ApplyStatsMods();
@@ -2358,7 +2359,7 @@ void Player::UpdateDefense()
     if(UpdateSkill(SKILL_DEFENSE))
     {
         // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-        ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, 0.04,true);
+        UpdateBlockPercentage(1,0);
     }
 }
 
@@ -2433,17 +2434,21 @@ void Player::UpdateSkillPro(uint32 spellid)
 
 void Player::UpdateMeleeSkillWeapon()
 {
-    Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    if(isAttackReady(BASE_ATTACK))
+    {
+        Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-    if (!tmpitem)
-        UpdateSkill(SKILL_UNARMED);
-    else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
-        UpdateSkill(tmpitem->GetSkill());
+        if (!tmpitem)
+            UpdateSkill(SKILL_UNARMED);
+        else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+            UpdateSkill(tmpitem->GetSkill());
+    }else if(isAttackReady(OFF_ATTACK))
+    {
+        Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-    tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-
-    if (tmpitem)
-        UpdateSkill(tmpitem->GetSkill());
+        if (tmpitem)
+            UpdateSkill(tmpitem->GetSkill());
+    }
 }
 
 void Player::UpdateRangedSkillWeapon()
