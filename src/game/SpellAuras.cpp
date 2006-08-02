@@ -203,7 +203,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
-m_caster(caster), m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
+m_caster(caster),m_castItem(0), m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
 m_removeOnDeath(false)
 {
@@ -651,6 +651,39 @@ void Aura::HandleAuraDummy(bool apply)
             else
             {
                 m_procdamage = NULL;
+            }
+        }
+    }
+    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 
+        && m_caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
+    {
+        if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player * player = (Player*)m_target;
+            uint32 spellid;
+            uint32 itemflag = m_castItem->GetUInt32Value(ITEM_FIELD_FLAGS);
+            if(apply)
+            {
+                // 1<<20 just a temp value to detect if any one has be stored,
+                // we should find out a field to correctly mask the target.
+                if(itemflag & (1<<20))
+                    return;
+                switch(GetId())
+                {
+                    case 20707:spellid = 3026;break;
+                    case 20762:spellid = 20758;break;
+                    case 20763:spellid = 20759;break;
+                    case 20764:spellid = 20760;break;
+                    case 20765:spellid = 20761;break;
+                    default:break;
+                }
+                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),true);
+                player->SetSoulStone(m_castItem);
+                player->SetSoulStoneSpell(spellid);
+            }
+            else
+            {
+                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),false);
             }
         }
     }

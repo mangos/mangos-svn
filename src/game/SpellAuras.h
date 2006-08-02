@@ -157,6 +157,8 @@ class Aura
         Unit* GetTarget() const { return m_target; }
         void SetCaster(Unit* caster) { m_caster = caster; }
         void SetTarget(Unit* target) { m_target = target; }
+        void SetCastItem(Item* item) { m_castItem = item; }
+        Item* GetCastItem() const { return m_castItem; }
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
         void SetAuraSlot(uint8 slot) { m_auraSlot = slot; }
@@ -202,6 +204,7 @@ class Aura
         Unit* m_target;
         int32 m_duration;
         int32 m_timeCla;
+        Item* m_castItem;
 
         uint8 m_auraSlot;
 

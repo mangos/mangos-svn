@@ -96,7 +96,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_STEALTH = 48 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_DETECT = 49
     &Spell::EffectTransmitted,                              //SPELL_EFFECT_TRANS_DOOR = 50
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT = 51
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_FORCE_CRITICAL_HIT = 51 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_GUARANTEE_HIT = 52
     &Spell::EffectEnchantItemPerm,                          //SPELL_EFFECT_ENCHANT_ITEM = 53
     &Spell::EffectEnchantItemTmp,                           //SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY = 54
@@ -119,7 +119,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectPickPocket,                               //SPELL_EFFECT_PICKPOCKET = 71
     &Spell::EffectNULL,                                     //SPELL_EFFECT_ADD_FARSIGHT = 72
     &Spell::EffectSummonWild,                               //SPELL_EFFECT_SUMMON_POSSESSED = 73
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74
+    &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_TOTEM = 74 //Useless
     &Spell::EffectNULL,                                     //SPELL_EFFECT_HEAL_MECHANICAL = 75
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_OBJECT_WILD = 76
     &Spell::EffectScriptEffect,                             //SPELL_EFFECT_SCRIPT_EFFECT = 77
@@ -139,7 +139,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //SPELL_EFFECT_THREAT_ALL = 91
     &Spell::EffectEnchantHeldItem,                          //SPELL_EFFECT_ENCHANT_HELD_ITEM = 92
     &Spell::EffectNULL,                                     //SPELL_EFFECT_SUMMON_PHANTASM = 93
-    &Spell::EffectNULL,                                     //SPELL_EFFECT_SELF_RESURRECT = 94
+    &Spell::EffectSelfResurrect,                            //SPELL_EFFECT_SELF_RESURRECT = 94
     &Spell::EffectSkinning,                                 //SPELL_EFFECT_SKINNING = 95
     &Spell::EffectCharge,                                   //SPELL_EFFECT_CHARGE = 96
     &Spell::EffectSummonCritter,                            //SPELL_EFFECT_SUMMON_CRITTER = 97
@@ -262,6 +262,8 @@ void Spell::EffectApplyAura(uint32 i)
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
+    if(m_CastItem)
+        Aur->SetCastItem(m_CastItem);
     unitTarget->AddAura(Aur);
     if (Aur && Aur->IsTrigger())
     {
@@ -457,6 +459,7 @@ void Spell::EffectCreateItem(uint32 i)
     {
         player->SendEquipError( msg, NULL, NULL );
         delete pItem;
+        return;
     }
 
     player->StoreItem( dest, pItem, true);
@@ -2141,6 +2144,32 @@ void Spell::EffectQuestComplete(uint32 i)
         return
 
             _player->PlayerTalkClass->SendQuestReward( pQuest, _player->GetGUID(), true, NULL, 0 );
+}
+
+void Spell::EffectSelfResurrect(uint32 i)
+{
+    if(!unitTarget) return;
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
+    if(unitTarget->isAlive()) return;
+    if(!unitTarget->IsInWorld()) return;
+
+    uint32 health = 0;
+    uint32 mana = 0;
+
+    if(m_spellInfo->SpellVisual == 99 && m_spellInfo->SpellIconID ==1)
+    {
+        health = m_spellInfo->EffectBasePoints[i] > 0 ? m_spellInfo->EffectBasePoints[i] :(-m_spellInfo->EffectBasePoints[i]);
+        if(unitTarget->getPowerType() == POWER_MANA)
+            mana = m_spellInfo->EffectMiscValue[i];
+    }
+    else
+    {
+        health = uint32(damage*unitTarget->GetMaxHealth());
+        if(unitTarget->getPowerType() == POWER_MANA)
+            mana = uint32(damage*unitTarget->GetMaxPower(unitTarget->getPowerType()));
+    }
+    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    SendResurrectRequest((Player*)unitTarget);
 }
 
 void Spell::EffectSkinning(uint32 i)

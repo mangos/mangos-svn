@@ -211,6 +211,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_LEARN_SPELL:
                 case SPELL_EFFECT_SKILL_STEP:
+                case SPELL_EFFECT_SELF_RESURRECT:
                 case SPELL_EFFECT_RESURRECT_NEW:
                     tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
@@ -1063,6 +1064,8 @@ void Spell::TakeCastItem()
 
     if (ItemClass == ITEM_CLASS_CONSUMABLE)
     {
+        if(proto->DisplayInfoID == 6009 && m_spellInfo->School == 5)
+            return;
         ((Player*)m_caster)->DestroyItemCount(proto->ItemId, 1, true);
         if(ItemCount<=1)
         {
