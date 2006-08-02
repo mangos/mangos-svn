@@ -387,8 +387,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
             ((Creature *)pVictim)->AI().DamageInflict(this, damage);
             pVictim->AddHostil(GetGUID(), damage);
             if( GetTypeId() == TYPEID_PLAYER
-                && (getClass() == WARRIOR || m_form == 5 || m_form == 8) 
-                && !m_currentMeleeSpell) // not generate rage for special attacks
+                && (getClass() == WARRIOR || m_form == 5 || m_form == 8)
+                && !m_currentMeleeSpell)                    // not generate rage for special attacks
                 ((Player*)this)->CalcRage(damage,true);
         }
         else

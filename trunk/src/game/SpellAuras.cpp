@@ -654,7 +654,7 @@ void Aura::HandleAuraDummy(bool apply)
             }
         }
     }
-    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 
+    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92
         && m_caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
     {
         if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)

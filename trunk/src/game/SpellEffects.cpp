@@ -655,9 +655,9 @@ void Spell::EffectOpenLock(uint32 i)
 
         loottype = LOOT_SKINNING;
     }
-    else 
+    else
         loottype = LOOT_CORPSE;
-    
+
     if(loottype == LOOT_CORPSE)
     {
         ((Player*)m_caster)->UpdateSkillPro(m_spellInfo->Id);
@@ -954,14 +954,15 @@ void Spell::EffectDispel(uint32 i)
 
 void Spell::EffectPickPocket(uint32 i)
 {
-    if( m_caster->GetTypeId() != TYPEID_PLAYER ) 
+    if( m_caster->GetTypeId() != TYPEID_PLAYER )
         return;
 
     if( !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
         return;
-    
-    if( unitTarget->getDeathState() == ALIVE &&    //victim is alive
-        ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID )  //victim have to be humanoid
+
+    if( unitTarget->getDeathState() == ALIVE &&             //victim is alive
+                                                            //victim have to be humanoid
+        ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID )
     {
         int chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
 

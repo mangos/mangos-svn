@@ -1089,7 +1089,7 @@ void Player::Regenerate(Powers power)
             }
             break;
         case POWER_RAGE:                                    // Regenerate rage
-            addvalue = uint32(30 * RageIncreaseRate); // 3 rage by tick
+            addvalue = uint32(30 * RageIncreaseRate);       // 3 rage by tick
             break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = uint32(20);
@@ -3745,7 +3745,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 loot->clear();
 
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                    FillLoot(this,loot,lootid,LootTemplates_Pickpocketing);    
+                    FillLoot(this,loot,lootid,LootTemplates_Pickpocketing);
                 // Generate extra money for pick pocket loot
                 loot->gold = 10* (rand() % ( (creature->getLevel() / 2) + 1) + rand() % ( (getLevel() / 2) + 1 ));
             }
@@ -3763,7 +3763,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                     FillLoot(this,loot,lootid,LootTemplates_Creature);
 
-                    creature->generateMoneyLoot();
+                creature->generateMoneyLoot();
 
                 if (loot_type == LOOT_SKINNING)
                     creature->getSkinLoot();
