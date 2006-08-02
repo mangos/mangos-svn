@@ -149,6 +149,14 @@ struct PowerCostSchool
     int32 damage;
 };*/
 
+struct SpellImmune
+{
+    uint32 type;
+    uint32 spellId;
+};
+
+typedef std::list<SpellImmune*> SpellImmuneList;
+
 enum DeathState
 {
     ALIVE = 0,
@@ -203,6 +211,17 @@ enum UnitFlags
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
 //some aura(related to ImmuneToMechanic or ImmuneToState<aura>) can't apply to it.
+enum SpellImmunity
+{
+    IMMUNITY_EFFECT                = 0,
+    IMMUNITY_STATE                 = 1,
+    IMMUNITY_SCHOOL                = 2,
+    IMMUNITY_DAMAGE                = 3,
+    IMMUNITY_DISPEL                = 4,
+    IMMUNITY_MECHANIC              = 5,
+
+};
+
 enum ImmuneToMechanic
 {
     IMMUNE_MECHANIC_CHARM            =1,
@@ -534,12 +553,6 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint32 m_triggerSpell;
         uint32 m_triggerDamage;
         uint32 m_canMove;
-        uint32 m_immuneToMechanic;
-        uint32 m_immuneToEffect;
-        uint32 m_immuneToState;
-        uint32 m_immuneToSchool;
-        uint32 m_immuneToDmg;
-        uint32 m_immuneToDispel;
         uint32 m_detectStealth;
         uint32 m_stealthvalue;
         float m_speed;
@@ -562,6 +575,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         //std::list<struct SpellCritSchool*> m_spellCritSchool;
         std::list<Aura *> *GetSingleCastAuras() { return &m_scAuras; }
         std::list<struct ReflectSpellSchool*> m_reflectSpellSchool;
+        SpellImmuneList m_spellImmune[6];
         /*std::list<struct DamageDoneCreature*> m_damageDoneCreature;
         std::list<struct DamageDone*> m_damageDone;
         std::list<struct DamageTaken*> m_damageTaken;
@@ -593,6 +607,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void UnsummonTotem(int8 slot = -1);
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 damage);
         uint32 MeleeDamageBonus(Unit *pVictim, uint32 damage);
+        void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
 
     protected:
         Unit ( );

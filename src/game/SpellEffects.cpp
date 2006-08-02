@@ -255,10 +255,23 @@ void Spell::EffectApplyAura(uint32 i)
         return;
     if(!unitTarget->isAlive())
         return;
+    uint8 castResult = 0;
     //If m_immuneToState type contain this aura type, IMMUNE aura.
-    if(unitTarget->m_immuneToState & m_spellInfo->EffectApplyAuraName[i])
+    for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_EFFECT].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_EFFECT].end(); itr = next)
+    {
+        next = itr;
+        next++;
+        if((*itr)->type == m_spellInfo->EffectApplyAuraName[i])
+        {
+            castResult = CAST_FAIL_IMMUNE;
+            break;
+        }
+    }
+    if(castResult)
+    {
+        SendCastResult(castResult);
         return;
-
+    }
     sLog.outDebug("Apply Auraname is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, m_caster, unitTarget);
@@ -1434,8 +1447,6 @@ void Spell::EffectHealMaxHealth(uint32 i)
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
-        return;
-    if(unitTarget->m_immuneToMechanic == 16)
         return;
 
     uint32 heal = m_caster->GetMaxHealth();
