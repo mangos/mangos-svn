@@ -713,10 +713,22 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             *damage = 0;
             *victimState = 3;
 
-            // reset melee attacks
-            pVictim->resetAttackTimer(BASE_ATTACK);
-            if(haveOffhandWeapon())
-                pVictim->resetAttackTimer(OFF_ATTACK);
+            // instant (maybe with small delay) counter attack
+            {
+                uint32 offtime  = pVictim->getAttackTimer(OFF_ATTACK);
+                uint32 basetime = pVictim->getAttackTimer(BASE_ATTACK);
+
+                if (pVictim->haveOffhandWeapon() && offtime < basetime)
+                {
+                    if( offtime > ATTACK_DISPLAY_DELAY )
+                        pVictim->setAttackTimer(OFF_ATTACK,ATTACK_DISPLAY_DELAY);
+                }
+                else
+                {
+                    if ( basetime > ATTACK_DISPLAY_DELAY )
+                        pVictim->setAttackTimer(BASE_ATTACK,ATTACK_DISPLAY_DELAY);
+                }
+            }
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();

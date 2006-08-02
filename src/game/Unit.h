@@ -326,6 +326,10 @@ enum MeleeHitOutcome
     MELEE_HIT_CRIT, MELEE_HIT_CRUSHING, MELEE_HIT_NORMAL
 };
 
+
+// delay time next attack to privent client attack animanation problems
+#define ATTACK_DISPLAY_DELAY 200
+
 class MANGOS_DLL_SPEC Unit : public Object
 {
     public:
