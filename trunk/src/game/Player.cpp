@@ -2109,6 +2109,9 @@ void Player::BuildPlayerRepop()
 
     SetUInt32Value(UNIT_FIELD_BYTES_1, 0x1000000);          //Set standing so always be standing
 
+    if (getRace() == RACE_NIGHT_ELF)
+        SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 correct wisp model
+
     SetUInt32Value(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
 
 }
