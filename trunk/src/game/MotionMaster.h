@@ -53,7 +53,7 @@ class MANGOS_DLL_DECL MotionMaster : public std::stack<MovementGenerator *>
 
     private:
 
-        inline bool isStatic(MovementGenerator *mv) const { return (mv == & si_idleMovement); }
+        inline bool isStatic(MovementGenerator *mv) const { return (mv == &si_idleMovement); }
         Creature *i_owner;
 };
 #endif

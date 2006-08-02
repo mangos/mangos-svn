@@ -533,16 +533,16 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
         return;
     }
 
-    if ((m_isunderwater & 0x01) && !(m_isunderwater & 0x80) && (!(m_deathState & DEAD)))
+    if ((m_isunderwater & 0x01) && !(m_isunderwater & 0x80) && !(m_deathState & DEAD))
     {
         //single trigger timer
-        if (!((m_isunderwater & 0x02)))
+        if (!(m_isunderwater & 0x02))
         {
             m_isunderwater|= 0x02;
             m_breathTimer = UnderWaterTime + 1000;
         }
         //single trigger "Breathbar"
-        if ((m_breathTimer <= UnderWaterTime) && (!(m_isunderwater & 0x04)))
+        if ( m_breathTimer <= UnderWaterTime && !(m_isunderwater & 0x04))
         {
             m_isunderwater|= 0x04;
             StartMirrorTimer(1, UnderWaterTime);
@@ -560,7 +560,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
     }
 
     //single trigger retract bar
-    else if ((!(m_isunderwater & 0x01)) && (!(m_isunderwater & 0x08)) && (m_isunderwater & 0x02) && (m_breathTimer > 0) && (!(m_deathState & DEAD)))
+    else if (!(m_isunderwater & 0x01) && !(m_isunderwater & 0x08) && (m_isunderwater & 0x02) && (m_breathTimer > 0) && (!(m_deathState & DEAD)))
     {
         m_isunderwater = 0x08;
 
@@ -570,7 +570,7 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
         m_isunderwater = 0x10;
     }
     //remove bar
-    else if ((m_breathTimer < 50) && (!(m_isunderwater & 0x01)) && (m_isunderwater == 0x10))
+    else if ((m_breathTimer < 50) && !(m_isunderwater & 0x01) && (m_isunderwater == 0x10))
     {
         StopMirrorTimer(1);
 
@@ -581,10 +581,10 @@ void Player::HandleDrowing(uint32 UnderWaterTime)
 
 void Player::HandleLava()
 {
-    if ((m_isunderwater & 0x80) && (!(m_deathState & DEAD)))
+    if ((m_isunderwater & 0x80) && !(m_deathState & DEAD))
     {
         //Single trigger Set BreathTimer
-        if (!((m_isunderwater & 0x04)))
+        if (!(m_isunderwater & 0x04))
         {
             m_isunderwater|= 0x04;
             m_breathTimer = 1000;
@@ -714,11 +714,11 @@ void Player::Update( uint32 p_time )
                 }
                 else
                 {
-                    // prevent base and off attack in same time
+                    // prevent base and off attack in same time, delay attack at 0.2 sec
                     if(haveOffhandWeapon())
                     {
                         uint32 off_att = getAttackTimer(OFF_ATTACK);
-                        if(off_att <= 200)
+                        if(off_att < 200)
                             setAttackTimer(OFF_ATTACK,200);
                     }
                     AttackerStateUpdate(pVictim);
@@ -738,9 +738,9 @@ void Player::Update( uint32 p_time )
                 }
                 else
                 {
-                    // prevent base and off attack in same time
+                    // prevent base and off attack in same time, delay attack at 0.2 sec
                     uint32 base_att = getAttackTimer(BASE_ATTACK);
-                    if(base_att <= 200)
+                    if(base_att < 200)
                         setAttackTimer(BASE_ATTACK,200);
                     // do attack
                     AttackerStateUpdate(pVictim);
