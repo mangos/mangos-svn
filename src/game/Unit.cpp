@@ -718,16 +718,13 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
             *damage = 0;
             *victimState = 3;
 
-            if(pVictim->isAttackReady(BASE_ATTACK))
-                pVictim->resetAttackTimer(BASE_ATTACK);
+            // reset melee attacks
+            pVictim->resetAttackTimer(BASE_ATTACK);
+            if(haveOffhandWeapon())
+                pVictim->resetAttackTimer(OFF_ATTACK);
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
-            {
                 ((Player*)pVictim)->UpdateDefense();
-
-                if(haveOffhandWeapon() && pVictim->isAttackReady(OFF_ATTACK))
-                    pVictim->resetAttackTimer(OFF_ATTACK);
-            }
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             break;
@@ -853,7 +850,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         if(procdamage)
         {
             bool nocharges = procdamage->procCharges == 0 ? true : false;
-            if(procdamage->procFlags & 20 && procdamage->procChance > rand_chance()
+            if( (procdamage->procFlags & 20) && procdamage->procChance > rand_chance()
                 && (procdamage->procCharges > 0 || nocharges))
             {
                 SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
@@ -2201,6 +2198,11 @@ bool Unit::Attack(Unit *victim)
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_ATTACKING);
     m_attacking = victim;
     m_attacking->_addAttacker(this);
+
+    // delay offhand weapon attack to next attack time
+    if(haveOffhandWeapon())
+        resetAttackTimer(OFF_ATTACK);
+
     return true;
 }
 

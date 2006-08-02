@@ -1071,7 +1071,7 @@ void WorldSession::HandleForceRunSpeedChangeAck(WorldPacket& recv_data)
 
     recv_data >> GUID;
     recv_data >> unk0 >> Flags;
-    if (Flags & 0x2000 || Flags & 0x6000)                   //0x2000 == jumping  0x6000 == Falling
+    if ( (Flags & 0x2000) || (Flags & 0x6000) )                   //0x2000 == jumping  0x6000 == Falling
     {
         uint32 unk2, unk3, unk4, unk5;
         float OldSpeed;

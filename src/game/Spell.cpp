@@ -1246,7 +1246,7 @@ uint8 Spell::CanCast()
             else if(!(pitem->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
                 castResult = CAST_FAIL_MUST_HAVE_XXXX_IN_MAINHAND;
         }*/
-        if(m_spellInfo->AttributesExEx & 1048576 && !target->HasInArc(M_PI, m_caster) )
+        if((m_spellInfo->AttributesExEx & 0x4000000) && !target->HasInArc(M_PI, m_caster) )
             castResult = CAST_FAIL_NOT_BEHIND_TARGET;
 
         if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
@@ -1518,7 +1518,7 @@ uint8 Spell::CheckRange()
             return CAST_FAIL_OUT_OF_RANGE;                  //0x56;
         if(dist < min_range * min_range)
             return CAST_FAIL_TOO_CLOSE;
-        if(m_caster != target && !m_caster->isInFront( target, max_range))
+        if( m_caster != target && !m_Istriggeredpell && !m_caster->isInFront( target, max_range) )
             return CAST_FAIL_TARGET_NEED_TO_BE_INFRONT;
     }
 
