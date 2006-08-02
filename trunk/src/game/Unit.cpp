@@ -249,6 +249,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         victimGuid = pVictim->GetGUID();
 
         DEBUG_LOG("DealDamageAttackStop");
+        SendAttackStop(victimGuid);
         pVictim->SendAttackStop(attackerGuid);
 
         DEBUG_LOG("DealDamageHealth1");
@@ -365,7 +366,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         {
             DEBUG_LOG("Monster kill Monster");
             SendAttackStop(victimGuid);
-            addUnitState(UNIT_STAT_DIED);
+            pVictim->addUnitState(UNIT_STAT_DIED);
         }
         AttackStop();
     }

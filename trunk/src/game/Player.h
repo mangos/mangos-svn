@@ -809,6 +809,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void FlightComplete(void);
         void SendLoot(uint64 guid, LootType loot_type);
         uint8 CheckFishingAble() const;
+        void SetSoulStoneSpell(uint32 spellid) { m_soulStoneSpell = spellid; }
+        void SetSoulStone(Item *item) {  m_soulStone = item;}
+        uint32 GetSoulStoneSpell()const { return m_soulStoneSpell;}
+        Item *GetSoulStone() const { return m_soulStone;}
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -1023,6 +1027,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_pvp_counting;
 
         uint32 m_BlockValue;
+        uint32 m_soulStoneSpell;
+        Item *m_soulStone;
 };
 
 int irand(int min, int max);

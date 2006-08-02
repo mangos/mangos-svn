@@ -417,6 +417,7 @@ class Spell
         void EffectFeedPet(uint32 i);
         void EffectDismissPet(uint32 i);
         void EffectReputation(uint32 i);
+        void EffectSelfResurrect(uint32 i);
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
         void EffectSummonCritter(uint32 i);

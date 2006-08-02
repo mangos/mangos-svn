@@ -126,6 +126,8 @@ Player::Player (WorldSession *session): Unit()
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
+    m_soulStone = NULL;
+    m_soulStoneSpell = 0;
 }
 
 Player::~Player ()
@@ -784,6 +786,21 @@ void Player::Update( uint32 p_time )
         else
         {
             KillPlayer();
+        }
+        if( GetSoulStoneSpell() && GetSoulStone())
+        {
+            SpellEntry *spellInfo = sSpellStore.LookupEntry(GetSoulStoneSpell());
+            if(spellInfo)
+            {
+                Spell spell(this, spellInfo, true, 0);
+
+                SpellCastTargets targets;
+                targets.setUnitTarget( this );
+                spell.m_CastItem = GetSoulStone();
+                spell.prepare(&targets);
+            }
+            SetSoulStone(NULL);
+            SetSoulStoneSpell(0);
         }
     }
 
