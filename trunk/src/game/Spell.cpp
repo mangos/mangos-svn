@@ -1155,17 +1155,26 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     if(unitTarget)
     {
         //If m_immuneToEffect type contain this effect type, IMMUNE effect.
-        if(unitTarget->m_immuneToEffect & eff)
-            castResult = CAST_FAIL_IMMUNE;
-        //If m_immuneToMechanic type contain this Mechanic type IMMUNE spell, or it should fit to aura?
-        if(unitTarget->m_immuneToMechanic & m_spellInfo->Mechanic)
-            castResult = CAST_FAIL_IMMUNE;
-        //If m_immuneToDamage type contain magic, IMMUNE spell.
-        if(unitTarget->m_immuneToDmg & IMMUNE_DAMAGE_MAGIC)
-            castResult = CAST_FAIL_IMMUNE;
-        //If m_immuneToSchool type contain this school type, IMMUNE spell.
-        if(unitTarget->m_immuneToSchool & school)
-            castResult = CAST_FAIL_IMMUNE;
+        for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_EFFECT].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_EFFECT].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if((*itr)->type == eff)
+            {
+                castResult = CAST_FAIL_IMMUNE;
+                break;
+            }
+        }
+        for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_MECHANIC].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if((*itr)->type == m_spellInfo->Mechanic)
+            {
+                castResult = CAST_FAIL_IMMUNE;
+                break;
+            }
+        }
     }
     if(castResult)
     {
@@ -1233,8 +1242,16 @@ uint8 Spell::CanCast()
     if(target)
     {
         //If m_immuneToDispel type contain this spell type, IMMUNE spell.
-        if(target->m_immuneToDispel & m_spellInfo->Dispel)
-            castResult = CAST_FAIL_IMMUNE;
+        for (SpellImmuneList::iterator itr = target->m_spellImmune[IMMUNITY_DISPEL].begin(), next; itr != target->m_spellImmune[IMMUNITY_DISPEL].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if((*itr)->type == m_spellInfo->Dispel)
+            {
+                castResult = CAST_FAIL_IMMUNE;
+                break;
+            }
+        }
         /*
         if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass > 0)
         {

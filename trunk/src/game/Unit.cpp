@@ -63,12 +63,6 @@ Unit::Unit() : Object()
     m_silenced = false;
     waterbreath = false;
 
-    m_immuneToMechanic = 0;
-    m_immuneToEffect = 0;
-    m_immuneToState  = 0;
-    m_immuneToSchool = 0;
-    m_immuneToDmg    = 0;
-    m_immuneToDispel = 0;
     m_detectStealth = 0;
     m_stealthvalue = 0;
     m_transform = 0;
@@ -76,6 +70,8 @@ Unit::Unit() : Object()
 
     for (int i = 0; i < TOTAL_AURAS; i++)
         m_AuraModifiers[i] = -1;
+    for (int i = 0; i < IMMUNITY_MECHANIC; i++)
+        m_spellImmune[i].clear();
 
     m_attacking = NULL;
     m_modDamagePCT = 0;
@@ -606,7 +602,6 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
         return 0;
     if(!damage)
         return 0;
-
     for(std::list<struct DamageManaShield*>::iterator i = pVictim->m_damageManaShield.begin();i != pVictim->m_damageManaShield.end();i++)
     {
         SpellEntry *spellInfo = sSpellStore.LookupEntry( (*i)->m_spellId);
@@ -2349,6 +2344,30 @@ void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage
 uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdamage)
 {
     if(!spellProto || !pVictim) return pdamage;
+    //If m_immuneToDamage type contain this damage type, IMMUNE damage.
+    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
+    {
+        next = itr;
+        next++;
+        if((*itr)->type & uint32(1<<spellProto->School))
+        {
+            pdamage = 0;
+            break;
+        }
+    }
+    //If m_immuneToSchool type contain this school type, IMMUNE damage.
+    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); itr = next)
+    {
+        next = itr;
+        next++;
+        if((*itr)->type & uint32(1<<spellProto->School))
+        {
+            pdamage = 0;
+            break;
+        }
+    }
+    if(pdamage == 0)
+        return pdamage;
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -2367,12 +2386,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
 
     AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & (int32)spellProto->School) != 0)
+        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & (int32)spellProto->School) != 0)
+        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
     // TODO - fix PenaltyFactor and complete the formula from the wiki
@@ -2389,7 +2408,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
 
     AuraList& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
     for(AuraList::iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & spellProto->School) != 0)
+        if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             critchance += (*i)->GetModifier()->m_amount;
 
     critchance = critchance > 0 ? critchance :0;
@@ -2404,6 +2423,31 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
 
 uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
 {
+    if(!pVictim) return pdamage;
+    //If m_immuneToDamage type contain magic, IMMUNE damage.
+    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_DAMAGE].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_DAMAGE].end(); itr = next)
+    {
+        next = itr;
+        next++;
+        if((*itr)->type & IMMUNE_DAMAGE_PHYSICAL)
+        {
+            pdamage = 0;
+            break;
+        }
+    }
+    //If m_immuneToSchool type contain this school type, IMMUNE damage.
+    for (SpellImmuneList::iterator itr = pVictim->m_spellImmune[IMMUNITY_SCHOOL].begin(), next; itr != pVictim->m_spellImmune[IMMUNITY_SCHOOL].end(); itr = next)
+    {
+        next = itr;
+        next++;
+        if((*itr)->type & IMMUNE_SCHOOL_PHYSICAL)
+        {
+            pdamage = 0;
+            break;
+        }
+    }
+    if(pdamage == 0)
+        return pdamage;
     CreatureInfo *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -2420,28 +2464,64 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
         }
     }
 
-    if(!pVictim) return pdamage;
-
     AuraList& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if(cinfo && cinfo->type == (*i)->GetModifier()->m_miscvalue)
+        if(cinfo && cinfo->type == uint32((*i)->GetModifier()->m_miscvalue))
             pdamage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if(SpellSchools((*i)->GetModifier()->m_miscvalue) == 0)
+        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             pdamage += (*i)->GetModifier()->m_amount;
 
     AuraList& mDamageTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
-        if(SpellSchools((*i)->GetModifier()->m_miscvalue) == 0)
+        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             pdamage += (*i)->GetModifier()->m_amount;
 
     AuraList& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
-        if(cinfo && (cinfo->type & (*i)->GetModifier()->m_miscvalue) != 0)
+        if(cinfo && (cinfo->type & uint32((*i)->GetModifier()->m_miscvalue)) != 0)
             pdamage += uint32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(BASE_ATTACK)/1000);
 
     pdamage = uint32(pdamage * (m_modDamagePCT+100)/100);
     return pdamage;
+}
+
+void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
+{
+    if (apply)
+    {
+        for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if((*itr)->type == type)
+            {
+                m_spellImmune[op].erase(itr);
+                if (m_spellImmune[op].empty())
+                    break;
+                else
+                    next = m_spellImmune[op].begin();
+            }
+        }
+        SpellImmune *Immune = new SpellImmune();
+        Immune->spellId = spellId;
+        Immune->type = type;
+        m_spellImmune[op].push_back(Immune);
+    }
+    else
+    {
+        for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if((*itr)->spellId == spellId)
+            {
+                m_spellImmune[op].erase(itr);
+                break;
+            }
+        }
+    }
+
 }

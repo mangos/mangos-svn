@@ -780,8 +780,7 @@ void HandleHealEvent(void *obj)
 
 void Aura::HandlePeriodicHeal(bool apply)
 {
-                                                            //Can't heal
-    if(!m_target || (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_HEAL))
+    if(!m_target)
         return;
     if(apply)
     {
@@ -1159,7 +1158,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
     {
         for(int8 x=0;x < 6;x++)
         {
-            SpellSchools school  = SpellSchools(IMMUNE_SCHOOL_HOLY + x);
+            SpellSchools school  = SpellSchools(SPELL_SCHOOL_HOLY + x);
 
             m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -1288,7 +1287,7 @@ void Aura::HandleAuraModResistance(bool apply)
     {
         for(int8 x=0;x < 6;x++)
         {
-            SpellSchools school = SpellSchools(IMMUNE_SCHOOL_HOLY + x);
+            SpellSchools school = SpellSchools(SPELL_SCHOOL_HOLY + x);
 
             m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -1685,32 +1684,32 @@ void Aura::HandleFarSight(bool apply)
 
 void Aura::HandleModMechanicImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToMechanic,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToMechanic,m_modifier.m_miscvalue);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_EFFECT,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToEffect,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToEffect,m_modifier.m_miscvalue);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_STATE,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModStateImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToState,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToState,m_modifier.m_miscvalue);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_SCHOOL,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModSchoolImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToSchool,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToSchool,m_modifier.m_miscvalue);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_DAMAGE,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToDmg,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDmg,m_modifier.m_miscvalue);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply)
 {
-    apply ? m_target->SetStateFlag(m_target->m_immuneToDispel,m_modifier.m_miscvalue) : m_target->RemoveStateFlag(m_target->m_immuneToDispel,m_modifier.m_miscvalue);
+    m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
 }
 
 void Aura::HandleAuraProcTriggerSpell(bool apply)
@@ -1990,9 +1989,6 @@ void Aura::HandleModCreatureAttackPower(bool apply)
 void Aura::HandleAuraTransform(bool apply)
 {
     if(!m_target)
-        return;
-                                                            //Can't transform
-    if (m_target->m_immuneToMechanic & IMMUNE_MECHANIC_POLYMORPH)
         return;
 
     if (apply)
@@ -2360,7 +2356,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
     {
         for(int8 x=0;x < 6;x++)
         {
-            SpellSchools school = SpellSchools(IMMUNE_SCHOOL_HOLY + x);
+            SpellSchools school = SpellSchools(SPELL_SCHOOL_HOLY + x);
 
             m_target->ApplyResistancePercentMod(school,m_modifier.m_amount, apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
