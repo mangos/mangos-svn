@@ -566,13 +566,20 @@ void Spell::cancel()
 
 void Spell::cast()
 {
+    uint32 mana = 0;
     uint8 castResult = 0;
     if(m_caster->GetTypeId() != TYPEID_PLAYER && unitTarget)
         m_caster->SetInFront(unitTarget);
+    castResult = CheckMana( &mana);
+    if(castResult != 0)
+    {
+        SendCastResult(castResult);
+        return;
+    }
     castResult = CanCast();
     if(castResult == 0)
     {
-        TakePower();
+        TakePower(mana);
         TakeCastItem();
         TakeReagents();
         FillTargetMap();
@@ -1075,7 +1082,7 @@ void Spell::TakeCastItem()
     }
 }
 
-void Spell::TakePower()
+void Spell::TakePower(uint32 mana)
 {
     if(m_CastItem)
         return;
@@ -1083,37 +1090,14 @@ void Spell::TakePower()
     Powers powerType = Powers(m_spellInfo->powerType);
 
     uint32 currentPower = m_caster->GetPower(powerType);
-    uint32 manaCost = m_spellInfo->manaCost;
-    if(m_spellInfo->manaCostPerlevel)
-        manaCost += uint32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
-    if(m_spellInfo->ManaCostPercentage)
-        manaCost += uint32(m_spellInfo->ManaCostPercentage*currentPower);
 
-    Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
-    for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == m_spellInfo->School)
-            manaCost += (*i)->GetModifier()->m_amount;
-
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
-
-    manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
-
-    if(currentPower < manaCost)
+    m_caster->SetPower(powerType, currentPower - mana);
+    if (powerType == POWER_MANA)
     {
-        SendCastResult(CAST_FAIL_NOT_ENOUGH_MANA);
-        return;
-    }
-    else if(manaCost > 0)
-    {
-        m_caster->SetPower(powerType, currentPower - manaCost);
-        if (powerType == POWER_MANA)
+        // Set the five second timer
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            // Set the five second timer
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
-            }
+            ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
         }
     }
 }
@@ -1160,16 +1144,6 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
             next = itr;
             next++;
             if((*itr)->type == eff)
-            {
-                castResult = CAST_FAIL_IMMUNE;
-                break;
-            }
-        }
-        for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_MECHANIC].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); itr = next)
-        {
-            next = itr;
-            next++;
-            if((*itr)->type == m_spellInfo->Mechanic)
             {
                 castResult = CAST_FAIL_IMMUNE;
                 break;
@@ -1229,15 +1203,6 @@ uint8 Spell::CanCast()
 {
     uint8 castResult = 0;
 
-    if (m_CastItem || itemTarget)
-    {
-        castResult = CheckItems();
-
-        if(castResult != 0)
-            SendCastResult(castResult);
-
-        //return castResult;
-    }
     Unit *target = m_targets.getUnitTarget();
     if(target)
     {
@@ -1247,6 +1212,16 @@ uint8 Spell::CanCast()
             next = itr;
             next++;
             if((*itr)->type == m_spellInfo->Dispel)
+            {
+                castResult = CAST_FAIL_IMMUNE;
+                break;
+            }
+        }
+        for (SpellImmuneList::iterator itr = unitTarget->m_spellImmune[IMMUNITY_MECHANIC].begin(), next; itr != unitTarget->m_spellImmune[IMMUNITY_MECHANIC].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            if((*itr)->type == m_spellInfo->Mechanic)
             {
                 castResult = CAST_FAIL_IMMUNE;
                 break;
@@ -1275,6 +1250,9 @@ uint8 Spell::CanCast()
 
     if(m_caster->m_silenced)
         castResult = CAST_FAIL_SILENCED;                    //0x5A;
+
+    if(m_CastItem || itemTarget)
+        castResult = CheckItems();
 
     if(castResult == 0)
         castResult = CheckRange();
@@ -1465,6 +1443,7 @@ uint8 Spell::CanCast()
                 }
             }
             case SPELL_AURA_MOD_STEALTH:
+            case SPELL_AURA_MOD_INVISIBILITY:
             {
                 //detect if any mod is in x range.if true,can't steath.FIX ME!
                 if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -1549,6 +1528,33 @@ uint8 Spell::CheckRange()
     }
 
     return 0;                                               // ok
+}
+
+uint8 Spell::CheckMana(uint32 *mana)
+{
+    Powers powerType = Powers(m_spellInfo->powerType);
+
+    uint32 currentPower = m_caster->GetPower(powerType);
+    uint32 manaCost = m_spellInfo->manaCost;
+    if(m_spellInfo->manaCostPerlevel)
+        manaCost += uint32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
+    if(m_spellInfo->ManaCostPercentage)
+        manaCost += uint32(m_spellInfo->ManaCostPercentage/100*m_caster->GetMaxPower(powerType));
+
+    Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
+    for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue == m_spellInfo->School)
+            manaCost += (*i)->GetModifier()->m_amount;
+
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
+
+    manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
+    *mana = manaCost;
+
+    if(currentPower < manaCost)
+        return CAST_FAIL_NOT_ENOUGH_MANA;
+    else return 0;
 }
 
 uint8 Spell::CheckItems()
