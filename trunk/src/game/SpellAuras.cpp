@@ -553,284 +553,12 @@ void Aura::_RemoveAura()
     m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
 }
 
+/*********************************************************/
+/***               BASIC AURA FUCTION                  ***/
+/*********************************************************/
+
 void Aura::HandleNULL(bool apply)
 {
-}
-
-void HandleDOTEvent(void *obj)
-{
-    Aura *Aur = ((Aura*)obj);
-    //Aur->GetCaster()->AddPeriodicAura(Aur);
-    Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
-}
-
-void Aura::HandleBindSight(bool apply)
-{
-    if(!m_target)
-        return;
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
-        return;
-    Player *player = (Player*)m_caster;
-    player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
-}
-
-void Aura::HandleModPossess(bool apply)
-{
-    if(!m_target)
-        return;
-
-    if(m_target->GetTypeId() != TYPEID_UNIT)
-        return;
-
-    Creature* creatureTarget = (Creature*)m_target;
-
-    if(m_target->getLevel() <= m_modifier.m_amount)
-    {
-        WorldPacket data;
-
-        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-        if( apply )
-        {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-            m_caster->SetCharm(creatureTarget);
-            creatureTarget->AIM_Initialize();
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)m_caster)->PetSpellInitialize();
-            }
-        }
-        else
-        {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-            m_caster->SetCharm(0);
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                data.Initialize(SMSG_PET_SPELLS);
-                data << uint64(0);
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            }
-            creatureTarget->AIM_Initialize();
-        }
-    }
-}
-
-void Aura::HandlePeriodicDamage(bool apply)
-{
-    if( apply )
-    {
-        //m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
-}
-
-void Aura::HandleAuraDummy(bool apply)
-{
-    if(GetSpellProto()->SpellVisual == 5622 && m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player *player = (Player*)m_caster;
-        if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
-        {
-            if(apply)
-            {
-                m_procdamage = new ProcTriggerDamage();
-                m_procdamage->caster = m_caster->GetGUID();
-                m_procdamage->procChance = GetSpellProto()->procChance;
-                m_procdamage->procDamage = uint32(0.035 * m_modifier.m_amount);
-                m_procdamage->procFlags = GetSpellProto()->procFlags;
-                m_procdamage->procCharges = GetSpellProto()->procCharges;
-            }
-            else
-            {
-                m_procdamage = NULL;
-            }
-        }
-    }
-    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92
-        && m_caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
-    {
-        if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player * player = (Player*)m_target;
-            uint32 spellid;
-            uint32 itemflag = m_castItem->GetUInt32Value(ITEM_FIELD_FLAGS);
-            if(apply)
-            {
-                // 1<<20 just a temp value to detect if any one has be stored,
-                // we should find out a field to correctly mask the target.
-                if(itemflag & (1<<20))
-                    return;
-                switch(GetId())
-                {
-                    case 20707:spellid = 3026;break;
-                    case 20762:spellid = 20758;break;
-                    case 20763:spellid = 20759;break;
-                    case 20764:spellid = 20760;break;
-                    case 20765:spellid = 20761;break;
-                    default:break;
-                }
-                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),true);
-                player->SetSoulStone(m_castItem);
-                player->SetSoulStoneSpell(spellid);
-            }
-            else
-            {
-                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),false);
-            }
-        }
-    }
-}
-
-void Aura::HandleModConfuse(bool apply)
-{
-    uint32 apply_stat = UNIT_STAT_CONFUSED;
-    if( apply )
-    {
-        m_target->addUnitState(UNIT_STAT_CONFUSED);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-    }
-    else
-    {
-        m_target->clearUnitState(UNIT_STAT_CONFUSED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-    }
-}
-
-void Aura::HandleModCharm(bool apply)
-{
-    if(!m_target)
-        return;
-
-    if(m_target->GetTypeId() != TYPEID_UNIT)
-        return;
-
-    Creature* creatureTarget = (Creature*)m_target;
-
-    if(m_target->getLevel() <= m_modifier.m_amount)
-    {
-        WorldPacket data;
-
-        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-        if( apply )
-        {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-            m_caster->SetCharm(creatureTarget);
-            creatureTarget->AIM_Initialize();
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)m_caster)->PetSpellInitialize();
-            }
-        }
-        else
-        {
-            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
-            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-            m_caster->SetCharm(0);
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                data.Initialize(SMSG_PET_SPELLS);
-                data << uint64(0);
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            }
-            creatureTarget->AIM_Initialize();
-        }
-    }
-}
-
-void Aura::HandleModFear(bool Apply)
-{
-    uint32 apply_stat = UNIT_STAT_FLEEING;
-    WorldPacket data;
-    data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
-    if( Apply )
-    {
-        m_target->addUnitState(UNIT_STAT_FLEEING);
-        m_target->SendAttackStop(m_caster->GetGUID());
-        m_caster->SendAttackStop(m_target->GetGUID());
-        m_target->AttackStop();
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-
-        data<<m_target->GetGUIDLow();
-        data<<uint8(0);
-    }
-    else
-    {
-        data<<m_target->GetGUIDLow();
-        data<<uint8(1);
-        m_target->clearUnitState(UNIT_STAT_FLEEING);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-    }
-    m_target->SendMessageToSet(&data,true);
-}
-
-void HandleHealEvent(void *obj)
-{
-    Aura *Aur = ((Aura*)obj);
-    Aur->GetTarget()->PeriodicAuraLog(Aur->GetCaster(), Aur->GetSpellProto(), Aur->GetModifier());
-}
-
-void Aura::HandlePeriodicHeal(bool apply)
-{
-    if(!m_target)
-        return;
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
-}
-
-void Aura::HandleModAttackSpeed(bool apply)
-{
-    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
-        return;
-
-    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleModThreat(bool apply)
-{
-    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
-        return;
-    m_target->AddHostil(m_caster->GetGUID(),apply ? float(m_modifier.m_amount) : -float(m_modifier.m_amount));
-}
-
-void Aura::HandleAuraWaterWalk(bool apply)
-{
-    WorldPacket data;
-    if(apply)
-        data.Initialize(SMSG_MOVE_WATER_WALK);
-    else
-        data.Initialize(SMSG_MOVE_LAND_WALK);
-    data << uint8(0xFF) << m_target->GetGUID();
-    m_target->SendMessageToSet(&data,true);
-}
-
-void Aura::HandleAuraFeatherFall(bool apply)
-{
-    WorldPacket data;
-    if(apply)
-        data.Initialize(SMSG_MOVE_FEATHER_FALL);
-    else
-        data.Initialize(SMSG_MOVE_NORMAL_FALL);
-    data << uint8(0xFF) << m_target->GetGUID();
-    m_target->SendMessageToSet(&data,true);
 }
 
 void Aura::HandleAddModifier(bool apply)
@@ -914,161 +642,6 @@ void Aura::HandleAddModifier(bool apply)
     }
 }
 
-void Aura::HandleAuraModStun(bool apply)
-{
-    WorldPacket data;
-    if (apply)
-    {
-        m_target->addUnitState(UNIT_STAT_STUNDED);
-        //m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        if(m_target->GetTypeId() != TYPEID_PLAYER)
-            ((Creature *)m_target)->StopMoving();
-
-        data.Initialize(SMSG_FORCE_MOVE_ROOT);
-        data << uint8(0xFF) << m_target->GetGUID();
-        m_target->SendMessageToSet(&data,true);
-        m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
-    }
-    else
-    {
-        m_target->clearUnitState(UNIT_STAT_STUNDED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
-
-        data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-        data << uint8(0xFF) << m_target->GetGUID();
-        m_target->SendMessageToSet(&data,true);
-    }
-}
-
-void Aura::HandleModDamageDone(bool apply)
-{
-    /*    if(apply)
-        {
-
-            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
-            {
-                if(GetId() == (*i)->spellId)
-                {
-                    m_target->m_damageDone.erase(i);
-                }
-            }
-
-            DamageDone *dd = new DamageDone();
-
-            dd->spellId = GetId();
-            dd->damage = m_modifier.m_amount;
-            dd->school = m_modifier.m_miscvalue;
-            m_target->m_damageDone.push_back(dd);
-        }
-        else
-        {
-            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
-            {
-                if(GetId() == (*i)->spellId)
-                {
-                    m_target->m_damageDone.erase(i);
-                    break;
-                }
-            }
-        }*/
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-    if(m_modifier.m_miscvalue2)
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-    else
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleModDamageTaken(bool apply)
-{
-    /*if(apply)
-    {
-
-        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageTaken.erase(i);
-            }
-        }
-
-        DamageTaken *dt = new DamageTaken();
-
-        dt->spellId = GetId();
-        dt->damage = m_modifier.m_amount;
-        dt->school = m_modifier.m_miscvalue;
-        m_target->m_damageTaken.push_back(dt);
-    }
-    else
-    {
-        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageTaken.erase(i);
-                break;
-            }
-        }
-    }*/
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-    if(m_modifier.m_miscvalue2)
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-    else
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModRangedAttackPower(bool apply)
-{
-    m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
-{
-    m_target->ApplyPowerPercentMod(POWER_ENERGY,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
-{
-    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount,apply);
-}
-
-void Aura::HandleHaste(bool apply)
-{
-    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
-    m_target->ApplyAttackTimePercentMod(OFF_ATTACK,m_modifier.m_amount,apply);
-    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
-}
-
-// FIX-ME!!
-void HandleTriggerSpellEvent(void *obj)
-{
-    Aura *Aur = ((Aura*)obj);
-    if(!Aur)
-        return;
-    SpellEntry *spellInfo = sSpellStore.LookupEntry(Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
-
-    if(!spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i\n", Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
-        return;
-    }
-
-    Spell spell(Aur->GetCaster(), spellInfo, true, Aur);
-    SpellCastTargets targets;
-    targets.setUnitTarget(Aur->GetTarget());
-    //WorldPacket dump;
-    //dump.Initialize(0);
-    //dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
-    //targets.read(&dump,this);
-    spell.prepare(&targets);
-
-    /*else if(m_spellProto->EffectApplyAuraName[i] == 23)
-    {
-        unitTarget->tmpAura->SetPeriodicTriggerSpell(m_spellProto->EffectTriggerSpell[i],m_spellProto->EffectAmplitude[i]);
-    }*/
-}
-
 void Aura::TriggerSpell()
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry( GetSpellProto()->EffectTriggerSpell[m_effIndex] );
@@ -1092,89 +665,99 @@ void Aura::TriggerSpell()
     spell.prepare(&targets);
 }
 
-void Aura::HandlePeriodicTriggerSpell(bool apply)
+/*********************************************************/
+/***                  AURA EFFECTS                     ***/
+/*********************************************************/
+
+void Aura::HandleAuraDummy(bool apply)
 {
-    if(apply)
+    if(GetSpellProto()->SpellVisual == 5622 && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_isTrigger = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_isTrigger = false;
-        m_duration = 0;
-        //probably it's temporary for taming creature..
-        if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
+        Player *player = (Player*)m_caster;
+        if(GetSpellProto()->SpellIconID == 25 && GetEffIndex() == 0)
         {
-            SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
-            Spell spell(m_caster, spell_proto, true, 0);
-            Unit* target = NULL;
-            target = m_target;
-            if(!target || !target->isAlive())
-                return;
-            SpellCastTargets targets;
-            targets.setUnitTarget(target);
-            // prevent double stat apply for triggered auras
-            target->ApplyStats(true);
-            spell.prepare(&targets);
-            target->ApplyStats(false);
+            if(apply)
+            {
+                m_procdamage = new ProcTriggerDamage();
+                m_procdamage->caster = m_caster->GetGUID();
+                m_procdamage->procChance = GetSpellProto()->procChance;
+                m_procdamage->procDamage = uint32(0.035 * m_modifier.m_amount);
+                m_procdamage->procFlags = GetSpellProto()->procFlags;
+                m_procdamage->procCharges = GetSpellProto()->procCharges;
+            }
+            else
+            {
+                m_procdamage = NULL;
+            }
+        }
+    }
+    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92
+        && m_caster->GetTypeId() == TYPEID_PLAYER && m_castItem)
+    {
+        if(m_target && m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player * player = (Player*)m_target;
+            uint32 spellid;
+            uint32 itemflag = m_castItem->GetUInt32Value(ITEM_FIELD_FLAGS);
+            if(apply)
+            {
+                // 1<<20 just a temp value to detect if any one has be stored,
+                // we should find out a field to correctly mask the target.
+                if(itemflag & (1<<20))
+                    return;
+                switch(GetId())
+                {
+                    case 20707:spellid = 3026;break;
+                    case 20762:spellid = 20758;break;
+                    case 20763:spellid = 20759;break;
+                    case 20764:spellid = 20760;break;
+                    case 20765:spellid = 20761;break;
+                    default:break;
+                }
+                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),true);
+                player->SetSoulStone(m_castItem);
+                player->SetSoulStoneSpell(spellid);
+            }
+            else
+            {
+                m_castItem->ApplyModFlag(ITEM_FIELD_FLAGS,(1<<20),false);
+            }
         }
     }
 }
 
-void Aura::HandlePeriodicEnergize(bool apply)
+void Aura::HandleAuraMounted(bool apply)
 {
     if(apply)
     {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
-}
-
-void Aura::HandleAuraModResistanceExclusive(bool apply)
-{
-    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > IMMUNE_SCHOOL_MAGIC)
-    {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_SRESISTANCE_EXCLUSIVE not valid");
-        return;
-    }
-
-    ImmuneToSchool immune = ImmuneToSchool(m_modifier.m_miscvalue);
-
-    bool positive = m_modifier.m_miscvalue2 == 0;
-
-    if(immune == IMMUNE_SCHOOL_MAGIC)
-    {
-        for(int8 x=0;x < 6;x++)
+        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
+        if(!ci)return;
+        uint32 displayId = ci->DisplayID;
+        if(displayId != 0)
         {
-            SpellSchools school  = SpellSchools(SPELL_SCHOOL_HOLY + x);
-
-            m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount,apply);
+            m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , displayId);
+            //m_target->SetFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_MOVEBLOCKED );
+            m_target->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
         }
-        return;
+    }else
+    {
+        m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
+        m_target->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT  | UNIT_FLAG_DISABLE_MOVE );
     }
-
-    SpellSchools school = immuneToSchool(immune);
-
-    m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount,apply);
 }
 
-void Aura::HandleAuraSafeFall(bool apply)
+void Aura::HandleAuraWaterWalk(bool apply)
+{
+    WorldPacket data;
+    if(apply)
+        data.Initialize(SMSG_MOVE_WATER_WALK);
+    else
+        data.Initialize(SMSG_MOVE_LAND_WALK);
+    data << uint8(0xFF) << m_target->GetGUID();
+    m_target->SendMessageToSet(&data,true);
+}
+
+void Aura::HandleAuraFeatherFall(bool apply)
 {
     WorldPacket data;
     if(apply)
@@ -1185,331 +768,9 @@ void Aura::HandleAuraSafeFall(bool apply)
     m_target->SendMessageToSet(&data,true);
 }
 
-void Aura::HandleAuraDamageShield(bool apply)
+void Aura::HandleWaterBreathing(bool apply)
 {
-    if(apply)
-    {
-        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-        {
-            m_target->m_damageShields.erase(i);
-            break;
-        }
-        DamageShield* ds = new DamageShield();
-        ds->m_caster = GetCaster();
-        ds->m_damage = m_modifier.m_amount;
-        ds->m_spellId = GetId();
-        m_target->m_damageShields.push_back((*ds));
-    }
-    else
-    {
-        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
-        {
-            m_target->m_damageShields.erase(i);
-            break;
-        }
-    }
-}
-
-void Aura::HandleModStealth(bool apply)
-{
-    if(apply)
-    {
-        m_target->m_stealthvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-    }
-    else
-    {
-        SendCoolDownEvent();
-        m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-    }
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_target);
-}
-
-void Aura::HandleModDetect(bool apply)
-{
-    if(apply)
-    {
-        m_target->m_detectStealth = CalculateDamage();
-    }
-    else
-    {
-        m_target->m_detectStealth = 0;
-    }
-}
-
-void Aura::HandleInvisibility(bool Apply)
-{
-    if(Apply)
-    {
-        m_target->m_stealthvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-    }
-    else
-    {
-        SendCoolDownEvent();
-        m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
-    }
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_target);
-}
-
-void Aura::HandleInvisibilityDetect(bool Apply)
-{
-    if(Apply)
-    {
-        m_target->m_detectStealth = CalculateDamage();
-    }
-    else
-    {
-        m_target->m_detectStealth = 0;
-    }
-}
-
-void Aura::HandleAuraModResistance(bool apply)
-{
-
-    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > IMMUNE_SCHOOL_MAGIC)
-    {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_RESISTANCE not valid");
-        return;
-    }
-
-    ImmuneToSchool immune = ImmuneToSchool(m_modifier.m_miscvalue);
-
-    bool positive = m_modifier.m_miscvalue2 == 0;
-
-    if(immune == IMMUNE_SCHOOL_MAGIC)
-    {
-        for(int8 x=0;x < 6;x++)
-        {
-            SpellSchools school = SpellSchools(SPELL_SCHOOL_HOLY + x);
-
-            m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount,apply);
-        }
-        return;
-    }
-
-    SpellSchools school = immuneToSchool(immune);
-
-    m_target->ApplyResistanceMod(school,m_modifier.m_amount,apply);
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModRoot(bool apply)
-{
-    uint32 apply_stat = UNIT_STAT_ROOT;
-    if (apply)
-    {
-        m_target->addUnitState(UNIT_STAT_ROOT);
-        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldPacket data;
-            data.Initialize(SMSG_FORCE_MOVE_ROOT);
-            data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
-            m_target->SendMessageToSet(&data,true);
-        }
-        else
-            ((Creature *)m_target)->StopMoving();
-    }
-    else
-    {
-        m_target->clearUnitState(UNIT_STAT_ROOT);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        WorldPacket data;
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldPacket data;
-            data.Initialize(SMSG_FORCE_MOVE_UNROOT);
-            data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
-            m_target->SendMessageToSet(&data,true);
-        }
-    }
-}
-
-void Aura::HandleAuraModSilence(bool apply)
-{
-    apply ? m_target->m_silenced = true : m_target->m_silenced = false;
-}
-
-void Aura::HandleReflectSpells(bool apply)
-{
-    if(apply)
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_reflectSpellSchool.erase(i);
-            }
-        }
-        ReflectSpellSchool *rss = new ReflectSpellSchool();
-
-        rss->chance = m_modifier.m_amount;
-        rss->spellId = GetId();
-        rss->school = -1;
-        m_target->m_reflectSpellSchool.push_back(rss);
-    }
-    else
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_reflectSpellSchool.erase(i);
-                break;
-            }
-        }
-    }
-}
-
-void Aura::HandleAuraModStat(bool apply)
-{
-    Stats stat = STAT_STRENGTH;
-    uint16 index2 = 0;
-    switch(m_modifier.m_miscvalue)
-    {
-        case 0:
-            stat = STAT_STRENGTH;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
-            break;
-        case 1:
-            stat = STAT_AGILITY;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
-            break;
-        case 2:
-            stat = STAT_STAMINA;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
-            break;
-        case 3:
-            stat = STAT_INTELLECT;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
-            break;
-        case 4:
-            stat = STAT_SPIRIT;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
-            break;
-        case -1:
-        {
-            stat = STAT_STRENGTH;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
-            for(int x=0;x<5;x++)
-            {
-                m_target->ApplyStatMod(Stats(stat+x),m_modifier.m_amount,apply);
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->ApplyModUInt32Value(index2+x,m_modifier.m_amount,apply);
-            }
-            return;
-        }break;
-        default:
-            sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
-            return;
-            break;
-    }
-
-    m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
-{
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
-    if(m_modifier.m_amount<=1)
-        return;
-    WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
-    data.Initialize(MSG_MOVE_SET_RUN_SPEED);
-    data << m_target->GetGUID();
-    data << m_target->GetSpeed( MOVE_RUN );
-    m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
-}
-
-void Aura::HandleAuraModIncreaseSpeed(bool apply)
-{
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
-    if(m_modifier.m_amount<=1)
-        return;
-    WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
-
-    m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
-}
-
-void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
-{
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
-    if(m_modifier.m_amount<=1)
-        return;
-    WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
-    m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
-}
-
-void Aura::HandleAuraModDecreaseSpeed(bool apply)
-{
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
-    if(m_modifier.m_amount<=1)
-        return;
-    WorldPacket data;
-    if(apply)
-        m_target->SetSpeed( m_target->GetSpeed() * m_modifier.m_amount/100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier.m_amount );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_RUN );
-    m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
-}
-
-void Aura::HandleAuraModIncreaseHealth(bool apply)
-{
-    m_target->ApplyMaxHealthMod(m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModIncreaseEnergy(bool apply)
-{
-    Powers powerType = m_target->getPowerType();
-    if(int32(powerType) != m_modifier.m_miscvalue)
-        return;
-
-    uint32 newValue = m_target->GetPower(powerType);
-    apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
-    m_target->SetPower(powerType,newValue);
+    m_target->waterbreath = apply;
 }
 
 void Aura::HandleAuraModShapeshift(bool apply)
@@ -1672,6 +933,108 @@ void Aura::HandleAuraModShapeshift(bool apply)
     }
 }
 
+void Aura::HandleAuraTransform(bool apply)
+{
+    if(!m_target)
+        return;
+
+    if (apply)
+    {
+        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
+        if(!ci)
+            return;
+        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
+        m_target->setTransForm(GetSpellProto()->Id);
+    }
+    else
+    {
+        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+        m_target->setTransForm(0);
+    }
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_caster);
+}
+
+void Aura::HandleForceReaction(bool Apply)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(Apply)
+    {
+        uint32 faction_id = m_modifier.m_miscvalue;
+
+        FactionTemplateEntry *factionTemplateEntry;
+
+        for(uint32 i = 0; i <  sFactionTemplateStore.GetNumRows(); ++i)
+        {
+            factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
+            if(!factionTemplateEntry)
+                continue;
+
+            if(factionTemplateEntry->faction == faction_id)
+                break;
+        }
+
+        if(!factionTemplateEntry)
+            return;
+
+        m_target->setFaction(factionTemplateEntry->ID);
+    }
+    else
+        ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
+}
+
+void Aura::HandleAuraModSkill(bool apply)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    SpellEntry* prot=GetSpellProto();
+
+    ((Player*)m_target)->ModifySkillBonus(prot->EffectMiscValue[0],
+        (apply ? (prot->EffectBasePoints[0]+1): (-(prot->EffectBasePoints[0]+1))));
+}
+
+void Aura::HandleChannelDeathItem(bool apply)
+{
+    if(!apply)
+    {
+        if(m_caster->GetTypeId() != TYPEID_PLAYER || !m_removeOnDeath)
+            return;
+        SpellEntry *spellInfo = GetSpellProto();
+        if(spellInfo->EffectItemType[m_effIndex] == 0)
+            return;
+        uint16 dest;
+        uint8 msg = ((Player*)m_caster)->CanStoreNewItem( 0, NULL_SLOT, dest, spellInfo->EffectItemType[m_effIndex], 1, false);
+        if( msg == EQUIP_ERR_OK )
+            ((Player*)m_caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
+        else
+            ((Player*)m_caster)->SendEquipError( msg, NULL, NULL );
+    }
+}
+
+void Aura::HandleAuraSafeFall(bool apply)
+{
+    WorldPacket data;
+    if(apply)
+        data.Initialize(SMSG_MOVE_FEATHER_FALL);
+    else
+        data.Initialize(SMSG_MOVE_NORMAL_FALL);
+    data << uint8(0xFF) << m_target->GetGUID();
+    m_target->SendMessageToSet(&data,true);
+}
+
+void Aura::HandleBindSight(bool apply)
+{
+    if(!m_target)
+        return;
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player *player = (Player*)m_caster;
+    player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+}
+
 void Aura::HandleFarSight(bool apply)
 {
     if(!m_target)
@@ -1681,6 +1044,378 @@ void Aura::HandleFarSight(bool apply)
     Player *player = (Player*)m_caster;
     player->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_modifier.m_miscvalue : 0);
 }
+
+void Aura::HandleAuraTracCreatures(bool apply)
+{
+    m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? m_modifier.m_miscvalue : 0 );
+}
+
+void Aura::HandleAuraTracResources(bool apply)
+{
+    m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1): 0 );
+}
+
+void Aura::HandleAuraModScale(bool apply)
+{
+    m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
+}
+
+void Aura::HandleModPossess(bool apply)
+{
+    if(!m_target)
+        return;
+
+    if(m_target->GetTypeId() != TYPEID_UNIT)
+        return;
+
+    Creature* creatureTarget = (Creature*)m_target;
+
+    if(m_target->getLevel() <= m_modifier.m_amount)
+    {
+        WorldPacket data;
+
+        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        if( apply )
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+            m_caster->SetCharm(creatureTarget);
+            creatureTarget->AIM_Initialize();
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)m_caster)->PetSpellInitialize();
+            }
+        }
+        else
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            m_caster->SetCharm(0);
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                data.Initialize(SMSG_PET_SPELLS);
+                data << uint64(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+            creatureTarget->AIM_Initialize();
+        }
+    }
+}
+
+void Aura::HandleModCharm(bool apply)
+{
+    if(!m_target)
+        return;
+
+    if(m_target->GetTypeId() != TYPEID_UNIT)
+        return;
+
+    Creature* creatureTarget = (Creature*)m_target;
+
+    if(m_target->getLevel() <= m_modifier.m_amount)
+    {
+        WorldPacket data;
+
+        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        if( apply )
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+            m_caster->SetCharm(creatureTarget);
+            creatureTarget->AIM_Initialize();
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)m_caster)->PetSpellInitialize();
+            }
+        }
+        else
+        {
+            creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+            creatureTarget->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+            m_caster->SetCharm(0);
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                data.Initialize(SMSG_PET_SPELLS);
+                data << uint64(0);
+                ((Player*)m_caster)->GetSession()->SendPacket(&data);
+            }
+            creatureTarget->AIM_Initialize();
+        }
+    }
+}
+
+void Aura::HandleModConfuse(bool apply)
+{
+    uint32 apply_stat = UNIT_STAT_CONFUSED;
+    if( apply )
+    {
+        m_target->addUnitState(UNIT_STAT_CONFUSED);
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
+    else
+    {
+        m_target->clearUnitState(UNIT_STAT_CONFUSED);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
+}
+
+void Aura::HandleModFear(bool Apply)
+{
+    uint32 apply_stat = UNIT_STAT_FLEEING;
+    WorldPacket data;
+    data.Initialize(SMSG_DEATH_NOTIFY_OBSOLETE);
+    if( Apply )
+    {
+        m_target->addUnitState(UNIT_STAT_FLEEING);
+        m_target->SendAttackStop(m_caster->GetGUID());
+        m_caster->SendAttackStop(m_target->GetGUID());
+        m_target->AttackStop();
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+
+        data<<m_target->GetGUIDLow();
+        data<<uint8(0);
+    }
+    else
+    {
+        data<<m_target->GetGUIDLow();
+        data<<uint8(1);
+        m_target->clearUnitState(UNIT_STAT_FLEEING);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+    }
+    m_target->SendMessageToSet(&data,true);
+}
+
+void Aura::HandleAuraModStun(bool apply)
+{
+    WorldPacket data;
+    if (apply)
+    {
+        m_target->addUnitState(UNIT_STAT_STUNDED);
+        //m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        if(m_target->GetTypeId() != TYPEID_PLAYER)
+            ((Creature *)m_target)->StopMoving();
+
+        data.Initialize(SMSG_FORCE_MOVE_ROOT);
+        data << uint8(0xFF) << m_target->GetGUID();
+        m_target->SendMessageToSet(&data,true);
+        m_target->SetFlag(UNIT_FIELD_FLAGS, 0x40000);
+    }
+    else
+    {
+        m_target->clearUnitState(UNIT_STAT_STUNDED);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, 0x40000);
+
+        data.Initialize(SMSG_FORCE_MOVE_UNROOT);
+        data << uint8(0xFF) << m_target->GetGUID();
+        m_target->SendMessageToSet(&data,true);
+    }
+}
+
+void Aura::HandleModStealth(bool apply)
+{
+    if(apply)
+    {
+        m_target->m_stealthvalue = CalculateDamage();
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+    }
+    else
+    {
+        SendCoolDownEvent();
+        m_target->m_stealthvalue = 0;
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+    }
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_target);
+}
+
+void Aura::HandleModDetect(bool apply)
+{
+    if(apply)
+    {
+        m_target->m_detectStealth = CalculateDamage();
+    }
+    else
+    {
+        m_target->m_detectStealth = 0;
+    }
+}
+
+void Aura::HandleInvisibility(bool Apply)
+{
+    if(Apply)
+    {
+        m_target->m_stealthvalue = CalculateDamage();
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+    }
+    else
+    {
+        SendCoolDownEvent();
+        m_target->m_stealthvalue = 0;
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (0x2000000) );
+    }
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->SendUpdateToPlayer((Player*)m_target);
+}
+
+void Aura::HandleInvisibilityDetect(bool Apply)
+{
+    if(Apply)
+    {
+        m_target->m_detectStealth = CalculateDamage();
+    }
+    else
+    {
+        m_target->m_detectStealth = 0;
+    }
+}
+
+void Aura::HandleAuraModRoot(bool apply)
+{
+    uint32 apply_stat = UNIT_STAT_ROOT;
+    if (apply)
+    {
+        m_target->addUnitState(UNIT_STAT_ROOT);
+        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            WorldPacket data;
+            data.Initialize(SMSG_FORCE_MOVE_ROOT);
+            data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
+            m_target->SendMessageToSet(&data,true);
+        }
+        else
+            ((Creature *)m_target)->StopMoving();
+    }
+    else
+    {
+        m_target->clearUnitState(UNIT_STAT_ROOT);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        WorldPacket data;
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            WorldPacket data;
+            data.Initialize(SMSG_FORCE_MOVE_UNROOT);
+            data << uint8(0xFF) << m_target->GetGUID() << (uint32)2;
+            m_target->SendMessageToSet(&data,true);
+        }
+    }
+}
+
+void Aura::HandleAuraModSilence(bool apply)
+{
+    apply ? m_target->m_silenced = true : m_target->m_silenced = false;
+}
+
+void Aura::HandleModThreat(bool apply)
+{
+    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
+        return;
+    m_target->AddHostil(m_caster->GetGUID(),apply ? float(m_modifier.m_amount) : -float(m_modifier.m_amount));
+}
+
+/*********************************************************/
+/***                  MODIDY SPEED                     ***/
+/*********************************************************/
+
+void Aura::HandleAuraModIncreaseSpeedAlways(bool apply)
+{
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
+    data.Initialize(MSG_MOVE_SET_RUN_SPEED);
+    data << m_target->GetGUID();
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+}
+
+void Aura::HandleAuraModIncreaseSpeed(bool apply)
+{
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * (100.0f + m_modifier.m_amount)/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/(100.0f + m_modifier.m_amount) );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << (uint32)0;
+    data << m_target->GetSpeed( MOVE_RUN );
+
+    m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+}
+
+void Aura::HandleAuraModIncreaseMountedSpeed(bool apply)
+{
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << (uint32)0;
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+}
+
+void Aura::HandleAuraModDecreaseSpeed(bool apply)
+{
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+    WorldPacket data;
+    if(apply)
+        m_target->SetSpeed( m_target->GetSpeed() * m_modifier.m_amount/100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f/m_modifier.m_amount );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << (uint32)0;
+    data << m_target->GetSpeed( MOVE_RUN );
+    m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+}
+
+void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
+{
+    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+    WorldPacket data;
+    if(Apply)
+        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
+    else
+        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
+    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
+    data << uint8(0xFF);
+    data << m_target->GetGUID();
+    data << (uint32)0;
+    data << m_target->GetSpeed( MOVE_SWIM );
+    m_target->SendMessageToSet(&data,true);
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_SWIM));
+}
+
+/*********************************************************/
+/***                     IMMUNITY                      ***/
+/*********************************************************/
+
 
 void Aura::HandleModMechanicImmunity(bool apply)
 {
@@ -1712,396 +1447,35 @@ void Aura::HandleAuraModDispelImmunity(bool apply)
     m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
 }
 
-void Aura::HandleAuraProcTriggerSpell(bool apply)
+/*********************************************************/
+/***                  MANA SHIELD                      ***/
+/*********************************************************/
+
+void Aura::HandleAuraDamageShield(bool apply)
 {
     if(apply)
     {
-        m_procSpell = new ProcTriggerSpell();
-        m_procSpell->spellId = GetSpellProto()->Id;
-        m_procSpell->caster = m_caster->GetGUID();
-        m_procSpell->trigger = GetSpellProto()->EffectTriggerSpell[GetEffIndex()];
-        m_procSpell->procChance = GetSpellProto()->procChance;
-        m_procSpell->procFlags = GetSpellProto()->procFlags;
-        m_procSpell->procCharges = GetSpellProto()->procCharges;
-    }
-    else
-    {
-        delete m_procSpell;
-        m_procSpell = NULL;
-    }
-}
-
-void Aura::HandleAuraProcTriggerDamage(bool apply)
-{
-    if(apply)
-    {
-        m_procdamage = new ProcTriggerDamage();
-        m_procdamage->caster = m_caster->GetGUID();
-        m_procdamage->procDamage = m_modifier.m_amount;
-        m_procdamage->procChance = GetSpellProto()->procChance;
-        m_procdamage->procFlags = GetSpellProto()->procFlags;
-        m_procdamage->procCharges = GetSpellProto()->procCharges;
-    }
-    else
-    {
-        m_procdamage = NULL;
-    }
-}
-
-void Aura::HandleAuraTracCreatures(bool apply)
-{
-    m_target->SetUInt32Value(PLAYER_TRACK_CREATURES, apply ? m_modifier.m_miscvalue : 0 );
-}
-
-void Aura::HandleAuraTracResources(bool apply)
-{
-    m_target->SetUInt32Value(PLAYER_TRACK_RESOURCES, apply ? ((uint32)1)<<(m_modifier.m_miscvalue-1): 0 );
-}
-
-void Aura::HandleAuraModParryPercent(bool apply)
-{
-    m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModDodgePercent(bool apply)
-{
-    m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModBlockPercent(bool apply)
-{
-    m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleAuraModCritPercent(bool apply)
-{
-    m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier.m_amount,apply);
-}
-
-void Aura::HandlePeriodicLeech(bool apply)
-{
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
-}
-
-void Aura::HandleModHitChance(bool Apply)
-{
-    m_target->m_modHitChance = Apply?m_modifier.m_amount:0;
-}
-
-void Aura::HandleModSpellHitChance(bool Apply)
-{
-    m_target->m_modSpellHitChance = Apply?m_modifier.m_amount:0;
-}
-
-void Aura::HandleAuraModScale(bool apply)
-{
-    m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,10,apply);
-}
-
-void Aura::HandlePeriodicManaLeech(bool Apply)
-{
-    if(Apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
-}
-
-void Aura::HandleModCastingSpeed(bool apply)
-{
-    m_target->m_modCastSpeedPct += apply ? m_modifier.m_amount : (-m_modifier.m_amount);
-}
-
-void Aura::HandleAuraMounted(bool apply)
-{
-    if(apply)
-    {
-        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
-        if(!ci)return;
-        uint32 displayId = ci->DisplayID;
-        if(displayId != 0)
+        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
+            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
         {
-            m_target->SetUInt32Value( UNIT_FIELD_MOUNTDISPLAYID , displayId);
-            //m_target->SetFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_MOVEBLOCKED );
-            m_target->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
+            m_target->m_damageShields.erase(i);
+            break;
         }
-    }else
-    {
-        m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID , 0);
-        m_target->RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT  | UNIT_FLAG_DISABLE_MOVE );
+        DamageShield* ds = new DamageShield();
+        ds->m_caster = GetCaster();
+        ds->m_damage = m_modifier.m_amount;
+        ds->m_spellId = GetId();
+        m_target->m_damageShields.push_back((*ds));
     }
-}
-
-void Aura::HandleWaterBreathing(bool apply)
-{
-    m_target->waterbreath = apply;
-}
-
-void Aura::HandleModBaseResistance(bool apply)
-{
-    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
-        m_target->ApplyArmorMod(m_modifier.m_amount, apply);
-    if(m_modifier.m_miscvalue == 126 || m_modifier.m_miscvalue == 127)
+    else
     {
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply);
-        m_target->ApplyResistanceMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply);
-    }
-}
-
-void Aura::HandleModRegen(bool apply)                       // eating
-{
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
-        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
-
-    if(apply && !m_periodicTimer)
-    {
-        m_periodicTimer = 5000;
-        if (m_target->GetHealth() + m_modifier.m_amount <= m_target->GetMaxHealth())
-            m_target->SetHealth(m_target->GetHealth() + m_modifier.m_amount);
-    }
-
-    m_isPeriodic = apply;
-}
-
-void Aura::HandleModPowerRegen(bool apply)                  // drinking
-{
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
-        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
-
-    if(apply && !m_periodicTimer)
-    {
-        m_periodicTimer = 5000;
-        Powers pt = m_target->getPowerType();
-        // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
-        if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )     
+        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
+            if(i->m_spellId == GetId() && i->m_caster == GetCaster())
         {
-            if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
-                m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
+            m_target->m_damageShields.erase(i);
+            break;
         }
     }
-
-    m_isPeriodic = apply;
-}
-
-void Aura::HandleChannelDeathItem(bool apply)
-{
-    if(!apply)
-    {
-        if(m_caster->GetTypeId() != TYPEID_PLAYER || !m_removeOnDeath)
-            return;
-        SpellEntry *spellInfo = GetSpellProto();
-        if(spellInfo->EffectItemType[m_effIndex] == 0)
-            return;
-        uint16 dest;
-        uint8 msg = ((Player*)m_caster)->CanStoreNewItem( 0, NULL_SLOT, dest, spellInfo->EffectItemType[m_effIndex], 1, false);
-        if( msg == EQUIP_ERR_OK )
-            ((Player*)m_caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
-        else
-            ((Player*)m_caster)->SendEquipError( msg, NULL, NULL );
-    }
-}
-
-void Aura::HandleModDamagePCTTaken(bool apply)
-{
-    m_target->m_modDamagePCT = apply ? m_modifier.m_amount : 0;
-}
-
-void Aura::HandleModPCTRegen(bool apply)
-{
-    m_target->m_RegenPCT = apply ? m_modifier.m_amount : 0;
-}
-
-void Aura::HandlePeriodicDamagePCT(bool apply)
-{
-    if(apply)
-    {
-        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
-        m_isPeriodic = true;
-        m_periodicTimer = m_modifier.periodictime;
-    }
-    else
-    {
-        //RemovePeriodicEvent(m_PeriodicEventId);
-        m_isPeriodic = false;
-        m_duration = 0;
-    }
-}
-
-void Aura::HandleAuraModAttackPower(bool apply)
-{
-    m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier.m_amount, apply);
-}
-
-void Aura::HandleModCreatureAttackPower(bool apply)
-{
-    /*   if(apply)
-       {
-
-           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
-           {
-               if(GetId() == (*i)->spellId)
-               {
-                   m_target->m_creatureAttackPower.erase(i);
-               }
-           }
-
-           CreatureAttackPower *cap = new CreatureAttackPower();
-
-           cap->spellId = GetId();
-           cap->damage = m_modifier.m_amount;
-           cap->creaturetype = m_modifier.m_miscvalue;
-           m_target->m_creatureAttackPower.push_back(cap);
-       }
-       else
-       {
-           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
-           {
-               if(GetId() == (*i)->spellId)
-               {
-                   m_target->m_creatureAttackPower.erase(i);
-                   break;
-               }
-           }
-       }*/
-}
-
-void Aura::HandleAuraTransform(bool apply)
-{
-    if(!m_target)
-        return;
-
-    if (apply)
-    {
-        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
-        if(!ci)
-            return;
-        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
-        m_target->setTransForm(GetSpellProto()->Id);
-    }
-    else
-    {
-        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-        m_target->setTransForm(0);
-    }
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_target->SendUpdateToPlayer((Player*)m_caster);
-
-    /*uint32 id=GetId();
-    switch (id)
-    {
-        case 118:
-        case 851:
-        case 5254:
-        case 12824:
-        case 12825:
-        case 12826:
-        case 13323:
-            if (apply)
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 856);
-            else
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-            break;
-        case 228:
-            if (apply)
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 304);
-            else
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-            break;
-
-        case 4060:
-            if (apply)
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 131);
-            else
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-            break;
-
-        case 15534:
-            if (apply)
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 1141);
-            else
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
-            break;
-
-    }*/
-}
-
-void Aura::HandleModSpellCritChance(bool Apply)
-{
-    m_target->m_baseSpellCritChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
-}
-
-void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
-{
-    sLog.outDebug("Current Speed:%f \tmodify:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
-    if(m_modifier.m_amount<=1)
-        return;
-    WorldPacket data;
-    if(Apply)
-        m_target->SetSpeed( m_target->GetSpeed() * ( m_modifier.m_amount + 100.0f ) / 100.0f );
-    else
-        m_target->SetSpeed( m_target->GetSpeed() * 100.0f / ( m_modifier.m_amount + 100.0f ) );
-    data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE);
-    data << uint8(0xFF);
-    data << m_target->GetGUID();
-    data << (uint32)0;
-    data << m_target->GetSpeed( MOVE_SWIM );
-    m_target->SendMessageToSet(&data,true);
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_SWIM));
-}
-
-void Aura::HandleModDamageDoneCreature(bool Apply)
-{
-    /*if(Apply)
-    {
-
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageDoneCreature.erase(i);
-            }
-        }
-
-        DamageDoneCreature *ddc = new DamageDoneCreature();
-
-        ddc->spellId = GetId();
-        ddc->damage = m_modifier.m_amount;
-        ddc->creaturetype = m_modifier.m_miscvalue;
-        m_target->m_damageDoneCreature.push_back(ddc);
-    }
-    else
-    {
-        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_damageDoneCreature.erase(i);
-                break;
-            }
-        }
-    }*/
 }
 
 void Aura::HandleAuraManaShield(bool apply)
@@ -2175,6 +1549,535 @@ void Aura::HandleAuraSchoolAbsorb(bool apply)
     }
 }
 
+/*********************************************************/
+/***               REFLECT SPELLS                      ***/
+/*********************************************************/
+
+void Aura::HandleReflectSpells(bool apply)
+{
+    if(apply)
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+            }
+        }
+        ReflectSpellSchool *rss = new ReflectSpellSchool();
+
+        rss->chance = m_modifier.m_amount;
+        rss->spellId = GetId();
+        rss->school = -1;
+        m_target->m_reflectSpellSchool.push_back(rss);
+    }
+    else
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+                break;
+            }
+        }
+    }
+}
+
+void Aura::HandleReflectSpellsSchool(bool apply)
+{
+    if(apply)
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_reflectSpellSchool.erase(i);
+            }
+        }
+        ReflectSpellSchool *rss = new ReflectSpellSchool();
+
+        rss->chance = m_modifier.m_amount;
+        rss->spellId = GetId();
+        rss->school = m_modifier.m_miscvalue;
+        m_target->m_reflectSpellSchool.push_back(rss);
+    }
+    else
+    {
+        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                delete *i;
+                m_target->m_reflectSpellSchool.erase(i);
+                break;
+            }
+        }
+    }
+}
+
+/*********************************************************/
+/***                 PROC TRIGGER                      ***/
+/*********************************************************/
+
+void Aura::HandleAuraProcTriggerSpell(bool apply)
+{
+    if(apply)
+    {
+        m_procSpell = new ProcTriggerSpell();
+        m_procSpell->spellId = GetSpellProto()->Id;
+        m_procSpell->caster = m_caster->GetGUID();
+        m_procSpell->trigger = GetSpellProto()->EffectTriggerSpell[GetEffIndex()];
+        m_procSpell->procChance = GetSpellProto()->procChance;
+        m_procSpell->procFlags = GetSpellProto()->procFlags;
+        m_procSpell->procCharges = GetSpellProto()->procCharges;
+    }
+    else
+    {
+        delete m_procSpell;
+        m_procSpell = NULL;
+    }
+}
+
+void Aura::HandleAuraProcTriggerDamage(bool apply)
+{
+    if(apply)
+    {
+        m_procdamage = new ProcTriggerDamage();
+        m_procdamage->caster = m_caster->GetGUID();
+        m_procdamage->procDamage = m_modifier.m_amount;
+        m_procdamage->procChance = GetSpellProto()->procChance;
+        m_procdamage->procFlags = GetSpellProto()->procFlags;
+        m_procdamage->procCharges = GetSpellProto()->procCharges;
+    }
+    else
+    {
+        m_procdamage = NULL;
+    }
+}
+
+void Aura::HandlePeriodicTriggerSpell(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_isTrigger = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_isTrigger = false;
+        m_duration = 0;
+        //probably it's temporary for taming creature..
+        if(GetSpellProto()->Id == 1515 && m_caster->isAlive())
+        {
+            SpellEntry *spell_proto = sSpellStore.LookupEntry(13481);
+            Spell spell(m_caster, spell_proto, true, 0);
+            Unit* target = NULL;
+            target = m_target;
+            if(!target || !target->isAlive())
+                return;
+            SpellCastTargets targets;
+            targets.setUnitTarget(target);
+            // prevent double stat apply for triggered auras
+            target->ApplyStats(true);
+            spell.prepare(&targets);
+            target->ApplyStats(false);
+        }
+    }
+}
+
+void Aura::HandlePeriodicEnergize(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+
+void Aura::HandlePeriodicHeal(bool apply)
+{
+    if(!m_target)
+        return;
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleHealEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+
+void Aura::HandlePeriodicDamage(bool apply)
+{
+    if( apply )
+    {
+        //m_PeriodicEventId = AddEvent(&HandleDOTEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+void Aura::HandlePeriodicDamagePCT(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+
+void Aura::HandlePeriodicLeech(bool apply)
+{
+    if(apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+
+void Aura::HandlePeriodicManaLeech(bool Apply)
+{
+    if(Apply)
+    {
+        //m_PeriodicEventId = AddEvent(&HandleTriggerSpellEvent,(void*)this,m_modifier.periodictime,false,true);
+        m_isPeriodic = true;
+        m_periodicTimer = m_modifier.periodictime;
+    }
+    else
+    {
+        //RemovePeriodicEvent(m_PeriodicEventId);
+        m_isPeriodic = false;
+        m_duration = 0;
+    }
+}
+
+/*********************************************************/
+/***                  MODITY STATES                    ***/
+/*********************************************************/
+
+/********************************/
+/***        RESISTANCE        ***/
+/********************************/
+
+void Aura::HandleAuraModResistanceExclusive(bool apply)
+{
+    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
+    {
+        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        return;
+    }
+
+    bool positive = m_modifier.m_miscvalue2 == 0;
+
+    for(int8 x=0;x < 6;x++)
+    {
+        if(m_modifier.m_miscvalue & int32(1<<x))
+        {
+            SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
+
+            m_target->ApplyResistanceMod(school,m_modifier.m_amount, apply);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount, apply);
+        }
+    }
+}
+
+void Aura::HandleAuraModResistance(bool apply)
+{
+    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
+    {
+        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        return;
+    }
+
+    bool positive = m_modifier.m_miscvalue2 == 0;
+
+    for(int8 x=0;x < 6;x++)
+    {
+        if(m_modifier.m_miscvalue & int32(1<<x))
+        {
+            SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
+
+            m_target->ApplyResistanceMod(school,m_modifier.m_amount, apply);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount, apply);
+        }
+    }
+}
+
+void Aura::HandleAuraModBaseResistancePCT(bool apply)
+{
+    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
+    {
+        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        return;
+    }
+
+    bool positive = m_modifier.m_miscvalue2 == 0;
+
+    for(int8 x=0;x < 6;x++)
+    {
+        if(m_modifier.m_miscvalue & int32(1<<x))
+        {
+            SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
+
+            m_target->ApplyResistancePercentMod(school,m_modifier.m_amount, apply);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(school,positive,m_modifier.m_amount, apply);
+        }
+    }
+}
+
+void Aura::HandleModResistancePercent(bool apply)
+{
+    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
+        m_target->ApplyArmorPercentMod(m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 127 || m_modifier.m_miscvalue == 126)
+    {
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply );
+        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply );
+    }
+}
+
+void Aura::HandleModBaseResistance(bool apply)
+{
+    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
+        m_target->ApplyArmorMod(m_modifier.m_amount, apply);
+    if(m_modifier.m_miscvalue == 126 || m_modifier.m_miscvalue == 127)
+    {
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply);
+        m_target->ApplyResistanceMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply);
+    }
+}
+
+/********************************/
+/***           STAT           ***/
+/********************************/
+
+void Aura::HandleAuraModStat(bool apply)
+{
+    Stats stat = STAT_STRENGTH;
+    uint16 index2 = 0;
+    switch(m_modifier.m_miscvalue)
+    {
+        case 0:
+            stat = STAT_STRENGTH;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
+            break;
+        case 1:
+            stat = STAT_AGILITY;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
+            break;
+        case 2:
+            stat = STAT_STAMINA;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
+            break;
+        case 3:
+            stat = STAT_INTELLECT;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
+            break;
+        case 4:
+            stat = STAT_SPIRIT;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
+            break;
+        case -1:
+        {
+            stat = STAT_STRENGTH;
+            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
+            for(int x=0;x<5;x++)
+            {
+                m_target->ApplyStatMod(Stats(stat+x),m_modifier.m_amount,apply);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->ApplyModUInt32Value(index2+x,m_modifier.m_amount,apply);
+            }
+            return;
+        }break;
+        default:
+            sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
+            return;
+            break;
+    }
+
+    m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
+}
+void Aura::HandleModPercentStat(bool apply)
+{
+    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_MANA,     m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_RAGE,     m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_FOCUS,    m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_ENERGY,   m_modifier.m_amount, apply );
+    m_target->ApplyMaxPowerPercentMod(POWER_HAPPINESS,m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 0 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyStatPercentMod(STAT_STRENGTH,m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyStatPercentMod(STAT_AGILITY, m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyStatPercentMod(STAT_STAMINA, m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 3 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyStatPercentMod(STAT_INTELLECT,m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue == 4 || m_modifier.m_miscvalue == -1)
+        m_target->ApplyStatPercentMod(STAT_SPIRIT,  m_modifier.m_amount, apply );
+}
+
+/********************************/
+/***      HEAL & ENERGIZE     ***/
+/********************************/
+
+void Aura::HandleModRegen(bool apply)                       // eating
+{
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+
+    if(apply && !m_periodicTimer)
+    {
+        m_periodicTimer = 5000;
+        if (m_target->GetHealth() + m_modifier.m_amount <= m_target->GetMaxHealth())
+            m_target->SetHealth(m_target->GetHealth() + m_modifier.m_amount);
+    }
+
+    m_isPeriodic = apply;
+}
+
+void Aura::HandleModPowerRegen(bool apply)                  // drinking
+{
+    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+
+    if(apply && !m_periodicTimer)
+    {
+        m_periodicTimer = 5000;
+        Powers pt = m_target->getPowerType();
+        // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
+        if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )     
+        {
+            if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
+                m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
+        }
+    }
+
+    m_isPeriodic = apply;
+}
+
+void Aura::HandleAuraModIncreaseHealth(bool apply)
+{
+    m_target->ApplyMaxHealthMod(m_modifier.m_amount,apply);
+}
+
+void Aura::HandleAuraModIncreaseEnergy(bool apply)
+{
+    Powers powerType = m_target->getPowerType();
+    if(int32(powerType) != m_modifier.m_miscvalue)
+        return;
+
+    uint32 newValue = m_target->GetPower(powerType);
+    apply ? newValue += m_modifier.m_amount : newValue -= m_modifier.m_amount;
+    m_target->SetPower(powerType,newValue);
+}
+
+void Aura::HandleAuraModIncreaseEnergyPercent(bool apply)
+{
+    m_target->ApplyPowerPercentMod(POWER_ENERGY,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleAuraModIncreaseHealthPercent(bool apply)
+{
+    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount,apply);
+}
+
+/********************************/
+/***          FIGHT           ***/
+/********************************/
+
+void Aura::HandleAuraModParryPercent(bool apply)
+{
+    m_target->ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleAuraModDodgePercent(bool apply)
+{
+    m_target->ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleAuraModBlockPercent(bool apply)
+{
+    m_target->ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleAuraModCritPercent(bool apply)
+{
+    m_target->ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleModShieldBlock(bool apply)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    ((Player*)m_target)->ApplyBlockValueMod(m_modifier.m_amount,apply);
+}
+
+void Aura::HandleModHitChance(bool Apply)
+{
+    m_target->m_modHitChance = Apply?m_modifier.m_amount:0;
+}
+
+void Aura::HandleModSpellHitChance(bool Apply)
+{
+    m_target->m_modSpellHitChance = Apply?m_modifier.m_amount:0;
+}
+
+void Aura::HandleModSpellCritChance(bool Apply)
+{
+    m_target->m_baseSpellCritChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
+}
+
 void Aura::HandleModSpellCritChanceShool(bool Apply)
 {
     /*if(Apply)
@@ -2205,6 +2108,232 @@ void Aura::HandleModSpellCritChanceShool(bool Apply)
         }
     }*/
 }
+
+/********************************/
+/***         ATTACK SPEED     ***/
+/********************************/
+
+void Aura::HandleModCastingSpeed(bool apply)
+{
+    m_target->m_modCastSpeedPct += apply ? m_modifier.m_amount : (-m_modifier.m_amount);
+}
+
+void Aura::HandleModAttackSpeed(bool apply)
+{
+    if(!m_target || !m_target->isAlive() || !m_caster->isAlive())
+        return;
+
+    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
+}
+void Aura::HandleHaste(bool apply)
+{
+    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(OFF_ATTACK,m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleRangedAmmoHaste(bool apply)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount, apply);
+}
+/********************************/
+/***        ATTACK POWER      ***/
+/********************************/
+
+void Aura::HandleAuraModAttackPower(bool apply)
+{
+    m_target->ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, m_modifier.m_amount, apply);
+}
+
+void Aura::HandleAuraModRangedAttackPower(bool apply)
+{
+    m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier.m_amount,apply);
+}
+
+/********************************/
+/***        DAMAGE BONUS      ***/
+/********************************/
+
+void Aura::HandleModDamagePCTTaken(bool apply)
+{
+    m_target->m_modDamagePCT = apply ? m_modifier.m_amount : 0;
+}
+
+void Aura::HandleModPCTRegen(bool apply)
+{
+    m_target->m_RegenPCT = apply ? m_modifier.m_amount : 0;
+}
+
+void Aura::HandleModCreatureAttackPower(bool apply)
+{
+    /*   if(apply)
+       {
+
+           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
+           {
+               if(GetId() == (*i)->spellId)
+               {
+                   m_target->m_creatureAttackPower.erase(i);
+               }
+           }
+
+           CreatureAttackPower *cap = new CreatureAttackPower();
+
+           cap->spellId = GetId();
+           cap->damage = m_modifier.m_amount;
+           cap->creaturetype = m_modifier.m_miscvalue;
+           m_target->m_creatureAttackPower.push_back(cap);
+       }
+       else
+       {
+           for(std::list<struct CreatureAttackPower*>::iterator i = m_target->m_creatureAttackPower.begin();i != m_target->m_creatureAttackPower.end();i++)
+           {
+               if(GetId() == (*i)->spellId)
+               {
+                   m_target->m_creatureAttackPower.erase(i);
+                   break;
+               }
+           }
+       }*/
+}
+
+void Aura::HandleModDamageDoneCreature(bool Apply)
+{
+    /*if(Apply)
+    {
+
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageDoneCreature.erase(i);
+            }
+        }
+
+        DamageDoneCreature *ddc = new DamageDoneCreature();
+
+        ddc->spellId = GetId();
+        ddc->damage = m_modifier.m_amount;
+        ddc->creaturetype = m_modifier.m_miscvalue;
+        m_target->m_damageDoneCreature.push_back(ddc);
+    }
+    else
+    {
+        for(std::list<struct DamageDoneCreature*>::iterator i = m_target->m_damageDoneCreature.begin();i != m_target->m_damageDoneCreature.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageDoneCreature.erase(i);
+                break;
+            }
+        }
+    }*/
+}
+
+void Aura::HandleModDamageDone(bool apply)
+{
+    /*    if(apply)
+        {
+
+            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
+            {
+                if(GetId() == (*i)->spellId)
+                {
+                    m_target->m_damageDone.erase(i);
+                }
+            }
+
+            DamageDone *dd = new DamageDone();
+
+            dd->spellId = GetId();
+            dd->damage = m_modifier.m_amount;
+            dd->school = m_modifier.m_miscvalue;
+            m_target->m_damageDone.push_back(dd);
+        }
+        else
+        {
+            for(std::list<struct DamageDone*>::iterator i = m_target->m_damageDone.begin();i != m_target->m_damageDone.end();i++)
+            {
+                if(GetId() == (*i)->spellId)
+                {
+                    m_target->m_damageDone.erase(i);
+                    break;
+                }
+            }
+        }*/
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(m_modifier.m_miscvalue2)
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+    else
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleModDamageTaken(bool apply)
+{
+    /*if(apply)
+    {
+
+        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageTaken.erase(i);
+            }
+        }
+
+        DamageTaken *dt = new DamageTaken();
+
+        dt->spellId = GetId();
+        dt->damage = m_modifier.m_amount;
+        dt->school = m_modifier.m_miscvalue;
+        m_target->m_damageTaken.push_back(dt);
+    }
+    else
+    {
+        for(std::list<struct DamageTaken*>::iterator i = m_target->m_damageTaken.begin();i != m_target->m_damageTaken.end();i++)
+        {
+            if(GetId() == (*i)->spellId)
+            {
+                m_target->m_damageTaken.erase(i);
+                break;
+            }
+        }
+    }*/
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(m_modifier.m_miscvalue2)
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
+    else
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleModDamagePercentDone(bool apply)
+{
+    sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
+
+    if(m_modifier.m_miscvalue == 1)
+    {
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
+    }
+    if(m_modifier.m_miscvalue == 126)
+    {
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
+    }
+    if(m_modifier.m_miscvalue == 127)
+    {
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
+        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
+    }
+}
+
+/********************************/
+/***        POWER COST        ***/
+/********************************/
 
 void Aura::HandleModPowerCost(bool apply)
 {
@@ -2242,181 +2371,9 @@ void Aura::HandleModPowerCostSchool(bool apply)
     }*/
 }
 
-void Aura::HandleReflectSpellsSchool(bool apply)
-{
-    if(apply)
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                m_target->m_reflectSpellSchool.erase(i);
-            }
-        }
-        ReflectSpellSchool *rss = new ReflectSpellSchool();
-
-        rss->chance = m_modifier.m_amount;
-        rss->spellId = GetId();
-        rss->school = m_modifier.m_miscvalue;
-        m_target->m_reflectSpellSchool.push_back(rss);
-    }
-    else
-    {
-        for(std::list<struct ReflectSpellSchool*>::iterator i = m_target->m_reflectSpellSchool.begin();i != m_target->m_reflectSpellSchool.end();i++)
-        {
-            if(GetId() == (*i)->spellId)
-            {
-                delete *i;
-                m_target->m_reflectSpellSchool.erase(i);
-                break;
-            }
-        }
-    }
-}
-
-void Aura::HandleAuraModSkill(bool apply)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    SpellEntry* prot=GetSpellProto();
-
-    ((Player*)m_target)->ModifySkillBonus(prot->EffectMiscValue[0],
-        (apply ? (prot->EffectBasePoints[0]+1): (-(prot->EffectBasePoints[0]+1))));
-}
-
-void Aura::HandleModDamagePercentDone(bool apply)
-{
-    sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
-
-    if(m_modifier.m_miscvalue == 1)
-    {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, m_modifier.m_amount, apply );
-    }
-    if(m_modifier.m_miscvalue == 126)
-    {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, m_modifier.m_amount, apply );
-    }
-    if(m_modifier.m_miscvalue == 127)
-    {
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, m_modifier.m_amount, apply );
-        m_target->ApplyPercentModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, m_modifier.m_amount, apply );
-    }
-}
-
-void Aura::HandleModPercentStat(bool apply)
-{
-    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_MANA,     m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_RAGE,     m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_FOCUS,    m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_ENERGY,   m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_HAPPINESS,m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 0 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_STRENGTH,m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_AGILITY, m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_STAMINA, m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 3 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_INTELLECT,m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 4 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_SPIRIT,  m_modifier.m_amount, apply );
-}
-
-void Aura::HandleModResistancePercent(bool apply)
-{
-    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == 127)
-        m_target->ApplyArmorPercentMod(m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 127 || m_modifier.m_miscvalue == 126)
-    {
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_HOLY,   m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FIRE,   m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_NATURE, m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_FROST,  m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_SHADOW, m_modifier.m_amount, apply );
-        m_target->ApplyResistancePercentMod(SPELL_SCHOOL_ARCANE, m_modifier.m_amount, apply );
-    }
-}
-
-void Aura::HandleAuraModBaseResistancePCT(bool apply)
-{
-    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > IMMUNE_SCHOOL_MAGIC)
-    {
-        sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
-        return;
-    }
-
-    ImmuneToSchool immune = ImmuneToSchool(m_modifier.m_miscvalue);
-
-    bool positive = m_modifier.m_miscvalue2 == 0;
-
-    if(immune == IMMUNE_SCHOOL_MAGIC)
-    {
-        for(int8 x=0;x < 6;x++)
-        {
-            SpellSchools school = SpellSchools(SPELL_SCHOOL_HOLY + x);
-
-            m_target->ApplyResistancePercentMod(school,m_modifier.m_amount, apply);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(school,positive,m_modifier.m_amount, apply);
-        }
-        return;
-    }
-
-    SpellSchools school = immuneToSchool(immune);
-
-    m_target->ApplyResistancePercentMod(school,m_modifier.m_amount,apply);
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(school,positive,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleForceReaction(bool Apply)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if(Apply)
-    {
-        uint32 faction_id = m_modifier.m_miscvalue;
-
-        FactionTemplateEntry *factionTemplateEntry;
-
-        for(uint32 i = 0; i <  sFactionTemplateStore.GetNumRows(); ++i)
-        {
-            factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
-            if(!factionTemplateEntry)
-                continue;
-
-            if(factionTemplateEntry->faction == faction_id)
-                break;
-        }
-
-        if(!factionTemplateEntry)
-            return;
-
-        m_target->setFaction(factionTemplateEntry->ID);
-    }
-    else
-        ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
-}
-
-void Aura::HandleModShieldBlock(bool apply)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    ((Player*)m_target)->ApplyBlockValueMod(m_modifier.m_amount,apply);
-}
-
-void Aura::HandleRangedAmmoHaste(bool apply)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount, apply);
-}
+/*********************************************************/
+/***                    OTHERS                         ***/
+/*********************************************************/
 
 void Aura::SendCoolDownEvent()
 {
@@ -2451,4 +2408,46 @@ bool Aura::IsSingleTarget()
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;
+}
+
+// FIX-ME!!
+void HandleTriggerSpellEvent(void *obj)
+{
+    Aura *Aur = ((Aura*)obj);
+    if(!Aur)
+        return;
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
+
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %i\n", Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
+        return;
+    }
+
+    Spell spell(Aur->GetCaster(), spellInfo, true, Aur);
+    SpellCastTargets targets;
+    targets.setUnitTarget(Aur->GetTarget());
+    //WorldPacket dump;
+    //dump.Initialize(0);
+    //dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
+    //targets.read(&dump,this);
+    spell.prepare(&targets);
+
+    /*else if(m_spellProto->EffectApplyAuraName[i] == 23)
+    {
+        unitTarget->tmpAura->SetPeriodicTriggerSpell(m_spellProto->EffectTriggerSpell[i],m_spellProto->EffectAmplitude[i]);
+    }*/
+}
+
+void HandleDOTEvent(void *obj)
+{
+    Aura *Aur = ((Aura*)obj);
+    //Aur->GetCaster()->AddPeriodicAura(Aur);
+    Aur->GetCaster()->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
+}
+
+void HandleHealEvent(void *obj)
+{
+    Aura *Aur = ((Aura*)obj);
+    Aur->GetTarget()->PeriodicAuraLog(Aur->GetCaster(), Aur->GetSpellProto(), Aur->GetModifier());
 }

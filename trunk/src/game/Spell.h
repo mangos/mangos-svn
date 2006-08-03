@@ -433,13 +433,14 @@ class Spell
         void update(uint32 difftime);
         void cast();
         void finish();
-        void TakePower();
+        void TakePower(uint32 mana);
         void TakeReagents();
         void TakeCastItem();
         void TriggerSpell();
         uint8 CanCast();
         uint8 CheckItems();
         uint8 CheckRange();
+        uint8 CheckMana(uint32 *mana);
         uint32 CalculateDamage(uint8 i);
         void HandleTeleport(uint32 id, Unit* Target);
         void Delayed(int32 delaytime);

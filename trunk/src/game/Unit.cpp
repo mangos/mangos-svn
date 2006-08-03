@@ -214,6 +214,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
 
     if(isStealth())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    if(isInvisible())
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
@@ -806,7 +808,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
         if(procdamage)
         {
-            bool nocharges = procdamage->procCharges == 0 ? true : false;
+            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
             if((procdamage->procFlags & 40) && procdamage->procChance > rand_chance()
                 && (procdamage->procCharges > 0 || nocharges))
             {
@@ -821,7 +823,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         }
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
-            bool nocharges = procspell->procCharges == 0 ? true : false;
+            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
             if((procspell->procFlags & 40)  && procspell->procChance > rand_chance()
                 && (procspell->procCharges > 0 || nocharges))
             {
@@ -856,7 +858,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
         if(procdamage)
         {
-            bool nocharges = procdamage->procCharges == 0 ? true : false;
+            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
             if( (procdamage->procFlags & 20) && procdamage->procChance > rand_chance()
                 && (procdamage->procCharges > 0 || nocharges))
             {
@@ -871,7 +873,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         }
         if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
         {
-            bool nocharges = procspell->procCharges == 0 ? true : false;
+            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
             if((procspell->procFlags & 20) && procspell->procChance > rand_chance()
                 && (procspell->procCharges > 0 || nocharges))
             {

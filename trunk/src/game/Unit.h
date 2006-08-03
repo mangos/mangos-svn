@@ -479,6 +479,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         {
             return HasAuraType(SPELL_AURA_MOD_STEALTH);
         }
+        bool isInvisible() const                            // cache this in a bool someday
+        {
+            return HasAuraType(SPELL_AURA_MOD_INVISIBILITY);
+        }
         bool isTargetableForAttack() const { return isAlive() && !isInFlight() /*&& !isStealth()*/; }
 
         void SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage);
