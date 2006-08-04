@@ -446,13 +446,14 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     //WorldPacket data;
     if(m_modSpellHitChance+100 < urand(0,100))
     {
-        SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_MISS, pVictim->GetGUID(), 1, spellInfo->School, 0, 0,0,1,0);
+        SendAttackStateUpdate(HITINFO_MISS, pVictim->GetGUID(), 1, spellInfo->School, 0, 0,0,1,0);
         return;
     }
 
-    if( (damage-absorb-resist)<= 0 )
+    // Only send absorbed message if we actually absorbed some damage
+    if( (damage-absorb-resist)<= 0 && absorb)
     {
-        SendAttackStateUpdate(HITINFO_HITSTRANGESOUND1|HITINFO_NOACTION, pVictim->GetGUID(), 1, spellInfo->School, pdamage, absorb,resist,1,0);
+        SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim->GetGUID(), 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;
     }
 
@@ -704,7 +705,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     {
         case MELEE_HIT_CRIT:
             //*hitInfo = 0xEA;
-            *hitInfo  = HITINFO_HITSTRANGESOUND1 | HITINFO_HITSTRANGESOUND2 | HITINFO_CRITICALHIT
+	    *hitInfo  = HITINFO_CRITICALHIT
                 | HITINFO_NORMALSWING2 | 0x8;               // 0xEA
             *damage *= 2;
 
@@ -792,7 +793,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     if (*damage <= absorb + *resist + *blocked_amount)
     {
         //*hitInfo = 0x00010020;
-        *hitInfo = HITINFO_NOACTION | HITINFO_HITSTRANGESOUND1;
+        *hitInfo = HITINFO_NOACTION | HITINFO_ABSORB;
         *absorbDamage = absorb;
         *damageType = 0;
         return;
@@ -911,12 +912,17 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         {
             sLog.outString("Spell Canceled!");
             pVictim->m_currentSpell->cancel();
+
+
+
         }
     }
+
 }
 
 void Unit::AttackerStateUpdate (Unit *pVictim)
 {
+
     if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
         return;
 
@@ -937,9 +943,9 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 
     uint32 hitInfo;
     if( haveOffhandWeapon() && isAttackReady(OFF_ATTACK) )
-        hitInfo = HITINFO_LEFTSWING|HITINFO_HITSTRANGESOUND1;
+        hitInfo = HITINFO_LEFTSWING;
     else if ( isAttackReady(BASE_ATTACK) )
-        hitInfo = HITINFO_NORMALSWING2|HITINFO_HITSTRANGESOUND1;
+	hitInfo = HITINFO_NORMALSWING2;
     else
         return;
 
@@ -955,11 +961,15 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
 
     if (hitInfo & HITINFO_MISS)
         //send miss
-        SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+	SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
     else
     {
+	if (absorbed_dmg)hitInfo |= HITINFO_ABSORB;
+	if (resisted_dmg)hitInfo |= HITINFO_RESIST;
+        if ((absorbed_dmg || resisted_dmg) && ((absorbed_dmg + resisted_dmg + blocked_dmg) > damage))hitInfo |= HITINFO_SWINGNOHITSOUND;
         //do animation
-        SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+	SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+
         if (damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
             damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
         else
