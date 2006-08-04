@@ -3792,7 +3792,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     data << uint8(loot_type);
     data << *loot;
 
-    SendMessageToSet(&data, true);
+    SendDirectMessage(&data);
 }
 
 void Player::SendUpdateWordState(uint16 Field, uint16 Value)

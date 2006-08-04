@@ -27,30 +27,37 @@ void HandleCorpsesErase(void*)
 {
     mysql_thread_init();                                    // let thread do safe mySQL requests
 
-    sLog.outBasic("Global Event (corpses/bones removal)");
+    //sLog.outBasic("Global Event (corpses/bones removal)");
 
     QueryResult *result = sDatabase.Query("SELECT * FROM `game_corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > 1200 AND `bones_flag` = 1;");
 
     if(result)
     {
-        Field *fields = result->Fetch();
-        Corpse *m_pCorpse = new Corpse();
+        do{
 
-        uint64 guid = fields[0].GetUInt64();
-        float positionX = fields[2].GetFloat();
-        float positionY = fields[3].GetFloat();
-        float positionZ = fields[4].GetFloat();
-        float ort       = fields[5].GetFloat();
-        uint32 mapid    = fields[7].GetUInt32();
+            Field *fields = result->Fetch();
+            uint64 guid = fields[0].GetUInt64();
+            float positionX = fields[2].GetFloat();
+            float positionY = fields[3].GetFloat();
+            //float positionZ = fields[4].GetFloat();
+            //float ort       = fields[5].GetFloat();
+            uint32 mapid    = fields[7].GetUInt32();
 
-        m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
-        m_pCorpse->SetMapId(mapid);
-        m_pCorpse->LoadValues( fields[8].GetString() );
+            sLog.outDebug("Removing corpse %u:%u (X:%u Y:%u Map:%u).",GUID_HIPART(guid),GUID_LOPART(guid),positionX,positionY,mapid);
 
-        ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
-        MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+            Corpse *m_pCorpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
 
-        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%lu';",(unsigned long)guid);
+            if(m_pCorpse)
+            {
+                ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
+                MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+            }
+            else
+                sLog.outDebug("Corpse %lu not found!",guid);
+
+            sDatabase.PExecute("DELETE FROM `game_corpse` WHERE guid = '%lu';",(unsigned long)guid);
+
+        } while (result->NextRow());
 
         delete result;
     }
@@ -60,24 +67,30 @@ void HandleCorpsesErase(void*)
     if(result)
     {
 
-        Field *fields = result->Fetch();
-        Corpse *m_pCorpse = new Corpse();
+        do{
+            Field *fields = result->Fetch();
 
-        uint64 guid = fields[0].GetUInt64();
-        float positionX = fields[2].GetFloat();
-        float positionY = fields[3].GetFloat();
-        float positionZ = fields[4].GetFloat();
-        float ort       = fields[5].GetFloat();
-        uint32 mapid    = fields[7].GetUInt32();
+            uint64 guid = fields[0].GetUInt64();
+            float positionX = fields[2].GetFloat();
+            float positionY = fields[3].GetFloat();
+            //float positionZ = fields[4].GetFloat();
+            //float ort       = fields[5].GetFloat();
+            uint32 mapid    = fields[7].GetUInt32();
 
-        m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
-        m_pCorpse->SetMapId(mapid);
-        m_pCorpse->LoadValues( fields[8].GetString() );
+            sLog.outDebug("Removing corpse %u:%u (X:%u Y:%u Map:%u).",GUID_HIPART(guid),GUID_LOPART(guid),positionX,positionY,mapid);
 
-        ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
-        MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+            Corpse *m_pCorpse = ObjectAccessor::Instance().GetCorpse(positionX,positionY,mapid,guid);
 
-        sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%lu';",(unsigned long)guid);
+            if(m_pCorpse)
+            {
+                ObjectAccessor::Instance().RemoveBonesFromPlayerView(m_pCorpse);
+                MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Remove(m_pCorpse,true);
+            }
+            else
+                sLog.outDebug("Corpse %lu not found!",guid);
+
+            sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `guid` = '%lu';",(unsigned long)guid);
+        } while (result->NextRow());
 
         delete result;
     }

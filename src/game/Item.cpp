@@ -432,7 +432,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+3,m_itemProto->Spells[3].SpellCharges);
     SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4, m_itemProto->Spells[4].SpellCharges);
     SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
-    SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay);
+    //SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
     return true;
 }
 

@@ -59,14 +59,20 @@ ObjectAccessor::GetCreature(Unit const &u, uint64 guid)
 Corpse*
 ObjectAccessor::GetCorpse(Unit const &u, uint64 guid)
 {
-    CellPair p(MaNGOS::ComputeCellPair(u.GetPositionX(), u.GetPositionY()));
+    return GetCorpse(u.GetPositionX(), u.GetPositionY(), u.GetMapId(), guid);
+}
+
+Corpse*
+ObjectAccessor::GetCorpse(uint32 x, uint32 y, uint32 mapid, uint64 guid)
+{
+    CellPair p(MaNGOS::ComputeCellPair(x,y));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     Corpse *obj=NULL;
     MaNGOS::ObjectAccessorNotifier<Corpse> searcher(obj, guid);
     TypeContainerVisitor<MaNGOS::ObjectAccessorNotifier<Corpse>, TypeMapContainer<AllObjectTypes> > object_notifier(searcher);
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(u.GetMapId()));
+    cell_lock->Visit(cell_lock, object_notifier, *MapManager::Instance().GetMap(mapid));
     return obj;
 }
 
