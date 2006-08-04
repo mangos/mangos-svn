@@ -442,6 +442,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendEquipError( uint8 msg, Item* pItem, Item *pItem2 );
         void SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param );
         void SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param );
+        void AddWeaponProficiency(uint32 newflag) { m_WeaponProficiency |= newflag ;}
+        void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag ;}
+        uint32 GetWeaponProficiency() { return m_WeaponProficiency;}
+        uint32 GetArmorProficiency() { return m_ArmorProficiency;}
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -1035,6 +1039,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_BlockValue;
         uint32 m_soulStoneSpell;
         Item *m_soulStone;
+        uint32 m_WeaponProficiency;
+        uint32 m_ArmorProficiency;
 };
 
 int irand(int min, int max);

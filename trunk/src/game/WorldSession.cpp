@@ -478,11 +478,11 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 }
 
 // send Proficiency
-void WorldSession::SendProficiency (uint8 pr1, uint8 pr2, uint8 pr3, uint8 pr4, uint8 pr5)
+void WorldSession::SendProficiency (uint8 pr1, uint32 pr2)
 {
     WorldPacket data;
     data.Initialize (SMSG_SET_PROFICIENCY);
-    data << pr1 << pr2 << pr3 << pr4 << pr5;
+    data << pr1 << pr2;
     SendPacket (&data);
 }
 

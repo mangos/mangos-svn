@@ -128,6 +128,8 @@ Player::Player (WorldSession *session): Unit()
     m_Last_tick = m_logintime;
     m_soulStone = NULL;
     m_soulStoneSpell = 0;
+    m_WeaponProficiency = 0x2000;
+    m_ArmorProficiency = 0;
 }
 
 Player::~Player ()
@@ -1527,8 +1529,22 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     if(!spellInfo) return;
     newrank = FindSpellRank(spell_id);
 
-    if(spellInfo->Effect[0] == 60)
-        GetSession()->SendProficiency(spellInfo->EquippedItemClass,spellInfo->EquippedItemSubClass);
+    for(int i=0;i<3;i++)
+    if(spellInfo->Effect[i] == 60)
+    {
+        uint32 newflag = spellInfo->EquippedItemSubClass;
+        if(spellInfo->EquippedItemClass == 2 && !(GetWeaponProficiency() & newflag))
+        {
+            AddWeaponProficiency(newflag);
+            GetSession()->SendProficiency(uint8(0x02),GetWeaponProficiency());
+        }
+        if(spellInfo->EquippedItemClass == 4 && !(GetArmorProficiency() & newflag))
+        {
+            AddArmorProficiency(newflag);
+            GetSession()->SendProficiency(uint8(0x02),GetArmorProficiency());
+        }
+        break;
+    }
 
     PlayerSpell *newspell;
 
@@ -1645,6 +1661,78 @@ void Player::learnSpell(uint16 spell_id)
     data.Initialize(SMSG_LEARNED_SPELL);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
+
+    uint16 maxskill = getLevel()*5 > 300 ? 300 :getLevel()*5;
+    switch(spell_id)
+    {
+        //Armor
+        case 9078:                                          //Cloth
+            SetSkill(415,1,1);
+            break;
+        case 9077:                                          //Leather
+            SetSkill(414,1,1);
+            break;
+        case 8737:                                          //Mail
+            SetSkill(413,1,1);
+            break;
+        case 750:                                           //Plate Mail
+            SetSkill(293,1,1);
+            break;
+        case 9116:                                          //Shield
+            SetSkill(433,1,1);
+            break;
+        //Melee Weapons
+        case 196:                                           //Axes
+            SetSkill(44,1,maxskill);
+            break;
+        case 197:                                           //Two-Handed Axes
+            SetSkill(172,1,maxskill);
+            break;
+        case 227:                                           //Staves
+            SetSkill(136,1,maxskill);
+            break;
+        case 198:                                           //Maces
+            SetSkill(54,1,maxskill);
+            break;
+        case 199:                                           //Two-Handed Maces
+            SetSkill(160,1,maxskill);
+            break;
+        case 201:                                           //Swords
+            SetSkill(43,1,maxskill);
+            break;
+        case 202:                                           //Two-Handed Swords
+            SetSkill(55,1,maxskill);
+            break;
+        case 1180:                                          //Daggers
+            SetSkill(173,1,maxskill);
+            break;
+        case 15590:                                         //Fist Weapons
+            SetSkill(473,1,maxskill);
+            break;
+        case 200:                                           //Polearms
+            SetSkill(229,1,maxskill);
+            break;
+        case 3386:                                          //Polearms
+            SetSkill(227,1,maxskill);
+            break;
+        //Range Weapons
+        case 264:                                           //Bows
+            SetSkill(45,1,maxskill);
+            break;
+        case 5011:                                          //Crossbows
+            SetSkill(226,1,maxskill);
+            break;
+        case 266:                                           //Guns
+            SetSkill(46,1,maxskill);
+            break;
+        case 2567:                                          //Thrown
+            SetSkill(176,1,maxskill);
+            break;
+        case 5009:                                          //Wands
+            SetSkill(228,1,maxskill);
+            break;
+        default:break;
+    }
 
     addSpell(spell_id,1);
 

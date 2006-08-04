@@ -329,86 +329,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         delete result7;
     }
 
-    // set proficiency
-    switch (GetPlayer()->getClass())
-    {
-        case CLASS_MAGE:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x00, 0x04);
-            SendProficiency (0x02, 0x00, 0x44);
-            SendProficiency (0x04, 0x03);
-            SendProficiency (0x02, 0x00, 0x44, 0x08);
-            break;
-        case CLASS_ROGUE:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x00, 0x00, 0x01);
-            SendProficiency (0x04, 0x06);
-            SendProficiency (0x02, 0x00, 0x80, 0x01);
-            SendProficiency (0x02, 0x00, 0xC0, 0x01);
-            SendProficiency (0x04, 0x07);
-            break;
-        case CLASS_WARRIOR:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x01);
-            SendProficiency (0x02, 0x11);
-            SendProficiency (0x04, 0x42);
-            SendProficiency (0x04, 0x4A);
-            SendProficiency (0x04, 0x4E);
-            SendProficiency (0x02, 0x11, 0x40);
-            SendProficiency (0x04, 0x4F);
-            SendProficiency (0x02, 0x91, 0x40);
-            break;
-        case CLASS_PALADIN:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x10);
-            SendProficiency (0x04, 0x42);
-            SendProficiency (0x02, 0x30);
-            SendProficiency (0x04, 0x4A);
-            SendProficiency (0x04, 0x4E);
-            SendProficiency (0x02, 0x30, 0x40);
-            SendProficiency (0x04, 0x4F);
-            break;
-        case CLASS_WARLOCK:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x00, 0x80);
-            SendProficiency (0x02, 0x00, 0xC0);
-            SendProficiency (0x04, 0x03);
-            SendProficiency (0x02, 0x00, 0xC0, 0x08);
-            break;
-        case CLASS_PRIEST:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x10);
-            SendProficiency (0x02, 0x10, 0x40);
-            SendProficiency (0x04, 0x03);
-            SendProficiency (0x02, 0x10, 0x40, 0x08);
-            break;
-        case CLASS_DRUID:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x00, 0x04);
-            SendProficiency (0x04, 0x06);
-            SendProficiency (0x02, 0x00, 0x84);
-            SendProficiency (0x02, 0x00, 0xC4);
-            SendProficiency (0x04, 0x07);
-            break;
-        case CLASS_HUNTER:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x01);
-            SendProficiency (0x04, 0x06);
-            SendProficiency (0x02, 0x05);
-            SendProficiency (0x02, 0x05, 0x40);
-            SendProficiency (0x04, 0x07);
-            break;
-        case CLASS_SHAMAN:
-            SendProficiency (0x04, 0x02);
-            SendProficiency (0x02, 0x00, 0x04);
-            SendProficiency (0x02, 0x10, 0x04);
-            SendProficiency (0x04, 0x42);
-            SendProficiency (0x04, 0x46);
-            SendProficiency (0x02, 0x10, 0x44);
-            SendProficiency (0x04, 0x47);
-            break;
-    }
-
     data.Initialize( SMSG_TUTORIAL_FLAGS );
 
     for (int i = 0; i < 8; i++)
@@ -416,47 +336,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     SendPacket(&data);
     sLog.outDebug( "WORLD: Sent tutorial flags." );
-
-    // Proficiency more to come
-    switch (GetPlayer()->getClass())
-    {
-        case CLASS_MAGE:
-            SendProficiency (0x02, 0x00, 0x44, 0x08);
-            SendProficiency (0x04, 0x03);
-            break;
-        case CLASS_ROGUE:
-            SendProficiency (0x02, 0x00, 0xC0, 0x01);
-            SendProficiency (0x04, 0x07);
-            break;
-        case CLASS_WARRIOR:
-            SendProficiency (0x02, 0x91, 0x40);
-            SendProficiency (0x04, 0x4F);
-            break;
-        case CLASS_PALADIN:
-            SendProficiency (0x02, 0x30, 0x40);
-            SendProficiency (0x04, 0x4F);
-            break;
-        case CLASS_WARLOCK:
-            SendProficiency (0x02, 0x00, 0xC0, 0x08);
-            SendProficiency (0x04, 0x03);
-            break;
-        case CLASS_PRIEST:
-            SendProficiency (0x02, 0x10, 0x40, 0x08);
-            SendProficiency (0x04, 0x03);
-            break;
-        case CLASS_DRUID:
-            SendProficiency (0x02, 0x00, 0xC4);
-            SendProficiency (0x04, 0x07);
-            break;
-        case CLASS_HUNTER:
-            SendProficiency (0x02, 0x05, 0x40);
-            SendProficiency (0x04, 0x07);
-            break;
-        case CLASS_SHAMAN:
-            SendProficiency (0x02, 0x10, 0x44);
-            SendProficiency (0x04, 0x47);
-            break;
-    }
 
     GetPlayer()->SendInitialSpells();
 
