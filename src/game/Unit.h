@@ -54,8 +54,8 @@
 #define HITINFO_NORMALSWING2        0x02
 #define HITINFO_LEFTSWING           0x04
 #define HITINFO_MISS                0x10
-#define HITINFO_ABSORB		    0x20                    // plays absorb sound
-#define HITINFO_RESIST		    0x40                    // resisted atleast some damage
+#define HITINFO_ABSORB              0x20                    // plays absorb sound
+#define HITINFO_RESIST              0x40                    // resisted atleast some damage
 #define HITINFO_CRITICALHIT         0x80
 #define HITINFO_GLANCING            0x4000
 #define HITINFO_CRUSHING            0x8000
@@ -437,10 +437,10 @@ class MANGOS_DLL_SPEC Unit : public Object
         uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
 
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
-        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist);
+        void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType);
         uint32 CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uint32 *resist);
         void HandleEmoteCommand(uint32 anim_id);
-        void AttackerStateUpdate (Unit *pVictim);
+        void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
 
         float GetUnitDodgeChance()    const;
         float GetUnitParryChance()    const;
@@ -450,8 +450,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         virtual uint32 GetBlockValue() const =0;
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
         uint16 GetDefenceSkillValue() const;
-        uint16 GetWeaponSkillValue() const;
-        MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim) const;
+        uint16 GetWeaponSkillValue(WeaponAttackType attType) const;
+        MeleeHitOutcome RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const;
 
         bool isVendor()       const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ); }
         bool isTrainer()      const { return HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ); }
@@ -608,7 +608,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void RemoveDynObject(uint32 spellid);
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(uint32 spellid, bool del);
-        uint32 CalculateDamage(bool ranged);
+        uint32 CalculateDamage(WeaponAttackType attType);
         void SetStateFlag(uint32 index, uint32 newFlag );
         void RemoveStateFlag(uint32 index, uint32 oldFlag );
         void ApplyStats(bool apply);

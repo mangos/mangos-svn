@@ -722,7 +722,7 @@ void Player::Update( uint32 p_time )
                         if(off_att < ATTACK_DISPLAY_DELAY)
                             setAttackTimer(OFF_ATTACK,ATTACK_DISPLAY_DELAY);
                     }
-                    AttackerStateUpdate(pVictim);
+                    AttackerStateUpdate(pVictim, BASE_ATTACK);
                     resetAttackTimer(BASE_ATTACK);
                 }
             }
@@ -744,7 +744,7 @@ void Player::Update( uint32 p_time )
                     if(base_att < ATTACK_DISPLAY_DELAY)
                         setAttackTimer(BASE_ATTACK,ATTACK_DISPLAY_DELAY);
                     // do attack
-                    AttackerStateUpdate(pVictim);
+                    AttackerStateUpdate(pVictim, OFF_ATTACK);
                     resetAttackTimer(OFF_ATTACK);
                 }
             }
@@ -2432,22 +2432,27 @@ void Player::UpdateSkillPro(uint32 spellid)
 
 }
 
-void Player::UpdateMeleeSkillWeapon()
+void Player::UpdateMeleeSkillWeapon (WeaponAttackType attType)
 {
-    if(isAttackReady(BASE_ATTACK))
+    switch(attType)
     {
-        Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        case BASE_ATTACK:
+        {
+            Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-        if (!tmpitem)
-            UpdateSkill(SKILL_UNARMED);
-        else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
-            UpdateSkill(tmpitem->GetSkill());
-    }else if(isAttackReady(OFF_ATTACK))
-    {
-        Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            if (!tmpitem)
+                UpdateSkill(SKILL_UNARMED);
+            else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
+                UpdateSkill(tmpitem->GetSkill());
+            
+        };break;
+        case OFF_ATTACK:
+        {
+            Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-        if (tmpitem)
-            UpdateSkill(tmpitem->GetSkill());
+            if (tmpitem)
+                UpdateSkill(tmpitem->GetSkill());
+        };break;
     }
 }
 

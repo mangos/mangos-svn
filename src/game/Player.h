@@ -738,7 +738,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BroadcastToFriends(std::string msg);
 
         void UpdateDefense();
-        void UpdateMeleeSkillWeapon();
+        void UpdateMeleeSkillWeapon (WeaponAttackType attType);
         void UpdateRangedSkillWeapon();
 
         void SetSkill(uint32 id, uint16 currVal, uint16 maxVal);
