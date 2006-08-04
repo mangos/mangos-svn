@@ -54,8 +54,8 @@
 #define HITINFO_NORMALSWING2        0x02
 #define HITINFO_LEFTSWING           0x04
 #define HITINFO_MISS                0x10
-#define HITINFO_HITSTRANGESOUND1    0x20                    //maybe linked to critical hit
-#define HITINFO_HITSTRANGESOUND2    0x40                    //maybe linked to critical hit
+#define HITINFO_ABSORB		    0x20                    // plays absorb sound
+#define HITINFO_RESIST		    0x40                    // resisted atleast some damage
 #define HITINFO_CRITICALHIT         0x80
 #define HITINFO_GLANCING            0x4000
 #define HITINFO_CRUSHING            0x8000
