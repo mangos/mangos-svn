@@ -1356,7 +1356,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
 
     float    chanceToHit = 100.0f;
-    int32    attackerSkill = m_caster->GetWeaponSkillValue();
+    int32    attackerSkill = m_caster->GetWeaponSkillValue(BASE_ATTACK);
     int32    victimSkill = unitTarget->GetDefenceSkillValue();
     if (m_caster->GetTypeId() == TYPEID_PLAYER && unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1371,10 +1371,10 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     float fdamage;
     if(m_spellInfo->rangeIndex == 1 || m_spellInfo->rangeIndex == 2 || m_spellInfo->rangeIndex == 7)
-        fdamage = m_caster->CalculateDamage(false);
+        fdamage = m_caster->CalculateDamage(BASE_ATTACK);
     else
     {
-        fdamage = m_caster->CalculateDamage(true);
+        fdamage = m_caster->CalculateDamage(RANGED_ATTACK);
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );

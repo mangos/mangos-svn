@@ -117,7 +117,8 @@ bool Unit::haveOffhandWeapon() const
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        return tmpitem && tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON;
+    
+        return tmpitem && (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND);
     }
     else
         return false;
@@ -683,9 +684,9 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
     return AbsorbDamage;
 }
 
-void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState,uint32 *absorbDamage,uint32 *resist)
+void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType)
 {
-    MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim);
+    MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
     if (outcome == MELEE_HIT_MISS)
     {
         *hitInfo |= HITINFO_MISS;
@@ -696,17 +697,16 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
-    *damage = MeleeDamageBonus(pVictim,CalculateDamage (false));
+    *damage = MeleeDamageBonus(pVictim, CalculateDamage (attType));
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != 8 )
-        ((Player*)this)->UpdateMeleeSkillWeapon();
+        ((Player*)this)->UpdateMeleeSkillWeapon (attType);
 
     switch (outcome)
     {
         case MELEE_HIT_CRIT:
             //*hitInfo = 0xEA;
-	    *hitInfo  = HITINFO_CRITICALHIT
-                | HITINFO_NORMALSWING2 | 0x8;               // 0xEA
+            *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;               // 0xEA
             *damage *= 2;
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
@@ -766,7 +766,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
         case MELEE_HIT_GLANCING:
         {
             // 30% reduction at 15 skill diff, no reduction at 5 skill diff
-            int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue() - 5) * 3;
+            int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue(attType) - 5) * 3;
             if (reducePerc < 70)
                 reducePerc = 70;
             *damage = *damage * reducePerc / 100;
@@ -920,7 +920,7 @@ void Unit::DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount,
 
 }
 
-void Unit::AttackerStateUpdate (Unit *pVictim)
+void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 {
 
     if(hasUnitState(UNIT_STAT_CONFUSED) || hasUnitState(UNIT_STAT_STUNDED))
@@ -942,10 +942,10 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     }
 
     uint32 hitInfo;
-    if( haveOffhandWeapon() && isAttackReady(OFF_ATTACK) )
+    if (attType == BASE_ATTACK)
         hitInfo = HITINFO_LEFTSWING;
-    else if ( isAttackReady(BASE_ATTACK) )
-	hitInfo = HITINFO_NORMALSWING2;
+    else if (attType == OFF_ATTACK)
+        hitInfo = HITINFO_NORMALSWING2;
     else
         return;
 
@@ -957,18 +957,19 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
     uint32   absorbed_dmg = 0;
     uint32   resisted_dmg = 0;
 
-    DoAttackDamage (pVictim, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg);
+    DoAttackDamage (pVictim, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
     if (hitInfo & HITINFO_MISS)
         //send miss
-	SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+        SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
     else
     {
-	if (absorbed_dmg)hitInfo |= HITINFO_ABSORB;
-	if (resisted_dmg)hitInfo |= HITINFO_RESIST;
-        if ((absorbed_dmg || resisted_dmg) && ((absorbed_dmg + resisted_dmg + blocked_dmg) > damage))hitInfo |= HITINFO_SWINGNOHITSOUND;
+        if (absorbed_dmg)hitInfo |= HITINFO_ABSORB;
+        if (resisted_dmg)hitInfo |= HITINFO_RESIST;
+        if ((absorbed_dmg || resisted_dmg) && ((absorbed_dmg + resisted_dmg + blocked_dmg) > damage)) hitInfo |= HITINFO_SWINGNOHITSOUND;
+
         //do animation
-	SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+        SendAttackStateUpdate (hitInfo, pVictim->GetGUID(), 1, damageType, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
 
         if (damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
             damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
@@ -991,9 +992,9 @@ void Unit::AttackerStateUpdate (Unit *pVictim)
             GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
 
-MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const
 {
-    int32 skillDiff =  GetWeaponSkillValue() - pVictim->GetDefenceSkillValue();
+    int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenceSkillValue();
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
     int32    sum = 0, tmp = 0;
@@ -1114,23 +1115,24 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim) const
     return MELEE_HIT_NORMAL;
 }
 
-uint32 Unit::CalculateDamage(bool ranged)
+uint32 Unit::CalculateDamage (WeaponAttackType attType)
 {
-    float min_damage, max_damage, dmg;
-    if(ranged)
+    float min_damage, max_damage;
+
+    switch (attType)
     {
-        min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-        max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-    }
-    else if( haveOffhandWeapon() && isAttackReady(OFF_ATTACK) )
-    {
-        min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE)/2;
-        max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)/2;
-    }
-    else
-    {
-        min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
-        max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+        case RANGED_ATTACK:
+            min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
+            max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+            break;
+        case BASE_ATTACK:
+            min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
+            max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+            break;
+        case OFF_ATTACK:
+            min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * 0.5; // TODO: add offhand dmg from talents
+            max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) * 0.5;
+            break;
     }
 
     if (min_damage > max_damage)
@@ -1141,10 +1143,7 @@ uint32 Unit::CalculateDamage(bool ranged)
     if(max_damage == 0.0)
         max_damage = 5.0;
 
-    float diff = max_damage - min_damage + 1;
-
-    dmg = float (rand()%(uint32)diff + (uint32)min_damage);
-    return (uint32)dmg;
+    return urand ((uint32)min_damage, (uint32)max_damage);
 }
 
 void Unit::SendAttackStop(uint64 victimGuid)
@@ -1221,16 +1220,23 @@ float Unit::GetUnitBlockChance() const
     return chance;
 }
 
-uint16 Unit::GetWeaponSkillValue() const
+uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        uint32 skill = 0;
-        Item *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        if(!item)
-            Item *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        uint16  slot;
+        switch (attType)
+        {
+            case BASE_ATTACK: slot = EQUIPMENT_SLOT_MAINHAND; break;
+            case OFF_ATTACK: slot = EQUIPMENT_SLOT_OFFHAND; break;
+            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED; break;
+        }
+        Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
-        skill = item ? item->GetSkill() : SKILL_UNARMED;
+        if(attType != EQUIPMENT_SLOT_MAINHAND && !item)
+            return 0;
+
+        uint32  skill = item ? item->GetSkill() : SKILL_UNARMED; // in range
         return ((Player*)this)->GetSkillValue (skill);
     }
     else
