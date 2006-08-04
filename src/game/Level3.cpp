@@ -946,12 +946,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
                 loop++;
                 continue;
             }
-
-            WorldPacket data;
-            data.Initialize( SMSG_LEARNED_SPELL );
-            data << (uint32)spell;
-            m_session->SendPacket( &data );
-            m_session->GetPlayer()->addSpell((uint16)spell,1);
+            m_session->GetPlayer()->learnSpell((uint16)spell);
 
             loop++;
         }
@@ -967,11 +962,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return true;
     }
 
-    WorldPacket data;
-    data.Initialize( SMSG_LEARNED_SPELL );
-    data << (uint32)spell;
-    m_session->SendPacket( &data );
-    m_session->GetPlayer()->addSpell((uint16)spell,1);
+    m_session->GetPlayer()->learnSpell((uint16)spell);
 
     return true;
 }

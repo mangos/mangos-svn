@@ -886,77 +886,6 @@ void Spell::EffectLearnSpell(uint32 i)
         }
         default:break;
     }
-    uint16 maxskill = player->getLevel()*5 > 300 ? 300 :player->getLevel()*5;
-    switch(spellToLearn)
-    {
-        //Armor
-        case 9078:                                          //Cloth
-            player->SetSkill(415,1,1);
-            break;
-        case 9077:                                          //Leather
-            player->SetSkill(414,1,1);
-            break;
-        case 8737:                                          //Mail
-            player->SetSkill(413,1,1);
-            break;
-        case 750:                                           //Plate Mail
-            player->SetSkill(293,1,1);
-            break;
-        case 9116:                                          //Shield
-            player->SetSkill(433,1,1);
-            break;
-            //Melee Weapons
-        case 196:                                           //Axes
-            player->SetSkill(44,1,maxskill);
-            break;
-        case 197:                                           //Two-Handed Axes
-            player->SetSkill(172,1,maxskill);
-            break;
-        case 227:                                           //Staves
-            player->SetSkill(136,1,maxskill);
-            break;
-        case 198:                                           //Maces
-            player->SetSkill(54,1,maxskill);
-            break;
-        case 199:                                           //Two-Handed Maces
-            player->SetSkill(160,1,maxskill);
-            break;
-        case 201:                                           //Swords
-            player->SetSkill(43,1,maxskill);
-            break;
-        case 202:                                           //Two-Handed Swords
-            player->SetSkill(55,1,maxskill);
-            break;
-        case 1180:                                          //Daggers
-            player->SetSkill(173,1,maxskill);
-            break;
-        case 15590:                                         //Fist Weapons
-            player->SetSkill(473,1,maxskill);
-            break;
-        case 200:                                           //Polearms
-            player->SetSkill(229,1,maxskill);
-            break;
-        case 3386:                                          //Polearms
-            player->SetSkill(227,1,maxskill);
-            break;
-            //Range Weapons
-        case 264:                                           //Bows
-            player->SetSkill(45,1,maxskill);
-            break;
-        case 5011:                                          //Crossbows
-            player->SetSkill(226,1,maxskill);
-            break;
-        case 266:                                           //Guns
-            player->SetSkill(46,1,maxskill);
-            break;
-        case 2567:                                          //Thrown
-            player->SetSkill(176,1,maxskill);
-            break;
-        case 5009:                                          //Wands
-            player->SetSkill(228,1,maxskill);
-            break;
-        default:break;
-    }
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
@@ -1154,11 +1083,10 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     if (add_slot < 21)
     {
-        for(int j = 0;j < 3; j++)
-            if (m_spellInfo->EffectMiscValue[j])
+        if (m_spellInfo->EffectMiscValue[i])
         {
-            uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
+            uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot, enchant_id);
             if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
                 p_caster->AddItemEnchant(enchant_id,true);
         }

@@ -78,7 +78,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
 
-        void SendProficiency (uint8 pr1, uint8 pr2=0, uint8 pr3=0, uint8 pr4=0, uint8 pr5=0);
+        void SendProficiency (uint8 pr1, uint32 pr2);
         void SendCreatureQuery( uint32 entry, uint64 guid );
         void SendTrainerList( uint64 guid );
         void SendTrainerList( uint64 guid,std::string strTitle );
