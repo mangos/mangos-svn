@@ -451,7 +451,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage)
     }
 
     // Only send absorbed message if we actually absorbed some damage
-    if( (damage-absorb-resist)<= 0 && absorb)
+    if( damage <= absorb+resist && absorb)
     {
         SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim->GetGUID(), 1, spellInfo->School, pdamage, absorb,resist,1,0);
         return;

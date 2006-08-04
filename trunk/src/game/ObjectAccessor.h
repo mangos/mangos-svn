@@ -52,7 +52,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         Creature* GetCreature(Unit const &, uint64);
-        Corpse* GetCorpse(Unit const &, uint64);
+        Corpse*   GetCorpse(Unit const &u, uint64 guid);
+        Corpse*   GetCorpse(uint32 x, uint32 y, uint32 mapid, uint64 guid);
         Unit* GetUnit(Unit const &, uint64);
         Player* GetPlayer(Unit const &, uint64);
         GameObject* GetGameObject(Unit const &, uint64);
