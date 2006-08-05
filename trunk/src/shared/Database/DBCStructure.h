@@ -91,8 +91,8 @@ struct SpellEntry
     uint32    Totem[2];
     uint32    Reagent[8];
     uint32    ReagentCount[8];
-    uint32    EquippedItemClass;
-    uint32    EquippedItemSubClass;
+    int32    EquippedItemClass;
+    int32    EquippedItemSubClass;
     uint32    Effect[3];
     int32     EffectDieSides[3];
     uint32    EffectBaseDice[3];
@@ -202,5 +202,5 @@ struct SpellItemEnchantment
     uint32      unkown2;
     uint32      description;
     uint32      aura_id;
-    uint32      unkown4;
+    uint32      slot;
 };

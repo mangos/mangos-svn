@@ -1805,7 +1805,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < 6;x++)
+    for(int8 x=0;x < 7;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -1828,7 +1828,7 @@ void Aura::HandleAuraModResistance(bool apply)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < 6;x++)
+    for(int8 x=0;x < 7;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
@@ -1851,7 +1851,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply)
 
     bool positive = m_modifier.m_miscvalue2 == 0;
 
-    for(int8 x=0;x < 6;x++)
+    for(int8 x=0;x < 7;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {

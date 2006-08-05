@@ -134,7 +134,7 @@ Player::Player (WorldSession *session): Unit()
     m_Last_tick = m_logintime;
     m_soulStone = NULL;
     m_soulStoneSpell = 0;
-    m_WeaponProficiency = 0x2000;
+    m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
 }
 
@@ -1746,6 +1746,10 @@ void Player::learnSpell(uint16 spell_id)
         case 5009:                                          //Wands
             SetSkill(228,1,maxskill);
             break;
+        //Others
+        case 2842:                                          //poisons
+            SetSkill(40,1,maxskill);
+            break;
         default:break;
     }
 }
@@ -2511,6 +2515,11 @@ void Player::UpdateSkillPro(uint32 spellid)
     uint16 max = SKILL_MAX(data);
 
     if ((!max) || (!value) || (value >= max)) return;
+    if(skill_id == SKILL_POISONS && value < 125)
+    {
+        SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+        return;
+    }
     if(skill_id == SKILL_MINING && value>75)
         return;
     if(value >= maxValue+25 )
@@ -3634,7 +3643,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     {
         uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_solt);
         if(Enchant_id)
-            AddItemEnchant(Enchant_id, apply);
+            AddItemEnchant(item,Enchant_id, apply);
     }
 
     sLog.outDebug("_ApplyItemMods complete.");

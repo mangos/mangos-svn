@@ -717,3 +717,16 @@ void WorldSession::SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID
     data << uint8(0);
     SendPacket(&data);
 }
+
+void WorldSession::SendItemEnchantTimeUpdate(uint64 Itemguid, uint64 Owner,uint32 ItemID,uint32 Duration)
+{
+    //Fix me for all fields.
+    WorldPacket data;
+    data.Initialize(SMSG_ITEM_ENCHANT_TIME_UPDATE);
+    data << Itemguid;
+    data << Owner;
+    data << ItemID;
+    data << Duration;
+    data << uint8(0);
+    SendPacket(&data);
+}

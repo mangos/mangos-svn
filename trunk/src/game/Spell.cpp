@@ -1589,6 +1589,16 @@ uint8 Spell::CheckItems()
             return uint8(0);
         }
     }
+    if(itemTarget)
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->EquippedItemClass > 0)
+        {
+            if(!(itemTarget->GetProto()->Class & m_spellInfo->EquippedItemClass))
+                return CAST_FAIL_ITEM_NOT_READY;
+            else if(!(itemTarget->GetProto()->SubClass & m_spellInfo->EquippedItemSubClass))
+                return CAST_FAIL_ITEM_NOT_READY;
+        }
+    }
 
     if(m_spellInfo->RequiresSpellFocus)
     {

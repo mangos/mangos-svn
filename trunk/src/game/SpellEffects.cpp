@@ -1022,27 +1022,15 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    uint32 add_slot = 0;
-
-    for(add_slot = 0; add_slot < 21; add_slot ++)
-        if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
-    {
-        p_caster->AddItemEnchant(itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot),false);
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot,0);
-    }
-    add_slot = 0;
 
     p_caster->UpdateSkillPro(m_spellInfo->Id);
 
-    if (add_slot < 21)
+    if (m_spellInfo->EffectMiscValue[i])
     {
-        for(int j = 0;j < 3; j++)
-            if (m_spellInfo->EffectMiscValue[j])
-        {
-            uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
-            p_caster->AddItemEnchant(enchant_id,true);
-        }
+        uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+        p_caster->AddItemEnchant(itemTarget,enchant_id,true);
+        //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
+        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->EffectBasePoints[i]+1);
     }
 }
 
@@ -1052,44 +1040,16 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    uint32 add_slot = 0;
-    uint8 item_slot = 0;
-
-    uint32 field = 99;
-    if(itemTarget)
-        field = 1;
-    else
-        field = 3;
 
     if(!itemTarget)
-    {
-        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-        {
-            if(p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j ) != 0 && p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j )->GetProto()->ItemId == itemTarget->GetEntry())
-            {
-                itemTarget = p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j );
-                item_slot = j;
-            }
-        }
-    }
+        return;
 
-    for(add_slot = 0; add_slot < 21; add_slot ++)
-        if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot))
+    if (m_spellInfo->EffectMiscValue[i])
     {
-        p_caster->AddItemEnchant(itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot),false);
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot,0);
-    }
-    add_slot = 0;
-
-    if (add_slot < 21)
-    {
-        if (m_spellInfo->EffectMiscValue[i])
-        {
-            uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+add_slot, enchant_id);
-            if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-                p_caster->AddItemEnchant(enchant_id,true);
-        }
+        uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+        p_caster->AddItemEnchant(itemTarget,enchant_id,true);
+        //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
+        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->EffectBasePoints[i]+1);
     }
 }
 
@@ -1618,39 +1578,16 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    uint32 add_slot = 0;
-    uint8 item_slot = 0;
-
-    uint32 field = 99;
-    if(itemTarget)
-        field = 1;
-    else
-        field = 3;
 
     if(!itemTarget)
-    {
-        for(uint8 j=0;j<INVENTORY_SLOT_ITEM_END;j++)
-        {
-            if(p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j ) != 0 && p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j )->GetProto()->ItemId == itemTarget->GetEntry())
-            {
-                itemTarget = p_caster->GetItemByPos( INVENTORY_SLOT_BAG_0, j );
-                item_slot = j;
-            }
-        }
-    }
+        return;
 
-    if (add_slot < 21)
+    if (m_spellInfo->EffectMiscValue[i])
     {
-        for(int j = 0;j < 3; j++)
-            if (m_spellInfo->EffectMiscValue[j])
-        {
-            uint32 enchant_id = m_spellInfo->EffectMiscValue[j];
-            if (itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j)))
-                p_caster->AddItemEnchant(itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j)),false);
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(add_slot+3*j), enchant_id);
-            if(itemTarget->GetSlot() < EQUIPMENT_SLOT_END)
-                p_caster->AddItemEnchant(enchant_id,true);
-        }
+        uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+        p_caster->AddItemEnchant(itemTarget,enchant_id,true);
+        //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
+        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->EffectBasePoints[i]+1);
     }
 }
 
