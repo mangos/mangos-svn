@@ -210,6 +210,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_GAME_TYPE] = sConfig.GetIntDefault("GameType", 0);
     m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
     m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
+    m_configs[CONFIG_WISPERING_TO_GM] = sConfig.GetIntDefault("WhisperingToGM",0);
 
     m_gameTime = (3600*atoi(hour))+(atoi(minute)*60)+(atoi(second));
 

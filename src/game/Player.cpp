@@ -58,7 +58,13 @@ Player::Player (WorldSession *session): Unit()
     m_timedquest = 0;
 
     m_afk = 0;
-    m_acceptTicket = true;
+
+    m_GMFlags = 0;
+    if(GetSession()->GetSecurity() >=2)
+        SetAcceptTicket(true);
+    if(GetSession()->GetSecurity() >=1 && sWorld.getConfig(CONFIG_WISPERING_TO_GM))
+        SetAcceptWispers(true);
+
     m_curTarget = 0;
     m_curSelection = 0;
     m_lootGuid = 0;
@@ -1177,7 +1183,7 @@ void Player::RegenerateHealth()
 
 bool Player::isAcceptTickets() const
 {
-    return GetSession()->GetSecurity() >=2 && m_acceptTicket;
+    return GetSession()->GetSecurity() >=2 && (m_GMFlags & GM_ACCEPT_TICKETS);
 }
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim)

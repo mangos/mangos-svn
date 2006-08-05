@@ -47,16 +47,14 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
 
 bool ChatHandler::HandleGMOnCommand(const char* args)
 {
-    uint32 newbytes = m_session->GetPlayer( )->GetUInt32Value(PLAYER_BYTES_2) | 0x8;
-    m_session->GetPlayer( )->SetUInt32Value( PLAYER_BYTES_2, newbytes);
+    m_session->GetPlayer()->SetFlag(PLAYER_BYTES_2, 0x8);
 
     return true;
 }
 
 bool ChatHandler::HandleGMOffCommand(const char* args)
 {
-    uint32 newbytes = m_session->GetPlayer( )->GetUInt32Value(PLAYER_BYTES_2) & ~(0x8);
-    m_session->GetPlayer( )->SetUInt32Value( PLAYER_BYTES_2, newbytes);
+    m_session->GetPlayer()->RemoveFlag(PLAYER_BYTES_2, 0x8);
 
     return true;
 }
@@ -1202,4 +1200,34 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     delete result;
     m_session->GetPlayer()->TeleportTo(mapid, x, y, z, ort);
     return true;
+}
+
+bool ChatHandler::HandleWhispersCommand(const char* args)
+{
+    char* px = strtok((char*)args, " ");
+
+    // ticket<end>
+    if (!px)
+    {
+        PSendSysMessage("Wispers accepting: %s", m_session->GetPlayer()->isAcceptWispers() ?  "on" : "off");
+        return true;
+    }
+
+    // ticket on
+    if(strncmp(px,"on",3) == 0)
+    {
+        m_session->GetPlayer()->SetAcceptWispers(true);
+        SendSysMessage("Wispers accepting: on");
+        return true;
+    }
+
+    // ticket off
+    if(strncmp(px,"off",4) == 0)
+    {
+        m_session->GetPlayer()->SetAcceptWispers(false);
+        SendSysMessage("Wispers accepting: off");
+        return true;
+    }
+
+    return false;
 }

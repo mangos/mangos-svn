@@ -193,6 +193,6 @@ class Channel
         void List(Player *p);
         void Announce(Player *p);
         void Moderate(Player *p);
-        void Say(Player *p, const char *what);
+        void Say(Player *p, const char *what, uint32 lang);
         void Invite(Player *p, const char *newp);
 };

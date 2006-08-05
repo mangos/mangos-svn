@@ -50,6 +50,19 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
+    uint32 sidea = GetPlayer()->GetTeam();
+    uint32 sideb = player->GetTeam();
+    //This may be the right respons. It is the same as for if(player == null)
+    if ( sidea != sideb )
+    {
+        data.Initialize(SMSG_PARTY_COMMAND_RESULT);
+        data << uint32( 0 );
+        data << membername;
+        data << uint32( 0x00000001 );
+        SendPacket( &data );
+        return;
+    }
+
     if ( GetPlayer()->IsInGroup() && (GetPlayer()->GetGroupLeader() != GetPlayer()->GetGUID() ))
     {
         data.Initialize(SMSG_PARTY_COMMAND_RESULT);

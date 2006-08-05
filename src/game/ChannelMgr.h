@@ -69,4 +69,14 @@ class ChannelMgr
         }
 };
 
-#define channelmgr MaNGOS::Singleton<ChannelMgr>::Instance()
+class AllianceChannelMgr : public ChannelMgr {};
+class HordeChannelMgr    : public ChannelMgr {};
+
+inline ChannelMgr* channelMgr(uint32 team)
+{
+    if(team==ALLIANCE) 
+        return &MaNGOS::Singleton<AllianceChannelMgr>::Instance();
+    if(team==HORDE)
+        return &MaNGOS::Singleton<HordeChannelMgr>::Instance();
+    return NULL;
+}

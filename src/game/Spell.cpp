@@ -1019,7 +1019,7 @@ void Spell::SendResurrectRequest(Player* target)
 {
     WorldPacket data;
     data.Initialize(SMSG_RESURRECT_REQUEST);
-    data << uint8(0xFF) << m_caster->GetGUID();
+    data << m_caster->GetGUID();
     data << uint32(0) << uint8(0);
 
     target->GetSession()->SendPacket(&data);
