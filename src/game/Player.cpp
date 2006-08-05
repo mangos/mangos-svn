@@ -8149,6 +8149,23 @@ bool Player::LoadFromDB( uint32 guid )
     Object::_Create( guid, HIGHGUID_PLAYER );
 
     LoadValues( fields[3].GetString() );
+
+    // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
+    for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
+    {
+        SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), 0 );
+
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 12);
+        for(int i = 0; i < 9; ++i )
+            SetUInt32Value(VisibleBase + i, 0);
+
+        if (m_items[slot])
+        {
+            delete m_items[slot];
+            m_items[slot] = NULL;
+        }
+    }
+
     m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF;
 
     m_name = fields[4].GetCppString();

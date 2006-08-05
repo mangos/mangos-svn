@@ -94,6 +94,8 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 {
     if(!Item::LoadFromDB(guid, owner_guid, auctioncheck))
         return false;
+
+    // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
     for (uint32 i = 0; i < GetProto()->ContainerSlots; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);
@@ -103,6 +105,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
             m_bagslot[i] = NULL;
         }
     }
+
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", GUID_LOPART(GetOwnerGUID()), GetSlot());
 
     if (result)
