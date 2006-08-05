@@ -130,7 +130,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> to >> msg;
             Player *player = objmgr.GetPlayer(to.c_str());
             // send whispers from player to GM only if GM accept its (not show online state GM in other case)
-            if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWispers())
+            if(!player || GetSecurity() == 0 && player->GetSession()->GetSecurity() > 0 && !player->isAcceptWhispers())
             {
                 std::string msg_err = "Player "+to+" is not online (Names are case sensitive)";
                 sChatHandler.SendSysMessage(this ,msg_err.c_str() );
@@ -150,10 +150,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             SendPacket(&data);
 
             // Auto enable whispers accepting at sending whispers
-            if(!GetPlayer()->isAcceptWispers())
+            if(!GetPlayer()->isAcceptWhispers())
             {
-                GetPlayer()->SetAcceptWispers(true);
-                sChatHandler.SendSysMessage(this ,"Wispers accepting now: ON");
+                GetPlayer()->SetAcceptWhispers(true);
+                sChatHandler.SendSysMessage(this ,"Whispers accepting now: ON");
             }
         } break;
 

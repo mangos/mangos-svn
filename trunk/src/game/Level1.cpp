@@ -1209,23 +1209,23 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     // ticket<end>
     if (!px)
     {
-        PSendSysMessage("Wispers accepting: %s", m_session->GetPlayer()->isAcceptWispers() ?  "on" : "off");
+        PSendSysMessage("Whispers accepting: %s", m_session->GetPlayer()->isAcceptWhispers() ?  "on" : "off");
         return true;
     }
 
     // ticket on
     if(strncmp(px,"on",3) == 0)
     {
-        m_session->GetPlayer()->SetAcceptWispers(true);
-        SendSysMessage("Wispers accepting: on");
+        m_session->GetPlayer()->SetAcceptWhispers(true);
+        SendSysMessage("Whispers accepting: on");
         return true;
     }
 
     // ticket off
     if(strncmp(px,"off",4) == 0)
     {
-        m_session->GetPlayer()->SetAcceptWispers(false);
-        SendSysMessage("Wispers accepting: off");
+        m_session->GetPlayer()->SetAcceptWhispers(false);
+        SendSysMessage("Whispers accepting: off");
         return true;
     }
 
