@@ -232,6 +232,12 @@ enum LootType
     LOOT_PICKPOKETING = 4                                   // unsupported by client, sending LOOT_SKINNING instead
 };
 
+enum GMFlags
+{
+    GM_ACCEPT_TICKETS = 1,
+    GM_ACCEPT_WISPERS = 2
+};
+
 #define IS_BACK_SLOT(s) (s == 0xFF)
 
 class Quest;
@@ -359,7 +365,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint8 ToggleAFK() { m_afk = !m_afk; return m_afk; };
         bool isAcceptTickets() const;
-        void SetAcceptTicket(bool on) { m_acceptTicket = on; }
+        void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
+        bool isAcceptWispers() const { return m_GMFlags & GM_ACCEPT_WISPERS; }
+        void SetAcceptWispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WISPERS; else m_GMFlags &= ~GM_ACCEPT_WISPERS; }
 
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
@@ -970,7 +978,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_movement_flags;
 
-        bool  m_acceptTicket;
+        uint32 m_GMFlags;
         uint64 m_curTarget;
         uint64 m_curSelection;
 
