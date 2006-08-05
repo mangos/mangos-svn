@@ -234,8 +234,8 @@ enum LootType
 
 enum GMFlags
 {
-    GM_ACCEPT_TICKETS = 1,
-    GM_ACCEPT_WISPERS = 2
+    GM_ACCEPT_TICKETS  = 1,
+    GM_ACCEPT_WHISPERS = 2
 };
 
 #define IS_BACK_SLOT(s) (s == 0xFF)
@@ -366,8 +366,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 ToggleAFK() { m_afk = !m_afk; return m_afk; };
         bool isAcceptTickets() const;
         void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
-        bool isAcceptWispers() const { return m_GMFlags & GM_ACCEPT_WISPERS; }
-        void SetAcceptWispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WISPERS; else m_GMFlags &= ~GM_ACCEPT_WISPERS; }
+        bool isAcceptWhispers() const { return m_GMFlags & GM_ACCEPT_WHISPERS; }
+        void SetAcceptWhispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WHISPERS; else m_GMFlags &= ~GM_ACCEPT_WHISPERS; }
 
         const char* GetName() { return m_name.c_str(); };
         PlayerCreateInfo* GetPlayerInfo(){return info;}
