@@ -104,28 +104,28 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
 
         if(!(GetPlayer( )->HasSpell(spellid)))
         {
+            if(!GetPlayer( )->addSpell((uint16)spellid,1))
+                return;
 
             data.Initialize(SMSG_LEARNED_SPELL);
             sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
             data << spellid;
             GetPlayer( )->GetSession()->SendPacket(&data);
-            GetPlayer( )->addSpell((uint16)spellid,1);
 
             SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
-            if(spellInfo)
-            {
-                for(uint32 i = 0;i<3;i++)
-                {
-                    uint8 eff = spellInfo->Effect[i];
-                    if (eff>=TOTAL_SPELL_EFFECTS)
-                        continue;
+            assert(spellInfo); // checked in addSpell
 
-                    // Duration 21 = permanent
-                    if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
-                    {
-                        Aura *Aur = new Aura(spellInfo, i, NULL, GetPlayer());
-                        GetPlayer()->AddAura(Aur);
-                    }
+            for(uint32 i = 0;i<3;i++)
+            {
+                uint8 eff = spellInfo->Effect[i];
+                if (eff>=TOTAL_SPELL_EFFECTS)
+                    continue;
+
+                // Duration 21 = permanent
+                if ((eff == 6) && (spellInfo->DurationIndex == 21) && (spellInfo->rangeIndex == 1))
+                {
+                    Aura *Aur = new Aura(spellInfo, i, NULL, GetPlayer());
+                    GetPlayer()->AddAura(Aur);
                 }
             }
 

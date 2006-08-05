@@ -2413,26 +2413,26 @@ bool ChatHandler::HandleResetCommand (const char * args)
         player->SetUInt32Value(PLAYER_FIELD_POSSTAT4, 0);
 
         //+5% HP if has skill Endurance
-        if (player->HasSpell(20550))
+        if (player->HasSpell(SPELL_PASSIVE_ENDURENCE))
         {
                                                             // only integer part
             player->SetMaxHealth( uint32(player->GetMaxHealth() * 1.05));
         }
 
         // school resistances
-        if (player->HasSpell(20596))
+        if (player->HasSpell(SPELL_PASSIVE_FROST_RESISTANCE))
         {
             player->SetResistance(SPELL_SCHOOL_FROST, 10 );
         }
-        if (player->HasSpell(20583))
+        if (player->HasSpell(SPELL_PASSIVE_NATURE_RESISTANCE))
         {
             player->SetResistance(SPELL_SCHOOL_NATURE, 10 );
         }
-        if (player->HasSpell(20579))
+        if (player->HasSpell(SPELL_PASSIVE_SHADOW_RESISTANCE))
         {
             player->SetResistance(SPELL_SCHOOL_SHADOW, 10 );
         }
-        if (player->HasSpell(20592))
+        if (player->HasSpell(SPELL_PASSIVE_ARCANE_RESISTANCE))
         {
             player->SetResistance(SPELL_SCHOOL_ARCANE, 10 );
         }
