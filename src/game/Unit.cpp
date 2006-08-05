@@ -300,13 +300,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
 
         //judge if GainXP, Pet kill like player kill,kill pet not like PvP
-        bool playerkill = false;
         bool PvP = false;
-        Player *player;
+        Player *player = 0;
 
         if(GetTypeId() == TYPEID_PLAYER)
         {
-            playerkill = true;
             player = (Player*)this;
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 PvP = true;
@@ -314,16 +312,15 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         else if(((Creature*)this)->isPet())
         {
             Unit* owner = ((Pet*)this)->GetOwner();
-            if(!owner)
-                playerkill = false;
-            else if(owner->GetTypeId() == TYPEID_PLAYER)
+
+            if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
                 player = (Player*)owner;
-                playerkill = true;
             }
         }
 
-        if(playerkill)
+        // self or owner of pet
+        if(player) 
         {
             player->CalculateHonor(pVictim);
             player->CalculateReputation(pVictim);
@@ -943,9 +940,9 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType)
 
     uint32 hitInfo;
     if (attType == BASE_ATTACK)
-        hitInfo = HITINFO_LEFTSWING;
-    else if (attType == OFF_ATTACK)
         hitInfo = HITINFO_NORMALSWING2;
+    else if (attType == OFF_ATTACK)
+        hitInfo = HITINFO_LEFTSWING;
     else
         return;
 
