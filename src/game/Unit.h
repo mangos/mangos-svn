@@ -95,6 +95,7 @@ class Aura;
 class Creature;
 class Spell;
 class DynamicObject;
+class Item;
 
 struct DamageShield
 {
@@ -623,7 +624,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         AuraList& GetAurasByType(uint8 type) {return m_modAuras[type];}
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run);
-        void AddItemEnchant(uint32 enchant_id,bool apply);
+        void AddItemEnchant(Item *item,uint32 enchant_id,bool apply);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() { return m_transform;}
         void AddDynObject(DynamicObject* dynObj);

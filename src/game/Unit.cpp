@@ -683,6 +683,53 @@ uint32 Unit::CalDamageAbsorb(Unit *pVictim,uint32 School,const uint32 damage,uin
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType)
 {
+    // this unit's proc trigger damage and spell
+    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
+    {
+        ProcTriggerDamage *procdamage = (*i).second->GetProcDamage();
+        if(procdamage)
+        {
+            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
+            if( (procdamage->procFlags == 0) && procdamage->procChance > rand_chance()
+                && (procdamage->procCharges > 0 || nocharges))
+            {
+                SpellNonMeleeDamageLog(pVictim,(*i).second->GetSpellProto()->Id,procdamage->procDamage);
+                if(!nocharges)
+                {
+                    procdamage->procCharges -= 1;
+                    if(procdamage->procCharges == 0)
+                        (*i).second->RemoveProcDamage();
+                }
+            }
+        }
+        if(ProcTriggerSpell* procspell = (*i).second->GetProcSpell())
+        {
+            bool nocharges = (*i).second->GetSpellProto()->procCharges == 0 ? true : false;
+            if((procspell->procFlags == 0) && procspell->procChance > rand_chance()
+                && (procspell->procCharges > 0 || nocharges))
+            {
+                SpellEntry *spellInfo = sSpellStore.LookupEntry((*i).second->GetProcSpell()->trigger );
+
+                if(!spellInfo)
+                {
+                    sLog.outError("WORLD: unknown spell id %i\n", (*i).second->GetProcSpell()->trigger);
+                    return;
+                }
+
+                Spell spell(this, spellInfo, true, 0);
+
+                SpellCastTargets targets;
+                targets.setUnitTarget( pVictim );
+                spell.prepare(&targets);
+                if(!nocharges)
+                {
+                    procspell->procCharges -= 1;
+                    if(procspell->procCharges == 0)
+                        (*i).second->RemoveProcSpell();
+                }
+            }
+        }
+    }
     MeleeHitOutcome outcome = RollMeleeOutcomeAgainst (pVictim, attType);
     if (outcome == MELEE_HIT_MISS)
     {
@@ -2008,9 +2055,12 @@ void Unit::AddHostil(uint64 guid, float hostility)
     m_hostilList.push_back(Hostil(guid,hostility));
 }
 
-void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
+void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
 {
     if (GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(!item)
         return;
 
     SpellItemEnchantment *pEnchant;
@@ -2021,9 +2071,20 @@ void Unit::AddItemEnchant(uint32 enchant_id,bool apply)
     uint32 enchant_value1 = pEnchant->value1;
     //uint32 enchant_value2 = pEnchant->value2;
     uint32 enchant_spell_id = pEnchant->spellid;
-    //uint32 enchant_aura_id = pEnchant->aura_id;
+    uint32 enchant_aura_id = pEnchant->aura_id;
     //uint32 enchant_description = pEnchant->description;
+    uint32 enchant_slot = pEnchant->slot*3;
     SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
+    if(apply && enchant_id > 0)
+    {
+        for(int i=0;i<3;i++)
+        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+i,0);
+        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot, enchant_id);
+        //Add words before weapon name?
+        //item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+1, enchant_aura_id);
+        //Charges for poison
+        //item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+2, charges);
+    }
 
     if(enchant_display ==4)
     {
