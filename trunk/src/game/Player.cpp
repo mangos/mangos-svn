@@ -351,51 +351,51 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     m_standing = 0;
 
     // Skill spec +5
-    if (Player::HasSpell(20597))
+    if (Player::HasSpell(SPELL_PASSIVE_SWORD_SPECIALIZATION))
     {
         SetSkill(43,1 ,10);
         SetSkill(55,1 ,10);
     }
-    if (Player::HasSpell(20864))
+    if (Player::HasSpell(SPELL_PASSIVE_MACE_SPECIALIZATION))
     {
         SetSkill(54,1 ,10);
         SetSkill(160,1 ,10);
     }
-    if (Player::HasSpell(20574))
+    if (Player::HasSpell(SPELL_PASSIVE_AXE_SPECIALIZATION))
     {
         SetSkill(44,1 ,10);
         SetSkill(172,1 ,10);
     }
-    if (Player::HasSpell(20558))
+    if (Player::HasSpell(SPELL_PASSIVE_THROWING_SPECIALIZATION))
     {
         SetSkill(176,1 ,10);
     }
-    if (Player::HasSpell(26290))
+    if (Player::HasSpell(SPELL_PASSIVE_BOW_SPECIALIZATION))
     {
         SetSkill(45,1 ,10);
         SetSkill(226,1 ,10);
     }
 
     //+5% HP if has skill Endurance
-    if (Player::HasSpell(20550))
+    if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))
     {
         SetMaxHealth( uint32(GetMaxHealth() * 1.05));       // only integer part
     }
 
     // school resistances
-    if (Player::HasSpell(20596))
+    if (Player::HasSpell(SPELL_PASSIVE_FROST_RESISTANCE))
     {
         SetResistance(SPELL_SCHOOL_FROST, 10 );
     }
-    if (Player::HasSpell(20583))
+    if (Player::HasSpell(SPELL_PASSIVE_NATURE_RESISTANCE))
     {
         SetResistance(SPELL_SCHOOL_NATURE, 10 );
     }
-    if (Player::HasSpell(20579))
+    if (Player::HasSpell(SPELL_PASSIVE_SHADOW_RESISTANCE))
     {
         SetResistance(SPELL_SCHOOL_SHADOW, 10 );
     }
-    if (Player::HasSpell(20592))
+    if (Player::HasSpell(SPELL_PASSIVE_ARCANE_RESISTANCE))
     {
         SetResistance(SPELL_SCHOOL_ARCANE, 10 );
     }
@@ -521,7 +521,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
 
 void Player::HandleDrowing(uint32 UnderWaterTime)
 {
-    if (Player::HasSpell(5227))
+    if (Player::HasSpell(SPELL_PASSIVE_UNDERWATER_BREATHING))
     {
         UnderWaterTime*=4;
     }
@@ -1015,7 +1015,7 @@ void Player::RegenerateAll()
 
     // Not in combat or they have regeneration
     // TODO: Replace the 20555 with test for if they have an aura of regeneration
-    if (!isInCombat() || Player::HasSpell(20555))
+    if (!isInCombat() || Player::HasSpell(SPELL_PASSIVE_REGENERATION))
     {
         RegenerateHealth();
         if (!isInCombat())
@@ -1152,7 +1152,7 @@ void Player::RegenerateHealth()
         case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
         case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
     }
-    if (HasSpell(20555))                                    // TODO: Should be aura controlled
+    if (HasSpell(SPELL_PASSIVE_REGENERATION))                                    // TODO: Should be aura controlled
     {
         if (isInCombat())
             addvalue*=uint32(0.10);
@@ -1254,13 +1254,13 @@ void Player::GiveLevel()
     float newSPI = GetStat(STAT_SPIRIT);
 
     // Remove class and race bonuses from base stats
-    if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
+    if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))          //endurance skill support (+5% to total health)
         newHP = newHP / 1.05;
 
-    if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
+    if (Player::HasSpell(SPELL_PASSIVE_HUMAN_SPIRIT))       //Human Spirit skill support (+5% to total spirit)
         newSPI = newSPI / 1.05;
 
-    if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
+    if (Player::HasSpell(SPELL_PASSIVE_EXPANSIVE_MIND))     //Expansive mind support (+5% to total Intellect)
         newINT  = newINT / 1.05;
 
     // Gain stats
@@ -1278,13 +1278,13 @@ void Player::GiveLevel()
     newSPI += SPIGain;
 
     // Apply class and race bonuses to stats
-    if (Player::HasSpell(20550))                            //endurance skill support (+5% to total health)
+    if (Player::HasSpell(SPELL_PASSIVE_ENDURENCE))          //endurance skill support (+5% to total health)
         newHP  = newHP * 1.05;
 
-    if (Player::HasSpell(20598))                            //Human Spirit skill support (+5% to total spirit)
+    if (Player::HasSpell(SPELL_PASSIVE_HUMAN_SPIRIT))       //Human Spirit skill support (+5% to total spirit)
         newSPI  = newSPI * 1.05;
 
-    if (Player::HasSpell(20591))                            //Expansive mind support (+5% to total Intellect)
+    if (Player::HasSpell(SPELL_PASSIVE_EXPANSIVE_MIND))     //Expansive mind support (+5% to total Intellect)
         newINT = newINT * 1.05;
 
     // update level, talants, max level of skills
@@ -1521,12 +1521,17 @@ void Player::AddMail(Mail *m)
     m_mail.push_back(m);
 }
 
-void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
+bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 {
     uint32 newrank = 0;
     uint32 oldrank = 0;
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
-    if(!spellInfo) return;
+    if (!spellInfo) 
+    { 
+        sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
+        return false;
+    }
+
     newrank = FindSpellRank(spell_id);
 
     for(int i=0;i<3;i++)
@@ -1653,10 +1658,14 @@ void Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 
     newspell->slotId = tmpslot;
     m_spells.push_back(newspell);
+    return true;
 }
 
 void Player::learnSpell(uint16 spell_id)
 {
+    if(!addSpell(spell_id,1))
+        return;
+
     WorldPacket data;
     data.Initialize(SMSG_LEARNED_SPELL);
     data <<uint32(spell_id);
@@ -1733,9 +1742,6 @@ void Player::learnSpell(uint16 spell_id)
             break;
         default:break;
     }
-
-    addSpell(spell_id,1);
-
 }
 
 bool Player::removeSpell(uint16 spell_id)
@@ -1938,7 +1944,11 @@ bool Player::HasSpell(uint32 spell) const
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
 
-    if (!spellInfo) return true;
+    if (!spellInfo) 
+    { 
+        sLog.outError("Player::HasSpell: Non-existed in SpellStore spell #%u request.",spell);
+        return false;
+    }
 
     // Look in the effects of spell , if is a Learn Spell Effect, see if is equal to triggerspell
     // If inst, look if have this spell.
@@ -2583,35 +2593,35 @@ void Player::UpdateMaxSkills()
         if(max!=1 && max != 300)
         {
             SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
-            if (Player::HasSpell(20597))
+            if (Player::HasSpell(SPELL_PASSIVE_SWORD_SPECIALIZATION))
             {
                 if (GetUInt32Value(PLAYER_SKILL(i)) == 43 || GetUInt32Value(PLAYER_SKILL(i)) == 55)
                 {
                     SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
                 }
             }
-            if (Player::HasSpell(20864))
+            if (Player::HasSpell(SPELL_PASSIVE_MACE_SPECIALIZATION))
             {
                 if (GetUInt32Value(PLAYER_SKILL(i))==54 || GetUInt32Value(PLAYER_SKILL(i))==160)
                 {
                     SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
                 }
             }
-            if (Player::HasSpell(20574))
+            if (Player::HasSpell(SPELL_PASSIVE_AXE_SPECIALIZATION))
             {
                 if (GetUInt32Value(PLAYER_SKILL(i))==44 || GetUInt32Value(PLAYER_SKILL(i))==172)
                 {
                     SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
                 }
             }
-            if (Player::HasSpell(20558))
+            if (Player::HasSpell(SPELL_PASSIVE_THROWING_SPECIALIZATION))
             {
                 if (GetUInt32Value(PLAYER_SKILL(i))==176)
                 {
                     SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill+5*0x10000);
                 }
             }
-            if (Player::HasSpell(26290))
+            if (Player::HasSpell(SPELL_PASSIVE_BOW_SPECIALIZATION))
             {
                 if (GetUInt32Value(PLAYER_SKILL(i))==45 || GetUInt32Value(PLAYER_SKILL(i))==226)
                 {
@@ -3055,7 +3065,7 @@ void Player::CalculateReputation(Quest *pQuest, uint64 guid)
         else if(dif > 5) dif = 5;
 
         int RepPoints;
-        if(HasSpell(20599))                                 //spell : diplomacy
+        if(HasSpell(SPELL_PASSIVE_DIPLOMACY))               //spell : diplomacy
             RepPoints = (uint32)(((5-dif)*0.20)*110);       //human gain more 10% rep.
         else
             RepPoints = (uint32)(((5-dif)*0.20)*100);
@@ -5288,9 +5298,14 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
             slots[0] =  EQUIPMENT_SLOT_BACK;
             break;
         case INVTYPE_WEAPON:
+        {
             slots[0] = EQUIPMENT_SLOT_MAINHAND;
-            slots[1] = EQUIPMENT_SLOT_OFFHAND;
-            break;
+
+            // suggest offhand slot only if know dual wielding 
+            // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual weilding" ...
+            if(HasSpell( SPELL_PASSIVE_DUAL_WIELD ) )
+                slots[1] = EQUIPMENT_SLOT_OFFHAND;
+        };break;
         case INVTYPE_SHIELD:
             slots[0] = EQUIPMENT_SLOT_OFFHAND;
             break;
@@ -5341,13 +5356,23 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
     }
     else
     {
+        // search empty slot at first
         for (int i = 0; i < 4; i++)
         {
-            if ( slots[i] != NULL_SLOT && ( swap || !GetItemByPos( INVENTORY_SLOT_BAG_0, slots[i] ) ) )
+            if ( slots[i] != NULL_SLOT && !GetItemByPos( INVENTORY_SLOT_BAG_0, slots[i] ) )
+                return slots[i];
+        }
+
+        // if not found empty and can swap return first appropriate
+        for (int i = 0; i < 4; i++)
+        {
+            if ( slots[i] != NULL_SLOT && swap )
                 return slots[i];
         }
     }
-    return slots[0];
+
+    // no free position
+    return NULL_SLOT;
 }
 
 Item* Player::CreateItem( uint32 item, uint32 count ) const
@@ -5927,22 +5952,22 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             uint8 eslot = FindEquipSlot( type, slot, swap );
             if( eslot == NULL_SLOT )
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+
             uint8 msg = CanUseItem( pItem , check_alive );
             if( msg != EQUIP_ERR_OK )
                 return msg;
             if( !swap && GetItemByPos( INVENTORY_SLOT_BAG_0, eslot ) )
                 return EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE;
-            if( type == INVTYPE_WEAPON || type == INVTYPE_WEAPONMAINHAND || type == INVTYPE_WEAPONOFFHAND )
+
+            if( type == INVTYPE_WEAPON || type == INVTYPE_WEAPONOFFHAND )
             {
-                uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
-                Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, twinslot );
-                if( twinItem && twinItem->GetProto()->InventoryType != INVTYPE_SHIELD && !HasSpell( 274 ) )
+                if(eslot == EQUIPMENT_SLOT_OFFHAND && !HasSpell( SPELL_PASSIVE_DUAL_WIELD ))
                     return EQUIP_ERR_CANT_DUAL_WIELD;
             }
             if( type == INVTYPE_SHIELD )
             {
-                uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
-                Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, twinslot );
+                assert(eslot==EQUIPMENT_SLOT_OFFHAND);
+                Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
                 if( twinItem )
                 {
                     uint32 twintype = twinItem->GetProto()->InventoryType;

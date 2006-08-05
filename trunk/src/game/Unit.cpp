@@ -1186,7 +1186,7 @@ float Unit::GetUnitParryChance() const
     {
         Player const* player = (Player const*)this;
                                                             // Parry passive skill
-        if(player->HasSpell(3127) || player->HasSpell(18848))
+        if(player->HasSpell(SPELL_PASSIVE_PARRY_1) || player->HasSpell(SPELL_PASSIVE_PARRY_2))
         {
             Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             if(!tmpitem)

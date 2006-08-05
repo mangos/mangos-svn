@@ -576,7 +576,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasSpell(uint32 spell) const;
         bool CanLearnProSpell(uint32 spell);
         void SendInitialSpells();
-        void addSpell(uint16 spell_id,uint8 active,uint16 slot_id=0xffff);
+        bool addSpell(uint16 spell_id,uint8 active,uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         bool removeSpell(uint16 spell_id);
         void DealWithSpellDamage(DynamicObject &);
