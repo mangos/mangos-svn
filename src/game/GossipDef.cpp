@@ -240,11 +240,11 @@ QuestMenu::~QuestMenu()
 
 void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon, bool Available)
 {
-    Quest *pQuest = objmgr.GetQuest(QuestId);
-    if (!pQuest) return;
+    QuestInfo const *qinfo = objmgr.GetQuestInfo(QuestId);
+    if (!qinfo) return;
 
-    char* Text = new char[strlen( pQuest->GetQuestInfo()->Title ) + 1];
-    strcpy( Text, pQuest->GetQuestInfo()->Title );
+    char* Text = new char[strlen( qinfo->Title ) + 1];
+    strcpy( Text, qinfo->Title );
 
     m_qItemsCount++;
     ASSERT( m_qItemsCount < GOSSIP_MAX_MENU_ITEMS  );
@@ -316,17 +316,19 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     WorldPacket data;
     data.Initialize(SMSG_QUESTGIVER_QUEST_DETAILS);
 
+    QuestInfo const* qInfo = pQuest->GetQuestInfo();
+
     data << npcGUID;
-    data << pQuest->GetQuestInfo()->QuestId << pQuest->GetQuestInfo()->Title << pQuest->GetQuestInfo()->Details;
-    data << pQuest->GetQuestInfo()->Objectives << uint32( ActivateAccept );
-    ItemPrototype* IProto;
+    data << qInfo->QuestId << qInfo->Title << qInfo->Details;
+    data << qInfo->Objectives << uint32( ActivateAccept );
+    ItemPrototype const* IProto;
 
     data << pQuest->m_rewchoiceitemscount;
     for (uint32 i=0; i <QUEST_REWARD_CHOICES_COUNT; i++)
     {
-        data << uint32(pQuest->GetQuestInfo()->RewChoiceItemId[i]);
-        data << uint32(pQuest->GetQuestInfo()->RewChoiceItemCount[i]);
-        IProto = objmgr.GetItemPrototype(pQuest->GetQuestInfo()->RewChoiceItemId[i]);
+        data << uint32(qInfo->RewChoiceItemId[i]);
+        data << uint32(qInfo->RewChoiceItemCount[i]);
+        IProto = objmgr.GetItemPrototype(qInfo->RewChoiceItemId[i]);
         if ( IProto )
             data << uint32(IProto->DisplayInfoID);
         else
@@ -336,33 +338,33 @@ void PlayerMenu::SendQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateA
     data << pQuest->m_rewitemscount;
     for (uint32 i=0; i <QUEST_REWARDS_COUNT; i++)
     {
-        data << pQuest->GetQuestInfo()->RewItemId[i];
-        data << pQuest->GetQuestInfo()->RewItemCount[i];
-        IProto = objmgr.GetItemPrototype(pQuest->GetQuestInfo()->RewItemId[i]);
+        data << qInfo->RewItemId[i];
+        data << qInfo->RewItemCount[i];
+        IProto = objmgr.GetItemPrototype(qInfo->RewItemId[i]);
         if ( IProto )
             data << IProto->DisplayInfoID;
         else
             data << uint32( 0x00 );
     }
 
-    data << pQuest->GetQuestInfo()->RewMoney;
+    data << qInfo->RewMoney;
 
     data << pQuest->m_reqitemscount;
     for (uint32 i=0; i <  QUEST_OBJECTIVES_COUNT; i++)
     {
-        data << pQuest->GetQuestInfo()->ReqItemId[i];
-        data << pQuest->GetQuestInfo()->ReqItemCount[i];
+        data << qInfo->ReqItemId[i];
+        data << qInfo->ReqItemCount[i];
     }
 
     data << pQuest->m_reqmobs_or_GO_count;
     for (uint32 i=0; i <QUEST_OBJECTIVES_COUNT; i++)
     {
-        data << pQuest->GetQuestInfo()->ReqKillMobOrGOId[i];
-        data << pQuest->GetQuestInfo()->ReqKillMobOrGOCount[i];
+        data << qInfo->ReqKillMobOrGOId[i];
+        data << qInfo->ReqKillMobOrGOCount[i];
     }
 
     pSession->SendPacket( &data );
-    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestInfo()->QuestId);
+    sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestId());
 }
 
 void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
@@ -431,15 +433,19 @@ void PlayerMenu::SendUpdateQuestDetails ( Quest *pQuest )
     sLog.outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u",pQuest->GetQuestInfo()->QuestId );
 }
 
-void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt )
+void PlayerMenu::SendQuestReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt )
 {
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest_id);
+    if(!qInfo)
+        return;
+
     WorldPacket data;
     data.Initialize( SMSG_QUESTGIVER_OFFER_REWARD );
 
     data << npcGUID;
-    data << pQuest->GetQuestInfo()->QuestId;
-    data << pQuest->GetQuestInfo()->Title;
-    data << pQuest->GetQuestInfo()->Details;
+    data << quest_id;
+    data << qInfo->Title;
+    data << qInfo->Details;
 
     data << uint32( EnbleNext );
 
@@ -454,15 +460,17 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
         }
     } else data << uint32( 0x00 );
 
-    ItemPrototype *pItem;
+    Quest* pQuest =  pSession->GetPlayer()->GetActiveQuest(quest_id);
+
+    ItemPrototype const *pItem;
 
     data << uint32(pQuest->m_rewchoiceitemscount);
     for (uint32 i=0; i < pQuest->m_rewchoiceitemscount; i++)
     {
-        pItem = objmgr.GetItemPrototype( pQuest->GetQuestInfo()->RewChoiceItemId[i] );
+        pItem = objmgr.GetItemPrototype( qInfo->RewChoiceItemId[i] );
 
-        data << uint32(pQuest->GetQuestInfo()->RewChoiceItemId[i]);
-        data << uint32(pQuest->GetQuestInfo()->RewChoiceItemCount[i]);
+        data << uint32(qInfo->RewChoiceItemId[i]);
+        data << uint32(qInfo->RewChoiceItemCount[i]);
 
         if ( pItem )
             data << uint32(pItem->DisplayInfoID);
@@ -473,8 +481,8 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
     data << uint32(pQuest->m_rewitemscount);
     for (uint16 i=0; i < pQuest->m_rewitemscount; i++)
     {
-        pItem = objmgr.GetItemPrototype(pQuest->GetQuestInfo()->RewItemId[i]);
-        data << uint32(pQuest->GetQuestInfo()->RewItemId[i]) << uint32(pQuest->GetQuestInfo()->RewItemCount[i]);
+        pItem = objmgr.GetItemPrototype(qInfo->RewItemId[i]);
+        data << uint32(qInfo->RewItemId[i]) << uint32(qInfo->RewItemCount[i]);
 
         if ( pItem )
             data << uint32(pItem->DisplayInfoID);
@@ -482,12 +490,12 @@ void PlayerMenu::SendQuestReward( Quest *pQuest, uint64 npcGUID, bool EnbleNext,
             data << uint32(0);
     }
 
-    data << uint32(pQuest->GetQuestInfo()->RewMoney);
+    data << uint32(qInfo->RewMoney);
     data << uint32(0x00);
-    data << uint32(pQuest->GetQuestInfo()->RewSpell);
+    data << uint32(qInfo->RewSpell);
 
     pSession->SendPacket( &data );
-    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,pQuest->GetQuestInfo()->QuestId );
+    sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%lu, questid=%u",(unsigned long)npcGUID,quest_id );
 }
 
 void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel )
@@ -527,7 +535,7 @@ void PlayerMenu::SendRequestedItems( Quest *pQuest, uint64 npcGUID, bool Complet
 
     data << uint32( pQuest->m_reqitemscount );
 
-    ItemPrototype *pItem;
+    ItemPrototype const *pItem;
     for (int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
     {
         if ( !pQuest->GetQuestInfo()->ReqItemId[i] ) continue;

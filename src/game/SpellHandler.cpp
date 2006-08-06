@@ -44,7 +44,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    ItemPrototype *proto = pItem->GetProto();
+    ItemPrototype const *proto = pItem->GetProto();
     if(!proto)
     {
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );

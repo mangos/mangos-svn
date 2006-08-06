@@ -35,13 +35,25 @@ class SQLStorage
             iNumFields =strlen(fmt);
         }
 
-        char** pIndex;
+        template<class T>
+        T const* LookupEntry(uint32 id) const
+        {
+            if(id>MaxEntry)
+            {
+                printIndexError(id);
+                return NULL;
+            }
+            return reinterpret_cast<T const*>(pIndex[id]);
+        }
+
         uint32 RecordCount;
         uint32 MaxEntry;
         uint32 iNumFields;
         void Load();
         void Free();
+        void printIndexError(uint32 id) const;
     private:
+        char** pIndex;
 
         char *data;
         char *pOldData;

@@ -79,8 +79,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Quest *pQuest = objmgr.GetQuest(quest);
-    if ( pQuest )
+    QuestInfo const* qInfo = objmgr.GetQuestInfo(quest);
+    if ( qInfo )
     {
         if( _player->GetDivider() != 0 )
         {
@@ -92,12 +92,13 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
             }
         }
 
+        Quest *pQuest = objmgr.NewQuest(quest);
         if( _player->CanAddQuest( pQuest, true ) )
         {
             _player->AddQuest( pQuest );
 
-            if ( _player->CanCompleteQuest( pQuest ) )
-                _player->CompleteQuest( pQuest );
+            if ( _player->CanCompleteQuest( quest ) )
+                _player->CompleteQuest( quest );
 
             Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
             if( pCreature )
@@ -117,6 +118,8 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                 }
             }
         }
+        else
+            delete pQuest;
     }
     _player->PlayerTalkClass->CloseGossip();
 }
@@ -129,16 +132,16 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Quest *pQuest = objmgr.GetQuest(quest);
+    Quest *pQuest = objmgr.NewQuest(quest);
     if ( pQuest )
     {
-        uint32 status = _player->GetQuestStatus( pQuest );
+        uint32 status = _player->GetQuestStatus( quest );
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
         if( pCreature )
         {
             if( !Script->QuestSelect(_player, pCreature, pQuest ) )
             {
-                if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( pQuest ) )
+                if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
                     _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), true, false );
                 else if( status == QUEST_STATUS_INCOMPLETE )
                     _player->PlayerTalkClass->SendRequestedItems( pQuest, pCreature->GetGUID(), false, false );
@@ -166,8 +169,8 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
                 {
                     if( !Script->GOQuestAccept(_player, pGO, pQuest ) )
                     {
-                        if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( pQuest ) )
-                            _player->PlayerTalkClass->SendQuestReward( pQuest, pCreature->GetGUID(), true, NULL, 0 );
+                        if( status == QUEST_STATUS_COMPLETE && !_player->GetQuestRewardStatus( quest ) )
+                            _player->PlayerTalkClass->SendQuestReward( quest, pCreature->GetGUID(), true, NULL, 0 );
                         else if( status == QUEST_STATUS_INCOMPLETE )
                             _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
                         else
@@ -177,6 +180,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
             }
         }
     }
+    delete pQuest;
     _player->PlayerTalkClass->CloseGossip();
 }
 
@@ -186,10 +190,13 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     recv_data >> quest;
     sLog.outDebug( "WORLD: Received CMSG_QUEST_QUERY quest = %u",quest );
 
-    Quest *pQuest = objmgr.GetQuest(quest);
+    Quest *pQuest = objmgr.NewQuest(quest);
 
     if ( pQuest )
+    {
         _player->PlayerTalkClass->SendUpdateQuestDetails( pQuest );
+        delete pQuest;
+    }
 }
 
 void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
@@ -200,7 +207,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     sLog.outString( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
-    Quest *pQuest = objmgr.GetQuest(quest);
+    Quest *pQuest = objmgr.NewQuest(quest);
     if( pQuest )
     {
         if( _player->CanRewardQuest( pQuest, reward, true ) )
@@ -227,6 +234,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
             else
                 sLog.outError("Unknown questgiver GUID #%lu for reward choice (not creature and not gameobject), ignore.",guid);
         }
+        delete pQuest;
     }
 }
 
@@ -238,22 +246,23 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
     sLog.outString( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Quest *pQuest       = objmgr.GetQuest( quest );
+    Quest *pQuest       = objmgr.NewQuest( quest );
     if( pQuest )
     {
         if(Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid))
         {
-            if ( _player->CanCompleteQuest( pQuest ) )
-                _player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
+            if ( _player->CanCompleteQuest( quest ) )
+                _player->PlayerTalkClass->SendQuestReward( quest, guid, true, NULL, 0);
         }
         else if(GameObject *pGO = ObjectAccessor::Instance().GetGameObject(*_player, guid))
         {
-            if ( _player->CanCompleteQuest( pQuest ) )
-                _player->PlayerTalkClass->SendQuestReward( pQuest, guid, true, NULL, 0);
+            if ( _player->CanCompleteQuest( quest ) )
+                _player->PlayerTalkClass->SendQuestReward( quest, guid, true, NULL, 0);
         }
         else
             sLog.outError("Unknown questgiver GUID #%lu for reward request (not creature and not gameobject), ignore.",guid);
 
+        delete pQuest;
     }
 }
 
@@ -302,11 +311,10 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
         _player->SetUInt32Value(3*slot + 200 + 1, 0);
         _player->SetUInt32Value(3*slot + 200 + 2, 0);
 
-        Quest *pQuest = objmgr.GetQuest( quest );
-        if( pQuest )
+        if( quest )
         {
-            _player->SetQuestStatus( pQuest, QUEST_STATUS_NONE);
-            _player->TakeQuestSourceItem( pQuest );
+            _player->SetQuestStatus( quest, QUEST_STATUS_NONE);
+            _player->TakeQuestSourceItem( quest );
         }
     }
 }
@@ -327,13 +335,14 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 
     sLog.outString( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Quest *pQuest = objmgr.GetQuest( quest );
+    Quest *pQuest = objmgr.NewQuest( quest );
     if( pQuest )
     {
-        if( _player->GetQuestStatus( pQuest ) != QUEST_STATUS_COMPLETE )
+        if( _player->GetQuestStatus( quest ) != QUEST_STATUS_COMPLETE )
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, false, false);
         else
             _player->PlayerTalkClass->SendRequestedItems(pQuest, guid, true, false);
+        delete pQuest;
     }
 }
 
@@ -352,7 +361,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 
     sLog.outString( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
-    Quest *pQuest = objmgr.GetQuest( quest );
+    Quest *pQuest = objmgr.NewQuest( quest );
     if( pQuest )
     {
         if( _player->IsInGroup() )
@@ -383,13 +392,13 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                                 continue;
                             }
 
-                            if( !pPlayer->SatisfyQuestStatus( pQuest, false ) )
+                            if( !pPlayer->SatisfyQuestStatus( quest, false ) )
                             {
                                 _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_HAVE_QUEST );
                                 continue;
                             }
 
-                            if( pPlayer->GetQuestStatus( pQuest ) == QUEST_STATUS_COMPLETE )
+                            if( pPlayer->GetQuestStatus( quest ) == QUEST_STATUS_COMPLETE )
                             {
                                 _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_FINISH_QUEST );
                                 continue;
@@ -420,6 +429,8 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                 }
             }
         }
+
+        delete pQuest;
     }
 }
 

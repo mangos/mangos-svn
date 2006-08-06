@@ -79,7 +79,7 @@ bool Pet::LoadPetFromDB( Unit* owner )
     name.append("\\\'s Pet");
     SetName( name );
 
-    CreatureInfo *cinfo = GetCreatureInfo();
+    CreatureInfo const *cinfo = GetCreatureInfo();
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
         AIM_Initialize();

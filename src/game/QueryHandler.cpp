@@ -82,7 +82,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     WorldPacket data;
     uint32 entry;
     uint64 guid;
-    CreatureInfo *ci;
 
     recv_data >> entry;
     recv_data >> guid;
@@ -109,7 +108,7 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         return;
     }
 
-    ci = unit->GetCreatureInfo();
+    CreatureInfo const *ci = unit->GetCreatureInfo();
 
     if (!ci)
     {
@@ -157,7 +156,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 {
     WorldPacket data;
-    CreatureInfo *ci;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
@@ -167,7 +165,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
         return;
     }
 
-    ci = unit->GetCreatureInfo();
+    CreatureInfo const *ci = unit->GetCreatureInfo();
 
     if (!ci)
     {
@@ -246,7 +244,6 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue )
 {
     WorldPacket data;
-    CreatureInfo *ci;
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
 
@@ -256,7 +253,7 @@ void WorldSession::SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint3
         return;
     }
 
-    ci = unit->GetCreatureInfo();
+    CreatureInfo const *ci = unit->GetCreatureInfo();
 
     if (!ci)
     {

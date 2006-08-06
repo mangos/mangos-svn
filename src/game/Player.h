@@ -463,47 +463,47 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendPreparedQuest( uint64 guid );
         Quest *GetActiveQuest( uint32 quest_id ) const;
         Quest *GetNextQuest( uint64 guid, Quest *pQuest );
-        bool CanSeeStartQuest( Quest *pQuest );
+        bool CanSeeStartQuest( uint32 quest_id );
         bool CanTakeQuest( Quest *pQuest, bool msg );
         bool CanAddQuest( Quest *pQuest, bool msg );
-        bool CanCompleteQuest( Quest *pQuest );
+        bool CanCompleteQuest( uint32 quest_id );
         bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
         void AddQuest( Quest *pQuest );
-        void CompleteQuest( Quest *pQuest );
-        void IncompleteQuest( Quest *pQuest );
+        void CompleteQuest( uint32 quest_id );
+        void IncompleteQuest( uint32 quest_id );
         void RewardQuest( Quest *pQuest, uint32 reward );
-        void FailQuest( Quest *pQuest );
-        void FailTimedQuest( Quest *pQuest );
-        bool SatisfyQuestClass( Quest *pQuest, bool msg );
-        bool SatisfyQuestLevel( Quest *pQuest, bool msg );
+        void FailQuest( uint32 quest_id );
+        void FailTimedQuest( uint32 quest_id );
+        bool SatisfyQuestClass( uint32 quest_id, bool msg );
+        bool SatisfyQuestLevel( uint32 quest_id, bool msg );
         bool SatisfyQuestLog( bool msg );
-        bool SatisfyQuestPreviousQuest( Quest *pQuest, bool msg );
-        bool SatisfyQuestRace( Quest *pQuest, bool msg );
-        bool SatisfyQuestReputation( Quest *pQuest, bool msg );
-        bool SatisfyQuestSkill( Quest *pQuest, bool msg );
-        bool SatisfyQuestStatus( Quest *pQuest, bool msg );
-        bool SatisfyQuestTimed( Quest *pQuest, bool msg );
-        bool GiveQuestSourceItem( Quest *pQuest );
-        void TakeQuestSourceItem( Quest *pQuest );
-        bool GetQuestRewardStatus( Quest *pQuest );
-        uint32 GetQuestStatus( Quest *pQuest );
-        void SetQuestStatus( Quest *pQuest, uint32 status );
-        void AdjustQuestReqItemCount( Quest *pQuest );
-        uint16 GetQuestSlot( Quest *pQuest );
-        void AreaExplored( Quest *pQuest );
+        bool SatisfyQuestPreviousQuest( uint32 quest_id, bool msg );
+        bool SatisfyQuestRace( uint32 quest_id, bool msg );
+        bool SatisfyQuestReputation( uint32 quest_id, bool msg );
+        bool SatisfyQuestSkill( uint32 quest_id, bool msg );
+        bool SatisfyQuestStatus( uint32 quest_id, bool msg );
+        bool SatisfyQuestTimed( uint32 quest_id, bool msg );
+        bool GiveQuestSourceItem( uint32 quest_id );
+        void TakeQuestSourceItem( uint32 quest_id );
+        bool GetQuestRewardStatus( uint32 quest_id );
+        uint32 GetQuestStatus( uint32 quest_id );
+        void SetQuestStatus( uint32 quest_id, uint32 status );
+        void AdjustQuestReqItemCount( uint32 questId );
+        uint16 GetQuestSlot( uint32 quest_id );
+        void AreaExplored( uint32 questId );
         void ItemAdded( uint32 entry, uint32 count );
         void ItemRemoved( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
         bool HaveQuestForItem( uint32 itemid );
 
-        void SendQuestComplete( Quest *pQuest );
+        void SendQuestComplete( uint32 quest_id );
         void SendQuestReward( Quest *pQuest );
-        void SendQuestFailed( Quest *pQuest );
-        void SendQuestTimerFailed( Quest *pQuest );
+        void SendQuestFailed( uint32 quest_id );
+        void SendQuestTimerFailed( uint32 quest_id );
         void SendCanTakeQuestResponse( uint32 msg );
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
-        void SendQuestUpdateAddItem( Quest *pQuest, uint32 item_idx, uint32 count );
-        void SendQuestUpdateAddKill( Quest *pQuest, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
+        void SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 count );
+        void SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };
@@ -513,13 +513,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetInGameTime( uint32 time ) { m_ingametime = time; };
 
         uint32 GetTimedQuest() { return m_timedquest; };
-        void SetTimedQuest( Quest *pQuest )
-        {
-            if( pQuest )
-                m_timedquest = pQuest->GetQuestInfo()->QuestId;
-            else
-                m_timedquest = 0;
-        }
+        void SetTimedQuest( uint32 quest_id ) { m_timedquest = quest_id; }
 
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
@@ -1059,7 +1053,7 @@ inline uint32 urand(uint32 min, uint32 max)
 }
 
 void AddItemsSetItem(Player*player,Item *item);
-void RemoveItemsSetItem(Player*player,ItemPrototype *proto);
+void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 
 // "the bodies of template functions must be made available in a header file"
 template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)

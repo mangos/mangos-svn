@@ -95,7 +95,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         return;
     }
 
-    CreatureInfo *ci = unit->GetCreatureInfo();
+    CreatureInfo const *ci = unit->GetCreatureInfo();
 
     if (!ci)
     {

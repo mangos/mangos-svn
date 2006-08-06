@@ -273,11 +273,11 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             continue;
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->GetQuestStatus( pQuest );
-        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( pQuest ) )
+        status = pPlayer->GetQuestStatus( quest_id );
+        if ( status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus( quest_id ) )
         {
             SetFlag(UNIT_DYNAMIC_FLAGS ,2);
-            if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+            if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
                 return DIALOG_STATUS_REWARD_REP;
             else
                 return DIALOG_STATUS_REWARD;
@@ -298,14 +298,14 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             continue;
 
         quest_id = pQuest->GetQuestInfo()->QuestId;
-        status = pPlayer->GetQuestStatus( pQuest );
+        status = pPlayer->GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_NONE )
         {
-            if ( pPlayer->CanSeeStartQuest( pQuest ) )
+            if ( pPlayer->CanSeeStartQuest( quest_id ) )
             {
-                if ( pPlayer->SatisfyQuestLevel(pQuest, false) )
+                if ( pPlayer->SatisfyQuestLevel(quest_id, false) )
                 {
-                    if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
+                    if ( pQuest->GetQuestInfo()->HasSpecialFlag( QUEST_SPECIAL_FLAGS_REPEATABLE ) )
                         return DIALOG_STATUS_REWARD_REP;
                     else
                         return DIALOG_STATUS_AVAILABLE;
@@ -656,7 +656,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
 void Creature::getSkinLoot()
 {
-    CreatureInfo *cinfo = GetCreatureInfo();
+    CreatureInfo const *cinfo = GetCreatureInfo();
 
     if(cinfo->type == CREATURE_TYPE_DRAGON)
         FillSkinLoot(&loot,8165);
@@ -718,7 +718,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 {
     Object::_Create(guidlow, HIGHGUID_UNIT);
     SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
-    CreatureInfo *cinfo = objmgr.GetCreatureTemplate(Entry);
+    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
     {
         sLog.outString("Error: creature entry %u does not exist.",Entry);
@@ -876,7 +876,7 @@ void Creature::_LoadQuests()
         do
         {
             fields = result->Fetch();
-            pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+            pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
             if (!pQuest) continue;
 
             addQuest(pQuest);
@@ -893,7 +893,7 @@ void Creature::_LoadQuests()
     do
     {
         fields = result1->Fetch();
-        pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+        pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
         if (!pQuest) continue;
 
         addInvolvedQuest(pQuest);
@@ -937,7 +937,7 @@ float Creature::GetAttackDistance(Unit *pl)
     return RetDistance;
 }
 
-CreatureInfo *Creature::GetCreatureInfo() const
+CreatureInfo const *Creature::GetCreatureInfo() const
 {
     return objmgr.GetCreatureTemplate(GetEntry());
 }

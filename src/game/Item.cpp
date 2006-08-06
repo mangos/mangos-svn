@@ -42,7 +42,7 @@ SpellEntry* Cast(Player*player,Item* item, uint32 spellId)
 
 void AddItemsSetItem(Player*player,Item *item)
 {
-    ItemPrototype *proto = item->GetProto();
+    ItemPrototype const *proto = item->GetProto();
     uint32 setid = proto->ItemSet;
 
     ItemSetEntry *set=sItemSetStore.LookupEntry(setid);
@@ -103,7 +103,7 @@ void AddItemsSetItem(Player*player,Item *item)
 
 }
 
-void RemoveItemsSetItem(Player*player,ItemPrototype *proto)
+void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
 {
     uint32 setid = proto->ItemSet;
 
@@ -418,21 +418,21 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt64Value(ITEM_FIELD_OWNER, owner->GetGUID());
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner->GetGUID());
 
-    ItemPrototype *m_itemProto = objmgr.GetItemPrototype(itemid);
-    if(!m_itemProto)
+    ItemPrototype const *itemProto = objmgr.GetItemPrototype(itemid);
+    if(!itemProto)
         return false;
 
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
-    SetUInt32Value(ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
-    SetUInt32Value(ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
+    SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
+    SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
 
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES, m_itemProto->Spells[0].SpellCharges );
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+1,m_itemProto->Spells[1].SpellCharges);
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+2, m_itemProto->Spells[2].SpellCharges);
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+3,m_itemProto->Spells[3].SpellCharges);
-    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4, m_itemProto->Spells[4].SpellCharges);
-    SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
-    //SetUInt32Value(ITEM_FIELD_DURATION, m_itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES, itemProto->Spells[0].SpellCharges );
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+1,itemProto->Spells[1].SpellCharges);
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+2, itemProto->Spells[2].SpellCharges);
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+3,itemProto->Spells[3].SpellCharges);
+    SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+4, itemProto->Spells[4].SpellCharges);
+    SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
+    //SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
     return true;
 }
 
@@ -492,7 +492,7 @@ void Item::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
-ItemPrototype *Item::GetProto() const
+ItemPrototype const *Item::GetProto() const
 {
     return objmgr.GetItemPrototype(GetUInt32Value(OBJECT_FIELD_ENTRY));
 }

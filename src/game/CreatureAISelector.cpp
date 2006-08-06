@@ -36,7 +36,7 @@ namespace FactorySelector
 
         CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );
-        CreatureInfo* cinfo=creature->GetCreatureInfo();
+        CreatureInfo const *cinfo=creature->GetCreatureInfo();
         std::string ainame=cinfo->AIName;
         if( ainame=="")
         {

@@ -42,6 +42,8 @@
 #include "Database/SQLStorage.h"
 
 extern SQLStorage sQuestsStorage;
+extern SQLStorage sGOStorage;
+extern SQLStorage sItemStorage;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
 extern QuestRelations sPrevQuests;
@@ -105,7 +107,8 @@ class ObjectMgr
         Player* GetPlayer(const char* name){ return ObjectAccessor::Instance().FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid){ return ObjectAccessor::Instance().FindPlayer(guid); }
 
-        GameObjectInfo *GetGameObjectInfo(uint32 id);
+        static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
+
         void LoadGameobjectInfo();
         void AddGameobjectInfo(GameObjectInfo *goinfo);
 
@@ -117,16 +120,17 @@ class ObjectMgr
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
 
-        QuestInfo *GetQuestInfo(uint32 id) { return (sQuestsStorage.MaxEntry<=id)?NULL:(QuestInfo*)sQuestsStorage.pIndex[id]; }
-        Quest* GetQuest(uint32 id) const
+        static QuestInfo const* GetQuestInfo(uint32 id) { return sQuestsStorage.LookupEntry<QuestInfo>(id); }
+        Quest* NewQuest(uint32 id) const
         {
-            if(sQuestsStorage.MaxEntry<=id)
-                return NULL;
             Quest *rquest=new Quest;
-            QuestInfo *qi=(QuestInfo*)sQuestsStorage.pIndex[id];
-            if(!qi)
+
+            if(!rquest->LoadQuest(id))
+            {
+                delete rquest;
                 return NULL;
-            rquest->LoadQuest(qi);
+            }
+
             return rquest;
         }
 
@@ -155,9 +159,9 @@ class ObjectMgr
             return true;
         }
 
-        CreatureInfo *GetCreatureTemplate( uint32 id );
+        CreatureInfo const *GetCreatureTemplate( uint32 id );
 
-        ItemPrototype* GetItemPrototype(uint32 id) ;
+        static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 
         Item* GetMItem(uint32 id)
         {

@@ -96,7 +96,7 @@ class MANGOS_DLL_SPEC Object
         const uint32& GetGUIDLow() const { return GetUInt32Value(0); }
         const uint32& GetGUIDHigh() const { return GetUInt32Value(1); }
 
-        uint32 GetEntry() const {return m_uint32Values[OBJECT_FIELD_ENTRY];}
+        uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
 
         const uint8& GetTypeId() const { return m_objectTypeId; }
         bool isType(uint8 mask) const
@@ -153,19 +153,19 @@ class MANGOS_DLL_SPEC Object
 
         const uint32& GetUInt32Value( uint16 index ) const
         {
-            ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
             return m_uint32Values[ index ];
         }
 
         const uint64& GetUInt64Value( uint16 index ) const
         {
-            ASSERT( index + 1 < m_valuesCount || PrintIndexError( index ) );
+            ASSERT( index + 1 < m_valuesCount || PrintIndexError( index , false) );
             return *((uint64*)&(m_uint32Values[ index ]));
         }
 
         const float& GetFloatValue( uint16 index ) const
         {
-            ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false ) );
             return m_floatValues[ index ];
         }
 
@@ -188,7 +188,7 @@ class MANGOS_DLL_SPEC Object
 
         bool HasFlag( uint16 index, uint32 flag ) const
         {
-            ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false ) );
             return (m_uint32Values[ index ] & flag) != 0;
         }
 
@@ -263,7 +263,6 @@ class MANGOS_DLL_SPEC Object
         void _InitValues()
         {
             m_uint32Values = new uint32[ m_valuesCount ];
-            WPAssert(m_uint32Values);
             memset(m_uint32Values, 0, m_valuesCount*sizeof(uint32));
 
             m_updateMask.SetCount(m_valuesCount);
@@ -314,6 +313,6 @@ class MANGOS_DLL_SPEC Object
 
     private:
         // for output helpfull error messages from asserts
-        bool PrintIndexError(uint32 index) const;
+        bool PrintIndexError(uint32 index, bool set) const;
 };
 #endif
