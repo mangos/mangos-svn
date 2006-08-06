@@ -84,7 +84,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     {
         uint16 dest;
 
-        ItemPrototype *pProto = pItem->GetProto();
+        ItemPrototype const *pProto = pItem->GetProto();
         bool not_swapable = pProto && pProto->InventoryType == INVTYPE_BAG;
 
         uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, !not_swapable );
@@ -143,7 +143,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
-    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
         data << pProto->ItemId;
@@ -291,7 +291,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         Item *pItem = _player->GetItemByPos( pos );
         if( pItem )
         {
-            ItemPrototype *pProto = pItem->GetProto();
+            ItemPrototype const *pProto = pItem->GetProto();
             if( pProto )
             {
                 if( pProto->SellPrice > 0 )
@@ -360,7 +360,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
     recv_data.hexlike();
 
-    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
@@ -446,7 +446,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
     recv_data >> vendorguid >> item >> count >> unk1;
     recv_data.hexlike();
 
-    ItemPrototype *pProto = objmgr.GetItemPrototype( item );
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
         Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, vendorguid);
@@ -528,7 +528,7 @@ void WorldSession::SendListInventory( uint64 guid )
         data << guid;
         data << numitems;
 
-        ItemPrototype *pProto;
+        ItemPrototype const *pProto;
         for(int i = 0; i < numitems; i++ )
         {
             if( pCreature->GetItemId(i) )

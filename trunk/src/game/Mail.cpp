@@ -352,7 +352,7 @@ bool WorldSession::SendItemInfo( uint32 itemid, WorldPacket data )
         return false;
     }
 
-    ItemPrototype *itemProto = objmgr.GetItemPrototype(realID);
+    ItemPrototype const *itemProto = objmgr.GetItemPrototype(realID);
 
     if(!itemProto)
     {

@@ -409,11 +409,11 @@ class MANGOS_DLL_SPEC Unit : public Object
 
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); };
         void SetLevel(uint32 lvl) { SetUInt32Value(UNIT_FIELD_LEVEL,lvl); }
-        uint8 getRace() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_0 ] & 0xFF; };
+        uint8 getRace() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_0) & 0xFF); };
         uint32 getRaceMask() const { return 1 << (getRace()-1); };
-        uint8 getClass() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 8) & 0xFF; };
+        uint8 getClass() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 8) & 0xFF); };
         uint32 getClassMask() const { return 1 << (getClass()-1); };
-        uint8 getGender() const { return (uint8)(m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 16) & 0xFF; };
+        uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); };
 
         uint32 GetStat(Stats stat) const { return (uint32)GetFloatValue(UNIT_FIELD_STATS+stat); }
         void SetStat(Stats stat, uint32 val) { SetFloatValue(UNIT_FIELD_STATS+stat, val); }
@@ -437,7 +437,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void ApplyMaxHealthMod(uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_MAXHEALTH, val, apply); }
         void ApplyMaxHealthPercentMod(float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_MAXHEALTH, val, apply); }
 
-        Powers getPowerType() const { return Powers((m_uint32Values[ UNIT_FIELD_BYTES_0 ] >> 24) & 0xFF); };
+        Powers getPowerType() const { return Powers((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24) & 0xFF); };
         void setPowerType(Powers power);
         uint32 GetPower(   Powers power) const { return (uint32)GetFloatValue(UNIT_FIELD_POWER1   +power); }
         uint32 GetMaxPower(Powers power) const { return (uint32)GetFloatValue(UNIT_FIELD_MAXPOWER1+power); }
@@ -457,7 +457,7 @@ class MANGOS_DLL_SPEC Unit : public Object
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
         FactionTemplateEntry* getFactionTemplateEntry() const;
 
-        uint8 getStandState() const { return (uint8)m_uint32Values[ UNIT_FIELD_BYTES_1 ] & 0xFF; };
+        uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); };
 
         void DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabilityLoss);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resist, WeaponAttackType attType);

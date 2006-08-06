@@ -198,6 +198,13 @@ enum ITEM_SUBCLASS_QUIVER
     ITEM_SUBCLASS_AMMO_POUCH        = 3,
 };
 
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct _Damage
 {
     float DamageMin;
@@ -222,6 +229,7 @@ struct _Spell
     uint32 SpellCategoryCooldown;
 
 };
+
 struct ItemPrototype
 {
     uint32 ItemId;
@@ -283,4 +291,11 @@ struct ItemPrototype
     uint32 Unknown1;
     char* ScriptName;
 };
+
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
+
 #endif

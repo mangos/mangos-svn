@@ -58,7 +58,7 @@ class Bag : public Item
         Item* m_bagslot[28];
 };
 
-inline Item* NewItemOrBag(ItemPrototype* proto)
+inline Item* NewItemOrBag(ItemPrototype const * proto)
 {
     return (proto->InventoryType == INVTYPE_BAG) ? new Bag : new Item;
 }

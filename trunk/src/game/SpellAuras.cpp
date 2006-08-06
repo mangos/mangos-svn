@@ -730,7 +730,7 @@ void Aura::HandleAuraMounted(bool apply)
 {
     if(apply)
     {
-        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
+        CreatureInfo const* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         if(!ci)return;
         uint32 displayId = ci->DisplayID;
         if(displayId != 0)
@@ -940,7 +940,7 @@ void Aura::HandleAuraTransform(bool apply)
 
     if (apply)
     {
-        CreatureInfo* ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
+        CreatureInfo const * ci = objmgr.GetCreatureTemplate(m_modifier.m_miscvalue);
         if(!ci)
             return;
         m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID);
@@ -1074,7 +1074,7 @@ void Aura::HandleModPossess(bool apply)
     {
         WorldPacket data;
 
-        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
             creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());
@@ -1116,7 +1116,7 @@ void Aura::HandleModCharm(bool apply)
     {
         WorldPacket data;
 
-        CreatureInfo *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+        CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
         if( apply )
         {
             creatureTarget->SetUInt64Value(UNIT_FIELD_CHARMEDBY,m_caster->GetGUID());

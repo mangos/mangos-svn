@@ -397,7 +397,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
 
 void Object::SetUInt32Value( uint16 index, uint32 value )
 {
-    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+    ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
     if(m_uint32Values[ index ] != value)
     {
         m_uint32Values[ index ] = value;
@@ -417,7 +417,7 @@ void Object::SetUInt32Value( uint16 index, uint32 value )
 
 void Object::SetUInt64Value( uint16 index, const uint64 &value )
 {
-    ASSERT( index + 1 < m_valuesCount || PrintIndexError( index ) );
+    ASSERT( index + 1 < m_valuesCount || PrintIndexError( index , true ) );
     if(*((uint64*)&(m_uint32Values[ index ])) != value)
     {
         m_uint32Values[ index ] = *((uint32*)&value);
@@ -439,7 +439,7 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
 
 void Object::SetFloatValue( uint16 index, const float &value )
 {
-    ASSERT( index + 1 < m_valuesCount || PrintIndexError( index ) );
+    ASSERT( index + 1 < m_valuesCount || PrintIndexError( index , true ) );
     if(m_floatValues[ index ] != value)
     {
         m_floatValues[ index ] = value;
@@ -478,7 +478,7 @@ void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
 
 void Object::SetFlag( uint16 index, uint32 newFlag )
 {
-    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+    ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
     uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval | newFlag;
 
@@ -501,7 +501,7 @@ void Object::SetFlag( uint16 index, uint32 newFlag )
 
 void Object::RemoveFlag( uint16 index, uint32 oldFlag )
 {
-    ASSERT( index < m_valuesCount || PrintIndexError( index ) );
+    ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
     uint32 oldval = m_uint32Values[ index ];
     uint32 newval = oldval & ~oldFlag;
 
@@ -631,9 +631,9 @@ void Object::GetClosePoint( const float ox, const float oy, const float oz, floa
 
 }
 
-bool Object::PrintIndexError(uint32 index) const
+bool Object::PrintIndexError(uint32 index, bool set) const
 {
-    sLog.outError("\nERROR: Access to non-existed value field: %u (count: %u) for object typeid: %u",index,m_valuesCount,GetTypeId());
+    sLog.outError("\nERROR: Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);
 
     // assert must fail after function call
     return false;

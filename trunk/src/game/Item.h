@@ -129,7 +129,7 @@ class MANGOS_DLL_SPEC Item : public Object
 
         virtual bool Create( uint32 guidlow, uint32 itemid, Player* owner);
 
-        ItemPrototype* GetProto() const;
+        ItemPrototype const* GetProto() const;
 
         uint64 const& GetOwnerGUID()    const { return GetUInt64Value(ITEM_FIELD_OWNER); }
         void SetOwnerGUID(uint64 guid) { SetUInt64Value(ITEM_FIELD_OWNER, guid); }

@@ -19,6 +19,7 @@
 #include "SQLStorage.h"
 #include "ProgressBar.h"
 #include "EventSystem.h"
+#include "Log.h"
 
 extern DatabaseMysql  sDatabase;
 
@@ -95,7 +96,7 @@ void SQLStorage::Load ()
         return;
     }
 
-    if(sizeof(void*)==4)
+    if(sizeof(char*)==sizeof(uint32))
         recordsize=4*iNumFields;
     else
     {
@@ -126,11 +127,11 @@ void SQLStorage::Load ()
             {
                 case FT_INT:
                     *((uint32*)(&p[offset]))=fields[x].GetUInt32();
-                    offset+=4;
+                    offset+=sizeof(uint32);
                     break;
                 case FT_FLOAT:
                     *((float*)(&p[offset]))=fields[x].GetFloat();
-                    offset+=4;
+                    offset+=sizeof(float);
                     break;
                 case FT_STRING:
                     char * tmp=(char*)fields[x].GetString();
@@ -166,4 +167,9 @@ void SQLStorage::Load ()
     MaxEntry=maxi;
     data=_data;
 
+}
+
+void SQLStorage::printIndexError(uint32 id) const
+{
+    sLog.outError("ERROR: There is no record %u in DB table `%s`",id,table);
 }

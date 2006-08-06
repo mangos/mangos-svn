@@ -1065,7 +1065,7 @@ void Spell::TakeCastItem()
 {
     if(!m_CastItem || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
-    ItemPrototype *proto = m_CastItem->GetProto();
+    ItemPrototype const *proto = m_CastItem->GetProto();
     uint32 ItemCount = m_CastItem->GetCount();
     uint32 ItemClass = proto->Class;
 
@@ -1290,7 +1290,7 @@ uint8 Spell::CanCast()
                     castResult = CAST_FAIL_TARGET_IS_TOO_HIGH;
                     break;
                 }
-                CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
+                CreatureInfo const *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
                 if(cinfo->type != CREATURE_TYPE_BEAST)
                 {
                     castResult = CAST_FAIL_INVALID_TARGET;
@@ -1337,7 +1337,7 @@ uint8 Spell::CanCast()
                 if (m_caster->GetTypeId() != TYPEID_PLAYER) return CAST_FAIL_FAILED;
                 if(!unitTarget) return CAST_FAIL_FAILED;
                 if(unitTarget->GetTypeId() != TYPEID_UNIT) return CAST_FAIL_FAILED;
-                CreatureInfo *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
+                CreatureInfo const *cinfo = ((Creature*)unitTarget)->GetCreatureInfo();
                 if(cinfo->type != CREATURE_TYPE_BEAST && cinfo->type != CREATURE_TYPE_DRAGON)
                 {
                     castResult = CAST_FAIL_INVALID_TARGET;
@@ -1569,10 +1569,13 @@ uint8 Spell::CheckItems()
     {
         itemid = m_CastItem->GetEntry();
         if( !p_caster->HasItemCount(itemid,1) )
-            return (uint8)CAST_FAIL_ITEM_NOT_READY;
+            return CAST_FAIL_ITEM_NOT_READY;
         else
         {
-            ItemPrototype *proto = m_CastItem->GetProto();
+            ItemPrototype const *proto = m_CastItem->GetProto();
+            if(!proto)
+                return CAST_FAIL_ITEM_NOT_READY;
+
             uint32 ItemClass = proto->Class;
             if (ItemClass == ITEM_CLASS_CONSUMABLE && unitTarget)
             {

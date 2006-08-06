@@ -21,25 +21,26 @@
 
 Quest::Quest()
 {
-    m_quest = new QuestInfo;
+    m_quest_id = 0;
     m_reqitemscount = 0;
     m_reqmobs_or_GO_count = 0;
     m_rewchoiceitemscount = 0;
     m_rewitemscount = 0;
 }
 
-void Quest::LoadQuest( uint32 quest )
-{
-    QuestInfo *pQuestInfo = objmgr.GetQuestInfo( quest );
-    if( pQuestInfo )
-        LoadQuest( pQuestInfo );
+QuestInfo const* Quest::GetQuestInfo() const 
+{ 
+    return objmgr.GetQuestInfo( m_quest_id );
 }
 
-void Quest::LoadQuest( QuestInfo *pQuestInfo )
+
+bool Quest::LoadQuest( uint32 quest )
 {
+    QuestInfo const *pQuestInfo = objmgr.GetQuestInfo( quest );
+
     if( pQuestInfo )
     {
-        m_quest = pQuestInfo;
+        m_quest_id = quest;
         m_reqitemscount = 0;
         m_reqmobs_or_GO_count = 0;
         m_rewitemscount = 0;
@@ -64,7 +65,9 @@ void Quest::LoadQuest( QuestInfo *pQuestInfo )
             if ( pQuestInfo->RewItemId[i] )
                 m_rewitemscount++;
         }
+        return true;
     }
+    return false;
 }
 
 uint32 Quest::XPValue( Player *pPlayer )

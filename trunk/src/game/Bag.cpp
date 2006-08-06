@@ -45,9 +45,9 @@ Bag::~Bag()
 
 bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 {
-    ItemPrototype *m_itemProto = objmgr.GetItemPrototype(itemid);
+    ItemPrototype const * itemProto = objmgr.GetItemPrototype(itemid);
 
-    if(!m_itemProto || m_itemProto->ContainerSlots > 20)
+    if(!itemProto || itemProto->ContainerSlots > 20)
         return false;
 
     Object::_Create( guidlow, HIGHGUID_CONTAINER );
@@ -58,13 +58,13 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt64Value(ITEM_FIELD_OWNER, owner->GetGUID());
     SetUInt64Value(ITEM_FIELD_CONTAINED, owner->GetGUID());
 
-    SetUInt32Value(ITEM_FIELD_MAXDURABILITY, m_itemProto->MaxDurability);
-    SetUInt32Value(ITEM_FIELD_DURABILITY, m_itemProto->MaxDurability);
-    SetUInt32Value(ITEM_FIELD_FLAGS, m_itemProto->Flags);
+    SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
+    SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
+    SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
     SetUInt32Value(ITEM_FIELD_STACK_COUNT, 1);
 
     // Setting the number of Slots the Container has
-    SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, m_itemProto->ContainerSlots);
+    SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
 
     // Cleanning 20 slots
     for (uint8 i = 0; i < 20; i++)
@@ -117,7 +117,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
             uint32 item_guid = fields[3].GetUInt32();
             uint32 item_id   = fields[4].GetUInt32();
 
-            ItemPrototype* proto = objmgr.GetItemPrototype(item_id);
+            ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
 
             if(!proto)
             {
@@ -217,7 +217,7 @@ uint8 Bag::GetSlotByItemGUID(uint64 guid) const
 //                  2 - item added to a stack (item should be deleted)
 Item* Bag::GetItemByPos( uint8 slot ) const
 {
-    ItemPrototype *pBagProto = GetProto();
+    ItemPrototype const *pBagProto = GetProto();
     if( pBagProto )
     {
         if( slot < pBagProto->ContainerSlots )

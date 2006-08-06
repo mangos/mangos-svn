@@ -737,7 +737,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         return;
     }
 
-    CreatureInfo *cinfo = NULL;
+    CreatureInfo const *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
@@ -2456,7 +2456,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry *spellProto, uint32 pdam
     }
     if(pdamage == 0)
         return pdamage;
-    CreatureInfo *cinfo = NULL;
+    CreatureInfo const *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
@@ -2536,7 +2536,7 @@ uint32 Unit::MeleeDamageBonus(Unit *pVictim, uint32 pdamage)
     }
     if(pdamage == 0)
         return pdamage;
-    CreatureInfo *cinfo = NULL;
+    CreatureInfo const *cinfo = NULL;
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
     if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())

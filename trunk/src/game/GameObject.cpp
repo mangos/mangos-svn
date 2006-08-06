@@ -44,7 +44,7 @@ GameObject::GameObject() : Object()
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3)
 {
-    GameObjectInfo*  goinfo = objmgr.GetGameObjectInfo(name_id);
+    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
 
     if (!goinfo)
         return false;
@@ -203,7 +203,7 @@ void GameObject::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", GetGUIDLow());
 }
 
-GameObjectInfo *GameObject::GetGOInfo()
+GameObjectInfo const *GameObject::GetGOInfo()
 {
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
 }
@@ -227,7 +227,7 @@ void GameObject::_LoadQuests()
         do
         {
             fields = result->Fetch();
-            pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+            pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
             if (!pQuest) continue;
 
             addQuest(pQuest);
@@ -244,7 +244,7 @@ void GameObject::_LoadQuests()
     do
     {
         fields = result1->Fetch();
-        pQuest = objmgr.GetQuest( fields[1].GetUInt32() );
+        pQuest = objmgr.NewQuest( fields[1].GetUInt32() );
         if (!pQuest) continue;
 
         addInvolvedQuest(pQuest);

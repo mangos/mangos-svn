@@ -71,7 +71,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             chance = fields[2].GetFloat();
             questchance = fields[3].GetFloat();
 
-            ItemPrototype *proto = objmgr.GetItemPrototype(item);
+            ItemPrototype const *proto = objmgr.GetItemPrototype(item);
 
             displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
 
@@ -154,7 +154,7 @@ void FillLoot(Player* player, Loot *loot, uint32 loot_id, LootStore& store)
 void FillSkinLoot(Loot *Skinloot,uint32 itemid)
 {
     //Skinloot->items.clear();
-    ItemPrototype *proto = objmgr.GetItemPrototype(itemid);
+    ItemPrototype const *proto = objmgr.GetItemPrototype(itemid);
     uint32 displayid = (proto != NULL) ? proto->DisplayInfoID : 0;
     Skinloot->items.push_back(LootItem(itemid,displayid,99,0));
 }

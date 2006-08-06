@@ -445,7 +445,7 @@ void Spell::EffectCreateItem(uint32 i)
     Player* player = (Player*)m_caster;
 
     uint32 newitemid = m_spellInfo->EffectItemType[i];
-    ItemPrototype *pProto = objmgr.GetItemPrototype( newitemid );
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( newitemid );
     if(!pProto)
     {
         player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
@@ -2007,20 +2007,15 @@ void Spell::EffectQuestComplete(uint32 i)
 
     uint32 quest_id = m_spellInfo->EffectMiscValue[i];
 
-    Quest *pQuest = _player->GetActiveQuest(quest_id);
-
-    if(!pQuest)
-        return;
-
-    if(_player->CanCompleteQuest( pQuest ) )
-        _player->CompleteQuest( pQuest );
+    if(_player->CanCompleteQuest( quest_id ) )
+        _player->CompleteQuest( quest_id );
     else
         return;
 
-    if(_player->GetQuestRewardStatus( pQuest ))
+    if(_player->GetQuestRewardStatus( quest_id ))
         return
 
-            _player->PlayerTalkClass->SendQuestReward( pQuest, _player->GetGUID(), true, NULL, 0 );
+    _player->PlayerTalkClass->SendQuestReward( quest_id, _player->GetGUID(), true, NULL, 0 );
 }
 
 void Spell::EffectSelfResurrect(uint32 i)
@@ -2194,7 +2189,7 @@ void Spell::EffectTransmitted(uint32 i)
 
     pGameObj->SetUInt32Value(OBJECT_FIELD_ENTRY, m_spellInfo->EffectMiscValue[i] );
     pGameObj->SetUInt32Value(OBJECT_FIELD_TYPE, 33 );
-    pGameObj->SetUInt32Value(OBJECT_FIELD_CREATED_BY, m_caster->GetGUIDLow() );
+    pGameObj->SetUInt64Value(OBJECT_FIELD_CREATED_BY, m_caster->GetGUID() );
     pGameObj->SetUInt32Value(12, 0x3F63BB3C );
     pGameObj->SetUInt32Value(13, 0xBEE9E017 );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );

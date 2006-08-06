@@ -393,7 +393,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
                 Item *item = objmgr.GetAItem(Aentry->item);
                 if( item )
                 {
-                    ItemPrototype *proto = item->GetProto();
+                    ItemPrototype const *proto = item->GetProto();
                     if( proto )
                     {
                         count++;
@@ -450,7 +450,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
             Item *item = objmgr.GetAItem(Aentry->item);
             if( item )
             {
-                ItemPrototype *proto = item->GetProto();
+                ItemPrototype const *proto = item->GetProto();
                 if( proto )
                 {
                     if( auctionMainCategory == (0xffffffff) || proto->Class == auctionMainCategory )

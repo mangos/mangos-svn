@@ -134,6 +134,13 @@ enum __QuestSpecialFlags                                    //according to mango
     QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
 };
 
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct QuestInfo
 {
     uint32 QuestId;
@@ -181,27 +188,35 @@ struct QuestInfo
     float PointX;
     float PointY;
     uint32 PointOpt;
+
+    // simple data access functions
+    bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
 };
+
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 class Quest
 {
     public:
         Quest();
 
-        QuestInfo *GetQuestInfo() { return m_quest; }
+        QuestInfo const* GetQuestInfo() const;
+        uint32 GetQuestId() const { return m_quest_id; }
 
         uint32 m_reqitemscount;
         uint32 m_reqmobs_or_GO_count;
         uint32 m_rewchoiceitemscount;
         uint32 m_rewitemscount;
 
-        void LoadQuest( uint32 quest );
-        void LoadQuest( QuestInfo *pQuestInfo );
+        bool LoadQuest( uint32 quest );
         uint32 XPValue( Player *pPlayer );
 
-        bool HasSpecialFlag( uint32 flag )  { return (( m_quest->SpecialFlags & flag ) != 0); }
     private:
-        QuestInfo *m_quest;
+        uint32 m_quest_id;
 };
 
 struct quest_status

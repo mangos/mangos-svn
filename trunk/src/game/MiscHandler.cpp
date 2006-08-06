@@ -866,13 +866,14 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     AreaTriggerPoint *pArea = objmgr.GetAreaTriggerQuestPoint( Trigger_ID );
     if( pArea )
     {
-        Quest *pQuest = objmgr.GetQuest( pArea->Quest_ID );
+        uint32 quest_id = pArea->Quest_ID;
+        Quest* pQuest = GetPlayer()->GetActiveQuest(quest_id);
         if( pQuest )
         {
             if( !Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID ) )
             {
-                if(GetPlayer()->GetQuestStatus(pQuest) == QUEST_STATUS_INCOMPLETE)
-                    GetPlayer()->AreaExplored( pQuest );
+                if(GetPlayer()->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
+                    GetPlayer()->AreaExplored( quest_id );
             }
         }
     }

@@ -101,9 +101,9 @@ Guild * ObjectMgr::GetGuildById(const uint32 GuildId) const
     return NULL;
 }
 
-CreatureInfo *ObjectMgr::GetCreatureTemplate(uint32 id)
+CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
 {
-    return (sCreatureStorage.MaxEntry<=id)?NULL:(CreatureInfo*)sCreatureStorage.pIndex[id];
+    return sCreatureStorage.LookupEntry<CreatureInfo>(id);
 }
 
 void ObjectMgr::LoadCreatureTemplates()
@@ -374,7 +374,7 @@ void ObjectMgr::LoadQuests()
     // for example set of race quests can lead to single not race specific quest
     for(uint32 i = 1; i < sQuestsStorage.MaxEntry; ++i )
     {
-        QuestInfo* qinfo = (QuestInfo*)sQuestsStorage.pIndex[i];
+        QuestInfo const* qinfo = GetQuestInfo(i);
 
         if(!qinfo)
             continue;
@@ -832,28 +832,10 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
     return 0;
 }
 
-GameObjectInfo *ObjectMgr::GetGameObjectInfo(uint32 id)
-{
-    //debug
-    if(sGOStorage.MaxEntry<=id)
-    {
-        sLog.outString("ERROR: There is no GO with proto %u id the DB",id);
-        return NULL;
-    }
-
-    return (sGOStorage.MaxEntry<=id)?NULL:(GameObjectInfo *)sGOStorage.pIndex[id];
-
-}
-
 void ObjectMgr::LoadGameobjectInfo()
 {
     sGOStorage.Load();
 
     sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
 
-}
-
-ItemPrototype* ObjectMgr::GetItemPrototype(uint32 id)
-{
-    return (sItemStorage.MaxEntry<=id)?NULL:(ItemPrototype*)sItemStorage.pIndex[id];
 }

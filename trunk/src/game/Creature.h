@@ -131,6 +131,13 @@ struct TrainerSpell
     uint32 reqskillvalue;
 };
 
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct CreatureInfo
 {
     uint32  Entry;
@@ -187,6 +194,12 @@ struct CreatureInfo
     char const* MovementGen;
     char const* ScriptName;
 };
+
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 enum UNIT_TYPE
 {
@@ -268,7 +281,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
             itemcount++;
         }
 
-        CreatureInfo *GetCreatureInfo() const;
+        CreatureInfo const *GetCreatureInfo() const;
 
         void CreateTrainerSpells();
         uint32 GetTrainerSpellsSize() const { return m_tspells.size(); }
