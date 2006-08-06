@@ -1547,7 +1547,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
         if(spellInfo->EquippedItemClass == 4 && !(GetArmorProficiency() & newflag))
         {
             AddArmorProficiency(newflag);
-            GetSession()->SendProficiency(uint8(0x02),GetArmorProficiency());
+            GetSession()->SendProficiency(uint8(0x04),GetArmorProficiency());
         }
         break;
     }
@@ -1664,13 +1664,19 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 
 void Player::learnSpell(uint16 spell_id)
 {
-    if(!addSpell(spell_id,1))
+    SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
+    if (!spellInfo) 
+    { 
+        sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
         return;
+    }
 
     WorldPacket data;
     data.Initialize(SMSG_LEARNED_SPELL);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
+
+	addSpell(spell_id,1);
 
     uint16 maxskill = getLevel()*5 > 300 ? 300 :getLevel()*5;
     switch(spell_id)
