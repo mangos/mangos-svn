@@ -693,7 +693,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, (float(defSkillGrow) - levelGrow*5)*0.04, true);
         }
 
-
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
 

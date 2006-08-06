@@ -2015,7 +2015,7 @@ void Spell::EffectQuestComplete(uint32 i)
     if(_player->GetQuestRewardStatus( quest_id ))
         return
 
-    _player->PlayerTalkClass->SendQuestReward( quest_id, _player->GetGUID(), true, NULL, 0 );
+            _player->PlayerTalkClass->SendQuestReward( quest_id, _player->GetGUID(), true, NULL, 0 );
 }
 
 void Spell::EffectSelfResurrect(uint32 i)

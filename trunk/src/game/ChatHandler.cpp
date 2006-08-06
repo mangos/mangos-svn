@@ -164,7 +164,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             if(ChannelMgr* cMgr = channelMgr(GetPlayer()->GetTeam()))
-                if(Channel *chn = cMgr->GetChannel(channel,GetPlayer())) 
+                if(Channel *chn = cMgr->GetChannel(channel,GetPlayer()))
                     chn->Say(GetPlayer(),msg.c_str(),lang);
         } break;
 

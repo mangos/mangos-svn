@@ -1416,7 +1416,6 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool Apply)
 /***                     IMMUNITY                      ***/
 /*********************************************************/
 
-
 void Aura::HandleModMechanicImmunity(bool apply)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_EFFECT,m_modifier.m_miscvalue,apply);
@@ -1739,6 +1738,7 @@ void Aura::HandlePeriodicDamage(bool apply)
         m_duration = 0;
     }
 }
+
 void Aura::HandlePeriodicDamagePCT(bool apply)
 {
     if(apply)
@@ -1946,6 +1946,7 @@ void Aura::HandleAuraModStat(bool apply)
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
+
 void Aura::HandleModPercentStat(bool apply)
 {
     m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount, apply );
@@ -1995,7 +1996,7 @@ void Aura::HandleModPowerRegen(bool apply)                  // drinking
         m_periodicTimer = 5000;
         Powers pt = m_target->getPowerType();
         // Prevent rage regeneration in combat with rage loss slowdown warrior talant and 0<->1 switching range out combat.
-        if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )     
+        if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
             if (m_target->GetPower(pt) + m_modifier.m_amount <= m_target->GetMaxPower(pt))
                 m_target->SetPower(pt, m_target->GetPower(pt) + m_modifier.m_amount);
@@ -2125,6 +2126,7 @@ void Aura::HandleModAttackSpeed(bool apply)
 
     m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
 }
+
 void Aura::HandleHaste(bool apply)
 {
     m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
@@ -2138,6 +2140,7 @@ void Aura::HandleRangedAmmoHaste(bool apply)
         return;
     m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount, apply);
 }
+
 /********************************/
 /***        ATTACK POWER      ***/
 /********************************/

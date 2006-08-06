@@ -33,7 +33,8 @@ void HandleCorpsesErase(void*)
 
     if(result)
     {
-        do{
+        do
+        {
 
             Field *fields = result->Fetch();
             uint64 guid = fields[0].GetUInt64();
@@ -67,7 +68,8 @@ void HandleCorpsesErase(void*)
     if(result)
     {
 
-        do{
+        do
+        {
             Field *fields = result->Fetch();
 
             uint64 guid = fields[0].GetUInt64();

@@ -117,7 +117,7 @@ bool Unit::haveOffhandWeapon() const
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-    
+
         return tmpitem && (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND);
     }
     else
@@ -320,7 +320,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, uint32 procFlag, bool durabi
         }
 
         // self or owner of pet
-        if(player) 
+        if(player)
         {
             player->CalculateHonor(pVictim);
             player->CalculateReputation(pVictim);
@@ -750,7 +750,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     {
         case MELEE_HIT_CRIT:
             //*hitInfo = 0xEA;
-            *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;               // 0xEA
+                                                            // 0xEA
+            *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
             *damage *= 2;
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
@@ -956,8 +957,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         {
             sLog.outString("Spell Canceled!");
             pVictim->m_currentSpell->cancel();
-
-
 
         }
     }
@@ -1174,7 +1173,8 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
             max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
             break;
         case OFF_ATTACK:
-            min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * 0.5; // TODO: add offhand dmg from talents
+                                                            // TODO: add offhand dmg from talents
+            min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) * 0.5;
             max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE) * 0.5;
             break;
     }
@@ -1280,7 +1280,8 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         if(attType != EQUIPMENT_SLOT_MAINHAND && !item)
             return 0;
 
-        uint32  skill = item ? item->GetSkill() : SKILL_UNARMED; // in range
+                                                            // in range
+        uint32  skill = item ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetSkillValue (skill);
     }
     else
@@ -2078,7 +2079,7 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
     if(apply && enchant_id > 0)
     {
         for(int i=0;i<3;i++)
-        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+i,0);
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+i,0);
         item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot, enchant_id);
         //Add words before weapon name?
         //item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+1, enchant_aura_id);
