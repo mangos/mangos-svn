@@ -36,7 +36,7 @@ class SQLStorage
         }
 
         template<class T>
-        T const* LookupEntry(uint32 id) const
+            T const* LookupEntry(uint32 id) const
         {
             if(id>MaxEntry)
             {

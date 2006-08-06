@@ -49,7 +49,6 @@
 #define SPELL_PASSIVE_MACE_SPECIALIZATION     20864
 #define SPELL_PASSIVE_BOW_SPECIALIZATION      26290
 
-
 #define CREATURE_MAX_SPELLS     4
 #define PLAYER_MAX_SKILLS       127
 #define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_START + ((x)*3))
@@ -348,7 +347,6 @@ enum MeleeHitOutcome
     MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY, MELEE_HIT_GLANCING,
     MELEE_HIT_CRIT, MELEE_HIT_CRUSHING, MELEE_HIT_NORMAL
 };
-
 
 // delay time next attack to privent client attack animanation problems
 #define ATTACK_DISPLAY_DELAY 200

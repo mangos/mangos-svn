@@ -74,7 +74,7 @@ class HordeChannelMgr    : public ChannelMgr {};
 
 inline ChannelMgr* channelMgr(uint32 team)
 {
-    if(team==ALLIANCE) 
+    if(team==ALLIANCE)
         return &MaNGOS::Singleton<AllianceChannelMgr>::Instance();
     if(team==HORDE)
         return &MaNGOS::Singleton<HordeChannelMgr>::Instance();

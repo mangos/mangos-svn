@@ -28,11 +28,10 @@ Quest::Quest()
     m_rewitemscount = 0;
 }
 
-QuestInfo const* Quest::GetQuestInfo() const 
-{ 
+QuestInfo const* Quest::GetQuestInfo() const
+{
     return objmgr.GetQuestInfo( m_quest_id );
 }
-
 
 bool Quest::LoadQuest( uint32 quest )
 {

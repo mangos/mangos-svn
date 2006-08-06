@@ -979,7 +979,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
 
     WorldSession::Update( getMSTime() );
-    DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );  
+    DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
 }
 

@@ -1153,7 +1153,7 @@ void Player::RegenerateHealth()
         case WARLOCK: addvalue = uint32((Spirit*0.07 + 6.0) * HealthIncreaseRate); break;
         case WARRIOR: addvalue = uint32((Spirit*0.80) * HealthIncreaseRate); break;
     }
-    if (HasSpell(SPELL_PASSIVE_REGENERATION))                                    // TODO: Should be aura controlled
+    if (HasSpell(SPELL_PASSIVE_REGENERATION))               // TODO: Should be aura controlled
     {
         if (isInCombat())
             addvalue*=uint32(0.10);
@@ -1527,8 +1527,8 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     uint32 newrank = 0;
     uint32 oldrank = 0;
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
-    if (!spellInfo) 
-    { 
+    if (!spellInfo)
+    {
         sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
         return false;
     }
@@ -1536,7 +1536,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     newrank = FindSpellRank(spell_id);
 
     for(int i=0;i<3;i++)
-    if(spellInfo->Effect[i] == 60)
+        if(spellInfo->Effect[i] == 60)
     {
         uint32 newflag = spellInfo->EquippedItemSubClass;
         if(spellInfo->EquippedItemClass == 2 && !(GetWeaponProficiency() & newflag))
@@ -1665,8 +1665,8 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 void Player::learnSpell(uint16 spell_id)
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
-    if (!spellInfo) 
-    { 
+    if (!spellInfo)
+    {
         sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
         return;
     }
@@ -1676,7 +1676,7 @@ void Player::learnSpell(uint16 spell_id)
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
 
-	addSpell(spell_id,1);
+    addSpell(spell_id,1);
 
     uint16 maxskill = getLevel()*5 > 300 ? 300 :getLevel()*5;
     switch(spell_id)
@@ -1697,7 +1697,7 @@ void Player::learnSpell(uint16 spell_id)
         case 9116:                                          //Shield
             SetSkill(433,1,1);
             break;
-        //Melee Weapons
+            //Melee Weapons
         case 196:                                           //Axes
             SetSkill(44,1,maxskill);
             break;
@@ -1731,7 +1731,7 @@ void Player::learnSpell(uint16 spell_id)
         case 3386:                                          //Polearms
             SetSkill(227,1,maxskill);
             break;
-        //Range Weapons
+            //Range Weapons
         case 264:                                           //Bows
             SetSkill(45,1,maxskill);
             break;
@@ -1747,7 +1747,7 @@ void Player::learnSpell(uint16 spell_id)
         case 5009:                                          //Wands
             SetSkill(228,1,maxskill);
             break;
-        //Others
+            //Others
         case 2842:                                          //poisons
             SetSkill(40,1,maxskill);
             break;
@@ -1955,8 +1955,8 @@ bool Player::HasSpell(uint32 spell) const
 {
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell);
 
-    if (!spellInfo) 
-    { 
+    if (!spellInfo)
+    {
         sLog.outError("Player::HasSpell: Non-existed in SpellStore spell #%u request.",spell);
         return false;
     }
@@ -2558,7 +2558,7 @@ void Player::UpdateMeleeSkillWeapon (WeaponAttackType attType)
                 UpdateSkill(SKILL_UNARMED);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
                 UpdateSkill(tmpitem->GetSkill());
-            
+
         };break;
         case OFF_ATTACK:
         {
@@ -5317,7 +5317,7 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
         {
             slots[0] = EQUIPMENT_SLOT_MAINHAND;
 
-            // suggest offhand slot only if know dual wielding 
+            // suggest offhand slot only if know dual wielding
             // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual weilding" ...
             if(HasSpell( SPELL_PASSIVE_DUAL_WIELD ) )
                 slots[1] = EQUIPMENT_SLOT_OFFHAND;
@@ -7275,8 +7275,8 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
 {
     if( quest_id )
     {
-        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) 
-            && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false ) 
+        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false )
+            && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
             && SatisfyQuestPreviousQuest( quest_id, false ) )
             return ( getLevel() + 7 >= objmgr.GetQuestInfo(quest_id)->MinLevel );
     }
@@ -7288,9 +7288,9 @@ bool Player::CanTakeQuest( Quest *pQuest, bool msg )
     if( pQuest)
     {
         uint32 quest_id = pQuest->GetQuestId();
-        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestRace( quest_id, msg ) 
-            && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg ) 
-            && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg ) 
+        return ( SatisfyQuestStatus( quest_id, msg ) && SatisfyQuestRace( quest_id, msg )
+            && SatisfyQuestLevel( quest_id, msg ) && SatisfyQuestClass( quest_id, msg )
+            && SatisfyQuestSkill( quest_id, msg ) && SatisfyQuestReputation( quest_id, msg )
             && SatisfyQuestPreviousQuest( quest_id, msg ) && SatisfyQuestTimed( quest_id, msg ) );
     }
     return false;
@@ -8689,7 +8689,7 @@ void Player::SaveToDB()
     _SaveReputation();
     SavePet();
 
-    if(m_pCorpse) 
+    if(m_pCorpse)
         m_pCorpse->SaveToDB(false);
 
     Creature *OldSummon = GetPet();

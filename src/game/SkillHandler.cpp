@@ -113,7 +113,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
             GetPlayer( )->GetSession()->SendPacket(&data);
 
             SpellEntry *spellInfo = sSpellStore.LookupEntry( spellid );
-            assert(spellInfo); // checked in addSpell
+            assert(spellInfo);                              // checked in addSpell
 
             for(uint32 i = 0;i<3;i++)
             {

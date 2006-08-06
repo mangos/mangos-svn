@@ -39,11 +39,11 @@ void WorldRunnable::run()
         sWorld.Update( realCurrTime - realPrevTime );
         realPrevTime = realCurrTime;
 
-	#ifdef WIN32
-	ZThread::Thread::sleep(50);
-	#else
+        #ifdef WIN32
+        ZThread::Thread::sleep(50);
+        #else
         ZThread::Thread::sleep(100);
-	#endif
+        #endif
     }
 
     mysql_thread_end();                                     // free mySQL thread resources
