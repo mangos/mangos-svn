@@ -33,8 +33,9 @@ void Container::Create( uint32 guidlow, uint32 itemid, Player *owner )
 {
     Object::_Create( guidlow, HIGHGUID_CONTAINER );
 
-    ItemPrototype *m_itemProto = objmgr.GetItemPrototype( itemid );
+    ItemPrototype const *m_itemProto = objmgr.GetItemPrototype( itemid );
     ASSERT(m_itemProto);
+
     uint32 ContainerSlots =m_itemProto->ContainerSlots;
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, itemid );
@@ -74,7 +75,7 @@ void Container::AddItem(uint8 slot, Item *item)
     SetUInt64Value( (uint16)(CONTAINER_FIELD_SLOT_1  + (slot*2)), item->GetGUID() );
 }
 
-ItemPrototype* Container:: GetProto()
+ItemPrototype const * Container:: GetProto()
 {
     return  objmgr.GetItemPrototype(GetUInt32Value( OBJECT_FIELD_ENTRY ));
 }

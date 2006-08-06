@@ -30,8 +30,9 @@ class Container : public Object
 
         void Create( uint32 guidlow, uint32 itemid, Player* owner );
 
-        ItemPrototype* GetProto();
-
+//        ItemPrototype* GetProto();
+	ItemPrototype const * GetProto();
+	
         void AddItem(uint8 slot, Item *item);
         Item *GetItem(uint8 slot) { return m_Slot[slot]; }
         uint8 FindFreeSlot();
