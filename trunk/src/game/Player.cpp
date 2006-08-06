@@ -8371,16 +8371,6 @@ void Player::_LoadCorpse()
 
 void Player::_LoadInventory()
 {
-    for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
-    {
-        if(m_items[i])
-        {
-            delete m_items[i];
-            SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2), 0);
-            m_items[i] = 0;
-        }
-    }
-
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
     uint16 dest;

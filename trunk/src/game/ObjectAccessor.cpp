@@ -63,7 +63,7 @@ ObjectAccessor::GetCorpse(Unit const &u, uint64 guid)
 }
 
 Corpse*
-ObjectAccessor::GetCorpse(uint32 x, uint32 y, uint32 mapid, uint64 guid)
+ObjectAccessor::GetCorpse(float x, float y, uint32 mapid, uint64 guid)
 {
     CellPair p(MaNGOS::ComputeCellPair(x,y));
     Cell cell = RedZone::GetZone(p);
