@@ -978,7 +978,9 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 {
 
-    DEBUG_LOG( "WORLD: Move time lag/synchronization fix - not yet" );
+    WorldSession::Update( getMSTime() );
+    DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );  
+
 }
 
 void WorldSession::HandleMooveUnRootAck(WorldPacket& recv_data)
