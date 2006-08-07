@@ -1525,16 +1525,12 @@ void Player::AddMail(Mail *m)
 
 bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
 {
-    uint32 newrank = 0;
-    uint32 oldrank = 0;
     SpellEntry *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
         sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
         return false;
     }
-
-    newrank = FindSpellRank(spell_id);
 
     for(int i=0;i<3;i++)
         if(spellInfo->Effect[i] == 60)
@@ -1560,7 +1556,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
     newspell->active = active;
 
     WorldPacket data;
-    if(newrank > 0 && newspell->active)
+    if(newspell->active)
     {
         PlayerSpellList::iterator itr,next;
         for (itr = m_spells.begin(); itr != m_spells.end(); itr=next)
@@ -1571,24 +1567,13 @@ bool Player::addSpell(uint16 spell_id, uint8 active, uint16 slot_id)
                 continue;
             if(IsRankSpellDueToSpell(spellInfo,(*itr)->spellId))
             {
-                oldrank = FindSpellRank((*itr)->spellId);
-                if(oldrank == 0)
-                    break;
-                if(newrank > oldrank && (*itr)->active)
+                if((*itr)->active)
                 {
                     data.Initialize(SMSG_SUPERCEDED_SPELL);
                     data << uint32((*itr)->spellId);
                     data << uint32(spell_id);
                     GetSession()->SendPacket( &data );
                     (*itr)->active = 0;
-                }
-                if(newrank < oldrank)
-                {
-                    data.Initialize(SMSG_SUPERCEDED_SPELL);
-                    data << uint32(spell_id);
-                    data << uint32((*itr)->spellId);
-                    GetSession()->SendPacket( &data );
-                    newspell->active = 0;
                 }
             }
         }
