@@ -240,6 +240,7 @@ namespace MaNGOS
         PlayerRelocationNotifier(Player &pl) : i_player(pl) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
         #ifdef WIN32
+        template<> void Visit(std::map<OBJECT_HANDLE, Corpse   *> &);
         template<> void Visit(std::map<OBJECT_HANDLE, Player   *> &);
         template<> void Visit(std::map<OBJECT_HANDLE, Creature *> &);
         #endif
@@ -262,6 +263,7 @@ namespace MaNGOS
     template<> void NotVisibleNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void NotVisibleNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void ObjectUpdater::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
+    template<> void PlayerRelocationNotifier::Visit<Corpse>(std::map<OBJECT_HANDLE, Corpse *> &);
     template<> void PlayerRelocationNotifier::Visit<Creature>(std::map<OBJECT_HANDLE, Creature *> &);
     template<> void PlayerRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
     template<> void CreatureRelocationNotifier::Visit<Player>(std::map<OBJECT_HANDLE, Player *> &);
