@@ -866,6 +866,7 @@ void Player::Update( uint32 p_time )
         else
             m_deathTimer -= p_time;
     }
+    UpdateEnchantTime(p_time);
 }
 
 void Player::BuildEnumData( WorldPacket * p_data )
@@ -5231,6 +5232,22 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
     SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2*i,    item ? item->GetGUIDLow()              : 0);
     SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2*i +1, item ? item->GetProto()->Sheath        : 0);
     SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
+    if(i < 2 && item)
+    {
+        if(!item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3))
+            return;
+        uint32 charges = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+5);
+        if(charges == 0)
+            return;
+        if(charges > 1)
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+5,charges-1);
+        else if(charges <= 1)
+        {
+            AddItemEnchant(item,item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3),false);
+            for(int y=0;y<3;y++)
+            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+y,0);
+        }
+    }
 }
 
 void Player::SetSheath( uint32 sheathed )
@@ -7129,6 +7146,212 @@ void Player::SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 
     GetSession()->SendPacket(&data);
 }
 
+void Player::UpdateEnchantTime(uint32 time)
+{
+    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    {
+        next=itr;
+        next++;
+        if(*itr)
+        {
+            if((*itr)->item)
+            {
+                if(!(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3))
+                {
+                    m_enchantDuration.erase(itr);
+                    continue;
+                }
+                if((*itr)->leftduration <= time)
+                {
+                    AddItemEnchant((*itr)->item,(*itr)->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3),false);
+                    for(int y=0;y<3;y++)
+                    (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+y,0);
+                    m_enchantDuration.erase(itr);
+                    continue;
+                }
+                else if((*itr)->leftduration > time)
+                {
+                    (*itr)->leftduration -= time;
+                }
+            }
+        }
+    }
+}
+
+void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
+{
+    if(!item || duration <= 0 )
+        return;
+    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    {
+        next=itr;
+        next++;
+        if(*itr)
+        {
+            if((*itr)->item)
+            {
+                if((*itr)->item->GetGUID() == item->GetGUID() && (*itr)->slot == slot)
+                {
+                    m_enchantDuration.erase(itr);
+                    break;
+                }
+            }
+        }
+    }
+    if(item && duration > 0 )
+    {
+        GetSession()->SendItemEnchantTimeUpdate(item->GetGUID(),slot,uint32(duration/1000));
+        EnchantDuration *ed = new EnchantDuration();
+        ed->item = item;
+        ed->leftduration = duration;
+        ed->slot = slot;
+        m_enchantDuration.push_back(ed);
+    }
+}
+
+void Player::ReducePoisonCharges(uint32 enchantId)
+{
+    if(!enchantId)
+        return;
+    uint32 pEnchantId = 0;
+    uint32 charges = 0;
+    Item *pItem;
+    uint16 pos;
+
+    for(int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_RANGED; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        
+        pItem = GetItemByPos( pos );
+        if(!pItem)
+            continue;
+        for(int x=0;x<7;x++)
+        {
+            charges = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+2);
+            if(charges == 0)
+                continue;
+            if(charges <= 1)
+            {
+                AddItemEnchant(pItem,enchantId,false);
+                for(int y=0;y<3;y++)
+                pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+y,0);
+                break;
+            }
+            else
+            {
+                pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+2,charges-1);
+                break;
+            }
+        }
+    }
+}
+
+void Player::SaveEnchant()
+{
+    uint32 duration = 0;
+
+    for(std::list<struct EnchantDuration*>::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();itr++)
+    {
+        if(*itr)
+        {
+            if((*itr)->item)
+            {
+                if((*itr)->leftduration > 0)
+                {
+                    (*itr)->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+(*itr)->slot*3+1,(*itr)->leftduration);
+                }
+            }
+        }
+    }
+}
+
+void Player::LoadEnchant()
+{
+    uint32 duration = 0;
+    Item *pItem;
+    uint16 pos;
+
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        
+        pItem = GetItemByPos( pos );
+        if(!pItem)
+            continue;
+        if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+            continue;
+        for(int x=0;x<7;x++)
+        {
+            duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+            if( duration == 0 )
+                continue;
+            else if( duration > 0 )
+                AddEnchantDuration(pItem,x,duration);
+        }
+    }
+    Bag *pBag;
+    ItemPrototype const *pBagProto;
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        pBag = (Bag*)GetItemByPos( pos );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    pos = ((i << 8) | j);
+                    pItem = GetItemByPos( pos );
+                    if(!pItem)
+                        continue;
+                    if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+                        continue;
+                    for(int x=0;x<7;x++)
+                    {
+                        duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+                        if( duration == 0 )
+                            continue;
+                        else if( duration > 0 )
+                            AddEnchantDuration(pItem,x,duration);
+                    }
+                }
+            }
+        }
+    }
+    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+    {
+        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
+        pBag = (Bag*)GetItemByPos( pos );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    pos = ((i << 8) | j);
+                    pItem = GetItemByPos( pos );
+                    if(!pItem)
+                        continue;
+                    if(pItem->GetProto()->Class != 2 && pItem->GetProto()->Class != 4)
+                        continue;
+                    for(int x=0;x<7;x++)
+                    {
+                        duration = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+                        if( duration == 0 )
+                            continue;
+                        else if( duration > 0 )
+                            AddEnchantDuration(pItem,x,duration);
+                    }
+                }
+            }
+        }
+    }
+
+}
+
 /*********************************************************/
 /***                    QUEST SYSTEM                   ***/
 /*********************************************************/
@@ -8667,6 +8890,7 @@ void Player::SaveToDB()
 
     sDatabase.Execute( ss.str().c_str() );
 
+    SaveEnchant();
     _SaveMail();
     _SaveBids();
     _SaveAuctions();

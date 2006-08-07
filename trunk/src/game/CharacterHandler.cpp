@@ -460,7 +460,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     delete result;
-
+    pCurrChar->LoadEnchant();
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

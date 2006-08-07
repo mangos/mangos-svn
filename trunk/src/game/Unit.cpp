@@ -2070,22 +2070,9 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
         return;
     uint32 enchant_display = pEnchant->display_type;
     uint32 enchant_value1 = pEnchant->value1;
-    //uint32 enchant_value2 = pEnchant->value2;
     uint32 enchant_spell_id = pEnchant->spellid;
-    uint32 enchant_aura_id = pEnchant->aura_id;
-    //uint32 enchant_description = pEnchant->description;
-    uint32 enchant_slot = pEnchant->slot*3;
+
     SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-    if(apply && enchant_id > 0)
-    {
-        for(int i=0;i<3;i++)
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+i,0);
-        item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot, enchant_id);
-        //Add words before weapon name?
-        //item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+1, enchant_aura_id);
-        //Charges for poison
-        //item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot+2, charges);
-    }
 
     if(enchant_display ==4)
     {
@@ -2106,7 +2093,7 @@ void Unit::AddItemEnchant(Item *item,uint32 enchant_id,bool apply)
     }
     else
     {
-        if(apply && ((Player*)this)->IsItemSpellToEquip(enchantSpell_info))
+        if(apply && enchant_display == 3)
         {
             Spell spell(this, enchantSpell_info, true, 0);
             SpellCastTargets targets;

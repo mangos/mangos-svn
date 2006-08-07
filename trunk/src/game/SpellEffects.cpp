@@ -1028,9 +1028,19 @@ void Spell::EffectEnchantItemPerm(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+
+        SpellItemEnchantment *pEnchant;
+        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!pEnchant)
+            return;
+        for(int x=0;x<3;x++)
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x,0);
+
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, enchant_id);
+
         p_caster->AddItemEnchant(itemTarget,enchant_id,true);
         //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
-        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->EffectBasePoints[i]+1);
+        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
     }
 }
 
@@ -1047,9 +1057,24 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+        int32 duration = m_spellInfo->EffectBasePoints[i]+1;
+        if(duration <= 1)
+            duration = 300;
+        SpellItemEnchantment *pEnchant;
+        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!pEnchant)
+            return;
+        for(int x=0;x<3;x++)
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+x,0);
+
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3, enchant_id);
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+1, duration*1000);
+        if(m_spellInfo->SpellFamilyName == 8)
+            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2, 45+FindSpellRank(m_spellInfo->Id)*15);
         p_caster->AddItemEnchant(itemTarget,enchant_id,true);
+        p_caster->AddEnchantDuration(itemTarget,1,duration*1000);
         //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
-        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->EffectBasePoints[i]+1);
+        p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
     }
 }
 
@@ -1585,9 +1610,21 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+        int32 duration = m_spellInfo->EffectBasePoints[i]+1;
+        if(duration <= 1)
+            duration = 300;
+        SpellItemEnchantment *pEnchant;
+        pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!pEnchant)
+            return;
+        for(int x=0;x<3;x++)
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+x,0);
+
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3, enchant_id);
+        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type*3+1, duration*1000);
         p_caster->AddItemEnchant(itemTarget,enchant_id,true);
         //p_caster->GetSession()->SendEnchantmentLog(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->Id);
-        //p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),p_caster->GetGUID(),itemTarget->GetEntry(),m_spellInfo->EffectBasePoints[i]+1);
+        p_caster->GetSession()->SendItemEnchantTimeUpdate(itemTarget->GetGUID(),pEnchant->display_type,duration);
     }
 }
 

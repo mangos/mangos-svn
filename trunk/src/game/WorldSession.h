@@ -94,7 +94,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         //Item Enchantement
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
-        void SendItemEnchantTimeUpdate(uint64 Itemguid, uint64 Owner,uint32 ItemID,uint32 Duration);
+        void SendItemEnchantTimeUpdate(uint64 Itemguid,uint32 slot,uint32 Duration);
 
     protected:
 
