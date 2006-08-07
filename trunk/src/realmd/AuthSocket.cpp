@@ -465,7 +465,6 @@ void AuthSocket::_HandleRealmList()
         else
         {
             AmountOfCharacters = 0;
-            delete result;
         }
         pkt << (uint8) AmountOfCharacters;
         pkt << (uint8) i->second->timezone;

@@ -77,7 +77,6 @@ Player::Player (WorldSession *session): Unit()
 
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
-    m_pCorpse = NULL;
     m_resurrectGUID = 0;
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
@@ -978,6 +977,8 @@ void Player::AddToWorld()
             m_items[i]->AddToWorld();
     }
     AddWeather();
+
+    UpdateCorpse(GetCorpse());
 }
 
 void Player::RemoveFromWorld()
@@ -2018,7 +2019,8 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `player` = '%u'",guid);
+
+    DeleteCorpse(true); // delete from World (to prevent exiting World object without DB entry) and DB
 
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
     QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
@@ -2272,22 +2274,18 @@ void Player::KillPlayer()
 
     // create the body
     CreateCorpse();
-
-    // save body in db
-    if(m_pCorpse)
-        m_pCorpse->SaveToDB();
 }
 
 void Player::CreateCorpse()
 {
+    DeleteCorpse();
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    m_pCorpse = new Corpse();
-    if(!m_pCorpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
+    Corpse* corpse = new Corpse();
+    if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
-        delete m_pCorpse;
-        m_pCorpse = NULL;
+        delete corpse;
         return;
     }
 
@@ -2305,10 +2303,10 @@ void Player::CreateCorpse()
     _cfb1 = ((0x00) | (race << 8) | (0x00 << 16) | (skin << 24));
     _cfb2 = ((face) | (hairstyle << 8) | (haircolor << 16) | (facialhair << 24));
 
-    m_pCorpse->SetUInt32Value( CORPSE_FIELD_BYTES_1, _cfb1 );
-    m_pCorpse->SetUInt32Value( CORPSE_FIELD_BYTES_2, _cfb2 );
-    m_pCorpse->SetUInt32Value( CORPSE_FIELD_FLAGS, 4 );
-    m_pCorpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
+    corpse->SetUInt32Value( CORPSE_FIELD_BYTES_1, _cfb1 );
+    corpse->SetUInt32Value( CORPSE_FIELD_BYTES_2, _cfb2 );
+    corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, 4 );
+    corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
 
     uint32 iDisplayID;
     uint16 iIventoryType;
@@ -2321,41 +2319,58 @@ void Player::CreateCorpse()
             iIventoryType = (uint16)m_items[i]->GetProto()->InventoryType;
 
             _cfi =  (uint16(iDisplayID)) | (iIventoryType)<< 24;
-            m_pCorpse->SetUInt32Value(CORPSE_FIELD_ITEM + i,_cfi);
+            corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i,_cfi);
         }
     }
 
-    MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
+    corpse->SaveToDB(CORPSE_RESURRECTABLE);
 
-    std::string corpsename = m_name;
-    corpsename.append(" corpse.");
+    MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
 
-    this->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, corpsename.c_str());
+    UpdateCorpse(corpse);
 }
 
 void Player::SpawnCorpseBones()
 {
-    if(!m_pCorpse) return;
+    Corpse* corpse =  GetCorpse();
+    if(!corpse) return;
 
-    m_pCorpse->SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
-    m_pCorpse->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
+    corpse->SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
+    corpse->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        if(m_pCorpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
-            m_pCorpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+        if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
+            corpse->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
     }
 
     DEBUG_LOG("Deleting Corpse and swpaning bones.\n");
 
     WorldPacket data;
     data.Initialize(SMSG_DESTROY_OBJECT);
-    data << (uint64)m_pCorpse->GetGUID();
+    data << (uint64)corpse->GetGUID();
     GetSession()->SendPacket(&data);
 
-    m_pCorpse->SaveToDB(true);
-    m_pCorpse = NULL;
+    corpse->DeleteFromDB(CORPSE_RESURRECTABLE);
+    corpse->SaveToDB(CORPSE_BONES);
 }
+
+Corpse* Player::GetCorpse() const 
+{ 
+    return ObjectAccessor::Instance().GetCorpseForPlayer(*this); 
+}
+
+void Player::DeleteCorpse(bool inc_bones)
+{
+    Corpse* corpse =  GetCorpse();
+    if(!corpse) return;
+
+    corpse->DeleteFromDB(CORPSE_RESURRECTABLE);
+    if(inc_bones)
+        corpse->DeleteFromDB(CORPSE_BONES);
+    corpse->DeleteFromWorld(true);
+}
+
 
 void Player::DeathDurabilityLoss(double percent)
 {
@@ -8552,30 +8567,19 @@ void Player::_LoadBids()
 
 void Player::_LoadCorpse()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `game_corpse` WHERE `player` = '%u' AND `bones_flag` = '0';",GetGUIDLow());
-
-    if(!result) return;
-
-    Field *fields = result->Fetch();
-
-    m_pCorpse = new Corpse();
-
-    float positionX = fields[2].GetFloat();
-    float positionY = fields[3].GetFloat();
-    float positionZ = fields[4].GetFloat();
-    float ort       = fields[5].GetFloat();
-    //uint32 zoneid   = fields[6].GetUInt32();
-    uint32 mapid    = fields[7].GetUInt32();
-
-    m_pCorpse->Relocate(positionX,positionY,positionZ,ort);
-    m_pCorpse->SetMapId(mapid);
-    //m_pCorpse->SetZoneId(zoneid);
-    m_pCorpse->LoadValues( fields[8].GetString() );
-
-    MapManager::Instance().GetMap(m_pCorpse->GetMapId())->Add(m_pCorpse);
-
-    delete result;
+    //UpdateCorpse(GetCorpse());
 }
+
+void Player::UpdateCorpse(Corpse* corpse)
+{
+    if(corpse && GetGUID() == corpse->GetOwnerGUID())
+    {
+        std::string corpsename = m_name;
+        corpsename.append(" corpse.");
+        PlayerTalkClass->SendPointOfInterest( corpse->GetPositionX(), corpse->GetPositionY(), 7, 6, 30, corpsename.c_str());
+    }
+}
+
 
 void Player::_LoadInventory()
 {
@@ -8888,9 +8892,6 @@ void Player::SaveToDB()
     _SaveReputation();
     SavePet();
 
-    if(m_pCorpse)
-        m_pCorpse->SaveToDB(false);
-
     Creature *OldSummon = GetPet();
     if(OldSummon && OldSummon->isPet())
     {
@@ -9087,6 +9088,16 @@ void Player::outDebugValues() const
 /*********************************************************/
 /***              LOW LEVEL FUNCTIONS:Notifiers        ***/
 /*********************************************************/
+
+void Player::SendOutOfRange(Object* obj)
+{
+    UpdateData his_data;
+    WorldPacket his_pk;
+    obj->BuildOutOfRangeUpdateBlock(&his_data);
+    his_data.BuildPacket(&his_pk);
+    GetSession()->SendPacket(&his_pk);
+}
+
 
 inline void Player::SendAttackSwingNotInRange()
 {

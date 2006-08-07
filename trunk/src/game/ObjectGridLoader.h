@@ -29,16 +29,13 @@ class MANGOS_DLL_DECL ObjectGridLoader
 {
     public:
         ObjectGridLoader(NGridType &grid, uint32 id, const Cell &cell)
-            : i_cell(cell), i_grid(grid), i_mapId(id), i_gameObjects(0), i_creatures (0)
+            : i_cell(cell), i_grid(grid), i_mapId(id), i_gameObjects(0), i_corpses (0), i_creatures (0)
             {}
 
         void Load(GridType &grid);
         void Visit(std::map<OBJECT_HANDLE, GameObject *> &m);
         void Visit(std::map<OBJECT_HANDLE, Creature *> &m);
-
-        void Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
-        {
-        }
+        void Visit(std::map<OBJECT_HANDLE, Corpse *> &m);
 
         void Visit(std::map<OBJECT_HANDLE, DynamicObject *> &m)
         {
@@ -47,7 +44,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
 
         void LoadN(void)
         {
-            i_gameObjects = 0; i_creatures = 0;
+            i_gameObjects = 0; i_creatures = 0; i_corpses = 0;
             i_cell.data.Part.cell_y = 0;
             for(unsigned int x=0; x < MAX_NUMBER_OF_CELLS; ++x)
             {
@@ -59,7 +56,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
                     loader.Load(i_grid(x, y), *this);
                 }
             }
-            sLog.outDebug("%u GameObjects and %u Creatures loaded for grid %u on map %u", i_gameObjects, i_creatures, i_grid.GetGridId(), i_mapId);
+            sLog.outDebug("%u GameObjects, %u Creatures, and %u Corpses/Bones loaded for grid %u on map %u", i_gameObjects, i_creatures, i_corpses,i_grid.GetGridId(), i_mapId);
         }
 
     private:
@@ -68,6 +65,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
         uint32 i_mapId;
         uint32 i_gameObjects;
         uint32 i_creatures;
+        uint32 i_corpses;
 };
 
 class MANGOS_DLL_DECL ObjectGridUnloader

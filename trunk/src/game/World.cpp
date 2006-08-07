@@ -221,7 +221,7 @@ void World::SetInitialWorldSettings()
     loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = %d;", m_configs[CONFIG_GAME_TYPE],sConfig.GetIntDefault("RealmID", 0));
 
     // remove bones after restart
-    sDatabase.PExecute("DELETE FROM `game_corpse` WHERE `bones_flag` = '1';");
+    sDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1';");
 
     new ChannelMgr;
 
@@ -291,7 +291,7 @@ void World::SetInitialWorldSettings()
     // need good tests on windows
 
     //uint32 m_CorpsesEventID =
-    AddEvent(&HandleCorpsesErase,NULL,12000,false,true);
+    AddEvent(&HandleCorpsesErase,NULL,1200,false,true);
 }
 
 void World::Update(time_t diff)
@@ -343,16 +343,15 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0,  m->checked);
 
-                    uint64 rcpl = m->receiver;
-                    std::string pname;
-                    objmgr.GetPlayerNameByGUID(rcpl,pname);
-                    Player *rpl = objmgr.GetPlayer(pname.c_str());
+                    Player *rpl = objmgr.GetPlayer(m->receiver);
                     if (rpl)
                     {
                         rpl->AddMail(m);
                     }
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",m->receiver);
-                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",m->item);
+                    else
+                        delete m;
+                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `itemowner` = '%u'",itr->second->owner);
+                    sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",itr->second->item);
                     sDatabase.PExecute("DELETE FROM `auctionhouse_bid` WHERE `id` = '%u'",itr->second->Id);
 
                     objmgr.RemoveAuction(itr->second->Id);
@@ -375,14 +374,13 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item, m->time, m->money, 0, m->checked);
 
-                    uint64 rcpl = m->receiver;
-                    std::string pname;
-                    objmgr.GetPlayerNameByGUID(rcpl,pname);
-                    Player *rpl = objmgr.GetPlayer(pname.c_str());
+                    Player *rpl = objmgr.GetPlayer(m->receiver);
                     if (rpl)
                     {
                         rpl->AddMail(m);
                     }
+                    else
+                        delete m;
 
                     Mail *mn = new Mail;
                     mn->receiver = itr->second->bidder;
@@ -412,14 +410,13 @@ void World::Update(time_t diff)
 
                     sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mn->messageID, mn->sender, mn->receiver, mn->subject.c_str(), mn->body.c_str(), mn->item, mn->time, mn->money, 0, mn->checked);
 
-                    uint64 rcpl1 = mn->receiver;
-                    std::string pname1;
-                    objmgr.GetPlayerNameByGUID(rcpl1,pname1);
-                    Player *rpl1 = objmgr.GetPlayer(pname1.c_str());
+                    Player *rpl1 = objmgr.GetPlayer(mn->receiver);
                     if (rpl1)
                     {
                         rpl1->AddMail(mn);
                     }
+                    else
+                        delete mn;
                     objmgr.RemoveAItem(itr->second->item);
                     objmgr.RemoveAuction(itr->second->Id);
                 }
@@ -545,7 +542,7 @@ void World::KickPlayer(char* playerName)
             }
             if (strcmp(playerName, tmpPlayerName) == 0)
                 playerToKick = itr->second;
-            delete tmpPlayerName;
+            delete[] tmpPlayerName;
         }
     }
     if (playerToKick)

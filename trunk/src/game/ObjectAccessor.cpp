@@ -258,12 +258,12 @@ ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_
 }
 
 Corpse*
-ObjectAccessor::GetCorpseForPlayer(Player &player)
+ObjectAccessor::GetCorpseForPlayer(Player const &player)
 {
     Guard guard(i_corpseGuard);
-    const uint64 guid(player.GetGUID());
+    uint64 guid = player.GetGUID();
     for(CorpsesMapType::iterator iter=i_corpse.begin(); iter != i_corpse.end(); ++iter)
-        if(iter->second->GetUInt64Value(CORPSE_FIELD_OWNER) == guid)
+        if(iter->second->GetOwnerGUID() == guid)
             return iter->second;
     return NULL;
 }

@@ -122,7 +122,12 @@ MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Player *> &m)
         if(i_player.GetSelection()==iter->second->GetGUID())
                                                             // visibility distance
             if(i_player.GetDistanceSq(iter->second) > 100*100)
-                sLog.outError("Player %s deselection of player %s (out of range) not implemented.",i_player.GetName(),iter->second->GetName());
+                i_player.SendOutOfRange(iter->second);
+
+        if(iter->second->GetSelection()==i_player.GetGUID())
+                                                            // visibility distance
+            if(i_player.GetDistanceSq(iter->second) > 100*100)
+                iter->second->SendOutOfRange(&i_player);
 
         // Cancel Trade
         if(i_player.GetTrader()==iter->second)
@@ -136,16 +141,36 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
     // Remove selection
     if(pl->GetSelection()==c->GetGUID())
         if(pl->GetDistanceSq(c) > 100*100)                  // visibility distance
-            sLog.outError("Player %s deselection of creature %lu (out of range) not implemented.",pl->GetName(),c->GetGUID());
+            pl->SendOutOfRange(c);
 
     // Cancel training or shoping or bank dialogs
     //if(pl->**==c)
     //    if(pl->GetDistanceSq(iter->second) > 5*5) // iteraction distance
-    //        ??? what do
+    //        pl->SendOutOfRange(c);
 
     // Creature AI reaction
     if( c->AI().IsVisible(pl) )
         c->AI().MoveInLineOfSight(pl);
+}
+
+template<>
+inline void
+MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+{
+    for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
+        if( !i_player.isAlive() )
+        {
+           if(i_player.GetDistance2dSq(iter->second) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS)
+           {
+                if(!iter->second->m_POI)
+                {
+                    i_player.UpdateCorpse(iter->second);
+                    iter->second->m_POI = true;
+                }
+           }
+           else
+                iter->second->m_POI = false;
+        }
 }
 
 template<>

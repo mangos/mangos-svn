@@ -566,6 +566,64 @@ UNLOCK TABLES;
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 
 --
+-- Table structure for table `corpse`
+--
+
+DROP TABLE IF EXISTS `corpse`;
+CREATE TABLE `corpse` (
+  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Identifier',
+  `position_x` float NOT NULL default '0',
+  `position_y` float NOT NULL default '0',
+  `position_z` float NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `zone` int(11) unsigned NOT NULL default '38' COMMENT 'Zone Identifier',
+  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `data` longtext,
+  `time` timestamp NOT NULL default '0000-00-00 00:00:00',
+  `bones_flag` tinyint(3) NOT NULL default '0',
+  PRIMARY KEY  (`guid`),
+  KEY `idx_bones_flag` (`bones_flag`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
+
+--
+-- Dumping data for table `corpse`
+--
+
+
+/*!40000 ALTER TABLE `corpse` DISABLE KEYS */;
+LOCK TABLES `corpse` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `corpse` ENABLE KEYS */;
+
+--
+-- Table structure for table `corpse_grid`
+--
+
+DROP TABLE IF EXISTS `corpse_grid`;
+CREATE TABLE `corpse_grid` (
+  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `position_x` int(11) NOT NULL default '0',
+  `position_y` int(11) NOT NULL default '0',
+  `cell_position_x` int(11) NOT NULL default '0',
+  `cell_position_y` int(11) NOT NULL default '0',
+  `grid` int(11) unsigned NOT NULL default '0' COMMENT 'Grid Identifier',
+  `cell` int(11) unsigned NOT NULL default '0' COMMENT 'Cell Identifier',
+  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
+
+--
+-- Dumping data for table `corpse_grid`
+--
+
+
+/*!40000 ALTER TABLE `corpse_grid` DISABLE KEYS */;
+LOCK TABLES `corpse_grid` WRITE;
+UNLOCK TABLES;
+/*!40000 ALTER TABLE `corpse_grid` ENABLE KEYS */;
+
+--
 -- Table structure for table `creature`
 --
 
@@ -848,37 +906,6 @@ CREATE TABLE `game_addons` (
 LOCK TABLES `game_addons` WRITE;
 UNLOCK TABLES;
 /*!40000 ALTER TABLE `game_addons` ENABLE KEYS */;
-
---
--- Table structure for table `game_corpse`
---
-
-DROP TABLE IF EXISTS `game_corpse`;
-CREATE TABLE `game_corpse` (
-  `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `player` bigint(20) unsigned NOT NULL default '0' COMMENT 'Character Global Identifier',
-  `position_x` float NOT NULL default '0',
-  `position_y` float NOT NULL default '0',
-  `position_z` float NOT NULL default '0',
-  `orientation` float NOT NULL default '0',
-  `zone` int(11) unsigned NOT NULL default '38' COMMENT 'Zone Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `data` longtext,
-  `time` timestamp NOT NULL default '0000-00-00 00:00:00',
-  `bones_flag` tinyint(3) NOT NULL default '0',
-  PRIMARY KEY  (`guid`),
-  KEY `idx_bones_flag` (`bones_flag`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
-
---
--- Dumping data for table `game_corpse`
---
-
-
-/*!40000 ALTER TABLE `game_corpse` DISABLE KEYS */;
-LOCK TABLES `game_corpse` WRITE;
-UNLOCK TABLES;
-/*!40000 ALTER TABLE `game_corpse` ENABLE KEYS */;
 
 --
 -- Table structure for table `game_graveyard`

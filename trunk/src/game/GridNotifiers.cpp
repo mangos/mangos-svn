@@ -118,13 +118,7 @@ void
 ObjectNotVisibleNotifier::Visit(PlayerMapType &m)
 {
     for(std::map<OBJECT_HANDLE, Player *>::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        UpdateData update_data;
-        WorldPacket packet;
-        i_object.BuildOutOfRangeUpdateBlock(&update_data);
-        update_data.BuildPacket(&packet);
-        iter->second->GetSession()->SendPacket(&packet);
-    }
+        iter->second->SendOutOfRange(&i_object);
 }
 
 void
@@ -168,16 +162,8 @@ void
 CreatureNotVisibleMovementNotifier::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
         if( iter->second->isAlive() )
-        {
-            UpdateData update_data;
-            WorldPacket packet;
-            i_creature.BuildOutOfRangeUpdateBlock(&update_data);
-            update_data.BuildPacket(&packet);
-            iter->second->GetSession()->SendPacket(&packet);
-        }
-    }
+            iter->second->SendOutOfRange(&i_creature);
 }
 
 template<class T> void

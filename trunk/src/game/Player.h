@@ -610,7 +610,9 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_resurrectHealth = health;
             m_resurrectMana = mana;
         };
-        Corpse* GetCorpse() const { return this->m_pCorpse; }
+        Corpse* GetCorpse() const;
+        void DeleteCorpse(bool inc_bones = false);
+        void UpdateCorpse(Corpse* corpse);
 
         int getCinematic()
         {
@@ -718,6 +720,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DestroyForPlayer( Player *target ) const;
         void SendDelayResponse(const uint32);
         void SendLogXPGain(uint32 GivenXP,Unit* victim);
+        void SendOutOfRange(Object* obj);
 
         void SendAttackStart(Unit* pVictim);
 
@@ -1009,8 +1012,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
         uint32 m_resurrectHealth, m_resurrectMana;
-
-        Corpse *m_pCorpse;
 
         WorldSession *m_session;
 
