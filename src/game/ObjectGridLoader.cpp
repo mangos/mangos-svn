@@ -40,7 +40,6 @@ ObjectAccessor::RemoveUpdateObjects(std::map<OBJECT_HANDLE, Corpse *> &m)
 
 template<class T> void addUnitState(T *obj)
 {
-    obj->AddToWorld();
 }
 
 template<> void addUnitState(Creature *obj)
@@ -96,6 +95,15 @@ ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Creature *> &m)
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
     CellPair cell_pair(x,y);
     LoadHelper<Creature>("creature_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_creatures);
+}
+
+void
+ObjectGridLoader::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
+{
+    uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
+    uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
+    CellPair cell_pair(x,y);
+    LoadHelper<Corpse>("corpse_grid", i_grid.GetGridId(), i_mapId, cell_pair, m, i_corpses);
 }
 
 void

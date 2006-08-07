@@ -76,7 +76,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         void Update(const uint32 &diff);
 
-        Corpse* GetCorpseForPlayer(Player &);
+        Corpse* GetCorpseForPlayer(Player const &);
         void RemoveCorpse(uint64);
         void AddCorpse(Corpse *corpse);
 

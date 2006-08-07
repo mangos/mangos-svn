@@ -23,6 +23,13 @@
 #include "Object.h"
 #include "LootMgr.h"
 
+// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
 struct GameObjectInfo
 {
     uint32  id;
@@ -44,6 +51,12 @@ struct GameObjectInfo
     uint32  sound9;
     char   *ScriptName;
 };
+
+#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
 
 enum LootState
 {

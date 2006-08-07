@@ -20,6 +20,7 @@
 #include "Corpse.h"
 #include "Player.h"
 #include "UpdateMask.h"
+#include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
@@ -32,6 +33,8 @@ Corpse::Corpse() : Object()
     m_objectTypeId = TYPEID_CORPSE;
 
     m_valuesCount = CORPSE_END;
+
+    m_POI = false;
 }
 
 bool Corpse::Create( uint32 guidlow )
@@ -50,33 +53,94 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
     SetFloatValue( CORPSE_FIELD_POS_Z, z );
     SetFloatValue( CORPSE_FIELD_FACING, ang );
     SetUInt64Value( CORPSE_FIELD_OWNER, owner->GetGUID() );
+
     return true;
 }
 
-void Corpse::SaveToDB(bool bones)
+void Corpse::SaveToDB(CorpseType type)
+{
+    // prevent DB data inconsistance problems and duplicates
+    DeleteFromDB(type);
+
+    std::stringstream ss;
+    ss.rdbuf()->str("");
+    ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES (" 
+        << GetGUIDLow() << ", " << GetOwnerGUID() << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " 
+        << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
+    for(uint16 i = 0; i < m_valuesCount; i++ )
+        ss << GetUInt32Value(i) << " ";
+    ss << "', NOW(), " << int(type) << ")";
+    sDatabase.Execute( ss.str().c_str() );
+
+    // update grid table
+    sDatabase.PExecute(
+        "INSERT INTO `corpse_grid` (`guid`,`map`,`position_x`,`position_y`,`cell_position_x`,`cell_position_y` ) "
+        "SELECT `guid`,`map`,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u "
+        "FROM `corpse` WHERE `guid` = '%u';", CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, 
+        CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, GetGUIDLow()
+    );
+    sDatabase.PExecute("UPDATE `corpse_grid` SET `grid`=(`position_x`*%u) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`) WHERE `guid` = '%u';", MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP,GetGUIDLow());
+}
+
+void Corpse::DeleteFromWorld(bool remove)
+{
+    ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
+    MapManager::Instance().GetMap(GetMapId())->Remove(this,remove);
+}
+
+void Corpse::DeleteFromDB(CorpseType type)
+{
+    std::stringstream ss;
+    ss.rdbuf()->str("");
+    if(type == CORPSE_BONES)
+        // only specific bones
+        ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "';";
+    else
+        // all corpses (not bones)
+        ss  << "DELETE FROM `corpse` WHERE `player` = '" << GetOwnerGUID() << "' AND `bones_flag` = '0';";
+    sDatabase.Execute( ss.str().c_str() );
+
+    sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u';",GetGUIDLow());
+}
+
+bool Corpse::LoadFromDB(uint32 guid)
+{
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE `guid` = '%u';",guid);
+
+    if( ! result )
+        return false;
+
+    Field *fields = result->Fetch();
+    //uint64 guid = fields[0].GetUInt64();
+    float positionX = fields[2].GetFloat();
+    float positionY = fields[3].GetFloat();
+    float positionZ = fields[4].GetFloat();
+    float ort       = fields[5].GetFloat();
+    //uint32 zoneid   = fields[6].GetUInt32();
+    uint32 mapid    = fields[7].GetUInt32();
+
+    LoadValues( fields[8].GetString() );
+
+    // place
+    SetMapId(mapid);
+    Relocate(positionX,positionY,positionZ,ort);
+
+    delete result;
+
+    return true;
+}
+
+void Corpse::AddToWorld()
+{
+    Object::AddToWorld();
+
+    ObjectAccessor::Instance().AddCorpse(this);
+}
+
+void Corpse::RemoveFromWorld()
 {
 
-    int bflag = 0;
-    if (bones)
-    {
-        bflag = 1;
-        std::stringstream ss;
-        ss.rdbuf()->str("");
-        ss << "REPLACE INTO `game_corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`time`,`bones_flag`) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
-        for(uint16 i = 0; i < m_valuesCount; i++ )
-            ss << GetUInt32Value(i) << " ";
-        ss << "', NOW(), " << bflag << ")";
-        sDatabase.Execute( ss.str().c_str() );
-    }
-    else
-    {
-        std::stringstream ss;
-        ss.rdbuf()->str("");
-        ss << "INSERT INTO `game_corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`time`,`bones_flag`) VALUES (" << GetGUIDLow() << ", " << GetUInt64Value(CORPSE_FIELD_OWNER) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " << GetOrientation() << ", "  << GetMapId() << ", '";
-        for(uint16 i = 0; i < m_valuesCount; i++ )
-            ss << GetUInt32Value(i) << " ";
-        ss << "', NOW(), " << bflag << ")";
-        sDatabase.Execute( ss.str().c_str() );
-    }
+    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
 
+    Object::RemoveFromWorld();
 }

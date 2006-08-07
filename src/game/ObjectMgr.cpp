@@ -794,7 +794,7 @@ void ObjectMgr::SetHighestGuids()
         m_mailid = 0;
     }
 
-    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `game_corpse`;" );
+    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `corpse`;" );
     if( result )
     {
         m_hiCorpseGuid = (*result)[0].GetUInt32()+1;

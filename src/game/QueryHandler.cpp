@@ -396,14 +396,16 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 
     sLog.outDetail("WORLD: Received MSG_CORPSE_QUERY");
 
-    if(!GetPlayer()->m_pCorpse) return;
+    Corpse* corpse = GetPlayer()->GetCorpse();
+
+    if(!corpse) return;
 
     data.Initialize(MSG_CORPSE_QUERY);
     data << uint8(0x01);
     data << uint32(0x01);
-    data << GetPlayer()->m_pCorpse->GetPositionX();
-    data << GetPlayer()->m_pCorpse->GetPositionY();
-    data << GetPlayer()->m_pCorpse->GetPositionZ();
+    data << corpse->GetPositionX();
+    data << corpse->GetPositionY();
+    data << corpse->GetPositionZ();
     data << uint32(0x01);
     SendPacket(&data);
 

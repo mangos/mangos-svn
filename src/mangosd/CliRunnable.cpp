@@ -161,10 +161,10 @@ void CliDelete(char*command,pPrintf zprintf)
 
 void CliBroadcast(char *text,pPrintf zprintf)
 {
-    char tmp[512]="|cffff0000[System Message]:|r";
-    strcat(tmp,text);
-    sWorld.SendWorldText(tmp, NULL);
-    zprintf("Broadcasting to the world:%s\x0d\x0a",text);
+    std::string str ="|cffff0000[System Message]:|r";
+    str += text;
+    sWorld.SendWorldText(str.c_str(), NULL);
+    zprintf("Broadcasting to the world:%s\x0d\x0a",str.c_str());
 }
 
 void CliHelp(char*,pPrintf zprintf)
@@ -488,7 +488,7 @@ void CliRunnable::run()
         char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
         if (command != NULL)
         {
-            for(int x=0;true;x++)
+            for(int x=0;command[x];x++)
                 if(command[x]==0xd||command[x]==0xa)
             {
                 command[x]=0;

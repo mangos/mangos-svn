@@ -21,6 +21,14 @@
 
 #include "Object.h"
 
+enum CorpseType
+{
+    CORPSE_RESURRECTABLE = 0,
+    CORPSE_BONES         = 1
+};
+
+#define CORPSE_RECLAIM_RADIUS 20
+
 class Corpse : public Object
 {
     public:
@@ -29,6 +37,17 @@ class Corpse : public Object
         bool Create( uint32 guidlow );
         bool Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang );
 
-        void SaveToDB(bool bones = false);
+        void SaveToDB(CorpseType type);
+        bool LoadFromDB(uint32 guid);
+
+        void DeleteFromWorld(bool remove);
+        void DeleteFromDB(CorpseType type);
+
+        void AddToWorld();
+        void RemoveFromWorld();
+
+        uint64 const& GetOwnerGUID() const { return GetUInt64Value(CORPSE_FIELD_OWNER); }
+
+        bool m_POI;
 };
 #endif

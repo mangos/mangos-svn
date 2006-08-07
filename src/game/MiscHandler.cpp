@@ -764,10 +764,15 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     sLog.outDetail("WORLD: Received CMSG_RECLAIM_CORPSE");
     if (GetPlayer()->isAlive())
         return;
-    if (!GetPlayer()->m_pCorpse)
+
+    Corpse* corpse = GetPlayer()->GetCorpse();
+
+    if (!corpse )
         return;
-    sLog.outDebug("Corpse Dis: \t%f",GetPlayer()->m_pCorpse->GetDistanceSq(((Object *)GetPlayer())));
-    if (GetPlayer()->m_pCorpse->GetDistanceSq(((Object *)GetPlayer()))>1470)
+
+    float dist = corpse->GetDistance2dSq(GetPlayer());
+    sLog.outDebug("Corpse 2D Distance: \t%f",dist);
+    if (dist > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS)
         return;
 
     //need a accurate value of Max distance
