@@ -1,9 +1,6 @@
-/*ALTER TABLE `game_corpse`
-//    RENAME TO `corpse`;*/
+ALTER TABLE `game_corpse`
+    RENAME TO `corpse`;
 
-ALTER TABLE `game_corpse_grid`
-    RENAME TO `corpse_grid`;
-/*
 CREATE TABLE `corpse_grid` (
   `guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `position_x` int(11) NOT NULL default '0',
@@ -15,4 +12,3 @@ CREATE TABLE `corpse_grid` (
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   UNIQUE KEY `idx_search` (`grid`,`cell`,`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid System';
-*/
