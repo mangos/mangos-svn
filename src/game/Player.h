@@ -165,6 +165,13 @@ struct Factions
     uint32 Standing;
 };
 
+struct EnchantDuration
+{
+    Item *item;
+    uint32 slot;
+    uint32 leftduration;
+};
+
 enum PlayerMovementType
 {
     MOVE_ROOT       = 1,
@@ -454,6 +461,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag ;}
         uint32 GetWeaponProficiency() { return m_WeaponProficiency;}
         uint32 GetArmorProficiency() { return m_ArmorProficiency;}
+        void UpdateEnchantTime(uint32 time);
+        void ReducePoisonCharges(uint32 enchantId);
+        void AddEnchantDuration(Item *item,uint32 slot,uint32 duration);
+        void SaveEnchant();
+        void LoadEnchant();
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
@@ -992,6 +1004,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerSpellList m_spells;
         std::list<struct actions> m_actions;
         SpellModList m_spellMods[32];
+        std::list<struct EnchantDuration*> m_enchantDuration;
 
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
