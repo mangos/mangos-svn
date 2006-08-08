@@ -25,7 +25,7 @@
 
 static void CorpsesErase(CorpseType type,uint32 delay)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u';",delay,type );
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
 
     if(result)
     {
@@ -48,8 +48,8 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             else
                 sLog.outDebug("%s %u not found in world. Delete from DB also.",(type==CORPSE_BONES?"Bones":"Corpse"),GUID_LOPART(guid));
 
-            sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u';",GUID_LOPART(guid));
-            sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u';",GUID_LOPART(guid));
+            sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",GUID_LOPART(guid));
+            sDatabase.PExecute("DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GUID_LOPART(guid));
         } while (result->NextRow());
 
         delete result;

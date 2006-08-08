@@ -226,7 +226,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     uint32 id  = atoi(charID);
 
-    //QueryResult *result = sDatabase.PQuery("SELECT `modelid`,`flags`,`faction`,`level`,`name` FROM `creature_template` WHERE `entry` = '%u';", id);
+    //QueryResult *result = sDatabase.PQuery("SELECT `modelid`,`flags`,`faction`,`level`,`name` FROM `creature_template` WHERE `entry` = '%u'", id);
 
     //if(result)
     //{
@@ -333,7 +333,7 @@ bool ChatHandler::HandleItemCommand(const char* args)
 
         if(tmpItem)
         {
-            QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d');",pCreature->GetEntry(), item, amount);
+            QueryResult *result = sDatabase.PQuery("INSERT INTO `npc_vendor` (`entry`,`itemguid`,`amount`) VALUES('%u','%u','%d')",pCreature->GetEntry(), item, amount);
 
             uint8 itemscount = pCreature->GetItemCount();
             pCreature->setItemId(itemscount , item);
@@ -421,7 +421,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     // changed 'creatureId' to lowercase
     // changed 'X', 'y', 'Z' to 'positionx', 'positiony', 'positionz'
-    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f');", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
+    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f')", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
 
     SendSysMessage(LANG_WAYPOINT_ADDED);
 
@@ -459,7 +459,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     // fix me : 'moverandom' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creature ?
     // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `moverandom` = '%i' WHERE `guid` = '%u';", option, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `creature` SET `moverandom` = '%i' WHERE `guid` = '%u'", option, GUID_LOPART(guid));
 
     pCreature->setMoveRandomFlag(option > 0);
 
@@ -498,7 +498,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     // fix me : 'running' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
     // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u';", option, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, GUID_LOPART(guid));
 
     pCreature->setMoveRunFlag(option > 0);
 
@@ -673,7 +673,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     // ticket<end>
     if (!px)
     {
-        QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`;");
+        QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`");
         size_t count = result ? result->GetRowCount() : 0;
 
         PSendSysMessage("Tickets count: %i show new tickets: %s\n", count,m_session->GetPlayer()->isAcceptTickets() ?  "on" : "off");
@@ -701,7 +701,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     int num = atoi(px);
     if(num > 0)
     {
-        QueryResult *result = sDatabase.Query("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket`;");
+        QueryResult *result = sDatabase.Query("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket`");
 
         if(!result || num > result->GetRowCount())
         {
@@ -730,7 +730,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         return false;
 
     // ticket $char_name
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket` WHERE `guid` = '%u';",GUID_LOPART(guid));
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`ticket_category`,`ticket_text` FROM `character_ticket` WHERE `guid` = '%u'",GUID_LOPART(guid));
 
     if(!result)
         return false;
@@ -748,7 +748,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
 
 uint32 ChatHandler::GetTicketIDByNum(uint32 num)
 {
-    QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`;");
+    QueryResult *result = sDatabase.Query("SELECT `ticket_id` FROM `character_ticket`");
 
     if(!result || num > result->GetRowCount())
     {
@@ -776,7 +776,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     // delticket all
     if(strncmp(px,"all",4) == 0)
     {
-        QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character_ticket`;");
+        QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character_ticket`");
 
         if(!result)
             return true;
@@ -795,7 +795,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
         delete result;
 
-        sDatabase.PExecute("DELETE FROM `character_ticket`;");
+        sDatabase.PExecute("DELETE FROM `character_ticket`");
         SendSysMessage("All tickets deleted.");
         return true;
     }
@@ -805,7 +805,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     // delticket #num
     if(num > 0)
     {
-        QueryResult *result = sDatabase.PQuery("SELECT `ticket_id`,`guid` FROM `character_ticket` LIMIT %i;",num);
+        QueryResult *result = sDatabase.PQuery("SELECT `ticket_id`,`guid` FROM `character_ticket` LIMIT '%i'",num);
 
         if(!result || num > result->GetRowCount())
         {
@@ -823,7 +823,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         uint64 guid = fields[1].GetUInt64();
         delete result;
 
-        sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `ticket_id` = '%u';", id);
+        sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `ticket_id` = '%u'", id);
 
         // notify players about ticket deleting
         if(Player* sender = objmgr.GetPlayer(guid))
@@ -843,7 +843,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         return false;
 
     // delticket $char_name
-    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u';",GUID_LOPART(guid));
+    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u'",GUID_LOPART(guid));
 
     // notify players about ticket deleting
     if(Player* sender = objmgr.GetPlayer(guid))

@@ -1609,7 +1609,7 @@ uint8 Spell::CheckItems()
         assert(focusobj);
         char const* focusname = focusobj->Name;
 
-        QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `gameobject_template` WHERE `name` = \"%s\";",focusname);
+        QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `gameobject_template` WHERE `name` = \"%s\"",focusname);
         if(!result)
         {
             sLog.outError("Gameobject template \"%s\" not found (required as object focus for cast #u)",focusname,this->m_spellInfo->Id);
@@ -1788,7 +1788,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     if(m_spellInfo->Id == 8690 )
     {
         Field *fields;
-        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u';", m_caster->GetGUIDLow());
+        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
         fields = result4->Fetch();
         TC->mapId = fields[0].GetUInt32();
         TC->x = fields[2].GetFloat();

@@ -169,7 +169,7 @@ bool GameObject::LoadFromDB(uint32 guid)
 {
     float rotation0, rotation1, rotation2, rotation3;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject` WHERE `guid` = '%u';", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject` WHERE `guid` = '%u'", guid);
 
     if( ! result )
         return false;
@@ -220,7 +220,7 @@ void GameObject::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject_questrelation` WHERE `id` = '%u';", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `gameobject_questrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(result)
     {
@@ -237,7 +237,7 @@ void GameObject::_LoadQuests()
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `gameobject_involvedrelation` WHERE `id` = '%u';", GetEntry ());
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `gameobject_involvedrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(!result1) return;
 

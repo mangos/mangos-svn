@@ -61,7 +61,7 @@ void SQLStorage::Load ()
 {
     uint32 maxi;
     Field *fields;
-    QueryResult *result  = sDatabase.PQuery("SELECT MAX(`entry`) FROM `%s`;",table);
+    QueryResult *result  = sDatabase.PQuery("SELECT MAX(`entry`) FROM `%s`",table);
     if(!result)
     {
         printf("Error loading %s table\n",table);
@@ -71,13 +71,13 @@ void SQLStorage::Load ()
     maxi= (*result)[0].GetUInt32()+1;
     delete result;
 
-    result = sDatabase.PQuery("SELECT COUNT(*) FROM `%s`;",table);
+    result = sDatabase.PQuery("SELECT COUNT(*) FROM `%s`",table);
 
     fields = result->Fetch();
     RecordCount=fields[0].GetUInt32();
     delete result;
 
-    result = sDatabase.PQuery("SELECT * FROM `%s`;",table);
+    result = sDatabase.PQuery("SELECT * FROM `%s`",table);
 
     if(!result)
     {

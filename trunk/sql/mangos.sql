@@ -1940,7 +1940,8 @@ CREATE TABLE `playercreateinfo_skill` (
   `Skill` mediumint(8) unsigned NOT NULL default '0',
   `SkillMin` smallint(5) unsigned NOT NULL default '0',
   `SkillMax` smallint(5) unsigned NOT NULL default '0',
-  `Note` varchar(255) default NULL
+  `Note` varchar(255) default NULL,
+  PRIMARY KEY (`createid`,`Skill`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1962,7 +1963,8 @@ DROP TABLE IF EXISTS `playercreateinfo_spell`;
 CREATE TABLE `playercreateinfo_spell` (
   `createid` smallint(5) unsigned NOT NULL default '0',
   `Spell` bigint(20) unsigned NOT NULL default '0',
-  `Note` varchar(255) default NULL
+  `Note` varchar(255) default NULL,
+  PRIMARY KEY (`createid`,`Spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

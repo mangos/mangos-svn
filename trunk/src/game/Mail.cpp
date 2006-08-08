@@ -59,7 +59,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
     {
 
-        QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s';", receiver.c_str());
+        QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", receiver.c_str());
 
         Player *receive = objmgr.GetPlayer(receiver.c_str());
         uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
@@ -115,7 +115,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             }
 
             sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
+            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
 
         }
         else
@@ -196,7 +196,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     }
 
     sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",m->messageID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u');", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u','%u', '%s', '%s', '%u','%u','%u','%u','%u')", m->messageID, pl->GetGUIDLow(), m->receiver, m->subject.c_str(), m->body.c_str(), m->item, (long)m->time, m->money, 0, m->checked);
 
 }
 

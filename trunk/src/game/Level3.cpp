@@ -80,7 +80,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
         chr->GetSession()->SendPacket(&data);
         chr->GetSession()->SetSecurity(gm);
 
-        sDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u';", gm, chr->GetSession()->GetAccountId());
+        sDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u'", gm, chr->GetSession()->GetAccountId());
 
     }
     else
@@ -130,7 +130,7 @@ bool ChatHandler::HandleAddSpiritCommand(const char* args)
         UpdateMask unitMask;
         WorldPacket data;
 
-        QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`F`,`name_id`,`map`,`zone`,`faction` FROM `npc_spirithealer`;");
+        QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`F`,`name_id`,`map`,`zone`,`faction` FROM `npc_spirithealer`");
 
         if(!result)
         {
@@ -1080,7 +1080,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
 
     sLog.outDetail(LANG_ADDITEMSET, itemsetId);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `itemset` = %u;",itemsetId);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `itemset` = %u",itemsetId);
 
     if(!result)
     {
@@ -1461,7 +1461,7 @@ bool ChatHandler::GetCurrentGraveId(uint32& id )
 
     QueryResult *result = sDatabase.PQuery(
         "SELECT `id` FROM `game_graveyard` "
-        "WHERE  `map` = %u AND (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) < 50*50;",
+        "WHERE  `map` = %u AND (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) < 50*50",
         player->GetMapId(), player->GetPositionX(), player->GetPositionY(), player->GetPositionZ());
 
     if(result)
@@ -1483,7 +1483,7 @@ void ChatHandler::LinkGraveIfNeed(uint32 g_id)
     Player* player = m_session->GetPlayer();
 
     QueryResult *result = sDatabase.PQuery(
-        "SELECT `id` FROM `game_graveyard_zone` WHERE `id` = %u AND `ghost_map` = %u AND `ghost_zone` =%u;",
+        "SELECT `id` FROM `game_graveyard_zone` WHERE `id` = %u AND `ghost_map` = %u AND `ghost_zone` = '%u'",
         g_id,player->GetMapId(),player->GetZoneId());
 
     if(result)
@@ -1494,7 +1494,7 @@ void ChatHandler::LinkGraveIfNeed(uint32 g_id)
     }
     else
     {
-        sDatabase.PExecute("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_map`,`ghost_zone`) VALUES ('%u', '%u', '%u');",
+        sDatabase.PExecute("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_map`,`ghost_zone`) VALUES ('%u', '%u', '%u')",
             g_id,player->GetMapId(),player->GetZoneId());
 
         PSendSysMessage("Graveyard #%u linked to zone #%u (current).", g_id,player->GetZoneId());
@@ -1529,7 +1529,7 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
         sDatabase.PExecute(
             "UPDATE `game_graveyard` "
             "SET `position_x` = '%f',`position_y` = '%f',`position_z` = '%f',`orientation` = '%f', `map` = %u, `faction` = %u "
-            "WHERE `id` = %u ;" ,
+            "WHERE `id` = '%u'" ,
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), player->GetMapId() , g_team, g_id );
 
         PSendSysMessage("Graveyard #%u updated (coordinates, orientation and faction).", g_id);
@@ -1538,7 +1538,7 @@ bool ChatHandler::HandleAddGraveCommand(const char* args)
     {
         // new graveyard
         sDatabase.PExecute("INSERT INTO `game_graveyard` ( `position_x`,`position_y`,`position_z`,`orientation`,`map`,`faction`) "
-            "VALUES ('%f', '%f', '%f', '%f', '%u', '%u');",
+            "VALUES ('%f', '%f', '%f', '%f', '%u', '%u')",
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), player->GetMapId(), g_team );
 
         if(GetCurrentGraveId(g_id))
@@ -1569,7 +1569,7 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
 
     WorldPacket data;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `game_graveyard` WHERE `id` = %u;",g_id);
+    QueryResult *result = sDatabase.PQuery("SELECT `id` FROM `game_graveyard` WHERE `id` = '%u'",g_id);
 
     if(!result)
     {
@@ -1611,7 +1611,7 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
             "SELECT (POW('%f'-`position_x`,2)+POW('%f'-`position_y`,2)+POW('%f'-`position_z`,2)) AS `distance`,`game_graveyard`.`id`,`faction` "
             "FROM `game_graveyard`, `game_graveyard_zone` "
             "WHERE  `game_graveyard`.`id` = `game_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
-            "ORDER BY `distance` ASC LIMIT 1;",
+            "ORDER BY `distance` ASC LIMIT 1",
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetZoneId());
     }
     else
@@ -1621,7 +1621,7 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
             "FROM `game_graveyard`, `game_graveyard_zone` "
             "WHERE  `game_graveyard`.`id` = `game_graveyard_zone`.`id` AND `ghost_map` = %u AND `ghost_zone` = %u "
             "        AND (`faction` = %u OR `faction` = 0 ) "
-            "ORDER BY `distance` ASC LIMIT 1;",
+            "ORDER BY `distance` ASC LIMIT 1",
             player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetZoneId(),g_team);
     }
 
@@ -1715,24 +1715,24 @@ bool ChatHandler::HandleAddSHCommand(const char *args)
     std::stringstream ss,ss2,ss3;
     QueryResult *result;
 
-    result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_gossip`;" );
+    result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_gossip`" );
     if( result )
     {
-        sDatabase.PExecute("INSERT INTO `npc_gossip` (`id`,`npc_guid`,`gossip_type`,`textid`,`option_count`) VALUES ('%u', '%u', '%u', '%u', '%u');", (*result)[0].GetUInt32()+1, pCreature->GetGUIDLow(), 1, 1, 1);
+        sDatabase.PExecute("INSERT INTO `npc_gossip` (`id`,`npc_guid`,`gossip_type`,`textid`,`option_count`) VALUES ('%u', '%u', '%u', '%u', '%u')", (*result)[0].GetUInt32()+1, pCreature->GetGUIDLow(), 1, 1, 1);
         delete result;
         result = NULL;
 
-        result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_option`;" );
+        result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_option`" );
         if( result )
         {
-            sDatabase.PExecute("INSERT INTO `npc_option` (`id`,`gossip_id`,`type`,`option`,`npc_text_nextid`,`special`) VALUES ('%u', '%u', '%u', '%s', '%u', '%u');", (*result)[0].GetUInt32()+1, (*result)[0].GetUInt32()+2, 0, "Return me to life.", 0, 2);
+            sDatabase.PExecute("INSERT INTO `npc_option` (`id`,`gossip_id`,`type`,`option`,`npc_text_nextid`,`special`) VALUES ('%u', '%u', '%u', '%s', '%u', '%u')", (*result)[0].GetUInt32()+1, (*result)[0].GetUInt32()+2, 0, "Return me to life.", 0, 2);
             delete result;
             result = NULL;
         }
-        result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_text`;" );
+        result = sDatabase.PQuery( "SELECT MAX(`id`) FROM `npc_text`" );
         if( result )
         {
-            sDatabase.PExecute("INSERT INTO `npc_text` (`id`,`text0_0`) VALUES ('%u', '%s');", (*result)[0].GetUInt32()+1, "It is not yet your time. I shall aid your journey back to the realm of the living... For a price.");
+            sDatabase.PExecute("INSERT INTO `npc_text` (`id`,`text0_0`) VALUES ('%u', '%s')", (*result)[0].GetUInt32()+1, "It is not yet your time. I shall aid your journey back to the realm of the living... For a price.");
 
             delete result;
             result = NULL;
@@ -2255,7 +2255,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     if (!player) return false;
     char *name=(char*)args;
 
-    result = sDatabase.PQuery("SELECT * FROM `game_tele` WHERE `name` = '%s';",name);
+    result = sDatabase.PQuery("SELECT * FROM `game_tele` WHERE `name` = '%s'",name);
     if (result)
     {
         SendSysMessage("Teleport location already exists!");
@@ -2269,7 +2269,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     float ort = player->GetOrientation();
     int mapid = player->GetMapId();
 
-    if(sDatabase.PExecute("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s');",x,y,z,ort,mapid,name))
+    if(sDatabase.PExecute("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name))
     {
         SendSysMessage("Teleport location added.");
     }
@@ -2282,7 +2282,7 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
         return false;
 
     char *name=(char*)args;
-    QueryResult *result=sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s';",name);
+    QueryResult *result=sDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name);
     if (!result)
     {
         SendSysMessage("Teleport location not found!");
@@ -2290,7 +2290,7 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     }
     delete result;
 
-    if(sDatabase.PExecute("DELETE FROM `game_tele` WHERE `name` = '%s';",name))
+    if(sDatabase.PExecute("DELETE FROM `game_tele` WHERE `name` = '%s'",name))
     {
         SendSysMessage("Teleport location deleted.");
     }

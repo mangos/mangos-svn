@@ -185,7 +185,7 @@ ChatCommand * ChatHandler::getCommandTable()
     {
         for(uint32 i = 0; commandTable[i].Name != NULL; i++)
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `security`,`help` FROM `command` WHERE `name` = '%s';", commandTable[i].Name);
+            QueryResult *result = sDatabase.PQuery("SELECT `security`,`help` FROM `command` WHERE `name` = '%s'", commandTable[i].Name);
 
             if (result)
             {
@@ -198,7 +198,7 @@ ChatCommand * ChatHandler::getCommandTable()
                 ChatCommand *ptable = commandTable[i].ChildCommands;
                 for(uint32 j = 0; ptable[j].Name != NULL; j++)
                 {
-                    QueryResult *result = sDatabase.PQuery("SELECT `security`,`help` FROM `command` WHERE `name` = '%s %s';", commandTable[i].Name, ptable[j].Name);
+                    QueryResult *result = sDatabase.PQuery("SELECT `security`,`help` FROM `command` WHERE `name` = '%s %s'", commandTable[i].Name, ptable[j].Name);
 
                     if (result)
                     {
