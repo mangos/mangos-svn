@@ -1952,22 +1952,22 @@ void Unit::ApplyStats(bool apply)
 
 void Unit::_RemoveAllAuraMods()
 {
+    ApplyStats(false);
+
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
-    {
-        ApplyStats(false);
         (*i).second->ApplyModifier(false);
-        ApplyStats(true);
-    }
+
+    ApplyStats(true);
 }
 
 void Unit::_ApplyAllAuraMods()
 {
+    ApplyStats(false);
+
     for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end(); ++i)
-    {
-        ApplyStats(false);
         (*i).second->ApplyModifier(true);
-        ApplyStats(true);
-    }
+
+    ApplyStats(true);
 }
 
 // TODO: FIX-ME!!!
