@@ -57,6 +57,7 @@ void CliDelete(char*,pPrintf);
 void CliLoadScripts(char*,pPrintf);
 void CliLoadAddons(char*,pPrintf);
 void CliKick(char*,pPrintf);
+void CliMotd(char*,pPrintf);
 
 #define CMD(a) a,(sizeof(a)-1)
 const CliCommand Commands[]=
@@ -76,7 +77,8 @@ const CliCommand Commands[]=
     {CMD("version"), & CliVersion,"Display server version"},
     {CMD("loadscripts"), & CliLoadScripts,"Load script library"},
     {CMD("loadaddons"), & CliLoadAddons,"Load Addons data"},
-    {CMD("kick"), & CliKick,"Kick user"}
+    {CMD("kick"), & CliKick,"Kick user"},
+    {CMD("motd"), & CliMotd,"Change or display motd"}
 };
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
@@ -522,4 +524,24 @@ void CliKick(char*command,pPrintf zprintf)
 
     sWorld.KickPlayer(kickName);
 }
+
+void CliMotd(char*command,pPrintf zprintf)
+{
+    char const *motdText;
+    int x=0;
+    while(command[x]==' ')
+        x++;
+    motdText=&command[x];
+
+    if (strlen(motdText) == 0)
+    {
+        zprintf("Current Message of the day: \x0d\x0a%s\x0d\x0a", sWorld.GetMotd());
+        return;
+    } else {   
+        sWorld.SetMotd(motdText);
+        zprintf("Text changed to:\x0d\x0a%s\x0d\x0a", motdText);
+    }
+
+}
+
 #endif
