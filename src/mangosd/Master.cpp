@@ -249,7 +249,7 @@ bool Master::_StartDB()
         sLog.outString("Realm running as realm ID %d", realmID);
     }
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
+    sDatabase.PExecute("UPDATE `character` SET `online` = 0");
 
     clearOnlineAccounts();
     return true;
@@ -266,7 +266,7 @@ void Master::clearOnlineAccounts()
     loginDatabase.PExecute(
         "UPDATE `account`,`realmcharacters` SET `account`.`online` = 0 "
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
-        "  AND `realmcharacters`.`realmid` = %d;",realmID);
+        "  AND `realmcharacters`.`realmid` = '%d'",realmID);
 }
 
 void Master::_HookSignals()

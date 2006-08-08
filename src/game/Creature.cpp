@@ -468,7 +468,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
         uint16 pflag;
 
         // use the action relate to creaturetemplate.trainer_type ?
-        result= sDatabase.PQuery("SELECT `creature`.`position_x`,`creature`.`position_y` FROM `creature`,`creature_template` WHERE `creature`.`map` = '%u' AND `creature`.`id` = `creature_template`.`entry` AND `creature_template`.`trainer_type` = '%u';", mapid, gossip->Action );
+        result= sDatabase.PQuery("SELECT `creature`.`position_x`,`creature`.`position_y` FROM `creature`,`creature_template` WHERE `creature`.`map` = '%u' AND `creature`.`id` = `creature_template`.`entry` AND `creature_template`.`trainer_type` = '%u'", mapid, gossip->Action );
         if(!result)
             return;
         do
@@ -512,7 +512,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption *gossip)
 
 uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 {
-    QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `npc_gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u';", action, zoneid );
+    QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `npc_gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u'", action, zoneid );
     if(!result)
         return 0;
     Field *fields = result->Fetch();
@@ -534,7 +534,7 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
 
 uint32 Creature::GetNpcTextId()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_gossip` WHERE `npc_guid`= '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `npc_gossip` WHERE `npc_guid`= '%u'",GetGUIDLow());
     if(result)
     {
         Field *fields = result->Fetch();
@@ -571,7 +571,7 @@ void Creature::LoadGossipOptions()
 {
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
 
-    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (npcflag & %u)!=0;", npcflags );
+    QueryResult *result = sDatabase.PQuery( "SELECT * FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
     if(!result)
         return;
     GossipOption *go;
@@ -795,7 +795,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 bool Creature::LoadFromDB(uint32 guid)
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u';", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature` WHERE `guid` = '%u'", guid);
     if(!result)
         return false;
 
@@ -839,7 +839,7 @@ void Creature::_LoadGoods()
 
     itemcount = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u';", GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
 
     if(!result) return;
 
@@ -869,7 +869,7 @@ void Creature::_LoadQuests()
     Field *fields;
     Quest *pQuest;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature_questrelation` WHERE `id` = '%u';", GetEntry ());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `creature_questrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(result)
     {
@@ -886,7 +886,7 @@ void Creature::_LoadQuests()
         delete result;
     }
 
-    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `creature_involvedrelation` WHERE `id` = '%u';", GetEntry ());
+    QueryResult *result1 = sDatabase.PQuery("SELECT * FROM `creature_involvedrelation` WHERE `id` = '%u'", GetEntry ());
 
     if(!result1) return;
 

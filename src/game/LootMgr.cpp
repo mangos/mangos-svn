@@ -53,7 +53,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
     sLog.outString( "%s :", tablename);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance` FROM `%s`;",tablename);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `chance`, `questchance` FROM `%s`",tablename);
 
     if (result)
     {

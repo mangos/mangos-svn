@@ -1166,7 +1166,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     QueryResult *result;
     if(!*args)
     {
-        result = sDatabase.Query("SELECT `name` FROM `game_tele`;");
+        result = sDatabase.Query("SELECT `name` FROM `game_tele`");
         if (!result)
         {
             SendSysMessage("Teleport location table is empty!");
@@ -1185,7 +1185,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
     char *name = (char*)args;
-    result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s';",name);
+    result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name);
     if (!result)
     {
         SendSysMessage("Teleport location not found!");

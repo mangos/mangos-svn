@@ -68,7 +68,7 @@ void AddonHandler::_SaveToDB()
     {
         sDatabase.PExecute("DELETE FROM `game_addons` WHERE `addonname` = '%s'",(*i)->Name.c_str());
         //TODO FIX THE (uint32)
-        sDatabase.PExecute("INSERT INTO `game_addons` (`addonname`,`crc`,`enabled`) VALUES('%s','%lu','%d');", (*i)->Name.c_str(),(uint32)(*i)->CRC,(*i)->Enabled);
+        sDatabase.PExecute("INSERT INTO `game_addons` (`addonname`,`crc`,`enabled`) VALUES('%s','%lu','%d')", (*i)->Name.c_str(),(uint32)(*i)->CRC,(*i)->Enabled);
     }
 }
 
@@ -77,7 +77,7 @@ void AddonHandler::_LoadFromDB()
     //clean the addon data before use
     m_Addon_data.clear();
 
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `game_addons`;" );
+    QueryResult *result = sDatabase.Query( "SELECT * FROM `game_addons`" );
     if( !result )
         return;
 

@@ -145,7 +145,7 @@ void AuthSocket::_HandleLogonChallenge()
         pkt << (uint8) AUTH_LOGON_CHALLENGE;
         pkt << (uint8) 0x00;
 
-        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s'",GetRemoteAddress().c_str());
+        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s';",GetRemoteAddress().c_str());
         if(result)
         {
             pkt << (uint8)AUTH_BANNED;
@@ -186,7 +186,7 @@ void AuthSocket::_HandleLogonChallenge()
                 {
                     password = (*result)[0].GetCppString();
                     /*
-                    QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0;");
+                    QueryResult *result =  .PQuery("SELECT COUNT(*) FROM `account` WHERE `account`.`online` > 0 AND `login`.`gmlevel` = 0");
                     uint32 cnt=0;
                     if(result)
                     {
@@ -205,14 +205,14 @@ void AuthSocket::_HandleLogonChallenge()
                     //if server is not full
 
                     uint32 acct;
-                    QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';", _login.c_str ());
+                    QueryResult *resultAcct = dbRealmServer.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'", _login.c_str ());
                     if(resultAcct)
                     {
                         Field *fields = resultAcct->Fetch();
                         acct=fields[0].GetUInt32();
                         delete resultAcct;
 
-                        QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `id` = '%u';",acct);
+                        QueryResult *result = dbRealmServer.PQuery("SELECT * FROM `account` WHERE `online` > 0 AND `id` = '%u'",acct);
                         if(result)
                         {
                             delete result;
@@ -454,8 +454,8 @@ void AuthSocket::_HandleRealmList()
         pkt << i->second->address;
         //TODO FIX THIS
         pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
-        //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = %d",id);
-        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `acctid` = %d AND `realmid` = %d",id,i->second->m_ID);
+        //result = i->second->dbRealm.PQuery( "SELECT COUNT(*) FROM `character` WHERE `account` = '%d'",id);
+        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `acctid` = %d AND `realmid` = '%d'",id,i->second->m_ID);
         if( result )
         {
             Field *fields = result->Fetch();

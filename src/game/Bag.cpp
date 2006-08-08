@@ -79,12 +79,12 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 void Bag::SaveToDB()
 {
     Item::SaveToDB();
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", GUID_LOPART(GetOwnerGUID()), GetSlot());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
     for (uint8 i = 0; i < GetProto()->ContainerSlots; i++)
     {
         if (m_bagslot[i])
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GUID_LOPART(GetOwnerGUID()), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory`  (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GUID_LOPART(GetOwnerGUID()), GetSlot(), i, m_bagslot[i]->GetGUIDLow(), m_bagslot[i]->GetEntry());
             m_bagslot[i]->SaveToDB();
         }
     }
@@ -106,7 +106,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
         }
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';", GUID_LOPART(GetOwnerGUID()), GetSlot());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetSlot());
 
     if (result)
     {

@@ -141,7 +141,7 @@ void CliDelete(char*command,pPrintf zprintf)
         return;
     }
     Field *fields;
-    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s';",del);
+    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",del);
 
     if (!result)
     {
@@ -182,7 +182,7 @@ void CliExit(char*,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `character` WHERE `online` > 0;");
+    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `character` WHERE `online` > 0");
 
     if (result)
     {
@@ -192,7 +192,7 @@ void CliInfo(char*,pPrintf zprintf)
         if ( cnt > 0 )
         {
             zprintf("Online users: %d\x0d\x0a",cnt);
-            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`realmd`.`account`.`gmlevel`,`realmd`.`account`.`username`,`realmd`.`account`.`last_ip` FROM `character` LEFT JOIN `realmd`.`account` ON `realmd`.`account`.`id` = `character`.`account` WHERE `character`.`online` > 0;" );
+            result = sDatabase.PQuery( "SELECT `character`.`name`,`character`.`account`,`realmd`.`account`.`gmlevel`,`realmd`.`account`.`username`,`realmd`.`account`.`last_ip` FROM `character` LEFT JOIN `realmd`.`account` ON `realmd`.`account`.`id` = `character`.`account` WHERE `character`.`online` > 0" );
 
             zprintf("========================================================\x0d\x0a");
             zprintf("|    Account    |   Character   |      IP       |  GM  |\x0d\x0a");
@@ -220,7 +220,7 @@ void CliInfo(char*,pPrintf zprintf)
 void CliBanList(char*,pPrintf zprintf)
 {
     Field *fields;
-    QueryResult *result2 = loginDatabase.Query( "SELECT `username` FROM `account` WHERE `banned` > 0;" );
+    QueryResult *result2 = loginDatabase.Query( "SELECT `username` FROM `account` WHERE `banned` > 0" );
     if(result2)
     {
         zprintf("Banned Accounts:\x0d\x0a");
@@ -232,7 +232,7 @@ void CliBanList(char*,pPrintf zprintf)
         delete result2;
     }
 
-    QueryResult *result3 = loginDatabase.Query( "SELECT `ip` FROM `ip_banned`;" );
+    QueryResult *result3 = loginDatabase.Query( "SELECT `ip` FROM `ip_banned`" );
     if(result3)
     {
         zprintf("Banned IPs:\x0d\x0a");
@@ -313,7 +313,7 @@ void CliListGM(char *command,pPrintf zprintf)
 
     Field *fields;
 
-    QueryResult *result = loginDatabase.Query( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0;" );
+    QueryResult *result = loginDatabase.Query( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0" );
     if(result)
     {
 
@@ -373,7 +373,7 @@ void CliSetGM(char *command,pPrintf zprintf)
     //wow it's ok,let's hope it was integer given
     int lev=atoi(&charcr[x]);                               //get int anyway
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `username` = '%s';",szAcc );
+    QueryResult *result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE `username` = '%s'",szAcc );
 
     if (result)
     {
@@ -425,7 +425,7 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    QueryResult *result1 = loginDatabase.PQuery("SELECT `username` FROM `account` WHERE `username` = '%s';",szAcc );
+    QueryResult *result1 = loginDatabase.PQuery("SELECT `username` FROM `account` WHERE `username` = '%s'",szAcc );
 
     if (result1)
     {
