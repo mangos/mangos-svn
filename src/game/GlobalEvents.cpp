@@ -59,12 +59,12 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 
 void HandleCorpsesErase(void*)
 {
-    mysql_thread_init();                                    // let thread do safe mySQL requests
+    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     //sLog.outBasic("Global Event (corpses/bones removal)");
 
     CorpsesErase(CORPSE_BONES,             20*60); // 20 mins
     CorpsesErase(CORPSE_RESURRECTABLE,3*24*60*60); // 3 days
 
-    mysql_thread_end();                                     // free mySQL thread resources
+    sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }

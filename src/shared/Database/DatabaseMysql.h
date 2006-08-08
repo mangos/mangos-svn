@@ -47,10 +47,13 @@ class DatabaseMysql : public Database
 
         operator bool () const { return mMysql != NULL; }
 
+        // must be call before first query in thread
+        void ThreadStart();
+        // must be call before finish thread run
+        void ThreadEnd();
     private:
         ZThread::FastMutex mMutex;
         MYSQL *mMysql;
 };
 
-#define sMySqlDatabase MaNGOS::Singleton<DatabaseMysql>::Instance()
 #endif

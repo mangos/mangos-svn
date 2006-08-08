@@ -18,4 +18,10 @@
 
 #include "DatabaseEnv.h"
 
-Database* DatabaseRegistry::si_database = NULL;
+void Database::ThreadStart()
+{
+}
+
+void Database::ThreadEnd()
+{
+}

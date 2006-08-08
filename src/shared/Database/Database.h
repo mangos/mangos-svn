@@ -37,16 +37,11 @@ class Database
         virtual bool PExecute(const char *format,...) = 0;
 
         virtual operator bool () const = 0;
+
+        // must be called before first query in thread (one time for thread using one from existed Database objects)
+        virtual void ThreadStart();
+        // must be called before finish thread run (one time for thread using one from existed Database objects)
+        virtual void ThreadEnd();
 };
 
-class DatabaseRegistry
-{
-    static Database* si_database;
-    public:
-
-        static Database& GetDatabase(void) { return *si_database; }
-        static void RegisterDatabase(Database *d) { si_database = d; }
-};
-
-//#define sDatabase DatabaseRegistry::GetDatabase()
 #endif
