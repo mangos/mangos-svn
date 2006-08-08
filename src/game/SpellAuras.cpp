@@ -201,6 +201,9 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL                                       //SPELL_AURA_PET_DAMAGE_MULTI    =    157    ,//    Mod Pet Damage
 };
 
+// add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
+static void HandleShapeshiftBoosts(bool apply, Aura* aura);
+
 Aura::Aura(SpellEntry* spellproto, uint32 eff, Unit *caster, Unit *target) :
 m_procSpell(NULL),m_procdamage(NULL), m_spellId(spellproto->Id), m_effIndex(eff),
 m_caster(caster),m_castItem(0), m_target(target), m_timeCla(1000),m_auraSlot(0),m_positive(false), m_permanent(false),
@@ -470,52 +473,60 @@ void Aura::_AddAura()
     m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
-    if(m_isPassive)                                         // passive auras do not get placed in the slots
-        return;
-
-    if(!samespell)
+    if(!m_isPassive)                                        // passive auras do not get placed in the slots
     {
-        if (IsPositive())
+        if(!samespell)
         {
-            for (i = 0; i < MAX_POSITIVE_AURAS; i++)
+            if (IsPositive())
             {
-                if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+                for (i = 0; i < MAX_POSITIVE_AURAS; i++)
                 {
-                    slot = i;
-                    break;
+                    if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+                    {
+                        slot = i;
+                        break;
+                    }
                 }
             }
-        }
-        else
-        {
-            for (i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
+            else
             {
-                if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+                for (i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
                 {
-                    slot = i;
-                    break;
+                    if (m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURA + i)) == 0)
+                    {
+                        slot = i;
+                        break;
+                    }
                 }
             }
+
+            m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
+
+            uint8 flagslot = slot >> 3;
+            uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+
+            uint8 value1 = (slot & 7) << 2;
+            value |= ((uint32)AFLAG_SET << value1);
+
+            m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
         }
 
-        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
-
-        uint8 flagslot = slot >> 3;
-        uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
-
-        uint8 value1 = (slot & 7) << 2;
-        value |= ((uint32)AFLAG_SET << value1);
-
-        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+        SetAuraSlot( slot );
+        if( m_target->GetTypeId() == TYPEID_PLAYER )
+            UpdateAuraDuration();
     }
 
-    SetAuraSlot( slot );
-    if( m_target->GetTypeId() == TYPEID_PLAYER )
-        UpdateAuraDuration();
+    // adding linked auras 
+    if(m_modifier.m_auraname == 36) // add the shapeshift aura's boosts
+        HandleShapeshiftBoosts(true, this);
 }
 
 void Aura::_RemoveAura()
 {
+    // removing linked auras added ad _AddAura call before removing aura
+    if(m_modifier.m_auraname == 36) // remove the shapeshift aura's boosts
+        HandleShapeshiftBoosts(false, this);
+
     m_target->ApplyStats(false);
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false);
@@ -778,7 +789,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
     if(!m_target)
         return;
     Unit *unit_target = m_target;
-    uint32 spellId = 0;
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
     uint32 new_bytes_1 = m_modifier.m_miscvalue;
@@ -790,21 +800,15 @@ void Aura::HandleAuraModShapeshift(bool apply)
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 8571;
             PowerType = POWER_ENERGY;
-            spellId = 3025;
-            break;
-        case FORM_TREE:
-            spellId = 3122;
             break;
         case FORM_TRAVEL:
             modelid = 632;
-            spellId = 5419;
             break;
         case FORM_AQUA:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 2428;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2428;
-            spellId = 5421;
             break;
         case FORM_BEAR:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
@@ -812,15 +816,10 @@ void Aura::HandleAuraModShapeshift(bool apply)
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
             PowerType = POWER_RAGE;
-            spellId = 1178;
-            break;
-        case FORM_AMBIENT:
-            spellId = 0;
             break;
         case FORM_GHOUL:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 10045;
-            spellId = 0;
             break;
         case FORM_DIREBEAR:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
@@ -828,43 +827,30 @@ void Aura::HandleAuraModShapeshift(bool apply)
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 2289;
             PowerType = POWER_RAGE;
-            spellId = 9635;
             break;
         case FORM_CREATUREBEAR:
             modelid = 902;
-            spellId = 2882;
             break;
         case FORM_GHOSTWOLF:
             modelid = 1236;
-            spellId = 0;
-            break;
-        case FORM_BATTLESTANCE:
-            spellId = 0;
-            break;
-        case FORM_DEFENSIVESTANCE:
-            spellId = 7376;
-            break;
-        case FORM_BERSERKERSTANCE:
-            spellId = 7381;
-            break;
-        case FORM_SHADOW:
-            spellId = 0;
-            break;
-        case FORM_STEALTH:
-            spellId = 0;
             break;
         case FORM_MOONKIN:
             if(unit_target->getRace() == RACE_NIGHT_ELF)
                 modelid = 15374;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 15375;
-            spellId = 24907;
+            break;
+        case FORM_AMBIENT:
+        case FORM_BATTLESTANCE:
+        case FORM_BERSERKERSTANCE:
+        case FORM_DEFENSIVESTANCE:
+        case FORM_SHADOW:
+        case FORM_STEALTH:
+        case FORM_TREE:
             break;
         default:
             sLog.outString("Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
     }
-
-    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
 
     if(apply)
     {
@@ -875,13 +861,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
                 if(m_modifier.m_miscvalue != FORM_AQUA )
                     return;
             }
-        }
-        if(unit_target->m_ShapeShiftForm)
-        {
-            // prevent double stat apply for triggered auras
-            unit_target->ApplyStats(true);
-            unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
-            unit_target->ApplyStats(false);
         }
 
         unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
@@ -902,17 +881,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
         }
         else
             m_target->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
-
-        if(spellInfo)
-        {
-            Spell p_spell(m_caster,spellInfo,true,this);
-            SpellCastTargets targets;
-            targets.setUnitTarget(unit_target);
-            // prevent double stat apply for triggered auras
-            unit_target->ApplyStats(true);
-            p_spell.prepare(&targets);
-            unit_target->ApplyStats(false);
-        }
     }
     else
     {
@@ -926,10 +894,6 @@ void Aura::HandleAuraModShapeshift(bool apply)
             unit_target->setPowerType(POWER_MANA);
         unit_target->m_ShapeShiftForm = 0;
         unit_target->m_form = 0;
-        // prevent double stat apply for triggered auras
-        unit_target->ApplyStats(true);
-        unit_target->RemoveAurasDueToSpell(spellId);
-        unit_target->ApplyStats(false);
     }
 }
 
@@ -2453,4 +2417,85 @@ void HandleHealEvent(void *obj)
 {
     Aura *Aur = ((Aura*)obj);
     Aur->GetTarget()->PeriodicAuraLog(Aur->GetCaster(), Aur->GetSpellProto(), Aur->GetModifier());
+}
+
+void HandleShapeshiftBoosts(bool apply, Aura* aura)
+{
+    if(!aura->GetTarget())
+        return;
+
+    Unit *unit_target = aura->GetTarget();
+    uint32 spellId = 0;
+
+    switch(aura->GetModifier()->m_miscvalue)
+    {
+        case FORM_CAT:
+            spellId = 3025;
+            break;
+        case FORM_TREE:
+            spellId = 3122;
+            break;
+        case FORM_TRAVEL:
+            spellId = 5419;
+            break;
+        case FORM_AQUA:
+            spellId = 5421;
+            break;
+        case FORM_BEAR:
+            spellId = 1178;
+            break;
+        case FORM_DIREBEAR:
+            spellId = 9635;
+            break;
+        case FORM_CREATUREBEAR:
+            spellId = 2882;
+            break;
+        case FORM_DEFENSIVESTANCE:
+            spellId = 7376;
+            break;
+        case FORM_BERSERKERSTANCE:
+            spellId = 7381;
+            break;
+        case FORM_MOONKIN:
+            spellId = 24907;
+            break;
+        case FORM_GHOSTWOLF:
+        case FORM_BATTLESTANCE:
+        case FORM_AMBIENT:
+        case FORM_GHOUL:
+        case FORM_SHADOW:
+        case FORM_STEALTH:
+            spellId = 0;
+            break;
+    }
+
+    SpellEntry *spellInfo = sSpellStore.LookupEntry( spellId );
+
+    if(apply)
+    {
+        if(unit_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(((Player*)unit_target)->IsInWater())
+            {
+                if(aura->GetModifier()->m_miscvalue != FORM_AQUA )
+                    return;
+            }
+        }
+        if(unit_target->m_ShapeShiftForm)
+        {
+            unit_target->RemoveAurasDueToSpell(unit_target->m_ShapeShiftForm);
+        }
+
+        if(spellInfo)
+        {
+            Spell p_spell(aura->GetCaster(),spellInfo,true,aura);
+            SpellCastTargets targets;
+            targets.setUnitTarget(unit_target);
+            p_spell.prepare(&targets);
+        }
+    }
+    else
+    {
+        unit_target->RemoveAurasDueToSpell(spellId);
+    }
 }
