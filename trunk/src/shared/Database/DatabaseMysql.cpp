@@ -20,13 +20,29 @@
 #include "Util.h"
 #include "Policies/SingletonImp.h"
 
-INSTANTIATE_SINGLETON_1(DatabaseMysql);
-
 using namespace std;
+
+void DatabaseMysql::ThreadStart()
+{
+    mysql_thread_init();
+}
+void DatabaseMysql::ThreadEnd()
+{
+    mysql_thread_end();
+}
 
 DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
 {
-    DatabaseRegistry::RegisterDatabase(this);
+    static bool first_ttime = true;
+
+    // before first connection
+    if(first_ttime)
+    {
+        first_ttime = false;
+
+        if (!mysql_thread_safe())
+            sLog.outError("ERROR: Used MySQL library isn't thread-safe.");
+    }
 }
 
 DatabaseMysql::~DatabaseMysql()
@@ -41,7 +57,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
     mysqlInit = mysql_init(NULL);
     if (!mysqlInit)
     {
-        sLog.outError( "Could not initialize Mysql" );
+        sLog.outError( "Could not initialize Mysql connection" );
         return false;
     }
 

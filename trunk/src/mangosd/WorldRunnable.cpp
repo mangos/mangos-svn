@@ -25,7 +25,7 @@
 
 void WorldRunnable::run()
 {
-    mysql_thread_init();                                    // let thread do safe mySQL requests
+    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     uint32 realCurrTime = 0, realPrevTime = 0;
 
@@ -46,5 +46,5 @@ void WorldRunnable::run()
         #endif
     }
 
-    mysql_thread_end();                                     // free mySQL thread resources
+    sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }

@@ -251,9 +251,6 @@ bool Master::_StartDB()
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 0;");
 
-    if (!mysql_thread_safe())
-        sLog.outError("ERROR: Used MySQL library isn't thread-safe.");
-
     clearOnlineAccounts();
     return true;
 }
