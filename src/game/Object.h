@@ -213,7 +213,7 @@ class MANGOS_DLL_SPEC Object
 
         virtual void SendMessageToSet(WorldPacket *data, bool self);
 
-        void LoadValues(const char* data);
+        bool LoadValues(const char* data);
         void LoadTaxiMask(const char* data);
 
         uint16 GetValuesCount() const { return m_valuesCount; }

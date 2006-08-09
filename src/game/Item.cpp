@@ -474,7 +474,12 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, uint32 auctioncheck)
 
     Field *fields = result->Fetch();
 
-    LoadValues(fields[0].GetString());
+    if(!LoadValues(fields[0].GetString()))
+    {
+        sLog.outError("ERROR: Item #%d have broken data in `data` field. Can't be loaded.",guid);
+        return false;
+    }
+
 
     if(GetOwnerGUID()!=owner_guid)
     {

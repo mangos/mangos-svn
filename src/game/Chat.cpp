@@ -54,7 +54,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "rage",        1, &ChatHandler::HandleModifyRageCommand,       "",   NULL },
         { "energy",      1, &ChatHandler::HandleModifyEnergyCommand,     "",   NULL },
         { "gold",        1, &ChatHandler::HandleModifyGoldCommand,       "",   NULL },
-        { "level",       1, &ChatHandler::HandleModifyLevelCommand,      "",   NULL },
         { "speed",       1, &ChatHandler::HandleModifySpeedCommand,      "",   NULL },
         { "swim",        1, &ChatHandler::HandleModifySwimCommand,       "",   NULL },
         { "scale",       1, &ChatHandler::HandleModifyScaleCommand,      "",   NULL },
@@ -459,18 +458,29 @@ void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 
     */
 }
 
-Player * ChatHandler::getSelectedChar(WorldSession *client)
+Player * ChatHandler::getSelectedPlayer()
 {
-    uint64 guid;
-    Player *chr;
+    uint64 guid  = m_session->GetPlayer()->GetSelection();
 
-    guid = client->GetPlayer()->GetSelection();
     if (guid == 0)
-        chr = client->GetPlayer();
-    else
-        chr = objmgr.GetPlayer(guid);
+        return m_session->GetPlayer();
 
-    return chr;
+    return objmgr.GetPlayer(guid);
+}
+
+Unit* ChatHandler::getSelectedUnit()
+{
+    uint64 guid = m_session->GetPlayer()->GetSelection();
+
+    if (guid == 0)
+        return m_session->GetPlayer();
+
+    return ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(),guid);
+}
+
+Creature* ChatHandler::getSelectedCreature()
+{
+    return ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
 }
 
 char const *fmtstring( char const *format, ... )
