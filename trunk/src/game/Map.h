@@ -115,7 +115,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
-		GridMap * LoadMAP(int mapid, int x, int y);
+        GridMap * LoadMAP(int mapid, int x, int y);
         static void InitStateMachine(void);
         float GetHeight(float x, float y);
         uint16 GetAreaFlag(float x, float y );

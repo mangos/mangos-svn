@@ -1558,8 +1558,10 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         Aur->_AddAura();
         m_Auras[spellEffectPair(Aur->GetId(), Aur->GetEffIndex())] = Aur;
         if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
+        {
             m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
-        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
+            m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
+        }
 
         if (Aur->IsSingleTarget() && Aur->GetTarget() && Aur->GetSpellProto())
         {
@@ -1764,9 +1766,11 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             }
         }
     }
-    m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount);
     if ((*i).second->GetModifier()->m_auraname < TOTAL_AURAS)
+    {
+        m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount);
         m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
+    }
     (*i).second->SetRemoveOnDeath(onDeath);
     (*i).second->_RemoveAura();
     delete (*i).second;
