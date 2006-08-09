@@ -61,20 +61,13 @@ bool ChatHandler::HandleGMOffCommand(const char* args)
 
 bool ChatHandler::HandleGPSCommand(const char* args)
 {
-    Object *obj;
+    Object *obj = getSelectedUnit();
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid != 0)
+    if(!obj)
     {
-        obj = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(),guid);
-        if(!obj)
-        {
-            SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-            return true;
-        }
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
     }
-    else
-        obj = (Object*)m_session->GetPlayer();
 
     PSendSysMultilineMessage(LANG_MAP_POSITION,
         obj->GetMapId(), obj->GetZoneId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
@@ -205,7 +198,7 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -249,7 +242,7 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -293,7 +286,7 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         PSendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -339,7 +332,7 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -360,41 +353,6 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleModifyLevelCommand(const char* args)
-{
-    WorldPacket data;
-
-    if(!*args)
-        return false;
-
-    int32 lvl = atoi((char*)args);
-
-    if(lvl > 99 || lvl < 1)
-    {
-        SendSysMessage(LANG_BAD_VALUE);
-        return true;
-    }
-
-    Player *chr = getSelectedChar(m_session);
-    if (chr == NULL)
-    {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
-    }
-
-    PSendSysMessage(LANG_YOU_CHANGE_LVL, lvl, chr->GetName());
-
-    char buf[256];
-    sprintf((char*)buf,LANG_YOURS_LVL_CHANGED, m_session->GetPlayer()->GetName(), lvl);
-    FillSystemMessageData(&data, m_session, buf);
-
-    chr->GetSession()->SendPacket(&data);
-
-    chr->SetLevel( lvl );
-
-    return true;
-}
-
 bool ChatHandler::HandleModifyFactionCommand(const char* args)
 {
 
@@ -404,8 +362,13 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     uint32 dyflag;
 
     char* pfactionid = strtok((char*)args, " ");
-    Unit* chr =NULL;
-    chr = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+
+    Unit* chr = getSelectedCreature();
+    if(!chr)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
 
     if(!pfactionid)
     {
@@ -496,7 +459,7 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     else
         mark = atoi(pmark);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -530,7 +493,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 
     int flag = atoi((char*)args);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -587,7 +550,7 @@ bool ChatHandler::HandleModifyASpedCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -642,7 +605,7 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -684,7 +647,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -725,7 +688,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -765,7 +728,7 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
         return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1011,7 +974,7 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
             return true;
     }
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1058,7 +1021,7 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
 
     int32 gold = atoi((char*)args);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1117,7 +1080,7 @@ bool ChatHandler::HandleModifyGoldCommand(const char* args)
 
 bool ChatHandler::HandleModifyBitCommand(const char* args)
 {
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);

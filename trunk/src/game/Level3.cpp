@@ -257,9 +257,7 @@ bool ChatHandler::HandleLearnSkillCommand (const char* args)
     }
 
     Player * player = m_session->GetPlayer();
-    Player * target = objmgr.GetPlayer(player->GetSelection());
-
-    if (!target) target = player;
+    Player * target = getSelectedPlayer();
 
     if (skill > 0)
     {
@@ -292,10 +290,12 @@ bool ChatHandler::HandleUnLearnSkillCommand (const char* args)
         return true;
     }
 
-    Player * player = m_session->GetPlayer();
-    Player * target = objmgr.GetPlayer(player->GetSelection());
-
-    if (!target) target = player;
+    Player * target = getSelectedPlayer();
+    if(!target)
+    {
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
 
     if (target->GetSkillValue(skill))
     {
@@ -1166,22 +1166,15 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
 
 bool ChatHandler::HandleGetDistanceCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
+    Unit* pUnit = getSelectedUnit();
+
+    if(!pUnit)
     {
-        SendSysMessage(LANG_NO_SELECTION);
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         return true;
     }
 
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-
-    if(!pCreature)
-    {
-        SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
-    }
-
-    PSendSysMessage(LANG_DISTANCE, m_session->GetPlayer()->GetDistanceSq(pCreature));
+    PSendSysMessage(LANG_DISTANCE, m_session->GetPlayer()->GetDistanceSq(pUnit));
 
     return true;
 }
@@ -1366,36 +1359,26 @@ bool ChatHandler::HandleStandStateCommand(const char* args)
 
 bool ChatHandler::HandleDieCommand(const char* args)
 {
-    Player* SelectedPlayer=NULL;
-    Player *  player=m_session->GetPlayer();
-    uint64 guid = player->GetSelection();
-    if(guid)
-        SelectedPlayer = objmgr.GetPlayer(guid);
+    Unit* target = getSelectedUnit();
 
-    if(!SelectedPlayer)
-        SelectedPlayer = player;
+    if(!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
 
-    SelectedPlayer->SetHealth( 0);
-    SelectedPlayer->setDeathState(JUST_DIED);
+    target->SetHealth( 0);
+    target->setDeathState(JUST_DIED);
     return true;
 }
 
 bool ChatHandler::HandleReviveCommand(const char* args)
 {
-    Player* SelectedPlayer;
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-
-    if(guid == 0)
-    {
-        SelectedPlayer = m_session->GetPlayer();
-    }
-    else
-    {
-        SelectedPlayer = objmgr.GetPlayer(guid);
-    }
+    Player* SelectedPlayer = getSelectedPlayer();
     if(!SelectedPlayer)
     {
-        SelectedPlayer = m_session->GetPlayer();
+        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
     }
 
     SelectedPlayer->ResurrectPlayer();
@@ -1751,14 +1734,13 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
 bool ChatHandler::HandleEmoteCommand(const char* args)
 {
     uint32 emote = atoi((char*)args);
-    Player* chr = m_session->GetPlayer();
-    if(chr->GetSelection() == 0)
-        return false;
 
-    Unit* target = ObjectAccessor::Instance().GetCreature(*chr, chr->GetSelection());
-
+    Unit* target = getSelectedCreature();
     if(!target)
-        return false;
+    {
+        PSendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
 
     target->SetUInt32Value(UNIT_NPC_EMOTESTATE,emote);
 
@@ -1767,10 +1749,9 @@ bool ChatHandler::HandleEmoteCommand(const char* args)
 
 bool ChatHandler::HandleNpcInfoCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
     uint32 faction = 0, npcflags = 0, skinid = 0, Entry = 0;
 
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Unit* target = getSelectedCreature();
 
     if(!target)
     {
@@ -1783,7 +1764,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
     skinid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
     Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
 
-    PSendSysMessage(LANG_NPCINFO_CHAR,  GUID_LOPART(guid), faction, npcflags, Entry, skinid);
+    PSendSysMessage(LANG_NPCINFO_CHAR,  target->GetGUIDLow(), faction, npcflags, Entry, skinid);
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH,target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
@@ -1804,15 +1785,17 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
 bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
     uint32 entry = 0, testvalue = 0;
 
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
-
-    if(!target || !args)
+    Unit* target = getSelectedCreature();
+    if(!target)
     {
+        PSendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
+
+    if(!args)
+        return true;
 
     //m_session->GetPlayer( )->SetUInt32Value(PLAYER_FLAGS, (uint32)8);
 
@@ -1820,7 +1803,7 @@ bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
 
     entry = target->GetUInt32Value( OBJECT_FIELD_ENTRY );
 
-    m_session->SendTestCreatureQueryOpcode( entry, guid, testvalue );
+    m_session->SendTestCreatureQueryOpcode( entry, target->GetGUID(), testvalue );
 
     return true;
 }
@@ -1832,7 +1815,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
 
     int flag = atoi((char*)args);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1917,7 +1900,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 {
     int nrlvl = atoi((char*)args);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1944,7 +1927,7 @@ bool ChatHandler::HandleShowAreaCommand(const char* args)
 
     int area = atoi((char*)args);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1970,7 +1953,7 @@ bool ChatHandler::HandleHideAreaCommand(const char* args)
 
     int area = atoi((char*)args);
 
-    Player *chr = getSelectedChar(m_session);
+    Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
@@ -1993,12 +1976,11 @@ bool ChatHandler::HandleUpdate(const char* args)
     uint32 value;
 
     char* pUpdateIndex = strtok((char*)args, " ");
-    Unit* chr =NULL;
-    chr = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
 
+    Unit* chr = getSelectedUnit();
     if (chr == NULL)
     {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         return true;
     }
 
@@ -2086,13 +2068,14 @@ bool ChatHandler::HandleSetValue(const char* args)
     if (!px || !py)
         return false;
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Unit* target = getSelectedUnit();
     if(!target)
     {
-        target = m_session->GetPlayer();
-        guid = target->GetGUID();
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
     }
+
+    uint64 guid = target->GetGUID();
 
     uint32 Opcode = (uint32)atoi(px);
     if(Opcode >= target->GetValuesCount())
@@ -2131,13 +2114,14 @@ bool ChatHandler::HandleGetValue(const char* args)
     if (!px)
         return false;
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    Unit* target = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), m_session->GetPlayer()->GetSelection());
+    Unit* target = getSelectedUnit();
     if(!target)
     {
-        target = m_session->GetPlayer();
-        guid = target->GetGUID();
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
     }
+
+    uint64 guid = target->GetGUID();
 
     uint32 Opcode = (uint32)atoi(px);
     if(Opcode >= target->GetValuesCount())
@@ -2301,13 +2285,12 @@ bool ChatHandler::HandleResetCommand (const char * args)
 {
     if(!*args)
         return false;
-    Player* SelectedPlayer=NULL;
-    Player* player=m_session->GetPlayer();
-    uint64 guid = player->GetSelection();
-    if(guid)
-        SelectedPlayer = objmgr.GetPlayer(guid);
-    if(SelectedPlayer)
-        player = SelectedPlayer;
+    Player* player = getSelectedPlayer();
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
 
     std::string argstr = (char*)args;
     if (argstr == "stats")
@@ -2476,15 +2459,15 @@ bool ChatHandler::HandleResetCommand (const char * args)
 
 bool ChatHandler::HandleMaxSkillCommand(const char* args)
 {
-    Player* SelectedPlayer=NULL;
-    Player* player=m_session->GetPlayer();
-    uint64 guid = player->GetSelection();
-    if(guid)
-        SelectedPlayer = objmgr.GetPlayer(guid);
-    if(SelectedPlayer)
-        player = SelectedPlayer;
+    Player* SelectedPlayer = getSelectedPlayer();
+    if(!SelectedPlayer)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
     // each skills that have max skill value dependent from level seted to current level max skill value
-    player->UpdateSkillsToMaxSkillsForLevel();
+    SelectedPlayer->UpdateSkillsToMaxSkillsForLevel();
     return true;
 }
 

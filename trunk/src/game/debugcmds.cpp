@@ -33,20 +33,13 @@
 
 bool ChatHandler::HandleDebugInArcCommand(const char* args)
 {
-    Object *obj;
+    Object *obj = getSelectedUnit();
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid != 0)
+    if(!obj)
     {
-        obj = ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(), guid);
-        if(!obj)
-        {
-            SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-            return true;
-        }
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
     }
-    else
-        obj = m_session->GetPlayer();
 
     SendSysMessage(LANG_NOT_IMPLEMENTED);
 
@@ -78,10 +71,10 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 bool ChatHandler::HandleSetPoiCommand(const char* args)
 {
     Player *  pPlayer = m_session->GetPlayer();
-    Unit* target = ObjectAccessor::Instance().GetCreature(*pPlayer, pPlayer->GetSelection());
+    Unit* target = getSelectedUnit();
     if(!target)
     {
-        SendSysMessage(LANG_SELECT_CREATURE);
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
         return true;
     }
     uint32 icon = atol((char*)args);

@@ -351,20 +351,23 @@ void Object::SendMessageToSet(WorldPacket *data, bool bToSelf)
     MapManager::Instance().GetMap(m_mapId)->MessageBoardcast(this, data);
 }
 
-void Object::LoadValues(const char* data)
+bool Object::LoadValues(const char* data)
 {
     if(!m_uint32Values) _InitValues();
 
     vector<string> tokens = StrSplit(data, " ");
 
+    if(tokens.size() != m_valuesCount)
+        return false;
+
     vector<string>::iterator iter;
     int index;
 
-    for (iter = tokens.begin(), index = 0;
-        index < m_valuesCount && iter != tokens.end(); ++iter, ++index)
+    for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
         m_uint32Values[index] = atol((*iter).c_str());
     }
+    return true;
 }
 
 void Object::LoadTaxiMask(const char* data)

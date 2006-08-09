@@ -265,15 +265,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
 bool ChatHandler::HandleDeleteCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-
+    Creature *unit = getSelectedCreature();
     if(!unit)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
@@ -404,14 +396,7 @@ bool ChatHandler::HandleItemRemoveCommand(const char* args)
 
 bool ChatHandler::HandleAddMoveCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = getSelectedCreature();
 
     if(!pCreature)
     {
@@ -421,7 +406,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     // changed 'creatureId' to lowercase
     // changed 'X', 'y', 'Z' to 'positionx', 'positiony', 'positionz'
-    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f')", GUID_LOPART(guid), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
+    sDatabase.PExecute("INSERT INTO `creature_movement` (`id`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%f', '%f', '%f')", pCreature->GetGUIDLow(), m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ());
 
     SendSysMessage(LANG_WAYPOINT_ADDED);
 
@@ -442,14 +427,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
         return true;
     }
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = getSelectedCreature();
 
     if(!pCreature)
     {
@@ -459,7 +437,7 @@ bool ChatHandler::HandleRandomCommand(const char* args)
 
     // fix me : 'moverandom' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creature ?
     // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `moverandom` = '%i' WHERE `guid` = '%u'", option, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `creature` SET `moverandom` = '%i' WHERE `guid` = '%u'", option, pCreature->GetGUIDLow());
 
     pCreature->setMoveRandomFlag(option > 0);
 
@@ -481,14 +459,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
         return true;
     }
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = getSelectedCreature();
 
     if(!pCreature)
     {
@@ -498,7 +469,7 @@ bool ChatHandler::HandleRunCommand(const char* args)
 
     // fix me : 'running' doesn't exist in https://svn.mangosproject.org/trac/MaNGOS/wiki/Database/creatures ?
     // perhaps it should be 'state'?
-    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `creature` SET `running` = '%i' WHERE `guid` = '%u'", option, pCreature->GetGUIDLow());
 
     pCreature->setMoveRunFlag(option > 0);
 
@@ -518,15 +489,7 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return true;
     }
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
-
+    Creature* pCreature = getSelectedCreature();
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
@@ -549,14 +512,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     uint32 npcFlags = (uint32) atoi((char*)args);
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = getSelectedCreature();
 
     if(!pCreature)
     {
@@ -571,7 +527,7 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
     SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
     uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
-    m_session->SendCreatureQuery( entry, guid );
+    m_session->SendCreatureQuery( entry, pCreature->GetGUID() );
 
     return true;
 }
@@ -583,14 +539,7 @@ bool ChatHandler::HandleDisplayIdCommand(const char* args)
 
     uint32 displayId = (uint32) atoi((char*)args);
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature *pCreature = getSelectedCreature();
 
     if(!pCreature)
     {
@@ -612,14 +561,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
 
     uint32 factionId = (uint32) atoi((char*)args);
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    if (guid == 0)
-    {
-        SendSysMessage(LANG_NO_SELECTION);
-        return true;
-    }
-
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = getSelectedCreature();
 
     if(!pCreature)
     {

@@ -24,6 +24,7 @@
 
 class ChatHandler;
 class WorldSession;
+class Creature;
 class Player;
 class Unit;
 
@@ -123,7 +124,6 @@ class ChatHandler
         bool HandleModifyManaCommand(const char* args);
         bool HandleModifyRageCommand(const char* args);
         bool HandleModifyEnergyCommand(const char* args);
-        bool HandleModifyLevelCommand(const char* args);
         bool HandleModifyGoldCommand(const char* args);
         bool HandleModifyASpedCommand(const char* args);
         bool HandleModifySpeedCommand(const char* args);
@@ -224,7 +224,9 @@ class ChatHandler
         bool HandleSendMailNotice(const char* args);
         bool HandleQueryNextMailTime(const char * args);
 
-        Player* getSelectedChar(WorldSession *client);
+        Player*   getSelectedPlayer();
+        Creature* getSelectedCreature();
+        Unit*     getSelectedUnit();
 
         WorldSession *m_session;
 
