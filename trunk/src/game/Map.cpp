@@ -41,7 +41,7 @@ bool FileExists(const char * fn)
     return true;
 }
 
-GridMap * LoadMAP(int mapid,int x,int y)
+GridMap * Map::LoadMAP(int mapid,int x,int y)
 {
     char *tmp;
     static bool showcheckmapInfo=false;
@@ -142,7 +142,7 @@ Map::EnsureGridCreated(const GridPair &p)
             int gy=63-p.y_coord;
 
             if(!GridMaps[gx][gy])
-                GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+				GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
 
         }
     }
@@ -572,7 +572,7 @@ float Map::GetHeight(float x, float y )
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+		GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
@@ -607,7 +607,7 @@ uint16 Map::GetAreaFlag(float x, float y )
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+		GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
@@ -642,7 +642,7 @@ uint8 Map::GetTerrainType(float x, float y )
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+		GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->terrain_type[(int)(lx)][(int)(ly)];
@@ -677,7 +677,7 @@ float Map::GetWaterLevel(float x, float y )
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=LoadMAP(i_id,gx,gy);
+		GridMaps[gx][gy]=Map::LoadMAP(i_id,gx,gy);
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->liquid_level[(int)(lx)][(int)(ly)];
