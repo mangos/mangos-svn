@@ -612,7 +612,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         };
         Corpse* GetCorpse() const;
         void DeleteCorpse(bool inc_bones = false);
-        void UpdateCorpse(Corpse* corpse);
 
         int getCinematic()
         {

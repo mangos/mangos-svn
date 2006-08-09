@@ -26,6 +26,7 @@
 #include "Opcodes.h"
 #include "WorldSession.h"
 #include "WorldPacket.h"
+#include "GossipDef.h"
 
 Corpse::Corpse() : Object()
 {
@@ -76,15 +77,16 @@ void Corpse::SaveToDB(CorpseType type)
     sDatabase.PExecute(
         "INSERT INTO `corpse_grid` (`guid`,`map`,`position_x`,`position_y`,`cell_position_x`,`cell_position_y` ) "
         "SELECT `guid`,`map`,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u,((`position_x`-%f)/%f) + %u,((`position_y`-%f)/%f) + %u "
-        "FROM `corpse` WHERE `guid` = '%u';", CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, 
+        "FROM `corpse` WHERE `guid` = '%u'", CENTER_GRID_OFFSET, SIZE_OF_GRIDS, CENTER_GRID_ID, CENTER_GRID_OFFSET,SIZE_OF_GRIDS, CENTER_GRID_ID, 
         CENTER_GRID_CELL_OFFSET,SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL, CENTER_GRID_CELL_ID, GetGUIDLow()
     );
-    sDatabase.PExecute("UPDATE `corpse_grid` SET `grid`=(`position_x`*%u) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`) WHERE `guid` = '%u';", MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP,GetGUIDLow());
+    sDatabase.PExecute("UPDATE `corpse_grid` SET `grid`=(`position_x`*%u) + `position_y`,`cell`=((`cell_position_y` * %u) + `cell_position_x`) WHERE `guid` = '%u'", MAX_NUMBER_OF_GRIDS, TOTAL_NUMBER_OF_CELLS_PER_MAP,GetGUIDLow());
 }
 
 void Corpse::DeleteFromWorld(bool remove)
 {
     ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
+    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
     MapManager::Instance().GetMap(GetMapId())->Remove(this,remove);
 }
 
@@ -94,18 +96,18 @@ void Corpse::DeleteFromDB(CorpseType type)
     ss.rdbuf()->str("");
     if(type == CORPSE_BONES)
         // only specific bones
-        ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "';";
+        ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "'";
     else
         // all corpses (not bones)
-        ss  << "DELETE FROM `corpse` WHERE `player` = '" << GetOwnerGUID() << "' AND `bones_flag` = '0';";
+        ss  << "DELETE FROM `corpse` WHERE `player` = '" << GetOwnerGUID() << "' AND `bones_flag` = '0'";
     sDatabase.Execute( ss.str().c_str() );
 
-    sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u';",GetGUIDLow());
+    sDatabase.PExecute( "DELETE FROM `corpse_grid` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 bool Corpse::LoadFromDB(uint32 guid)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE `guid` = '%u';",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
         return false;
@@ -119,7 +121,11 @@ bool Corpse::LoadFromDB(uint32 guid)
     //uint32 zoneid   = fields[6].GetUInt32();
     uint32 mapid    = fields[7].GetUInt32();
 
-    LoadValues( fields[8].GetString() );
+    if(!LoadValues( fields[8].GetString() ))
+    {
+        sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
+        return false;
+    }
 
     // place
     SetMapId(mapid);
@@ -132,15 +138,32 @@ bool Corpse::LoadFromDB(uint32 guid)
 
 void Corpse::AddToWorld()
 {
+    ObjectAccessor::Instance().AddCorpse(this);
     Object::AddToWorld();
 
-    ObjectAccessor::Instance().AddCorpse(this);
+    if(Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID()))
+        UpdateForPlayer(player,true);
 }
 
 void Corpse::RemoveFromWorld()
 {
-
-    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
-
     Object::RemoveFromWorld();
+    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
+}
+
+void Corpse::UpdateForPlayer(Player* player, bool first)
+{
+    if(player && player->GetGUID() == GetOwnerGUID())
+    {
+        bool POI_range = (GetDistance2dSq(player) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS);
+
+        if(first || POI_range && !m_POI)
+        {
+            std::string corpsename = player->GetName();
+            corpsename.append(" corpse.");
+            player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), 7, 6, 30, corpsename.c_str());
+        }
+
+        m_POI = POI_range;
+    }
 }

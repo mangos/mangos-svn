@@ -978,7 +978,8 @@ void Player::AddToWorld()
     }
     AddWeather();
 
-    UpdateCorpse(GetCorpse());
+    if(Corpse* corpse = GetCorpse())
+        corpse->UpdateForPlayer(this,true);
 }
 
 void Player::RemoveFromWorld()
@@ -2030,7 +2031,7 @@ void Player::DeleteFromDB()
         Field *fields = resultCount->Fetch();
         charCount = fields[0].GetUInt32();
         delete resultCount;
-        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = %d", charCount, GetSession()->GetAccountId(), realmID, charCount);
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetSession()->GetAccountId(), realmID, charCount);
     }
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
@@ -2327,7 +2328,7 @@ void Player::CreateCorpse()
 
     MapManager::Instance().GetMap(corpse->GetMapId())->Add(corpse);
 
-    UpdateCorpse(corpse);
+    corpse->AddToWorld();
 }
 
 void Player::SpawnCorpseBones()
@@ -2353,6 +2354,11 @@ void Player::SpawnCorpseBones()
 
     corpse->DeleteFromDB(CORPSE_RESURRECTABLE);
     corpse->SaveToDB(CORPSE_BONES);
+
+    // Removing outdated POI if at same map
+    if(corpse->GetMapId() == GetMapId())
+        PlayerTalkClass->SendPointOfInterest( corpse->GetPositionX(), corpse->GetPositionY(), 7, 0, 30, "" );
+
 }
 
 Corpse* Player::GetCorpse() const 
@@ -2419,7 +2425,11 @@ void Player::RepopAtGraveyard()
         m_deathTimer = 0;
 
         TeleportTo(ClosestGrave->MapId, ClosestGrave->X, ClosestGrave->Y, ClosestGrave->Z, ClosestGrave->orientation);
+
         delete ClosestGrave;
+
+        if(Corpse* corpse = GetCorpse())
+            corpse->UpdateForPlayer(this,true);
     }
 }
 
@@ -2445,7 +2455,7 @@ void Player::BroadcastToFriends(std::string msg)
     Field *fields;
     Player *pfriend;
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
@@ -3133,7 +3143,7 @@ void Player::UpdateHonor(void)
 
     sLog.outDetail("PLAYER: UpdateHonor");
 
-    QueryResult *result = sDatabase.PQuery("SELECT `type`,`honor`,`date` FROM `character_kill` WHERE `guid` = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `type`,`honor`,`date` FROM `character_kill` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
     {
@@ -3266,7 +3276,7 @@ int Player::CalculateTotalKills(Player *pVictim) const
 {
     int total_kills = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `honor` FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u';", GetGUIDLow(), pVictim->GetEntry());
+    QueryResult *result = sDatabase.PQuery("SELECT `honor` FROM `character_kill` WHERE `guid` = '%u' AND `creature_template` = '%u'", GetGUIDLow(), pVictim->GetEntry());
 
     if(result)
     {
@@ -3321,7 +3331,7 @@ void Player::CalculateHonor(Unit *uVictim)
         now = localtime( &rawtime );
         today = ((uint32)(now->tm_year << 16)|(uint32)(now->tm_yday));
 
-        sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`,`type`) VALUES (%u, %u, %f, %u, %u);", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
+        sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`,`type`) VALUES (%u, %u, %f, %u, %u)", (uint32)GetGUIDLow(), (uint32)uVictim->GetEntry(), (float)parcial_honor_points, (uint32)today, (uint8)kill_type);
 
         UpdateHonor();
     }
@@ -8381,7 +8391,7 @@ void Player::SendQuestUpdateAddKill( uint32 quest_id, uint64 guid, uint32 creatu
 bool Player::LoadFromDB( uint32 guid )
 {
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%lu';",(unsigned long)guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`realm`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`online`,`highest_rank`,`standing`, `rating`,`cinematic` FROM `character` WHERE `guid` = '%lu'",(unsigned long)guid);
 
     if(!result)
         return false;
@@ -8390,7 +8400,11 @@ bool Player::LoadFromDB( uint32 guid )
 
     Object::_Create( guid, HIGHGUID_PLAYER );
 
-    LoadValues( fields[3].GetString() );
+    if(!LoadValues( fields[3].GetString()))
+    {
+        sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
+        return false;
+    }
 
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
@@ -8481,7 +8495,7 @@ void Player::_LoadActions()
 
     m_actions.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`;",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
 
     if(result)
     {
@@ -8506,7 +8520,7 @@ void Player::_LoadAuras()
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8546,7 +8560,7 @@ void Player::_LoadBids()
 
     m_bids.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`amount` FROM `auctionhouse_bid` WHERE `bidder` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8567,23 +8581,13 @@ void Player::_LoadBids()
 
 void Player::_LoadCorpse()
 {
-    //UpdateCorpse(GetCorpse());
+    if(Corpse* corpse = GetCorpse())
+        corpse->UpdateForPlayer(this,true);
 }
-
-void Player::UpdateCorpse(Corpse* corpse)
-{
-    if(corpse && GetGUID() == corpse->GetOwnerGUID())
-    {
-        std::string corpsename = m_name;
-        corpsename.append(" corpse.");
-        PlayerTalkClass->SendPointOfInterest( corpse->GetPositionX(), corpse->GetPositionY(), 7, 6, 30, corpsename.c_str());
-    }
-}
-
 
 void Player::_LoadInventory()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(),INVENTORY_SLOT_BAG_0);
 
     uint16 dest;
     if (result)
@@ -8642,7 +8646,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `mail` WHERE `receiver` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `mail` WHERE `receiver` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8685,7 +8689,7 @@ void Player::_LoadQuestStatus()
 {
     mQuestStatus.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u';", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
     {
@@ -8730,7 +8734,7 @@ void Player::_LoadReputation()
 
     factions.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8762,7 +8766,7 @@ void Player::_LoadSpells()
 
     m_spells.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8780,7 +8784,7 @@ void Player::_LoadSpells()
 
 void Player::_LoadTutorials()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_tutorial` WHERE `guid` = '%u';",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -8921,7 +8925,7 @@ void Player::_SaveActions()
     std::list<struct actions>::iterator itr;
     for (itr = m_actions.begin(); itr != m_actions.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
+        sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), (uint32)itr->button, (uint32)itr->action, (uint32)itr->type, (uint32)itr->misc);
     }
 }
 
@@ -8938,7 +8942,7 @@ void Player::_SaveAuctions()
             Item *it = objmgr.GetAItem(Aentry->item);
 
             sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
-            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u');", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
+            sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u')", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
 
             std::stringstream ss;
             ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
@@ -8960,7 +8964,7 @@ void Player::_SaveAuras()
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d');", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
+        sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
     }
 }
 
@@ -8974,7 +8978,7 @@ void Player::_SaveBids()
         AuctionEntry *a = objmgr.GetAuction((*itr)->AuctionID);
         if (a)
         {
-            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%u', '%u', '%u');", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
+            sDatabase.PExecute("INSERT INTO `auctionhouse_bid` (`bidder`,`id`,`amount`) VALUES ('%u', '%u', '%u')", GetGUIDLow(), (*itr)->AuctionID, (*itr)->amt);
         }
     }
 
@@ -8982,13 +8986,13 @@ void Player::_SaveBids()
 
 void Player::_SaveInventory()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u';",GetGUIDLow(), INVENTORY_SLOT_BAG_0);
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'",GetGUIDLow(), INVENTORY_SLOT_BAG_0);
 
     for(int i = EQUIPMENT_SLOT_START; i < BANK_SLOT_BAG_END; i++)
     {
         if ( m_items[i] != 0 )
         {
-            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), INVENTORY_SLOT_BAG_0, i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
+            sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), INVENTORY_SLOT_BAG_0, i, m_items[i]->GetGUIDLow(), m_items[i]->GetEntry());
             m_items[i]->SaveToDB();
         }
     }
@@ -9004,7 +9008,7 @@ void Player::_SaveMail()
     {
         Mail *m = (*itr);
 
-        QueryResult *result = sDatabase.PQuery("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u');", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
+        QueryResult *result = sDatabase.PQuery("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", m->messageID, m->sender, m->receiver, m->subject.c_str(), m->body.c_str(), m->item,  m->time, m->money, m->COD, m->checked);
         delete result;
     }
 }
@@ -9015,7 +9019,7 @@ void Player::_SaveQuestStatus()
 
     for( StatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++ i )
     {
-        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_timer, i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
+        sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, i->second.m_timer, i->second.m_mobcount[0], i->second.m_mobcount[1], i->second.m_mobcount[2], i->second.m_mobcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
     }
 }
 
@@ -9030,7 +9034,7 @@ void Player::_SaveReputation()
     for(itr = factions.begin(); itr != factions.end(); ++itr)
     {
 
-        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u');", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+        sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%u', '%u')", (uint32)GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
 
     }
 }
@@ -9041,14 +9045,14 @@ void Player::_SaveSpells()
 
     for (PlayerSpellList::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u');", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
+        sDatabase.PQuery("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), (*itr)->spellId, (*itr)->slotId,(*itr)->active);
     }
 }
 
 void Player::_SaveTutorials()
 {
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
-    sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u');", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+    sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
 }
 
 void Player::SavePet()
