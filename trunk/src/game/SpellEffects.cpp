@@ -370,10 +370,12 @@ void Spell::EffectHeal( uint32 i )
         float pct = (100+unitTarget->m_RegenPCT)/100;
         uint32 curhealth = unitTarget->GetHealth();
         uint32 maxhealth = unitTarget->GetMaxHealth();
-        uint32 addhealth = ( curhealth + damage*pct < maxhealth ? uint32(damage*pct) : maxhealth - curhealth );
-        unitTarget->SetHealth( curhealth + addhealth );
+        uint32 addhealth = damage*pct;
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth);
+        uint32 newhealth = curhealth + addhealth < maxhealth ? uint32(curhealth + addhealth) : maxhealth;
+        unitTarget->SetHealth( newhealth );
+        
 
         //If the target is in combat, then player is in combat too
         if( m_caster != unitTarget &&
@@ -1372,7 +1374,7 @@ void Spell::EffectHealMaxHealth(uint32 i)
         unitTarget->SetHealth(curHealth+heal);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        SendHealSpellOnPlayer((Player*)unitTarget, m_spellInfo->Id, maxHealth - curHealth);
+        SendHealSpellOnPlayer((Player*)unitTarget, m_spellInfo->Id, heal);
 }
 
 void Spell::EffectInterruptCast(uint32 i)
@@ -1565,9 +1567,11 @@ void Spell::EffectSummonTotem(uint32 i)
         delete pTotem;
         return;
     }
-    pTotem->AIM_Initialize();
 
+    pTotem->AIM_Initialize();
+    pTotem->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
     pTotem->SetLevel(m_caster->getLevel());
+
     sLog.outError("AddObject at Spell.cppl line 1040");
     MapManager::Instance().GetMap(pTotem->GetMapId())->Add(pTotem);
 

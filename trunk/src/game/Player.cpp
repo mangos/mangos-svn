@@ -3507,7 +3507,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             case INTELLECT:                                 //modify intellect
                 ApplyStatMod(STAT_INTELLECT,               val,    apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT3,val,    apply);
-                ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
+                //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 typestr = "INTELLECT";
                 break;
             case SPIRIT:                                    //modify spirit
@@ -3518,7 +3518,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             case STAMINA:                                   //modify stamina
                 ApplyStatMod(STAT_STAMINA                ,val,   apply);
                 ApplyModUInt32Value(PLAYER_FIELD_POSSTAT2,val,   apply);
-                ApplyMaxHealthMod(                        val*10,apply);
+                //ApplyMaxHealthMod(                        val*10,apply);
                 typestr = "STAMINA";
                 break;
         }
