@@ -48,6 +48,8 @@ class Corpse : public Object
 
         uint64 const& GetOwnerGUID() const { return GetUInt64Value(CORPSE_FIELD_OWNER); }
 
+        void UpdateForPlayer(Player* player, bool first);
+
         bool m_POI;
 };
 #endif

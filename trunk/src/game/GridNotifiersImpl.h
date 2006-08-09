@@ -143,11 +143,6 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
         if(pl->GetDistanceSq(c) > 100*100)                  // visibility distance
             pl->SendOutOfRange(c);
 
-    // Cancel training or shoping or bank dialogs
-    //if(pl->**==c)
-    //    if(pl->GetDistanceSq(iter->second) > 5*5) // iteraction distance
-    //        pl->SendOutOfRange(c);
-
     // Creature AI reaction
     if( c->AI().IsVisible(pl) )
         c->AI().MoveInLineOfSight(pl);
@@ -159,18 +154,7 @@ MaNGOS::PlayerRelocationNotifier::Visit(std::map<OBJECT_HANDLE, Corpse *> &m)
 {
     for(std::map<OBJECT_HANDLE, Corpse *>::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( !i_player.isAlive() )
-        {
-           if(i_player.GetDistance2dSq(iter->second) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS)
-           {
-                if(!iter->second->m_POI)
-                {
-                    i_player.UpdateCorpse(iter->second);
-                    iter->second->m_POI = true;
-                }
-           }
-           else
-                iter->second->m_POI = false;
-        }
+            iter->second->UpdateForPlayer(&i_player,false);
 }
 
 template<>
