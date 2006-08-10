@@ -467,7 +467,10 @@ void Aura::_AddAura()
         }
     }
 
-    //m_target->RemoveRankAurasDueToSpell(m_spellId);
+    // adding linked auras 
+    if(m_modifier.m_auraname == 36) // add the shapeshift aura's boosts
+        HandleShapeshiftBoosts(true, this);
+
     m_target->ApplyStats(false);
     ApplyModifier(true);
     m_target->ApplyStats(true);
@@ -516,9 +519,6 @@ void Aura::_AddAura()
             UpdateAuraDuration();
     }
 
-    // adding linked auras 
-    if(m_modifier.m_auraname == 36) // add the shapeshift aura's boosts
-        HandleShapeshiftBoosts(true, this);
 }
 
 void Aura::_RemoveAura()
