@@ -669,13 +669,21 @@ void Spell::SendSpellCooldown()
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if( m_spellInfo->RecoveryTime == 0 && m_spellInfo->CategoryRecoveryTime == 0 )
+    // some special spells without correct cooldown in SpellInfo
+    bool thrownAttack = (m_spellInfo->Id == 2764);
+
+    if( m_spellInfo->RecoveryTime == 0 && m_spellInfo->CategoryRecoveryTime == 0 && !thrownAttack )
         return;
 
     Player* _player = (Player*)m_caster;
 
     int32 rec = m_spellInfo->RecoveryTime;
     int32 catrec = m_spellInfo->CategoryRecoveryTime;
+
+    // throw spell used equiped item cooldown values
+    if (thrownAttack)
+        rec = _player->GetAttackTime(RANGED_ATTACK);
+
     _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
     _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
     if (rec < 0) rec = 0;

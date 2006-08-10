@@ -48,6 +48,17 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     WorldPacket tmpData;
 
+    uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
+    if(pl->GetGUID() == rc)
+    {
+        tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
+        tmpData << uint32(0);
+        tmpData << uint32(0);
+        tmpData << uint32(2);
+        SendPacket(&tmpData);
+        return;
+    }
+
     if (pl->GetMoney() < money + 30)
     {
         tmpData.Initialize(SMSG_SEND_MAIL_RESULT);
@@ -55,78 +66,73 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         tmpData << uint32(0);
         tmpData << uint32(3);
         SendPacket(&tmpData);
+        return;
     }
-    else
+
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", receiver.c_str());
+
+    if (!result)
     {
-
-        QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", receiver.c_str());
-
-        Player *receive = objmgr.GetPlayer(receiver.c_str());
-        uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
-        if (result)
-        {
-            delete result;
-            data.Initialize(SMSG_SEND_MAIL_RESULT);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(0);
-            SendPacket(&data);
-
-            if (item != 0)
-            {
-                uint16 pos = pl->GetPosByGuid(item);
-                Item *it = pl->GetItemByPos( pos );
-
-                objmgr.AddMItem(it);
-
-                std::stringstream ss;
-                ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
-                    << it->GetGUIDLow() << ", '";
-                for(uint16 i = 0; i < it->GetValuesCount(); i++ )
-                {
-                    ss << it->GetUInt32Value(i) << " ";
-                }
-                ss << "' )";
-                sDatabase.Execute( ss.str().c_str() );
-
-                pl->RemoveItem( (pos >> 8), (pos & 255), true );
-            }
-            pl->ModifyMoney( -30 - money );
-
-            if (receive)
-            {
-                Mail* m = new Mail;
-                m->messageID = mID;
-                m->sender =   pl->GetGUIDLow();
-                m->receiver = GUID_LOPART(rc);
-                m->subject = subject;
-                m->body = body;
-                m->item = GUID_LOPART(item);
-                m->money = money;
-                m->time = etime;
-                m->COD = 0;
-                m->checked = 0;
-                receive->AddMail(m);
-
-                data.Initialize(SMSG_RECEIVED_MAIL);
-                data << uint32(0);
-                SendPacket(&data);
-                receive->GetSession()->SendPacket(&data);
-            }
-
-            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
-
-        }
-        else
-        {
-            data.Initialize(SMSG_SEND_MAIL_RESULT);
-            data << uint32(0);
-            data << uint32(0);
-            data << uint32(4);
-            SendPacket(&data);
-        }
+        data.Initialize(SMSG_SEND_MAIL_RESULT);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(4);
+        SendPacket(&data);
     }
+
+    delete result;
+    data.Initialize(SMSG_SEND_MAIL_RESULT);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    SendPacket(&data);
+
+    if (item != 0)
+    {
+        uint16 pos = pl->GetPosByGuid(item);
+        Item *it = pl->GetItemByPos( pos );
+
+        objmgr.AddMItem(it);
+
+        std::stringstream ss;
+        ss  << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
+            << it->GetGUIDLow() << ", '";
+        for(uint16 i = 0; i < it->GetValuesCount(); i++ )
+        {
+            ss << it->GetUInt32Value(i) << " ";
+        }
+        ss << "' )";
+        sDatabase.Execute( ss.str().c_str() );
+
+        pl->RemoveItem( (pos >> 8), (pos & 255), true );
+    }
+    pl->ModifyMoney( -30 - money );
+
+    Player *receive = objmgr.GetPlayer(rc);
+
+    if (receive)
+    {
+        Mail* m = new Mail;
+        m->messageID = mID;
+        m->sender =   pl->GetGUIDLow();
+        m->receiver = GUID_LOPART(rc);
+        m->subject = subject;
+        m->body = body;
+        m->item = GUID_LOPART(item);
+        m->money = money;
+        m->time = etime;
+        m->COD = 0;
+        m->checked = 0;
+        receive->AddMail(m);
+
+        data.Initialize(SMSG_RECEIVED_MAIL);
+        data << uint32(0);
+        SendPacket(&data);
+        receive->GetSession()->SendPacket(&data);
+    }
+
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`sender`,`receiver`,`subject`,`body`,`item`,`time`,`money`,`cod`,`checked`) VALUES ('%u', '%u', '%u', '%s', '%s', '%u', '%u', '%u', '%u', '%u')", mID, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), body.c_str(), GUID_LOPART(item), (long)etime, money, 0, 0);
 }
 
 void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
