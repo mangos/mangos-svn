@@ -350,7 +350,7 @@ ObjectAccessor::Update(const uint32  &diff)
                         break;
                 }
 
-                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+                if (update_cell.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
                     break;
             }
         }
