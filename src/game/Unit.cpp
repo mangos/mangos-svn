@@ -37,6 +37,7 @@
 #include "Formulas.h"
 #include "Pet.h"
 #include "Util.h"
+#include "Totem.h"
 
 #include <math.h>
 
@@ -55,7 +56,7 @@ Unit::Unit() : Object()
     m_currentSpell = NULL;
     m_currentMeleeSpell = NULL;
     m_addDmgOnce = 0;
-    m_TotemSlot1 = m_TotemSlot2 = m_TotemSlot3 = m_TotemSlot4  = 0;
+    m_TotemSlot[0] = m_TotemSlot[1] = m_TotemSlot[2] = m_TotemSlot[3]  = 0;
     //m_Aura = NULL;
     //m_AurasCheck = 2000;
     //m_removeAuraTimer = 4;
@@ -1747,9 +1748,19 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     if((*i).second->IsAreaAura())
     {
         Unit *i_caster = (*i).second->GetCaster(), *i_target = (*i).second->GetTarget();
-        if(i_caster->GetTypeId() == TYPEID_PLAYER && i_caster->GetGUID() == i_target->GetGUID())
+        if(i_caster->GetGUID() == i_target->GetGUID())
         {
-            Group* pGroup = objmgr.GetGroupByLeader(((Player*)i_caster)->GetGroupLeader());
+            uint64 leaderGuid = 0;
+            if (i_caster->GetTypeId() == TYPEID_PLAYER)
+                leaderGuid = ((Player*)i_caster)->GetGroupLeader();
+            else if(((Creature*)i_caster)->isTotem())
+            {
+                Unit *owner = ((Totem*)i_caster)->GetOwner();
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    leaderGuid = ((Player*)owner)->GetGroupLeader();
+            }
+
+            Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
             float radius =  GetRadius(sSpellRadius.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
             if(pGroup)
             {
@@ -2374,26 +2385,14 @@ void Unit::SetCharm(Creature* charmed)
 
 void Unit::UnsummonTotem(int8 slot)
 {
-    uint64 t_guids[4] = { m_TotemSlot1, m_TotemSlot2, m_TotemSlot3, m_TotemSlot4 };
     WorldPacket data;
 
     for (int8 i = 0; i < 4; i++)
     {
         if (i != slot && slot != -1) continue;
-        Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*this, t_guids[i]);
-
-        if(OldTotem)
-        {
-            data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-            data << t_guids[i];
-            SendMessageToSet(&data, true);
-
-            data.Initialize(SMSG_DESTROY_OBJECT);
-            data << t_guids[i];
-            SendMessageToSet(&data, true);
-            MapManager::Instance().GetMap(OldTotem->GetMapId())->Remove(OldTotem, true);
-            OldTotem = NULL;
-        }
+        Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*this, m_TotemSlot[i]);
+        if (!OldTotem || !OldTotem->isTotem()) continue;
+        ((Totem*)OldTotem)->UnSummon();
     }
 }
 

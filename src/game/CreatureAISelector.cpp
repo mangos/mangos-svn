@@ -44,6 +44,8 @@ namespace FactorySelector
                 ainame="GuardAI";
             else if(creature->isPet())
                 ainame="PetAI";
+            else if(creature->isTotem())
+                ainame="TotemAI";
         }
 
         const CreatureAICreator *ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );

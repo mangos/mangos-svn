@@ -43,7 +43,7 @@ Creature::Creature() :
 Unit(), i_AI(NULL), m_lootMoney(0), m_deathTimer(0), m_respawnTimer(0),
 m_respawnDelay(25000), m_corpseDelay(60000), m_respawnradius(0.0),
 itemcount(0), mTaxiNode(0), m_moveBackward(false), m_moveRandom(false),
-m_moveRun(false), m_emoteState(0), m_isPet(false),
+m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), pickPocketed(false)
 {
     m_valuesCount = UNIT_END;

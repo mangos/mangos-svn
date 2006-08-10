@@ -38,6 +38,7 @@
 #include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "Policies/SingletonImp.h"
+#include "Totem.h"
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
@@ -353,9 +354,19 @@ void Aura::Update(uint32 diff)
     if(m_areaAura && m_caster && m_target)
     {
         // update for the caster of the aura
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->GetGUID() == m_target->GetGUID())
+        if(m_caster->GetGUID() == m_target->GetGUID())
         {
-            Group* pGroup = objmgr.GetGroupByLeader(((Player*)m_caster)->GetGroupLeader());
+            uint64 leaderGuid = 0;
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                leaderGuid = ((Player*)m_caster)->GetGroupLeader();
+            else if(((Creature*)m_caster)->isTotem())
+            {
+                Unit *owner = ((Totem*)m_caster)->GetOwner();
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                    leaderGuid = ((Player*)owner)->GetGroupLeader();
+            }
+            
+            Group* pGroup = objmgr.GetGroupByLeader(leaderGuid);
             float radius =  GetRadius(sSpellRadius.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
             if(pGroup)
             {
@@ -380,6 +391,29 @@ void Aura::Update(uint32 diff)
                         {
                             Aura *aur = new Aura(GetSpellProto(), m_effIndex, m_caster, Target);
                             Target->AddAura(aur);
+                        }
+                    }
+                }
+            }
+            else if (m_caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)m_caster)->isTotem())
+            {
+                // add / remove auras from the totem's owner
+                Unit *owner = ((Totem*)m_caster)->GetOwner();
+                if (owner)
+                {
+                    Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
+                    if(m_caster->GetDistanceSq(owner) > radius * radius )
+                    {
+                        if (o_aura)
+                            if (o_aura->GetCaster()->GetGUID() == m_caster->GetGUID())
+                                owner->RemoveAura(m_spellId, m_effIndex);
+                    }
+                    else
+                    {
+                        if (!o_aura)
+                        {
+                            Aura *aur = new Aura(GetSpellProto(), m_effIndex, m_caster, owner);
+                            owner->AddAura(aur);
                         }
                     }
                 }
@@ -476,7 +510,8 @@ void Aura::_AddAura()
     m_target->ApplyStats(true);
     sLog.outDebug("Aura %u now is in use", m_modifier.m_auraname);
 
-    if(!m_isPassive)                                        // passive auras do not get placed in the slots
+    // passive auras (except totem auras) do not get placed in the slots
+    if(!m_isPassive || (m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem()))
     {
         if(!samespell)
         {
@@ -532,7 +567,7 @@ void Aura::_RemoveAura()
     ApplyModifier(false);
     m_target->ApplyStats(true);
 
-    if(m_isPassive)                                         //passive auras do not get put in slots
+    if(m_isPassive && !(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem()))                                         //passive auras do not get put in slots
         return;
 
     uint8 slot = GetAuraSlot();
