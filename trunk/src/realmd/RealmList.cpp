@@ -88,7 +88,7 @@ void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint
 
         if( addr.find(':', 0) == std::string::npos )
         {
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << addr << ":" << DEFAULT_WORLDSERVER_PORT;
             addr = ss.str();
         }

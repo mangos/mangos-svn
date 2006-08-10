@@ -206,10 +206,6 @@ EXTRA_DIST += \
 	dep/include/zthread/Waitable.h \
 	dep/include/zthread/ZThread.h
 
-# MySQL shared library (Linux)
-EXTRA_DIST += \
-	dep/lib/libmysqlclient.a
-
 # MySQL shared library (Win32)
 EXTRA_DIST += \
 	dep/lib/debug/libmySQL.dll \

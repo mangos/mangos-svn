@@ -59,7 +59,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     {
         barGoLink bar(result->GetRowCount());
 
-        std::stringstream ssNonLootableItems;
+        std::ostringstream ssNonLootableItems;
 
         do
         {
@@ -87,7 +87,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
         sLog.outString( "\n>> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
-            sLog.outError("\nSome items can't be succesfully looted: have in chance and questchance fields value < 0.000001 in `%s` DB table . List:\n%s",ssNonLootableItems.str().c_str(),tablename);
+            sLog.outError("\nSome items can't be succesfully looted: have in chance and questchance fields value < 0.000001 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
     }
     else
         sLog.outError("\n>> Loaded 0 loot definitions. DB table `%s` is empty.",tablename);

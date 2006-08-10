@@ -329,7 +329,7 @@ void World::Update(time_t diff)
                     Item *it = objmgr.GetAItem(m->item);
                     objmgr.AddMItem(it);
 
-                    std::stringstream ss;
+                    std::ostringstream ss;
                     ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
                         << it->GetGUIDLow() << ", '";
                     for(uint16 i = 0; i < it->GetValuesCount(); i++ )
@@ -396,7 +396,7 @@ void World::Update(time_t diff)
                     Item *it = objmgr.GetAItem(itr->second->item);
                     objmgr.AddMItem(it);
 
-                    std::stringstream ss;
+                    std::ostringstream ss;
                     ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
                         << it->GetGUIDLow() << ", '";
                     for(uint16 i = 0; i < it->GetValuesCount(); i++ )
@@ -586,12 +586,15 @@ void World::ShuttDownMsg()
     if(m_ShutdownTimer <= 0)
         raise(SIGINT);
 
-    std::stringstream ss;
     WorldPacket data;
 
     data.Initialize(SMSG_SERVER_MESSAGE);
+
+    std::ostringstream ss;
     ss << m_ShutdownTimer << " Second(s).";
+
     data << uint32(1) << ss.str().c_str() << (uint8)0x00;
+
     SendGlobalMessage( &data );
 
     data.clear();

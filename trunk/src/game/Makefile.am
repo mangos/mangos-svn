@@ -98,6 +98,8 @@ libgame_a_SOURCES = \
 	TaxiHandler.cpp \
 	TaxiMovementGenerator.cpp \
 	tools.cpp \
+	Totem.cpp \
+	TotemAI.cpp \
 	TradeHandler.cpp \
 	Unit.cpp \
 	UpdateData.cpp \
@@ -177,6 +179,8 @@ libgame_a_SOURCES = \
 	TargetedMovementGenerator.h \
 	TaxiMovementGenerator.h \
 	Tools.h \
+	Totem.h \
+	TotemAI.h \
 	Traveller.h \
 	Unit.h \
 	UpdateData.h \
