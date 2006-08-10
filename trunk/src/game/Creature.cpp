@@ -905,10 +905,7 @@ void Creature::_LoadQuests()
 
 void Creature::DeleteFromDB()
 {
-
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
-    sDatabase.PExecute("DELETE FROM `npc_trainer` WHERE `entry` = '%u'", GetEntry());
     sDatabase.PExecute("DELETE FROM `creature_involvedrelation` WHERE `id` = '%u'", GetGUIDLow());
 }
 
