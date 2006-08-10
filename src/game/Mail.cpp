@@ -78,6 +78,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         data << uint32(0);
         data << uint32(4);
         SendPacket(&data);
+	return;
     }
 
     delete result;
