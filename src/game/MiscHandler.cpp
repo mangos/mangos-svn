@@ -123,7 +123,17 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     WorldPacket data;
     Player* Target = GetPlayer();
 
-    sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message" );
+    uint32 security = Target->GetSession()->GetSecurity();
+
+    sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", security );
+
+    //instant logout for admins, gm's, mod's
+    if (security > 0)
+    {
+        LogoutRequest(0);
+        LogoutPlayer(true);
+        return;
+    }
 
     //Can not logout if...
     if( Target->isInCombat() ||                             //...is in combat
@@ -140,15 +150,21 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
         return;
     }
 
+    //instant logout in taverns/cities
+    if(Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+    {
+        LogoutRequest(0);
+        LogoutPlayer(true);
+        return;
+    }
+
+
     Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-    if(!Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
-    {                                                       //in city no root no lock rotate
-        data.Initialize( SMSG_FORCE_MOVE_ROOT );
-        data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
-        SendPacket( &data );
-        Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-    }
+    data.Initialize( SMSG_FORCE_MOVE_ROOT );
+    data << (uint8)0xFF << Target->GetGUID() << (uint32)2;
+    SendPacket( &data );
+    Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
     data.Initialize( SMSG_LOGOUT_RESPONSE );
     data << uint32(0);
@@ -161,11 +177,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_PLAYER_LOGOUT Message" );
-    if (GetPlayer()->GetSession()->GetSecurity() > 0)
-    {
-        LogoutRequest(0);
-        LogoutPlayer(true);
-    }
 }
 
 void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
