@@ -46,7 +46,13 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                     r_zone.data.Part.nocreate = l->data.Part.nocreate;
                     CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                     m.Visit(lock, visitor);
+
+                    if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                        break;
                 }
+
+                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
             break;
         }
@@ -62,6 +68,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
 
             for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
@@ -70,6 +79,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
             break;
         }
@@ -85,6 +97,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.x_coord == 0)
+                    break;
             }
 
             for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
@@ -93,6 +108,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
 
             break;
@@ -109,6 +127,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
 
             for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
@@ -117,6 +138,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.y_coord == 0)
+                    break;
             }
 
             break;
@@ -133,6 +157,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.x_coord == 0)
+                    break;
             }
 
             for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
@@ -141,6 +168,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.y_coord == 0)
+                    break;
             }
 
             break;
@@ -157,6 +187,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
 
             break;
@@ -173,6 +206,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
             break;
         }
@@ -188,6 +224,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
 
             break;
@@ -204,6 +243,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
+
+                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                    break;
             }
 
             break;

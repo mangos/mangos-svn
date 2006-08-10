@@ -343,7 +343,13 @@ ObjectAccessor::Update(const uint32  &diff)
                         cell.SetNoCreate();
                         CellLock<NullGuard> cell_lock(cell, cell_iter);
                         cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
+
+                        if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                            break;
                     }
+
+                    if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                        break;
                 }
             }
         }
