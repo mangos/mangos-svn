@@ -344,13 +344,14 @@ ObjectAccessor::Update(const uint32  &diff)
                         CellLock<NullGuard> cell_lock(cell, cell_iter);
                         cell_lock->Visit(cell_lock, object_update, *MapManager::Instance().GetMap(map_id));
 
-                        if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                            break;
                     }
 
-                    if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+                    if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
                         break;
                 }
+
+                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
+                    break;
             }
         }
 
