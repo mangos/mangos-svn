@@ -776,6 +776,10 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     if (GetPlayer()->isAlive())
         return;
 
+    // body not released yet
+    if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        return;
+
     Corpse* corpse = GetPlayer()->GetCorpse();
 
     if (!corpse )
@@ -813,6 +817,10 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     sLog.outDetail("WORLD: Received CMSG_RESURRECT_RESPONSE");
 
     if(GetPlayer()->isAlive())
+        return;
+
+    // body already released 
+    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
     WorldPacket data;
