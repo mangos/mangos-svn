@@ -18872,13 +18872,13 @@ _ACEOF
 fi
 
 
-echo "$as_me:$LINENO: checking for mysql_init in -lmysqlclient" >&5
-echo $ECHO_N "checking for mysql_init in -lmysqlclient... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking for mysql_init in -lmysqlclient_r" >&5
+echo $ECHO_N "checking for mysql_init in -lmysqlclient_r... $ECHO_C" >&6
 if test "${ac_cv_lib_mysqlclient_mysql_init+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
   ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmysqlclient  $LIBS"
+LIBS="-lmysqlclient_r  $LIBS"
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -18940,7 +18940,7 @@ if test $ac_cv_lib_mysqlclient_mysql_init = yes; then
 #define HAVE_LIBMYSQLCLIENT 1
 _ACEOF
 
-  LIBS="-lmysqlclient $LIBS"
+  LIBS="-lmysqlclient_r $LIBS"
 
 else
 

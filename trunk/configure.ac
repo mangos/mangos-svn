@@ -123,7 +123,7 @@ AC_CHECK_LIB( pthread, pthread_create, [],
     ])
 AC_CHECK_LIB( z, compress, [],[AC_MSG_ERROR([Missing zlib])] )
 AC_CHECK_LIB( compat, ftime )
-AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
+AC_CHECK_LIB( mysqlclient_r, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
 AC_CHECK_LIB( ssl, SHA1_Init, [], [AC_CHECK_LIB(ssl, SHA1_Init,[],[AC_MSG_ERROR([Missing openssl])])])
 
 CPPFLAGS_SAVE=$CPPFLAGS
