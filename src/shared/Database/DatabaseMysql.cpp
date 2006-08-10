@@ -33,15 +33,18 @@ void DatabaseMysql::ThreadEnd()
 
 DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
 {
-    static bool first_ttime = true;
+    static bool first_time = true;
 
     // before first connection
-    if(first_ttime)
+    if(first_time)
     {
-        first_ttime = false;
+        first_time = false;
 
         if (!mysql_thread_safe())
-            sLog.outError("ERROR: Used MySQL library isn't thread-safe.");
+        {
+            sLog.outError("FATAL ERROR: Used MySQL library isn't thread-safe.");
+            exit(1);
+        }
     }
 }
 

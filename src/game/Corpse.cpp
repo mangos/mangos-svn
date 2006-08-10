@@ -63,8 +63,7 @@ void Corpse::SaveToDB(CorpseType type)
     // prevent DB data inconsistance problems and duplicates
     DeleteFromDB(type);
 
-    std::stringstream ss;
-    ss.rdbuf()->str("");
+    std::ostringstream ss;
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`) VALUES (" 
         << GetGUIDLow() << ", " << GetOwnerGUID() << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", " 
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
@@ -86,14 +85,13 @@ void Corpse::SaveToDB(CorpseType type)
 void Corpse::DeleteFromWorld(bool remove)
 {
     ObjectAccessor::Instance().RemoveBonesFromPlayerView(this);
-    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
     MapManager::Instance().GetMap(GetMapId())->Remove(this,remove);
+    ObjectAccessor::Instance().RemoveCorpse(GetGUID());
 }
 
 void Corpse::DeleteFromDB(CorpseType type)
 {
-    std::stringstream ss;
-    ss.rdbuf()->str("");
+    std::ostringstream ss;
     if(type == CORPSE_BONES)
         // only specific bones
         ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "'";

@@ -293,8 +293,6 @@ void Guild::SaveGuildToDB()
 
 void Guild::SaveRanksToDB()
 {
-    std::stringstream ss;
-
     sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u'",Id);
 
     std::list<RankInfo*>::iterator itr;
@@ -302,7 +300,6 @@ void Guild::SaveRanksToDB()
     for (itr = ranks.begin(); itr != ranks.end();itr++)
     {
         sDatabase.PExecute("INSERT INTO `guild_rank` (`guildid`,`rname`,`rights`) VALUES ('%u', '%s', '%u')", Id, (*itr)->name.c_str(), (*itr)->rights);
-        sLog.outDebug( "query rank: %s", ss.str( ).c_str( ) );
     }
 }
 

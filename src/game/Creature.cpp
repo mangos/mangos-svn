@@ -679,12 +679,11 @@ void Creature::getSkinLoot()
 
 void Creature::SaveToDB()
 {
-    std::stringstream ss;
     sDatabase.PExecute("DELETE FROM `creature` WHERE `guid` = '%u'", GetGUIDLow());
 
-    ss << "INSERT INTO `creature` VALUES (";
-
-    ss << GetGUIDLow () << ","
+    std::ostringstream ss;
+    ss << "INSERT INTO `creature` VALUES ("
+        << GetGUIDLow () << ","
         << GetEntry() << ","
         << m_mapId <<","
         << m_positionX << ","

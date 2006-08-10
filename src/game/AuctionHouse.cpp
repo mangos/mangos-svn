@@ -216,7 +216,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             Item *it = objmgr.GetAItem(ah->item);
 
             objmgr.AddMItem(it);
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
                 << it->GetGUIDLow() << ", '";
             for(uint16 i = 0; i < it->GetValuesCount(); i++ )
@@ -300,7 +300,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     Item *it = pl->GetItemByPos( pos );
     objmgr.AddAItem(it);
 
-    std::stringstream ss;
+    std::ostringstream ss;
     ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
         << it->GetGUIDLow() << ", '";
     for(uint16 i = 0; i < it->GetValuesCount(); i++ )

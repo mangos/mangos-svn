@@ -95,7 +95,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
         objmgr.AddMItem(it);
 
-        std::stringstream ss;
+        std::ostringstream ss;
         ss  << "INSERT INTO `mail_item` (`guid`,`data`) VALUES ("
             << it->GetGUIDLow() << ", '";
         for(uint16 i = 0; i < it->GetValuesCount(); i++ )

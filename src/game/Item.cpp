@@ -440,10 +440,9 @@ void Item::SaveToDB()
 {
     uint32 guid = GetGUIDLow();
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
-    std::stringstream ss;
-    ss.rdbuf()->str("");
-    ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES ("
-        << guid << ",'";
+
+    std::ostringstream ss;
+    ss << "INSERT INTO `item_instance` (`guid`,`data`) VALUES (" << guid << ",'";
 
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";

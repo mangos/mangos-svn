@@ -8836,11 +8836,10 @@ void Player::SaveToDB()
     if (inworld)
         RemoveFromWorld();
 
-    std::stringstream ss;
 
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
-    ss.rdbuf()->str("");
+    std::ostringstream ss;
     ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,`taximask`,`online`,`highest_rank`,`standing`,`rating`,`cinematic`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
@@ -8919,7 +8918,6 @@ void Player::SaveToDB()
 
 void Player::_SaveActions()
 {
-    std::stringstream query;
     sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::list<struct actions>::iterator itr;
@@ -8944,7 +8942,7 @@ void Player::_SaveAuctions()
             sDatabase.PExecute("DELETE FROM `auctionhouse_item` WHERE `guid` = '%u'",it->GetGUIDLow());
             sDatabase.PExecute("INSERT INTO `auctionhouse` (`auctioneerguid`,`itemguid`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`id`) VALUES ('%u', '%u', '%u', '%u', '%d', '%u', '%u', '%u')", Aentry->auctioneer, Aentry->item, Aentry->owner, Aentry->buyout, Aentry->time, Aentry->bidder, Aentry->bid, Aentry->Id);
 
-            std::stringstream ss;
+            std::ostringstream ss;
             ss << "INSERT INTO `auctionhouse_item` (`guid`,`data`) VALUES ("
                 << it->GetGUIDLow() << ", '";
             for(uint16 i = 0; i < it->GetValuesCount(); i++ )
@@ -9026,8 +9024,6 @@ void Player::_SaveQuestStatus()
 void Player::_SaveReputation()
 {
     std::list<Factions>::iterator itr;
-
-    std::stringstream ss;
 
     sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 

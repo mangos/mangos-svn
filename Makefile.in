@@ -336,7 +336,7 @@ EXTRA_DIST = reconf configure win/mangosdVC71.sln \
 	dep/include/zthread/Thread.h dep/include/zthread/ThreadLocal.h \
 	dep/include/zthread/ThreadLocalImpl.h \
 	dep/include/zthread/Time.h dep/include/zthread/Waitable.h \
-	dep/include/zthread/ZThread.h dep/lib/libmysqlclient.a \
+	dep/include/zthread/ZThread.h \
 	dep/lib/debug/libmySQL.dll dep/lib/debug/libmySQL.lib \
 	dep/lib/release/libmySQL.dll dep/lib/release/libmySQL.lib \
 	dep/lib/debug/libeay32.dll dep/lib/debug/libeay32.lib \
