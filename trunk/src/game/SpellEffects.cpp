@@ -42,6 +42,7 @@
 #include "GameObject.h"
 #include "GossipDef.h"
 #include "Creature.h"
+#include "Totem.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -1513,51 +1514,25 @@ void Spell::EffectDuel(uint32 i)
 
 void Spell::EffectSummonTotem(uint32 i)
 {
-    WorldPacket data;
-    uint64 guid = 0;
-
+    uint8 slot = 0;
     switch(m_spellInfo->Effect[i])
     {
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1:
-        {
-            guid = m_caster->m_TotemSlot1;
-            m_caster->m_TotemSlot1 = 0;
-        }break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2:
-        {
-            guid = m_caster->m_TotemSlot2;
-            m_caster->m_TotemSlot2 = 0;
-        }break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3:
-        {
-            guid = m_caster->m_TotemSlot3;
-            m_caster->m_TotemSlot3 = 0;
-        }break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4:
-        {
-            guid = m_caster->m_TotemSlot4;
-            m_caster->m_TotemSlot4 = 0;
-        }break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: slot = 0; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = 1; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = 2; break;
+        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = 3; break;
+        default: return;
     }
+
+    uint64 guid = m_caster->m_TotemSlot[slot];
     if(guid != 0)
     {
         Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
-
-        if(OldTotem)
-        {
-            data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-            data << guid;
-            m_caster->SendMessageToSet(&data, true);
-
-            data.Initialize(SMSG_DESTROY_OBJECT);
-            data << guid;
-            m_caster->SendMessageToSet(&data, true);
-            MapManager::Instance().GetMap(OldTotem->GetMapId())->Remove(OldTotem, true);
-            OldTotem = NULL;
-        }
+        if(OldTotem && OldTotem->isTotem()) ((Totem*)OldTotem)->UnSummon();
+        m_caster->m_TotemSlot[slot] = 0;
     }
 
-    Creature* pTotem = new Creature();
+    Totem* pTotem = new Totem();
 
     if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
         m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(),
@@ -1568,37 +1543,12 @@ void Spell::EffectSummonTotem(uint32 i)
         return;
     }
 
-    pTotem->AIM_Initialize();
-    pTotem->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
-    pTotem->SetLevel(m_caster->getLevel());
-
-    sLog.outError("AddObject at Spell.cppl line 1040");
-    MapManager::Instance().GetMap(pTotem->GetMapId())->Add(pTotem);
-
-    data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
-    data << pTotem->GetGUID();
-    m_caster->SendMessageToSet(&data,true);
-
-    switch(m_spellInfo->Effect[i])
-    {
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1:
-        {
-            m_caster->m_TotemSlot1 = pTotem->GetGUID();
-        }break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2:
-        {
-            m_caster->m_TotemSlot2 = pTotem->GetGUID();
-        }break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3:
-        {
-            m_caster->m_TotemSlot3 = pTotem->GetGUID();
-        }break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4:
-        {
-            m_caster->m_TotemSlot4 = pTotem->GetGUID();
-        }break;
-    }
-    m_caster->CastSpell(m_caster, pTotem->GetCreatureInfo()->spell1, true);
+    m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
+    pTotem->SetOwner(m_caster->GetGUID());
+    pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
+    pTotem->SetDuration(GetDuration(m_spellInfo));
+    pTotem->SetHealth(5);
+    pTotem->Summon();
 }
 
 void Spell::EffectEnchantHeldItem(uint32 i)
@@ -1898,31 +1848,17 @@ void Spell::EffectDismissPet(uint32 i)
 void Spell::EffectSummonObject(uint32 i)
 {
     WorldPacket data;
-    uint64 guid = 0;
-
+    uint8 slot = 0;
     switch(m_spellInfo->Effect[i])
     {
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-        {
-            guid = m_caster->m_TotemSlot1;
-            m_caster->m_TotemSlot1 = 0;
-        }break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-        {
-            guid = m_caster->m_TotemSlot2;
-            m_caster->m_TotemSlot2 = 0;
-        }break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-        {
-            guid = m_caster->m_TotemSlot3;
-            m_caster->m_TotemSlot3 = 0;
-        }break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
-        {
-            guid = m_caster->m_TotemSlot4;
-            m_caster->m_TotemSlot4 = 0;
-        }break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1: slot = 0; break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2: slot = 1; break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3: slot = 2; break;
+        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4: slot = 3; break;
+        default: return;
     }
+
+    uint64 guid = m_caster->m_ObjectSlot[slot];
     if(guid != 0)
     {
         GameObject* obj = NULL;
@@ -1935,6 +1871,7 @@ void Spell::EffectSummonObject(uint32 i)
             MapManager::Instance().GetMap(obj->GetMapId())->Remove(obj, true);
             obj = NULL;
         }
+        m_caster->m_ObjectSlot[slot] = 0;
     }
 
     GameObject* pGameObj = new GameObject();
@@ -1959,27 +1896,8 @@ void Spell::EffectSummonObject(uint32 i)
     data.Initialize(SMSG_GAMEOBJECT_SPAWN_ANIM);
     data << pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
-
-    switch(m_spellInfo->Effect[i])
-    {
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-        {
-            m_caster->m_TotemSlot1 = pGameObj->GetGUID();
-        }break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-        {
-            m_caster->m_TotemSlot2 = pGameObj->GetGUID();
-        }break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-        {
-            m_caster->m_TotemSlot3 = pGameObj->GetGUID();
-        }break;
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
-        {
-            m_caster->m_TotemSlot4 = pGameObj->GetGUID();
-        }break;
-    }
-
+    
+    m_caster->m_ObjectSlot[slot] = pGameObj->GetGUID();
 }
 
 void Spell::EffectResurrect(uint32 i)

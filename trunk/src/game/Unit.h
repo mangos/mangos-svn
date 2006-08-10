@@ -575,10 +575,8 @@ class MANGOS_DLL_SPEC Unit : public Object
         Spell * m_currentSpell;
         Spell * m_currentMeleeSpell;
         uint32 m_addDmgOnce;
-        uint64 m_TotemSlot1;
-        uint64 m_TotemSlot2;
-        uint64 m_TotemSlot3;
-        uint64 m_TotemSlot4;
+        uint64 m_TotemSlot[4];
+        uint64 m_ObjectSlot[4];
         uint32 m_triggerSpell;
         uint32 m_triggerDamage;
         uint32 m_canMove;

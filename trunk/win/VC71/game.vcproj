@@ -539,6 +539,18 @@
 				RelativePath="..\..\src\game\TargetedMovementGenerator.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\Totem.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Totem.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\TotemAI.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\TotemAI.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Traveller.h">
 			</File>
 			<File
