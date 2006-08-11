@@ -669,20 +669,45 @@ void Spell::SendSpellCooldown()
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // some special spells without correct cooldown in SpellInfo
-    bool thrownAttack = (m_spellInfo->Id == 2764);
-
-    if( m_spellInfo->RecoveryTime == 0 && m_spellInfo->CategoryRecoveryTime == 0 && !thrownAttack )
-        return;
-
     Player* _player = (Player*)m_caster;
 
     int32 rec = m_spellInfo->RecoveryTime;
     int32 catrec = m_spellInfo->CategoryRecoveryTime;
 
     // throw spell used equiped item cooldown values
-    if (thrownAttack)
+    if (m_spellInfo->Id == 2764)
         rec = _player->GetAttackTime(RANGED_ATTACK);
+
+    // shoot spell used equiped wand cooldown values
+    if (m_spellInfo->Id == 5019)
+    {
+        if(Item* item = _player->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+            if(ItemPrototype const* proto = item->GetProto())
+                rec = proto->Delay;
+    }
+
+    // some special item spells without correct cooldown in SpellInfo
+    // cooldown information stored in item prototype
+    if( rec == 0 && catrec == 0 && m_CastItem)
+    {
+        ItemPrototype const* proto = m_CastItem->GetProto();
+        if(proto) 
+        {
+            for(int idx = 0; idx < 5; ++idx)
+            {
+                if(proto->Spells[idx].SpellId == m_spellInfo->Id)
+                {
+                    rec    = proto->Spells[idx].SpellCooldown;
+                    catrec = proto->Spells[idx].SpellCategoryCooldown;
+                    break;
+                }
+            }
+        }
+    }
+
+    // no cooldown 
+    if( rec == 0 && catrec == 0)
+        return;
 
     _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
     _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
