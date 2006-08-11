@@ -143,6 +143,7 @@ ReactorAI::stopAttack()
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
+        i_creature->MovementExpired();
         i_creature->Idle();
     }
     else if( !victim  )

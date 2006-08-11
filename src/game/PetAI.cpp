@@ -83,6 +83,7 @@ void PetAI::_stopAttack()
     if( !i_pet.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
+        i_pet->MovementExpired();
         i_pet.StopMoving();
         i_pet->Idle();
         i_victimGuid = 0;
@@ -112,6 +113,7 @@ void PetAI::_stopAttack()
 
     if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
     {
+        i_pet->MovementExpired();
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Mutate(new TargetedMovementGenerator(*i_owner));
     }

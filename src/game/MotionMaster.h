@@ -22,7 +22,7 @@
 #include "IdleMovementGenerator.h"
 #include <stack>
 
-class MANGOS_DLL_DECL MotionMaster : public std::stack<MovementGenerator *>
+class MANGOS_DLL_DECL MotionMaster : private std::stack<MovementGenerator *>
 {
     static IdleMovementGenerator si_idleMovement;
     public:
@@ -32,6 +32,8 @@ class MANGOS_DLL_DECL MotionMaster : public std::stack<MovementGenerator *>
         void Initialize(Creature *creature);
 
         MovementGenerator* operator->(void) { return top(); }
+
+        using std::stack<MovementGenerator *>::top;
 
         void UpdateMotion(const uint32 &diff);
 

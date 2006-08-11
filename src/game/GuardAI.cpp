@@ -158,7 +158,6 @@ void GuardAI::UpdateAI(const uint32 diff)
                 i_tracker.Update(diff);
                 if( i_tracker.Passed() )
                 {
-                    i_creature->MovementExpired();
                     DEBUG_LOG("Creature running back home [guid=%u]", i_creature.GetGUIDLow());
                     static_cast<TargetedMovementGenerator *>(i_creature->top())->TargetedHome(i_creature);
                     i_state = STATE_NORMAL;
