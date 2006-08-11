@@ -26,6 +26,8 @@
 #include "DynamicObject.h"
 #include "Corpse.h"
 
+#include <cmath>
+
 #define MAX_NUMBER_OF_GRIDS      64
 
 #define SIZE_OF_GRIDS            533.33333
