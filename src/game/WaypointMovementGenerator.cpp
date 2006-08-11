@@ -46,6 +46,18 @@ WaypointMovementGenerator::_load(Creature &c)
             i_path[count].z = fields[2].GetFloat();
             i_delays[count] = fields[3].GetUInt16();
 
+            if(!MaNGOS::IsValidMapCoord(i_path[count].x)||!MaNGOS::IsValidMapCoord(i_path[count].y))
+            {
+                sLog.outError("ERROR: Creature (guidlow %d,entry %d) have invalid coordinates in his waypoint %d (X: %d, Y: %d).",
+                    c.GetGUIDLow(),c.GetEntry(),count,i_path[count].x,i_path[count].y
+                );
+
+                // prevent invalid coordinates using
+                MaNGOS::NormalizeMapCoord(i_path[count].x);
+                MaNGOS::NormalizeMapCoord(i_path[count].y);
+                i_path[count].z = MapManager::Instance ().GetMap(c.GetMapId())->GetHeight(i_path[count].x,i_path[count].y);
+            }
+
             if( i_delays[count] < 30 /* millisecond */ )
                 i_delays[count] = (rand() % 5000);
             ++count;

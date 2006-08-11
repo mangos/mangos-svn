@@ -253,6 +253,13 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
     m_positionX =x;
     m_positionY=y;
     m_positionZ=z;
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,Entry,x,y);
+        return false;
+    }
+
     m_orientation=ang;
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
     return  CreateFromProto(guidlow, Entry);

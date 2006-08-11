@@ -28,7 +28,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
     const float wander_distance=16;
     float x,y,z,z2;
     creature.GetRespawnCoord(x, y, z);
-    int mapid=creature.GetMapId();
+    uint32 mapid=creature.GetMapId();
     z2 = MapManager::Instance().GetMap(mapid)->GetHeight(x,y);
     if( abs( z2 - z ) < 5 )
         z = z2;
@@ -43,24 +43,17 @@ RandomMovementGenerator::Initialize(Creature &creature)
         const float wanderX=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
         const float wanderY=((wander_distance*rand())/RAND_MAX)-wander_distance/2;
 
-        if( idx == 1 )
-        {
-            i_waypoints[idx][0] = x + wanderX;
-            i_waypoints[idx][1] = y + wanderY;
-            z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
-            if( abs( z2 - z ) < 5 )
-                z = z2;
-            i_waypoints[idx][2] = z;
-        }
-        else
-        {
-            i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
-            i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
-            z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
-            if( abs( z2 - z ) < 5 )
-                z = z2;
-            i_waypoints[idx][2] =  z;
-        }
+        i_waypoints[idx][0] = i_waypoints[idx-1][0]+wanderX;
+        i_waypoints[idx][1] = i_waypoints[idx-1][1]+wanderY;
+
+        // prevent invalid coordinates generation
+        MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
+        MaNGOS::NormalizeMapCoord(i_waypoints[idx][1]);
+
+        z2 = MapManager::Instance ().GetMap(mapid)->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
+        if( abs( z2 - z ) < 5 )
+            z = z2;
+        i_waypoints[idx][2] =  z;
     }
     i_nextMoveTime.Reset((rand() % 10000));
     creature.StopMoving();

@@ -49,15 +49,20 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     if (!goinfo)
         return false;
 
-    Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
-
-    //
     m_positionX = x;
     m_positionY = y;
     m_positionZ = z;
     m_orientation = ang;
 
     m_mapId = mapid;
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Gameobject (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,name_id,x,y);
+        return false;
+    }
+
+    Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
 
     SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
