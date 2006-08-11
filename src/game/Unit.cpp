@@ -1856,6 +1856,31 @@ void Unit::ApplyStats(bool apply)
 
     float val;
     uint32 val2,tem_att_power;
+    int32 totalstatmods[5] = {0,0,0,0,0};
+
+    AuraList& mModPercentStat = GetAurasByType(SPELL_AURA_MOD_PERCENT_STAT);
+    for(AuraList::iterator i = mModPercentStat.begin(); i != mModPercentStat.end(); ++i)
+    {
+        if((*i)->GetModifier()->m_miscvalue != -1)
+            totalstatmods[(*i)->GetModifier()->m_miscvalue] += (*i)->GetModifier()->m_amount;
+        else
+            for (uint8 j = 0; j < 5; j++)
+                totalstatmods[j] += (*i)->GetModifier()->m_amount;
+    }
+
+    // restore percent mods
+    if (apply)
+    {
+        for (uint8 i = 0; i < 5; i++)
+        {
+            if (totalstatmods[i])
+            {
+                ApplyStatPercentMod(Stats(i),totalstatmods[i], apply );
+                ((Player*)this)->ApplyPosStatPercentMod(Stats(i),totalstatmods[i], apply );
+                ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
+            }
+        }
+    }
 
     // Armor
     val2 = 2*GetStat(STAT_AGILITY);
@@ -1963,6 +1988,20 @@ void Unit::ApplyStats(bool apply)
     val = float(5);
 
     ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, val, apply);
+
+    // remove percent mods to see original stats when adding buffs/items
+    if (!apply)
+    {
+        for (uint8 i = 0; i < 5; i++)
+        {
+            if (totalstatmods[i])
+            {
+                ApplyStatPercentMod(Stats(i),totalstatmods[i], apply );
+                ((Player*)this)->ApplyPosStatPercentMod(Stats(i),totalstatmods[i], apply );
+                ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );
+            }
+        }
+    }
 }
 
 void Unit::_RemoveAllAuraMods()

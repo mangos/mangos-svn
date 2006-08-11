@@ -1548,6 +1548,7 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
     pTotem->SetDuration(GetDuration(m_spellInfo));
     pTotem->SetHealth(5);
+    pTotem->SetMaxHealth(5);
     pTotem->Summon();
 }
 

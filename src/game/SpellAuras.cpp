@@ -1899,71 +1899,62 @@ void Aura::HandleModBaseResistance(bool apply)
 
 void Aura::HandleAuraModStat(bool apply)
 {
-    Stats stat = STAT_STRENGTH;
-    uint16 index2 = 0;
     switch(m_modifier.m_miscvalue)
     {
-        case 0:
-            stat = STAT_STRENGTH;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
-            break;
-        case 1:
-            stat = STAT_AGILITY;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT1 : index2 = PLAYER_FIELD_NEGSTAT1;
-            break;
-        case 2:
-            stat = STAT_STAMINA;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT2 : index2 = PLAYER_FIELD_NEGSTAT2;
-            break;
-        case 3:
-            stat = STAT_INTELLECT;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT3 : index2 = PLAYER_FIELD_NEGSTAT3;
-            break;
-        case 4:
-            stat = STAT_SPIRIT;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT4 : index2 = PLAYER_FIELD_NEGSTAT4;
-            break;
+        case 0: case 1: case 2: case 3: case 4:
+        {
+            Stats stat = (Stats)m_modifier.m_miscvalue;
+            m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                if (m_modifier.m_miscvalue2 == 0)
+                    ((Player*)m_target)->ApplyPosStatMod(stat,m_modifier.m_amount,apply);
+                else
+                    ((Player*)m_target)->ApplyNegStatMod(stat,m_modifier.m_amount,apply);
+            }
+        }break;
         case -1:
         {
-            stat = STAT_STRENGTH;
-            m_modifier.m_miscvalue2 == 0 ? index2 = PLAYER_FIELD_POSSTAT0 : index2 = PLAYER_FIELD_NEGSTAT0;
-            for(int x=0;x<5;x++)
+            for(Stats stat = STAT_STRENGTH; stat <= STAT_SPIRIT; stat = Stats(uint8(stat)+1))
             {
-                m_target->ApplyStatMod(Stats(stat+x),m_modifier.m_amount,apply);
+                m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->ApplyModUInt32Value(index2+x,m_modifier.m_amount,apply);
+                {
+                    if (m_modifier.m_miscvalue2 == 0)
+                        ((Player*)m_target)->ApplyPosStatMod(stat,m_modifier.m_amount,apply);
+                    else
+                        ((Player*)m_target)->ApplyNegStatMod(stat,m_modifier.m_amount,apply);
+                }
             }
-            return;
         }break;
         default:
             sLog.outString("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
-            return;
-            break;
     }
-
-    m_target->ApplyStatMod(stat,m_modifier.m_amount,apply);
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyModUInt32Value(index2,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleModPercentStat(bool apply)
 {
-    m_target->ApplyMaxHealthPercentMod(m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_MANA,     m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_RAGE,     m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_FOCUS,    m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_ENERGY,   m_modifier.m_amount, apply );
-    m_target->ApplyMaxPowerPercentMod(POWER_HAPPINESS,m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 0 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_STRENGTH,m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 1 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_AGILITY, m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 2 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_STAMINA, m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 3 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_INTELLECT,m_modifier.m_amount, apply );
-    if(m_modifier.m_miscvalue == 4 || m_modifier.m_miscvalue == -1)
-        m_target->ApplyStatPercentMod(STAT_SPIRIT,  m_modifier.m_amount, apply );
+    if(m_modifier.m_miscvalue != -1)
+    {
+        m_target->ApplyStatPercentMod(Stats(m_modifier.m_miscvalue), m_modifier.m_amount, apply );
+        if (m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Player*)m_target)->ApplyPosStatPercentMod(Stats(m_modifier.m_miscvalue), m_modifier.m_amount, apply );
+            ((Player*)m_target)->ApplyNegStatPercentMod(Stats(m_modifier.m_miscvalue), m_modifier.m_amount, apply );
+        }
+    }
+    else
+    {
+        for (uint8 i = 0; i < 5; i++)
+        {
+            m_target->ApplyStatPercentMod(Stats(i), m_modifier.m_amount, apply );
+            if (m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)m_target)->ApplyPosStatPercentMod(Stats(i), m_modifier.m_amount, apply );
+                ((Player*)m_target)->ApplyNegStatPercentMod(Stats(i), m_modifier.m_amount, apply );
+            }
+        }
+    }
 }
 
 /********************************/

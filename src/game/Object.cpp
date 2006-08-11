@@ -300,14 +300,14 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask) const
                 index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
                 index >= UNIT_FIELD_STR            && index <= UNIT_FIELD_RESISTANCES_06 )
                 || isType(TYPE_PLAYER) &&
-                index >= PLAYER_FIELD_RESISTANCEBUFFMODSPOSITIVE && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 )
+                index >= PLAYER_FIELD_POSSTAT0 && index <= PLAYER_FIELD_RESISTANCEBUFFMODSNEGATIVE_06 )
             {
                 // convert from float to uint32 and send
                 *data << uint32(m_floatValues[ index ]);
             }
             else
             {
-                // send in current format (float as float, uin32 as uint32)
+                // send in current format (float as float, uint32 as uint32)
                 *data << m_uint32Values[ index ];
             }
         }
