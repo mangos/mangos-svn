@@ -45,6 +45,9 @@
 
 #define MAP_RESOLUTION 256
 
+#define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
+#define MAP_HALFSIZE            (MAP_SIZE/2)
+
 typedef TYPELIST_4(GameObject, Creature, DynamicObject, Corpse)    AllObjectTypes;
 typedef Grid<Player, AllObjectTypes> GridType;
 typedef std::map<OBJECT_HANDLE, Player* > PlayerMapType;
@@ -121,6 +124,19 @@ namespace MaNGOS
     inline CellPair ComputeCellPair(const float &x, const float &y)
     {
         return Compute<CellPair, CENTER_GRID_CELL_ID>(x, y, CENTER_GRID_CELL_OFFSET, SIZE_OF_GRID_CELL);
+    }
+
+    inline void NormalizeMapCoord(float &c)
+    {
+        if(c > MAP_HALFSIZE - 0.5)
+            c = MAP_HALFSIZE - 0.5;
+        else if(c < -(MAP_HALFSIZE - 0.5))
+            c = -(MAP_HALFSIZE - 0.5);
+    }
+
+    inline bool IsValidMapCoord(float c)
+    {
+        return (std::abs(c) < MAP_HALFSIZE - 0.5);
     }
 }
 #endif

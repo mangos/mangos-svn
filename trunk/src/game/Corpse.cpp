@@ -48,6 +48,12 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
 {
     Object::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang, (uint8)-1);
 
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Corpse (guidlow %d, owner %s) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,owner->GetName(),x,y);
+        return false;
+    }
+
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );
     SetFloatValue( CORPSE_FIELD_POS_X, x );
     SetFloatValue( CORPSE_FIELD_POS_Y, y );
@@ -128,6 +134,12 @@ bool Corpse::LoadFromDB(uint32 guid)
     // place
     SetMapId(mapid);
     Relocate(positionX,positionY,positionZ,ort);
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Corpse (guidlow %d, owner %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()),GetPositionX(),GetPositionY());
+        return false;
+    }
 
     delete result;
 

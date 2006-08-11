@@ -8444,6 +8444,23 @@ bool Player::LoadFromDB( uint32 guid )
     m_positionZ = fields[9].GetFloat();
     m_mapId = fields[10].GetUInt32();
     m_orientation = fields[11].GetFloat();
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %d Y: ^%d). Teleport to default race/class locations.",guid,m_positionX,m_positionY);
+        PlayerCreateInfo* info = objmgr.GetPlayerCreateInfo(m_race, m_class);
+        if(!info) 
+        {
+            sLog.outError("Player have incorrect race/class pair. Can't be loaded.");
+            return false;
+        }
+
+        m_mapId = info->mapId;
+        m_positionX = info->positionX;
+        m_positionY = info->positionY;
+        m_positionZ = info->positionZ;
+    }
+
     m_highest_rank = fields[14].GetUInt32();
     m_standing = fields[15].GetUInt32();
     m_rating = fields[16].GetFloat();

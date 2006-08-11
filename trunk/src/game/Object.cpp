@@ -634,6 +634,12 @@ void Object::GetClosePoint( const float ox, const float oy, const float oz, floa
 
 }
 
+bool Object::IsPositionValid() const
+{
+    return MaNGOS::IsValidMapCoord(m_positionX) && MaNGOS::IsValidMapCoord(m_positionY);
+}
+
+
 bool Object::PrintIndexError(uint32 index, bool set) const
 {
     sLog.outError("\nERROR: Attempt %s non-existed value field: %u (count: %u) for object typeid: %u type mask: %u",(set ? "set value to" : "get value from"),index,m_valuesCount,GetTypeId(),m_objectType);

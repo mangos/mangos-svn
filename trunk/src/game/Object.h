@@ -140,6 +140,7 @@ class MANGOS_DLL_SPEC Object
         {
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
         }
+        bool IsPositionValid() const;
 
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
