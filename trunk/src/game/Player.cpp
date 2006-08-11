@@ -6442,8 +6442,7 @@ void Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update )
     if( pItem )
     {
         ItemPrototype const *pProto = pItem->GetProto();
-        if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-            ItemAdded( item, count );
+        ItemAdded( item, count );
         StoreItem( pos, pItem, update );
     }
 }
@@ -6660,8 +6659,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
-            if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-                ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
+            ItemRemoved( pItem->GetEntry(), pItem->GetCount() );
 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
@@ -6747,8 +6745,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
             else
             {
                 pProto = pItem->GetProto();
-                if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-                    ItemRemoved( pItem->GetEntry(), count - remcount );
+                ItemRemoved( pItem->GetEntry(), count - remcount );
                 pItem->SetCount( pItem->GetCount() - count + remcount );
                 if( IsInWorld() & update )
                     pItem->SendUpdateToPlayer( this );
@@ -6779,8 +6776,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                         else
                         {
                             pProto = pItem->GetProto();
-                            if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-                                ItemRemoved( pItem->GetEntry(), count - remcount );
+                            ItemRemoved( pItem->GetEntry(), count - remcount );
                             pItem->SetCount( pItem->GetCount() - count + remcount );
                             if( IsInWorld() && update )
                                 pItem->SendUpdateToPlayer( this );
